@@ -1,7 +1,7 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.PureUtilities.Vector3D;
-import com.laytonsmith.abstraction.MCArmorStand;
+import com.laytonsmith.abstraction.entities.MCArmorStand;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntityEquipment;
@@ -275,21 +275,12 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 
 	@Override
 	public Boolean isMarker() {
-		try {
-			return as.isMarker();
-		} catch (NoSuchMethodError ex) {
-			// Probably before 1.8.7
-			return null;
-		}
+		return as.isMarker();
 	}
 
 	@Override
 	public void setMarker(boolean marker) {
-		try {
-			as.setMarker(marker);
-		} catch (NoSuchMethodError ex) {
-			// Probably before 1.8.7
-		}
+		as.setMarker(marker);
 	}
 
 	/**
@@ -314,11 +305,13 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public ItemStack getItemInHand() {
 			return holder.getItemInHand();
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void setItemInHand(ItemStack itemStack) {
 			holder.setItemInHand(itemStack);
 		}
@@ -421,11 +414,13 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public float getItemInHandDropChance() {
 			return 0;
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void setItemInHandDropChance(float v) {
 
 		}

@@ -18,6 +18,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.enums.MCGameMode;
+import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCWeather;
@@ -28,7 +29,10 @@ import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -61,9 +65,12 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -312,11 +319,7 @@ public class PlayerManagement {
 					+ (y1 - y2) * (y1 - y2)
 					+ (z1 - z2) * (z1 - z2));
 
-			if(distance <= dist) {
-				return true;
-			}
-
-			return false;
+			return distance <= dist;
 		}
 
 		@Override
@@ -575,27 +578,43 @@ public class PlayerManagement {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			HashSet<Short> trans = null;
+			HashSet<MCMaterial> trans = null;
+			int transparentIndex = -1;
 			if(args.length == 1) {
 				if(args[0] instanceof CArray) {
-					CArray ta = (CArray) args[0];
-					trans = new HashSet<Short>();
-					for(int i = 0; i < ta.size(); i++) {
-						trans.add(Static.getInt16(ta.get(i, t), t));
-					}
+					transparentIndex = 0;
 				} else {
 					p = Static.GetPlayer(args[0], t);
 				}
 			} else if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
 				if(args[1] instanceof CArray) {
-					CArray ta = (CArray) args[1];
-					trans = new HashSet<Short>();
-					for(int i = 0; i < ta.size(); i++) {
-						trans.add(Static.getInt16(ta.get(i, t), t));
-					}
+					transparentIndex = 1;
 				} else {
 					throw new CREFormatException("An array was expected for argument 2 but received " + args[1], t);
+				}
+			}
+			if(transparentIndex >= 0) {
+				CArray ta = (CArray) args[transparentIndex];
+				trans = new HashSet<>();
+				for(Construct mat : ta.asList()) {
+					MCMaterial material = StaticLayer.GetMaterial(mat.val());
+					if(material != null) {
+						trans.add(StaticLayer.GetMaterial(mat.val()));
+						continue;
+					}
+					try {
+						material = StaticLayer.GetMaterialFromLegacy(Static.getInt16(mat, t), 0);
+						if(material != null) {
+							CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The id \"" + mat.val() + "\" is deprecated."
+									+ " Converted to \"" + material.getName() + "\"", t);
+							trans.add(material);
+							continue;
+						}
+					} catch (CRECastException ex) {
+						// ignore and throw a more specific message
+					}
+					throw new CREFormatException("Could not find a material by the name \"" + mat.val() + "\"", t);
 				}
 			}
 			Static.AssertPlayerNonNull(p, t);
@@ -833,7 +852,7 @@ public class PlayerManagement {
 					+ "<li>3 - player's IP; Returns the IP address of this player.</li>"
 					+ "<li>4 - Display name; The name that is typically used when displayed on screen.</li>"
 					+ "<li>5 - player's health; The current health of the player, which will be an int from 0-20.</li>"
-					+ "<li>6 - Item in hand; The type and data for the item in the 0:0 format. (deprecated)</li>"
+					+ "<li>6 - Item in hand; The type of item in their main hand.</li>"
 					+ "<li>7 - World name; Gets the name of the world this player is in.</li>"
 					+ "<li>8 - Is Op; true or false if this player is an op.</li>"
 					+ "<li>9 - player groups; An array of the groups the player is in, by permission nodes.</li>"
@@ -874,10 +893,10 @@ public class PlayerManagement {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender m = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			String player = "";
-			int index = -1;
+			String player;
+			int index;
 			if(args.length == 0) {
-				player = (m instanceof MCPlayer ? ((MCPlayer) m).getName() : null);
+				player = m instanceof MCPlayer ? m.getName() : null;
 				index = -1;
 			} else if(args.length == 1) {
 				player = args[0].val();
@@ -893,7 +912,7 @@ public class PlayerManagement {
 			if(index < -1 || index > maxIndex) {
 				throw new CRERangeException(this.getName() + " expects the index to be between -1 and " + maxIndex, t);
 			}
-			ArrayList<Construct> retVals = new ArrayList<Construct>();
+			ArrayList<Construct> retVals = new ArrayList<>();
 			if(index == 0 || index == -1) {
 				//MCPlayer name
 				retVals.add(new CString(p.getName(), t));
@@ -945,8 +964,8 @@ public class PlayerManagement {
 			}
 			if(index == 6 || index == -1) {
 				//Item in hand
-				MCItemStack is = p.getItemInHand();
-				retVals.add(new CString(is.getTypeId() + ":" + is.getDurability(), t));
+				MCItemStack is = p.getInventory().getItemInMainHand();
+				retVals.add(new CString(is.getType().getName(), t));
 			}
 			if(index == 7 || index == -1) {
 				//World name
@@ -1202,9 +1221,9 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {playerName, newDisplayName | newDisplayName} Sets a player's display name. If the second usage is used,"
-					+ " it sets the display name of the player running the command. See reset_display_name also. playerName, as well"
-					+ " as all CommandHelper commands expect the player's real name, not their display name.";
+			return "void {[playerName], newDisplayName} Sets a player's display name. If the first name isn't provided,"
+					+ " it sets the display name of the player running the command. See reset_display_name() also."
+					+ " All player functions expect the player's real name, not their display name.";
 		}
 
 		@Override
@@ -1229,20 +1248,17 @@ public class PlayerManagement {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCPlayer MCPlayer = null;
+			MCPlayer player;
 			String name;
 			if(args.length == 1) {
-				if(p instanceof MCPlayer) {
-					MCPlayer = (MCPlayer) p;
-				}
+				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(player, t);
 				name = args[0].val();
 			} else {
-				MCPlayer = Static.GetPlayer(args[0], t);
+				player = Static.GetPlayer(args[0], t);
 				name = args[1].val();
 			}
-			Static.AssertPlayerNonNull(MCPlayer, t);
-			MCPlayer.setDisplayName(name);
+			player.setDisplayName(name);
 			return CVoid.VOID;
 		}
 	}
@@ -1262,8 +1278,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[playerName]} Resets a player's display name to their real name. If playerName isn't specified, defaults to the"
-					+ " player running the command.";
+			return "void {[playerName]} Resets a player's display name to their real name."
+					+ " If playerName isn't specified, defaults to the player running the command.";
 		}
 
 		@Override
@@ -1288,17 +1304,14 @@ public class PlayerManagement {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCPlayer MCPlayer = null;
+			MCPlayer player;
 			if(args.length == 0) {
-				if(p instanceof MCPlayer) {
-					MCPlayer = (MCPlayer) p;
-				}
+				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(player, t);
 			} else {
-				MCPlayer = Static.GetPlayer(args[0], t);
+				player = Static.GetPlayer(args[0], t);
 			}
-			Static.AssertPlayerNonNull(MCPlayer, t);
-			MCPlayer.setDisplayName(MCPlayer.getName());
+			player.setDisplayName(player.getName());
 			return CVoid.VOID;
 		}
 	}
@@ -1402,14 +1415,13 @@ public class PlayerManagement {
 				//Either we are setting this MCPlayer's pitch and yaw, or we are setting the specified MCPlayer's F.
 				//Check to see if args[0] is a number
 				try {
-					Float.parseFloat(args[0].val());
+					yaw = (float) Static.getNumber(args[0], t);
+					pitch = (float) Static.getNumber(args[1], t);
 					//It's the yaw, pitch variation
 					if(p instanceof MCPlayer) {
 						toSet = (MCPlayer) p;
 					}
-					yaw = (float) Static.getNumber(args[0], t);
-					pitch = (float) Static.getNumber(args[1], t);
-				} catch (NumberFormatException e) {
+				} catch (CRECastException e) {
 					//It's the MCPlayer, F variation
 					toSet = Static.GetPlayer(args[0], t);
 					pitch = toSet.getLocation().getPitch();
@@ -1554,7 +1566,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			String mode = "";
+			String mode;
 			MCGameMode gm;
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
@@ -1673,7 +1685,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			int xp = 0;
+			int xp;
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
@@ -1734,7 +1746,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			int xp = 0;
+			int xp;
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
@@ -1846,7 +1858,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			int level = 0;
+			int level;
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
@@ -1959,7 +1971,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			int xp = 0;
+			int xp;
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
@@ -2077,7 +2089,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			int level = 0;
+			int level;
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
@@ -2103,21 +2115,22 @@ public class PlayerManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{3, 4, 5, 6};
+			return new Integer[]{2, 3, 4, 5, 6};
 		}
 
 		@Override
 		public String docs() {
-			return "boolean {player, potionID, strength, [seconds], [ambient], [particles]} Effect is 1-23."
-					+ " Seconds defaults to 30.0. If the potionID is out of range, a RangeException is thrown, because"
-					+ " out of range potion effects cause the client to crash, fairly hardcore. See"
-					+ " http://www.minecraftwiki.net/wiki/Potion_effects for a complete list of potions that can be"
-					+ " added. To remove an effect, set the seconds to 0. Strength is the number of levels to add to the"
-					+ " base power (effect level 1). Ambient takes a boolean of whether the particles should be less"
-					+ " noticeable. Particles takes a boolean of whether the particles should be visible at all. The"
-					+ " function returns true if the effect was added or removed as desired, and false if it wasn't"
-					+ " (however, this currently only will happen if an effect is attempted to be removed, yet isn't"
-					+ " already on the player).";
+			return "boolean {player, potionEffect, [strength], [seconds], [ambient], [particles], [icon]}"
+					+ " Adds one, or modifies an existing, potion effect on a mob."
+					+ " The potionEffect can be " + StringUtils.Join(MCPotionEffectType.types(), ", ", ", or ", " or ")
+					+ ". It also accepts an integer corresponding to the effect id listed on the Minecraft wiki."
+					+ " Strength is an integer representing the power level of the effect, starting at 0."
+					+ " Seconds defaults to 30.0. To remove an effect, set the seconds to 0."
+					+ " If seconds is less than 0 or greater than 107374182 a RangeException is thrown."
+					+ " Ambient takes a boolean of whether the particles should be more transparent."
+					+ " Particles takes a boolean of whether the particles should be visible at all."
+					+ " Icon takes a boolean for whether or not to show the icon to the player."
+					+ " The function returns whether or not the effect was modified.";
 		}
 
 		@Override
@@ -2145,38 +2158,56 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = Static.GetPlayer(args[0].val(), t);
 
-			int effect = Static.getInt32(args[1], t);
-			//To work around a bug in bukkit/vanilla, if the effect is invalid, throw an exception
-			//otherwise the client crashes, and requires deletion of
-			//player data to fix.
-			if(effect < 1 || effect > m.getMaxEffect()) {
-				throw new CRERangeException("Invalid effect ID recieved, must be from 1-" + m.getMaxEffect(), t);
+			MCPotionEffectType type = null;
+			if(args[1] instanceof CString) {
+				try {
+					type = MCPotionEffectType.valueOf(args[1].val().toUpperCase());
+				} catch (IllegalArgumentException ex) {
+					// maybe it's a number id
+				}
+			}
+			if(type == null) {
+				try {
+					type = MCPotionEffectType.getById(Static.getInt32(args[1], t));
+				} catch (CRECastException | IllegalArgumentException ex) {
+					throw new CREFormatException("Invalid potion effect type: " + args[1].val(), t);
+				}
 			}
 
-			int strength = Static.getInt32(args[2], t);
+			int strength = 0;
 			double seconds = 30.0;
 			boolean ambient = false;
 			boolean particles = true;
-			if(args.length >= 4) {
-				seconds = Static.getDouble(args[3], t);
-				if(seconds < 0.0) {
-					throw new CRERangeException("Seconds cannot be less than 0.0", t);
-				} else if(seconds * 20 > Integer.MAX_VALUE) {
-					throw new CRERangeException("Seconds cannot be greater than 107374182.0", t);
+			boolean icon = true;
+			if(args.length >= 3) {
+				strength = Static.getInt32(args[2], t);
+
+				if(args.length >= 4) {
+					seconds = Static.getDouble(args[3], t);
+					if(seconds < 0.0) {
+						throw new CRERangeException("Seconds cannot be less than 0.0", t);
+					} else if(seconds * 20 > Integer.MAX_VALUE) {
+						throw new CRERangeException("Seconds cannot be greater than 107374182.0", t);
+					}
+
+					if(args.length >= 5) {
+						ambient = Static.getBoolean(args[4], t);
+
+						if(args.length >= 6) {
+							particles = Static.getBoolean(args[5], t);
+
+							if(args.length == 7) {
+								icon = Static.getBoolean(args[6], t);
+							}
+						}
+					}
 				}
 			}
-			if(args.length >= 5) {
-				ambient = Static.getBoolean(args[4], t);
-			}
-			if(args.length == 6) {
-				particles = Static.getBoolean(args[5], t);
-			}
-			Static.AssertPlayerNonNull(m, t);
+
 			if(seconds == 0.0) {
-				return CBoolean.get(m.removeEffect(effect));
+				return CBoolean.get(m.removeEffect(type));
 			} else {
-				m.addEffect(effect, strength, (int) (seconds * 20), ambient, particles, t);
-				return CBoolean.TRUE;
+				return CBoolean.get(m.addEffect(type, strength, (int) (seconds * 20), ambient, particles, icon));
 			}
 		}
 
@@ -2184,13 +2215,13 @@ public class PlayerManagement {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Give player Notch nausea for 30 seconds",
-				"set_peffect('Notch', 9, 30)",
+				"set_peffect('Notch', 'NAUSEA')",
 				"The player will experience a wobbly screen."),
 				new ExampleScript("Make player ArenaPlayer unable to jump for 10 minutes",
-				"set_peffect('ArenaPlayer', 8, -16, 600)",
+				"set_peffect('ArenaPlayer', 'JUMP_BOOST', -16, 600)",
 				"From the player's perspective, they will not even leave the ground."),
 				new ExampleScript("Remove poison from yourself",
-				"set_peffect(player(), 19, 1, 0)",
+				"set_peffect(player(), 'POISON', 1, 0)",
 				"You are now unpoisoned. Note, it does not matter what you set strength to here.")
 			};
 		}
@@ -2236,10 +2267,11 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[player]} Returns an array of effects that are currently active on a given player."
-					+ " The array will be full of playerEffect objects, which contain three fields, \"id\","
-					+ " \"strength\", \"seconds\" remaining, whether the effect is \"ambient\", and whether"
-					+ " \"particles\" are enabled.";
+			return "array {[player]} Returns an array of potion effects that are currently active on a given player."
+					+ " The array can contain potion effect objects, with the key defining the type of potion effect."
+					+ " The arrays contain the following fields: \"id\","
+					+ " \"strength\", \"seconds\" remaining, whether the effect is \"ambient\", whether"
+					+ " \"particles\" are enabled, and whether the \"icon\" is shown to the player.";
 		}
 
 		@Override
@@ -2572,13 +2604,7 @@ public class PlayerManagement {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
-			boolean ret;
-			if(pl == null) {
-				ret = false;
-			} else {
-				ret = pl.isWhitelisted();
-			}
-			return CBoolean.get(ret);
+			return CBoolean.get(pl != null && pl.isWhitelisted());
 		}
 	}
 
@@ -2705,14 +2731,16 @@ public class PlayerManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{2, 3, 4};
 		}
 
 		@Override
 		public String docs() {
-			return "void {player, isBanned} Sets the ban flag of the specified player. Note that"
-					+ " this will work with offline players, but the name must be exact. At this"
-					+ " time, this function only works with the vanilla ban system. If you use"
+			return "void {player, isBanned, [reason], [source]} Sets the ban flag of the specified player."
+					+ " Note that this will work with offline players, but the name must be exact. When banning,"
+					+ " an optional reason message may be provided that the player will see when attempting to login."
+					+ " An optional source may also be provided that indicates who or what banned the player."
+					+ " At this time, this function only works with the vanilla ban system. If you use"
 					+ " a third party ban system, you should instead run the command for that"
 					+ " plugin instead." + UUID_WARNING;
 		}
@@ -2741,6 +2769,9 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			String target = args[0].val();
 			boolean ban = Static.getBoolean(args[1], t);
+			String reason = "";
+			String source = "";
+
 			if(target.length() > 16) {
 				MCOfflinePlayer pl = Static.GetUser(target, t);
 				if(pl == null) {
@@ -2752,8 +2783,15 @@ public class PlayerManagement {
 					throw new CRENotFoundException(this.getName() + " could not get offline player's name", t);
 				}
 			}
+
 			if(ban) {
-				Static.getServer().banName(target);
+				if(args.length > 2) {
+					reason = args[2].nval();
+					if(args.length == 4) {
+						source = args[3].nval();
+					}
+				}
+				Static.getServer().banName(target, reason, source);
 			} else {
 				Static.getServer().unbanName(target);
 			}
@@ -2803,7 +2841,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			double speed = 0;
+			double speed;
 
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
@@ -2924,7 +2962,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			double speed = 0;
+			double speed;
 
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
@@ -3778,10 +3816,9 @@ public class PlayerManagement {
 		public String docs() {
 			return "void {[player], [listName]} Sets the player's list name. Colors are supported"
 					+ " and setting the name to null resets it."
-					+ " MineCraft versions prior to 1.8 have a limit of 16 characters for the name."
 					+ " In these versions, an IllegalArgumentException is thrown if the name specified is already"
 					+ " taken and a LengthException is thrown when the name is greater than 16 characters."
-					+ " In versions 1.8 and higher, specifying an already taken name will be silently ignored.";
+					+ " Specifying an already taken name will be silently ignored.";
 		}
 
 		@Override
@@ -4073,7 +4110,7 @@ public class PlayerManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class psend_block_change extends AbstractFunction {
+	public static class psend_block_change extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -4099,9 +4136,16 @@ public class PlayerManagement {
 				offset = 1;
 			}
 			Static.AssertPlayerNonNull(p, t);
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0 + offset], p.getWorld(), t);
-			MCItemStack item = Static.ParseItemNotation(getName(), args[1 + offset].val(), 1, t);
-			p.sendBlockChange(loc, item.getType().getType(), (byte) item.getData().getData());
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
+			MCMaterial mat = StaticLayer.GetMaterial(args[1 + offset].val());
+			if(mat == null) {
+				mat = Static.ParseItemNotation(getName(), args[1 + offset].val(), 1, t).getType();
+			}
+			if(!mat.isBlock()) {
+				throw new CREIllegalArgumentException("The value \"" + args[1 + offset].val()
+						+ "\" is not a valid block material.", t);
+			}
+			p.sendBlockChange(loc, mat.createBlockData());
 			return CVoid.VOID;
 		}
 
@@ -4117,13 +4161,29 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], locationArray, itemID} Changes a block, but only temporarily, and only for the specified player."
-					+ " This can be used to \"fake\" blocks for a player. ItemID is in the 1[:1] data format.";
+			return "void {[player], locationArray, blockName} Changes a block temporarily for the specified player."
+					+ " This can be used to \"fake\" blocks for a player.";
 		}
 
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() < 2) {
+				return null;
+			}
+			if(children.get(children.size() - 1).getData().val().contains(":")) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The 1:1 format is deprecated in psend_block_change()", t);
+			}
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -5346,7 +5406,7 @@ public class PlayerManagement {
 		public String docs() {
 			return "int {[player], material} Gets the time left on the player's cooldown for the specified material."
 					+ " The material is the name found in item arrays. This returns an integer representing the"
-					+ " time in game ticks until items of this material can be used again by this player. (MC 1.11.2)";
+					+ " time in game ticks until items of this material can be used again by this player.";
 		}
 
 		@Override
@@ -5418,7 +5478,7 @@ public class PlayerManagement {
 		public String docs() {
 			return "int {[player], material, cooldown} Sets the player's cooldown time for the specified material."
 					+ " The material is the name found in item arrays. The cooldown must be a positive integer"
-					+ " representing game ticks. (MC 1.11.2)";
+					+ " representing game ticks.";
 		}
 
 		@Override

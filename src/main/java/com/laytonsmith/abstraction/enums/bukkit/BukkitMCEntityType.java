@@ -15,10 +15,12 @@ import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.entity.EntityType;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class BukkitMCEntityType extends MCEntityType<EntityType> {
+
+	protected static final Map<EntityType, MCEntityType> BUKKIT_MAP = new HashMap<>();
 
 	public BukkitMCEntityType(EntityType concreteType, MCVanillaEntityType abstractedType) {
 		super(abstractedType, concreteType);
@@ -26,10 +28,7 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 
 	// This way we don't take up extra memory on non-bukkit implementations
 	public static void build() {
-		vanilla = new HashMap<>();
-		mappings = new HashMap<>();
 		NULL = new BukkitMCEntityType(EntityType.UNKNOWN, MCVanillaEntityType.UNKNOWN);
-		ArrayList<EntityType> counted = new ArrayList<>();
 		for(MCVanillaEntityType v : MCVanillaEntityType.values()) {
 			if(v.existsInCurrent()) {
 				EntityType type;
@@ -41,14 +40,15 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 				}
 				BukkitMCEntityType wrapper = new BukkitMCEntityType(type, v);
 				wrapper.setWrapperClass();
-				vanilla.put(v, wrapper);
-				mappings.put(v.name(), wrapper);
-				counted.add(type);
+				VANILLA_MAP.put(v, wrapper);
+				MAP.put(v.name(), wrapper);
+				BUKKIT_MAP.put(type, wrapper);
 			}
 		}
 		for(EntityType b : EntityType.values()) {
-			if(!counted.contains(b)) {
-				mappings.put(b.name(), new BukkitMCEntityType(b, MCVanillaEntityType.UNKNOWN));
+			if(!BUKKIT_MAP.containsKey(b)) {
+				MAP.put(b.name(), new BukkitMCEntityType(b, MCVanillaEntityType.UNKNOWN));
+				BUKKIT_MAP.put(b, new BukkitMCEntityType(b, MCVanillaEntityType.UNKNOWN));
 			}
 		}
 	}
@@ -73,10 +73,9 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 	}
 
 	public static BukkitMCEntityType valueOfConcrete(EntityType test) {
-		for(MCEntityType t : mappings.values()) {
-			if(((BukkitMCEntityType) t).getConcrete().equals(test)) {
-				return (BukkitMCEntityType) t;
-			}
+		MCEntityType type = BUKKIT_MAP.get(test);
+		if(type != null) {
+			return (BukkitMCEntityType) type;
 		}
 		return (BukkitMCEntityType) NULL;
 	}

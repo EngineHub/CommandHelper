@@ -29,7 +29,7 @@ public final class Prefilters {
 	public enum PrefilterType {
 		/**
 		 * Item matches are fuzzy matches for item notation. Red wool and black wool will match. Essentially, this match
-		 * ignores the item's data value when comparing.
+		 * ignores the item's data value when comparing. (deprecated)
 		 */
 		ITEM_MATCH,
 		/**

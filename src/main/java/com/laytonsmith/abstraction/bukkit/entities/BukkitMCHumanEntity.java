@@ -47,8 +47,7 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 
 	@Override
 	public MCItemStack getItemInHand() {
-		// deprecated in 1.9
-		ItemStack is = he.getItemInHand();
+		ItemStack is = he.getInventory().getItemInMainHand();
 		return is == null ? null : new BukkitMCItemStack(is);
 	}
 
@@ -79,8 +78,7 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 
 	@Override
 	public void setItemInHand(MCItemStack item) {
-		// deprecated in 1.9
-		he.setItemInHand(((BukkitMCItemStack) item).asItemStack());
+		he.getInventory().setItemInMainHand(((BukkitMCItemStack) item).asItemStack());
 	}
 
 	@Override
@@ -90,21 +88,12 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 
 	@Override
 	public int getCooldown(MCMaterial material) {
-		try {
-			return he.getCooldown((Material) material.getHandle());
-		} catch (NoSuchMethodError ex) {
-			// Probably prior to 1.11.2
-			return 0;
-		}
+		return he.getCooldown((Material) material.getHandle());
 	}
 
 	@Override
 	public void setCooldown(MCMaterial material, int ticks) {
-		try {
-			he.setCooldown((Material) material.getHandle(), ticks);
-		} catch (NoSuchMethodError ex) {
-			// Probably prior to 1.11.2
-		}
+		he.setCooldown((Material) material.getHandle(), ticks);
 	}
 
 	@Override

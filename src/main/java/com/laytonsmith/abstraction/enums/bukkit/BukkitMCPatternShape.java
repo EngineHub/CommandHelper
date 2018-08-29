@@ -3,9 +3,7 @@ package com.laytonsmith.abstraction.enums.bukkit;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.abstractionenum;
-import com.laytonsmith.core.Static;
 import org.bukkit.block.banner.PatternType;
 
 @abstractionenum(
@@ -22,13 +20,5 @@ public class BukkitMCPatternShape extends EnumConvertor<MCPatternShape, PatternT
 			instance = new BukkitMCPatternShape();
 		}
 		return instance;
-	}
-
-	@Override
-	protected PatternType getConcreteEnumCustom(MCPatternShape abstracted) {
-		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
-			return null;
-		}
-		return super.getConcreteEnumCustom(abstracted);
 	}
 }

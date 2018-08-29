@@ -16,12 +16,17 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
@@ -34,11 +39,13 @@ import com.laytonsmith.core.events.drivers.ServerEvents;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
 import java.io.IOException;
@@ -60,8 +67,8 @@ public class Minecraft {
 	public static String docs() {
 		return "These functions provide a hook into game functionality.";
 	}
+
 	private static final SortedMap<String, Construct> DATA_VALUE_LOOKUP = new TreeMap<>();
-	private static final SortedMap<String, Construct> DATA_NAME_LOOKUP = new TreeMap<>();
 
 	static {
 		Properties p1 = new Properties();
@@ -75,22 +82,10 @@ public class Minecraft {
 		} catch (IOException ex) {
 			Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
 		}
-
-		Properties p2 = new Properties();
-		try {
-			p2.load(Minecraft.class.getResourceAsStream("/data_names.txt"));
-			Enumeration e = p2.propertyNames();
-			while(e.hasMoreElements()) {
-				String name = e.nextElement().toString();
-				DATA_NAME_LOOKUP.put(name, new CString(p2.getProperty(name), Target.UNKNOWN));
-			}
-		} catch (IOException ex) {
-			Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
-		}
 	}
 
 	@api
-	public static class data_values extends AbstractFunction {
+	public static class data_values extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -108,9 +103,9 @@ public class Minecraft {
 				return new CInt(Static.getInt(args[0], t), t);
 			}
 			String c = args[0].val();
-			int number = StaticLayer.LookupItemId(c);
-			if(number != -1) {
-				return new CInt(number, t);
+			MCMaterial mat = StaticLayer.GetMaterial("LEGACY_" + c.toUpperCase());
+			if(mat != null) {
+				return new CInt(mat.getType(), t);
 			}
 			String changed = c;
 			if(changed.contains(":")) {
@@ -135,8 +130,8 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "int {var1} Does a lookup to return the data value of a name. For instance, returns 1 for 'stone'. If an integer is given,"
-					+ " simply returns that number. If the data value cannot be found, null is returned.";
+			return "int {var1} Does a lookup to return the data value of a name. For instance, returns 1 for 'stone'."
+					+ " If the data value cannot be found, null is returned.";
 		}
 
 		@Override
@@ -158,6 +153,17 @@ public class Minecraft {
 		public Boolean runAsync() {
 			return false;
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "data_values() is deprecated.", t);
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 	@api
@@ -175,10 +181,10 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "string {int | itemArray} Performs the reverse functionality as data_values. Given 1, returns 'Stone'. Note that the enum value"
-					+ " given in bukkit's Material class is what is returned as a fallback, if the id doesn't match a value in the internally maintained list."
-					+ " If a completely invalid argument is passed"
-					+ " in, null is returned.";
+			return "string {item} Returns a modern material for the a legacy item id, name, notation, or array."
+					+ " If an invalid argument is passed in, null is returned."
+					+ " Given 1 or '1:0', returns 'STONE'."
+					+ " Given an item array with {name: STONE, data: 1}, returns 'GRANITE'.";
 		}
 
 		@Override
@@ -218,23 +224,26 @@ public class Minecraft {
 					}
 				}
 			} else if(args[0] instanceof CArray) {
-				MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], t);
-				i = is.getTypeId();
-				i2 = is.getData().getData();
+				MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], t, true);
+				return new CString(is.getType().getName(), t);
 			}
 			if(i == -1) {
-				i = Static.getInt32(args[0], t);
+				try {
+					i = Static.getInt32(args[0], t);
+				} catch (CRECastException ex) {
+					// possibly a material name
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(args[0].val(), 0);
+					if(mat == null) {
+						return CNull.NULL;
+					}
+					return new CString(mat.getName(), t);
+				}
 			}
 			if(i2 == -1) {
 				i2 = 0;
 			}
-			if(DATA_NAME_LOOKUP.containsKey(i + "_" + i2)) {
-				return DATA_NAME_LOOKUP.get(i + "_" + i2);
-			} else if(DATA_NAME_LOOKUP.containsKey(i + "_0")) {
-				return DATA_NAME_LOOKUP.get(i + "_0");
-			}
 			try {
-				return new CString(StaticLayer.LookupMaterialName(i), t);
+				return new CString(StaticLayer.GetMaterialFromLegacy(i, i2).getName(), t);
 			} catch (NullPointerException e) {
 				return CNull.NULL;
 			}
@@ -242,7 +251,61 @@ public class Minecraft {
 	}
 
 	@api
-	public static class max_stack_size extends AbstractFunction {
+	public static class convert_legacy_item extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "convert_legacy_item";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {itemArray} Converts old pre-1.13 item arrays to new item arrays."
+					+ " Almost all item arrays will be converted successfully when passing them to a function that"
+					+ " accepts item arrays. However, if the array is missing the 'type' key, several item types"
+					+ " might not convert accurately due to name conflicts."
+					+ " This function offers convenience and ensures better conversion accuracy."
+					+ " Use this if you have item arrays stored in a database and want to convert them all at once."
+					+ " Passing new item arrays to this function is not supported."
+					+ " Conversions may not be supported in far future versions of Minecraft.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CRERangeException.class,
+					CRENotFoundException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray item = Static.getArray(args[0], t);
+			MCItemStack is = ObjectGenerator.GetGenerator().item(item, t, true);
+			return ObjectGenerator.GetGenerator().item(is, t);
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_3;
+		}
+	}
+
+	@api
+	public static class max_stack_size extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -256,12 +319,8 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "integer {itemType | itemArray} Given an item type, returns"
-					+ " the maximum allowed stack size. This method will accept either"
-					+ " a single data value (i.e. 278) or an item array like is returned"
-					+ " from pinv(). Additionally, if a single value, it can also be in"
-					+ " the old item notation (i.e. '35:11'), though for the purposes of this"
-					+ " function, the data is unnecessary.";
+			return "integer {itemArray} Given an item array, returns the maximum allowed stack size."
+					+ " This method will accept an item array like is returned from pinv().";
 		}
 
 		@Override
@@ -286,17 +345,22 @@ public class Minecraft {
 			if(id instanceof CArray) {
 				MCItemStack is = ObjectGenerator.GetGenerator().item(id, t);
 				return new CInt(is.getType().getMaxStackSize(), t);
-			} else if(id instanceof CString) {
-				int seperatorIndex = id.val().indexOf(':');
-				if(seperatorIndex != -1) {
-					id = new CString(id.val().substring(0, seperatorIndex), t);
+			}
+			// legacy
+			int type;
+			int data = 0;
+			try {
+				int separatorIndex = id.val().indexOf(':');
+				if(separatorIndex != -1) {
+					type = Integer.parseInt(id.val().substring(0, separatorIndex));
+					data = Integer.parseInt(id.val().substring(separatorIndex + 1));
+				} else {
+					type = Integer.parseInt(id.val());
 				}
+			} catch (NumberFormatException e) {
+				throw new CREFormatException("Invalid item notation: " + id.val(), t);
 			}
-			int seperatorIndex = id.val().indexOf(':');
-			if(seperatorIndex != -1) {
-				id = new CString(id.val().substring(0, seperatorIndex), t);
-			}
-			MCMaterial mat = StaticLayer.GetConvertor().getMaterial(Static.getInt32(id, t));
+			MCMaterial mat = StaticLayer.GetMaterialFromLegacy(type, data);
 			if(mat == null) {
 				throw new CRENotFoundException("A material type could not be found based on the given id.", t);
 			}
@@ -307,10 +371,27 @@ public class Minecraft {
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() < 1) {
+				return null;
+			}
+			if(children.get(0).getData() instanceof CString && children.get(0).getData().val().contains(":")
+					|| ArgumentValidation.isNumber(children.get(0).getData())) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Numeric ids are deprecated in max_stack_size()", t);
+			}
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class make_effect extends AbstractFunction {
+	public static class make_effect extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -371,10 +452,11 @@ public class Minecraft {
 			try {
 				e = MCEffect.valueOf(preEff.toUpperCase());
 			} catch (IllegalArgumentException ex) {
-				throw new CREFormatException("The effect type " + args[1].val() + " is not valid", t);
+				CHLog.GetLogger().e(CHLog.Tags.GENERAL, "The effect type " + args[1].val() + " is not valid", t);
+				return CVoid.VOID;
 			}
 			if(e.equals(MCEffect.STEP_SOUND)) {
-				MCMaterial mat = StaticLayer.GetConvertor().getMaterial(data);
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(data, 0);
 				if(mat == null || !mat.isBlock()) {
 					throw new CREFormatException("This effect requires a valid BlockID", t);
 				}
@@ -384,6 +466,30 @@ public class Minecraft {
 			}
 			l.getWorld().playEffect(l, e, data, radius);
 			return CVoid.VOID;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 2) {
+				return null;
+			}
+			Construct effect = children.get(1).getData();
+			if(effect instanceof CString) {
+				String effectName = effect.val().split(":")[0].toUpperCase();
+				try {
+					MCEffect.valueOf(effectName);
+				} catch (IllegalArgumentException ex) {
+					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The effect type " + effectName + " is not valid", t);
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -460,7 +566,7 @@ public class Minecraft {
 				throw new CRERangeException(this.getName() + " expects the index to be between -1 and 16 (inclusive)", t);
 			}
 
-			ArrayList<Construct> retVals = new ArrayList<Construct>();
+			ArrayList<Construct> retVals = new ArrayList<>();
 
 			if(index == 0 || index == -1) {
 				//Server name
@@ -954,56 +1060,82 @@ public class Minecraft {
 	}
 
 	@api
-	public static class material_info extends AbstractFunction {
+	public static class material_info extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREFormatException.class};
+			return new Class[]{CRECastException.class, CREFormatException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCMaterial i = StaticLayer.GetConvertor().getMaterial(Static.getInt32(args[0], t));
+			MCMaterial mat = StaticLayer.GetMaterial(args[0].val());
+			if(mat == null) {
+				try {
+					mat = StaticLayer.GetMaterialFromLegacy(Static.getInt32(args[0], t), 0);
+				} catch (CRECastException ex) {
+					throw new CREIllegalArgumentException("Unable to get the material from: " + args[0].val(), t);
+				}
+			}
 			if(args.length == 2) {
 				switch(args[1].val()) {
 					case "maxStacksize":
-						return new CInt(i.getMaxStackSize(), t);
+						return new CInt(mat.getMaxStackSize(), t);
 					case "maxDurability":
-						return new CInt(i.getMaxDurability(), t);
+						return new CInt(mat.getMaxDurability(), t);
 					case "hasGravity":
-						return CBoolean.get(i.hasGravity());
+						return CBoolean.get(mat.hasGravity());
 					case "isBlock":
-						return CBoolean.get(i.isBlock());
+						return CBoolean.get(mat.isBlock());
 					case "isBurnable":
-						return CBoolean.get(i.isBurnable());
+						return CBoolean.get(mat.isBurnable());
 					case "isEdible":
-						return CBoolean.get(i.isEdible());
+						return CBoolean.get(mat.isEdible());
 					case "isFlammable":
-						return CBoolean.get(i.isFlammable());
+						return CBoolean.get(mat.isFlammable());
 					case "isOccluding":
-						return CBoolean.get(i.isOccluding());
+						return CBoolean.get(mat.isOccluding());
 					case "isRecord":
-						return CBoolean.get(i.isRecord());
+						return CBoolean.get(mat.isRecord());
 					case "isSolid":
-						return CBoolean.get(i.isSolid());
+						return CBoolean.get(mat.isSolid());
 					case "isTransparent":
-						return CBoolean.get(i.isTransparent());
+						return CBoolean.get(mat.isTransparent());
+					case "isInteractable":
+						return CBoolean.get(mat.isInteractable());
+					case "hardness":
+						if(!mat.isBlock()) {
+							throw new CREIllegalArgumentException(
+									"Invalid trait \"hardness\" for non-block material " + mat.getName(), t);
+						}
+						return new CDouble(mat.getHardness(), t);
+					case "blastResistance":
+						if(!mat.isBlock()) {
+							throw new CREIllegalArgumentException(
+									"Invalid trait \"blastResistance\" for non-block material " + mat.getName(), t);
+						}
+						return new CDouble(mat.getBlastResistance(), t);
 					default:
-						throw new CREFormatException("Invalid argument for material_info", t);
+						throw new CREFormatException("Invalid argument for material_info: " + args[1].val(), t);
 				}
 			}
 			CArray ret = CArray.GetAssociativeArray(t);
-			ret.set("maxStacksize", new CInt(i.getMaxStackSize(), t), t);
-			ret.set("maxDurability", new CInt(i.getMaxDurability(), t), t);
-			ret.set("hasGravity", CBoolean.get(i.hasGravity()), t);
-			ret.set("isBlock", CBoolean.get(i.isBlock()), t);
-			ret.set("isBurnable", CBoolean.get(i.isBurnable()), t);
-			ret.set("isEdible", CBoolean.get(i.isEdible()), t);
-			ret.set("isFlammable", CBoolean.get(i.isFlammable()), t);
-			ret.set("isOccluding", CBoolean.get(i.isOccluding()), t);
-			ret.set("isRecord", CBoolean.get(i.isRecord()), t);
-			ret.set("isSolid", CBoolean.get(i.isSolid()), t);
-			ret.set("isTransparent", CBoolean.get(i.isTransparent()), t);
+			ret.set("maxStacksize", new CInt(mat.getMaxStackSize(), t), t);
+			ret.set("maxDurability", new CInt(mat.getMaxDurability(), t), t);
+			ret.set("hasGravity", CBoolean.get(mat.hasGravity()), t);
+			ret.set("isBlock", CBoolean.get(mat.isBlock()), t);
+			ret.set("isBurnable", CBoolean.get(mat.isBurnable()), t);
+			ret.set("isEdible", CBoolean.get(mat.isEdible()), t);
+			ret.set("isFlammable", CBoolean.get(mat.isFlammable()), t);
+			ret.set("isOccluding", CBoolean.get(mat.isOccluding()), t);
+			ret.set("isRecord", CBoolean.get(mat.isRecord()), t);
+			ret.set("isSolid", CBoolean.get(mat.isSolid()), t);
+			ret.set("isTransparent", CBoolean.get(mat.isTransparent()), t);
+			ret.set("isInteractable", CBoolean.get(mat.isInteractable()), t);
+			if(mat.isBlock()) {
+				ret.set("hardness", new CDouble(mat.getHardness(), t), t);
+				ret.set("blastResistance", new CDouble(mat.getBlastResistance(), t), t);
+			}
 			return ret;
 		}
 
@@ -1019,9 +1151,11 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "mixed {int, [trait]} Returns an array of info about the material. If a trait is specified, it"
-					+ " returns only that trait. Available traits: hasGravity, isBlock, isBurnable, isEdible,"
-					+ " isFlammable, isOccluding, isRecord, isSolid, isTransparent, maxDurability, maxStacksize.";
+			return "mixed {material, [trait]} Returns an array of info about the material. If a trait is specified,"
+					+ " it returns only that trait. Available traits: hasGravity, isBlock, isBurnable, isEdible,"
+					+ " isFlammable, isOccluding, isRecord, isSolid, isTransparent, isInteractable, maxDurability,"
+					+ " hardness (for block materials only), blastResistance (for block materials only),"
+					+ " and maxStacksize.";
 		}
 
 		@Override
@@ -1037,6 +1171,22 @@ public class Minecraft {
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() < 1) {
+				return null;
+			}
+			if(ArgumentValidation.isNumber(children.get(0).getData())) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Numeric ids are deprecated in material_info()", t);
+			}
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 

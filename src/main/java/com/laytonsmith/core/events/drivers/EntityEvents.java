@@ -4,12 +4,13 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCHanging;
+import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.entities.MCHanging;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MCProjectile;
+import com.laytonsmith.abstraction.entities.MCProjectile;
 import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
@@ -46,6 +47,8 @@ import com.laytonsmith.abstraction.events.MCPlayerPickupItemEvent;
 import com.laytonsmith.abstraction.events.MCProjectileHitEvent;
 import com.laytonsmith.abstraction.events.MCProjectileLaunchEvent;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -60,12 +63,14 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
+import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
+import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -93,7 +98,7 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{item: <item match> the item id and data value to check}"
+			return "{itemname: <string match> the type of item that despawned}"
 					+ " Fires when an item entity is removed from the world because it has existed for 5 minutes."
 					+ " Cancelling the event will allow the item to exist for 5 more minutes."
 					+ " {location: where the item is | id: the item's entityID | item: the itemstack of the entity}"
@@ -102,10 +107,24 @@ public class EntityEvents {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilter
+			Map<String, Construct> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("item")) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
+						+ " is deprecated for \"itemname\".", event.getTarget());
+				MCItemStack is = Static.ParseItemNotation(null, prefilter.get("item").val(), 1, event.getTarget());
+				prefilter.put("itemname", new CString(is.getType().getName(), event.getTarget()));
+			}
+		}
+
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCItemDespawnEvent) {
-				Prefilters.match(prefilter, "item", Static.ParseItemNotation(
-						((MCItemDespawnEvent) e).getEntity().getItemStack()), PrefilterType.ITEM_MATCH);
+				MCItemDespawnEvent event = (MCItemDespawnEvent) e;
+				Prefilters.match(prefilter, "itemname", event.getEntity().getItemStack().getType().getName(),
+						PrefilterType.STRING_MATCH);
 				return true;
 			}
 			return false;
@@ -158,7 +177,7 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{item: <item match> the item id and data value to check}"
+			return "{itemname: <string match> the type of item that spawned}"
 					+ " Fires when an item entity comes into existance."
 					+ " {location: where the item spawns | id: the item's entityID | item}"
 					+ " {item: the itemstack of the entity}"
@@ -166,10 +185,24 @@ public class EntityEvents {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilter
+			Map<String, Construct> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("item")) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
+						+ " is deprecated for \"itemname\".", event.getTarget());
+				MCItemStack is = Static.ParseItemNotation(null, prefilter.get("item").val(), 1, event.getTarget());
+				prefilter.put("itemname", new CString(is.getType().getName(), event.getTarget()));
+			}
+		}
+
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCItemSpawnEvent) {
-				Prefilters.match(prefilter, "item", Static.ParseItemNotation(
-						((MCItemSpawnEvent) e).getEntity().getItemStack()), PrefilterType.ITEM_MATCH);
+				MCItemSpawnEvent event = (MCItemSpawnEvent) e;
+				Prefilters.match(prefilter, "itemname",
+						event.getEntity().getItemStack().getType().getName(), PrefilterType.STRING_MATCH);
 				return true;
 			}
 			return false;
@@ -358,8 +391,8 @@ public class EntityEvents {
 					+ " the type of object hit, either ENTITY or BLOCK}"
 					+ " Fires when a projectile collides with something."
 					+ " {type | id: the entityID of the projectile |"
-					+ " location: where it makes contact | shooter | hittype (MC 1.11) | hit: the entity id or block"
-					+ " location array of the hit object. (MC 1.11)}"
+					+ " location: where it makes contact | shooter | hittype | hit: the entity id or block"
+					+ " location array of the hit object.}"
 					+ " {shooter: the entityID of the mob/player that fired"
 					+ " the projectile, or null if it is from a dispenser}"
 					+ " {id}";
@@ -923,7 +956,6 @@ public class EntityEvents {
 				MCPlayerInteractEntityEvent event = (MCPlayerInteractEntityEvent) e;
 				Map<String, Construct> map = evaluate_helper(e);
 
-				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 				map.put("clicked", new CString(event.getEntity().getType().name(), Target.UNKNOWN));
 				map.put("id", new CString(event.getEntity().getUniqueId().toString(), Target.UNKNOWN));
 
@@ -1020,7 +1052,6 @@ public class EntityEvents {
 				MCPlayerInteractAtEntityEvent event = (MCPlayerInteractAtEntityEvent) e;
 				Map<String, Construct> map = evaluate_helper(e);
 
-				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 				map.put("clicked", new CString(event.getEntity().getType().name(), Target.UNKNOWN));
 				map.put("id", new CString(event.getEntity().getUniqueId().toString(), Target.UNKNOWN));
 				map.put("position", ObjectGenerator.GetGenerator().vector(event.getClickedPosition(), Target.UNKNOWN));
@@ -1070,7 +1101,7 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <macro> | item: <item match>} "
+			return "{player: <macro> | itemname: <string match>} "
 					+ "This event is called when a player drops an item. "
 					+ "{player: The player | item: An item array representing "
 					+ "the item being dropped. } "
@@ -1094,11 +1125,25 @@ public class EntityEvents {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilter
+			Map<String, Construct> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("item")) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
+						+ " is deprecated for \"itemname\".", event.getTarget());
+				MCItemStack is = Static.ParseItemNotation(null, prefilter.get("item").val(), 1, event.getTarget());
+				prefilter.put("itemname", new CString(is.getType().getName(), event.getTarget()));
+			}
+		}
+
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerDropItemEvent) {
 				MCPlayerDropItemEvent event = (MCPlayerDropItemEvent) e;
 
-				Prefilters.match(prefilter, "item", Static.ParseItemNotation(event.getItemDrop().getItemStack()), Prefilters.PrefilterType.ITEM_MATCH);
+				Prefilters.match(prefilter, "itemname", event.getItemDrop().getItemStack().getType().getName(),
+						Prefilters.PrefilterType.STRING_MATCH);
 				Prefilters.match(prefilter, "player", event.getPlayer().getName(), Prefilters.PrefilterType.MACRO);
 
 				return true;
@@ -1112,7 +1157,6 @@ public class EntityEvents {
 				MCPlayerDropItemEvent event = (MCPlayerDropItemEvent) e;
 				Map<String, Construct> map = evaluate_helper(e);
 
-				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 				map.put("item", ObjectGenerator.GetGenerator().item(event.getItemDrop().getItemStack(), Target.UNKNOWN));
 				map.put("id", new CString(event.getItemDrop().getUniqueId().toString(), Target.UNKNOWN));
 
@@ -1149,7 +1193,7 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <macro> | item: <item match>} "
+			return "{player: <macro> | itemname: <string match>} "
 					+ "This event is called when a player picks up an item."
 					+ "{player: The player | item: An item array representing "
 					+ "the item being picked up | "
@@ -1159,11 +1203,25 @@ public class EntityEvents {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilter
+			Map<String, Construct> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("item")) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
+						+ " is deprecated for \"itemname\".", event.getTarget());
+				MCItemStack is = Static.ParseItemNotation(null, prefilter.get("item").val(), 1, event.getTarget());
+				prefilter.put("itemname", new CString(is.getType().getName(), event.getTarget()));
+			}
+		}
+
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerPickupItemEvent) {
 				MCPlayerPickupItemEvent event = (MCPlayerPickupItemEvent) e;
 
-				Prefilters.match(prefilter, "item", Static.ParseItemNotation(event.getItem().getItemStack()), Prefilters.PrefilterType.ITEM_MATCH);
+				Prefilters.match(prefilter, "itemname", event.getItem().getItemStack().getType().getName(),
+						Prefilters.PrefilterType.STRING_MATCH);
 				Prefilters.match(prefilter, "player", event.getPlayer().getName(), Prefilters.PrefilterType.MACRO);
 
 				return true;
@@ -1182,13 +1240,9 @@ public class EntityEvents {
 			if(e instanceof MCPlayerPickupItemEvent) {
 				MCPlayerPickupItemEvent event = (MCPlayerPickupItemEvent) e;
 				Map<String, Construct> map = evaluate_helper(e);
-
-				//Fill in the event parameters
-				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 				map.put("id", new CString(event.getItem().getUniqueId().toString(), Target.UNKNOWN));
 				map.put("item", ObjectGenerator.GetGenerator().item(event.getItem().getItemStack(), Target.UNKNOWN));
 				map.put("remaining", new CInt(event.getRemaining(), Target.UNKNOWN));
-
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to MCPlayerPickupItemEvent");
@@ -1401,7 +1455,7 @@ public class EntityEvents {
 						MCPlayer p = Static.GetPlayer(value.val(), value.getTarget());
 
 						if(p.isOnline()) {
-							ete.setTarget((MCEntity) p);
+							ete.setTarget(p);
 							return true;
 						}
 					}
@@ -1429,12 +1483,12 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <macro> the type of entity | block: <math match> (deprecated) the block numeric id of the portal"
+			return "{type: <macro> the type of entity"
 					+ " | portaltype: <string match> The type of portal (PORTAL or END_PORTAL)"
 					+ " world: <macro> the world in which the portal was entered }"
 					+ " Fires when an entity touches a portal block."
 					+ " {id: the entityID of the entity | location: the location of the block touched | type"
-					+ " | block (deprecated) | portaltype }"
+					+ " | portaltype }"
 					+ " {}"
 					+ " {}";
 		}
@@ -1449,9 +1503,6 @@ public class EntityEvents {
 					if(!prefilter.get("portaltype").val().equals(mat.getName())) {
 						return false;
 					}
-				} else if(prefilter.containsKey("block")) {
-					int type = event.getLocation().getBlock().getTypeId();
-					Prefilters.match(prefilter, "block", type, PrefilterType.MATH_MATCH);
 				}
 				Prefilters.match(prefilter, "world", event.getLocation().getWorld().getName(), PrefilterType.MACRO);
 				return true;
@@ -1475,7 +1526,6 @@ public class EntityEvents {
 				ret.put("type", new CString(event.getEntity().getType().name(), t));
 				ret.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
 				ret.put("portaltype", new CString(mat.getName(), t));
-				ret.put("block", new CInt(mat.getType(), t));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCPortalEnterEvent");
@@ -1508,14 +1558,39 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{from: <math match> the block ID before the change | to: <math match> the block ID after change"
+			return "{from: <string match> the block name before the change"
+					+ " | to: <string match> the block name after change"
 					+ " | location: <location match> the location of the block changed}"
 					+ " Fires when an entity change block in some way."
-					+ " {entity: the entity ID of the entity which changed block | from: the block ID before the change"
-					+ " | data: the data value for the block being changed | to: the block ID after change"
-					+ " | location: the location of the block changed}"
+					+ " {entity: the entity ID of the entity which changed block"
+					+ " | from | to | location: the location of the block changed}"
 					+ " {}"
-					+ " {from|to|location}";
+					+ " {}";
+		}
+
+		@Override
+		@SuppressWarnings("deprecation")
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilter
+			Map<String, Construct> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("from")) {
+				Construct type = prefilter.get("from");
+				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The 0:0 block format in " + getName()
+							+ " is deprecated in \"from\" prefilter.", event.getTarget());
+					MCItemStack is = Static.ParseItemNotation(null, type.val(), 1, event.getTarget());
+					prefilter.put("from", new CString(is.getType().getName(), event.getTarget()));
+				}
+			}
+			if(prefilter.containsKey("to")) {
+				Construct type = prefilter.get("to");
+				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The 0:0 block format in " + getName()
+							+ " is deprecated in \"to\" prefilter.", event.getTarget());
+					MCItemStack is = Static.ParseItemNotation(null, type.val(), 1, event.getTarget());
+					prefilter.put("to", new CString(is.getType().getName(), event.getTarget()));
+				}
+			}
 		}
 
 		@Override
@@ -1523,8 +1598,8 @@ public class EntityEvents {
 				throws PrefilterNonMatchException {
 			if(e instanceof MCEntityChangeBlockEvent) {
 				MCEntityChangeBlockEvent event = (MCEntityChangeBlockEvent) e;
-				Prefilters.match(prefilter, "from", event.getBlock().getTypeId(), PrefilterType.MATH_MATCH);
-				Prefilters.match(prefilter, "to", event.getTo().getType(), PrefilterType.MATH_MATCH);
+				Prefilters.match(prefilter, "from", event.getBlock().getType().getName(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "to", event.getTo().getName(), PrefilterType.STRING_MATCH);
 				Prefilters.match(prefilter, "location", event.getBlock().getLocation(), PrefilterType.LOCATION_MATCH);
 				return true;
 			}
@@ -1544,9 +1619,8 @@ public class EntityEvents {
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(event);
 				ret.put("entity", new CString(event.getEntity().getUniqueId().toString(), t));
-				ret.put("from", new CInt(event.getBlock().getTypeId(), t));
-				ret.put("data", new CInt(event.getData(), t));
-				ret.put("to", new CInt(event.getTo().getType(), t));
+				ret.put("from", new CString(event.getBlock().getType().getName(), t));
+				ret.put("to", new CString(event.getTo().getName(), t));
 				ret.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 				return ret;
 			} else {
@@ -1581,24 +1655,56 @@ public class EntityEvents {
 		@Override
 		public String docs() {
 			return "{type: <string match> the entity type"
-					+ " | blockname: <string match> The block name the entity is interacting with."
-					+ " | block: <item match> (deprecated) The numeric block id }"
+					+ " | block: <string match> The block name the entity is interacting with.}"
 					+ " Fires when a non-player entity physically interacts with and triggers a block."
-					+ " (eg. pressure plates, redstone ore, farmland, tripwire, and wooden button)"
-					+ " {entity: the ID of the entity that interacted with the block | blockname | block (deprecated)"
+					+ " (eg. pressure plates, redstone ore, farmland, tripwire, doors, and wooden button)"
+					+ " {entity: the ID of the entity that interacted with the block | block | block (deprecated)"
 					+ " | location: the location of the interaction}"
 					+ " {}"
 					+ " {}";
 		}
 
 		@Override
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilter
+			Map<String, Construct> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("blockname")) {
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("blockname").val(), 0);
+				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"blockname\" prefilter in " + getName()
+						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
+			} else if(prefilter.containsKey("block")) {
+				Construct ctype = prefilter.get("block");
+				if(ctype instanceof CString && ctype.val().contains(":") || ArgumentValidation.isNumber(ctype)) {
+					int type;
+					String notation = ctype.val();
+					int separatorIndex = notation.indexOf(':');
+					if(separatorIndex != -1) {
+						type = Integer.parseInt(notation.substring(0, separatorIndex));
+					} else {
+						type = Integer.parseInt(notation);
+					}
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(type, 0);
+					if(mat == null) {
+						throw new CREBindException("Cannot find material by the id '" + notation + "'", event.getTarget());
+					}
+					prefilter.put("block", new CString(mat.getName(), event.getTarget()));
+					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The block notation format in the \"block\" prefilter"
+							+ " in " + getName() + " is deprecated. Converted to " + mat.getName(), event.getTarget());
+				}
+			}
+		}
+
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCEntityInteractEvent) {
 				MCEntityInteractEvent event = (MCEntityInteractEvent) e;
-				MCMaterial mat = event.getBlock().getType();
 				Prefilters.match(prefilter, "type", event.getEntity().getType().name(), PrefilterType.STRING_MATCH);
-				Prefilters.match(prefilter, "blockname", mat.getName(), PrefilterType.STRING_MATCH);
-				Prefilters.match(prefilter, "block", mat.getType(), PrefilterType.ITEM_MATCH);
+				if(prefilter.containsKey("block")) {
+					if(!event.getBlock().getType().getName().equals(prefilter.get("block").val())) {
+						return false;
+					}
+				}
 				return true;
 			}
 			return false;
@@ -1613,12 +1719,10 @@ public class EntityEvents {
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCEntityInteractEvent) {
 				MCEntityInteractEvent event = (MCEntityInteractEvent) e;
-				MCMaterial mat = event.getBlock().getType();
 				Target t = Target.UNKNOWN;
 				Map<String, Construct> ret = evaluate_helper(event);
 				ret.put("entity", new CString(event.getEntity().getUniqueId().toString(), t));
-				ret.put("blockname", new CString(mat.getName(), t));
-				ret.put("block", new CInt(mat.getType(), t));
+				ret.put("block", new CString(event.getBlock().getType().getName(), t));
 				ret.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 				return ret;
 			} else {

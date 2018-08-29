@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import com.laytonsmith.abstraction.MCItem;
+import com.laytonsmith.abstraction.entities.MCItem;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import org.bukkit.entity.Entity;

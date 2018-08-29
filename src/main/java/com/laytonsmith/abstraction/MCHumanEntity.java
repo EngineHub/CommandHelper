@@ -32,7 +32,6 @@ public interface MCHumanEntity extends MCInventoryHolder, MCLivingEntity, MCAnim
 
 	MCInventoryView openWorkbench(MCLocation loc, boolean force);
 
-	//MCInventoryView	openWorkbench(MCLocation location, boolean force);
 	void setGameMode(MCGameMode mode);
 
 	void setItemInHand(MCItemStack item);

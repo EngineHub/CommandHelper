@@ -1,4 +1,6 @@
-package com.laytonsmith.abstraction;
+package com.laytonsmith.abstraction.entities;
+
+import com.laytonsmith.abstraction.MCAnimalTamer;
 
 public interface MCTameable extends MCAgeable {
 

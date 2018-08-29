@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import com.laytonsmith.abstraction.MCHanging;
+import com.laytonsmith.abstraction.entities.MCHanging;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;

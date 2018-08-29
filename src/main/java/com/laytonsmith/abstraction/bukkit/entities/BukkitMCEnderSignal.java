@@ -23,11 +23,7 @@ public class BukkitMCEnderSignal extends BukkitMCEntity implements MCEnderSignal
 
 	@Override
 	public void setDespawnTicks(int ticks) {
-		try {
-			es.setDespawnTimer(ticks);
-		} catch (NoSuchMethodError ex) {
-			// probably prior to 1.12.2
-		}
+		es.setDespawnTimer(ticks);
 	}
 
 	@Override
@@ -37,11 +33,7 @@ public class BukkitMCEnderSignal extends BukkitMCEntity implements MCEnderSignal
 
 	@Override
 	public void setDropItem(boolean drop) {
-		try {
-			es.setDropItem(drop);
-		} catch (NoSuchMethodError ex) {
-			// probably prior to 1.12.2
-		}
+		es.setDropItem(drop);
 	}
 
 	@Override
@@ -51,10 +43,6 @@ public class BukkitMCEnderSignal extends BukkitMCEntity implements MCEnderSignal
 
 	@Override
 	public void setTargetLocation(MCLocation loc) {
-		try {
-			es.setTargetLocation((Location) loc.getHandle());
-		} catch (NoSuchMethodError ex) {
-			// probably prior to 1.12.2
-		}
+		es.setTargetLocation((Location) loc.getHandle());
 	}
 }

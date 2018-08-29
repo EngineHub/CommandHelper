@@ -693,49 +693,15 @@ public class StaticTest {
 		}
 
 		@Override
-		public int LookupItemId(String materialName) {
-			throw new UnsupportedOperationException("Not supported yet.");
-		}
-
-		@Override
-		public String LookupMaterialName(int id) {
-			throw new UnsupportedOperationException("Not supported yet.");
-		}
-
-		@Override
-		public MCItemStack GetItemStack(int type, int qty) {
-			Convertor c = new BukkitConvertor();
-			return c.GetItemStack(type, qty);
-		}
-
-		@Override
-		public MCItemStack GetItemStack(int type, int data, int qty) {
-			Convertor c = new BukkitConvertor();
-			return c.GetItemStack(type, data, qty);
-		}
-
-		@Override
 		public MCItemStack GetItemStack(MCMaterial type, int qty) {
 			Convertor c = new BukkitConvertor();
 			return c.GetItemStack(type, qty);
 		}
 
 		@Override
-		public MCItemStack GetItemStack(MCMaterial type, int data, int qty) {
-			Convertor c = new BukkitConvertor();
-			return c.GetItemStack(type, data, qty);
-		}
-
-		@Override
 		public MCItemStack GetItemStack(String type, int qty) {
 			Convertor c = new BukkitConvertor();
 			return c.GetItemStack(type, qty);
-		}
-
-		@Override
-		public MCItemStack GetItemStack(String type, int data, int qty) {
-			Convertor c = new BukkitConvertor();
-			return c.GetItemStack(type, data, qty);
 		}
 
 		@Override
@@ -838,7 +804,12 @@ public class StaticTest {
 		}
 
 		@Override
-		public MCMaterial getMaterial(int id) {
+		public MCMaterial GetMaterialFromLegacy(String name, int data) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public MCMaterial GetMaterialFromLegacy(int id, int data) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 

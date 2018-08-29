@@ -1,7 +1,6 @@
 package com.laytonsmith.abstraction.entities;
 
-import com.laytonsmith.abstraction.MCMaterialData;
-import com.laytonsmith.abstraction.MCVehicle;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 
 public interface MCMinecart extends MCVehicle {
 
@@ -17,9 +16,9 @@ public interface MCMinecart extends MCVehicle {
 
 	void setSlowWhenEmpty(boolean slow);
 
-	void setDisplayBlock(MCMaterialData material);
+	void setDisplayBlock(MCBlockData data);
 
-	MCMaterialData getDisplayBlock();
+	MCBlockData getDisplayBlock();
 
 	void setDisplayBlockOffset(int offset);
 

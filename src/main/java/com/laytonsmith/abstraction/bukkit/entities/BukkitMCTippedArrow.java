@@ -4,6 +4,7 @@ import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPotionData;
 import com.laytonsmith.abstraction.entities.MCTippedArrow;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.TippedArrow;
 import org.bukkit.potion.PotionData;
@@ -31,16 +32,17 @@ public class BukkitMCTippedArrow extends BukkitMCArrow implements MCTippedArrow 
 	public List<MCLivingEntity.MCEffect> getCustomEffects() {
 		List<MCLivingEntity.MCEffect> list = new ArrayList<>();
 		for(PotionEffect pe : ta.getCustomEffects()) {
-			list.add(new MCLivingEntity.MCEffect(pe.getType().getId(), pe.getAmplifier(),
-					pe.getDuration(), pe.isAmbient(), pe.hasParticles()));
+			list.add(new MCLivingEntity.MCEffect(BukkitMCPotionEffectType.valueOfConcrete(pe.getType()),
+					pe.getAmplifier(), pe.getDuration(), pe.isAmbient(), pe.hasParticles(), pe.hasIcon()));
 		}
 		return list;
 	}
 
 	@Override
 	public void addCustomEffect(MCLivingEntity.MCEffect effect) {
-		PotionEffect pe = new PotionEffect(PotionEffectType.getById(effect.getPotionID()),
-				effect.getTicksRemaining(), effect.getStrength(), effect.isAmbient(), effect.hasParticles());
+		PotionEffect pe = new PotionEffect((PotionEffectType) effect.getPotionEffectType().getConcrete(),
+				effect.getTicksRemaining(), effect.getStrength(), effect.isAmbient(), effect.hasParticles(),
+				effect.showIcon());
 		ta.addCustomEffect(pe, true);
 	}
 

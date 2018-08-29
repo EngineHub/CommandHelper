@@ -2,9 +2,12 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCShapelessRecipe;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
 
@@ -19,12 +22,7 @@ public class BukkitMCShapelessRecipe extends BukkitMCRecipe implements MCShapele
 
 	@Override
 	public String getKey() {
-		try {
-			return r.getKey().getKey();
-		} catch (NoSuchMethodError ex) {
-			// Probably prior to 1.12
-			return null;
-		}
+		return r.getKey().getKey();
 	}
 
 	@Override
@@ -53,7 +51,13 @@ public class BukkitMCShapelessRecipe extends BukkitMCRecipe implements MCShapele
 
 	@Override
 	public MCShapelessRecipe addIngredient(MCItemStack ingredient) {
-		r.addIngredient(ingredient.getAmount(), ((ItemStack) ingredient.getHandle()).getData());
+		r.addIngredient(ingredient.getAmount(), ((ItemStack) ingredient.getHandle()).getType());
+		return this;
+	}
+
+	@Override
+	public MCShapelessRecipe addIngredient(MCMaterial ingredient) {
+		r.addIngredient((Material) ingredient.getHandle());
 		return this;
 	}
 }

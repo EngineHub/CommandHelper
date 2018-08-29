@@ -4,11 +4,7 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.PureUtilities.ZipReader;
-import com.laytonsmith.abstraction.MCEnchantment;
-import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MCPlayerInventory;
-import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
@@ -19,11 +15,9 @@ import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -35,10 +29,8 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
-import com.laytonsmith.core.exceptions.CRE.CREEnchantmentException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREIncludeException;
-import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRESecurityException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -118,95 +110,6 @@ public class Sandbox {
 				BukkitDirtyRegisteredListener.setCancelled((org.bukkit.event.Event) original.getUnderlyingEvent());
 			}
 			environment.getEnv(GlobalEnv.class).GetEvent().setCancelled(true);
-			return CVoid.VOID;
-		}
-	}
-
-	@api(environments = {CommandHelperEnvironment.class})
-	public static class enchant_inv_unsafe extends AbstractFunction {
-
-		@Override
-		public String getName() {
-			return "enchant_inv_unsafe";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{3, 4};
-		}
-
-		@Override
-		public String docs() {
-			return "void {[player], slot, type, level} Works the same as enchant_inv, except anything goes. "
-					+ " You can enchant a fish with a level 5000 enchantment if you wish. Side effects"
-					+ " may include nausia, dry mouth, insomnia, or server crashes. (Seriously, this might"
-					+ " crash your server, be careful with it.)";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREEnchantmentException.class,
-				CREPlayerOfflineException.class, CRENotFoundException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V0_0_0;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			int offset = 1;
-			if(args.length == 4) {
-				m = Static.GetPlayer(args[0].val(), t);
-				offset = 0;
-			}
-			Static.AssertPlayerNonNull(m, t);
-			MCItemStack is;
-			if(args[1 - offset] instanceof CNull) {
-				is = m.getItemInHand();
-			} else {
-				int slot = Static.getInt32(args[1 - offset], t);
-				MCPlayerInventory pinv = m.getInventory();
-				if(pinv == null) {
-					throw new CRENotFoundException(
-							"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
-				}
-				is = pinv.getItem(slot);
-			}
-			CArray enchantArray = new CArray(t);
-			if(!(args[2 - offset] instanceof CArray)) {
-				enchantArray.push(args[2 - offset], t);
-			} else {
-				enchantArray = (CArray) args[2 - offset];
-			}
-
-			CArray levelArray = new CArray(t);
-			if(!(args[3 - offset] instanceof CArray)) {
-				levelArray.push(args[3 - offset], t);
-			} else {
-				levelArray = (CArray) args[3 - offset];
-			}
-			for(String key : enchantArray.stringKeySet()) {
-				MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
-				if(e == null) {
-					throw new CREEnchantmentException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", t);
-				}
-				int level = Static.getInt32(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
-
-				is.addUnsafeEnchantment(e, level);
-			}
 			return CVoid.VOID;
 		}
 	}

@@ -1,6 +1,5 @@
 package com.laytonsmith.abstraction.entities;
 
-import com.laytonsmith.abstraction.MCTameable;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 
 public interface MCWolf extends MCTameable {

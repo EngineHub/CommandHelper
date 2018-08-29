@@ -41,7 +41,6 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
-import org.bukkit.Note;
 import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
@@ -526,18 +525,8 @@ public class BukkitBlockEvents {
 		}
 
 		@Override
-		public void setNote(MCNote note) {
-			npe.setNote((Note) note.getHandle());
-		}
-
-		@Override
 		public MCInstrument getInstrument() {
 			return BukkitMCInstrument.getConvertor().getAbstractedEnum(npe.getInstrument());
-		}
-
-		@Override
-		public void setInstrument(MCInstrument i) {
-			npe.setInstrument(BukkitMCInstrument.getConvertor().getConcreteEnum(i));
 		}
 	}
 

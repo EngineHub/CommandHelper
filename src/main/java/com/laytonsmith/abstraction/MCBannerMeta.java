@@ -1,14 +1,10 @@
 package com.laytonsmith.abstraction;
 
-import com.laytonsmith.abstraction.enums.MCDyeColor;
-
 import java.util.List;
 
 public interface MCBannerMeta extends MCItemMeta {
 
 	void addPattern(MCPattern pattern);
-
-	MCDyeColor getBaseColor();
 
 	MCPattern getPattern(int i);
 
@@ -17,8 +13,6 @@ public interface MCBannerMeta extends MCItemMeta {
 	int numberOfPatterns();
 
 	void removePattern(int i);
-
-	void setBaseColor(MCDyeColor color);
 
 	void setPattern(int i, MCPattern pattern);
 

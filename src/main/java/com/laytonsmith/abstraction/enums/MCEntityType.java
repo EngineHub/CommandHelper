@@ -8,6 +8,7 @@ import com.laytonsmith.core.Static;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -16,8 +17,8 @@ import java.util.Set;
 public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MCVanillaEntityType, Concrete> {
 
 	// To be filled by the implementer
-	protected static Map<String, MCEntityType> mappings;
-	protected static Map<MCVanillaEntityType, MCEntityType> vanilla;
+	protected static final Map<String, MCEntityType> MAP = new HashMap<>();
+	protected static final Map<MCVanillaEntityType, MCEntityType> VANILLA_MAP = new HashMap<>();
 
 	@SuppressWarnings("checkstyle:staticvariablename") // Fixing this violation might break dependents.
 	public static MCEntityType NULL = null;
@@ -45,10 +46,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	}
 
 	public static MCEntityType valueOf(String test) throws IllegalArgumentException {
-		if(mappings == null) {
-			return null;
-		}
-		MCEntityType ret = mappings.get(test);
+		MCEntityType ret = MAP.get(test);
 		if(ret == null) {
 			throw new IllegalArgumentException("Unknown entity type: " + test);
 		}
@@ -56,10 +54,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	}
 
 	public static MCEntityType valueOfVanillaType(MCVanillaEntityType type) {
-		if(vanilla == null) {
-			return null;
-		}
-		return vanilla.get(type);
+		return VANILLA_MAP.get(type);
 	}
 
 	/**
@@ -73,7 +68,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 			}
 			return dummy;
 		}
-		return mappings.keySet();
+		return MAP.keySet();
 	}
 
 	/**
@@ -102,111 +97,110 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 			}
 			return dummy;
 		}
-		return mappings.values();
+		return MAP.values();
 	}
 
 	@MEnum("VanillaEntityType")
 	public enum MCVanillaEntityType {
-		AREA_EFFECT_CLOUD(true, MCVersion.MC1_9),
-		ARMOR_STAND(true, MCVersion.MC1_8),
+		AREA_EFFECT_CLOUD(true),
+		ARMOR_STAND(true),
 		ARROW(true),
-		BAT(true, MCVersion.MC1_4),
+		BAT(true),
 		BLAZE(true),
 		BOAT(true),
 		CAVE_SPIDER(true),
 		CHICKEN(true),
+		COD(true),
 		COMPLEX_PART(false),
 		COW(true),
 		CREEPER(true),
-		DRAGON_FIREBALL(true, MCVersion.MC1_9),
-		/**
-		 * Spawn with world.dropItem()
-		 */
+		DOLPHIN(true),
+		DRAGON_FIREBALL(true),
 		DROPPED_ITEM(true),
-		DONKEY(true, MCVersion.MC1_11),
+		DROWNED(true),
+		DONKEY(true),
 		EGG(true),
-		ELDER_GUARDIAN(true, MCVersion.MC1_11),
+		ELDER_GUARDIAN(true),
 		ENDERMAN(true),
-		ENDERMITE(true, MCVersion.MC1_8),
+		ENDERMITE(true),
 		ENDER_CRYSTAL(true),
 		ENDER_DRAGON(true),
 		ENDER_EYE(true),
 		ENDER_PEARL(true),
-		EVOKER(true, MCVersion.MC1_11),
-		EVOKER_FANGS(true, MCVersion.MC1_11),
+		EVOKER(true),
+		EVOKER_FANGS(true),
 		EXPERIENCE_ORB(true),
-		/**
-		 * Spawn with world.spawnFallingBlock() I'm not sure what version we switched to FALLING_BLOCK from
-		 * FALLING_SAND, but it was after 1.0
-		 */
 		FALLING_BLOCK(true),
 		FIREBALL(true),
-		FIREWORK(true, MCVersion.MC1_4_7),
+		FIREWORK(true),
 		FISHING_HOOK(false),
 		GHAST(true),
 		GIANT(true),
-		GUARDIAN(true, MCVersion.MC1_8),
-		HORSE(true, MCVersion.MC1_6),
-		HUSK(true, MCVersion.MC1_11),
-		ILLUSIONER(true, MCVersion.MC1_12),
-		IRON_GOLEM(true, MCVersion.MC1_2),
-		ITEM_FRAME(true, MCVersion.MC1_4_5),
-		LLAMA(true, MCVersion.MC1_11),
-		LLAMA_SPIT(false, MCVersion.MC1_11),
-		LEASH_HITCH(true, MCVersion.MC1_6),
-		/**
-		 * Spawn with world.strikeLightning()
-		 */
+		GUARDIAN(true),
+		HORSE(true),
+		HUSK(true),
+		ILLUSIONER(true),
+		IRON_GOLEM(true),
+		ITEM_FRAME(true),
+		LLAMA(true),
+		LLAMA_SPIT(false),
+		LEASH_HITCH(true),
 		LIGHTNING(true),
-		LINGERING_POTION(true, MCVersion.MC1_9),
+		LINGERING_POTION(true),
 		MAGMA_CUBE(true),
 		MINECART(true),
 		MINECART_CHEST(true),
-		MINECART_COMMAND(true, MCVersion.MC1_7),
+		MINECART_COMMAND(true),
 		MINECART_FURNACE(true),
-		MINECART_HOPPER(true, MCVersion.MC1_5),
-		MINECART_MOB_SPAWNER(true, MCVersion.MC1_5),
-		MINECART_TNT(true, MCVersion.MC1_5),
-		MULE(true, MCVersion.MC1_11),
+		MINECART_HOPPER(true),
+		MINECART_MOB_SPAWNER(true),
+		MINECART_TNT(true),
+		MULE(true),
 		MUSHROOM_COW(true),
-		OCELOT(true, MCVersion.MC1_2),
+		OCELOT(true),
 		PAINTING(true),
-		PARROT(true, MCVersion.MC1_12),
+		PARROT(true),
+		PHANTOM(true),
 		PIG(true),
 		PIG_ZOMBIE(true),
 		PLAYER(false),
-		POLAR_BEAR(true, MCVersion.MC1_10),
+		POLAR_BEAR(true),
 		PRIMED_TNT(true),
-		RABBIT(true, MCVersion.MC1_8),
+		PUFFERFISH(true),
+		RABBIT(true),
+		SALMON(true),
 		SHEEP(true),
 		SILVERFISH(true),
 		SKELETON(true),
-		SHULKER(true, MCVersion.MC1_9),
-		SHULKER_BULLET(true, MCVersion.MC1_9),
-		SKELETON_HORSE(true, MCVersion.MC1_11),
+		SHULKER(true),
+		SHULKER_BULLET(true),
+		SKELETON_HORSE(true),
 		SLIME(true),
 		SMALL_FIREBALL(true),
 		SNOWBALL(true),
 		SNOWMAN(true),
 		SQUID(true),
-		SPECTRAL_ARROW(true, MCVersion.MC1_9),
+		SPECTRAL_ARROW(true),
 		SPIDER(true),
 		SPLASH_POTION(true),
-		STRAY(true, MCVersion.MC1_11),
+		STRAY(true),
 		THROWN_EXP_BOTTLE(true),
-		TIPPED_ARROW(true, MCVersion.MC1_9),
-		VEX(true, MCVersion.MC1_11),
+		TIPPED_ARROW(true),
+		TRIDENT(true),
+		TROPICAL_FISH(true),
+		TURTLE(true),
+		VEX(true),
 		VILLAGER(true),
-		VINDICATOR(true, MCVersion.MC1_11),
+		VINDICATOR(true),
 		WEATHER(false),
-		WITCH(true, MCVersion.MC1_4_5),
-		WITHER(true, MCVersion.MC1_4),
-		WITHER_SKELETON(true, MCVersion.MC1_11),
-		WITHER_SKULL(true, MCVersion.MC1_4),
+		WITCH(true),
+		WITHER(true),
+		WITHER_SKELETON(true),
+		WITHER_SKULL(true),
 		WOLF(true),
 		ZOMBIE(true),
-		ZOMBIE_HORSE(true, MCVersion.MC1_11),
-		ZOMBIE_VILLAGER(true, MCVersion.MC1_11),
+		ZOMBIE_HORSE(true),
+		ZOMBIE_VILLAGER(true),
 		/**
 		 * An unknown entity without an Entity Class
 		 */
@@ -238,7 +232,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		}
 
 		public boolean existsInCurrent() {
-			return Static.getServer().getMinecraftVersion().ordinal() >= version.ordinal();
+			return Static.getServer().getMinecraftVersion().gte(version);
 		}
 	}
 }

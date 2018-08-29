@@ -78,7 +78,7 @@ public class Recipes {
 					+ " The RecipeArray can contain the following keys:"
 					+ " <pre>"
 					+ "   type: The type of recipe. Expected to be 'SHAPED', 'SHAPELESS', or 'FURNACE'.\n"
-					+ "   key: A unique string for this recipe. (shaped and shapeless recipes; MC 1.12+)\n"
+					+ "   key: A unique string for this recipe.\n"
 					+ "   result: The result item array of the recipe.\n"
 					+ "   shape: The shape of the recipe. Represented as a 3 index normal array. (shaped recipes)\n"
 					+ "   ingredients: Ingredients array of the recipe. See examples. (shaped and shapeless recipes)\n"
@@ -106,6 +106,7 @@ public class Recipes {
 					+ " Furnace Recipe. Turns grass into dirt through smelting."
 					+ " <pre>"
 					+ "{\n"
+					+ "    key: 'cook_grass_to_dirt'"
 					+ "    type: 'FURNACE',\n"
 					+ "    result: {name: 'DIRT'},\n"
 					+ "    input: {name: 'GRASS'}\n"
@@ -124,7 +125,7 @@ public class Recipes {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class};
+			return new Class[]{CREFormatException.class, CRECastException.class};
 		}
 
 		@Override
@@ -141,7 +142,7 @@ public class Recipes {
 
 		@Override
 		public String getName() {
-			return "get_recipe_for";
+			return "get_recipes_for";
 		}
 
 		@Override

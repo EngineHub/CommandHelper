@@ -1,7 +1,7 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.PureUtilities.Vector3D;
-import com.laytonsmith.abstraction.MCFireball;
+import com.laytonsmith.abstraction.entities.MCFireball;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
 import org.bukkit.util.Vector;

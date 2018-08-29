@@ -3,71 +3,70 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.abstraction.MCArmorStand;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommandSender;
-import com.laytonsmith.abstraction.MCEnderCrystal;
 import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCExperienceOrb;
-import com.laytonsmith.abstraction.MCFireball;
 import com.laytonsmith.abstraction.MCFireworkEffect;
 import com.laytonsmith.abstraction.MCHumanEntity;
-import com.laytonsmith.abstraction.MCItem;
 import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.abstraction.MCLightningStrike;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCMaterialData;
-import com.laytonsmith.abstraction.MCPainting;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPotionData;
-import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.MCProjectileSource;
-import com.laytonsmith.abstraction.MCTNT;
-import com.laytonsmith.abstraction.MCTameable;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.entities.MCAbstractHorse;
 import com.laytonsmith.abstraction.entities.MCAreaEffectCloud;
+import com.laytonsmith.abstraction.entities.MCArmorStand;
 import com.laytonsmith.abstraction.entities.MCArrow;
 import com.laytonsmith.abstraction.entities.MCBoat;
 import com.laytonsmith.abstraction.entities.MCChestedHorse;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.entities.MCCreeper;
+import com.laytonsmith.abstraction.entities.MCEnderCrystal;
 import com.laytonsmith.abstraction.entities.MCEnderDragon;
 import com.laytonsmith.abstraction.entities.MCEnderSignal;
 import com.laytonsmith.abstraction.entities.MCEnderman;
 import com.laytonsmith.abstraction.entities.MCEvokerFangs;
+import com.laytonsmith.abstraction.entities.MCExperienceOrb;
 import com.laytonsmith.abstraction.entities.MCFallingBlock;
+import com.laytonsmith.abstraction.entities.MCFireball;
 import com.laytonsmith.abstraction.entities.MCFirework;
-import com.laytonsmith.abstraction.entities.MCGuardian;
 import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorseColor;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorsePattern;
-import com.laytonsmith.abstraction.entities.MCHorse.MCHorseVariant;
 import com.laytonsmith.abstraction.entities.MCIronGolem;
+import com.laytonsmith.abstraction.entities.MCItem;
 import com.laytonsmith.abstraction.entities.MCItemFrame;
+import com.laytonsmith.abstraction.entities.MCLightningStrike;
 import com.laytonsmith.abstraction.entities.MCLlama;
 import com.laytonsmith.abstraction.entities.MCLlama.MCLlamaColor;
 import com.laytonsmith.abstraction.entities.MCMinecart;
 import com.laytonsmith.abstraction.entities.MCOcelot;
+import com.laytonsmith.abstraction.entities.MCPainting;
 import com.laytonsmith.abstraction.entities.MCParrot;
 import com.laytonsmith.abstraction.entities.MCPig;
 import com.laytonsmith.abstraction.entities.MCPigZombie;
+import com.laytonsmith.abstraction.entities.MCProjectile;
 import com.laytonsmith.abstraction.entities.MCRabbit;
 import com.laytonsmith.abstraction.entities.MCSheep;
 import com.laytonsmith.abstraction.entities.MCShulker;
 import com.laytonsmith.abstraction.entities.MCShulkerBullet;
-import com.laytonsmith.abstraction.entities.MCSkeleton;
 import com.laytonsmith.abstraction.entities.MCSlime;
 import com.laytonsmith.abstraction.entities.MCSnowman;
+import com.laytonsmith.abstraction.entities.MCTNT;
+import com.laytonsmith.abstraction.entities.MCTameable;
 import com.laytonsmith.abstraction.entities.MCThrownPotion;
 import com.laytonsmith.abstraction.entities.MCTippedArrow;
+import com.laytonsmith.abstraction.entities.MCTropicalFish;
 import com.laytonsmith.abstraction.entities.MCVillager;
 import com.laytonsmith.abstraction.entities.MCWitherSkull;
 import com.laytonsmith.abstraction.entities.MCWolf;
@@ -87,9 +86,7 @@ import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.MCProjectileType;
 import com.laytonsmith.abstraction.enums.MCRabbitType;
 import com.laytonsmith.abstraction.enums.MCRotation;
-import com.laytonsmith.abstraction.enums.MCSkeletonType;
 import com.laytonsmith.abstraction.enums.MCTreeSpecies;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
@@ -98,6 +95,7 @@ import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -111,10 +109,10 @@ import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityTypeException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
-import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -440,7 +438,7 @@ public class EntityManagement {
 			if(args[1] instanceof CArray) {
 				l = ObjectGenerator.GetGenerator().location((CArray) args[1], e.getWorld(), t);
 			} else {
-				throw new CREFormatException("An array was expected but recieved " + args[1], t);
+				throw new CREFormatException("An array was expected but received " + args[1], t);
 			}
 			return CBoolean.get(e.teleport(l));
 		}
@@ -1132,7 +1130,7 @@ public class EntityManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREFormatException.class, CREBadEntityException.class,
-				CREInvalidWorldException.class, CREPlayerOfflineException.class, CRENotFoundException.class};
+				CREInvalidWorldException.class, CREPlayerOfflineException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -1143,8 +1141,16 @@ public class EntityManagement {
 			MCEntityType entType;
 			MCLocation l;
 			MCEntity ent;
-			if(args.length == 3) {
+			CClosure consumer = null;
+			if(args.length >= 3) {
 				l = ObjectGenerator.GetGenerator().location(args[2], null, t);
+				if(args.length == 4) {
+					if(args[3] instanceof CClosure) {
+						consumer = (CClosure) args[3];
+					} else {
+						throw new CREIllegalArgumentException("Expected a closure as last argument for spawn_entity().", t);
+					}
+				}
 			} else {
 				if(cs instanceof MCPlayer) {
 					l = ((MCPlayer) cs).getLocation();
@@ -1161,36 +1167,36 @@ public class EntityManagement {
 			}
 			try {
 				entType = MCEntityType.valueOf(args[0].val().toUpperCase());
-				if(entType == null) {
-					throw new CRENotFoundException(
-							"Could not find the entity type internal object (are you running in cmdline mode?)", t);
-				}
 				if(!entType.isSpawnable()) {
-					throw new CREFormatException("Unspawnable entitytype: " + args[0].val(), t);
+					throw new CREFormatException("Unspawnable entity type: " + args[0].val(), t);
 				}
 			} catch (IllegalArgumentException iae) {
-				throw new CREFormatException("Unknown entitytype: " + args[0].val(), t);
+				throw new CREFormatException("Unknown entity type: " + args[0].val(), t);
 			}
 			for(int i = 0; i < qty; i++) {
 				switch(entType.getAbstracted()) {
-					case DROPPED_ITEM:
-						ent = l.getWorld().dropItem(l, StaticLayer.GetItemStack(1, qty));
-						qty = 0;
-						break;
 					case FALLING_BLOCK:
-						ent = l.getWorld().spawnFallingBlock(l, 12, (byte) 0);
+						ent = l.getWorld().spawnFallingBlock(l, StaticLayer.GetMaterial("SAND").createBlockData());
 						break;
 					case ITEM_FRAME:
 					case LEASH_HITCH:
 					case PAINTING:
 						try {
-							ent = l.getWorld().spawn(l.getBlock().getLocation(), entType);
+							if(consumer != null) {
+								ent = l.getWorld().spawn(l.getBlock().getLocation(), entType, consumer);
+							} else {
+								ent = l.getWorld().spawn(l.getBlock().getLocation(), entType);
+							}
 						} catch (NullPointerException | IllegalArgumentException ex) {
 							throw new CREFormatException("Unspawnable location for " + entType.getAbstracted().name(), t);
 						}
 						break;
 					default:
-						ent = l.getWorld().spawn(l, entType);
+						if(consumer != null) {
+							ent = l.getWorld().spawn(l, entType, consumer);
+						} else {
+							ent = l.getWorld().spawn(l, entType);
+						}
 				}
 				ret.push(new CString(ent.getUniqueId().toString(), t), t);
 			}
@@ -1204,7 +1210,7 @@ public class EntityManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1, 2, 3};
+			return new Integer[]{1, 2, 3, 4};
 		}
 
 		@Override
@@ -1215,18 +1221,30 @@ public class EntityManagement {
 					spawnable.add(type.name());
 				}
 			}
-			return "array {entityType, [qty], [location]} Spawns the specified number of entities of the given type"
-					+ " at the given location. Returns an array of entityIDs of what is spawned. Qty defaults to 1"
-					+ " and location defaults to the location of the commandsender, if it is a block or player."
-					+ " If the commandsender is console, location must be supplied. ---- Entitytype can be one of "
-					+ StringUtils.Join(spawnable, ", ", " or ", ", or ")
-					+ ". Falling_blocks will be sand by default, and dropped_items will be stone,"
-					+ " as these entities already have their own functions for spawning.";
+			return "array {entityType, [qty], [location], [closure]} Spawns the specified number of entities of the"
+					+ " given type at the given location. Returns an array of entityIDs of what is spawned."
+					+ "  Qty defaults to 1 and location defaults to the location of the commandsender,"
+					+ " if it is a block or player. If the commandsender is console, location must be supplied."
+					+ " ---- Entitytype can be one of " + StringUtils.Join(spawnable, ", ", " or ", ", or ") + "."
+					+ " FALLING_BLOCK will be always be sand with this function (see {{function|spawn_falling_block}})."
+					+ " DROPPED_ITEM will be dirt by default (see {{function|drop_item}})."
+					+ " A closure can be used as the last argument to modify the entity before adding it to the world."
+					+ " The entity's UUID is passed to the closure. FALLING_BLOCK does not support closures.";
 		}
 
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+					new ExampleScript("Applying entity attributes before adding it to the world.",
+							"spawn_entity('ZOMBIE', 1, ptarget_space(),"
+							+ " closure(@id){ set_entity_spec(@id, array('baby': true)); set_entity_ai(@id, false); })",
+							"Creates a zombie, changes it to a baby zombie without AI, then adds it to the world."),
+			};
 		}
 	}
 
@@ -1332,10 +1350,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "string {entityID} Returns the ID of the given entity's vehicle, or null if it doesn't have one. ----"
-					+ " If the entity is on top of a stack of other entities, this returns the bottom most entity"
-					+ " on Bukkit versions 1.9 through much of 1.12.2. This was a bug. It returns the direct entity"
-					+ " underneath on other versions.";
+			return "string {entityID} Returns the ID of the given entity's vehicle, or null if it doesn't have one.";
 		}
 
 		@Override
@@ -1649,19 +1664,18 @@ public class EntityManagement {
 			docs = docs.replace("%BODY_PART%", "pose" + StringUtils.Join(MCBodyPart.humanoidParts(), ", pose", ", or pose", " or pose"));
 			docs = docs.replace("%HORSE_COLOR%", StringUtils.Join(MCHorseColor.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%HORSE_STYLE%", StringUtils.Join(MCHorsePattern.values(), ", ", ", or ", " or "));
-			docs = docs.replace("%HORSE_VARIANT%", StringUtils.Join(MCHorseVariant.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%LLAMA_COLOR%", StringUtils.Join(MCLlamaColor.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%ROTATION%", StringUtils.Join(MCRotation.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%OCELOT_TYPE%", StringUtils.Join(MCOcelotType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%PARROT_TYPE%", StringUtils.Join(MCParrotType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%ART%", StringUtils.Join(MCArt.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%DYE_COLOR%", StringUtils.Join(MCDyeColor.values(), ", ", ", or ", " or "));
-			docs = docs.replace("%SKELETON_TYPE%", StringUtils.Join(MCSkeletonType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%PROFESSION%", StringUtils.Join(MCProfession.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%RABBIT_TYPE%", StringUtils.Join(MCRabbitType.values(), ", ", ", or ", " or "));
-			docs = docs.replace("%PARTICLE%", StringUtils.Join(MCParticle.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%PARTICLE%", StringUtils.Join(MCParticle.types(), ", ", ", or ", " or "));
 			docs = docs.replace("%ENDERDRAGON_PHASE%", StringUtils.Join(MCEnderDragonPhase.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%TREE_SPECIES%", StringUtils.Join(MCTreeSpecies.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%FISH_PATTERN%", StringUtils.Join(MCTropicalFish.MCPattern.values(), ", ", ", or ", " or "));
 			for(Field field : entity_spec.class.getDeclaredFields()) {
 				try {
 					String name = field.getName();
@@ -1718,10 +1732,7 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_ARMORSTAND_ARMS, CBoolean.get(stand.hasArms()), t);
 					specArray.set(entity_spec.KEY_ARMORSTAND_BASEPLATE, CBoolean.get(stand.hasBasePlate()), t);
 					specArray.set(entity_spec.KEY_ARMORSTAND_GRAVITY, CBoolean.get(stand.hasGravity()), t);
-					Boolean marker = stand.isMarker();
-					if(marker != null) { // unsupported before 1.8.7
-						specArray.set(entity_spec.KEY_ARMORSTAND_MARKER, CBoolean.get(marker), t);
-					}
+					specArray.set(entity_spec.KEY_ARMORSTAND_MARKER, CBoolean.get(stand.isMarker()), t);
 					specArray.set(entity_spec.KEY_ARMORSTAND_SMALLSIZE, CBoolean.get(stand.isSmall()), t);
 					specArray.set(entity_spec.KEY_ARMORSTAND_VISIBLE, CBoolean.get(stand.isVisible()), t);
 					CArray poses = CArray.GetAssociativeArray(t);
@@ -1733,9 +1744,7 @@ public class EntityManagement {
 					break;
 				case BOAT:
 					MCBoat boat = (MCBoat) entity;
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-						specArray.set(entity_spec.KEY_BOAT_TYPE, new CString(boat.getWoodType().name(), t), t);
-					}
+					specArray.set(entity_spec.KEY_BOAT_TYPE, new CString(boat.getWoodType().name(), t), t);
 					break;
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
@@ -1759,39 +1768,29 @@ public class EntityManagement {
 					break;
 				case ENDER_CRYSTAL:
 					MCEnderCrystal endercrystal = (MCEnderCrystal) entity;
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-						specArray.set(entity_spec.KEY_ENDERCRYSTAL_BASE, CBoolean.get(endercrystal.isShowingBottom()), t);
-						MCLocation location = endercrystal.getBeamTarget();
-						if(location == null) {
-							specArray.set(entity_spec.KEY_ENDERCRYSTAL_BEAMTARGET, CNull.NULL, t);
-						} else {
-							specArray.set(entity_spec.KEY_ENDERCRYSTAL_BEAMTARGET,
-									ObjectGenerator.GetGenerator().location(location, false), t);
-						}
+					specArray.set(entity_spec.KEY_ENDERCRYSTAL_BASE, CBoolean.get(endercrystal.isShowingBottom()), t);
+					MCLocation location = endercrystal.getBeamTarget();
+					if(location == null) {
+						specArray.set(entity_spec.KEY_ENDERCRYSTAL_BEAMTARGET, CNull.NULL, t);
+					} else {
+						specArray.set(entity_spec.KEY_ENDERCRYSTAL_BEAMTARGET,
+								ObjectGenerator.GetGenerator().location(location, false), t);
 					}
 					break;
 				case ENDER_EYE:
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_12_X)) {
-						MCEnderSignal endereye = (MCEnderSignal) entity;
-						specArray.set(entity_spec.KEY_ENDEREYE_DESPAWNTICKS, new CInt(endereye.getDespawnTicks(), t), t);
-						specArray.set(entity_spec.KEY_ENDEREYE_DROP, CBoolean.get(endereye.getDropItem()), t);
-						specArray.set(entity_spec.KEY_ENDEREYE_TARGET, ObjectGenerator.GetGenerator().location(endereye.getTargetLocation(), false), t);
-					}
+					MCEnderSignal endereye = (MCEnderSignal) entity;
+					specArray.set(entity_spec.KEY_ENDEREYE_DESPAWNTICKS, new CInt(endereye.getDespawnTicks(), t), t);
+					specArray.set(entity_spec.KEY_ENDEREYE_DROP, CBoolean.get(endereye.getDropItem()), t);
+					specArray.set(entity_spec.KEY_ENDEREYE_TARGET, ObjectGenerator.GetGenerator().location(endereye.getTargetLocation(), false), t);
 					break;
 				case ENDER_DRAGON:
 					MCEnderDragon enderdragon = (MCEnderDragon) entity;
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9_X)) {
-						specArray.set(entity_spec.KEY_ENDERDRAGON_PHASE, new CString(enderdragon.getPhase().name(), t), t);
-					}
+					specArray.set(entity_spec.KEY_ENDERDRAGON_PHASE, new CString(enderdragon.getPhase().name(), t), t);
 					break;
 				case ENDERMAN:
 					MCEnderman enderman = (MCEnderman) entity;
-					MCMaterialData carried = enderman.getCarriedMaterial();
-					if(carried != null) {
-						specArray.set(entity_spec.KEY_ENDERMAN_CARRIED, new CString(carried.getMaterial().getName(), t), t);
-					} else {
-						specArray.set(entity_spec.KEY_ENDERMAN_CARRIED, CNull.NULL, t);
-					}
+					MCBlockData carried = enderman.getCarriedMaterial();
+					specArray.set(entity_spec.KEY_ENDERMAN_CARRIED, new CString(carried.getMaterial().getName(), t), t);
 					break;
 				case EVOKER_FANGS:
 					MCEvokerFangs fangs = (MCEvokerFangs) entity;
@@ -1810,25 +1809,17 @@ public class EntityManagement {
 					MCFallingBlock block = (MCFallingBlock) entity;
 					specArray.set(entity_spec.KEY_FALLING_BLOCK_BLOCK, new CString(block.getMaterial().getName(), t), t);
 					specArray.set(entity_spec.KEY_FALLING_BLOCK_DROPITEM, CBoolean.get(block.getDropItem()), t);
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8_X)) {
-						specArray.set(entity_spec.KEY_FALLING_BLOCK_DAMAGE, CBoolean.get(block.canHurtEntities()), t);
-					}
+					specArray.set(entity_spec.KEY_FALLING_BLOCK_DAMAGE, CBoolean.get(block.canHurtEntities()), t);
 					break;
 				case FIREBALL:
 				case SMALL_FIREBALL:
 					MCFireball ball = (MCFireball) entity;
 					specArray.set(entity_spec.KEY_FIREBALL_DIRECTION, ObjectGenerator.GetGenerator().vector(ball.getDirection(), t), t);
 					break;
-				case GUARDIAN:
-					MCGuardian guardian = (MCGuardian) entity;
-					specArray.set(entity_spec.KEY_GUARDIAN_ELDER, CBoolean.get(guardian.isElder()), t);
-					break;
 				case HORSE:
 					MCHorse horse = (MCHorse) entity;
 					specArray.set(entity_spec.KEY_HORSE_COLOR, new CString(horse.getColor().name(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_STYLE, new CString(horse.getPattern().name(), t), t);
-					specArray.set(entity_spec.KEY_HORSE_VARIANT, new CString(horse.getVariant().name(), t), t);
-					specArray.set(entity_spec.KEY_HORSE_CHEST, CBoolean.get(horse.hasChest()), t);
 					specArray.set(entity_spec.KEY_HORSE_JUMP, new CDouble(horse.getJumpStrength(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, new CInt(horse.getDomestication(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, new CInt(horse.getMaxDomestication(), t), t);
@@ -1930,10 +1921,8 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_SHEEP_SHEARED, CBoolean.get(sheep.isSheared()), t);
 					break;
 				case SHULKER:
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_12)) {
-						MCShulker shulker = (MCShulker) entity;
-						specArray.set(entity_spec.KEY_SHULKER_COLOR, new CString(shulker.getColor().name(), t), t);
-					}
+					MCShulker shulker = (MCShulker) entity;
+					specArray.set(entity_spec.KEY_SHULKER_COLOR, new CString(shulker.getColor().name(), t), t);
 					break;
 				case SHULKER_BULLET:
 					MCShulkerBullet bullet = (MCShulkerBullet) entity;
@@ -1944,12 +1933,6 @@ public class EntityManagement {
 						specArray.set(entity_spec.KEY_SHULKERBULLET_TARGET, new CString(target.getUniqueId().toString(), t), t);
 					}
 					break;
-				case SKELETON:
-				case STRAY:
-				case WITHER_SKELETON:
-					MCSkeleton skeleton = (MCSkeleton) entity;
-					specArray.set(entity_spec.KEY_SKELETON_TYPE, new CString(skeleton.getSkeletonType().name(), t), t);
-					break;
 				case SKELETON_HORSE:
 				case ZOMBIE_HORSE:
 					MCAbstractHorse undeadhorse = (MCAbstractHorse) entity;
@@ -1959,10 +1942,8 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(undeadhorse.getSaddle(), t), t);
 					break;
 				case SNOWMAN:
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9_4)) {
-						MCSnowman snowman = (MCSnowman) entity;
-						specArray.set(entity_spec.KEY_SNOWMAN_DERP, CBoolean.GenerateCBoolean(snowman.isDerp(), t), t);
-					}
+					MCSnowman snowman = (MCSnowman) entity;
+					specArray.set(entity_spec.KEY_SNOWMAN_DERP, CBoolean.GenerateCBoolean(snowman.isDerp(), t), t);
 					break;
 				case LINGERING_POTION:
 				case SPLASH_POTION:
@@ -1978,6 +1959,12 @@ public class EntityManagement {
 					tippedmeta.set("potions", tippedeffects, t);
 					tippedmeta.set("base", ObjectGenerator.GetGenerator().potionData(tippedarrow.getBasePotionData(), t), t);
 					specArray.set(entity_spec.KEY_TIPPEDARROW_POTIONMETA, tippedmeta, t);
+					break;
+				case TROPICAL_FISH:
+					MCTropicalFish fish = (MCTropicalFish) entity;
+					specArray.set(entity_spec.KEY_TROPICALFISH_COLOR, new CString(fish.getBodyColor().name(), t), t);
+					specArray.set(entity_spec.KEY_TROPICALFISH_PATTERN, new CString(fish.getPattern().name(), t), t);
+					specArray.set(entity_spec.KEY_TROPICALFISH_PATTERNCOLOR, new CString(fish.getPatternColor().name(), t), t);
 					break;
 				case VILLAGER:
 					MCVillager villager = (MCVillager) entity;
@@ -1997,7 +1984,6 @@ public class EntityManagement {
 				case ZOMBIE:
 					MCZombie zombie = (MCZombie) entity;
 					specArray.set(entity_spec.KEY_ZOMBIE_BABY, CBoolean.get(zombie.isBaby()), t);
-					specArray.set(entity_spec.KEY_ZOMBIE_VILLAGER, CBoolean.get(zombie.isVillager()), t);
 					break;
 				case ZOMBIE_VILLAGER:
 					MCZombieVillager zombievillager = (MCZombieVillager) entity;
@@ -2053,10 +2039,8 @@ public class EntityManagement {
 		private static final String KEY_FALLING_BLOCK_DROPITEM = "dropitem";
 		private static final String KEY_FALLING_BLOCK_DAMAGE = "damage";
 		private static final String KEY_FIREBALL_DIRECTION = "direction";
-		private static final String KEY_GUARDIAN_ELDER = "elder";
 		private static final String KEY_HORSE_COLOR = "color";
 		private static final String KEY_HORSE_STYLE = "style";
-		private static final String KEY_HORSE_VARIANT = "variant";
 		private static final String KEY_HORSE_CHEST = "chest";
 		private static final String KEY_HORSE_JUMP = "jump";
 		private static final String KEY_HORSE_DOMESTICATION = "domestication";
@@ -2086,18 +2070,19 @@ public class EntityManagement {
 		private static final String KEY_SHEEP_SHEARED = "sheared";
 		private static final String KEY_SHULKER_COLOR = "color";
 		private static final String KEY_SHULKERBULLET_TARGET = "target";
-		private static final String KEY_SKELETON_TYPE = "type";
 		private static final String KEY_SLIME_SIZE = "size";
 		private static final String KEY_SNOWMAN_DERP = "derp";
 		private static final String KEY_SPLASH_POTION_ITEM = "item";
 		private static final String KEY_TIPPEDARROW_POTIONMETA = "potionmeta";
+		private static final String KEY_TROPICALFISH_COLOR = "color";
+		private static final String KEY_TROPICALFISH_PATTERN = "pattern";
+		private static final String KEY_TROPICALFISH_PATTERNCOLOR = "patterncolor";
 		private static final String KEY_VILLAGER_PROFESSION = "profession";
 		private static final String KEY_WITHER_SKULL_CHARGED = "charged";
 		private static final String KEY_WOLF_ANGRY = "angry";
 		private static final String KEY_WOLF_COLOR = "color";
 		private static final String KEY_WOLF_SITTING = "sitting";
 		private static final String KEY_ZOMBIE_BABY = "baby";
-		private static final String KEY_ZOMBIE_VILLAGER = "villager";
 	}
 
 	@api
@@ -2445,7 +2430,8 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_ENDERMAN_CARRIED:
-								enderman.setCarriedMaterial(ObjectGenerator.GetGenerator().material(specArray.get(index, t), t).getData());
+								MCMaterial mat = ObjectGenerator.GetGenerator().material(specArray.get(index, t), t);
+								enderman.setCarriedMaterial(mat.createBlockData());
 								break;
 							default:
 								throwException(index, t);
@@ -2510,18 +2496,6 @@ public class EntityManagement {
 						}
 					}
 					break;
-				case GUARDIAN:
-					MCGuardian guardian = (MCGuardian) entity;
-					for(String index : specArray.stringKeySet()) {
-						switch(index.toLowerCase()) {
-							case entity_spec.KEY_GUARDIAN_ELDER:
-								guardian.setElder(Static.getBoolean(specArray.get(index, t), t));
-								break;
-							default:
-								throwException(index, t);
-						}
-					}
-					break;
 				case HORSE:
 					MCHorse horse = (MCHorse) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -2539,16 +2513,6 @@ public class EntityManagement {
 								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid horse style: " + specArray.get(index, t).val(), t);
 								}
-								break;
-							case entity_spec.KEY_HORSE_VARIANT:
-								try {
-									horse.setVariant(MCHorseVariant.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
-									throw new CREFormatException("Invalid horse variant: " + specArray.get(index, t).val(), t);
-								}
-								break;
-							case entity_spec.KEY_HORSE_CHEST:
-								horse.setHasChest(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_HORSE_JUMP:
 								try {
@@ -2676,7 +2640,8 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_MINECART_BLOCK:
-								minecart.setDisplayBlock(ObjectGenerator.GetGenerator().material(specArray.get(index, t), t).getData());
+								MCMaterial mat = ObjectGenerator.GetGenerator().material(specArray.get(index, t), t);
+								minecart.setDisplayBlock(mat.createBlockData());
 								break;
 							case entity_spec.KEY_MINECART_OFFSET:
 								minecart.setDisplayBlockOffset(Static.getInt32(specArray.get(index, t), t));
@@ -2705,7 +2670,8 @@ public class EntityManagement {
 								}
 								break;
 							case entity_spec.KEY_MINECART_BLOCK:
-								commandminecart.setDisplayBlock(ObjectGenerator.GetGenerator().material(specArray.get(index, t), t).getData());
+								MCMaterial mat = ObjectGenerator.GetGenerator().material(specArray.get(index, t), t);
+								commandminecart.setDisplayBlock(mat.createBlockData());
 								break;
 							case entity_spec.KEY_MINECART_OFFSET:
 								commandminecart.setDisplayBlockOffset(Static.getInt32(specArray.get(index, t), t));
@@ -2879,22 +2845,6 @@ public class EntityManagement {
 						}
 					}
 					break;
-				case SKELETON:
-					MCSkeleton skeleton = (MCSkeleton) entity;
-					for(String index : specArray.stringKeySet()) {
-						switch(index.toLowerCase()) {
-							case entity_spec.KEY_SKELETON_TYPE:
-								try {
-									skeleton.setSkeletonType(MCSkeletonType.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
-									throw new CREFormatException("Invalid skeleton type: " + specArray.get(index, t).val(), t);
-								}
-								break;
-							default:
-								throwException(index, t);
-						}
-					}
-					break;
 				case SKELETON_HORSE:
 				case ZOMBIE_HORSE:
 					MCAbstractHorse undeadhorse = (MCAbstractHorse) entity;
@@ -3000,6 +2950,36 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case TROPICAL_FISH:
+					MCTropicalFish fish = (MCTropicalFish) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_TROPICALFISH_COLOR:
+								try {
+									fish.setBodyColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid fish color: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							case entity_spec.KEY_TROPICALFISH_PATTERNCOLOR:
+								try {
+									fish.setPatternColor(MCDyeColor.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid fish pattern color: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							case entity_spec.KEY_TROPICALFISH_PATTERN:
+								try {
+									fish.setPattern(MCTropicalFish.MCPattern.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid fish pattern: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case VILLAGER:
 					MCVillager villager = (MCVillager) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -3059,9 +3039,6 @@ public class EntityManagement {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_ZOMBIE_BABY:
 								zombie.setBaby(Static.getBoolean(specArray.get(index, t), t));
-								break;
-							case entity_spec.KEY_ZOMBIE_VILLAGER:
-								zombie.setVillager(Static.getBoolean(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -3301,7 +3278,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, boolean} If true, applies glowing effect to the entity (MC 1.9)";
+			return "void {entityID, boolean} If true, applies glowing effect to the entity";
 		}
 
 		@Override
@@ -3326,7 +3303,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns true if the entity is glowing (MC 1.9)";
+			return "boolean {entityID} Returns true if the entity is glowing";
 		}
 
 		@Override
@@ -3351,7 +3328,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns true if the entity produces sounds (MC 1.9.4)";
+			return "boolean {entityID} Returns true if the entity produces sounds";
 		}
 
 		@Override
@@ -3375,7 +3352,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, boolean} Sets whether or not entity produces sounds (MC 1.9.4)";
+			return "void {entityID, boolean} Sets whether or not entity produces sounds";
 		}
 
 		@Override
@@ -3401,7 +3378,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns true if gravity applies to the entity (MC 1.10)";
+			return "boolean {entityID} Returns true if gravity applies to the entity.";
 		}
 
 		@Override
@@ -3425,7 +3402,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, boolean} Sets whether or not gravity applies to the entity (MC 1.10)";
+			return "void {entityID, boolean} Sets whether or not gravity applies to the entity.";
 		}
 
 		@Override
@@ -3451,7 +3428,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns true if the entity cannot be damaged (MC 1.9.2)";
+			return "boolean {entityID} Returns true if the entity cannot be damaged";
 		}
 
 		@Override
@@ -3476,7 +3453,7 @@ public class EntityManagement {
 		@Override
 		public String docs() {
 			return "void {entityID, boolean} If set to true the entity cannot be damaged, except by players in"
-					+ " creative mode (MC 1.9.2)";
+					+ " creative mode";
 		}
 
 		@Override
@@ -3502,7 +3479,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "array {entityID} Returns an array of scoreboard tags for this entity. (MC 1.10.2)";
+			return "array {entityID} Returns an array of scoreboard tags for this entity.";
 		}
 
 		@Override
@@ -3531,7 +3508,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID, tag} Adds a tag to the entity. Returns whether or not it was successful. (MC 1.10.2)";
+			return "boolean {entityID, tag} Adds a tag to the entity. Returns whether or not it was successful.";
 		}
 
 		@Override
@@ -3556,7 +3533,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID, tag} Removes a tag from the entity. Returns whether or not it was successful. (MC 1.10.2)";
+			return "boolean {entityID, tag} Removes a tag from the entity. Returns whether or not it was successful.";
 		}
 
 		@Override
@@ -3638,7 +3615,7 @@ public class EntityManagement {
 				}
 				is = ObjectGenerator.GetGenerator().item(args[1], t);
 			}
-			if(is.getTypeId() == 0) {
+			if(is.isEmpty()) {
 				// can't drop air
 				return CNull.NULL;
 			}

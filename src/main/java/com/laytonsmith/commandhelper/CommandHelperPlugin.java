@@ -41,6 +41,9 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCParticle;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.core.AliasCore;
@@ -107,7 +110,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public final ExecutionQueue executionQueue = new MethodScriptExecutionQueue("CommandHelperExecutionQueue", "default");
 	public PersistenceNetwork persistenceNetwork;
 	public Profiles profiles;
-	//public boolean firstLoad = true;
+	private boolean firstLoad = true;
 	public long interpreterUnlockedUntil = 0;
 	private Thread loadingThread;
 	/**
@@ -270,8 +273,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 		Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
 		if(new SimpleVersion(System.getProperty("java.version")).lt(new SimpleVersion("1.8"))) {
-			CHLog.GetLogger().w(CHLog.Tags.GENERAL, "You appear to be running a version of Java older than Java 8. You should have plans"
-					+ " to upgrade at some point, as " + Implementation.GetServerType().getBranding() + " may require it at some point.", Target.UNKNOWN);
+			CHLog.GetLogger().e(CHLog.Tags.GENERAL, "CommandHelper does not support a Java version older than 8!", Target.UNKNOWN);
 		}
 
 		self = this;
@@ -323,6 +325,9 @@ public class CommandHelperPlugin extends JavaPlugin {
 		BukkitMCEntityType.build();
 		BukkitMCBiomeType.build();
 		BukkitMCSound.build();
+		BukkitMCParticle.build();
+		BukkitMCLegacyMaterial.build();
+		BukkitMCPotionEffectType.build();
 
 		//Metrics
 		Metrics m = new Metrics(this);
@@ -359,7 +364,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				CommandHelperFileLocations.getDefault().getLocalPackagesDirectory(),
 				CommandHelperFileLocations.getDefault().getPreferencesFile(),
 				new File(CommandHelperFileLocations.getDefault().getConfigDirectory(), mainFile), this);
-		ac.reload(null, null, true);
+		ac.reload(null, null, this.firstLoad);
 
 		//Clear out our hostname cache
 		hostnameLookupCache = new ConcurrentHashMap<>();
@@ -391,7 +396,13 @@ public class CommandHelperPlugin extends JavaPlugin {
 		playerListener.loadGlobalAliases();
 		interpreterListener.reload();
 
+		firstLoad = false;
+
 		Static.getLogger().log(Level.INFO, "[CommandHelper] CommandHelper {0} enabled", getDescription().getVersion());
+	}
+
+	public boolean isFirstLoad() {
+		return this.firstLoad;
 	}
 
 	public static AliasCore getCore() {

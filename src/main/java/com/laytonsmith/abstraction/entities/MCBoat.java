@@ -1,6 +1,5 @@
 package com.laytonsmith.abstraction.entities;
 
-import com.laytonsmith.abstraction.MCVehicle;
 import com.laytonsmith.abstraction.enums.MCTreeSpecies;
 
 public interface MCBoat extends MCVehicle {

@@ -67,7 +67,7 @@ import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
-import com.laytonsmith.abstraction.enums.MCVersion;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPatternShape;
@@ -76,7 +76,6 @@ import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -108,7 +107,6 @@ import org.bukkit.entity.Ageable;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.ComplexLivingEntity;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Hanging;
 import org.bukkit.entity.HumanEntity;
@@ -136,7 +134,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.inventory.meta.SpawnEggMeta;
+import org.bukkit.inventory.meta.TropicalFishBucketMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionData;
 import org.yaml.snakeyaml.Yaml;
@@ -183,17 +181,14 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public MCEnchantment GetEnchantmentByName(String name) {
-		Enchantment enchant = Enchantment.getByName(name);
-		if(enchant != null) {
-			return new BukkitMCEnchantment(enchant);
+		Enchantment enchant = Enchantment.getByKey(NamespacedKey.minecraft(name.toLowerCase()));
+		if(enchant == null) {
+			enchant = Enchantment.getByName(name.toUpperCase());
+			if(enchant == null) {
+				return null;
+			}
 		}
-		try {
-			//If they are looking it up by number, we can support that too
-			int i = Integer.valueOf(name);
-			return new BukkitMCEnchantment(Enchantment.getById(i));
-		} catch (NumberFormatException | NullPointerException e) {
-			return null;
-		}
+		return new BukkitMCEnchantment(enchant);
 	}
 
 	@Override
@@ -202,19 +197,35 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	@Override
-	public MCMaterial getMaterial(int id) {
-		Material mat = Material.getMaterial(id);
-		return mat == null ? null : new BukkitMCMaterial(mat);
+	public MCMaterial GetMaterialFromLegacy(String mat, int data) {
+		Material m = BukkitMCLegacyMaterial.getMaterial(mat, data);
+		return m == null ? null : new BukkitMCMaterial(m);
 	}
 
 	@Override
-	public MCItemStack GetItemStack(int type, int qty) {
-		return new BukkitMCItemStack(new ItemStack(type, qty));
+	public MCMaterial GetMaterialFromLegacy(int id, int data) {
+		Material m = BukkitMCLegacyMaterial.getMaterial(id, data);
+		return m == null ? null : new BukkitMCMaterial(m);
 	}
 
 	@Override
-	public MCItemStack GetItemStack(int type, int data, int qty) {
-		return new BukkitMCItemStack(new ItemStack(type, qty, (short) data));
+	public MCMaterial GetMaterial(String name) {
+		// Fast match
+		Material match = Material.getMaterial(name);
+		if(match != null) {
+			return new BukkitMCMaterial(match);
+		}
+		// Try fuzzy match
+		match = Material.matchMaterial(name);
+		if(match != null) {
+			return new BukkitMCMaterial(match);
+		}
+		// Try legacy
+		match = Material.getMaterial(name, true);
+		if(match != null) {
+			return new BukkitMCMaterial(match);
+		}
+		return null;
 	}
 
 	@Override
@@ -223,26 +234,15 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	@Override
-	public MCItemStack GetItemStack(MCMaterial type, int data, int qty) {
-		return new BukkitMCItemStack(new ItemStack(((BukkitMCMaterial) type).getHandle(), qty, (short) data));
-	}
-
-	@Override
 	public MCItemStack GetItemStack(String type, int qty) {
 		Material mat = Material.getMaterial(type);
+		if(mat == null) {
+			mat = Material.getMaterial(type, true);
+		}
 		if(mat == null) {
 			return null;
 		}
 		return new BukkitMCItemStack(new ItemStack(mat, qty));
-	}
-
-	@Override
-	public MCItemStack GetItemStack(String type, int data, int qty) {
-		Material mat = Material.getMaterial(type);
-		if(mat == null) {
-			return null;
-		}
-		return new BukkitMCItemStack(new ItemStack(mat, qty, (short) data));
 	}
 
 	@Override
@@ -275,21 +275,6 @@ public class BukkitConvertor extends AbstractConvertor {
 		chp.registerEvents(VEHICLE_LISTENER);
 		chp.registerEvents(WEATHER_LISTENER);
 		chp.registerEvents(WORLD_LISTENER);
-	}
-
-	@Override
-	public int LookupItemId(String materialName) {
-		Material mat = Material.matchMaterial(materialName);
-		if(mat != null) {
-			return mat.getId();
-		} else {
-			return -1;
-		}
-	}
-
-	@Override
-	public String LookupMaterialName(int id) {
-		return Material.getMaterial(id).toString();
 	}
 
 	@Override
@@ -460,15 +445,7 @@ public class BukkitConvertor extends AbstractConvertor {
 			radius = 1;
 		}
 		Location l = (Location) location.getHandle();
-		Collection<Entity> near;
-		try {
-			near = l.getWorld().getNearbyEntities(l, radius, radius, radius);
-		} catch (NoSuchMethodError ex) {
-			// Probably before 1.8.3
-			Entity tempEntity = l.getWorld().spawnEntity(l, EntityType.ARROW);
-			near = tempEntity.getNearbyEntities(radius, radius, radius);
-			tempEntity.remove();
-		}
+		Collection<Entity> near = l.getWorld().getNearbyEntities(l, radius, radius, radius);
 		List<MCEntity> entities = new ArrayList<>();
 		for(Entity e : near) {
 			entities.add(BukkitGetCorrectEntity(e));
@@ -477,11 +454,10 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	public static MCBlockState BukkitGetCorrectBlockState(BlockState bs) {
-		MCVersion version = Static.getServer().getMinecraftVersion();
-		if(version.gte(MCVersion.MC1_11) && bs instanceof ShulkerBox) {
+		if(bs instanceof ShulkerBox) {
 			return new BukkitMCShulkerBox((ShulkerBox) bs);
 		}
-		if(version.gte(MCVersion.MC1_9) && bs instanceof Banner) {
+		if(bs instanceof Banner) {
 			return new BukkitMCBanner((Banner) bs);
 		}
 		if(bs instanceof CreatureSpawner) {
@@ -512,14 +488,10 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	public static MCItemMeta BukkitGetCorrectMeta(ItemMeta im) {
-		MCVersion version = Static.getServer().getMinecraftVersion();
-		if(version.gte(MCVersion.MC1_11_X) && im instanceof SpawnEggMeta) {
-			return new BukkitMCSpawnEggMeta((SpawnEggMeta) im);
-		}
-		if(version.gte(MCVersion.MC1_8_6) && im instanceof BlockStateMeta) {
+		if(im instanceof BlockStateMeta) {
 			return new BukkitMCBlockStateMeta((BlockStateMeta) im);
 		}
-		if(version.gte(MCVersion.MC1_8) && im instanceof BannerMeta) {
+		if(im instanceof BannerMeta) {
 			return new BukkitMCBannerMeta((BannerMeta) im);
 		}
 		if(im instanceof BookMeta) {
@@ -545,6 +517,9 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		if(im instanceof MapMeta) {
 			return new BukkitMCMapMeta((MapMeta) im);
+		}
+		if(im instanceof TropicalFishBucketMeta) {
+			return new BukkitMCTropicalFishBucketMeta((TropicalFishBucketMeta) im);
 		}
 		return new BukkitMCItemMeta(im);
 	}
@@ -649,24 +624,14 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCRecipe GetNewRecipe(String key, MCRecipeType type, MCItemStack result) {
 		ItemStack is = ((BukkitMCItemStack) result).asItemStack();
+		NamespacedKey nskey = new NamespacedKey(CommandHelperPlugin.self, key);
 		switch(type) {
 			case FURNACE:
-				FurnaceRecipe recipe = new FurnaceRecipe(is, Material.PISTON_MOVING_PIECE);
-				return new BukkitMCFurnaceRecipe(recipe);
+				return new BukkitMCFurnaceRecipe(new FurnaceRecipe(nskey, is, Material.AIR, 0.0F, 200));
 			case SHAPED:
-				if(key != null) {
-					return new BukkitMCShapedRecipe(new ShapedRecipe(new NamespacedKey(CommandHelperPlugin.self, key), is));
-				} else {
-					// deprecated in 1.12
-					return new BukkitMCShapedRecipe(new ShapedRecipe(is));
-				}
+				return new BukkitMCShapedRecipe(new ShapedRecipe(nskey, is));
 			case SHAPELESS:
-				if(key != null) {
-					return new BukkitMCShapelessRecipe(new ShapelessRecipe(new NamespacedKey(CommandHelperPlugin.self, key), is));
-				} else {
-					// deprecated in 1.12
-					return new BukkitMCShapelessRecipe(new ShapelessRecipe(is));
-				}
+				return new BukkitMCShapelessRecipe(new ShapelessRecipe(nskey, is));
 		}
 		return null;
 	}
@@ -714,19 +679,6 @@ public class BukkitConvertor extends AbstractConvertor {
 		} else {
 			return new BukkitMCCommandSender(sender);
 		}
-	}
-
-	@Override
-	public MCMaterial GetMaterial(String name) {
-		Material match = Material.getMaterial(name);
-		if(match == null) {
-			// Try harder
-			match = Material.matchMaterial(name);
-			if(match == null) {
-				return null;
-			}
-		}
-		return new BukkitMCMaterial(match);
 	}
 
 	@Override

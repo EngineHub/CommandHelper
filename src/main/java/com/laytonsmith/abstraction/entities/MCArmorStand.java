@@ -1,6 +1,7 @@
-package com.laytonsmith.abstraction;
+package com.laytonsmith.abstraction.entities;
 
 import com.laytonsmith.PureUtilities.Vector3D;
+import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.enums.MCBodyPart;
 
 import java.util.Map;

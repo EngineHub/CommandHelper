@@ -1,7 +1,9 @@
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCParticle;
+import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCWeather;
@@ -65,7 +67,7 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 	void kickPlayer(String message);
 
 	@Override
-	boolean removeEffect(int effect);
+	boolean removeEffect(MCPotionEffectType type);
 
 	void resetPlayerTime();
 
@@ -109,7 +111,7 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 
 	String getHost();
 
-	void sendBlockChange(MCLocation loc, int material, byte data);
+	void sendBlockChange(MCLocation loc, MCBlockData data);
 
 	void sendSignTextChange(MCLocation loc, String[] lines);
 

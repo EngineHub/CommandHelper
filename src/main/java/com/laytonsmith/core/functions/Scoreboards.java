@@ -8,11 +8,10 @@ import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCTeam;
 import com.laytonsmith.abstraction.enums.MCCriteria;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
-import com.laytonsmith.abstraction.enums.MCNameTagVisibility;
 import com.laytonsmith.abstraction.enums.MCOption;
 import com.laytonsmith.abstraction.enums.MCOptionStatus;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.NotInitializedYetException;
 import com.laytonsmith.core.Static;
@@ -194,13 +193,9 @@ public class Scoreboards {
 		CArray ops = CArray.GetAssociativeArray(t);
 		ops.set("friendlyfire", CBoolean.get(team.allowFriendlyFire()), t);
 		ops.set("friendlyinvisibles", CBoolean.get(team.canSeeFriendlyInvisibles()), t);
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
-			ops.set("nametagvisibility", new CString(team.getNameTagVisibility().name(), t), t);
-		}
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-			ops.set("collisionrule", new CString(team.getOption(MCOption.COLLISION_RULE).name(), t), t);
-			ops.set("deathmessagevisibility", new CString(team.getOption(MCOption.DEATH_MESSAGE_VISIBILITY).name(), t), t);
-		}
+		ops.set("nametagvisibility", new CString(team.getOption(MCOption.NAME_TAG_VISIBILITY).name(), t), t);
+		ops.set("collisionrule", new CString(team.getOption(MCOption.COLLISION_RULE).name(), t), t);
+		ops.set("deathmessagevisibility", new CString(team.getOption(MCOption.DEATH_MESSAGE_VISIBILITY).name(), t), t);
 		to.set("options", ops, t);
 		CArray pl = new CArray(t);
 		for(String entry : team.getEntries()) {
@@ -438,9 +433,9 @@ public class Scoreboards {
 			} else {
 				s = getBoard(args[0].val(), t);
 			}
-			CArray ret = new CArray(t);
+			CArray ret = CArray.GetAssociativeArray(t);
 			for(MCTeam team : s.getTeams()) {
-				ret.push(getTeam(team, t), t);
+				ret.set(team.getName(), getTeam(team, t), t);
 			}
 			return ret;
 		}
@@ -458,8 +453,9 @@ public class Scoreboards {
 		@Override
 		public String docs() {
 			return "array {[scoreboard]} Returns an array of arrays about the teams on the given scoreboard,"
-					+ " which defaults to '" + MAIN + "' if not given. The arrays contain the keys name,"
-					+ " displayname, prefix, suffix, size, options, and players.";
+					+ " which defaults to '" + MAIN + "' if not given. The array keys are the team names,"
+					+ " and each value is a team array containing the keys: name, displayname, prefix, suffix, size,"
+					+ " options, and players.";
 		}
 
 		@Override
@@ -654,11 +650,11 @@ public class Scoreboards {
 				} else {
 					dname = dis.get("displayname", t).val();
 				}
-				if(dname.length() > 32) {
-					throw new CRELengthException("Displayname can only be 32 characters but was "
-							+ dname.length(), t);
+				try {
+					o.setDisplayName(dname);
+				} catch (IllegalArgumentException ex) {
+					throw new CRELengthException(ex.getMessage(), t);
 				}
-				o.setDisplayName(dname);
 			}
 			return CVoid.VOID;
 		}
@@ -681,7 +677,9 @@ public class Scoreboards {
 					+ " with keys 'displayname' and/or 'slot', affecting their respective properties."
 					+ " Null name resets it to the actual name, and null slot removes it from"
 					+ " all displays. Slot can be one of: " + StringUtils.Join(MCDisplaySlot.values(), ", ", ", or ")
-					+ ". Displayname can be a max of 32 characters, otherwise it throws a LengthException. " + DEF_MSG;
+					+ " If the displayname is too long, a LengthException will be thrown."
+					+ " The max length may differ based on server implementation, but will probably be 128."
+					+ ". " + DEF_MSG;
 		}
 
 		@Override
@@ -718,11 +716,11 @@ public class Scoreboards {
 				} else {
 					dname = dis.get("displayname", t).val();
 				}
-				if(dname.length() > 32) {
-					throw new CRELengthException("Displayname can only be 32 characters but was "
-							+ dname.length(), t);
+				try {
+					o.setDisplayName(dname);
+				} catch (IllegalArgumentException ex) {
+					throw new CRELengthException(ex.getMessage(), t);
 				}
-				o.setDisplayName(dname);
 			}
 			if(dis.containsKey("prefix")) {
 				String prefix;
@@ -731,11 +729,11 @@ public class Scoreboards {
 				} else {
 					prefix = dis.get("prefix", t).val();
 				}
-				if(prefix.length() > 16) {
-					throw new CRELengthException("Prefix can only be 16 characters but was "
-							+ prefix.length(), t);
+				try {
+					o.setPrefix(prefix);
+				} catch (IllegalArgumentException ex) {
+					throw new CRELengthException(ex.getMessage(), t);
 				}
-				o.setPrefix(prefix);
 			}
 			if(dis.containsKey("suffix")) {
 				String suffix;
@@ -744,11 +742,11 @@ public class Scoreboards {
 				} else {
 					suffix = dis.get("suffix", t).val();
 				}
-				if(suffix.length() > 16) {
-					throw new CRELengthException("Suffix can only be 16 characters but was "
-							+ suffix.length(), t);
+				try {
+					o.setSuffix(suffix);
+				} catch (IllegalArgumentException ex) {
+					throw new CRELengthException(ex.getMessage(), t);
 				}
-				o.setSuffix(suffix);
 			}
 			return CVoid.VOID;
 		}
@@ -770,9 +768,11 @@ public class Scoreboards {
 					+ " If arg 2 is not an array, it is assumed to be the displayname,"
 					+ " otherwise arg 2 should be an array with keys 'displayname', 'prefix',"
 					+ " and/or 'suffix', affecting their respective properties."
+					+ " If the prefix, suffix, or displayname is too long, a LengthException will be thrown."
+					+ " The max length may differ based on server implementation,"
+					+ " but will probably be 64, 64, 128 respectively."
 					+ " Null name resets it to the actual name, and null prefix or suffix removes it from"
-					+ " all displays. Displayname can be a max of 32 characters,"
-					+ " prefix and suffix can only be 16, otherwise a LengthException is thrown. " + DEF_MSG;
+					+ " all displays. " + DEF_MSG;
 		}
 
 		@Override
@@ -796,8 +796,7 @@ public class Scoreboards {
 			if(team == null) {
 				throw new CREScoreboardException("No team by that name exists.", t);
 			}
-			if(args[1].val().length() > 40
-					|| (args[1].val().length() > 16 && Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8_7))) {
+			if(args[1].val().length() > 40) {
 				throw new CRELengthException("Player name is too long.", t);
 			}
 			team.addEntry(args[1].val());
@@ -817,7 +816,7 @@ public class Scoreboards {
 		@Override
 		public String docs() {
 			return "void {teamName, player, [scoreboard]} Adds a player to a team, given the team exists. This allows"
-					+ " you to add fake players with up to 40 characters. (16 characters prior to 1.8.7) The player"
+					+ " you to add fake players with up to 40 characters. The player"
 					+ " will be removed from any other team on the same scoreboard. " + DEF_MSG;
 		}
 
@@ -1079,10 +1078,11 @@ public class Scoreboards {
 			if(o == null) {
 				throw new CREScoreboardException("The given objective does not exist.", t);
 			}
-			if(args[1].val().length() > 40) {
-				throw new CRELengthException("Player names can only be 40 characters.", t);
+			try {
+				o.getScore(args[1].val()).setScore(Static.getInt32(args[2], t));
+			} catch (IllegalArgumentException ex) {
+				throw new CRELengthException(ex.getMessage(), t);
 			}
-			o.getScore(args[1].val()).setScore(Static.getInt32(args[2], t));
 			return CVoid.VOID;
 		}
 
@@ -1099,7 +1099,9 @@ public class Scoreboards {
 		@Override
 		public String docs() {
 			return "void {objectiveName, name, int, [scoreboard]} Sets the player's score for the given objective."
-					+ " You can set scores for fake players with up to 40 characters. " + DEF_MSG;
+					+ " The name can be anything, not just player names. An LengthException is thrown if it's too long."
+					+ " The max length may differ based on server implementation, but will probably be 128."
+					+ DEF_MSG;
 		}
 
 		@Override
@@ -1162,37 +1164,47 @@ public class Scoreboards {
 				if(options.containsKey("friendlyinvisibles")) {
 					team.setCanSeeFriendlyInvisibles(Static.getBoolean(options.get("friendlyinvisibles", t), t));
 				}
-				if(options.containsKey("nametagvisibility") && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
-					MCNameTagVisibility visibility;
+				if(options.containsKey("nametagvisibility")) {
+					MCOptionStatus namevisibility;
 					try {
-						visibility = MCNameTagVisibility.valueOf(options.get("nametagvisibility", t).val().toUpperCase());
+						namevisibility = MCOptionStatus.valueOf(options.get("nametagvisibility", t).val().toUpperCase());
 					} catch (IllegalArgumentException iae) {
-						throw new CREFormatException("Unknown nametagvisibility: "
-								+ options.get("nametagvisibility", t).val(), t);
+						String name = options.get("nametagvisibility", t).val().toUpperCase();
+						if(name.startsWith("HIDE_")) {
+							name = name.substring(5);
+							try {
+								namevisibility = MCOptionStatus.valueOf(name);
+								CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Found old value for NameTagVisibility: \""
+										+ "HIDE_" + name + "\". This should be: \"" + name + "\"", t);
+							} catch (IllegalArgumentException ex) {
+								throw new CREFormatException("Unknown nametagvisibility: "
+										+ options.get("nametagvisibility", t).val(), t);
+							}
+						} else {
+							throw new CREFormatException("Unknown nametagvisibility: " + name, t);
+						}
 					}
-					team.setNameTagVisibility(visibility);
+					team.setOption(MCOption.NAME_TAG_VISIBILITY, namevisibility);
 				}
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-					if(options.containsKey("collisionrule")) {
-						MCOptionStatus collision;
-						try {
-							collision = MCOptionStatus.valueOf(options.get("collisionrule", t).val().toUpperCase());
-						} catch (IllegalArgumentException iae) {
-							throw new CREFormatException("Unknown collisionrule: "
-									+ options.get("collisionrule", t).val(), t);
-						}
-						team.setOption(MCOption.COLLISION_RULE, collision);
+				if(options.containsKey("collisionrule")) {
+					MCOptionStatus collision;
+					try {
+						collision = MCOptionStatus.valueOf(options.get("collisionrule", t).val().toUpperCase());
+					} catch (IllegalArgumentException iae) {
+						throw new CREFormatException("Unknown collisionrule: "
+								+ options.get("collisionrule", t).val(), t);
 					}
-					if(options.containsKey("deathmessagevisibility")) {
-						MCOptionStatus visibility;
-						try {
-							visibility = MCOptionStatus.valueOf(options.get("deathmessagevisibility", t).val().toUpperCase());
-						} catch (IllegalArgumentException iae) {
-							throw new CREFormatException("Unknown deathmessagevisibility: "
-									+ options.get("deathmessagevisibility", t).val(), t);
-						}
-						team.setOption(MCOption.DEATH_MESSAGE_VISIBILITY, visibility);
+					team.setOption(MCOption.COLLISION_RULE, collision);
+				}
+				if(options.containsKey("deathmessagevisibility")) {
+					MCOptionStatus deathvisibility;
+					try {
+						deathvisibility = MCOptionStatus.valueOf(options.get("deathmessagevisibility", t).val().toUpperCase());
+					} catch (IllegalArgumentException iae) {
+						throw new CREFormatException("Unknown deathmessagevisibility: "
+								+ options.get("deathmessagevisibility", t).val(), t);
 					}
+					team.setOption(MCOption.DEATH_MESSAGE_VISIBILITY, deathvisibility);
 				}
 			} else {
 				throw new CREFormatException("Expected arg 2 to be an array.", t);
@@ -1213,9 +1225,9 @@ public class Scoreboards {
 		@Override
 		public String docs() {
 			return "void {teamName, array, [scoreboard]} Sets various options about the team from an array. The keys"
-					+ " 'friendlyfire' and 'friendlyinvisibles' must be booleans. The keys 'collisionrule' and"
-					+ " 'deathmessagevisibility' must be one of " + StringUtils.Join(MCOptionStatus.values(), ", ", ", or ")
-					+ ". The key 'nametagvisibility' must be one of " + StringUtils.Join(MCNameTagVisibility.values(), ", ", ", or ")
+					+ " 'friendlyfire' and 'friendlyinvisibles' must be booleans. The keys 'collisionrule', "
+					+ " 'nametagvisibility', and 'deathmessagevisibility' must be one of "
+					+ StringUtils.Join(MCOptionStatus.values(), ", ", ", or ")
 					+ "." + DEF_MSG;
 		}
 

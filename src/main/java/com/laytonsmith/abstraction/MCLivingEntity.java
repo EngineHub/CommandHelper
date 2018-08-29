@@ -1,6 +1,8 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.core.constructs.Target;
 
 import java.util.HashSet;
@@ -8,18 +10,11 @@ import java.util.List;
 
 public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 
-	void addEffect(int potionID, int strength, int ticks, boolean ambient, boolean particles, Target t);
+	boolean addEffect(MCPotionEffectType type, int strength, int ticks, boolean ambient, boolean particles, boolean icon);
 
-	boolean removeEffect(int potionID);
+	boolean removeEffect(MCPotionEffectType type);
 
 	void removeEffects();
-
-	/**
-	 * Returns the maximum effect id, inclusive.
-	 *
-	 * @return
-	 */
-	int getMaxEffect();
 
 	List<MCEffect> getEffects();
 
@@ -53,11 +48,11 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 
 	MCLivingEntity getTarget(Target t);
 
-	MCBlock getTargetBlock(HashSet<Short> transparent, int maxDistance);
+	MCBlock getTargetBlock(HashSet<MCMaterial> transparent, int maxDistance);
 
 	MCBlock getTargetSpace(int maxDistance);
 
-	List<MCBlock> getLineOfSight(HashSet<Short> transparent, int maxDistance);
+	List<MCBlock> getLineOfSight(HashSet<MCMaterial> transparent, int maxDistance);
 
 	boolean hasLineOfSight(MCEntity other);
 
@@ -105,6 +100,10 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 
 	void setAI(Boolean ai);
 
+	boolean isCollidable();
+
+	void setCollidable(boolean collidable);
+
 	/**
 	 * Kills the entity. In some cases, this will be equivalent to setHealth(0), but may not be, so this method should
 	 * be used instead.
@@ -113,30 +112,42 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 
 	class MCEffect {
 
-		private int potionID;
+		private MCPotionEffectType type;
 		private int strength;
 		private int ticksRemaining;
 		private boolean ambient;
 		private boolean particles;
+		private boolean icon;
 
-		public MCEffect(int potionID, int strength, int ticks, boolean ambient) {
-			this.potionID = potionID;
+		public MCEffect(MCPotionEffectType type, int strength, int ticks, boolean ambient) {
+			this.type = type;
 			this.strength = strength;
 			this.ticksRemaining = ticks;
 			this.ambient = ambient;
 			this.particles = true;
+			this.icon = true;
 		}
 
-		public MCEffect(int potionID, int strength, int ticks, boolean ambient, boolean particles) {
-			this.potionID = potionID;
+		public MCEffect(MCPotionEffectType type, int strength, int ticks, boolean ambient, boolean particles) {
+			this.type = type;
 			this.strength = strength;
 			this.ticksRemaining = ticks;
 			this.ambient = ambient;
 			this.particles = particles;
+			this.icon = particles;
 		}
 
-		public int getPotionID() {
-			return potionID;
+		public MCEffect(MCPotionEffectType type, int strength, int ticks, boolean ambient, boolean particles, boolean icon) {
+			this.type = type;
+			this.strength = strength;
+			this.ticksRemaining = ticks;
+			this.ambient = ambient;
+			this.particles = particles;
+			this.icon = icon;
+		}
+
+		public MCPotionEffectType getPotionEffectType() {
+			return type;
 		}
 
 		public int getStrength() {
@@ -153,6 +164,10 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 
 		public boolean hasParticles() {
 			return particles;
+		}
+
+		public boolean showIcon() {
+			return icon;
 		}
 	}
 }

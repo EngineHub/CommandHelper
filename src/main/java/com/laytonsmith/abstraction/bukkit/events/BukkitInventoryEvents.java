@@ -374,10 +374,8 @@ public class BukkitInventoryEvents {
 			ItemStack is = ((BukkitMCItemStack) i).asItemStack();
 
 			item.setAmount(is.getAmount());
-			item.setData(is.getData());
-			item.setDurability(is.getDurability());
-			item.setItemMeta(is.getItemMeta());
 			item.setType(is.getType());
+			item.setItemMeta(is.getItemMeta());
 		}
 
 		@Override
@@ -436,10 +434,8 @@ public class BukkitInventoryEvents {
 			ItemStack is = ((BukkitMCItemStack) i).asItemStack();
 
 			item.setAmount(is.getAmount());
-			item.setData(is.getData());
-			item.setDurability(is.getDurability());
-			item.setItemMeta(is.getItemMeta());
 			item.setType(is.getType());
+			item.setItemMeta(is.getItemMeta());
 		}
 	}
 

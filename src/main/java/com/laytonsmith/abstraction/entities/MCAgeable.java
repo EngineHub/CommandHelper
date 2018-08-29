@@ -1,4 +1,6 @@
-package com.laytonsmith.abstraction;
+package com.laytonsmith.abstraction.entities;
+
+import com.laytonsmith.abstraction.MCLivingEntity;
 
 public interface MCAgeable extends MCLivingEntity {
 

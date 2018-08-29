@@ -1,15 +1,14 @@
 package com.laytonsmith.abstraction.blocks;
 
 import com.laytonsmith.abstraction.AbstractionObject;
-import com.laytonsmith.abstraction.MCMaterialData;
 
 public interface MCMaterial extends AbstractionObject {
+
+	MCBlockData createBlockData();
 
 	short getMaxDurability();
 
 	int getType();
-
-	MCMaterialData getData();
 
 	String getName();
 
@@ -32,4 +31,10 @@ public interface MCMaterial extends AbstractionObject {
 	boolean isSolid();
 
 	boolean isTransparent();
+
+	boolean isInteractable();
+
+	float getHardness();
+
+	float getBlastResistance();
 }

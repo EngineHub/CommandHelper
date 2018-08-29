@@ -1,6 +1,5 @@
 package com.laytonsmith.abstraction.entities;
 
-import com.laytonsmith.abstraction.MCTameable;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
 
 public interface MCOcelot extends MCTameable {

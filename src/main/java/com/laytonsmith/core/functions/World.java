@@ -5,7 +5,6 @@ import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCCommandSender;
-import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
@@ -13,18 +12,22 @@ import com.laytonsmith.abstraction.MCWorldBorder;
 import com.laytonsmith.abstraction.MCWorldCreator;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.enums.MCDifficulty;
 import com.laytonsmith.abstraction.enums.MCGameRule;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -49,9 +52,12 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 import java.util.Random;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -1078,8 +1084,9 @@ public class World {
 		}
 	}
 
+	@hide("Deprecated")
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class spawn_falling_block extends AbstractFunction {
+	public static class spawn_falling_block extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -1100,17 +1107,19 @@ public class World {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
-			MCItemStack item = Static.ParseItemNotation(this.getName(), args[1].val(), 1, t);
-			Vector3D v = null;
+
+			MCMaterial mat = StaticLayer.GetMaterial(args[1].val());
+			if(mat == null) {
+				mat = Static.ParseItemNotation(getName(), args[1].val(), 1, t).getType();
+			}
+			if(!mat.isBlock()) {
+				throw new CREIllegalArgumentException("The value \"" + args[1].val()
+						+ "\" is not a valid block material.", t);
+			}
+			MCFallingBlock block = loc.getWorld().spawnFallingBlock(loc, mat.createBlockData());
 
 			if(args.length == 3) {
-				v = ObjectGenerator.GetGenerator().vector(args[2], t);
-			}
-
-			MCFallingBlock block = loc.getWorld().spawnFallingBlock(loc, item.getType().getType(), (byte) item.getData().getData());
-
-			if(v != null) {
-				block.setVelocity(v);
+				block.setVelocity(ObjectGenerator.GetGenerator().vector(args[2], t));
 			}
 
 			return new CString(block.getUniqueId().toString(), t);
@@ -1128,8 +1137,8 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "integer {location array, id[:type], [vector array]} Spawns a"
-					+ " falling block of the specified id and type at the specified location, applying"
+			return "integer {location array, blockName, [vector array]} Spawns a falling block"
+					+ " of the specified material at the specified location, applying"
 					+ " vector array as a velocity if given. Values for the vector array are doubles, and 1.0"
 					+ " seems to imply about 3 times walking speed. Gravity applies for y.";
 		}
@@ -1137,6 +1146,20 @@ public class World {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() > 1 && children.get(1).getData().val().contains(":")) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The 1:1 format is deprecated in spawn_falling_block()", t);
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -2043,9 +2066,6 @@ public class World {
 			if(w == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
 			}
-			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
-				return CNull.NULL;
-			}
 			MCWorldBorder wb = w.getWorldBorder();
 			CArray ret = CArray.GetAssociativeArray(t);
 			ret.set("width", new CDouble(wb.getSize(), t), t);
@@ -2103,9 +2123,6 @@ public class World {
 			MCWorld w = Static.getServer().getWorld(args[0].val());
 			if(w == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
-			}
-			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
-				return CVoid.VOID;
 			}
 			MCWorldBorder wb = w.getWorldBorder();
 			Construct c = args[1];

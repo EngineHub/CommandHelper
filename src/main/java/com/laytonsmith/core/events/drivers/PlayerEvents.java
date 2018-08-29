@@ -8,15 +8,16 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.entities.MCFishHook;
 import com.laytonsmith.abstraction.enums.MCAction;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
-import com.laytonsmith.abstraction.events.MCChatTabCompleteEvent;
 import com.laytonsmith.abstraction.events.MCExpChangeEvent;
 import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
@@ -33,7 +34,6 @@ import com.laytonsmith.abstraction.events.MCPlayerKickEvent;
 import com.laytonsmith.abstraction.events.MCPlayerLoginEvent;
 import com.laytonsmith.abstraction.events.MCPlayerMoveEvent;
 import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
-import com.laytonsmith.abstraction.events.MCPlayerPreLoginEvent;
 import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
 import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
 import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
@@ -44,6 +44,8 @@ import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -178,7 +180,7 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{item: <item match>}"
+			return "{itemname: <string match>}"
 					+ " Fires as a player is finishing eating/drinking an item."
 					+ " Cancelling the event will cause any effects to not be"
 					+ " applied and the item to not be taken from the player."
@@ -189,10 +191,23 @@ public class PlayerEvents {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilter
+			Map<String, Construct> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("item")) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
+						+ " is deprecated for \"itemname\".", event.getTarget());
+				MCItemStack is = Static.ParseItemNotation(null, prefilter.get("item").val(), 1, event.getTarget());
+				prefilter.put("itemname", new CString(is.getType().getName(), event.getTarget()));
+			}
+		}
+
+		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerItemConsumeEvent) {
 				MCPlayerItemConsumeEvent event = (MCPlayerItemConsumeEvent) e;
-				Prefilters.match(prefilter, "item", Static.ParseItemNotation(event.getItem()), PrefilterType.ITEM_MATCH);
+				Prefilters.match(prefilter, "itemname", event.getItem().getType().getName(), PrefilterType.STRING_MATCH);
 				return true;
 			}
 			return false;
@@ -532,94 +547,6 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class player_prelogin extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "player_prelogin";
-		}
-
-		@Override
-		public String docs() {
-			return "{player: <string match>} "
-					+ "This event is called when a player is about to be authed. "
-					+ "This event only fires if your server is in online mode. "
-					+ "This event cannot be cancelled. Instead, you can deny them by setting "
-					+ "'result' to KICK_BANNED, KICK_WHITELIST, KICK_OTHER, or KICK_FULL. "
-					+ "The default for 'result' is ALLOWED. When setting 'result', you "
-					+ "can specify the kick message by modifying 'kickmsg'. "
-					+ "{player: The player's name | kickmsg: The default kick message | "
-					+ "ip: the player's IP address | result: the default response to their logging in}"
-					+ "{kickmsg|result}"
-					+ "{player|kickmsg|ip|result}";
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCPlayerPreLoginEvent) {
-				MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent) e;
-				if(prefilter.containsKey("player")) {
-					if(!event.getName().equals(prefilter.get("player").val())) {
-						return false;
-					}
-				}
-			}
-
-			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(e instanceof MCPlayerPreLoginEvent) {
-				MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent) e;
-				Map<String, Construct> map = evaluate_helper(e);
-
-				map.put("player", new CString(event.getName(), Target.UNKNOWN));
-				map.put("ip", new CString(event.getIP(), Target.UNKNOWN));
-				map.put("result", new CString(event.getResult(), Target.UNKNOWN));
-				map.put("kickmsg", new CString(event.getKickMessage(), Target.UNKNOWN));
-
-				return map;
-			} else {
-				throw new EventException("Cannot convert e to PlayerPreLoginEvent");
-			}
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.PLAYER_PRELOGIN;
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
-			if(e instanceof MCPlayerPreLoginEvent) {
-				MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent) e;
-				if(key.equals("result")) {
-					String[] possible = new String[]{"ALLOWED", "KICK_WHITELIST",
-						"KICK_BANNED", "KICK_FULL", "KICK_OTHER"};
-					if(Arrays.asList(possible).contains(value.val().toUpperCase())) {
-						event.setResult(value.val().toUpperCase());
-					}
-				} else if(key.equals("kickmsg")) {
-					event.setKickMessage(value.val());
-				}
-			}
-			return false;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
-	}
-
-	@api
 	public static class player_login extends AbstractEvent {
 
 		@Override
@@ -645,16 +572,16 @@ public class PlayerEvents {
 
 		@Override
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCPlayerPreLoginEvent) {
-				MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent) e;
+			if(e instanceof MCPlayerLoginEvent) {
+				MCPlayerLoginEvent event = (MCPlayerLoginEvent) e;
 				if(prefilter.containsKey("player")) {
 					if(!event.getName().equals(prefilter.get("player").val())) {
 						return false;
 					}
 				}
+				return true;
 			}
-
-			return true;
+			return false;
 		}
 
 		@Override
@@ -781,7 +708,6 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerJoinEvent) {
 				MCPlayerJoinEvent ple = (MCPlayerJoinEvent) e;
 				Map<String, Construct> map = evaluate_helper(e);
-				//map.put("player", new CString(ple.getPlayer().getName(), Target.UNKNOWN));
 				map.put("world", new CString(ple.getPlayer().getWorld().getName(), Target.UNKNOWN));
 				map.put("join_message", new CString(ple.getJoinMessage(), Target.UNKNOWN));
 				map.put("first_login", CBoolean.get(ple.getPlayer().isNewPlayer()));
@@ -845,17 +771,18 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{block: <item match> If the block the player interacts with is this"
+			return "{block: <string match> The block type the player interacts with, or null if nothing"
 					+ " | button: <string match> left or right. If they left or right clicked |"
-					+ " item: <item match> The item they are holding when they interacted |"
+					+ " itemname: <string match> The item type they are holding when they interacted, or null |"
 					+ " hand: <string match> The hand the player clicked with |"
 					+ " player: <macro> The player that triggered the event} "
 					+ "Fires when a player left or right clicks a block or the air"
-					+ "{action: One of either: left_click_block, right_click_block, left_click_air, or right_click_air |"
-					+ "block: The id of the block they clicked, or 0 if they clicked the air. If they clicked the air, "
-					+ " neither facing or location will be present. |"
-					+ "player: The player associated with this event |"
-					+ "facing: The (lowercase) face of the block they clicked. (One of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ") + ") |"
+					+ "{action: One of either: left_click_block, right_click_block, left_click_air, or right_click_air"
+					+ " | block: The type of block they clicked, or null if they clicked air. If they clicked air,"
+					+ " neither facing nor location will be present."
+					+ " | item: The item array the player used to click, or null if not holding anything in that hand"
+					+ " | player: The player associated with this event"
+					+ " | facing: The (lowercase) face of the block they clicked. (One of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ") + ") |"
 					+ "location: The (x, y, z, world) location of the block they clicked |"
 					+ "hand: The hand used to click with, can be either main_hand or off_hand}"
 					+ "{}"
@@ -870,6 +797,39 @@ public class PlayerEvents {
 		@Override
 		public Driver driver() {
 			return Driver.PLAYER_INTERACT;
+		}
+
+		@Override
+		@SuppressWarnings("deprecation")
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilters
+			Map<String, Construct> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("item")) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
+						+ " is deprecated for \"itemname\".", event.getTarget());
+				MCItemStack is = Static.ParseItemNotation(null, prefilter.get("item").val(), 1, event.getTarget());
+				prefilter.put("itemname", new CString(is.getType().getName(), event.getTarget()));
+			}
+			if(prefilter.containsKey("block")) {
+				Construct ctype = prefilter.get("block");
+				if(ctype instanceof CString && ctype.val().contains(":") || ArgumentValidation.isNumber(ctype)) {
+					int type;
+					String notation = ctype.val();
+					int separatorIndex = notation.indexOf(':');
+					if(separatorIndex != -1) {
+						type = Integer.parseInt(notation.substring(0, separatorIndex));
+					} else {
+						type = Integer.parseInt(notation);
+					}
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(type, 0);
+					if(mat == null) {
+						throw new CREBindException("Invalid material '" + notation + "'", event.getTarget());
+					}
+					prefilter.put("block", new CString(mat.getName(), event.getTarget()));
+					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The notation format in the \"block\" prefilter in "
+							+ getName() + " is deprecated. Converted to " + mat.getName(), event.getTarget());
+				}
+			}
 		}
 
 		@Override
@@ -890,8 +850,28 @@ public class PlayerEvents {
 					}
 				}
 
-				Prefilters.match(prefilter, "item", Static.ParseItemNotation(pie.getItem()), PrefilterType.ITEM_MATCH);
-				Prefilters.match(prefilter, "block", Static.ParseItemNotation(pie.getClickedBlock()), PrefilterType.ITEM_MATCH);
+				if(prefilter.containsKey("itemname")) {
+					Construct item = prefilter.get("itemname");
+					MCMaterial mat = pie.getItem().getType();
+					if(mat == null) {
+						if(!(item instanceof CNull)) {
+							return false;
+						}
+					} else if(!mat.getName().equals(item.val())) {
+						return false;
+					}
+				}
+				if(prefilter.containsKey("block")) {
+					Construct block = prefilter.get("block");
+					MCBlock b = pie.getClickedBlock();
+					if(b.isEmpty()) {
+						if(!(block instanceof CNull)) {
+							return false;
+						}
+					} else if(!b.getType().getName().equals(block.val())) {
+						return false;
+					}
+				}
 				Prefilters.match(prefilter, "player", pie.getPlayer().getName(), PrefilterType.MACRO);
 
 				if(pie.getHand() == MCEquipmentSlot.WEAPON) {
@@ -912,7 +892,8 @@ public class PlayerEvents {
 				Map<String, Construct> map = evaluate_helper(e);
 				MCAction a = pie.getAction();
 				map.put("action", new CString(a.name().toLowerCase(), Target.UNKNOWN));
-				map.put("block", new CString(Static.ParseItemNotation(pie.getClickedBlock()), Target.UNKNOWN));
+				MCBlock block = pie.getClickedBlock();
+				map.put("block", block.isEmpty() ? CNull.NULL : new CString(block.getType().getName(), Target.UNKNOWN));
 				if(a == MCAction.LEFT_CLICK_AIR || a == MCAction.LEFT_CLICK_BLOCK) {
 					map.put("button", new CString("left", Target.UNKNOWN));
 				} else {
@@ -923,7 +904,7 @@ public class PlayerEvents {
 					map.put("location", ObjectGenerator.GetGenerator().location(pie.getClickedBlock().getLocation(), false));
 				}
 				map.put("world", new CString(pie.getPlayer().getWorld().getName(), Target.UNKNOWN));
-				map.put("item", new CString(Static.ParseItemNotation(pie.getItem()), Target.UNKNOWN));
+				map.put("item", ObjectGenerator.GetGenerator().item(pie.getItem(), Target.UNKNOWN));
 				if(pie.getHand() == MCEquipmentSlot.WEAPON) {
 					map.put("hand", new CString("main_hand", Target.UNKNOWN));
 				} else {
@@ -993,10 +974,7 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerBedEvent) {
 				MCPlayerBedEvent bee = (MCPlayerBedEvent) e;
 				Map<String, Construct> map = evaluate_helper(e);
-
 				map.put("location", ObjectGenerator.GetGenerator().location(bee.getBed().getLocation(), false));
-				map.put("player", new CString(bee.getPlayer().getName(), Target.UNKNOWN));
-
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to an appropriate PlayerBedEvent.");
@@ -2192,92 +2170,6 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class tab_complete_chat extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "tab_complete_chat";
-		}
-
-		@Override
-		public String docs() {
-			return "{player: <macro>}"
-					+ " Fires when a player asks for a list of completions to the current word in their chat message."
-					+ " Setting the completions to an empty array is this event's equivalent of cancel()."
-					+ " {player: the player asking for completion | message: the full message they have typed"
-					+ " | last: the partial word completion is asked for | completions}"
-					+ " {completions: the list of completions to send, default is player names containing the last text}"
-					+ " {}";
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCChatTabCompleteEvent) {
-				Prefilters.match(prefilter, "player", ((MCChatTabCompleteEvent) e).getPlayer().getName(), PrefilterType.MACRO);
-				return true;
-			}
-			return false;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new CREBindException("Unsupported Operation", Target.UNKNOWN);
-		}
-
-		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(e instanceof MCChatTabCompleteEvent) {
-				MCChatTabCompleteEvent event = (MCChatTabCompleteEvent) e;
-				Target t = Target.UNKNOWN;
-				Map<String, Construct> ret = evaluate_helper(event);
-				ret.put("message", new CString(event.getChatMessage(), t));
-				ret.put("last", new CString(event.getLastToken(), t));
-				CArray completions = new CArray(t);
-				for(String c : event.getTabCompletions()) {
-					completions.push(new CString(c, t), t);
-				}
-				ret.put("completions", completions);
-				return ret;
-			} else {
-				throw new EventException("Could not convert to MCChatTabCompleteEvent.");
-			}
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if(event instanceof MCChatTabCompleteEvent) {
-				MCChatTabCompleteEvent e = (MCChatTabCompleteEvent) event;
-				if("completions".equals(key)) {
-					if(value instanceof CArray) {
-						e.getTabCompletions().clear();
-						if(((CArray) value).inAssociativeMode()) {
-							for(Construct k : ((CArray) value).keySet()) {
-								e.getTabCompletions().add(((CArray) value).get(k, value.getTarget()).val());
-							}
-						} else {
-							for(Construct v : ((CArray) value).asList()) {
-								e.getTabCompletions().add(v.val());
-							}
-						}
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.TAB_COMPLETE;
-		}
-
-		@Override
-		public Version since() {
-			return CHVersion.V3_3_1;
-		}
-	}
-
-	@api
 	public static class exp_change extends AbstractEvent {
 
 		@Override
@@ -2542,9 +2434,7 @@ public class PlayerEvents {
 			if(event instanceof MCPlayerToggleFlightEvent) {
 				MCPlayerToggleFlightEvent ptfe = (MCPlayerToggleFlightEvent) event;
 				Map<String, Construct> mapEvent = evaluate_helper(event);
-				MCPlayer player = ptfe.getPlayer();
-				mapEvent.put("player", new CString(player.getName(), Target.UNKNOWN));
-				mapEvent.put("location", ObjectGenerator.GetGenerator().location(player.getLocation()));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(ptfe.getPlayer().getLocation()));
 				mapEvent.put("flying", CBoolean.get(ptfe.isFlying()));
 				return mapEvent;
 			} else {
@@ -2610,9 +2500,7 @@ public class PlayerEvents {
 			if(event instanceof MCPlayerToggleSneakEvent) {
 				MCPlayerToggleSneakEvent ptse = (MCPlayerToggleSneakEvent) event;
 				Map<String, Construct> mapEvent = evaluate_helper(event);
-				MCPlayer player = ptse.getPlayer();
-				mapEvent.put("player", new CString(player.getName(), Target.UNKNOWN));
-				mapEvent.put("location", ObjectGenerator.GetGenerator().location(player.getLocation()));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(ptse.getPlayer().getLocation()));
 				mapEvent.put("sneaking", CBoolean.get(ptse.isSneaking()));
 				return mapEvent;
 			} else {
@@ -2678,9 +2566,7 @@ public class PlayerEvents {
 			if(event instanceof MCPlayerToggleSprintEvent) {
 				MCPlayerToggleSprintEvent ptse = (MCPlayerToggleSprintEvent) event;
 				Map<String, Construct> mapEvent = evaluate_helper(event);
-				MCPlayer player = ptse.getPlayer();
-				mapEvent.put("player", new CString(player.getName(), Target.UNKNOWN));
-				mapEvent.put("location", ObjectGenerator.GetGenerator().location(player.getLocation()));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(ptse.getPlayer().getLocation()));
 				mapEvent.put("sprinting", CBoolean.get(ptse.isSprinting()));
 				return mapEvent;
 			} else {

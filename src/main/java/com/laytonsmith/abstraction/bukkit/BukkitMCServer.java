@@ -5,6 +5,7 @@ import com.laytonsmith.abstraction.MCBossBar;
 import com.laytonsmith.abstraction.MCCommandMap;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
+import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemFactory;
@@ -16,6 +17,8 @@ import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockData;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.pluginmessages.BukkitMCMessenger;
 import com.laytonsmith.abstraction.enums.MCBarColor;
@@ -33,10 +36,11 @@ import org.bukkit.World;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.server.BroadcastMessageEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.Recipe;
 
@@ -168,6 +172,7 @@ public class BukkitMCServer implements MCServer {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public MCPlayer getPlayer(String name) {
 		Player p = s.getPlayer(name);
 		if(p == null) {
@@ -183,6 +188,11 @@ public class BukkitMCServer implements MCServer {
 			return null;
 		}
 		return new BukkitMCPlayer(p);
+	}
+
+	@Override
+	public MCEntity getEntity(UUID uuid) {
+		return BukkitConvertor.BukkitGetCorrectEntity(s.getEntity(uuid));
 	}
 
 	@Override
@@ -254,26 +264,18 @@ public class BukkitMCServer implements MCServer {
 	 */
 	private int bukkitBroadcastMessage(String message, Set<CommandSender> recipients) {
 
-		try {
-			// Fire a BroadcastMessageEvent for this broadcast.
-			// We have to use reflection to prevent the entire plugin from failing to load if not on MC 1.12+
-			Class broadcastMessageClass = Class.forName("org.bukkit.event.server.BroadcastMessageEvent");
-			Event broadcastMessageEvent = (Event) ReflectionUtils.newInstance(broadcastMessageClass,
-					new Class[]{String.class, Set.class},
-					new Object[]{message, recipients});
-			this.s.getPluginManager().callEvent(broadcastMessageEvent);
+		// Fire a BroadcastMessageEvent for this broadcast.
+		BroadcastMessageEvent broadcastMessageEvent = new BroadcastMessageEvent(message, recipients);
+		this.s.getPluginManager().callEvent(broadcastMessageEvent);
 
-			// Return if the event was cancelled.
-			if((Boolean) ReflectionUtils.invokeMethod(broadcastMessageEvent, "isCancelled")) {
-				return 0;
-			}
-
-			// Get the possibly modified message and recipients.
-			message = (String) ReflectionUtils.invokeMethod(broadcastMessageEvent, "getMessage");
-			recipients = (Set<CommandSender>) ReflectionUtils.invokeMethod(broadcastMessageEvent, "getRecipients"); // This returns the same reference, but breaks less likely.
-		} catch (ClassNotFoundException ex) {
-			// probably prior to 1.12
+		// Return if the event was cancelled.
+		if(broadcastMessageEvent.isCancelled()) {
+			return 0;
 		}
+
+		// Get the possibly modified message and recipients.
+		message = broadcastMessageEvent.getMessage();
+		recipients = broadcastMessageEvent.getRecipients(); // This returns the same reference, but breaks less likely.
 
 		// Perform the actual broadcast to all remaining recipients.
 		for(CommandSender recipient : recipients) {
@@ -471,8 +473,8 @@ public class BukkitMCServer implements MCServer {
 	}
 
 	@Override
-	public void banName(String name) {
-		s.getBanList(BanList.Type.NAME).addBan(name, null, null, null);
+	public void banName(String name, String reason, String source) {
+		s.getBanList(BanList.Type.NAME).addBan(name, reason, null, source);
 	}
 
 	@Override
@@ -562,11 +564,11 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public MCBossBar createBossBar(String title, MCBarColor color, MCBarStyle style) {
-		try {
-			return new BukkitMCBossBar(s.createBossBar(title, BarColor.valueOf(color.name()), BarStyle.valueOf(style.name())));
-		} catch (NoSuchMethodError ex) {
-			// Probably prior to 1.9
-			return null;
-		}
+		return new BukkitMCBossBar(s.createBossBar(title, BarColor.valueOf(color.name()), BarStyle.valueOf(style.name())));
+	}
+
+	@Override
+	public MCBlockData createBlockData(String data) {
+		return new BukkitMCBlockData(s.createBlockData(data));
 	}
 }

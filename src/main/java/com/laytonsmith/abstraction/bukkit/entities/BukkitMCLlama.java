@@ -5,9 +5,7 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.entities.MCLlama;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.abstractionenum;
-import com.laytonsmith.core.Static;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Llama;
 
@@ -54,14 +52,6 @@ public class BukkitMCLlama extends BukkitMCChestedHorse implements MCLlama {
 				instance = new BukkitMCLlamaColor();
 			}
 			return instance;
-		}
-
-		@Override
-		protected Llama.Color getConcreteEnumCustom(MCLlamaColor abstracted) {
-			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_11)) {
-				return null;
-			}
-			return super.getConcreteEnumCustom(abstracted);
 		}
 	}
 }

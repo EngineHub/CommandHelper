@@ -11,16 +11,14 @@ import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
-import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCMetadatable;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.abstraction.MCVehicle;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.CArray;
@@ -70,7 +68,6 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -112,12 +109,6 @@ public final class Static {
 	 * Third party APIs may provide better access.
 	 */
 	public static final String GROUP_PREFIX = "group.";
-	/**
-	 * @deprecated Use {@link #GROUP_PREFIX} instead.
-	 */
-	@Deprecated // Deprecated on 14-06-2018 dd-mm-yyyy.
-	@SuppressWarnings("checkstyle:constantname") // Fixing this violation might break dependents.
-	public static final String groupPrefix = GROUP_PREFIX;
 
 	/**
 	 * The label representing unrestricted access.
@@ -625,7 +616,7 @@ public final class Static {
 	 * @param qty
 	 * @throws CREFormatException If the notation is invalid.
 	 * @return
-	 * @deprecated Use {@link StaticLayer#GetItemStack(int, int, int)} instead.
+	 * @deprecated Use MCMaterial instead
 	 */
 	@Deprecated
 	public static MCItemStack ParseItemNotation(String functionName, String notation, int qty, Target t) {
@@ -642,37 +633,14 @@ public final class Static {
 		} catch (NumberFormatException e) {
 			throw new CREFormatException("Invalid item notation: " + notation, t);
 		}
-		return StaticLayer.GetItemStack(type, data, qty);
-	}
-
-	/**
-	 * Works in reverse from the other ParseItemNotation
-	 *
-	 * @param is
-	 * @return
-	 */
-	public static String ParseItemNotation(MCItemStack is) {
-		if(is == null) {
-			return "0";
+		MCMaterial mat = StaticLayer.GetMaterialFromLegacy(type, data);
+		if(mat == null) {
+			throw new CREFormatException("Invalid item values: " + notation, t);
 		}
-		String append = null;
-		if(is.getDurability() != 0) {
-			append = Short.toString(is.getDurability());
-		} else {
-			MCMaterialData md = is.getData();
-			if(md != null) {
-				append = Integer.toString(md.getData());
-			}
-		}
-		return is.getTypeId() + (append == null ? "" : ":" + append);
-	}
-
-	public static String ParseItemNotation(MCBlock b) {
-		if(b == null || b.isNull()) {
-			return "0";
-		}
-		byte data = b.getData();
-		return b.getTypeId() + (data == 0 ? "" : ":" + Byte.toString(data));
+		MCItemStack is = StaticLayer.GetItemStack(mat, qty);
+		CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Item notation is deprecated."
+				+ " Converting '" + notation + "' to '" + is.getType().getName() + "'.", t);
+		return is;
 	}
 
 	private static final Map<String, MCCommandSender> INJECTED_PLAYERS = new HashMap<>();
@@ -863,14 +831,11 @@ public final class Static {
 			// This entity is not in the world yet, but it was injected by the event
 			return injectedEntity;
 		}
-		for(MCWorld w : getServer().getWorlds()) {
-			for(MCEntity e : w.getEntities()) {
-				if(e.getUniqueId().compareTo(id) == 0) {
-					return StaticLayer.GetCorrectEntity(e);
-				}
-			}
+		MCEntity ent = getServer().getEntity(id);
+		if(ent == null) {
+			throw new CREBadEntityException("That entity (UUID: " + id + ") does not exist.", t);
 		}
-		throw new CREBadEntityException("That entity (UUID " + id + ") does not exist.", t);
+		return ent;
 	}
 
 	/**
@@ -886,41 +851,16 @@ public final class Static {
 			if(injectedEntity instanceof MCLivingEntity) {
 				return (MCLivingEntity) injectedEntity;
 			}
-			throw new CREBadEntityException("That entity (" + id + ") is not alive.", t);
+			throw new CREBadEntityException("That entity (UUID: " + id + ") is not alive.", t);
 		}
-		for(MCWorld w : Static.getServer().getWorlds()) {
-			for(MCLivingEntity e : w.getLivingEntities()) {
-				if(e.getUniqueId().compareTo(id) == 0) {
-					try {
-						return (MCLivingEntity) StaticLayer.GetCorrectEntity(e);
-					} catch (ClassCastException cce) {
-						throw new CREBadEntityException("The entity found was misinterpreted by the converter, this is"
-								+ " a developer mistake, please file a ticket.", t);
-					}
-				}
-			}
+		MCEntity ent = getServer().getEntity(id);
+		if(ent == null) {
+			throw new CREBadEntityException("That entity (UUID: " + id + ") does not exist.", t);
 		}
-		throw new CREBadEntityException("That entity (" + id + ") does not exist or is not alive.", t);
-	}
-
-	/**
-	 * Returns all vehicles from all maps.
-	 *
-	 * @return
-	 */
-	public static List<MCVehicle> getVehicles() {
-
-		List<MCVehicle> vehicles = new ArrayList<MCVehicle>();
-
-		for(MCWorld w : Static.getServer().getWorlds()) {
-			for(MCEntity e : w.getEntities()) {
-				MCEntity entity = StaticLayer.GetCorrectEntity(e);
-				if(entity instanceof MCVehicle) {
-					vehicles.add((MCVehicle) entity);
-				}
-			}
+		if(!(ent instanceof MCLivingEntity)) {
+			throw new CREBadEntityException("That entity (UUID: " + id + ") is not alive.", t);
 		}
-		return vehicles;
+		return (MCLivingEntity) ent;
 	}
 
 	/**
@@ -1228,7 +1168,6 @@ public final class Static {
 		if(p == null) {
 			throw new CREPlayerOfflineException("No player was specified!", t);
 		}
-		assert p != null;
 	}
 
 	public static long msToTicks(long ms) {

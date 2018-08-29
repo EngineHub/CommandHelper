@@ -9,7 +9,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.enums.MCCollisionType;
 import com.laytonsmith.abstraction.events.MCVehicleBlockCollideEvent;
-import com.laytonsmith.abstraction.events.MCVehicleEnitityCollideEvent;
+import com.laytonsmith.abstraction.events.MCVehicleEntityCollideEvent;
 import com.laytonsmith.abstraction.events.MCVehicleEnterExitEvent;
 import com.laytonsmith.abstraction.events.MCVehicleEvent;
 import com.laytonsmith.abstraction.events.MCVehicleMoveEvent;
@@ -28,7 +28,7 @@ public class BukkitVehicleEvents {
 
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCVehicleEntityCollideEvent extends BukkitMCVehicleEvent
-			implements MCVehicleEnitityCollideEvent {
+			implements MCVehicleEntityCollideEvent {
 
 		VehicleEntityCollisionEvent vec;
 

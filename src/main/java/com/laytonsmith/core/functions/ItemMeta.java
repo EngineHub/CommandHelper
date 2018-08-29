@@ -40,26 +40,31 @@ public class ItemMeta {
 	}
 
 	private static final String APPLICABLE_ITEM_META = "<ul>"
-			+ "<li>All items - \"display\" (string), \"lore\" (array of strings), \"enchants\" (An array of enchantment"
-			+ " arrays, which are associative arrays that look like: array(\"etype\": The type of enchantment, \"elevel\":"
-			+ " The strength of the enchantment)), \"repair\" (int, repair cost), \"unbreakable\" (boolean), \"flags\""
-			+ " (array). Possible flags: " + StringUtils.Join(MCItemFlag.values(), ", ", " or ") + "</li>"
+			+ "<li>All items - \"display\" (string), \"lore\" (array of strings), \"enchants\" (An associative array of"
+			+ " enchantments with the vanilla name of enchantment as the key, and value being an enchantment array with"
+			+ " the key \"elevel\" for the level of the enchantment),"
+			+ " \"flags\" (array). Possible flags: " + StringUtils.Join(MCItemFlag.values(), ", ", " or ") + "</li>"
+			+ "<li>Damageable: \"damage\" on the item (0 is undamaged; each item type has its own max durability),"
+			+ " \"unbreakable\" (boolean) and \"repair\" (int, repair cost)</li>"
 			+ "<li>Books - \"title\" (string), author (string), \"pages\" (array of strings)</li>"
-			+ "<li>EnchantedBooks - \"stored\" (array of enchantment arrays (see Example))</li>"
+			+ "<li>EnchantedBooks - \"stored\" (associative array of enchantments (see Example))</li>"
 			+ "<li>Leather Armor - \"color\" (color array (see Example))</li>"
-			+ "<li>Player Skulls - \"owner\" (string) or \"owneruuid\" (string)</li>"
-			+ "<li>Potions - \"potions\" (array of potion arrays), \"base\" (an array with the keys \"type\","
-			+ " \"extended\", and \"upgraded\")</li>"
-			+ "<li>Banners - \"basecolor\" (string), \"patterns\" (an array of pattern arrays, each with the keys"
+			+ "<li>Player Skulls - \"owner\" (string)</li>"
+			+ "<li>Potions - \"potions\" (array of custom potion effects (see get_peffect()),"
+			+ " \"base\" (an array with the keys \"type\", \"extended\", and \"upgraded\")</li>"
+			+ "<li>Banners - \"patterns\" (an array of pattern arrays, each with the keys"
 			+ " \"shape\" and \"color\")</li>"
+			+ "<li>Shields - \"basecolor\" (string), and \"patterns\" like in Banners."
 			+ "<li>Fireworks - \"firework\" (array with strength (int), \"effects\" (array of effect arrays (see Example)))</li>"
 			+ "<li>Firework Charges - \"effect\" (single Firework effect array)</li>"
 			+ "<li>Storage Blocks - \"inventory\" (an array of item arrays)</li>"
-			+ "<li>Mob Eggs/Spawners - \"spawntype\" (an entity type)</li>"
+			+ "<li>Mob Spawners - \"spawntype\" (an entity type)</li>"
 			+ "<li>Furnace - \"burntime\" (int), \"cooktime\" (int), and in \"inventory\" these keys can exist if an"
 			+ " item exists in that slot: \"result\", \"fuel\", and \"smelting\".</li>"
 			+ "<li>Brewing Stand - \"brewtime\" (int), \"fuel\" (int), and in \"inventory\" these keys can exist if an"
 			+ " item exists in that slot: \"fuel\", \"ingredient\", \"leftbottle\", \"middlebottle\", and \"rightbottle\".</li>"
+			+ "<li>Tropical Fish Bucket - \"fishcolor\" (the base dye color of the fish), \"fishpatterncolor\" (the"
+			+ " color of the pattern on the fish), and \"fishpattern\" (the pattern type on the fish).</li>"
 			+ "</ul>";
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -93,7 +98,7 @@ public class ItemMeta {
 			}
 			Static.AssertPlayerNonNull(p, t);
 			if(slot instanceof CNull) {
-				is = p.getItemInHand();
+				is = p.getItemAt(null);
 			} else {
 				is = p.getItemAt(Static.getInt32(slot, t));
 			}
@@ -137,7 +142,7 @@ public class ItemMeta {
 				"{author: Notch, display: null, enchants: {}, lore: null,"
 				+ " pages: {This is page 1, This is page 2}, title: Example Book}"),
 				new ExampleScript("Demonstrates an EnchantedBook", "msg(get_itemmeta(null))",
-				"{display: null, enchants: {}, lore: null, stored: {{elevel: 1, etype: ARROW_FIRE}}}"),
+				"{display: null, enchants: {}, lore: null, stored: {flame: 1}}"),
 				new ExampleScript("Demonstrates a piece of leather armor", "msg(get_itemmeta(null))",
 				"{color: {b: 106, g: 160, r: 64}, display: null, enchants: {}, lore: null}"),
 				new ExampleScript("Demonstrates a skull", "msg(get_itemmeta(null))",
@@ -192,7 +197,7 @@ public class ItemMeta {
 			}
 			Static.AssertPlayerNonNull(p, t);
 			if(slot instanceof CNull) {
-				is = p.getItemInHand();
+				is = p.getItemAt(null);
 			} else {
 				is = p.getItemAt(Static.getInt32(slot, t));
 			}
@@ -238,7 +243,7 @@ public class ItemMeta {
 				"set_itemmeta(null, array(author: 'Writer', pages: array('Once upon a time', 'The end.'), title: 'Epic Story'))",
 				"This will write a very short story"),
 				new ExampleScript("Demonstrates an EnchantedBook",
-				"set_itemmeta(null, array(stored: array(array(elevel: 25, etype: DAMAGE_ALL), array(etype: DURABILITY, elevel: 3))))",
+				"set_itemmeta(null, array('stored': array('sharpness': 25, 'unbreaking': 3)))",
 				"This book now contains Unbreaking 3 and Sharpness 25"),
 				new ExampleScript("Demonstrates coloring leather armor",
 				"set_itemmeta(102, array(color: array(r: 50, b: 150, g: 100)))",
@@ -359,14 +364,14 @@ public class ItemMeta {
 				if(args[2] instanceof CArray) {
 					color = (CArray) args[2];
 				} else {
-					throw new CREFormatException("Expected an array but recieved " + args[2] + " instead.", t);
+					throw new CREFormatException("Expected an array but received " + args[2] + " instead.", t);
 				}
 			} else {
 				slot = Static.getInt32(args[0], t);
 				if(args[1] instanceof CArray) {
 					color = (CArray) args[1];
 				} else {
-					throw new CREFormatException("Expected an array but recieved " + args[1] + " instead.", t);
+					throw new CREFormatException("Expected an array but received " + args[1] + " instead.", t);
 				}
 			}
 			Static.AssertPlayerNonNull(p, t);

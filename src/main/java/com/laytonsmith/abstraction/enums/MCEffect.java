@@ -54,64 +54,15 @@ public enum MCEffect {
 	WITHER_BREAK_BLOCK(1022),
 	WITHER_SHOOT(1024),
 	ZOMBIE_CONVERTED_VILLAGER(1027),
-	ZOMBIE_INFECT(1026),
-	/**
-	 * PARTICLE Deprecated in favor of the Particle API
-	 */
-	FIREWORKS_SPARK("fireworksSpark"),
-	CRIT("crit"),
-	MAGIC_CRIT("magicCrit"),
-	POTION_SWIRL("mobSpell"),
-	POTION_SWIRL_TRANSPARENT("mobSpellAmbient"),
-	SPELL("spell"),
-	INSTANT_SPELL("instantSpell"),
-	WITCH_MAGIC("witchMagic"),
-	NOTE("note"),
-	PORTAL("portal"),
-	FLYING_GLYPH("enchantmenttable"),
-	FLAME("flame"),
-	LAVA_POP("lava"),
-	FOOTSTEP("footstep"),
-	SPLASH("splash"),
-	PARTICLE_SMOKE("smoke"),
-	EXPLOSION_HUGE("hugeexplosion"),
-	EXPLOSION_LARGE("largeexplode"),
-	EXPLOSION("explode"),
-	VOID_FOG("depthsuspend"),
-	SMALL_SMOKE("townaura"),
-	CLOUD("cloud"),
-	COLOURED_DUST("reddust"),
-	SNOWBALL_BREAK("snowballpoof"),
-	WATERDRIP("dripWater"),
-	LAVADRIP("dripLava"),
-	SNOW_SHOVEL("snowshovel"),
-	SLIME("slime"),
-	HEART("heart"),
-	VILLAGER_THUNDERCLOUD("angryVillager"),
-	HAPPY_VILLAGER("happyVillager"),
-	LARGE_SMOKE("largesmoke"),
-	//ITEM_BREAK("iconcrack"), // crashes clients without correct data
-	TILE_BREAK("blockcrack"),
-	TILE_DUST("blockdust");
+	ZOMBIE_INFECT(1026);
 
 	private final int id;
-	private final String particleName;
 
 	MCEffect(int id) {
 		this.id = id;
-		particleName = null;
-	}
-
-	MCEffect(String particleName) {
-		this.id = 0;
-		this.particleName = particleName;
 	}
 
 	public int getId() {
 		return this.id;
-	}
-
-	public String getName() {
-		return particleName;
 	}
 }

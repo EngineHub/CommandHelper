@@ -96,7 +96,7 @@ public class Reflection {
 					+ "<tr><td>file</td><td></td><td>The absolute path to the current file</td></tr>"
 					+ "<tr><td>col</td><td></td><td>The current column number</td></tr>"
 					+ "<tr><td>datasources</td><td></td><td>An array of data source protocols available</td></tr>"
-					+ "<tr><td>enum</td><td>[enum name]</td><td>An array of enum names, or if one if provided, a list of all"
+					+ "<tr><td>enum</td><td>[enum name]</td><td>An array of enum names, or if one is provided, a list of all"
 					+ " the values in that enum</td></tr>"
 					+ "</table>";
 			//+ "<tr><td></td><td></td><td></td></tr>"

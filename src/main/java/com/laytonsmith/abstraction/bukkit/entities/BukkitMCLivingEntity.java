@@ -1,24 +1,25 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntityEquipment;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
-import com.laytonsmith.abstraction.enums.MCVersion;
-import com.laytonsmith.core.Static;
+import com.laytonsmith.abstraction.enums.MCPotionEffectType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -28,8 +29,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource implements MCLivingEntity {
 
@@ -110,21 +109,28 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	}
 
 	@Override
-	public List<MCBlock> getLineOfSight(HashSet<Short> transparent, int maxDistance) {
+	public List<MCBlock> getLineOfSight(HashSet<MCMaterial> transparent, int maxDistance) {
 		List<Block> lst = getLineOfSight(transparent, maxDistance, 512);
 		List<MCBlock> retn = new ArrayList<>();
 
 		for(Block b : lst) {
 			retn.add(new BukkitMCBlock(b));
 		}
-
 		return retn;
 	}
 
-	private List<Block> getLineOfSight(HashSet<Short> transparent, int maxDistance, int maxLength) {
+	private List<Block> getLineOfSight(HashSet<MCMaterial> transparent, int maxDistance, int maxLength) {
 		if(maxDistance > 512) {
 			maxDistance = 512;
 		}
+
+		HashSet<Material> ignored = new HashSet<>();
+		if(transparent != null) {
+			for(MCMaterial mat : transparent) {
+				ignored.add((Material) mat.getHandle());
+			}
+		}
+
 		ArrayList<Block> blocks = new ArrayList<>();
 		Iterator<Block> itr = new BlockIterator(le, maxDistance);
 
@@ -134,13 +140,13 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 			if(maxLength != 0 && blocks.size() > maxLength) {
 				blocks.remove(0);
 			}
-			int id = block.getTypeId();
 			if(transparent == null) {
-				if(id != 0) {
+				if(!block.isEmpty()) {
 					break;
 				}
 			} else {
-				if(!transparent.contains((short) id)) {
+				Material id = block.getType();
+				if(!ignored.contains(id)) {
 					break;
 				}
 			}
@@ -174,57 +180,25 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	}
 
 	@Override
-	public MCBlock getTargetBlock(HashSet<Short> b, int i) {
-		return new BukkitMCBlock(getFirstTargetBlock(b, i));
-	}
-
-	private Block getFirstTargetBlock(HashSet<Short> transparent, int maxDistance) {
-		List<Block> blocks = getLineOfSight(transparent, maxDistance, 1);
-		return blocks.get(0);
+	public MCBlock getTargetBlock(HashSet<MCMaterial> b, int i) {
+		List<Block> blocks = getLineOfSight(b, i, 1);
+		return new BukkitMCBlock(blocks.get(0));
 	}
 
 	@Override
 	public boolean hasAI() {
-		try {
-			return le.hasAI();
-		} catch (NoSuchMethodError ex) {
-			// Probably before 1.9.2
-			return true;
-		}
+		return le.hasAI();
 	}
 
 	@Override
-	public void addEffect(int potionID, int strength, int ticks, boolean ambient, boolean particles, Target t) {
-		PotionEffect pe;
-		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
-			pe = new PotionEffect(PotionEffectType.getById(potionID), ticks, strength, ambient);
-		} else {
-			pe = new PotionEffect(PotionEffectType.getById(potionID), ticks, strength, ambient, particles);
-		}
-		try {
-			if(le != null) {
-				le.addPotionEffect(pe, true);
-			}
-		} catch (NullPointerException e) {
-			Logger.getLogger(BukkitMCLivingEntity.class.getName()).log(Level.SEVERE,
-					"Bukkit appears to have derped. This is a problem with Bukkit, not CommandHelper."
-					+ "The effect should have still been applied.", e);
-		}
+	public boolean addEffect(MCPotionEffectType type, int strength, int ticks, boolean ambient, boolean particles, boolean icon) {
+		PotionEffect pe = new PotionEffect((PotionEffectType) type.getConcrete(), ticks, strength, ambient, particles, icon);
+		return le.addPotionEffect(pe, true);
 	}
 
 	@Override
-	public int getMaxEffect() {
-		try {
-			PotionEffectType[] arr = (PotionEffectType[]) ReflectionUtils.get(PotionEffectType.class, "byId");
-			return arr.length - 1;
-		} catch (ReflectionUtils.ReflectionException e) {
-			return Integer.MAX_VALUE;
-		}
-	}
-
-	@Override
-	public boolean removeEffect(int potionID) {
-		PotionEffectType t = PotionEffectType.getById(potionID);
+	public boolean removeEffect(MCPotionEffectType type) {
+		PotionEffectType t = (PotionEffectType) type.getConcrete();
 		boolean hasIt = false;
 		for(PotionEffect pe : le.getActivePotionEffects()) {
 			if(pe.getType() == t) {
@@ -247,12 +221,8 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public List<MCEffect> getEffects() {
 		List<MCEffect> effects = new ArrayList<>();
 		for(PotionEffect pe : le.getActivePotionEffects()) {
-			MCEffect e;
-			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_8)) {
-				e = new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration(), pe.isAmbient(), true);
-			} else {
-				e = new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration(), pe.isAmbient(), pe.hasParticles());
-			}
+			MCEffect e = new MCEffect(BukkitMCPotionEffectType.valueOfConcrete(pe.getType()), pe.getAmplifier(), pe.getDuration(),
+					pe.isAmbient(), pe.hasParticles(), pe.hasIcon());
 			effects.add(e);
 		}
 		return effects;
@@ -317,10 +287,10 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public MCLivingEntity getTarget(Target t) {
-		if(!(le instanceof Creature)) {
-			throw new CREBadEntityException("This type of mob does not have a target API", t);
+		if(!(le instanceof Mob)) {
+			throw new CREBadEntityException("This type of entity does not have a target API", t);
 		}
-		LivingEntity target = ((Creature) le).getTarget();
+		LivingEntity target = ((Mob) le).getTarget();
 		if(target == null) {
 			return null;
 		}
@@ -329,13 +299,13 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public void setTarget(MCLivingEntity target, Target t) {
-		if(!(le instanceof Creature)) {
-			throw new CREBadEntityException("This type of mob does not have a target API", t);
+		if(!(le instanceof Mob)) {
+			throw new CREBadEntityException("This type of entity not have a target API", t);
 		}
 		if(target == null) {
-			((Creature) le).setTarget(null);
+			((Mob) le).setTarget(null);
 		} else {
-			((Creature) le).setTarget(((BukkitMCLivingEntity) target).asLivingEntity());
+			((Mob) le).setTarget(((BukkitMCLivingEntity) target).asLivingEntity());
 		}
 	}
 
@@ -369,29 +339,26 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public boolean isGliding() {
-		try {
-			return le.isGliding();
-		} catch (NoSuchMethodError ex) {
-			// Probably before 1.9
-			return false;
-		}
+		return le.isGliding();
 	}
 
 	@Override
 	public void setGliding(Boolean glide) {
-		try {
-			le.setGliding(glide);
-		} catch (NoSuchMethodError ex) {
-			// Probably before 1.9
-		}
+		le.setGliding(glide);
 	}
 
 	@Override
 	public void setAI(Boolean ai) {
-		try {
-			le.setAI(ai);
-		} catch (NoSuchMethodError ex) {
-			// Probably before 1.9.2
-		}
+		le.setAI(ai);
+	}
+
+	@Override
+	public boolean isCollidable() {
+		return le.isCollidable();
+	}
+
+	@Override
+	public void setCollidable(boolean collidable) {
+		le.setCollidable(collidable);
 	}
 }

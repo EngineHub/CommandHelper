@@ -18,11 +18,14 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
@@ -45,12 +48,15 @@ import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class InventoryManagement {
 
@@ -58,10 +64,8 @@ public class InventoryManagement {
 		return "Provides methods for managing inventory related tasks.";
 	}
 
-	private static final String ITEM_OBJECT = " An item object consists of an associative array with the following keys,"
+	private static final String ITEM_OBJECT = " An item is an associative array with the following keys,"
 			+ " name: the string id of the item,"
-			+ " type: The numeric id of the item (deprecated),"
-			+ " data: The data value of the item, or the damage if a damageable item,"
 			+ " qty: The number of items in their inventory,"
 			+ " meta: An array of item meta or null if none exists (see {{function|get_itemmeta}} for details).";
 
@@ -141,9 +145,7 @@ public class InventoryManagement {
 				for(int i = 100; i < 104; i++) {
 					ret.set(i, getInvSlot(m, i, t), t);
 				}
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-					ret.set(-106, getInvSlot(m, -106, t), t);
-				}
+				ret.set(-106, getInvSlot(m, -106, t), t);
 				return ret;
 			} else {
 				return getInvSlot(m, index, t);
@@ -151,15 +153,14 @@ public class InventoryManagement {
 		}
 
 		private Construct getInvSlot(MCPlayer m, Integer slot, Target t) {
-			if(slot == null) {
-				return ObjectGenerator.GetGenerator().item(m.getItemInHand(), t);
-			}
 			MCPlayerInventory inv = m.getInventory();
 			if(inv == null) {
 				throw new CRENotFoundException(
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
-
+			if(slot == null) {
+				return ObjectGenerator.GetGenerator().item(inv.getItemInMainHand(), t);
+			}
 			if(slot.equals(36)) {
 				slot = 100;
 			}
@@ -492,7 +493,6 @@ public class InventoryManagement {
 				} else {
 					setInvSlot(m.getInventory(), Static.getInt32(args[1], t), is);
 				}
-				m.getInventory().updateViewers();
 				return CVoid.VOID;
 			} else if(args.length == 1) {
 				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -523,7 +523,6 @@ public class InventoryManagement {
 					}
 				}
 			}
-			inv.updateViewers();
 			return CVoid.VOID;
 		}
 
@@ -600,20 +599,12 @@ public class InventoryManagement {
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
 			inv.clear();
-			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_9)) {
-				// 1.9 clears armor and offhand too, but before then we need clear armor manually.
-				MCItemStack empty = StaticLayer.GetItemStack("AIR", 0);
-				inv.setBoots(empty);
-				inv.setLeggings(empty);
-				inv.setChestplate(empty);
-				inv.setHelmet(empty);
-			}
 			return CVoid.VOID;
 		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class phas_item extends AbstractFunction {
+	public static class phas_item extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -627,7 +618,7 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player], item} Returns the quantity of the specified item that the player is carrying"
+			return "int {[player], itemArray} Returns the quantity of the specified item that the player is carrying"
 					+ " (including armor slots). This counts across all slots in inventory. Recall that 0 is false, and"
 					+ " anything else is true, so this can be used to get the total, or just see if they have the item."
 					+ ITEM_MATCHING;
@@ -664,6 +655,10 @@ public class InventoryManagement {
 				c = args[1];
 			}
 
+			if(c instanceof CNull) {
+				return new CInt(0, t);
+			}
+
 			if(c instanceof CArray) {
 				ca = (CArray) c;
 				is = ObjectGenerator.GetGenerator().item(ca, t);
@@ -686,9 +681,7 @@ public class InventoryManagement {
 			total += total(ca, is, inv.getLeggings(), t);
 			total += total(ca, is, inv.getChestplate(), t);
 			total += total(ca, is, inv.getHelmet(), t);
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-				total += total(ca, is, inv.getItemInOffHand(), t);
-			}
+			total += total(ca, is, inv.getItemInOffHand(), t);
 			return new CInt(total, t);
 		}
 
@@ -704,10 +697,23 @@ public class InventoryManagement {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() > 0 && children.get(children.size() - 1).getData() instanceof CString) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class pitem_slot extends AbstractFunction {
+	public static class pitem_slot extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -721,7 +727,7 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "array {[player], item} Given an item array, returns the slot numbers"
+			return "array {[player], itemArray} Given an item array, returns the slot numbers"
 					+ " that the matching item has at least one item in." + ITEM_MATCHING;
 		}
 
@@ -755,7 +761,10 @@ public class InventoryManagement {
 				item = args[1];
 			}
 			MCItemStack is;
-			if(item instanceof CArray) {
+			if(item instanceof CNull) {
+				ca = null;
+				is = StaticLayer.GetItemStack("AIR", 1);
+			} else if(item instanceof CArray) {
 				ca = (CArray) item;
 				is = ObjectGenerator.GetGenerator().item(ca, t);
 			} else {
@@ -785,7 +794,7 @@ public class InventoryManagement {
 			if(IsMatch(ca, is, inv.getHelmet(), t)) {
 				ret.push(new CInt(103, t), t);
 			}
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9) && IsMatch(ca, is, inv.getItemInOffHand(), t)) {
+			if(IsMatch(ca, is, inv.getItemInOffHand(), t)) {
 				ret.push(new CInt(-106, t), t);
 			}
 			return ret;
@@ -796,10 +805,24 @@ public class InventoryManagement {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() > 0 && children.get(children.size() - 1).getData() instanceof CString) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class pgive_item extends AbstractFunction {
+	public static class pgive_item extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -813,7 +836,7 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player], itemArray | [player], itemID, qty, [meta]} Gives a player the specified item. Unlike"
+			return "int {[player], itemArray} Gives a player the specified item. Unlike"
 					+ " set_pinv(), this does not specify a slot. The qty is distributed in the player's inventory,"
 					+ " first filling up slots that have the same item type, up to the max stack size, then fills up"
 					+ " empty slots, until either the entire inventory is filled, or the entire amount has been given."
@@ -825,7 +848,8 @@ public class InventoryManagement {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREFormatException.class, CREPlayerOfflineException.class,
-					CRENotFoundException.class, CREIllegalArgumentException.class, CRELengthException.class};
+					CRENotFoundException.class, CREIllegalArgumentException.class, CRELengthException.class,
+					CREInsufficientArgumentsException.class};
 		}
 
 		@Override
@@ -845,6 +869,9 @@ public class InventoryManagement {
 			int itemOffset = 0;
 
 			if(args.length == 2) {
+				if(args[1] instanceof CNull) {
+					return new CInt(0, t);
+				}
 				if(args[1] instanceof CArray) {
 					itemOffset = 1;
 				}
@@ -865,11 +892,13 @@ public class InventoryManagement {
 
 			if(args[itemOffset] instanceof CArray) {
 				is = ObjectGenerator.GetGenerator().item(args[itemOffset], t);
-			} else {
+			} else if(args.length > 1) {
 				is = Static.ParseItemNotation(null, args[itemOffset].val(), Static.getInt32(args[itemOffset + 1], t), t);
 				if(args.length > itemOffset + 2) {
 					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[itemOffset + 2], is.getType(), t));
 				}
+			} else {
+				throw new CREInsufficientArgumentsException("Expecting a qty for string item format.", t);
 			}
 
 			MCInventory inv = p.getInventory();
@@ -880,7 +909,6 @@ public class InventoryManagement {
 				} catch (IllegalArgumentException e) {
 					throw new CREIllegalArgumentException("Item value is invalid", t);
 				}
-				p.updateInventory();
 				if(!h.isEmpty()) {
 					return new CInt(h.get(0).getAmount(), t);
 				}
@@ -893,10 +921,25 @@ public class InventoryManagement {
 			return CHVersion.V3_3_0;
 		}
 
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() > 2 || children.size() == 2
+					&& (children.get(1).getData() instanceof CString || children.get(1).getData() instanceof CInt)) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class ptake_item extends AbstractFunction {
+	public static class ptake_item extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -910,7 +953,7 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player], itemArray | [player], itemID, qty} Works in reverse of pgive_item(), but returns the"
+			return "int {[player], itemArray} Works in reverse of pgive_item(), but returns the"
 					+ " number of items actually taken, which will be from 0 to qty." + ITEM_MATCHING;
 		}
 
@@ -938,6 +981,9 @@ public class InventoryManagement {
 			CArray ca = null;
 
 			if(args.length == 2) {
+				if(args[1] instanceof CNull) {
+					return new CInt(0, t);
+				}
 				if(args[1] instanceof CArray) {
 					itemOffset = 1;
 				}
@@ -985,7 +1031,6 @@ public class InventoryManagement {
 					}
 				}
 			}
-			inv.updateViewers();
 			return new CInt(total - remaining, t);
 
 		}
@@ -994,10 +1039,25 @@ public class InventoryManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() > 2 || children.size() == 2
+					&& (children.get(1).getData() instanceof CString || children.get(1).getData() instanceof CInt)) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class pgive_enderchest_item extends AbstractFunction {
+	public static class pgive_enderchest_item extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -1011,7 +1071,7 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player], itemArray | [player], itemID, qty, [meta]} Adds the specified item to a player's"
+			return "int {[player], itemArray} Adds the specified item to a player's"
 					+ " enderchest. Unlike set_penderchest(), this does not specify a slot. The items are distributed"
 					+ " in the player's inventory, first filling up slots that have the same item type, up to the max"
 					+ " stack size, then fills up empty slots, until either the entire inventory is filled or the"
@@ -1044,6 +1104,9 @@ public class InventoryManagement {
 			int itemOffset = 0;
 
 			if(args.length == 2) {
+				if(args[1] instanceof CNull) {
+					return new CInt(0, t);
+				}
 				if(args[1] instanceof CArray) {
 					itemOffset = 1;
 				}
@@ -1090,10 +1153,25 @@ public class InventoryManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() > 2 || children.size() == 2
+					&& (children.get(1).getData() instanceof CString || children.get(1).getData() instanceof CInt)) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class ptake_enderchest_item extends AbstractFunction {
+	public static class ptake_enderchest_item extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -1107,7 +1185,7 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player], itemArray | [player], itemID, qty} Works in reverse of pgive_enderchest_item(), but"
+			return "int {[player], itemArray} Works in reverse of pgive_enderchest_item(), but"
 					+ " returns the number of items actually taken, which will be from 0 to qty." + ITEM_MATCHING;
 		}
 
@@ -1135,6 +1213,9 @@ public class InventoryManagement {
 			CArray ca = null;
 
 			if(args.length == 2) {
+				if(args[1] instanceof CNull) {
+					return new CInt(0, t);
+				}
 				if(args[1] instanceof CArray) {
 					itemOffset = 1;
 				}
@@ -1182,13 +1263,27 @@ public class InventoryManagement {
 					}
 				}
 			}
-			inv.updateViewers();
 			return new CInt(total - remaining, t);
 		}
 
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() > 2 || children.size() == 2
+					&& (children.get(1).getData() instanceof CString || children.get(1).getData() instanceof CInt)) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -1293,7 +1388,6 @@ public class InventoryManagement {
 					ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to set_penderchest(), but \"" + key + "\" was found. Ignoring.");
 				}
 			}
-			m.getEnderChest().updateViewers();
 			return CVoid.VOID;
 		}
 	}
@@ -1495,7 +1589,6 @@ public class InventoryManagement {
 			MCItemStack is = ObjectGenerator.GetGenerator().item(args[2], t);
 			try {
 				inv.setItem(slot, is);
-				inv.updateViewers();
 				return CVoid.VOID;
 			} catch (ArrayIndexOutOfBoundsException e) {
 				throw new CRERangeException("Index out of bounds for the inventory type.", t);
@@ -1890,13 +1983,12 @@ public class InventoryManagement {
 					ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to set_inventory(), but \"" + key + "\" was found. Ignoring.");
 				}
 			}
-			inventory.updateViewers();
 			return CVoid.VOID;
 		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class add_to_inventory extends AbstractFunction {
+	public static class add_to_inventory extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -1910,7 +2002,7 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "int {specifier, itemArray | specifier, itemID, qty, [metaArray]} Add to inventory the specified item."
+			return "int {specifier, itemArray} Add to inventory the specified item."
 					+ " The specifier must be a location array, entity UUID, or virtual inventory id."
 					+ " The items are distributed in the inventory, first filling up slots that have the same item type,"
 					+ " up to the max stack size, then fills up empty slots, until either the entire inventory is filled,"
@@ -1966,10 +2058,24 @@ public class InventoryManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() > 2) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class take_from_inventory extends AbstractFunction {
+	public static class take_from_inventory extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -2039,13 +2145,26 @@ public class InventoryManagement {
 					}
 				}
 			}
-			inventory.updateViewers();
 			return new CInt(total - remaining, t);
 		}
 
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() == 3) {
+				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -2655,7 +2774,7 @@ public class InventoryManagement {
 	}
 
 	private static final String ITEM_MATCHING = " ---- The item array also serves as a map for what to compare."
-			+ " If included in the array, the value for the key \"data\", as well as \"display\", \"lore\" and "
+			+ " If included in the array, the values for the keys \"display\", \"lore\" and "
 			+ " \"enchants\" from the meta array, will be compared to the items in the inventory."
 			+ " More keys may be added in the future.";
 
@@ -2670,9 +2789,6 @@ public class InventoryManagement {
 	 */
 	private static boolean IsMatch(CArray map, MCItemStack is, MCItemStack iis, Target t) {
 		if(!is.getType().equals(iis.getType())) {
-			return false;
-		}
-		if((map == null || map.containsKey("data")) && is.getDurability() != iis.getDurability()) {
 			return false;
 		}
 		if(map != null && map.containsKey("meta")) {

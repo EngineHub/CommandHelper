@@ -5,6 +5,7 @@ import com.laytonsmith.abstraction.blocks.MCBanner;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPattern;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
+import org.bukkit.DyeColor;
 import org.bukkit.block.Banner;
 import org.bukkit.block.banner.Pattern;
 
@@ -22,7 +23,12 @@ public class BukkitMCBanner extends BukkitMCBlockState implements MCBanner {
 
 	@Override
 	public MCDyeColor getBaseColor() {
-		return BukkitMCDyeColor.getConvertor().getAbstractedEnum(b.getBaseColor());
+		DyeColor c = b.getBaseColor();
+		if(c != null) {
+			return BukkitMCDyeColor.getConvertor().getAbstractedEnum(c);
+		}
+		// fallback method in case basecolor is incorrectly null
+		return MCDyeColor.valueOf(b.getType().name().replace("_BANNER", ""));
 	}
 
 	@Override

@@ -53,6 +53,11 @@ public class BukkitMCEnchantment implements MCEnchantment {
 	}
 
 	@Override
+	public String getKey() {
+		return e.getKey().getKey();
+	}
+
+	@Override
 	public String toString() {
 		return e.toString();
 	}

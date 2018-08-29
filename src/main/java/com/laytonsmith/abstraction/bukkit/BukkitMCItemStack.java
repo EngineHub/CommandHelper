@@ -4,14 +4,15 @@ import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 public class BukkitMCItemStack implements MCItemStack {
 
@@ -36,39 +37,11 @@ public class BukkitMCItemStack implements MCItemStack {
 	}
 
 	@Override
-	public MCMaterialData getData() {
-		if(is == null) {
-			return null;
-		}
-		MaterialData md = is.getData();
-		if(md == null) {
-			return null;
-		}
-		return new BukkitMCMaterialData(md);
-	}
-
-	@Override
-	public short getDurability() {
-		if(is == null) {
-			return 0;
-		}
-		return is.getDurability();
-	}
-
-	@Override
 	public int getTypeId() {
 		if(is == null) {
 			return 0;
 		}
-		return is.getTypeId();
-	}
-
-	@Override
-	public void setDurability(short data) {
-		if(is == null) {
-			return;
-		}
-		is.setDurability(data);
+		return Bukkit.getUnsafe().toLegacy(is.getType()).getId();
 	}
 
 	@Override
@@ -111,17 +84,17 @@ public class BukkitMCItemStack implements MCItemStack {
 	@Override
 	public MCMaterial getType() {
 		if(is == null) {
-			return null;
+			return new BukkitMCMaterial(Material.AIR);
 		}
 		return new BukkitMCMaterial(is.getType());
 	}
 
 	@Override
-	public void setTypeId(int type) {
+	public void setType(MCMaterial type) {
 		if(is == null) {
 			return;
 		}
-		is.setTypeId(type);
+		is.setType((Material) type.getHandle());
 	}
 
 	@Override
@@ -142,14 +115,6 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	public ItemStack __ItemStack() {
 		return is;
-	}
-
-	@Override
-	public void setData(int data) {
-		if(is == null) {
-			return;
-		}
-		is.setData(new MaterialData(is.getTypeId(), (byte) data));
 	}
 
 	@Override
@@ -199,5 +164,10 @@ public class BukkitMCItemStack implements MCItemStack {
 			return;
 		}
 		is.setItemMeta(((BukkitMCItemMeta) im).asItemMeta());
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return is == null || is.getAmount() == 0 || is.getType() == Material.AIR;
 	}
 }

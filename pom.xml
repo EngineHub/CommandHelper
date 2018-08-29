@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.sk89q</groupId>
 	<artifactId>commandhelper</artifactId>
-	<version>3.3.2-SNAPSHOT</version>
+	<version>3.3.3-SNAPSHOT</version>
 	<name>CommandHelper</name>
 	<description>CommandHelper is a full blown scripting language built right into Minecraft</description>
 	<inceptionYear>2010</inceptionYear>
@@ -171,9 +171,9 @@
 		<!-- Bukkit -->
 		<dependency>
 			<!-- GPL -->
-			<groupId>org.spigotmc</groupId>
-			<artifactId>spigot-api</artifactId>
-			<version>1.12.2-R0.1-SNAPSHOT</version>
+			<groupId>org.bukkit</groupId>
+			<artifactId>bukkit</artifactId>
+			<version>1.13.1-R0.1-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Used for storing and retreiving Constructs in a storage transparent medium: JSONs -->

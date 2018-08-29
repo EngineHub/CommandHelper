@@ -2,7 +2,6 @@ package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
-import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCChatTabCompleteEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCExpChangeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCGamemodeChangeEvent;
@@ -17,7 +16,6 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlay
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerLoginEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerMoveEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerPortalEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerPreLoginEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerQuitEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerRespawnEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerTeleportEvent;
@@ -40,7 +38,6 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerChatTabCompleteEvent;
 import org.bukkit.event.player.PlayerEditBookEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerFishEvent;
@@ -52,7 +49,6 @@ import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
-import org.bukkit.event.player.PlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -97,12 +93,6 @@ public class BukkitPlayerListener implements Listener {
 	public void onPlayerLogin(PlayerLoginEvent e) {
 		BukkitMCPlayerLoginEvent ple = new BukkitMCPlayerLoginEvent(e);
 		EventUtils.TriggerListener(Driver.PLAYER_LOGIN, "player_login", ple);
-	}
-
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerPreLogin(PlayerPreLoginEvent e) {
-		BukkitMCPlayerPreLoginEvent pple = new BukkitMCPlayerPreLoginEvent(e);
-		EventUtils.TriggerListener(Driver.PLAYER_PRELOGIN, "player_prelogin", pple);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -279,12 +269,6 @@ public class BukkitPlayerListener implements Listener {
 	public void onGamemodeChange(PlayerGameModeChangeEvent event) {
 		BukkitMCGamemodeChangeEvent e = new BukkitMCGamemodeChangeEvent(event);
 		EventUtils.TriggerListener(Driver.GAMEMODE_CHANGE, "gamemode_change", e);
-	}
-
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void onChatTab(PlayerChatTabCompleteEvent event) {
-		BukkitMCChatTabCompleteEvent e = new BukkitMCChatTabCompleteEvent(event);
-		EventUtils.TriggerListener(Driver.TAB_COMPLETE, "tab_complete_chat", e);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
