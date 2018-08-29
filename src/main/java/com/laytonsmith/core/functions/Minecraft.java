@@ -1104,11 +1104,19 @@ public class Minecraft {
 					case "isInteractable":
 						return CBoolean.get(mat.isInteractable());
 					case "hardness":
+						if(!mat.isBlock()) {
+							throw new CREIllegalArgumentException(
+									"Invalid trait \"hardness\" for non-block material " + mat.getName(), t);
+						}
 						return new CDouble(mat.getHardness(), t);
 					case "blastResistance":
+						if(!mat.isBlock()) {
+							throw new CREIllegalArgumentException(
+									"Invalid trait \"blastResistance\" for non-block material " + mat.getName(), t);
+						}
 						return new CDouble(mat.getBlastResistance(), t);
 					default:
-						throw new CREFormatException("Invalid argument for material_info", t);
+						throw new CREFormatException("Invalid argument for material_info: " + args[1].val(), t);
 				}
 			}
 			CArray ret = CArray.GetAssociativeArray(t);
@@ -1124,8 +1132,10 @@ public class Minecraft {
 			ret.set("isSolid", CBoolean.get(mat.isSolid()), t);
 			ret.set("isTransparent", CBoolean.get(mat.isTransparent()), t);
 			ret.set("isInteractable", CBoolean.get(mat.isInteractable()), t);
-			ret.set("hardness", new CDouble(mat.getHardness(), t), t);
-			ret.set("blastResistance", new CDouble(mat.getBlastResistance(), t), t);
+			if(mat.isBlock()) {
+				ret.set("hardness", new CDouble(mat.getHardness(), t), t);
+				ret.set("blastResistance", new CDouble(mat.getBlastResistance(), t), t);
+			}
 			return ret;
 		}
 
@@ -1144,7 +1154,8 @@ public class Minecraft {
 			return "mixed {material, [trait]} Returns an array of info about the material. If a trait is specified,"
 					+ " it returns only that trait. Available traits: hasGravity, isBlock, isBurnable, isEdible,"
 					+ " isFlammable, isOccluding, isRecord, isSolid, isTransparent, isInteractable, maxDurability,"
-					+ " hardness, blastResistance, and maxStacksize.";
+					+ " hardness (for block materials only), blastResistance (for block materials only),"
+					+ " and maxStacksize.";
 		}
 
 		@Override
