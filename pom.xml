@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.sk89q</groupId>
 	<artifactId>commandhelper</artifactId>
-	<version>3.3.2-SNAPSHOT</version>
+	<version>3.3.2</version>
 	<name>CommandHelper</name>
 	<description>CommandHelper is a full blown scripting language built right into Minecraft</description>
 	<inceptionYear>2010</inceptionYear>
