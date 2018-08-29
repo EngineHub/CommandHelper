@@ -13,6 +13,16 @@ Also note that CommandHelper may still be backwards and forward compatible to a 
 ! scope="col" width="40%" | Milestone
 ! scope="col" width="50%" | Compatibility
 |-
+| http://builds.enginehub.org/job/commandhelper/10371 #3427-]
+| [https://github.com/sk89q/commandhelper/commit/7277e87c4bb988b0244e258f4e478b01a4f29a01 7277e87c]
+| Updated for Bukkit 1.13
+| Bukkit 1.13.1
+|-
+| http://builds.enginehub.org/job/commandhelper/10370 #3426-]
+| [https://github.com/EngineHub/CommandHelper/commit/90d3bc1b979bb5b2f2a3d8a32dec8cccd7502e75 90d3bc1b]
+| CommandHelper 3.3.2 Release
+| Bukkit 1.7.10 - 1.12.2
+|-
 | [http://builds.enginehub.org/job/commandhelper/10106 #3345-]
 | [https://github.com/EngineHub/CommandHelper/commit/40dc779ee121f771b1ac643e5d180365bec2ac80 40dc779e]
 | Updated several dependencies
