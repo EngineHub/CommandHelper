@@ -307,8 +307,11 @@ public class ObjectGenerator {
 				}
 			}
 			if(material == null || material.getName().equals("AIR")) {
-				throw new CREFormatException("Could not find legacy item material from \"" + mat + "\""
-						+ " with data \"" + data + "\"", t);
+				material = StaticLayer.GetMaterial(mat); // try modern material just in case
+				if(material == null) {
+					throw new CREFormatException("Could not find legacy item material from \"" + mat + "\""
+							+ " with data \"" + data + "\"", t);
+				}
 			}
 
 			// convert legacy meta to material
@@ -1190,8 +1193,7 @@ public class ObjectGenerator {
 					if(setype.equals("SWEEPING")) {
 						// data from 1.11.2, changed in 1.12
 						etype = StaticLayer.GetEnchantmentByName("SWEEPING_EDGE");
-					}
-					if(etype == null) {
+					} else {
 						throw new CREEnchantmentException("Unknown enchantment type: " + setype, t);
 					}
 				}
