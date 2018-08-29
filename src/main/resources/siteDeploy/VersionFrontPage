@@ -26,10 +26,9 @@ Remember that [https://github.com/EngineHub/commandhelper CommandHelper is open 
 
 How do you use CommandHelper? We have a set of easy to follow articles that you can read!
 
-* '''Want to setup simple aliases?''' Try the [[Beginner's_Guide|Beginner's Guide]]
+* '''Want to setup simple aliases?''' Try the [[Beginner's_Guide.html|Beginner's Guide]]
 * '''Want to script completely new features?''' Follow the ''Learning Trail'' at the bottom of the page.
 * '''Just want the API?''' See the [[API.html|API reference]].
-* '''Want an example configuration?''' See the [[CommandHelper/Example Script|this example]].
 
 Need more help? Visit the [http://forum.sk89q.com/forums/commandhelper.20/ forums], or chat with us on IRC in [http://skq.me/irc/irc.esper.net/commandhelper/ #CommandHelper on irc.esper.net].
 {{LearningTrail}}
@@ -51,13 +50,13 @@ If you create a syntax highlighter for your favorite text editor, put a link in 
 <br>
 <code>java -jar CommandHelper.jar syntax npp obsidian</code>
 <br>
-For more detailed instructions, [[SyntaxHighlighting|see here]]}}
+For more detailed instructions, [[SyntaxHighlighting.html|see here]]}}
 
 == CommandHelper ==
 
 === Feature requests and bugs ===
 
-Long-term planned features can be found on the [[/Roadmap/|roadmap]], and short term features can be found on the issue tracker. To request your own features or file a bug, use [http://youtrack.sk89q.com/issues/CMDHELPER our issue tracker]. Known bugs can be found on the issue tracker.
+Long-term planned features can be found on the [[Roadmap.html|roadmap]], and short term features can be found on the issue tracker. To request your own features or file a bug, use [http://youtrack.sk89q.com/issues/CMDHELPER our issue tracker]. Known bugs can be found on the issue tracker.
 
 If you would to request new functions, it is typically easy to add those, so please post your feature request in the issue tracker. If you happen to find a bug in the program, please let us know so we can fix it!
 
@@ -69,8 +68,6 @@ CommandHelper is turning into a large project, and I would love for more people 
 * '''Testing:''' While a large portion of CommandHelper has automated tests, there is still no substitute for running [http://builds.enginehub.org/ beta] versions of CommandHelper on a real server. It would be nice to know that several servers have put it through the ringer before a version goes to full release status.
 * '''Programming:''' From adding functions, to writing test cases, to working on the core aspects of CommandHelper, there are many different tasks to conquer.
 
-[[CommandHelper/Next Version|Next version notes staging area]]
-
 === Donations ===
 
 Do you like the plugin a lot? I certainly don't expect donations, and the any money I receive won't influence the amount of time I spend on the plugin (well, maybe it will), however I do spend a lot of time working on it, and I certainly won't turn anything down if you want to say thank you! If you reeeeally want a feature added to Command Helper, and you're willing to pay money, get in contact with me, and we can discuss contract work, and we can discuss your needs, but otherwise, donations are just a way for you to tell me thanks!
@@ -79,6 +76,6 @@ Do you like the plugin a lot? I certainly don't expect donations, and the any mo
 
 == Changelog ==
 
-For the full changelog, including the changelog for older releases, see [[Changelog|this page]]
+For the full changelog, including the changelog for older releases, see [[Changelog.html|this page]]
 
 __NOTOC__
