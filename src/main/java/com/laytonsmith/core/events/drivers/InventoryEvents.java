@@ -391,9 +391,9 @@ public class InventoryEvents {
 				}
 				map.put("inventory", items);
 
-				map.put("inventorytype", new CString(e.getInventory().getType().name(), t));
-				map.put("holder", InventoryManagement.GetInventoryHolder(e.getInventory(), t));
-				map.put("virtual", CBoolean.get(e.getInventory().getHolder() instanceof MCVirtualInventoryHolder));
+				map.put("inventorytype", new CString(inv.getType().name(), t));
+				map.put("holder", InventoryManagement.GetInventoryHolder(inv, t));
+				map.put("virtual", CBoolean.get(inv.getHolder() instanceof MCVirtualInventoryHolder));
 
 				return map;
 			} else {
@@ -473,9 +473,9 @@ public class InventoryEvents {
 				}
 				map.put("inventory", items);
 
-				map.put("inventorytype", new CString(e.getInventory().getType().name(), t));
-				map.put("holder", InventoryManagement.GetInventoryHolder(e.getInventory(), t));
-				map.put("virtual", CBoolean.get(e.getInventory().getHolder() instanceof MCVirtualInventoryHolder));
+				map.put("inventorytype", new CString(inv.getType().name(), t));
+				map.put("holder", InventoryManagement.GetInventoryHolder(inv, t));
+				map.put("virtual", CBoolean.get(inv.getHolder() instanceof MCVirtualInventoryHolder));
 
 				return map;
 			} else {
