@@ -1212,7 +1212,7 @@ public class World {
 		@Override
 		public String docs() {
 			return "array {world} Returns an associative array of all the info needed to duplicate the world."
-					+ " The keys are name, seed, environment, generator, worldtype, and sealevel.";
+					+ " The keys are name, seed, environment, generator, worldtype, sealevel and maxheight.";
 		}
 
 		@Override
