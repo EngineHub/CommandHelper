@@ -515,7 +515,7 @@ public class Minecraft {
 					+ "<ul><li>0 - Server name; the name of the server in server.properties.</li>"
 					+ "<li>1 - API version; The version of the plugin API this server is implementing.</li>"
 					+ "<li>2 - Server version; The bare version string of the server implementation.</li>"
-					+ "<li>3 - Allow flight; If true, Minecraft's inbuilt anti fly check is enabled.</li>"
+					+ "<li>3 - Allow flight; If true, Minecraft's inbuilt anti fly check is disabled.</li>"
 					+ "<li>4 - Allow nether; is true, the Nether dimension is enabled</li>"
 					+ "<li>5 - Allow end; if true, the End is enabled</li>"
 					+ "<li>6 - World container; The path to the world container.</li>"
