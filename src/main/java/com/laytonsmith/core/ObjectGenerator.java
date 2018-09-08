@@ -894,7 +894,7 @@ public class ObjectGenerator {
 				} else if(meta instanceof MCSkullMeta) {
 					if(ma.containsKey("owner")) {
 						Construct owner = ma.get("owner", t);
-						if(!(owner instanceof CNull)) {
+						if(!(owner instanceof CNull) && !owner.val().isEmpty()) {
 							((MCSkullMeta) meta).setOwner(owner.val());
 						}
 					}
