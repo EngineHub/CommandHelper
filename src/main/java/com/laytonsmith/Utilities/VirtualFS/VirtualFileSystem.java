@@ -119,7 +119,7 @@ public class VirtualFileSystem {
 					while(true) {
 						try {
 							fsSize = FileUtils.sizeOfDirectoryAsBigInteger(root);
-							//Sleep for a minute before running again. 
+							//Sleep for a minute before running again.
 							Thread.sleep(TimeUnit.MILLISECONDS.convert(1, TimeUnit.MINUTES));
 						} catch (InterruptedException ex) {
 							Logger.getLogger(VirtualFileSystem.class.getName()).log(Level.SEVERE, null, ex);
