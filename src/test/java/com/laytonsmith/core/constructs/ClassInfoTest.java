@@ -1,7 +1,7 @@
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.Common.ReflectionUtils;
+import com.methodscript.PureUtilities.Common.StringUtils;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.ObjectModifier;
 import com.laytonsmith.core.natives.interfaces.ObjectType;

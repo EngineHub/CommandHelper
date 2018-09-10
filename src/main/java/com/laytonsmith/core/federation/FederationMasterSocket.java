@@ -1,6 +1,6 @@
 package com.laytonsmith.core.federation;
 
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import java.io.BufferedInputStream;

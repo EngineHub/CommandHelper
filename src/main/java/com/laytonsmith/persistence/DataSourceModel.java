@@ -1,6 +1,6 @@
 package com.laytonsmith.persistence;
 
-import com.laytonsmith.PureUtilities.Pair;
+import com.methodscript.PureUtilities.Pair;
 import com.laytonsmith.core.GenericTreeNode;
 import java.util.ArrayList;
 import java.util.Arrays;

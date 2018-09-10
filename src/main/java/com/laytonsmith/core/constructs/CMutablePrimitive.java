@@ -1,6 +1,6 @@
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;

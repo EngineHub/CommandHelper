@@ -1,6 +1,6 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.Version;
 import com.laytonsmith.core.extensions.AbstractExtension;
 import com.laytonsmith.core.extensions.MSExtension;
 

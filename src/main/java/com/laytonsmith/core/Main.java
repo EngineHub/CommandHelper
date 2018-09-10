@@ -1,21 +1,21 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.ArgumentParser;
-import com.laytonsmith.PureUtilities.ArgumentSuite;
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
-import com.laytonsmith.PureUtilities.CommandExecutor;
-import com.laytonsmith.PureUtilities.Common.ArrayUtils;
-import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.Common.Misc;
-import com.laytonsmith.PureUtilities.Common.OSUtils;
-import com.laytonsmith.PureUtilities.Common.RSAEncrypt;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.SimpleVersion;
-import com.laytonsmith.PureUtilities.TermColors;
-import com.laytonsmith.PureUtilities.ZipReader;
+import com.methodscript.PureUtilities.ArgumentParser;
+import com.methodscript.PureUtilities.ArgumentSuite;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscoveryCache;
+import com.methodscript.PureUtilities.CommandExecutor;
+import com.methodscript.PureUtilities.Common.ArrayUtils;
+import com.methodscript.PureUtilities.Common.FileUtil;
+import com.methodscript.PureUtilities.Common.Misc;
+import com.methodscript.PureUtilities.Common.OSUtils;
+import com.methodscript.PureUtilities.Common.RSAEncrypt;
+import com.methodscript.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.DaemonManager;
+import com.methodscript.PureUtilities.SimpleVersion;
+import com.methodscript.PureUtilities.TermColors;
+import com.methodscript.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
@@ -632,10 +632,9 @@ public class Main {
 				} else {
 					// Relaunch the jar in a new process with the --run flag set,
 					// so that the process will be in its own subshell
-					CommandExecutor ce = new CommandExecutor("java -jar "
+					CommandExecutor.Start("java -jar "
 							+ ClassDiscovery.GetClassContainer(Main.class).getPath() + " "
 							+ StringUtils.Join(args, " ") + " --in-shell");
-					ce.start();
 					System.exit(0);
 				}
 			} else if(mode == SITE_DEPLOY) {

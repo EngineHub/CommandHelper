@@ -1,7 +1,7 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.Common.FileUtil;
+import com.methodscript.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.core.profiler.Profiler;
 import java.io.BufferedReader;
 import java.io.File;

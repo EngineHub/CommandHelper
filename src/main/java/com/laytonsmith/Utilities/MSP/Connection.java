@@ -15,7 +15,7 @@ public interface Connection {
 	 * connection, if isAttemptSecure returned true, and the connection is actually insecure, it MUST fail, prior to
 	 * transmission of any data.
 	 *
-	 * @throws com.laytonsmith.PureUtilities.MSP.Connection.ConnectionException
+	 * @throws com.methodscript.PureUtilities.MSP.Connection.ConnectionException
 	 */
 	public void connect() throws ConnectionException;
 
@@ -24,7 +24,7 @@ public interface Connection {
 	 * succeed even if the connection is insecure, and isAttemptSecure returned true. This should normally not be called
 	 * without a user's intervention however.
 	 *
-	 * @throws com.laytonsmith.PureUtilities.MSP.Connection.ConnectionException
+	 * @throws com.methodscript.PureUtilities.MSP.Connection.ConnectionException
 	 */
 	public void forceConnection() throws ConnectionException;
 

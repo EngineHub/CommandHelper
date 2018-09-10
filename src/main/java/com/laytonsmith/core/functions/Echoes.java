@@ -1,8 +1,8 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.TermColors;
+import com.methodscript.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;

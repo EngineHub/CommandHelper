@@ -1,7 +1,7 @@
 package com.laytonsmith.core.packetjumper;
 
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.Common.ReflectionUtils;
+import com.methodscript.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.constructs.Construct;
 import org.bukkit.Bukkit;

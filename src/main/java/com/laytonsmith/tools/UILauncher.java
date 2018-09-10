@@ -1,6 +1,6 @@
 package com.laytonsmith.tools;
 
-import com.laytonsmith.PureUtilities.Common.UIUtils;
+import com.methodscript.PureUtilities.Common.UIUtils;
 import com.laytonsmith.tools.docgen.DocGenUI;
 import com.laytonsmith.tools.pnviewer.PNViewer;
 import java.awt.event.ActionEvent;

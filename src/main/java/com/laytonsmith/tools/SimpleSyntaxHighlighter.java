@@ -1,8 +1,8 @@
 package com.laytonsmith.tools;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Color;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.Color;
+import com.methodscript.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.compiler.KeywordList;
 import com.laytonsmith.core.compiler.TokenStream;

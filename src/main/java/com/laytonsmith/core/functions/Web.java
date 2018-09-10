@@ -1,14 +1,14 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.PureUtilities.Web.Cookie;
-import com.laytonsmith.PureUtilities.Web.CookieJar;
-import com.laytonsmith.PureUtilities.Web.HTTPMethod;
-import com.laytonsmith.PureUtilities.Web.HTTPResponse;
-import com.laytonsmith.PureUtilities.Web.RequestSettings;
-import com.laytonsmith.PureUtilities.Web.WebUtility;
+import com.methodscript.PureUtilities.Common.StackTraceUtils;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.Version;
+import com.methodscript.PureUtilities.Web.Cookie;
+import com.methodscript.PureUtilities.Web.CookieJar;
+import com.methodscript.PureUtilities.Web.HTTPMethod;
+import com.methodscript.PureUtilities.Web.HTTPResponse;
+import com.methodscript.PureUtilities.Web.RequestSettings;
+import com.methodscript.PureUtilities.Web.WebUtility;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;

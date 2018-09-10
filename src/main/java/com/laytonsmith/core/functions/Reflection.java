@@ -1,10 +1,10 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
-import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
+import com.methodscript.PureUtilities.ClassLoading.DynamicEnum;
+import com.methodscript.PureUtilities.Common.ReflectionUtils;
+import com.methodscript.PureUtilities.Version;
 import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;

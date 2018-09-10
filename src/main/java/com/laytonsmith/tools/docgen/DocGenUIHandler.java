@@ -1,13 +1,13 @@
 package com.laytonsmith.tools.docgen;
 
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.Web.CookieJar;
-import com.laytonsmith.PureUtilities.Web.HTTPMethod;
-import com.laytonsmith.PureUtilities.Web.HTTPResponse;
-import com.laytonsmith.PureUtilities.Web.RequestSettings;
-import com.laytonsmith.PureUtilities.Web.WebUtility;
-import com.laytonsmith.PureUtilities.XMLDocument;
-import com.laytonsmith.PureUtilities.ZipReader;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.Web.CookieJar;
+import com.methodscript.PureUtilities.Web.HTTPMethod;
+import com.methodscript.PureUtilities.Web.HTTPResponse;
+import com.methodscript.PureUtilities.Web.RequestSettings;
+import com.methodscript.PureUtilities.Web.WebUtility;
+import com.methodscript.PureUtilities.XMLDocument;
+import com.methodscript.PureUtilities.ZipReader;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Function;

@@ -1,9 +1,9 @@
 package com.laytonsmith.tools.docgen;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.Common.ReflectionUtils;
+import com.methodscript.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.functions.Function;

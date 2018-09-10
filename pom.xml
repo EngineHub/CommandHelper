@@ -170,7 +170,7 @@
 		
 		<!-- Pure Utilities -->
 		<dependency>
-			<groupId>com.laytonsmith</groupId>
+			<groupId>com.methodscript</groupId>
 			<artifactId>pureutilities</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>

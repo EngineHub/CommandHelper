@@ -1,10 +1,10 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.XMLDocument;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.Common.FileUtil;
+import com.methodscript.PureUtilities.Common.ReflectionUtils;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.XMLDocument;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;

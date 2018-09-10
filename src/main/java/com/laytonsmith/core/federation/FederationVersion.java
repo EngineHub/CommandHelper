@@ -1,7 +1,7 @@
 package com.laytonsmith.core.federation;
 
-import com.laytonsmith.PureUtilities.SimpleVersion;
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.SimpleVersion;
+import com.methodscript.PureUtilities.Version;
 
 public enum FederationVersion implements Version {
 	V1_0_0("1.0.0"),;

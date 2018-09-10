@@ -1,6 +1,6 @@
 package com.laytonsmith.core.packetjumper;
 
-import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.Common.StringUtils;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;

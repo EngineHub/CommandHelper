@@ -1,6 +1,6 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;

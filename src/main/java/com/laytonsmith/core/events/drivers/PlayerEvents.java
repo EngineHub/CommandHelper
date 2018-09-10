@@ -1,7 +1,7 @@
 package com.laytonsmith.core.events.drivers;
 
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;

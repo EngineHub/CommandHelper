@@ -1,7 +1,7 @@
 package com.laytonsmith.core.events;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.abstraction;
 import com.laytonsmith.core.constructs.Target;

@@ -1,19 +1,19 @@
 package com.laytonsmith.tools;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.CommandExecutor;
-import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.Common.MutableObject;
-import com.laytonsmith.PureUtilities.Common.OSUtils;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.Common.WinRegistry;
-import com.laytonsmith.PureUtilities.LimitedQueue;
-import com.laytonsmith.PureUtilities.RunnableQueue;
-import com.laytonsmith.PureUtilities.SignalHandler;
-import com.laytonsmith.PureUtilities.SignalType;
-import com.laytonsmith.PureUtilities.Signals;
-import com.laytonsmith.PureUtilities.TermColors;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.CommandExecutor;
+import com.methodscript.PureUtilities.Common.FileUtil;
+import com.methodscript.PureUtilities.Common.MutableObject;
+import com.methodscript.PureUtilities.Common.OSUtils;
+import com.methodscript.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.Common.WinRegistry;
+import com.methodscript.PureUtilities.LimitedQueue;
+import com.methodscript.PureUtilities.RunnableQueue;
+import com.methodscript.PureUtilities.SignalHandler;
+import com.methodscript.PureUtilities.SignalType;
+import com.methodscript.PureUtilities.Signals;
+import com.methodscript.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.AbstractConvertor;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCColor;
@@ -91,13 +91,13 @@ import java.util.Queue;
 import java.util.Scanner;
 import java.util.Set;
 
-import static com.laytonsmith.PureUtilities.TermColors.BLUE;
-import static com.laytonsmith.PureUtilities.TermColors.RED;
-import static com.laytonsmith.PureUtilities.TermColors.YELLOW;
-import static com.laytonsmith.PureUtilities.TermColors.p;
-import static com.laytonsmith.PureUtilities.TermColors.pl;
-import static com.laytonsmith.PureUtilities.TermColors.reset;
-import com.laytonsmith.PureUtilities.ZipReader;
+import static com.methodscript.PureUtilities.TermColors.BLUE;
+import static com.methodscript.PureUtilities.TermColors.RED;
+import static com.methodscript.PureUtilities.TermColors.YELLOW;
+import static com.methodscript.PureUtilities.TermColors.p;
+import static com.methodscript.PureUtilities.TermColors.pl;
+import static com.methodscript.PureUtilities.TermColors.reset;
+import com.methodscript.PureUtilities.ZipReader;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
@@ -903,7 +903,7 @@ public final class Interpreter {
 
 						// 3. Execute the setup.exe file
 						File setup = new File(tmp.toFile(), "setup.exe");
-						int setupResult = new CommandExecutor(new String[]{setup.getAbsolutePath()}).start().waitFor();
+						int setupResult = CommandExecutor.Start(new String[]{setup.getAbsolutePath()}).waitFor();
 						if(setupResult != 0) {
 							StreamUtils.GetSystemErr().println("Setup failed to complete successfully (exit code " + setupResult + ")");
 							System.exit(setupResult);

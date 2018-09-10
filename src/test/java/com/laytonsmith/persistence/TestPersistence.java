@@ -1,10 +1,10 @@
 package com.laytonsmith.persistence;
 
-import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.Common.Misc;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.ZipReader;
+import com.methodscript.PureUtilities.Common.FileUtil;
+import com.methodscript.PureUtilities.Common.Misc;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.DaemonManager;
+import com.methodscript.PureUtilities.ZipReader;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import com.laytonsmith.persistence.io.ReadWriteFileConnection;
 import com.laytonsmith.testing.StaticTest;

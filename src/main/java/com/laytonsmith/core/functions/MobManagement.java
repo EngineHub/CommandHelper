@@ -1,7 +1,7 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCAgeable;
 import com.laytonsmith.abstraction.MCAnimalTamer;
 import com.laytonsmith.abstraction.MCEntity;

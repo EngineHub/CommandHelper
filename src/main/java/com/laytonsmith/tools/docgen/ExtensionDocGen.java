@@ -1,9 +1,9 @@
 package com.laytonsmith.tools.docgen;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
-import com.laytonsmith.PureUtilities.ClassLoading.DynamicClassLoader;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscoveryCache;
+import com.methodscript.PureUtilities.ClassLoading.DynamicClassLoader;
+import com.methodscript.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.core.events.Event;

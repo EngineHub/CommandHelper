@@ -129,7 +129,7 @@ Please include the following snippit under the <code>&lt;build&gt;&lt;plugins&gt
     </executions>
 
     <configuration>
-        <mainClass>com.laytonsmith.PureUtilities.ClassLoading.Annotations.CacheAnnotations</mainClass>
+        <mainClass>com.methodscript.PureUtilities.ClassLoading.Annotations.CacheAnnotations</mainClass>
 
         <arguments>
             <argument>${basedir}/target/classes</argument>

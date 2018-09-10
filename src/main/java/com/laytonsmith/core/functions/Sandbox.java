@@ -1,9 +1,9 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.TermColors;
-import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.PureUtilities.ZipReader;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.TermColors;
+import com.methodscript.PureUtilities.Version;
+import com.methodscript.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;

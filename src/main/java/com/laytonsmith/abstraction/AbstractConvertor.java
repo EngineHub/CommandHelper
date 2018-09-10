@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction;
 
-import com.laytonsmith.PureUtilities.DaemonManager;
+import com.methodscript.PureUtilities.DaemonManager;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;

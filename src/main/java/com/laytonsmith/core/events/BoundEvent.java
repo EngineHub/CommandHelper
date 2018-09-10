@@ -1,7 +1,7 @@
 package com.laytonsmith.core.events;
 
-import com.laytonsmith.PureUtilities.Common.DateUtils;
-import com.laytonsmith.PureUtilities.Pair;
+import com.methodscript.PureUtilities.Common.DateUtils;
+import com.methodscript.PureUtilities.Pair;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;

@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.methodscript.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCObjective;
 import com.laytonsmith.abstraction.MCScore;
 import com.laytonsmith.abstraction.MCScoreboard;

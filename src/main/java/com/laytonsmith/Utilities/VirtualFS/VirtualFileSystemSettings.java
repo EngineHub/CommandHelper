@@ -1,8 +1,8 @@
 package com.laytonsmith.Utilities.VirtualFS;
 
-import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.Common.FileUtil;
+import com.methodscript.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.Common.StringUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;

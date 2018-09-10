@@ -18,17 +18,16 @@
  */
 package com.laytonsmith.commandhelper;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
-import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.Common.OSUtils;
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.Common.TimeConversionUtil;
-import com.laytonsmith.PureUtilities.ExecutionQueue;
-import com.laytonsmith.PureUtilities.SimpleVersion;
-import com.laytonsmith.PureUtilities.TermColors;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscoveryCache;
+import com.methodscript.PureUtilities.Common.FileUtil;
+import com.methodscript.PureUtilities.Common.OSUtils;
+import com.methodscript.PureUtilities.Common.ReflectionUtils;
+import com.methodscript.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.ExecutionQueue;
+import com.methodscript.PureUtilities.SimpleVersion;
+import com.methodscript.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCCommand;
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -84,6 +83,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.entity.minecart.CommandMinecart;
@@ -570,7 +570,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				int interpreterTimeout = Prefs.InterpreterTimeout();
 				if(interpreterTimeout != 0) {
 					interpreterUnlockedUntil =
-							TimeConversionUtil.inMilliseconds(interpreterTimeout, TimeConversionUtil.TimeUnit.MINUTE)
+							TimeUnit.MILLISECONDS.convert(interpreterTimeout, TimeUnit.MINUTES)
 							+ System.currentTimeMillis();
 					sender.sendMessage("Interpreter mode unlocked for " + interpreterTimeout + " minute"
 							+ (interpreterTimeout == 1 ? "" : "s"));

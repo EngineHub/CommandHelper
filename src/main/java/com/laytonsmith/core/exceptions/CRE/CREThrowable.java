@@ -1,7 +1,7 @@
 package com.laytonsmith.core.exceptions.CRE;
 
-import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.Common.Annotations.ForceImplementation;
+import com.methodscript.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.constructs.CClassType;

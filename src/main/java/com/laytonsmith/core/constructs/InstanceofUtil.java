@@ -1,6 +1,6 @@
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.PureUtilities.Common.ClassUtils;
+import com.methodscript.PureUtilities.Common.ClassUtils;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.natives.interfaces.Mixed;

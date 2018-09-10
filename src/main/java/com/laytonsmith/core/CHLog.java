@@ -1,9 +1,9 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.Preferences;
-import com.laytonsmith.PureUtilities.Preferences.Preference;
+import com.methodscript.PureUtilities.Common.StackTraceUtils;
+import com.methodscript.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.Preferences;
+import com.methodscript.PureUtilities.Preferences.Preference;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.core.constructs.Target;
 import java.io.File;

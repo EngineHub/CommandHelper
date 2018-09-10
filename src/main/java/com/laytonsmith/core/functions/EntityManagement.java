@@ -1,8 +1,8 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.Vector3D;
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.Vector3D;
+import com.methodscript.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCArmorStand;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCChunk;

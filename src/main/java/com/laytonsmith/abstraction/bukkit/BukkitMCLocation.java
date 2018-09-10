@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.PureUtilities.Vector3D;
+import com.methodscript.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCLocation;

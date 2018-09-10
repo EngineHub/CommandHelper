@@ -1,9 +1,9 @@
 package com.laytonsmith.testing;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
-import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.RunnableQueue;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.Common.StackTraceUtils;
+import com.methodscript.PureUtilities.DaemonManager;
+import com.methodscript.PureUtilities.RunnableQueue;
 import com.laytonsmith.abstraction.AbstractConvertor;
 import com.laytonsmith.abstraction.Convertor;
 import com.laytonsmith.abstraction.ConvertorHelper;

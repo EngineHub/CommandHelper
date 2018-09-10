@@ -1,6 +1,6 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.Common.Annotations.NonInheritImplements;
+import com.methodscript.PureUtilities.Common.Annotations.NonInheritImplements;
 
 
 /**

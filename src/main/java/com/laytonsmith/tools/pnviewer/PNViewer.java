@@ -1,15 +1,15 @@
 package com.laytonsmith.tools.pnviewer;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Common.ArrayUtils;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.Utilities.UI.TextDialog;
-import com.laytonsmith.PureUtilities.Common.AutoFlushObjectOutputStream;
-import com.laytonsmith.PureUtilities.Common.MutableObject;
-import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.Common.TemplateBuilder;
-import com.laytonsmith.PureUtilities.Common.UIUtils;
+import com.methodscript.PureUtilities.Common.AutoFlushObjectOutputStream;
+import com.methodscript.PureUtilities.Common.MutableObject;
+import com.methodscript.PureUtilities.Common.StackTraceUtils;
+import com.methodscript.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.Common.TemplateBuilder;
+import com.methodscript.PureUtilities.Common.UIUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.constructs.CNull;

@@ -1,6 +1,6 @@
 package com.laytonsmith.core.compiler;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

@@ -1,6 +1,6 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCCommand;
 import com.laytonsmith.abstraction.MCCommandMap;

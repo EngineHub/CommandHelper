@@ -1,6 +1,6 @@
 package com.laytonsmith.core.extensions;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.core.AliasCore;
 

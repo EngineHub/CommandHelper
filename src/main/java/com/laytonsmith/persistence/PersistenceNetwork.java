@@ -1,7 +1,7 @@
 package com.laytonsmith.persistence;
 
-import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.DaemonManager;
+import com.methodscript.PureUtilities.Common.FileUtil;
+import com.methodscript.PureUtilities.DaemonManager;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.File;
 import java.io.IOException;

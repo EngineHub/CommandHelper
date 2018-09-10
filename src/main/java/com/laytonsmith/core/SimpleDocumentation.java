@@ -1,6 +1,6 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.Version;
 
 /**
  * Elements implementing this provide simple documentation data to the docgen, not complex data.

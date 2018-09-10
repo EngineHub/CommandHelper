@@ -1,7 +1,7 @@
 package com.laytonsmith.tools;
 
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.ZipReader;
+import com.methodscript.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.ZipReader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;

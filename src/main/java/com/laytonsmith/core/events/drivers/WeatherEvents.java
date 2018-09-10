@@ -1,6 +1,6 @@
 package com.laytonsmith.core.events.drivers;
 
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.events.MCLightningStrikeEvent;
 import com.laytonsmith.abstraction.events.MCThunderChangeEvent;

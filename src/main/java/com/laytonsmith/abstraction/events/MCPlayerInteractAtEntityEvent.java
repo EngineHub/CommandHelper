@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction.events;
 
-import com.laytonsmith.PureUtilities.Vector3D;
+import com.methodscript.PureUtilities.Vector3D;
 
 public interface MCPlayerInteractAtEntityEvent extends MCPlayerInteractEntityEvent {
 

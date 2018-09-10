@@ -1,8 +1,8 @@
 package com.laytonsmith.persistence;
 
-import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.Pair;
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.DaemonManager;
+import com.methodscript.PureUtilities.Pair;
+import com.methodscript.PureUtilities.Version;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;

@@ -1,6 +1,6 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.methodscript.PureUtilities.Common.FileUtil;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.After;

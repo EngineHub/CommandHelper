@@ -1,9 +1,9 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
-import com.laytonsmith.PureUtilities.Common.Annotations.CheckOverrides;
-import com.laytonsmith.PureUtilities.Common.ClassUtils;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
+import com.methodscript.PureUtilities.Common.Annotations.CheckOverrides;
+import com.methodscript.PureUtilities.Common.ClassUtils;
 import com.laytonsmith.annotations.mobject;
 import com.laytonsmith.core.mobjects.MObject;
 import java.lang.reflect.Modifier;

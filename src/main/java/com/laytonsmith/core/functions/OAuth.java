@@ -1,12 +1,12 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.Common.MutableObject;
-import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.PureUtilities.Web.HTTPMethod;
-import com.laytonsmith.PureUtilities.Web.HTTPResponse;
-import com.laytonsmith.PureUtilities.Web.RequestSettings;
-import com.laytonsmith.PureUtilities.Web.WebUtility;
+import com.methodscript.PureUtilities.Common.MutableObject;
+import com.methodscript.PureUtilities.DaemonManager;
+import com.methodscript.PureUtilities.Version;
+import com.methodscript.PureUtilities.Web.HTTPMethod;
+import com.methodscript.PureUtilities.Web.HTTPResponse;
+import com.methodscript.PureUtilities.Web.RequestSettings;
+import com.methodscript.PureUtilities.Web.WebUtility;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;

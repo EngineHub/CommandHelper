@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
-import com.laytonsmith.PureUtilities.Vector3D;
+import com.methodscript.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;

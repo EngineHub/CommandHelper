@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction.enums;
 
-import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
+import com.methodscript.PureUtilities.ClassLoading.DynamicEnum;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.annotations.MEnum;

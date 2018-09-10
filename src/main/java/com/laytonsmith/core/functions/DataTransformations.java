@@ -1,7 +1,7 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.PureUtilities.XMLDocument;
+import com.methodscript.PureUtilities.Version;
+import com.methodscript.PureUtilities.XMLDocument;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;

@@ -1,6 +1,6 @@
 package com.laytonsmith.core.extensions;
 
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.Version;
 import com.laytonsmith.core.AliasCore;
 
 import java.io.File;

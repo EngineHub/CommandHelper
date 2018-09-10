@@ -1,7 +1,7 @@
 package com.laytonsmith.abstraction;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
 import com.laytonsmith.annotations.abstractionenum;
 import com.laytonsmith.core.Prefs;

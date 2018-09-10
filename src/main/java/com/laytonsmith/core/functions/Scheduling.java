@@ -1,11 +1,11 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.Common.ArrayUtils;
-import com.laytonsmith.PureUtilities.Common.MutableObject;
-import com.laytonsmith.PureUtilities.Common.Range;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.Common.ArrayUtils;
+import com.methodscript.PureUtilities.Common.MutableObject;
+import com.methodscript.PureUtilities.Common.Range;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.DaemonManager;
+import com.methodscript.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;

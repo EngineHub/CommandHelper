@@ -1,7 +1,7 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.SimpleVersion;
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.SimpleVersion;
+import com.methodscript.PureUtilities.Version;
 
 /**
  *

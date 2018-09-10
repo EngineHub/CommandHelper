@@ -1,7 +1,7 @@
 package com.laytonsmith.persistence;
 
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.DaemonManager;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.DaemonManager;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.persistence.io.ConnectionMixin;

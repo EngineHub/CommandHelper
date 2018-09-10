@@ -1,7 +1,7 @@
 package com.laytonsmith.core.extensions;
 
-import com.laytonsmith.PureUtilities.Common.ClassUtils;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.Common.ClassUtils;
+import com.methodscript.PureUtilities.Common.StreamUtils;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 import java.util.logging.Level;

@@ -1,11 +1,11 @@
 package com.laytonsmith.core.profiler;
 
-import com.laytonsmith.PureUtilities.Common.DateUtils;
-import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.ExecutionQueue;
-import com.laytonsmith.PureUtilities.Preferences;
-import com.laytonsmith.PureUtilities.Preferences.Preference;
+import com.methodscript.PureUtilities.Common.DateUtils;
+import com.methodscript.PureUtilities.Common.FileUtil;
+import com.methodscript.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.ExecutionQueue;
+import com.methodscript.PureUtilities.Preferences;
+import com.methodscript.PureUtilities.Preferences.Preference;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.Static;

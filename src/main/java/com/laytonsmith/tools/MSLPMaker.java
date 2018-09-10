@@ -1,12 +1,12 @@
 package com.laytonsmith.tools;
 
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import static com.laytonsmith.PureUtilities.TermColors.GREEN;
-import static com.laytonsmith.PureUtilities.TermColors.RED;
-import static com.laytonsmith.PureUtilities.TermColors.pl;
-import static com.laytonsmith.PureUtilities.TermColors.prompt;
-import static com.laytonsmith.PureUtilities.TermColors.reset;
-import com.laytonsmith.PureUtilities.ZipMaker;
+import com.methodscript.PureUtilities.Common.StreamUtils;
+import static com.methodscript.PureUtilities.TermColors.GREEN;
+import static com.methodscript.PureUtilities.TermColors.RED;
+import static com.methodscript.PureUtilities.TermColors.pl;
+import static com.methodscript.PureUtilities.TermColors.prompt;
+import static com.methodscript.PureUtilities.TermColors.reset;
+import com.methodscript.PureUtilities.ZipMaker;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Script;

@@ -1,8 +1,8 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.Preferences;
-import com.laytonsmith.PureUtilities.Preferences.Preference;
-import com.laytonsmith.PureUtilities.TermColors;
+import com.methodscript.PureUtilities.Preferences;
+import com.methodscript.PureUtilities.Preferences.Preference;
+import com.methodscript.PureUtilities.TermColors;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.methodscript.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCCommand;
 import com.laytonsmith.abstraction.MCCommandMap;
 import java.util.ArrayList;

@@ -1,13 +1,13 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.CommandExecutor;
-import com.laytonsmith.PureUtilities.Common.ArrayUtils;
-import com.laytonsmith.PureUtilities.Common.MutableObject;
-import com.laytonsmith.PureUtilities.Common.OSUtils;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.TermColors;
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.CommandExecutor;
+import com.methodscript.PureUtilities.Common.ArrayUtils;
+import com.methodscript.PureUtilities.Common.MutableObject;
+import com.methodscript.PureUtilities.Common.OSUtils;
+import com.methodscript.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.TermColors;
+import com.methodscript.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
@@ -984,11 +984,12 @@ public class Cmdline {
 				exit = null;
 				subshell = false;
 			}
-			final CommandExecutor cmd = new CommandExecutor(command);
-			cmd.setWorkingDir(workingDir);
+			final CommandExecutor.CommandExecutorBuilder.CommandExecutorBuilderOptional bldr = 
+					new CommandExecutor.CommandExecutorBuilder().setArgs(command);
+			bldr.setWorkingDir(workingDir);
 			final MutableObject<StringBuilder> sbout = new MutableObject(new StringBuilder());
 			final MutableObject<StringBuilder> sberr = new MutableObject(new StringBuilder());
-			cmd.setSystemOut(new OutputStream() {
+			bldr.setSystemOut(new OutputStream() {
 				@Override
 				public void write(int b) throws IOException {
 					if(stdout == null) {
@@ -1014,7 +1015,7 @@ public class Cmdline {
 					}
 				}
 			});
-			cmd.setSystemErr(new OutputStream() {
+			bldr.setSystemErr(new OutputStream() {
 				@Override
 				public void write(int b) throws IOException {
 					if(stderr == null) {
@@ -1040,6 +1041,7 @@ public class Cmdline {
 					}
 				}
 			});
+			CommandExecutor cmd = bldr.build();
 			try {
 				cmd.start();
 			} catch (IOException ex) {
@@ -1189,7 +1191,8 @@ public class Cmdline {
 					}
 				}
 			}
-			CommandExecutor cmd = new CommandExecutor(command);
+			CommandExecutor.CommandExecutorBuilder.CommandExecutorBuilderOptional bldr = 
+					new CommandExecutor.CommandExecutorBuilder().setArgs(command);
 			final StringBuilder sout = new StringBuilder();
 			OutputStream out = new BufferedOutputStream(new OutputStream() {
 
@@ -1206,7 +1209,8 @@ public class Cmdline {
 					serr.append((char) b);
 				}
 			});
-			cmd.setSystemOut(out).setSystemErr(err).setWorkingDir(workingDir);
+			bldr.setSystemOut(out).setSystemErr(err).setWorkingDir(workingDir);
+			CommandExecutor cmd = bldr.build();
 			try {
 				int exitCode = cmd.start().waitFor();
 				try {

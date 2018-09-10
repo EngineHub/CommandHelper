@@ -1,8 +1,8 @@
 package com.laytonsmith.persistence.io;
 
-import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.ZipReader;
+import com.methodscript.PureUtilities.Common.FileUtil;
+import com.methodscript.PureUtilities.DaemonManager;
+import com.methodscript.PureUtilities.ZipReader;
 import com.laytonsmith.persistence.ReadOnlyException;
 import java.io.File;
 import java.io.FileNotFoundException;

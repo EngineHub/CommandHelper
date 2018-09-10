@@ -1,10 +1,10 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.Common.DateUtils;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.SimpleVersion;
-import com.laytonsmith.PureUtilities.TermColors;
-import com.laytonsmith.PureUtilities.XMLDocument;
+import com.methodscript.PureUtilities.Common.DateUtils;
+import com.methodscript.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.SimpleVersion;
+import com.methodscript.PureUtilities.TermColors;
+import com.methodscript.PureUtilities.XMLDocument;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;

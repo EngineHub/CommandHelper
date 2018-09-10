@@ -1,8 +1,8 @@
 package com.laytonsmith.persistence;
 
-import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.PropertiesManager;
+import com.methodscript.PureUtilities.Common.FileUtil;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.PropertiesManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;

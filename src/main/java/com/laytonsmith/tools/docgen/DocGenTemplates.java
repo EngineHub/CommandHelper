@@ -1,14 +1,14 @@
 package com.laytonsmith.tools.docgen;
 
-import com.laytonsmith.PureUtilities.ArgumentParser;
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Common.ArrayUtils;
-import com.laytonsmith.PureUtilities.Common.HTMLUtils;
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.ArgumentParser;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.Common.ArrayUtils;
+import com.methodscript.PureUtilities.Common.HTMLUtils;
+import com.methodscript.PureUtilities.Common.ReflectionUtils;
+import com.methodscript.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.Common.StringUtils;
 import com.laytonsmith.Utilities.MSP.Burst;
-import com.laytonsmith.PureUtilities.TermColors;
+import com.methodscript.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.annotations.typeof;

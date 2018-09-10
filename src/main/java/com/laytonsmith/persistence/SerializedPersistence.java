@@ -1,10 +1,10 @@
 package com.laytonsmith.persistence;
 
-import com.laytonsmith.PureUtilities.Common.ArrayUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.MemoryMapFileUtil;
-import com.laytonsmith.PureUtilities.RunnableQueue;
+import com.methodscript.PureUtilities.Common.ArrayUtils;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.DaemonManager;
+import com.methodscript.PureUtilities.MemoryMapFileUtil;
+import com.methodscript.PureUtilities.RunnableQueue;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;

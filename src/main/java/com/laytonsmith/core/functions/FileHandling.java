@@ -1,10 +1,10 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.RunnableQueue;
-import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.PureUtilities.ZipReader;
+import com.methodscript.PureUtilities.Common.FileUtil;
+import com.methodscript.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.RunnableQueue;
+import com.methodscript.PureUtilities.Version;
+import com.methodscript.PureUtilities.ZipReader;
 import com.laytonsmith.Utilities.SSHWrapper;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;

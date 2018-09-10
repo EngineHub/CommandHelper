@@ -1,6 +1,6 @@
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.Version;
 import com.laytonsmith.core.constructs.Construct.ConstructType;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 

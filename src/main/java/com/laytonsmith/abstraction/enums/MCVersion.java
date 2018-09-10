@@ -1,7 +1,7 @@
 package com.laytonsmith.abstraction.enums;
 
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.Version;
 
 /**
  * Created by jb_aero on 3/17/2015.

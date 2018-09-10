@@ -1,8 +1,8 @@
 package com.laytonsmith.tools;
 
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.TermColors;
+import com.methodscript.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.TermColors;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;

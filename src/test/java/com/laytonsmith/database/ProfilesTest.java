@@ -1,7 +1,7 @@
 package com.laytonsmith.database;
 
 import com.laytonsmith.core.Profiles;
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

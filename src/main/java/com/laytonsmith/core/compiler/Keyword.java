@@ -1,6 +1,6 @@
 package com.laytonsmith.core.compiler;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CFunction;

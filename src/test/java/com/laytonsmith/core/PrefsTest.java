@@ -1,7 +1,7 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.Preferences;
-import com.laytonsmith.PureUtilities.Preferences.Type;
+import com.methodscript.PureUtilities.Preferences;
+import com.methodscript.PureUtilities.Preferences.Type;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

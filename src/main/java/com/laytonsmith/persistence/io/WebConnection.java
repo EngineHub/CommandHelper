@@ -1,7 +1,7 @@
 package com.laytonsmith.persistence.io;
 
-import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.Web.WebUtility;
+import com.methodscript.PureUtilities.DaemonManager;
+import com.methodscript.PureUtilities.Web.WebUtility;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;

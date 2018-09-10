@@ -30,8 +30,8 @@ public class Marquee {
 	}
 
 	// TODO: This should be removed in favor of a common runtime environment stash.
-	private static final Map<String, com.laytonsmith.PureUtilities.Marquee> MARQUEE_MAP =
-			new HashMap<String, com.laytonsmith.PureUtilities.Marquee>();
+	private static final Map<String, com.methodscript.PureUtilities.Marquee> MARQUEE_MAP =
+			new HashMap<String, com.methodscript.PureUtilities.Marquee>();
 
 	@api
 	public static class marquee extends AbstractFunction {
@@ -73,10 +73,10 @@ public class Marquee {
 			} else {
 				throw new CRECastException("Expected argument " + (4 + offset + 1) + " to be a closure, but was not.", t);
 			}
-			final com.laytonsmith.PureUtilities.Marquee m = new com.laytonsmith.PureUtilities.Marquee(text, stringWidth, delayTime, new com.laytonsmith.PureUtilities.Marquee.MarqueeCallback() {
+			final com.methodscript.PureUtilities.Marquee m = new com.methodscript.PureUtilities.Marquee(text, stringWidth, delayTime, new com.methodscript.PureUtilities.Marquee.MarqueeCallback() {
 
 				@Override
-				public void stringPortion(final String portion, com.laytonsmith.PureUtilities.Marquee m) {
+				public void stringPortion(final String portion, com.methodscript.PureUtilities.Marquee m) {
 					try {
 						StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
 

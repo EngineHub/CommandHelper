@@ -1,8 +1,8 @@
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
-import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
+import com.methodscript.PureUtilities.Common.Annotations.InterfaceRunnerFor;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.MixedInterfaceRunner;

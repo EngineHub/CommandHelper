@@ -1,7 +1,7 @@
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.PureUtilities.Sizes;
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.Sizes;
+import com.methodscript.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;

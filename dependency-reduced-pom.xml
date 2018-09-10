@@ -420,7 +420,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<mainClass>com.laytonsmith.PureUtilities.ClassLoading.Annotations.CacheAnnotations</mainClass>
+					<mainClass>com.methodscript.PureUtilities.ClassLoading.Annotations.CacheAnnotations</mainClass>
 					<arguments>
 						<argument>${basedir}/target/classes</argument>
 						<argument>${basedir}/target/classes</argument>
@@ -443,7 +443,7 @@
 				<configuration>
 					<outputDirectory>src/main/generated</outputDirectory>
 					<processors>
-						<processor>com.laytonsmith.PureUtilities.Common.Annotations.CheckOverrides</processor>
+						<processor>com.methodscript.PureUtilities.Common.Annotations.CheckOverrides</processor>
 						<processor>com.laytonsmith.core.extensions.ExtensionAnnotationProcessor</processor>
 						<processor>com.laytonsmith.core.MObjectAnnotationProcessor</processor>
 					</processors>

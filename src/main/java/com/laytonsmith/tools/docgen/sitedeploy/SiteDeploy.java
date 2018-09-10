@@ -1,19 +1,19 @@
 package com.laytonsmith.tools.docgen.sitedeploy;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.CommandExecutor;
-import com.laytonsmith.PureUtilities.Common.GNUErrorMessageFormat;
-import com.laytonsmith.PureUtilities.Common.HTMLUtils;
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.Preferences;
-import com.laytonsmith.PureUtilities.Web.HTTPMethod;
-import com.laytonsmith.PureUtilities.Web.HTTPResponse;
-import com.laytonsmith.PureUtilities.Web.RequestSettings;
-import com.laytonsmith.PureUtilities.Web.WebUtility;
-import com.laytonsmith.PureUtilities.ZipReader;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.CommandExecutor;
+import com.methodscript.PureUtilities.Common.GNUErrorMessageFormat;
+import com.methodscript.PureUtilities.Common.HTMLUtils;
+import com.methodscript.PureUtilities.Common.ReflectionUtils;
+import com.methodscript.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.DaemonManager;
+import com.methodscript.PureUtilities.Preferences;
+import com.methodscript.PureUtilities.Web.HTTPMethod;
+import com.methodscript.PureUtilities.Web.HTTPResponse;
+import com.methodscript.PureUtilities.Web.RequestSettings;
+import com.methodscript.PureUtilities.Web.WebUtility;
+import com.methodscript.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.api;
@@ -426,8 +426,10 @@ public final class SiteDeploy {
 				List<String> args = new ArrayList<>();
 				args.add(finalizerScript.getCanonicalPath());
 				args.addAll(filesChanged);
-				CommandExecutor exec = new CommandExecutor(args.toArray(new String[args.size()]));
-				exec.setSystemInputsAndOutputs();
+				CommandExecutor exec = new CommandExecutor.CommandExecutorBuilder()
+						.setArgs(args.toArray(new String[args.size()]))
+						.setSystemInputsAndOutputs()
+						.build();
 				exec.start();
 				exec.waitFor();
 			}

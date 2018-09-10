@@ -1,7 +1,7 @@
 package com.laytonsmith.core.taskmanager;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.Version;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Documentation;
 import java.net.URL;

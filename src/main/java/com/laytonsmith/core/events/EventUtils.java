@@ -1,6 +1,6 @@
 package com.laytonsmith.core.events;
 
-import com.laytonsmith.PureUtilities.TermColors;
+import com.methodscript.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.core.Static;

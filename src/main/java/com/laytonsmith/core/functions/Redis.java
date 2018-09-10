@@ -1,6 +1,6 @@
 package com.laytonsmith.core.functions;
 
-//import com.laytonsmith.PureUtilities.Version;
+//import com.methodscript.PureUtilities.Version;
 //import com.laytonsmith.annotations.api;
 //import com.laytonsmith.core.CHVersion;
 //import com.laytonsmith.core.constructs.Construct;

@@ -1,7 +1,7 @@
 package com.laytonsmith.core.natives.interfaces;
 
-import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.Common.Annotations.InterfaceRunnerFor;
+import com.methodscript.PureUtilities.Version;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.constructs.CClassType;
 import java.util.EnumSet;

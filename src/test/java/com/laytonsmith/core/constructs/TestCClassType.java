@@ -1,8 +1,8 @@
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.Common.ReflectionUtils;
+import com.methodscript.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.testing.StaticTest;

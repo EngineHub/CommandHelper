@@ -1,7 +1,7 @@
 package com.laytonsmith.core.natives.interfaces;
 
-import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
-import com.laytonsmith.PureUtilities.Version;
+import com.methodscript.PureUtilities.Common.Annotations.ForceImplementation;
+import com.methodscript.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.SimpleDocumentation;

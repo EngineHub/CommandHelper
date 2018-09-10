@@ -1,7 +1,7 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.FileLocations;
+import com.methodscript.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.FileLocations;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.core.extensions.Extension;
 import java.io.File;

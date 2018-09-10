@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction;
 
-import com.laytonsmith.PureUtilities.DaemonManager;
+import com.methodscript.PureUtilities.DaemonManager;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCPatternShape;

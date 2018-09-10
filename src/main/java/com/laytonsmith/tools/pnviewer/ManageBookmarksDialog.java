@@ -1,6 +1,6 @@
 package com.laytonsmith.tools.pnviewer;
 
-import com.laytonsmith.PureUtilities.Common.UIUtils;
+import com.methodscript.PureUtilities.Common.UIUtils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;

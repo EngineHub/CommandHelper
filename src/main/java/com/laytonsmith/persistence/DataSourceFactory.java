@@ -1,6 +1,6 @@
 package com.laytonsmith.persistence;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;

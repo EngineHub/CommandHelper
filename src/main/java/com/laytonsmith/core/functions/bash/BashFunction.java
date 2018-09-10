@@ -1,6 +1,6 @@
 package com.laytonsmith.core.functions.bash;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.functions.CompiledFunction;

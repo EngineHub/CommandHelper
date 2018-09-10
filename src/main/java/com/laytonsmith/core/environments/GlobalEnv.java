@@ -1,8 +1,8 @@
 package com.laytonsmith.core.environments;
 
-import com.laytonsmith.PureUtilities.Common.MutableObject;
-import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.ExecutionQueue;
+import com.methodscript.PureUtilities.Common.MutableObject;
+import com.methodscript.PureUtilities.DaemonManager;
+import com.methodscript.PureUtilities.ExecutionQueue;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Profiles;

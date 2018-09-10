@@ -1,6 +1,6 @@
 package com.laytonsmith.core.compiler;
 
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.io.File;

@@ -1,9 +1,8 @@
 package com.laytonsmith.Utilities.VirtualFS;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.Common.TimeConversionUtil;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
+import com.methodscript.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.Utilities.VirtualFS.VirtualFileSystemSettings.VirtualFileSystemSetting;
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
@@ -120,7 +120,8 @@ public class VirtualFileSystem {
 						try {
 							fsSize = FileUtils.sizeOfDirectoryAsBigInteger(root);
 							//Sleep for a minute before running again.
-							Thread.sleep(TimeConversionUtil.inMilliseconds(1, TimeConversionUtil.TimeUnit.MINUTE));
+							
+							Thread.sleep(TimeUnit.MILLISECONDS.convert(1, TimeUnit.MINUTES));
 						} catch (InterruptedException ex) {
 							Logger.getLogger(VirtualFileSystem.class.getName()).log(Level.SEVERE, null, ex);
 						}

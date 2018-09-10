@@ -1,9 +1,9 @@
 package com.laytonsmith.Utilities;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Common.Annotations.AnnotationChecks;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.methodscript.PureUtilities.ClassLoading.ClassDiscovery;
+import com.methodscript.PureUtilities.Common.Annotations.AnnotationChecks;
+import com.methodscript.PureUtilities.Common.StreamUtils;
+import com.methodscript.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.typeof;
@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
+import com.methodscript.PureUtilities.Common.Annotations.InterfaceRunnerFor;
 import com.laytonsmith.core.natives.interfaces.MixedInterfaceRunner;
 
 /**
