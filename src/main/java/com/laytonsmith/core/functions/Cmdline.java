@@ -984,7 +984,7 @@ public class Cmdline {
 				exit = null;
 				subshell = false;
 			}
-			final CommandExecutor.CommandExecutorBuilder.CommandExecutorBuilderOptional bldr = 
+			final CommandExecutor.CommandExecutorBuilder.CommandExecutorBuilderOptional bldr =
 					new CommandExecutor.CommandExecutorBuilder().setArgs(command);
 			bldr.setWorkingDir(workingDir);
 			final MutableObject<StringBuilder> sbout = new MutableObject(new StringBuilder());
@@ -1191,7 +1191,7 @@ public class Cmdline {
 					}
 				}
 			}
-			CommandExecutor.CommandExecutorBuilder.CommandExecutorBuilderOptional bldr = 
+			CommandExecutor.CommandExecutorBuilder.CommandExecutorBuilderOptional bldr =
 					new CommandExecutor.CommandExecutorBuilder().setArgs(command);
 			final StringBuilder sout = new StringBuilder();
 			OutputStream out = new BufferedOutputStream(new OutputStream() {
