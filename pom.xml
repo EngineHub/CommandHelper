@@ -532,7 +532,7 @@
 									<include>javax.activation:activation:jar:*</include>
 									<include>postgresql:postgresql:jar:*</include>
 									<include>org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:jar:*</include>
-									<include>com.laytonsmith:pureutilities:jar:*</include>
+									<include>com.methodscript:pureutilities:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -728,7 +728,7 @@
 									</includes>
 								</filter>
 								<filter>
-									<artifact>com.laytonsmith:pureutilities:jar:*</artifact>
+									<artifact>com.methodscript:pureutilities:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
