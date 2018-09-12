@@ -350,17 +350,6 @@
 			<scope>test</scope>
 		</dependency>-->
 		<dependency>
-			<groupId>org.java.net.substance</groupId>
-			<artifactId>substance</artifactId>
-			<version>6.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>asm</groupId>
-					<artifactId>asm-all</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 			<type>jar</type>
