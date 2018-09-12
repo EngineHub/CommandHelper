@@ -16,6 +16,8 @@ import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.Keyword;
+import com.laytonsmith.core.compiler.KeywordList;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
@@ -31,6 +33,7 @@ import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -47,6 +50,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -97,7 +101,10 @@ public class Reflection {
 					+ "<tr><td>col</td><td></td><td>The current column number</td></tr>"
 					+ "<tr><td>datasources</td><td></td><td>An array of data source protocols available</td></tr>"
 					+ "<tr><td>enum</td><td>[enum name]</td><td>An array of enum names, or if one is provided, a list of all"
-					+ " the values in that enum</td></tr>"
+					+ " the values in that enum</td>"
+					+ "<tr><td>keywords</td><td>[keyword name]</td><td>Lists the keywords, if no parameter is provided, otherwise"
+					+ " provides the documentation for the specified keyword</td>"
+					+ "</tr>"
 					+ "</table>";
 			//+ "<tr><td></td><td></td><td></td></tr>"
 		}
@@ -195,6 +202,24 @@ public class Reflection {
 					}
 				}
 				return a;
+			} else if("keywords".equalsIgnoreCase(param)) {
+				if(args.length == 1) {
+					CArray a = new CArray(t);
+					List<Keyword> l = new ArrayList<>(KeywordList.getKeywordList());
+					l.forEach(new Consumer<Keyword>() {
+						@Override
+						public void accept(Keyword t) {
+							a.push(new CString(t.getKeywordName(), Target.UNKNOWN), Target.UNKNOWN);
+						}
+					});
+					return new ArrayHandling.array_sort().exec(t, env, a);
+				} else if(args.length == 2) {
+					Keyword k = KeywordList.getKeywordByName(args[1].val());
+					if(k == null) {
+						throw new CREIllegalArgumentException(args[1].val() + " is not a valid keyword", t);
+					}
+					return new CString(k.docs(), Target.UNKNOWN);
+				}
 			}
 
 			throw new CREFormatException("The arguments passed to " + getName() + " are incorrect. Please check them and try again.", t);
