@@ -2,6 +2,7 @@ CommandHelper
 =============
 
 [![Build Status](https://travis-ci.org/EngineHub/CommandHelper.svg?branch=master)](https://travis-ci.org/EngineHub/CommandHelper)
+[![Known Vulnerabilities](https://snyk.io/test/github/EngineHub/CommandHelper/badge.svg)](https://snyk.io/test/github/EngineHub/CommandHelper)
 
 CommandHelper adds simple command aliases, complex macros,
 and the ability to script your own commands and events into Minecraft,
