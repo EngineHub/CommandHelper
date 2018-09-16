@@ -593,7 +593,7 @@ public class BlockEvents {
 					+ " | ignitingblock: the block's type, if caused by block"
 					+ " | ignitingblocklocation: the block's location that ignited"
 					+ " | location: the locationArray that got ignited"
-					+ " | cause: the cause of ignition, one of: " + StringUtils.Join(MCIgniteCause.values(), ", ") + "}"
+					+ " | cause: the cause of ignition, one of " + StringUtils.Join(MCIgniteCause.values(), ", ") + "}"
 					+ "{}"
 					+ "{}";
 		}
@@ -1294,7 +1294,7 @@ public class BlockEvents {
 		public String docs() {
 			return "{}"
 					+ " This event is called when a noteblock is activated via player interaction or redstone."
-					+ " The instrument may be one of: " + StringUtils.Join(MCInstrument.values(), ", ", ", or ") + "."
+					+ " The instrument may be one of " + StringUtils.Join(MCInstrument.values(), ", ", ", or ") + "."
 					+ " {location: The location of the noteblock | instrument: The name of the sound"
 					+ " | tone: The note played (eg. F#) | octave: The octave the tone was played (0 - 2)}"
 					+ " {}"
