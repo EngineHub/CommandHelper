@@ -304,11 +304,12 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "string {x, y, z, [world] | locationArray, [world]} Gets the id of the block at the coordinates. The format"
-					+ " of the return will be x:y where x is the id of the block, and y is the meta data for the block."
-					+ " All blocks will return in this format, but blocks that don't have meta data will return 0 in y"
-					+ " (eg. air is \"0:0\"). If a world isn't provided in the location array or as an argument, the"
-					+ " current player's world is used.";
+			return "string {x, y, z, [world] | locationArray, [world]} Gets the id of the block at the coordinates."
+					+ " The format of the return will be x:y where x is the id of the block,"
+					+ " and y is the meta data for the block. All blocks will return in this format,"
+					+ " but blocks that don't have meta data will return 0 in y (eg. air is \"0:0\")."
+					+ " If a world isn't provided in the location array or as an argument,"
+					+ " the current player's world is used. (deprecated for get_block())";
 		}
 
 		@Override
@@ -407,9 +408,10 @@ public class Environment {
 		public String docs() {
 			return "void {x, y, z, id, [world] [physics] | locationArray, id, [physics]} Sets the id of the block at"
 					+ " the x y z coordinates specified. The id must be an integer or a blocktype identifier similar to"
-					+ " the type returned from get_block_at (eg. \"0:0\"). If the meta value is not specified, 0 is used."
-					+ " If world isn't specified, the current player's world is used. Physics (which defaults to true)"
-					+ " specifies whether or not to update the surrounding blocks when this block is set.";
+					+ " the type returned from get_block_at (eg. \"0:0\"). If the meta value is not specified,"
+					+ " 0 is used. If world isn't specified, the current player's world is used."
+					+ " Physics (which defaults to true) specifies whether or not to update the surrounding blocks when"
+					+ " this block is set. (deprecated for set_block())";
 		}
 
 		@Override
@@ -526,8 +528,7 @@ public class Environment {
 		public String docs() {
 			return "void {locationArray, lineArray | locationArray, line1, [line2, [line3, [line4]]]}"
 					+ " Sets the text of the sign at the given location. If the block at x,y,z isn't a sign,"
-					+ " a RangeException is thrown. If the text on a line overflows 15 characters, it is simply"
-					+ " truncated.";
+					+ " a RangeException is thrown. If a text line cannot fit on the sign, it'll be cut off.";
 		}
 
 		@Override
@@ -955,9 +956,8 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "array {x, z, [world] | locationArray, [world]} Gets the xyz of the highest block at a x and a z."
-					+ "It works the same as get_block_at, except that it doesn't matter now what the Y is."
-					+ "You can set it to -1000 or to 92374 it will just be ignored.";
+			return "array {x, z, [world] | locationArray, [world]} Gets a location array for the highest block at a"
+					+ " specific x and z column. If a location array is specified, the y coordinate is ignored.";
 		}
 
 		@Override
@@ -1095,7 +1095,8 @@ public class Environment {
 
 			if(w == null) {
 				if(!(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer)) {
-					throw new CREPlayerOfflineException(this.getName() + " needs a world in the location array, or a player so it can take the current world of that player.", t);
+					throw new CREPlayerOfflineException(this.getName() + " needs a world in the location array,"
+							+ " or a player so it can take the current world of that player.", t);
 				}
 
 				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -1167,7 +1168,8 @@ public class Environment {
 			try {
 				i = MCInstrument.valueOf(args[instrumentOffset].val().toUpperCase().trim());
 			} catch (IllegalArgumentException e) {
-				throw new CREFormatException("Instrument provided is not a valid type, required one of: " + StringUtils.Join(MCInstrument.values(), ", ", ", or "), t);
+				throw new CREFormatException("Instrument provided is not a valid type, required one of: "
+						+ StringUtils.Join(MCInstrument.values(), ", ", ", or "), t);
 			}
 			MCTone tone = null;
 			if(args[noteOffset] instanceof CArray) {
@@ -1211,11 +1213,14 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {[player], instrument, note, [locationArray]} Plays a note for the given player, at the given location."
-					+ " Player defaults to the current player, and location defaults to the player's location. Instrument may be one of:"
-					+ " " + StringUtils.Join(MCInstrument.values(), ", ", ", or ") + ", and note is an associative array with 2 values,"
-					+ " array(octave: 0, tone: 'F#') where octave is either 0, 1, or 2, and tone is one of the notes "
-					+ StringUtils.Join(MCTone.values(), ", ", ", or ") + ", optionally suffixed with a pound symbol, which denotes a sharp."
+			return "void {[player], instrument, note, [locationArray]} Plays a note for the given player, at the given"
+					+ " note block location. Player defaults to the current player, and location defaults to the"
+					+ " player's location. Instrument may be one of: "
+					+ StringUtils.Join(MCInstrument.values(), ", ", ", or ")
+					+ ", and note is an associative array with 2 values, array(octave: 0, tone: 'F#') where octave is"
+					+ " either 0, 1, or 2, and tone is one of the notes "
+					+ StringUtils.Join(MCTone.values(), ", ", ", or ")
+					+ ", optionally suffixed with a pound symbol, which denotes a sharp."
 					+ " (Not all notes can be sharped.)";
 		}
 
@@ -1481,7 +1486,7 @@ public class Environment {
 					+ " be a single player or an array of players to play the sound to, if"
 					+ " not given, all players can potentially hear it. ---- Possible categories: "
 					+ StringUtils.Join(MCSoundCategory.values(), ", ", ", or ", " or ") + "."
-					+ " \nPossible sounds: " + StringUtils.Join(MCSound.types(), "\n");
+					+ " \n\nPossible sounds: " + StringUtils.Join(MCSound.types(), "<br>");
 		}
 
 		@Override
@@ -1694,7 +1699,9 @@ public class Environment {
 		@Override
 		public String docs() {
 			return "mixed {locationArray, [index]} Returns an associative array with various information about a block."
-					+ " If an index is specified, it will return a boolean. ---- <ul>"
+					+ " If an index is specified, it will return a boolean. ---- The accuracy of these values will"
+					+ " depend on the server implementation."
+					+ "<ul>"
 					+ " <li>solid: If a block is solid (i.e. dirt or stone, as opposed to a torch or water)</li>"
 					+ " <li>flammable: Indicates if a block can catch fire</li>"
 					+ " <li>transparent: Indicates if light can pass through</li>"
@@ -1793,8 +1800,9 @@ public class Environment {
 		@Override
 		public String docs() {
 			return "boolean {locationArray, [checkMode]} Returns whether or not a block is being supplied with power."
-					+ "checkMode can be: \"BOTH\" (Check both direct and indirect power), \"DIRECT_ONLY\" (Check direct power only)"
-					+ " or \"INDIRECT_ONLY\" (Check indirect power only). CheckMode defaults to \"BOTH\".";
+					+ "checkMode can be: \"BOTH\" (Check both direct and indirect power),"
+					+ " \"DIRECT_ONLY\" (Check direct power only) or \"INDIRECT_ONLY\" (Check indirect power only)."
+					+ " CheckMode defaults to \"BOTH\".";
 		}
 
 		@Override
@@ -1881,7 +1889,7 @@ public class Environment {
 		@Override
 		public String docs() {
 			return "int {locationArray} Returns the redstone power level that is supplied to this block [0-15]."
-					+ " If is_block_powered(locationArray, 'DIRECT_ONLY') returns true, a redstone ore placed at the"
+					+ " If is_block_powered(locationArray, 'DIRECT_ONLY') returns true, a redstone dust placed at the"
 					+ " given location would be powered the return value - 1.";
 		}
 
@@ -1933,8 +1941,10 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "boolean {locationArray, [treeType]} Generates a tree at the given location and returns if the generation succeeded or not."
-					+ " treeType can be " + StringUtils.Join(MCTreeType.values(), ", ", ", or ", " or ") + ", defaulting to TREE.";
+			return "boolean {locationArray, [treeType]} Generates a tree at the given location and returns if the"
+					+ " generation succeeded or not. The treeType can be "
+					+ StringUtils.Join(MCTreeType.values(), ", ", ", or ", " or ")
+					+ ", defaulting to TREE.";
 		}
 
 		@Override

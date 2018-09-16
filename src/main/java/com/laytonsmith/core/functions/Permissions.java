@@ -44,8 +44,7 @@ public class Permissions {
 			return "boolean {[player], permissionName} Using the built in permissions system,"
 					+ " checks to see if the player has a particular permission."
 					+ " This is simply passed through to the permissions system."
-					+ " If you notice, this function isn't restricted. A player can check their own permissions,"
-					+ " however it IS restricted if the player attempts to check another player's permissions."
+					+ " This function is only restricted if the player attempts to check another player's permissions."
 					+ " If run from the console or a CommandBlock, will always return true unless a value has been"
 					+ " explicitly set for them.";
 		}

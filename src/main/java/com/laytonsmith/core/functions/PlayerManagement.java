@@ -58,7 +58,6 @@ import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
-import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
@@ -103,7 +102,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 
 			if(args.length == 1) {
@@ -129,15 +128,16 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "string {[playerName]} Returns a player's name. If a string is specified, it will attempt to find"
-					+ " a complete match for a partial name. If no string is specified, the current player is returned."
-					+ " UUIDs are also accepted for this and other online player functions."
+			return "string {[playerName] | [uuid]} Returns a player's name. If a string is specified, it will attempt"
+					+ " to find a complete match for a partial name. If no string is specified, the current player is"
+					+ " returned. UUIDs are also accepted for this and other functions that apply to online players."
 					+ " If the command is being run from the console, then the string '" + Static.getConsoleName()
 					+ "' is returned. If the command came from a CommandBlock, the block's name prefixed with "
 					+ Static.getBlockPrefix() + " is returned. If the command is coming from elsewhere,"
 					+ " returns a string chosen by the sender of this command (or null)."
-					+ " Note that most functions won't support console or block names (they'll throw a PlayerOfflineException),"
-					+ " but you can use this to determine where a command is being run from.";
+					+ " Note that most functions won't support console or block names"
+					+ " (they'll throw a PlayerOfflineException), but you can use this to determine where a command is"
+					+ " being run from.";
 		}
 
 		@Override
@@ -217,7 +217,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "string {[player], [dashless]} Returns the uuid of the current player or the specified player."
+			return "string {[player], [dashless]} Returns the UUID of the current player or the specified player."
 					+ " This will attempt to find an offline player, but if that also fails,"
 					+ " a PlayerOfflineException will be thrown.";
 		}
@@ -242,7 +242,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			CArray players = new CArray(t);
 			if(args.length == 0) {
 				for(MCPlayer player : Static.getServer().getOnlinePlayers()) {
@@ -264,7 +264,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[world]} Returns an array of all the player names of all the online players on the server, if world is given only the name of the players in this world will be returned.";
+			return "array {[world]} Returns an array of all the player names of all the online players on the server."
+					+ " If world is given only the name of the players in this world will be returned.";
 		}
 
 		@Override
@@ -323,7 +324,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			Collection<MCPlayer> pa = Static.getServer().getOnlinePlayers();
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 
@@ -356,7 +357,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[location array], distance} Returns an array of all the player names of all the online players within the given radius";
+			return "array {[locationArray], distance} Returns an array of all the players within the given radius.";
 		}
 
 		@Override
@@ -395,7 +396,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 0) {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -414,8 +415,10 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[playerName]} Returns an array of x, y, z coords of the player specified, or the player running the command otherwise. Note that the y coordinate is"
-					+ " in relation to the block the player is standing on. The array returned will also include the player's world.";
+			return "array {[playerName]} Returns a location array of the coordinates of the player specified,"
+					+ " or the player running the command if no player is specified."
+					+ " Note that unlike entity_loc() the y coordinate will be for the block the player is standing on,"
+					+ " which is one meter lower. The array returned also includes the player's world, yaw and pitch.";
 		}
 
 		@Override
@@ -482,7 +485,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l;
 			if(args.length <= 2) {
@@ -552,11 +555,12 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[player], [array]} Returns an array with the (x, y, z, world) coordinates of the block the player has highlighted"
-					+ " in their crosshairs. If player is omitted, the current player is used. If the block is too far, a"
-					+ " RangeException is thrown. An array of ids to be considered transparent can be supplied, otherwise"
-					+ " only air will be considered transparent. Providing an empty array will cause air to be considered"
-					+ " a potential target, allowing a way to get the block containing the player's head.";
+			return "array {[player], [array]} Returns a location array with the coordinates of the block the player has"
+					+ " highlighted in their crosshairs. If player is omitted, the current player is used."
+					+ " If the block is too far, a RangeException is thrown. An array of block types to be considered"
+					+ " transparent can be supplied, otherwise only air will be considered transparent."
+					+ " Providing an empty array will cause air to be considered a potential target, allowing a way to"
+					+ " get the block containing the player's head.";
 		}
 
 		@Override
@@ -576,7 +580,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			HashSet<MCMaterial> trans = null;
 			int transparentIndex = -1;
@@ -700,8 +704,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[player]} Returns the \"target space\" that the player is currently targetting. This is the"
-					+ " \"space\" where if they placed a block (and were close enough), it would end up going.";
+			return "array {[player]} Returns a location array of the space that the player is currently looking at."
+					+ " This is the space where if they placed a block (and were close enough), it would end up going.";
 		}
 
 		@Override
@@ -725,7 +729,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if(args.length == 1) {
@@ -742,7 +746,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[playerName]} Kills the specified player, or the current player if it is omitted";
+			return "void {[playerName]} Kills the specified player, or the current player if a name is omitted.";
 		}
 
 		@Override
@@ -780,7 +784,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender sender;
 			if(args.length == 0) {
 				sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
@@ -799,7 +803,9 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[playerName]} Returns an array of the groups a player is in. If playerName is omitted, the current player is used.";
+			return "array {[playerName]} Returns an array of the groups a player is in. If playerName is omitted,"
+					+ " the current player is used. This relies on \"group.groupname\" permission nodes in your"
+					+ " permissions plugin. Otherwise an extension is required to get the groups from the plugin.";
 		}
 
 		@Override
@@ -842,23 +848,23 @@ public class PlayerManagement {
 					+ " player if no argument was given. ----"
 					+ " If value is set, it should be an integer of one of the following indexes, and only that"
 					+ " information for that index will be returned. Otherwise if value is not specified (or is -1), it"
-					+ " returns an array of information with the following pieces of information in the specified index:"
+					+ " returns an array of values with the following pieces of information in the specified index:"
 					+ "<ul>"
-					+ "<li>0 - player's name; This will return the player's exact name,"
+					+ "<li>0 - Player's name; This will return the player's exact name,"
 					+ " even if called with a partial match.</li>"
-					+ "<li>1 - player's location; a location array of the player's coordinates</li>"
-					+ "<li>2 - player's cursor; an array of the location of the player's cursor,"
-					+ " or null if the block is out of sight.</li>"
-					+ "<li>3 - player's IP; Returns the IP address of this player.</li>"
+					+ "<li>1 - Player's location; a location array of the player's coordinates</li>"
+					+ "<li>2 - Player's cursor; a location array of the block the player is looking at,"
+					+ " or null if no block is in sight.</li>"
+					+ "<li>3 - Player's IP; Returns the IP address of this player.</li>"
 					+ "<li>4 - Display name; The name that is typically used when displayed on screen.</li>"
-					+ "<li>5 - player's health; The current health of the player, which will be an int from 0-20.</li>"
+					+ "<li>5 - Player's health; The current health of the player, which will be an int from 0-20.</li>"
 					+ "<li>6 - Item in hand; The type of item in their main hand.</li>"
 					+ "<li>7 - World name; Gets the name of the world this player is in.</li>"
 					+ "<li>8 - Is Op; true or false if this player is an op.</li>"
-					+ "<li>9 - player groups; An array of the groups the player is in, by permission nodes.</li>"
+					+ "<li>9 - Player groups; An array of the groups the player is in, by permission nodes.</li>"
 					+ "<li>10 - The player's hostname (or IP if a hostname can't be found)</li>"
 					+ "<li>11 - Is sneaking?</li><li>12 - Host; The host the player connected to.</li>"
-					+ "<li>13 - Player UUID; (This is the same as 20, but exists for backwards compatibility.)</li>"
+					+ "<li>13 - Player UUID; (deprecated for index 20, but exists for backwards compatibility.)</li>"
 					+ "<li>14 - Is player in a vehicle? Returns true or false.</li>"
 					+ "<li>15 - Held Slot; The slot number of the player's current hand.</li>"
 					+ "<li>16 - Is sleeping?</li>"
@@ -891,7 +897,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender m = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			String player;
 			int index;
@@ -1054,7 +1060,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "string {[playerName]} Gets the world of the player specified, or the current player, if playerName isn't specified.";
+			return "string {[playerName]} Gets the world of the player specified,"
+					+ " or the current player if playerName isn't specified.";
 		}
 
 		@Override
@@ -1078,7 +1085,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if(args.length == 0) {
@@ -1108,8 +1115,9 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[playerName], [message]} Kicks the specified player, with an optional message. If no message is specified, "
-					+ "\"You have been kicked\" is used. If no player is specified, the current player is used, with the default message.";
+			return "void {[playerName], [message]} Kicks the specified player with an optional message."
+					+ " If no message is specified, \"You have been kicked\" is used."
+					+ " If no player is specified, the current player is used with the default message.";
 		}
 
 		@Override
@@ -1133,7 +1141,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			String message = "You have been kicked";
 			MCPlayer m = null;
@@ -1247,7 +1255,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			String name;
 			if(args.length == 1) {
@@ -1303,7 +1311,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			if(args.length == 0) {
 				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -1331,16 +1339,24 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "mixed {F | yaw, pitch | player, F | player, yaw, pitch | player | &lt;none&gt;} Sets the direction the player is facing. ---- When using the first variation, expects an integer 0-3, which will"
-					+ " set the direction the player faces using their existing pitch (up and down) but sets their yaw (left and right) to one of the"
-					+ " cardinal directions, as follows: 0 - West, 1 - South, 2 - East, 3 - North, which corresponds to the directions given by F when"
-					+ " viewed with F3. In the second variation, specific yaw and pitches can be provided. If the player is not specified, the current player"
-					+ " is used. If just the player is specified, that player's yaw and pitch are returned as an array, or if no arguments are given, the"
-					+ " player running the command's yaw and pitch are returned as an array. The function returns void when setting the values. (Note that while this"
-					+ " function looks like it has ambiguous arguments, players cannot be named numbers.) A note on numbers: The values returned by the getter will always be"
-					+ " as such: pitch will always be a number between 90 and -90, with -90 being the player looking up, and 90 being the player looking down. Yaw will"
-					+ " always be a number between 0 and 359.9~. When using it as a setter, pitch must be a number between -90 and 90, and yaw may be any number."
-					+ " If the number given is not between 0 and 359.9~, it will be normalized first. 0 is dead west, 90 is north, etc.";
+			return "mixed {F | yaw, pitch | player, F | player, yaw, pitch | player | &lt;none&gt;}"
+					+ " Gets or sets the direction the player is facing."
+					+ " ---- When using the first variation, expects an integer 0-3, which will set the direction the"
+					+ " player faces using their existing pitch (up and down) but sets their yaw (left and right) to"
+					+ " one of the cardinal directions, as follows: 0 - West, 1 - South, 2 - East, 3 - North, which"
+					+ " corresponds to the directions given by F when viewed with F3."
+					+ " In the second variation, specific yaw and pitches can be provided."
+					+ " If the player is not specified, the current player is used."
+					+ " If just the player is specified, that player's yaw and pitch are returned as an array,"
+					+ " or if no arguments are given, the current player's yaw and pitch are returned as an array."
+					+ " The function returns void when setting the values. (Note that while this"
+					+ " function looks like it has ambiguous arguments, players cannot be named numbers.)"
+					+ " A note on numbers: The values returned by the getter will always be as such:"
+					+ " pitch will always be a number between 90 and -90, with -90 being the player looking up,"
+					+ " and 90 being the player looking down. Yaw will always be a number between 0 and 359.9~."
+					+ " When setting the facing, pitch must be a number between -90 and 90, and yaw may be any number."
+					+ " If the number given is not between 0 and 359.9~, it will be normalized first."
+					+ " 0 is dead west, 90 is north, etc.";
 		}
 
 		@Override
@@ -1478,7 +1494,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "string {[player]} Returns the player's game mode. It will be one of " + StringUtils.Join(MCGameMode.values(), ", ", ", or ") + ".";
+			return "string {[player]} Returns the player's game mode."
+					+ " It will be one of " + StringUtils.Join(MCGameMode.values(), ", ", ", or ") + ".";
 		}
 
 		@Override
@@ -1539,7 +1556,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], mode} Sets the player's game mode. mode must be one of: " + StringUtils.Join(MCGameMode.values(), ", ", ", or ");
+			return "void {[player], mode} Sets the player's game mode."
+					+ " Mode must be one of: " + StringUtils.Join(MCGameMode.values(), ", ", ", or ");
 		}
 
 		@Override
@@ -1604,8 +1622,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player]} Gets the experience of a player within this level, as a percentage, from 0 to 99. (100 would be next level,"
-					+ " therefore, 0.)";
+			return "int {[player]} Gets the experience of a player within this level, as a percentage, from 0 to 99."
+					+ " (100 would be next level, therefore, 0.)";
 		}
 
 		@Override
@@ -1658,7 +1676,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], xp} Sets the experience of a player within the current level, as a percentage, from 0 to 100.";
+			return "void {[player], xp} Sets the experience of a player within the current level, as a percentage,"
+					+ " from 0 to 99. 100 resets the experience to zero and adds a level to the player.";
 		}
 
 		@Override
@@ -1719,7 +1738,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], exp} Gives the player the specified amount of xp.";
+			return "void {[player], exp} Gives the player the specified amount of experience.";
 		}
 
 		@Override
@@ -1943,13 +1962,12 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], xp} Sets the total experience of a player.";
+			return "void {[player], exp} Sets the total experience of a player.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREPlayerOfflineException.class,
-				CRERangeException.class};
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -2449,7 +2467,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], health} Sets the player's health. Health should be a double between 0 and their max health.";
+			return "void {[player], health} Sets the player's health."
+					+ " Health should be a double between 0 and their max health, which is 20.0 by default.";
 		}
 
 		@Override
@@ -2511,8 +2530,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {player} Returns whether or not the specified player is online. Note"
-					+ " that the name must match exactly, but it will not throw a PlayerOfflineException"
+			return "boolean {player} Returns whether or not the specified player is online."
+					+ " Note that the name must match exactly, but it will not throw a PlayerOfflineException"
 					+ " if the player is not online, or if the player doesn't even exist.";
 		}
 
@@ -2577,8 +2596,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {player} Returns whether or not this player is whitelisted. Note that"
-					+ " this will work with offline players, but the name must be exact." + UUID_WARNING;
+			return "boolean {player} Returns whether or not this player is whitelisted."
+					+ " This will work with offline players, but the name must be exact. ---- " + UUID_WARNING;
 		}
 
 		@Override
@@ -2623,8 +2642,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {player, isWhitelisted} Sets the whitelist flag of the specified player. Note that"
-					+ " this will work with offline players, but the name must be exact." + UUID_WARNING;
+			return "void {player, isWhitelisted} Sets the whitelist flag of the specified player."
+					+ " This will work with offline players, but the name must be exact. ---- " + UUID_WARNING;
 		}
 
 		@Override
@@ -2662,7 +2681,7 @@ public class PlayerManagement {
 
 	private static final String UUID_WARNING = " NOTICE: This function accepts UUIDs in place of player names,"
 			+ " however due to lack of API from Mojang, some server software is not able to"
-			+ " correctly associate a uuid with a player if the player has not recently been online."
+			+ " correctly associate a UUID with a player if the player has not recently been online."
 			+ " As such, it may not always be possible to ban or whitelist a player by UUID."
 			+ " Servers known to have this problem are Bukkit and Spigot. Furthermore,"
 			+ " although this API functions, due to the limitations of the vanilla ban/whitelist"
@@ -2683,11 +2702,11 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {player} Returns whether or not this player is banned. Note that"
-					+ " this will work with offline players, but the name must be exact. At this"
-					+ " time, this function only works with the vanilla ban system. If you use"
-					+ " a third party ban system, you should instead run the command for that"
-					+ " plugin instead." + UUID_WARNING;
+			return "boolean {player} Returns whether or not this player is banned."
+					+ " This will work with offline players, but the name must be exact."
+					+ " At this time, this function only works with the vanilla ban system."
+					+ " If you use a third party ban system, you should instead run the command for that"
+					+ " plugin instead. ---- " + UUID_WARNING;
 		}
 
 		@Override
@@ -2736,13 +2755,13 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {player, isBanned, [reason], [source]} Sets the ban flag of the specified player."
-					+ " Note that this will work with offline players, but the name must be exact. When banning,"
-					+ " an optional reason message may be provided that the player will see when attempting to login."
+			return "void {player, isBanned, [reason], [source]} Sets the ban flag for the specified player."
+					+ " This will work with offline players, but the name must be exact. When banning,"
+					+ " a reason message may be provided that the player will see when attempting to login."
 					+ " An optional source may also be provided that indicates who or what banned the player."
-					+ " At this time, this function only works with the vanilla ban system. If you use"
-					+ " a third party ban system, you should instead run the command for that"
-					+ " plugin instead." + UUID_WARNING;
+					+ " At this time, this function only works with the vanilla ban system."
+					+ " If you use a third party ban system, you should instead run the command for that"
+					+ " plugin instead. ---- " + UUID_WARNING;
 		}
 
 		@Override
@@ -2814,7 +2833,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], speed} Sets players speed. The speed must be between -1 or 1";
+			return "void {[player], speed} Sets a player's walk speed. The speed must be between -1.0 and 1.0."
+					+ " The default player walk speed is 0.2.";
 		}
 
 		@Override
@@ -2878,7 +2898,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "double {[player]} Gets the players speed. The speed must be between -1 or 1";
+			return "double {[player]} Gets a player's walk speed. The speed will be between -1.0 and 1.0.";
 		}
 
 		@Override
@@ -2935,7 +2955,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], speed} Sets players fly speed. The speed must be between -1 or 1";
+			return "void {[player], speed} Sets a player's fly speed. The speed must be between -1.0 and 1.0."
+					+ " The default player fly speed is 0.1.";
 		}
 
 		@Override
@@ -2999,7 +3020,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "double {[player]} Gets the players speed. The speed must be between -1 or 1";
+			return "double {[player]} Gets a player's fly speed. The speed will be between -1.0 and 1.0.";
 		}
 
 		@Override
@@ -3056,8 +3077,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {[player]} Returns whether or not the specified player (or the current"
-					+ " player if not specified) is op";
+			return "boolean {[player]} Returns whether or not the player is op.";
 		}
 
 		@Override
@@ -3164,7 +3184,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[player]} Gets the compass target of the specified player";
+			return "array {[player]} Gets the compass target location for the specified player.";
 		}
 
 		@Override
@@ -3213,9 +3233,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player]} Returns the number of ticks remaining that this player will"
-					+ " be on fire for. If the player is not on fire, 0 is returned, which incidentally"
-					+ " is false.";
+			return "int {[player]} Returns the number of ticks remaining that this player will be on fire for."
+					+ " If the player is not on fire, 0 is returned, which evaluates as false.";
 		}
 
 		@Override
@@ -3265,8 +3284,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], ticks} Sets the player on fire for the specified number of"
-					+ " ticks. If a boolean is given for ticks, false is 0, and true is 20.";
+			return "void {[player], ticks} Sets the player on fire for the specified number of ticks."
+					+ " If a boolean is given for ticks, false is 0, and true is 20.";
 		}
 
 		@Override
@@ -3329,7 +3348,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {[player]} Returns whether or not the player has the ability to fly";
+			return "boolean {[player]} Returns whether or not the player has the ability to fly.";
 		}
 
 		@Override
@@ -3379,7 +3398,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], flight} Sets whether or not this player is allowed to fly";
+			return "void {[player], flight} Sets whether or not this player is allowed to fly.";
 		}
 
 		@Override
@@ -3450,7 +3469,7 @@ public class PlayerManagement {
 		public String docs() {
 			StringBuilder doc = new StringBuilder();
 			doc.append("void {[player], time, [relative]} Sets the time of a given player. Relative defaults to false,"
-					+ " but if true, the time will be an offset and the player's time will still progress with the world."
+					+ " but if true, the time will be an offset and the player's time will still progress."
 					+ " Otherwise it will be locked and should be a number from 0 to 24000, else it is modulo scaled."
 					+ " Alternatively, common time notation (9:30pm, 4:00 am) is acceptable,"
 					+ " and convenient english mappings also exist:");
@@ -3555,8 +3574,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player]} Returns the time of the specified player, as an integer from"
-					+ " 0 to 24000-1";
+			return "int {[player]} Returns the time of the specified player, as an integer from 0 to 24000-1";
 		}
 
 		@Override
@@ -3608,7 +3626,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player]} Resets the time of the player to the time of the world.";
+			return "void {[player]} Resets the visible time for the player to the time of the world.";
 		}
 
 		@Override
@@ -3746,8 +3764,8 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "void {[player], downFall} Sets the weather for the given player only. If downFall is true, the"
-					+ " player will experience a storm. If downFall is null, it will reset the player's weather to that"
-					+ " of the world.";
+					+ " player will experience a storm. If downFall is null, it will reset the player's visible weather"
+					+ " to that which the player's world is experiencing.";
 		}
 
 		@Override
@@ -3761,8 +3779,7 @@ public class PlayerManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class,
-				CRELengthException.class, CREIllegalArgumentException.class};
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class};
 		}
 
 		@Override
@@ -3784,21 +3801,10 @@ public class PlayerManagement {
 				listName = args[1].nval();
 			} else {
 				m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(m, t);
 				listName = args[0].nval();
 			}
-			Static.AssertPlayerNonNull(m, t);
-			try {
-				m.setPlayerListName(listName);
-			} catch (IllegalArgumentException e) {
-				if(listName.length() > 16) {
-					throw new CRELengthException("set_list_name([player,] name)"
-							+ " expects name to be 16 characters or less for MineCraft versions prior to 1.8.", t);
-				} else {
-					throw new CREIllegalArgumentException("set_list_name([player,] name)"
-							+ " was called with a name that is already in use."
-							+ " (This will no longer cause an Exception for MineCraft versions 1.8 and higher).", t);
-				}
-			}
+			m.setPlayerListName(listName);
 			return CVoid.VOID;
 		}
 
@@ -3814,11 +3820,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], [listName]} Sets the player's list name. Colors are supported"
-					+ " and setting the name to null resets it."
-					+ " In these versions, an IllegalArgumentException is thrown if the name specified is already"
-					+ " taken and a LengthException is thrown when the name is greater than 16 characters."
-					+ " Specifying an already taken name will be silently ignored.";
+			return "void {[player], [listName]} Sets the player's list name."
+					+ " Colors are supported and setting the name to null resets it.";
 		}
 
 		@Override
@@ -3867,7 +3870,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "string {[player]} Returns the list name of the specified player, or the current player if none specified.";
+			return "string {[player]} Returns the name of the player that's display on the player list.";
 		}
 
 		@Override
@@ -3958,45 +3961,33 @@ public class PlayerManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			double x;
-			double y;
-			double z;
+			Vector3D v;
+			int offset = 0;
 			switch(args.length) {
 				case 1:
 				case 2: {
-					int offset = 0;
 					if(args.length == 2) {
 						offset = 1;
 						p = Static.GetPlayer(args[0], t);
 					}
-					if(args[offset] instanceof CArray) {
-						Static.AssertPlayerNonNull(p, t);
-						MCLocation l = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
-						x = l.getX();
-						y = l.getY();
-						z = l.getZ();
-					} else {
-						throw new CRECastException("Expecting an array, but \"" + args[offset].val() + "\" was given.", t);
-					}
+					v = ObjectGenerator.GetGenerator().vector(args[offset], t);
 					break;
 				}
 				case 3:
 				case 4: {
-					int offset = 0;
 					if(args.length == 4) {
 						offset = 1;
 						p = Static.GetPlayer(args[0], t);
 					}
-					x = Static.getDouble(args[offset], t);
-					y = Static.getDouble(args[offset + 1], t);
-					z = Static.getDouble(args[offset + 2], t);
+					double x = Static.getDouble(args[offset], t);
+					double y = Static.getDouble(args[offset + 1], t);
+					double z = Static.getDouble(args[offset + 2], t);
+					v = new Vector3D(x, y, z);
 					break;
 				}
 				default:
 					throw new RuntimeException();
 			}
-			Vector3D v = new Vector3D(x, y, z);
-			// TODO: consider removing this and updating the switch above
 			if(v.length() > 10) {
 				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING,
 						"The call to " + getName() + " has been cancelled, because the magnitude was greater than 10."
@@ -4024,8 +4015,7 @@ public class PlayerManagement {
 					+ " associative array with x, y, and z keys defined (if magnitude is set, it is ignored)."
 					+ " If the vector's magnitude is greater than 10, the command is cancelled, because the"
 					+ " server won't allow the player to move faster than that. A warning is issued, and false"
-					+ " is returned if this"
-					+ " happens, otherwise, true is returned.";
+					+ " is returned if this happens, otherwise, true is returned.";
 		}
 
 		@Override
@@ -4099,7 +4089,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], locationArray, 1, 2, 3, 4 | [player], locationArray, lineArray} Changes a signs' text, but only temporarily, and only for the specified player."
+			return "void {[player], locationArray, 1, 2, 3, 4 | [player], locationArray, lineArray}"
+					+ " Changes a sign's text only for the specified player. This change does not persist."
 					+ " This can be used to \"fake\" sign text for a player. LineArray, if used, must have 4 elements.";
 		}
 
@@ -4162,7 +4153,8 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "void {[player], locationArray, blockName} Changes a block temporarily for the specified player."
-					+ " This can be used to \"fake\" blocks for a player.";
+					+ " This can be used to \"fake\" blocks for a player. These illusory blocks will disappear when"
+					+ " the client updates them, most often by clicking on them or reloading the chunks.";
 		}
 
 		@Override
@@ -4227,7 +4219,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player]} Returns the player's hunger level";
+			return "int {[player]} Returns the player's hunger level.";
 		}
 
 		@Override
@@ -4280,7 +4272,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], hunger} Sets a player's hunger level";
+			return "void {[player], hunger} Sets a player's hunger level, where 0 is empty and 20 is full.";
 		}
 
 		@Override
@@ -4329,7 +4321,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "double {[player]} Returns the player's saturation level";
+			return "double {[player]} Returns the player's food saturation level.";
 		}
 
 		@Override
@@ -4383,7 +4375,9 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], saturation} ";
+			return "void {[player], saturation} Set's the player's food saturation level."
+					+ " If this is above 0.0 and the player's health is below max, the player will experience fast"
+					+ " health regeneration.";
 		}
 
 		@Override
@@ -4407,7 +4401,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCOfflinePlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				player = Static.GetUser(args[0].val(), t);
@@ -4428,8 +4422,10 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[playerName]} Returns an array of x, y, z, coords of the bed of the player specified, or the player running the command otherwise."
-					+ "The array returned will also include the bed's world in index 3 of the array. This is set when a player sleeps or by set_pbed_location.";
+			return "array {[playerName]} Returns a location array of the bed block the player last slept in."
+					+ " The player will normally respawn next to this bed if they die."
+					+ " However, this respawn location can be forcibly be set by plugins or commands to any location,"
+					+ " like when using set_pbed_location().";
 		}
 
 		@Override
@@ -4476,9 +4472,8 @@ public class PlayerManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CRELengthException.class,
-				CREPlayerOfflineException.class, CREFormatException.class,
-				CRENullPointerException.class};
+			return new Class[]{CRECastException.class, CRELengthException.class, CREPlayerOfflineException.class,
+				CREFormatException.class, CRENullPointerException.class};
 		}
 
 		@Override
@@ -4497,9 +4492,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args)
-				throws CancelCommandException, ConfigRuntimeException {
-
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			String pname = null;
 			MCPlayer m = null;
@@ -4597,7 +4590,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "string {[player]} Returns ID of vehicle which player is in or null if player is outside the vehicle";
+			return "string {[player]} Returns the UUID of the vehicle which the player is riding,"
+					+ " or null if player is not riding a vehicle.";
 		}
 
 		@Override
@@ -4651,7 +4645,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {[player]} Leave vehicle by player or return false if player is outside the vehicle";
+			return "boolean {[player]} Forces a player to leave their vehicile."
+					+ " This returns false if the player is not riding a vehicle.";
 		}
 
 		@Override
@@ -4708,7 +4703,8 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			CArray ret = new CArray(t);
-			if(s != null && s.getOfflinePlayers() != null) { // This causes the function to return an empty array for a fake/null server.
+			// This causes the function to return an empty array for a fake/null server.
+			if(s != null && s.getOfflinePlayers() != null) {
 				for(MCOfflinePlayer offp : s.getOfflinePlayers()) {
 					ret.push(new CString(offp.getName(), t), t);
 				}
@@ -4782,7 +4778,7 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "boolean {player} Returns whether the given player has ever been on this server."
-					+ " This will not throw a PlayerOfflineException, so the name must be exact.";
+					+ " The player argument can be a UUID or a name. But if given a name, it must be exact.";
 		}
 
 		@Override
@@ -4793,8 +4789,10 @@ public class PlayerManagement {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Demonstrates a player that has played", "phas_played('Notch')", ":true"),
-				new ExampleScript("Demonstrates a player that has not played", "phas_played('Herobrine')", ":false")
+				new ExampleScript("Demonstrates a player that has played",
+						"phas_played('Notch')", ":true"),
+				new ExampleScript("Demonstrates a player that has not played",
+						"phas_played('Herobrine')", ":false")
 			};
 		}
 
@@ -4819,8 +4817,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCOfflinePlayer op = null;
 			if(args.length == 1) {
@@ -4844,8 +4841,8 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "int {[player]} Returns the unix time stamp, in milliseconds, that this player first logged onto"
-					+ " this server, or 0 if they never have. This will not throw a PlayerOfflineException, so the"
-					+ " name or UUID must be exact.";
+					+ " this server, or 0 if they never have."
+					+ " The player argument can be a UUID or a name. But if given a name, it must be exact.";
 		}
 
 		@Override
@@ -4908,8 +4905,8 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "int {[player]} Returns the unix time stamp, in milliseconds, that this player was last seen on this"
-					+ " server, or 0 if they never were. This will not throw a PlayerOfflineException, so the name or "
-					+ " UUID must be exact.";
+					+ " server, or 0 if they never were."
+					+ " The player argument can be a UUID or a name. But if given a name, it must be exact.";
 		}
 
 		@Override
@@ -5043,7 +5040,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], flight} Sets whether or not this player is flying."
+			return "void {[player], flying} Sets the flying state for the player."
 					+ "Requires player to have the ability to fly, which is set with set_pflight().";
 		}
 
@@ -5111,7 +5108,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "string {[player]} Gets the entity that a spectator is viewing. If the player isn't spectating"
+			return "string {[player]} Gets the entity UUID that a spectator is viewing. If the player isn't spectating"
 					+ " from an entity, null is returned. If the player isn't in spectator mode, an"
 					+ " IllegalArgumentException is thrown.";
 		}
@@ -5404,9 +5401,9 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player], material} Gets the time left on the player's cooldown for the specified material."
-					+ " The material is the name found in item arrays. This returns an integer representing the"
-					+ " time in game ticks until items of this material can be used again by this player.";
+			return "int {[player], material} Gets the time left on the player's cooldown for the specified item type."
+					+ " This returns an integer representing the time in server ticks until any items of this material"
+					+ " can be used again by this player.";
 		}
 
 		@Override
@@ -5476,9 +5473,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player], material, cooldown} Sets the player's cooldown time for the specified material."
-					+ " The material is the name found in item arrays. The cooldown must be a positive integer"
-					+ " representing game ticks.";
+			return "int {[player], material, cooldown} Sets the player's cooldown time for the specified item type."
+					+ " The cooldown must be a positive integer representing server ticks.";
 		}
 
 		@Override

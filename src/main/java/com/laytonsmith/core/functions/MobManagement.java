@@ -195,7 +195,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], entityID} Tames any tameable mob to the specified player. Offline players are"
+			return "void {[player], entityUUID} Tames any tameable mob to the specified player. Offline players are"
 					+ " supported, but this means that partial matches are NOT supported. You must type the players"
 					+ " name exactly. Setting the player to null will untame the mob. If the entity doesn't exist,"
 					+ " nothing happens.";
@@ -284,8 +284,8 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "string {entityID} Returns the owner's name, or null if the mob is unowned. An UntameableMobException is thrown if"
-					+ " mob isn't tameable to begin with.";
+			return "string {entityUUID} Returns the owner's name, or null if the mob is unowned."
+					+ "An UntameableMobException is thrown if mob isn't tameable to begin with.";
 		}
 
 		@Override
@@ -339,7 +339,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, player} Sets the tameable mob to the specified player. Offline players are"
+			return "void {entityUUID, player} Sets the tameable mob to the specified player. Offline players are"
 					+ " supported, but this means that partial matches are NOT supported. You must type the player's"
 					+ " name exactly. Setting the player to null will untame the mob.";
 		}
@@ -397,9 +397,9 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, healthPercent} Sets the specified entity's health as a percentage,"
+			return "void {entityUUID, healthPercent} Sets the specified entity's health as a percentage,"
 					+ " where 0 kills it and 100 gives it full health."
-					+ " An exception is thrown if the entityID doesn't exist or isn't a LivingEntity.";
+					+ " An exception is thrown if the entity by that UUID doesn't exist or isn't a LivingEntity.";
 		}
 
 		@Override
@@ -451,7 +451,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "double {entityID} Returns the entity's health as a percentage of its maximum health."
+			return "double {entityUUID} Returns the entity's health as a percentage of its maximum health."
 					+ " If the specified entity doesn't exist, or is not a LivingEntity, a format exception is thrown.";
 		}
 
@@ -503,7 +503,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns if an entity is set to be breedable.";
+			return "boolean {entityUUID} Returns if an entity is set to be breedable.";
 		}
 
 		@Override
@@ -537,7 +537,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, boolean} Set an entity to be breedable.";
+			return "void {entityUUID, boolean} Set an entity to be breedable.";
 		}
 
 		@Override
@@ -575,7 +575,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "int {entityID} Returns the mob's age as an integer. Zero represents the point of adulthood. Throws an"
+			return "int {entityUUID} Returns the mob's age as an integer. Zero represents the point of adulthood. Throws an"
 					+ " UnageableMobException if the mob is not a type that ages";
 		}
 
@@ -626,9 +626,9 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, int[, lockAge]} sets the age of the mob to the specified int, and locks it at that age"
-					+ " if lockAge is true, but by default it will not. Throws a UnageableMobException if the mob does"
-					+ " not age naturally.";
+			return "void {entityUUID, int[, lockAge]} sets the age of the mob to the specified int, and locks it at"
+					+ " that age if lockAge is true, but by default it will not."
+					+ " Throws a UnageableMobException if the mob does not age naturally.";
 		}
 
 		@Override
@@ -653,7 +653,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "array {entityID} Returns an array of potion effect arrays showing"
+			return "array {entityUUID} Returns an array of potion effect arrays showing"
 					+ " the effects on this mob.";
 		}
 
@@ -686,7 +686,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityId, potionEffect, [strength], [seconds], [ambient], [particles], [icon]}"
+			return "boolean {entityUUID, potionEffect, [strength], [seconds], [ambient], [particles], [icon]}"
 					+ " Adds one, or modifies an existing, potion effect on a mob."
 					+ " The potionEffect can be " + StringUtils.Join(MCPotionEffectType.types(), ", ", ", or ", " or ")
 					+ ". It also accepts an integer corresponding to the effect id listed on the Minecraft wiki."
@@ -788,7 +788,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "entityID {entityID} Gets the mob's target if it has one, and returns the target's entityID."
+			return "string {entityUUID} Gets the mob's target if it has one, and returns the target's entityUUID."
 					+ " If there is no target, null is returned instead. Not all mobs will have a returnable target.";
 		}
 
@@ -824,7 +824,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, entityID} The first ID is the entity that is targeting, the second is the target."
+			return "void {entityUUID, entityUUID} The first is the entity that is targeting, the second is the target."
 					+ " It can also be set to null to clear the current target. Not all mobs can have their target set.";
 		}
 
@@ -859,7 +859,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "array {entityID} Returns an associative array showing the equipment this mob is wearing."
+			return "array {entityUUID} Returns an associative array showing the equipment this mob is wearing."
 					+ " This does not work on most \"dumb\" entities, only mobs (entities with AI).";
 		}
 
@@ -917,8 +917,8 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, array} Takes an associative array with keys representing equipment slots and values"
-					+ " of itemArrays, the same used by set_pinv. This does not work on most \"dumb\" entities,"
+			return "void {entityUUID, array} Takes an associative array with keys representing equipment slots and"
+					+ " values of itemArrays, the same used by set_pinv. This does not work on most \"dumb\" entities,"
 					+ " only mobs (entities with AI). Unless a mod, plugin, or future update changes vanilla functionality,"
 					+ " only humanoid mobs will render their equipment slots. The equipment slots are: "
 					+ StringUtils.Join(MCEquipmentSlot.values(), ", ", ", or ", " or ");
@@ -955,7 +955,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "double {entityID} Returns the maximum health of this living entity.";
+			return "double {entityUUID} Returns the maximum health of this living entity.";
 		}
 
 		@Override
@@ -981,7 +981,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, double} Sets the max health of a living entity, players included."
+			return "void {entityUUID, double} Sets the max health of a living entity, players included."
 					+ " This value is persistent, and will not reset even after server restarts.";
 		}
 
@@ -1021,7 +1021,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "array {entityID} Returns an associative array of the drop rate for each equipment slot."
+			return "array {entityUUID} Returns an associative array of the drop rate for each equipment slot."
 					+ " If the rate is 0, the equipment will not drop. If it is 1, it is guaranteed to drop.";
 		}
 
@@ -1068,7 +1068,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, array} Sets the drop chances for each equipment slot on a mob,"
+			return "void {entityUUID, array} Sets the drop chances for each equipment slot on a mob,"
 					+ " but does not work on players. Passing null instead of an array will automatically"
 					+ " set all rates to 0, which will cause nothing to drop. A rate of 1 will guarantee a drop.";
 		}
@@ -1094,7 +1094,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns whether the specified living entity can pick up items.";
+			return "boolean {entityUUID} Returns whether the specified living entity can pick up items.";
 		}
 
 		@Override
@@ -1119,7 +1119,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, boolean} Sets a living entity's ability to pick up items.";
+			return "void {entityUUID, boolean} Sets a living entity's ability to pick up items.";
 		}
 
 		@Override
@@ -1143,7 +1143,8 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns whether the specified living entity will despawn. True means it will not.";
+			return "boolean {entityUUID} Returns whether the specified living entity will despawn."
+					+ " True means it will not.";
 		}
 
 		@Override
@@ -1168,7 +1169,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, boolean} Sets whether a living entity will despawn. True means it will not.";
+			return "void {entityUUID, boolean} Sets whether a living entity will despawn. True means it will not.";
 		}
 
 		@Override
@@ -1196,7 +1197,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "int {entityID} Returns the entityID of the entity that is holding the given living entity's leash,"
+			return "string {entityUUID} Returns the UUID of the entity that is holding the given living entity's leash,"
 					+ " or null if it isn't being held.";
 		}
 
@@ -1229,10 +1230,11 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, entityID} The first entity is the entity to be held on a leash, and must be living."
-					+ " The second entity is the holder of the leash. This does not have to be living,"
+			return "void {entityUUID, entityUUID} The first argument is the entity to be held on a leash,"
+					+ " and must be living. The second is the holder of the leash. This does not have to be living,"
 					+ " but the only non-living entity that will persist as a holder across restarts is the leash hitch."
-					+ " Bats, enderdragons, players, and withers can not be held by leashes due to minecraft limitations.";
+					+ " Players, bats, enderdragons, withers and certain other entities can not be held by leashes due"
+					+ " to minecraft limitations.";
 		}
 
 		@Override
@@ -1251,7 +1253,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "int {entityID} Returns the amount of air the specified living entity has remaining.";
+			return "int {entityUUID} Returns the amount of air the specified living entity has remaining.";
 		}
 
 		@Override
@@ -1275,7 +1277,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, int} Sets the amount of air the specified living entity has remaining.";
+			return "void {entityUUID, int} Sets the amount of air the specified living entity has remaining.";
 		}
 
 		@Override
@@ -1300,7 +1302,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "int {entityID} Returns the maximum amount of air the specified living entity can have.";
+			return "int {entityUUID} Returns the maximum amount of air the specified living entity can have.";
 		}
 
 		@Override
@@ -1324,7 +1326,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, int} Sets the maximum amount of air the specified living entity can have.";
+			return "void {entityUUID, int} Sets the maximum amount of air the specified living entity can have.";
 		}
 
 		@Override
@@ -1360,7 +1362,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "array {entityID, [transparents, [maxDistance]]} Returns an array containing all blocks along the"
+			return "array {entityUUID, [transparents, [maxDistance]]} Returns an array containing all blocks along the"
 					+ " living entity's line of sight. transparents is an array of block IDs, only air by default."
 					+ " maxDistance represents the maximum distance to scan. The server may cap the scan distance,"
 					+ " but probably by not any less than 100 meters.";
@@ -1433,8 +1435,10 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID, otherEntityID} Returns if the entity can have the other entity in his line of sight."
-					+ " For instance for players this mean that it can have the other entity on its screen and that this one is not hidden by opaque blocks."
+			return "boolean {entityUUID, otherEntityUUID} Returns whether or not the first entity can have the other"
+					+ " entity in an unimpeded line of sight, ignoring the direction it's facing."
+					+ " For instance, for players this mean that it can have the other entity on its screen and that"
+					+ " this one is not hidden by opaque blocks."
 					+ " This uses the same algorithm that hostile mobs use to find the closest player.";
 		}
 
@@ -1492,7 +1496,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityId, amount, [sourceEntityId]} Damage an entity. If given,"
+			return "void {entityUUID, amount, [sourceEntityUUID]} Damage an entity. If given,"
 					+ " the source entity will be attributed as the damager.";
 		}
 
@@ -1512,7 +1516,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, boolean} If possible, makes the entity glide.";
+			return "void {entityUUID, boolean} If possible, makes the entity glide.";
 		}
 
 		@Override
@@ -1541,7 +1545,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns true if the given entity is gliding.";
+			return "boolean {entityUUID} Returns true if the given entity is gliding.";
 		}
 
 		@Override
@@ -1565,7 +1569,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns true if the given entity has AI.";
+			return "boolean {entityUUID} Returns true if the given entity has AI.";
 		}
 
 		@Override
@@ -1589,7 +1593,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, boolean} enables or disables the entity AI.";
+			return "void {entityUUID, boolean} enables or disables the entity AI.";
 		}
 
 		@Override
@@ -1618,7 +1622,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns whether another entity, like an arrow, will collide with this mob.";
+			return "boolean {entityUUID} Returns whether another entity, like an arrow, will collide with this mob.";
 		}
 
 		@Override
@@ -1642,7 +1646,7 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, boolean} Sets whether or not other entities will collide with this mob.";
+			return "void {entityUUID, boolean} Sets whether or not other entities will collide with this mob.";
 		}
 
 		@Override

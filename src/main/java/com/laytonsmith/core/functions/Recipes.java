@@ -74,7 +74,6 @@ public class Recipes {
 		@Override
 		public String docs() {
 			return "boolean {RecipeArray} Adds a recipe to the server and returns whether it was added or not. ----"
-					+ " Please read [[CommandHelper/Array_Formatting|this page]] to see how the recipe array is formatted."
 					+ " The RecipeArray can contain the following keys:"
 					+ " <pre>"
 					+ "   type: The type of recipe. Expected to be 'SHAPED', 'SHAPELESS', or 'FURNACE'.\n"
@@ -152,8 +151,9 @@ public class Recipes {
 
 		@Override
 		public String docs() {
-			return "array {itemArray} Gets all recipes that have a result of the given item. "
-					+ "NOTE: Gets all recipes for result item regardless of meta and enchants, although the array has correct data.";
+			return "array {itemArray} Gets all recipes that have a result of the given item."
+					+ " NOTE: Gets all recipes for result item regardless of meta and enchants,"
+					+ " although the array has correct data.";
 		}
 
 		@Override

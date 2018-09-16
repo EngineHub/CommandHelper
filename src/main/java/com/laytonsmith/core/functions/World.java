@@ -86,7 +86,8 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "array {[world]} Returns a location array for the specified world, or the current player's world, if not specified.";
+			return "array {[world]} Returns a location array for the specified world, or the current player's world"
+					+ " if one is not specified.";
 		}
 
 		@Override
@@ -191,9 +192,9 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {locationArray | [world], x, y, z} Sets the spawn of the world. Note that in some cases, a plugin"
-					+ " may set the spawn differently, and this method will do nothing. In that case, you should use"
-					+ " the plugin's commands to set the spawn.";
+			return "void {locationArray | [world], x, y, z} Sets the spawn of the world. Note that in some cases"
+					+ " a plugin may override the spawn, and this method will do nothing. In that case,"
+					+ " you should use the plugin's commands to set the spawn.";
 		}
 
 		@Override
@@ -356,8 +357,8 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {[world], x, z | [world], locationArray} Loads the chunk, using the specified world, or the current"
-					+ " players world if not provided.";
+			return "void {[world], x, z | [world], locationArray} Loads a chunk for a world using the"
+					+ " x and z coordinates. The current player's world is used if one isn't provided.";
 		}
 
 		@Override
@@ -436,8 +437,8 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {[world], x, z | [world], locationArray} Unloads the chunk, using the specified world, or the current"
-					+ " players world if not provided.";
+			return "void {[world], x, z | [world], locationArray} Unloads a chunk for a world using the"
+					+ " x and z coordinates. The current player's world is used if one is not provided.";
 		}
 
 		@Override
@@ -487,14 +488,13 @@ public class World {
 						"Could not find the chunk objects of the world (are you running in cmdline mode?)", t);
 			}
 			CArray ret = new CArray(t);
-			for(int i = 0; i < chunks.length; i++) {
-				CArray chunk = new CArray(t);
-				chunk.set("x", new CInt(chunks[i].getX(), t), t);
-				chunk.set("z", new CInt(chunks[i].getZ(), t), t);
-				chunk.set("world", chunks[i].getWorld().getName(), t);
-				ret.set(i, chunk, t);
+			for(MCChunk c : chunks) {
+				CArray chunk = CArray.GetAssociativeArray(t);
+				chunk.set("x", new CInt(c.getX(), t), t);
+				chunk.set("z", new CInt(c.getZ(), t), t);
+				chunk.set("world", c.getWorld().getName(), t);
+				ret.push(chunk, t);
 			}
-
 			return ret;
 		}
 
@@ -510,8 +510,9 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "array {[world]} Gets all currently loaded chunks, in the specified world, or the current"
-					+ " players world if not provided.";
+			return "array {[world]} Gets an array of all currently loaded chunks for a world."
+					+ " The current player's world is used if one is not provided."
+					+ " The chunk objects are associative arrays with the keys: x, z, and world.";
 		}
 
 		@Override
@@ -536,9 +537,9 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {x, z, [world]| locationArray, [world]} Regenerate the chunk, using the specified world, or"
-					+ " the current players world if not provided. Beware that this is destructive! Any data in this"
-					+ " chunk will be lost!";
+			return "void {x, z, [world]| locationArray, [world]} Regenerate the chunk for a world."
+					+ " The current player's world is used if one is not provided. Beware that this is destructive!"
+					+ " Any data in this chunk will be lost!";
 		}
 
 		@Override
@@ -624,8 +625,8 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "boolean {x, z, [world]| locationArray, [world]} Returns if the chunk is a slime spawning chunk,"
-					+ " using the specified world, or the current players world if not provided.";
+			return "boolean {x, z, [world]| locationArray, [world]} Returns if the chunk is a slime spawning chunk."
+					+ " The current player's world is used if one is not provided.";
 		}
 
 		@Override
@@ -735,8 +736,8 @@ public class World {
 			StringBuilder doc = new StringBuilder();
 			synchronized(World.class) {
 				doc.append("void {[world], time} Sets the time of a given world. Should be a number from 0 to"
-						+ " 24000, if not, it is modulo scaled. ---- Alternatively, common time notation (9:30pm, 4:00 am)"
-						+ " is acceptable, and convenient english mappings also exist:");
+						+ " 24000, if not, it is modulo scaled. ---- Alternatively, common time notation"
+						+ " (9:30pm, 4:00 am) is acceptable, and convenient english mappings also exist:");
 				doc.append("<ul>");
 				for(String key : TIME_LOOKUP.keySet()) {
 					doc.append("<li>").append(key).append(" = ").append(TIME_LOOKUP.get(key)).append("</li>");
@@ -834,8 +835,7 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "int {[world]} Returns the time of the specified world, as an integer from"
-					+ " 0 to 24000-1";
+			return "int {[world]} Returns the time of the specified world, as an integer from 0 to 24000-1";
 		}
 
 		@Override
@@ -938,12 +938,12 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {name, [type, environment, [seed, [generator]]]} Creates a new world with the specified options."
-					+ " If the world already exists, it will be loaded from disk, and the last 3 arguments may be"
-					+ " ignored. name is the name of the world, type is one of "
+			return "void {name, [type, environment, [seed, [generator]]]} Creates a world with the specified options."
+					+ " If a world by that name already exists, it will instead be loaded from disk, and the last three"
+					+ " arguments may be ignored. The name is the name of the world, type is one of "
 					+ StringUtils.Join(MCWorldType.values(), ", ") + " and environment is one of "
-					+ StringUtils.Join(MCWorldEnvironment.values(), ", ") + ". The seed can be an integer, a string"
-					+ " (will be the hashcode), or null (will be random int)."
+					+ StringUtils.Join(MCWorldEnvironment.values(), ", ") + ". The seed can be an integer,"
+					+ " a string (will be the hashcode), or null (will be random int)."
 					+ " Generator is the name of a world generator loaded on the server.";
 		}
 
@@ -1057,9 +1057,8 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "array {[location array]} Returns an array of x, z, world "
-					+ "coords of the chunk of either the location specified or the location of "
-					+ "the player running the command.";
+			return "array {[locationArray]} Returns an array of (x, z, world) coordinates of the chunk of either the"
+					+ " location specified or the location of the player running the command.";
 		}
 
 		@Override
@@ -1137,10 +1136,10 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "integer {location array, blockName, [vector array]} Spawns a falling block"
-					+ " of the specified material at the specified location, applying"
-					+ " vector array as a velocity if given. Values for the vector array are doubles, and 1.0"
-					+ " seems to imply about 3 times walking speed. Gravity applies for y.";
+			return "string {locationArray, blockName, [vectorArray]} Spawns a falling block entity of the specified"
+					+ " block type at the specified location, applying the vector array as a velocity if given."
+					+ " Values for the vector array are doubles, and 1.0 seems to imply about 3 times walking speed."
+					+ " Gravity applies for y.";
 		}
 
 		@Override
@@ -1353,8 +1352,9 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {[world], difficulty} Sets the difficulty of the world with the given name, or all worlds if the name is not given."
-					+ " difficulty can be " + StringUtils.Join(MCDifficulty.values(), ", ", ", or ", " or ") + ".";
+			return "void {[world], difficulty} Sets the difficulty of the world with the given name, or all worlds"
+					+ " if the name is not given. The difficulty can be "
+					+ StringUtils.Join(MCDifficulty.values(), ", ", ", or ", " or ") + ".";
 		}
 
 		@Override
@@ -1468,7 +1468,8 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {[world], boolean} Sets if PVP is allowed in the world with the given name, or all worlds if the name is not given.";
+			return "void {[world], boolean} Sets if PVP is allowed in the world with the given name,"
+					+ " or all worlds if the name is not given.";
 		}
 
 		@Override
@@ -1525,8 +1526,9 @@ public class World {
 		@Override
 		public String docs() {
 			return "mixed {world, [gameRule]} Returns an associative array containing the values of all existing"
-					+ " gamerules for the given world. If gameRule is specified, the function only returns that value."
-					+ " gameRule can be " + StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
+					+ " gamerules for the given world. If the gameRule parameter is specified, the function only"
+					+ " returns that one value instead of an array."
+					+ " The gameRule can be " + StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
 		}
 
 		@Override
@@ -1669,10 +1671,10 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "locationArray {origin, target, [distance] | origin, direction, [distance]} Returns a location that"
+			return "array {origin, target, [distance] | origin, direction, [distance]} Returns a location array that"
 					+ " is the specified distance from the origin location along a vector. ---- If a target location is"
 					+ " specified, the vector is gotten from that. (the target's world is ignored) If a direction is"
-					+ " specified, that vector is use instead. Distance defaults to 1. Direction can be one of "
+					+ " specified, that vector is use instead. Distance defaults to 1.0. Direction can be one of "
 					+ StringUtils.Join(MCBlockFace.values(), ", ", ", or ", " or ") + ".";
 		}
 
@@ -1815,7 +1817,8 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "double {location_from, location_to} Calculate pitch from one location to another.";
+			return "double {location_from, location_to} Calculate pitch from one location to another."
+					+ " This will be from -90.0 to 90.0, which is up and down respectively.";
 		}
 
 		@Override
@@ -1874,7 +1877,8 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "array {location, [magnitude]} Returns a vector from the yaw and pitch in a location array."
+			return "array {locationArray, [magnitude]} Returns a vector from the yaw and pitch in a location array."
+					+ " All other values in the location array are ignored."
 					+ " The second parameter, that defines the magnitude of the vector, defaults to 1.0.";
 		}
 
@@ -2033,7 +2037,7 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "double {locationArray} Returns the current temperature of the location given.";
+			return "double {locationArray} Returns the current temperature at the location given.";
 		}
 
 		@Override
@@ -2169,8 +2173,8 @@ public class World {
 		@Override
 		public String docs() {
 			return "void {world_name, paramArray} Updates the world's border with the given values. In addition to the"
-					+ " keys returned by get_world_border(), you can specify the \"seconds\" for which the \"width\""
-					+ " will be applied.";
+					+ " keys returned by get_world_border(), you can also specify the \"seconds\". This is time in"
+					+ " which the border will move from the previous width to the new \"width\".";
 		}
 
 		@Override

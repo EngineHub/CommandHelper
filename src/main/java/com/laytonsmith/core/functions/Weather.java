@@ -25,7 +25,6 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
-import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
 import java.util.UUID;
@@ -54,11 +53,12 @@ public class Weather {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CRELengthException.class, CREInvalidWorldException.class, CREFormatException.class};
+			return new Class[]{CRECastException.class, CRELengthException.class, CREInvalidWorldException.class,
+					CREFormatException.class};
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			int x;
 			int y;
 			int z;
@@ -68,7 +68,8 @@ public class Weather {
 			int safeIndex = 1;
 			if(args[0] instanceof CArray) {
 				CArray a = (CArray) args[0];
-				MCLocation l = ObjectGenerator.GetGenerator().location(a, (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld() : null), t);
+				MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				MCLocation l = ObjectGenerator.GetGenerator().location(a, p == null ? null : p.getWorld(), t);
 				x = (int) java.lang.Math.floor(l.getX());
 				y = (int) java.lang.Math.floor(l.getY());
 				z = (int) java.lang.Math.floor(l.getZ());
@@ -97,11 +98,11 @@ public class Weather {
 
 		@Override
 		public String docs() {
-			return "int {strikeLocArray, [safe] | x, y, z, [safe]} Makes"
+			return "string {locationArray, [safe] | x, y, z, [safe]} Makes"
 					+ " lightning strike at the x y z coordinates specified"
-					+ " in the array(x, y, z). Safe  defaults to false, but"
+					+ " in the array or arguments. Safe defaults to false, but"
 					+ " if true, lightning striking a player will not hurt"
-					+ " them. Returns the entityID of the lightning bolt.";
+					+ " them. Returns the UUID of the lightning bolt entity.";
 		}
 
 		@Override
@@ -134,7 +135,7 @@ public class Weather {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			boolean b = Static.getBoolean(args[0], t);
 			MCWorld w = null;
 			int duration = -1;
@@ -221,8 +222,7 @@ public class Weather {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if(args.length == 1) {
 				if(environment.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
@@ -255,7 +255,7 @@ public class Weather {
 		@Override
 		public String docs() {
 			return "void {boolean, [world], [int]} Sets whether or not the weather can have thunder. The third argument"
-					+ " can specify how long the thunder should last.";
+					+ " can specify how long the thunder should last in server ticks.";
 		}
 
 		@Override
@@ -284,8 +284,7 @@ public class Weather {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if(args.length == 1) {
 				w = Static.getServer().getWorld(args[0].val());
@@ -342,8 +341,7 @@ public class Weather {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if(args.length == 1) {
 				w = Static.getServer().getWorld(args[0].val());

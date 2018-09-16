@@ -292,7 +292,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns true if entity exists, otherwise false.";
+			return "boolean {entityUUID} Returns true if entity exists, otherwise false.";
 		}
 
 		@Override
@@ -324,7 +324,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns true if entity is living, otherwise false.";
+			return "boolean {entityUUID} Returns true if entity is living, otherwise false.";
 		}
 
 		@Override
@@ -348,7 +348,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns true or false if the specified entity is tameable";
+			return "boolean {entityUUID} Returns true or false if the specified entity is tameable";
 		}
 
 		@Override
@@ -402,7 +402,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "locationArray {entityID} Returns the location array for this entity, if it exists."
+			return "locationArray {entityUUID} Returns the location array for this entity, if it exists."
 					+ " This array will be compatible with any function that expects a location.";
 		}
 
@@ -450,7 +450,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID, locationArray} Teleports the entity to the given location and returns whether"
+			return "boolean {entityUUID, locationArray} Teleports the entity to the given location and returns whether"
 					+ " the action was successful. Note this can set both location and direction.";
 		}
 
@@ -497,8 +497,8 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "array {entityID} Returns an associative array indicating the x/y/z components of this entity's velocity."
-					+ " As a convenience, the magnitude is also included.";
+			return "array {entityUUID} Returns an entity's motion vector represented as an associative array with the"
+					+ " the keys x, y, and z. As a convenience, the magnitude is also included.";
 		}
 
 		@Override
@@ -534,9 +534,9 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, array} Sets the velocity of this entity according to the supplied xyz array. All 3"
-					+ " values default to 0, so an empty array will simply stop the entity's motion. Both normal and"
-					+ " associative arrays are accepted.";
+			return "void {entityUUID, array} Sets the velocity of this entity according to the supplied xyz array."
+					+ " All 3 values default to 0, so an empty array will simply stop the entity's motion. Both normal"
+					+ " and associative arrays are accepted.";
 		}
 
 		@Override
@@ -581,7 +581,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID} Removes the specified entity from the world, without any drops or animations. "
+			return "void {entityUUID} Removes the specified entity from the world, without any drops or animations. "
 					+ "Note: you can't remove players. As a safety measure for working with NPC plugins, it will "
 					+ "not work on anything human, even if it is not a player.";
 		}
@@ -619,7 +619,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "string {entityID} Returns the EntityType of the entity with the specified ID."
+			return "string {entityUUID} Returns the EntityType of the entity with the specified ID."
 					+ " Returns null if the entity does not exist.";
 		}
 
@@ -649,7 +649,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "int {entityID} Returns the entity age as an integer, represented by server ticks.";
+			return "int {entityUUID} Returns the entity age as an integer, represented by server ticks.";
 		}
 
 		@Override
@@ -689,7 +689,8 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, int} Sets the age of the entity to the specified int, represented by server ticks.";
+			return "void {entityUUID, int} Sets the age of the entity to the specified int,"
+					+ " represented by server ticks.";
 		}
 
 		@Override
@@ -847,12 +848,12 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "int {[entity[, projectile]] | player, projectile, target[, speed]} shoots an entity from the"
-					+ " specified location (can be entityID, player name or location array), or the current player"
-					+ " if no arguments are passed. If no entity type is specified, it defaults to a fireball."
-					+ " If provide three arguments, with target (entityID, player name or location array), entity will"
-					+ " shoot to target location. Last, fourth argument, is double and specifies the speed"
-					+ " of projectile. Returns the EntityID of the entity. Valid projectile types: "
+			return "string {[entity[, projectile]] | player, projectile, target[, speed]} shoots an entity from the"
+					+ " specified location (can be an entity UUID, player name or location array), or the current"
+					+ " player if no arguments are passed. If no entity type is specified, it defaults to a fireball."
+					+ " If provide three arguments, with target (entity UUID, player name or location array), entity"
+					+ " will shoot to target location. Last, fourth argument, is double and specifies the speed"
+					+ " of projectile. Returns the UUID of the entity. Valid projectile types: "
 					+ StringUtils.Join(MCProjectileType.values(), ", ", ", or ", " or ");
 		}
 
@@ -979,7 +980,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "int {entityID} Returns the number of seconds until this entity"
+			return "int {entityUUID} Returns the number of seconds until this entity"
 					+ " stops being on fire, 0 if it already isn't.";
 		}
 
@@ -1013,7 +1014,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, seconds} Sets the entity on fire for the"
+			return "void {entityUUID, seconds} Sets the entity on fire for the"
 					+ " given number of seconds. Throws a RangeException"
 					+ " if seconds is less than 0 or greater than 107374182.";
 		}
@@ -1048,7 +1049,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, effect} Plays the given visual effect on the"
+			return "void {entityUUID, effect} Plays the given visual effect on the"
 					+ " entity. Non-applicable effects simply won't happen. Note:"
 					+ " the death effect makes the mob invisible to players and"
 					+ " immune to melee attacks. When used on players, they are"
@@ -1084,7 +1085,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "string {entityID} Returns the name of the given mob.";
+			return "string {entityUUID} Returns the name of the given mob.";
 		}
 
 		@Override
@@ -1114,7 +1115,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, name} Sets the name of the given mob. This"
+			return "void {entityUUID, name} Sets the name of the given mob. This"
 					+ " automatically truncates if it is more than 64 characters.";
 		}
 
@@ -1222,7 +1223,7 @@ public class EntityManagement {
 				}
 			}
 			return "array {entityType, [qty], [location], [closure]} Spawns the specified number of entities of the"
-					+ " given type at the given location. Returns an array of entityIDs of what is spawned."
+					+ " given type at the given location. Returns an array of entity UUIDs of what is spawned."
 					+ "  Qty defaults to 1 and location defaults to the location of the commandsender,"
 					+ " if it is a block or player. If the commandsender is console, location must be supplied."
 					+ " ---- Entitytype can be one of " + StringUtils.Join(spawnable, ", ", " or ", ", or ") + "."
@@ -1322,7 +1323,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "string {entityID} Returns the ID of the given entity's rider, or null if it doesn't have one.";
+			return "string {entityUUID} Returns the UUID of the given entity's rider, or null if it doesn't have one.";
 		}
 
 		@Override
@@ -1350,7 +1351,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "string {entityID} Returns the ID of the given entity's vehicle, or null if it doesn't have one.";
+			return "string {entityUUID} Returns the UUID of the given entity's vehicle, or null if none exists.";
 		}
 
 		@Override
@@ -1370,12 +1371,10 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
-			if(e instanceof MCBoat) {
-				return new CDouble(((MCBoat) e).getMaxSpeed(), t);
-			} else if(e instanceof MCMinecart) {
+			if(e instanceof MCMinecart) {
 				return new CDouble(((MCMinecart) e).getMaxSpeed(), t);
 			}
-			throw new CREBadEntityTypeException("Given entity must be a boat or minecart.", t);
+			throw new CREBadEntityTypeException("Given entity must be a minecart.", t);
 		}
 
 		@Override
@@ -1385,8 +1384,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "double {entityID} Returns a max speed for given entity. Make sure that the entity is a boat"
-					+ " or minecart.";
+			return "double {entityUUID} Returns a max speed for given entity. Make sure that the entity is a minecart.";
 		}
 
 		@Override
@@ -1408,12 +1406,10 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
 			double speed = Static.getDouble(args[1], t);
-			if(e instanceof MCBoat) {
-				((MCBoat) e).setMaxSpeed(speed);
-			} else if(e instanceof MCMinecart) {
+			if(e instanceof MCMinecart) {
 				((MCMinecart) e).setMaxSpeed(speed);
 			} else {
-				throw new CREBadEntityTypeException("Given entity must be a boat or minecart.", t);
+				throw new CREBadEntityTypeException("Given entity must be a minecart.", t);
 			}
 			return CVoid.VOID;
 		}
@@ -1425,8 +1421,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID} Sets a max speed for given entity. Make sure that the entity is a boat"
-					+ " or minecart.";
+			return "void {entityUUID} Sets a max speed for given entity. Make sure that the entity is a minecart.";
 		}
 
 		@Override
@@ -1454,7 +1449,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns whether or not a mob's custom name is always visible."
+			return "boolean {entityUUID} Returns whether or not a mob's custom name is always visible."
 					+ " If this is true it will be as visible as player names, otherwise it will only be"
 					+ " visible when near the mob.";
 		}
@@ -1485,7 +1480,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, boolean} Sets the visibility of a mob's custom name."
+			return "void {entityUUID, boolean} Sets the visibility of a mob's custom name."
 					+ " True means it will be visible from a distance, like a playername."
 					+ " False means it will only be visible when near the mob.";
 		}
@@ -1640,7 +1635,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} returns whether the entity is touching the ground";
+			return "boolean {entityUUID} returns whether the entity is touching the ground";
 		}
 
 		@Override
@@ -2103,7 +2098,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, specArray} Sets the data in the specArray to the given entity."
+			return "void {entityUUID, specArray} Sets the data in the specArray to the given entity."
 					+ " The specArray must follow the same format as entity_spec()."
 					+ " See the documentation for that function for info on available options."
 					+ " All indices in the specArray are optional.";
@@ -3089,7 +3084,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "mixed {entityID} Returns the shooter of the given projectile, can be null."
+			return "mixed {entityUUID} Returns the shooter of the given projectile, can be null."
 					+ " If the shooter is an entity, that entity's ID will be return, but if it is a block,"
 					+ " that block's location will be returned.";
 		}
@@ -3128,7 +3123,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, shooterID} Sets the shooter of the given projectile. This can be entity UUID,"
+			return "void {entityUUID, shooter} Sets the shooter of the given projectile. This can be an entity UUID,"
 					+ " dispenser location array (throws CastException if not a dispenser), or null.";
 		}
 
@@ -3170,7 +3165,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns whether or not the given projectile should bounce or not when it hits something.";
+			return "boolean {entityUUID} Returns if the given projectile should bounce when it hits something.";
 		}
 
 		@Override
@@ -3199,7 +3194,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, boolean} Sets whether or not the given projectile should bounce or not when it hits something.";
+			return "void {entityUUID, boolean} Sets if the given projectile should bounce when it hits something.";
 		}
 
 		@Override
@@ -3229,7 +3224,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "double {entityID} Returns the distance the entity has fallen.";
+			return "double {entityUUID} Returns the distance the entity has fallen.";
 		}
 
 		@Override
@@ -3253,7 +3248,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, double} Sets the distance the entity has fallen.";
+			return "void {entityUUID, double} Sets the distance the entity has fallen.";
 		}
 
 		@Override
@@ -3278,7 +3273,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, boolean} If true, applies glowing effect to the entity";
+			return "void {entityUUID, boolean} If true, applies glowing effect to the entity";
 		}
 
 		@Override
@@ -3303,7 +3298,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns true if the entity is glowing";
+			return "boolean {entityUUID} Returns true if the entity is glowing";
 		}
 
 		@Override
@@ -3328,7 +3323,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns true if the entity produces sounds";
+			return "boolean {entityUUID} Returns true if the entity produces sounds";
 		}
 
 		@Override
@@ -3352,7 +3347,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, boolean} Sets whether or not entity produces sounds";
+			return "void {entityUUID, boolean} Sets whether or not entity produces sounds";
 		}
 
 		@Override
@@ -3378,7 +3373,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns true if gravity applies to the entity.";
+			return "boolean {entityUUID} Returns true if gravity applies to the entity.";
 		}
 
 		@Override
@@ -3402,7 +3397,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, boolean} Sets whether or not gravity applies to the entity.";
+			return "void {entityUUID, boolean} Sets whether or not gravity applies to the entity.";
 		}
 
 		@Override
@@ -3428,7 +3423,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID} Returns true if the entity cannot be damaged";
+			return "boolean {entityUUID} Returns true if the entity cannot be damaged";
 		}
 
 		@Override
@@ -3452,7 +3447,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "void {entityID, boolean} If set to true the entity cannot be damaged, except by players in"
+			return "void {entityUUID, boolean} If set to true the entity cannot be damaged, except by players in"
 					+ " creative mode";
 		}
 
@@ -3479,7 +3474,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "array {entityID} Returns an array of scoreboard tags for this entity.";
+			return "array {entityUUID} Returns an array of scoreboard tags for this entity.";
 		}
 
 		@Override
@@ -3508,7 +3503,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID, tag} Adds a tag to the entity. Returns whether or not it was successful.";
+			return "boolean {entityUUID, tag} Adds a tag to the entity. Returns whether or not it was successful.";
 		}
 
 		@Override
@@ -3533,7 +3528,7 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {entityID, tag} Removes a tag from the entity. Returns whether or not it was successful.";
+			return "boolean {entityUUID, tag} Removes a tag from the entity. Returns whether or not it was successful.";
 		}
 
 		@Override
@@ -3563,10 +3558,10 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player/LocationArray], itemArray, [spawnNaturally]} Drops the specified item stack at the"
+			return "string {[player/LocationArray], itemArray, [spawnNaturally]} Drops the specified item stack at the"
 					+ " specified player's feet (or at an arbitrary Location, if an array is given), and returns its"
-					+ " entity id. spawnNaturally takes a boolean, which forces the way the item will be spawned. If"
-					+ " true, the item will be dropped with a random velocity.";
+					+ " entity UUID. spawnNaturally takes a boolean, which forces the way the item will be spawned."
+					+ " If true, the item will be dropped with a random velocity.";
 		}
 
 		@Override
@@ -3720,30 +3715,34 @@ public class EntityManagement {
 					names.add(f.getName());
 				}
 			}
-			return "void {locationArray, [optionsArray]} Launches a firework. The location array specifies where it is launched from,"
-					+ " and the options array is an associative array described below. All parameters in the associative array are"
-					+ " optional, and default to the specified values if not set. The default options being set will make it look like"
-					+ " a normal firework, with a white explosion. ----"
+			return "string {locationArray, [optionsArray]} Launches a firework rocket."
+					+ " The location array specifies where it is launched from,"
+					+ " and the options array is an associative array described below."
+					+ " All parameters in the array are optional, and default to the specified values if not set."
+					+ " The default options being set will make it look like a normal firework, with a white explosion."
+					+ " Returns the firework rocket entity's UUID. ----"
 					+ " The options array may have the following keys:\n"
 					+ "{| cellspacing=\"1\" cellpadding=\"1\" border=\"1\" class=\"wikitable\"\n"
 					+ "! Array key !! Description !! Default\n"
 					+ "|-\n"
-					+ "| strength || A number specifying how far up the firework should go || 2\n"
+					+ "| strength \n A number specifying how far up the firework should go \n 2\n"
 					+ "|-\n"
-					+ "| flicker || A boolean, determining if the firework will flicker\n || false\n"
+					+ "| flicker \n A boolean, determining if the firework will flicker \n false\n"
 					+ "|-\n"
-					+ "| trail || A boolean, determining if the firework will leave a trail || true\n"
+					+ "| trail \n A boolean, determining if the firework will leave a trail \n true\n"
 					+ "|-\n"
-					+ "| colors || An array of colors, or a pipe seperated string of color names (for the named colors only)"
-					+ " for instance: array('WHITE') or 'WHITE<nowiki>|</nowiki>BLUE'. If you want custom colors, you must use an array, though"
-					+ " you can still use color names as an item in the array, for instance: array('ORANGE', array(30, 45, 150))."
-					+ " These colors are used as the primary colors. || 'WHITE'\n"
+					+ "| colors \n An array of colors, or a pipe separated string of color names"
+					+ " for instance: array('WHITE') or 'WHITE<nowiki>|</nowiki>BLUE'. If you want custom colors,"
+					+ " you must use an array, though you can still use color names as an item in the array,"
+					+ " for instance: array('ORANGE', array(30, 45, 150))."
+					+ " These colors are used as the primary colors. \n 'WHITE'\n"
 					+ "|-\n"
-					+ "| fade || An array of colors to be used as the fade colors. This parameter should be formatted the same as"
-					+ " the colors parameter || array()\n"
+					+ "| fade \n An array of colors to be used as the fade colors. This parameter should be formatted"
+					+ " the same as the colors parameter \n array()\n"
 					+ "|-\n"
-					+ "| type || An enum value of one of the firework types, one of: " + StringUtils.Join(MCFireworkType.values(), ", ", " or ")
-					+ " || " + MCFireworkType.BALL.name() + "\n"
+					+ "| type \n An enum value of one of the firework types, one of: "
+					+ StringUtils.Join(MCFireworkType.values(), ", ", " or ")
+					+ " \n " + MCFireworkType.BALL.name() + "\n"
 					+ "|}\n"
 					+ "The \"named colors\" can be one of: " + StringUtils.Join(names, ", ", " or ");
 		}
