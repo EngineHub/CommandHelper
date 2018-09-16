@@ -16,16 +16,6 @@ public class BukkitMCBoat extends BukkitMCVehicle implements MCBoat {
 	}
 
 	@Override
-	public double getMaxSpeed() {
-		return b.getMaxSpeed();
-	}
-
-	@Override
-	public void setMaxSpeed(double speed) {
-		b.setMaxSpeed(speed);
-	}
-
-	@Override
 	public MCTreeSpecies getWoodType() {
 		return BukkitMCTreeSpecies.getConvertor().getAbstractedEnum(b.getWoodType());
 	}

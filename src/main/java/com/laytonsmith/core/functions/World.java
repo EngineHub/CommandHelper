@@ -1083,7 +1083,6 @@ public class World {
 		}
 	}
 
-	@hide("Deprecated")
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class spawn_falling_block extends AbstractFunction implements Optimizable {
 

@@ -96,11 +96,11 @@ public final class Profiler {
 		if(configGranularity == null) {
 			configGranularity = LogLevel.ERROR;
 		}
-		profilerOn = (Boolean) prefs.getPreference("profiler-on");
-		logFile = (String) prefs.getPreference("profiler-log");
-		writeToFile = (Boolean) prefs.getPreference("write-to-file");
-		writeToScreen = (Boolean) prefs.getPreference("write-to-screen");
-		logThreshold = (Double) prefs.getPreference("profile-log-threshold");
+		profilerOn = prefs.getBooleanPreference("profiler-on");
+		logFile = prefs.getStringPreference("profiler-log");
+		writeToFile = prefs.getBooleanPreference("write-to-file");
+		writeToScreen = prefs.getBooleanPreference("write-to-screen");
+		logThreshold = prefs.getDoublePreference("profile-log-threshold");
 		new GarbageCollectionDetector(this);
 		//As a form of calibration, we want to "warm up" a point.
 		//For whatever reason, this levels out the profile points pretty well.

@@ -118,7 +118,7 @@ public class CHLog {
 		}
 		LogLevel level;
 		try {
-			String pref = (String) prefs.getPreference(tag.name);
+			String pref = prefs.getStringPreference(tag.name);
 			if("ON".equals(pref)) {
 				level = LogLevel.ERROR;
 			} else {
