@@ -34,7 +34,7 @@ import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +43,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -536,14 +537,14 @@ public class AliasCore {
 	 * @throws Exception if the file cannot be found
 	 */
 	public static String file_get_contents(String fileLocation) throws IOException {
-		BufferedReader in = new BufferedReader(new FileReader(fileLocation));
-		String ret = "";
-		String str;
-		while((str = in.readLine()) != null) {
-			ret += str + "\n";
+		StringBuilder ret = new StringBuilder();
+		try(BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(fileLocation), Charset.forName("UTF-8")))) {
+			String str;
+			while((str = in.readLine()) != null) {
+				ret.append(str).append('\n');
+			}
 		}
-		in.close();
-		return ret;
+		return ret.toString();
 	}
 
 	/**
