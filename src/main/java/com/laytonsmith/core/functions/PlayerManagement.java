@@ -15,6 +15,7 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.enums.MCGameMode;
@@ -4128,15 +4129,22 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(p, t);
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
-			MCMaterial mat = StaticLayer.GetMaterial(args[1 + offset].val());
-			if(mat == null) {
-				mat = Static.ParseItemNotation(getName(), args[1 + offset].val(), 1, t).getType();
+			MCBlockData data;
+			try {
+				data = StaticLayer.GetServer().createBlockData(args[1 + offset].val().toLowerCase());
+			} catch (IllegalArgumentException ex) {
+				String value = args[1 + offset].val();
+				if(value.contains(":") && value.length() <= 6) {
+					data = Static.ParseItemNotation(getName(), args[1 + offset].val(), 1, t).getType().createBlockData();
+				} else {
+					throw new CREFormatException("Invalid block format: " + value, t);
+				}
 			}
-			if(!mat.isBlock()) {
+			if(!data.getMaterial().isBlock()) {
 				throw new CREIllegalArgumentException("The value \"" + args[1 + offset].val()
 						+ "\" is not a valid block material.", t);
 			}
-			p.sendBlockChange(loc, mat.createBlockData());
+			p.sendBlockChange(loc, data);
 			return CVoid.VOID;
 		}
 
@@ -4152,9 +4160,10 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], locationArray, blockName} Changes a block temporarily for the specified player."
+			return "void {[player], locationArray, block} Changes a block temporarily for the specified player."
 					+ " This can be used to \"fake\" blocks for a player. These illusory blocks will disappear when"
-					+ " the client updates them, most often by clicking on them or reloading the chunks.";
+					+ " the client updates them, most often by clicking on them or reloading the chunks."
+					+ " A block type or blockdata format is supported. (see set_blockdata_string())";
 		}
 
 		@Override
@@ -4167,7 +4176,8 @@ public class PlayerManagement {
 			if(children.size() < 2) {
 				return null;
 			}
-			if(children.get(children.size() - 1).getData().val().contains(":")) {
+			String value = children.get(children.size() - 1).getData().val();
+			if(value.contains(":") && value.length() <= 6) { // longest valid item format without being blockdata string
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The 1:1 format is deprecated in psend_block_change()", t);
 			}
 			return null;
