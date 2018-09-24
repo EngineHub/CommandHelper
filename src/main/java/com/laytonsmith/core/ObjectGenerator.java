@@ -1,41 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Vector3D;
-import com.laytonsmith.abstraction.MCBannerMeta;
-import com.laytonsmith.abstraction.MCBlockStateMeta;
-import com.laytonsmith.abstraction.MCBookMeta;
-import com.laytonsmith.abstraction.MCBrewerInventory;
-import com.laytonsmith.abstraction.MCColor;
-import com.laytonsmith.abstraction.MCCreatureSpawner;
-import com.laytonsmith.abstraction.MCEnchantment;
-import com.laytonsmith.abstraction.MCEnchantmentStorageMeta;
-import com.laytonsmith.abstraction.MCFireworkBuilder;
-import com.laytonsmith.abstraction.MCFireworkEffect;
-import com.laytonsmith.abstraction.MCFireworkEffectMeta;
-import com.laytonsmith.abstraction.MCFireworkMeta;
-import com.laytonsmith.abstraction.MCFurnaceInventory;
-import com.laytonsmith.abstraction.MCFurnaceRecipe;
-import com.laytonsmith.abstraction.MCInventory;
-import com.laytonsmith.abstraction.MCInventoryHolder;
-import com.laytonsmith.abstraction.MCItemFactory;
-import com.laytonsmith.abstraction.MCItemMeta;
-import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.abstraction.MCLeatherArmorMeta;
-import com.laytonsmith.abstraction.MCLivingEntity;
-import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCMapMeta;
-import com.laytonsmith.abstraction.MCMetadataValue;
-import com.laytonsmith.abstraction.MCPattern;
-import com.laytonsmith.abstraction.MCPlugin;
-import com.laytonsmith.abstraction.MCPotionData;
-import com.laytonsmith.abstraction.MCPotionMeta;
-import com.laytonsmith.abstraction.MCRecipe;
-import com.laytonsmith.abstraction.MCShapedRecipe;
-import com.laytonsmith.abstraction.MCShapelessRecipe;
-import com.laytonsmith.abstraction.MCSkullMeta;
-import com.laytonsmith.abstraction.MCTropicalFishBucketMeta;
-import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCBanner;
@@ -1456,6 +1422,16 @@ public class ObjectGenerator {
 			ret.set("shape", shape, t);
 			ret.set("ingredients", imap, t);
 			ret.set("key", shaped.getKey(), t);
+		} else if (r instanceof MCMerchantRecipe) {
+			MCMerchantRecipe merchant = (MCMerchantRecipe) r;
+			CArray il = new CArray(t);
+			for (MCItemStack i : merchant.getIngredients()) {
+				il.push(item(i, t), t);
+			}
+			ret.set("ingredients", il, t);
+			ret.set("maxuses", new CInt(merchant.getMaxUses(), t), t);
+			ret.set("uses", new CInt(merchant.getUses(), t), t);
+			ret.set("hasxpreward", CBoolean.get(merchant.hasExperienceReward()), t);
 		}
 		return ret;
 	}
@@ -1581,6 +1557,24 @@ public class ObjectGenerator {
 					throw new CREFormatException("Item was not found", t);
 				}
 				return ret;
+
+			case MERCHANT:
+				((MCMerchantRecipe) ret).setMaxUses(Static.getInt32(recipe.get("maxuses", t), t));
+				((MCMerchantRecipe) ret).setUses(Static.getInt32(recipe.get("uses", t), t));
+				((MCMerchantRecipe) ret).setHasExperienceReward(Static.getBoolean(recipe.get("hasxpreward", t), t));
+				ingredients = Static.getArray(recipe.get("ingredients", t), t);
+				if (ingredients.inAssociativeMode()) {
+					throw new CREFormatException("Ingredients array is invalid.", t);
+				}
+				if (ingredients.size() < 1 || ingredients.size() > 2) {
+					throw new CRERangeException("Ingredients for merchants must contain 1 or 2 items, found "
+							+ ingredients.size(), t);
+				}
+				List<MCItemStack> mcIngredients = new ArrayList<>();
+				for (Construct ingredient : ingredients.asList()) {
+					mcIngredients.add(item(ingredient, t));
+				}
+				((MCMerchantRecipe) ret).setIngredients(mcIngredients);
 
 			default:
 				throw new CREFormatException("Could not find valid recipe type.", t);
