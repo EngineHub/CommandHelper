@@ -16,7 +16,7 @@ import java.util.List;
 public class BukkitMCMerchant implements MCMerchant {
 
 	private Merchant merchant;
-	BukkitMCMerchant(Merchant mer) {
+	public BukkitMCMerchant(Merchant mer) {
 		merchant = mer;
 	}
 

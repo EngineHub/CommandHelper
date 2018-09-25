@@ -1,8 +1,12 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCMerchant;
+import com.laytonsmith.abstraction.MCMerchantRecipe;
 import com.laytonsmith.abstraction.MCRecipe;
+import com.laytonsmith.abstraction.entities.MCVillager;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -15,8 +19,11 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -276,5 +283,73 @@ public class Recipes {
 			return CHVersion.V3_3_1;
 		}
 
+	}
+
+	@api
+	public static class get_merchant_recipes extends recipeFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[0];
+		}
+
+		@Override
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			CArray ret = new CArray(t);
+			for (MCMerchantRecipe mr : GetMerchant(args[0], t).getRecipes()) {
+				ret.push(ObjectGenerator.GetGenerator().recipe(mr, t), t);
+			}
+			return ret;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public String getName() {
+			return "get_merchant_recipes";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {specifier} Returns a list of recipes used by the specified merchant."
+					+ " Specifier can be the UUID of an entity or a virtual merchant ID.";
+		}
+	}
+
+	public static final HashMap<String, MCMerchantRecipe> MERCHANT_RECIPES = new HashMap<>();
+	public static final HashMap<String, MCMerchant> VIRTUAL_MERCHANTS = new HashMap<>();
+
+	/**
+	 * Returns the merchant specified.
+	 * @param specifier The string representing the merchant, whether entity UUID or virtual id.
+	 * @param t
+	 * @return
+	 */
+	private static MCMerchant GetMerchant(Construct specifier, Target t) {
+		MCMerchant merchant;
+		if(specifier.val().length() == 36 || specifier.val().length() == 32) {
+			try {
+				MCEntity entity = Static.getEntity(specifier, t);
+				if(!(entity instanceof MCVillager)) {
+					throw new CREIllegalArgumentException("The entity specified is not capable of being an merchant.", t);
+				}
+				return ((MCVillager) entity).asMerchant();
+			} catch (CREFormatException iae) {
+				// not a UUID
+			}
+		}
+		merchant = VIRTUAL_MERCHANTS.get(specifier.val());
+		if(merchant == null) {
+			throw new CREIllegalArgumentException("A merchant named \"" + specifier.val() + "\" does not exist.", t);
+		}
+		return merchant;
 	}
 }

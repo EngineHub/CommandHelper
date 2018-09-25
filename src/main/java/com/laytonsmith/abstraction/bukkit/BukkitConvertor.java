@@ -630,7 +630,7 @@ public class BukkitConvertor extends AbstractConvertor {
 			case FURNACE:
 				return new BukkitMCFurnaceRecipe(new FurnaceRecipe(nskey, is, Material.AIR, 0.0F, 200));
 			case MERCHANT:
-				return new BukkitMCMerchantRecipe(new MerchantRecipe(is, -1));
+				return new BukkitMCMerchantRecipe(new MerchantRecipe(is, Integer.MAX_VALUE));
 			case SHAPED:
 				return new BukkitMCShapedRecipe(new ShapedRecipe(nskey, is));
 			case SHAPELESS:
