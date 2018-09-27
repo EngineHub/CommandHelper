@@ -1,7 +1,11 @@
 package com.laytonsmith.PureUtilities.Common.Annotations;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.AbstractMethodMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassReferenceMirror;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ConstructorMirror;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.MethodMirror;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.ExhaustiveVisitor;
@@ -11,7 +15,6 @@ import com.laytonsmith.core.constructs.CClassType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,41 +56,50 @@ public class AnnotationChecks {
 	@SuppressWarnings("UnnecessaryLabelOnBreakStatement")
 	public static void checkForceImplementation() throws Exception {
 		Set<String> uhohs = new HashSet<>();
-		Set<Constructor<?>> set = ClassDiscovery.getDefaultInstance().loadConstructorsWithAnnotation(ForceImplementation.class);
-		for(Constructor<?> cons : set) {
-			Class superClass = cons.getDeclaringClass();
-			Set<Class> s = ClassDiscovery.getDefaultInstance().loadClassesThatExtend(superClass);
+		Set<ConstructorMirror<?>> set = ClassDiscovery.getDefaultInstance().getConstructorsWithAnnotation(ForceImplementation.class);
+		for(ConstructorMirror<?> cons : set) {
+			ClassReferenceMirror superClass = cons.getDeclaringClass();
+			Set<ClassMirror<?>> s = ClassDiscovery.getDefaultInstance().getClassesThatExtend(ClassDiscovery.getDefaultInstance().getClassMirror(superClass));
 			checkImplements:
-			for(Class c : s) {
+			for(ClassMirror c : s) {
+				if(c.getModifiers().isAbstract()) {
+					// Abstract classes are not required to implement this
+					continue;
+				}
 				// c is the class we want to check to make sure it implements cons
-				for(Constructor cCons : c.getDeclaredConstructors()) {
-					if(Arrays.equals(cons.getParameterTypes(), cCons.getParameterTypes())) {
+				for(ConstructorMirror cCons : c.getConstructors()) {
+					if(Arrays.asList(cons.getParams()).equals(Arrays.asList(cCons.getParams()))) {
 						continue checkImplements;
 					}
 				}
-				if(c.isMemberClass() && (c.getModifiers() & Modifier.STATIC) == 0) {
+				if(c.getJVMClassName().contains("$") && c.getModifiers().isStatic()) {
 					// Ok, so, an inner, non static class actually passes the super class's reference to the constructor as
 					// the first parameter, at a byte code level. So this is a different type of error, or at least, a different
 					// error message will be helpful.
-					uhohs.add(c.getName() + " must be static.");
+					uhohs.add(c.getClassName() + " must be static.");
 				} else {
-					uhohs.add(c.getName() + " must implement the constructor with signature (" + getSignature(cons) + "), but doesn't.");
+					uhohs.add(c.getClassName() + " must implement the constructor with signature (" + getSignature(cons) + "), but doesn't.");
 				}
 			}
 		}
 
-		Set<Method> set2 = ClassDiscovery.getDefaultInstance().loadMethodsWithAnnotation(ForceImplementation.class);
-		for(Method cons : set2) {
-			Class superClass = cons.getDeclaringClass();
+		Set<MethodMirror> set2 = ClassDiscovery.getDefaultInstance().getMethodsWithAnnotation(ForceImplementation.class);
+		for(MethodMirror cons : set2) {
+			ClassReferenceMirror superClass = cons.getDeclaringClass();
 			@SuppressWarnings("unchecked")
-			Set<Class<?>> s = ClassDiscovery.getDefaultInstance().loadClassesThatExtend(superClass);
+			Set<ClassMirror<?>> s = ClassDiscovery.getDefaultInstance().getClassesThatExtend(ClassDiscovery.getDefaultInstance().getClassMirror(superClass));
+			String S = StringUtils.Join(s, "; ");
 			checkImplements:
-			for(Class<?> c : s) {
+			for(ClassMirror<?> c : s) {
+				if(c.getModifiers().isAbstract() ) {
+					// Abstract classes are not required to implement this
+					continue;
+				}
 				// First, check if maybe it has a InterfaceRunner for it
 				findRunner:
-				for(Class<?> ir : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(InterfaceRunnerFor.class)) {
-					InterfaceRunnerFor ira = ir.getAnnotation(InterfaceRunnerFor.class);
-					if(ira.value() == c) {
+				for(ClassMirror<?> ir : ClassDiscovery.getDefaultInstance().getClassesWithAnnotation(InterfaceRunnerFor.class)) {
+					String ira = (String) ir.getAnnotation(InterfaceRunnerFor.class).getValue("value");
+					if(ira.equals(c.getClassName())) {
 						// Aha! It does. Set c to ir, then break this for loop.
 						// The runner for this class will act in the stead of this
 						// class.
@@ -96,12 +108,13 @@ public class AnnotationChecks {
 					}
 				}
 				// c is the class we want to check to make sure it implements cons
-				for(Method cCons : c.getDeclaredMethods()) {
-					if(cCons.getName().equals(cons.getName()) && Arrays.equals(cons.getParameterTypes(), cCons.getParameterTypes())) {
+				for(MethodMirror cCons : c.getMethods()) {
+					if(cCons.getName().equals(cons.getName()) && Arrays.asList(cons.getParams()).equals(Arrays.asList(cCons.getParams()))) {
 						continue checkImplements;
 					}
 				}
-				uhohs.add(c.getName() + " must implement the method with signature " + cons.getName() + "(" + getSignature(cons) + "), but doesn't.");
+				System.err.println("Adding uh oh");
+				uhohs.add(c.getClassName() + " must implement the method with signature " + cons.getName() + "(" + getSignature(cons) + "), but doesn't.");
 			}
 		}
 
@@ -112,21 +125,10 @@ public class AnnotationChecks {
 		}
 	}
 
-	private static String getSignature(Member executable) {
+	private static String getSignature(AbstractMethodMirror executable) {
 		List<String> l = new ArrayList<>();
-//		for(Class cc : executable.getParameterTypes()){
-//			l.add(cc.getName());
-//		}
-		if(executable instanceof Method) {
-			for(Class cc : ((Method) executable).getParameterTypes()) {
-				l.add(cc.getName());
-			}
-		} else if(executable instanceof Constructor) {
-			for(Class cc : ((Constructor) executable).getParameterTypes()) {
-				l.add(cc.getName());
-			}
-		} else {
-			throw new Error("Unexpected executable type");
+		for(ClassReferenceMirror crm : executable.getParams()) {
+			l.add(crm.toString());
 		}
 		return StringUtils.Join(l, ", ");
 	}

@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.HeapDumper;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHVersion;
@@ -265,8 +266,7 @@ public class Debug {
 			if(args[0] instanceof IVariable) {
 				if(Prefs.DebugMode()) {
 					IVariable ivar = (IVariable) args[0];
-					Construct val = environment.getEnv(GlobalEnv.class).GetVarList().get(ivar.getVariableName(), t);
-					StreamUtils.GetSystemOut().println(ivar.getVariableName() + ": " + val.val());
+					DoTrace(ivar, environment, t);
 				}
 				return CVoid.VOID;
 			} else {
@@ -302,6 +302,69 @@ public class Debug {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+
+		public static void DoTrace(IVariable var, Environment environment, Target t) {
+			Construct val = environment.getEnv(GlobalEnv.class).GetVarList().get(var.getVariableName(), t);
+			StreamUtils.GetSystemOut().println(var.getVariableName() + ": " + val.val());
+		}
+
+	}
+
+	@api
+	public static class dtrace extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if(args[0] instanceof IVariable) {
+				IVariable ivar = (IVariable) args[0];
+				trace.DoTrace(ivar, environment, t);
+				return CVoid.VOID;
+			} else {
+				throw new CRECastException("Expecting an ivar, but recieved " + args[0].getCType() + " instead", t);
+			}
+		}
+
+		@Override
+		public boolean preResolveVariables() {
+			return false;
+		}
+
+		@Override
+		public String getName() {
+			return "dtrace";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {var} Works like trace(), but ignores the debug setting, and always prints out.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+
 
 	}
 

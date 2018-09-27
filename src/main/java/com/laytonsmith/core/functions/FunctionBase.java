@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+//import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.snapins.PackagePermission;
 
@@ -19,6 +20,7 @@ public interface FunctionBase {
 	 *
 	 * @return
 	 */
+	//@ForceImplementation
 	public String getName();
 
 	/**
@@ -37,6 +39,7 @@ public interface FunctionBase {
 	 * @return A string with the documentation, or null, which will give a standard message to the user telling them
 	 * there is no documentation for this function yet.
 	 */
+	//@ForceImplementation
 	public String docs();
 
 	/**

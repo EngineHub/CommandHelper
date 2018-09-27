@@ -152,11 +152,17 @@ public class ClassMirror<T> implements Serializable {
 	/**
 	 * Returns a {@link ClassReferenceMirror} to the class's superclass.
 	 *
+	 * If the underlying Class is java.lang.Object, then this method returns
+	 * null.
 	 * @return
 	 */
 	public ClassReferenceMirror<?> getSuperClass() {
 		if(underlyingClass != null) {
-			return ClassReferenceMirror.fromClass(underlyingClass.getSuperclass());
+			Class su = underlyingClass.getSuperclass();
+			if(su == null) {
+				return null;
+			}
+			return ClassReferenceMirror.fromClass(su);
 		}
 		return new ClassReferenceMirror<>("L" + info.superClass + ";");
 	}
@@ -513,6 +519,44 @@ public class ClassMirror<T> implements Serializable {
 		}
 		for(String in : info.interfaces) {
 			if(in.equals(name)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns true if this class either extends or implements the class
+	 * specified, or is the same as that class. Note that if it transiently
+	 * extends from this class, it can't necessarily find that information
+	 * without actually loading the intermediate class, so this is a less useful
+	 * method than {@link Class#isAssignableFrom(java.lang.Class)}, however, in
+	 * combination with a system that is aware of all classes in a class
+	 * ecosystem, this can be used to piece together that information without
+	 * actually loading the classes.
+	 *
+	 * @param superClass
+	 * @return
+	 */
+	public boolean directlyExtendsFrom(ClassMirror<?> superClass) {
+		if(underlyingClass != null) {
+			if(ClassUtils.getJVMName(underlyingClass).equals(superClass.getJVMClassName())) {
+				return true;
+			}
+			if(underlyingClass.isInterface()) {
+				return Arrays.asList(underlyingClass.getInterfaces()).stream()
+						.map((Class<?> t) -> ClassUtils.getJVMName(t))
+						.anyMatch((String t) -> t.equals(superClass.getJVMClassName()));
+			} else {
+				return ClassUtils.getJVMName(underlyingClass.getSuperclass()).equals(superClass.getJVMClassName());
+			}
+		}
+		String name = superClass.getJVMClassName();
+		if(("L" + info.superClass + ";").equals(name)) {
+			return true;
+		}
+		for(String in : info.interfaces) {
+			if(("L" + in + ";").equals(name)) {
 				return true;
 			}
 		}

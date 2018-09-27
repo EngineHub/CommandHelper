@@ -120,6 +120,10 @@ public class ClassDiscovery {
 	 */
 	private final Map<Class<?>, Set<ClassMirror<?>>> classSubtypeCache = new HashMap<>();
 	/**
+	 * Cache for ClassMirror subtypes. Whenever a new URL is added to the URL cache, this is cleared.
+	 */
+	private final Map<ClassMirror<?>, Set<ClassMirror<?>>> classMirrorSubtypeCache = new HashMap<>();
+	/**
 	 * Cache for class annotations. Whenever a new URL is added to the URL cache, this is cleared.
 	 */
 	private final Map<Class<? extends Annotation>, Set<ClassMirror<?>>> classAnnotationCache = new HashMap<>();
@@ -242,7 +246,7 @@ public class ClassDiscovery {
 			String url;
 			try {
 				url = URLDecoder.decode(rootLocation.toString(), "UTF-8");
-			} catch (UnsupportedEncodingException ex) {
+			} catch(UnsupportedEncodingException ex) {
 				// apparently this should never happen, but we have to catch it anyway
 				url = null;
 			}
@@ -300,13 +304,13 @@ public class ClassDiscovery {
 							ClassMirrorVisitor mirrorVisitor = new ClassMirrorVisitor();
 							reader.accept(mirrorVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
 							mirrors.add(mirrorVisitor.getMirror(new URL(url)));
-						} catch (IOException ex) {
+						} catch(IOException ex) {
 							Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
 						} finally {
 							if(stream != null) {
 								try {
 									stream.close();
-								} catch (IOException ex) {
+								} catch(IOException ex) {
 									Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
 								}
 							}
@@ -335,20 +339,20 @@ public class ClassDiscovery {
 									ClassMirrorVisitor mirrorVisitor = new ClassMirrorVisitor();
 									reader.accept(mirrorVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
 									mirrors.add(mirrorVisitor.getMirror(rootLocationFile.toURI().toURL()));
-								} catch (IOException ex) {
+								} catch(IOException ex) {
 									Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
 								}
 
 							}
 						}
 					}, progressIterator);
-				} catch (IOException ex) {
+				} catch(IOException ex) {
 					Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			} else {
 				throw new RuntimeException("Unknown url type: " + rootLocation);
 			}
-		} catch (RuntimeException e) {
+		} catch(RuntimeException e) {
 			e.printStackTrace(System.err);
 		} finally {
 			if(debug) {
@@ -413,7 +417,7 @@ public class ClassDiscovery {
 				if(f.getName().endsWith(".jar")) {
 					try {
 						addDiscoveryLocation(f.toURI().toURL());
-					} catch (MalformedURLException ex) {
+					} catch(MalformedURLException ex) {
 						//
 					}
 				}
@@ -458,6 +462,8 @@ public class ClassDiscovery {
 		fieldAnnotationCache.clear();
 		methodAnnotationCache.clear();
 		constructorAnnotationCache.clear();
+		classSubtypeCache.clear();
+		classMirrorSubtypeCache.clear();
 		dirtyURLs.addAll(urlCache);
 	}
 
@@ -518,7 +524,7 @@ public class ClassDiscovery {
 		doDiscovery();
 		Set<ClassMirror<?>> mirrors = new HashSet<>();
 		Set<ClassMirror<T>> knownClasses = (Set) getKnownClasses();
-		outer:
+
 		for(ClassMirror<T> m : knownClasses) {
 			if(doesClassExtend(m, superType)) {
 				mirrors.add(m);
@@ -526,6 +532,35 @@ public class ClassDiscovery {
 		}
 		classSubtypeCache.put(superType, mirrors);
 		return (Set) mirrors;
+	}
+
+	/**
+	 * Returns a list of known classes that extend the given superclass, or implement the given interface.
+	 *
+	 * @param <T>
+	 * @param superType
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> Set<ClassMirror<T>> getClassesThatExtend(ClassMirror<T> superType) {
+		if(superType.getClassName().equals("java.lang.Object")) {
+			return (Set<ClassMirror<T>>) (Set<?>) getKnownClasses();
+		}
+		if(classMirrorSubtypeCache.containsKey(superType)) {
+			return new HashSet<>((Set) classMirrorSubtypeCache.get(superType));
+		}
+		doDiscovery();
+		Set<ClassMirror<?>> mirrors = new HashSet<>();
+		Set<ClassMirror<T>> knownClasses = (Set) getKnownClasses();
+		outer:
+		for(ClassMirror<T> m : knownClasses) {
+			if(doesClassExtend(m, superType)) {
+				mirrors.add(m);
+			}
+		}
+		classMirrorSubtypeCache.put(superType, mirrors);
+		return (Set) mirrors;
+
 	}
 
 	/**
@@ -538,100 +573,146 @@ public class ClassDiscovery {
 	 */
 	@SuppressWarnings("unchecked")
 	public boolean doesClassExtend(ClassMirror<?> subClass, Class<?> superClass) {
-		if(subClass.directlyExtendsFrom(superClass)) {
-			//Trivial case, so just add this now, then continue.
-			return true;
+		return doesClassExtend(subClass, new ClassMirror(superClass));
+	}
+
+	private Set<? extends Object> doesClassExtendWithBlacklist(ClassMirror c, Set<ClassReferenceMirror> blacklist) {
+		if(blacklist.contains(c)) {
+			return blacklist;
 		}
-		//Well, crap, more complicated. Ok, so, the list of supers
-		//can probably be walked up even further, so we need to find
-		//the supers of these (and make sure it's not in the ClassMirror
-		//cache, to avoid loading classes unneccessarily) and then load
-		//the actual Class object for them. Essentially, this falls back
-		//to loading the class when it
-		//can't be found in the mirrors pool.
-		Set<ClassReferenceMirror<?>> supers = new HashSet<>();
-		// Interfaces don't have a superclass. If they extend something, that's different.
-		if(!subClass.isInterface()) {
-			//Get the superclass. If it's java.lang.Object, we're done.
-			ClassReferenceMirror<?> su = subClass.getSuperClass();
-			while(!"Ljava/lang/Object;".equals(su.getJVMName())) {
-				supers.add(su);
-				ClassMirror<?> find = getClassMirrorFromJVMName(su.getJVMName());
-				if(find == null) {
-					try {
-						//Ok, have to Class.forName this one
-						Class<?> clazz = ClassUtils.forCanonicalName(su.toString(), false, defaultClassLoader);
-						//We can just use isAssignableFrom now
-						if(superClass.isAssignableFrom(clazz)) {
-							return true;
-						} else {
-							//We need to add change the reference to su
-							su = new ClassReferenceMirror<>("L" + clazz.getSuperclass().getName().replace('.', '/') + ";");
-						}
-					} catch (ClassNotFoundException ex) {
-						//Hmm, ok? I guess something bad happened, so let's break
-						//the loop and give up on this class.
-						return false;
-					}
-				} else {
-					su = find.getSuperClass();
-				}
+		while(true) {
+			blacklist.add(c);
+			Object su;
+			su = c.getSuperClass();
+			if(su == null) {
+				return blacklist;
 			}
-			for(ClassReferenceMirror<?> r : supers) {
-				// Look through the supers. If any of them equal the search class, return true
-				if(r.getJVMName().equals(ClassUtils.getJVMName(superClass))) {
-					return true;
-				}
-			}
-		}
-		//Same thing now, but for interfaces
-		Deque<ClassReferenceMirror<?>> interfaces = new ArrayDeque<>();
-		Set<ClassReferenceMirror<?>> handled = new HashSet<>();
-		interfaces.addAll(subClass.getInterfaces());
-		//Also have to add all the supers' interfaces too
-		for(ClassReferenceMirror<?> r : supers) {
-			ClassMirror<?> find = getClassMirrorFromJVMName(r.getJVMName());
-			if(find == null) {
-				try {
-					Class<?> clazz = Class.forName(r.toString());
-					for(Class<?> c : clazz.getInterfaces()) {
-						interfaces.add(new ClassReferenceMirror<>("L" + c.getName().replace('.', '/') + ";"));
-					}
-				} catch (ClassNotFoundException ex) {
-					return false;
-				}
+			blacklist.add(su);
+			blacklist.addAll(doesClassExtendWithBlacklist(su, blacklist));
+			if(c instanceof Class) {
+				for(Class iface : ((Class)c).getInterfaces())
+			} else if(c instanceof ClassMirror) {
+
 			} else {
-				interfaces.addAll(find.getInterfaces());
+				throw new Error();
 			}
 		}
-		while(!interfaces.isEmpty()) {
-			ClassReferenceMirror<?> in = interfaces.pop();
-			if(ClassUtils.getJVMName(superClass).equals(in.getJVMName())) {
-				//Early short circuit. We know it's in the the list already.
-				return true;
-			}
-			if(handled.contains(in)) {
-				continue;
-			}
-			handled.add(in);
-			supers.add(in);
-			ClassMirror<?> find = getClassMirrorFromJVMName(in.getJVMName());
-			if(find != null) {
-				interfaces.addAll(find.getInterfaces());
-			} else {
-				try {
-					//Again, have to check Class.forName
-					Class<?> clazz = ClassUtils.forCanonicalName(in.toString(), false, getDefaultClassLoader());
-					if(superClass.isAssignableFrom(clazz)) {
-						return true;
-					}
-				} catch (ClassNotFoundException ex) {
-					return false;
-				}
-			}
+	}
+
+	@SuppressWarnings("unchecked")
+	public boolean doesClassExtend(ClassMirror<?> subClass, ClassMirror<?> superClass) {
+		if(superClass.getClassName().equals("com.laytonsmith.core.natives.interfaces.Mixed")
+				&& subClass.getClassName().contains("CommandHelper")) {
+			System.out.println("Checking if " + subClass + " is extension of Mixed");
 		}
-		//Nope.
-		return false;
+
+//		if(subClass.directlyExtendsFrom(superClass)) {
+//			//Trivial case, so just add this now, then continue.
+//			System.out.println("1");
+//			return true;
+//		}
+//		//Well, crap, more complicated. Ok, so, the list of supers
+//		//can probably be walked up even further, so we need to find
+//		//the supers of these (and make sure it's not in the ClassMirror
+//		//cache, to avoid loading classes unneccessarily) and then load
+//		//the actual Class object for them. Essentially, this falls back
+//		//to loading the class when it
+//		//can't be found in the mirrors pool.
+//		Set<ClassReferenceMirror<?>> supers = new HashSet<>();
+//		// Interfaces don't have a superclass. If they extend something, that's different.
+//		if(!subClass.isInterface()) {
+//			//Get the superclass. If it's java.lang.Object, we're done.
+//			ClassReferenceMirror<?> su = subClass.getSuperClass();
+//			while(!"Ljava/lang/Object;".equals(su.getJVMName())) {
+//				supers.add(su);
+//				ClassMirror<?> find = getClassMirrorFromJVMName(su.getJVMName());
+//				if(find == null) {
+//					try {
+//						//Ok, have to Class.forName this one
+//						Class<?> clazz = ClassUtils.forCanonicalName(su.toString(), false, defaultClassLoader);
+//						//We can just use isAssignableFrom now
+//						if(superClass.directlyExtendsFrom(clazz)) {
+//							System.out.println("2");
+//							return true;
+//						} else {
+//							//We need to add change the reference to su
+//							su = new ClassReferenceMirror<>("L" + clazz.getSuperclass().getName().replace('.', '/') + ";");
+//						}
+//					} catch(ClassNotFoundException ex) {
+//						//Hmm, ok? I guess something bad happened, so let's break
+//						//the loop and give up on this class.
+//						System.out.println("3");
+//						return false;
+//					}
+//				} else {
+//					su = find.getSuperClass();
+//				}
+//			}
+//			for(ClassReferenceMirror<?> r : supers) {
+//				// Look through the supers. If any of them equal the search class, return true
+//				if(r.getJVMName().equals(superClass.getJVMClassName())) {
+//					System.out.println("4");
+//					return true;
+//				}
+//			}
+//		}
+//		//Same thing now, but for interfaces
+//		Deque<ClassReferenceMirror<?>> interfaces = new ArrayDeque<>();
+//		Set<ClassReferenceMirror<?>> handled = new HashSet<>();
+//		interfaces.addAll(subClass.getInterfaces());
+//		//Also have to add all the supers' interfaces too
+//		for(ClassReferenceMirror<?> r : supers) {
+//			ClassMirror<?> find = getClassMirrorFromJVMName(r.getJVMName());
+//			if(find == null) {
+//				try {
+//					Class<?> clazz = Class.forName(r.toString());
+//					for(Class<?> c : clazz.getInterfaces()) {
+//						interfaces.add(new ClassReferenceMirror<>("L" + c.getName().replace('.', '/') + ";"));
+//					}
+//				} catch(ClassNotFoundException ex) {
+//					System.out.println("5");
+//					return false;
+//				}
+//			} else {
+//				interfaces.addAll(find.getInterfaces());
+//			}
+//		}
+//		while(!interfaces.isEmpty()) {
+//			ClassReferenceMirror<?> in = interfaces.pop();
+//			if(superClass.getJVMClassName().equals(in.getJVMName())) {
+//				//Early short circuit. We know it's in the the list already.
+//				System.out.println("6");
+//				return true;
+//			}
+//			if(handled.contains(in)) {
+//				continue;
+//			}
+//			handled.add(in);
+//			supers.add(in);
+//			ClassMirror<?> find = getClassMirrorFromJVMName(in.getJVMName());
+//			if(find != null) {
+//				interfaces.addAll(find.getInterfaces());
+//			} else {
+//				try {
+//					//Again, have to check Class.forName
+//					Class<?> clazz = ClassUtils.forCanonicalName(in.toString(), false, getDefaultClassLoader());
+//					if(subClass.directlyExtendsFrom(clazz)) {
+//						if(superClass.getClassName().equals("com.laytonsmith.core.natives.interfaces.Mixed")
+//								&& subClass.getClassName().contains("CommandHelper")) {
+//							System.out.println("clazz is " + clazz + "; superClass is " + superClass);
+//						}
+//						System.out.println("7");
+//						return true;
+//					}
+//				} catch(ClassNotFoundException ex) {
+//					System.out.println("8");
+//					return false;
+//				}
+//			}
+//		}
+//		//Nope.
+//		System.out.println("9");
+//		return false;
 	}
 
 	/**
@@ -679,6 +760,29 @@ public class ClassDiscovery {
 		//Still not found? Return null then.
 		jvmNameToMirror.put(className, null);
 		return null;
+	}
+
+	/**
+	 * Converts the {@link ClassReferenceMirror} to a {@link ClassMirror} object. Note that in general, a
+	 * ClassReferenceMirror does not need to represent an actually known class, so it is possible that the class
+	 * referenced by the class is not known by the JVM (or at least the ClassDiscovery system) but it was known at
+	 * compile time. If that is the case, then the system will not be able to create a ClassMirror object, which
+	 * contains information about the class based on the information in that class's bytecode, and will therefore throw
+	 * a ClassNotFoundException.
+	 *
+	 * In order to correct this problem, you'll need to link to the jar via {@link #addDiscoveryLocation(java.net.URL)}
+	 * first.
+	 *
+	 * @param annotation
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> ClassMirror<T> getClassMirror(ClassReferenceMirror<T> reference) throws ClassNotFoundException {
+		ClassMirror<T> mirror = (ClassMirror<T>) getClassMirrorFromJVMName(reference.getJVMName());
+		if(mirror == null) {
+			throw new ClassNotFoundException();
+		}
+		return mirror;
 	}
 
 	/**
@@ -758,7 +862,7 @@ public class ClassDiscovery {
 		for(ClassMirror<? extends T> cm : getClassesWithAnnotationThatExtend(annotation, superClass)) {
 			try {
 				set.add(cm.loadClass(loader, initialize));
-			} catch (NoClassDefFoundError e) {
+			} catch(NoClassDefFoundError e) {
 				//Ignore this for now?
 				//throw new Error("While trying to process " + cm.toString() + ", an error occurred.", e);
 			}
@@ -793,7 +897,7 @@ public class ClassDiscovery {
 		for(ClassMirror<?> cm : getClassesWithAnnotation(annotation)) {
 			try {
 				set.add(cm.loadClass(loader, initialize));
-			} catch (NoClassDefFoundError e) {
+			} catch(NoClassDefFoundError e) {
 				//Ignore this for now?
 				//throw new Error("While trying to process " + cm.toString() + ", an error occurred.", e);
 			}
@@ -877,7 +981,7 @@ public class ClassDiscovery {
 				set.add(mm.loadMethod(loader, initialize));
 			}
 			return set;
-		} catch (ClassNotFoundException ex) {
+		} catch(ClassNotFoundException ex) {
 			throw new NoClassDefFoundError();
 		}
 	}
@@ -943,7 +1047,7 @@ public class ClassDiscovery {
 					}
 					set.add(cc);
 				}
-			} catch (ClassNotFoundException ex) {
+			} catch(ClassNotFoundException ex) {
 				throw new NoClassDefFoundError();
 			}
 		}
@@ -1068,7 +1172,7 @@ public class ClassDiscovery {
 		try {
 			try {
 				packageRoot = StringUtils.replaceLast(thisClass, Pattern.quote(c.getName().replaceAll("\\.", "/") + ".class"), "");
-			} catch (Exception e) {
+			} catch(Exception e) {
 				//Hmm, ok, try this then
 				packageRoot = c.getProtectionDomain().getCodeSource().getLocation().toString();
 			}
@@ -1078,9 +1182,9 @@ public class ClassDiscovery {
 				packageRoot = packageRoot.replaceFirst("jar:", "");
 			}
 			return new URL(packageRoot);
-		} catch (UnsupportedEncodingException e) {
+		} catch(UnsupportedEncodingException e) {
 			throw new RuntimeException("While interrogating " + c.getName() + ", an unexpected exception was thrown.", e);
-		} catch (MalformedURLException e) {
+		} catch(MalformedURLException e) {
 			throw new RuntimeException("While interrogating " + c.getName() + ", an unexpected exception was thrown for potential URL: \"" + packageRoot + "\"", e);
 		}
 	}
