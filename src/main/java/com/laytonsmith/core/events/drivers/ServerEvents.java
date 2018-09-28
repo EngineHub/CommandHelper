@@ -66,7 +66,7 @@ public class ServerEvents {
 					+ " before CommandHelper aliases, allowing you to insert control beforehand. Be careful with this"
 					+ " event, because it can override ALL server commands, potentially creating all sorts of havoc."
 					+ "{command: The entire command | prefix: The prefix of the command"
-					+ " | type: The command sender type. This is one of: console, command_block,"
+					+ " | sendertype: The command sender type. This is one of: console, command_block,"
 					+ " command_minecart or null if the sender is unknown to CommandHelper.}"
 					+ "{command}"
 					+ "{}";
@@ -90,7 +90,7 @@ public class ServerEvents {
 			MCServerCommandEvent event = (MCServerCommandEvent) e;
 			String prefix = event.getCommand().split(" ", 2)[0];
 			Prefilters.match(prefilter, "prefix", prefix, PrefilterType.STRING_MATCH);
-			Prefilters.match(prefilter, "type",
+			Prefilters.match(prefilter, "sendertype",
 					getCommandsenderString(event.getCommandSender()), PrefilterType.STRING_MATCH);
 			return true;
 		}
@@ -113,7 +113,7 @@ public class ServerEvents {
 
 			// Set the command sender type.
 			String type = getCommandsenderString(event.getCommandSender());
-			map.put("type", (type == null ? CNull.NULL : new CString(type, Target.UNKNOWN)));
+			map.put("sendertype", (type == null ? CNull.NULL : new CString(type, Target.UNKNOWN)));
 
 			return map;
 		}
