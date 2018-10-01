@@ -23,11 +23,14 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -728,16 +731,18 @@ public class Compiler {
 			StringBuilder b = new StringBuilder();
 			boolean inBrace = false;
 			boolean inSimpleVar = false;
+			char varChar = '\u0000';
 			ParseTree root = new ParseTree(new CFunction(new StringHandling.concat().getName(), t), fileOptions);
 			for(int i = 0; i < value.length(); i++) {
 				char c = value.charAt(i);
 				char c2 = (i + 1 < value.length() ? value.charAt(i + 1) : '\0');
-				if(c == '\\' && c2 == '@') {
-					b.append("@");
+				if(c == '\\' && isValidVarChar(c2)) {
+					b.append(c2);
 					i++;
 					continue;
 				}
-				if(c == '@') {
+				if(isValidVarChar(c)) {
+					varChar = c;
 					if(c2 == '{') {
 						//Start of a complex variable
 						inBrace = true;
@@ -747,7 +752,7 @@ public class Compiler {
 						inSimpleVar = true;
 					} else {
 						// Loose @, this is a compile error
-						throw new ConfigCompileException("Unexpected \"@\" in string. If you want a literal at sign, escape it with \"\\@\".", t);
+						throw new ConfigCompileException(MessageFormat.format("Unexpected \"{0}\" in string. If you want a literal at sign, escape it with \"\\{0}\".", varChar), t);
 					}
 					if(b.length() > 0) {
 						root.addChild(new ParseTree(new CString(b.toString(), t), fileOptions));
@@ -759,7 +764,7 @@ public class Compiler {
 					// End of simple var. The buffer is the variable name.
 					String vname = b.toString();
 					b = new StringBuilder();
-					root.addChild(new ParseTree(new IVariable("@" + vname, t), fileOptions));
+					root.addChild(new ParseTree(createVariable(varChar, vname, t), fileOptions));
 					inSimpleVar = false;
 				}
 				if(inBrace && c == '}') {
@@ -769,7 +774,7 @@ public class Compiler {
 					inBrace = false;
 					if(complex.matches("[a-zA-Z0-9_]+")) {
 						//This is a simple variable name.
-						root.addChild(new ParseTree(new IVariable("@" + complex, t), fileOptions));
+						root.addChild(new ParseTree(createVariable(varChar, complex, t), fileOptions));
 						continue;
 					} else {
 						//Complex variable name, with arrays (or perhaps an error case)
@@ -782,7 +787,7 @@ public class Compiler {
 				throw new ConfigCompileException("Missing end brace (}) in double string", t);
 			}
 			if(inSimpleVar) {
-				root.addChild(new ParseTree(new IVariable("@" + b.toString(), t), fileOptions));
+				root.addChild(new ParseTree(createVariable(varChar, b.toString(), t), fileOptions));
 			} else if(b.length() > 0) {
 				root.addChild(new ParseTree(new CString(b.toString(), t), fileOptions));
 			}
@@ -791,6 +796,21 @@ public class Compiler {
 			}
 			//throw new ConfigCompileException("Doubly quoted strings are not yet supported...", t);
 			return root;
+		}
+
+		private static Construct createVariable(char varChar, String name, Target t) throws ConfigCompileException {
+			switch(varChar) {
+				case '@':
+					return new IVariable(varChar + name, t);
+				case '$':
+					return new Variable(varChar + name, null, t);
+				default:
+					throw new ConfigCompileException("Unknown type of variable", t);
+			}
+		}
+
+		private static boolean isValidVarChar(char varChar) {
+			return varChar == '@' || varChar == '$';
 		}
 
 	}
