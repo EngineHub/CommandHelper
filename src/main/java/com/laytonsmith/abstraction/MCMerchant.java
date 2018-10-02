@@ -11,4 +11,6 @@ public interface MCMerchant extends AbstractionObject {
 	List<MCMerchantRecipe> getRecipes();
 
 	void setRecipes(List<MCMerchantRecipe> recipes);
+
+	String getTitle();
 }

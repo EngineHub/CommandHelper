@@ -4,8 +4,6 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 
 public interface MCFurnaceRecipe extends MCRecipe {
 
-	String getKey();
-
 	MCItemStack getInput();
 
 	void setInput(MCItemStack input);

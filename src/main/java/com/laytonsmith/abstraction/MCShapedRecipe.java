@@ -6,8 +6,6 @@ import java.util.Map;
 
 public interface MCShapedRecipe extends MCRecipe {
 
-	String getKey();
-
 	Map<Character, MCItemStack> getIngredientMap();
 
 	String[] getShape();

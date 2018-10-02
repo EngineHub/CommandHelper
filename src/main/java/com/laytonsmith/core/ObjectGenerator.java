@@ -1432,10 +1432,10 @@ public class ObjectGenerator {
 		CArray ret = CArray.GetAssociativeArray(t);
 		ret.set("type", new CString(r.getRecipeType().name(), t), t);
 		ret.set("result", item(r.getResult(), t), t);
+		ret.set("key", r.getKey(), t);
 		if(r instanceof MCFurnaceRecipe) {
 			MCFurnaceRecipe furnace = (MCFurnaceRecipe) r;
 			ret.set("input", item(furnace.getInput(), t), t);
-			ret.set("key", furnace.getKey(), t);
 		} else if(r instanceof MCShapelessRecipe) {
 			MCShapelessRecipe shapeless = (MCShapelessRecipe) r;
 			CArray il = new CArray(t);
@@ -1443,7 +1443,6 @@ public class ObjectGenerator {
 				il.push(item(i, t), t);
 			}
 			ret.set("ingredients", il, t);
-			ret.set("key", shapeless.getKey(), t);
 		} else if(r instanceof MCShapedRecipe) {
 			MCShapedRecipe shaped = (MCShapedRecipe) r;
 			CArray shape = new CArray(t);
@@ -1456,11 +1455,10 @@ public class ObjectGenerator {
 			}
 			ret.set("shape", shape, t);
 			ret.set("ingredients", imap, t);
-			ret.set("key", shaped.getKey(), t);
-		} else if (r instanceof MCMerchantRecipe) {
+		} else if(r instanceof MCMerchantRecipe) {
 			MCMerchantRecipe merchant = (MCMerchantRecipe) r;
 			CArray il = new CArray(t);
-			for (MCItemStack i : merchant.getIngredients()) {
+			for(MCItemStack i : merchant.getIngredients()) {
 				il.push(item(i, t), t);
 			}
 			ret.set("ingredients", il, t);
@@ -1594,28 +1592,29 @@ public class ObjectGenerator {
 				return ret;
 
 			case MERCHANT:
-				if (recipe.containsKey("maxuses")) {
-					((MCMerchantRecipe) ret).setMaxUses(Static.getInt32(recipe.get("maxuses", t), t));
+				MCMerchantRecipe mer = (MCMerchantRecipe) ret;
+				if(recipe.containsKey("maxuses")) {
+					mer.setMaxUses(Static.getInt32(recipe.get("maxuses", t), t));
 				}
-				if (recipe.containsKey("uses")) {
-					((MCMerchantRecipe) ret).setUses(Static.getInt32(recipe.get("uses", t), t));
+				if(recipe.containsKey("uses")) {
+					mer.setUses(Static.getInt32(recipe.get("uses", t), t));
 				}
-				if (recipe.containsKey("hasxpreward")) {
-					((MCMerchantRecipe) ret).setHasExperienceReward(Static.getBoolean(recipe.get("hasxpreward", t), t));
+				if(recipe.containsKey("hasxpreward")) {
+					mer.setHasExperienceReward(Static.getBoolean(recipe.get("hasxpreward", t), t));
 				}
 				ingredients = Static.getArray(recipe.get("ingredients", t), t);
-				if (ingredients.inAssociativeMode()) {
+				if(ingredients.inAssociativeMode()) {
 					throw new CREFormatException("Ingredients array is invalid.", t);
 				}
-				if (ingredients.size() < 1 || ingredients.size() > 2) {
+				if(ingredients.size() < 1 || ingredients.size() > 2) {
 					throw new CRERangeException("Ingredients for merchants must contain 1 or 2 items, found "
 							+ ingredients.size(), t);
 				}
 				List<MCItemStack> mcIngredients = new ArrayList<>();
-				for (Construct ingredient : ingredients.asList()) {
+				for(Construct ingredient : ingredients.asList()) {
 					mcIngredients.add(item(ingredient, t));
 				}
-				((MCMerchantRecipe) ret).setIngredients(mcIngredients);
+				mer.setIngredients(mcIngredients);
 				return ret;
 
 			default:

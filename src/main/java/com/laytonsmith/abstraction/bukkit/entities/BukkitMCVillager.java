@@ -43,7 +43,7 @@ public class BukkitMCVillager extends BukkitMCAgeable implements MCVillager {
 
 	@Override
 	public MCMerchant asMerchant() {
-		return new BukkitMCMerchant(getHandle());
+		return new BukkitMCMerchant(getHandle(), getHandle().getCareer().toString());
 	}
 
 	@Override

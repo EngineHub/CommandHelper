@@ -12,9 +12,20 @@ import java.util.List;
 public class BukkitMCMerchantRecipe extends BukkitMCRecipe implements MCMerchantRecipe {
 
 	private MerchantRecipe handle;
-	BukkitMCMerchantRecipe(MerchantRecipe recipe) {
+	private String key;
+	public BukkitMCMerchantRecipe(MerchantRecipe recipe) {
+		this(recipe, null);
+	}
+
+	public BukkitMCMerchantRecipe(MerchantRecipe recipe, String key) {
 		super(recipe);
 		handle = recipe;
+		this.key = key;
+	}
+
+	@Override
+	public String getKey() {
+		return key;
 	}
 
 	@Override
@@ -70,7 +81,7 @@ public class BukkitMCMerchantRecipe extends BukkitMCRecipe implements MCMerchant
 	@Override
 	public List<MCItemStack> getIngredients() {
 		List<MCItemStack> ret = new ArrayList<>();
-		for (ItemStack s : getHandle().getIngredients()) {
+		for(ItemStack s : getHandle().getIngredients()) {
 			ret.add(new BukkitMCItemStack(s));
 		}
 		return ret;
@@ -80,8 +91,8 @@ public class BukkitMCMerchantRecipe extends BukkitMCRecipe implements MCMerchant
 	public void setIngredients(List<MCItemStack> ingredients) {
 		int i = 0;
 		List<ItemStack> ings = new ArrayList<>();
-		for (MCItemStack s : ingredients) {
-			if (++i > 2) {
+		for(MCItemStack s : ingredients) {
+			if(++i > 2) {
 				break;
 				// This recipe type only supports two ingredients.
 				// The Bukkit set method does not include built in enforcement
