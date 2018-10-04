@@ -14,6 +14,7 @@ import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -422,7 +423,7 @@ public class Trades {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class,
-					CREIllegalArgumentException.class};
+					CREIllegalArgumentException.class, CREBadEntityException.class, CREFormatException.class};
 		}
 
 		@Override
@@ -467,6 +468,42 @@ public class Trades {
 					+ " When true, force will make the merchant trade with the player, closing the trade with"
 					+ " the previous player if there was one. Function returns true if trading was successfully"
 					+ " opened, and false if not.";
+		}
+	}
+
+	@api
+	public static class merchant_trading extends Recipes.recipeFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREBadEntityException.class, CREFormatException.class, CREFormatException.class,
+					CREIllegalArgumentException.class, CRELengthException.class};
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCMerchant merchant = GetMerchant(args[0], t);
+			return merchant.isTrading() ? new CString(merchant.getTrader().getUniqueId().toString(), t) : CNull.NULL;
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public String getName() {
+			return "merchant_trading";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "UUID {specifier} Returns the UUID of the user trading with the merchant, or null if no one is.";
 		}
 	}
 
