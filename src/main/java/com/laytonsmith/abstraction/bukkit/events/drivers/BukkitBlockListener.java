@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.bukkit.events.BukkitBlockEvents;
+import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 
@@ -14,18 +15,8 @@ import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockBurnEvent;
-import org.bukkit.event.block.BlockDispenseEvent;
-import org.bukkit.event.block.BlockFadeEvent;
-import org.bukkit.event.block.BlockFromToEvent;
-import org.bukkit.event.block.BlockGrowEvent;
-import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockPistonExtendEvent;
-import org.bukkit.event.block.BlockPistonRetractEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.block.NotePlayEvent;
-import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.block.*;
+import org.bukkit.event.inventory.BrewEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 
@@ -134,4 +125,19 @@ public class BukkitBlockListener implements Listener {
 		BukkitBlockEvents.BukkitMCBlockFadeEvent bfe = new BukkitBlockEvents.BukkitMCBlockFadeEvent(e);
 		EventUtils.TriggerListener(Driver.BLOCK_FADE, "block_fade", bfe);
 	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onBlockPhysics(BlockPhysicsEvent e) {
+		BukkitBlockEvents.BukkitMCBlockPhysicsEvent bpe = new BukkitBlockEvents.BukkitMCBlockPhysicsEvent(e);
+		EventUtils.TriggerListener(Driver.BLOCK_PHYSICS, "block_physics", bpe);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onBrew(BrewEvent e){
+		BukkitBlockEvents.BukkitMCBrewEvent be = new BukkitBlockEvents.BukkitMCBrewEvent(e);
+		EventUtils.TriggerListener(Driver.BREW, "brew", be);
+	}
+
+
+
 }

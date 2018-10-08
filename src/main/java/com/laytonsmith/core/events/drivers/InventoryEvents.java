@@ -10,15 +10,7 @@ import com.laytonsmith.abstraction.enums.MCClickType;
 import com.laytonsmith.abstraction.enums.MCDragType;
 import com.laytonsmith.abstraction.enums.MCInventoryAction;
 import com.laytonsmith.abstraction.enums.MCSlotType;
-import com.laytonsmith.abstraction.events.MCEnchantItemEvent;
-import com.laytonsmith.abstraction.events.MCInventoryClickEvent;
-import com.laytonsmith.abstraction.events.MCInventoryCloseEvent;
-import com.laytonsmith.abstraction.events.MCInventoryDragEvent;
-import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
-import com.laytonsmith.abstraction.events.MCItemHeldEvent;
-import com.laytonsmith.abstraction.events.MCItemSwapEvent;
-import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
-import com.laytonsmith.abstraction.events.MCPrepareItemEnchantEvent;
+import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
@@ -116,6 +108,7 @@ public class InventoryEvents {
 
 				return true;
 			}
+
 			return false;
 		}
 

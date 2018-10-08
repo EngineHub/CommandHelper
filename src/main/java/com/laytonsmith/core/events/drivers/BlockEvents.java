@@ -6,21 +6,10 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.bukkit.events.BukkitBlockEvents;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
 import com.laytonsmith.abstraction.enums.MCInstrument;
-import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
-import com.laytonsmith.abstraction.events.MCBlockBurnEvent;
-import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
-import com.laytonsmith.abstraction.events.MCBlockFadeEvent;
-import com.laytonsmith.abstraction.events.MCBlockFromToEvent;
-import com.laytonsmith.abstraction.events.MCBlockGrowEvent;
-import com.laytonsmith.abstraction.events.MCBlockIgniteEvent;
-import com.laytonsmith.abstraction.events.MCBlockPistonEvent;
-import com.laytonsmith.abstraction.events.MCBlockPistonExtendEvent;
-import com.laytonsmith.abstraction.events.MCBlockPistonRetractEvent;
-import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
-import com.laytonsmith.abstraction.events.MCNotePlayEvent;
-import com.laytonsmith.abstraction.events.MCSignChangeEvent;
+import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
@@ -45,6 +34,8 @@ import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.block.BlockBreakEvent;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -293,7 +284,6 @@ public class BlockEvents {
 
 			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
 			map.put("xp", new CInt(event.getExpToDrop(), t));
-
 			return map;
 		}
 
@@ -1440,4 +1430,125 @@ public class BlockEvents {
 			return false;
 		}
 	}
+
+	@api
+    public static class block_physics extends AbstractEvent{
+
+        @Override
+        public String getName() {
+            return "block_physics";
+        }
+
+        @Override
+        public String docs() {
+            return "{}"
+                    + "Thrown when a block physics check is called. "
+                    + "{changedtype : Gets the type of block that changed, causing this event. }"
+                    + "{}"
+                    + "{}";
+        }
+
+        @Override
+        public Version since() {
+            return CHVersion.V3_3_3;
+        }
+
+        @Override
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+            return true;
+        }
+
+        @Override
+        public BindableEvent convert(CArray manualObject, Target t) {
+            return null;
+        }
+
+        @Override
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            if(!(e instanceof MCBlockPhysicsEvent)) {
+                throw new EventException("Cannot convert event to BlockPhysicsEvent");
+            }
+
+            MCBlockPhysicsEvent event = (MCBlockPhysicsEvent) e;
+            Target t = Target.UNKNOWN;
+            Map<String, Construct> mapEvent = evaluate_helper(event);
+
+            mapEvent.put("changedtype", new CString(event.getChangedType().getName(), t));
+
+            return mapEvent;
+        }
+
+        @Override
+        public Driver driver() {
+            return Driver.BLOCK_PHYSICS;
+        }
+
+        @Override
+        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+            return false;
+        }
+    }
+
+    @api
+    public static class brew extends AbstractEvent {
+
+        @Override
+        public String getName() {
+            return "brew";
+        }
+
+        @Override
+        public String docs() {
+            return "{}"
+                    + "Called when the brewing of the contents inside the Brewing Stand is complete."
+                    + "{inventory: gets the contents of the brewing stand."
+                    + " | fuellevel: gets the remaining fuel level.}"
+                    + "{}"
+                    + "{}";
+        }
+
+        @Override
+        public Version since() {
+            return CHVersion.V3_3_3;
+        }
+
+        @Override
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+            return true;
+        }
+
+        @Override
+        public BindableEvent convert(CArray manualObject, Target t) {
+            return null;
+        }
+
+        @Override
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            if(!(e instanceof MCBrewEvent)) {
+                throw new EventException("Cannot convert event to BrewEvent");
+            }
+            MCBrewEvent event = (MCBrewEvent) e;
+            Target t = Target.UNKNOWN;
+            Map<String, Construct> mapEvent = evaluate_helper(event);
+
+            CArray inv = new CArray(t);
+            for(int i = 0 ; i < event.getContents().getSize() ; i ++)
+                inv.set(i, ObjectGenerator.GetGenerator().item(event.getContents().getItem(i), t), t);
+            mapEvent.put("inventory", inv);
+
+            mapEvent.put("fuellevel", event.getFuelLevel());
+
+            return mapEvent;
+        }
+
+        @Override
+        public Driver driver() {
+            return Driver.BREW;
+        }
+
+        @Override
+        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+            return false;
+        }
+    }
 }
