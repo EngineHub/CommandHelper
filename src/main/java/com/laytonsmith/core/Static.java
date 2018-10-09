@@ -631,11 +631,11 @@ public final class Static {
 				type = Integer.parseInt(notation);
 			}
 		} catch (NumberFormatException e) {
-			throw new CREFormatException("Invalid item notation: " + notation, t);
+			throw new CREFormatException("Invalid item format: " + notation, t);
 		}
 		MCMaterial mat = StaticLayer.GetMaterialFromLegacy(type, data);
 		if(mat == null) {
-			throw new CREFormatException("Invalid item values: " + notation, t);
+			throw new CREFormatException("Invalid item format: " + notation, t);
 		}
 		MCItemStack is = StaticLayer.GetItemStack(mat, qty);
 		CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Item notation is deprecated."

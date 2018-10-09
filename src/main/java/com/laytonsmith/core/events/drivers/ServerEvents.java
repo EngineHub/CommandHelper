@@ -1,8 +1,12 @@
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.MCBlockCommandSender;
+import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.events.MCBroadcastMessageEvent;
 import com.laytonsmith.abstraction.events.MCCommandTabCompleteEvent;
 import com.laytonsmith.abstraction.events.MCServerCommandEvent;
@@ -16,6 +20,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -55,11 +60,14 @@ public class ServerEvents {
 
 		@Override
 		public String docs() {
-			return "{prefix: <string match> The first part of the command, i.e. 'cmd' in '/cmd blah blah'}"
+			return "{prefix: <string match> The first part of the command, i.e. 'cmd' in '/cmd blah blah'"
+					+ " | type: <string match> The command sender type}"
 					+ "This event is fired off when any command is run from the console or commandblock. This fires"
 					+ " before CommandHelper aliases, allowing you to insert control beforehand. Be careful with this"
 					+ " event, because it can override ALL server commands, potentially creating all sorts of havoc."
-					+ "{command: The entire command | prefix: Just the prefix of the command}"
+					+ "{command: The entire command | prefix: The prefix of the command"
+					+ " | sendertype: The command sender type. This is one of: console, command_block,"
+					+ " command_minecart or null if the sender is unknown to CommandHelper.}"
 					+ "{command}"
 					+ "{}";
 		}
@@ -80,12 +88,10 @@ public class ServerEvents {
 				return false;
 			}
 			MCServerCommandEvent event = (MCServerCommandEvent) e;
-			if(prefilter.containsKey("prefix")) {
-				String prefix = event.getCommand().split(" ", 2)[0];
-				if(!prefix.equals(prefilter.get("prefix").val())) {
-					return false;
-				}
-			}
+			String prefix = event.getCommand().split(" ", 2)[0];
+			Prefilters.match(prefilter, "prefix", prefix, PrefilterType.STRING_MATCH);
+			Prefilters.match(prefilter, "sendertype",
+					getCommandsenderString(event.getCommandSender()), PrefilterType.STRING_MATCH);
 			return true;
 		}
 
@@ -104,7 +110,24 @@ public class ServerEvents {
 			map.put("command", new CString(event.getCommand(), Target.UNKNOWN));
 			String prefix = event.getCommand().split(" ", 2)[0];
 			map.put("prefix", new CString(prefix, Target.UNKNOWN));
+
+			// Set the command sender type.
+			String type = getCommandsenderString(event.getCommandSender());
+			map.put("sendertype", (type == null ? CNull.NULL : new CString(type, Target.UNKNOWN)));
+
 			return map;
+		}
+
+		private static String getCommandsenderString(MCCommandSender sender) {
+			if(sender instanceof MCConsoleCommandSender) {
+				return "console";
+			} else if(sender instanceof MCBlockCommandSender) {
+				return "command_block";
+			} else if(sender instanceof MCCommandMinecart) {
+				return "command_minecart";
+			} else {
+				return null; // Unknown sender implementation.
+			}
 		}
 
 		@Override

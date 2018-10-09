@@ -348,7 +348,7 @@ public class PlayerEvents {
 					+ "| from: <location match> This should be a location array (x, y, z, world)."
 					+ "| to: <location match> The location the player is now in. This should be a location array as well.} "
 					+ "{player | from: The location the player is coming from | to: The location the player is now in | "
-					+ "type: the type of teleport occuring, one of: " + StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
+					+ "type: the type of teleport occuring, one of " + StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
 					+ "{to}"
 					+ "{}";
 		}
@@ -445,7 +445,7 @@ public class PlayerEvents {
 		public String docs() {
 			return "{player: <macro> | from: <location match> This should be a location array (x, y, z, world)."
 					+ " | to: <location match> The location the player is coming to. This should be a location array as well."
-					+ " | type: <macro> the type of portal occuring, one of: " + StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
+					+ " | type: <macro> the type of portal occuring, one of " + StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
 					+ "Fired when a player collides with portal."
 					+ "{player: The player that teleport | from: The location the player is coming from"
 					+ " | to: The location the player is coming to. Returns null when using Nether portal and \"allow-nether\""

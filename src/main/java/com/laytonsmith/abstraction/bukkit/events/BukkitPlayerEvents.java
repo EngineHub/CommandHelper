@@ -831,9 +831,14 @@ public class BukkitPlayerEvents {
 			pebe.setNewBookMeta(((BukkitMCBookMeta) bookMeta).getBookMeta());
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public int getSlot() {
-			return pebe.getSlot();
+			int slot = pebe.getSlot();
+			if(slot == -1) { // bukkit offhand slot
+				return -106; // vanilla offhand slot
+			}
+			return slot;
 		}
 
 		@Override

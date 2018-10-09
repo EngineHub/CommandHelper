@@ -400,7 +400,7 @@ public class BukkitMCServer implements MCServer {
 	public List<MCOfflinePlayer> getBannedPlayers() {
 		List<MCOfflinePlayer> list = new ArrayList<>();
 		for(OfflinePlayer p : s.getBannedPlayers()) {
-			list.add(getOfflinePlayer(p.getName()));
+			list.add(new BukkitMCOfflinePlayer(p));
 		}
 		return list;
 	}
@@ -409,7 +409,7 @@ public class BukkitMCServer implements MCServer {
 	public List<MCOfflinePlayer> getWhitelistedPlayers() {
 		List<MCOfflinePlayer> list = new ArrayList<>();
 		for(OfflinePlayer p : s.getWhitelistedPlayers()) {
-			list.add(getOfflinePlayer(p.getName()));
+			list.add(new BukkitMCOfflinePlayer(p));
 		}
 		return list;
 	}
@@ -418,7 +418,7 @@ public class BukkitMCServer implements MCServer {
 	public List<MCOfflinePlayer> getOperators() {
 		List<MCOfflinePlayer> list = new ArrayList<>();
 		for(OfflinePlayer p : s.getOperators()) {
-			list.add(getOfflinePlayer(p.getName()));
+			list.add(new BukkitMCOfflinePlayer(p));
 		}
 		return list;
 	}

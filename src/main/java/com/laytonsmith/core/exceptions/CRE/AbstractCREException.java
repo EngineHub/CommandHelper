@@ -32,10 +32,12 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 	private List<StackTraceElement> stackTrace = null;
 
+	@SuppressWarnings("deprecation")
 	public AbstractCREException(String msg, Target t) {
 		super(msg, t);
 	}
 
+	@SuppressWarnings("deprecation")
 	public AbstractCREException(String msg, Target t, Throwable cause) {
 		super(msg, t, cause);
 	}

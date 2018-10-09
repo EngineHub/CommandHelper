@@ -2020,7 +2020,7 @@ public class EntityEvents {
 					+ " Fired when an entity regained the health."
 					+ " {id: The entity ID of regained entity"
 					+ " amount: The amount of regained the health |"
-					+ " cause: The cause of regain, one of: " + StringUtils.Join(MCRegainReason.values(), ", ")
+					+ " cause: The cause of regain, one of " + StringUtils.Join(MCRegainReason.values(), ", ")
 					+ " player: The regained player}"
 					+ " {amount}"
 					+ " {}";

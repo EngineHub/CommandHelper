@@ -170,17 +170,17 @@ public final class SiteDeploy {
 		}
 		prefs.init(sitedeploy);
 
-		String username = (String) prefs.getPreference(USERNAME);
-		String hostname = (String) prefs.getPreference(HOSTNAME);
-		Integer port = (Integer) prefs.getPreference(PORT);
-		String directory = (String) prefs.getPreference(DIRECTORY);
-		Boolean usePassword = (Boolean) prefs.getPreference(PASSWORD);
-		String docsBase = (String) prefs.getPreference(DOCSBASE);
-		String siteBase = (String) prefs.getPreference(SITEBASE);
-		Boolean showTemplateCredit = (Boolean) prefs.getPreference(SHOW_TEMPLATE_CREDIT);
-		String githubBaseUrl = (String) prefs.getPreference(GITHUB_BASE_URL);
-		String validatorUrl = (String) prefs.getPreference(VALIDATOR_URL);
-		File finalizerScript = (File) prefs.getPreference(POST_SCRIPT);
+		String username = prefs.getStringPreference(USERNAME);
+		String hostname = prefs.getStringPreference(HOSTNAME);
+		Integer port = prefs.getIntegerPreference(PORT);
+		String directory = prefs.getStringPreference(DIRECTORY);
+		Boolean usePassword = prefs.getBooleanPreference(PASSWORD);
+		String docsBase = prefs.getStringPreference(DOCSBASE);
+		String siteBase = prefs.getStringPreference(SITEBASE);
+		Boolean showTemplateCredit = prefs.getBooleanPreference(SHOW_TEMPLATE_CREDIT);
+		String githubBaseUrl = prefs.getStringPreference(GITHUB_BASE_URL);
+		String validatorUrl = prefs.getStringPreference(VALIDATOR_URL);
+		File finalizerScript = prefs.getFilePreference(POST_SCRIPT);
 
 		{
 			// Check for config errors
@@ -260,7 +260,7 @@ public final class SiteDeploy {
 				password = reader.readLine("Please enter your password: ", cha);
 			} finally {
 				if(reader != null) {
-					reader.shutdown();
+					reader.close();
 				}
 			}
 		}

@@ -268,7 +268,7 @@ public class Scoreboards {
 
 		@Override
 		public String docs() {
-			return "scoreboard {player} Returns the id of the scoreboard assigned to a player."
+			return "string {player} Returns the id of the scoreboard a player is assigned to."
 					+ " If it is not already cached, it will be added using the player's name."
 					+ " Using this method, it should be possible to import scoreboards created by other plugins.";
 		}
@@ -326,8 +326,7 @@ public class Scoreboards {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(String id : boards.keySet()) {
 				ret.push(new CString(id, t), t);
@@ -469,7 +468,7 @@ public class Scoreboards {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRENullPointerException.class};
+			return new Class[]{CRENullPointerException.class, CREScoreboardException.class};
 		}
 
 		@Override
@@ -496,8 +495,8 @@ public class Scoreboards {
 
 		@Override
 		public String docs() {
-			return "void {name} Creates a new scoreboard identified by the given name,"
-					+ " and stores it internally for later use. Throws an exception if the name is already in use.";
+			return "void {name} Creates a new scoreboard identified by the given name, and stores it internally"
+					+ " for later use. Throws a ScoreboardException if the name is already in use.";
 		}
 
 		@Override
@@ -549,8 +548,8 @@ public class Scoreboards {
 
 		@Override
 		public String docs() {
-			return "void {name, [criteria, [scoreboard]]} Adds a new objective to the scoreboard,"
-					+ " throwing a CREScoreboardException if the name is already in use. The vanilla criteria names are "
+			return "void {name, [criteria, [scoreboard]]} Adds a new objective to the scoreboard, throwing a"
+					+ " CREScoreboardException if the name is already in use. The vanilla criteria names are "
 					+ StringUtils.Join(MCCriteria.values(), ", ", ", and ") + ". You can put anything,"
 					+ " but if none of the other values match, 'dummy' will be used."
 					+ " Those values which are not 'dummy' are server-managed."
@@ -598,8 +597,8 @@ public class Scoreboards {
 
 		@Override
 		public String docs() {
-			return "void {name, [scoreboard]} Adds a new team to the scoreboard,"
-					+ " throws a CREScoreboardException if a team already exists with the given name."
+			return "void {name, [scoreboard]} Adds a new team to the scoreboard."
+					+ " Throws a ScoreboardException if a team already exists with the given name."
 					+ " Throws a LengthException if the team name is more than 16 characters. " + DEF_MSG;
 		}
 
@@ -675,7 +674,7 @@ public class Scoreboards {
 					+ " Sets the display name and/or slot of the given objective. If arg 2 is not an array,"
 					+ " it is assumed to be the displayname, otherwise arg 2 should be an array"
 					+ " with keys 'displayname' and/or 'slot', affecting their respective properties."
-					+ " Null name resets it to the actual name, and null slot removes it from"
+					+ " A null name resets it to the actual name, and null slot removes it from"
 					+ " all displays. Slot can be one of: " + StringUtils.Join(MCDisplaySlot.values(), ", ", ", or ")
 					+ " If the displayname is too long, a LengthException will be thrown."
 					+ " The max length may differ based on server implementation, but will probably be 128."
@@ -1054,7 +1053,8 @@ public class Scoreboards {
 
 		@Override
 		public String docs() {
-			return "int {objectiveName, player, [scoreboard]} Returns the player's score for the given objective." + DEF_MSG;
+			return "int {objectiveName, player, [scoreboard]} Returns the player's score for the given objective."
+					+ DEF_MSG;
 		}
 
 		@Override

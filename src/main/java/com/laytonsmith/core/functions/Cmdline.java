@@ -645,7 +645,7 @@ public class Cmdline {
 				throw new CREIOException(ex.getMessage(), t);
 			} finally {
 				if(reader != null) {
-					reader.shutdown();
+					reader.close();
 				}
 			}
 
@@ -723,7 +723,7 @@ public class Cmdline {
 				throw new CREIOException(ex.getMessage(), t);
 			} finally {
 				if(reader != null) {
-					reader.shutdown();
+					reader.close();
 				}
 			}
 
@@ -788,7 +788,7 @@ public class Cmdline {
 				throw new CREIOException(ex.getMessage(), t);
 			} finally {
 				if(reader != null) {
-					reader.shutdown();
+					reader.close();
 				}
 			}
 

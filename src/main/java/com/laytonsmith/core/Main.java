@@ -603,7 +603,7 @@ public class Main {
 							password = reader.readLine("Enter password: ", cha);
 						} finally {
 							if(reader != null) {
-								reader.shutdown();
+								reader.close();
 							}
 						}
 					}

@@ -535,7 +535,7 @@ public class BukkitEntityEvents {
 			ItemStack is = (ItemStack) stack.getHandle();
 			e.setCancelled(true);
 			e.getItem().remove();
-			if(is != null && is.getType().equals(Material.AIR)) {
+			if(is != null && !is.getType().equals(Material.AIR)) {
 				((Player) e.getEntity()).getInventory().addItem(is);
 				//and for added realism :)
 				e.getEntity().getWorld().playSound(e.getItem().getLocation(),
