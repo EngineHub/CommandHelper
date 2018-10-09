@@ -719,10 +719,15 @@ public final class Interpreter {
 									}
 								}
 							}, null, vars);
-						} catch (CancelCommandException e) {
-							//Nothing, though we could have been Ctrl+C cancelled, so we need to reset
-							//the interrupt flag. But we do that unconditionally below, in the finally,
-							//in the other thread.
+							env.getEnv(GlobalEnv.class).GetDaemonManager().waitForThreads();
+						} catch (CancelCommandException | InterruptedException e) {
+							// Nothing, though we could have been Ctrl+C cancelled, so we need to reset
+							// the interrupt flag. But we do that unconditionally below, in the finally,
+							// in the other thread.
+							// However, interrupt all the underlying threads
+							for(Thread t : env.getEnv(GlobalEnv.class).GetDaemonManager().getActiveThreads()) {
+								t.interrupt();
+							}
 						} catch (ConfigRuntimeException e) {
 							ConfigRuntimeException.HandleUncaughtException(e, env);
 							//No need for the full stack trace
@@ -757,7 +762,6 @@ public final class Interpreter {
 				} catch (InterruptedException ex) {
 					//
 				}
-
 			} finally {
 				p.stop();
 			}
