@@ -54,6 +54,16 @@ specified, it is reasonable to assume that it is meant to be used as a generic s
 not the enum type. Additionally, when hard coding strings or numbers, the compiler
 can check to ensure that the type is a valid cross cast type, at compile time.
 
+Cross casting can be done explicitly, using the same mechanism as a normal cast:
+
+<%CODE|
+string @v = 'NORTH';
+(@v as Compass)
+%>
+
+This runs the risk of a CastException however, in the event the value cannot be cast or
+cross cast.
+
 == Cross Casting User Classes ==
 
 You can also take advantage of the cross compiling system, should it suit your classes
@@ -84,7 +94,7 @@ public class Label {
 		}
 	}
 }
-<pre>
+</pre>
 
 The compiler will attempt to check the validity of the cross casting at compile
 time, if the cast method is determined to be a constant expression, so you
@@ -145,7 +155,7 @@ AbstractLabel @al = AbstractLabelFactory::instance('Label');
 
 Label @l1 = @al; # If you meant the second one, but did this instead, you get totally
 				 # different results. Therefore, this is not allowed
-Label @l2 = (Label)@al; # This is allowed though, because we are obviously just
+Label @l2 = (@al as Label); # This is allowed though, because we are obviously just
 						# trying to cast to the Label type, from AbstractLabel
 </pre>
 
