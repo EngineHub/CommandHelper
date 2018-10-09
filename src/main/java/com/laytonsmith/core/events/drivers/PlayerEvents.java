@@ -18,29 +18,7 @@ import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
-import com.laytonsmith.abstraction.events.MCExpChangeEvent;
-import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
-import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
-import com.laytonsmith.abstraction.events.MCPlayerBedEvent;
-import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
-import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
-import com.laytonsmith.abstraction.events.MCPlayerDeathEvent;
-import com.laytonsmith.abstraction.events.MCPlayerEditBookEvent;
-import com.laytonsmith.abstraction.events.MCPlayerFishEvent;
-import com.laytonsmith.abstraction.events.MCPlayerInteractEvent;
-import com.laytonsmith.abstraction.events.MCPlayerItemConsumeEvent;
-import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
-import com.laytonsmith.abstraction.events.MCPlayerKickEvent;
-import com.laytonsmith.abstraction.events.MCPlayerLoginEvent;
-import com.laytonsmith.abstraction.events.MCPlayerMoveEvent;
-import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
-import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
-import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
-import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
-import com.laytonsmith.abstraction.events.MCPlayerToggleFlightEvent;
-import com.laytonsmith.abstraction.events.MCPlayerToggleSneakEvent;
-import com.laytonsmith.abstraction.events.MCPlayerToggleSprintEvent;
-import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
+import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -2576,6 +2554,83 @@ public class PlayerEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+	}
+
+	@api
+	public static class async_player_pre_login extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "async_player_pre_login";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " {address: Gets the player IP address. | result: Gets the current result of the login, as an enum |"
+					+ " player: Gets the player's name. |"
+					+ " kickmsg : Gets the current kick message that will be used if getResult() != Result.ALLOWED}"
+					+ " {kickmsg|result}"
+					+ " {}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(e instanceof MCAsyncPlayerPreLoginEvent){
+
+				MCAsyncPlayerPreLoginEvent event = (MCAsyncPlayerPreLoginEvent) e;
+				Map<String, Construct> mapEvent = evaluate_helper(event);
+				Target t = Target.UNKNOWN;
+
+				mapEvent.put("kickmsg", new CString(event.getKickMessage(), t));
+				mapEvent.put("result", new CString(event.getLoginResult(), t));
+				mapEvent.put("address", new CString(event.getAddress(), t));
+				mapEvent.put("player", new CString(event.getName(), t));
+
+				return mapEvent;
+			}else{
+				throw new EventException("Cannot convert event to AsyncPlayerPreLoginEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ASYNC_PLAYER_PRE_LOGIN;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if(event instanceof MCAsyncPlayerPreLoginEvent){
+				MCAsyncPlayerPreLoginEvent e = (MCAsyncPlayerPreLoginEvent) event;
+				if(key.equalsIgnoreCase("kickmsg")){
+					e.setKickMessage(value.getValue());
+					return true;
+				}else if(key.equalsIgnoreCase("result")){
+					String[] possible = new String[]{"ALLOWED", "KICK_WHITELIST",
+							"KICK_BANNED", "KICK_FULL", "KICK_OTHER"};
+					if(Arrays.asList(possible).contains(value.val().toUpperCase())) {
+						e.setResult(value.val().toUpperCase());
+						return true;
+					}
+				}
+			}
 			return false;
 		}
 	}

@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityChangeBlockEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityDamageEvent;
@@ -24,6 +25,7 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCPlay
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCProjectileHitEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCProjectileLaunchEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCTargetEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCAreaEffectCloudApplyEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
 import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.core.events.Driver;
@@ -184,5 +186,11 @@ public class BukkitEntityListener implements Listener {
 	public void onPortalTravel(Event event) {
 		BukkitMCEntityPortalEvent epe = new BukkitMCEntityPortalEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_PORTAL_TRAVEL, "entity_portal_travel", epe);
+	}
+
+	@EventIdentifier(event = Driver.AREA_EFFECT_CLOUD_APPLY, className = "org.bukkit.event.entity.AreaEffectCloudApplyEvent")
+	public void onAreaEffectCloudApply(Event event){
+		BukkitMCAreaEffectCloudApplyEvent aeca = new BukkitMCAreaEffectCloudApplyEvent(event);
+		EventUtils.TriggerListener(Driver.AREA_EFFECT_CLOUD_APPLY, "area_effect_cloud_apply", aeca);
 	}
 }

@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCExpChangeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCGamemodeChangeEvent;
@@ -23,6 +24,7 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlay
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerToggleSneakEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerToggleSprintEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCWorldChangedEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCAsyncPrePlayerLogin;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
@@ -34,27 +36,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerBedEnterEvent;
-import org.bukkit.event.player.PlayerBedLeaveEvent;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerEditBookEvent;
-import org.bukkit.event.player.PlayerExpChangeEvent;
-import org.bukkit.event.player.PlayerFishEvent;
-import org.bukkit.event.player.PlayerGameModeChangeEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerPortalEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.event.player.PlayerToggleFlightEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
-import org.bukkit.event.player.PlayerToggleSprintEvent;
+import org.bukkit.event.player.*;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -332,6 +314,13 @@ public class BukkitPlayerListener implements Listener {
 			}
 		}
 	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent event){
+		BukkitMCAsyncPrePlayerLogin appl = new BukkitMCAsyncPrePlayerLogin(event);
+		EventUtils.TriggerListener(Driver.ASYNC_PLAYER_PRE_LOGIN, "async_player_pre_login", appl);
+	}
+
 
 	// Reset player_move lastLocations when player respawns or teleports
 	@EventHandler(priority = EventPriority.MONITOR)

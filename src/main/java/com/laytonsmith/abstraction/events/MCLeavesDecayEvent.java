@@ -1,12 +1,9 @@
 package com.laytonsmith.abstraction.events;
 
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.core.events.BindableEvent;
 
-public interface MCBlockPhysicsEvent extends BindableEvent {
-
-    public MCMaterial getChangedType();
+public interface MCLeavesDecayEvent extends BindableEvent {
 
     public MCBlock getBlock();
 

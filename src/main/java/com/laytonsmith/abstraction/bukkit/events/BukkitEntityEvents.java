@@ -41,29 +41,7 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRegainReason;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRemoveCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason;
-import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
-import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
-import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
-import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
-import com.laytonsmith.abstraction.events.MCEntityDeathEvent;
-import com.laytonsmith.abstraction.events.MCEntityEnterPortalEvent;
-import com.laytonsmith.abstraction.events.MCEntityExplodeEvent;
-import com.laytonsmith.abstraction.events.MCEntityInteractEvent;
-import com.laytonsmith.abstraction.events.MCEntityPortalEvent;
-import com.laytonsmith.abstraction.events.MCEntityRegainHealthEvent;
-import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
-import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
-import com.laytonsmith.abstraction.events.MCFireworkExplodeEvent;
-import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
-import com.laytonsmith.abstraction.events.MCItemDespawnEvent;
-import com.laytonsmith.abstraction.events.MCItemSpawnEvent;
-import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
-import com.laytonsmith.abstraction.events.MCPlayerInteractAtEntityEvent;
-import com.laytonsmith.abstraction.events.MCPlayerInteractEntityEvent;
-import com.laytonsmith.abstraction.events.MCPlayerPickupItemEvent;
-import com.laytonsmith.abstraction.events.MCPotionSplashEvent;
-import com.laytonsmith.abstraction.events.MCProjectileHitEvent;
-import com.laytonsmith.abstraction.events.MCProjectileLaunchEvent;
+import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -75,25 +53,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntityChangeBlockEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.EntityInteractEvent;
-import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.event.entity.EntityPortalEnterEvent;
-import org.bukkit.event.entity.EntityPortalEvent;
-import org.bukkit.event.entity.EntityRegainHealthEvent;
-import org.bukkit.event.entity.EntityTargetEvent;
-import org.bukkit.event.entity.EntityToggleGlideEvent;
-import org.bukkit.event.entity.FireworkExplodeEvent;
-import org.bukkit.event.entity.ItemDespawnEvent;
-import org.bukkit.event.entity.ItemSpawnEvent;
-import org.bukkit.event.entity.PotionSplashEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -947,6 +907,32 @@ public class BukkitEntityEvents {
 		@Override
 		public MCTravelAgent getPortalTravelAgent() {
 			return new BukkitMCTravelAgent(epe.getPortalTravelAgent());
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCAreaEffectCloudApplyEvent implements MCAreaEffectCloudApplyEvent {
+
+		AreaEffectCloudApplyEvent aeca;
+
+		public BukkitMCAreaEffectCloudApplyEvent(Event e){ this.aeca = (AreaEffectCloudApplyEvent) e; }
+
+		@Override
+		public List<MCLivingEntity> getAffectedEntities() {
+			List<MCLivingEntity> list = new ArrayList<>();
+			for(LivingEntity le : aeca.getAffectedEntities())
+				list.add(new BukkitMCLivingEntity(le));
+			return list;
+		}
+
+		@Override
+		public MCEntity getEntity() {
+			return new BukkitMCEntity(aeca.getEntity());
+		}
+
+		@Override
+		public Object _GetObject() {
+			return aeca;
 		}
 	}
 }

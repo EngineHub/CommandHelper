@@ -1,12 +1,12 @@
 package com.laytonsmith.abstraction.events;
 
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.core.events.BindableEvent;
 
-public interface MCBlockPhysicsEvent extends BindableEvent {
+public interface MCMoistureChangeEvent extends BindableEvent {
 
-    public MCMaterial getChangedType();
+    public MCBlockState getNewState();
 
     public MCBlock getBlock();
 

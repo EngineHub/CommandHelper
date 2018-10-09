@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCLightningStrike;
 import com.laytonsmith.abstraction.entities.MCProjectile;
 import com.laytonsmith.abstraction.MCProjectileSource;
 import com.laytonsmith.abstraction.MCWorld;
@@ -24,28 +25,7 @@ import com.laytonsmith.abstraction.enums.MCRegainReason;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
-import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
-import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
-import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
-import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
-import com.laytonsmith.abstraction.events.MCEntityDeathEvent;
-import com.laytonsmith.abstraction.events.MCEntityEnterPortalEvent;
-import com.laytonsmith.abstraction.events.MCEntityExplodeEvent;
-import com.laytonsmith.abstraction.events.MCEntityInteractEvent;
-import com.laytonsmith.abstraction.events.MCEntityPortalEvent;
-import com.laytonsmith.abstraction.events.MCEntityRegainHealthEvent;
-import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
-import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
-import com.laytonsmith.abstraction.events.MCFireworkExplodeEvent;
-import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
-import com.laytonsmith.abstraction.events.MCItemDespawnEvent;
-import com.laytonsmith.abstraction.events.MCItemSpawnEvent;
-import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
-import com.laytonsmith.abstraction.events.MCPlayerInteractAtEntityEvent;
-import com.laytonsmith.abstraction.events.MCPlayerInteractEntityEvent;
-import com.laytonsmith.abstraction.events.MCPlayerPickupItemEvent;
-import com.laytonsmith.abstraction.events.MCProjectileHitEvent;
-import com.laytonsmith.abstraction.events.MCProjectileLaunchEvent;
+import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
@@ -2169,6 +2149,72 @@ public class EntityEvents {
 					return true;
 				}
 			}
+			return false;
+		}
+	}
+
+	@api
+	public static class area_effect_cloud_apply extends AbstractEvent{
+
+		@Override
+		public String getName() {
+			return "area_effect_cloud_apply";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ " Called when a lingering potion applies it's effects. Happens once every 5 ticks."
+					+ " {id: Returns the Entity involved in this event."
+					+ " affected: Retrieves a mutable list of the effected entities}"
+					+ " {}"
+					+ " {}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(e instanceof MCAreaEffectCloudApplyEvent){
+
+				MCAreaEffectCloudApplyEvent event = (MCAreaEffectCloudApplyEvent) e;
+				Map<String, Construct> ret = evaluate_helper(event);
+				Target t = Target.UNKNOWN;
+
+				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
+
+				CArray affected = new CArray(t);
+				for(MCLivingEntity le : event.getAffectedEntities())
+					affected.push(new CString(le.getUniqueId().toString(), t), t);
+				ret.put("affected", affected);
+
+				return ret;
+
+			}else{
+				throw new EventException("Could not convert to MCEntityPortalEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.AREA_EFFECT_CLOUD_APPLY;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			return false;
 		}
 	}
