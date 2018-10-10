@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("FormatException")
+@typeof("ms::lang::FormatException")
 public class CREFormatException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("FormatException");
+	public static final CClassType TYPE = CClassType.get("ms::lang::FormatException");
 
 	public CREFormatException(String msg, Target t) {
 		super(msg, t);

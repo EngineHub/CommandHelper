@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("Exception")
+@typeof("ms::lang::Exception")
 public class CREException extends CREThrowable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("Exception");
+	public static final CClassType TYPE = CClassType.get("ms::lang::Exception");
 
 	public CREException(String msg, Target t) {
 		super(msg, t);

@@ -493,6 +493,6 @@ public class BasicLogicTest {
 	@Test
 	public void testDand() throws Exception {
 		SRun("msg(typeof(dand('a', 'b', false)))", fakePlayer);
-		verify(fakePlayer).sendMessage("boolean");
+		verify(fakePlayer).sendMessage("ms::lang::boolean");
 	}
 }

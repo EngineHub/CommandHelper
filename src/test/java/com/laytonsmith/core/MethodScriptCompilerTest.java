@@ -1167,13 +1167,13 @@ public class MethodScriptCompilerTest {
 
 		// "- something".
 		this.verifyExecute("msg(-5)", "-5");
-		this.verifyExecute("msg(typeof(-5))", "int");
+		this.verifyExecute("msg(typeof(-5))", "ms::lang::int");
 		this.verifyExecute("msg(- 5)", "-5");
-		this.verifyExecute("msg(typeof(- 5))", "int");
+		this.verifyExecute("msg(typeof(- 5))", "ms::lang::int");
 		this.verifyExecute("@a = 5; msg(-@a)", "-5");
-		this.verifyExecute("@a = 5; msg(typeof(-@a))", "int");
+		this.verifyExecute("@a = 5; msg(typeof(-@a))", "ms::lang::int");
 		this.verifyExecute("@a = 5; msg(- @a)", "-5");
-		this.verifyExecute("@a = 5; msg(typeof(- @a))", "int");
+		this.verifyExecute("@a = 5; msg(typeof(- @a))", "ms::lang::int");
 	}
 
 	@Test
@@ -1223,13 +1223,13 @@ public class MethodScriptCompilerTest {
 
 		// "+ something".
 		this.verifyExecute("msg(+5)", "5");
-		this.verifyExecute("msg(typeof(+5))", "int");
+		this.verifyExecute("msg(typeof(+5))", "ms::lang::int");
 		this.verifyExecute("msg(+ 5)", "5");
-		this.verifyExecute("msg(typeof(+ 5))", "int");
+		this.verifyExecute("msg(typeof(+ 5))", "ms::lang::int");
 		this.verifyExecute("@a = 5; msg(+@a)", "5");
-		this.verifyExecute("@a = 5; msg(typeof(+@a))", "int");
+		this.verifyExecute("@a = 5; msg(typeof(+@a))", "ms::lang::int");
 		this.verifyExecute("@a = 5; msg(+ @a)", "5");
-		this.verifyExecute("@a = 5; msg(typeof(+ @a))", "int");
+		this.verifyExecute("@a = 5; msg(typeof(+ @a))", "ms::lang::int");
 	}
 
 	private void verifyExecute(String script, String expectedResponse) throws ConfigCompileException, ConfigCompileGroupException {

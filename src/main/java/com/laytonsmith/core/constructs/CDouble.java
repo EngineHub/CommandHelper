@@ -9,11 +9,11 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
  *
  *
  */
-@typeof("double")
+@typeof("ms::lang::double")
 public class CDouble extends CNumber implements Cloneable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("double");
+	public static final CClassType TYPE = CClassType.get("ms::lang::double");
 
 	public static final long serialVersionUID = 1L;
 	final double val;

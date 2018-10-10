@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("EventException")
+@typeof("ms::lang::EventException")
 public class CREEventException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("EventException");
+	public static final CClassType TYPE = CClassType.get("ms::lang::EventException");
 
 	public CREEventException(String msg, Target t) {
 		super(msg, t);

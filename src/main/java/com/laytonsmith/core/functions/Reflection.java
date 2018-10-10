@@ -9,6 +9,7 @@ import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -19,12 +20,14 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.compiler.KeywordList;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -38,6 +41,7 @@ import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.PersistenceNetwork;
 
@@ -666,5 +670,60 @@ public class Reflection {
 				+ "msg(get_procedures());")
 			};
 		}
+	}
+	
+	@api
+	public static class get_classes extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray ret = new CArray(t);
+			for(String c : NativeTypeList.getNativeTypeList()) {
+				CClassType cct = CClassType.get(c);
+				if(cct == CNull.TYPE) {
+					continue;
+				}
+				ret.push(cct, t);
+			}
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "get_classes";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "array {} Returns a list of all known classes. This may not be completely exhaustive, but will"
+					+ " at least contain all system defined classes. The returned value is an array of ClassType"
+					+ " objects.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+		
 	}
 }

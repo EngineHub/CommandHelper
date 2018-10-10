@@ -52,7 +52,7 @@ public class StringHandlingTest {
 	public void testConcat() throws Exception {
 		StringHandling.concat a = new StringHandling.concat();
 		assertCEquals(C.onstruct("1234"), a.exec(Target.UNKNOWN, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(4)));
-		assertCEquals(C.onstruct("astring"), a.exec(Target.UNKNOWN, null, C.onstruct("a"), C.onstruct("string")));
+		assertCEquals(C.onstruct("astring"), a.exec(Target.UNKNOWN, null, C.onstruct("a"), C.String("string")));
 		assertEquals("05", SRun("'0' . 5", null));
 	}
 

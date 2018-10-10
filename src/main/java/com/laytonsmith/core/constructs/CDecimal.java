@@ -10,11 +10,11 @@ import java.math.BigDecimal;
  *
  * @author cailin
  */
-@typeof("decimal")
+@typeof("ms::lang::decimal")
 public class CDecimal extends CPrimitive implements Cloneable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("decimal");
+	public static final CClassType TYPE = CClassType.get("ms::lang::decimal");
 
 	private final BigDecimal val;
 

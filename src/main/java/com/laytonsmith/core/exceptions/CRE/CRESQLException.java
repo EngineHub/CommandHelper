@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("SQLException")
+@typeof("ms::lang::SQLException")
 public class CRESQLException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("SQLException");
+	public static final CClassType TYPE = CClassType.get("ms::lang::SQLException");
 
 	public CRESQLException(String msg, Target t) {
 		super(msg, t);

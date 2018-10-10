@@ -7,11 +7,11 @@ import com.laytonsmith.core.CHVersion;
 /**
  *
  */
-@typeof("primitive")
+@typeof("ms::lang::primitive")
 public abstract class CPrimitive extends Construct {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("primitive");
+	public static final CClassType TYPE = CClassType.get("ms::lang::primitive");
 
 	public CPrimitive(String value, ConstructType type, Target t) {
 		super(value, type, t);

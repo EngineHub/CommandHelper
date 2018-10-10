@@ -10,11 +10,11 @@ import java.util.Set;
 /**
  * Represents a MethodScript boolean.
  */
-@typeof("boolean")
+@typeof("ms::lang::boolean")
 public final class CBoolean extends CPrimitive implements Cloneable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("boolean");
+	public static final CClassType TYPE = CClassType.get("ms::lang::boolean");
 
 	public static final long serialVersionUID = 1L;
 

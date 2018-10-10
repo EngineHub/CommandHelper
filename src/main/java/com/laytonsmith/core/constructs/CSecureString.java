@@ -28,11 +28,11 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * @author cailin
  */
-@typeof("secure_string")
+@typeof("ms::lang::secure_string")
 public class CSecureString extends CString {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("secure_string");
+	public static final CClassType TYPE = CClassType.get("ms::lang::secure_string");
 
 	private byte[] encrypted;
 	private Cipher decrypter;

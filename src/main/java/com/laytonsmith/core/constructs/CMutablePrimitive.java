@@ -13,11 +13,11 @@ import java.util.Stack;
 /**
  *
  */
-@typeof("mutable_primitive")
+@typeof("ms::lang::mutable_primitive")
 public class CMutablePrimitive extends CArray implements Sizeable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("mutable_primitive");
+	public static final CClassType TYPE = CClassType.get("ms::lang::mutable_primitive");
 
 	private Construct value = CNull.NULL;
 

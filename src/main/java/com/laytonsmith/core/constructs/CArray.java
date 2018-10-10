@@ -37,10 +37,10 @@ import java.util.TreeMap;
  * For subclasses, the ArrayAccess methods are the most commonly overridden methods. There are several overloaded
  * methods in this class, you need only to override the non-final ones for the same effect.
  */
-@typeof("array")
+@typeof("ms::lang::array")
 public class CArray extends Construct implements ArrayAccess {
 
-	public static final CClassType TYPE = CClassType.get("array");
+	public static final CClassType TYPE = CClassType.get("ms::lang::array");
 	private boolean associativeMode = false;
 	private long nextIndex = 0;
 	private List<Construct> array;
@@ -863,7 +863,7 @@ public class CArray extends Construct implements ArrayAccess {
 					}
 					if(!(c instanceof CBoolean || c instanceof CString || c instanceof CInt
 							|| c instanceof CDouble || c instanceof CNull)) {
-						throw new CREFormatException("Unsupported type being sorted: " + c.getCType(), CArray.this.getTarget());
+						throw new CREFormatException("Unsupported type being sorted: " + c.typeof(), CArray.this.getTarget());
 					}
 				}
 				if(o1 instanceof CNull || o2 instanceof CNull) {

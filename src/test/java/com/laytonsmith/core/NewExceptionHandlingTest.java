@@ -42,7 +42,8 @@ public class NewExceptionHandlingTest {
 
 	@Test
 	public void testBasicKeywordUsage() throws Exception {
-		assertEquals("complex_try(null,assign(IOException,@e,null),null,assign(Exception,@e,null),null,null)", optimize("try { } catch (IOException @e){ } catch (Exception @e){ } finally { }"));
+		assertEquals("complex_try(null,assign(ms::lang::IOException,@e,null),null,assign(ms::lang::Exception,@e,null),null,null)", 
+				optimize("try { } catch (IOException @e){ } catch (Exception @e){ } finally { }"));
 	}
 
 	@Test
@@ -76,7 +77,7 @@ public class NewExceptionHandlingTest {
 				/* 3 */ + "} catch (IOException @e){ \n"
 				/* 4 */ + "msg(@e); \n"
 				/* 5 */ + "}", fakePlayer);
-		verify(fakePlayer).sendMessage("{causedBy: null, classType: IOException, message: message, stackTrace: {{file: Unknown file, id: <<main code>>, line: 2}}}");
+		verify(fakePlayer).sendMessage("{causedBy: null, classType: ms::lang::IOException, message: message, stackTrace: {{file: Unknown file, id: <<main code>>, line: 2}}}");
 	}
 
 	@Test
@@ -97,7 +98,7 @@ public class NewExceptionHandlingTest {
 				/* 12 */ + "} catch (IOException @e){\n"
 				/* 13 */ + "msg(@e);\n"
 				/* 14 */ + "}", fakePlayer);
-		verify(fakePlayer).sendMessage("{causedBy: null, classType: IOException, message: message, stackTrace:"
+		verify(fakePlayer).sendMessage("{causedBy: null, classType: ms::lang::IOException, message: message, stackTrace:"
 				+ " {"
 				+ "{file: Unknown file, id: proc _c, line: 8}, "
 				+ "{file: Unknown file, id: proc _b, line: 5}, "
@@ -124,7 +125,7 @@ public class NewExceptionHandlingTest {
 				/* 12 */ + "} catch (RangeException @e){\n"
 				/* 13 */ + "msg(@e);\n"
 				/* 14 */ + "}", fakePlayer);
-		verify(fakePlayer).sendMessage("{causedBy: null, classType: RangeException, message: Division by 0!, stackTrace:"
+		verify(fakePlayer).sendMessage("{causedBy: null, classType: ms::lang::RangeException, message: Division by 0!, stackTrace:"
 				+ " {"
 				+ "{file: Unknown file, id: proc _c, line: 8}, "
 				+ "{file: Unknown file, id: proc _b, line: 5}, "
@@ -252,7 +253,7 @@ public class NewExceptionHandlingTest {
 				"{"
 				+ "causedBy: {"
 				+ "causedBy: null, "
-				+ "classType: IOException, "
+				+ "classType: ms::lang::IOException, "
 				+ "message: original, "
 				+ "stackTrace: {"
 				+ "{"
@@ -270,7 +271,7 @@ public class NewExceptionHandlingTest {
 				+ "}"
 				+ "}"
 				+ "}, "
-				+ "classType: CastException, "
+				+ "classType: ms::lang::CastException, "
 				+ "message: new, "
 				+ "stackTrace: {"
 				+ "{"

@@ -14,7 +14,7 @@ public class InstanceofUtil {
 	 * Returns true whether or not a given MethodScript value is an instance of the specified MethodScript type.
 	 *
 	 * @param value The value to check for
-	 * @param instanceofThis The string type to check
+	 * @param instanceofThis The string type to check. This must be the fully qualified name.
 	 * @return
 	 */
 	public static boolean isInstanceof(Mixed value, String instanceofThis) {
@@ -30,9 +30,20 @@ public class InstanceofUtil {
 		}
 		return false;
 	}
+	
+	/**
+	 * Returns whether or not a given MethodScript value is an instanceof the specified MethodScript type.
+	 * @param value
+	 * @param instanceofThis
+	 * @return 
+	 */
+	public static boolean isInstanceof(Mixed value, Class<? extends Mixed> instanceofThis) {
+		String typeof = typeof(instanceofThis);
+		return typeof == null ? false : isInstanceof(value, typeof);
+	}
 
 	/**
-	 * Returns true whether or not a given MethodScript value is an instance of the specified MethodScript type.
+	 * Returns whether or not a given MethodScript value is an instance of the specified MethodScript type.
 	 *
 	 * @param value The value to check for
 	 * @param instanceofThis The CClassType to check

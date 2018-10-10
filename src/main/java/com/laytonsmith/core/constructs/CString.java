@@ -16,11 +16,11 @@ import java.util.Set;
  *
  *
  */
-@typeof("string")
+@typeof("ms::lang::string")
 public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("string");
+	public static final CClassType TYPE = CClassType.get("ms::lang::string");
 
 	public CString(String value, Target t) {
 		super(value == null ? "" : value, ConstructType.STRING, t);

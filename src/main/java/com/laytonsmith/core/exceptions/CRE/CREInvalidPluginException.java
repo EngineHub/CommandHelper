@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("InvalidPluginException")
+@typeof("com::commandhelper::InvalidPluginException")
 public class CREInvalidPluginException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("InvalidPluginException");
+	public static final CClassType TYPE = CClassType.get("com::commandhelper::InvalidPluginException");
 
 	public CREInvalidPluginException(String msg, Target t) {
 		super(msg, t);

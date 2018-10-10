@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("IndexOverflowException")
+@typeof("ms::lang::IndexOverflowException")
 public class CREIndexOverflowException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("IndexOverflowException");
+	public static final CClassType TYPE = CClassType.get("ms::lang::IndexOverflowException");
 
 	public CREIndexOverflowException(String msg, Target t) {
 		super(msg, t);
