@@ -9,7 +9,6 @@ import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
-import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -41,7 +40,6 @@ import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.PersistenceNetwork;
 
@@ -671,7 +669,7 @@ public class Reflection {
 			};
 		}
 	}
-	
+
 	@api
 	public static class get_classes extends AbstractFunction {
 
@@ -724,6 +722,6 @@ public class Reflection {
 		public Version since() {
 			return CHVersion.V3_3_3;
 		}
-		
+
 	}
 }

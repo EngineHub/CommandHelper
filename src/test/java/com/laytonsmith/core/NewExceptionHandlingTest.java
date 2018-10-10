@@ -42,7 +42,7 @@ public class NewExceptionHandlingTest {
 
 	@Test
 	public void testBasicKeywordUsage() throws Exception {
-		assertEquals("complex_try(null,assign(ms::lang::IOException,@e,null),null,assign(ms::lang::Exception,@e,null),null,null)", 
+		assertEquals("complex_try(null,assign(ms::lang::IOException,@e,null),null,assign(ms::lang::Exception,@e,null),null,null)",
 				optimize("try { } catch (IOException @e){ } catch (Exception @e){ } finally { }"));
 	}
 

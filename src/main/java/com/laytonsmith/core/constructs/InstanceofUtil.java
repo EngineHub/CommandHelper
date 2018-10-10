@@ -30,12 +30,12 @@ public class InstanceofUtil {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Returns whether or not a given MethodScript value is an instanceof the specified MethodScript type.
 	 * @param value
 	 * @param instanceofThis
-	 * @return 
+	 * @return
 	 */
 	public static boolean isInstanceof(Mixed value, Class<? extends Mixed> instanceofThis) {
 		String typeof = typeof(instanceofThis);

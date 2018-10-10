@@ -10,7 +10,6 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * A utility class for managing the native class lists.
@@ -24,7 +23,7 @@ public class NativeTypeList {
 	 * within the native types (not user defined types). If the class can't be found, null is returned,
 	 * but that just means that it's not defined in the native types, not that it doesn't exist at all.
 	 * @param simpleName
-	 * @return 
+	 * @return
 	 */
 	public static String resolveType(String simpleName) {
 		// Optimization, using internal members
@@ -42,7 +41,7 @@ public class NativeTypeList {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns a list of all the known native classes.
 	 *

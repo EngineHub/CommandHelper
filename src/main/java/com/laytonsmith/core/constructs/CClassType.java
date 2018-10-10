@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 public final class CClassType extends Construct {
 
 	public static final String PATH_SEPARATOR = "::";
-	
+
 	private static final Map<String, CClassType> CACHE = new HashMap<>();
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = new CClassType("ms::lang::ClassType", Target.UNKNOWN);
@@ -59,7 +59,7 @@ public final class CClassType extends Construct {
 	 * @return
 	 */
 	public static CClassType get(String type) {
-		// This must change once user types are added		
+		// This must change once user types are added
 		type = NativeTypeList.resolveType(type);
 		assert type != null;
 		if(!CACHE.containsKey(type)) {
@@ -271,11 +271,11 @@ public final class CClassType extends Construct {
 		}
 		return t;
 	}
-	
+
 	/**
-	 * Returns the package that this class is in. If the class is not in a package, or if this is a class union, null 
+	 * Returns the package that this class is in. If the class is not in a package, or if this is a class union, null
 	 * is returned.
-	 * @return 
+	 * @return
 	 */
 	public CPackage getPackage() {
 		if(isTypeUnion) {
@@ -287,11 +287,11 @@ public final class CClassType extends Construct {
 		String[] parts = val().split(Pattern.quote(PATH_SEPARATOR));
 		return new CPackage(Target.UNKNOWN, ArrayUtils.slice(parts, 0, parts.length - 2));
 	}
-	
+
 	/**
 	 * Returns the name of the class type without the package. If this is a type union, then each type is simplified,
 	 * and returned as a string such as "int|string".
-	 * @return 
+	 * @return
 	 */
 	public String getSimpleName() {
 		List<String> parts = new ArrayList<>();
