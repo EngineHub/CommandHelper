@@ -31,6 +31,11 @@ public class NativeTypeList {
 			getNativeTypeList();
 		}
 		// This list should only extremely rarely change
+		// This mechanism won't work long term. It works for now, because it just so happens that no
+		// simple class names are repeated across the code. But if there were two classes A in different
+		// namespaces, then it would only find the first one, rather than causing an error, which is
+		// the correct behavior when it's ambiguous. This is the same thing for user classes as well,
+		// once those are added.
 		Set<String> defaultPackages = new HashSet<>(Arrays.asList("", "ms::lang::", "com::commandhelper::"));
 		for(String pack : defaultPackages) {
 			for(String type : nativeTypes) {
