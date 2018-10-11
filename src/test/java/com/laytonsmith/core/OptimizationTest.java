@@ -338,7 +338,7 @@ public class OptimizationTest {
 //	}
 	@Test
 	public void testNotinstanceofKeyword() throws Exception {
-		assertEquals("msg(not(instanceof(dyn(2),ms::lang::int)))", optimize("msg(dyn(2) notinstanceof int);"));
+		assertEquals("msg(not(instanceof(dyn(2),ms.lang.int)))", optimize("msg(dyn(2) notinstanceof int);"));
 	}
 
 	@Test

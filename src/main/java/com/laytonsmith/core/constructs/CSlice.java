@@ -19,11 +19,11 @@ import java.util.Stack;
  *
  *
  */
-@typeof("ms::lang::slice")
+@typeof("ms.lang.slice")
 public class CSlice extends CArray {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms::lang::slice");
+	public static final CClassType TYPE = CClassType.get("ms.lang.slice");
 
 	private long start;
 	private long finish;

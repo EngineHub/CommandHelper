@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("ms::lang::RangeException")
+@typeof("ms.lang.RangeException")
 public class CRERangeException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms::lang::RangeException");
+	public static final CClassType TYPE = CClassType.get("ms.lang.RangeException");
 
 	public CRERangeException(String msg, Target t) {
 		super(msg, t);

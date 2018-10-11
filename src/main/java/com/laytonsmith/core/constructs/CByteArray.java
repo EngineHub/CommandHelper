@@ -23,11 +23,11 @@ import java.util.EnumSet;
  *
  *
  */
-@typeof("ms::lang::byte_array")
+@typeof("ms.lang.byte_array")
 public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms::lang::byte_array");
+	public static final CClassType TYPE = CClassType.get("ms.lang.byte_array");
 
 	/**
 	 * Initial size of the ByteBuffer
@@ -524,11 +524,11 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	/**
 	 * This is a more efficient implementation of CArray for the backing byte arrays.
 	 */
-	@typeof("ms::lang::ByteBackingArray")
+	@typeof("ms.lang.ByteBackingArray")
 	private static class CArrayByteBacking extends CArray {
 
 		@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-		public static final CClassType TYPE = CClassType.get("ms::lang::ByteBackingArray");
+		public static final CClassType TYPE = CClassType.get("ms.lang.ByteBackingArray");
 		private final byte[] backing;
 		private String value = null;
 
@@ -626,11 +626,11 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 			return CByteArray.TYPE;
 		}
 
-		@typeof("ms::lang::ByteArrayReadOnlyException")
+		@typeof("ms.lang.ByteArrayReadOnlyException")
 		public static class CREByteArrayReadOnlyException extends CREReadOnlyException {
 
 			@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-			public static final CClassType TYPE = CClassType.get("ms::lang::ByteArrayReadOnlyException");
+			public static final CClassType TYPE = CClassType.get("ms.lang.ByteArrayReadOnlyException");
 
 			public CREByteArrayReadOnlyException(java.lang.String msg, com.laytonsmith.core.constructs.Target t) {
 				super(msg, t);

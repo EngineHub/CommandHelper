@@ -37,10 +37,10 @@ import java.util.TreeMap;
  * For subclasses, the ArrayAccess methods are the most commonly overridden methods. There are several overloaded
  * methods in this class, you need only to override the non-final ones for the same effect.
  */
-@typeof("ms::lang::array")
+@typeof("ms.lang.array")
 public class CArray extends Construct implements ArrayAccess {
 
-	public static final CClassType TYPE = CClassType.get("ms::lang::array");
+	public static final CClassType TYPE = CClassType.get("ms.lang.array");
 	private boolean associativeMode = false;
 	private long nextIndex = 0;
 	private List<Construct> array;

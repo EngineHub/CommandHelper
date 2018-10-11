@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("com::commandhelper::EnchantmentException")
+@typeof("com.commandhelper.EnchantmentException")
 public class CREEnchantmentException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("com::commandhelper::EnchantmentException");
+	public static final CClassType TYPE = CClassType.get("com.commandhelper.EnchantmentException");
 
 	public CREEnchantmentException(String msg, Target t) {
 		super(msg, t);

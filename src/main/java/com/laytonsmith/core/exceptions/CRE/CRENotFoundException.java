@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("ms::lang::NotFoundException")
+@typeof("ms.lang.NotFoundException")
 public class CRENotFoundException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms::lang::NotFoundException");
+	public static final CClassType TYPE = CClassType.get("ms.lang.NotFoundException");
 
 	public CRENotFoundException(String msg, Target t) {
 		super(msg, t);

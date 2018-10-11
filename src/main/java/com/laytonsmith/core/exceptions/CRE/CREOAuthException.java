@@ -10,11 +10,11 @@ import com.laytonsmith.core.constructs.Target;
  *
  * @author cailin
  */
-@typeof("ms::lang::auth::OAuthException")
+@typeof("ms.lang.auth.OAuthException")
 public class CREOAuthException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms::lang::auth::OAuthException");
+	public static final CClassType TYPE = CClassType.get("ms.lang.auth.OAuthException");
 
 	public CREOAuthException(String msg, Target t) {
 		super(msg, t);

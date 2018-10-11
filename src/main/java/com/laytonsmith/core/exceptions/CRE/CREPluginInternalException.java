@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("ms::lang::PluginInternalException")
+@typeof("ms.lang.PluginInternalException")
 public class CREPluginInternalException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms::lang::PluginInternalException");
+	public static final CClassType TYPE = CClassType.get("ms.lang.PluginInternalException");
 
 	public CREPluginInternalException(String msg, Target t) {
 		super(msg, t);

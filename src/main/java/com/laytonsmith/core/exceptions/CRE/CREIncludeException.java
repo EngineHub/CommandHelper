@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("ms::lang::IncludeException")
+@typeof("ms.lang.IncludeException")
 public class CREIncludeException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms::lang::IncludeException");
+	public static final CClassType TYPE = CClassType.get("ms.lang.IncludeException");
 
 	public CREIncludeException(String msg, Target t) {
 		super(msg, t);

@@ -14,11 +14,11 @@ import com.laytonsmith.core.CHVersion;
  *
  * @author Cailin
  */
-@typeof("ms::lang::Package")
+@typeof("ms.lang.Package")
 public class CPackage extends Construct {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms::lang::Package");
+	public static final CClassType TYPE = CClassType.get("ms.lang.Package");
 
 	public CPackage(Target t, String... parts) {
 		super(StringUtils.Join(parts, CClassType.PATH_SEPARATOR), Construct.ConstructType.IDENTIFIER, t);

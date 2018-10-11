@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("com::commandhelper::BadEntityTypeException")
+@typeof("com.commandhelper.BadEntityTypeException")
 public class CREBadEntityTypeException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("com::commandhelper::BadEntityTypeException");
+	public static final CClassType TYPE = CClassType.get("com.commandhelper.BadEntityTypeException");
 
 	public CREBadEntityTypeException(String msg, Target t) {
 		super(msg, t);

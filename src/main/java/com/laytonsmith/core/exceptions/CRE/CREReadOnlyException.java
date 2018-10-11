@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("ms::lang::ReadOnlyException")
+@typeof("ms.lang.ReadOnlyException")
 public class CREReadOnlyException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms::lang::ReadOnlyException");
+	public static final CClassType TYPE = CClassType.get("ms.lang.ReadOnlyException");
 
 	public CREReadOnlyException(String msg, Target t) {
 		super(msg, t);

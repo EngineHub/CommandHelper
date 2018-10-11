@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("ms::lang::InsufficientPermissionException")
+@typeof("ms.lang.InsufficientPermissionException")
 public class CREInsufficientPermissionException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms::lang::InsufficientPermissionException");
+	public static final CClassType TYPE = CClassType.get("ms.lang.InsufficientPermissionException");
 
 	public CREInsufficientPermissionException(String msg, Target t) {
 		super(msg, t);

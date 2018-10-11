@@ -21,14 +21,14 @@ import java.util.regex.Pattern;
 /**
  *
  */
-@typeof("ms::lang::ClassType")
+@typeof("ms.lang.ClassType")
 public final class CClassType extends Construct {
 
 	public static final String PATH_SEPARATOR = "::";
 
 	private static final Map<String, CClassType> CACHE = new HashMap<>();
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = new CClassType("ms::lang::ClassType", Target.UNKNOWN);
+	public static final CClassType TYPE = new CClassType("ms.lang.ClassType", Target.UNKNOWN);
 	public static final CClassType AUTO = new CClassType("auto", Target.UNKNOWN);
 	public static final CClassType VOID = new CClassType("void", Target.UNKNOWN);
 

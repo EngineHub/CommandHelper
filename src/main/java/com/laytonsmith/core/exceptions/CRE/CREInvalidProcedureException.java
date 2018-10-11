@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("ms::lang::InvalidProcedureException")
+@typeof("ms.lang.InvalidProcedureException")
 public class CREInvalidProcedureException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms::lang::InvalidProcedureException");
+	public static final CClassType TYPE = CClassType.get("ms.lang.InvalidProcedureException");
 
 	public CREInvalidProcedureException(String msg, Target t) {
 		super(msg, t);
