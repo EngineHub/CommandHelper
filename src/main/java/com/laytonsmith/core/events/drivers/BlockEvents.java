@@ -1505,8 +1505,8 @@ public class BlockEvents {
 					+ "{player: The player's name | block: the block type that was placed"
 					+ " | item: Gets the ItemStack for the item currently in the player's hand. "
 					+ " | instabreak : Gets if the block is set to instantly break when damaged by the player. }"
-					+ "{instabreak} "
-					+ "{}";
+					+ "{} "
+					+ "{instabreak}";
 		}
 
 		@Override
@@ -1581,8 +1581,8 @@ public class BlockEvents {
 					+ "Called when we try to place a block, to see if we can build it here or not."
 					+ "{block : Gets the Block that we are trying to place."
 					+ "| buildable : Gets whether or not the block can be built here.}"
-					+ "{buildable}"
-					+ "{}";
+					+ "{}"
+					+ "{buildable}";
 		}
 
 		@Override
@@ -1656,8 +1656,8 @@ public class BlockEvents {
 					+ "{blocks :  The list of blocks that would have been removed or were removed from the explosion event."
 					+ "| yield : The percentage of blocks to drop from this explosion. "
 					+ "| location : Gets the location involved in this event.}"
-					+ "{yield}"
-					+ "{}";
+					+ "{}"
+					+ "{yield}";
 		}
 
 		@Override
@@ -1811,8 +1811,8 @@ public class BlockEvents {
 					+ "{new : Gets the new current of this block"
 					+ "| old : Gets the old current of this block"
 					+ "| location : Gets the location involved in this event.}"
-					+ "{new}"
-					+ "{}";
+					+ "{}"
+					+ "{new}";
 		}
 
 		@Override
@@ -1880,8 +1880,8 @@ public class BlockEvents {
 					+ "| power : Gets the fuel power for this fuel."
 					+ "| consuming : Gets whether the brewing stand's fuel will be reduced / consumed or not."
 					+ "| location : Gets the location involved in this event.}"
-					+ "{power|consuming}"
-					+ "{}";
+					+ "{}"
+					+ "{power|consuming}";
 		}
 
 		@Override
@@ -2020,8 +2020,8 @@ public class BlockEvents {
 					+ "| old : Gets the old level of this block. "
 					+ "| reason : Gets the reason why the level has changed. "
 					+ "| location : Gets the location involved in this event.}"
-					+ "{new}"
-					+ "{}";
+					+ "{}"
+					+ "{new}";
 		}
 
 		@Override
@@ -2091,8 +2091,8 @@ public class BlockEvents {
 					+ "| fuel : Gets the fuel ItemStack for this event. "
 					+ "| burning: Gets whether the furnace's fuel is burning or not."
 					+ "| location : Gets the location involved in this event.}"
-					+ "{burntime|burning}"
-					+ "{}";
+					+ "{}"
+					+ "{burntime|burning}";
 		}
 
 		@Override
@@ -2165,8 +2165,8 @@ public class BlockEvents {
 					+ "| amount : Get the item count being retrieved."
 					+ "| item : Get the Material of the item being retrieved."
 					+ "| player : Get the player that triggered the event.}"
-					+ "{exp}"
-					+ "{}";
+					+ "{}"
+					+ "{exp}";
 		}
 
 		@Override
@@ -2235,8 +2235,8 @@ public class BlockEvents {
 					+ "{result : Gets the resultant ItemStack for this event. "
 					+ "| source : Gets the smelted ItemStack for this event. "
 					+ "| location : Gets the block involved in this event.}"
-					+ "{result}"
-					+ "{}";
+					+ "{}"
+					+ "{result}";
 		}
 
 		@Override
