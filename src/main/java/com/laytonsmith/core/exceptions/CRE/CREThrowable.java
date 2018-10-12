@@ -16,10 +16,11 @@ import java.util.Set;
 /**
  *
  */
-@typeof("Throwable")
+@typeof("ms.lang.Throwable")
 public class CREThrowable extends AbstractCREException {
 
-	public static final CClassType TYPE = CClassType.get("Throwable");
+	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
+	public static final CClassType TYPE = CClassType.get("ms.lang.Throwable");
 
 	@ForceImplementation
 	public CREThrowable(String msg, Target t) {

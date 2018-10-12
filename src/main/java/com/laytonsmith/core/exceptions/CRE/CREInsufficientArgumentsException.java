@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("InsufficientArgumentsException")
+@typeof("ms.lang.InsufficientArgumentsException")
 public class CREInsufficientArgumentsException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("InsufficientArgumentsException");
+	public static final CClassType TYPE = CClassType.get("ms.lang.InsufficientArgumentsException");
 
 	public CREInsufficientArgumentsException(String msg, Target t) {
 		super(msg, t);

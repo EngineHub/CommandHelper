@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("CastException")
+@typeof("ms.lang.CastException")
 public class CRECastException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("CastException");
+	public static final CClassType TYPE = CClassType.get("ms.lang.CastException");
 
 	public CRECastException(String msg, Target t) {
 		super(msg, t);

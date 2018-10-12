@@ -27,7 +27,7 @@ import java.util.logging.Logger;
  *
  *
  */
-@typeof("closure")
+@typeof("ms.lang.closure")
 public class CClosure extends Construct {
 
 	public static final long serialVersionUID = 1L;
@@ -39,7 +39,7 @@ public class CClosure extends Construct {
 	protected final CClassType returnType;
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("closure");
+	public static final CClassType TYPE = CClassType.get("ms.lang.closure");
 
 	public CClosure(ParseTree node, Environment env, CClassType returnType, String[] names, Construct[] defaults, CClassType[] types, Target t) {
 		super(node != null ? node.toString() : "", ConstructType.CLOSURE, t);

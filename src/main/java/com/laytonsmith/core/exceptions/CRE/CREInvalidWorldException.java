@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("InvalidWorldException")
+@typeof("com.commandhelper.InvalidWorldException")
 public class CREInvalidWorldException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("InvalidWorldException");
+	public static final CClassType TYPE = CClassType.get("com.commandhelper.InvalidWorldException");
 
 	public CREInvalidWorldException(String msg, Target t) {
 		super(msg, t);

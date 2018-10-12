@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("BindException")
+@typeof("ms.lang.BindException")
 public class CREBindException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("BindException");
+	public static final CClassType TYPE = CClassType.get("ms.lang.BindException");
 
 	public CREBindException(String msg, Target t) {
 		super(msg, t);

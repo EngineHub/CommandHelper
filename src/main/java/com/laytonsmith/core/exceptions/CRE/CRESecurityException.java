@@ -9,11 +9,11 @@ import com.laytonsmith.core.constructs.Target;
 /**
  *
  */
-@typeof("SecurityException")
+@typeof("ms.lang.SecurityException")
 public class CRESecurityException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("SecurityException");
+	public static final CClassType TYPE = CClassType.get("ms.lang.SecurityException");
 
 	public CRESecurityException(String msg, Target t) {
 		super(msg, t);

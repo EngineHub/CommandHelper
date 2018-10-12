@@ -357,7 +357,7 @@ public class RandomTests {
 	public void testVoidAndReturnedVoidAreSEqualsAndOthers() throws Exception {
 		assertEquals("true", SRun("array_insert(array(), '', 0) === void", fakePlayer));
 		assertEquals("void", SRun("typeof(array_insert(array(), '', 0))", fakePlayer));
-		assertEquals("ClassType", SRun("typeof(typeof(array_insert(array(), '', 0)))", fakePlayer));
+		assertEquals("ms.lang.ClassType", SRun("typeof(typeof(array_insert(array(), '', 0)))", fakePlayer));
 	}
 
 	@Test

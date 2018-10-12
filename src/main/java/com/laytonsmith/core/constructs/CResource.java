@@ -12,11 +12,11 @@ import java.util.concurrent.atomic.AtomicLong;
  * slightly more complicated. Therefore, this is a stopgap measure that WILL be removed at some point, once Objects are
  * created.
  */
-@typeof("resource")
+@typeof("ms.lang.resource")
 public class CResource<T> extends Construct {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("resource");
+	public static final CClassType TYPE = CClassType.get("ms.lang.resource");
 
 	private static final AtomicLong RESOURCE_POOL = new AtomicLong(0);
 

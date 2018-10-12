@@ -12,11 +12,11 @@ import java.util.Set;
 /**
  * Things that implement this can be accessed like an array, with array_get, or [].
  */
-@typeof("ArrayAccess")
+@typeof("ms.lang.ArrayAccess")
 public interface ArrayAccess extends Mixed, Sizeable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ArrayAccess");
+	public static final CClassType TYPE = CClassType.get("ms.lang.ArrayAccess");
 
 	/**
 	 * Return the mixed at this location. This should throw an exception if the index does not exist. This method will

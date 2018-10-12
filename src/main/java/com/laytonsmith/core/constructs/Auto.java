@@ -7,5 +7,5 @@ package com.laytonsmith.core.constructs;
  */
 public class Auto {
 
-	public static final CClassType TYPE = CClassType.get("auto");
+	public static final CClassType TYPE = CClassType.AUTO;
 }

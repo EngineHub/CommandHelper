@@ -23,11 +23,11 @@ import java.util.logging.Logger;
 /**
  *
  */
-@typeof("iclosure")
+@typeof("ms.lang.iclosure")
 public class CIClosure extends CClosure {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("iclosure");
+	public static final CClassType TYPE = CClassType.get("ms.lang.iclosure");
 
 	public CIClosure(ParseTree node, Environment env, CClassType returnType, String[] names, Construct[] defaults, CClassType[] types, Target t) {
 		super(node, env, returnType, names, defaults, types, t);
