@@ -2,30 +2,7 @@ package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCCreatureSpawnEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityChangeBlockEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityDamageEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityDamageByEntityEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityDeathEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityEnterPortalEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityExplodeEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityInteractEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityPortalEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityRegainHealthEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityToggleGlideEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCFireworkExplodeEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCHangingBreakEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCItemDespawnEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCItemSpawnEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCPlayerDropItemEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCPlayerInteractAtEntityEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCPlayerInteractEntityEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCPlayerPickupItemEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCProjectileHitEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCProjectileLaunchEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCTargetEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCAreaEffectCloudApplyEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.*;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
 import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.core.events.Driver;
@@ -192,5 +169,47 @@ public class BukkitEntityListener implements Listener {
 	public void onAreaEffectCloudApply(Event event){
 		BukkitMCAreaEffectCloudApplyEvent aeca = new BukkitMCAreaEffectCloudApplyEvent(event);
 		EventUtils.TriggerListener(Driver.AREA_EFFECT_CLOUD_APPLY, "area_effect_cloud_apply", aeca);
+	}
+
+	@EventIdentifier(event = Driver.CREEPER_POWER, className = "org.bukkit.event.entity.CreeperPowerEvent")
+	public void onCreeperPower(Event event){
+		BukkitMCCreeperPowerEvent cpe = new BukkitMCCreeperPowerEvent(event);
+		EventUtils.TriggerListener(Driver.CREEPER_POWER, "creeper_power", cpe);
+	}
+
+	@EventIdentifier(event = Driver.ENDERDRAGON_CHANGE_PAHSE, className =  "org.bukkit.event.entity.EnderDragonChangePhaseEvent")
+	public void onEnderdragonChangePhase(Event event){
+		BukkitMCEnderdragonChangePhaseEvent ecpe = new BukkitMCEnderdragonChangePhaseEvent(event);
+		EventUtils.TriggerListener(Driver.ENDERDRAGON_CHANGE_PAHSE, "enderdragon_change_phase", ecpe);
+	}
+
+	@EventIdentifier(event = Driver.ENTITY_AIR_CHANGE, className = "org.bukkit.event.entity.EntityAirChangeEvent")
+	public void onEntityAirChange(Event event){
+		BukkitMCEntityAirChangeEvent eace = new BukkitMCEntityAirChangeEvent(event);
+		EventUtils.TriggerListener(Driver.ENTITY_AIR_CHANGE, "entity_air_change", eace);
+	}
+
+	@EventIdentifier(event = Driver.ENTITY_BREED, className = "org.bukkit.event.entity.EntityBreedEvent")
+	public void onEntityBreed(Event event){
+		BukkitMCEntityBreedEvent ebe = new BukkitMCEntityBreedEvent(event);
+		EventUtils.TriggerListener(Driver.ENTITY_BREED, "entity_breed", ebe);
+	}
+
+	@EventIdentifier(event = Driver.ENTITY_CREATE_PORTAL, className = "org.bukkit.event.entity.EntityCreatePortalEvent")
+	public void onEntityCreatePortal(Event event){
+		BukkitMCEntityCreatePortalEvent ecpe = new BukkitMCEntityCreatePortalEvent(event);
+		EventUtils.TriggerListener(Driver.ENTITY_CREATE_PORTAL, "entity_create_portal", ecpe);
+	}
+
+	@EventIdentifier(event = Driver.ENTITY_DROP_ITEM, className = "org.bukkit.event.entity.EntityDropItemEvent")
+	public void onEntityDropItem(Event event){
+		BukkitMCEntityDropItemEvent edie = new BukkitMCEntityDropItemEvent(event);
+		EventUtils.TriggerListener(Driver.ENTITY_DROP_ITEM, "entity_drop_item", edie);
+	}
+
+	@EventIdentifier(event = Driver.ENTITY_RESURRECT, className = "org.bukkit.event.entity.EntityResurrectEvent")
+	public void onEntityResurrect(Event event){
+		BukkitMCEntityResurrectEvent ere = new BukkitMCEntityResurrectEvent(event);
+		EventUtils.TriggerListener(Driver.ENTITY_RESURRECT, "entity_resurrect", ere);
 	}
 }

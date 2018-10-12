@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.entities.MCHanging;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
@@ -56,11 +57,10 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import org.bukkit.entity.EnderDragon;
+import org.bukkit.event.entity.EntityCreatePortalEvent;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class EntityEvents {
 
@@ -2204,13 +2204,492 @@ public class EntityEvents {
 				return ret;
 
 			}else{
-				throw new EventException("Could not convert to MCEntityPortalEvent");
+				throw new EventException("Could not convert to AreaEffectCloudApplyEvent");
 			}
 		}
 
 		@Override
 		public Driver driver() {
 			return Driver.AREA_EFFECT_CLOUD_APPLY;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+	}
+
+	@api
+	public static class creeper_power extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "creeper_power";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "Called when a Creeper is struck by lightning."
+					+ "{id : Returns the entityID involved in this event."
+					+ "| lightning : Gets the lightning bolt which is striking the Creeper"
+					+ "| cause : Gets the cause of the creeper being (un)powered.}"
+					+ "{}"
+					+ "{}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(e instanceof MCCreeperPowerEvent){
+				MCCreeperPowerEvent event = (MCCreeperPowerEvent) e;
+				Map<String, Construct> ret = evaluate_helper(event);
+				Target t = Target.UNKNOWN;
+
+				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
+
+				CArray lightning = new CArray(t);
+				lightning.set("world", event.getLightning().getWorld().getName());
+				lightning.set("id", event.getLightning().getUniqueId().toString());
+				lightning.set("location", ObjectGenerator.GetGenerator().location(event.getLightning().getLocation(), false), t);
+				lightning.set("is_effect", CBoolean.get(event.getLightning().isEffect()), t);
+				ret.put("lightning", lightning);
+
+				ret.put("cause", new CString(event.getCause(), t));
+
+				return ret;
+			}else{
+				throw new EventException("Could not convert to CreeperPowerEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.CREEPER_POWER;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+	}
+
+	@api
+	public static class enderdragon_change_phase extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "enderdragon_change_phase";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "Called when an EnderDragon switches controller phase."
+					+ "{current : Gets the current phase that the dragon is in."
+					+ "new : Gets the new phase that the dragon will switch to."
+					+ "id : Returns the Entity involved in this event.}"
+					+ "{new}"
+					+ "{}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(e instanceof MCEnderdragonChangePhaseEvent){
+				MCEnderdragonChangePhaseEvent event = (MCEnderdragonChangePhaseEvent) e;
+				Map<String, Construct> ret = evaluate_helper(event);
+				Target t = Target.UNKNOWN;
+
+				ret.put("current", event.getCurrentPhase());
+				ret.put("new", event.getNewPhase());
+				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
+
+				return ret;
+			}else{
+				throw new EventException("Could not convert to EnderDragonChangePhaseEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ENDERDRAGON_CHANGE_PAHSE;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if(event instanceof MCEnderdragonChangePhaseEvent){
+				if(key.equalsIgnoreCase("new")){
+					String[] phases = new String[]{"BREATH_ATTACK", "CHANGE_PLAYER", "CIRCLING", "DYING", "FLY_TO_PORTAL",
+					"HOVER", "LAND_ON_PORTAL", "LEAVE_PORTAL", "ROAR_BEFORE_ATTACK", "SEARCH_FOR_BREATH_ATTACK_TARGET",
+					"STRAFING"};
+					if(Arrays.asList(phases).contains(value.val().toUpperCase())){
+						((MCEnderdragonChangePhaseEvent) event).setNewPhase(EnderDragon.Phase.valueOf(value.val().toUpperCase()));
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+	}
+
+	@api
+	public static class entity_air_change extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "entity_air_change";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "Called when the amount of air an entity has remaining changes."
+					+ "{id : Returns the Entity involved in this event."
+					+ "| amount : Gets the amount of air the entity has left.}"
+					+ "{amount}"
+					+ "{}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(e instanceof MCEntityAirChangeEvent){
+
+				MCEntityAirChangeEvent event = (MCEntityAirChangeEvent) e;
+				Map<String, Construct> ret = evaluate_helper(event);
+				Target t = Target.UNKNOWN;
+
+				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
+				ret.put("amount", event.getAmount());
+
+				return ret;
+			}else{
+				throw new EventException("Could not convert to EntityAirChangeEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ENTITY_AIR_CHANGE;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if(event instanceof MCEntityAirChangeEvent){
+				if(key.equalsIgnoreCase("amount")){
+					((MCEntityAirChangeEvent) event).setAmount(Static.getInt32(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	@api
+	public static class entity_breed extends AbstractEvent{
+
+		@Override
+		public String getName() {
+			return "entity_breed";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "Called when one Entity breeds with another Entity."
+					+ "{ bredwith : The ItemStack that was used to initiate breeding, if present."
+					+ "| breeder : Gets the Entity responsible for breeding."
+					+ "| id : Returns the Entity involved in this event"
+					+ "| exp : Get the amount of experience granted by breeding."
+					+ "| mother : Gets the parent creating this entity."
+					+ "| father : Gets the other parent of the newly born entity.}"
+					+ "{exp}"
+					+ "{}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(e instanceof MCEntityBreedEvent){
+
+				MCEntityBreedEvent event = (MCEntityBreedEvent) e;
+				Map<String, Construct> ret = evaluate_helper(event);
+				Target t = Target.UNKNOWN;
+
+				ret.put("bredwith", ObjectGenerator.GetGenerator().item(event.getBredWith(), t));
+				ret.put("breeder", new CString(event.getBreeder().getUniqueId().toString(), t));
+				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
+				ret.put("exp", event.getExperience());
+				ret.put("father", new CString(event.getFather().getUniqueId().toString(), t));
+				ret.put("mother", new CString(event.getMother().getUniqueId().toString(), t));
+
+				return ret;
+
+			}else{
+				throw new EventException("Could not convert to EntityBreedEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ENTITY_BREED;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if(event instanceof MCEntityBreedEvent){
+				if(key.equalsIgnoreCase("exp")){
+					((MCEntityBreedEvent) event).setExperience(Static.getInt32(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	@api
+	public static class entity_create_portal extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "entity_create_portal";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "Thrown when a Living Entity creates a portal in a world."
+					+ "{blocks : Gets a list of all blocks associated with the portal."
+					+ "| id : Returns the Entity involved in this event. "
+					+ "| type : Gets the type of portal that is trying to be created.}"
+					+ "{}"
+					+ "{}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(e instanceof MCEntityCreatePortalEvent){
+
+				MCEntityCreatePortalEvent event = (MCEntityCreatePortalEvent) e;
+				Map<String, Construct> ret = evaluate_helper(event);
+				Target t = Target.UNKNOWN;
+
+				CArray blocks = new CArray(t);
+				for(MCBlockState bs : event.getBlocks())
+					blocks.push(ObjectGenerator.GetGenerator().location(bs.getLocation(), false), t);
+				ret.put("blocks", blocks);
+
+				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
+				ret.put("type", event.getPortalType());
+
+				return ret;
+
+			}else{
+				throw new EventException("Could not convert to EntityCreatePortalEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ENTITY_CREATE_PORTAL;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+	}
+
+	@api
+	public static class entity_drop_item extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "entity_drop_item";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "Thrown when an entity creates an item drop."
+					+ "{item : Gets the Item created by the entity."
+					+ "| id : Returns the Entity involved in this event.}"
+					+ "{}"
+					+ "{}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(e instanceof MCEntityDropItemEvent){
+
+				MCEntityDropItemEvent event = (MCEntityDropItemEvent) e;
+				Map<String, Construct> ret = evaluate_helper(event);
+				Target t = Target.UNKNOWN;
+
+				CArray item = new CArray(t);
+				item.set("item", ObjectGenerator.GetGenerator().item(event.getItemDrop().getItemStack(), t), t);
+				item.set("id", event.getItemDrop().getUniqueId().toString());
+				ret.put("item", item);
+
+				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
+
+				return ret;
+
+			}else{
+				throw new EventException("Could not convert to EntityDropItemEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ENTITY_DROP_ITEM;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+	}
+
+	@api
+	public static class entity_resurrect extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "entity_resurrect";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "Called when an entity dies and may have the opportunity to be resurrected."
+					+ "{id : Returns the Entity involved in this event.}"
+					+ "{}"
+					+ "{}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(e instanceof MCEntityResurrectEvent){
+
+				MCEntityResurrectEvent event = (MCEntityResurrectEvent) e;
+				Map<String, Construct> ret = evaluate_helper(event);
+				Target t = Target.UNKNOWN;
+
+				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
+
+				return ret;
+
+			}else{
+				throw new EventException("Could not convert to EntityResurrectEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ENTITY_RESURRECT;
 		}
 
 		@Override

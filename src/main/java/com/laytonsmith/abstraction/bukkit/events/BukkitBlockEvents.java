@@ -1074,7 +1074,7 @@ public class BukkitBlockEvents {
 		}
 	}
 
-	@abstraction(type = Implementation.Type.BUKKIT)
+	/*@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCMoistureChangeEvent implements MCMoistureChangeEvent {
 
 		MoistureChangeEvent mce;
@@ -1105,7 +1105,7 @@ public class BukkitBlockEvents {
 		public Object _GetObject() {
 			return mce;
 		}
-	}
+	}*/
 
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCSpongeAbsorbEvent implements MCSpongeAbsorbEvent {
