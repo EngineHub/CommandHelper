@@ -503,9 +503,9 @@ public class Script {
 					args.add(t.getData().val());
 				}
 			} else if(t.getData() instanceof IVariable) {
-				args.add(((IVariable)t.getData()).getVariableName());
+				args.add(((IVariable) t.getData()).getVariableName());
 			} else if(t.getData() instanceof Variable) {
-				args.add(((Variable)t.getData()).getVariableName());
+				args.add(((Variable) t.getData()).getVariableName());
 			} else {
 				args.add("[[Dynamic Element]]");
 			}

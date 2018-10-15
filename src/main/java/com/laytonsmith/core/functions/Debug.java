@@ -600,6 +600,7 @@ public class Debug {
 	}
 
 	@api
+	@noboilerplate
 	public static class set_debug_output extends AbstractFunction {
 
 		@Override
