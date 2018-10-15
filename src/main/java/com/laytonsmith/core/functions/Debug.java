@@ -2,12 +2,15 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.HeapDumper;
+import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
@@ -592,6 +595,60 @@ public class Debug {
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+
+	}
+
+	@api
+	public static class set_debug_output extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Script.debugOutput = Static.getBoolean(args[0], t);
+			if(Script.debugOutput) {
+				StreamUtils.GetSystemOut().println(TermColors.BG_RED + "[[DEBUG]] set_debug_output(true)"
+						+ TermColors.RESET);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "set_debug_output";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {booleanValue} Turns verbose debug output on or off. This should generally never be on in"
+					+ " a production server, but can be useful to quickly trace what a script is doing when it runs in a"
+					+ " test environment. When on, every single function call will be printed out, along with the"
+					+ " parameters passed in to it. To reduce impact on scripts when this is disabled, this has been"
+					+ " implemented as a system wide setting, and applies to all scripts running in the same system.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
 		}
 
 	}

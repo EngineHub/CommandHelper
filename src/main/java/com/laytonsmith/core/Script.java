@@ -73,6 +73,9 @@ import java.util.logging.Level;
  */
 public class Script {
 
+	// See set_debug_output()
+	public static boolean debugOutput = false;
+
 	private List<Token> left;
 	private List<List<Token>> right;
 	private List<Token> fullRight;
@@ -298,6 +301,9 @@ public class Script {
 				ProfilePoint pp = env.getEnv(GlobalEnv.class).GetProfiler().start(m.val() + " execution", LogLevel.INFO);
 				Construct ret;
 				try {
+					if(debugOutput) {
+						doDebugOutput(p.getName(), c.getChildren());
+					}
 					ret = p.cexecute(c.getChildren(), newEnv, m.getTarget());
 				} finally {
 					pp.stop();
@@ -319,6 +325,9 @@ public class Script {
 							+ f.getName() + " function.", m.getTarget());
 				}
 
+				if(debugOutput) {
+					doDebugOutput(f.getName(), c.getChildren());
+				}
 				if(f.useSpecialExec()) {
 					ProfilePoint p = null;
 					if(f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null
@@ -482,6 +491,27 @@ public class Script {
 				stManager.popStackTraceElement();
 			}
 		}
+	}
+
+	private void doDebugOutput(String nodeName, List<ParseTree> children) {
+		List<String> args = new ArrayList<>();
+		for(ParseTree t : children) {
+			if(t.isConst()) {
+				if(t.getData() instanceof CString) {
+					args.add(t.getData().asString().getQuote());
+				} else {
+					args.add(t.getData().val());
+				}
+			} else if(t.getData() instanceof IVariable) {
+				args.add(((IVariable)t.getData()).getVariableName());
+			} else if(t.getData() instanceof Variable) {
+				args.add(((Variable)t.getData()).getVariableName());
+			} else {
+				args.add("[[Dynamic Element]]");
+			}
+		}
+		StreamUtils.GetSystemOut().println(TermColors.BG_RED + "[[DEBUG]] " + nodeName + "("
+				+ StringUtils.Join(args, ", ") + ")" + TermColors.RESET);
 	}
 
 	public boolean match(String command) {
