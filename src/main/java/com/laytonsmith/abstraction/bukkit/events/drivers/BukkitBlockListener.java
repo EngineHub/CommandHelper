@@ -203,12 +203,6 @@ public class BukkitBlockListener implements Listener {
 		EventUtils.TriggerListener(Driver.LEAVES_DECAY, "leaves_decay", lde);
 	}
 
-	/*@EventHandler(priority = EventPriority.LOWEST)
-	public void onMoistureChange(MoistureChangeEvent e){
-		BukkitBlockEvents.BukkitMCMoistureChangeEvent mce = new BukkitBlockEvents.BukkitMCMoistureChangeEvent(e);
-		EventUtils.TriggerListener(Driver.MOISTURE_CHANGE, "moisture_change", mce);
-	} NOT WORKING */
-
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onSpongeAbsorb(SpongeAbsorbEvent e){
 		BukkitBlockEvents.BukkitMCSpongeAbsorbEvent sae = new BukkitBlockEvents.BukkitMCSpongeAbsorbEvent(e);
