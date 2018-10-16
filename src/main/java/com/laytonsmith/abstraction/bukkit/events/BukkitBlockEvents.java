@@ -1074,39 +1074,6 @@ public class BukkitBlockEvents {
 		}
 	}
 
-	/*@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCMoistureChangeEvent implements MCMoistureChangeEvent {
-
-		MoistureChangeEvent mce;
-
-		public BukkitMCMoistureChangeEvent(MoistureChangeEvent e){ this.mce = e;}
-
-		@Override
-		public MCBlockState getNewState() {
-			return new BukkitMCBlockState(mce.getNewState());
-		}
-
-		@Override
-		public MCBlock getBlock() {
-			return new BukkitMCBlock(mce.getBlock());
-		}
-
-		@Override
-		public boolean isCancelled() {
-			return mce.isCancelled();
-		}
-
-		@Override
-		public void setCancelled(boolean cancel) {
-			mce.setCancelled(cancel);
-		}
-
-		@Override
-		public Object _GetObject() {
-			return mce;
-		}
-	}*/
-
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCSpongeAbsorbEvent implements MCSpongeAbsorbEvent {
 
