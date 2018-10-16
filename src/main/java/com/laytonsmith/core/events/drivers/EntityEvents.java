@@ -3440,6 +3440,7 @@ public class EntityEvents {
 
 				return ret;
 
+
 			} else {
 				throw new EventException("Could not convert to SheepDyeWoolEvent");
 			}
