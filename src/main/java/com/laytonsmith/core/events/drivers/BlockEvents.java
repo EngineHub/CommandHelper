@@ -2346,65 +2346,6 @@ public class BlockEvents {
 	}
 
 	@api
-	public static class moisture_change extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "moisture_change";
-		}
-
-		@Override
-		public String docs() {
-			return "{}"
-					+ "Called when the moisture level of a soil block changes."
-					+ "{new : Gets the new state of the affected block."
-					+ "| location : Gets the block involved in this event. }"
-					+ "{}"
-					+ "{}";
-		}
-
-		@Override
-		public Version since() {
-			return CHVersion.V3_3_3;
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(!(e instanceof MCMoistureChangeEvent))
-				throw new EventException("Cannot convert event to MoistureChangeEvent");
-
-			MCMoistureChangeEvent event = (MCMoistureChangeEvent) e;
-			Target t = Target.UNKNOWN;
-			Map<String, Construct> mapEvent = evaluate_helper(event);
-
-			mapEvent.put("new", new CString(event.getNewState().getType().getName(), t));
-			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
-
-			return mapEvent;
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.MOISTURE_CHANGE;
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			return false;
-		}
-	}
-
-	@api
 	public static class sponge_absorb extends AbstractEvent {
 
 		@Override
