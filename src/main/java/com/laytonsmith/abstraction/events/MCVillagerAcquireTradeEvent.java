@@ -6,14 +6,14 @@ import org.bukkit.inventory.MerchantRecipe;
 
 public interface MCVillagerAcquireTradeEvent extends BindableEvent {
 
-    public MCVillager getEntity();
+	MCVillager getEntity();
 
-    public MerchantRecipe getRecipe();
+	MerchantRecipe getRecipe();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
-    public void setRecipe(MerchantRecipe recipe);
+	void setRecipe(MerchantRecipe recipe);
 
 }

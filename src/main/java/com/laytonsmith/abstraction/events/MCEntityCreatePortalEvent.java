@@ -9,13 +9,13 @@ import java.util.List;
 
 public interface MCEntityCreatePortalEvent extends BindableEvent {
 
-    public List<MCBlockState> getBlocks();
+	List<MCBlockState> getBlocks();
 
-    public MCEntity getEntity();
+	MCEntity getEntity();
 
-    public CString getPortalType();
+	CString getPortalType();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 }

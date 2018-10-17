@@ -8,20 +8,20 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCCauldronLevelChangeEvent extends BindableEvent {
 
-    public MCEntity getEntity();
+	MCEntity getEntity();
 
-    public CInt getNewLevel();
+	CInt getNewLevel();
 
-    public CInt getOldLevel();
+	CInt getOldLevel();
 
-    public CString getReason();
+	CString getReason();
 
-    public MCBlock getBlock();
+	MCBlock getBlock();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
-    public void setNewLevel(int newLevel);
+	void setNewLevel(int newLevel);
 
 }

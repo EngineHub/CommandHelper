@@ -7,21 +7,21 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCBrewingStandFuelEvent extends BindableEvent {
 
-    public MCItemStack getFuel();
+	MCItemStack getFuel();
 
-    public CInt getFuelPower();
+	CInt getFuelPower();
 
-    public MCBlock getBlock();
+	MCBlock getBlock();
 
-    public boolean isConsuming();
+	boolean isConsuming();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setFuelPower(int fuelPower);
+	void setFuelPower(int fuelPower);
 
-    public void setConsuming(boolean consuming);
+	void setConsuming(boolean consuming);
 
-    public void setCancelled(boolean cancel);
+	void setCancelled(boolean cancel);
 
 
 }

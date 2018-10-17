@@ -7,14 +7,14 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCPigZapEvent extends BindableEvent {
 
-    public MCPig getEntity();
+	MCPig getEntity();
 
-    public MCLightningStrike getLightning();
+	MCLightningStrike getLightning();
 
-    public MCPigZombie getPigZombie();
+	MCPigZombie getPigZombie();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
 }

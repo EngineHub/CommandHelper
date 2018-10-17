@@ -8,16 +8,16 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCFurnaceExtractEvent extends BindableEvent {
 
-    public CInt getExpToDrop();
+	CInt getExpToDrop();
 
-    public CInt getItemAmount();
+	CInt getItemAmount();
 
-    public MCMaterial getItemType();
+	MCMaterial getItemType();
 
-    public MCPlayer getPlayer();
+	MCPlayer getPlayer();
 
-    public MCBlock getBlock();
+	MCBlock getBlock();
 
-    public void setExpToDrop(int exp);
+	void setExpToDrop(int exp);
 
 }

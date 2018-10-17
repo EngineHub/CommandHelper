@@ -11,21 +11,22 @@ import org.bukkit.inventory.ItemStack;
 
 public interface MCPlayerBucketEvent extends BindableEvent {
 
-    public MCBlock getBlockClicked();
+	MCBlock getBlockClicked();
 
-    public MCBlockFace getBlockFace();
+	MCBlockFace getBlockFace();
 
-    public MCMaterial getBucket();
+	MCMaterial getBucket();
 
-    public MCItemStack getItemStack();
+	MCItemStack getItemStack();
 
-    public CString getType();
+	CString getType();
 
-    public MCPlayer getPlayer();
+	MCPlayer getPlayer();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancel);
+	void setCancelled(boolean cancel);
 
-    public void setItemStack(ItemStack is);
+	void setItemStack(ItemStack is);
+
 }

@@ -6,14 +6,14 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCEntityAirChangeEvent extends BindableEvent {
 
-    public CInt getAmount();
+	CInt getAmount();
 
-    public MCEntity getEntity();
+	MCEntity getEntity();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setAmount(int amount);
+	void setAmount(int amount);
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
 }

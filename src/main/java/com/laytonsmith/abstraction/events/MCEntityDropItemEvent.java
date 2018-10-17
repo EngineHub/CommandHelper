@@ -6,12 +6,12 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCEntityDropItemEvent extends BindableEvent {
 
-    public MCItem getItemDrop();
+	MCItem getItemDrop();
 
-    public MCEntity getEntity();
+	MCEntity getEntity();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
 }

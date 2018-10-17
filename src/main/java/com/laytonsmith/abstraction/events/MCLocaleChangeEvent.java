@@ -6,8 +6,8 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCLocaleChangeEvent extends BindableEvent {
 
-    public CString getLocale();
+	CString getLocale();
 
-    public MCPlayer getPlayer();
+	MCPlayer getPlayer();
 
 }

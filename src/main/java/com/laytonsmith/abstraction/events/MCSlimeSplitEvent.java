@@ -6,13 +6,14 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCSlimeSplitEvent extends BindableEvent {
 
-    public CInt getCount();
+	CInt getCount();
 
-    public MCSlime getEntity();
+	MCSlime getEntity();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
-    public void setCount(int count);
+	void setCount(int count);
+
 }

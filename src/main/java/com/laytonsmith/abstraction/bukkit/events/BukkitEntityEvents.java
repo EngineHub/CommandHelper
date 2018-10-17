@@ -1,33 +1,170 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
 import com.laytonsmith.PureUtilities.Vector3D;
-import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.MCAnimalTamer;
+import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCTravelAgent;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
-import com.laytonsmith.abstraction.blocks.MCBlockState;
-import com.laytonsmith.abstraction.bukkit.*;
+import com.laytonsmith.abstraction.bukkit.BukkitMCAnimalTamer;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockData;
-import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
-import com.laytonsmith.abstraction.bukkit.entities.*;
-import com.laytonsmith.abstraction.entities.*;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAbstractHorse;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLightningStrike;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPig;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPigZombie;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCSheep;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCSlime;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCVillager;
+import com.laytonsmith.abstraction.entities.MCAbstractHorse;
+import com.laytonsmith.abstraction.entities.MCHanging;
+import com.laytonsmith.abstraction.entities.MCItem;
+import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLivingEntity;
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
+import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
+import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCTravelAgent;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFirework;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHanging;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCItem;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLivingEntity;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCProjectile;
+import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
-import com.laytonsmith.abstraction.enums.*;
+import com.laytonsmith.abstraction.entities.MCLightningStrike;
+import com.laytonsmith.abstraction.entities.MCPig;
+import com.laytonsmith.abstraction.entities.MCPigZombie;
+import com.laytonsmith.abstraction.entities.MCProjectile;
+import com.laytonsmith.abstraction.entities.MCSheep;
+import com.laytonsmith.abstraction.entities.MCSlime;
+import com.laytonsmith.abstraction.entities.MCVillager;
+import com.laytonsmith.abstraction.enums.MCDamageCause;
+import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import com.laytonsmith.abstraction.enums.MCRegainReason;
+import com.laytonsmith.abstraction.enums.MCRemoveCause;
+import com.laytonsmith.abstraction.enums.MCSpawnReason;
+import com.laytonsmith.abstraction.enums.MCTargetReason;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDamageCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRegainReason;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRemoveCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason;
-import com.laytonsmith.abstraction.events.*;
+import com.laytonsmith.abstraction.events.MCAreaEffectCloudApplyEvent;
+import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
+import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
+import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
+import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
+import com.laytonsmith.abstraction.events.MCEntityDeathEvent;
+import com.laytonsmith.abstraction.events.MCEntityEnterPortalEvent;
+import com.laytonsmith.abstraction.events.MCEntityExplodeEvent;
+import com.laytonsmith.abstraction.events.MCEntityInteractEvent;
+import com.laytonsmith.abstraction.events.MCEntityPortalEvent;
+import com.laytonsmith.abstraction.events.MCEntityRegainHealthEvent;
+import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
+import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
+import com.laytonsmith.abstraction.events.MCFireworkExplodeEvent;
+import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
+import com.laytonsmith.abstraction.events.MCItemDespawnEvent;
+import com.laytonsmith.abstraction.events.MCItemSpawnEvent;
+import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
+import com.laytonsmith.abstraction.events.MCPlayerInteractAtEntityEvent;
+import com.laytonsmith.abstraction.events.MCPlayerInteractEntityEvent;
+import com.laytonsmith.abstraction.events.MCPlayerPickupItemEvent;
+import com.laytonsmith.abstraction.events.MCPotionSplashEvent;
+import com.laytonsmith.abstraction.events.MCProjectileHitEvent;
+import com.laytonsmith.abstraction.events.MCProjectileLaunchEvent;
+import com.laytonsmith.abstraction.events.MCCreeperPowerEvent;
+import com.laytonsmith.abstraction.events.MCEnderdragonChangePhaseEvent;
+import com.laytonsmith.abstraction.events.MCEntityAirChangeEvent;
+import com.laytonsmith.abstraction.events.MCEntityBreedEvent;
+import com.laytonsmith.abstraction.events.MCEntityCreatePortalEvent;
+import com.laytonsmith.abstraction.events.MCEntityDropItemEvent;
+import com.laytonsmith.abstraction.events.MCEntityResurrectEvent;
+import com.laytonsmith.abstraction.events.MCEntityShootBowEvent;
+import com.laytonsmith.abstraction.events.MCEntityTameEvent;
+import com.laytonsmith.abstraction.events.MCEntityTeleportEvent;
+import com.laytonsmith.abstraction.events.MCEntityToggleSwimEvent;
+import com.laytonsmith.abstraction.events.MCEntityUnleashEvent;
+import com.laytonsmith.abstraction.events.MCExplosionPrimeEvent;
+import com.laytonsmith.abstraction.events.MCHorseJumpEvent;
+import com.laytonsmith.abstraction.events.MCItemMergeEvent;
+import com.laytonsmith.abstraction.events.MCPigZapEvent;
+import com.laytonsmith.abstraction.events.MCPigZombieAngerEvent;
+import com.laytonsmith.abstraction.events.MCSheepDyeWoolEvent;
+import com.laytonsmith.abstraction.events.MCSheepRegrowWoolEvent;
+import com.laytonsmith.abstraction.events.MCSlimeSplitEvent;
+import com.laytonsmith.abstraction.events.MCVillagerAcquireTradeEvent;
+import com.laytonsmith.abstraction.events.MCVillagerReplenishTradeEvent;
 import com.laytonsmith.annotations.abstraction;
-import com.laytonsmith.core.constructs.*;
-import org.bukkit.*;
+import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Target;
+import org.bukkit.DyeColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.entity.*;
+import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.bukkit.event.entity.*;
+import org.bukkit.event.entity.AreaEffectCloudApplyEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.CreeperPowerEvent;
+import org.bukkit.event.entity.EnderDragonChangePhaseEvent;
+import org.bukkit.event.entity.EntityAirChangeEvent;
+import org.bukkit.event.entity.EntityBreedEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityCreatePortalEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityDropItemEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityInteractEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.EntityPortalEnterEvent;
+import org.bukkit.event.entity.EntityPortalEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.entity.EntityResurrectEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.entity.EntityTameEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.EntityTeleportEvent;
+import org.bukkit.event.entity.EntityToggleGlideEvent;
+import org.bukkit.event.entity.EntityToggleSwimEvent;
+import org.bukkit.event.entity.EntityUnleashEvent;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.entity.FireworkExplodeEvent;
+import org.bukkit.event.entity.HorseJumpEvent;
+import org.bukkit.event.entity.ItemDespawnEvent;
+import org.bukkit.event.entity.ItemMergeEvent;
+import org.bukkit.event.entity.ItemSpawnEvent;
+import org.bukkit.event.entity.PigZapEvent;
+import org.bukkit.event.entity.PigZombieAngerEvent;
+import org.bukkit.event.entity.PotionSplashEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.entity.SheepDyeWoolEvent;
+import org.bukkit.event.entity.SheepRegrowWoolEvent;
+import org.bukkit.event.entity.SlimeSplitEvent;
+import org.bukkit.event.entity.VillagerAcquireTradeEvent;
+import org.bukkit.event.entity.VillagerReplenishTradeEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -38,7 +175,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.util.Vector;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class BukkitEntityEvents {
 
@@ -105,7 +245,7 @@ public class BukkitEntityEvents {
 
 		@Override
 		public MCEntity getEntity() {
-			if (e.getEntity() != null) {
+			if(e.getEntity() != null) {
 				return BukkitConvertor.BukkitGetCorrectEntity(e.getEntity());
 			}
 			return null;
@@ -114,7 +254,7 @@ public class BukkitEntityEvents {
 		@Override
 		public List<MCBlock> getBlocks() {
 			List<MCBlock> ret = new ArrayList<>();
-			for (Block b : e.blockList()) {
+			for(Block b : e.blockList()) {
 				ret.add(new BukkitMCBlock(b));
 			}
 			return ret;
@@ -123,7 +263,7 @@ public class BukkitEntityEvents {
 		@Override
 		public void setBlocks(List<MCBlock> blocks) {
 			e.blockList().clear();
-			for (MCBlock b : blocks) {
+			for(MCBlock b : blocks) {
 				e.blockList().add(((BukkitMCBlock) b).__Block());
 			}
 		}
@@ -176,7 +316,7 @@ public class BukkitEntityEvents {
 		@Override
 		public MCBlock getHitBlock() {
 			Block blk = phe.getHitBlock();
-			if (blk == null) {
+			if(blk == null) {
 				return null;
 			}
 			return new BukkitMCBlock(blk);
@@ -233,7 +373,7 @@ public class BukkitEntityEvents {
 		@Override
 		public Set<MCLivingEntity> getAffectedEntities() {
 			Set<MCLivingEntity> ret = new HashSet<>();
-			for (LivingEntity le : pse.getAffectedEntities()) {
+			for(LivingEntity le : pse.getAffectedEntities()) {
 				ret.add((MCLivingEntity) BukkitConvertor.BukkitGetCorrectEntity(le));
 			}
 			return ret;
@@ -274,7 +414,7 @@ public class BukkitEntityEvents {
 			List<ItemStack> islist = e.getDrops();
 			List<MCItemStack> drops = new ArrayList<>();
 
-			for (ItemStack is : islist) {
+			for(ItemStack is : islist) {
 				drops.add(new BukkitMCItemStack(is));
 			}
 
@@ -374,7 +514,7 @@ public class BukkitEntityEvents {
 
 		@Override
 		public MCEquipmentSlot getHand() {
-			if (e.getHand() == EquipmentSlot.HAND) {
+			if(e.getHand() == EquipmentSlot.HAND) {
 				return MCEquipmentSlot.WEAPON;
 			}
 			return MCEquipmentSlot.OFF_HAND;
@@ -415,7 +555,7 @@ public class BukkitEntityEvents {
 		@Override
 		public void setItemStack(MCItemStack stack) {
 			ItemStack is = (ItemStack) stack.getHandle();
-			if (is == null || is.getType().equals(Material.AIR)) {
+			if(is == null || is.getType().equals(Material.AIR)) {
 				e.getItemDrop().remove();
 			} else {
 				e.getItemDrop().setItemStack(is);
@@ -467,7 +607,7 @@ public class BukkitEntityEvents {
 			ItemStack is = (ItemStack) stack.getHandle();
 			e.setCancelled(true);
 			e.getItem().remove();
-			if (is != null && !is.getType().equals(Material.AIR)) {
+			if(is != null && !is.getType().equals(Material.AIR)) {
 				((Player) e.getEntity()).getInventory().addItem(is);
 				//and for added realism :)
 				e.getEntity().getWorld().playSound(e.getItem().getLocation(),
@@ -578,7 +718,7 @@ public class BukkitEntityEvents {
 
 		@Override
 		public void setTarget(MCEntity target) {
-			if (target == null) {
+			if(target == null) {
 				pie.setTarget(null);
 			} else {
 				pie.setTarget(((BukkitMCEntity) target).getHandle());
@@ -730,7 +870,7 @@ public class BukkitEntityEvents {
 
 		@Override
 		public MCEntity getRemover() {
-			if (hbe instanceof HangingBreakByEntityEvent) {
+			if(hbe instanceof HangingBreakByEntityEvent) {
 				return BukkitConvertor.BukkitGetCorrectEntity(((HangingBreakByEntityEvent) hbe).getRemover());
 			} else {
 				return null;
@@ -855,7 +995,7 @@ public class BukkitEntityEvents {
 
 		@Override
 		public MCLocation getTo() {
-			if (epe.getTo() == null) {
+			if(epe.getTo() == null) {
 				return null;
 			}
 			return new BukkitMCLocation(epe.getTo());
@@ -894,8 +1034,9 @@ public class BukkitEntityEvents {
 		@Override
 		public List<MCLivingEntity> getAffectedEntities() {
 			List<MCLivingEntity> list = new ArrayList<>();
-			for (LivingEntity le : aeca.getAffectedEntities())
+			for(LivingEntity le : aeca.getAffectedEntities()) {
 				list.add(new BukkitMCLivingEntity(le));
+			}
 			return list;
 		}
 
@@ -1000,7 +1141,9 @@ public class BukkitEntityEvents {
 
 		EntityAirChangeEvent eace;
 
-		public BukkitMCEntityAirChangeEvent(Event e){ this.eace = (EntityAirChangeEvent) e; }
+		public BukkitMCEntityAirChangeEvent(Event e) {
+			this.eace = (EntityAirChangeEvent) e;
+		}
 
 		@Override
 		public CInt getAmount() {
@@ -1038,7 +1181,9 @@ public class BukkitEntityEvents {
 
 		EntityBreedEvent ebe;
 
-		public BukkitMCEntityBreedEvent(Event e){ this.ebe = (EntityBreedEvent) e; }
+		public BukkitMCEntityBreedEvent(Event e) {
+			this.ebe = (EntityBreedEvent) e;
+		}
 
 		@Override
 		public MCItemStack getBredWith() {
@@ -1096,13 +1241,16 @@ public class BukkitEntityEvents {
 
 		EntityCreatePortalEvent ecpe;
 
-		public BukkitMCEntityCreatePortalEvent(Event e){ this.ecpe = (EntityCreatePortalEvent) e; }
+		public BukkitMCEntityCreatePortalEvent(Event e) {
+			this.ecpe = (EntityCreatePortalEvent) e;
+		}
 
 		@Override
 		public List<MCBlockState> getBlocks() {
 			List<MCBlockState> list = new ArrayList<>();
-			for(BlockState bs : ecpe.getBlocks())
+			for(BlockState bs : ecpe.getBlocks()) {
 				list.add(new BukkitMCBlockState(bs));
+			}
 			return list;
 		}
 
@@ -1137,7 +1285,9 @@ public class BukkitEntityEvents {
 
 		EntityDropItemEvent edie;
 
-		public BukkitMCEntityDropItemEvent(Event e){ this.edie = (EntityDropItemEvent) e; }
+		public BukkitMCEntityDropItemEvent(Event e) {
+			this.edie = (EntityDropItemEvent) e;
+		}
 
 		@Override
 		public MCItem getItemDrop() {
@@ -1170,7 +1320,9 @@ public class BukkitEntityEvents {
 
 		EntityResurrectEvent ere;
 
-		public BukkitMCEntityResurrectEvent(Event e){ this.ere = (EntityResurrectEvent) e; }
+		public BukkitMCEntityResurrectEvent(Event e) {
+			this.ere = (EntityResurrectEvent) e;
+		}
 
 		@Override
 		public MCLivingEntity getEntity() {
@@ -1198,7 +1350,9 @@ public class BukkitEntityEvents {
 
 		EntityShootBowEvent esbe;
 
-		public BukkitMCEntityShootBowEvent(Event e){ this.esbe = (EntityShootBowEvent) e; }
+		public BukkitMCEntityShootBowEvent(Event e) {
+			this.esbe = (EntityShootBowEvent) e;
+		}
 
 		@Override
 		public MCItemStack getBow() {
@@ -1246,7 +1400,9 @@ public class BukkitEntityEvents {
 
 		EntityTameEvent ete;
 
-		public BukkitMCEntityTameEvent(Event e){ this.ete = (EntityTameEvent) e; }
+		public BukkitMCEntityTameEvent(Event e) {
+			this.ete = (EntityTameEvent) e;
+		}
 
 		@Override
 		public MCLivingEntity getEntity() {
@@ -1279,7 +1435,9 @@ public class BukkitEntityEvents {
 
 		EntityTeleportEvent ete;
 
-		public BukkitMCEntityTeleportEvent(Event e){ this.ete = (EntityTeleportEvent) e; }
+		public BukkitMCEntityTeleportEvent(Event e) {
+			this.ete = (EntityTeleportEvent) e;
+		}
 
 		@Override
 		public MCLocation getFrom() {
@@ -1327,7 +1485,9 @@ public class BukkitEntityEvents {
 
 		EntityToggleSwimEvent etse;
 
-		public BukkitMCEntityToggleSwimEvent(Event e){ this.etse = (EntityToggleSwimEvent) e; }
+		public BukkitMCEntityToggleSwimEvent(Event e) {
+			this.etse = (EntityToggleSwimEvent) e;
+		}
 
 		@Override
 		public boolean isSwimming() {
@@ -1360,7 +1520,9 @@ public class BukkitEntityEvents {
 
 		EntityUnleashEvent eue;
 
-		public BukkitMCEntityUnleashEvent(Event e){ this.eue = (EntityUnleashEvent) e; }
+		public BukkitMCEntityUnleashEvent(Event e) {
+			this.eue = (EntityUnleashEvent) e;
+		}
 
 		@Override
 		public CString getReason() {
@@ -1378,7 +1540,9 @@ public class BukkitEntityEvents {
 
 		ExplosionPrimeEvent epe;
 
-		public BukkitMCExplosionPrimeEvent(Event e){ this.epe = (ExplosionPrimeEvent) e; }
+		public BukkitMCExplosionPrimeEvent(Event e) {
+			this.epe = (ExplosionPrimeEvent) e;
+		}
 
 		@Override
 		public boolean getFire() {
@@ -1426,7 +1590,9 @@ public class BukkitEntityEvents {
 
 		HorseJumpEvent hje;
 
-		public BukkitMCHorseJumpEvent(Event e){ this.hje = (HorseJumpEvent) e; }
+		public BukkitMCHorseJumpEvent(Event e) {
+			this.hje = (HorseJumpEvent) e;
+		}
 
 		@Override
 		public MCAbstractHorse getEntity() {
@@ -1464,7 +1630,9 @@ public class BukkitEntityEvents {
 
 		ItemMergeEvent ime;
 
-		public BukkitMCItemMergeEvent(Event e){ this.ime = (ItemMergeEvent) e; }
+		public BukkitMCItemMergeEvent(Event e) {
+			this.ime = (ItemMergeEvent) e;
+		}
 
 		@Override
 		public MCItem getEntity() {
@@ -1497,7 +1665,9 @@ public class BukkitEntityEvents {
 
 		PigZapEvent pze;
 
-		public BukkitMCPigZapEvent(Event e){ this.pze = (PigZapEvent) e; }
+		public BukkitMCPigZapEvent(Event e) {
+			this.pze = (PigZapEvent) e;
+		}
 
 		@Override
 		public MCPig getEntity() {
@@ -1535,7 +1705,9 @@ public class BukkitEntityEvents {
 
 		PigZombieAngerEvent pzae;
 
-		public BukkitMCPigZombieAngerEvent(Event e){ this.pzae = (PigZombieAngerEvent) e; }
+		public BukkitMCPigZombieAngerEvent(Event e) {
+			this.pzae = (PigZombieAngerEvent) e;
+		}
 
 		@Override
 		public MCPigZombie getEntity() {
@@ -1578,7 +1750,9 @@ public class BukkitEntityEvents {
 
 		SheepDyeWoolEvent sdwe;
 
-		public BukkitMCSheepDyeWoolEvent(Event e){ this.sdwe = (SheepDyeWoolEvent) e; }
+		public BukkitMCSheepDyeWoolEvent(Event e) {
+			this.sdwe = (SheepDyeWoolEvent) e;
+		}
 
 		@Override
 		public DyeColor getColor() {
@@ -1616,7 +1790,9 @@ public class BukkitEntityEvents {
 
 		SheepRegrowWoolEvent srwe;
 
-		public BukkitMCSheepRegrowWoolEvent(Event e){ this.srwe = (SheepRegrowWoolEvent) e; }
+		public BukkitMCSheepRegrowWoolEvent(Event e) {
+			this.srwe = (SheepRegrowWoolEvent) e;
+		}
 
 		@Override
 		public MCSheep getEnity() {
@@ -1644,7 +1820,9 @@ public class BukkitEntityEvents {
 
 		SlimeSplitEvent sse;
 
-		public BukkitMCSlimeSplitEvent(Event e){ this.sse = (SlimeSplitEvent) e; }
+		public BukkitMCSlimeSplitEvent(Event e) {
+			this.sse = (SlimeSplitEvent) e;
+		}
 
 		@Override
 		public CInt getCount() {
@@ -1682,7 +1860,9 @@ public class BukkitEntityEvents {
 
 		VillagerAcquireTradeEvent vate;
 
-		public BukkitMCVillagerAcquireTradeEvent(Event e){ this.vate = (VillagerAcquireTradeEvent) e; }
+		public BukkitMCVillagerAcquireTradeEvent(Event e) {
+			this.vate = (VillagerAcquireTradeEvent) e;
+		}
 
 		@Override
 		public MCVillager getEntity() {
@@ -1716,11 +1896,13 @@ public class BukkitEntityEvents {
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCVillagerReplenishTradeEvent implements MCVillagerReplenishTradeEvent{
+	public static class BukkitMCVillagerReplenishTradeEvent implements MCVillagerReplenishTradeEvent {
 
 		VillagerReplenishTradeEvent vrte;
 
-		public BukkitMCVillagerReplenishTradeEvent(Event e){ this.vrte = (VillagerReplenishTradeEvent) e; }
+		public BukkitMCVillagerReplenishTradeEvent(Event e) {
+			this.vrte = (VillagerReplenishTradeEvent) e;
+		}
 
 		@Override
 		public CInt getBonus() {

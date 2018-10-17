@@ -7,16 +7,16 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCPigZombieAngerEvent extends BindableEvent {
 
-    public MCPigZombie getEntity();
+	MCPigZombie getEntity();
 
-    public CInt getNewAnger();
+	CInt getNewAnger();
 
-    public MCEntity getTarget();
+	MCEntity getTarget();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
-    public void setNewAnger(int newAnger);
+	void setNewAnger(int newAnger);
 
 }

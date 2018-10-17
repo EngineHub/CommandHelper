@@ -5,10 +5,10 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCLeavesDecayEvent extends BindableEvent {
 
-    public MCBlock getBlock();
+	MCBlock getBlock();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancel);
+	void setCancelled(boolean cancel);
 
 }

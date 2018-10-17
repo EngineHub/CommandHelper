@@ -6,18 +6,18 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCExplosionPrimeEvent extends BindableEvent {
 
-    public boolean getFire();
+	boolean getFire();
 
-    public CDouble getRadius();
+	CDouble getRadius();
 
-    public MCEntity getEntity();
+	MCEntity getEntity();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
-    public void setFire(boolean fire);
+	void setFire(boolean fire);
 
-    public void setRadius(float radius);
+	void setRadius(float radius);
 
 }

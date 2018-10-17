@@ -9,15 +9,13 @@ import java.util.List;
 
 public interface MCBlockFertilizeEvent extends BindableEvent {
 
-    public List<MCBlockState> getBlocks();
+	List<MCBlockState> getBlocks();
 
-    public MCPlayer getPlayer();
+	MCPlayer getPlayer();
 
-    public MCBlock getBlock();
+	MCBlock getBlock();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancel);
-
-
+	void setCancelled(boolean cancel);
 }

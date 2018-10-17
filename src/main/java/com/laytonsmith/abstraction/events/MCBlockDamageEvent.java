@@ -5,20 +5,20 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.core.events.BindableEvent;
 
-public interface MCBlockDamageEvent extends BindableEvent{
+public interface MCBlockDamageEvent extends BindableEvent {
 
-    public boolean getInstaBreak();
+	public boolean getInstaBreak();
 
-    public MCItemStack getItemInHand();
+	public MCItemStack getItemInHand();
 
-    public MCPlayer getPlayer();
+	public MCPlayer getPlayer();
 
-    public MCBlock getBlock();
+	public MCBlock getBlock();
 
-    public boolean isCancelled();
+	public boolean isCancelled();
 
-    public void setCancelled(boolean cancel);
+	public void setCancelled(boolean cancel);
 
-    public void setInstaBreak(boolean bool);
+	public void setInstaBreak(boolean bool);
 
 }

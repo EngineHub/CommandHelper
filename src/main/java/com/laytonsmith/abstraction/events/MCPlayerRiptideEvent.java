@@ -6,8 +6,8 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCPlayerRiptideEvent extends BindableEvent {
 
-    public MCItemStack getItem();
+	MCItemStack getItem();
 
-    public MCPlayer getPlayer();
+	MCPlayer getPlayer();
 
 }

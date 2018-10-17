@@ -1,8 +1,17 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
 import com.laytonsmith.PureUtilities.Vector3D;
-import com.laytonsmith.abstraction.*;
-import com.laytonsmith.abstraction.blocks.*;
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCInventory;
+import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCNote;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.blocks.MCBlockState;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
@@ -17,14 +26,71 @@ import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCIgniteCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
-import com.laytonsmith.abstraction.events.*;
+import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
+import com.laytonsmith.abstraction.events.MCBlockBurnEvent;
+import com.laytonsmith.abstraction.events.MCBlockCanBuildEvent;
+import com.laytonsmith.abstraction.events.MCBlockDamageEvent;
+import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
+import com.laytonsmith.abstraction.events.MCBlockEvent;
+import com.laytonsmith.abstraction.events.MCBlockExplodeEvent;
+import com.laytonsmith.abstraction.events.MCBlockFadeEvent;
+import com.laytonsmith.abstraction.events.MCBlockFertilizeEvent;
+import com.laytonsmith.abstraction.events.MCBlockFromToEvent;
+import com.laytonsmith.abstraction.events.MCBlockGrowEvent;
+import com.laytonsmith.abstraction.events.MCBlockIgniteEvent;
+import com.laytonsmith.abstraction.events.MCBlockPhysicsEvent;
+import com.laytonsmith.abstraction.events.MCBlockPistonEvent;
+import com.laytonsmith.abstraction.events.MCBlockPistonExtendEvent;
+import com.laytonsmith.abstraction.events.MCBlockPistonRetractEvent;
+import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
+import com.laytonsmith.abstraction.events.MCBlockRedstoneEvent;
+import com.laytonsmith.abstraction.events.MCBrewEvent;
+import com.laytonsmith.abstraction.events.MCBrewingStandFuelEvent;
+import com.laytonsmith.abstraction.events.MCCauldronLevelChangeEvent;
+import com.laytonsmith.abstraction.events.MCFurnaceBurnEvent;
+import com.laytonsmith.abstraction.events.MCFurnaceExtractEvent;
+import com.laytonsmith.abstraction.events.MCFurnaceSmeltEvent;
+import com.laytonsmith.abstraction.events.MCLeavesDecayEvent;
+import com.laytonsmith.abstraction.events.MCNotePlayEvent;
+import com.laytonsmith.abstraction.events.MCSignChangeEvent;
+import com.laytonsmith.abstraction.events.MCSpongeAbsorbEvent;
 import com.laytonsmith.annotations.abstraction;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.event.block.*;
-import org.bukkit.event.inventory.*;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockCanBuildEvent;
+import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockFadeEvent;
+import org.bukkit.event.block.BlockFertilizeEvent;
+import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockGrowEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.event.block.BlockPistonEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.event.block.CauldronLevelChangeEvent;
+import org.bukkit.event.block.LeavesDecayEvent;
+import org.bukkit.event.block.NotePlayEvent;
+import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.block.SpongeAbsorbEvent;
+import org.bukkit.event.inventory.BrewEvent;
+import org.bukkit.event.inventory.BrewingStandFuelEvent;
+import org.bukkit.event.inventory.FurnaceBurnEvent;
+import org.bukkit.event.inventory.FurnaceExtractEvent;
+import org.bukkit.event.inventory.FurnaceSmeltEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
@@ -529,7 +595,9 @@ public class BukkitBlockEvents {
 
 		BlockPhysicsEvent bpe;
 
-		public BukkitMCBlockPhysicsEvent(BlockPhysicsEvent e){ this.bpe = e; }
+		public BukkitMCBlockPhysicsEvent(BlockPhysicsEvent e) {
+			this.bpe = e;
+		}
 
 		@Override
 		public Object _GetObject() {
@@ -562,7 +630,10 @@ public class BukkitBlockEvents {
 	public static class BukkitMCBlockDamageEvent implements MCBlockDamageEvent {
 
 		BlockDamageEvent bde;
-		public BukkitMCBlockDamageEvent(BlockDamageEvent e){ this.bde = e; }
+
+		public BukkitMCBlockDamageEvent(BlockDamageEvent e) {
+			this.bde = e;
+		}
 
 		@Override
 		public boolean getInstaBreak() {
@@ -640,15 +711,16 @@ public class BukkitBlockEvents {
 
 		BlockExplodeEvent bee;
 
-		public BukkitMCBlockExplodeEvent(BlockExplodeEvent e){
+		public BukkitMCBlockExplodeEvent(BlockExplodeEvent e) {
 			this.bee = e;
 		}
 
 		@Override
 		public List<MCBlock> getBlockList() {
 			List<MCBlock> list = new ArrayList<>();
-			for(Block b : bee.blockList())
+			for(Block b : bee.blockList()) {
 				list.add(new BukkitMCBlock(b));
+			}
 			return list;
 		}
 
@@ -688,15 +760,16 @@ public class BukkitBlockEvents {
 
 		BlockFertilizeEvent bfe;
 
-		public BukkitMCBlockFertilizeEvent(BlockFertilizeEvent e){
+		public BukkitMCBlockFertilizeEvent(BlockFertilizeEvent e) {
 			this.bfe = e;
 		}
 
 		@Override
 		public List<MCBlockState> getBlocks() {
 			List<MCBlockState> list = new ArrayList<>();
-			for(BlockState bs : bfe.getBlocks())
+			for(BlockState bs : bfe.getBlocks()) {
 				list.add(new BukkitMCBlockState(bs));
+			}
 			return list;
 		}
 
@@ -731,7 +804,9 @@ public class BukkitBlockEvents {
 
 		BlockRedstoneEvent bre;
 
-		public BukkitMCBlockRedstoneEvent(BlockRedstoneEvent e){ this.bre = e; }
+		public BukkitMCBlockRedstoneEvent(BlockRedstoneEvent e) {
+			this.bre = e;
+		}
 
 		@Override
 		public CInt getNewCurrent() {
@@ -764,7 +839,9 @@ public class BukkitBlockEvents {
 
 		BrewingStandFuelEvent bsfe;
 
-		public BukkitMCBrewingStandFuelEvent(BrewingStandFuelEvent e){ this.bsfe = e; }
+		public BukkitMCBrewingStandFuelEvent(BrewingStandFuelEvent e) {
+			this.bsfe = e;
+		}
 
 		@Override
 		public MCItemStack getFuel() {
@@ -853,11 +930,13 @@ public class BukkitBlockEvents {
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCCauldronLevelChangeEvent implements MCCauldronLevelChangeEvent{
+	public static class BukkitMCCauldronLevelChangeEvent implements MCCauldronLevelChangeEvent {
 
 		CauldronLevelChangeEvent clce;
 
-		public BukkitMCCauldronLevelChangeEvent(CauldronLevelChangeEvent e){ this.clce = e; }
+		public BukkitMCCauldronLevelChangeEvent(CauldronLevelChangeEvent e) {
+			this.clce = e;
+		}
 
 		@Override
 		public MCEntity getEntity() {
@@ -910,7 +989,9 @@ public class BukkitBlockEvents {
 
 		FurnaceBurnEvent fbe;
 
-		public BukkitMCFurnaceBurnEvent(FurnaceBurnEvent e){ this.fbe = e; }
+		public BukkitMCFurnaceBurnEvent(FurnaceBurnEvent e) {
+			this.fbe = e;
+		}
 
 		@Override
 		public CInt getBurnTine() {
@@ -963,7 +1044,7 @@ public class BukkitBlockEvents {
 
 		FurnaceExtractEvent fee;
 
-		public BukkitMCFurnaceExtractEvent(FurnaceExtractEvent e){
+		public BukkitMCFurnaceExtractEvent(FurnaceExtractEvent e) {
 			this.fee = e;
 		}
 
@@ -1003,12 +1084,14 @@ public class BukkitBlockEvents {
 		}
 	}
 
-	@abstraction(type= Implementation.Type.BUKKIT)
+	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCFurnaceSmeltEvent implements MCFurnaceSmeltEvent {
 
 		FurnaceSmeltEvent fse;
 
-		public BukkitMCFurnaceSmeltEvent(FurnaceSmeltEvent e){ this.fse = e; }
+		public BukkitMCFurnaceSmeltEvent(FurnaceSmeltEvent e) {
+			this.fse = e;
+		}
 
 		@Override
 		public MCItemStack getResult() {
@@ -1051,7 +1134,9 @@ public class BukkitBlockEvents {
 
 		LeavesDecayEvent lde;
 
-		public BukkitMCLeavesDeacyEvent(LeavesDecayEvent e){ this.lde = e; }
+		public BukkitMCLeavesDeacyEvent(LeavesDecayEvent e) {
+			this.lde = e;
+		}
 
 		@Override
 		public MCBlock getBlock() {
@@ -1074,51 +1159,21 @@ public class BukkitBlockEvents {
 		}
 	}
 
-	/*@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCMoistureChangeEvent implements MCMoistureChangeEvent {
-
-		MoistureChangeEvent mce;
-
-		public BukkitMCMoistureChangeEvent(MoistureChangeEvent e){ this.mce = e;}
-
-		@Override
-		public MCBlockState getNewState() {
-			return new BukkitMCBlockState(mce.getNewState());
-		}
-
-		@Override
-		public MCBlock getBlock() {
-			return new BukkitMCBlock(mce.getBlock());
-		}
-
-		@Override
-		public boolean isCancelled() {
-			return mce.isCancelled();
-		}
-
-		@Override
-		public void setCancelled(boolean cancel) {
-			mce.setCancelled(cancel);
-		}
-
-		@Override
-		public Object _GetObject() {
-			return mce;
-		}
-	}*/
-
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCSpongeAbsorbEvent implements MCSpongeAbsorbEvent {
 
 		SpongeAbsorbEvent sae;
 
-		public BukkitMCSpongeAbsorbEvent(SpongeAbsorbEvent e){ this.sae = e; }
+		public BukkitMCSpongeAbsorbEvent(SpongeAbsorbEvent e) {
+			this.sae = e;
+		}
 
 		@Override
 		public List<MCBlockState> getBlocks() {
 			List<MCBlockState> list = new ArrayList<>();
-			for(BlockState bs : sae.getBlocks())
+			for(BlockState bs : sae.getBlocks()) {
 				list.add(new BukkitMCBlockState(bs));
+			}
 			return list;
 		}
 
@@ -1142,6 +1197,5 @@ public class BukkitBlockEvents {
 			return sae;
 		}
 	}
-
 
 }

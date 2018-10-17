@@ -5,10 +5,10 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCSheepRegrowWoolEvent extends BindableEvent {
 
-    public MCSheep getEnity();
+	MCSheep getEnity();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
 }

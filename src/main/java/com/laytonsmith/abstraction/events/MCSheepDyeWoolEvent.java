@@ -1,20 +1,19 @@
 package com.laytonsmith.abstraction.events;
 
 import com.laytonsmith.abstraction.entities.MCSheep;
-import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.core.events.BindableEvent;
 import org.bukkit.DyeColor;
 
 public interface MCSheepDyeWoolEvent extends BindableEvent {
 
-    public DyeColor getColor();
+	DyeColor getColor();
 
-    public MCSheep getEntity();
+	MCSheep getEntity();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
-    public void setColor(DyeColor color);
+	void setColor(DyeColor color);
 
 }

@@ -8,18 +8,18 @@ import org.bukkit.entity.Entity;
 
 public interface MCEntityShootBowEvent extends BindableEvent {
 
-    public MCItemStack getBow();
+	MCItemStack getBow();
 
-    public MCEntity getEntity();
+	MCEntity getEntity();
 
-    public CDouble getForce();
+	CDouble getForce();
 
-    public MCEntity getProjectile();
+	MCEntity getProjectile();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
-    public void setProjectile(Entity projectile);
+	void setProjectile(Entity projectile);
 
 }

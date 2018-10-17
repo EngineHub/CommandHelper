@@ -6,8 +6,8 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCItemBreakEvent extends BindableEvent {
 
-    public MCItemStack getBrokenItem();
+	MCItemStack getBrokenItem();
 
-    public MCPlayer getPlayer();
+	MCPlayer getPlayer();
 
 }

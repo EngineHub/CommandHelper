@@ -7,18 +7,18 @@ import org.bukkit.inventory.MerchantRecipe;
 
 public interface MCVillagerReplenishTradeEvent extends BindableEvent {
 
-    public CInt getBonus();
+	CInt getBonus();
 
-    public MCVillager getEntity();
+	MCVillager getEntity();
 
-    public MerchantRecipe getRecipe();
+	MerchantRecipe getRecipe();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setBonus(int bonus);
+	void setBonus(int bonus);
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
-    public void setRecipe(MerchantRecipe recipe);
+	void setRecipe(MerchantRecipe recipe);
 
 }

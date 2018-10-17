@@ -6,10 +6,10 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCPlayerChannelEvent extends BindableEvent {
 
-    public CString getChannel();
+	CString getChannel();
 
-    public CString getType();
+	CString getType();
 
-    public MCPlayer getPlayer();
+	MCPlayer getPlayer();
 
 }

@@ -6,12 +6,12 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCBlockRedstoneEvent extends BindableEvent {
 
-    public CInt getNewCurrent();
+	CInt getNewCurrent();
 
-    public CInt getOldCurrent();
+	CInt getOldCurrent();
 
-    public MCBlock getBlock();
+	MCBlock getBlock();
 
-    public void setNewCurrent(int newCurrent);
+	void setNewCurrent(int newCurrent);
 
 }

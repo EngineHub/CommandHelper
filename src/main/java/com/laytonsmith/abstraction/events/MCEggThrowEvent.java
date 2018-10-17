@@ -7,20 +7,20 @@ import org.bukkit.entity.EntityType;
 
 public interface MCEggThrowEvent extends BindableEvent {
 
-    public Egg getEgg();
+	Egg getEgg();
 
-    public MCPlayer getPlayer();
+	MCPlayer getPlayer();
 
-    public EntityType getHatchingType();
+	EntityType getHatchingType();
 
-    public byte getNumHatches();
+	byte getNumHatches();
 
-    public boolean isHatching();
+	boolean isHatching();
 
-    public void setHatching(boolean hatching);
+	void setHatching(boolean hatching);
 
-    public void setHatchingType(EntityType hatchingType);
+	void setHatchingType(EntityType hatchingType);
 
-    public void setNumHatches(byte numHatches);
+	void setNumHatches(byte numHatches);
 
 }

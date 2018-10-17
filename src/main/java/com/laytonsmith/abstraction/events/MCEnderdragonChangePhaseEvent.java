@@ -7,15 +7,15 @@ import org.bukkit.entity.EnderDragon;
 
 public interface MCEnderdragonChangePhaseEvent extends BindableEvent {
 
-    public CString getCurrentPhase();
+	CString getCurrentPhase();
 
-    public MCEntity getEntity();
+	MCEntity getEntity();
 
-    public CString getNewPhase();
+	CString getNewPhase();
 
-    public boolean iscancelled();
+	boolean iscancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
-    public void setNewPhase(EnderDragon.Phase newPhase);
+	void setNewPhase(EnderDragon.Phase newPhase);
 }

@@ -4,18 +4,18 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCAsyncPlayerPreLoginEvent extends BindableEvent {
 
-    public String getAddress();
+	String getAddress();
 
-    public String getKickMessage();
+	String getKickMessage();
 
-    public String getLoginResult();
+	String getLoginResult();
 
-    public String getName();
+	String getName();
 
-    public String getUUID();
+	String getUUID();
 
-    public void setKickMessage(String msg);
+	void setKickMessage(String msg);
 
-    public void setResult(String result);
+	void setResult(String result);
 
 }

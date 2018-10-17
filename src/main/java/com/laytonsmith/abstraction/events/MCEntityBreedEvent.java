@@ -7,22 +7,22 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCEntityBreedEvent extends BindableEvent {
 
-    public MCItemStack getBredWith();
+	MCItemStack getBredWith();
 
-    public MCLivingEntity getBreeder();
+	MCLivingEntity getBreeder();
 
-    public MCLivingEntity getEntity();
+	MCLivingEntity getEntity();
 
-    public CInt getExperience();
+	CInt getExperience();
 
-    public MCLivingEntity getFather();
+	MCLivingEntity getFather();
 
-    public MCLivingEntity getMother();
+	MCLivingEntity getMother();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
-    public void setExperience(int experience);
+	void setExperience(int experience);
 
 }

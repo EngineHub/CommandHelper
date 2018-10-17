@@ -5,12 +5,12 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCEntityToggleSwimEvent extends BindableEvent {
 
-    public boolean isSwimming();
+	boolean isSwimming();
 
-    public MCEntity getEntity();
+	MCEntity getEntity();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
 }

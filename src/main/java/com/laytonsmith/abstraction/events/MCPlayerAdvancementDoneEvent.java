@@ -6,8 +6,8 @@ import org.bukkit.advancement.Advancement;
 
 public interface MCPlayerAdvancementDoneEvent extends BindableEvent {
 
-    public Advancement getAdvancement();
+	Advancement getAdvancement();
 
-    public MCPlayer getPlayer();
+	MCPlayer getPlayer();
 
 }

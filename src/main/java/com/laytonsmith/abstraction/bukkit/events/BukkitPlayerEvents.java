@@ -27,24 +27,113 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityDeathEvent;
 import com.laytonsmith.abstraction.entities.MCExperienceOrb;
 import com.laytonsmith.abstraction.entities.MCFishHook;
-import com.laytonsmith.abstraction.enums.*;
-import com.laytonsmith.abstraction.enums.bukkit.*;
-import com.laytonsmith.abstraction.events.*;
+import com.laytonsmith.abstraction.enums.MCAction;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import com.laytonsmith.abstraction.enums.MCFishingState;
+import com.laytonsmith.abstraction.enums.MCGameMode;
+import com.laytonsmith.abstraction.enums.MCTeleportCause;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAction;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCFishingState;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCGameMode;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTeleportCause;
+import com.laytonsmith.abstraction.events.MCAsyncPlayerPreLoginEvent;
+import com.laytonsmith.abstraction.events.MCExpChangeEvent;
+import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
+import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBedEvent;
+import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
+import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
+import com.laytonsmith.abstraction.events.MCPlayerDeathEvent;
+import com.laytonsmith.abstraction.events.MCPlayerEditBookEvent;
+import com.laytonsmith.abstraction.events.MCPlayerEvent;
+import com.laytonsmith.abstraction.events.MCPlayerFishEvent;
+import com.laytonsmith.abstraction.events.MCPlayerInteractEvent;
+import com.laytonsmith.abstraction.events.MCPlayerItemConsumeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
+import com.laytonsmith.abstraction.events.MCPlayerKickEvent;
+import com.laytonsmith.abstraction.events.MCPlayerLoginEvent;
+import com.laytonsmith.abstraction.events.MCPlayerMoveEvent;
+import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
+import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
+import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
+import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleFlightEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleSneakEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleSprintEvent;
+import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
+import com.laytonsmith.abstraction.events.MCChangedMainHandEvent;
+import com.laytonsmith.abstraction.events.MCEggThrowEvent;
+import com.laytonsmith.abstraction.events.MCItemBreakEvent;
+import com.laytonsmith.abstraction.events.MCItemMendEvent;
+import com.laytonsmith.abstraction.events.MCLocaleChangeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerAdvancementDoneEvent;
+import com.laytonsmith.abstraction.events.MCPlayerAnimationEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBucketEvent;
+import com.laytonsmith.abstraction.events.MCPlayerChannelEvent;
+import com.laytonsmith.abstraction.events.MCPlayerResourcepackStatusEvent;
+import com.laytonsmith.abstraction.events.MCPlayerRiptideEvent;
+import com.laytonsmith.abstraction.events.MCPlayerStatisticIncrementEvent;
+import com.laytonsmith.abstraction.events.MCPlayerVelocityEvent;
 import com.laytonsmith.annotations.abstraction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.TravelAgent;
+import org.bukkit.World;
+import org.bukkit.Statistic;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.player.PlayerAnimationType;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerBedEnterEvent;
+import org.bukkit.event.player.PlayerBedLeaveEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerEditBookEvent;
+import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.event.player.PlayerExpChangeEvent;
+import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerKickEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerPortalEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerToggleFlightEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.PlayerToggleSprintEvent;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import org.bukkit.event.player.PlayerChangedMainHandEvent;
+import org.bukkit.event.player.PlayerEggThrowEvent;
+import org.bukkit.event.player.PlayerItemBreakEvent;
+import org.bukkit.event.player.PlayerItemMendEvent;
+import org.bukkit.event.player.PlayerLocaleChangeEvent;
+import org.bukkit.event.player.PlayerAdvancementDoneEvent;
+import org.bukkit.event.player.PlayerAnimationEvent;
+import org.bukkit.event.player.PlayerBucketEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerChannelEvent;
+import org.bukkit.event.player.PlayerResourcePackStatusEvent;
+import org.bukkit.event.player.PlayerRiptideEvent;
+import org.bukkit.event.player.PlayerStatisticIncrementEvent;
+import org.bukkit.event.player.PlayerVelocityEvent;
+import org.bukkit.event.player.PlayerRegisterChannelEvent;
+import org.bukkit.event.player.PlayerUnregisterChannelEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MainHand;
@@ -474,7 +563,7 @@ public class BukkitPlayerEvents {
 		}
 
 		public static BukkitMCPlayerInteractEvent _instantiate(MCPlayer player, MCAction action, MCItemStack itemstack,
-				MCBlock clickedBlock, MCBlockFace clickedFace) {
+																MCBlock clickedBlock, MCBlockFace clickedFace) {
 			return new BukkitMCPlayerInteractEvent(new PlayerInteractEvent(((BukkitMCPlayer) player)._Player(),
 					BukkitMCAction.getConvertor().getConcreteEnum(action), ((BukkitMCItemStack) itemstack).__ItemStack(),
 					((BukkitMCBlock) clickedBlock).__Block(), BlockFace.valueOf(clickedFace.name())));
@@ -551,7 +640,7 @@ public class BukkitPlayerEvents {
 		}
 
 		public static BukkitMCPlayerDeathEvent _instantiate(MCPlayer entity, List<MCItemStack> listOfDrops,
-				int droppedExp, String deathMessage) {
+															int droppedExp, String deathMessage) {
 			List<ItemStack> drops = new ArrayList<>();
 
 			return new BukkitMCPlayerDeathEvent(new PlayerDeathEvent(((BukkitMCPlayer) entity)._Player(), drops, droppedExp, deathMessage));
@@ -933,7 +1022,9 @@ public class BukkitPlayerEvents {
 
 		AsyncPlayerPreLoginEvent appl;
 
-		public BukkitMCAsyncPrePlayerLogin(AsyncPlayerPreLoginEvent e){ this.appl = e; }
+		public BukkitMCAsyncPrePlayerLogin(AsyncPlayerPreLoginEvent e) {
+			this.appl = e;
+		}
 
 		@Override
 		public String getAddress() {
@@ -981,7 +1072,9 @@ public class BukkitPlayerEvents {
 
 		PlayerChangedMainHandEvent pcmhe;
 
-		public BukkitMCChangedMainHandEvent(PlayerChangedMainHandEvent e){ this.pcmhe = e; }
+		public BukkitMCChangedMainHandEvent(PlayerChangedMainHandEvent e) {
+			this.pcmhe = e;
+		}
 
 		@Override
 		public MCPlayer getPlayer() {
@@ -1004,7 +1097,9 @@ public class BukkitPlayerEvents {
 
 		PlayerEggThrowEvent pete;
 
-		public BukkitMCEggThrowEvent(PlayerEggThrowEvent e){ this.pete = e; }
+		public BukkitMCEggThrowEvent(PlayerEggThrowEvent e) {
+			this.pete = e;
+		}
 
 		@Override
 		public Egg getEgg() {
@@ -1057,7 +1152,9 @@ public class BukkitPlayerEvents {
 
 		PlayerItemBreakEvent pibe;
 
-		public BukkitMCItemBreakEvent(PlayerItemBreakEvent e){ this.pibe = e; }
+		public BukkitMCItemBreakEvent(PlayerItemBreakEvent e) {
+			this.pibe = e;
+		}
 
 		@Override
 		public MCItemStack getBrokenItem() {
@@ -1080,7 +1177,9 @@ public class BukkitPlayerEvents {
 
 		PlayerItemMendEvent pime;
 
-		public BukkitMCItemMendEvent(PlayerItemMendEvent e){ this.pime = e; }
+		public BukkitMCItemMendEvent(PlayerItemMendEvent e) {
+			this.pime = e;
+		}
 
 		@Override
 		public MCExperienceOrb getExperienceOrb() {
@@ -1128,7 +1227,9 @@ public class BukkitPlayerEvents {
 
 		PlayerLocaleChangeEvent plce;
 
-		public BukkitMCLocaleChangeEvent(PlayerLocaleChangeEvent e){ this.plce = e; }
+		public BukkitMCLocaleChangeEvent(PlayerLocaleChangeEvent e) {
+			this.plce = e;
+		}
 
 		@Override
 		public CString getLocale() {
@@ -1151,7 +1252,9 @@ public class BukkitPlayerEvents {
 
 		PlayerAdvancementDoneEvent pade;
 
-		public BukkitMCPlayerAdvancementDoneEvent(PlayerAdvancementDoneEvent e){ this.pade = e; }
+		public BukkitMCPlayerAdvancementDoneEvent(PlayerAdvancementDoneEvent e) {
+			this.pade = e;
+		}
 
 		@Override
 		public Advancement getAdvancement() {
@@ -1174,7 +1277,9 @@ public class BukkitPlayerEvents {
 
 		PlayerAnimationEvent pae;
 
-		public BukkitMCPlayerAnimationEvent(PlayerAnimationEvent e){ this.pae = e; }
+		public BukkitMCPlayerAnimationEvent(PlayerAnimationEvent e) {
+			this.pae = e;
+		}
 
 		@Override
 		public PlayerAnimationType getAnimationType() {
@@ -1207,7 +1312,9 @@ public class BukkitPlayerEvents {
 
 		PlayerBucketEvent pbe;
 
-		public BukkitMCPlayerBucketEvent(PlayerBucketEvent e){ this.pbe = e; }
+		public BukkitMCPlayerBucketEvent(PlayerBucketEvent e) {
+			this.pbe = e;
+		}
 
 		@Override
 		public MCBlock getBlockClicked() {
@@ -1232,9 +1339,9 @@ public class BukkitPlayerEvents {
 
 		@Override
 		public CString getType() {
-			if(pbe instanceof PlayerBucketEmptyEvent){
+			if(pbe instanceof PlayerBucketEmptyEvent) {
 				return new CString("empty", Target.UNKNOWN);
-			}else if(pbe instanceof PlayerBucketFillEvent){
+			} else if(pbe instanceof PlayerBucketFillEvent) {
 				return new CString("fill", Target.UNKNOWN);
 			}
 			return new CString("unknown", Target.UNKNOWN);
@@ -1271,7 +1378,9 @@ public class BukkitPlayerEvents {
 
 		PlayerResourcePackStatusEvent prpse;
 
-		public BukkitMCPlayerResourcepackStatusEvent(PlayerResourcePackStatusEvent e){ this.prpse = e; }
+		public BukkitMCPlayerResourcepackStatusEvent(PlayerResourcePackStatusEvent e) {
+			this.prpse = e;
+		}
 
 		@Override
 		public MCPlayer getPlayer() {
@@ -1294,7 +1403,9 @@ public class BukkitPlayerEvents {
 
 		PlayerRiptideEvent pre;
 
-		public BukkitMCPlayerRiptideEvent(PlayerRiptideEvent e){ this.pre = e; }
+		public BukkitMCPlayerRiptideEvent(PlayerRiptideEvent e) {
+			this.pre = e;
+		}
 
 		@Override
 		public MCItemStack getItem() {
@@ -1317,7 +1428,9 @@ public class BukkitPlayerEvents {
 
 		PlayerStatisticIncrementEvent psie;
 
-		public BukkitMCPlayerStatisticIncrementEvent(PlayerStatisticIncrementEvent e){ this.psie = e; }
+		public BukkitMCPlayerStatisticIncrementEvent(PlayerStatisticIncrementEvent e) {
+			this.psie = e;
+		}
 
 		@Override
 		public EntityType getEntityType() {
@@ -1370,7 +1483,9 @@ public class BukkitPlayerEvents {
 
 		PlayerVelocityEvent pve;
 
-		public BukkitMCPlayerVelocityEvent(PlayerVelocityEvent e){ this.pve = e; }
+		public BukkitMCPlayerVelocityEvent(PlayerVelocityEvent e) {
+			this.pve = e;
+		}
 
 		@Override
 		public Vector getVelocity() {
@@ -1408,7 +1523,9 @@ public class BukkitPlayerEvents {
 
 		PlayerChannelEvent pce;
 
-		public BukkitMCPlayerChannelEvent(PlayerChannelEvent e){ this.pce = e; }
+		public BukkitMCPlayerChannelEvent(PlayerChannelEvent e) {
+			this.pce = e;
+		}
 
 
 		@Override
@@ -1418,12 +1535,13 @@ public class BukkitPlayerEvents {
 
 		@Override
 		public CString getType() {
-			if(pce instanceof PlayerRegisterChannelEvent)
+			if(pce instanceof PlayerRegisterChannelEvent) {
 				return new CString("register", Target.UNKNOWN);
-			else if(pce instanceof PlayerUnregisterChannelEvent)
+			} else if(pce instanceof PlayerUnregisterChannelEvent) {
 				return new CString("unregister", Target.UNKNOWN);
-			else
+			} else {
 				return new CString("unknown", Target.UNKNOWN);
+			}
 		}
 
 		@Override
@@ -1438,3 +1556,4 @@ public class BukkitPlayerEvents {
 	}
 
 }
+

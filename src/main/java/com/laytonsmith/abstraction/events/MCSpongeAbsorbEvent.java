@@ -8,12 +8,12 @@ import java.util.List;
 
 public interface MCSpongeAbsorbEvent extends BindableEvent {
 
-    public List<MCBlockState> getBlocks();
+	List<MCBlockState> getBlocks();
 
-    public MCBlock getBlock();
+	MCBlock getBlock();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancel);
+	void setCancelled(boolean cancel);
 
 }

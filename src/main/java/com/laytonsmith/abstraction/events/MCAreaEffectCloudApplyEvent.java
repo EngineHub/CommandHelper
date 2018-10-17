@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface MCAreaEffectCloudApplyEvent extends BindableEvent {
 
-    public List<MCLivingEntity> getAffectedEntities();
+	List<MCLivingEntity> getAffectedEntities();
 
-    public MCEntity getEntity();
+	MCEntity getEntity();
 
 }

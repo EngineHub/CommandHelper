@@ -14,8 +14,32 @@ import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.*;
-import org.bukkit.event.inventory.*;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockCanBuildEvent;
+import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockFadeEvent;
+import org.bukkit.event.block.BlockFertilizeEvent;
+import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockGrowEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.event.block.CauldronLevelChangeEvent;
+import org.bukkit.event.block.LeavesDecayEvent;
+import org.bukkit.event.block.NotePlayEvent;
+import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.block.SpongeAbsorbEvent;
+import org.bukkit.event.inventory.BrewEvent;
+import org.bukkit.event.inventory.BrewingStandFuelEvent;
+import org.bukkit.event.inventory.FurnaceBurnEvent;
+import org.bukkit.event.inventory.FurnaceExtractEvent;
+import org.bukkit.event.inventory.FurnaceSmeltEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 
@@ -132,85 +156,79 @@ public class BukkitBlockListener implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onBlockDamage(BlockDamageEvent e){
+	public void onBlockDamage(BlockDamageEvent e) {
 		BukkitBlockEvents.BukkitMCBlockDamageEvent bde = new BukkitBlockEvents.BukkitMCBlockDamageEvent(e);
 		EventUtils.TriggerListener(Driver.BLOCK_DAMAGE, "block_damage", bde);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onBlockCanBuild(BlockCanBuildEvent e){
+	public void onBlockCanBuild(BlockCanBuildEvent e) {
 		BukkitBlockEvents.BukkitMCBlockCanBuildEvent bcbe = new BukkitBlockEvents.BukkitMCBlockCanBuildEvent(e);
 		EventUtils.TriggerListener(Driver.BLOCK_CAN_BUILD, "block_can_build", bcbe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onBlockExplode(BlockExplodeEvent e){
+	public void onBlockExplode(BlockExplodeEvent e) {
 		BukkitBlockEvents.BukkitMCBlockExplodeEvent bee = new BukkitBlockEvents.BukkitMCBlockExplodeEvent(e);
 		EventUtils.TriggerListener(Driver.BLOCK_EXPLODE, "block_explode", bee);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onBlockFertilize(BlockFertilizeEvent e){
+	public void onBlockFertilize(BlockFertilizeEvent e) {
 		BukkitBlockEvents.BukkitMCBlockFertilizeEvent bfe = new BukkitBlockEvents.BukkitMCBlockFertilizeEvent(e);
 		EventUtils.TriggerListener(Driver.BLOCK_FERTILIZE, "block_fertilize", bfe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onBlockRedstone(BlockRedstoneEvent e){
+	public void onBlockRedstone(BlockRedstoneEvent e) {
 		BukkitBlockEvents.BukkitMCBlockRedstoneEvent bre = new BukkitBlockEvents.BukkitMCBlockRedstoneEvent(e);
 		EventUtils.TriggerListener(Driver.BLOCK_REDSTONE, "block_redstone", bre);
 	}
 
 	@EventHandler
-	public void onBrewingStandFuel(BrewingStandFuelEvent e){
+	public void onBrewingStandFuel(BrewingStandFuelEvent e) {
 		BukkitBlockEvents.BukkitMCBrewingStandFuelEvent bsfe = new BukkitBlockEvents.BukkitMCBrewingStandFuelEvent(e);
 		EventUtils.TriggerListener(Driver.BREWING_STAND_FUEL, "brewing_stand_fuel", bsfe);
 	}
 
 	@EventHandler
-	public void onCauldronLevelChange(CauldronLevelChangeEvent e){
+	public void onCauldronLevelChange(CauldronLevelChangeEvent e) {
 		BukkitBlockEvents.BukkitMCCauldronLevelChangeEvent clce = new BukkitBlockEvents.BukkitMCCauldronLevelChangeEvent(e);
 		EventUtils.TriggerListener(Driver.CAULDRON_LEVEL_CHANGE, "cauldron_level_change", clce);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onBrew(BrewEvent e){
+	public void onBrew(BrewEvent e) {
 		BukkitBlockEvents.BukkitMCBrewEvent be = new BukkitBlockEvents.BukkitMCBrewEvent(e);
 		EventUtils.TriggerListener(Driver.BREW, "brew", be);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onFurnaceBurn(FurnaceBurnEvent e){
+	public void onFurnaceBurn(FurnaceBurnEvent e) {
 		BukkitBlockEvents.BukkitMCFurnaceBurnEvent fbe = new BukkitBlockEvents.BukkitMCFurnaceBurnEvent(e);
 		EventUtils.TriggerListener(Driver.FURNACE_BURN, "furnace_burn", fbe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onFurnaceExtract(FurnaceExtractEvent e){
+	public void onFurnaceExtract(FurnaceExtractEvent e) {
 		BukkitBlockEvents.BukkitMCFurnaceExtractEvent fee = new BukkitBlockEvents.BukkitMCFurnaceExtractEvent(e);
 		EventUtils.TriggerListener(Driver.FURNACE_EXTRACT, "furnace_extract", fee);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onFurnaceSmelt(FurnaceSmeltEvent e){
+	public void onFurnaceSmelt(FurnaceSmeltEvent e) {
 		BukkitBlockEvents.BukkitMCFurnaceSmeltEvent fse = new BukkitBlockEvents.BukkitMCFurnaceSmeltEvent(e);
 		EventUtils.TriggerListener(Driver.FURNACE_SMELT, "furnace_smelt", fse);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onLeavesDecay(LeavesDecayEvent e){
+	public void onLeavesDecay(LeavesDecayEvent e) {
 		BukkitBlockEvents.BukkitMCLeavesDeacyEvent lde = new BukkitBlockEvents.BukkitMCLeavesDeacyEvent(e);
 		EventUtils.TriggerListener(Driver.LEAVES_DECAY, "leaves_decay", lde);
 	}
 
-	/*@EventHandler(priority = EventPriority.LOWEST)
-	public void onMoistureChange(MoistureChangeEvent e){
-		BukkitBlockEvents.BukkitMCMoistureChangeEvent mce = new BukkitBlockEvents.BukkitMCMoistureChangeEvent(e);
-		EventUtils.TriggerListener(Driver.MOISTURE_CHANGE, "moisture_change", mce);
-	} NOT WORKING */
-
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onSpongeAbsorb(SpongeAbsorbEvent e){
+	public void onSpongeAbsorb(SpongeAbsorbEvent e) {
 		BukkitBlockEvents.BukkitMCSpongeAbsorbEvent sae = new BukkitBlockEvents.BukkitMCSpongeAbsorbEvent(e);
 		EventUtils.TriggerListener(Driver.SPONGE_ABSORB, "sponge_absorb", sae);
 	}

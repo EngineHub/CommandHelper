@@ -7,16 +7,16 @@ import org.bukkit.inventory.ItemStack;
 
 public interface MCFurnaceSmeltEvent extends BindableEvent {
 
-    public MCItemStack getResult();
+	MCItemStack getResult();
 
-    public MCItemStack getSource();
+	MCItemStack getSource();
 
-    public MCBlock getBlock();
+	MCBlock getBlock();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancel);
+	void setCancelled(boolean cancel);
 
-    public void setResult(ItemStack result);
+	void setResult(ItemStack result);
 
 }

@@ -8,18 +8,18 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCItemMendEvent extends BindableEvent {
 
-    public MCExperienceOrb getExperienceOrb();
+	MCExperienceOrb getExperienceOrb();
 
-    public MCItemStack getItem();
+	MCItemStack getItem();
 
-    public CInt getRepairAmount();
+	CInt getRepairAmount();
 
-    public MCPlayer getPlayer();
+	MCPlayer getPlayer();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
-    public void setRepairAmount(int amount);
+	void setRepairAmount(int amount);
 
 }

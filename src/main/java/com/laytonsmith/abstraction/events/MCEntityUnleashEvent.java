@@ -5,6 +5,6 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCEntityUnleashEvent extends BindableEvent {
 
-    public CString getReason();
+	CString getReason();
 
 }

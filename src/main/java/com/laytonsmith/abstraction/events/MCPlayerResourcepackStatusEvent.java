@@ -6,8 +6,8 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCPlayerResourcepackStatusEvent extends BindableEvent {
 
-    public MCPlayer getPlayer();
+	MCPlayer getPlayer();
 
-    public CString getStatus();
+	CString getStatus();
 
 }

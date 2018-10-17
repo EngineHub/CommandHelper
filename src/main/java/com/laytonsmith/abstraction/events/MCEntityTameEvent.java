@@ -6,12 +6,12 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCEntityTameEvent extends BindableEvent {
 
-    public MCLivingEntity getEntity();
+	MCLivingEntity getEntity();
 
-    public MCAnimalTamer getOwner();
+	MCAnimalTamer getOwner();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
 }

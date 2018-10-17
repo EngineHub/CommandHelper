@@ -6,14 +6,14 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCHorseJumpEvent extends BindableEvent {
 
-    public MCAbstractHorse getEntity();
+	MCAbstractHorse getEntity();
 
-    public CDouble getPower();
+	CDouble getPower();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
-    public void setPower(float power);
+	void setPower(float power);
 
 }

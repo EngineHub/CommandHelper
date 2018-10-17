@@ -7,14 +7,14 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCBrewEvent extends BindableEvent {
 
-    public MCInventory getContents();
+	MCInventory getContents();
 
-    public CInt getFuelLevel();
+	CInt getFuelLevel();
 
-    public MCBlock getBlock();
+	MCBlock getBlock();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
 }

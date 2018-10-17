@@ -20,7 +20,43 @@ import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
-import com.laytonsmith.abstraction.events.*;
+import com.laytonsmith.abstraction.events.MCAsyncPlayerPreLoginEvent;
+import com.laytonsmith.abstraction.events.MCExpChangeEvent;
+import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
+import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBedEvent;
+import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
+import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
+import com.laytonsmith.abstraction.events.MCPlayerDeathEvent;
+import com.laytonsmith.abstraction.events.MCPlayerEditBookEvent;
+import com.laytonsmith.abstraction.events.MCPlayerFishEvent;
+import com.laytonsmith.abstraction.events.MCPlayerInteractEvent;
+import com.laytonsmith.abstraction.events.MCPlayerItemConsumeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
+import com.laytonsmith.abstraction.events.MCPlayerKickEvent;
+import com.laytonsmith.abstraction.events.MCPlayerLoginEvent;
+import com.laytonsmith.abstraction.events.MCPlayerMoveEvent;
+import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
+import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
+import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
+import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleFlightEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleSneakEvent;
+import com.laytonsmith.abstraction.events.MCPlayerToggleSprintEvent;
+import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
+import com.laytonsmith.abstraction.events.MCChangedMainHandEvent;
+import com.laytonsmith.abstraction.events.MCEggThrowEvent;
+import com.laytonsmith.abstraction.events.MCItemBreakEvent;
+import com.laytonsmith.abstraction.events.MCItemMendEvent;
+import com.laytonsmith.abstraction.events.MCLocaleChangeEvent;
+import com.laytonsmith.abstraction.events.MCPlayerAdvancementDoneEvent;
+import com.laytonsmith.abstraction.events.MCPlayerAnimationEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBucketEvent;
+import com.laytonsmith.abstraction.events.MCPlayerChannelEvent;
+import com.laytonsmith.abstraction.events.MCPlayerResourcepackStatusEvent;
+import com.laytonsmith.abstraction.events.MCPlayerRiptideEvent;
+import com.laytonsmith.abstraction.events.MCPlayerStatisticIncrementEvent;
+import com.laytonsmith.abstraction.events.MCPlayerVelocityEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -29,7 +65,14 @@ import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
@@ -287,8 +330,7 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if(event instanceof MCPlayerKickEvent) {
 				MCPlayerKickEvent e = (MCPlayerKickEvent) event;
 				if(key.equalsIgnoreCase("message")) {
@@ -596,8 +638,8 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerLoginEvent) {
 				MCPlayerLoginEvent event = (MCPlayerLoginEvent) e;
 				if(key.equals("result")) {
-					String[] possible = new String[]{"ALLOWED", "KICK_WHITELIST",
-						"KICK_BANNED", "KICK_FULL", "KICK_OTHER"};
+					String[] possible = new String[] {"ALLOWED", "KICK_WHITELIST",
+							"KICK_BANNED", "KICK_FULL", "KICK_OTHER"};
 					if(Arrays.asList(possible).contains(value.val().toUpperCase())) {
 						event.setResult(value.val().toUpperCase());
 					}
@@ -1289,7 +1331,7 @@ public class PlayerEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if(event instanceof MCPlayerDeathEvent) {
 				MCPlayerDeathEvent e = (MCPlayerDeathEvent) event;
-				switch(key) {
+				switch (key) {
 					case "death_message":
 						e.setDeathMessage(value.nval());
 						return true;
@@ -2049,7 +2091,7 @@ public class PlayerEvents {
 			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerFishEvent) {
 				MCPlayerFishEvent event = (MCPlayerFishEvent) activeEvent.getUnderlyingEvent();
 				// Static lookups of just spawned entities in certain fishing states don't work here, so inject them
-				switch(event.getState()) {
+				switch (event.getState()) {
 					case FISHING:
 						MCFishHook hook = event.getHook();
 						Static.InjectEntity(hook);
@@ -2067,7 +2109,7 @@ public class PlayerEvents {
 		public void postExecution(Environment env, ActiveEvent activeEvent) {
 			if(activeEvent.getUnderlyingEvent() instanceof MCPlayerFishEvent) {
 				MCPlayerFishEvent event = (MCPlayerFishEvent) activeEvent.getUnderlyingEvent();
-				switch(event.getState()) {
+				switch (event.getState()) {
 					case FISHING:
 						MCFishHook hook = event.getHook();
 						Static.UninjectEntity(hook);
@@ -2592,7 +2634,7 @@ public class PlayerEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(e instanceof MCAsyncPlayerPreLoginEvent){
+			if(e instanceof MCAsyncPlayerPreLoginEvent) {
 
 				MCAsyncPlayerPreLoginEvent event = (MCAsyncPlayerPreLoginEvent) e;
 				Map<String, Construct> mapEvent = evaluate_helper(event);
@@ -2604,7 +2646,7 @@ public class PlayerEvents {
 				mapEvent.put("player", new CString(event.getName(), t));
 
 				return mapEvent;
-			}else{
+			} else {
 				throw new EventException("Cannot convert event to AsyncPlayerPreLoginEvent");
 			}
 		}
@@ -2616,13 +2658,13 @@ public class PlayerEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if(event instanceof MCAsyncPlayerPreLoginEvent){
+			if(event instanceof MCAsyncPlayerPreLoginEvent) {
 				MCAsyncPlayerPreLoginEvent e = (MCAsyncPlayerPreLoginEvent) event;
-				if(key.equalsIgnoreCase("kickmsg")){
+				if(key.equalsIgnoreCase("kickmsg")) {
 					e.setKickMessage(value.getValue());
 					return true;
-				}else if(key.equalsIgnoreCase("result")){
-					String[] possible = new String[]{"ALLOWED", "KICK_WHITELIST",
+				} else if(key.equalsIgnoreCase("result")) {
+					String[] possible = new String[] {"ALLOWED", "KICK_WHITELIST",
 							"KICK_BANNED", "KICK_FULL", "KICK_OTHER"};
 					if(Arrays.asList(possible).contains(value.val().toUpperCase())) {
 						e.setResult(value.val().toUpperCase());
@@ -2669,7 +2711,7 @@ public class PlayerEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(e instanceof MCChangedMainHandEvent){
+			if(e instanceof MCChangedMainHandEvent) {
 
 				MCChangedMainHandEvent cmhe = (MCChangedMainHandEvent) e;
 				Map<String, Construct> mapEvent = evaluate_helper(cmhe);
@@ -2681,7 +2723,7 @@ public class PlayerEvents {
 
 				return mapEvent;
 
-			}else{
+			} else {
 				throw new EventException("Cannot convert event to PlayerChangedMainHandEvent.");
 			}
 		}
@@ -2734,7 +2776,7 @@ public class PlayerEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(e instanceof MCEggThrowEvent){
+			if(e instanceof MCEggThrowEvent) {
 
 				MCEggThrowEvent ete = (MCEggThrowEvent) e;
 				Map<String, Construct> mapEvent = evaluate_helper(ete);
@@ -2748,7 +2790,7 @@ public class PlayerEvents {
 
 				return mapEvent;
 
-			}else{
+			} else {
 				throw new EventException("Cannot conver event to PlayerEggThrowEvent.");
 			}
 		}
@@ -2760,14 +2802,14 @@ public class PlayerEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if(event instanceof MCEggThrowEvent){
-				if(key.equalsIgnoreCase("hatching")){
+			if(event instanceof MCEggThrowEvent) {
+				if(key.equalsIgnoreCase("hatching")) {
 					((MCEggThrowEvent) event).setHatching(Static.getBoolean(value, Target.UNKNOWN));
 					return true;
-				}else if(key.equalsIgnoreCase("hatchtype")){
+				} else if(key.equalsIgnoreCase("hatchtype")) {
 					((MCEggThrowEvent) event).setHatchingType(EntityType.valueOf(value.val()));
 					return true;
-				}else if(key.equalsIgnoreCase("numhatch")){
+				} else if(key.equalsIgnoreCase("numhatch")) {
 					((MCEggThrowEvent) event).setNumHatches(Byte.valueOf(value.val()));
 					return true;
 				}
@@ -2810,7 +2852,7 @@ public class PlayerEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(e instanceof MCItemBreakEvent){
+			if(e instanceof MCItemBreakEvent) {
 
 				MCItemBreakEvent ibe = (MCItemBreakEvent) e;
 				Map<String, Construct> mapEvent = evaluate_helper(ibe);
@@ -2821,7 +2863,7 @@ public class PlayerEvents {
 
 				return mapEvent;
 
-			}else{
+			} else {
 				throw new EventException("Cannot convert event to PlayerItemBreakEvent.");
 			}
 		}
@@ -2873,7 +2915,7 @@ public class PlayerEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(e instanceof MCItemMendEvent){
+			if(e instanceof MCItemMendEvent) {
 
 				MCItemMendEvent ime = (MCItemMendEvent) e;
 				Map<String, Construct> mapEvent = evaluate_helper(ime);
@@ -2886,7 +2928,7 @@ public class PlayerEvents {
 
 				return mapEvent;
 
-			}else{
+			} else {
 				throw new EventException("Cannot convert event to PlayerItemMendEvent.");
 			}
 		}
@@ -2898,8 +2940,8 @@ public class PlayerEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if(event instanceof MCItemMendEvent){
-				if(key.equalsIgnoreCase("amount")){
+			if(event instanceof MCItemMendEvent) {
+				if(key.equalsIgnoreCase("amount")) {
 					((MCItemMendEvent) event).setRepairAmount(Static.getInt32(value, Target.UNKNOWN));
 					return true;
 				}
@@ -2942,7 +2984,7 @@ public class PlayerEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(e instanceof MCLocaleChangeEvent){
+			if(e instanceof MCLocaleChangeEvent) {
 
 				MCLocaleChangeEvent lce = (MCLocaleChangeEvent) e;
 				Map<String, Construct> mapEvent = evaluate_helper(e);
@@ -2953,7 +2995,7 @@ public class PlayerEvents {
 
 				return mapEvent;
 
-			}else{
+			} else {
 				throw new EventException("Cannot convert event to PlayerLocaleChangeEvent.");
 			}
 		}
@@ -3006,7 +3048,7 @@ public class PlayerEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(e instanceof MCPlayerAdvancementDoneEvent){
+			if(e instanceof MCPlayerAdvancementDoneEvent) {
 
 				MCPlayerAdvancementDoneEvent pade = (MCPlayerAdvancementDoneEvent) e;
 				Map<String, Construct> mapEvent = evaluate_helper(e);
@@ -3015,8 +3057,9 @@ public class PlayerEvents {
 				mapEvent.put("player", new CString(pade.getPlayer().getName(), t));
 
 				CArray criteria = new CArray(t);
-				for(String s : pade.getAdvancement().getCriteria())
+				for(String s : pade.getAdvancement().getCriteria()) {
 					criteria.push(new CString(s, t), t);
+				}
 				mapEvent.put("criteria", criteria);
 
 				mapEvent.put("key", new CString(pade.getAdvancement().getKey().getKey(), t));
@@ -3024,7 +3067,7 @@ public class PlayerEvents {
 
 				return mapEvent;
 
-			}else{
+			} else {
 				throw new EventException("Cannot convert event to PlayerAdvancementDoneEvent.");
 			}
 		}
@@ -3074,7 +3117,7 @@ public class PlayerEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(e instanceof MCPlayerAnimationEvent){
+			if(e instanceof MCPlayerAnimationEvent) {
 
 				MCPlayerAnimationEvent pae = (MCPlayerAnimationEvent) e;
 				Map<String, Construct> mapEvent = evaluate_helper(e);
@@ -3085,7 +3128,7 @@ public class PlayerEvents {
 
 				return mapEvent;
 
-			}else{
+			} else {
 				throw new EventException("Cannot convert event to PlayerAnimationEvent.");
 			}
 		}
@@ -3138,7 +3181,7 @@ public class PlayerEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(e instanceof MCPlayerBucketEvent){
+			if(e instanceof MCPlayerBucketEvent) {
 
 				MCPlayerBucketEvent pbe = (MCPlayerBucketEvent) e;
 				Map<String, Construct> mapEvent = evaluate_helper(e);
@@ -3161,7 +3204,7 @@ public class PlayerEvents {
 
 				return mapEvent;
 
-			}else{
+			} else {
 				throw new EventException("Cannot convert event to PlayerBucketEvent.");
 			}
 		}
@@ -3173,8 +3216,8 @@ public class PlayerEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if(event instanceof MCPlayerBucketEvent){
-				if(key.equalsIgnoreCase("item") && value instanceof CArray){
+			if(event instanceof MCPlayerBucketEvent) {
+				if(key.equalsIgnoreCase("item") && value instanceof CArray) {
 					BukkitMCItemStack is = (BukkitMCItemStack) ObjectGenerator.GetGenerator().item(value, value.getTarget());
 					((MCPlayerBucketEvent) event).setItemStack(is.asItemStack());
 					return true;
@@ -3218,7 +3261,7 @@ public class PlayerEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if( e instanceof MCPlayerResourcepackStatusEvent ){
+			if(e instanceof MCPlayerResourcepackStatusEvent) {
 
 				MCPlayerResourcepackStatusEvent prse = (MCPlayerResourcepackStatusEvent) e;
 				Map<String, Construct> mapEvent = evaluate_helper(e);
@@ -3229,7 +3272,7 @@ public class PlayerEvents {
 
 				return mapEvent;
 
-			}else{
+			} else {
 				throw new EventException("Cannot convert event to PlayerResourcepackStatusEvent.");
 			}
 		}
@@ -3248,223 +3291,225 @@ public class PlayerEvents {
 	@api
 	public static class player_riptide extends AbstractEvent {
 
-        @Override
-        public String getName() {
-            return "player_riptide";
-        }
+		@Override
+		public String getName() {
+			return "player_riptide";
+		}
 
-        @Override
-        public String docs() {
-            return "{}"
-                    + "This event is fired when the player activates the riptide enchantment."
-                    + "{item : Gets the item containing the used enchantment."
-                    + "| player : the Player}"
-                    + "{}"
-                    + "{}";
-        }
+		@Override
+		public String docs() {
+			return "{}"
+					+ "This event is fired when the player activates the riptide enchantment."
+					+ "{item : Gets the item containing the used enchantment."
+					+ "| player : the Player}"
+					+ "{}"
+					+ "{}";
+		}
 
-        @Override
-        public Version since() {
-            return CHVersion.V3_3_3;
-        }
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
 
-        @Override
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-            return true;
-        }
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
 
-        @Override
-        public BindableEvent convert(CArray manualObject, Target t) {
-            return null;
-        }
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
 
-        @Override
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-            if( e instanceof MCPlayerRiptideEvent){
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(e instanceof MCPlayerRiptideEvent) {
 
-                MCPlayerRiptideEvent pre = (MCPlayerRiptideEvent) e;
-                Map<String, Construct> mapEvent = evaluate_helper(e);
-                Target t = Target.UNKNOWN;
+				MCPlayerRiptideEvent pre = (MCPlayerRiptideEvent) e;
+				Map<String, Construct> mapEvent = evaluate_helper(e);
+				Target t = Target.UNKNOWN;
 
-                mapEvent.put("item", ObjectGenerator.GetGenerator().item(pre.getItem(), t));
-                mapEvent.put("player", new CString(pre.getPlayer().getName(), t));
+				mapEvent.put("item", ObjectGenerator.GetGenerator().item(pre.getItem(), t));
+				mapEvent.put("player", new CString(pre.getPlayer().getName(), t));
 
-                return mapEvent;
+				return mapEvent;
 
-            }else{
-                throw new EventException("Cannot convert event to PlayerRiptideEvent.");
-            }
-        }
+			} else {
+				throw new EventException("Cannot convert event to PlayerRiptideEvent.");
+			}
+		}
 
-        @Override
-        public Driver driver() {
-            return Driver.PLAYER_RIPTIDE;
-        }
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_RIPTIDE;
+		}
 
-        @Override
-        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-            return false;
-        }
-    }
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+	}
 
-    @api
-    public static class player_statistic_increment extends AbstractEvent {
+	@api
+	public static class player_statistic_increment extends AbstractEvent {
 
-        @Override
-        public String getName() {
-            return "player_statistic_increment";
-        }
+		@Override
+		public String getName() {
+			return "player_statistic_increment";
+		}
 
-        @Override
-        public String docs() {
-            return "{name : <macro> Gets the statistic name that is being incremented."
+		@Override
+		public String docs() {
+			return "{name : <macro> Gets the statistic name that is being incremented."
 					+ "type : <macro> Gets the statistic type that is being incremented.}"
-                    + "Called when a player statistic is incremented."
-                    + "{entitytype : Gets the EntityType | player : the Player"
-                    + "| material : Gets the Material. | prev : Gets the previous value of the statistic."
-                    + "| new : Gets the new value of the statistic."
-                    + "| name : Gets the statistic name that is being incremented."
+					+ "Called when a player statistic is incremented."
+					+ "{entitytype : Gets the EntityType | player : the Player"
+					+ "| material : Gets the Material. | prev : Gets the previous value of the statistic."
+					+ "| new : Gets the new value of the statistic."
+					+ "| name : Gets the statistic name that is being incremented."
 					+ "| type : Gets the statistic type that is being incremented.}"
-                    + "{}"
-                    + "{}";
-        }
+					+ "{}"
+					+ "{}";
+		}
 
-        @Override
-        public Version since() {
-            return CHVersion.V3_3_3;
-        }
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
 
-        @Override
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-        	if(e instanceof MCPlayerStatisticIncrementEvent){
-        		MCPlayerStatisticIncrementEvent event = (MCPlayerStatisticIncrementEvent) e;
-        		Prefilters.match(prefilter, "name", event.getStatistic().name(), PrefilterType.MACRO);
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if(e instanceof MCPlayerStatisticIncrementEvent) {
+				MCPlayerStatisticIncrementEvent event = (MCPlayerStatisticIncrementEvent) e;
+				Prefilters.match(prefilter, "name", event.getStatistic().name(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "type", event.getStatistic().getType().name(), PrefilterType.MACRO);
 
-        		return true;
+				return true;
 			} else {
 				return false;
 			}
-        }
+		}
 
-        @Override
-        public BindableEvent convert(CArray manualObject, Target t) {
-            return null;
-        }
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
 
-        @Override
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-            if(e instanceof MCPlayerStatisticIncrementEvent){
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(e instanceof MCPlayerStatisticIncrementEvent) {
 
-                MCPlayerStatisticIncrementEvent psie = (MCPlayerStatisticIncrementEvent) e;
-                Map<String, Construct> mapEvent = evaluate_helper(e);
-                Target t = Target.UNKNOWN;
+				MCPlayerStatisticIncrementEvent psie = (MCPlayerStatisticIncrementEvent) e;
+				Map<String, Construct> mapEvent = evaluate_helper(e);
+				Target t = Target.UNKNOWN;
 
-                if(psie.getEntityType() != null)
-                	mapEvent.put("entitytype", new CString(psie.getEntityType().name(), t));
+				if(psie.getEntityType() != null) {
+					mapEvent.put("entitytype", new CString(psie.getEntityType().name(), t));
+				}
 
-                if(psie.getMaterial() instanceof MCMaterial)
-					mapEvent.put("material", new CString(((MCMaterial)psie.getMaterial()).getName(), t));
+				if(psie.getMaterial() instanceof MCMaterial) {
+					mapEvent.put("material", new CString(((MCMaterial) psie.getMaterial()).getName(), t));
+				}
 
-                mapEvent.put("prev", psie.getPreviousValue());
-                mapEvent.put("new", psie.getNewValue());
-                mapEvent.put("player", new CString(psie.getPlayer().getName(), t));
+				mapEvent.put("prev", psie.getPreviousValue());
+				mapEvent.put("new", psie.getNewValue());
+				mapEvent.put("player", new CString(psie.getPlayer().getName(), t));
 
-                mapEvent.put("name", new CString(psie.getStatistic().name(), t));
+				mapEvent.put("name", new CString(psie.getStatistic().name(), t));
 				mapEvent.put("type", new CString(psie.getStatistic().getType().name(), t));
 
-                return mapEvent;
+				return mapEvent;
 
-            }else{
-                throw new EventException("Cannot convert event to PlayerStatisticIncrementEvent.");
-            }
-        }
+			} else {
+				throw new EventException("Cannot convert event to PlayerStatisticIncrementEvent.");
+			}
+		}
 
-        @Override
-        public Driver driver() {
-            return Driver.PLAYER_STATISTIC_INCREMENT;
-        }
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_STATISTIC_INCREMENT;
+		}
 
-        @Override
-        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-            return false;
-        }
-    }
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+	}
 
-    @api
-    public static class player_velocity extends AbstractEvent {
+	@api
+	public static class player_velocity extends AbstractEvent {
 
-        @Override
-        public String getName() {
-            return "player_velocity";
-        }
+		@Override
+		public String getName() {
+			return "player_velocity";
+		}
 
-        @Override
-        public String docs() {
-            return "{}"
-                    + "Called when the velocity of a player changes."
-                    + "{velocity : Gets the velocity vector that will be sent to the player."
-                    + "| player : the Player}"
-                    + "{}"
-                    + "{velocity}";
-        }
+		@Override
+		public String docs() {
+			return "{}"
+					+ "Called when the velocity of a player changes."
+					+ "{velocity : Gets the velocity vector that will be sent to the player."
+					+ "| player : the Player}"
+					+ "{}"
+					+ "{velocity}";
+		}
 
-        @Override
-        public Version since() {
-            return CHVersion.V3_3_3;
-        }
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
 
-        @Override
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-            return true;
-        }
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
 
-        @Override
-        public BindableEvent convert(CArray manualObject, Target t) {
-            return null;
-        }
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
 
-        @Override
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-            if(e instanceof MCPlayerVelocityEvent){
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(e instanceof MCPlayerVelocityEvent) {
 
-                MCPlayerVelocityEvent pve = (MCPlayerVelocityEvent) e;
-                Map<String, Construct> mapEvent = evaluate_helper(e);
-                Target t = Target.UNKNOWN;
+				MCPlayerVelocityEvent pve = (MCPlayerVelocityEvent) e;
+				Map<String, Construct> mapEvent = evaluate_helper(e);
+				Target t = Target.UNKNOWN;
 
-                Vector3D v3d = new Vector3D(pve.getVelocity().getX(), pve.getVelocity().getY(), pve.getVelocity().getZ());
-                CArray vector = ObjectGenerator.GetGenerator().vector(v3d);
-                vector.set("magnitude", new CDouble(v3d.length(), t), t);
-                mapEvent.put("velocity", vector);
-                mapEvent.put("player", new CString(pve.getPlayer().getName(), t));
+				Vector3D v3d = new Vector3D(pve.getVelocity().getX(), pve.getVelocity().getY(), pve.getVelocity().getZ());
+				CArray vector = ObjectGenerator.GetGenerator().vector(v3d);
+				vector.set("magnitude", new CDouble(v3d.length(), t), t);
+				mapEvent.put("velocity", vector);
+				mapEvent.put("player", new CString(pve.getPlayer().getName(), t));
 
-                return mapEvent;
+				return mapEvent;
 
-            }else{
-                throw new EventException("Cannot convert event to PlayerVelocityEvent.");
-            }
-        }
+			} else {
+				throw new EventException("Cannot convert event to PlayerVelocityEvent.");
+			}
+		}
 
-        @Override
-        public Driver driver() {
-            return Driver.PLAYER_VELOCITY;
-        }
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_VELOCITY;
+		}
 
-        @Override
-        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-            if(event instanceof MCPlayerVelocityEvent){
-                if(key.equalsIgnoreCase("velocity")){
-                    Vector3D v3d = ObjectGenerator.GetGenerator().vector(value, Target.UNKNOWN);
-                    Vector vector = new Vector(v3d.X(), v3d.Y(), v3d.Z());
-                    ((MCPlayerVelocityEvent) event).setVelocity(vector);
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if(event instanceof MCPlayerVelocityEvent) {
+				if(key.equalsIgnoreCase("velocity")) {
+					Vector3D v3d = ObjectGenerator.GetGenerator().vector(value, Target.UNKNOWN);
+					Vector vector = new Vector(v3d.X(), v3d.Y(), v3d.Z());
+					((MCPlayerVelocityEvent) event).setVelocity(vector);
+					return true;
+				}
+			}
+			return false;
+		}
+	}
 
-    @api
+	@api
 	public static class player_channel extends AbstractEvent {
 
 		@Override
@@ -3498,7 +3543,7 @@ public class PlayerEvents {
 
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(e instanceof MCPlayerChannelEvent){
+			if(e instanceof MCPlayerChannelEvent) {
 				MCPlayerChannelEvent pce = (MCPlayerChannelEvent) e;
 				Map<String, Construct> mapEvent = evaluate_helper(e);
 				Target t = Target.UNKNOWN;
@@ -3509,7 +3554,7 @@ public class PlayerEvents {
 
 				return mapEvent;
 
-			}else{
+			} else {
 				throw new EventException("Cannot convert event to PlayerChannelEvent");
 			}
 		}

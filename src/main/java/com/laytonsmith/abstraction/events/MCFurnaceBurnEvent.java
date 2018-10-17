@@ -7,20 +7,20 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCFurnaceBurnEvent extends BindableEvent {
 
-    public CInt getBurnTine();
+	CInt getBurnTine();
 
-    public MCItemStack getFuel();
+	MCItemStack getFuel();
 
-    public MCBlock getBlock();
+	MCBlock getBlock();
 
-    public boolean isBurning();
+	boolean isBurning();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setBurning(boolean burning);
+	void setBurning(boolean burning);
 
-    public void setBurnTime(int burnTime);
+	void setBurnTime(int burnTime);
 
-    public void setCancelled(boolean cancel);
+	void setCancelled(boolean cancel);
 
 }

@@ -2,7 +2,51 @@ package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.*;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCCreatureSpawnEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityChangeBlockEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityDamageEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityDamageByEntityEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityDeathEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityEnterPortalEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityExplodeEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityInteractEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityPortalEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityRegainHealthEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityToggleGlideEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCFireworkExplodeEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCHangingBreakEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCItemDespawnEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCItemSpawnEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCPlayerDropItemEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCPlayerInteractAtEntityEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCPlayerInteractEntityEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCPlayerPickupItemEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCProjectileHitEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCProjectileLaunchEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCAreaEffectCloudApplyEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCCreeperPowerEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEnderdragonChangePhaseEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityAirChangeEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityBreedEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityCreatePortalEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityDropItemEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityResurrectEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityShootBowEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityTameEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityTeleportEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityToggleSwimEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityUnleashEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCExplosionPrimeEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCHorseJumpEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCItemMergeEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCPigZapEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCPigZombieAngerEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCSheepDyeWoolEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCSheepRegrowWoolEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCSlimeSplitEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCVillagerAcquireTradeEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCVillagerReplenishTradeEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCTargetEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
 import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.core.events.Driver;
@@ -166,139 +210,139 @@ public class BukkitEntityListener implements Listener {
 	}
 
 	@EventIdentifier(event = Driver.AREA_EFFECT_CLOUD_APPLY, className = "org.bukkit.event.entity.AreaEffectCloudApplyEvent")
-	public void onAreaEffectCloudApply(Event event){
+	public void onAreaEffectCloudApply(Event event) {
 		BukkitMCAreaEffectCloudApplyEvent aeca = new BukkitMCAreaEffectCloudApplyEvent(event);
 		EventUtils.TriggerListener(Driver.AREA_EFFECT_CLOUD_APPLY, "area_effect_cloud_apply", aeca);
 	}
 
 	@EventIdentifier(event = Driver.CREEPER_POWER, className = "org.bukkit.event.entity.CreeperPowerEvent")
-	public void onCreeperPower(Event event){
+	public void onCreeperPower(Event event) {
 		BukkitMCCreeperPowerEvent cpe = new BukkitMCCreeperPowerEvent(event);
 		EventUtils.TriggerListener(Driver.CREEPER_POWER, "creeper_power", cpe);
 	}
 
-	@EventIdentifier(event = Driver.ENDERDRAGON_CHANGE_PAHSE, className =  "org.bukkit.event.entity.EnderDragonChangePhaseEvent")
-	public void onEnderdragonChangePhase(Event event){
+	@EventIdentifier(event = Driver.ENDERDRAGON_CHANGE_PAHSE, className = "org.bukkit.event.entity.EnderDragonChangePhaseEvent")
+	public void onEnderdragonChangePhase(Event event) {
 		BukkitMCEnderdragonChangePhaseEvent ecpe = new BukkitMCEnderdragonChangePhaseEvent(event);
 		EventUtils.TriggerListener(Driver.ENDERDRAGON_CHANGE_PAHSE, "enderdragon_change_phase", ecpe);
 	}
 
 	@EventIdentifier(event = Driver.ENTITY_AIR_CHANGE, className = "org.bukkit.event.entity.EntityAirChangeEvent")
-	public void onEntityAirChange(Event event){
+	public void onEntityAirChange(Event event) {
 		BukkitMCEntityAirChangeEvent eace = new BukkitMCEntityAirChangeEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_AIR_CHANGE, "entity_air_change", eace);
 	}
 
 	@EventIdentifier(event = Driver.ENTITY_BREED, className = "org.bukkit.event.entity.EntityBreedEvent")
-	public void onEntityBreed(Event event){
+	public void onEntityBreed(Event event) {
 		BukkitMCEntityBreedEvent ebe = new BukkitMCEntityBreedEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_BREED, "entity_breed", ebe);
 	}
 
 	@EventIdentifier(event = Driver.ENTITY_CREATE_PORTAL, className = "org.bukkit.event.entity.EntityCreatePortalEvent")
-	public void onEntityCreatePortal(Event event){
+	public void onEntityCreatePortal(Event event) {
 		BukkitMCEntityCreatePortalEvent ecpe = new BukkitMCEntityCreatePortalEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_CREATE_PORTAL, "entity_create_portal", ecpe);
 	}
 
 	@EventIdentifier(event = Driver.ENTITY_DROP_ITEM, className = "org.bukkit.event.entity.EntityDropItemEvent")
-	public void onEntityDropItem(Event event){
+	public void onEntityDropItem(Event event) {
 		BukkitMCEntityDropItemEvent edie = new BukkitMCEntityDropItemEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_DROP_ITEM, "entity_drop_item", edie);
 	}
 
 	@EventIdentifier(event = Driver.ENTITY_RESURRECT, className = "org.bukkit.event.entity.EntityResurrectEvent")
-	public void onEntityResurrect(Event event){
+	public void onEntityResurrect(Event event) {
 		BukkitMCEntityResurrectEvent ere = new BukkitMCEntityResurrectEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_RESURRECT, "entity_resurrect", ere);
 	}
 
 	@EventIdentifier(event = Driver.ENTITY_SHOOT_BOW, className = "org.bukkit.event.entity.EntityShootBowEvent")
-    public void onEntityShootBow(Event event){
-	    BukkitMCEntityShootBowEvent esbe = new BukkitMCEntityShootBowEvent(event);
-	    EventUtils.TriggerListener(Driver.ENTITY_SHOOT_BOW, "entity_shoot_bow", esbe);
-    }
+	public void onEntityShootBow(Event event) {
+		BukkitMCEntityShootBowEvent esbe = new BukkitMCEntityShootBowEvent(event);
+		EventUtils.TriggerListener(Driver.ENTITY_SHOOT_BOW, "entity_shoot_bow", esbe);
+	}
 
-    @EventIdentifier(event = Driver.ENTITY_TAME, className = "org.bukkit.event.entity.EntityTameEvent")
-    public void onEntityTame(Event event){
-	    BukkitMCEntityTameEvent ete = new BukkitMCEntityTameEvent(event);
-	    EventUtils.TriggerListener(Driver.ENTITY_TAME, "entity_tame", ete);
-    }
+	@EventIdentifier(event = Driver.ENTITY_TAME, className = "org.bukkit.event.entity.EntityTameEvent")
+	public void onEntityTame(Event event) {
+		BukkitMCEntityTameEvent ete = new BukkitMCEntityTameEvent(event);
+		EventUtils.TriggerListener(Driver.ENTITY_TAME, "entity_tame", ete);
+	}
 
-    @EventIdentifier(event = Driver.ENTITY_TELEPORT, className = "org.bukkit.event.entity.EntityTeleportEvent")
-    public void onEntityTeleport(Event event){
-	    BukkitMCEntityTeleportEvent ete = new BukkitMCEntityTeleportEvent(event);
-	    EventUtils.TriggerListener(Driver.ENTITY_TELEPORT, "entity_teleport", ete);
-    }
+	@EventIdentifier(event = Driver.ENTITY_TELEPORT, className = "org.bukkit.event.entity.EntityTeleportEvent")
+	public void onEntityTeleport(Event event) {
+		BukkitMCEntityTeleportEvent ete = new BukkitMCEntityTeleportEvent(event);
+		EventUtils.TriggerListener(Driver.ENTITY_TELEPORT, "entity_teleport", ete);
+	}
 
-    @EventIdentifier(event = Driver.ENTITY_TOGGLE_SWIM, className = "org.bukkit.event.entity.EntityToggleSwimEvent")
-	public void onEntityToggleSwim(Event event){
+	@EventIdentifier(event = Driver.ENTITY_TOGGLE_SWIM, className = "org.bukkit.event.entity.EntityToggleSwimEvent")
+	public void onEntityToggleSwim(Event event) {
 		BukkitMCEntityToggleSwimEvent etse = new BukkitMCEntityToggleSwimEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_TOGGLE_SWIM, "entity_toggle_swim", etse);
 	}
 
 	@EventIdentifier(event = Driver.ENTITY_UNLEASH, className = "org.bukkit.event.entity.EntityUnleashEvent")
-	public void onEntityUnlesah(Event event){
+	public void onEntityUnlesah(Event event) {
 		BukkitMCEntityUnleashEvent eue = new BukkitMCEntityUnleashEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_UNLEASH, "entity_unleash", eue);
 	}
 
 	@EventIdentifier(event = Driver.EXPLOSION_PRIME, className = "org.bukkit.event.entity.ExplosionPrimeEvent")
-	public void onExplosionPrime(Event event){
+	public void onExplosionPrime(Event event) {
 		BukkitMCExplosionPrimeEvent epe = new BukkitMCExplosionPrimeEvent(event);
 		EventUtils.TriggerListener(Driver.EXPLOSION_PRIME, "explosion_prime", epe);
 	}
 
 	@EventIdentifier(event = Driver.HORSE_JUMP, className = "org.bukkit.event.entity.HorseJumpEvent")
-	public void onHorseJump(Event event){
+	public void onHorseJump(Event event) {
 		BukkitMCHorseJumpEvent hje = new BukkitMCHorseJumpEvent(event);
 		EventUtils.TriggerListener(Driver.HORSE_JUMP, "horse_jump", hje);
 	}
 
 	@EventIdentifier(event = Driver.ITEM_MERGE, className = "org.bukkit.event.entity.ItemMergeEvent")
-	public void onItemMerge(Event event){
+	public void onItemMerge(Event event) {
 		BukkitMCItemMergeEvent ime = new BukkitMCItemMergeEvent(event);
 		EventUtils.TriggerListener(Driver.ITEM_MERGE, "item_merge", ime);
 	}
 
 	@EventIdentifier(event = Driver.PIG_ZAP, className = "org.bukkit.event.entity.PigZapEvent")
-	public void onPigZap(Event event){
+	public void onPigZap(Event event) {
 		BukkitMCPigZapEvent pze = new BukkitMCPigZapEvent(event);
 		EventUtils.TriggerListener(Driver.PIG_ZAP, "pig_zap", pze);
 	}
 
 	@EventIdentifier(event = Driver.PIG_ZOMBIE_ANGER, className = "org.bukkit.event.entity.PigZombieAngerEvent")
-	public void onPigZombieAnger(Event event){
+	public void onPigZombieAnger(Event event) {
 		BukkitMCPigZombieAngerEvent pzae = new BukkitMCPigZombieAngerEvent(event);
 		EventUtils.TriggerListener(Driver.PIG_ZOMBIE_ANGER, "pig_zombie_anger", pzae);
 	}
 
 	@EventIdentifier(event = Driver.SHEEP_DYE_WOOL, className = "org.bukkit.event.entity.SheepDyeWoolEvent")
-	public void onSheepDyeWool(Event event){
+	public void onSheepDyeWool(Event event) {
 		BukkitMCSheepDyeWoolEvent sdwe = new BukkitMCSheepDyeWoolEvent(event);
 		EventUtils.TriggerListener(Driver.SHEEP_DYE_WOOL, "sheep_dye_wool", sdwe);
 	}
 
 	@EventIdentifier(event = Driver.SHEEP_REGROW_WOOL, className = "org.bukkit.event.entity.SheepRegrowWoolEvent")
-	public void onSheepRegrowWool(Event event){
+	public void onSheepRegrowWool(Event event) {
 		BukkitMCSheepRegrowWoolEvent srwe = new BukkitMCSheepRegrowWoolEvent(event);
 		EventUtils.TriggerListener(Driver.SHEEP_REGROW_WOOL, "sheep_regrow_wool", srwe);
 	}
 
 	@EventIdentifier(event = Driver.SLIME_SPLIT, className = "org.bukkit.event.entity.SlimeSplitEvent")
-	public void onSlimeSplit(Event event){
+	public void onSlimeSplit(Event event) {
 		BukkitMCSlimeSplitEvent sse = new BukkitMCSlimeSplitEvent(event);
 		EventUtils.TriggerListener(Driver.SLIME_SPLIT, "slime_split", sse);
 	}
 
 	@EventIdentifier(event = Driver.VILLAGER_ACQUIRE_TRADE, className = "org.bukkit.event.entity.VillagerAcquireTradeEvent")
-	public void onVillagerAcquireTrade(Event event){
+	public void onVillagerAcquireTrade(Event event) {
 		BukkitMCVillagerAcquireTradeEvent vate = new BukkitMCVillagerAcquireTradeEvent(event);
 		EventUtils.TriggerListener(Driver.VILLAGER_ACQUIRE_TRADE, "villager_acquire_trade", vate);
 	}
 
 	@EventIdentifier(event = Driver.VILLAGER_REPLENISH_TRADE, className = "org.bukkit.event.entity.VillagerReplenishTradeEvent")
-	public void onVillagerReplenishTrade(Event event){
+	public void onVillagerReplenishTrade(Event event) {
 		BukkitMCVillagerReplenishTradeEvent vrte = new BukkitMCVillagerReplenishTradeEvent(event);
 		EventUtils.TriggerListener(Driver.VILLAGER_REPLENISH_TRADE, "villager_replenish_trade", vrte);
 	}

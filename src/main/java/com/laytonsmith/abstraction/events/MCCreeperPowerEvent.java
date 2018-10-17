@@ -6,14 +6,14 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCCreeperPowerEvent extends BindableEvent  {
 
-    public String getCause();
+	String getCause();
 
-    public MCEntity getEntity();
+	MCEntity getEntity();
 
-    public MCLightningStrike getLightning();
+	MCLightningStrike getLightning();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
 }

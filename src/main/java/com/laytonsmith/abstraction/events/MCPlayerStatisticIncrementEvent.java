@@ -8,20 +8,20 @@ import org.bukkit.entity.EntityType;
 
 public interface MCPlayerStatisticIncrementEvent extends BindableEvent {
 
-    public EntityType getEntityType();
+	EntityType getEntityType();
 
-    public Object getMaterial();
+	Object getMaterial();
 
-    public CInt getPreviousValue();
+	CInt getPreviousValue();
 
-    public CInt getNewValue();
+	CInt getNewValue();
 
-    public Statistic getStatistic();
+	Statistic getStatistic();
 
-    public MCPlayer getPlayer();
+	MCPlayer getPlayer();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancel);
+	void setCancelled(boolean cancel);
 
 }

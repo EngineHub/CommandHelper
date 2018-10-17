@@ -6,12 +6,12 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCBlockPhysicsEvent extends BindableEvent {
 
-    public MCMaterial getChangedType();
+	MCMaterial getChangedType();
 
-    public MCBlock getBlock();
+	MCBlock getBlock();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancel);
+	void setCancelled(boolean cancel);
 
 }

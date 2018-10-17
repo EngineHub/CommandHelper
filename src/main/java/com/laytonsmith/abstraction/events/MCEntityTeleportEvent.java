@@ -8,18 +8,18 @@ import org.bukkit.Location;
 
 public interface MCEntityTeleportEvent extends BindableEvent {
 
-    public MCLocation getFrom();
+	MCLocation getFrom();
 
-    public MCLocation getTo();
+	MCLocation getTo();
 
-    public MCEntity getEntity();
+	MCEntity getEntity();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
-    public void setFrom(Location from);
+	void setFrom(Location from);
 
-    public void setTo(Location to);
+	void setTo(Location to);
 
 }

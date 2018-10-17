@@ -6,14 +6,14 @@ import org.bukkit.util.Vector;
 
 public interface MCPlayerVelocityEvent extends BindableEvent {
 
-    public Vector getVelocity();
+	Vector getVelocity();
 
-    public MCPlayer getPlayer();
+	MCPlayer getPlayer();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancel);
+	void setCancelled(boolean cancel);
 
-    public void setVelocity(Vector velocity);
+	void setVelocity(Vector velocity);
 
 }

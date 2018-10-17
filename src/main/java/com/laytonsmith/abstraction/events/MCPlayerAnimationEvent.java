@@ -6,12 +6,12 @@ import org.bukkit.event.player.PlayerAnimationType;
 
 public interface MCPlayerAnimationEvent extends BindableEvent {
 
-    public PlayerAnimationType getAnimationType();
+	PlayerAnimationType getAnimationType();
 
-    public MCPlayer getPlayer();
+	MCPlayer getPlayer();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancel);
+	void setCancelled(boolean cancel);
 
 }

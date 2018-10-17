@@ -8,16 +8,16 @@ import java.util.List;
 
 public interface MCBlockExplodeEvent extends BindableEvent {
 
-    public List<MCBlock> getBlockList();
+	List<MCBlock> getBlockList();
 
-    public MCBlock getBlock();
+	MCBlock getBlock();
 
-    public CDouble getYield();
+	CDouble getYield();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setYield(float yield);
+	void setYield(float yield);
 
-    public void setCancelled(boolean cancel);
+	void setCancelled(boolean cancel);
 
 }

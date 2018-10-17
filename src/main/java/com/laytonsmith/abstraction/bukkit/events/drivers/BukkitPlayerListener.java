@@ -2,7 +2,41 @@ package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
-import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.*;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCExpChangeEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCFoodLevelChangeEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCGamemodeChangeEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerBedEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerChatEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerEditBookEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerFishEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerInteractEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerItemConsumeEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerJoinEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerKickEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerLoginEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerMoveEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerPortalEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerQuitEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerRespawnEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerTeleportEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerToggleFlightEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerToggleSneakEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerToggleSprintEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCWorldChangedEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCAsyncPrePlayerLogin;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCChangedMainHandEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCEggThrowEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCItemBreakEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCItemMendEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCLocaleChangeEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerAdvancementDoneEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerAnimationEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerBucketEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerResourcepackStatusEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerRiptideEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerStatisticIncrementEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerVelocityEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerChannelEvent;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
@@ -14,7 +48,42 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import org.bukkit.event.player.PlayerAdvancementDoneEvent;
+import org.bukkit.event.player.PlayerAnimationEvent;
+import org.bukkit.event.player.PlayerBedEnterEvent;
+import org.bukkit.event.player.PlayerBedLeaveEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.event.player.PlayerChangedMainHandEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerChannelEvent;
+import org.bukkit.event.player.PlayerEditBookEvent;
+import org.bukkit.event.player.PlayerEggThrowEvent;
+import org.bukkit.event.player.PlayerExpChangeEvent;
+import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemBreakEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerItemMendEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerKickEvent;
+import org.bukkit.event.player.PlayerLocaleChangeEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerPortalEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerResourcePackStatusEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerRiptideEvent;
+import org.bukkit.event.player.PlayerStatisticIncrementEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerToggleFlightEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.PlayerToggleSprintEvent;
+import org.bukkit.event.player.PlayerVelocityEvent;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -294,25 +363,25 @@ public class BukkitPlayerListener implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent event){
+	public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent event) {
 		BukkitMCAsyncPrePlayerLogin appl = new BukkitMCAsyncPrePlayerLogin(event);
 		EventUtils.TriggerListener(Driver.ASYNC_PLAYER_PRE_LOGIN, "async_player_pre_login", appl);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onChangedMainHand(PlayerChangedMainHandEvent event){
+	public void onChangedMainHand(PlayerChangedMainHandEvent event) {
 		BukkitMCChangedMainHandEvent pcmhe = new BukkitMCChangedMainHandEvent(event);
 		EventUtils.TriggerListener(Driver.CHANGED_MAIN_HAND, "changed_main_hand", pcmhe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onEggThrow(PlayerEggThrowEvent event){
+	public void onEggThrow(PlayerEggThrowEvent event) {
 		BukkitMCEggThrowEvent ete = new BukkitMCEggThrowEvent(event);
 		EventUtils.TriggerListener(Driver.EGG_THROW, "egg_throw", ete);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onItemBreak(PlayerItemBreakEvent event){
+	public void onItemBreak(PlayerItemBreakEvent event) {
 		BukkitMCItemBreakEvent ibe = new BukkitMCItemBreakEvent(event);
 		EventUtils.TriggerListener(Driver.ITEM_BREAK, "item_break", ibe);
 	}
@@ -324,63 +393,61 @@ public class BukkitPlayerListener implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onLocaleChange(PlayerLocaleChangeEvent event){
+	public void onLocaleChange(PlayerLocaleChangeEvent event) {
 		BukkitMCLocaleChangeEvent lce = new BukkitMCLocaleChangeEvent(event);
 		EventUtils.TriggerListener(Driver.LOCALE_CHANGE, "locale_change", lce);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerAdvancementDone(PlayerAdvancementDoneEvent event){
+	public void onPlayerAdvancementDone(PlayerAdvancementDoneEvent event) {
 		BukkitMCPlayerAdvancementDoneEvent pade = new BukkitMCPlayerAdvancementDoneEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_ADVANCEMENT_DONE, "player_advancement_done", pade);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerAnimation(PlayerAnimationEvent event){
+	public void onPlayerAnimation(PlayerAnimationEvent event) {
 		BukkitMCPlayerAnimationEvent pae = new BukkitMCPlayerAnimationEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_ANIMATION, "player_animation", pae);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerBucketFill(PlayerBucketFillEvent event){
-		System.out.println("Fill");
+	public void onPlayerBucketFill(PlayerBucketFillEvent event) {
 		BukkitMCPlayerBucketEvent pbe = new BukkitMCPlayerBucketEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_BUCKET, "player_bucket", pbe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event){
-		System.out.println("Empty");
+	public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
 		BukkitMCPlayerBucketEvent pbe = new BukkitMCPlayerBucketEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_BUCKET, "player_bucket", pbe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerResourcepackStatus(PlayerResourcePackStatusEvent event){
+	public void onPlayerResourcepackStatus(PlayerResourcePackStatusEvent event) {
 		BukkitMCPlayerResourcepackStatusEvent prpse = new BukkitMCPlayerResourcepackStatusEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_RESOURCEPACK_STATUS, "player_resourcepack_status", prpse);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerRiptide(PlayerRiptideEvent event){
+	public void onPlayerRiptide(PlayerRiptideEvent event) {
 		BukkitMCPlayerRiptideEvent pre = new BukkitMCPlayerRiptideEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_RIPTIDE, "player_riptide", pre);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerStatisticIncrement(PlayerStatisticIncrementEvent event){
+	public void onPlayerStatisticIncrement(PlayerStatisticIncrementEvent event) {
 		BukkitMCPlayerStatisticIncrementEvent psie = new BukkitMCPlayerStatisticIncrementEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_STATISTIC_INCREMENT, "player_statistic_increment", psie);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerVelocity(PlayerVelocityEvent event){
+	public void onPlayerVelocity(PlayerVelocityEvent event) {
 		BukkitMCPlayerVelocityEvent pve = new BukkitMCPlayerVelocityEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_VELOCITY, "player_velocity", pve);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerChannel(PlayerChannelEvent event){
+	public void onPlayerChannel(PlayerChannelEvent event) {
 		BukkitMCPlayerChannelEvent pce = new BukkitMCPlayerChannelEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_CHANNEL, "player_channel", pce);
 	}

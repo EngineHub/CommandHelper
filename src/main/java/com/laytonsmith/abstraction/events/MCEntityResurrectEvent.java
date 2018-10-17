@@ -5,10 +5,10 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCEntityResurrectEvent extends BindableEvent {
 
-    public MCLivingEntity getEntity();
+	MCLivingEntity getEntity();
 
-    public boolean isCancelled();
+	boolean isCancelled();
 
-    public void setCancelled(boolean cancelled);
+	void setCancelled(boolean cancelled);
 
 }

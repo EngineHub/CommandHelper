@@ -6,8 +6,8 @@ import org.bukkit.inventory.MainHand;
 
 public interface MCChangedMainHandEvent extends BindableEvent {
 
-    public MCPlayer getPlayer();
+	MCPlayer getPlayer();
 
-    public MainHand getMainHand();
+	MainHand getMainHand();
 
 }
