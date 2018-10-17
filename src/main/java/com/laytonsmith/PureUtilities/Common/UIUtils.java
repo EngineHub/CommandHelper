@@ -73,26 +73,32 @@ public class UIUtils {
 	}
 
 	/**
-	 * Opens the system's default browser to the specified URI.
+	 * Opens the system's default browser to the specified URI. Returns false if the web browser was
+	 * definitely not opened. True returned means that as far as this code can be aware, the browser
+	 * was launched, but there is no guarantee.
 	 *
 	 * @param uri
 	 * @throws java.io.IOException
 	 */
-	public static void openWebpage(URI uri) throws IOException {
+	public static boolean openWebpage(URI uri) throws IOException {
 		Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
 		if(desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
 			desktop.browse(uri);
+			return true;
 		}
+		return false;
 	}
 
 	/**
-	 * Opens the system's default browser to the specified URL.
+	 * Opens the system's default browser to the specified URL. Returns false if the web browser was
+	 * definitely not opened. True returned means that as far as this code can be aware, the browser
+	 * was launched, but there is no guarantee.
 	 *
 	 * @param url
 	 * @throws java.io.IOException
 	 * @throws java.net.URISyntaxException
 	 */
-	public static void openWebpage(URL url) throws IOException, URISyntaxException {
-		openWebpage(url.toURI());
+	public static boolean openWebpage(URL url) throws IOException, URISyntaxException {
+		return openWebpage(url.toURI());
 	}
 }

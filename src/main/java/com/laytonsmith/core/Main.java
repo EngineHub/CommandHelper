@@ -12,6 +12,7 @@ import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.RSAEncrypt;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Common.UIUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
@@ -52,6 +53,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -156,7 +158,9 @@ public class Main {
 		suite.addMode("docgen", DOCGEN_MODE);
 		API_MODE = ArgumentParser.GetParser()
 				.addDescription("Prints documentation for the function specified, then exits.")
-				.addArgument("The name of the function to print the information for", "function", true);
+				.addArgument("The name of the function to print the information for", "function", true)
+				.addFlag('o', "online", "Instead of displaying the results in the console, launches the website with this function highlighted. The local documentation is guaranteed to be consistent with your"
+						+ " local version of MethodScript, while the online results may be slightly stale, or may be from a different build, but the results are generally richer.");
 		suite.addMode("api", API_MODE);
 		EXAMPLES_MODE = ArgumentParser.GetParser()
 				.addDescription("Installs one of the built in LocalPackage examples, which may in and of itself be useful.")
@@ -457,16 +461,25 @@ public class Main {
 					System.exit(1);
 					throw new Error();
 				}
-				DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
-				String ret = di.ret.replaceAll("</?[a-z].*?>", "");
-				String args2 = di.args.replaceAll("</?[a-z].*?>", "");
-				String desc = (di.desc + (di.extendedDesc != null ? "\n\n" + di.extendedDesc : "")).replaceAll("</?[a-z].*?>", "");
-				StreamUtils.GetSystemOut().println(StringUtils.Join(new String[]{
-					function,
-					"Returns " + ret,
-					"Expects " + args2,
-					desc
-				}, " // "));
+				if(parsedArgs.isFlagSet("online")) {
+					String url = String.format("https://methodscript.com/docs/%s/API/functions/%s",
+							CHVersion.LATEST.toString(), f.getName());
+					System.out.println("Launching browser to " + url);
+					if(!UIUtils.openWebpage(new URL(url))) {
+						System.err.println("Could not launch browser");
+					}
+				} else {
+					DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
+					String ret = di.ret.replaceAll("</?[a-z].*?>", "");
+					String args2 = di.args.replaceAll("</?[a-z].*?>", "");
+					String desc = (di.desc + (di.extendedDesc != null ? "\n\n" + di.extendedDesc : "")).replaceAll("</?[a-z].*?>", "");
+					StreamUtils.GetSystemOut().println(StringUtils.Join(new String[]{
+						function,
+						"Returns " + ret,
+						"Expects " + args2,
+						desc
+					}, " // "));
+				}
 				System.exit(0);
 			} else if(mode == SYNTAX_MODE) {
 				// TODO: Maybe load extensions here?
