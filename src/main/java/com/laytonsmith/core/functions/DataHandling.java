@@ -2918,7 +2918,7 @@ public class DataHandling {
 			return "closure {[varNames...,] code} Returns a closure on the provided code. A closure is"
 					+ " a datatype that represents some code as code, not the results of some"
 					+ " code after it is run. Code placed in a closure can be used as"
-					+ " a string, or executed by other functions using the eval() function."
+					+ " a string, or executed by other functions using the execute() function."
 					+ " If a closure is \"to string'd\" it will not necessarily look like"
 					+ " the original code, but will be functionally equivalent. The current environment"
 					+ " is \"snapshotted\" and stored with the closure, however, this information is"
