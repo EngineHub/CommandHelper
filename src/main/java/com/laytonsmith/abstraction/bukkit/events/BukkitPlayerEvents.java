@@ -11,6 +11,7 @@ import com.laytonsmith.abstraction.MCTravelAgent;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCBookMeta;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
@@ -18,79 +19,36 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCTravelAgent;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCExperienceOrb;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFishHook;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityDeathEvent;
+import com.laytonsmith.abstraction.entities.MCExperienceOrb;
 import com.laytonsmith.abstraction.entities.MCFishHook;
-import com.laytonsmith.abstraction.enums.MCAction;
-import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
-import com.laytonsmith.abstraction.enums.MCFishingState;
-import com.laytonsmith.abstraction.enums.MCGameMode;
-import com.laytonsmith.abstraction.enums.MCTeleportCause;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAction;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCFishingState;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCGameMode;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTeleportCause;
-import com.laytonsmith.abstraction.events.MCExpChangeEvent;
-import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
-import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
-import com.laytonsmith.abstraction.events.MCPlayerBedEvent;
-import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
-import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
-import com.laytonsmith.abstraction.events.MCPlayerDeathEvent;
-import com.laytonsmith.abstraction.events.MCPlayerEditBookEvent;
-import com.laytonsmith.abstraction.events.MCPlayerEvent;
-import com.laytonsmith.abstraction.events.MCPlayerFishEvent;
-import com.laytonsmith.abstraction.events.MCPlayerInteractEvent;
-import com.laytonsmith.abstraction.events.MCPlayerItemConsumeEvent;
-import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
-import com.laytonsmith.abstraction.events.MCPlayerKickEvent;
-import com.laytonsmith.abstraction.events.MCPlayerLoginEvent;
-import com.laytonsmith.abstraction.events.MCPlayerMoveEvent;
-import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
-import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
-import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
-import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
-import com.laytonsmith.abstraction.events.MCPlayerToggleFlightEvent;
-import com.laytonsmith.abstraction.events.MCPlayerToggleSneakEvent;
-import com.laytonsmith.abstraction.events.MCPlayerToggleSprintEvent;
-import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
+import com.laytonsmith.abstraction.enums.*;
+import com.laytonsmith.abstraction.enums.bukkit.*;
+import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.TravelAgent;
-import org.bukkit.World;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Target;
+import org.bukkit.*;
+import org.bukkit.advancement.Advancement;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Egg;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerBedEnterEvent;
-import org.bukkit.event.player.PlayerBedLeaveEvent;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerEditBookEvent;
-import org.bukkit.event.player.PlayerEvent;
-import org.bukkit.event.player.PlayerExpChangeEvent;
-import org.bukkit.event.player.PlayerFishEvent;
-import org.bukkit.event.player.PlayerGameModeChangeEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerPortalEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.event.player.PlayerToggleFlightEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
-import org.bukkit.event.player.PlayerToggleSprintEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.MainHand;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -969,4 +927,514 @@ public class BukkitPlayerEvents {
 			pme.setCancelled(bln);
 		}
 	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCAsyncPrePlayerLogin implements MCAsyncPlayerPreLoginEvent {
+
+		AsyncPlayerPreLoginEvent appl;
+
+		public BukkitMCAsyncPrePlayerLogin(AsyncPlayerPreLoginEvent e){ this.appl = e; }
+
+		@Override
+		public String getAddress() {
+			return appl.getAddress().getHostAddress();
+		}
+
+		@Override
+		public String getKickMessage() {
+			return appl.getKickMessage();
+		}
+
+		@Override
+		public String getLoginResult() {
+			return appl.getLoginResult().toString();
+		}
+
+		@Override
+		public String getName() {
+			return appl.getName();
+		}
+
+		@Override
+		public String getUUID() {
+			return appl.getUniqueId().toString();
+		}
+
+		@Override
+		public void setKickMessage(String msg) {
+			appl.setKickMessage(msg);
+		}
+
+		@Override
+		public void setResult(String result) {
+			appl.setLoginResult(AsyncPlayerPreLoginEvent.Result.valueOf(result.toUpperCase()));
+		}
+
+		@Override
+		public Object _GetObject() {
+			return appl;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCChangedMainHandEvent implements MCChangedMainHandEvent {
+
+		PlayerChangedMainHandEvent pcmhe;
+
+		public BukkitMCChangedMainHandEvent(PlayerChangedMainHandEvent e){ this.pcmhe = e; }
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(pcmhe.getPlayer());
+		}
+
+		@Override
+		public MainHand getMainHand() {
+			return pcmhe.getMainHand();
+		}
+
+		@Override
+		public Object _GetObject() {
+			return pcmhe;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCEggThrowEvent implements MCEggThrowEvent {
+
+		PlayerEggThrowEvent pete;
+
+		public BukkitMCEggThrowEvent(PlayerEggThrowEvent e){ this.pete = e; }
+
+		@Override
+		public Egg getEgg() {
+			return pete.getEgg();
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(pete.getPlayer());
+		}
+
+		@Override
+		public EntityType getHatchingType() {
+			return pete.getHatchingType();
+		}
+
+		@Override
+		public byte getNumHatches() {
+			return pete.getNumHatches();
+		}
+
+		@Override
+		public boolean isHatching() {
+			return pete.isHatching();
+		}
+
+		@Override
+		public void setHatching(boolean hatching) {
+			pete.setHatching(hatching);
+		}
+
+		@Override
+		public void setHatchingType(EntityType hatchingType) {
+			pete.setHatchingType(hatchingType);
+		}
+
+		@Override
+		public void setNumHatches(byte numHatches) {
+			pete.setNumHatches(numHatches);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return pete;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCItemBreakEvent implements MCItemBreakEvent {
+
+		PlayerItemBreakEvent pibe;
+
+		public BukkitMCItemBreakEvent(PlayerItemBreakEvent e){ this.pibe = e; }
+
+		@Override
+		public MCItemStack getBrokenItem() {
+			return new BukkitMCItemStack(pibe.getBrokenItem());
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(pibe.getPlayer());
+		}
+
+		@Override
+		public Object _GetObject() {
+			return pibe;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCItemMendEvent implements MCItemMendEvent {
+
+		PlayerItemMendEvent pime;
+
+		public BukkitMCItemMendEvent(PlayerItemMendEvent e){ this.pime = e; }
+
+		@Override
+		public MCExperienceOrb getExperienceOrb() {
+			return new BukkitMCExperienceOrb(pime.getExperienceOrb());
+		}
+
+		@Override
+		public MCItemStack getItem() {
+			return new BukkitMCItemStack(pime.getItem());
+		}
+
+		@Override
+		public CInt getRepairAmount() {
+			return new CInt(pime.getRepairAmount(), Target.UNKNOWN);
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(pime.getPlayer());
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return pime.isCancelled();
+		}
+
+		@Override
+		public void setCancelled(boolean cancelled) {
+			pime.setCancelled(cancelled);
+		}
+
+		@Override
+		public void setRepairAmount(int amount) {
+			pime.setRepairAmount(amount);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return pime;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCLocaleChangeEvent implements MCLocaleChangeEvent {
+
+		PlayerLocaleChangeEvent plce;
+
+		public BukkitMCLocaleChangeEvent(PlayerLocaleChangeEvent e){ this.plce = e; }
+
+		@Override
+		public CString getLocale() {
+			return new CString(plce.getLocale(), Target.UNKNOWN);
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(plce.getPlayer());
+		}
+
+		@Override
+		public Object _GetObject() {
+			return plce;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerAdvancementDoneEvent implements MCPlayerAdvancementDoneEvent {
+
+		PlayerAdvancementDoneEvent pade;
+
+		public BukkitMCPlayerAdvancementDoneEvent(PlayerAdvancementDoneEvent e){ this.pade = e; }
+
+		@Override
+		public Advancement getAdvancement() {
+			return pade.getAdvancement();
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(pade.getPlayer());
+		}
+
+		@Override
+		public Object _GetObject() {
+			return pade;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerAnimationEvent implements MCPlayerAnimationEvent {
+
+		PlayerAnimationEvent pae;
+
+		public BukkitMCPlayerAnimationEvent(PlayerAnimationEvent e){ this.pae = e; }
+
+		@Override
+		public PlayerAnimationType getAnimationType() {
+			return pae.getAnimationType();
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(pae.getPlayer());
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return pae.isCancelled();
+		}
+
+		@Override
+		public void setCancelled(boolean cancel) {
+			pae.setCancelled(cancel);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return pae;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerBucketEvent implements MCPlayerBucketEvent {
+
+		PlayerBucketEvent pbe;
+
+		public BukkitMCPlayerBucketEvent(PlayerBucketEvent e){ this.pbe = e; }
+
+		@Override
+		public MCBlock getBlockClicked() {
+			return new BukkitMCBlock(pbe.getBlockClicked());
+		}
+
+		@Override
+		public MCBlockFace getBlockFace() {
+			MCBlock b = new BukkitMCBlock(pbe.getBlockClicked());
+			return b.getFace(b);
+		}
+
+		@Override
+		public MCMaterial getBucket() {
+			return new BukkitMCMaterial(pbe.getBucket());
+		}
+
+		@Override
+		public MCItemStack getItemStack() {
+			return new BukkitMCItemStack(pbe.getItemStack());
+		}
+
+		@Override
+		public CString getType() {
+			if(pbe instanceof PlayerBucketEmptyEvent){
+				return new CString("empty", Target.UNKNOWN);
+			}else if(pbe instanceof PlayerBucketFillEvent){
+				return new CString("fill", Target.UNKNOWN);
+			}
+			return new CString("unknown", Target.UNKNOWN);
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(pbe.getPlayer());
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return pbe.isCancelled();
+		}
+
+		@Override
+		public void setCancelled(boolean cancel) {
+			pbe.setCancelled(cancel);
+		}
+
+		@Override
+		public void setItemStack(ItemStack is) {
+			pbe.setItemStack(is);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return pbe;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerResourcepackStatusEvent implements MCPlayerResourcepackStatusEvent {
+
+		PlayerResourcePackStatusEvent prpse;
+
+		public BukkitMCPlayerResourcepackStatusEvent(PlayerResourcePackStatusEvent e){ this.prpse = e; }
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(prpse.getPlayer());
+		}
+
+		@Override
+		public CString getStatus() {
+			return new CString(prpse.getStatus().name(), Target.UNKNOWN);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return prpse;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerRiptideEvent implements MCPlayerRiptideEvent {
+
+		PlayerRiptideEvent pre;
+
+		public BukkitMCPlayerRiptideEvent(PlayerRiptideEvent e){ this.pre = e; }
+
+		@Override
+		public MCItemStack getItem() {
+			return new BukkitMCItemStack(pre.getItem());
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(pre.getPlayer());
+		}
+
+		@Override
+		public Object _GetObject() {
+			return pre;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerStatisticIncrementEvent implements MCPlayerStatisticIncrementEvent {
+
+		PlayerStatisticIncrementEvent psie;
+
+		public BukkitMCPlayerStatisticIncrementEvent(PlayerStatisticIncrementEvent e){ this.psie = e; }
+
+		@Override
+		public EntityType getEntityType() {
+			return psie.getEntityType();
+		}
+
+		@Override
+		public Object getMaterial() {
+			return (psie.getMaterial() == null ? CNull.NULL : new BukkitMCMaterial(psie.getMaterial()));
+		}
+
+		@Override
+		public CInt getPreviousValue() {
+			return new CInt(psie.getPreviousValue(), Target.UNKNOWN);
+		}
+
+		@Override
+		public CInt getNewValue() {
+			return new CInt(psie.getNewValue(), Target.UNKNOWN);
+		}
+
+		@Override
+		public Statistic getStatistic() {
+			return psie.getStatistic();
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(psie.getPlayer());
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return psie.isCancelled();
+		}
+
+		@Override
+		public void setCancelled(boolean cancel) {
+			psie.setCancelled(cancel);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return psie;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerVelocityEvent implements MCPlayerVelocityEvent {
+
+		PlayerVelocityEvent pve;
+
+		public BukkitMCPlayerVelocityEvent(PlayerVelocityEvent e){ this.pve = e; }
+
+		@Override
+		public Vector getVelocity() {
+			return pve.getVelocity();
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(pve.getPlayer());
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return pve.isCancelled();
+		}
+
+		@Override
+		public void setCancelled(boolean cancel) {
+			pve.setCancelled(cancel);
+		}
+
+		@Override
+		public void setVelocity(Vector velocity) {
+			pve.setVelocity(velocity);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return pve;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerChannelEvent implements MCPlayerChannelEvent {
+
+		PlayerChannelEvent pce;
+
+		public BukkitMCPlayerChannelEvent(PlayerChannelEvent e){ this.pce = e; }
+
+
+		@Override
+		public CString getChannel() {
+			return new CString(pce.getChannel(), Target.UNKNOWN);
+		}
+
+		@Override
+		public CString getType() {
+			if(pce instanceof PlayerRegisterChannelEvent)
+				return new CString("register", Target.UNKNOWN);
+			else if(pce instanceof PlayerUnregisterChannelEvent)
+				return new CString("unregister", Target.UNKNOWN);
+			else
+				return new CString("unknown", Target.UNKNOWN);
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(pce.getPlayer());
+		}
+
+		@Override
+		public Object _GetObject() {
+			return pce;
+		}
+	}
+
 }

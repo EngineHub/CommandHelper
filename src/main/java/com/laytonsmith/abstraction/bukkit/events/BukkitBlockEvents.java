@@ -1,20 +1,15 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
 import com.laytonsmith.PureUtilities.Vector3D;
-import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCNote;
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.blocks.MCBlockFace;
-import com.laytonsmith.abstraction.blocks.MCBlockState;
+import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.blocks.*;
+import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCNote;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
@@ -22,40 +17,15 @@ import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCIgniteCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
-import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
-import com.laytonsmith.abstraction.events.MCBlockBurnEvent;
-import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
-import com.laytonsmith.abstraction.events.MCBlockEvent;
-import com.laytonsmith.abstraction.events.MCBlockFadeEvent;
-import com.laytonsmith.abstraction.events.MCBlockFromToEvent;
-import com.laytonsmith.abstraction.events.MCBlockGrowEvent;
-import com.laytonsmith.abstraction.events.MCBlockIgniteEvent;
-import com.laytonsmith.abstraction.events.MCBlockPistonEvent;
-import com.laytonsmith.abstraction.events.MCBlockPistonExtendEvent;
-import com.laytonsmith.abstraction.events.MCBlockPistonRetractEvent;
-import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
-import com.laytonsmith.abstraction.events.MCNotePlayEvent;
-import com.laytonsmith.abstraction.events.MCSignChangeEvent;
+import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
-import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import org.bukkit.block.Block;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockBurnEvent;
-import org.bukkit.event.block.BlockDispenseEvent;
-import org.bukkit.event.block.BlockEvent;
-import org.bukkit.event.block.BlockFadeEvent;
-import org.bukkit.event.block.BlockFromToEvent;
-import org.bukkit.event.block.BlockGrowEvent;
-import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockPistonEvent;
-import org.bukkit.event.block.BlockPistonExtendEvent;
-import org.bukkit.event.block.BlockPistonRetractEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.block.NotePlayEvent;
-import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.block.BlockState;
+import org.bukkit.event.block.*;
+import org.bukkit.event.inventory.*;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -554,4 +524,591 @@ public class BukkitBlockEvents {
 			return bfe;
 		}
 	}
+
+	public static class BukkitMCBlockPhysicsEvent implements MCBlockPhysicsEvent {
+
+		BlockPhysicsEvent bpe;
+
+		public BukkitMCBlockPhysicsEvent(BlockPhysicsEvent e){ this.bpe = e; }
+
+		@Override
+		public Object _GetObject() {
+			return bpe;
+		}
+
+		@Override
+		public MCMaterial getChangedType() {
+			return new BukkitMCMaterial(bpe.getChangedType());
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(bpe.getBlock());
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return bpe.isCancelled();
+		}
+
+		@Override
+		public void setCancelled(boolean cancel) {
+			bpe.setCancelled(cancel);
+		}
+
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCBlockDamageEvent implements MCBlockDamageEvent {
+
+		BlockDamageEvent bde;
+		public BukkitMCBlockDamageEvent(BlockDamageEvent e){ this.bde = e; }
+
+		@Override
+		public boolean getInstaBreak() {
+			return bde.getInstaBreak();
+		}
+
+		@Override
+		public MCItemStack getItemInHand() {
+			return new BukkitMCItemStack(bde.getItemInHand());
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(bde.getPlayer());
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(bde.getBlock());
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return bde.isCancelled();
+		}
+
+		@Override
+		public void setCancelled(boolean cancel) {
+			bde.setCancelled(cancel);
+		}
+
+		@Override
+		public void setInstaBreak(boolean bool) {
+			bde.setInstaBreak(bool);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return bde;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCBlockCanBuildEvent implements MCBlockCanBuildEvent {
+
+		BlockCanBuildEvent bcbe;
+
+		public BukkitMCBlockCanBuildEvent(BlockCanBuildEvent e) {
+			this.bcbe = e;
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(bcbe.getBlock());
+		}
+
+		@Override
+		public boolean isBuildable() {
+			return bcbe.isBuildable();
+		}
+
+		@Override
+		public void setBuildable(boolean cancel) {
+			bcbe.setBuildable(cancel);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return bcbe;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCBlockExplodeEvent implements MCBlockExplodeEvent {
+
+		BlockExplodeEvent bee;
+
+		public BukkitMCBlockExplodeEvent(BlockExplodeEvent e){
+			this.bee = e;
+		}
+
+		@Override
+		public List<MCBlock> getBlockList() {
+			List<MCBlock> list = new ArrayList<>();
+			for(Block b : bee.blockList())
+				list.add(new BukkitMCBlock(b));
+			return list;
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(bee.getBlock());
+		}
+
+		@Override
+		public CDouble getYield() {
+			return new CDouble(bee.getYield(), Target.UNKNOWN);
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return bee.isCancelled();
+		}
+
+		@Override
+		public void setYield(float yield) {
+			bee.setYield(yield);
+		}
+
+		@Override
+		public void setCancelled(boolean cancel) {
+			bee.setCancelled(cancel);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return bee;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCBlockFertilizeEvent implements MCBlockFertilizeEvent {
+
+		BlockFertilizeEvent bfe;
+
+		public BukkitMCBlockFertilizeEvent(BlockFertilizeEvent e){
+			this.bfe = e;
+		}
+
+		@Override
+		public List<MCBlockState> getBlocks() {
+			List<MCBlockState> list = new ArrayList<>();
+			for(BlockState bs : bfe.getBlocks())
+				list.add(new BukkitMCBlockState(bs));
+			return list;
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(bfe.getPlayer());
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(bfe.getBlock());
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return bfe.isCancelled();
+		}
+
+		@Override
+		public void setCancelled(boolean cancel) {
+			bfe.setCancelled(cancel);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return bfe;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCBlockRedstoneEvent implements MCBlockRedstoneEvent {
+
+		BlockRedstoneEvent bre;
+
+		public BukkitMCBlockRedstoneEvent(BlockRedstoneEvent e){ this.bre = e; }
+
+		@Override
+		public CInt getNewCurrent() {
+			return new CInt(bre.getNewCurrent(), Target.UNKNOWN);
+		}
+
+		@Override
+		public CInt getOldCurrent() {
+			return new CInt(bre.getOldCurrent(), Target.UNKNOWN);
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(bre.getBlock());
+		}
+
+		@Override
+		public void setNewCurrent(int newCurrent) {
+			bre.setNewCurrent(newCurrent);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return bre;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCBrewingStandFuelEvent implements MCBrewingStandFuelEvent {
+
+		BrewingStandFuelEvent bsfe;
+
+		public BukkitMCBrewingStandFuelEvent(BrewingStandFuelEvent e){ this.bsfe = e; }
+
+		@Override
+		public MCItemStack getFuel() {
+			return new BukkitMCItemStack(bsfe.getFuel());
+		}
+
+		@Override
+		public CInt getFuelPower() {
+			return new CInt(bsfe.getFuelPower(), Target.UNKNOWN);
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(bsfe.getBlock());
+		}
+
+		@Override
+		public boolean isConsuming() {
+			return bsfe.isConsuming();
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return bsfe.isCancelled();
+		}
+
+		@Override
+		public void setFuelPower(int fuelPower) {
+			bsfe.setFuelPower(fuelPower);
+		}
+
+		@Override
+		public void setConsuming(boolean consuming) {
+			bsfe.setConsuming(consuming);
+		}
+
+		@Override
+		public void setCancelled(boolean cancel) {
+			bsfe.setCancelled(cancel);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return bsfe;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCBrewEvent implements MCBrewEvent {
+
+		BrewEvent be;
+
+		public BukkitMCBrewEvent(BrewEvent be) {
+			this.be = be;
+		}
+
+		@Override
+		public MCInventory getContents() {
+			return new BukkitMCInventory(be.getContents());
+		}
+
+		@Override
+		public CInt getFuelLevel() {
+			return new CInt(be.getFuelLevel(), Target.UNKNOWN);
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(be.getBlock());
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return be.isCancelled();
+		}
+
+		@Override
+		public void setCancelled(boolean cancelled) {
+			be.setCancelled(cancelled);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return be;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCCauldronLevelChangeEvent implements MCCauldronLevelChangeEvent{
+
+		CauldronLevelChangeEvent clce;
+
+		public BukkitMCCauldronLevelChangeEvent(CauldronLevelChangeEvent e){ this.clce = e; }
+
+		@Override
+		public MCEntity getEntity() {
+			return new BukkitMCEntity(clce.getEntity());
+		}
+
+		@Override
+		public CInt getNewLevel() {
+			return new CInt(clce.getNewLevel(), Target.UNKNOWN);
+		}
+
+		@Override
+		public CInt getOldLevel() {
+			return new CInt(clce.getOldLevel(), Target.UNKNOWN);
+		}
+
+		@Override
+		public CString getReason() {
+			return new CString(clce.getReason().name(), Target.UNKNOWN);
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(clce.getBlock());
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return clce.isCancelled();
+		}
+
+		@Override
+		public void setCancelled(boolean cancelled) {
+			clce.setCancelled(cancelled);
+		}
+
+		@Override
+		public void setNewLevel(int newLevel) {
+			clce.setNewLevel(newLevel);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return clce;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCFurnaceBurnEvent implements MCFurnaceBurnEvent {
+
+		FurnaceBurnEvent fbe;
+
+		public BukkitMCFurnaceBurnEvent(FurnaceBurnEvent e){ this.fbe = e; }
+
+		@Override
+		public CInt getBurnTine() {
+			return new CInt(fbe.getBurnTime(), Target.UNKNOWN);
+		}
+
+		@Override
+		public MCItemStack getFuel() {
+			return new BukkitMCItemStack(fbe.getFuel());
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(fbe.getBlock());
+		}
+
+		@Override
+		public boolean isBurning() {
+			return fbe.isBurning();
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return fbe.isCancelled();
+		}
+
+		@Override
+		public void setBurning(boolean burning) {
+			fbe.setBurning(burning);
+		}
+
+		@Override
+		public void setBurnTime(int burnTime) {
+			fbe.setBurnTime(burnTime);
+		}
+
+		@Override
+		public void setCancelled(boolean cancel) {
+			fbe.setCancelled(cancel);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return fbe;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCFurnaceExtractEvent implements MCFurnaceExtractEvent {
+
+		FurnaceExtractEvent fee;
+
+		public BukkitMCFurnaceExtractEvent(FurnaceExtractEvent e){
+			this.fee = e;
+		}
+
+		@Override
+		public CInt getExpToDrop() {
+			return new CInt(fee.getExpToDrop(), Target.UNKNOWN);
+		}
+
+		@Override
+		public CInt getItemAmount() {
+			return new CInt(fee.getItemAmount(), Target.UNKNOWN);
+		}
+
+		@Override
+		public MCMaterial getItemType() {
+			return new BukkitMCMaterial(fee.getItemType());
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(fee.getPlayer());
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(fee.getBlock());
+		}
+
+		@Override
+		public void setExpToDrop(int exp) {
+			fee.setExpToDrop(exp);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return fee;
+		}
+	}
+
+	@abstraction(type= Implementation.Type.BUKKIT)
+	public static class BukkitMCFurnaceSmeltEvent implements MCFurnaceSmeltEvent {
+
+		FurnaceSmeltEvent fse;
+
+		public BukkitMCFurnaceSmeltEvent(FurnaceSmeltEvent e){ this.fse = e; }
+
+		@Override
+		public MCItemStack getResult() {
+			return new BukkitMCItemStack(fse.getResult());
+		}
+
+		@Override
+		public MCItemStack getSource() {
+			return new BukkitMCItemStack(fse.getSource());
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(fse.getBlock());
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return fse.isCancelled();
+		}
+
+		@Override
+		public void setCancelled(boolean cancel) {
+			fse.setCancelled(cancel);
+		}
+
+		@Override
+		public void setResult(ItemStack result) {
+			fse.setResult(result);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return fse;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCLeavesDeacyEvent implements MCLeavesDecayEvent {
+
+		LeavesDecayEvent lde;
+
+		public BukkitMCLeavesDeacyEvent(LeavesDecayEvent e){ this.lde = e; }
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(lde.getBlock());
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return lde.isCancelled();
+		}
+
+		@Override
+		public void setCancelled(boolean cancel) {
+			lde.setCancelled(cancel);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return lde;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCSpongeAbsorbEvent implements MCSpongeAbsorbEvent {
+
+		SpongeAbsorbEvent sae;
+
+		public BukkitMCSpongeAbsorbEvent(SpongeAbsorbEvent e){ this.sae = e; }
+
+		@Override
+		public List<MCBlockState> getBlocks() {
+			List<MCBlockState> list = new ArrayList<>();
+			for(BlockState bs : sae.getBlocks())
+				list.add(new BukkitMCBlockState(bs));
+			return list;
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(sae.getBlock());
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return sae.isCancelled();
+		}
+
+		@Override
+		public void setCancelled(boolean cancel) {
+			sae.setCancelled(cancel);
+		}
+
+		@Override
+		public Object _GetObject() {
+			return sae;
+		}
+	}
+
+
 }

@@ -5,22 +5,12 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
 import com.laytonsmith.abstraction.enums.MCInstrument;
-import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
-import com.laytonsmith.abstraction.events.MCBlockBurnEvent;
-import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
-import com.laytonsmith.abstraction.events.MCBlockFadeEvent;
-import com.laytonsmith.abstraction.events.MCBlockFromToEvent;
-import com.laytonsmith.abstraction.events.MCBlockGrowEvent;
-import com.laytonsmith.abstraction.events.MCBlockIgniteEvent;
-import com.laytonsmith.abstraction.events.MCBlockPistonEvent;
-import com.laytonsmith.abstraction.events.MCBlockPistonExtendEvent;
-import com.laytonsmith.abstraction.events.MCBlockPistonRetractEvent;
-import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
-import com.laytonsmith.abstraction.events.MCNotePlayEvent;
-import com.laytonsmith.abstraction.events.MCSignChangeEvent;
+import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
@@ -293,7 +283,6 @@ public class BlockEvents {
 
 			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
 			map.put("xp", new CInt(event.getExpToDrop(), t));
-
 			return map;
 		}
 
@@ -1433,6 +1422,985 @@ public class BlockEvents {
 
 			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 			return mapEvent;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+	}
+
+	@api
+    public static class block_physics extends AbstractEvent{
+
+        @Override
+        public String getName() {
+            return "block_physics";
+        }
+
+        @Override
+        public String docs() {
+            return "{}"
+                    + "Thrown when a block physics check is called. "
+                    + "{changedtype : Gets the type of block that changed, causing this event. }"
+                    + "{}"
+                    + "{}";
+        }
+
+        @Override
+        public Version since() {
+            return CHVersion.V3_3_3;
+        }
+
+        @Override
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+            return true;
+        }
+
+        @Override
+        public BindableEvent convert(CArray manualObject, Target t) {
+            return null;
+        }
+
+        @Override
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            if(!(e instanceof MCBlockPhysicsEvent)) {
+                throw new EventException("Cannot convert event to BlockPhysicsEvent");
+            }
+
+            MCBlockPhysicsEvent event = (MCBlockPhysicsEvent) e;
+            Target t = Target.UNKNOWN;
+            Map<String, Construct> mapEvent = evaluate_helper(event);
+
+            mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
+            mapEvent.put("changedtype", new CString(event.getChangedType().getName(), t));
+
+            return mapEvent;
+        }
+
+        @Override
+        public Driver driver() {
+            return Driver.BLOCK_PHYSICS;
+        }
+
+        @Override
+        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+            return false;
+        }
+    }
+
+    @api
+	public static class block_damage extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "block_damage";
+		}
+
+		@Override
+		public String docs() {
+			return "{} "
+					+ "Called when a block is damaged by a player. |"
+					+ "If a Block Damage event is cancelled, the block will not be damaged."
+					+ "{player: The player's name | block: the block type that was placed"
+					+ " | item: Gets the ItemStack for the item currently in the player's hand. "
+					+ " | instabreak : Gets if the block is set to instantly break when damaged by the player. }"
+					+ "{} "
+					+ "{instabreak}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(!(e instanceof MCBlockDamageEvent))
+				throw new EventException("Cannot convert event to BlockPhysicsEvent");
+
+			MCBlockDamageEvent event = (MCBlockDamageEvent) e;
+			Target t = Target.UNKNOWN;
+			Map<String, Construct> mapEvent = evaluate_helper(event);
+
+			mapEvent.put("instabreak", CBoolean.get(event.getInstaBreak()));
+			mapEvent.put("item", ObjectGenerator.GetGenerator().item(event.getItemInHand(), t));
+			mapEvent.put("player", new CString(event.getPlayer().getName(), t));
+
+			CArray blk = CArray.GetAssociativeArray(t);
+			blk.set("name", event.getBlock().getType().getName(), t);
+			blk.set("x", new CInt(event.getBlock().getX(), t), t);
+			blk.set("y", new CInt(event.getBlock().getY(), t), t);
+			blk.set("z", new CInt(event.getBlock().getZ(), t), t);
+			blk.set("world", new CString(event.getBlock().getWorld().getName(), t), t);
+
+			mapEvent.put("block", blk);
+
+			return mapEvent;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.BLOCK_DAMAGE;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if(event instanceof MCBlockDamageEvent){
+				if(key.equalsIgnoreCase("instabreak")){
+					((MCBlockDamageEvent)event).setInstaBreak(Static.getBoolean(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+
+	}
+
+	@api
+	public static class block_can_build extends AbstractEvent{
+
+		@Override
+		public String getName() {
+			return "block_can_build";
+		}
+
+		@Override
+		public String docs() {
+			return ""
+					+ "Called when we try to place a block, to see if we can build it here or not."
+					+ "{block : Gets the Block that we are trying to place."
+					+ "| buildable : Gets whether or not the block can be built here.}"
+					+ "{}"
+					+ "{buildable}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+
+			if(!(e instanceof MCBlockCanBuildEvent))
+				throw new EventException("Cannot convert event to BlockCanBuildEvent");
+
+			MCBlockCanBuildEvent event = (MCBlockCanBuildEvent) e;
+			Target t = Target.UNKNOWN;
+			Map<String, Construct> mapEvent = evaluate_helper(event);
+
+			CArray blk = CArray.GetAssociativeArray(t);
+			blk.set("name", event.getBlock().getType().getName(), t);
+			blk.set("x", new CInt(event.getBlock().getX(), t), t);
+			blk.set("y", new CInt(event.getBlock().getY(), t), t);
+			blk.set("z", new CInt(event.getBlock().getZ(), t), t);
+			blk.set("world", new CString(event.getBlock().getWorld().getName(), t), t);
+
+			mapEvent.put("block", blk);
+
+			mapEvent.put("buildable", CBoolean.get(event.isBuildable()));
+
+			return mapEvent;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.BLOCK_CAN_BUILD;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if(event instanceof MCBlockCanBuildEvent){
+				if(key.equalsIgnoreCase("buildable")){
+					((MCBlockCanBuildEvent)event).setBuildable(Static.getBoolean(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	@api
+	public static class block_explode extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "block_explode";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "Called when a block explodes from unknown sources."
+					+ "{blocks :  The list of blocks that would have been removed or were removed from the explosion event."
+					+ "| yield : The percentage of blocks to drop from this explosion. "
+					+ "| location : Gets the location involved in this event.}"
+					+ "{}"
+					+ "{yield}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+
+			if(!(e instanceof MCBlockExplodeEvent))
+				throw new EventException("Cannot convert event to BlockExplodeEvent");
+
+			MCBlockExplodeEvent event = (MCBlockExplodeEvent) e;
+			Target t = Target.UNKNOWN;
+			Map<String, Construct> mapEvent = evaluate_helper(event);
+
+			CArray blocks = new CArray(t);
+			for(MCBlock b : event.getBlockList()) {
+				CArray blk = CArray.GetAssociativeArray(t);
+				blk.set("name", b.getType().getName(), t);
+				blk.set("x", new CInt(b.getX(), t), t);
+				blk.set("y", new CInt(b.getY(), t), t);
+				blk.set("z", new CInt(b.getZ(), t), t);
+				blk.set("world", new CString(b.getWorld().getName(), t), t);
+
+				blocks.push(blk, Target.UNKNOWN);
+			}
+			mapEvent.put("blocks", blocks);
+
+			mapEvent.put("yield", event.getYield());
+
+			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
+
+			return mapEvent;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.BLOCK_EXPLODE;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if(event instanceof MCBlockExplodeEvent){
+				if(key.equalsIgnoreCase("yield")){
+					((MCBlockExplodeEvent)event).setYield(Static.getDouble32(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	@api
+	public static class block_fertilize extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "block_fertilize";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "Called with the block changes resulting from a player fertilizing a given block with bonemeal."
+					+ "{blocks : Gets a list of all blocks changed by the fertilization. |"
+					+ "player : Gets the player that triggered the fertilization. | "
+					+ "location : Gets the location involved in this event.}"
+					+ "{}"
+					+ "{}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+
+			if(!(e instanceof MCBlockFertilizeEvent))
+				throw new EventException("Cannot convert event to BlockFertilizeEvent");
+
+			MCBlockFertilizeEvent event = (MCBlockFertilizeEvent) e;
+			Target t = Target.UNKNOWN;
+			Map<String, Construct> mapEvent = evaluate_helper(event);
+
+			CArray blocks = new CArray(t);
+			for(MCBlockState b : event.getBlocks()) {
+				CArray blk = CArray.GetAssociativeArray(t);
+				blk.set("name", b.getType().getName(), t);
+				blk.set("x", new CInt(b.getBlock().getX(), t), t);
+				blk.set("y", new CInt(b.getBlock().getY(), t), t);
+				blk.set("z", new CInt(b.getBlock().getZ(), t), t);
+				blk.set("world", new CString(b.getBlock().getWorld().getName(), t), t);
+
+				blocks.push(blk, Target.UNKNOWN);
+			}
+			mapEvent.put("blocks", blocks);
+
+			mapEvent.put("player", new CString(event.getPlayer().getName(), t));
+			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
+
+			return mapEvent;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.BLOCK_FERTILIZE;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+	}
+
+	@api
+	public static class block_redstone extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "block_redstone";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "Called when a redstone current changes. "
+					+ "{new : Gets the new current of this block"
+					+ "| old : Gets the old current of this block"
+					+ "| location : Gets the location involved in this event.}"
+					+ "{}"
+					+ "{new}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+
+			if(!(e instanceof MCBlockRedstoneEvent))
+				throw new EventException("Cannot convert event to BlockFertilizeEvent");
+
+			MCBlockRedstoneEvent event = (MCBlockRedstoneEvent) e;
+			Target t = Target.UNKNOWN;
+			Map<String, Construct> mapEvent = evaluate_helper(event);
+
+			mapEvent.put("new", event.getNewCurrent());
+			mapEvent.put("old", event.getOldCurrent());
+			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
+
+			return mapEvent;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.BLOCK_REDSTONE;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if(event instanceof MCBlockRedstoneEvent){
+				if(key.equalsIgnoreCase("new")){
+					((MCBlockRedstoneEvent)event).setNewCurrent(Static.getInt32(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	@api
+	public static class brewing_stand_fuel extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "brewing_stand_fuel";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "Called when an ItemStack is about to increase the fuel level of a brewing stand."
+					+ "{fuel : Gets the ItemStack of the fuel before the amount was subtracted."
+					+ "| power : Gets the fuel power for this fuel."
+					+ "| consuming : Gets whether the brewing stand's fuel will be reduced / consumed or not."
+					+ "| location : Gets the location involved in this event.}"
+					+ "{}"
+					+ "{power|consuming}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+
+			if(!(e instanceof MCBrewingStandFuelEvent))
+				throw new EventException("Cannot convert event to BrewingStandFuelEvent");
+
+			MCBrewingStandFuelEvent event = (MCBrewingStandFuelEvent) e;
+			Target t = Target.UNKNOWN;
+			Map<String, Construct> mapEvent = evaluate_helper(event);
+
+			mapEvent.put("fuel", ObjectGenerator.GetGenerator().item(event.getFuel(), t));
+			mapEvent.put("power", event.getFuelPower());
+			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
+			mapEvent.put("consuming", CBoolean.get(event.isConsuming()));
+
+			return mapEvent;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.BREWING_STAND_FUEL;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if(event instanceof MCBrewingStandFuelEvent){
+				MCBrewingStandFuelEvent bsfe = (MCBrewingStandFuelEvent)event;
+				if(key.equalsIgnoreCase("power")){
+					bsfe.setFuelPower(Static.getInt32(value, Target.UNKNOWN));
+					return true;
+				}else if(key.equalsIgnoreCase("consuming")){
+					bsfe.setConsuming(Static.getBoolean(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+    @api
+    public static class brew extends AbstractEvent {
+
+        @Override
+        public String getName() {
+            return "brew";
+        }
+
+        @Override
+        public String docs() {
+            return "{}"
+                    + "Called when the brewing of the contents inside the Brewing Stand is complete."
+                    + "{inventory: gets the contents of the brewing stand."
+                    + "| fuellevel: gets the remaining fuel level."
+					+ "| location : Gets the location involved in this event. }"
+                    + "{}"
+                    + "{}";
+        }
+
+        @Override
+        public Version since() {
+            return CHVersion.V3_3_3;
+        }
+
+        @Override
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+            return true;
+        }
+
+        @Override
+        public BindableEvent convert(CArray manualObject, Target t) {
+            return null;
+        }
+
+        @Override
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            if(!(e instanceof MCBrewEvent))
+                throw new EventException("Cannot convert event to BrewEvent");
+
+            MCBrewEvent event = (MCBrewEvent) e;
+            Target t = Target.UNKNOWN;
+            Map<String, Construct> mapEvent = evaluate_helper(event);
+
+            CArray inv = new CArray(t);
+            for(int i = 0 ; i < event.getContents().getSize() ; i ++)
+                inv.set(i, ObjectGenerator.GetGenerator().item(event.getContents().getItem(i), t), t);
+            mapEvent.put("inventory", inv);
+
+            mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
+            mapEvent.put("fuellevel", event.getFuelLevel());
+
+            return mapEvent;
+        }
+
+        @Override
+        public Driver driver() {
+            return Driver.BREW;
+        }
+
+        @Override
+        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+            return false;
+        }
+    }
+
+    @api
+	public static class cauldron_level_change extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "cauldron_level_change";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "Called when changed cauldron's water level."
+					+ "{ id : Get entity which did this."
+					+ "| new : Gets the new level of this block. "
+					+ "| old : Gets the old level of this block. "
+					+ "| reason : Gets the reason why the level has changed. "
+					+ "| location : Gets the location involved in this event.}"
+					+ "{}"
+					+ "{new}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+
+			if(!(e instanceof MCCauldronLevelChangeEvent))
+				throw new EventException("Cannot convert event to CauldronLevelChangeEvent");
+
+			MCCauldronLevelChangeEvent event = (MCCauldronLevelChangeEvent) e;
+			Target t = Target.UNKNOWN;
+			Map<String, Construct> mapEvent = evaluate_helper(event);
+
+			mapEvent.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
+			mapEvent.put("new", event.getNewLevel());
+			mapEvent.put("old", event.getOldLevel());
+			mapEvent.put("reason", event.getReason());
+			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
+
+			return mapEvent;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.CAULDRON_LEVEL_CHANGE;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if(event instanceof MCCauldronLevelChangeEvent){
+				if(key.equalsIgnoreCase("new")){
+					((MCCauldronLevelChangeEvent)event).setNewLevel(Static.getInt32(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	@api
+	public static class furnace_burn extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "furnace_burn";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "Called when an ItemStack is successfully burned as fuel in a furnace."
+					+ "{burntime : Gets the burn time for this fuel. "
+					+ "| fuel : Gets the fuel ItemStack for this event. "
+					+ "| burning: Gets whether the furnace's fuel is burning or not."
+					+ "| location : Gets the location involved in this event.}"
+					+ "{}"
+					+ "{burntime|burning}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(!(e instanceof MCFurnaceBurnEvent))
+				throw new EventException("Cannot convert event to FurnaceBurnEvent");
+
+			MCFurnaceBurnEvent event = (MCFurnaceBurnEvent) e;
+			Target t = Target.UNKNOWN;
+			Map<String, Construct> mapEvent = evaluate_helper(event);
+
+			mapEvent.put("burntime", event.getBurnTine());
+			mapEvent.put("fuel", ObjectGenerator.GetGenerator().item(event.getFuel(), t));
+			mapEvent.put("burning", CBoolean.get(event.isBurning()));
+			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
+
+			return mapEvent;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.FURNACE_BURN;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if(event instanceof MCFurnaceBurnEvent){
+				MCFurnaceBurnEvent fbe = (MCFurnaceBurnEvent) event;
+				if(key.equalsIgnoreCase("burntime")){
+					fbe.setBurnTime(Static.getInt32(value, Target.UNKNOWN));
+					return true;
+				}else if(key.equalsIgnoreCase("burning")){
+					fbe.setBurning(Static.getBoolean(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	@api
+	public static class furnace_extract extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "furnace_extract";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "An event that's called when a block yields experience."
+					+ "{exp : Get the experience dropped by the block after the event has processed."
+					+ "| location : Gets the block involved in this event."
+					+ "| amount : Get the item count being retrieved."
+					+ "| item : Get the Material of the item being retrieved."
+					+ "| player : Get the player that triggered the event.}"
+					+ "{}"
+					+ "{exp}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(!(e instanceof MCFurnaceExtractEvent))
+				throw new EventException("Cannot convert event to FurnaceExtractEvent");
+
+			MCFurnaceExtractEvent event = (MCFurnaceExtractEvent) e;
+			Target t = Target.UNKNOWN;
+			Map<String, Construct> mapEvent = evaluate_helper(event);
+
+			mapEvent.put("exp", event.getExpToDrop());
+			mapEvent.put("amount", event.getItemAmount());
+			mapEvent.put("item", new CString(event.getItemType().getName(), t));
+			mapEvent.put("player", new CString(event.getPlayer().getName(), t));
+
+			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
+
+			return mapEvent;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.FURNACE_EXTRACT;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if(event instanceof MCFurnaceExtractEvent){
+				if(key.equalsIgnoreCase("exp")){
+					((MCFurnaceExtractEvent)event).setExpToDrop(Static.getInt32(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	@api
+	public static class furnace_smelt extends AbstractEvent{
+
+		@Override
+		public String getName() {
+			return "furnace_smelt";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "Called when an ItemStack is successfully smelted in a furnace."
+					+ "{result : Gets the resultant ItemStack for this event. "
+					+ "| source : Gets the smelted ItemStack for this event. "
+					+ "| location : Gets the block involved in this event.}"
+					+ "{}"
+					+ "{result}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(!(e instanceof MCFurnaceSmeltEvent))
+				throw new EventException("Cannot convert event to FurnaceSmeltEvent");
+
+			MCFurnaceSmeltEvent event = (MCFurnaceSmeltEvent) e;
+			Target t = Target.UNKNOWN;
+			Map<String, Construct> mapEvent = evaluate_helper(event);
+
+			mapEvent.put("result", ObjectGenerator.GetGenerator().item(event.getResult(), t));
+			mapEvent.put("source", ObjectGenerator.GetGenerator().item(event.getSource(), t));
+			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
+
+			return mapEvent;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.FURNACE_SMELT;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if(event instanceof MCFurnaceSmeltEvent){
+				if(key.equalsIgnoreCase("result")){
+					MCItemStack enter = ObjectGenerator.GetGenerator().item(value, value.getTarget());
+					((MCFurnaceSmeltEvent)event).setResult(((BukkitMCItemStack)enter).asItemStack());
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@api
+		public static class leaves_deacy extends AbstractEvent {
+
+			@Override
+			public String getName() {
+				return "leaves_decay";
+			}
+
+			@Override
+			public String docs() {
+				return "{}"
+						+ "Called when leaves are decaying naturally."
+						+ "{location : Gets the block involved in this event.}"
+						+ "{}"
+						+ "{}";
+			}
+
+			@Override
+			public Version since() {
+				return CHVersion.V3_3_3;
+			}
+
+			@Override
+			public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+				return true;
+			}
+
+			@Override
+			public BindableEvent convert(CArray manualObject, Target t) {
+				return null;
+			}
+
+			@Override
+			public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+				if(!(e instanceof MCLeavesDecayEvent))
+					throw new EventException("Cannot convert event to LeavesDecayEvent");
+
+				MCLeavesDecayEvent event = (MCLeavesDecayEvent) e;
+				Target t = Target.UNKNOWN;
+				Map<String, Construct> mapEvent = evaluate_helper(event);
+
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
+
+				return mapEvent;
+			}
+
+			@Override
+			public Driver driver() {
+				return Driver.LEAVES_DECAY;
+			}
+
+			@Override
+			public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+				return false;
+			}
+		}
+	}
+
+	@api
+	public static class sponge_absorb extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "sponge_absorb";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "Called when a sponge absorbs water from the world. "
+					+ "{blocks : Get a list of all blocks to be removed by the sponge. "
+					+ "| location : Gets the block involved in this event.}"
+					+ "{}"
+					+ "{}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(!(e instanceof MCSpongeAbsorbEvent))
+				throw new EventException("Cannot convert event to SpongeAbsorbEvent");
+
+			MCSpongeAbsorbEvent event = (MCSpongeAbsorbEvent) e;
+			Target t = Target.UNKNOWN;
+			Map<String, Construct> mapEvent = evaluate_helper(event);
+
+			CArray bls = new CArray(t);
+			for(MCBlockState bs : event.getBlocks())
+				bls.push(ObjectGenerator.GetGenerator().location(bs.getLocation()), t);
+
+			mapEvent.put("blocks", bls);
+
+			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
+
+			return mapEvent;
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.SPONGE_ABSORB;
 		}
 
 		@Override
