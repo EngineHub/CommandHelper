@@ -624,13 +624,15 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public MCRecipe GetNewRecipe(String key, MCRecipeType type, MCItemStack result) {
+
 		ItemStack is = ((BukkitMCItemStack) result).asItemStack();
+		if(type == MCRecipeType.MERCHANT) {
+			return new BukkitMCMerchantRecipe(new MerchantRecipe(is, Integer.MAX_VALUE));
+		}
 		NamespacedKey nskey = new NamespacedKey(CommandHelperPlugin.self, key);
 		switch(type) {
 			case FURNACE:
 				return new BukkitMCFurnaceRecipe(new FurnaceRecipe(nskey, is, Material.AIR, 0.0F, 200));
-			case MERCHANT:
-				return new BukkitMCMerchantRecipe(new MerchantRecipe(is, Integer.MAX_VALUE), key);
 			case SHAPED:
 				return new BukkitMCShapedRecipe(new ShapedRecipe(nskey, is));
 			case SHAPELESS:

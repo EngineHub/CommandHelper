@@ -24,7 +24,6 @@ import com.laytonsmith.abstraction.MCLeatherArmorMeta;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMapMeta;
-import com.laytonsmith.abstraction.MCMerchantRecipe;
 import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlugin;
@@ -1455,16 +1454,6 @@ public class ObjectGenerator {
 			}
 			ret.set("shape", shape, t);
 			ret.set("ingredients", imap, t);
-		} else if(r instanceof MCMerchantRecipe) {
-			MCMerchantRecipe merchant = (MCMerchantRecipe) r;
-			CArray il = new CArray(t);
-			for(MCItemStack i : merchant.getIngredients()) {
-				il.push(item(i, t), t);
-			}
-			ret.set("ingredients", il, t);
-			ret.set("maxuses", new CInt(merchant.getMaxUses(), t), t);
-			ret.set("uses", new CInt(merchant.getUses(), t), t);
-			ret.set("hasxpreward", CBoolean.get(merchant.hasExperienceReward()), t);
 		}
 		return ret;
 	}
@@ -1589,32 +1578,6 @@ public class ObjectGenerator {
 				} else {
 					throw new CREFormatException("Item was not found", t);
 				}
-				return ret;
-
-			case MERCHANT:
-				MCMerchantRecipe mer = (MCMerchantRecipe) ret;
-				if(recipe.containsKey("maxuses")) {
-					mer.setMaxUses(Static.getInt32(recipe.get("maxuses", t), t));
-				}
-				if(recipe.containsKey("uses")) {
-					mer.setUses(Static.getInt32(recipe.get("uses", t), t));
-				}
-				if(recipe.containsKey("hasxpreward")) {
-					mer.setHasExperienceReward(Static.getBoolean(recipe.get("hasxpreward", t), t));
-				}
-				ingredients = Static.getArray(recipe.get("ingredients", t), t);
-				if(ingredients.inAssociativeMode()) {
-					throw new CREFormatException("Ingredients array is invalid.", t);
-				}
-				if(ingredients.size() < 1 || ingredients.size() > 2) {
-					throw new CRERangeException("Ingredients for merchants must contain 1 or 2 items, found "
-							+ ingredients.size(), t);
-				}
-				List<MCItemStack> mcIngredients = new ArrayList<>();
-				for(Construct ingredient : ingredients.asList()) {
-					mcIngredients.add(item(ingredient, t));
-				}
-				mer.setIngredients(mcIngredients);
 				return ret;
 
 			default:

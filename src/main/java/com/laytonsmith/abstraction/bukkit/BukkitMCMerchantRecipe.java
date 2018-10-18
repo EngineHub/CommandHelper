@@ -12,20 +12,14 @@ import java.util.List;
 public class BukkitMCMerchantRecipe extends BukkitMCRecipe implements MCMerchantRecipe {
 
 	private MerchantRecipe handle;
-	private String key;
 	public BukkitMCMerchantRecipe(MerchantRecipe recipe) {
-		this(recipe, null);
-	}
-
-	public BukkitMCMerchantRecipe(MerchantRecipe recipe, String key) {
 		super(recipe);
 		handle = recipe;
-		this.key = key;
 	}
 
 	@Override
 	public String getKey() {
-		return key;
+		return null;
 	}
 
 	@Override
