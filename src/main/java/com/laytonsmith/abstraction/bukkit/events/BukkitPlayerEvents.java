@@ -99,7 +99,8 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
-import org.bukkit.event.player.PlayerBucketEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerChannelEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -1305,11 +1306,67 @@ public class BukkitPlayerEvents {
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCPlayerBucketEvent implements MCPlayerBucketEvent {
+	public static class BukkitMCPlayerBucketFillEvent implements MCPlayerBucketEvent {
 
-		PlayerBucketEvent pbe;
+		PlayerBucketFillEvent pbe;
 
-		public BukkitMCPlayerBucketEvent(PlayerBucketEvent e) {
+		public BukkitMCPlayerBucketFillEvent(PlayerBucketFillEvent e) {
+			this.pbe = e;
+		}
+
+		@Override
+		public MCBlock getBlockClicked() {
+			return new BukkitMCBlock(pbe.getBlockClicked());
+		}
+
+		@Override
+		public MCBlockFace getBlockFace() {
+			MCBlock b = new BukkitMCBlock(pbe.getBlockClicked());
+			return b.getFace(b);
+		}
+
+		@Override
+		public MCMaterial getBucket() {
+			return new BukkitMCMaterial(pbe.getBucket());
+		}
+
+		@Override
+		public MCItemStack getItemStack() {
+			return new BukkitMCItemStack(pbe.getItemStack());
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(pbe.getPlayer());
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return pbe.isCancelled();
+		}
+
+		@Override
+		public void setCancelled(boolean cancel) {
+			pbe.setCancelled(cancel);
+		}
+
+		@Override
+		public void setItemStack(MCItemStack is) {
+			pbe.setItemStack(((BukkitMCItemStack) is).asItemStack());
+		}
+
+		@Override
+		public Object _GetObject() {
+			return pbe;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerBucketEmptyEvent implements MCPlayerBucketEvent {
+
+		PlayerBucketEmptyEvent pbe;
+
+		public BukkitMCPlayerBucketEmptyEvent(PlayerBucketEmptyEvent e) {
 			this.pbe = e;
 		}
 
