@@ -31,7 +31,8 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCItem
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCLocaleChangeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerAdvancementDoneEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerAnimationEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerBucketEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerBucketFillEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerBucketEmptyEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerResourcepackStatusEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerStatisticIncrementEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerVelocityEvent;
@@ -54,7 +55,6 @@ import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
-import org.bukkit.event.player.PlayerBucketEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerChangedMainHandEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -412,13 +412,15 @@ public class BukkitPlayerListener implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerBucket(PlayerBucketEvent event) {
-		BukkitMCPlayerBucketEvent pbe = new BukkitMCPlayerBucketEvent(event);
-		if(event instanceof PlayerBucketFillEvent) {
-			EventUtils.TriggerListener(Driver.PLAYER_BUCKET, "player_bucket_fill", pbe);
-		} else if(event instanceof PlayerBucketEmptyEvent) {
-			EventUtils.TriggerListener(Driver.PLAYER_BUCKET, "player_bucket_empty", pbe);
-		}
+	public void onPlayerBucketFill(PlayerBucketFillEvent event) {
+		BukkitMCPlayerBucketFillEvent pbfe = new BukkitMCPlayerBucketFillEvent(event);
+		EventUtils.TriggerListener(Driver.PLAYER_BUCKET, "player_bucket_fill", pbfe);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPlayerBucket(PlayerBucketEmptyEvent event) {
+		BukkitMCPlayerBucketEmptyEvent pbe = new BukkitMCPlayerBucketEmptyEvent(event);
+		EventUtils.TriggerListener(Driver.PLAYER_BUCKET, "player_bucket_empty", pbe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
