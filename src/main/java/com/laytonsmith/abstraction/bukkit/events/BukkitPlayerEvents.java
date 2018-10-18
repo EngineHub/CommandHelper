@@ -75,7 +75,8 @@ import com.laytonsmith.abstraction.events.MCItemMendEvent;
 import com.laytonsmith.abstraction.events.MCLocaleChangeEvent;
 import com.laytonsmith.abstraction.events.MCPlayerAdvancementDoneEvent;
 import com.laytonsmith.abstraction.events.MCPlayerAnimationEvent;
-import com.laytonsmith.abstraction.events.MCPlayerBucketEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBucketFillEvent;
+import com.laytonsmith.abstraction.events.MCPlayerBucketEmptyEvent;
 import com.laytonsmith.abstraction.events.MCPlayerResourcepackStatusEvent;
 import com.laytonsmith.abstraction.events.MCPlayerStatisticIncrementEvent;
 import com.laytonsmith.abstraction.events.MCPlayerVelocityEvent;
@@ -1305,11 +1306,67 @@ public class BukkitPlayerEvents {
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCPlayerBucketEvent implements MCPlayerBucketEvent {
+	public static class BukkitMCPlayerBucketFillEvent implements MCPlayerBucketEvent {
 
-		PlayerBucketEvent pbe;
+		PlayerBucketFillEvent pbe;
 
-		public BukkitMCPlayerBucketEvent(PlayerBucketEvent e) {
+		public BukkitMCPlayerBucketFillEvent(PlayerBucketFillEvent e) {
+			this.pbe = e;
+		}
+
+		@Override
+		public MCBlock getBlockClicked() {
+			return new BukkitMCBlock(pbe.getBlockClicked());
+		}
+
+		@Override
+		public MCBlockFace getBlockFace() {
+			MCBlock b = new BukkitMCBlock(pbe.getBlockClicked());
+			return b.getFace(b);
+		}
+
+		@Override
+		public MCMaterial getBucket() {
+			return new BukkitMCMaterial(pbe.getBucket());
+		}
+
+		@Override
+		public MCItemStack getItemStack() {
+			return new BukkitMCItemStack(pbe.getItemStack());
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(pbe.getPlayer());
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return pbe.isCancelled();
+		}
+
+		@Override
+		public void setCancelled(boolean cancel) {
+			pbe.setCancelled(cancel);
+		}
+
+		@Override
+		public void setItemStack(MCItemStack is) {
+			pbe.setItemStack(((BukkitMCItemStack) is).asItemStack());
+		}
+
+		@Override
+		public Object _GetObject() {
+			return pbe;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerBucketEmptyEvent implements MCPlayerBucketEvent {
+
+		PlayerBucketEmptyEvent pbe;
+
+		public BukkitMCPlayerBucketEmptyEvent(PlayerBucketEmptyEvent e) {
 			this.pbe = e;
 		}
 
