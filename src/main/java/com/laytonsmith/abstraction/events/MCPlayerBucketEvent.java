@@ -5,9 +5,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
-import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.events.BindableEvent;
-import org.bukkit.inventory.ItemStack;
 
 public interface MCPlayerBucketEvent extends BindableEvent {
 
@@ -19,14 +17,12 @@ public interface MCPlayerBucketEvent extends BindableEvent {
 
 	MCItemStack getItemStack();
 
-	CString getType();
-
 	MCPlayer getPlayer();
 
 	boolean isCancelled();
 
 	void setCancelled(boolean cancel);
 
-	void setItemStack(ItemStack is);
+	void setItemStack(MCItemStack is);
 
 }

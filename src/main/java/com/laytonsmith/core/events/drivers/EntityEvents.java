@@ -4,10 +4,9 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCMerchantRecipe;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
-import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
-import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.entities.MCHanging;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
@@ -21,6 +20,8 @@ import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
+import com.laytonsmith.abstraction.enums.MCDyeColor;
+import com.laytonsmith.abstraction.enums.MCEnderDragonPhase;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCRegainReason;
@@ -55,18 +56,15 @@ import com.laytonsmith.abstraction.events.MCEnderdragonChangePhaseEvent;
 import com.laytonsmith.abstraction.events.MCEntityAirChangeEvent;
 import com.laytonsmith.abstraction.events.MCEntityBreedEvent;
 import com.laytonsmith.abstraction.events.MCEntityCreatePortalEvent;
-import com.laytonsmith.abstraction.events.MCEntityDropItemEvent;
 import com.laytonsmith.abstraction.events.MCEntityResurrectEvent;
 import com.laytonsmith.abstraction.events.MCEntityShootBowEvent;
 import com.laytonsmith.abstraction.events.MCEntityTameEvent;
 import com.laytonsmith.abstraction.events.MCEntityTeleportEvent;
-import com.laytonsmith.abstraction.events.MCEntityToggleSwimEvent;
 import com.laytonsmith.abstraction.events.MCEntityUnleashEvent;
 import com.laytonsmith.abstraction.events.MCExplosionPrimeEvent;
 import com.laytonsmith.abstraction.events.MCHorseJumpEvent;
 import com.laytonsmith.abstraction.events.MCItemMergeEvent;
 import com.laytonsmith.abstraction.events.MCPigZapEvent;
-import com.laytonsmith.abstraction.events.MCPigZombieAngerEvent;
 import com.laytonsmith.abstraction.events.MCSheepDyeWoolEvent;
 import com.laytonsmith.abstraction.events.MCSheepRegrowWoolEvent;
 import com.laytonsmith.abstraction.events.MCSlimeSplitEvent;
@@ -102,11 +100,6 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-import org.bukkit.Bukkit;
-import org.bukkit.DyeColor;
-import org.bukkit.entity.EnderDragon;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.MerchantRecipe;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2379,8 +2372,8 @@ public class EntityEvents {
 				Map<String, Construct> ret = evaluate_helper(event);
 				Target t = Target.UNKNOWN;
 
-				ret.put("current", event.getCurrentPhase());
-				ret.put("new", event.getNewPhase());
+				ret.put("current", new CString(event.getCurrentPhase(), t));
+				ret.put("new", new CString(event.getNewPhase(), t));
 				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
 
 				return ret;
@@ -2402,7 +2395,7 @@ public class EntityEvents {
 							"HOVER", "LAND_ON_PORTAL", "LEAVE_PORTAL", "ROAR_BEFORE_ATTACK", "SEARCH_FOR_BREATH_ATTACK_TARGET",
 							"STRAFING"};
 					if(Arrays.asList(phases).contains(value.val().toUpperCase())) {
-						((MCEnderdragonChangePhaseEvent) event).setNewPhase(EnderDragon.Phase.valueOf(value.val().toUpperCase()));
+						((MCEnderdragonChangePhaseEvent) event).setNewPhase(MCEnderDragonPhase.valueOf(value.val().toUpperCase()));
 						return true;
 					}
 				}
@@ -2453,7 +2446,7 @@ public class EntityEvents {
 				Target t = Target.UNKNOWN;
 
 				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
-				ret.put("amount", event.getAmount());
+				ret.put("amount", new CInt(event.getAmount(), t));
 
 				return ret;
 			} else {
@@ -2526,7 +2519,7 @@ public class EntityEvents {
 				ret.put("bredwith", ObjectGenerator.GetGenerator().item(event.getBredWith(), t));
 				ret.put("breeder", new CString(event.getBreeder().getUniqueId().toString(), t));
 				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
-				ret.put("exp", event.getExperience());
+				ret.put("exp", new CInt(event.getExperience(), t));
 				ret.put("father", new CString(event.getFather().getUniqueId().toString(), t));
 				ret.put("mother", new CString(event.getMother().getUniqueId().toString(), t));
 
@@ -2603,7 +2596,7 @@ public class EntityEvents {
 				ret.put("blocks", blocks);
 
 				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
-				ret.put("type", event.getPortalType());
+				ret.put("type", new CString(event.getPortalType(), t));
 
 				return ret;
 
@@ -2615,72 +2608,6 @@ public class EntityEvents {
 		@Override
 		public Driver driver() {
 			return Driver.ENTITY_CREATE_PORTAL;
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			return false;
-		}
-	}
-
-	@api
-	public static class entity_drop_item extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "entity_drop_item";
-		}
-
-		@Override
-		public String docs() {
-			return "{}"
-					+ "Thrown when an entity creates an item drop."
-					+ "{item : Gets the Item created by the entity."
-					+ "| id : Returns the Entity involved in this event.}"
-					+ "{}"
-					+ "{}";
-		}
-
-		@Override
-		public Version since() {
-			return CHVersion.V3_3_3;
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(e instanceof MCEntityDropItemEvent) {
-
-				MCEntityDropItemEvent event = (MCEntityDropItemEvent) e;
-				Map<String, Construct> ret = evaluate_helper(event);
-				Target t = Target.UNKNOWN;
-
-				CArray item = new CArray(t);
-				item.set("item", ObjectGenerator.GetGenerator().item(event.getItemDrop().getItemStack(), t), t);
-				item.set("id", event.getItemDrop().getUniqueId().toString());
-				ret.put("item", item);
-
-				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
-
-				return ret;
-
-			} else {
-				throw new EventException("Could not convert to EntityDropItemEvent");
-			}
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.ENTITY_DROP_ITEM;
 		}
 
 		@Override
@@ -2795,7 +2722,7 @@ public class EntityEvents {
 
 				ret.put("bow", ObjectGenerator.GetGenerator().item(event.getBow(), t));
 				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
-				ret.put("force", event.getForce());
+				ret.put("force", new CDouble(event.getForce(), t));
 				ret.put("projectile", new CString(event.getProjectile().getUniqueId().toString(), t));
 
 				CArray ve = ObjectGenerator.GetGenerator().vector(event.getProjectile().getVelocity(), t);
@@ -2825,9 +2752,9 @@ public class EntityEvents {
 						le = Static.getEntity(value, Target.UNKNOWN);
 					}
 					if(le != null) {
-						((MCEntityShootBowEvent) event).setProjectile(Bukkit.getEntity(le.getUniqueId()));
+						((MCEntityShootBowEvent) event).setProjectile(le);
 					} else {
-						throw new CREBadEntityException("That entity (UUID: " + le + ")is not exists.", Target.UNKNOWN);
+						throw new CREBadEntityException("That entity (UUID: " + value.val() + ")is not exists.", Target.UNKNOWN);
 					}
 					return true;
 				}
@@ -2962,75 +2889,14 @@ public class EntityEvents {
 				MCEntityTeleportEvent ete = (MCEntityTeleportEvent) event;
 				if(key.equalsIgnoreCase("from")) {
 					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, Target.UNKNOWN);
-					ete.setFrom(((BukkitMCLocation) loc).asLocation());
+					ete.setFrom(loc);
 					return true;
 				} else if(key.equalsIgnoreCase("to")) {
 					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, Target.UNKNOWN);
-					ete.setTo(((BukkitMCLocation) loc).asLocation());
+					ete.setTo(loc);
 					return true;
 				}
 			}
-			return false;
-		}
-	}
-
-	@api
-	public static class entity_toggle_swim extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "entity_toggle_swim";
-		}
-
-		@Override
-		public String docs() {
-			return "{}"
-					+ "Sent when an entity's swimming status is toggled."
-					+ "{id : Entity who is involved in this event."
-					+ "{swimming : true if the entity is entering swimming mode, false if the entity is leaving it.}"
-					+ "{}"
-					+ "{}";
-		}
-
-		@Override
-		public Version since() {
-			return CHVersion.V3_3_3;
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(e instanceof MCEntityToggleSwimEvent) {
-
-				MCEntityToggleSwimEvent event = (MCEntityToggleSwimEvent) e;
-				Map<String, Construct> ret = evaluate_helper(event);
-				Target t = Target.UNKNOWN;
-
-				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
-				ret.put("swimming", CBoolean.get(event.isSwimming()));
-
-				return ret;
-			} else {
-				throw new EventException("Could not convert to EntityToggleSwimEvent");
-			}
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.ENTITY_TOGGLE_SWIM;
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			return false;
 		}
 	}
@@ -3075,7 +2941,7 @@ public class EntityEvents {
 				Map<String, Construct> ret = evaluate_helper(event);
 				Target t = Target.UNKNOWN;
 
-				ret.put("reason", event.getReason());
+				ret.put("reason", new CString(event.getReason(), t));
 
 				return ret;
 
@@ -3138,7 +3004,7 @@ public class EntityEvents {
 				Target t = Target.UNKNOWN;
 
 				ret.put("fire", CBoolean.get(event.getFire()));
-				ret.put("radius", event.getRadius());
+				ret.put("radius", new CDouble(event.getRadius(), t));
 				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
 
 				return ret;
@@ -3211,7 +3077,7 @@ public class EntityEvents {
 				Target t = Target.UNKNOWN;
 
 				ret.put("horse", new CString(event.getEntity().getUniqueId().toString(), t));
-				ret.put("power", event.getPower());
+				ret.put("power", new CDouble(event.getPower(), t));
 
 				return ret;
 
@@ -3371,76 +3237,6 @@ public class EntityEvents {
 	}
 
 	@api
-	public static class pig_zombie_anger extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "pig_zombie_anger";
-		}
-
-		@Override
-		public String docs() {
-			return "{}"
-					+ "Called when a Pig Zombie is angered by another entity."
-					+ "{id : Returns the Pigzombie's EntityID"
-					+ "| anger : Gets the new anger resulting from this event."
-					+ "| target : Gets the entity (if any) which triggered this anger update.}"
-					+ "{}"
-					+ "{anger}";
-		}
-
-		@Override
-		public Version since() {
-			return CHVersion.V3_3_3;
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(e instanceof MCPigZombieAngerEvent) {
-
-				MCPigZombieAngerEvent event = (MCPigZombieAngerEvent) e;
-				Map<String, Construct> ret = evaluate_helper(event);
-				Target t = Target.UNKNOWN;
-
-				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
-				ret.put("anger", event.getNewAnger());
-				ret.put("target", new CString(event.getTarget().getUniqueId().toString(), t));
-
-				return ret;
-
-			} else {
-				throw new EventException("Could not convert to PigZombieAngerEvent");
-			}
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.PIG_ZOMBIE_ANGER;
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			if(event instanceof MCPigZombieAngerEvent) {
-				if(key.equalsIgnoreCase("anger")) {
-					((MCPigZombieAngerEvent) event).setNewAnger(Static.getInt32(value, Target.UNKNOWN));
-					return true;
-				}
-			}
-			return false;
-		}
-	}
-
-	@api
 	public static class sheep_dye_wool extends AbstractEvent {
 
 		@Override
@@ -3504,7 +3300,7 @@ public class EntityEvents {
 					String[] possible = new String[] {"BLACK", "BLUE", "BROWN", "CYAN", "GRAY", "GREEN", "LIGHT_BLUE", "LIGHT_GRAY", "LIME",
 							"MAGENTA", "ORANGE", "PINK", "PUPPLE", "RED", "WHITE", "YELLOW"};
 					if(Arrays.asList(possible).contains(value.getValue().toUpperCase())) {
-						((MCSheepDyeWoolEvent) event).setColor(DyeColor.valueOf(value.getValue().toUpperCase()));
+						((MCSheepDyeWoolEvent) event).setColor(MCDyeColor.valueOf(value.getValue().toUpperCase()));
 						return true;
 					}
 				}
@@ -3614,7 +3410,7 @@ public class EntityEvents {
 				Map<String, Construct> ret = evaluate_helper(event);
 				Target t = Target.UNKNOWN;
 
-				ret.put("count", event.getCount());
+				ret.put("count", new CInt(event.getCount(), t));
 				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
 
 				return ret;
@@ -3686,13 +3482,13 @@ public class EntityEvents {
 
 				CArray recipe = new CArray(t);
 				CArray ingred = new CArray(t);
-				for(ItemStack is : event.getRecipe().getIngredients()) {
-					ingred.push(ObjectGenerator.GetGenerator().item(new BukkitMCItemStack(is), t), t);
+				for(MCItemStack is : event.getRecipe().getIngredients()) {
+					ingred.push(ObjectGenerator.GetGenerator().item(is, t), t);
 				}
 				recipe.set("ingredients", ingred, t);
 				recipe.set("maxuses", new CInt(event.getRecipe().getMaxUses(), t), t);
 				recipe.set("uses", new CInt(event.getRecipe().getUses(), t), t);
-				recipe.set("result", ObjectGenerator.GetGenerator().item(new BukkitMCItemStack(event.getRecipe().getResult()), t), t);
+				recipe.set("result", ObjectGenerator.GetGenerator().item(event.getRecipe().getResult(), t), t);
 				recipe.set("expreward", CBoolean.get(event.getRecipe().hasExperienceReward()), t);
 
 				ret.put("recipe", recipe);
@@ -3716,30 +3512,9 @@ public class EntityEvents {
 					if(value instanceof CArray) {
 						CArray arr = (CArray) value;
 						MCVillagerAcquireTradeEvent e = (MCVillagerAcquireTradeEvent) event;
-						ItemStack result = ((BukkitMCItemStack) ObjectGenerator.GetGenerator().item(arr.get("result", Target.UNKNOWN), Target.UNKNOWN)).asItemStack();
-						int maxUses = Static.getInt32(arr.get("maxuses", Target.UNKNOWN), Target.UNKNOWN);
-						MerchantRecipe mr = new MerchantRecipe(result, maxUses);
-						for(Construct arrkey : arr.keySet()) {
-							switch (arrkey.getValue().toLowerCase()) {
-								case "uses":
-									mr.setUses(Static.getInt32(arr.get(arrkey, Target.UNKNOWN), Target.UNKNOWN));
-									break;
-								case "expreward":
-									mr.setExperienceReward(Static.getBoolean(arr.get(arrkey, Target.UNKNOWN), Target.UNKNOWN));
-									break;
-								case "ingredients":
-									if(arr.get(arrkey, Target.UNKNOWN) instanceof CArray) {
-										List<ItemStack> list = new ArrayList<>();
-										for(Construct ingred : ((CArray) arr.get(arrkey, Target.UNKNOWN)).asList()) {
-											if(ingred instanceof CArray) {
-												list.add(((BukkitMCItemStack) ObjectGenerator.GetGenerator().item(ingred, Target.UNKNOWN)).asItemStack());
-											}
-										}
-										mr.setIngredients(list);
-									}
-									break;
-							}
-						}
+						Target t = Target.UNKNOWN;
+						arr.set("type", new CString("MERCHANT", t), t);
+						MCMerchantRecipe mr = (MCMerchantRecipe) ObjectGenerator.GetGenerator().recipe(arr, t);
 						e.setRecipe(mr);
 						return true;
 					}
@@ -3796,13 +3571,13 @@ public class EntityEvents {
 
 				CArray recipe = new CArray(t);
 				CArray ingred = new CArray(t);
-				for(ItemStack is : event.getRecipe().getIngredients()) {
-					ingred.push(ObjectGenerator.GetGenerator().item(new BukkitMCItemStack(is), t), t);
+				for(MCItemStack is : event.getRecipe().getIngredients()) {
+					ingred.push(ObjectGenerator.GetGenerator().item(is, t), t);
 				}
 				recipe.set("ingredients", ingred, t);
 				recipe.set("maxuses", new CInt(event.getRecipe().getMaxUses(), t), t);
 				recipe.set("uses", new CInt(event.getRecipe().getUses(), t), t);
-				recipe.set("result", ObjectGenerator.GetGenerator().item(new BukkitMCItemStack(event.getRecipe().getResult()), t), t);
+				recipe.set("result", ObjectGenerator.GetGenerator().item(event.getRecipe().getResult(), t), t);
 				recipe.set("expreward", CBoolean.get(event.getRecipe().hasExperienceReward()), t);
 
 				ret.put("recipe", recipe);
@@ -3828,37 +3603,14 @@ public class EntityEvents {
 					e.setBonus(Static.getInt32(value, Target.UNKNOWN));
 					return true;
 				} else if(key.equalsIgnoreCase("recipe")) {
-
 					if(value instanceof CArray) {
 						CArray arr = (CArray) value;
-						ItemStack result = ((BukkitMCItemStack) ObjectGenerator.GetGenerator().item(arr.get("result", Target.UNKNOWN), Target.UNKNOWN)).asItemStack();
-						int maxUses = Static.getInt32(arr.get("maxuses", Target.UNKNOWN), Target.UNKNOWN);
-						MerchantRecipe mr = new MerchantRecipe(result, maxUses);
-						for(Construct arrkey : arr.keySet()) {
-							switch (arrkey.getValue().toLowerCase()) {
-								case "uses":
-									mr.setUses(Static.getInt32(arr.get(arrkey, Target.UNKNOWN), Target.UNKNOWN));
-									break;
-								case "expreward":
-									mr.setExperienceReward(Static.getBoolean(arr.get(arrkey, Target.UNKNOWN), Target.UNKNOWN));
-									break;
-								case "ingredients":
-									if(arr.get(arrkey, Target.UNKNOWN) instanceof CArray) {
-										List<ItemStack> list = new ArrayList<>();
-										for(Construct ingred : ((CArray) arr.get(arrkey, Target.UNKNOWN)).asList()) {
-											if(ingred instanceof CArray) {
-												list.add(((BukkitMCItemStack) ObjectGenerator.GetGenerator().item(ingred, Target.UNKNOWN)).asItemStack());
-											}
-										}
-										mr.setIngredients(list);
-									}
-									break;
-							}
-						}
+						Target t = Target.UNKNOWN;
+						arr.set("type", new CString("MERCHANT", t), t);
+						MCMerchantRecipe mr = (MCMerchantRecipe) ObjectGenerator.GetGenerator().recipe(arr, t);
 						e.setRecipe(mr);
 						return true;
 					}
-
 				}
 			}
 			return false;

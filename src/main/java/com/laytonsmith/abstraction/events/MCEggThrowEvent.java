@@ -1,17 +1,17 @@
 package com.laytonsmith.abstraction.events;
 
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCEgg;
+import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.core.events.BindableEvent;
-import org.bukkit.entity.Egg;
-import org.bukkit.entity.EntityType;
 
 public interface MCEggThrowEvent extends BindableEvent {
 
-	Egg getEgg();
+	MCEgg getEgg();
 
 	MCPlayer getPlayer();
 
-	EntityType getHatchingType();
+	MCEntityType getHatchingType();
 
 	byte getNumHatches();
 
@@ -19,7 +19,7 @@ public interface MCEggThrowEvent extends BindableEvent {
 
 	void setHatching(boolean hatching);
 
-	void setHatchingType(EntityType hatchingType);
+	void setHatchingType(MCEntityType hatchingType);
 
 	void setNumHatches(byte numHatches);
 

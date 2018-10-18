@@ -7,18 +7,18 @@ import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCBlockDamageEvent extends BindableEvent {
 
-	public boolean getInstaBreak();
+	boolean getInstaBreak();
 
-	public MCItemStack getItemInHand();
+	MCItemStack getItemInHand();
 
-	public MCPlayer getPlayer();
+	MCPlayer getPlayer();
 
-	public MCBlock getBlock();
+	MCBlock getBlock();
 
-	public boolean isCancelled();
+	boolean isCancelled();
 
-	public void setCancelled(boolean cancel);
+	void setCancelled(boolean cancel);
 
-	public void setInstaBreak(boolean bool);
+	void setInstaBreak(boolean bool);
 
 }

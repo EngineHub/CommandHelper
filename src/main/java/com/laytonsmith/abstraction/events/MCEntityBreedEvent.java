@@ -2,7 +2,6 @@ package com.laytonsmith.abstraction.events;
 
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
-import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCEntityBreedEvent extends BindableEvent {
@@ -13,7 +12,7 @@ public interface MCEntityBreedEvent extends BindableEvent {
 
 	MCLivingEntity getEntity();
 
-	CInt getExperience();
+	int getExperience();
 
 	MCLivingEntity getFather();
 

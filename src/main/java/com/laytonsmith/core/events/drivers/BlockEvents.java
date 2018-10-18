@@ -5,13 +5,12 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
-import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
 import com.laytonsmith.abstraction.events.MCBlockBurnEvent;
+import com.laytonsmith.abstraction.events.MCBlockCanBuildEvent;
 import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
 import com.laytonsmith.abstraction.events.MCBlockFadeEvent;
 import com.laytonsmith.abstraction.events.MCBlockFromToEvent;
@@ -23,10 +22,8 @@ import com.laytonsmith.abstraction.events.MCBlockPistonRetractEvent;
 import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
 import com.laytonsmith.abstraction.events.MCNotePlayEvent;
 import com.laytonsmith.abstraction.events.MCSignChangeEvent;
-import com.laytonsmith.abstraction.events.MCBlockPhysicsEvent;
 import com.laytonsmith.abstraction.events.MCBlockDamageEvent;
 import com.laytonsmith.abstraction.events.MCBlockExplodeEvent;
-import com.laytonsmith.abstraction.events.MCBlockFertilizeEvent;
 import com.laytonsmith.abstraction.events.MCBlockRedstoneEvent;
 import com.laytonsmith.abstraction.events.MCBrewingStandFuelEvent;
 import com.laytonsmith.abstraction.events.MCBrewEvent;
@@ -35,7 +32,6 @@ import com.laytonsmith.abstraction.events.MCFurnaceBurnEvent;
 import com.laytonsmith.abstraction.events.MCFurnaceExtractEvent;
 import com.laytonsmith.abstraction.events.MCFurnaceSmeltEvent;
 import com.laytonsmith.abstraction.events.MCLeavesDecayEvent;
-import com.laytonsmith.abstraction.events.MCSpongeAbsorbEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.CHVersion;
@@ -1456,65 +1452,6 @@ public class BlockEvents {
 	}
 
 	@api
-	public static class block_physics extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "block_physics";
-		}
-
-		@Override
-		public String docs() {
-			return "{}"
-					+ "Thrown when a block physics check is called. "
-					+ "{changedtype : Gets the type of block that changed, causing this event. }"
-					+ "{}"
-					+ "{}";
-		}
-
-		@Override
-		public Version since() {
-			return CHVersion.V3_3_3;
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(!(e instanceof MCBlockPhysicsEvent)) {
-				throw new EventException("Cannot convert event to BlockPhysicsEvent");
-			}
-
-			MCBlockPhysicsEvent event = (MCBlockPhysicsEvent) e;
-			Target t = Target.UNKNOWN;
-			Map<String, Construct> mapEvent = evaluate_helper(event);
-
-			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
-			mapEvent.put("changedtype", new CString(event.getChangedType().getName(), t));
-
-			return mapEvent;
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.BLOCK_PHYSICS;
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			return false;
-		}
-	}
-
-	@api
 	public static class block_damage extends AbstractEvent {
 
 		@Override
@@ -1726,7 +1663,7 @@ public class BlockEvents {
 			}
 			mapEvent.put("blocks", blocks);
 
-			mapEvent.put("yield", event.getYield());
+			mapEvent.put("yield", new CDouble(event.getYield(), t));
 
 			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 
@@ -1746,81 +1683,6 @@ public class BlockEvents {
 					return true;
 				}
 			}
-			return false;
-		}
-	}
-
-	@api
-	public static class block_fertilize extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "block_fertilize";
-		}
-
-		@Override
-		public String docs() {
-			return "{}"
-					+ "Called with the block changes resulting from a player fertilizing a given block with bonemeal."
-					+ "{blocks : Gets a list of all blocks changed by the fertilization. |"
-					+ "player : Gets the player that triggered the fertilization. | "
-					+ "location : Gets the location involved in this event.}"
-					+ "{}"
-					+ "{}";
-		}
-
-		@Override
-		public Version since() {
-			return CHVersion.V3_3_3;
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-
-			if(!(e instanceof MCBlockFertilizeEvent)) {
-				throw new EventException("Cannot convert event to BlockFertilizeEvent");
-			}
-
-			MCBlockFertilizeEvent event = (MCBlockFertilizeEvent) e;
-			Target t = Target.UNKNOWN;
-			Map<String, Construct> mapEvent = evaluate_helper(event);
-
-			CArray blocks = new CArray(t);
-			for(MCBlockState b : event.getBlocks()) {
-				CArray blk = CArray.GetAssociativeArray(t);
-				blk.set("name", b.getType().getName(), t);
-				blk.set("x", new CInt(b.getBlock().getX(), t), t);
-				blk.set("y", new CInt(b.getBlock().getY(), t), t);
-				blk.set("z", new CInt(b.getBlock().getZ(), t), t);
-				blk.set("world", new CString(b.getBlock().getWorld().getName(), t), t);
-
-				blocks.push(blk, Target.UNKNOWN);
-			}
-			mapEvent.put("blocks", blocks);
-
-			mapEvent.put("player", new CString(event.getPlayer().getName(), t));
-			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
-
-			return mapEvent;
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.BLOCK_FERTILIZE;
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			return false;
 		}
 	}
@@ -1870,8 +1732,8 @@ public class BlockEvents {
 			Target t = Target.UNKNOWN;
 			Map<String, Construct> mapEvent = evaluate_helper(event);
 
-			mapEvent.put("new", event.getNewCurrent());
-			mapEvent.put("old", event.getOldCurrent());
+			mapEvent.put("new", new CInt(event.getNewCurrent(), t));
+			mapEvent.put("old", new CInt(event.getOldCurrent(), t));
 			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 
 			return mapEvent;
@@ -1941,7 +1803,7 @@ public class BlockEvents {
 			Map<String, Construct> mapEvent = evaluate_helper(event);
 
 			mapEvent.put("fuel", ObjectGenerator.GetGenerator().item(event.getFuel(), t));
-			mapEvent.put("power", event.getFuelPower());
+			mapEvent.put("power", new CInt(event.getFuelPower(), t));
 			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 			mapEvent.put("consuming", CBoolean.get(event.isConsuming()));
 
@@ -2020,7 +1882,7 @@ public class BlockEvents {
 			mapEvent.put("inventory", inv);
 
 			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
-			mapEvent.put("fuellevel", event.getFuelLevel());
+			mapEvent.put("fuellevel", new CInt(event.getFuelLevel(), t));
 
 			return mapEvent;
 		}
@@ -2085,9 +1947,9 @@ public class BlockEvents {
 			Map<String, Construct> mapEvent = evaluate_helper(event);
 
 			mapEvent.put("id", new CString(event.getEntity().getUniqueId().toString(), t));
-			mapEvent.put("new", event.getNewLevel());
-			mapEvent.put("old", event.getOldLevel());
-			mapEvent.put("reason", event.getReason());
+			mapEvent.put("new", new CInt(event.getNewLevel(), t));
+			mapEvent.put("old", new CInt(event.getOldLevel(), t));
+			mapEvent.put("reason", new CInt(event.getReason(), t));
 			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 
 			return mapEvent;
@@ -2155,7 +2017,7 @@ public class BlockEvents {
 			Target t = Target.UNKNOWN;
 			Map<String, Construct> mapEvent = evaluate_helper(event);
 
-			mapEvent.put("burntime", event.getBurnTine());
+			mapEvent.put("burntime", new CInt(event.getBurnTine(), t));
 			mapEvent.put("fuel", ObjectGenerator.GetGenerator().item(event.getFuel(), t));
 			mapEvent.put("burning", CBoolean.get(event.isBurning()));
 			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
@@ -2230,8 +2092,8 @@ public class BlockEvents {
 			Target t = Target.UNKNOWN;
 			Map<String, Construct> mapEvent = evaluate_helper(event);
 
-			mapEvent.put("exp", event.getExpToDrop());
-			mapEvent.put("amount", event.getItemAmount());
+			mapEvent.put("exp", new CInt(event.getExpToDrop(), t));
+			mapEvent.put("amount", new CInt(event.getItemAmount(), t));
 			mapEvent.put("item", new CString(event.getItemType().getName(), t));
 			mapEvent.put("player", new CString(event.getPlayer().getName(), t));
 
@@ -2317,8 +2179,7 @@ public class BlockEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if(event instanceof MCFurnaceSmeltEvent) {
 				if(key.equalsIgnoreCase("result")) {
-					MCItemStack enter = ObjectGenerator.GetGenerator().item(value, value.getTarget());
-					((MCFurnaceSmeltEvent) event).setResult(((BukkitMCItemStack) enter).asItemStack());
+					((MCFurnaceSmeltEvent) event).setResult(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 					return true;
 				}
 			}
@@ -2381,72 +2242,6 @@ public class BlockEvents {
 			public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 				return false;
 			}
-		}
-	}
-
-	@api
-	public static class sponge_absorb extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "sponge_absorb";
-		}
-
-		@Override
-		public String docs() {
-			return "{}"
-					+ "Called when a sponge absorbs water from the world. "
-					+ "{blocks : Get a list of all blocks to be removed by the sponge. "
-					+ "| location : Gets the block involved in this event.}"
-					+ "{}"
-					+ "{}";
-		}
-
-		@Override
-		public Version since() {
-			return CHVersion.V3_3_3;
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(!(e instanceof MCSpongeAbsorbEvent)) {
-				throw new EventException("Cannot convert event to SpongeAbsorbEvent");
-			}
-
-			MCSpongeAbsorbEvent event = (MCSpongeAbsorbEvent) e;
-			Target t = Target.UNKNOWN;
-			Map<String, Construct> mapEvent = evaluate_helper(event);
-
-			CArray bls = new CArray(t);
-			for(MCBlockState bs : event.getBlocks()) {
-				bls.push(ObjectGenerator.GetGenerator().location(bs.getLocation()), t);
-			}
-
-			mapEvent.put("blocks", bls);
-
-			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
-
-			return mapEvent;
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.SPONGE_ABSORB;
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			return false;
 		}
 	}
 }

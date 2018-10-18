@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCVirtualInventoryHolder;
+import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCClickType;
 import com.laytonsmith.abstraction.enums.MCDragType;
 import com.laytonsmith.abstraction.enums.MCInventoryAction;
@@ -17,6 +18,7 @@ import com.laytonsmith.abstraction.events.MCInventoryDragEvent;
 import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
 import com.laytonsmith.abstraction.events.MCItemHeldEvent;
 import com.laytonsmith.abstraction.events.MCItemSwapEvent;
+import com.laytonsmith.abstraction.events.MCPrepareAnvilEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemEnchantEvent;
 import com.laytonsmith.annotations.api;
@@ -28,6 +30,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -38,11 +41,13 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.InventoryManagement;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
 
@@ -997,6 +1002,97 @@ public class InventoryEvents {
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class pre_anvil extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "pre_anvil";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "Called when an item is put in a slot for repair by an anvil."
+					+ "{viewers: all humanentities viewing the screen this event takes place in | inventory | result"
+					+ "| rename : Get the name to be applied to the repaired item."
+					+ "| cost : Get the experience cost (in levels) to complete the current repair.}"
+					+ "{}"
+					+ "{result}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+			if(event instanceof MCPrepareAnvilEvent) {
+
+				MCPrepareAnvilEvent e = (MCPrepareAnvilEvent) event;
+				Map<String, Construct> ret = evaluate_helper(e);
+				Target t = Target.UNKNOWN;
+
+				CArray viewers = new CArray(t);
+				for(MCHumanEntity v : e.getViewers()) {
+					viewers.push(new CString(v.getName(), t), t);
+				}
+				ret.put("viewers", viewers);
+
+				CArray inventory = CArray.GetAssociativeArray(t);
+				ItemStack[] mi = e.getAnvilInventory().getContents();
+				for(int i = 0; i < mi.length; i++) {
+					inventory.set(i, ObjectGenerator.GetGenerator().item(new BukkitMCItemStack(mi[i]), t), t);
+				}
+				ret.put("inventory", inventory);
+
+				ret.put("result", ObjectGenerator.GetGenerator().item(e.getResult(), t));
+				ret.put("cost", new CInt(e.getAnvilInventory().getRepairCost(), t));
+				ret.put("rename", new CString(e.getAnvilInventory().getRenameText(), t));
+
+				return ret;
+
+			} else {
+				throw new EventException("Event received was not an MCPrepareAnvilEvent.");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.PRE_ANVIL;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if(event instanceof MCPrepareAnvilEvent) {
+				if(key.equalsIgnoreCase("result")) {
+					if(value instanceof CArray) {
+						BukkitMCItemStack is = new BukkitMCItemStack(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+						((MCPrepareAnvilEvent) event).setResult(is.asItemStack());
+						return true;
+					} else if(value instanceof CNull) {
+						((MCPrepareAnvilEvent) event).setResult(null);
+						return true;
+					} else {
+						throw new CRECastException("Expected an array but received " + value, Target.UNKNOWN);
+					}
+				}
+			}
+			return false;
 		}
 	}
 }

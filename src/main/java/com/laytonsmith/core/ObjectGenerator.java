@@ -24,6 +24,7 @@ import com.laytonsmith.abstraction.MCLeatherArmorMeta;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMapMeta;
+import com.laytonsmith.abstraction.MCMerchantRecipe;
 import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlugin;
@@ -1456,6 +1457,17 @@ public class ObjectGenerator {
 			ret.set("shape", shape, t);
 			ret.set("ingredients", imap, t);
 			ret.set("key", shaped.getKey(), t);
+		} else if(r instanceof MCMerchantRecipe) {
+			MCMerchantRecipe merchant = (MCMerchantRecipe) r;
+			CArray il = new CArray(t);
+			for(MCItemStack i : merchant.getIngredients()) {
+				il.push(item(i, t), t);
+			}
+			ret.set("ingredients", il, t);
+			ret.set("maxuses", new CInt(merchant.getMaxUses(), t), t);
+			ret.set("uses", new CInt(merchant.getUses(), t), t);
+			ret.set("result", item(merchant.getResult(), t), t);
+			ret.set("hasreward", CBoolean.get(merchant.hasExperienceReward()), t);
 		}
 		return ret;
 	}
@@ -1580,6 +1592,25 @@ public class ObjectGenerator {
 				} else {
 					throw new CREFormatException("Item was not found", t);
 				}
+				return ret;
+
+			case MERCHANT:
+				CArray merchantingredients = Static.getArray(recipe.get("ingredients", t), t);
+				((MCMerchantRecipe) ret).setMaxUses(Static.getInt32(recipe.get("maxuses", t), t));
+				((MCMerchantRecipe) ret).setUses(Static.getInt32(recipe.get("uses", t), t));
+				((MCMerchantRecipe) ret).setExperienceReward(Static.getBoolean(recipe.get("expreward", t), t));
+				if(merchantingredients.inAssociativeMode()) {
+					throw new CREFormatException("Ingredients is invaild.", t);
+				}
+				List<MCItemStack> mis = new ArrayList<>();
+				for(Construct ingredient : merchantingredients.asList()) {
+					if(ingredient instanceof CArray) {
+						mis.add(item(ingredient, t));
+					} else {
+						throw new CREFormatException("Item was not found", t);
+					}
+				}
+				((MCMerchantRecipe) ret).setIngredients(mis);
 				return ret;
 
 			default:

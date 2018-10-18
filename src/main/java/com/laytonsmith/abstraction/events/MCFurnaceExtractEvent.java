@@ -3,14 +3,13 @@ package com.laytonsmith.abstraction.events;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
-import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCFurnaceExtractEvent extends BindableEvent {
 
-	CInt getExpToDrop();
+	int getExpToDrop();
 
-	CInt getItemAmount();
+	int getItemAmount();
 
 	MCMaterial getItemType();
 

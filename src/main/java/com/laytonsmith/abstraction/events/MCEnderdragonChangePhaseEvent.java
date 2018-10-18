@@ -1,21 +1,20 @@
 package com.laytonsmith.abstraction.events;
 
 import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.abstraction.enums.MCEnderDragonPhase;
 import com.laytonsmith.core.events.BindableEvent;
-import org.bukkit.entity.EnderDragon;
 
 public interface MCEnderdragonChangePhaseEvent extends BindableEvent {
 
-	CString getCurrentPhase();
+	String getCurrentPhase();
 
 	MCEntity getEntity();
 
-	CString getNewPhase();
+	String getNewPhase();
 
 	boolean iscancelled();
 
 	void setCancelled(boolean cancelled);
 
-	void setNewPhase(EnderDragon.Phase newPhase);
+	void setNewPhase(MCEnderDragonPhase newPhase);
 }

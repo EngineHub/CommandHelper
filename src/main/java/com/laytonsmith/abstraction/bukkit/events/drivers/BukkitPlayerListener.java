@@ -33,7 +33,6 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlay
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerAnimationEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerBucketEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerResourcepackStatusEvent;
-import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerRiptideEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerStatisticIncrementEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerVelocityEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerChannelEvent;
@@ -55,6 +54,7 @@ import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerChangedMainHandEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -75,14 +75,15 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRegisterChannelEvent;
 import org.bukkit.event.player.PlayerResourcePackStatusEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerRiptideEvent;
 import org.bukkit.event.player.PlayerStatisticIncrementEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
+import org.bukkit.event.player.PlayerUnregisterChannelEvent;
 import org.bukkit.event.player.PlayerVelocityEvent;
 
 import java.util.Map;
@@ -411,27 +412,19 @@ public class BukkitPlayerListener implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerBucketFill(PlayerBucketFillEvent event) {
+	public void onPlayerBucket(PlayerBucketEvent event) {
 		BukkitMCPlayerBucketEvent pbe = new BukkitMCPlayerBucketEvent(event);
-		EventUtils.TriggerListener(Driver.PLAYER_BUCKET, "player_bucket", pbe);
-	}
-
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
-		BukkitMCPlayerBucketEvent pbe = new BukkitMCPlayerBucketEvent(event);
-		EventUtils.TriggerListener(Driver.PLAYER_BUCKET, "player_bucket", pbe);
+		if(event instanceof PlayerBucketFillEvent) {
+			EventUtils.TriggerListener(Driver.PLAYER_BUCKET, "player_bucket_fill", pbe);
+		} else if(event instanceof PlayerBucketEmptyEvent) {
+			EventUtils.TriggerListener(Driver.PLAYER_BUCKET, "player_bucket_empty", pbe);
+		}
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerResourcepackStatus(PlayerResourcePackStatusEvent event) {
 		BukkitMCPlayerResourcepackStatusEvent prpse = new BukkitMCPlayerResourcepackStatusEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_RESOURCEPACK_STATUS, "player_resourcepack_status", prpse);
-	}
-
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPlayerRiptide(PlayerRiptideEvent event) {
-		BukkitMCPlayerRiptideEvent pre = new BukkitMCPlayerRiptideEvent(event);
-		EventUtils.TriggerListener(Driver.PLAYER_RIPTIDE, "player_riptide", pre);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -448,8 +441,12 @@ public class BukkitPlayerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerChannel(PlayerChannelEvent event) {
-		BukkitMCPlayerChannelEvent pce = new BukkitMCPlayerChannelEvent(event);
-		EventUtils.TriggerListener(Driver.PLAYER_CHANNEL, "player_channel", pce);
+		BukkitMCPlayerChannelEvent prce = new BukkitMCPlayerChannelEvent(event);
+		if(event instanceof PlayerRegisterChannelEvent) {
+			EventUtils.TriggerListener(Driver.PLAYER_CHANNEL, "player_register_channel", prce);
+		} else if(event instanceof PlayerUnregisterChannelEvent) {
+			EventUtils.TriggerListener(Driver.PLAYER_CHANNEL, "player_unregister_channel", prce);
+		}
 	}
 
 	// Reset player_move lastLocations when player respawns or teleports

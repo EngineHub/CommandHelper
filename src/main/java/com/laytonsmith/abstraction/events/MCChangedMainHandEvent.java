@@ -1,13 +1,13 @@
 package com.laytonsmith.abstraction.events;
 
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.enums.MCMainHand;
 import com.laytonsmith.core.events.BindableEvent;
-import org.bukkit.inventory.MainHand;
 
 public interface MCChangedMainHandEvent extends BindableEvent {
 
 	MCPlayer getPlayer();
 
-	MainHand getMainHand();
+	MCMainHand getMainHand();
 
 }

@@ -4,9 +4,11 @@ import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCAnimalTamer;
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCMerchantRecipe;
 import com.laytonsmith.abstraction.MCTravelAgent;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.bukkit.BukkitMCAnimalTamer;
+import com.laytonsmith.abstraction.bukkit.BukkitMCMerchantRecipe;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockData;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAbstractHorse;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLightningStrike;
@@ -48,6 +50,8 @@ import com.laytonsmith.abstraction.entities.MCSheep;
 import com.laytonsmith.abstraction.entities.MCSlime;
 import com.laytonsmith.abstraction.entities.MCVillager;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
+import com.laytonsmith.abstraction.enums.MCDyeColor;
+import com.laytonsmith.abstraction.enums.MCEnderDragonPhase;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCRegainReason;
@@ -88,27 +92,22 @@ import com.laytonsmith.abstraction.events.MCEnderdragonChangePhaseEvent;
 import com.laytonsmith.abstraction.events.MCEntityAirChangeEvent;
 import com.laytonsmith.abstraction.events.MCEntityBreedEvent;
 import com.laytonsmith.abstraction.events.MCEntityCreatePortalEvent;
-import com.laytonsmith.abstraction.events.MCEntityDropItemEvent;
 import com.laytonsmith.abstraction.events.MCEntityResurrectEvent;
 import com.laytonsmith.abstraction.events.MCEntityShootBowEvent;
 import com.laytonsmith.abstraction.events.MCEntityTameEvent;
 import com.laytonsmith.abstraction.events.MCEntityTeleportEvent;
-import com.laytonsmith.abstraction.events.MCEntityToggleSwimEvent;
 import com.laytonsmith.abstraction.events.MCEntityUnleashEvent;
 import com.laytonsmith.abstraction.events.MCExplosionPrimeEvent;
 import com.laytonsmith.abstraction.events.MCHorseJumpEvent;
 import com.laytonsmith.abstraction.events.MCItemMergeEvent;
 import com.laytonsmith.abstraction.events.MCPigZapEvent;
-import com.laytonsmith.abstraction.events.MCPigZombieAngerEvent;
 import com.laytonsmith.abstraction.events.MCSheepDyeWoolEvent;
 import com.laytonsmith.abstraction.events.MCSheepRegrowWoolEvent;
 import com.laytonsmith.abstraction.events.MCSlimeSplitEvent;
 import com.laytonsmith.abstraction.events.MCVillagerAcquireTradeEvent;
 import com.laytonsmith.abstraction.events.MCVillagerReplenishTradeEvent;
 import com.laytonsmith.annotations.abstraction;
-import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
@@ -134,7 +133,6 @@ import org.bukkit.event.entity.EntityCreatePortalEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityDropItemEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
@@ -147,7 +145,6 @@ import org.bukkit.event.entity.EntityTameEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
-import org.bukkit.event.entity.EntityToggleSwimEvent;
 import org.bukkit.event.entity.EntityUnleashEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.FireworkExplodeEvent;
@@ -156,7 +153,6 @@ import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.ItemMergeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.PigZapEvent;
-import org.bukkit.event.entity.PigZombieAngerEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
@@ -1101,8 +1097,8 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public CString getCurrentPhase() {
-			return new CString(edcpe.getCurrentPhase().name(), Target.UNKNOWN);
+		public String getCurrentPhase() {
+			return edcpe.getCurrentPhase().name();
 		}
 
 		@Override
@@ -1111,8 +1107,8 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public CString getNewPhase() {
-			return new CString(edcpe.getNewPhase().name(), Target.UNKNOWN);
+		public String getNewPhase() {
+			return edcpe.getNewPhase().name();
 		}
 
 		@Override
@@ -1126,8 +1122,8 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public void setNewPhase(EnderDragon.Phase newPhase) {
-			edcpe.setNewPhase(newPhase);
+		public void setNewPhase(MCEnderDragonPhase newPhase) {
+			edcpe.setNewPhase(EnderDragon.Phase.valueOf(newPhase.name()));
 		}
 
 		@Override
@@ -1146,8 +1142,8 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public CInt getAmount() {
-			return new CInt(eace.getAmount(), Target.UNKNOWN);
+		public int getAmount() {
+			return eace.getAmount();
 		}
 
 		@Override
@@ -1201,8 +1197,8 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public CInt getExperience() {
-			return new CInt(ebe.getExperience(), Target.UNKNOWN);
+		public int getExperience() {
+			return ebe.getExperience();
 		}
 
 		@Override
@@ -1260,8 +1256,8 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public CString getPortalType() {
-			return new CString(ecpe.getPortalType().name(), Target.UNKNOWN);
+		public String getPortalType() {
+			return ecpe.getPortalType().name();
 		}
 
 		@Override
@@ -1277,41 +1273,6 @@ public class BukkitEntityEvents {
 		@Override
 		public Object _GetObject() {
 			return ecpe;
-		}
-	}
-
-	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCEntityDropItemEvent implements MCEntityDropItemEvent {
-
-		EntityDropItemEvent edie;
-
-		public BukkitMCEntityDropItemEvent(Event e) {
-			this.edie = (EntityDropItemEvent) e;
-		}
-
-		@Override
-		public MCItem getItemDrop() {
-			return new BukkitMCItem(edie.getItemDrop());
-		}
-
-		@Override
-		public MCEntity getEntity() {
-			return new BukkitMCEntity(edie.getEntity());
-		}
-
-		@Override
-		public boolean isCancelled() {
-			return edie.isCancelled();
-		}
-
-		@Override
-		public void setCancelled(boolean cancelled) {
-			edie.setCancelled(cancelled);
-		}
-
-		@Override
-		public Object _GetObject() {
-			return edie;
 		}
 	}
 
@@ -1365,8 +1326,8 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public CDouble getForce() {
-			return new CDouble(esbe.getForce(), Target.UNKNOWN);
+		public float getForce() {
+			return esbe.getForce();
 		}
 
 		@Override
@@ -1385,8 +1346,8 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public void setProjectile(Entity projectile) {
-			esbe.setProjectile(projectile);
+		public void setProjectile(MCEntity projectile) {
+			esbe.setProjectile((Entity) projectile.getHandle());
 		}
 
 		@Override
@@ -1465,53 +1426,18 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public void setFrom(Location from) {
-			ete.setFrom(from);
+		public void setFrom(MCLocation from) {
+			ete.setFrom(((BukkitMCLocation) from).asLocation());
 		}
 
 		@Override
-		public void setTo(Location to) {
-			ete.setTo(to);
+		public void setTo(MCLocation to) {
+			ete.setTo(((BukkitMCLocation) to).asLocation());
 		}
 
 		@Override
 		public Object _GetObject() {
 			return ete;
-		}
-	}
-
-	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCEntityToggleSwimEvent implements MCEntityToggleSwimEvent {
-
-		EntityToggleSwimEvent etse;
-
-		public BukkitMCEntityToggleSwimEvent(Event e) {
-			this.etse = (EntityToggleSwimEvent) e;
-		}
-
-		@Override
-		public boolean isSwimming() {
-			return etse.isSwimming();
-		}
-
-		@Override
-		public MCEntity getEntity() {
-			return new BukkitMCEntity(etse.getEntity());
-		}
-
-		@Override
-		public boolean isCancelled() {
-			return etse.isCancelled();
-		}
-
-		@Override
-		public void setCancelled(boolean cancelled) {
-			etse.setCancelled(cancelled);
-		}
-
-		@Override
-		public Object _GetObject() {
-			return etse;
 		}
 	}
 
@@ -1525,8 +1451,8 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public CString getReason() {
-			return new CString(eue.getReason().name(), Target.UNKNOWN);
+		public String getReason() {
+			return eue.getReason().name();
 		}
 
 		@Override
@@ -1550,8 +1476,8 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public CDouble getRadius() {
-			return new CDouble(epe.getRadius(), Target.UNKNOWN);
+		public float getRadius() {
+			return epe.getRadius();
 		}
 
 		@Override
@@ -1600,8 +1526,8 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public CDouble getPower() {
-			return new CDouble(hje.getPower(), Target.UNKNOWN);
+		public float getPower() {
+			return hje.getPower();
 		}
 
 		@Override
@@ -1701,51 +1627,6 @@ public class BukkitEntityEvents {
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCPigZombieAngerEvent implements MCPigZombieAngerEvent {
-
-		PigZombieAngerEvent pzae;
-
-		public BukkitMCPigZombieAngerEvent(Event e) {
-			this.pzae = (PigZombieAngerEvent) e;
-		}
-
-		@Override
-		public MCPigZombie getEntity() {
-			return new BukkitMCPigZombie(pzae.getEntity());
-		}
-
-		@Override
-		public CInt getNewAnger() {
-			return new CInt(pzae.getNewAnger(), Target.UNKNOWN);
-		}
-
-		@Override
-		public MCEntity getTarget() {
-			return new BukkitMCEntity(pzae.getTarget());
-		}
-
-		@Override
-		public boolean isCancelled() {
-			return pzae.isCancelled();
-		}
-
-		@Override
-		public void setCancelled(boolean cancelled) {
-			pzae.setCancelled(cancelled);
-		}
-
-		@Override
-		public void setNewAnger(int newAnger) {
-			pzae.setNewAnger(newAnger);
-		}
-
-		@Override
-		public Object _GetObject() {
-			return pzae;
-		}
-	}
-
-	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCSheepDyeWoolEvent implements MCSheepDyeWoolEvent {
 
 		SheepDyeWoolEvent sdwe;
@@ -1755,8 +1636,8 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public DyeColor getColor() {
-			return sdwe.getColor();
+		public MCDyeColor getColor() {
+			return MCDyeColor.valueOf(sdwe.getColor().name());
 		}
 
 		@Override
@@ -1775,8 +1656,8 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public void setColor(DyeColor color) {
-			sdwe.setColor(color);
+		public void setColor(MCDyeColor color) {
+			sdwe.setColor(DyeColor.valueOf(color.name()));
 		}
 
 		@Override
@@ -1825,8 +1706,8 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public CInt getCount() {
-			return new CInt(sse.getCount(), Target.UNKNOWN);
+		public int getCount() {
+			return sse.getCount();
 		}
 
 		@Override
@@ -1870,8 +1751,8 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public MerchantRecipe getRecipe() {
-			return vate.getRecipe();
+		public MCMerchantRecipe getRecipe() {
+			return new BukkitMCMerchantRecipe(vate.getRecipe());
 		}
 
 		@Override
@@ -1885,8 +1766,8 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public void setRecipe(MerchantRecipe recipe) {
-			vate.setRecipe(recipe);
+		public void setRecipe(MCMerchantRecipe recipe) {
+			vate.setRecipe((MerchantRecipe) recipe.getHandle());
 		}
 
 		@Override
@@ -1915,8 +1796,8 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public MerchantRecipe getRecipe() {
-			return vrte.getRecipe();
+		public MCMerchantRecipe getRecipe() {
+			return new BukkitMCMerchantRecipe(vrte.getRecipe());
 		}
 
 		@Override
@@ -1935,8 +1816,8 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public void setRecipe(MerchantRecipe recipe) {
-			vrte.setRecipe(recipe);
+		public void setRecipe(MCMerchantRecipe recipe) {
+			vrte.setRecipe((MerchantRecipe) recipe.getHandle());
 		}
 
 		@Override

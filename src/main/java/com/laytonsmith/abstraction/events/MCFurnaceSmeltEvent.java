@@ -3,7 +3,6 @@ package com.laytonsmith.abstraction.events;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.core.events.BindableEvent;
-import org.bukkit.inventory.ItemStack;
 
 public interface MCFurnaceSmeltEvent extends BindableEvent {
 
@@ -17,6 +16,6 @@ public interface MCFurnaceSmeltEvent extends BindableEvent {
 
 	void setCancelled(boolean cancel);
 
-	void setResult(ItemStack result);
+	void setResult(MCItemStack result);
 
 }

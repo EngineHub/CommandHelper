@@ -1,9 +1,9 @@
 package com.laytonsmith.abstraction.events;
 
+import com.laytonsmith.abstraction.MCMerchantRecipe;
 import com.laytonsmith.abstraction.entities.MCVillager;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.events.BindableEvent;
-import org.bukkit.inventory.MerchantRecipe;
 
 public interface MCVillagerReplenishTradeEvent extends BindableEvent {
 
@@ -11,7 +11,7 @@ public interface MCVillagerReplenishTradeEvent extends BindableEvent {
 
 	MCVillager getEntity();
 
-	MerchantRecipe getRecipe();
+	MCMerchantRecipe getRecipe();
 
 	boolean isCancelled();
 
@@ -19,6 +19,6 @@ public interface MCVillagerReplenishTradeEvent extends BindableEvent {
 
 	void setCancelled(boolean cancelled);
 
-	void setRecipe(MerchantRecipe recipe);
+	void setRecipe(MCMerchantRecipe recipe);
 
 }

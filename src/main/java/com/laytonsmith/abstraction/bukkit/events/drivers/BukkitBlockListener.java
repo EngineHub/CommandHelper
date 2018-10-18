@@ -21,11 +21,9 @@ import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFadeEvent;
-import org.bukkit.event.block.BlockFertilizeEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -34,7 +32,6 @@ import org.bukkit.event.block.CauldronLevelChangeEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.block.NotePlayEvent;
 import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.event.block.SpongeAbsorbEvent;
 import org.bukkit.event.inventory.BrewEvent;
 import org.bukkit.event.inventory.BrewingStandFuelEvent;
 import org.bukkit.event.inventory.FurnaceBurnEvent;
@@ -150,12 +147,6 @@ public class BukkitBlockListener implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onBlockPhysics(BlockPhysicsEvent e) {
-		BukkitBlockEvents.BukkitMCBlockPhysicsEvent bpe = new BukkitBlockEvents.BukkitMCBlockPhysicsEvent(e);
-		EventUtils.TriggerListener(Driver.BLOCK_PHYSICS, "block_physics", bpe);
-	}
-
-	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockDamage(BlockDamageEvent e) {
 		BukkitBlockEvents.BukkitMCBlockDamageEvent bde = new BukkitBlockEvents.BukkitMCBlockDamageEvent(e);
 		EventUtils.TriggerListener(Driver.BLOCK_DAMAGE, "block_damage", bde);
@@ -171,12 +162,6 @@ public class BukkitBlockListener implements Listener {
 	public void onBlockExplode(BlockExplodeEvent e) {
 		BukkitBlockEvents.BukkitMCBlockExplodeEvent bee = new BukkitBlockEvents.BukkitMCBlockExplodeEvent(e);
 		EventUtils.TriggerListener(Driver.BLOCK_EXPLODE, "block_explode", bee);
-	}
-
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void onBlockFertilize(BlockFertilizeEvent e) {
-		BukkitBlockEvents.BukkitMCBlockFertilizeEvent bfe = new BukkitBlockEvents.BukkitMCBlockFertilizeEvent(e);
-		EventUtils.TriggerListener(Driver.BLOCK_FERTILIZE, "block_fertilize", bfe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -225,12 +210,6 @@ public class BukkitBlockListener implements Listener {
 	public void onLeavesDecay(LeavesDecayEvent e) {
 		BukkitBlockEvents.BukkitMCLeavesDeacyEvent lde = new BukkitBlockEvents.BukkitMCLeavesDeacyEvent(e);
 		EventUtils.TriggerListener(Driver.LEAVES_DECAY, "leaves_decay", lde);
-	}
-
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void onSpongeAbsorb(SpongeAbsorbEvent e) {
-		BukkitBlockEvents.BukkitMCSpongeAbsorbEvent sae = new BukkitBlockEvents.BukkitMCSpongeAbsorbEvent(e);
-		EventUtils.TriggerListener(Driver.SPONGE_ABSORB, "sponge_absorb", sae);
 	}
 
 

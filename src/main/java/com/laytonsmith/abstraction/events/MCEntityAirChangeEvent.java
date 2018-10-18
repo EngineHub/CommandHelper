@@ -1,12 +1,11 @@
 package com.laytonsmith.abstraction.events;
 
 import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCEntityAirChangeEvent extends BindableEvent {
 
-	CInt getAmount();
+	int getAmount();
 
 	MCEntity getEntity();
 

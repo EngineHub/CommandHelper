@@ -13,18 +13,20 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
-import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.entities.MCFishHook;
 import com.laytonsmith.abstraction.enums.MCAction;
+import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
+import com.laytonsmith.abstraction.enums.MCMainHand;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.events.MCAsyncPlayerPreLoginEvent;
 import com.laytonsmith.abstraction.events.MCExpChangeEvent;
 import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
 import com.laytonsmith.abstraction.events.MCPlayerBedEvent;
+import com.laytonsmith.abstraction.events.MCPlayerChannelEvent;
 import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
 import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
 import com.laytonsmith.abstraction.events.MCPlayerDeathEvent;
@@ -52,9 +54,7 @@ import com.laytonsmith.abstraction.events.MCLocaleChangeEvent;
 import com.laytonsmith.abstraction.events.MCPlayerAdvancementDoneEvent;
 import com.laytonsmith.abstraction.events.MCPlayerAnimationEvent;
 import com.laytonsmith.abstraction.events.MCPlayerBucketEvent;
-import com.laytonsmith.abstraction.events.MCPlayerChannelEvent;
 import com.laytonsmith.abstraction.events.MCPlayerResourcepackStatusEvent;
-import com.laytonsmith.abstraction.events.MCPlayerRiptideEvent;
 import com.laytonsmith.abstraction.events.MCPlayerStatisticIncrementEvent;
 import com.laytonsmith.abstraction.events.MCPlayerVelocityEvent;
 import com.laytonsmith.annotations.api;
@@ -92,9 +92,6 @@ import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.EventBinding.modify_event;
 import com.laytonsmith.core.functions.StringHandling;
-import org.bukkit.entity.EntityType;
-import org.bukkit.inventory.MainHand;
-import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2719,7 +2716,7 @@ public class PlayerEvents {
 
 				mapEvent.put("player", new CString(cmhe.getPlayer().getName(), t));
 				mapEvent.put("prev", new CString(cmhe.getMainHand().name(), t));
-				mapEvent.put("new", (cmhe.getMainHand() == MainHand.LEFT) ? new CString("right", t) : new CString("left", t));
+				mapEvent.put("new", (cmhe.getMainHand() == MCMainHand.LEFT) ? new CString("RIGHT", t) : new CString("LEFT", t));
 
 				return mapEvent;
 
@@ -2807,7 +2804,7 @@ public class PlayerEvents {
 					((MCEggThrowEvent) event).setHatching(Static.getBoolean(value, Target.UNKNOWN));
 					return true;
 				} else if(key.equalsIgnoreCase("hatchtype")) {
-					((MCEggThrowEvent) event).setHatchingType(EntityType.valueOf(value.val()));
+					((MCEggThrowEvent) event).setHatchingType(MCEntityType.valueOf(value.val()));
 					return true;
 				} else if(key.equalsIgnoreCase("numhatch")) {
 					((MCEggThrowEvent) event).setNumHatches(Byte.valueOf(value.val()));
@@ -2923,7 +2920,7 @@ public class PlayerEvents {
 
 				mapEvent.put("exporb", new CString(ime.getExperienceOrb().getUniqueId().toString(), t));
 				mapEvent.put("player", new CString(ime.getPlayer().getName(), t));
-				mapEvent.put("amount", ime.getRepairAmount());
+				mapEvent.put("amount", new CInt(ime.getRepairAmount(), t));
 				mapEvent.put("item", ObjectGenerator.GetGenerator().item(ime.getItem(), t));
 
 				return mapEvent;
@@ -2991,7 +2988,7 @@ public class PlayerEvents {
 				Target t = Target.UNKNOWN;
 
 				mapEvent.put("player", new CString(lce.getPlayer().getName(), t));
-				mapEvent.put("locale", lce.getLocale());
+				mapEvent.put("locale", new CString(lce.getLocale(), t));
 
 				return mapEvent;
 
@@ -3145,11 +3142,11 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class player_bucket extends AbstractEvent {
+	public static class player_bucket_fill extends AbstractEvent {
 
 		@Override
 		public String getName() {
-			return "player_bucket";
+			return "player_bucket_fill";
 		}
 
 		@Override
@@ -3218,8 +3215,89 @@ public class PlayerEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if(event instanceof MCPlayerBucketEvent) {
 				if(key.equalsIgnoreCase("item") && value instanceof CArray) {
-					BukkitMCItemStack is = (BukkitMCItemStack) ObjectGenerator.GetGenerator().item(value, value.getTarget());
-					((MCPlayerBucketEvent) event).setItemStack(is.asItemStack());
+					((MCPlayerBucketEvent) event).setItemStack(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	@api
+	public static class player_bucket_empty extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "player_bucket_empty";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "Called when a player interacts with a Bucket."
+					+ "{player : the Player | block : Return the block clicked."
+					+ "| blockface : Get the face on the clicked block."
+					+ "| bucket : Returns the bucket used in this event."
+					+ "| item : Get the resulting item in hand after the bucket event. }"
+					+ "{}"
+					+ "{item}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(e instanceof MCPlayerBucketEvent) {
+
+				MCPlayerBucketEvent pbe = (MCPlayerBucketEvent) e;
+				Map<String, Construct> mapEvent = evaluate_helper(e);
+				Target t = Target.UNKNOWN;
+
+				MCBlock block = pbe.getBlockClicked();
+
+				mapEvent.put("player", new CString(pbe.getPlayer().getName(), t));
+				mapEvent.put("block", new CString(block.getType().getName(), t));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
+
+				CArray face = CArray.GetAssociativeArray(t);
+				face.set("x", new CInt(pbe.getBlockFace().getModX(), t), t);
+				face.set("y", new CInt(pbe.getBlockFace().getModY(), t), t);
+				face.set("z", new CInt(pbe.getBlockFace().getModZ(), t), t);
+				mapEvent.put("blockface", face);
+
+				mapEvent.put("bucket", new CString(pbe.getBucket().getName(), t));
+				mapEvent.put("item", ObjectGenerator.GetGenerator().item(pbe.getItemStack(), t));
+
+				return mapEvent;
+
+			} else {
+				throw new EventException("Cannot convert event to PlayerBucketEvent.");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_BUCKET;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if(event instanceof MCPlayerBucketEvent) {
+				if(key.equalsIgnoreCase("item") && value instanceof CArray) {
+					((MCPlayerBucketEvent) event).setItemStack(ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN));
 					return true;
 				}
 			}
@@ -3267,7 +3345,7 @@ public class PlayerEvents {
 				Map<String, Construct> mapEvent = evaluate_helper(e);
 				Target t = Target.UNKNOWN;
 
-				mapEvent.put("status", prse.getStatus());
+				mapEvent.put("status", new CString(prse.getStatus(), t));
 				mapEvent.put("player", new CString(prse.getPlayer().getName(), t));
 
 				return mapEvent;
@@ -3280,68 +3358,6 @@ public class PlayerEvents {
 		@Override
 		public Driver driver() {
 			return Driver.PLAYER_RESOURCEPACK_STATUS;
-		}
-
-		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
-			return false;
-		}
-	}
-
-	@api
-	public static class player_riptide extends AbstractEvent {
-
-		@Override
-		public String getName() {
-			return "player_riptide";
-		}
-
-		@Override
-		public String docs() {
-			return "{}"
-					+ "This event is fired when the player activates the riptide enchantment."
-					+ "{item : Gets the item containing the used enchantment."
-					+ "| player : the Player}"
-					+ "{}"
-					+ "{}";
-		}
-
-		@Override
-		public Version since() {
-			return CHVersion.V3_3_3;
-		}
-
-		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			return true;
-		}
-
-		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			return null;
-		}
-
-		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if(e instanceof MCPlayerRiptideEvent) {
-
-				MCPlayerRiptideEvent pre = (MCPlayerRiptideEvent) e;
-				Map<String, Construct> mapEvent = evaluate_helper(e);
-				Target t = Target.UNKNOWN;
-
-				mapEvent.put("item", ObjectGenerator.GetGenerator().item(pre.getItem(), t));
-				mapEvent.put("player", new CString(pre.getPlayer().getName(), t));
-
-				return mapEvent;
-
-			} else {
-				throw new EventException("Cannot convert event to PlayerRiptideEvent.");
-			}
-		}
-
-		@Override
-		public Driver driver() {
-			return Driver.PLAYER_RIPTIDE;
 		}
 
 		@Override
@@ -3477,9 +3493,8 @@ public class PlayerEvents {
 				Map<String, Construct> mapEvent = evaluate_helper(e);
 				Target t = Target.UNKNOWN;
 
-				Vector3D v3d = new Vector3D(pve.getVelocity().getX(), pve.getVelocity().getY(), pve.getVelocity().getZ());
-				CArray vector = ObjectGenerator.GetGenerator().vector(v3d);
-				vector.set("magnitude", new CDouble(v3d.length(), t), t);
+				CArray vector = ObjectGenerator.GetGenerator().vector(pve.getVelocity());
+				vector.set("magnitude", new CDouble(pve.getVelocity().length(), t), t);
 				mapEvent.put("velocity", vector);
 				mapEvent.put("player", new CString(pve.getPlayer().getName(), t));
 
@@ -3499,8 +3514,7 @@ public class PlayerEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if(event instanceof MCPlayerVelocityEvent) {
 				if(key.equalsIgnoreCase("velocity")) {
-					Vector3D v3d = ObjectGenerator.GetGenerator().vector(value, Target.UNKNOWN);
-					Vector vector = new Vector(v3d.X(), v3d.Y(), v3d.Z());
+					Vector3D vector = ObjectGenerator.GetGenerator().vector(value, Target.UNKNOWN);
 					((MCPlayerVelocityEvent) event).setVelocity(vector);
 					return true;
 				}
@@ -3510,18 +3524,18 @@ public class PlayerEvents {
 	}
 
 	@api
-	public static class player_channel extends AbstractEvent {
+	public static class player_register_channel extends AbstractEvent {
 
 		@Override
 		public String getName() {
-			return "player_channel";
+			return "player_register_channel";
 		}
 
 		@Override
 		public String docs() {
 			return "{}"
 					+ "This event is called after a player registers or unregisters a new plugin channel."
-					+ "{channel : the Channel | player : the Player | type : register or unregister}"
+					+ "{channel : the Channel | player : the Player}"
 					+ "{}"
 					+ "{}";
 		}
@@ -3549,8 +3563,67 @@ public class PlayerEvents {
 				Target t = Target.UNKNOWN;
 
 				mapEvent.put("player", new CString(pce.getPlayer().getName(), t));
-				mapEvent.put("channel", pce.getChannel());
-				mapEvent.put("type", pce.getType());
+				mapEvent.put("channel", new CString(pce.getChannel(), t));
+
+				return mapEvent;
+
+			} else {
+				throw new EventException("Cannot convert event to PlayerChannelEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.PLAYER_CHANNEL;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			return false;
+		}
+	}
+
+	@api
+	public static class player_unregister_channel extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "player_unregister_channel";
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "This event is called after a player registers or unregisters a new plugin channel."
+					+ "{channel : the Channel | player : the Player}"
+					+ "{}"
+					+ "{}";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return true;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if(e instanceof MCPlayerChannelEvent) {
+				MCPlayerChannelEvent pce = (MCPlayerChannelEvent) e;
+				Map<String, Construct> mapEvent = evaluate_helper(e);
+				Target t = Target.UNKNOWN;
+
+				mapEvent.put("player", new CString(pce.getPlayer().getName(), t));
+				mapEvent.put("channel", new CString(pce.getChannel(), t));
 
 				return mapEvent;
 

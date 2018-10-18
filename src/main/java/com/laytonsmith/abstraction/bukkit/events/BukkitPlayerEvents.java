@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCEntity;
@@ -20,19 +21,24 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCTravelAgent;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEgg;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCExperienceOrb;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFishHook;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityDeathEvent;
+import com.laytonsmith.abstraction.entities.MCEgg;
 import com.laytonsmith.abstraction.entities.MCExperienceOrb;
 import com.laytonsmith.abstraction.entities.MCFishHook;
 import com.laytonsmith.abstraction.enums.MCAction;
+import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
+import com.laytonsmith.abstraction.enums.MCMainHand;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAction;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCFishingState;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCGameMode;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTeleportCause;
@@ -55,6 +61,7 @@ import com.laytonsmith.abstraction.events.MCPlayerLoginEvent;
 import com.laytonsmith.abstraction.events.MCPlayerMoveEvent;
 import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
 import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
+import com.laytonsmith.abstraction.events.MCPlayerChannelEvent;
 import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
 import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
 import com.laytonsmith.abstraction.events.MCPlayerToggleFlightEvent;
@@ -69,15 +76,12 @@ import com.laytonsmith.abstraction.events.MCLocaleChangeEvent;
 import com.laytonsmith.abstraction.events.MCPlayerAdvancementDoneEvent;
 import com.laytonsmith.abstraction.events.MCPlayerAnimationEvent;
 import com.laytonsmith.abstraction.events.MCPlayerBucketEvent;
-import com.laytonsmith.abstraction.events.MCPlayerChannelEvent;
 import com.laytonsmith.abstraction.events.MCPlayerResourcepackStatusEvent;
-import com.laytonsmith.abstraction.events.MCPlayerRiptideEvent;
 import com.laytonsmith.abstraction.events.MCPlayerStatisticIncrementEvent;
 import com.laytonsmith.abstraction.events.MCPlayerVelocityEvent;
 import com.laytonsmith.annotations.abstraction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -86,7 +90,6 @@ import org.bukkit.World;
 import org.bukkit.Statistic;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Egg;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -96,7 +99,9 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
+import org.bukkit.event.player.PlayerBucketEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerChannelEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerEditBookEvent;
 import org.bukkit.event.player.PlayerEvent;
@@ -124,19 +129,11 @@ import org.bukkit.event.player.PlayerItemMendEvent;
 import org.bukkit.event.player.PlayerLocaleChangeEvent;
 import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.event.player.PlayerAnimationEvent;
-import org.bukkit.event.player.PlayerBucketEvent;
-import org.bukkit.event.player.PlayerBucketFillEvent;
-import org.bukkit.event.player.PlayerBucketEmptyEvent;
-import org.bukkit.event.player.PlayerChannelEvent;
 import org.bukkit.event.player.PlayerResourcePackStatusEvent;
-import org.bukkit.event.player.PlayerRiptideEvent;
 import org.bukkit.event.player.PlayerStatisticIncrementEvent;
 import org.bukkit.event.player.PlayerVelocityEvent;
-import org.bukkit.event.player.PlayerRegisterChannelEvent;
-import org.bukkit.event.player.PlayerUnregisterChannelEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.MainHand;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -1082,8 +1079,8 @@ public class BukkitPlayerEvents {
 		}
 
 		@Override
-		public MainHand getMainHand() {
-			return pcmhe.getMainHand();
+		public MCMainHand getMainHand() {
+			return MCMainHand.valueOf(pcmhe.getMainHand().name());
 		}
 
 		@Override
@@ -1102,8 +1099,8 @@ public class BukkitPlayerEvents {
 		}
 
 		@Override
-		public Egg getEgg() {
-			return pete.getEgg();
+		public MCEgg getEgg() {
+			return new BukkitMCEgg(pete.getEgg());
 		}
 
 		@Override
@@ -1112,8 +1109,8 @@ public class BukkitPlayerEvents {
 		}
 
 		@Override
-		public EntityType getHatchingType() {
-			return pete.getHatchingType();
+		public MCEntityType getHatchingType() {
+			return BukkitMCEntityType.valueOfConcrete(pete.getHatchingType());
 		}
 
 		@Override
@@ -1132,8 +1129,8 @@ public class BukkitPlayerEvents {
 		}
 
 		@Override
-		public void setHatchingType(EntityType hatchingType) {
-			pete.setHatchingType(hatchingType);
+		public void setHatchingType(MCEntityType hatchingType) {
+			pete.setHatchingType(EntityType.valueOf(hatchingType.name()));
 		}
 
 		@Override
@@ -1192,8 +1189,8 @@ public class BukkitPlayerEvents {
 		}
 
 		@Override
-		public CInt getRepairAmount() {
-			return new CInt(pime.getRepairAmount(), Target.UNKNOWN);
+		public int getRepairAmount() {
+			return pime.getRepairAmount();
 		}
 
 		@Override
@@ -1232,8 +1229,8 @@ public class BukkitPlayerEvents {
 		}
 
 		@Override
-		public CString getLocale() {
-			return new CString(plce.getLocale(), Target.UNKNOWN);
+		public String getLocale() {
+			return plce.getLocale();
 		}
 
 		@Override
@@ -1338,16 +1335,6 @@ public class BukkitPlayerEvents {
 		}
 
 		@Override
-		public CString getType() {
-			if(pbe instanceof PlayerBucketEmptyEvent) {
-				return new CString("empty", Target.UNKNOWN);
-			} else if(pbe instanceof PlayerBucketFillEvent) {
-				return new CString("fill", Target.UNKNOWN);
-			}
-			return new CString("unknown", Target.UNKNOWN);
-		}
-
-		@Override
 		public MCPlayer getPlayer() {
 			return new BukkitMCPlayer(pbe.getPlayer());
 		}
@@ -1363,8 +1350,8 @@ public class BukkitPlayerEvents {
 		}
 
 		@Override
-		public void setItemStack(ItemStack is) {
-			pbe.setItemStack(is);
+		public void setItemStack(MCItemStack is) {
+			pbe.setItemStack(((BukkitMCItemStack) is).asItemStack());
 		}
 
 		@Override
@@ -1388,38 +1375,13 @@ public class BukkitPlayerEvents {
 		}
 
 		@Override
-		public CString getStatus() {
-			return new CString(prpse.getStatus().name(), Target.UNKNOWN);
+		public String getStatus() {
+			return prpse.getStatus().name();
 		}
 
 		@Override
 		public Object _GetObject() {
 			return prpse;
-		}
-	}
-
-	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCPlayerRiptideEvent implements MCPlayerRiptideEvent {
-
-		PlayerRiptideEvent pre;
-
-		public BukkitMCPlayerRiptideEvent(PlayerRiptideEvent e) {
-			this.pre = e;
-		}
-
-		@Override
-		public MCItemStack getItem() {
-			return new BukkitMCItemStack(pre.getItem());
-		}
-
-		@Override
-		public MCPlayer getPlayer() {
-			return new BukkitMCPlayer(pre.getPlayer());
-		}
-
-		@Override
-		public Object _GetObject() {
-			return pre;
 		}
 	}
 
@@ -1488,8 +1450,8 @@ public class BukkitPlayerEvents {
 		}
 
 		@Override
-		public Vector getVelocity() {
-			return pve.getVelocity();
+		public Vector3D getVelocity() {
+			return new Vector3D(pve.getVelocity().getX(), pve.getVelocity().getY(), pve.getVelocity().getZ());
 		}
 
 		@Override
@@ -1508,8 +1470,8 @@ public class BukkitPlayerEvents {
 		}
 
 		@Override
-		public void setVelocity(Vector velocity) {
-			pve.setVelocity(velocity);
+		public void setVelocity(Vector3D velocity) {
+			pve.setVelocity(new Vector(velocity.X(), velocity.Y(), velocity.Z()));
 		}
 
 		@Override
@@ -1527,21 +1489,9 @@ public class BukkitPlayerEvents {
 			this.pce = e;
 		}
 
-
 		@Override
-		public CString getChannel() {
-			return new CString(pce.getChannel(), Target.UNKNOWN);
-		}
-
-		@Override
-		public CString getType() {
-			if(pce instanceof PlayerRegisterChannelEvent) {
-				return new CString("register", Target.UNKNOWN);
-			} else if(pce instanceof PlayerUnregisterChannelEvent) {
-				return new CString("unregister", Target.UNKNOWN);
-			} else {
-				return new CString("unknown", Target.UNKNOWN);
-			}
+		public String getChannel() {
+			return pce.getChannel();
 		}
 
 		@Override

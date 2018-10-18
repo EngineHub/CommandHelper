@@ -3,7 +3,6 @@ package com.laytonsmith.abstraction.events;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.core.events.BindableEvent;
-import org.bukkit.Location;
 
 
 public interface MCEntityTeleportEvent extends BindableEvent {
@@ -18,8 +17,8 @@ public interface MCEntityTeleportEvent extends BindableEvent {
 
 	void setCancelled(boolean cancelled);
 
-	void setFrom(Location from);
+	void setFrom(MCLocation from);
 
-	void setTo(Location to);
+	void setTo(MCLocation to);
 
 }
