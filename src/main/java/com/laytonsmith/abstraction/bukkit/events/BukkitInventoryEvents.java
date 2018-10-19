@@ -54,7 +54,6 @@ import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
-import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -554,13 +553,28 @@ public class BukkitInventoryEvents {
 		}
 
 		@Override
-		public AnvilInventory getAnvilInventory() {
-			return e.getInventory();
+		public int getCost() {
+			return e.getInventory().getRepairCost();
 		}
 
 		@Override
-		public void setResult(ItemStack result) {
-			e.setResult(result);
+		public String getRenameText() {
+			return e.getInventory().getRenameText();
+		}
+
+		@Override
+		public MCInventory getInventory() {
+			return new BukkitMCInventory(e.getInventory());
+		}
+
+		@Override
+		public void setResult(MCItemStack result) {
+			e.setResult((ItemStack) result.getHandle());
+		}
+
+		@Override
+		public void setCost(int cost) {
+			e.getInventory().setRepairCost(cost);
 		}
 	}
 }

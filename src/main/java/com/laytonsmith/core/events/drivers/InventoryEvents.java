@@ -6,7 +6,6 @@ import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCVirtualInventoryHolder;
-import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.enums.MCClickType;
 import com.laytonsmith.abstraction.enums.MCDragType;
 import com.laytonsmith.abstraction.enums.MCInventoryAction;
@@ -47,7 +46,6 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.InventoryManagement;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
 
@@ -1054,15 +1052,15 @@ public class InventoryEvents {
 				ret.put("viewers", viewers);
 
 				CArray inventory = CArray.GetAssociativeArray(t);
-				ItemStack[] mi = e.getAnvilInventory().getContents();
-				for(int i = 0; i < mi.length; i++) {
-					inventory.set(i, ObjectGenerator.GetGenerator().item(new BukkitMCItemStack(mi[i]), t), t);
+				MCInventory inv = e.getInventory();
+				for(int i = 0; i < e.getInventory().getSize(); i++) {
+					inventory.set(i, ObjectGenerator.GetGenerator().item(e.getInventory().getItem(i), t), t);
 				}
 				ret.put("inventory", inventory);
 
 				ret.put("result", ObjectGenerator.GetGenerator().item(e.getResult(), t));
-				ret.put("cost", new CInt(e.getAnvilInventory().getRepairCost(), t));
-				ret.put("rename", new CString(e.getAnvilInventory().getRenameText(), t));
+				ret.put("cost", new CInt(e.getCost(), t));
+				ret.put("rename", new CString(e.getRenameText(), t));
 
 				return ret;
 
@@ -1081,15 +1079,17 @@ public class InventoryEvents {
 			if(event instanceof MCPrepareAnvilEvent) {
 				if(key.equalsIgnoreCase("result")) {
 					if(value instanceof CArray) {
-						BukkitMCItemStack is = new BukkitMCItemStack(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
-						((MCPrepareAnvilEvent) event).setResult(is.asItemStack());
+						((MCPrepareAnvilEvent) event).setResult(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
 						return true;
 					} else if(value instanceof CNull) {
 						((MCPrepareAnvilEvent) event).setResult(null);
 						return true;
 					} else {
-						throw new CRECastException("Expected an array but received " + value, Target.UNKNOWN);
+						throw new CRECastException("Expected an array but received " + value, value.getTarget());
 					}
+				} else if(key.equalsIgnoreCase("cost")) {
+					((MCPrepareAnvilEvent) event).setCost(Static.getInt32(value, value.getTarget()));
+					return true;
 				}
 			}
 			return false;
