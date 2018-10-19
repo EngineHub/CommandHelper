@@ -331,7 +331,7 @@ public class Trades {
 	}
 
 	@api
-	public static class merchant_trading extends Recipes.recipeFunction {
+	public static class merchant_trader extends Recipes.recipeFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -352,7 +352,7 @@ public class Trades {
 
 		@Override
 		public String getName() {
-			return "merchant_trading";
+			return "merchant_trader";
 		}
 
 		@Override
