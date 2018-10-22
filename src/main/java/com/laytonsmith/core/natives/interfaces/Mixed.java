@@ -12,11 +12,11 @@ import java.util.Set;
 /**
  * Mixed is the root type of all MethodScript objects and primitives.
  */
-@typeof("mixed")
+@typeof("ms.lang.mixed")
 public interface Mixed extends Cloneable, Documentation {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("mixed");
+	public static final CClassType TYPE = CClassType.get("ms.lang.mixed");
 
 	public String val();
 

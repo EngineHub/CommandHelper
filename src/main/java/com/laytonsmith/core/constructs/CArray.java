@@ -862,7 +862,7 @@ public class CArray extends Construct implements ArrayAccess {
 						throw new CRECastException("Cannot sort an array of arrays.", CArray.this.getTarget());
 					}
 					if(!(c instanceof CBoolean || c instanceof CString || c instanceof CInt
-							|| c instanceof CDouble || c instanceof CNull)) {
+							|| c instanceof CDouble || c instanceof CNull || c instanceof CClassType)) {
 						throw new CREFormatException("Unsupported type being sorted: " + c.typeof(), CArray.this.getTarget());
 					}
 				}

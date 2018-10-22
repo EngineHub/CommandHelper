@@ -10,6 +10,8 @@ import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.ObjectType;
+import java.util.AbstractSet;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -103,7 +105,30 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 
 	@Override
 	public Set<Construct> keySet() {
-		throw new CREIndexOverflowException("Not supported.", Target.UNKNOWN);
+		return new AbstractSet<Construct>(){
+			@Override
+			public int size() {
+				return CString.this.val().length();
+			}
+
+			@Override
+			public Iterator<Construct> iterator() {
+				return new Iterator<Construct>() {
+					int i = 0;
+					@Override
+					public boolean hasNext() {
+						return i < CString.this.val().length();
+					}
+
+					@Override
+					public Construct next() {
+						return new CInt(i++, Target.UNKNOWN);
+					}
+				};
+			}
+
+
+		};
 	}
 
 	@Override
