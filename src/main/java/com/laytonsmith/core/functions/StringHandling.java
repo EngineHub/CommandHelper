@@ -1655,14 +1655,40 @@ public class StringHandling {
 					throw ConfigRuntimeException.CreateUncatchableException(e.getMessage(), t);
 				}
 			}
-			int length = Array.getLength(parse);
+			Arrayable a = new Arrayable(parse);
+			int length = a.length();
 			for(int i = 0; i < length; i++) {
-				FormatString s = new FormatString(Array.get(parse, i));
+				FormatString s = new FormatString(a.get(i));
 				if(s.getExpectedType() != null) {
 					list.add(s);
 				}
 			}
 			return list;
+		}
+
+		// In java 8, it's an array, in java 9+, it's an ArrayList. This class
+		// abstracts away the differences
+		private static class Arrayable {
+			private final Object t;
+			public Arrayable(Object o) {
+				this.t = o;
+			}
+
+			public int length() {
+				if(t instanceof List) {
+					return ((List) t).size();
+				} else {
+					return Array.getLength(t);
+				}
+			}
+
+			public Object get(int i) {
+				if(t instanceof List) {
+					return ((List) t).get(i);
+				} else {
+					return Array.get(t, i);
+				}
+			}
 		}
 
 		private int requiredArgs(List<FormatString> list) {
