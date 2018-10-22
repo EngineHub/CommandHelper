@@ -55,7 +55,7 @@ public class TaskHandling {
 			CArray ret = new CArray(t);
 			for(TaskHandler task : tm.getTasks()) {
 				CArray tt = new CArray(t);
-				tt.set("id", new CInt(task.getID(), t), t);
+				tt.set("id", CInt.getFromPool(task.getID(), t), t);
 				tt.set("type", task.getType().name());
 				tt.set("state", task.getState().name());
 				tt.set("target", task.getDefinedAt().toString());

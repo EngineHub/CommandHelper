@@ -656,7 +656,7 @@ public class InventoryManagement {
 			}
 
 			if(c instanceof CNull) {
-				return new CInt(0, t);
+				return CInt.unsafeGetFromPool(0);
 			}
 
 			if(c instanceof CArray) {
@@ -682,7 +682,7 @@ public class InventoryManagement {
 			total += total(ca, is, inv.getChestplate(), t);
 			total += total(ca, is, inv.getHelmet(), t);
 			total += total(ca, is, inv.getItemInOffHand(), t);
-			return new CInt(total, t);
+			return CInt.getFromPool(total, t);
 		}
 
 		private int total(CArray map, MCItemStack is, MCItemStack iis, Target t) {
@@ -779,23 +779,23 @@ public class InventoryManagement {
 			CArray ret = new CArray(t);
 			for(int i = 0; i < 36; i++) {
 				if(IsMatch(ca, is, inv.getItem(i), t)) {
-					ret.push(new CInt(i, t), t);
+					ret.push(CInt.getFromPool(i, t), t);
 				}
 			}
 			if(IsMatch(ca, is, inv.getBoots(), t)) {
-				ret.push(new CInt(100, t), t);
+				ret.push(CInt.unsafeGetFromPool(100), t);
 			}
 			if(IsMatch(ca, is, inv.getLeggings(), t)) {
-				ret.push(new CInt(101, t), t);
+				ret.push(CInt.unsafeGetFromPool(101), t);
 			}
 			if(IsMatch(ca, is, inv.getChestplate(), t)) {
-				ret.push(new CInt(102, t), t);
+				ret.push(CInt.unsafeGetFromPool(102), t);
 			}
 			if(IsMatch(ca, is, inv.getHelmet(), t)) {
-				ret.push(new CInt(103, t), t);
+				ret.push(CInt.unsafeGetFromPool(103), t);
 			}
 			if(IsMatch(ca, is, inv.getItemInOffHand(), t)) {
-				ret.push(new CInt(-106, t), t);
+				ret.push(CInt.unsafeGetFromPool(-106), t);
 			}
 			return ret;
 		}
@@ -870,7 +870,7 @@ public class InventoryManagement {
 
 			if(args.length == 2) {
 				if(args[1] instanceof CNull) {
-					return new CInt(0, t);
+					return CInt.unsafeGetFromPool(0);
 				}
 				if(args[1] instanceof CArray) {
 					itemOffset = 1;
@@ -910,10 +910,10 @@ public class InventoryManagement {
 					throw new CREIllegalArgumentException("Item value is invalid", t);
 				}
 				if(!h.isEmpty()) {
-					return new CInt(h.get(0).getAmount(), t);
+					return CInt.getFromPool(h.get(0).getAmount(), t);
 				}
 			}
-			return new CInt(0, t);
+			return CInt.unsafeGetFromPool(0);
 		}
 
 		@Override
@@ -982,7 +982,7 @@ public class InventoryManagement {
 
 			if(args.length == 2) {
 				if(args[1] instanceof CNull) {
-					return new CInt(0, t);
+					return CInt.unsafeGetFromPool(0);
 				}
 				if(args[1] instanceof CArray) {
 					itemOffset = 1;
@@ -1031,7 +1031,7 @@ public class InventoryManagement {
 					}
 				}
 			}
-			return new CInt(total - remaining, t);
+			return CInt.getFromPool(total - remaining, t);
 
 		}
 
@@ -1105,7 +1105,7 @@ public class InventoryManagement {
 
 			if(args.length == 2) {
 				if(args[1] instanceof CNull) {
-					return new CInt(0, t);
+					return CInt.unsafeGetFromPool(0);
 				}
 				if(args[1] instanceof CArray) {
 					itemOffset = 1;
@@ -1143,10 +1143,10 @@ public class InventoryManagement {
 					throw new CREIllegalArgumentException("Item value is invalid", t);
 				}
 				if(!h.isEmpty()) {
-					return new CInt(h.get(0).getAmount(), t);
+					return CInt.getFromPool(h.get(0).getAmount(), t);
 				}
 			}
-			return new CInt(0, t);
+			return CInt.unsafeGetFromPool(0);
 		}
 
 		@Override
@@ -1214,7 +1214,7 @@ public class InventoryManagement {
 
 			if(args.length == 2) {
 				if(args[1] instanceof CNull) {
-					return new CInt(0, t);
+					return CInt.unsafeGetFromPool(0);
 				}
 				if(args[1] instanceof CArray) {
 					itemOffset = 1;
@@ -1263,7 +1263,7 @@ public class InventoryManagement {
 					}
 				}
 			}
-			return new CInt(total - remaining, t);
+			return CInt.getFromPool(total - remaining, t);
 		}
 
 		@Override
@@ -1701,7 +1701,7 @@ public class InventoryManagement {
 				w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
 			}
 			MCInventory inventory = InventoryManagement.GetInventory(args[0], w, t);
-			return new CInt(inventory.getSize(), t);
+			return CInt.getFromPool(inventory.getSize(), t);
 		}
 
 		@Override
@@ -2048,9 +2048,9 @@ public class InventoryManagement {
 			}
 
 			if(h.isEmpty()) {
-				return new CInt(0, t);
+				return CInt.unsafeGetFromPool(0);
 			} else {
-				return new CInt(h.get(0).getAmount(), t);
+				return CInt.getFromPool(h.get(0).getAmount(), t);
 			}
 		}
 
@@ -2145,7 +2145,7 @@ public class InventoryManagement {
 					}
 				}
 			}
-			return new CInt(total - remaining, t);
+			return CInt.getFromPool(total - remaining, t);
 		}
 
 		@Override
@@ -2313,7 +2313,7 @@ public class InventoryManagement {
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
 			int slot = pinv.getHeldItemSlot();
-			return new CInt(slot, t);
+			return CInt.getFromPool(slot, t);
 		}
 
 		@Override

@@ -73,7 +73,7 @@ public final class Prefilters {
 
 	public static void match(Map<String, Construct> map, String key,
 			int actualValue, PrefilterType type) throws PrefilterNonMatchException {
-		match(map, key, new CInt(actualValue, Target.UNKNOWN), type);
+		match(map, key, CInt.getFromPool(actualValue, Target.UNKNOWN), type);
 	}
 
 	public static void match(Map<String, Construct> map, String key,

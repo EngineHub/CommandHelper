@@ -2,9 +2,11 @@ package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.HTMLUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.MSP.Burst;
@@ -453,8 +455,15 @@ public class DocGenTemplates {
 
 		@Override
 		public String generate(String... args) {
-			Class c = ClassDiscovery.getDefaultInstance().forFuzzyName(args[0], args[1]).loadClass();
-			return "[" + GITHUB_BASE_URL + "/" + c.getName().replace('.', '/') + ".java " + c.getSimpleName() + "]";
+			ClassMirror cm = ClassDiscovery.getDefaultInstance().forFuzzyName(args[0], args[1]);
+			if(cm != null) {
+				Class c = cm.loadClass();
+				return "[" + GITHUB_BASE_URL + "/" + c.getName().replace('.', '/') + ".java " + c.getSimpleName() + "]";
+			} else {
+				System.err.println(StackTraceUtils.getCallingClass() + " has an invalid reference: " + args[0] + ": "
+						+ args[1]);
+				return "(Could not find class " + args[0] + ")";
+			}
 		}
 	};
 

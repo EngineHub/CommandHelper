@@ -1016,7 +1016,7 @@ public class Meta {
 			}
 			ZipEntry manifest = jf.getEntry("META-INF/MANIFEST.MF");
 			long manifestTime = manifest.getTime();
-			return new CInt(manifestTime, t);
+			return CInt.getFromPool(manifestTime, t);
 		}
 
 		@Override
@@ -1062,7 +1062,7 @@ public class Meta {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CInt(environment.getEnv(GlobalEnv.class).GetScript().getCompileTime(), t);
+			return CInt.getFromPool(environment.getEnv(GlobalEnv.class).GetScript().getCompileTime(), t);
 		}
 
 		@Override

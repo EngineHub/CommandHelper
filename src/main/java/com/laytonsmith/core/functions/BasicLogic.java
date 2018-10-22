@@ -725,8 +725,8 @@ public class BasicLogic {
 				//will go unchecked, so we need to keep switch in the code somehow. To make it easy though,
 				//we'll make the most efficient switch we can.
 				ParseTree ret = new ParseTree(new CFunction(new _switch().getName(), t), fileOptions);
-				ret.addChild(new ParseTree(new CInt(1, t), fileOptions));
-				ret.addChild(new ParseTree(new CInt(1, t), fileOptions));
+				ret.addChild(new ParseTree(CInt.unsafeGetFromPool(1), fileOptions));
+				ret.addChild(new ParseTree(CInt.unsafeGetFromPool(1), fileOptions));
 				ret.addChild(toReturn);
 				return ret;
 			}
@@ -2546,7 +2546,7 @@ public class BasicLogic {
 			for(int i = 1; i < args.length; i++) {
 				val = val & Static.getInt(args[i], t);
 			}
-			return new CInt(val, t);
+			return CInt.getFromPool(val, t);
 		}
 
 		@Override
@@ -2622,7 +2622,7 @@ public class BasicLogic {
 			for(int i = 1; i < args.length; i++) {
 				val = val | Static.getInt(args[i], t);
 			}
-			return new CInt(val, t);
+			return CInt.getFromPool(val, t);
 		}
 
 		@Override
@@ -2700,7 +2700,7 @@ public class BasicLogic {
 			for(int i = 1; i < args.length; i++) {
 				val = val ^ Static.getInt(args[i], t);
 			}
-			return new CInt(val, t);
+			return CInt.getFromPool(val, t);
 		}
 
 		@Override
@@ -2770,7 +2770,7 @@ public class BasicLogic {
 			if(args.length != 1) {
 				throw new CREFormatException(this.getName() + " expects 1 argument.", t);
 			}
-			return new CInt(~Static.getInt(args[0], t), t);
+			return CInt.getFromPool(~Static.getInt(args[0], t), t);
 		}
 
 		@Override
@@ -2833,7 +2833,7 @@ public class BasicLogic {
 			}
 			long value = Static.getInt(args[0], t);
 			long toShift = Static.getInt(args[1], t);
-			return new CInt(value << toShift, t);
+			return CInt.getFromPool(value << toShift, t);
 		}
 
 		@Override
@@ -2896,7 +2896,7 @@ public class BasicLogic {
 			}
 			long value = Static.getInt(args[0], t);
 			long toShift = Static.getInt(args[1], t);
-			return new CInt(value >> toShift, t);
+			return CInt.getFromPool(value >> toShift, t);
 		}
 
 		@Override
@@ -2961,7 +2961,7 @@ public class BasicLogic {
 			}
 			long value = Static.getInt(args[0], t);
 			long toShift = Static.getInt(args[1], t);
-			return new CInt(value >>> toShift, t);
+			return CInt.getFromPool(value >>> toShift, t);
 		}
 
 		@Override

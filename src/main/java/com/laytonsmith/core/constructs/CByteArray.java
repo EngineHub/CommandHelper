@@ -498,7 +498,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	public Construct get(Construct index, Target t) throws ConfigRuntimeException {
 		int i = Static.getInt32(index, t);
 		byte b = getByte(i);
-		return new CInt(b, t);
+		return CInt.getFromPool(b, t);
 	}
 
 	@Override
@@ -556,7 +556,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		public Construct get(Construct index, Target t) {
 			int i = Static.getInt32(index, t);
 			try {
-				return new CInt(backing[i], t);
+				return CInt.getFromPool(backing[i], t);
 			} catch (ArrayIndexOutOfBoundsException e) {
 				throw new CRERangeException("Index out of range. Found " + i + ", but array length is only " + backing.length, t);
 			}

@@ -151,7 +151,7 @@ public class Reflection {
 					return env.getEnv(GlobalEnv.class).GetVarList().get(name, t).ival();
 				}
 			} else if("line_num".equalsIgnoreCase(param)) {
-				return new CInt(t.line(), t);
+				return CInt.getFromPool(t.line(), t);
 			} else if("file".equalsIgnoreCase(param)) {
 				if(t.file() == null) {
 					return new CString("Unknown (maybe the interpreter?)", t);
@@ -163,7 +163,7 @@ public class Reflection {
 					}
 				}
 			} else if("col".equalsIgnoreCase(param)) {
-				return new CInt(t.col(), t);
+				return CInt.getFromPool(t.col(), t);
 			} else if("datasources".equalsIgnoreCase(param)) {
 				if(protocols == null) {
 					protocols = new HashSet<Construct>();

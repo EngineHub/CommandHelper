@@ -694,9 +694,9 @@ public class DataHandling {
 				long start = ((CSlice) arr).getStart();
 				long finish = ((CSlice) arr).getFinish();
 				if(finish < start) {
-					arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish - 1, t), new CInt(-1, t));
+					arr = new ArrayHandling.range().exec(t, env, CInt.getFromPool(start, t), CInt.getFromPool(finish - 1, t), CInt.getFromPool(-1, t));
 				} else {
-					arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish + 1, t));
+					arr = new ArrayHandling.range().exec(t, env, CInt.getFromPool(start, t), CInt.getFromPool(finish + 1, t));
 				}
 			}
 			if(!(arr instanceof ArrayAccess)) {
@@ -784,7 +784,7 @@ public class DataHandling {
 						//If the item is blacklisted, we skip it.
 						if(!iterator.isBlacklisted(current)) {
 							if(kkey != null) {
-								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(), kkey.getVariableName(), new CInt(current, t), t));
+								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(), kkey.getVariableName(), CInt.getFromPool(current, t), t));
 							}
 							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(), two.getVariableName(), one.get(current, t), t));
 							try {
@@ -3405,7 +3405,7 @@ public class DataHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CInt((long) Static.getDouble(args[0], t), t);
+			return CInt.getFromPool((long) Static.getDouble(args[0], t), t);
 		}
 
 		@Override
@@ -3666,7 +3666,7 @@ public class DataHandling {
 				throw new CREFormatException("The input string: \"" + value + "\" is improperly formatted. (Perhaps you're using a character greater than"
 						+ " the radix specified?)", t);
 			}
-			return new CInt(ret, t);
+			return CInt.getFromPool(ret, t);
 		}
 
 		@Override

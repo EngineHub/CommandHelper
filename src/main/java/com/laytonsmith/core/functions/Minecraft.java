@@ -100,12 +100,12 @@ public class Minecraft {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args[0] instanceof CInt) {
-				return new CInt(Static.getInt(args[0], t), t);
+				return CInt.getFromPool(Static.getInt(args[0], t), t);
 			}
 			String c = args[0].val();
 			MCMaterial mat = StaticLayer.GetMaterial("LEGACY_" + c.toUpperCase());
 			if(mat != null) {
-				return new CInt(mat.getType(), t);
+				return CInt.getFromPool(mat.getType(), t);
 			}
 			String changed = c;
 			if(changed.contains(":")) {
@@ -121,7 +121,7 @@ public class Minecraft {
 			if(DATA_VALUE_LOOKUP.containsKey(changed)) {
 				String split[] = DATA_VALUE_LOOKUP.get(changed).toString().split(":");
 				if(split[1].equals("0")) {
-					return new CInt(split[0], t);
+					return CInt.getFromPool(split[0], t);
 				}
 				return new CString(split[0] + ":" + split[1], t);
 			}
@@ -344,7 +344,7 @@ public class Minecraft {
 			Construct id = args[0];
 			if(id instanceof CArray) {
 				MCItemStack is = ObjectGenerator.GetGenerator().item(id, t);
-				return new CInt(is.getType().getMaxStackSize(), t);
+				return CInt.getFromPool(is.getType().getMaxStackSize(), t);
 			}
 			// legacy
 			int type;
@@ -364,7 +364,7 @@ public class Minecraft {
 			if(mat == null) {
 				throw new CRENotFoundException("A material type could not be found based on the given id.", t);
 			}
-			return new CInt(mat.getMaxStackSize(), t);
+			return CInt.getFromPool(mat.getMaxStackSize(), t);
 		}
 
 		@Override
@@ -601,7 +601,7 @@ public class Minecraft {
 			}
 			if(index == 7 || index == -1) {
 				//Max player limit
-				retVals.add(new CInt(server.getMaxPlayers(), t));
+				retVals.add(CInt.getFromPool(server.getMaxPlayers(), t));
 			}
 			if(index == 8 || index == -1) {
 				//Array of op's
@@ -641,7 +641,7 @@ public class Minecraft {
 			}
 			if(index == 11 || index == -1) {
 				//Server port
-				retVals.add(new CInt(server.getPort(), t));
+				retVals.add(CInt.getFromPool(server.getPort(), t));
 			}
 			if(index == 12 || index == -1) {
 				//Server Ip
@@ -650,19 +650,19 @@ public class Minecraft {
 			if(index == 13 || index == -1) {
 				//Uptime
 				long uptime = System.currentTimeMillis() - ManagementFactory.getRuntimeMXBean().getStartTime();
-				retVals.add(new CInt(uptime, t));
+				retVals.add(CInt.getFromPool(uptime, t));
 			}
 			if(index == 14 || index == -1) {
 				//gcmax
-				retVals.add(new CInt((Runtime.getRuntime().maxMemory()), t));
+				retVals.add(CInt.getFromPool((Runtime.getRuntime().maxMemory()), t));
 			}
 			if(index == 15 || index == -1) {
 				//gctotal
-				retVals.add(new CInt((Runtime.getRuntime().totalMemory()), t));
+				retVals.add(CInt.getFromPool((Runtime.getRuntime().totalMemory()), t));
 			}
 			if(index == 16 || index == -1) {
 				//gcfree
-				retVals.add(new CInt((Runtime.getRuntime().freeMemory()), t));
+				retVals.add(CInt.getFromPool((Runtime.getRuntime().freeMemory()), t));
 			}
 			if(index == 17 || index == -1) {
 				//motd
@@ -1082,9 +1082,9 @@ public class Minecraft {
 			if(args.length == 2) {
 				switch(args[1].val()) {
 					case "maxStacksize":
-						return new CInt(mat.getMaxStackSize(), t);
+						return CInt.getFromPool(mat.getMaxStackSize(), t);
 					case "maxDurability":
-						return new CInt(mat.getMaxDurability(), t);
+						return CInt.getFromPool(mat.getMaxDurability(), t);
 					case "hasGravity":
 						return CBoolean.get(mat.hasGravity());
 					case "isBlock":
@@ -1122,8 +1122,8 @@ public class Minecraft {
 				}
 			}
 			CArray ret = CArray.GetAssociativeArray(t);
-			ret.set("maxStacksize", new CInt(mat.getMaxStackSize(), t), t);
-			ret.set("maxDurability", new CInt(mat.getMaxDurability(), t), t);
+			ret.set("maxStacksize", CInt.getFromPool(mat.getMaxStackSize(), t), t);
+			ret.set("maxDurability", CInt.getFromPool(mat.getMaxDurability(), t), t);
 			ret.set("hasGravity", CBoolean.get(mat.hasGravity()), t);
 			ret.set("isBlock", CBoolean.get(mat.isBlock()), t);
 			ret.set("isBurnable", CBoolean.get(mat.isBurnable()), t);

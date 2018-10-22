@@ -220,7 +220,7 @@ class CompilerObject {
 			case DOUBLE:
 				return new CDouble(t.val(), t.getTarget());
 			case INTEGER:
-				return new CInt(t.val(), t.getTarget());
+				return CInt.getFromPool(t.val(), t.getTarget());
 			default:
 				throw new ConfigCompileException("Unexpected identifier? Found '" + t.val() + "' but was not any expected value.", t.getTarget());
 		}

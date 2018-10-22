@@ -148,9 +148,9 @@ public class InventoryEvents {
 				map.put("keyboardclick", CBoolean.get(e.isKeyboardClick()));
 				map.put("cursoritem", ObjectGenerator.GetGenerator().item(e.getCursor(), t));
 
-				map.put("slot", new CInt(e.getSlot(), t));
-				map.put("rawslot", new CInt(e.getRawSlot(), t));
-				map.put("hotbarbutton", new CInt(e.getHotbarButton(), t));
+				map.put("slot", CInt.getFromPool(e.getSlot(), t));
+				map.put("rawslot", CInt.getFromPool(e.getRawSlot(), t));
+				map.put("hotbarbutton", CInt.getFromPool(e.getHotbarButton(), t));
 				map.put("slottype", new CString(e.getSlotType().name(), t));
 				map.put("slotitem", ObjectGenerator.GetGenerator().item(e.getCurrentItem(), t));
 
@@ -161,7 +161,7 @@ public class InventoryEvents {
 				}
 				map.put("inventory", items);
 				map.put("inventorytype", new CString(inv.getType().name(), t));
-				map.put("inventorysize", new CInt(inv.getSize(), t));
+				map.put("inventorysize", CInt.getFromPool(inv.getSize(), t));
 
 				return map;
 			} else {
@@ -276,13 +276,13 @@ public class InventoryEvents {
 
 				CArray slots = new CArray(Target.UNKNOWN);
 				for(Integer slot : e.getInventorySlots()) {
-					slots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN);
+					slots.push(CInt.getFromPool(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN);
 				}
 				map.put("slots", slots);
 
 				CArray rawSlots = new CArray(Target.UNKNOWN);
 				for(Integer slot : e.getRawSlots()) {
-					rawSlots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN);
+					rawSlots.push(CInt.getFromPool(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN);
 				}
 				map.put("rawslots", rawSlots);
 
@@ -301,7 +301,7 @@ public class InventoryEvents {
 				}
 				map.put("inventory", items);
 				map.put("inventorytype", new CString(inv.getType().name(), Target.UNKNOWN));
-				map.put("inventorysize", new CInt(inv.getSize(), Target.UNKNOWN));
+				map.put("inventorysize", CInt.getFromPool(inv.getSize(), Target.UNKNOWN));
 
 				map.put("type", new CString(e.getType().name(), Target.UNKNOWN));
 
@@ -544,7 +544,7 @@ public class InventoryEvents {
 				map.put("player", new CString(e.GetEnchanter().getName(), Target.UNKNOWN));
 				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN));
 				map.put("inventorytype", new CString(e.getInventory().getType().name(), Target.UNKNOWN));
-				map.put("levels", new CInt(e.getExpLevelCost(), Target.UNKNOWN));
+				map.put("levels", CInt.getFromPool(e.getExpLevelCost(), Target.UNKNOWN));
 				map.put("enchants", ObjectGenerator.GetGenerator().enchants(e.getEnchantsToAdd(), Target.UNKNOWN));
 
 				CArray loc = ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation());
@@ -556,7 +556,7 @@ public class InventoryEvents {
 
 				map.put("location", loc);
 
-				map.put("option", new CInt(e.whichButton(), Target.UNKNOWN));
+				map.put("option", CInt.getFromPool(e.whichButton(), Target.UNKNOWN));
 
 				return map;
 			} else {
@@ -640,14 +640,14 @@ public class InventoryEvents {
 				map.put("player", new CString(e.getEnchanter().getName(), Target.UNKNOWN));
 				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN));
 				map.put("inventorytype", new CString(e.getInventory().getType().name(), Target.UNKNOWN));
-				map.put("enchantmentbonus", new CInt(e.getEnchantmentBonus(), Target.UNKNOWN));
+				map.put("enchantmentbonus", CInt.getFromPool(e.getEnchantmentBonus(), Target.UNKNOWN));
 
 				int[] expCosts = e.getExpLevelCostsOffered();
 				CArray expCostsCArray = new CArray(Target.UNKNOWN);
 
 				for(int i = 0; i < expCosts.length; i++) {
 					int j = expCosts[i];
-					expCostsCArray.push(new CInt(j, Target.UNKNOWN), i, Target.UNKNOWN);
+					expCostsCArray.push(CInt.getFromPool(j, Target.UNKNOWN), i, Target.UNKNOWN);
 				}
 
 				map.put("expcosts", expCostsCArray);
@@ -752,8 +752,8 @@ public class InventoryEvents {
 			if(event instanceof MCItemHeldEvent) {
 				MCItemHeldEvent e = (MCItemHeldEvent) event;
 				Map<String, Construct> ret = evaluate_helper(e);
-				ret.put("to", new CInt(e.getNewSlot(), Target.UNKNOWN));
-				ret.put("from", new CInt(e.getPreviousSlot(), Target.UNKNOWN));
+				ret.put("to", CInt.getFromPool(e.getNewSlot(), Target.UNKNOWN));
+				ret.put("from", CInt.getFromPool(e.getPreviousSlot(), Target.UNKNOWN));
 				return ret;
 			} else {
 				throw new EventException("Event received was not an MCItemHeldEvent");

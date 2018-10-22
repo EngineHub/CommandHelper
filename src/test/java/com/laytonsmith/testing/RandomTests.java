@@ -214,7 +214,7 @@ public class RandomTests {
 		ca.push(C.Null(), t);
 		ca.push(C.Void(), t);
 		ca.push(new Command("/Command", Target.UNKNOWN), t);
-		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)), t);
+		ca.push(new CArray(Target.UNKNOWN, CInt.getFromPool(1, Target.UNKNOWN)), t);
 		//[1, 2.2, "string", "\"Quote\"", true, false, null, "", "/Command", [1]]
 		assertEquals("[1,2.2,\"string\",\"\\\"Quote\\\"\",true,false,null,\"\",\"\\/Command\",[1]]", Construct.json_encode(ca, Target.UNKNOWN));
 	}
@@ -231,7 +231,7 @@ public class RandomTests {
 		ca.push(C.Null(), Target.UNKNOWN);
 		ca.push(C.Void(), Target.UNKNOWN);
 		ca.push(new Command("/Command", Target.UNKNOWN), Target.UNKNOWN);
-		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)), Target.UNKNOWN);
+		ca.push(new CArray(Target.UNKNOWN, CInt.getFromPool(1, Target.UNKNOWN)), Target.UNKNOWN);
 		StaticTest.assertCEquals(ca, Construct.json_decode("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", \"\\/Command\", [1]]", Target.UNKNOWN));
 	}
 

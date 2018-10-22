@@ -198,7 +198,7 @@ public class NewMethodScriptCompiler {
 			return new CBareString(t.val(), t.getTarget());
 		}
 		if(t.type == Token.TType.INTEGER) {
-			return new CInt(Long.parseLong(t.val()), t.getTarget());
+			return CInt.getFromPool(Long.parseLong(t.val()), t.getTarget());
 		}
 		if(t.type == Token.TType.DOUBLE) {
 			return new CDouble(Double.parseDouble(t.val()), t.getTarget());

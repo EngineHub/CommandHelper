@@ -43,7 +43,7 @@ public class ArrayHandlingTest {
 	@Before
 	public void setUp() {
 		fakePlayer = StaticTest.GetOnlinePlayer();
-		commonArray = new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN), new CInt(2, Target.UNKNOWN), new CInt(3, Target.UNKNOWN));
+		commonArray = new CArray(Target.UNKNOWN, CInt.getFromPool(1, Target.UNKNOWN), CInt.getFromPool(2, Target.UNKNOWN), CInt.getFromPool(3, Target.UNKNOWN));
 		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
 	}
 

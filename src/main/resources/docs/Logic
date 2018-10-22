@@ -19,9 +19,7 @@ x < y
 Assuming x is 3 and y is 4, this statement is true. However, if we swap the values, and make x 4 and y 3, 
 the statement is false. Written in code, it would look like this:
 
-%%CODE|
-@x < @y
-%%
+<%CODE|@x < @y%>
 
 All the functions in the [[API#BasicLogic|BasicLogic class]] return a 
 boolean based on certain conditions. You should be familiar with the lt (less than <code>&lt;</code>), 

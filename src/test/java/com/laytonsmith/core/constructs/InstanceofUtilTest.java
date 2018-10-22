@@ -12,9 +12,9 @@ public class InstanceofUtilTest {
 
 	@Test
 	public void testInstanceofUtil() {
-		assertTrue(InstanceofUtil.isInstanceof(new CInt(0, Target.UNKNOWN), CInt.class));
-		assertTrue(InstanceofUtil.isInstanceof(new CInt(0, Target.UNKNOWN), CNumber.class));
-		assertTrue(InstanceofUtil.isInstanceof(new CInt(0, Target.UNKNOWN), Mixed.class));
-		assertFalse(InstanceofUtil.isInstanceof(new CInt(0, Target.UNKNOWN), CString.class));
+		assertTrue(InstanceofUtil.isInstanceof(CInt.getFromPool(0, Target.UNKNOWN), CInt.class));
+		assertTrue(InstanceofUtil.isInstanceof(CInt.getFromPool(0, Target.UNKNOWN), CNumber.class));
+		assertTrue(InstanceofUtil.isInstanceof(CInt.getFromPool(0, Target.UNKNOWN), Mixed.class));
+		assertFalse(InstanceofUtil.isInstanceof(CInt.getFromPool(0, Target.UNKNOWN), CString.class));
 	}
 }

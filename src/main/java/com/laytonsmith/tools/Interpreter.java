@@ -828,7 +828,7 @@ public final class Interpreter {
 					// We need previous code to intercept, we cannot do this here.
 					throw new Error("I should not run");
 				case "logout":
-					new Cmdline.exit().exec(Target.UNKNOWN, env, new CInt(0, Target.UNKNOWN));
+					new Cmdline.exit().exec(Target.UNKNOWN, env, CInt.unsafeGetFromPool(0));
 					return true; // won't actually run
 				case "echo":
 					// TODO Probably need some variable interpolation maybe? Otherwise, I don't think this command

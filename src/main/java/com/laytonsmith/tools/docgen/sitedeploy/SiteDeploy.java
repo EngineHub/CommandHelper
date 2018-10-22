@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.GNUErrorMessageFormat;
 import com.laytonsmith.PureUtilities.Common.HTMLUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
@@ -882,8 +883,9 @@ public final class SiteDeploy {
 						b = DocGenTemplates.DoTemplateReplacement(bW, standard);
 					} catch (Exception ex) {
 						if(ex instanceof GenerateException) {
-							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Failed to substitute template"
-									+ " while trying to upload resource to " + toLocation, ex);
+							System.out.println("Failed to substitute template"
+									+ " while trying to upload resource to " + toLocation + "\n"
+									+ StackTraceUtils.GetStacktrace(ex));
 						} else {
 							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 						}

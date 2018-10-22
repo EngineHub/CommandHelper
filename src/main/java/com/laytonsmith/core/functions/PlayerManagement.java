@@ -947,7 +947,7 @@ public class PlayerManagement {
 				if(b == null) {
 					retVals.add(CNull.NULL);
 				} else {
-					retVals.add(new CArray(t, new CInt(b.getX(), t), new CInt(b.getY(), t), new CInt(b.getZ(), t)));
+					retVals.add(new CArray(t, CInt.getFromPool(b.getX(), t), CInt.getFromPool(b.getY(), t), CInt.getFromPool(b.getZ(), t)));
 				}
 			}
 			if(index == 3 || index == -1) {
@@ -1017,7 +1017,7 @@ public class PlayerManagement {
 				retVals.add(CBoolean.get(p.isInsideVehicle()));
 			}
 			if(index == 15 || index == -1) {
-				retVals.add(new CInt(p.getInventory().getHeldItemSlot(), t));
+				retVals.add(CInt.getFromPool(p.getInventory().getHeldItemSlot(), t));
 			}
 			if(index == 16 || index == -1) {
 				retVals.add(CBoolean.get(p.isSleeping()));
@@ -1658,7 +1658,7 @@ public class PlayerManagement {
 				m = Static.GetPlayer(args[0].val(), t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			return new CInt(java.lang.Math.round(m.getExp() * 100), t);
+			return CInt.getFromPool(java.lang.Math.round(m.getExp() * 100), t);
 		}
 	}
 
@@ -1832,7 +1832,7 @@ public class PlayerManagement {
 				m = Static.GetPlayer(args[0].val(), t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			return new CInt(m.getLevel(), t);
+			return CInt.getFromPool(m.getLevel(), t);
 		}
 	}
 
@@ -1944,7 +1944,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(m, t);
 			int texp = m.getExpAtLevel() + java.lang.Math.round(m.getExpToLevel() * m.getExp());
-			return new CInt(texp, t);
+			return CInt.getFromPool(texp, t);
 		}
 	}
 
@@ -2062,7 +2062,7 @@ public class PlayerManagement {
 				m = Static.GetPlayer(args[0].val(), t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			return new CInt(m.getFoodLevel(), t);
+			return CInt.getFromPool(m.getFoodLevel(), t);
 		}
 	}
 
@@ -3266,7 +3266,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(p, t);
 			int left = p.getRemainingFireTicks();
-			return new CInt(left, t);
+			return CInt.getFromPool(left, t);
 		}
 	}
 
@@ -3608,7 +3608,7 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
-			return new CInt(p.getPlayerTime(), t);
+			return CInt.getFromPool(p.getPlayerTime(), t);
 		}
 	}
 
@@ -4214,7 +4214,7 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
-			return new CInt(p.getFoodLevel(), t);
+			return CInt.getFromPool(p.getFoodLevel(), t);
 		}
 
 		@Override
@@ -4835,7 +4835,7 @@ public class PlayerManagement {
 			} else if(cs != null) {
 				op = Static.GetUser(cs.getName(), t);
 			}
-			return new CInt((op == null ? 0 : op.getFirstPlayed()), t); // Return 0 for fake/null command senders.
+			return CInt.getFromPool((op == null ? 0 : op.getFirstPlayed()), t); // Return 0 for fake/null command senders.
 		}
 
 		@Override
@@ -4899,7 +4899,7 @@ public class PlayerManagement {
 			} else if(cs != null) {
 				op = Static.GetUser(cs.getName(), t);
 			}
-			return new CInt((op == null ? 0 : op.getLastPlayed()), t); // Return 0 for fake/null command senders.
+			return op == null ? CInt.unsafeGetFromPool(0) : CInt.getFromPool(op.getLastPlayed(), t); // Return 0 for fake/null command senders.
 		}
 
 		@Override
@@ -5396,7 +5396,7 @@ public class PlayerManagement {
 				throw new CREFormatException("Material name is invalid.", t);
 			}
 
-			return new CInt(p.getCooldown(mat), t);
+			return CInt.getFromPool(p.getCooldown(mat), t);
 		}
 
 		@Override

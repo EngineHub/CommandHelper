@@ -201,8 +201,8 @@ public class ServerEvents {
 				}
 				ret.put("ip", new CString(ip, t));
 				ret.put("motd", new CString(event.getMOTD(), t));
-				ret.put("players", new CInt(event.getNumPlayers(), t));
-				ret.put("maxplayers", new CInt(event.getMaxPlayers(), t));
+				ret.put("players", CInt.getFromPool(event.getNumPlayers(), t));
+				ret.put("maxplayers", CInt.getFromPool(event.getMaxPlayers(), t));
 				CArray players = new CArray(t);
 				for(MCPlayer player : event.getPlayers()) {
 					players.push(new CString(player.getName(), t), t);

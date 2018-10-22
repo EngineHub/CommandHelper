@@ -107,7 +107,7 @@ public class CmdlineEvents {
 		@Override
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
 			Map<String, Construct> map = new HashMap<>();
-			map.put("time", new CInt(System.currentTimeMillis(), Target.UNKNOWN));
+			map.put("time", CInt.getFromPool(System.currentTimeMillis(), Target.UNKNOWN));
 			return map;
 		}
 

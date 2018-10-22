@@ -77,7 +77,7 @@ public class ArrayHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CArray && !(args[0] instanceof CMutablePrimitive)) {
-				return new CInt(((CArray) args[0]).size(), t);
+				return CInt.getFromPool(((CArray) args[0]).size(), t);
 			}
 			throw new CRECastException("Argument 1 of array_size must be an array", t);
 		}
@@ -1021,7 +1021,7 @@ public class ArrayHandling {
 			}
 			CArray ret = new CArray(t);
 			for(long i = start; (increment > 0 ? i < finish : i > finish); i = i + increment) {
-				ret.push(new CInt(i, t), t);
+				ret.push(CInt.getFromPool(i, t), t);
 			}
 			return ret;
 		}
@@ -1785,7 +1785,7 @@ public class ArrayHandling {
 			} else {
 				for(long i = array.size() - 1; i >= 0; i--) {
 					if(BasicLogic.equals.doEquals(array.get(i, t), args[1])) {
-						new array_remove().exec(t, environment, array, new CInt(i, t));
+						new array_remove().exec(t, environment, array, CInt.getFromPool(i, t));
 					}
 				}
 			}
@@ -2309,7 +2309,7 @@ public class ArrayHandling {
 			} else {
 				newArray = new CArray(t);
 				for(int i = 0; i < array.size(); i++) {
-					Construct key = new CInt(i, t);
+					Construct key = CInt.getFromPool(i, t);
 					Construct value = array.get(i, t);
 					Construct ret = null;
 					try {

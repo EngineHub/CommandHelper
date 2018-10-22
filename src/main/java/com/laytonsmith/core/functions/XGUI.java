@@ -99,7 +99,7 @@ public class XGUI {
 			JPanel panel = new JPanel();
 			frame.add(panel);
 			windows.put(id, frame);
-			return new CInt(id, t);
+			return CInt.getFromPool(id, t);
 		}
 
 		@Override

@@ -250,7 +250,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			Number n = (Number) o;
 			if(n.longValue() == n.doubleValue()) {
 				//It's an int
-				return new CInt(n.longValue(), Target.UNKNOWN);
+				return CInt.getFromPool(n.longValue(), Target.UNKNOWN);
 			} else {
 				//It's a double
 				return new CDouble(n.doubleValue(), Target.UNKNOWN);
@@ -323,7 +323,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			if(o instanceof Integer || o instanceof Long || o instanceof Byte || o instanceof BigInteger
 					|| o instanceof AtomicInteger || o instanceof Short) {
 				//integral
-				return new CInt(((Number) o).longValue(), Target.UNKNOWN);
+				return CInt.getFromPool(((Number) o).longValue(), Target.UNKNOWN);
 			} else {
 				//floating point
 				return new CDouble(((Number) o).doubleValue(), Target.UNKNOWN);

@@ -293,7 +293,7 @@ public class CArray extends Construct implements ArrayAccess {
 		if(!associativeMode) {
 			set = new LinkedHashSet<>(array.size());
 			for(int i = 0; i < array.size(); i++) {
-				set.add(new CInt(i, Target.UNKNOWN));
+				set.add(CInt.getFromPool(i, Target.UNKNOWN));
 			}
 		} else {
 			set = new LinkedHashSet<>(associativeArray.size());
@@ -368,7 +368,7 @@ public class CArray extends Construct implements ArrayAccess {
 	}
 
 	public final void set(int index, Construct c, Target t) {
-		this.set(new CInt(index, t), c, t);
+		this.set(CInt.getFromPool(index, t), c, t);
 	}
 
 	/* Shortcuts */
@@ -409,12 +409,12 @@ public class CArray extends Construct implements ArrayAccess {
 	}
 
 	public final Construct get(long index, Target t) {
-		return this.get(new CInt(index, t), t);
+		return this.get(CInt.getFromPool(index, t), t);
 	}
 
 	@Override
 	public final Construct get(int index, Target t) {
-		return this.get(new CInt(index, t), t);
+		return this.get(CInt.getFromPool(index, t), t);
 	}
 
 	@Override
@@ -471,7 +471,7 @@ public class CArray extends Construct implements ArrayAccess {
 		} else {
 			for(int i = 0; i < array.size(); i++) {
 				if(BasicLogic.equals.doEquals(array.get(i), value)) {
-					ret.push(new CInt(i, Target.UNKNOWN), Target.UNKNOWN);
+					ret.push(CInt.getFromPool(i, Target.UNKNOWN), Target.UNKNOWN);
 				}
 			}
 		}
@@ -643,7 +643,7 @@ public class CArray extends Construct implements ArrayAccess {
 	 * @return
 	 */
 	public Construct remove(int i) {
-		return remove(new CInt(i, Target.UNKNOWN));
+		return remove(CInt.getFromPool(i, Target.UNKNOWN));
 	}
 
 	/**

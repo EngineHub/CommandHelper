@@ -531,7 +531,7 @@ public class Sandbox {
 				throw new CRESecurityException("The script cannot access " + file
 						+ " due to restrictions imposed by the base-dir setting.", t);
 			}
-			return new CInt(num, t);
+			return CInt.getFromPool(num, t);
 		}
 
 		private HashMap<File, ParseTree> compileDirectory(File file, Target t) {

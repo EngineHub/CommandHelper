@@ -1075,7 +1075,7 @@ public class Cmdline {
 
 									@Override
 									public Object call() throws Exception {
-										exit.execute(new CInt(exitCode, t));
+										exit.execute(CInt.getFromPool(exitCode, t));
 										return null;
 									}
 								});
@@ -1793,7 +1793,7 @@ public class Cmdline {
 			requireCmdlineMode(environment, this, t);
 			try {
 				int i = new jline.console.ConsoleReader().getTerminal().getWidth();
-				return new CInt(i, t);
+				return CInt.getFromPool(i, t);
 			} catch (IOException ex) {
 				throw new CREIOException(ex.getMessage(), t, ex);
 			}

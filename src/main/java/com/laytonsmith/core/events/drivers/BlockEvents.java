@@ -126,9 +126,9 @@ public class BlockEvents {
 				MCMaterial mat = block.getType();
 				CArray blk = CArray.GetAssociativeArray(t);
 				blk.set("name", mat.getName(), t);
-				blk.set("x", new CInt(block.getX(), t), t);
-				blk.set("y", new CInt(block.getY(), t), t);
-				blk.set("z", new CInt(block.getZ(), t), t);
+				blk.set("x", CInt.getFromPool(block.getX(), t), t);
+				blk.set("y", CInt.getFromPool(block.getY(), t), t);
+				blk.set("z", CInt.getFromPool(block.getZ(), t), t);
 				blk.set("world", new CString(block.getWorld().getName(), t), t);
 				affected.push(blk, t);
 			}
@@ -292,7 +292,7 @@ public class BlockEvents {
 			map.put("drops", drops);
 
 			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
-			map.put("xp", new CInt(event.getExpToDrop(), t));
+			map.put("xp", CInt.getFromPool(event.getExpToDrop(), t));
 
 			return map;
 		}
@@ -431,9 +431,9 @@ public class BlockEvents {
 			MCMaterial agstmat = agstblock.getType();
 			CArray agst = CArray.GetAssociativeArray(t);
 			agst.set("name", agstmat.getName(), t);
-			agst.set("x", new CInt(agstblock.getX(), t), t);
-			agst.set("y", new CInt(agstblock.getY(), t), t);
-			agst.set("z", new CInt(agstblock.getZ(), t), t);
+			agst.set("x", CInt.getFromPool(agstblock.getX(), t), t);
+			agst.set("y", CInt.getFromPool(agstblock.getY(), t), t);
+			agst.set("z", CInt.getFromPool(agstblock.getZ(), t), t);
 			map.put("against", agst);
 
 			map.put("oldblock", new CString(event.getBlockReplacedState().getType().getName(), t));
@@ -1328,7 +1328,7 @@ public class BlockEvents {
 			map.put("location", ObjectGenerator.GetGenerator().location(e.getBlock().getLocation(), false));
 			map.put("instrument", new CString(e.getInstrument().name(), t));
 			map.put("tone", new CString(e.getNote().getTone().name() + (e.getNote().isSharped() ? "#" : ""), t));
-			map.put("octave", new CInt(e.getNote().getOctave(), t));
+			map.put("octave", CInt.unsafeGetFromPool(e.getNote().getOctave()));
 
 			return map;
 		}

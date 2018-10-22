@@ -501,7 +501,7 @@ public class Regex {
 			while(m.find()) {
 				ret++;
 			}
-			return new CInt(ret, t);
+			return CInt.getFromPool(ret, t);
 		}
 
 		@Override

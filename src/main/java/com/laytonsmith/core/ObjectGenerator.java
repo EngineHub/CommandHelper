@@ -231,7 +231,7 @@ public class ObjectGenerator {
 
 		CArray ret = CArray.GetAssociativeArray(t);
 		ret.set("name", new CString(is.getType().getName(), t), t);
-		ret.set("qty", new CInt(is.getAmount(), t), t);
+		ret.set("qty", CInt.getFromPool(is.getAmount(), t), t);
 		ret.set("meta", itemMeta(is, t), t);
 		return ret;
 	}
@@ -413,7 +413,7 @@ public class ObjectGenerator {
 			ma.set("display", display, t);
 			ma.set("lore", lore, t);
 			ma.set("enchants", enchants(meta.getEnchants(), t), t);
-			ma.set("repair", new CInt(meta.getRepairCost(), t), t);
+			ma.set("repair", CInt.getFromPool(meta.getRepairCost(), t), t);
 
 			Set<MCItemFlag> itemFlags = meta.getItemFlags();
 			CArray flagArray = new CArray(t);
@@ -425,7 +425,7 @@ public class ObjectGenerator {
 			ma.set("flags", flagArray, t);
 
 			if(is.getType().getMaxDurability() > 0) {
-				ma.set("damage", new CInt(meta.getDamage(), t), t);
+				ma.set("damage", CInt.getFromPool(meta.getDamage(), t), t);
 				ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t);
 			}
 
@@ -458,11 +458,11 @@ public class ObjectGenerator {
 				} else if(bs instanceof MCCreatureSpawner) {
 					MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
 					ma.set("spawntype", mccs.getSpawnedType().name());
-					ma.set("delay", new CInt(mccs.getDelay(), t), t);
+					ma.set("delay", CInt.getFromPool(mccs.getDelay(), t), t);
 				} else if(bs instanceof MCBrewingStand) {
 					MCBrewingStand brewStand = (MCBrewingStand) bs;
-					ma.set("brewtime", new CInt(brewStand.getBrewingTime(), t), t);
-					ma.set("fuel", new CInt(brewStand.getFuelLevel(), t), t);
+					ma.set("brewtime", CInt.getFromPool(brewStand.getBrewingTime(), t), t);
+					ma.set("fuel", CInt.getFromPool(brewStand.getFuelLevel(), t), t);
 					MCBrewerInventory inv = brewStand.getInventory();
 					CArray invData = CArray.GetAssociativeArray(t);
 					if(inv.getFuel().getAmount() != 0) {
@@ -483,8 +483,8 @@ public class ObjectGenerator {
 					ma.set("inventory", invData, t);
 				} else if(bs instanceof MCFurnace) {
 					MCFurnace furnace = (MCFurnace) bs;
-					ma.set("burntime", new CInt(furnace.getBurnTime(), t), t);
-					ma.set("cooktime", new CInt(furnace.getCookTime(), t), t);
+					ma.set("burntime", CInt.getFromPool(furnace.getBurnTime(), t), t);
+					ma.set("cooktime", CInt.getFromPool(furnace.getCookTime(), t), t);
 					MCFurnaceInventory inv = furnace.getInventory();
 					CArray invData = CArray.GetAssociativeArray(t);
 					if(inv.getResult().getAmount() != 0) {
@@ -509,7 +509,7 @@ public class ObjectGenerator {
 			} else if(meta instanceof MCFireworkMeta) {
 				MCFireworkMeta mcfm = (MCFireworkMeta) meta;
 				CArray firework = CArray.GetAssociativeArray(t);
-				firework.set("strength", new CInt(mcfm.getStrength(), t), t);
+				firework.set("strength", CInt.getFromPool(mcfm.getStrength(), t), t);
 				CArray fe = new CArray(t);
 				for(MCFireworkEffect effect : mcfm.getEffects()) {
 					fe.push(fireworkEffect(effect, t), t);
@@ -585,7 +585,7 @@ public class ObjectGenerator {
 					ma.set("color", color(mapcolor, t), t);
 				}
 				if(mm.hasMapId()) {
-					ma.set("mapid", new CInt(mm.getMapId(), t), t);
+					ma.set("mapid", CInt.getFromPool(mm.getMapId(), t), t);
 				} else {
 					ma.set("mapid", CNull.NULL, t);
 				}
@@ -1015,9 +1015,9 @@ public class ObjectGenerator {
 	 */
 	public CArray color(MCColor color, Target t) {
 		CArray ca = CArray.GetAssociativeArray(t);
-		ca.set("r", new CInt(color.getRed(), t), t);
-		ca.set("g", new CInt(color.getGreen(), t), t);
-		ca.set("b", new CInt(color.getBlue(), t), t);
+		ca.set("r", CInt.getFromPool(color.getRed(), t), t);
+		ca.set("g", CInt.getFromPool(color.getGreen(), t), t);
+		ca.set("b", CInt.getFromPool(color.getBlue(), t), t);
 		return ca;
 	}
 
@@ -1164,7 +1164,7 @@ public class ObjectGenerator {
 		for(Map.Entry<MCEnchantment, Integer> entry : map.entrySet()) {
 			CArray enchant = CArray.GetAssociativeArray(t);
 			enchant.set("etype", new CString(entry.getKey().getName(), t), t);
-			enchant.set("elevel", new CInt(entry.getValue(), t), t);
+			enchant.set("elevel", CInt.getFromPool(entry.getValue(), t), t);
 			ret.set(entry.getKey().getKey(), enchant, t);
 		}
 		return ret;
@@ -1208,8 +1208,8 @@ public class ObjectGenerator {
 		CArray ea = CArray.GetAssociativeArray(t);
 		for(MCLivingEntity.MCEffect eff : effectList) {
 			CArray effect = CArray.GetAssociativeArray(t);
-			effect.set("id", new CInt(eff.getPotionEffectType().getId(), t), t);
-			effect.set("strength", new CInt(eff.getStrength(), t), t);
+			effect.set("id", CInt.getFromPool(eff.getPotionEffectType().getId(), t), t);
+			effect.set("strength", CInt.getFromPool(eff.getStrength(), t), t);
 			effect.set("seconds", new CDouble(eff.getTicksRemaining() / 20.0, t), t);
 			effect.set("ambient", CBoolean.get(eff.isAmbient()), t);
 			effect.set("particles", CBoolean.get(eff.hasParticles()), t);

@@ -638,7 +638,7 @@ public class EntityManagement {
 			if(ent == null) {
 				return CNull.NULL;
 			} else {
-				return new CInt(ent.getTicksLived(), t);
+				return CInt.getFromPool(ent.getTicksLived(), t);
 			}
 		}
 
@@ -970,7 +970,7 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
-			return new CInt(ent.getFireTicks() / 20, t);
+			return CInt.getFromPool(ent.getFireTicks() / 20, t);
 		}
 
 		@Override
@@ -1692,8 +1692,8 @@ public class EntityManagement {
 				case AREA_EFFECT_CLOUD:
 					MCAreaEffectCloud cloud = (MCAreaEffectCloud) entity;
 					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_COLOR, ObjectGenerator.GetGenerator().color(cloud.getColor(), t), t);
-					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_DURATION, new CInt(cloud.getDuration(), t), t);
-					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_DURATIONONUSE, new CInt(cloud.getDurationOnUse(), t), t);
+					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_DURATION, CInt.getFromPool(cloud.getDuration(), t), t);
+					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_DURATIONONUSE, CInt.getFromPool(cloud.getDurationOnUse(), t), t);
 					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_PARTICLE, new CString(cloud.getParticle().name(), t), t);
 					CArray meta = CArray.GetAssociativeArray(t);
 					CArray effects = ObjectGenerator.GetGenerator().potions(cloud.getCustomEffects(), t);
@@ -1703,7 +1703,7 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_RADIUS, new CDouble(cloud.getRadius(), t), t);
 					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_RADIUSONUSE, new CDouble(cloud.getRadiusOnUse(), t), t);
 					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_RADIUSPERTICK, new CDouble(cloud.getRadiusPerTick(), t), t);
-					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_REAPPLICATIONDELAY, new CInt(cloud.getReapplicationDelay(), t), t);
+					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_REAPPLICATIONDELAY, CInt.getFromPool(cloud.getReapplicationDelay(), t), t);
 					MCProjectileSource cloudSource = cloud.getSource();
 					if(cloudSource instanceof MCBlockProjectileSource) {
 						MCLocation blockLocation = ((MCBlockProjectileSource) cloudSource).getBlock().getLocation();
@@ -1715,12 +1715,12 @@ public class EntityManagement {
 					} else {
 						specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_SOURCE, CNull.NULL, t);
 					}
-					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_WAITTIME, new CInt(cloud.getWaitTime(), t), t);
+					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_WAITTIME, CInt.getFromPool(cloud.getWaitTime(), t), t);
 					break;
 				case ARROW:
 					MCArrow arrow = (MCArrow) entity;
 					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(arrow.isCritical()), t);
-					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(arrow.getKnockbackStrength(), t), t);
+					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, CInt.getFromPool(arrow.getKnockbackStrength(), t), t);
 					break;
 				case ARMOR_STAND:
 					MCArmorStand stand = (MCArmorStand) entity;
@@ -1744,22 +1744,22 @@ public class EntityManagement {
 				case CREEPER:
 					MCCreeper creeper = (MCCreeper) entity;
 					specArray.set(entity_spec.KEY_CREEPER_POWERED, CBoolean.get(creeper.isPowered()), t);
-					specArray.set(entity_spec.KEY_CREEPER_MAXFUSETICKS, new CInt(creeper.getMaxFuseTicks(), t), t);
-					specArray.set(entity_spec.KEY_CREEPER_EXPLOSIONRADIUS, new CInt(creeper.getExplosionRadius(), t), t);
+					specArray.set(entity_spec.KEY_CREEPER_MAXFUSETICKS, CInt.getFromPool(creeper.getMaxFuseTicks(), t), t);
+					specArray.set(entity_spec.KEY_CREEPER_EXPLOSIONRADIUS, CInt.getFromPool(creeper.getExplosionRadius(), t), t);
 					break;
 				case DONKEY:
 				case MULE:
 					MCChestedHorse chestedhorse = (MCChestedHorse) entity;
 					specArray.set(entity_spec.KEY_HORSE_CHEST, CBoolean.get(chestedhorse.hasChest()), t);
 					specArray.set(entity_spec.KEY_HORSE_JUMP, new CDouble(chestedhorse.getJumpStrength(), t), t);
-					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, new CInt(chestedhorse.getDomestication(), t), t);
-					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, new CInt(chestedhorse.getMaxDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, CInt.getFromPool(chestedhorse.getDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, CInt.getFromPool(chestedhorse.getMaxDomestication(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(chestedhorse.getSaddle(), t), t);
 					break;
 				case DROPPED_ITEM:
 					MCItem item = (MCItem) entity;
 					specArray.set(entity_spec.KEY_DROPPED_ITEM_ITEMSTACK, ObjectGenerator.GetGenerator().item(item.getItemStack(), t), t);
-					specArray.set(entity_spec.KEY_DROPPED_ITEM_PICKUPDELAY, new CInt(item.getPickupDelay(), t), t);
+					specArray.set(entity_spec.KEY_DROPPED_ITEM_PICKUPDELAY, CInt.getFromPool(item.getPickupDelay(), t), t);
 					break;
 				case ENDER_CRYSTAL:
 					MCEnderCrystal endercrystal = (MCEnderCrystal) entity;
@@ -1774,7 +1774,7 @@ public class EntityManagement {
 					break;
 				case ENDER_EYE:
 					MCEnderSignal endereye = (MCEnderSignal) entity;
-					specArray.set(entity_spec.KEY_ENDEREYE_DESPAWNTICKS, new CInt(endereye.getDespawnTicks(), t), t);
+					specArray.set(entity_spec.KEY_ENDEREYE_DESPAWNTICKS, CInt.getFromPool(endereye.getDespawnTicks(), t), t);
 					specArray.set(entity_spec.KEY_ENDEREYE_DROP, CBoolean.get(endereye.getDropItem()), t);
 					specArray.set(entity_spec.KEY_ENDEREYE_TARGET, ObjectGenerator.GetGenerator().location(endereye.getTargetLocation(), false), t);
 					break;
@@ -1798,7 +1798,7 @@ public class EntityManagement {
 					break;
 				case EXPERIENCE_ORB:
 					MCExperienceOrb orb = (MCExperienceOrb) entity;
-					specArray.set(entity_spec.KEY_EXPERIENCE_ORB_AMOUNT, new CInt(orb.getExperience(), t), t);
+					specArray.set(entity_spec.KEY_EXPERIENCE_ORB_AMOUNT, CInt.getFromPool(orb.getExperience(), t), t);
 					break;
 				case FALLING_BLOCK:
 					MCFallingBlock block = (MCFallingBlock) entity;
@@ -1816,8 +1816,8 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_HORSE_COLOR, new CString(horse.getColor().name(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_STYLE, new CString(horse.getPattern().name(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_JUMP, new CDouble(horse.getJumpStrength(), t), t);
-					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, new CInt(horse.getDomestication(), t), t);
-					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, new CInt(horse.getMaxDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, CInt.getFromPool(horse.getDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, CInt.getFromPool(horse.getMaxDomestication(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_ARMOR, ObjectGenerator.GetGenerator().item(horse.getArmor(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(horse.getSaddle(), t), t);
 					break;
@@ -1847,14 +1847,14 @@ public class EntityManagement {
 					MCLlama llama = (MCLlama) entity;
 					specArray.set(entity_spec.KEY_HORSE_COLOR, new CString(llama.getLlamaColor().name(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_CHEST, CBoolean.get(llama.hasChest()), t);
-					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, new CInt(llama.getDomestication(), t), t);
-					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, new CInt(llama.getMaxDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, CInt.getFromPool(llama.getDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, CInt.getFromPool(llama.getMaxDomestication(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(llama.getSaddle(), t), t);
 					break;
 				case MAGMA_CUBE:
 				case SLIME:
 					MCSlime cube = (MCSlime) entity;
-					specArray.set(entity_spec.KEY_SLIME_SIZE, new CInt(cube.getSize(), t), t);
+					specArray.set(entity_spec.KEY_SLIME_SIZE, CInt.getFromPool(cube.getSize(), t), t);
 					break;
 				case MINECART:
 				case MINECART_FURNACE:
@@ -1863,14 +1863,14 @@ public class EntityManagement {
 				case MINECART_TNT:
 					MCMinecart minecart = (MCMinecart) entity;
 					specArray.set(entity_spec.KEY_MINECART_BLOCK, new CString(minecart.getDisplayBlock().getMaterial().getName(), t), t);
-					specArray.set(entity_spec.KEY_MINECART_OFFSET, new CInt(minecart.getDisplayBlockOffset(), t), t);
+					specArray.set(entity_spec.KEY_MINECART_OFFSET, CInt.getFromPool(minecart.getDisplayBlockOffset(), t), t);
 					break;
 				case MINECART_COMMAND:
 					MCCommandMinecart commandminecart = (MCCommandMinecart) entity;
 					specArray.set(entity_spec.KEY_MINECART_COMMAND_COMMAND, new CString(commandminecart.getCommand(), t), t);
 					specArray.set(entity_spec.KEY_MINECART_COMMAND_CUSTOMNAME, new CString(commandminecart.getName(), t), t);
 					specArray.set(entity_spec.KEY_MINECART_BLOCK, new CString(commandminecart.getDisplayBlock().getMaterial().getName(), t), t);
-					specArray.set(entity_spec.KEY_MINECART_OFFSET, new CInt(commandminecart.getDisplayBlockOffset(), t), t);
+					specArray.set(entity_spec.KEY_MINECART_OFFSET, CInt.getFromPool(commandminecart.getDisplayBlockOffset(), t), t);
 					break;
 				case OCELOT:
 					MCOcelot ocelot = (MCOcelot) entity;
@@ -1893,12 +1893,12 @@ public class EntityManagement {
 				case PIG_ZOMBIE:
 					MCPigZombie pigZombie = (MCPigZombie) entity;
 					specArray.set(entity_spec.KEY_PIG_ZOMBIE_ANGRY, CBoolean.get(pigZombie.isAngry()), t);
-					specArray.set(entity_spec.KEY_PIG_ZOMBIE_ANGER, new CInt(pigZombie.getAnger(), t), t);
+					specArray.set(entity_spec.KEY_PIG_ZOMBIE_ANGER, CInt.getFromPool(pigZombie.getAnger(), t), t);
 					specArray.set(entity_spec.KEY_ZOMBIE_BABY, CBoolean.get(pigZombie.isBaby()), t);
 					break;
 				case PRIMED_TNT:
 					MCTNT tnt = (MCTNT) entity;
-					specArray.set(entity_spec.KEY_PRIMED_TNT_FUSETICKS, new CInt(tnt.getFuseTicks(), t), t);
+					specArray.set(entity_spec.KEY_PRIMED_TNT_FUSETICKS, CInt.getFromPool(tnt.getFuseTicks(), t), t);
 					MCEntity source = tnt.getSource();
 					if(source != null) {
 						specArray.set(entity_spec.KEY_PRIMED_TNT_SOURCE, new CString(source.getUniqueId().toString(), t), t);
@@ -1932,8 +1932,8 @@ public class EntityManagement {
 				case ZOMBIE_HORSE:
 					MCAbstractHorse undeadhorse = (MCAbstractHorse) entity;
 					specArray.set(entity_spec.KEY_HORSE_JUMP, new CDouble(undeadhorse.getJumpStrength(), t), t);
-					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, new CInt(undeadhorse.getDomestication(), t), t);
-					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, new CInt(undeadhorse.getMaxDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_DOMESTICATION, CInt.getFromPool(undeadhorse.getDomestication(), t), t);
+					specArray.set(entity_spec.KEY_HORSE_MAXDOMESTICATION, CInt.getFromPool(undeadhorse.getMaxDomestication(), t), t);
 					specArray.set(entity_spec.KEY_HORSE_SADDLE, ObjectGenerator.GetGenerator().item(undeadhorse.getSaddle(), t), t);
 					break;
 				case SNOWMAN:
@@ -1948,7 +1948,7 @@ public class EntityManagement {
 				case TIPPED_ARROW:
 					MCTippedArrow tippedarrow = (MCTippedArrow) entity;
 					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(tippedarrow.isCritical()), t);
-					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(tippedarrow.getKnockbackStrength(), t), t);
+					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, CInt.getFromPool(tippedarrow.getKnockbackStrength(), t), t);
 					CArray tippedmeta = CArray.GetAssociativeArray(t);
 					CArray tippedeffects = ObjectGenerator.GetGenerator().potions(tippedarrow.getCustomEffects(), t);
 					tippedmeta.set("potions", tippedeffects, t);

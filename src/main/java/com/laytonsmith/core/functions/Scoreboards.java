@@ -189,7 +189,7 @@ public class Scoreboards {
 		to.set("displayname", new CString(team.getDisplayName(), t), t);
 		to.set("prefix", new CString(team.getPrefix(), t), t);
 		to.set("suffix", new CString(team.getSuffix(), t), t);
-		to.set("size", new CInt(team.getSize(), t), t);
+		to.set("size", CInt.getFromPool(team.getSize(), t), t);
 		CArray ops = CArray.GetAssociativeArray(t);
 		ops.set("friendlyfire", CBoolean.get(team.allowFriendlyFire()), t);
 		ops.set("friendlyinvisibles", CBoolean.get(team.canSeeFriendlyInvisibles()), t);
@@ -1038,7 +1038,7 @@ public class Scoreboards {
 			if(o == null) {
 				throw new CREScoreboardException("The given objective does not exist.", t);
 			}
-			return new CInt(o.getScore(args[1].val()).getScore(), t);
+			return CInt.getFromPool(o.getScore(args[1].val()).getScore(), t);
 		}
 
 		@Override

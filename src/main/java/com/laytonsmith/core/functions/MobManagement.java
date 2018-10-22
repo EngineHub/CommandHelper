@@ -562,7 +562,7 @@ public class MobManagement {
 				return CNull.NULL;
 			} else if(ent instanceof MCAgeable) {
 				MCAgeable mob = ((MCAgeable) ent);
-				return new CInt(mob.getAge(), t);
+				return CInt.getFromPool(mob.getAge(), t);
 			} else {
 				throw new CREUnageableMobException("The specified entity does not age", t);
 			}
@@ -1258,7 +1258,7 @@ public class MobManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CInt(Static.getLivingEntity(args[0], t).getRemainingAir(), t);
+			return CInt.getFromPool(Static.getLivingEntity(args[0], t).getRemainingAir(), t);
 		}
 
 		@Override
@@ -1307,7 +1307,7 @@ public class MobManagement {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CInt(Static.getLivingEntity(args[0], t).getMaximumAir(), t);
+			return CInt.getFromPool(Static.getLivingEntity(args[0], t).getMaximumAir(), t);
 		}
 
 		@Override

@@ -151,7 +151,7 @@ public final class Static {
 	public static CNumber getNumber(Number number, Target t) {
 		long longValue = number.longValue();
 		double doubleValue = number.doubleValue();
-		return longValue == doubleValue ? new CInt(longValue, t) : new CDouble(doubleValue, t);
+		return longValue == doubleValue ? CInt.getFromPool(longValue, t) : new CDouble(doubleValue, t);
 	}
 
 	/**
@@ -487,20 +487,20 @@ public final class Static {
 		}
 		if(VALID_HEX.matcher(val).matches()) {
 			//Hex number
-			return new CInt(Long.parseLong(val.substring(2), 16), t);
+			return CInt.getFromPool(Long.parseLong(val.substring(2), 16), t);
 		}
 		if(INVALID_BINARY.matcher(val).matches()) {
 			throw new CREFormatException("Binary numbers must only contain digits 0 and 1, but \"" + val + "\" was found.", t);
 		}
 		if(VALID_BINARY.matcher(val).matches()) {
 			//Binary number
-			return new CInt(Long.parseLong(val.substring(2), 2), t);
+			return CInt.getFromPool(Long.parseLong(val.substring(2), 2), t);
 		}
 		if(INVALID_OCTAL.matcher(val).matches()) {
 			throw new CREFormatException("Octal numbers must only contain digits 0-7, but \"" + val + "\" was found.", t);
 		}
 		if(VALID_OCTAL.matcher(val).matches()) {
-			return new CInt(Long.parseLong(val.substring(2), 8), t);
+			return CInt.getFromPool(Long.parseLong(val.substring(2), 8), t);
 		}
 		if(INVALID_DECIMAL.matcher(val).matches()) {
 			throw new CREFormatException("Decimal numbers must only contain digits, but \"" + val + "\" was found.", t);
@@ -509,7 +509,7 @@ public final class Static {
 			return new CDecimal(val.substring(2), t);
 		}
 		try {
-			return new CInt(Long.parseLong(val), t);
+			return CInt.getFromPool(Long.parseLong(val), t);
 		} catch (NumberFormatException e) {
 			try {
 				if(!(val.contains(" ") || val.contains("\t"))) {
@@ -1328,7 +1328,7 @@ public final class Static {
 		} else if(object instanceof Boolean) {
 			return CBoolean.get((boolean) object);
 		} else if((object instanceof Byte) || (object instanceof Short) || (object instanceof Integer) || (object instanceof Long)) {
-			return new CInt((long) object, t);
+			return CInt.getFromPool((long) object, t);
 		} else if((object instanceof Float) || (object instanceof Double)) {
 			return new CDouble((double) object, t);
 		} else if(object instanceof Character) {
@@ -1366,21 +1366,21 @@ public final class Static {
 			short[] array = (short[]) object;
 			CArray r = new CArray(t);
 			for(short s : array) {
-				r.push(new CInt(s, t), t);
+				r.push(CInt.getFromPool(s, t), t);
 			}
 			return r;
 		} else if(object instanceof int[]) {
 			int[] array = (int[]) object;
 			CArray r = new CArray(t);
 			for(int i : array) {
-				r.push(new CInt(i, t), t);
+				r.push(CInt.getFromPool(i, t), t);
 			}
 			return r;
 		} else if(object instanceof long[]) {
 			long[] array = (long[]) object;
 			CArray r = new CArray(t);
 			for(long l : array) {
-				r.push(new CInt(l, t), t);
+				r.push(CInt.getFromPool(l, t), t);
 			}
 			return r;
 		} else if(object instanceof float[]) {

@@ -675,7 +675,7 @@ public class EntityEvents {
 				map.put("type", new CString(dead.getType().name(), t));
 				map.put("id", new CString(dead.getUniqueId().toString(), t));
 				map.put("drops", drops);
-				map.put("xp", new CInt(e.getDroppedExp(), t));
+				map.put("xp", CInt.getFromPool(e.getDroppedExp(), t));
 				CArray cod = CArray.GetAssociativeArray(t);
 				Map<String, Construct> ldc = parseEntityDamageEvent(dead.getLastDamageCause(),
 						new HashMap<String, Construct>());
@@ -1242,7 +1242,7 @@ public class EntityEvents {
 				Map<String, Construct> map = evaluate_helper(e);
 				map.put("id", new CString(event.getItem().getUniqueId().toString(), Target.UNKNOWN));
 				map.put("item", ObjectGenerator.GetGenerator().item(event.getItem().getItemStack(), Target.UNKNOWN));
-				map.put("remaining", new CInt(event.getRemaining(), Target.UNKNOWN));
+				map.put("remaining", CInt.getFromPool(event.getRemaining(), Target.UNKNOWN));
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to MCPlayerPickupItemEvent");
@@ -2132,8 +2132,8 @@ public class EntityEvents {
 				} else {
 					ret.put("to", ObjectGenerator.GetGenerator().location(to));
 				}
-				ret.put("creationradius", new CInt(event.getPortalTravelAgent().getCreationRadius(), t));
-				ret.put("searchradius", new CInt(event.getPortalTravelAgent().getSearchRadius(), t));
+				ret.put("creationradius", CInt.getFromPool(event.getPortalTravelAgent().getCreationRadius(), t));
+				ret.put("searchradius", CInt.getFromPool(event.getPortalTravelAgent().getSearchRadius(), t));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCEntityPortalEvent");

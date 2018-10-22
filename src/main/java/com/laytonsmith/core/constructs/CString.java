@@ -5,7 +5,6 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
-import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
@@ -105,7 +104,7 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 
 	@Override
 	public Set<Construct> keySet() {
-		return new AbstractSet<Construct>(){
+		return new AbstractSet<Construct>() {
 			@Override
 			public int size() {
 				return CString.this.val().length();
@@ -122,7 +121,7 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 
 					@Override
 					public Construct next() {
-						return new CInt(i++, Target.UNKNOWN);
+						return CInt.getFromPool(i++, Target.UNKNOWN);
 					}
 				};
 			}

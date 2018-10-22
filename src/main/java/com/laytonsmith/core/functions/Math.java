@@ -83,7 +83,7 @@ public class Math {
 				for(int i = 1; i < args.length; i++) {
 					tally += Static.getInt(args[i], t);
 				}
-				return new CInt(tally, t);
+				return CInt.getFromPool(tally, t);
 			}
 		}
 
@@ -165,7 +165,7 @@ public class Math {
 				for(int i = 1; i < args.length; i++) {
 					tally -= Static.getInt(args[i], t);
 				}
-				return new CInt(tally, t);
+				return CInt.getFromPool(tally, t);
 			}
 		}
 
@@ -238,7 +238,7 @@ public class Math {
 				for(int i = 1; i < args.length; i++) {
 					tally *= Static.getInt(args[i], t);
 				}
-				return new CInt(tally, t);
+				return CInt.getFromPool(tally, t);
 			}
 		}
 
@@ -316,7 +316,7 @@ public class Math {
 				tally /= next;
 			}
 			if(tally == (int) tally) {
-				return new CInt((long) tally, t);
+				return CInt.getFromPool((long) tally, t);
 			} else {
 				return new CDouble(tally, t);
 			}
@@ -387,7 +387,7 @@ public class Math {
 			if(arg2 == 0) {
 				throw new CRERangeException("Modulo by 0!", t);
 			}
-			return new CInt(arg1 % arg2, t);
+			return CInt.getFromPool(arg1 % arg2, t);
 		}
 
 		@Override
@@ -518,7 +518,7 @@ public class Math {
 				ParseTree eval = nodes[0];
 				Construct array = parent.seval(eval.getChildAt(0), env);
 				Construct index = parent.seval(eval.getChildAt(1), env);
-				Construct cdelta = new CInt(1, t);
+				Construct cdelta = CInt.unsafeGetFromPool(1);
 				if(nodes.length == 2) {
 					cdelta = parent.seval(nodes[1], env);
 				}
@@ -547,7 +547,7 @@ public class Math {
 						} else {
 							newVal = temp - delta;
 						}
-						new ArrayHandling.array_set().exec(t, env, array, index, new CInt(newVal, t));
+						new ArrayHandling.array_set().exec(t, env, array, index, CInt.getFromPool(newVal, t));
 					} else {
 						throw new CRECastException("Cannot increment/decrement a non numeric value.", t);
 					}
@@ -558,7 +558,7 @@ public class Math {
 				} else {
 					valueToReturn = temp;
 				}
-				return new CInt(valueToReturn, t);
+				return CInt.getFromPool(valueToReturn, t);
 			}
 		}
 		Construct[] args = new Construct[nodes.length];
@@ -609,7 +609,7 @@ public class Math {
 				if(Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival(), t) + value, t);
 				} else {
-					newVal = new CInt(Static.getInt(v.ival(), t) + value, t);
+					newVal = CInt.getFromPool(Static.getInt(v.ival(), t) + value, t);
 				}
 				if(v.ival() instanceof CMutablePrimitive) {
 					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
@@ -620,7 +620,7 @@ public class Math {
 			} else if(Static.anyDoubles(args[0])) {
 				return new CDouble(Static.getNumber(args[0], t) + value, t);
 			} else {
-				return new CInt(Static.getInt(args[0], t) + value, t);
+				return CInt.getFromPool(Static.getInt(args[0], t) + value, t);
 			}
 
 		}
@@ -725,7 +725,7 @@ public class Math {
 				if(Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival(), t) + value, t);
 				} else {
-					newVal = new CInt(Static.getInt(v.ival(), t) + value, t);
+					newVal = CInt.getFromPool(Static.getInt(v.ival(), t) + value, t);
 				}
 				if(v.ival() instanceof CMutablePrimitive) {
 					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
@@ -742,7 +742,7 @@ public class Math {
 			} else if(Static.anyDoubles(args[0])) {
 				return new CDouble(Static.getNumber(args[0], t) + value, t);
 			} else {
-				return new CInt(Static.getInt(args[0], t) + value, t);
+				return CInt.getFromPool(Static.getInt(args[0], t) + value, t);
 			}
 		}
 
@@ -851,7 +851,7 @@ public class Math {
 				if(Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival(), t) - value, t);
 				} else {
-					newVal = new CInt(Static.getInt(v.ival(), t) - value, t);
+					newVal = CInt.getFromPool(Static.getInt(v.ival(), t) - value, t);
 				}
 				if(v.ival() instanceof CMutablePrimitive) {
 					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
@@ -862,7 +862,7 @@ public class Math {
 			} else if(Static.anyDoubles(args[0])) {
 				return new CDouble(Static.getNumber(args[0], t) - value, t);
 			} else {
-				return new CInt(Static.getInt(args[0], t) - value, t);
+				return CInt.getFromPool(Static.getInt(args[0], t) - value, t);
 			}
 		}
 
@@ -967,7 +967,7 @@ public class Math {
 				if(Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival(), t) - value, t);
 				} else {
-					newVal = new CInt(Static.getInt(v.ival(), t) - value, t);
+					newVal = CInt.getFromPool(Static.getInt(v.ival(), t) - value, t);
 				}
 				if(v.ival() instanceof CMutablePrimitive) {
 					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
@@ -984,7 +984,7 @@ public class Math {
 			} else if(Static.anyDoubles(args[0])) {
 				return new CDouble(Static.getNumber(args[0], t) - value, t);
 			} else {
-				return new CInt(Static.getInt(args[0], t) - value, t);
+				return CInt.getFromPool(Static.getInt(args[0], t) - value, t);
 			}
 		}
 
@@ -1113,7 +1113,7 @@ public class Math {
 				long rand = java.lang.Math.abs(r.nextLong());
 				long i = (rand % (range)) + min;
 
-				return new CInt(i, t);
+				return CInt.getFromPool(i, t);
 			}
 		}
 
@@ -1174,7 +1174,7 @@ public class Math {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CInt) {
-				return new CInt(java.lang.Math.abs(Static.getInt(args[0], t)), t);
+				return CInt.getFromPool(java.lang.Math.abs(Static.getInt(args[0], t)), t);
 			} else {
 				return new CDouble(java.lang.Math.abs(Static.getDouble(args[0], t)), t);
 			}
@@ -1237,7 +1237,7 @@ public class Math {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CInt((long) java.lang.Math.floor(Static.getNumber(args[0], t)), t);
+			return CInt.getFromPool((long) java.lang.Math.floor(Static.getNumber(args[0], t)), t);
 		}
 
 		@Override
@@ -1289,7 +1289,7 @@ public class Math {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CInt((long) java.lang.Math.ceil(Static.getNumber(args[0], t)), t);
+			return CInt.getFromPool((long) java.lang.Math.ceil(Static.getNumber(args[0], t)), t);
 		}
 
 		@Override
@@ -1348,7 +1348,7 @@ public class Math {
 			}
 			double m = java.lang.Math.sqrt(d);
 			if(m == (int) m) {
-				return new CInt((long) m, t);
+				return CInt.getFromPool((long) m, t);
 			} else {
 				return new CDouble(m, t);
 			}
@@ -1417,7 +1417,7 @@ public class Math {
 				}
 			}
 			if(lowest == (long) lowest) {
-				return new CInt((long) lowest, t);
+				return CInt.getFromPool((long) lowest, t);
 			} else {
 				return new CDouble(lowest, t);
 			}
@@ -1499,7 +1499,7 @@ public class Math {
 				}
 			}
 			if(highest == (long) highest) {
-				return new CInt((long) highest, t);
+				return CInt.getFromPool((long) highest, t);
 			} else {
 				return new CDouble(highest, t);
 			}
@@ -2451,7 +2451,7 @@ public class Math {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CInt) {
-				return new CInt(-(Static.getInt(args[0], t)), t);
+				return CInt.getFromPool(-(Static.getInt(args[0], t)), t);
 			} else {
 				return new CDouble(-(Static.getDouble(args[0], t)), t);
 			}
@@ -2612,7 +2612,7 @@ public class Math {
 				if(v instanceof Double) {
 					return new CDouble((Double) c.getValue(), t);
 				} else {
-					return new CInt((Integer) c.getValue(), t);
+					return CInt.getFromPool((Integer) c.getValue(), t);
 				}
 			} catch (IllegalArgumentException ex) {
 				throw new CRECastException("No constant with the value " + args[0].val() + " exists.", t);

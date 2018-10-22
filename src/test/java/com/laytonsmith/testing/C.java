@@ -44,7 +44,7 @@ public class C {
 	}
 
 	public static CInt Int(long val) {
-		return new CInt(val, Target.UNKNOWN);
+		return CInt.getFromPool(val, Target.UNKNOWN);
 	}
 
 	public static CNull Null() {

@@ -152,7 +152,7 @@ public class ByteArrays {
 			CByteArray ba = getBA(args, t);
 			Integer pos = get_getPos(args, t);
 			try {
-				return new CInt(ba.getByte(pos), t);
+				return CInt.getFromPool(ba.getByte(pos), t);
 			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
 			}
@@ -216,7 +216,7 @@ public class ByteArrays {
 			CByteArray ba = getBA(args, t);
 			Integer pos = get_getPos(args, t);
 			try {
-				return new CInt(ba.getShort(pos), t);
+				return CInt.getFromPool(ba.getShort(pos), t);
 			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
 			}
@@ -247,7 +247,7 @@ public class ByteArrays {
 			CByteArray ba = getBA(args, t);
 			Integer pos = get_getPos(args, t);
 			try {
-				return new CInt(ba.getInt(pos), t);
+				return CInt.getFromPool(ba.getInt(pos), t);
 			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
 			}
@@ -279,7 +279,7 @@ public class ByteArrays {
 			CByteArray ba = getBA(args, t);
 			Integer pos = get_getPos(args, t);
 			try {
-				return new CInt(ba.getLong(pos), t);
+				return CInt.getFromPool(ba.getLong(pos), t);
 			} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 				throw new CRERangeException(e.getMessage(), t);
 			}

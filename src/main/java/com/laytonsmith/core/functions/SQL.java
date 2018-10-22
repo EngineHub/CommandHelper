@@ -228,7 +228,7 @@ public class SQL {
 									case Types.TINYINT:
 									case Types.SMALLINT:
 									case Types.BIGINT:
-										value = new CInt(rs.getLong(i), t);
+										value = CInt.getFromPool(rs.getLong(i), t);
 										break;
 									case Types.FLOAT:
 									case Types.DOUBLE:
@@ -252,14 +252,14 @@ public class SQL {
 									case Types.TIME:
 									case Types.TIMESTAMP:
 										if(md.getColumnTypeName(i).equals("YEAR")) {
-											value = new CInt(rs.getLong(i), t);
+											value = CInt.getFromPool(rs.getLong(i), t);
 										} else if(rs.getTimestamp(i) == null) {
 											// Normally we check for null below, but since
 											// we want to dereference the value now, we have
 											// to have a specific null check here.
 											value = CNull.NULL;
 										} else {
-											value = new CInt(rs.getTimestamp(i).getTime(), t);
+											value = CInt.getFromPool(rs.getTimestamp(i).getTime(), t);
 										}
 										break;
 									case Types.BOOLEAN:
@@ -289,7 +289,7 @@ public class SQL {
 						if(rs.next()) {
 							//This was an insert or something that returned generated keys. So we return
 							//that here.
-							return new CInt(rs.getInt(1), t);
+							return CInt.getFromPool(rs.getInt(1), t);
 						}
 						//Update count. Just return null.
 						return CNull.NULL;

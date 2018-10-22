@@ -1764,7 +1764,7 @@ public class Environment {
 				w = pl.getWorld();
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			return new CInt(loc.getBlock().getLightLevel(), t);
+			return CInt.getFromPool(loc.getBlock().getLightLevel(), t);
 		}
 	}
 
@@ -1907,7 +1907,7 @@ public class Environment {
 				w = pl.getWorld();
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			return new CInt(loc.getBlock().getBlockPower(), t);
+			return CInt.getFromPool(loc.getBlock().getBlockPower(), t);
 		}
 	}
 

@@ -127,7 +127,7 @@ public class Web {
 			c.set("value", cookie.getValue());
 			c.set("domain", cookie.getDomain());
 			c.set("path", cookie.getPath());
-			c.set("expiration", new CInt(cookie.getExpiration(), t), t);
+			c.set("expiration", CInt.getFromPool(cookie.getExpiration(), t), t);
 			c.set("httpOnly", CBoolean.get(cookie.isHttpOnly()), t);
 			c.set("secureOnly", CBoolean.get(cookie.isSecureOnly()), t);
 			if(!update) {
@@ -425,7 +425,7 @@ public class Web {
 							headers.set(key, h, t);
 						}
 						array.set("headers", headers, t);
-						array.set("responseCode", new CInt(resp.getResponseCode(), t), t);
+						array.set("responseCode", CInt.getFromPool(resp.getResponseCode(), t), t);
 						array.set("responseText", resp.getResponseText());
 						array.set("httpVersion", resp.getHttpVersion());
 						array.set("error", CBoolean.get(resp.getResponseCode() >= 400 && resp.getResponseCode() < 600), t);
@@ -782,10 +782,10 @@ public class Web {
 			String host = ArgumentValidation.getItemFromArray(options, "host", t, new CString("localhost", t)).val();
 			final String mailUser = ArgumentValidation.getItemFromArray(options, "user", t, new CString("", t)).val();
 			final String mailPassword = ArgumentValidation.getItemFromArray(options, "password", t, new CString("", t)).val();
-			int mailPort = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "port", t, new CInt(587, t)), t);
+			int mailPort = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "port", t, CInt.getFromPool(587, t)), t);
 			boolean useSSL = ArgumentValidation.getBoolean(ArgumentValidation.getItemFromArray(options, "use_ssl", t, CBoolean.FALSE), t);
 			boolean useStartTLS = ArgumentValidation.getBoolean(ArgumentValidation.getItemFromArray(options, "use_start_tls", t, CBoolean.FALSE), t);
-			int timeout = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "timeout", t, new CInt(10000, t)), t);
+			int timeout = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "timeout", t, CInt.getFromPool(10000, t)), t);
 
 			//Standard email options
 			String from = ArgumentValidation.getItemFromArray(options, "from", t, null).val();

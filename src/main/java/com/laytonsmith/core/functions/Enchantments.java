@@ -518,7 +518,7 @@ public class Enchantments {
 				MCEnchantment e = entry.getKey();
 				Integer l = entry.getValue();
 				enchants.push(new CString(e.getName(), t), t);
-				levels.push(new CInt(l, t), t);
+				levels.push(CInt.unsafeGetFromPool(l), t);
 			}
 
 			return new CArray(t, enchants, levels);
@@ -737,7 +737,7 @@ public class Enchantments {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEnchantment e = GetEnchantment(args[0].val().replace(' ', '_'), t);
-			return new CInt(e.getMaxLevel(), t);
+			return CInt.getFromPool(e.getMaxLevel(), t);
 		}
 	}
 

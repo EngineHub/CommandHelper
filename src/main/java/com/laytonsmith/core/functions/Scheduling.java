@@ -123,7 +123,7 @@ public class Scheduling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			return new CInt(System.currentTimeMillis(), t);
+			return CInt.getFromPool(System.currentTimeMillis(), t);
 		}
 	}
 
@@ -168,7 +168,7 @@ public class Scheduling {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			return new CInt(System.nanoTime(), t);
+			return CInt.getFromPool(System.nanoTime(), t);
 		}
 	}
 
@@ -300,7 +300,7 @@ public class Scheduling {
 					}
 				}
 			}));
-			return new CInt(ret.get(), t);
+			return CInt.getFromPool(ret.get(), t);
 		}
 
 		@Override
@@ -398,14 +398,14 @@ public class Scheduling {
 				@Override
 				public void run() {
 					if(isRunning.get()) {
-						new clear_task().exec(t, environment, new CInt(ret.get(), t));
+						new clear_task().exec(t, environment, CInt.getFromPool(ret.get(), t));
 						environment.getEnv(GlobalEnv.class).SetInterrupt(true);
 						taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.KILLED);
 					}
 				}
 			}));
 			taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.IDLE);
-			return new CInt(ret.get(), t);
+			return CInt.getFromPool(ret.get(), t);
 		}
 
 		@Override
@@ -641,7 +641,7 @@ public class Scheduling {
 			try {
 				dateFormat = new SimpleDateFormat(args[0].toString());
 				Date d = dateFormat.parse(args[1].val());
-				return new CInt(d.getTime(), t);
+				return CInt.getFromPool(d.getTime(), t);
 			} catch (IllegalArgumentException | ParseException ex) {
 				throw new CREFormatException(ex.getMessage(), t);
 			}
@@ -879,7 +879,7 @@ public class Scheduling {
 				CRON_JOBS.put(jobID, format);
 				format.job.getEnv().getEnv(GlobalEnv.class).SetCustom("cron-task-id", jobID);
 			}
-			return new CInt(jobID, t);
+			return CInt.getFromPool(jobID, t);
 		}
 
 		private static final Map<String, Integer> MONTHS = new HashMap<String, Integer>();

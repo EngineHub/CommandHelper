@@ -490,8 +490,8 @@ public class World {
 			CArray ret = new CArray(t);
 			for(MCChunk c : chunks) {
 				CArray chunk = CArray.GetAssociativeArray(t);
-				chunk.set("x", new CInt(c.getX(), t), t);
-				chunk.set("z", new CInt(c.getZ(), t), t);
+				chunk.set("x", CInt.getFromPool(c.getX(), t), t);
+				chunk.set("z", CInt.getFromPool(c.getZ(), t), t);
 				chunk.set("world", c.getWorld().getName(), t);
 				ret.push(chunk, t);
 			}
@@ -870,7 +870,7 @@ public class World {
 			if(w == null) {
 				throw new CREInvalidWorldException("No world specified", t);
 			}
-			return new CInt(w.getTime(), t);
+			return CInt.getFromPool(w.getTime(), t);
 		}
 	}
 
@@ -1046,11 +1046,11 @@ public class World {
 			}
 
 			CArray chunk = new CArray(t,
-					new CInt(l.getChunk().getX(), t),
-					new CInt(l.getChunk().getZ(), t),
+					CInt.getFromPool(l.getChunk().getX(), t),
+					CInt.getFromPool(l.getChunk().getZ(), t),
 					new CString(l.getChunk().getWorld().getName(), t));
-			chunk.set("x", new CInt(l.getChunk().getX(), t), t);
-			chunk.set("z", new CInt(l.getChunk().getZ(), t), t);
+			chunk.set("x", CInt.getFromPool(l.getChunk().getX(), t), t);
+			chunk.set("z", CInt.getFromPool(l.getChunk().getZ(), t), t);
 			chunk.set("world", l.getChunk().getWorld().getName(), t);
 			return chunk;
 		}
@@ -1188,12 +1188,12 @@ public class World {
 			}
 			CArray ret = CArray.GetAssociativeArray(t);
 			ret.set("name", new CString(w.getName(), t), t);
-			ret.set("seed", new CInt(w.getSeed(), t), t);
+			ret.set("seed", CInt.getFromPool(w.getSeed(), t), t);
 			ret.set("environment", new CString(w.getEnvironment().name(), t), t);
 			ret.set("generator", new CString(w.getGenerator(), t), t);
 			ret.set("worldtype", new CString(w.getWorldType().name(), t), t);
-			ret.set("sealevel", new CInt(w.getSeaLevel(), t), t);
-			ret.set("maxheight", new CInt(w.getMaxHeight(), t), t);
+			ret.set("sealevel", CInt.getFromPool(w.getSeaLevel(), t), t);
+			ret.set("maxheight", CInt.getFromPool(w.getMaxHeight(), t), t);
 			return ret;
 		}
 
@@ -2075,8 +2075,8 @@ public class World {
 			ret.set("center", ObjectGenerator.GetGenerator().location(wb.getCenter(), false), t);
 			ret.set("damagebuffer", new CDouble(wb.getDamageBuffer(), t), t);
 			ret.set("damageamount", new CDouble(wb.getDamageAmount(), t), t);
-			ret.set("warningtime", new CInt(wb.getWarningTime(), t), t);
-			ret.set("warningdistance", new CInt(wb.getWarningDistance(), t), t);
+			ret.set("warningtime", CInt.getFromPool(wb.getWarningTime(), t), t);
+			ret.set("warningdistance", CInt.getFromPool(wb.getWarningDistance(), t), t);
 			return ret;
 		}
 

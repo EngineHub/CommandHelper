@@ -532,7 +532,7 @@ public class ConfigRuntimeException extends RuntimeException {
 				}
 				element.set("file", name);
 			}
-			element.set("line", new CInt(getDefinedAt().line(), Target.UNKNOWN), Target.UNKNOWN);
+			element.set("line", CInt.getFromPool(getDefinedAt().line(), Target.UNKNOWN), Target.UNKNOWN);
 			return element;
 		}
 

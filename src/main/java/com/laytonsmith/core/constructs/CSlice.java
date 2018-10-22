@@ -68,7 +68,7 @@ public class CSlice extends CArray {
 
 	@Override
 	public List<Construct> asList() {
-		CArray ca = new ArrayHandling.range().exec(Target.UNKNOWN, null, new CInt(start, Target.UNKNOWN), new CInt(finish, Target.UNKNOWN));
+		CArray ca = new ArrayHandling.range().exec(Target.UNKNOWN, null, CInt.getFromPool(start, Target.UNKNOWN), CInt.getFromPool(finish, Target.UNKNOWN));
 		return ca.asList();
 	}
 
@@ -124,7 +124,7 @@ public class CSlice extends CArray {
 		if(i > max) {
 			throw new CRERangeException("Index out of bounds. Index: " + i + " Size: " + max, t);
 		}
-		return new CInt(start + (direction * i), t);
+		return CInt.getFromPool(start + (direction * i), t);
 	}
 
 	@Override
@@ -147,7 +147,7 @@ public class CSlice extends CArray {
 
 					@Override
 					public Construct next() {
-						return new CInt(index++, Target.UNKNOWN);
+						return CInt.getFromPool(index++, Target.UNKNOWN);
 					}
 
 					@Override

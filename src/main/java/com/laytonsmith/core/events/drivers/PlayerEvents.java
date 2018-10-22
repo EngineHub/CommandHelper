@@ -136,8 +136,8 @@ public class PlayerEvents {
 				MCFoodLevelChangeEvent event = (MCFoodLevelChangeEvent) e;
 
 				ret.put("player", new CString(event.getEntity().getName(), Target.UNKNOWN));
-				ret.put("level", new CInt(event.getFoodLevel(), Target.UNKNOWN));
-				ret.put("difference", new CInt(event.getDifference(), Target.UNKNOWN));
+				ret.put("level", CInt.getFromPool(event.getFoodLevel(), Target.UNKNOWN));
+				ret.put("difference", CInt.getFromPool(event.getDifference(), Target.UNKNOWN));
 
 				return ret;
 			} else {
@@ -499,8 +499,8 @@ public class PlayerEvents {
 					map.put("to", ObjectGenerator.GetGenerator().location(event.getTo()));
 				}
 				map.put("type", new CString(event.getCause().toString(), Target.UNKNOWN));
-				map.put("creationradius", new CInt(event.getPortalTravelAgent().getCreationRadius(), Target.UNKNOWN));
-				map.put("searchradius", new CInt(event.getPortalTravelAgent().getSearchRadius(), Target.UNKNOWN));
+				map.put("creationradius", CInt.getFromPool(event.getPortalTravelAgent().getCreationRadius(), Target.UNKNOWN));
+				map.put("searchradius", CInt.getFromPool(event.getPortalTravelAgent().getSearchRadius(), Target.UNKNOWN));
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to MCPlayerPortalEvent");
@@ -1277,9 +1277,9 @@ public class PlayerEvents {
 				map.put("death_message", new CString(event.getDeathMessage(), Target.UNKNOWN));
 				map.put("keep_inventory", CBoolean.get(event.getKeepInventory()));
 				map.put("keep_level", CBoolean.get(event.getKeepLevel()));
-				map.put("new_exp", new CInt(event.getNewExp(), Target.UNKNOWN));
-				map.put("new_level", new CInt(event.getNewLevel(), Target.UNKNOWN));
-				map.put("new_total_exp", new CInt(event.getNewTotalExp(), Target.UNKNOWN));
+				map.put("new_exp", CInt.getFromPool(event.getNewExp(), Target.UNKNOWN));
+				map.put("new_level", CInt.getFromPool(event.getNewLevel(), Target.UNKNOWN));
+				map.put("new_total_exp", CInt.getFromPool(event.getNewTotalExp(), Target.UNKNOWN));
 				if(event.getKiller() instanceof MCPlayer) {
 					map.put("killer", new CString(((MCPlayer) event.getKiller()).getName(), Target.UNKNOWN));
 				} else {
@@ -2033,7 +2033,7 @@ public class PlayerEvents {
 				ret.put("world", new CString(event.getPlayer().getWorld().getName(), t));
 				ret.put("state", new CString(event.getState().name(), t));
 				ret.put("hook", new CString(event.getHook().getUniqueId().toString(), t));
-				ret.put("xp", new CInt(event.getExpToDrop(), t));
+				ret.put("xp", CInt.getFromPool(event.getExpToDrop(), t));
 				Construct caught = CNull.NULL;
 				if(event.getCaught() != null) {
 					caught = new CString(event.getCaught().getUniqueId().toString(), t);
@@ -2206,7 +2206,7 @@ public class PlayerEvents {
 			if(event instanceof MCExpChangeEvent) {
 				MCExpChangeEvent e = (MCExpChangeEvent) event;
 				Map<String, Construct> ret = evaluate_helper(e);
-				ret.put("amount", new CInt(e.getAmount(), Target.UNKNOWN));
+				ret.put("amount", CInt.getFromPool(e.getAmount(), Target.UNKNOWN));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCExpChangeEvent.");
@@ -2332,7 +2332,7 @@ public class PlayerEvents {
 					newBookArray.set("pages", new CArray(Target.UNKNOWN), Target.UNKNOWN);
 				}
 				mapEvent.put("newbook", newBookArray);
-				mapEvent.put("slot", new CInt(playerEditBookEvent.getSlot(), Target.UNKNOWN));
+				mapEvent.put("slot", CInt.getFromPool(playerEditBookEvent.getSlot(), Target.UNKNOWN));
 				mapEvent.put("signing", CBoolean.get(playerEditBookEvent.isSigning()));
 				return mapEvent;
 			} else {

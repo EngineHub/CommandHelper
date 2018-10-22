@@ -631,9 +631,9 @@ public class StringHandling {
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args[0] instanceof Sizeable) {
-				return new CInt(((Sizeable) args[0]).size(), t);
+				return CInt.getFromPool(((Sizeable) args[0]).size(), t);
 			} else {
-				return new CInt(args[0].val().length(), t);
+				return CInt.getFromPool(args[0].val().length(), t);
 			}
 		}
 
@@ -1113,7 +1113,7 @@ public class StringHandling {
 			String haystack = args[0].nval();
 			String needle = args[1].nval();
 			Static.AssertNonCNull(t, args);
-			return new CInt(haystack.indexOf(needle), t);
+			return CInt.getFromPool(haystack.indexOf(needle), t);
 		}
 
 		@Override
@@ -2087,7 +2087,7 @@ public class StringHandling {
 				throw new CRERangeException("Empty string cannot be converted to unicode.", t);
 			}
 			int i = Character.codePointAt(args[0].val().toCharArray(), 0);
-			return new CInt(i, t);
+			return CInt.getFromPool(i, t);
 		}
 
 		@Override
@@ -2141,7 +2141,7 @@ public class StringHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CInt(StringUtils.LevenshteinDistance(args[0].val(), args[1].val()), t);
+			return CInt.getFromPool(StringUtils.LevenshteinDistance(args[0].val(), args[1].val()), t);
 		}
 
 		@Override

@@ -368,7 +368,7 @@ public class FileHandling {
 			if(!Security.CheckSecurity(location) && !Static.InCmdLine(environment)) {
 				throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 			}
-			return new CInt(location.length(), t);
+			return CInt.getFromPool(location.length(), t);
 		}
 
 		@Override
