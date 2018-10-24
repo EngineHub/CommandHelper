@@ -5,9 +5,11 @@ import com.laytonsmith.PureUtilities.LinkedComparatorSet;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -51,6 +53,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeSet;
 
 @core
 public class ArrayHandling {
@@ -3016,6 +3019,187 @@ public class ArrayHandling {
 				+ "msg(@list);")
 			};
 		}
+
+	}
+
+	@api
+	public static class array_intersect extends AbstractFunction {
+
+		@MEnum("ArrayIntersectComparisonMode")
+		public static enum ArrayIntersectComparisonMode {
+			EQUALS(new equals()),
+			STRICT_EQUALS(new sequals()),
+			HASH(null);
+
+			private final Function comparisonFunction;
+			private ArrayIntersectComparisonMode(Function f) {
+				this.comparisonFunction = f;
+			}
+
+			public Function getComparisonFunction() {
+				return comparisonFunction;
+			}
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREIllegalArgumentException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray one = Static.getArray(args[0], t);
+			CArray two = Static.getArray(args[1], t);
+			CClosure closure = null;
+			ArrayIntersectComparisonMode mode = ArrayIntersectComparisonMode.HASH;
+			boolean associativeMode = one.isAssociative() || two.isAssociative();
+			if(args.length > 2) {
+				if(associativeMode) {
+					throw new CREIllegalArgumentException("For associative arrays, only 2 parameters may be provided,"
+							+ " the comparison mode value is not used.", t);
+				}
+				if(args[2] instanceof CClosure) {
+					closure = Static.getObject(args[2], t, CClosure.class);
+				} else {
+					mode = ArgumentValidation.getEnum(args[2], ArrayIntersectComparisonMode.class, t);
+				}
+			}
+			CArray ret = new CArray(t);
+
+			if(!associativeMode && closure == null && mode == ArrayIntersectComparisonMode.HASH) {
+				// Optimize for O(n log n) method
+				Set<Integer> a2Set = new TreeSet<>();
+				for(Construct c : two) {
+					a2Set.add(c.hashCode());
+				}
+
+				// Iterate one, and check if the hash of each value is in the set. If so, add it.
+				for(Construct c : one) {
+					if(a2Set.contains(c.hashCode())) {
+						ret.push(c, t);
+					}
+				}
+			} else {
+				Construct[] k1 = new Construct[(int) one.size()];
+				Construct[] k2 = new Construct[(int) two.size()];
+				one.keySet().toArray(k1);
+				two.keySet().toArray(k2);
+				equals equals = new equals();
+				Function comparisonFunction = mode.getComparisonFunction();
+				i: for(int i = 0; i < k1.length; i++) {
+					for(int j = 0; j < k2.length; j++) {
+						if(associativeMode) {
+							if(equals.exec(t, environment, k1[i], k2[j]).getBoolean()) {
+								ret.set(k1[i], one.get(k1[i], t), t);
+								continue i;
+							}
+						} else {
+							if(closure == null) {
+								if(comparisonFunction != null) {
+									if(Static.getBoolean(comparisonFunction.exec(t, environment,
+											one.get(k1[i], t), two.get(k2[j], t)
+									), t)) {
+										ret.push(one.get(k1[i], t), t);
+										continue i;
+									}
+								} else {
+									throw new Error();
+								}
+							} else {
+								try {
+									closure.execute(one.get(k1[i], t), two.get(k2[j], t));
+									throw new CRECastException("The closure passed to " + getName() + " must return a"
+											+ " boolean value", t);
+								} catch (FunctionReturnException fre) {
+									boolean res = Static.getBoolean(fre.getReturn());
+									if(res) {
+										ret.push(one.get(k1[i], t), t);
+										continue i;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "array_intersect";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "array {array1, array2, [comparisonMode]|array1, array2, comparisonClosure} Returns an array that is"
+					+ " the intersection of the two provided arrays. If either"
+					+ " array is associative, it puts the function in associative mode. For normal arrays, the values"
+					+ " are compared, and for associative arrays, the keys are compared, but the values are taken from"
+					+ " the left array. comparisonMode is only applicable for normal arrays, and defaults to HASH, but"
+					+ " determines the mode in which the system decides"
+					+ " if two values are equal or not. A closure may be sent"
+					+ " instead, which should return true if the two values are considered equals or not. Using the HASH"
+					+ " mode is fastest, as this puts the function in an optimizing mode, and it can run at O(n log n)."
+					+ " Otherwise, the runtime is O(n**2). The results between HASH and STRICT_EQUALS should almost never"
+					+ " be different, and so in that case using STRICT_EQUALS has a lower performance for no gain,"
+					+ " but there may be some cases where using"
+					+ " the hash code is not desirable. EQUALS is necessary if you wish to disregard typing, so that"
+					+ " array(1, 2, 3) and array('1', '2', '3') are considered equal.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Usage with associative array",
+						"array_intersect(array(one: 1, five: 5), array(one: 1, three: 3))"),
+				new ExampleScript("Usage with normal arrays. The default comparison method is HASH",
+						"array_intersect(array(1, 2, 3), array(2, 3, 4))"),
+				new ExampleScript("Demonstrates that STRICT_EQUALS does not consider different types to be equal",
+						"array_intersect(array('1', '2', '3'), array(1, 2, 3), STRICT_EQUALS)"),
+				new ExampleScript("Note that the results of this method are the same as the previous example,"
+						+ " but this version would be faster, and is preferred in all but the most exceptional cases.",
+						"array_intersect(array('1', '2', '3'), array(1, 2, 3), HASH)"),
+				new ExampleScript("Demonstrates usage with equals. Note that '1' == 1 (but does not === 1) but since"
+						+ " the comparison method uses equals, not sequals, these arrays are considered equivalent.",
+						"array_intersect(array('1', '2', '3'), array(1, 2, 3), EQUALS)"),
+				new ExampleScript("Usage with a custom closure", "array_intersect(\n"
+						+ "\tarray(array(id: 1, qty: 2), array(id: 2, qty: 5)),\n"
+						+ "\tarray(array(id: 1, qty: 2), array(id: 5, qty: 10)),\n"
+						+ "\tclosure(@a, @b) {\n"
+						+ "\t\treturn(@a['id'] == @b['id']);\n"
+						+ "})"),
+				new ExampleScript("The value is taken from the left array. This is not important for primitives, but"
+						+ " when using arrays and a custom closure, it may make a difference.", "array_intersect(\n"
+						+ "\tarray(array(id: 1, pos: 'left')),\n"
+						+ "\tarray(array(id: 1, pos: 'right')),\n"
+						+ "\tclosure(@a, @b) {\n"
+						+ "\t\treturn(@a['id'] == @b['id']);\n"
+						+ "})")
+			};
+		}
+
+
 
 	}
 }

@@ -38,7 +38,7 @@ import java.util.TreeMap;
  * methods in this class, you need only to override the non-final ones for the same effect.
  */
 @typeof("ms.lang.array")
-public class CArray extends Construct implements ArrayAccess {
+public class CArray extends Construct implements ArrayAccess, Iterable<Construct> {
 
 	public static final CClassType TYPE = CClassType.get("ms.lang.array");
 	private boolean associativeMode = false;
@@ -815,6 +815,15 @@ public class CArray extends Construct implements ArrayAccess {
 	@Override
 	public Version since() {
 		return CHVersion.V3_0_1;
+	}
+
+	@Override
+	public Iterator<Construct> iterator() {
+		if(associativeMode) {
+			throw new RuntimeException("iterator() cannot be called on an associative array");
+		} else {
+			return array.iterator();
+		}
 	}
 
 	public enum SortType {

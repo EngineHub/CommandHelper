@@ -3051,4 +3051,49 @@ public class BasicLogic {
 
 	}
 
+	@api
+	public static class hash extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public CInt exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new CInt(args[0].hashCode(), t);
+		}
+
+		@Override
+		public String getName() {
+			return "hash";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "int {value} Hashes the value, and returns an int representing that value.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
+
+	}
+
 }

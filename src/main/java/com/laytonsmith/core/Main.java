@@ -27,6 +27,8 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.extensions.ExtensionManager;
+import com.laytonsmith.core.functions.ExampleScript;
+import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.Scheduling;
@@ -160,7 +162,8 @@ public class Main {
 				.addDescription("Prints documentation for the function specified, then exits.")
 				.addArgument("The name of the function to print the information for", "function", true)
 				.addFlag('o', "online", "Instead of displaying the results in the console, launches the website with this function highlighted. The local documentation is guaranteed to be consistent with your"
-						+ " local version of MethodScript, while the online results may be slightly stale, or may be from a different build, but the results are generally richer.");
+						+ " local version of MethodScript, while the online results may be slightly stale, or may be from a different build, but the results are generally richer.")
+				.addFlag('e', "examples", "Also prints out the examples for the function (if any).");
 		suite.addMode("api", API_MODE);
 		EXAMPLES_MODE = ArgumentParser.GetParser()
 				.addDescription("Installs one of the built in LocalPackage examples, which may in and of itself be useful.")
@@ -449,6 +452,7 @@ public class Main {
 				}
 			} else if(mode == API_MODE) {
 				String function = parsedArgs.getStringArgument();
+				boolean examples = parsedArgs.isFlagSet('e');
 				if("".equals(function)) {
 					StreamUtils.GetSystemErr().println("Usage: java -jar CommandHelper.jar --api <function name>");
 					System.exit(1);
@@ -479,6 +483,32 @@ public class Main {
 						"Expects " + args2,
 						desc
 					}, " // "));
+					if(examples) {
+						System.out.println("\nExamples:\n");
+						ExampleScript[] ex = null;
+						if(f instanceof Function) {
+							ex = ((Function) f).examples();
+						}
+						if(ex == null || ex.length == 0) {
+							StreamUtils.GetSystemOut().println("This function doesn't have any examples :(");
+						} else {
+							for(int i = 0; i < ex.length; i++) {
+								if(i > 0) {
+									System.out.println("\n\n");
+								}
+								ExampleScript e = ex[i];
+								StreamUtils.GetSystemOut().println(TermColors.BRIGHT_WHITE + TermColors.BOLD
+										+ TermColors.UNDERLINE
+										+ "Example " + (i + 1)
+										+ TermColors.RESET);
+								StreamUtils.GetSystemOut().println(e.getDescription() + "\n");
+								StreamUtils.GetSystemOut().println(TermColors.UNDERLINE + "Code" + TermColors.RESET
+										+ "\n" + e.getScript() + "\n");
+								StreamUtils.GetSystemOut().println(TermColors.UNDERLINE + "Output" + TermColors.RESET
+										+ "\n" + e.getOutput());
+							}
+						}
+					}
 				}
 				System.exit(0);
 			} else if(mode == SYNTAX_MODE) {

@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -535,5 +536,17 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	public boolean isInstanceOf(Class<? extends Mixed> type) {
 		return isInstanceof(this, type);
 	}
+
+	/**
+	 * Provides a default implementation of hashCode for all constructs. In this implementation, the type of the
+	 * object is taken into account, as well as the underlying value.
+	 * @return
+	 */
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.getClass().getAnnotation(typeof.class), val());
+	}
+
+
 
 }

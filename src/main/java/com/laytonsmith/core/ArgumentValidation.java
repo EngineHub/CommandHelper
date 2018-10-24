@@ -1,5 +1,7 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -101,6 +103,10 @@ public final class ArgumentValidation {
 	 * expectedClassName like the deprecated version uses.
 	 *
 	 * This will work if the value is a subtype of the expected value.
+	 *
+	 * User classes are not supported here, because user classes cannot be managed directly in the java,
+	 * it must be castable to an actual Java class to work, though it can work
+	 * with classes that are defined in extensions.
 	 *
 	 * @param <T> The type expected.
 	 * @param construct The generic object
@@ -458,5 +464,33 @@ public final class ArgumentValidation {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Returns the Enum value for the specified Enum value. While it doesn't technically have to be an MEnum,
+	 * non MEnum values should generally not be exposed to users, as they are not visible to the rest of
+	 * the ecosystem.
+	 * @param <T> The Enum type
+	 * @param c The construct passed in by the user
+	 * @param enumClass The desired enum class
+	 * @param t The code target
+	 * @return The Java enum value
+	 * @throws CRECastException If the user input is not a valid value, this is thrown, with a proper error message that
+	 * describes the valid options. If the value is an MEnum, then the name defined there will be used, otherwise the
+	 * class name will be used.
+	 */
+	public static <T extends Enum<T>> T getEnum(Construct c, Class<T> enumClass, Target t) {
+		String val = c.val();
+		try {
+			return Enum.valueOf(enumClass, val);
+		} catch (IllegalArgumentException e) {
+			String name = "java:" + enumClass.getName();
+			MEnum menum = enumClass.getAnnotation(MEnum.class);
+			if(menum != null) {
+				name = menum.value();
+			}
+			throw new CRECastException("Cannot find enum of type " + name + " with value \"" + val + "\"."
+					+ " Valid options are: " + StringUtils.Join(enumClass.getEnumConstants(), ", ", ", or "), t);
+		}
 	}
 }

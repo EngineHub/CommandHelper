@@ -8,6 +8,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.C;
@@ -24,6 +25,8 @@ import org.junit.Test;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.hamcrest.core.Is.*;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -493,6 +496,37 @@ public class ArrayHandlingTest {
 				+ "array_reverse(@array);\n"
 				+ "msg(@array);\n", fakePlayer);
 		verify(fakePlayer).sendMessage("{4, 3, 2, 1}");
+	}
+
+	@Test
+	public void testArrayIntersect() throws Exception {
+		assertThat(SRun("array_intersect(array(one: 1, two: 2), array(one: 1, three: 3))", fakePlayer), is("{one: 1}"));
+		try {
+			SRun("array_intersect(array(one: 1, two: 2), array(one: 1, three: 3), EQUALS)", fakePlayer);
+			fail("Did not expect 3 arguments to pass");
+		} catch (CREIllegalArgumentException e) {
+			// Pass
+		}
+
+
+		assertThat(SRun("array_intersect(array(1, 2, 3), array(2, 3, 4), HASH)", fakePlayer), is("{2, 3}"));
+		assertThat(SRun("array_intersect(array(1, 2, 3), array(4, 5, 6), HASH)", fakePlayer), is("{}"));
+
+		assertThat(SRun("array_intersect(array(1, 2, 3), array(2, 3, 4), EQUALS)", fakePlayer), is("{2, 3}"));
+		assertThat(SRun("array_intersect(array(1, 2, 3), array(4, 5, 6), EQUALS)", fakePlayer), is("{}"));
+
+		assertThat(SRun("array_intersect(array('1', '2', '3'), array(1, 2, 3), STRICT_EQUALS)", fakePlayer), is("{}"));
+		assertThat(SRun("array_intersect(array('1', '2', '3'), array('1', 2, 3), STRICT_EQUALS)", fakePlayer), is("{1}"));
+
+		assertThat(SRun("array_intersect(array(1, 2, 3), array(4, 5, 6), closure(@a, @b) { return(true); })", fakePlayer),
+				is("{1, 2, 3}"));
+		assertThat(SRun("array_intersect(array(1, 2, 3), array(1, 2, 3), closure(@a, @b) { return(false); })", fakePlayer),
+				is("{}"));
+
+		assertThat(SRun("array_intersect(array(array(id: 1, qty: 2), array(id: 2, qty: 8)),"
+				+ " array(array(id: 1, qty: 19), array(id: 6, qty: 2)), closure(@a, @b){ return(@a[id] == @b[id]); })", fakePlayer),
+				is("{{id: 1, qty: 2}}"));
+
 	}
 
 }
