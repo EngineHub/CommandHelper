@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemFactory;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCMerchant;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPluginManager;
@@ -570,5 +571,10 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public MCBlockData createBlockData(String data) {
 		return new BukkitMCBlockData(s.createBlockData(data));
+	}
+
+	@Override
+	public MCMerchant createMerchant(String title) {
+		return new BukkitMCMerchant(__Server().createMerchant(title), title);
 	}
 }

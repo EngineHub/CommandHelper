@@ -17,6 +17,7 @@ import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+
 import java.util.List;
 
 /**
@@ -215,7 +216,6 @@ public class Recipes {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.getServer().clearRecipes();
-
 			return CVoid.VOID;
 		}
 
@@ -252,7 +252,6 @@ public class Recipes {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			Static.getServer().resetRecipes();
-
 			return CVoid.VOID;
 		}
 
