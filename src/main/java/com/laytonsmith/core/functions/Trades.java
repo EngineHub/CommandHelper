@@ -203,16 +203,16 @@ public class Trades {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[0];
+			return new Class[] {CREIllegalArgumentException.class};
 		}
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if(VIRTUAL_MERCHANTS.containsKey(args[0].val())) {
-				return CBoolean.FALSE;
+				throw new CREIllegalArgumentException("There is already a merchant with id " + args[0].val(), t);
 			} else {
 				VIRTUAL_MERCHANTS.put(args[0].val(), Static.getServer().createMerchant(args[1].val()));
-				return CBoolean.TRUE;
+				return CVoid.VOID;
 			}
 		}
 
@@ -233,11 +233,11 @@ public class Trades {
 
 		@Override
 		public String docs() {
-			return "boolean {ID, title} Creates a merchant that can be traded with by players but is not attached to"
-					+ " a physical entity. Will return true if the ID was newly added, and false if the ID was already"
-					+ " in use. The ID given should not be a UUID. The title is the text that will display at the top"
-					+ " of the window while a player is trading with it. This list will persist across recompiles,"
-					+ " but not across server restarts.";
+			return "void {ID, title} Creates a merchant that can be traded with by players but is not attached to"
+					+ " a physical entity. The ID given should not be a UUID. The title is the text that will display"
+					+ " at the top of the window while a player is trading with it. Created merchants will persist"
+					+ " across recompiles, but not across server restarts. An exception will be thrown if a merchant"
+					+ " already exists using the given ID.";
 		}
 	}
 
