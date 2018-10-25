@@ -1180,6 +1180,7 @@ public class ArrayHandling {
 	}
 
 	@api
+	@seealso({array_intersect.class})
 	public static class array_merge extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -3023,6 +3024,7 @@ public class ArrayHandling {
 	}
 
 	@api
+	@seealso({array_merge.class})
 	public static class array_intersect extends AbstractFunction {
 
 		@MEnum("ArrayIntersectComparisonMode")
@@ -3160,7 +3162,8 @@ public class ArrayHandling {
 					+ " be different, and so in that case using STRICT_EQUALS has a lower performance for no gain,"
 					+ " but there may be some cases where using"
 					+ " the hash code is not desirable. EQUALS is necessary if you wish to disregard typing, so that"
-					+ " array(1, 2, 3) and array('1', '2', '3') are considered equal.";
+					+ " array(1, 2, 3) and array('1', '2', '3') are considered equal. Duplicate values in the left"
+					+ " array are duplicated, but duplicates in the right are not.";
 		}
 
 		@Override
@@ -3195,7 +3198,13 @@ public class ArrayHandling {
 						+ "\tarray(array(id: 1, pos: 'right')),\n"
 						+ "\tclosure(@a, @b) {\n"
 						+ "\t\treturn(@a['id'] == @b['id']);\n"
-						+ "})")
+						+ "})"),
+				new ExampleScript("Demonstrates behavior with duplicate values", "msg(array_intersect(\n"
+						+ "\tarray(1, 1, 1, 2, 3),\n"
+						+ "\tarray(1, 2)));\n"
+						+ "msg(array_intersect(\n"
+						+ "\tarray(1, 2, 3),\n"
+						+ "\tarray(1, 1, 1)));")
 			};
 		}
 
