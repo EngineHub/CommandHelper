@@ -120,6 +120,7 @@ import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
@@ -623,7 +624,11 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	@Override
 	public MCRecipe GetNewRecipe(String key, MCRecipeType type, MCItemStack result) {
+
 		ItemStack is = ((BukkitMCItemStack) result).asItemStack();
+		if(type == MCRecipeType.MERCHANT) {
+			return new BukkitMCMerchantRecipe(new MerchantRecipe(is, Integer.MAX_VALUE));
+		}
 		NamespacedKey nskey = new NamespacedKey(CommandHelperPlugin.self, key);
 		switch(type) {
 			case FURNACE:
@@ -649,6 +654,8 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCShapedRecipe((ShapedRecipe) r);
 		} else if(r instanceof FurnaceRecipe) {
 			return new BukkitMCFurnaceRecipe((FurnaceRecipe) r);
+		} else if(r instanceof MerchantRecipe) {
+			return new BukkitMCMerchantRecipe((MerchantRecipe) r);
 		} else {
 			return null;
 		}

@@ -165,4 +165,6 @@ public interface MCServer extends AbstractionObject {
 	MCBossBar createBossBar(String title, MCBarColor color, MCBarStyle style);
 
 	MCBlockData createBlockData(String data);
+
+	MCMerchant createMerchant(String title);
 }

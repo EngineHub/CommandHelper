@@ -7,4 +7,6 @@ public interface MCRecipe extends AbstractionObject {
 	MCItemStack getResult();
 
 	MCRecipeType getRecipeType();
+
+	String getKey();
 }

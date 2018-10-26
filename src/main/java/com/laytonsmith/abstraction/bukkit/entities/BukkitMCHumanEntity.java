@@ -5,6 +5,7 @@ import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryView;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCMerchant;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventoryView;
@@ -16,6 +17,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Merchant;
 
 public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHumanEntity {
 
@@ -119,6 +121,11 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 	@Override
 	public MCInventoryView openWorkbench(MCLocation loc, boolean force) {
 		return new BukkitMCInventoryView(he.openWorkbench((Location) loc.getHandle(), force));
+	}
+
+	@Override
+	public MCInventoryView openMerchant(MCMerchant merchant, boolean force) {
+		return new BukkitMCInventoryView(he.openMerchant((Merchant) merchant.getHandle(), force));
 	}
 
 	@Override
