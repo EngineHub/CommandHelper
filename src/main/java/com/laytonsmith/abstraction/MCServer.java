@@ -22,6 +22,8 @@ public interface MCServer extends AbstractionObject {
 
 	MCPluginManager getPluginManager();
 
+	MCPlayer getPlayerExact(String name);
+
 	MCPlayer getPlayer(String name);
 
 	MCPlayer getPlayer(UUID uuid);
