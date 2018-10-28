@@ -1267,7 +1267,7 @@ public class EntityManagement {
 			} else {
 				rider = Static.getEntity(args[1], t);
 			}
-			if((horse == null && rider == null) || horse == rider) {
+			if((horse == null && rider == null) || args[0].val().equals(args[1].val())) {
 				throw new CREFormatException("Horse and rider cannot be the same entity", t);
 			} else if(horse == null) {
 				success = rider.leaveVehicle();
@@ -1295,7 +1295,8 @@ public class EntityManagement {
 					+ " If rider is null, horse will eject its current rider, if it has one. If horse is null,"
 					+ " rider will leave whatever it is riding. If horse and rider are both valid entities,"
 					+ " rider will ride horse. The function returns the success of whatever operation is done."
-					+ " If horse and rider are both null, or otherwise the same, a FormatException is thrown.";
+					+ " If horse and rider are both null, or otherwise the same, a FormatException is thrown."
+					+ " If a horse already has a rider, this will add the new rider without ejecting the existing one.";
 		}
 
 		@Override
@@ -1310,8 +1311,9 @@ public class EntityManagement {
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
-			if(ent.getPassenger() != null) {
-				return new CString(ent.getPassenger().getUniqueId().toString(), t);
+			List<MCEntity> passengers = ent.getPassengers();
+			if(!passengers.isEmpty()) {
+				return new CString(passengers.get(0).getUniqueId().toString(), t);
 			}
 			return CNull.NULL;
 		}
@@ -1323,12 +1325,43 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "string {entityUUID} Returns the UUID of the given entity's rider, or null if it doesn't have one.";
+			return "string {entityUUID} Returns the UUID of the given entity's rider, or null if it doesn't have one."
+					+ " If there are multiple riders, only the first is returned.";
 		}
 
 		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+	}
+
+	@api
+	public static class get_entity_riders extends EntityGetterFunction {
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity ent = Static.getEntity(args[0], t);
+			List<MCEntity> riders = ent.getPassengers();
+			CArray ret = new CArray(t);
+			for(MCEntity rider : riders) {
+				ret.push(new CString(rider.getUniqueId().toString(), t), t);
+			}
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "get_entity_riders";
+		}
+
+		@Override
+		public String docs() {
+			return "array {entityUUID} Returns an array of UUIDs for the given entity's riders.";
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_3;
 		}
 	}
 
