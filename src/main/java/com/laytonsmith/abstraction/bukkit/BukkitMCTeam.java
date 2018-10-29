@@ -2,8 +2,10 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCTeam;
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.enums.MCOption;
 import com.laytonsmith.abstraction.enums.MCOptionStatus;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCChatColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCOption;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCOptionStatus;
 import org.bukkit.scoreboard.Team;
@@ -79,6 +81,11 @@ public class BukkitMCTeam implements MCTeam {
 	}
 
 	@Override
+	public MCChatColor getColor() {
+		return BukkitMCChatColor.getConvertor().getAbstractedEnum(t.getColor());
+	}
+
+	@Override
 	public boolean hasEntry(String entry) {
 		return t.hasEntry(entry);
 	}
@@ -116,6 +123,11 @@ public class BukkitMCTeam implements MCTeam {
 	@Override
 	public void setSuffix(String suffix) {
 		t.setSuffix(suffix);
+	}
+
+	@Override
+	public void setColor(MCChatColor color) {
+		t.setColor(BukkitMCChatColor.getConvertor().getConcreteEnum(color));
 	}
 
 	@Override
