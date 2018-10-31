@@ -44,7 +44,7 @@ public class BukkitMCFurnaceRecipe extends BukkitMCRecipe implements MCFurnaceRe
 
 	@Override
 	public void setInput(MCItemStack input) {
-		fr.setInput(((ItemStack) input.getHandle()).getData());
+		fr.setInput(((ItemStack) input.getHandle()).getType());
 	}
 
 	@Override
