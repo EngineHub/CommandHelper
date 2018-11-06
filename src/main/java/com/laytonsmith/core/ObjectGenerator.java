@@ -225,7 +225,7 @@ public class ObjectGenerator {
 	 * @return An item array or CNull
 	 */
 	public Construct item(MCItemStack is, Target t) {
-		if(is.isEmpty()) {
+		if(is == null || is.isEmpty()) {
 			return CNull.NULL;
 		}
 

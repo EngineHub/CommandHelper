@@ -2558,25 +2558,17 @@ public class PlayerManagement {
 
 		@Override
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			//We have to use this method here, because we might be in the midst
-			//of an event, in which the player is offline, but not really. It will
-			//throw an exception if the player doesn't exist
-			MCPlayer p = null;
 			try {
-				p = Static.GetPlayer(args[0], t);
+				//Static.GetPlayer() autocompletes names, which we don't want in this function,
+				//however we have to check if this is an injected player first.
+				MCPlayer p = Static.GetPlayer(args[0], t);
+				//Now we must check if the name was exact. Skip this if the argument is a UUID.
+				if(args[0].val().length() <= 16 && !p.getName().equalsIgnoreCase(args[0].val())) {
+					p = Static.getServer().getPlayerExact(args[0].val());
+				}
+				return CBoolean.get(p != null);
 			} catch (ConfigRuntimeException e) {
 				//They aren't in the player list
-			}
-			//If the player we grabbed doesn't match exactly, we're referring to another player
-			//However, we had to check with Static.GetPlayer first, in case this is an injected player.
-			//Otherwise, we need to use the player returned from Static.GetPlayer, not the one returned
-			//from the server directly
-			if(p != null && !p.getName().equals(args[0].val())) {
-				MCOfflinePlayer player = Static.getServer().getOfflinePlayer(args[0].val());
-				return CBoolean.get(player.isOnline());
-			} else if(p != null) {
-				return CBoolean.get(p.isOnline());
-			} else {
 				return CBoolean.FALSE;
 			}
 		}

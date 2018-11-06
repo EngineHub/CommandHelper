@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.MCObjective;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCTeam;
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.enums.MCCriteria;
 import com.laytonsmith.abstraction.enums.MCDisplaySlot;
 import com.laytonsmith.abstraction.enums.MCOption;
@@ -25,6 +26,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
@@ -189,6 +191,7 @@ public class Scoreboards {
 		to.set("displayname", new CString(team.getDisplayName(), t), t);
 		to.set("prefix", new CString(team.getPrefix(), t), t);
 		to.set("suffix", new CString(team.getSuffix(), t), t);
+		to.set("color", new CString(team.getColor().name(), t), t);
 		to.set("size", new CInt(team.getSize(), t), t);
 		CArray ops = CArray.GetAssociativeArray(t);
 		ops.set("friendlyfire", CBoolean.get(team.allowFriendlyFire()), t);
@@ -454,7 +457,7 @@ public class Scoreboards {
 			return "array {[scoreboard]} Returns an array of arrays about the teams on the given scoreboard,"
 					+ " which defaults to '" + MAIN + "' if not given. The array keys are the team names,"
 					+ " and each value is a team array containing the keys: name, displayname, prefix, suffix, size,"
-					+ " options, and players.";
+					+ " color, options, and players.";
 		}
 
 		@Override
@@ -692,7 +695,8 @@ public class Scoreboards {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRELengthException.class, CREScoreboardException.class};
+			return new Class[]{CRELengthException.class, CREScoreboardException.class,
+					CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -747,6 +751,15 @@ public class Scoreboards {
 					throw new CRELengthException(ex.getMessage(), t);
 				}
 			}
+			if(dis.containsKey("color")) {
+				try {
+					MCChatColor color = MCChatColor.valueOf(dis.get("color", t).val().toUpperCase());
+					o.setColor(color);
+				} catch (IllegalArgumentException ex) {
+					throw new CREIllegalArgumentException("Invalid chat color: \""
+							+ dis.get("color", t).val() + "\"", t);
+				}
+			}
 			return CVoid.VOID;
 		}
 
@@ -763,15 +776,16 @@ public class Scoreboards {
 		@Override
 		public String docs() {
 			return "void {teamName, array, [scoreboard] | teamName, displayname, [scoreboard]}"
-					+ " Sets the display name, prefix, and/or suffix of the given team."
+					+ " Sets the display name, color, prefix, and/or suffix of the given team."
 					+ " If arg 2 is not an array, it is assumed to be the displayname,"
-					+ " otherwise arg 2 should be an array with keys 'displayname', 'prefix',"
+					+ " otherwise arg 2 should be an array with keys 'displayname', 'color', 'prefix',"
 					+ " and/or 'suffix', affecting their respective properties."
-					+ " If the prefix, suffix, or displayname is too long, a LengthException will be thrown."
+					+ " ---- If the prefix, suffix, or displayname is too long, a LengthException will be thrown."
 					+ " The max length may differ based on server implementation,"
 					+ " but will probably be 64, 64, 128 respectively."
 					+ " Null name resets it to the actual name, and null prefix or suffix removes it from"
-					+ " all displays. " + DEF_MSG;
+					+ " all displays. Color can be one of "
+					+ StringUtils.Join(MCChatColor.values(), ", ", " or ") + ". " + DEF_MSG;
 		}
 
 		@Override
@@ -886,7 +900,8 @@ public class Scoreboards {
 		@Override
 		public String docs() {
 			return "array {player, [scoreboard]} Returns a team array for this player, or null if not in a team."
-					+ " Contains the keys name, displayname, prefix, suffix, size, options, and players." + DEF_MSG;
+					+ " Contains the keys name, displayname, color, prefix, suffix, size, options, and players."
+					+ DEF_MSG;
 		}
 
 		@Override

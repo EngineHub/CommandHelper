@@ -45,6 +45,7 @@ import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -465,9 +466,9 @@ public class VehicleEvents {
 				}
 
 				Prefilters.match(prefilter, "vehicletype", event.getVehicle().getType().name(), PrefilterType.MACRO);
-				MCEntity passenger = event.getVehicle().getPassenger();
-				if(passenger != null) {
-					Prefilters.match(prefilter, "passengertype", passenger.getType().name(), PrefilterType.MACRO);
+				List<MCEntity> passengers = event.getVehicle().getPassengers();
+				if(!passengers.isEmpty()) {
+					Prefilters.match(prefilter, "passengertype", passengers.get(0).getType().name(), PrefilterType.MACRO);
 				}
 
 				return true;
@@ -500,21 +501,21 @@ public class VehicleEvents {
 				ret.put("vehicletype", new CString(e.getVehicle().getType().name(), t));
 				ret.put("id", new CString(e.getVehicle().getUniqueId().toString(), t));
 
-				MCEntity passenger = e.getVehicle().getPassenger();
+				List<MCEntity> passengers = e.getVehicle().getPassengers();
 
-				if(passenger == null) {
+				if(passengers.isEmpty()) {
 					ret.put("passenger", CNull.NULL);
 					ret.put("passengertype", CNull.NULL);
 					ret.put("player", CNull.NULL);
 				} else {
-
-					MCEntityType<?> passengertype = e.getVehicle().getPassenger().getType();
+					MCEntity passenger = passengers.get(0);
+					MCEntityType<?> passengertype = passenger.getType();
 
 					ret.put("passengertype", new CString(passengertype.name(), t));
 					ret.put("passenger", new CString(passenger.getUniqueId().toString(), t));
 
 					if(passengertype.getAbstracted() == MCEntityType.MCVanillaEntityType.PLAYER) {
-						ret.put("player", new CString(((MCPlayer) e.getVehicle().getPassenger()).getName(), t));
+						ret.put("player", new CString(((MCPlayer) passenger).getName(), t));
 					} else {
 						ret.put("player", CNull.NULL);
 					}
