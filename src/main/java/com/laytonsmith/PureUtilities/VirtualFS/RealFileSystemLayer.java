@@ -20,7 +20,7 @@ public class RealFileSystemLayer extends FileSystemLayer {
 	protected final File real;
 
 	public RealFileSystemLayer(VirtualFile path, VirtualFileSystem fileSystem, String symlink) throws IOException {
-		super(path, fileSystem);
+		super(path, fileSystem, symlink);
 		if(symlink == null) {
 			real = new File(fileSystem.root, path.getPath());
 			if(!real.getCanonicalPath().startsWith(fileSystem.root.getCanonicalPath())) {
@@ -70,13 +70,19 @@ public class RealFileSystemLayer extends FileSystemLayer {
 
 	@Override
 	public void delete() throws IOException {
+		if(!exists()) {
+			throw new IOException("File does not exist");
+		}
 		if(!real.delete()) {
 			throw new IOException("Could not delete the file");
 		}
 	}
 
 	@Override
-	public void deleteOnExit() {
+	public void deleteEventually() throws IOException {
+		if(!exists()) {
+			throw new IOException("File does not exist");
+		}
 		real.deleteOnExit();
 	}
 
@@ -86,27 +92,42 @@ public class RealFileSystemLayer extends FileSystemLayer {
 	}
 
 	@Override
-	public boolean canRead() {
+	public boolean canRead() throws IOException {
+		if(!exists()) {
+			throw new IOException("File does not exist");
+		}
 		return real.canRead();
 	}
 
 	@Override
-	public boolean canWrite() {
+	public boolean canWrite() throws IOException {
+		if(!exists()) {
+			throw new IOException("File does not exist");
+		}
 		return real.canWrite();
 	}
 
 	@Override
-	public boolean isDirectory() {
+	public boolean isDirectory() throws IOException {
+		if(!exists()) {
+			throw new IOException("File does not exist");
+		}
 		return real.isDirectory();
 	}
 
 	@Override
-	public boolean isFile() {
+	public boolean isFile() throws IOException {
+		if(!exists()) {
+			throw new IOException("File does not exist");
+		}
 		return real.isFile();
 	}
 
 	@Override
 	public void mkdirs() throws IOException {
+		if(exists() && !isDirectory()) {
+			throw new IOException("The specified path already exists, and is not a directory");
+		}
 		if(!real.mkdirs()) {
 			throw new IOException("Directory structure could not be created");
 		}
@@ -114,8 +135,11 @@ public class RealFileSystemLayer extends FileSystemLayer {
 
 	@Override
 	public void createNewFile() throws IOException {
+		if(exists()) {
+			throw new IOException("File already exists");
+		}
 		if(!real.createNewFile()) {
-			throw new IOException("File already exists!");
+			throw new IOException("File could not be created");
 		}
 	}
 }

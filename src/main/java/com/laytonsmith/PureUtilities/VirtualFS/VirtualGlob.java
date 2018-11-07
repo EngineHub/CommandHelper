@@ -15,7 +15,7 @@ package com.laytonsmith.PureUtilities.VirtualFS;
  */
 public class VirtualGlob implements Comparable<VirtualGlob> {
 
-	private String glob;
+	private final String glob;
 
 	/**
 	 * Creates a new virtual glob object, that will match this glob pattern.
@@ -23,7 +23,7 @@ public class VirtualGlob implements Comparable<VirtualGlob> {
 	 * @param glob
 	 */
 	public VirtualGlob(String glob) {
-		this.glob = glob;
+		this.glob = glob.trim().toLowerCase();
 	}
 
 	/**
@@ -35,13 +35,30 @@ public class VirtualGlob implements Comparable<VirtualGlob> {
 		glob = file.getPath();
 	}
 
+	/**
+	 * Returns true if the specified file matches this glob.
+	 * @param file The actual file path to test
+	 * @return
+	 */
 	public boolean matches(VirtualFile file) {
+		if("**".equals(glob)) {
+			// Trivial case
+			return true;
+		}
 		throw new UnsupportedOperationException("Not implemented yet.");
 	}
 
+	/**
+	 * Compares two globs, to see which one is more specific than the other.
+	 * Returns 0 if they are the same weight, -1 if the passed in glob is more specific, and 1 if the passed
+	 * in glob is less specific (TODO or maybe this should be reversed)
+	 * @param o
+	 * @return
+	 */
 	@Override
 	public int compareTo(VirtualGlob o) {
-		throw new UnsupportedOperationException("Not supported yet.");
+		// TODO: This is wrong, we need to do a more specific comparison where we take into account the wildcards
+		return glob.length() - o.glob.length();
 	}
 
 	@Override

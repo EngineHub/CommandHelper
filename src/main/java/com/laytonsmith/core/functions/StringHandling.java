@@ -2065,7 +2065,9 @@ public class StringHandling {
 			return "string {unicode} Returns the unicode character for a given unicode value. This is meant"
 					+ " for dynamic input that needs converting to a unicode character, if you're hardcoding"
 					+ " it, you should just use '\\u1234' syntax instead, however, this is the dynamic equivalent"
-					+ " of the \\u string escape, so '\\u1234' == char_from_unicode(parse_int('1234', 16)). Despite the name,"
+					+ " of the \\u string escape, so"
+					+ " '\\u1234' == char_from_unicode(parse_int('1234', 16)) == char_from_unicode(0x1234)."
+					+ " Despite the name,"
 					+ " certain unicode escapes may return multiple characters, so there is no guarantee that"
 					+ " length(char_from_unicode(@val)) will equal 1.";
 		}
