@@ -25,9 +25,9 @@ import java.util.logging.Logger;
  * This class represents the underlying manifest file. Generally, it should only be necessary to use this version,
  * but it implements an interface which should be used throughout the code to allow for easier testing.
  */
-public class SystemVirtualFileSystemManifest implements VirtualFileSystemManifest {
+public final class SystemVirtualFileSystemManifest implements VirtualFileSystemManifest {
 
-	private final static Map<File, VirtualFileSystemManifest> INSTANCE = new HashMap<>();
+	private static final Map<File, VirtualFileSystemManifest> INSTANCE = new HashMap<>();
 
 	/**
 	 * There should only be one accessor for the manifest file in the system, but for test purposes, it may be
@@ -65,7 +65,7 @@ public class SystemVirtualFileSystemManifest implements VirtualFileSystemManifes
 				WatchKey key;
 				try {
 					key = watcher.take();
-				} catch(InterruptedException ex) {
+				} catch (InterruptedException ex) {
 					return;
 				}
 				for(WatchEvent<?> event : key.pollEvents()) {
@@ -75,7 +75,7 @@ public class SystemVirtualFileSystemManifest implements VirtualFileSystemManifes
 						if(path.equals(manifestFile.toPath())) {
 							try {
 								refresh();
-							} catch(IOException ex) {
+							} catch (IOException ex) {
 								Logger.getLogger(SystemVirtualFileSystemManifest.class.getName()).log(Level.SEVERE, null, ex);
 							}
 						}
@@ -93,7 +93,7 @@ public class SystemVirtualFileSystemManifest implements VirtualFileSystemManifes
 				manifest.clear();
 				manifest.addAll(fileSet);
 			}
-		} catch(ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			throw new Error(ex);
 		}
 	}
