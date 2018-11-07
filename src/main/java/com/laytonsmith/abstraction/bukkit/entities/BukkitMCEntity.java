@@ -105,12 +105,12 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	}
 
 	@Override
-	public MCEntity getPassenger() {
-		List<Entity> passengers = e.getPassengers();
-		if(passengers.isEmpty()) {
-			return null;
+	public List<MCEntity> getPassengers() {
+		List<MCEntity> passengers = new ArrayList<>();
+		for(Entity passenger :  e.getPassengers()) {
+			passengers.add(BukkitConvertor.BukkitGetCorrectEntity(passenger));
 		}
-		return BukkitConvertor.BukkitGetCorrectEntity(passengers.get(0));
+		return passengers;
 	}
 
 	@Override

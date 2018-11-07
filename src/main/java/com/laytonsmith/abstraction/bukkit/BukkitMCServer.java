@@ -174,6 +174,16 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	@SuppressWarnings("deprecation")
+	public MCPlayer getPlayerExact(String name) {
+		Player p = s.getPlayerExact(name);
+		if(p == null) {
+			return null;
+		}
+		return new BukkitMCPlayer(p);
+	}
+
+	@Override
+	@SuppressWarnings("deprecation")
 	public MCPlayer getPlayer(String name) {
 		Player p = s.getPlayer(name);
 		if(p == null) {
