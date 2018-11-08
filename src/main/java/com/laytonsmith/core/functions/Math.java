@@ -511,8 +511,6 @@ public class Math {
 			}
 			if(f.getName().equals(new ArrayHandling.array_get().getName())) {
 				//Ok, so, this is it, we're in charge here.
-				long temp;
-				long newVal;
 				//First, pull out the current value. We're gonna do this manually though, and we will actually
 				//skip the whole array_get execution.
 				ParseTree eval = nodes[0];
@@ -534,31 +532,41 @@ public class Math {
 					//own exception.
 					throw new CRECastException("Cannot increment/decrement a non-array array"
 							+ " accessed value. (The value passed in was \"" + array.val() + "\")", t);
-				} else {
-					//Ok, we're good. Data types should all be correct.
-					CArray myArray = ((CArray) array);
-					Construct value = myArray.get(index, t);
-					if(value instanceof CInt || value instanceof CDouble) {
-						temp = Static.getInt(value, t);
-						//Alright, now let's actually perform the increment, and store that in the array.
+				}
+				//Ok, we're good. Data types should all be correct.
+				CArray myArray = ((CArray) array);
+				Construct value = myArray.get(index, t);
 
-						if(inc) {
-							newVal = temp + delta;
-						} else {
-							newVal = temp - delta;
-						}
-						new ArrayHandling.array_set().exec(t, env, array, index, new CInt(newVal, t));
+				//Alright, now let's actually perform the increment, and store that in the array.
+				if(value instanceof CInt) {
+					CInt newVal;
+					if(inc) {
+						newVal = new CInt(Static.getInt(value, t) + delta, t);
 					} else {
-						throw new CRECastException("Cannot increment/decrement a non numeric value.", t);
+						newVal = new CInt(Static.getInt(value, t) - delta, t);
 					}
-				}
-				long valueToReturn;
-				if(pre) {
-					valueToReturn = newVal;
+					new ArrayHandling.array_set().exec(t, env, array, index, newVal);
+					if(pre) {
+						return newVal;
+					} else {
+						return value;
+					}
+				} else if(value instanceof CDouble) {
+					CDouble newVal;
+					if(inc) {
+						newVal = new CDouble(Static.getDouble(value, t) + delta, t);
+					} else {
+						newVal = new CDouble(Static.getDouble(value, t) - delta, t);
+					}
+					new ArrayHandling.array_set().exec(t, env, array, index, newVal);
+					if(pre) {
+						return newVal;
+					} else {
+						return value;
+					}
 				} else {
-					valueToReturn = temp;
+					throw new CRECastException("Cannot increment/decrement a non numeric value.", t);
 				}
-				return new CInt(valueToReturn, t);
 			}
 		}
 		Construct[] args = new Construct[nodes.length];

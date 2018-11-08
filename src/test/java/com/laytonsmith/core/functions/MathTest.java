@@ -119,6 +119,12 @@ public class MathTest {
 	}
 
 	@Test(timeout = 10000)
+	public void testArrayGetInc() throws Exception {
+		StaticTest.SRun("@var = array(1.1); @var[0]++; msg(@var[0])", fakePlayer);
+		verify(fakePlayer).sendMessage("2.1");
+	}
+
+	@Test(timeout = 10000)
 	public void testMod() {
 		Math.mod a = new Math.mod();
 		assertCEquals(C.onstruct(1), a.exec(Target.UNKNOWN, env, C.onstruct(5), C.onstruct(2)));
