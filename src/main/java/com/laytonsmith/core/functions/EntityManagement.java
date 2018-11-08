@@ -1751,6 +1751,7 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_WAITTIME, new CInt(cloud.getWaitTime(), t), t);
 					break;
 				case ARROW:
+				case TRIDENT:
 					MCArrow arrow = (MCArrow) entity;
 					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(arrow.isCritical()), t);
 					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(arrow.getKnockbackStrength(), t), t);
@@ -2234,6 +2235,7 @@ public class EntityManagement {
 					}
 					break;
 				case ARROW:
+				case TRIDENT:
 					MCArrow arrow = (MCArrow) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {

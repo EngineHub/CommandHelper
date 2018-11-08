@@ -18,5 +18,6 @@ public enum MCProjectileType {
 	SPLASH_POTION,
 	TIPPED_ARROW,
 	THROWN_EXP_BOTTLE,
+	TRIDENT,
 	WITHER_SKULL
 }
