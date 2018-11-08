@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import com.laytonsmith.core.natives.interfaces.Sizeable;
+import java.util.UUID;
 
 /**
  *
@@ -2472,6 +2473,49 @@ public class StringHandling {
 				+ "msg(typeof(@insecure));\n")
 			};
 		}
+	}
 
+	@api
+	public static class uuid extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new CString(UUID.randomUUID().toString(), t);
+		}
+
+		@Override
+		public String getName() {
+			return "uuid";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "string {} Returns a uuid.";
+		}
+
+		@Override
+		public Version since() {
+			return CHVersion.V3_3_3;
+		}
 	}
 }
