@@ -2518,7 +2518,7 @@ public class StringHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return null;
+			return new Class[]{CRECastException.class};
 		}
 
 		@Override

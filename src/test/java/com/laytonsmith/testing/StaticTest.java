@@ -279,7 +279,11 @@ public class StaticTest {
 					// objects instead, but for now, it returns an enum. This will
 					// be a large change.
 					List<String> expectedNames = new ArrayList<>();
-					for(Class<? extends CREThrowable> tt : f.thrown()) {
+					Class[] thrown = f.thrown();
+					if(thrown == null) {
+						thrown = new Class[0];
+					}
+					for(Class<? extends CREThrowable> tt : thrown) {
 						expectedNames.add(tt.getAnnotation(typeof.class).value());
 					}
 					if(f.thrown() == null || !expectedNames.contains(name)) {
