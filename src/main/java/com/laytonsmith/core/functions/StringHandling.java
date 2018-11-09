@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils.ReflectionException;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
@@ -2478,6 +2479,43 @@ public class StringHandling {
 	@api
 	public static class uuid extends AbstractFunction {
 
+		@MEnum("UUIDType")
+		public static enum UUIDType {
+			// TODO: May wish to instead look into https://github.com/cowtowncoder/java-uuid-generator instead
+			// of rolling our own here. Most people probably only will use RANDOM anyways
+//			MAC("Returns UUID representing the datetime and MAC address of this device. The system's current time"
+//					+ " is used if the argument is null, but you may instead send your own value to use"
+//					+ " instead", 1,
+//				(input) -> {
+//
+//				}),
+//			MAC_DCE("Returns the UUID representing the datetime and MAC address of this device, but is modified with"
+//					+ " the local domain parameter passed in", 1),
+//			NAMESPACE_MD5("", 1),
+			RANDOM("Returns a random UUID", 0,
+				(input) -> UUID.randomUUID()),
+//			NAMESPACE_SHA1("", 1),
+			NIL("Returns the nil UUID, that is 00000000-0000-0000-0000-000000000000", 0, (input) -> new UUID(0, 0));
+
+			private static interface Generate {
+				UUID g(String input);
+			}
+
+			private final String description;
+			private final int parameters;
+			private final Generate generator;
+
+			UUIDType(String description, int parameters, Generate g) {
+				this.description = description;
+				this.parameters = parameters;
+				this.generator = g;
+			}
+
+			public UUID generate(String input) {
+				return generator.g(input);
+			}
+		}
+
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return null;
@@ -2495,7 +2533,15 @@ public class StringHandling {
 
 		@Override
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CString(UUID.randomUUID().toString(), t);
+			UUIDType type = UUIDType.RANDOM;
+			String input = null;
+			if(args.length > 0) {
+				type = ArgumentValidation.getEnum(args[0], UUIDType.class, t);
+			}
+			if(args.length > 1) {
+				input = args[1].nval();
+			}
+			return new CString(type.generate(input).toString(), t);
 		}
 
 		@Override
@@ -2505,17 +2551,38 @@ public class StringHandling {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{0};
+			return new Integer[]{0, 1, 2};
 		}
 
 		@Override
 		public String docs() {
-			return "string {} Returns a uuid.";
+			return "string {type, arg} Returns a UUID (also known as a GUID). Different types of UUIDs can be"
+					+ " generated, by default, if no parameters are provided, a random uuid is returned (version 4)."
+					+ " For full details on what exactly a uuid is, and what the different versions are, see"
+					+ " https://en.wikipedia.org/wiki/Universally_unique_identifier. The arg varies depending on the"
+					+ " type, some types do not require an argument, in which case, this parameter will be ignored."
+					+ " <code>type</code> may be one of:\n- " + StringUtils.Join(UUIDType.values(), "\n- ", "\n- ",
+							"\n- ", "",
+							(Object item) -> {
+								UUIDType type = (UUIDType) item;
+								return type.description + ". This type takes "
+										+ StringUtils.PluralTemplateHelper(type.parameters, "%d argument.",
+												"%d arguments.");
+							});
 		}
 
 		@Override
 		public Version since() {
 			return CHVersion.V3_3_3;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Typical usage", "uuid()", "46fa3d0e-0178-4384-8a9c-2f0df1cada2b"),
+				new ExampleScript("Explicit RANDOM uuid", "uuid(RANDOM)", "fb9f9a7b-76c2-40e3-ba20-8ab23553b9d6"),
+				new ExampleScript("NIL uuid", "uuid(NIL)")
+			};
 		}
 	}
 }
