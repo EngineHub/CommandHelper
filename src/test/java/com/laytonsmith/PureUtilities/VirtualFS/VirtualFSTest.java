@@ -88,7 +88,6 @@ public class VirtualFSTest {
 	 * @throws Exception
 	 */
 	@Test
-	@Ignore("TODO")
 	public void testWriteReadWithNewFile() throws Exception {
 		String fileText = "This is the text in the file";
 		VirtualFileSystem vfs = new VirtualFileSystem(ROOT, null);
@@ -102,15 +101,15 @@ public class VirtualFSTest {
 
 	private void testGlob(VirtualGlob glob, boolean expectMatch, VirtualFile... files) {
 		for(VirtualFile f : files) {
-			assertEquals(expectMatch, glob.matches(f));
+			assertEquals("Glob " + glob.toString() + " was expected to " + (expectMatch ? "match" : "not match")
+					+ " " + f.getPath(), expectMatch, glob.matches(f));
 		}
 	}
 
 	@Test
-	@Ignore("TODO")
 	public void testGlobbingWorks() throws Exception {
 		VirtualFile v1 = new VirtualFile("/top.txt");
-		VirtualFile v12 = new VirtualFile("/top.txtt");
+		VirtualFile v12 = new VirtualFile("/top.txm");
 		VirtualFile v13 = new VirtualFile("/top.tx");
 		VirtualFile v2 = new VirtualFile("/top.ms");
 		VirtualFile v3 = new VirtualFile("/dir/middle.txt");
@@ -123,7 +122,7 @@ public class VirtualFSTest {
 
 		VirtualGlob glob1 = new VirtualGlob("**");
 		VirtualGlob glob2 = new VirtualGlob("**.ms");
-		VirtualGlob glob3 = new VirtualGlob("/top.txtt?");
+		VirtualGlob glob3 = new VirtualGlob("/top.tx?");
 		VirtualGlob glob4 = new VirtualGlob("/*/test.txt");
 		VirtualGlob glob5 = new VirtualGlob("/**/test.txt");
 
@@ -146,7 +145,6 @@ public class VirtualFSTest {
 	}
 
 	@Test
-	@Ignore("TODO")
 	public void testCordonedOffIsGlobal() throws Exception {
 		VirtualFileSystemSettings s = new VirtualFileSystemSettings("'**': {\n  cordoned-off: true\n}\n");
 		assertTrue(s.isCordonedOff());
@@ -166,8 +164,7 @@ public class VirtualFSTest {
 	 *
 	 * @throws Exception
 	 */
-	@Test
-	@Ignore("TODO")
+	@Test(expected = PermissionException.class)
 	public void testCordonedFileNotFound() throws Exception {
 		String settingsString = "'**': {\n"
 				+ "  cordoned-off: true\n"
@@ -178,7 +175,7 @@ public class VirtualFSTest {
 		real.createNewFile();
 		assertTrue(real.exists());
 		VirtualFile virtual = new VirtualFile("/" + fn);
-		assertFalse(s.exists(virtual));
+		s.exists(virtual);
 	}
 
 	/**

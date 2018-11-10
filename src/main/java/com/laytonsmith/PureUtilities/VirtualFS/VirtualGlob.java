@@ -1,5 +1,7 @@
 package com.laytonsmith.PureUtilities.VirtualFS;
 
+import java.util.regex.Pattern;
+
 /**
  * A VirtualGlob is a simple wrapper around a file matching glob. The following rules are applied: All characters are
  * taken literally, except for the asterisk, double asterisk, or question mark, which mean the following:
@@ -16,6 +18,8 @@ package com.laytonsmith.PureUtilities.VirtualFS;
 public class VirtualGlob implements Comparable<VirtualGlob> {
 
 	private final String glob;
+	private final boolean matchAll;
+	private final Pattern globPattern;
 
 	/**
 	 * Creates a new virtual glob object, that will match this glob pattern.
@@ -24,6 +28,8 @@ public class VirtualGlob implements Comparable<VirtualGlob> {
 	 */
 	public VirtualGlob(String glob) {
 		this.glob = glob.trim().toLowerCase();
+		matchAll = "**".equals(glob);
+		globPattern = getPattern(glob);
 	}
 
 	/**
@@ -33,6 +39,45 @@ public class VirtualGlob implements Comparable<VirtualGlob> {
 	 */
 	public VirtualGlob(VirtualFile file) {
 		glob = file.getPath();
+		matchAll = false;
+		globPattern = getPattern(glob);
+	}
+
+	private Pattern getPattern(String glob) {
+		if(glob.isEmpty()) {
+			throw new IllegalArgumentException("Glob cannot be empty");
+		}
+		StringBuilder buffer = new StringBuilder();
+		StringBuilder pattern = new StringBuilder();
+		for(int i = 0; i < glob.length(); i++) {
+			char c1 = glob.charAt(i);
+			char c2 = '\0';
+			if(i < glob.length() - 1) {
+				c2 = glob.charAt(i + 1);
+			}
+			if(c1 == '?' || c1 == '*') {
+				if(buffer.length() > 0) {
+					pattern.append(Pattern.quote(buffer.toString()));
+					buffer = new StringBuilder();
+				}
+				if(c1 == '?') {
+					pattern.append('.');
+				} else {
+					if(c2 == '*') {
+						i++;
+						pattern.append(".*");
+					} else {
+						pattern.append("[^/\\\\]*");
+					}
+				}
+				continue;
+			}
+			buffer.append(c1);
+		}
+		if(buffer.length() > 0) {
+			pattern.append(Pattern.quote(buffer.toString()));
+		}
+		return Pattern.compile(pattern.toString(), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 	}
 
 	/**
@@ -41,11 +86,11 @@ public class VirtualGlob implements Comparable<VirtualGlob> {
 	 * @return
 	 */
 	public boolean matches(VirtualFile file) {
-		if("**".equals(glob)) {
+		if(matchAll) {
 			// Trivial case
 			return true;
 		}
-		throw new UnsupportedOperationException("Not implemented yet.");
+		return globPattern.matcher(file.getPath()).matches();
 	}
 
 	/**
