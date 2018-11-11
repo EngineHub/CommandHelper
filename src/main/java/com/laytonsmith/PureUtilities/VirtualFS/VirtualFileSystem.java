@@ -189,10 +189,10 @@ public class VirtualFileSystem {
 
 	private void assertReadPermission(VirtualFile file) {
 		Boolean hidden = (Boolean) settings.getSetting(file, VirtualFileSystemSetting.HIDDEN);
-		boolean cordonedOff = settings.isCordonedOff();
 		if(hidden) {
 			throw new PermissionException(file.getPath() + " cannot be read.");
 		}
+		boolean cordonedOff = settings.isCordonedOff();
 		if(cordonedOff) {
 			// Check in manifest, to see if this file is in it. If not, then this file doesn't exist, for this purpose,
 			// and so we throw a permission exception
@@ -202,11 +202,24 @@ public class VirtualFileSystem {
 		}
 	}
 
-	private void assertWritePermission(VirtualFile file) {
+	private void assertWritePermission(VirtualFile file) throws IOException {
 		Boolean readOnly = (Boolean) settings.getSetting(file, VirtualFileSystemSetting.READONLY);
 		Boolean hidden = (Boolean) settings.getSetting(file, VirtualFileSystemSetting.HIDDEN);
 		if(readOnly || hidden) {
 			throw new PermissionException(file.getPath() + " cannot be written to.");
+		}
+		boolean cordonedOff = settings.isCordonedOff();
+		if(cordonedOff) {
+			// If the file already exists in the manifest, then it's fine.
+			if(vfsManifest.fileInManifest(file)) {
+				return;
+			}
+			// Not in manifest
+			// Check if the underlying real file location exists already. If so, don't allow writing. If not,
+			// then writing is ok
+			if(normalize(file).exists()) {
+				throw new PermissionException(file.getPath() + " cannot be written to.");
+			}
 		}
 	}
 

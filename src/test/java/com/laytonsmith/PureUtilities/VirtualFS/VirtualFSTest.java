@@ -37,8 +37,8 @@ public class VirtualFSTest {
 	public static void tearDownClass() {
 		FileUtil.recursiveDelete(ROOT);
 		FileUtil.recursiveDelete(EXTERNAL);
-		assertFalse(ROOT + " was not deleted!", ROOT.exists());
-		assertFalse(EXTERNAL + " was not deleted!", EXTERNAL.exists());
+		FileUtil.recursiveDeleteOnExit(ROOT);
+		FileUtil.recursiveDeleteOnExit(EXTERNAL);
 	}
 
 	@Before
@@ -185,9 +185,25 @@ public class VirtualFSTest {
 	 * @throws Exception
 	 */
 	@Test
-	@Ignore
 	public void testCordonedOffTryToWriteOverExternalFile() throws Exception {
-		// Required for minimum product
+		String settings = "'**': {\n"
+				+ "  cordoned-off: true\n"
+				+ "}\n";
+		VirtualFileSystem s = setupVFS(settings);
+		String fn = "testCordonedOffTryToWriteOverExternalFile";
+		File real = new File(ROOT, fn);
+		String contents = "test contents";
+		FileUtil.write(contents, real);
+		VirtualFile virtual = new VirtualFile("/" + fn);
+		try {
+			s.writeUTFString(virtual, "bad contents");
+			fail("File was written successfully");
+		} catch(PermissionException e) {
+			// pass
+		}
+		String actualContents = FileUtil.read(real);
+		// Furthermore, make sure the contents are still correct
+		assertEquals(contents, actualContents);
 	}
 
 	/**

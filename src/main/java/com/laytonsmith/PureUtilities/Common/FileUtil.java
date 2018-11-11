@@ -393,7 +393,26 @@ public final class FileUtil {
 	}
 
 	/**
+	 * Recursively deletes a file/folder structure on exit. This will not delete the file immediately, but it is not
+	 * an error to delete the file first.
+	 *
+	 * @param file
+	 */
+	public static void recursiveDeleteOnExit(File file) {
+		System.gc();
+		if(file.isDirectory()) {
+			for(File f : file.listFiles()) {
+				recursiveDelete(f);
+			}
+			file.deleteOnExit();
+		} else {
+			file.deleteOnExit();
+		}
+	}
+
+	/**
 	 * Returns the most likely character encoding for this file. The default is "ASCII" and is probably the most common.
+	 * Note that ASCII and UTF-8 are the same format when the character set is just the 8 byte characters.
 	 *
 	 * @param file
 	 * @return
@@ -403,12 +422,8 @@ public final class FileUtil {
 		int lang = nsPSMDetector.ALL;
 		nsDetector det = new nsDetector(lang);
 		final MutableObject result = new MutableObject("ASCII");
-		det.Init(new nsICharsetDetectionObserver() {
-
-			@Override
-			public void Notify(String charset) {
-				result.setObject(charset);
-			}
+		det.Init((String charset) -> {
+			result.setObject(charset);
 		});
 
 		BufferedInputStream imp = null;
