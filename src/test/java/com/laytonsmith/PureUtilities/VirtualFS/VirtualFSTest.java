@@ -198,7 +198,7 @@ public class VirtualFSTest {
 		try {
 			s.writeUTFString(virtual, "bad contents");
 			fail("File was written successfully");
-		} catch(PermissionException e) {
+		} catch (PermissionException e) {
 			// pass
 		}
 		String actualContents = FileUtil.read(real);
