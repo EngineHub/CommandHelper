@@ -22,6 +22,8 @@ public interface Mixed extends Cloneable, Documentation {
 
 	public void setTarget(Target target);
 
+	public Target getTarget();
+
 	public Mixed clone() throws CloneNotSupportedException;
 
 	/**
@@ -123,5 +125,5 @@ public interface Mixed extends Cloneable, Documentation {
 	 * @throws IllegalArgumentException If the class isn't public facing.
 	 */
 	public CClassType typeof();
-
+	
 }

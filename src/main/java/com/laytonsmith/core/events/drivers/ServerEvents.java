@@ -35,6 +35,7 @@ import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -229,9 +230,9 @@ public class ServerEvents {
 						// Modifies the player list. The new list will be the intersection of the original
 						// and the given list. Names and UUID's outside this intersection will simply be ignored.
 						Set<MCPlayer> modifiedPlayers = new HashSet<>();
-						List<Construct> passedList = ArgumentValidation.getArray(value, value.getTarget()).asList();
+						List<Mixed> passedList = ArgumentValidation.getArray(value, value.getTarget()).asList();
 						for(MCPlayer player : e.getPlayers()) {
-							for(Construct construct : passedList) {
+							for(Mixed construct : passedList) {
 								String playerStr = construct.val();
 								if(playerStr.length() > 0 && playerStr.length() <= 16) { // "player" is a name.
 									if(playerStr.equalsIgnoreCase(player.getName())) {
@@ -335,11 +336,11 @@ public class ServerEvents {
 					if(value instanceof CArray) {
 						List<String> comp = new ArrayList<>();
 						if(((CArray) value).inAssociativeMode()) {
-							for(Construct k : ((CArray) value).keySet()) {
+							for(Mixed k : ((CArray) value).keySet()) {
 								comp.add(((CArray) value).get(k, value.getTarget()).val());
 							}
 						} else {
-							for(Construct v : ((CArray) value).asList()) {
+							for(Mixed v : ((CArray) value).asList()) {
 								comp.add(v.val());
 							}
 						}
@@ -488,7 +489,7 @@ public class ServerEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
 			if(key.equals("message")) {
 				MCBroadcastMessageEvent event = (MCBroadcastMessageEvent) e;
-				event.setMessage(value.nval());
+				event.setMessage(Construct.nval(value));
 				return true;
 			}
 			return false;

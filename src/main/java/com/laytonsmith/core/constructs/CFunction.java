@@ -66,7 +66,7 @@ public class CFunction extends Construct {
 	 * @param ofType
 	 * @return
 	 */
-	public static boolean IsFunction(Construct possibleFunction, Class<? extends Function> ofType) {
+	public static boolean IsFunction(Mixed possibleFunction, Class<? extends Function> ofType) {
 		Function f = ReflectionUtils.newInstance(ofType);
 		return possibleFunction instanceof CFunction && possibleFunction.val().equals(f.getName());
 	}

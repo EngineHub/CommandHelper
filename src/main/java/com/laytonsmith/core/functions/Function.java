@@ -11,6 +11,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.List;
 
 /**
@@ -66,13 +67,13 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * function should indicate so, and {@code execs} will be called instead. If exec is needed, execs should return
 	 * CVoid.
 	 *
-	 * @param line_num The line that this function call is being run from
-	 * @param f The file that this function call is being run from
-	 * @param args An array of evaluated Constructs
+	 * @param t The location of this function call in the code, used for correct error messages
+	 * @param environment The current code environment
+	 * @param args An array of evaluated objects
 	 * @return
 	 * @throws CancelCommandException
 	 */
-	public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException;
+	public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException;
 
 	/**
 	 * If a function needs a code tree instead of a resolved construct, it should return true here. Most functions will
@@ -97,6 +98,7 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * Returns an array of example scripts, which are used for documentation purposes.
 	 *
 	 * @return
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException If the script could not be compiled
 	 */
 	public ExampleScript[] examples() throws ConfigCompileException;
 
@@ -118,9 +120,10 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	/**
 	 * Returns the message to use when this function gets profiled, if useSpecialExec returns false.
 	 *
+	 * @param args
 	 * @return
 	 */
-	public String profileMessage(Construct... args);
+	public String profileMessage(Mixed... args);
 
 	/**
 	 * Returns the message to use when this function gets profiled, if useSpecialExec returns true.

@@ -1,11 +1,11 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.core.compiler.FileOptions;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.List;
 import java.util.Set;
 
@@ -154,7 +154,7 @@ public interface Optimizable extends Function {
 	 * @param args
 	 * @return
 	 */
-	public Construct optimize(Target t, Construct... args) throws ConfigRuntimeException, ConfigCompileException;
+	public Mixed optimize(Target t, Mixed... args) throws ConfigRuntimeException, ConfigCompileException;
 
 	/**
 	 * If the function indicates it can optimize dynamic values, this method is called. It may also throw a compile

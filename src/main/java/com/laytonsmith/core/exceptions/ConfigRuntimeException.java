@@ -15,13 +15,13 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECausedByWrapper;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -96,10 +96,10 @@ public class ConfigRuntimeException extends RuntimeException {
 				c.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
 			}
 			try {
-				c.execute(new Construct[]{ex});
+				c.execute(new Mixed[]{ex});
 				return Reaction.REPORT; // Closure returned nothing -> REPORT.
 			} catch (FunctionReturnException retException) {
-				Construct ret = retException.getReturn();
+				Mixed ret = retException.getReturn();
 				if(ret instanceof CNull || Prefs.ScreamErrors()) {
 					return Reaction.REPORT; // Closure returned null or scream-errors was set in the config.
 				} else {
@@ -254,7 +254,7 @@ public class ConfigRuntimeException extends RuntimeException {
 				CArray exception = ((CRECausedByWrapper) ex).getException();
 				CArray stackTrace = Static.getArray(exception.get("stackTrace", t), t);
 				List<StackTraceElement> newSt = new ArrayList<>();
-				for(Construct consElement : stackTrace.asList()) {
+				for(Mixed consElement : stackTrace.asList()) {
 					CArray element = Static.getArray(consElement, t);
 					int line = Static.getInt32(element.get("line", t), t);
 					File file = new File(element.get("file", t).val());

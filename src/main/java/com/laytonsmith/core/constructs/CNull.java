@@ -67,11 +67,6 @@ public final class CNull extends Construct implements Cloneable {
 	}
 
 	@Override
-	public String nval() {
-		return null;
-	}
-
-	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof CNull;
 	}

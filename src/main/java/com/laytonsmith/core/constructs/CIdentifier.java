@@ -19,7 +19,7 @@ public class CIdentifier extends CFunction {
 
 	@Override
 	public boolean isDynamic() {
-		return contained.getData().isDynamic();
+		return Construct.IsDynamicHelper(contained.getData());
 	}
 
 	public ParseTree contained() {

@@ -21,11 +21,11 @@ public class FunctionList {
 		return getFunction(new CFunction(s, t), platform);
 	}
 
-	public static FunctionBase getFunction(Construct c) throws ConfigCompileException {
+	public static FunctionBase getFunction(CFunction c) throws ConfigCompileException {
 		return getFunction(c, api.Platforms.INTERPRETER_JAVA);
 	}
 
-	public static FunctionBase getFunction(Construct c, api.Platforms platform) throws ConfigCompileException {
+	public static FunctionBase getFunction(CFunction c, api.Platforms platform) throws ConfigCompileException {
 		return ExtensionManager.GetFunction(c, platform);
 	}
 

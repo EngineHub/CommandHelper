@@ -66,6 +66,7 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopBreakException;
 import com.laytonsmith.core.exceptions.LoopContinueException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.tools.docgen.templates.ArrayIteration;
 import com.laytonsmith.tools.docgen.templates.Loops;
 
@@ -2008,7 +2009,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			boolean b = true;
 			try {
 				Static.getNumber(args[0], t);

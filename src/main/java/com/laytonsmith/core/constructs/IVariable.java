@@ -12,7 +12,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 public class IVariable extends Construct implements Cloneable {
 
 	public static final long serialVersionUID = 1L;
-	private Construct varValue;
+	private Mixed varValue;
 	private final String name;
 	private final CClassType type;
 	private final Target definedTarget;
@@ -29,7 +29,7 @@ public class IVariable extends Construct implements Cloneable {
 		this.definedTarget = t;
 	}
 
-	public IVariable(CClassType type, String name, Construct value, Target t) {
+	public IVariable(CClassType type, String name, Mixed value, Target t) {
 		super(name, ConstructType.IVARIABLE, t);
 		if(!type.equals(Auto.TYPE) && !(value instanceof CNull)) {
 			if(!InstanceofUtil.isInstanceof(value, type.val())) {
@@ -54,7 +54,7 @@ public class IVariable extends Construct implements Cloneable {
 		return varValue.val();
 	}
 
-	public Construct ival() {
+	public Mixed ival() {
 		varValue.setTarget(getTarget());
 		return varValue;
 	}
@@ -68,7 +68,7 @@ public class IVariable extends Construct implements Cloneable {
 		return name;
 	}
 
-	public void setIval(Construct c) {
+	public void setIval(Mixed c) {
 		varValue = c;
 	}
 

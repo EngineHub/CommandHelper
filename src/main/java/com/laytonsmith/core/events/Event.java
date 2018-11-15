@@ -4,12 +4,12 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Map;
 
 /**
@@ -49,7 +49,7 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * @throws com.laytonsmith.core.exceptions.PrefilterNonMatchException Equivalent to returning false, though throwing
 	 * an exception is sometimes easier, given that lower level code may be handling the prefilter match.
 	 */
-	public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException;
+	public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException;
 
 	/**
 	 * If an event is manually triggered, then it may be required for an event object to be faked, so the rest of the
@@ -70,7 +70,7 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * @return The map build from the event
 	 * @throws com.laytonsmith.core.exceptions.EventException If some exception occurs during map building
 	 */
-	public Map<String, Construct> evaluate(BindableEvent e) throws EventException;
+	public Map<String, Mixed> evaluate(BindableEvent e) throws EventException;
 
 	/**
 	 * This is called to determine if an event is cancellable in the first place
@@ -166,7 +166,7 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * @param event
 	 * @return
 	 */
-	public boolean modifyEvent(String key, Construct value, BindableEvent event);
+	public boolean modifyEvent(String key, Mixed value, BindableEvent event);
 
 	/**
 	 * Returns if this event is cancelled. If the event is not cancellable, false should be returned, though this case

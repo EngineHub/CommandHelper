@@ -79,6 +79,11 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 	}
 
 	@Override
+	public Target getTarget() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public String val() {
 		throw new UnsupportedOperationException();
 	}

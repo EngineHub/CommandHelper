@@ -123,7 +123,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		}
 		String message = exception.get("message", t).val();
 		List<StackTraceElement> st = new ArrayList<>();
-		for(Construct consStElement : Static.getArray(exception.get("stackTrace", t), t).asList()) {
+		for(Mixed consStElement : Static.getArray(exception.get("stackTrace", t), t).asList()) {
 			CArray stElement = Static.getArray(consStElement, t);
 			int line = Static.getInt32(stElement.get("line", t), t);
 			File f = new File(stElement.get("file", t).val());
@@ -138,7 +138,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		return ex;
 	}
 
-	private static Construct getCausedBy(Throwable causedBy) {
+	private static Mixed getCausedBy(Throwable causedBy) {
 		if(causedBy == null || !(causedBy instanceof CRECausedByWrapper)) {
 			return CNull.NULL;
 		}
@@ -175,22 +175,22 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 * @throws ConfigRuntimeException
 	 */
 	@Override
-	public Construct get(String index, Target t) throws ConfigRuntimeException {
+	public Mixed get(String index, Target t) throws ConfigRuntimeException {
 		return exceptionObject.get(index, t);
 	}
 
 	@Override
-	public Construct get(int index, Target t) throws ConfigRuntimeException {
+	public Mixed get(int index, Target t) throws ConfigRuntimeException {
 		return exceptionObject.get(index, t);
 	}
 
 	@Override
-	public Construct get(Construct index, Target t) throws ConfigRuntimeException {
+	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
 		return exceptionObject.get(index, t);
 	}
 
 	@Override
-	public Set<Construct> keySet() {
+	public Set<Mixed> keySet() {
 		return exceptionObject.keySet();
 	}
 
@@ -210,7 +210,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	}
 
 	@Override
-	public Construct slice(int begin, int end, Target t) {
+	public Mixed slice(int begin, int end, Target t) {
 		return exceptionObject.slice(begin, end, t);
 	}
 

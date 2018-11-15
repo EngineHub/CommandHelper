@@ -3,7 +3,6 @@ package com.laytonsmith.core.natives.interfaces;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.CClassType;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.Arrays;
@@ -26,7 +25,7 @@ public interface ArrayAccess extends Mixed, Sizeable {
 	 * @param t
 	 * @return
 	 */
-	public Construct get(String index, Target t) throws ConfigRuntimeException;
+	public Mixed get(String index, Target t) throws ConfigRuntimeException;
 
 	/**
 	 * Returns the mixed at this location. This should throw an exception if the index does not exist. This method will

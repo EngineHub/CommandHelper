@@ -45,6 +45,7 @@ import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -813,7 +814,7 @@ public class BlockEvents {
 				if(value instanceof CArray) {
 					CArray blockArray = (CArray) value;
 					if(blockArray.containsKey("name")) {
-						Construct name = blockArray.get("name", value.getTarget());
+						Mixed name = blockArray.get("name", value.getTarget());
 						int data = 0;
 						if(blockArray.containsKey("data")) {
 							try {
@@ -869,7 +870,7 @@ public class BlockEvents {
 				if(value instanceof CArray) {
 					CArray blockArray = (CArray) value;
 					if(blockArray.containsKey("name")) {
-						Construct name = blockArray.get("name", value.getTarget());
+						Mixed name = blockArray.get("name", value.getTarget());
 						int data = 0;
 						if(blockArray.containsKey("data")) {
 							try {

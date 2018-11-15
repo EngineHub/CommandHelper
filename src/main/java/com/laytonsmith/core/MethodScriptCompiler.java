@@ -41,6 +41,7 @@ import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.IncludeCache;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.taskmanager.TaskManager;
 import com.laytonsmith.persistence.DataSourceException;
 import java.io.File;
@@ -1233,7 +1234,7 @@ public final class MethodScriptCompiler {
 				// Wrap previous construct in a CLabel
 				ParseTree cc = tree.getChildren().get(tree.getChildren().size() - 1);
 				tree.removeChildAt(tree.getChildren().size() - 1);
-				tree.addChild(new ParseTree(new CLabel(cc.getData()), fileOptions));
+				tree.addChild(new ParseTree(new CLabel((Construct) cc.getData()), fileOptions));
 				continue;
 			}
 
@@ -1801,12 +1802,12 @@ public final class MethodScriptCompiler {
 	private static void link(ParseTree tree, Set<ConfigCompileException> compilerErrors) {
 		FunctionBase treeFunction = null;
 		try {
-			treeFunction = FunctionList.getFunction(tree.getData());
+			treeFunction = FunctionList.getFunction((CFunction) tree.getData());
 			if(treeFunction.getClass().getAnnotation(nolinking.class) != null) {
 				//Don't link children of a nolinking function.
 				return;
 			}
-		} catch (ConfigCompileException ex) {
+		} catch (ConfigCompileException | ClassCastException ex) {
 			//This can happen if the treeFunction isn't a function, is a proc, etc,
 			//but we don't care, we just want to continue.
 		}
@@ -1835,9 +1836,11 @@ public final class MethodScriptCompiler {
 				if(child.getData().val().charAt(0) != '_' || child.getData().val().charAt(1) == '_') {
 					// This will throw an exception if the function doesn't exist.
 					try {
-						FunctionList.getFunction(child.getData());
+						FunctionList.getFunction((CFunction) child.getData());
 					} catch (ConfigCompileException ex) {
 						compilerErrors.add(ex);
+					} catch (ClassCastException ex) {
+						throw new RuntimeException(ex);
 					}
 				}
 				link(child, compilerErrors);
@@ -1888,7 +1891,9 @@ public final class MethodScriptCompiler {
 			//Add the child to the identifier
 			ParseTree c = ((CIdentifier) cFunction).contained();
 			tree.addChild(c);
-			c.getData().setWasIdentifier(true);
+			if(c.getData() instanceof Construct) {
+				((Construct) c.getData()).setWasIdentifier(true);
+			}
 		}
 
 		List<ParseTree> children = tree.getChildren();
@@ -1953,8 +1958,8 @@ public final class MethodScriptCompiler {
 				}
 				Function f;
 				try {
-					f = (Function) FunctionList.getFunction(t.getData());
-				} catch (ConfigCompileException ex) {
+					f = (Function) FunctionList.getFunction(((CFunction) t.getData()));
+				} catch (ConfigCompileException | ClassCastException ex) {
 					continue;
 				}
 				Set<OptimizationOption> options = NO_OPTIMIZATIONS;
@@ -1974,15 +1979,18 @@ public final class MethodScriptCompiler {
 				}
 			}
 		}
-		boolean fullyStatic = true;
+		boolean fullyStatic = false;
 		boolean hasIVars = false;
 		for(ParseTree node : children) {
 			if(node.getData() instanceof CFunction) {
 				optimize(node, procs, compilerErrors);
 			}
 
-			if(node.getData().isDynamic() && !(node.getData() instanceof IVariable)) {
-				fullyStatic = false;
+			if(node.getData() instanceof Construct) {
+				Construct d = (Construct) node.getData();
+				if(!d.isDynamic() && !(d instanceof IVariable)) {
+					fullyStatic = true;
+				}
 			}
 			if(node.getData() instanceof IVariable) {
 				hasIVars = true;
@@ -2091,7 +2099,7 @@ public final class MethodScriptCompiler {
 					tree.setData(tempNode.getData());
 					tree.setOptimized(tempNode.isOptimized());
 					tree.setChildren(tempNode.getChildren());
-					tree.getData().setWasIdentifier(tempNode.getData().wasIdentifier());
+					Construct.SetWasIdentifierHelper(tree.getData(), tempNode.getData(), false);
 					optimize(tree, procs, compilerErrors);
 					tree.setOptimized(true);
 					//Some functions can actually make static the arguments, for instance, by pulling up a hardcoded
@@ -2116,15 +2124,15 @@ public final class MethodScriptCompiler {
 		}
 		//It could have optimized by changing the name, in that case, we
 		//don't want to run this now
-		if(tree.getData().getValue().equals(oldFunctionName)
+		if(tree.getData().val().equals(oldFunctionName)
 				&& (options.contains(OptimizationOption.OPTIMIZE_CONSTANT) || options.contains(OptimizationOption.CONSTANT_OFFLINE))) {
-			Construct[] constructs = new Construct[tree.getChildren().size()];
+			Mixed[] constructs = new Mixed[tree.getChildren().size()];
 			for(int i = 0; i < tree.getChildren().size(); i++) {
 				constructs[i] = tree.getChildAt(i).getData();
 			}
 			try {
 				try {
-					Construct result;
+					Mixed result;
 					if(options.contains(OptimizationOption.CONSTANT_OFFLINE)) {
 						List<Integer> numArgsList = Arrays.asList(func.numArgs());
 						if(!numArgsList.contains(Integer.MAX_VALUE)
@@ -2141,7 +2149,7 @@ public final class MethodScriptCompiler {
 
 					//If the result is null, it was just a check, it can't optimize further.
 					if(result != null) {
-						result.setWasIdentifier(tree.getData().wasIdentifier());
+						Construct.SetWasIdentifierHelper(tree.getData(), result, false);
 						tree.setData(result);
 						tree.removeChildren();
 					}
@@ -2201,13 +2209,13 @@ public final class MethodScriptCompiler {
 	 * @throws com.laytonsmith.core.exceptions.ConfigCompileGroupException This indicates that a group of compile errors
 	 * occurred.
 	 */
-	public static Construct execute(String script, File file, boolean inPureMScript, Environment env, MethodScriptComplete done, Script s, List<Variable> vars) throws ConfigCompileException, ConfigCompileGroupException {
+	public static Mixed execute(String script, File file, boolean inPureMScript, Environment env, MethodScriptComplete done, Script s, List<Variable> vars) throws ConfigCompileException, ConfigCompileGroupException {
 		return execute(compile(lex(script, file, inPureMScript)), env, done, s, vars);
 	}
 
 	/**
 	 * Executes a pre-compiled MethodScript, given the specified Script environment. Both done and script may be null,
-	 * and if so, reasonable defaults will be provided. The value sent to done will also be returned, as a Construct, so
+	 * and if so, reasonable defaults will be provided. The value sent to done will also be returned, as a Mixed, so
 	 * this one function may be used synchronously also.
 	 *
 	 * @param root
@@ -2216,7 +2224,7 @@ public final class MethodScriptCompiler {
 	 * @param script
 	 * @return
 	 */
-	public static Construct execute(ParseTree root, Environment env, MethodScriptComplete done, Script script) {
+	public static Mixed execute(ParseTree root, Environment env, MethodScriptComplete done, Script script) {
 		return execute(root, env, done, script, null);
 	}
 
@@ -2231,7 +2239,7 @@ public final class MethodScriptCompiler {
 	 * @param vars
 	 * @return
 	 */
-	public static Construct execute(ParseTree root, Environment env, MethodScriptComplete done, Script script, List<Variable> vars) {
+	public static Mixed execute(ParseTree root, Environment env, MethodScriptComplete done, Script script, List<Variable> vars) {
 		if(root == null) {
 			return CVoid.VOID;
 		}
@@ -2243,7 +2251,7 @@ public final class MethodScriptCompiler {
 			for(Variable v : vars) {
 				varMap.put(v.getVariableName(), v);
 			}
-			for(Construct tempNode : root.getAllData()) {
+			for(Mixed tempNode : root.getAllData()) {
 				if(tempNode instanceof Variable) {
 					Variable vv = varMap.get(((Variable) tempNode).getVariableName());
 					if(vv != null) {
@@ -2256,9 +2264,9 @@ public final class MethodScriptCompiler {
 			}
 		}
 		StringBuilder b = new StringBuilder();
-		Construct returnable = null;
+		Mixed returnable = null;
 		for(ParseTree gg : root.getChildren()) {
-			Construct retc = script.eval(gg, env);
+			Mixed retc = script.eval(gg, env);
 			if(root.numberOfChildren() == 1) {
 				returnable = retc;
 			}

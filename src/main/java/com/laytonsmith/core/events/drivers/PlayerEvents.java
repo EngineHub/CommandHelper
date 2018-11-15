@@ -75,6 +75,7 @@ import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.EventBinding.modify_event;
 import com.laytonsmith.core.functions.StringHandling;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -315,11 +316,11 @@ public class PlayerEvents {
 			if(event instanceof MCPlayerKickEvent) {
 				MCPlayerKickEvent e = (MCPlayerKickEvent) event;
 				if(key.equalsIgnoreCase("message")) {
-					e.setMessage(value.nval());
+					e.setMessage(Construct.nval(value));
 					return true;
 				}
 				if(key.equalsIgnoreCase("reason")) {
-					e.setReason(value.nval());
+					e.setReason(Construct.nval(value));
 					return true;
 				}
 			}
@@ -1314,7 +1315,7 @@ public class PlayerEvents {
 				MCPlayerDeathEvent e = (MCPlayerDeathEvent) event;
 				switch(key) {
 					case "death_message":
-						e.setDeathMessage(value.nval());
+						e.setDeathMessage(Construct.nval(value));
 						return true;
 					case "keep_inventory":
 						e.setKeepInventory(Static.getBoolean(value, Target.UNKNOWN));
@@ -1380,7 +1381,7 @@ public class PlayerEvents {
 		public BindableEvent convert(CArray manualObject, Target t) {
 			//Get the parameters from the manualObject
 			MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
-			String message = manualObject.get("message", Target.UNKNOWN).nval();
+			String message = Construct.nval(manualObject.get("message", Target.UNKNOWN));
 
 			BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class,
 					player, message);
@@ -1405,7 +1406,7 @@ public class PlayerEvents {
 			if(event instanceof MCPlayerQuitEvent) {
 				MCPlayerQuitEvent e = (MCPlayerQuitEvent) event;
 				if("message".equals(key)) {
-					e.setMessage(value.nval());
+					e.setMessage(Construct.nval(value));
 				}
 				return true;
 			}
@@ -1481,8 +1482,8 @@ public class PlayerEvents {
 		public BindableEvent convert(CArray manualObject, Target t) {
 			//Get the parameters from the manualObject
 			MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
-			String message = manualObject.get("message", Target.UNKNOWN).nval();
-			String format = manualObject.get("format", Target.UNKNOWN).nval();
+			String message = Construct.nval(manualObject.get("message", Target.UNKNOWN));
+			String format = Construct.nval(manualObject.get("format", Target.UNKNOWN));
 
 			BindableEvent e = EventBuilder.instantiate(MCPlayerChatEvent.class,
 					player, message, format);
@@ -1513,13 +1514,13 @@ public class PlayerEvents {
 			if(event instanceof MCPlayerChatEvent) {
 				MCPlayerChatEvent e = (MCPlayerChatEvent) event;
 				if("message".equals(key)) {
-					e.setMessage(value.nval());
+					e.setMessage(Construct.nval(value));
 				}
 				if("recipients".equals(key)) {
 					if(value instanceof CArray) {
 						List<MCPlayer> list = new ArrayList<MCPlayer>();
 						for(String index : ((CArray) value).stringKeySet()) {
-							Construct v = ((CArray) value).get(index, value.getTarget());
+							Mixed v = ((CArray) value).get(index, value.getTarget());
 							try {
 								list.add(Static.GetPlayer(v, value.getTarget()));
 							} catch (ConfigRuntimeException ex) {
@@ -1532,7 +1533,7 @@ public class PlayerEvents {
 					}
 				}
 				if("format".equals(key)) {
-					String format = value.nval();
+					String format = Construct.nval(value);
 					if(format == null) {
 						throw new CRENullPointerException("The \"format\" key in " + new modify_event().getName() + " for the " + this.getName()
 								+ " event may not be null.", value.getTarget());
@@ -1612,7 +1613,7 @@ public class PlayerEvents {
 		public BindableEvent convert(CArray manualObject, Target t) {
 			//Get the parameters from the manualObject
 			MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
-			String message = manualObject.get("message", Target.UNKNOWN).nval();
+			String message = Construct.nval(manualObject.get("message", Target.UNKNOWN));
 
 			BindableEvent e = EventBuilder.instantiate(MCPlayerChatEvent.class,
 					player, message);
@@ -1643,13 +1644,13 @@ public class PlayerEvents {
 			if(event instanceof MCPlayerChatEvent) {
 				MCPlayerChatEvent e = (MCPlayerChatEvent) event;
 				if("message".equals(key)) {
-					e.setMessage(value.nval());
+					e.setMessage(Construct.nval(value));
 				}
 				if("recipients".equals(key)) {
 					if(value instanceof CArray) {
-						List<MCPlayer> list = new ArrayList<MCPlayer>();
+						List<MCPlayer> list = new ArrayList<>();
 						for(String index : ((CArray) value).stringKeySet()) {
-							Construct v = ((CArray) value).get(index, value.getTarget());
+							Mixed v = ((CArray) value).get(index, value.getTarget());
 							try {
 								list.add(Static.GetPlayer(v, value.getTarget()));
 							} catch (ConfigRuntimeException ex) {
@@ -1663,7 +1664,7 @@ public class PlayerEvents {
 				}
 				if("format".equals(key)) {
 					try {
-						e.setFormat(value.nval());
+						e.setFormat(Construct.nval(value));
 					} catch (UnknownFormatConversionException | IllegalFormatConversionException ex) {
 						throw new CREFormatException(ex.getMessage(), value.getTarget());
 					}
@@ -1732,7 +1733,7 @@ public class PlayerEvents {
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
 			MCPlayer player = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
-			String command = manualObject.get("command", Target.UNKNOWN).nval();
+			String command = Construct.nval(manualObject.get("command", Target.UNKNOWN));
 
 			BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class, player, command);
 			return e;
@@ -2361,7 +2362,7 @@ public class PlayerEvents {
 						throw new CRECastException("The page array must not be associative.", pageArray.getTarget());
 					} else {
 						List<String> pages = new ArrayList<String>();
-						for(Construct page : pageArray.asList()) {
+						for(Mixed page : pageArray.asList()) {
 							pages.add(page.val());
 						}
 						MCPlayerEditBookEvent e = ((MCPlayerEditBookEvent) event);

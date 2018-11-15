@@ -10,6 +10,8 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.natives.interfaces.ObjectType;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -70,7 +72,7 @@ public class ParseTree implements Cloneable {
 		cache.remove(tree);
 	}
 
-	private Construct data = null;
+	private Mixed data = null;
 	private boolean isOptimized = false;
 	private final FileOptions fileOptions;
 	private List<ParseTree> children = null;
@@ -89,7 +91,7 @@ public class ParseTree implements Cloneable {
 	 *
 	 * @param construct
 	 */
-	public ParseTree(Construct construct, FileOptions options) {
+	public ParseTree(Mixed construct, FileOptions options) {
 		this(options);
 		setData(construct);
 	}
@@ -98,7 +100,7 @@ public class ParseTree implements Cloneable {
 		return fileOptions;
 	}
 
-	public void setData(Construct data) {
+	public void setData(Mixed data) {
 		this.data = data;
 	}
 
@@ -124,8 +126,8 @@ public class ParseTree implements Cloneable {
 	 *
 	 * @return
 	 */
-	public List<Construct> getAllData() {
-		List<Construct> list = new ArrayList<Construct>();
+	public List<Mixed> getAllData() {
+		List<Mixed> list = new ArrayList<>();
 		list.add(getData());
 		for(ParseTree node : getChildren()) {
 			list.addAll(node.getAllData());
@@ -158,7 +160,7 @@ public class ParseTree implements Cloneable {
 	 *
 	 * @return
 	 */
-	public Construct getData() {
+	public Mixed getData() {
 		return data;
 	}
 
@@ -227,7 +229,12 @@ public class ParseTree implements Cloneable {
 	 * @return
 	 */
 	public boolean isConst() {
-		return !data.isDynamic();
+		// Constructs may or may not be const, everything else is dynamic. Enums are always const.
+		if(data instanceof Construct) {
+			return !((Construct) data).isDynamic();
+		}
+		// TODO This will be changed once the concept of immutable objects are introduced
+		return data.getObjectType() == ObjectType.ENUM;
 	}
 
 	/**
@@ -236,7 +243,10 @@ public class ParseTree implements Cloneable {
 	 * @return
 	 */
 	public boolean isDynamic() {
-		return data.isDynamic();
+		if(data instanceof Construct) {
+			return ((Construct) data).isDynamic();
+		}
+		return data.getObjectType() != ObjectType.ENUM;
 	}
 
 	//TODO: None of this will work until we deeply consider procs, which can't happen yet.
@@ -294,15 +304,15 @@ public class ParseTree implements Cloneable {
 	 */
 	public List<Function> getFunctions() {
 		if(isCached(this, CacheTypes.FUNCTIONS)) {
-			return new ArrayList<Function>((List<Function>) getCache(this, CacheTypes.FUNCTIONS));
+			return new ArrayList<>((List<Function>) getCache(this, CacheTypes.FUNCTIONS));
 		} else {
-			List<Function> functions = new ArrayList<Function>();
-			List<Construct> allChildren = getAllData();
+			List<Function> functions = new ArrayList<>();
+			List<Mixed> allChildren = getAllData();
 			loop:
-			for(Construct c : allChildren) {
+			for(Mixed c : allChildren) {
 				if(c instanceof CFunction) {
 					try {
-						FunctionBase f = FunctionList.getFunction(c);
+						FunctionBase f = FunctionList.getFunction((CFunction) c);
 						if(f instanceof Function) {
 							Function ff = (Function) f;
 							functions.add(ff);

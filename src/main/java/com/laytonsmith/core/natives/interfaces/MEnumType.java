@@ -50,6 +50,11 @@ public class MEnumType implements Mixed {
 	}
 
 	@Override
+	public Target getTarget() {
+		return this.target;
+	}
+
+	@Override
 	public MEnumType clone() throws CloneNotSupportedException {
 		return new MEnumType(parentType, name, ordinal);
 	}

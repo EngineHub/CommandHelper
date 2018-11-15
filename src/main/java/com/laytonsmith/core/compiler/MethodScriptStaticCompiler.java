@@ -3,6 +3,7 @@ package com.laytonsmith.core.compiler;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.functions.CompiledFunction;
@@ -43,7 +44,7 @@ public final class MethodScriptStaticCompiler {
 
 	private static void go(ParseTree node, StringBuilder b, api.Platforms platform) throws ConfigCompileException {
 		if(node.hasChildren()) {
-			FunctionBase f = FunctionList.getFunction(node.getData(), platform);
+			FunctionBase f = FunctionList.getFunction((CFunction) node.getData(), platform);
 			if(!(f instanceof CompiledFunction)) {
 				throw new ConfigCompileException("The function " + f.getName() + " is unknown in this platform.", node.getData().getTarget());
 			}
