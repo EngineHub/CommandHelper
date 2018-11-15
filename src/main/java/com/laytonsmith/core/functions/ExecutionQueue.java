@@ -7,7 +7,6 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -15,6 +14,7 @@ import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,7 +53,7 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Construct exec(Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
 			if(!(args[0] instanceof CClosure)) {
@@ -135,7 +135,7 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Construct exec(Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
 			if(!(args[0] instanceof CClosure)) {
@@ -217,7 +217,7 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1) {
 				queue = args[0].nval();
@@ -267,7 +267,7 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1) {
 				queue = args[0].nval();
@@ -318,7 +318,7 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1) {
 				queue = args[0].nval();
@@ -369,7 +369,7 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1) {
 				queue = args[0].nval();
@@ -418,7 +418,7 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 2) {
 				queue = args[1].nval();
@@ -480,7 +480,7 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 2) {
 				queue = args[1].nval();

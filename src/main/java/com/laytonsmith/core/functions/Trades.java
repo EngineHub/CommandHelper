@@ -19,7 +19,6 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
@@ -32,6 +31,7 @@ import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,7 +55,7 @@ public class Trades {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(MCMerchantRecipe mr : GetMerchant(args[0], t).getRecipes()) {
 				ret.push(trade(mr, t), t);
@@ -95,11 +95,11 @@ public class Trades {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCMerchant merchant = GetMerchant(args[0], t);
 			CArray trades = Static.getArray(args[1], t);
 			List<MCMerchantRecipe> recipes = new ArrayList<>();
-			for(Construct trade : trades.asList()) {
+			for(Mixed trade : trades.asList()) {
 				recipes.add(trade(trade, t));
 			}
 			merchant.setRecipes(recipes);
@@ -164,7 +164,7 @@ public class Trades {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = CArray.GetAssociativeArray(t);
 			for(Map.Entry<String, MCMerchant> entry : VIRTUAL_MERCHANTS.entrySet()) {
 				if(entry.getValue() == null) {
@@ -207,7 +207,7 @@ public class Trades {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(VIRTUAL_MERCHANTS.containsKey(args[0].val())) {
 				throw new CREIllegalArgumentException("There is already a merchant with id " + args[0].val(), t);
 			} else {
@@ -250,7 +250,7 @@ public class Trades {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(VIRTUAL_MERCHANTS.remove(args[0].val()) != null);
 		}
 
@@ -286,7 +286,7 @@ public class Trades {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			boolean force = false;
 			if(args.length > 1) {
@@ -340,7 +340,7 @@ public class Trades {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCMerchant merchant = GetMerchant(args[0], t);
 			return merchant.isTrading() ? new CString(merchant.getTrader().getUniqueId().toString(), t) : CNull.NULL;
 		}
@@ -374,7 +374,7 @@ public class Trades {
 	 * @param t
 	 * @return abstracted merchant
 	 */
-	private static MCMerchant GetMerchant(Construct specifier, Target t) {
+	private static MCMerchant GetMerchant(Mixed specifier, Target t) {
 		MCMerchant merchant;
 		if(specifier.val().length() == 36 || specifier.val().length() == 32) {
 			try {
@@ -394,7 +394,7 @@ public class Trades {
 		return merchant;
 	}
 
-	private static MCMerchantRecipe trade(Construct c, Target t) {
+	private static MCMerchantRecipe trade(Mixed c, Target t) {
 
 		if(!(c instanceof CArray)) {
 			throw new CRECastException("Expected array but received " + c.getCType().name(), t);
@@ -424,7 +424,7 @@ public class Trades {
 					+ ingredients.size(), t);
 		}
 		List<MCItemStack> mcIngredients = new ArrayList<>();
-		for(Construct ingredient : ingredients.asList()) {
+		for(Mixed ingredient : ingredients.asList()) {
 			mcIngredients.add(ObjectGenerator.GetGenerator().item(ingredient, t));
 		}
 		mer.setIngredients(mcIngredients);
@@ -432,7 +432,7 @@ public class Trades {
 		return mer;
 	}
 
-	private static Construct trade(MCMerchantRecipe r, Target t) {
+	private static Mixed trade(MCMerchantRecipe r, Target t) {
 		if(r == null) {
 			return CNull.NULL;
 		}

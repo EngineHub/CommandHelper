@@ -31,7 +31,6 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -47,6 +46,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -68,7 +68,7 @@ public class Minecraft {
 		return "These functions provide a hook into game functionality.";
 	}
 
-	private static final SortedMap<String, Construct> DATA_VALUE_LOOKUP = new TreeMap<>();
+	private static final SortedMap<String, Mixed> DATA_VALUE_LOOKUP = new TreeMap<>();
 
 	static {
 		Properties p1 = new Properties();
@@ -98,7 +98,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args[0] instanceof CInt) {
 				return new CInt(Static.getInt(args[0], t), t);
 			}
@@ -208,7 +208,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			int i = -1;
 			int i2 = -1;
 			if(args[0] instanceof CString) {
@@ -292,7 +292,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray item = Static.getArray(args[0], t);
 			MCItemStack is = ObjectGenerator.GetGenerator().item(item, t, true);
 			return ObjectGenerator.GetGenerator().item(is, t);
@@ -340,8 +340,8 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Construct id = args[0];
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			Mixed id = args[0];
 			if(id instanceof CArray) {
 				MCItemStack is = ObjectGenerator.GetGenerator().item(id, t);
 				return new CInt(is.getType().getMaxStackSize(), t);
@@ -434,7 +434,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t);
 			MCEffect e;
@@ -476,7 +476,7 @@ public class Minecraft {
 			if(children.size() < 2) {
 				return null;
 			}
-			Construct effect = children.get(1).getData();
+			Mixed effect = children.get(1).getData();
 			if(effect instanceof CString) {
 				String effectName = effect.val().split(":")[0].toUpperCase();
 				try {
@@ -555,7 +555,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCServer server = StaticLayer.GetServer();
 			int index = -1;
 			if(args.length == 0) {
@@ -568,7 +568,7 @@ public class Minecraft {
 				throw new CRERangeException(this.getName() + " expects the index to be between -1 and 16 (inclusive)", t);
 			}
 
-			ArrayList<Construct> retVals = new ArrayList<>();
+			ArrayList<Mixed> retVals = new ArrayList<>();
 
 			if(index == 0 || index == -1) {
 				//Server name
@@ -674,7 +674,7 @@ public class Minecraft {
 			}
 
 			CArray ca = new CArray(t);
-			for(Construct c : retVals) {
+			for(Mixed c : retVals) {
 				ca.push(c, t);
 			}
 			return ca;
@@ -720,7 +720,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCServer server = StaticLayer.GetServer();
 			CArray co = new CArray(t);
 			List<MCOfflinePlayer> so = server.getBannedPlayers();
@@ -774,7 +774,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCServer server = StaticLayer.GetServer();
 			CArray co = new CArray(t);
 			List<MCOfflinePlayer> so = server.getWhitelistedPlayers();
@@ -808,7 +808,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
@@ -864,7 +864,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
@@ -929,7 +929,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = Static.GetPlayer(args[0], t);
 			p.sendResourcePack(args[1].val());
 			return CVoid.VOID;
@@ -979,7 +979,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			CArray ret = new CArray(t);
 			for(String ip : s.getIPBans()) {
@@ -1028,7 +1028,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			String ip = args[0].val();
 			if(Static.getBoolean(args[1], t)) {
@@ -1070,7 +1070,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCMaterial mat = StaticLayer.GetMaterial(args[0].val());
 			if(mat == null) {
 				try {
@@ -1231,7 +1231,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws CancelCommandException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws CancelCommandException {
 			Static.getServer().shutdown();
 			throw new CancelCommandException("", t);
 		}
@@ -1263,7 +1263,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld world = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {

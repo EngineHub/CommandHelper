@@ -19,7 +19,6 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -32,6 +31,7 @@ import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -68,7 +68,7 @@ public class Enchantments {
 	 * @param value
 	 * @return
 	 */
-	public static int ConvertLevel(Construct value) {
+	public static int ConvertLevel(Mixed value) {
 		if(value instanceof CInt) {
 			return (int) ((CInt) value).getInt();
 		}
@@ -182,7 +182,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 1;
 			if(args.length == 4) {
@@ -272,7 +272,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			int offset = 0;
 			if(args.length == 4 || args.length == 3 && args[2] instanceof CArray) {
@@ -348,7 +348,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 1;
 			if(args.length == 3) {
@@ -421,7 +421,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			int offset = 0;
 			if(args.length == 3) {
@@ -495,9 +495,9 @@ public class Enchantments {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			Construct slot;
+			Mixed slot;
 			if(args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
 				slot = args[1];
@@ -565,9 +565,9 @@ public class Enchantments {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
-			Construct slot;
+			Mixed slot;
 			if(args.length == 2) {
 				p = Static.GetPlayer(args[0].val(), t);
 				slot = args[1];
@@ -627,7 +627,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEnchantment e = GetEnchantment(args[0].val().replace(' ', '_'), t);
 			MCItemStack is = Static.ParseItemNotation(null, args[1].val(), 1, t);
 			return CBoolean.get(e.canEnchantItem(is));
@@ -688,7 +688,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEnchantment e = GetEnchantment(args[0].val(), t);
 			MCItemStack is = ObjectGenerator.GetGenerator().item(args[1], t);
 			return CBoolean.get(e.canEnchantItem(is));
@@ -735,7 +735,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEnchantment e = GetEnchantment(args[0].val().replace(' ', '_'), t);
 			return new CInt(e.getMaxLevel(), t);
 		}
@@ -784,7 +784,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCItemStack is;
 			if(args[0] instanceof CArray) {
 				is = ObjectGenerator.GetGenerator().item(args[0], t);
@@ -864,7 +864,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
 				GetEnchantment(args[0].val(), t);
 				return CBoolean.TRUE;
@@ -893,7 +893,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEnchantment[] enchantments = StaticLayer.GetEnchantmentValues();
 			CArray ret = new CArray(t);
 			for(MCEnchantment e : enchantments) {

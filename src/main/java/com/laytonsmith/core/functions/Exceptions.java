@@ -28,7 +28,6 @@ import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.NativeTypeList;
@@ -118,7 +117,7 @@ public class Exceptions {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script that, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script that, ParseTree... nodes) {
 			ParseTree tryCode = nodes[0];
 			ParseTree varName = null;
 			ParseTree catchCode = null;
@@ -136,7 +135,7 @@ public class Exceptions {
 
 			IVariable ivar = null;
 			if(varName != null) {
-				Construct pivar = that.eval(varName, env);
+				Mixed pivar = that.eval(varName, env);
 				if(pivar instanceof IVariable) {
 					ivar = (IVariable) pivar;
 				} else {
@@ -145,7 +144,7 @@ public class Exceptions {
 			}
 			List<String> interest = new ArrayList<String>();
 			if(types != null) {
-				Construct ptypes = that.seval(types, env);
+				Mixed ptypes = that.seval(types, env);
 				if(ptypes instanceof CString) {
 					interest.add(ptypes.val());
 				} else if(ptypes instanceof CArray) {
@@ -193,7 +192,7 @@ public class Exceptions {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -264,7 +263,7 @@ public class Exceptions {
 //			return true;
 //		}
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length == 1) {
 				try {
 					// Exception type
@@ -319,7 +318,7 @@ public class Exceptions {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CClosure) {
 				CClosure old = environment.getEnv(GlobalEnv.class).GetExceptionHandler();
 				environment.getEnv(GlobalEnv.class).SetExceptionHandler((CClosure) args[0]);
@@ -409,12 +408,12 @@ public class Exceptions {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			boolean exceptionCaught = false;
 			ConfigRuntimeException caughtException = null;
 			try {
@@ -436,7 +435,7 @@ public class Exceptions {
 							IVariableList varList = env.getEnv(GlobalEnv.class).GetVarList();
 							IVariable var = (IVariable) assign.getChildAt(1).getData();
 							// This should eventually be changed to be of the appropriate type. Unfortunately, that will
-							// require reworking basically everything. We need all functions to accept Mixed, instead of Construct.
+							// require reworking basically everything. We need all functions to accept Mixed, instead of Mixed.
 							// This will have to do in the meantime.
 							varList.set(new IVariable(CArray.TYPE, var.getVariableName(), e.getExceptionObject(), t));
 							parent.eval(nodes[i + 1], env);
@@ -573,7 +572,7 @@ public class Exceptions {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			StackTraceManager stManager = environment.getEnv(GlobalEnv.class).GetStackTraceManager();
 			List<ConfigRuntimeException.StackTraceElement> elements = stManager.getCurrentStackTrace();
 			CArray ret = new CArray(t);

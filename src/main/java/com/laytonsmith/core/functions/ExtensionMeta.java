@@ -11,7 +11,6 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.Event;
@@ -21,6 +20,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.extensions.ExtensionTracker;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.net.URL;
 import java.util.EnumSet;
 import java.util.List;
@@ -57,7 +57,7 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
 				FunctionList.getFunction(args[0].val().toLowerCase(), t);
 			} catch (ConfigCompileException ex) {
@@ -148,7 +148,7 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(EventList.getEvent(args[0].val().toLowerCase()) != null);
 		}
 
@@ -214,7 +214,7 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Map<URL, ExtensionTracker> trackers = ExtensionManager.getTrackers();
 			for(ExtensionTracker tracker : trackers.values()) {
 				String identifier = tracker.getIdentifier();
@@ -283,7 +283,7 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Map<URL, ExtensionTracker> trackers = ExtensionManager.getTrackers();
 
 			CArray retn = CArray.GetAssociativeArray(t);

@@ -28,6 +28,7 @@ import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.ReadOnlyException;
@@ -83,7 +84,7 @@ public class OAuth {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args) throws ConfigRuntimeException {
 			// TODO: Make this part support profiles
 			CArray options = Static.getArray(args[0], t);
 			String authorizationUrl = options.get("authorizationUrl", t).val();
@@ -417,7 +418,7 @@ public class OAuth {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			PersistenceNetwork pn = environment.getEnv(GlobalEnv.class).GetPersistenceNetwork();
 			String namespace = "oauth";
 			if(args.length >= 1) {

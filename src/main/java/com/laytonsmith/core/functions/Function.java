@@ -4,7 +4,6 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -92,7 +91,7 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * @param nodes
 	 * @return
 	 */
-	public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes);
+	public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes);
 
 	/**
 	 * Returns an array of example scripts, which are used for documentation purposes.

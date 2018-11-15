@@ -26,7 +26,6 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -37,6 +36,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistence.DataSourceException;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -80,7 +80,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			if(!Static.InCmdLine(env)) {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
@@ -156,7 +156,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CNull.NULL;
 		}
 
@@ -250,7 +250,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			startup();
 			final String file = args[0].val();
 			final CClosure callback;
@@ -287,13 +287,13 @@ public class FileHandling {
 							exception = new CREIOException(ex.getMessage(), t, ex);
 						}
 					}
-					final Construct cret;
+					final Mixed cret;
 					if(returnString == null) {
 						cret = CNull.NULL;
 					} else {
 						cret = new CString(returnString, t);
 					}
-					final Construct cex;
+					final Mixed cex;
 					if(exception == null) {
 						cex = CNull.NULL;
 					} else {
@@ -303,7 +303,7 @@ public class FileHandling {
 
 						@Override
 						public void run() {
-							callback.execute(new Construct[]{cret, cex});
+							callback.execute(new Mixed[]{cret, cex});
 						}
 					});
 				}
@@ -363,7 +363,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), environment, t, null);
 			if(!Security.CheckSecurity(location) && !Static.InCmdLine(environment)) {
 				throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
@@ -412,7 +412,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			if(!Static.InCmdLine(env)) {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
@@ -474,7 +474,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			if(!Static.InCmdLine(env)) {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
@@ -537,7 +537,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			//TODO: Doesn't work yet.
 			//TODO: Be sure to change over to Static.GetFileFromArgument
 			String path = args[0].val().trim().replace('\\', '/');
@@ -600,7 +600,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			File f = Static.GetFileFromArgument(args[0].val(), environment, t, null);
 			try {
 				return new CString(f.getCanonicalPath(), t);

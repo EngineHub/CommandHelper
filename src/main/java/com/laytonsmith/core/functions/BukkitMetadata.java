@@ -14,7 +14,6 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
@@ -27,6 +26,7 @@ import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.List;
 
@@ -105,7 +105,7 @@ public class BukkitMetadata {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			List<MCMetadataValue> metadata;
 			if(args.length == 1) {
 				metadata = Static.getPlayer(environment, t).getMetadata(args[0].val());
@@ -154,7 +154,7 @@ public class BukkitMetadata {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String key;
 			MCMetadatable metadatable;
 			if(args.length == 1) {
@@ -211,10 +211,10 @@ public class BukkitMetadata {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String key;
 			MCMetadatable metadatable;
-			Construct value;
+			Mixed value;
 			MCPlugin plugin;
 			if(args.length == 2) {
 				metadatable = Static.getPlayer(environment, t);
@@ -256,7 +256,7 @@ public class BukkitMetadata {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String key;
 			MCMetadatable metadatable;
 			if(args.length == 1) {

@@ -15,7 +15,6 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -25,6 +24,7 @@ import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
@@ -100,7 +100,7 @@ public class Debug {
 //			return false;
 //		}
 //
-//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 //			if(!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //				throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //			}
@@ -233,7 +233,7 @@ public class Debug {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(Prefs.DebugMode()) {
 				try {
 					Static.LogDebug(MethodScriptFileLocations.getDefault().getConfigDirectory(), args[0].val(), LogLevel.DEBUG);
@@ -264,11 +264,11 @@ public class Debug {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof IVariable) {
 				if(Prefs.DebugMode()) {
 					IVariable ivar = (IVariable) args[0];
-					Construct val = environment.getEnv(GlobalEnv.class).GetVarList().get(ivar.getVariableName(), t);
+					Mixed val = environment.getEnv(GlobalEnv.class).GetVarList().get(ivar.getVariableName(), t);
 					StreamUtils.GetSystemOut().println(ivar.getVariableName() + ": " + val.val());
 				}
 				return CVoid.VOID;
@@ -347,7 +347,7 @@ public class Debug {
 //			return false;
 //		}
 //
-//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 //			if(!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //				throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //			}
@@ -400,7 +400,7 @@ public class Debug {
 //			return true;
 //		}
 //
-//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 //			if(!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //				throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //			}
@@ -476,7 +476,7 @@ public class Debug {
 //			return false;
 //		}
 //
-//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 //			if(!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //				throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //			}
@@ -512,7 +512,7 @@ public class Debug {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
 			CArray carray = new CArray(t);
 			for(Thread thread : threadSet) {
@@ -564,7 +564,7 @@ public class Debug {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			File file = new File("dump.bin");
 			try {
 				HeapDumper.dumpHeap(file.getAbsolutePath(), true);
@@ -619,7 +619,7 @@ public class Debug {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Script.debugOutput = Static.getBoolean(args[0], t);
 			if(Script.debugOutput) {
 				StreamUtils.GetSystemOut().println(TermColors.BG_RED + "[[DEBUG]] set_debug_output(true)"

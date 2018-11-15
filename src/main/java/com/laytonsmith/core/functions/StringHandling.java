@@ -29,7 +29,6 @@ import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CSecureString;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -42,6 +41,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
@@ -86,7 +86,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			StringBuilder b = new StringBuilder();
 			for(int i = 0; i < args.length; i++) {
 				b.append(args[i].val());
@@ -164,7 +164,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			StringBuilder b = new StringBuilder();
 			for(int i = 0; i < args.length; i++) {
 				if(i > 0) {
@@ -290,7 +290,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			String thing = args[0].val();
 			String what = args[1].val();
 			String that = args[2].val();
@@ -351,13 +351,13 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			String string = args[0].val();
 			boolean useAdvanced = false;
 			if(args.length >= 2) {
 				useAdvanced = Static.getBoolean(args[1], t);
 			}
-			List<Construct> a = new ArrayList<>();
+			List<Mixed> a = new ArrayList<>();
 			if(!useAdvanced) {
 				String[] sa = string.split(" ");
 				for(String s : sa) {
@@ -370,7 +370,7 @@ public class StringHandling {
 					a.add(new CString(s.trim(), t));
 				}
 			}
-			Construct[] csa = new Construct[a.size()];
+			Mixed[] csa = new Mixed[a.size()];
 			for(int i = 0; i < a.size(); i++) {
 				csa[i] = a.get(i);
 			}
@@ -455,7 +455,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CString(args[0].val().trim(), args[0].getTarget());
 		}
 
@@ -512,7 +512,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CString(StringUtils.trimRight(args[0].val()), args[0].getTarget());
 		}
 
@@ -569,7 +569,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CString(StringUtils.trimLeft(args[0].val()), t);
 		}
 
@@ -631,7 +631,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args[0] instanceof Sizeable) {
 				return new CInt(((Sizeable) args[0]).size(), t);
 			} else {
@@ -693,7 +693,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(!(args[0] instanceof CString)) {
 				throw new CREFormatException(this.getName() + " expects a string as first argument, but type "
 						+ args[0].typeof() + " was found.", t);
@@ -756,7 +756,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(!(args[0] instanceof CString)) {
 				throw new CREFormatException(this.getName() + " expects a string as first argument, but type "
 						+ args[0].typeof() + " was found.", t);
@@ -822,7 +822,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			try {
 				String s = args[0].val();
 				int begin = Static.getInt32(args[1], t);
@@ -878,7 +878,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			Static.AssertNonCNull(t, args);
 
 			String teststring = args[0].nval();
@@ -946,7 +946,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			Static.AssertNonCNull(t, args);
 
 			String teststring = args[0].nval();
@@ -1006,7 +1006,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(!(args[0].nval() instanceof String)) {
 				throw new CRECastException(this.getName() + " expects a string as first argument, but type "
 						+ args[0].typeof() + " was found.", t);
@@ -1111,7 +1111,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			String haystack = args[0].nval();
 			String needle = args[1].nval();
 			Static.AssertNonCNull(t, args);
@@ -1153,7 +1153,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String haystack = args[0].nval();
 			String needle = args[1].nval();
 			Static.AssertNonCNull(t, args);
@@ -1242,7 +1242,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			//http://stackoverflow.com/questions/2667015/is-regex-too-slow-real-life-examples-where-simple-non-regex-alternative-is-bett
 			//According to this, regex isn't necessarily slower, but we do want to escape the pattern either way, since the main advantage
 			//of this function is convenience (not speed) however, if we can eek out a little extra speed too, excellent.
@@ -1319,7 +1319,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREInsufficientArgumentsException(getName() + " expects 2 or more arguments", t);
 			}
@@ -1352,7 +1352,7 @@ public class StringHandling {
 						+ " expects " + requiredArgs(parsed) + " argument(s), but " + (numArgs - 2) + " were provided.", t);
 			}
 
-			List<Construct> flattenedArgs = new ArrayList<Construct>();
+			List<Mixed> flattenedArgs = new ArrayList<>();
 			if(numArgs == 3 && args[2] instanceof CArray) {
 				if(((CArray) args[2]).inAssociativeMode()) {
 					throw new CRECastException("If the second argument to " + getName() + " is an array, it may not be associative.", t);
@@ -1368,7 +1368,7 @@ public class StringHandling {
 			}
 			//Now figure out how to cast things, now that we know our argument numbers will match up
 			for(int i = 0; i < requiredArgs(parsed); i++) {
-				Construct arg = flattenedArgs.get(i);
+				Mixed arg = flattenedArgs.get(i);
 				FormatString fs = parsed.get(i);
 				Character c = fs.getExpectedType();
 				params[i] = convertArgument(arg, c, i, t);
@@ -1377,7 +1377,7 @@ public class StringHandling {
 			return new CString(String.format(locale, formatString, params), t);
 		}
 
-		private Object convertArgument(Construct arg, Character c, int i, Target t) {
+		private Object convertArgument(Mixed arg, Character c, int i, Target t) {
 			Object o;
 			if(Conversion.isValid(c)) {
 				if(c == 't' || c == 'T') {
@@ -1844,7 +1844,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String val = args[0].val();
 			String encoding = "UTF-8";
 			if(args.length == 2) {
@@ -1900,7 +1900,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CByteArray ba = Static.getByteArray(args[0], t);
 			String encoding = "UTF-8";
 			if(args.length == 2) {
@@ -1955,7 +1955,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREInsufficientArgumentsException(getName() + " must have 2 arguments at minimum", t);
 			}
@@ -2044,7 +2044,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
 				return new CString(new String(Character.toChars(Static.getInt32(args[0], t))), t);
 			} catch (IllegalArgumentException ex) {
@@ -2112,7 +2112,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0].val().toCharArray().length == 0) {
 				throw new CRERangeException("Empty string cannot be converted to unicode.", t);
 			}
@@ -2170,7 +2170,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(StringUtils.LevenshteinDistance(args[0].val(), args[1].val()), t);
 		}
 
@@ -2227,7 +2227,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CNull) {
 				return CNull.NULL;
 			}
@@ -2345,7 +2345,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CArray) {
 				CArray array = Static.getArray(args[0], t);
 				return new CSecureString(array, t);
@@ -2423,7 +2423,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CSecureString) {
 				CSecureString secure = ArgumentValidation.getObject(args[0], t, CSecureString.class);
 				return secure.getDecryptedCharCArray();
@@ -2532,7 +2532,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			UUIDType type = UUIDType.RANDOM;
 			String input = null;
 			if(args.length > 0) {

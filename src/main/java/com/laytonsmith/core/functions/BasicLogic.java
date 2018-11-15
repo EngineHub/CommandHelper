@@ -24,7 +24,6 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CSlice;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -69,7 +68,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for(ParseTree node : nodes) {
 				if(node.getData() instanceof CIdentifier) {
 					return new ifelse().execs(t, env, parent, nodes);
@@ -93,7 +92,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -255,29 +254,29 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CNull.NULL;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			if(nodes.length < 2) {
 				throw new CREInsufficientArgumentsException("ifelse expects at least 2 arguments", t);
 			}
 			for(int i = 0; i <= nodes.length - 2; i += 2) {
 				ParseTree statement = nodes[i];
 				ParseTree code = nodes[i + 1];
-				Construct evalStatement = parent.seval(statement, env);
+				Mixed evalStatement = parent.seval(statement, env);
 				if(evalStatement instanceof CIdentifier) {
 					evalStatement = parent.seval(((CIdentifier) evalStatement).contained(), env);
 				}
 				if(Static.getBoolean(evalStatement, t)) {
-					Construct ret = env.getEnv(GlobalEnv.class).GetScript().eval(code, env);
+					Mixed ret = env.getEnv(GlobalEnv.class).GetScript().eval(code, env);
 					return ret;
 				}
 			}
 			if(nodes.length % 2 == 1) {
-				Construct ret = env.getEnv(GlobalEnv.class).GetScript().seval(nodes[nodes.length - 1], env);
+				Mixed ret = env.getEnv(GlobalEnv.class).GetScript().seval(nodes[nodes.length - 1], env);
 				if(ret instanceof CIdentifier) {
 					return parent.seval(((CIdentifier) ret).contained(), env);
 				} else {
@@ -369,19 +368,19 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CNull.NULL;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			Construct value = parent.seval(nodes[0], env);
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			Mixed value = parent.seval(nodes[0], env);
 			equals equals = new equals();
 			try {
 				for(int i = 1; i <= nodes.length - 2; i += 2) {
 					ParseTree statement = nodes[i];
 					ParseTree code = nodes[i + 1];
-					Construct evalStatement = parent.seval(statement, env);
+					Mixed evalStatement = parent.seval(statement, env);
 					if(evalStatement instanceof CSlice) { //More specific subclass of array, we can do more optimal handling here
 						long rangeLeft = ((CSlice) evalStatement).getStart();
 						long rangeRight = ((CSlice) evalStatement).getFinish();
@@ -395,7 +394,7 @@ public class BasicLogic {
 						}
 					} else if(evalStatement instanceof CArray) {
 						for(String index : ((CArray) evalStatement).stringKeySet()) {
-							Construct inner = ((CArray) evalStatement).get(index, t);
+							Mixed inner = ((CArray) evalStatement).get(index, t);
 							if(inner instanceof CSlice) {
 								long rangeLeft = ((CSlice) inner).getStart();
 								long rangeRight = ((CSlice) inner).getFinish();
@@ -616,10 +615,10 @@ public class BasicLogic {
 			String notConstant = "Cases for a switch statement must be constant, not variable";
 			String alreadyContains = "The switch statement already contains a case for this value, remove the duplicate value";
 			final equals equals = new equals();
-			Set<Construct> values = new TreeSet<>(new Comparator<Construct>() {
+			Set<Mixed> values = new TreeSet<>(new Comparator<Mixed>() {
 
 				@Override
-				public int compare(Construct t, Construct t1) {
+				public int compare(Mixed t, Mixed t1) {
 					if(equals.exec(Target.UNKNOWN, null, t, t1).getBoolean()) {
 						return 0;
 					} else {
@@ -648,9 +647,9 @@ public class BasicLogic {
 				//Now we validate that the values are constant and non-repeating.
 				if(children.get(i).getData() instanceof CArray) {
 					List<Mixed> list = ((CArray) children.get(i).getData()).asList();
-					for(Construct c : list) {
+					for(Mixed c : list) {
 						if(c instanceof CSlice) {
-							for(Construct cc : ((CSlice) c).asList()) {
+							for(Mixed cc : ((CSlice) c).asList()) {
 								if(values.contains(cc)) {
 									throw new ConfigCompileException(alreadyContains, cc.getTarget());
 								}
@@ -667,7 +666,7 @@ public class BasicLogic {
 						}
 					}
 				} else {
-					Construct c = children.get(i).getData();
+					Mixed c = children.get(i).getData();
 					if(c.isDynamic()) {
 						throw new ConfigCompileException(notConstant, c.getTarget());
 					}
@@ -687,7 +686,7 @@ public class BasicLogic {
 				//so we can go ahead and condense this down to the single code path
 				//in the switch.
 				for(int i = 1; i < children.size(); i += 2) {
-					Construct data = children.get(i).getData();
+					Mixed data = children.get(i).getData();
 
 					if(!(data instanceof CArray) || data instanceof CSlice) {
 						//Put it in an array to make the rest of this parsing easier.
@@ -786,7 +785,7 @@ public class BasicLogic {
 			}
 			if(Static.anyNulls(args)) {
 				boolean equals = true;
-				for(Construct c : args) {
+				for(Mixed c : args) {
 					if(!(c instanceof CNull)) {
 						equals = false;
 					}
@@ -929,7 +928,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -998,7 +997,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new sequals().exec(t, environment, args).not();
 		}
 
@@ -1067,7 +1066,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new equals().exec(t, env, args).not();
 		}
 
@@ -1129,7 +1128,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args.length <= 1) {
 				throw new CREInsufficientArgumentsException("At least two arguments must be passed to equals_ic", t);
 			}
@@ -1215,9 +1214,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Construct v1 = args[0];
-			Construct v2 = args[1];
+		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			Mixed v1 = args[0];
+			Mixed v2 = args[1];
 			if(!v2.getClass().equals(v1.getClass())) {
 				return CBoolean.FALSE;
 			}
@@ -1306,7 +1305,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new equals_ic().exec(t, environment, args).not();
 		}
 
@@ -1345,7 +1344,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CArray && args[1] instanceof CArray) {
 				return CBoolean.get(args[0] == args[1]);
 			} else {
@@ -1408,7 +1407,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -1475,7 +1474,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -1542,7 +1541,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -1610,7 +1609,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -1677,10 +1676,10 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Construct... args) {
+		public CBoolean exec(Target t, Environment env, Mixed... args) {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
-			for(Construct c : args) {
+			for(Mixed c : args) {
 				if(!Static.getBoolean(c, t)) {
 					return CBoolean.FALSE;
 				}
@@ -1691,7 +1690,7 @@ public class BasicLogic {
 		@Override
 		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for(ParseTree tree : nodes) {
-				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
+				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
 				boolean b = Static.getBoolean(c, t);
 				if(b == false) {
 					return CBoolean.FALSE;
@@ -1763,7 +1762,7 @@ public class BasicLogic {
 //				//However, we can remove any functions that have no side effects that come before the false.
 //				it = children.iterator();
 //				while(it.hasNext()){
-//					Construct data = it.next().getData();
+//					Mixed data = it.next().getData();
 //					if(data instanceof CFunction && ((CFunction)data).getFunction() instanceof Optimizable){
 //						if(((Optimizable)((CFunction)data).getFunction()).optimizationOptions().contains(OptimizationOption.NO_SIDE_EFFECTS)){
 //							it.remove();
@@ -1822,14 +1821,14 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for(ParseTree tree : nodes) {
-				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
+				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
 				if(!Static.getBoolean(c, t)) {
 					return c;
 				}
@@ -1868,7 +1867,7 @@ public class BasicLogic {
 //				//However, we can remove any functions that have no side effects that come before the false.
 //				it = children.iterator();
 //				while(it.hasNext()){
-//					Construct data = it.next().getData();
+//					Mixed data = it.next().getData();
 //					if(data instanceof CFunction && ((CFunction)data).getFunction() instanceof Optimizable){
 //						if(((Optimizable)((CFunction)data).getFunction()).optimizationOptions().contains(OptimizationOption.NO_SIDE_EFFECTS)){
 //							it.remove();
@@ -1933,10 +1932,10 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Construct... args) {
+		public CBoolean exec(Target t, Environment env, Mixed... args) {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
-			for(Construct c : args) {
+			for(Mixed c : args) {
 				if(Static.getBoolean(c, t)) {
 					return CBoolean.TRUE;
 				}
@@ -1947,7 +1946,7 @@ public class BasicLogic {
 		@Override
 		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for(ParseTree tree : nodes) {
-				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
+				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
 				if(Static.getBoolean(c, t)) {
 					return CBoolean.TRUE;
 				}
@@ -2018,7 +2017,7 @@ public class BasicLogic {
 //				//However, we can remove any functions that have no side effects that come before the true.
 //				it = children.iterator();
 //				while(it.hasNext()){
-//					Construct data = it.next().getData();
+//					Mixed data = it.next().getData();
 //					if(data instanceof CFunction && ((CFunction)data).getFunction() instanceof Optimizable){
 //						if(((Optimizable)((CFunction)data).getFunction()).optimizationOptions().contains(OptimizationOption.NO_SIDE_EFFECTS)){
 //							it.remove();
@@ -2077,14 +2076,14 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for(ParseTree tree : nodes) {
-				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
+				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
 				if(Static.getBoolean(c, t)) {
 					return c;
 				}
@@ -2123,7 +2122,7 @@ public class BasicLogic {
 //				//However, we can remove any functions that have no side effects that come before the true.
 //				it = children.iterator();
 //				while(it.hasNext()){
-//					Construct data = it.next().getData();
+//					Mixed data = it.next().getData();
 //					if(data instanceof CFunction && ((CFunction)data).getFunction() instanceof Optimizable){
 //						if(((Optimizable)((CFunction)data).getFunction()).optimizationOptions().contains(OptimizationOption.NO_SIDE_EFFECTS)){
 //							it.remove();
@@ -2195,7 +2194,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 1) {
 				throw new CREFormatException(this.getName() + " expects 1 argument.", t);
 			}
@@ -2284,7 +2283,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -2352,7 +2351,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) {
 			return CNull.NULL;
 		}
 
@@ -2413,7 +2412,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) {
 			return CNull.NULL;
 		}
 
@@ -2474,7 +2473,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -2539,7 +2538,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREFormatException(this.getName() + " expects at least 2 arguments.", t);
 			}
@@ -2615,7 +2614,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREFormatException(this.getName() + " expects at least 2 arguments.", t);
 			}
@@ -2693,7 +2692,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREFormatException(this.getName() + " expects at least 2 arguments.", t);
 			}
@@ -2767,7 +2766,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 1) {
 				throw new CREFormatException(this.getName() + " expects 1 argument.", t);
 			}
@@ -2828,7 +2827,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -2891,7 +2890,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -2956,7 +2955,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -3000,7 +2999,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -3071,7 +3070,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CInt exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(args[0].hashCode(), t);
 		}
 

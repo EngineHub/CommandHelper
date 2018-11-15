@@ -36,6 +36,7 @@ import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRESQLException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.database.SQLProfile;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -144,7 +145,7 @@ public class SQL {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
 				Profiles.Profile profile;
 				if(args[0] instanceof CArray) {
@@ -161,7 +162,7 @@ public class SQL {
 					throw new CRECastException("Profile must be an SQL type profile, but found \"" + profile.getType() + "\"", t);
 				}
 				String query = args[1].val();
-				Construct[] params = new Construct[args.length - 2];
+				Mixed[] params = new Mixed[args.length - 2];
 				for(int i = 2; i < args.length; i++) {
 					int index = i - 2;
 					params[index] = args[i];
@@ -312,7 +313,7 @@ public class SQL {
 			//We can check 2 things here, one, that the statement isn't dynamic, and if not, then
 			//2, that the parameter count matches the ? count. No checks can be done for typing,
 			//without making a connection to the db though, so we won't do that here.
-			Construct queryData = children.get(1).getData();
+			Mixed queryData = children.get(1).getData();
 			if(queryData instanceof CFunction) {
 				//If it's a concat or sconcat, warn them that this is bad
 				if(doWarn && ("sconcat".equals(queryData.val()) || "concat".equals(queryData.val()))) {
@@ -472,34 +473,34 @@ public class SQL {
 		}
 
 		@Override
-		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			startup();
-			Construct arg = args[args.length - 1];
+			Mixed arg = args[args.length - 1];
 			if(!(arg instanceof CClosure)) {
 				throw new CRECastException("The last argument to " + getName() + " must be a closure.", t);
 			}
 			final CClosure closure = ((CClosure) arg);
-			final Construct[] newArgs = new Construct[args.length - 1];
+			final Mixed[] newArgs = new Mixed[args.length - 1];
 			//Make a new array minus the closure
 			System.arraycopy(args, 0, newArgs, 0, newArgs.length);
 			queue.invokeLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
 				@Override
 				public void run() {
-					Construct returnValue = CNull.NULL;
-					Construct exception = CNull.NULL;
+					Mixed returnValue = CNull.NULL;
+					Mixed exception = CNull.NULL;
 					try {
 						returnValue = new query().exec(t, environment, newArgs);
 					} catch (ConfigRuntimeException ex) {
 						exception = ObjectGenerator.GetGenerator().exception(ex, environment, t);
 					}
-					final Construct cret = returnValue;
-					final Construct cex = exception;
+					final Mixed cret = returnValue;
+					final Mixed cex = exception;
 					StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
 						@Override
 						public void run() {
-							closure.execute(new Construct[]{cret, cex});
+							closure.execute(new Mixed[]{cret, cex});
 						}
 					});
 				}

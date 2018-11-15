@@ -27,7 +27,6 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -40,6 +39,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -74,7 +74,7 @@ public class Meta {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(CommandHelperPlugin.isFirstLoad());
 		}
 
@@ -110,7 +110,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, final Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, final Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args[1].nval() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
 				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
 			}
@@ -118,7 +118,7 @@ public class Meta {
 			if(args[0] instanceof CArray) {
 				CArray u = (CArray) args[0];
 				for(int i = 0; i < u.size(); i++) {
-					exec(t, env, new Construct[]{new CString(u.get(i, t).val(), t), args[1]});
+					exec(t, env, new Mixed[]{new CString(u.get(i, t).val(), t), args[1]});
 				}
 				return CVoid.VOID;
 			}
@@ -205,7 +205,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
 				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
 			}
@@ -332,7 +332,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
 				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
 			}
@@ -404,7 +404,7 @@ public class Meta {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, Construct... args)
+		public CBoolean exec(Target t, Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
 			AliasCore ac = Static.getAliasCore();
 
@@ -482,7 +482,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			boolean doRemoval = true;
 			if(!Static.getAliasCore().hasPlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender())) {
 				doRemoval = false;
@@ -545,12 +545,12 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) {
 			return null;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment environment, Script parent, ParseTree... nodes) throws ConfigRuntimeException {
+		public Mixed execs(Target t, Environment environment, Script parent, ParseTree... nodes) throws ConfigRuntimeException {
 			MCPlayer p = Static.GetPlayer(parent.seval(nodes[0], environment).val(), t);
 			MCCommandSender originalPlayer = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			int offset = 0;
@@ -613,7 +613,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(environment.getEnv(CommandHelperEnvironment.class).GetCommand() == null) {
 				return CNull.NULL;
 			} else {
@@ -647,7 +647,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String player = args[0].val();
 			String cmd = args[1].val();
 			if(!cmd.startsWith("/")) {
@@ -712,7 +712,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCLocation loc;
 			CArray ret;
@@ -771,7 +771,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			boolean state;
 			if(args.length == 1) {
@@ -838,7 +838,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CString s;
 			if(args[0] instanceof CString) {
 				s = (CString) args[0];
@@ -897,7 +897,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -943,7 +943,7 @@ public class Meta {
 		}
 
 		@Override
-		public CArray exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CArray exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray c = new CArray(t);
 			for(Locale l : Locale.getAvailableLocales()) {
 				if(!l.getCountry().isEmpty()) {
@@ -1005,7 +1005,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			JarFile jf;
 			try {
 				String jar = ClassDiscovery.GetClassContainer(Meta.class).toString();
@@ -1061,7 +1061,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(environment.getEnv(GlobalEnv.class).GetScript().getCompileTime(), t);
 		}
 
@@ -1106,7 +1106,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CResource<>(environment, t);
 		}
 

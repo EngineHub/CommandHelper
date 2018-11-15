@@ -47,6 +47,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -107,7 +108,7 @@ public class Web {
 		for(Cookie cookie : cookieJar.getAllCookies()) {
 			boolean update = false;
 			CArray aCookie = null;
-			for(Construct ac : arrayJar.asList()) {
+			for(Mixed ac : arrayJar.asList()) {
 				aCookie = Static.getArray(ac, t);
 				if(cookie.getName().equals(aCookie.get("name", t).val())
 						&& cookie.getDomain().equals(aCookie.get("domain", t).val())
@@ -216,7 +217,7 @@ public class Web {
 		}
 
 		@Override
-		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			final URL url;
 			try {
 				url = new URL(args[0].val());
@@ -249,7 +250,7 @@ public class Web {
 					Map<String, List<String>> mheaders = new HashMap<String, List<String>>();
 					for(String key : headers.stringKeySet()) {
 						List<String> h = new ArrayList<String>();
-						Construct c = headers.get(key, t);
+						Mixed c = headers.get(key, t);
 						if(c instanceof CArray) {
 							for(String kkey : ((CArray) c).stringKeySet()) {
 								h.add(((CArray) c).get(kkey, t).val());
@@ -281,7 +282,7 @@ public class Web {
 						CArray params = Static.getArray(csettings.get("params", t), t);
 						Map<String, List<String>> mparams = new HashMap<>();
 						for(String key : params.stringKeySet()) {
-							Construct c = params.get(key, t);
+							Mixed c = params.get(key, t);
 							List<String> l = new ArrayList<>();
 							if(c instanceof CArray) {
 								for(String kkey : ((CArray) c).stringKeySet()) {
@@ -362,7 +363,7 @@ public class Web {
 					settings.setProxy(proxy);
 				}
 				if(csettings.containsKey("trustStore")) {
-					Construct trustStore = csettings.get("trustStore", t);
+					Mixed trustStore = csettings.get("trustStore", t);
 					if(trustStore instanceof CBoolean && Static.getBoolean(trustStore, t) == false) {
 						settings.setDisableCertChecking(true);
 					} else if(trustStore instanceof CArray) {
@@ -385,7 +386,7 @@ public class Web {
 					}
 				}
 				if(csettings.containsKey("download")) {
-					Construct download = csettings.get("download", t);
+					Mixed download = csettings.get("download", t);
 					if(download instanceof CNull) {
 						settings.setDownloadTo(null);
 					} else { // TODO: Remove this check and tie into the VFS once that is complete.
@@ -468,9 +469,9 @@ public class Web {
 			return CVoid.VOID;
 		}
 
-		private void executeFinish(CClosure closure, Construct arg, Target t, Environment environment) {
+		private void executeFinish(CClosure closure, Mixed arg, Target t, Environment environment) {
 			try {
-				closure.execute(new Construct[]{arg});
+				closure.execute(new Mixed[]{arg});
 			} catch (FunctionReturnException e) {
 				//Just ignore this if it's returning void. Otherwise, warn.
 				//TODO: Eventually, this should be taggable as a compile error
@@ -584,7 +585,7 @@ public class Web {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray array = Static.getArray(args[0], t);
 			CookieJar jar = getCookieJar(array, t);
 			jar.clearSessionCookies();
@@ -633,7 +634,7 @@ public class Web {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
 				return new CString(URLEncoder.encode(args[0].val(), "UTF-8"), t);
 			} catch (UnsupportedEncodingException ex) {
@@ -690,7 +691,7 @@ public class Web {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
 				return new CString(URLDecoder.decode(args[0].val(), "UTF-8"), t);
 			} catch (UnsupportedEncodingException ex) {
@@ -748,7 +749,7 @@ public class Web {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			// Argument processing
 			CArray options;
 			if(args.length == 1) {
@@ -791,7 +792,7 @@ public class Web {
 			String from = ArgumentValidation.getItemFromArray(options, "from", t, null).val();
 			String subject = ArgumentValidation.getItemFromArray(options, "subject", t, new CString("<No Subject>", t)).val();
 			String body = ArgumentValidation.getItemFromArray(options, "body", t, new CString("", t)).val();
-			Construct cto = ArgumentValidation.getItemFromArray(options, "to", t, null);
+			Mixed cto = ArgumentValidation.getItemFromArray(options, "to", t, null);
 			CArray to;
 			if(cto instanceof CString) {
 				to = new CArray(t);
@@ -846,7 +847,7 @@ public class Web {
 					attachments.push(bodyAttachment, 0, t);
 				}
 
-				for(Construct c : to.asList()) {
+				for(Mixed c : to.asList()) {
 					Message.RecipientType type = Message.RecipientType.TO;
 					String address;
 					if(c instanceof CArray) {
@@ -878,7 +879,7 @@ public class Web {
 					String fileName = ArgumentValidation.getItemFromArray(pattachment, "filename", t, new CString("", t)).val().trim();
 					String description = ArgumentValidation.getItemFromArray(pattachment, "description", t, new CString("", t)).val().trim();
 					String disposition = ArgumentValidation.getItemFromArray(pattachment, "disposition", t, new CString("", t)).val().trim();
-					Construct content = ArgumentValidation.getItemFromArray(pattachment, "content", t, null);
+					Mixed content = ArgumentValidation.getItemFromArray(pattachment, "content", t, null);
 					if(!"".equals(fileName)) {
 						message.setFileName(fileName);
 					}
@@ -891,7 +892,7 @@ public class Web {
 					message.setContent(getContent(content, t), type);
 				} else {
 					Multipart mp = new MimeMultipart("alternative");
-					for(Construct attachment : attachments.asList()) {
+					for(Mixed attachment : attachments.asList()) {
 						CArray pattachment = ArgumentValidation.getArray(attachment, t);
 						final String type = ArgumentValidation.getItemFromArray(pattachment, "type", t, null).val();
 						final String fileName = ArgumentValidation.getItemFromArray(pattachment, "filename", t, new CString("", t)).val().trim();
@@ -978,7 +979,7 @@ public class Web {
 		 * @param t
 		 * @return
 		 */
-		private Object getContent(Construct c, Target t) {
+		private Object getContent(Mixed c, Target t) {
 			if(c instanceof CString) {
 				return c.val();
 			} else if(c instanceof CByteArray) {

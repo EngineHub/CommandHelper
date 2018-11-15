@@ -21,7 +21,6 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -37,6 +36,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import org.bukkit.event.Cancellable;
 
 import java.io.File;
@@ -99,7 +99,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
 			if(original == null) {
 				throw new CREBindException("is_cancelled cannot be called outside an event handler", t);
@@ -152,7 +152,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer me;
 			boolean isVanished;
 			MCPlayer other;
@@ -213,7 +213,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer me;
 			MCPlayer other;
 			if(args.length == 1) {
@@ -266,7 +266,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CString(GenerateMooSaying(args[0].val())
 					+ " \\   ^__^\n"
 					+ "  \\  (oo)\\_______\n"
@@ -287,7 +287,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CString(
 					GenerateMooSaying(args[0].val())
 					+ "              ^__^   /\n"
@@ -309,7 +309,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CString("  .-*)) `*-.\n"
 					+ " /*  ((*   *'.\n"
 					+ "|   *))  *   *\\\n"
@@ -326,7 +326,7 @@ public class Sandbox {
 	public static class norway extends DummyFunction {
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Function color = new Echoes.color();
 			String red = color.exec(t, environment, args.length == 3 ? args[0] : new CString("RED", t)).val();
 			String white = color.exec(t, environment, args.length == 3 ? args[1] : new CString("WHITE", t)).val();
@@ -389,7 +389,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Random r;
 			try {
 				r = (Random) ArgumentValidation.getObject(args[0], t, CResource.class).getResource();
@@ -515,7 +515,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			File file = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			int num = 0;
 			if(Security.CheckSecurity(file)) {
