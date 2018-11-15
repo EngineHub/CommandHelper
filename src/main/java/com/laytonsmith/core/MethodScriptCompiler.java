@@ -2015,7 +2015,7 @@ public final class MethodScriptCompiler {
 			}
 			if(p != null) {
 				try {
-					Construct c = DataHandling.proc.optimizeProcedure(p.getTarget(), p, children);
+					Mixed c = DataHandling.proc.optimizeProcedure(p.getTarget(), p, children);
 					if(c != null) {
 						tree.setData(c);
 						tree.removeChildren();

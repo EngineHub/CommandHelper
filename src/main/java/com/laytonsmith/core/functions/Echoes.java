@@ -15,6 +15,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -302,7 +303,7 @@ public class Echoes {
 				fadeout = Static.getInt32(args[4 + offset], t);
 			}
 
-			player.sendTitle(args[offset].nval(), args[1 + offset].nval(), fadein, stay, fadeout);
+			player.sendTitle(Construct.nval(args[offset]), Construct.nval(args[1 + offset]), fadein, stay, fadeout);
 			return CVoid.VOID;
 		}
 	}
@@ -335,7 +336,7 @@ public class Echoes {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String color = null;
-			String val = args[0].nval();
+			String val = Construct.nval(args[0]);
 			if(val == null) {
 				return new CString(MCChatColor.WHITE.toString(), t);
 			}
@@ -654,7 +655,7 @@ public class Echoes {
 			final MCServer server = Static.getServer();
 
 			// Handle "broadcast(message, [null])".
-			if(args.length == 1 || args[1].nval() == null) { // args.length can only be 1 or 2 due to the numArgs().
+			if(args.length == 1 || Construct.nval(args[1]) == null) { // args.length can only be 1 or 2 due to the numArgs().
 				server.broadcastMessage(args[0].val());
 				return CVoid.VOID;
 			}
@@ -689,7 +690,7 @@ public class Echoes {
 			}
 
 			// Handle "broadcast(message, permission)".
-			String permission = args[1].nval();
+			String permission = Construct.nval(args[1]);
 			server.broadcastMessage(args[0].val(), permission);
 			return CVoid.VOID;
 		}

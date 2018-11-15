@@ -12,6 +12,7 @@ import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -416,7 +417,7 @@ public class ByteArrays {
 			Integer pos = get_getPos(args, t);
 			String encoding = null;
 			if(args.length == 3) {
-				encoding = args[2].nval();
+				encoding = Construct.nval(args[2]);
 			}
 			try {
 				return new CString(ba.readUTF8String(pos, encoding), t);
@@ -702,7 +703,7 @@ public class ByteArrays {
 			Integer pos = set_getPos(args, t);
 			String encoding = null;
 			if(args.length == 3) {
-				encoding = args[2].nval();
+				encoding = Construct.nval(args[2]);
 			}
 			try {
 				ba.writeUTF8String(s, pos, encoding);

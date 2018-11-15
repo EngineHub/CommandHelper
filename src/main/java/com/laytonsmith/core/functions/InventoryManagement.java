@@ -33,6 +33,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CNumber;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -2601,7 +2602,7 @@ public class InventoryManagement {
 					}
 				}
 				if(args.length > 2) {
-					title = args[2].nval();
+					title = Construct.nval(args[2]);
 				}
 			}
 

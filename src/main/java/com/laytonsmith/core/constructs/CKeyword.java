@@ -24,7 +24,7 @@ public class CKeyword extends CBareString {
 		return node.getData() instanceof CKeyword && keyword.equals(node.getData().val());
 	}
 
-	public static boolean isKeyword(Construct node, String keyword) {
+	public static boolean isKeyword(Mixed node, String keyword) {
 		return node instanceof CKeyword && keyword.equals(node.val());
 	}
 

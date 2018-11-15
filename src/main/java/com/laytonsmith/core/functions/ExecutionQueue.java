@@ -7,6 +7,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -61,7 +62,7 @@ public class ExecutionQueue {
 			}
 			c = ((CClosure) args[0]);
 			if(args.length == 2) {
-				queue = args[1].nval();
+				queue = Construct.nval(args[1]);
 			}
 
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(environment.getEnv(GlobalEnv.class).GetDaemonManager(), queue, new Runnable() {
@@ -143,7 +144,7 @@ public class ExecutionQueue {
 			}
 			c = ((CClosure) args[0]);
 			if(args.length == 2) {
-				queue = args[1].nval();
+				queue = Construct.nval(args[1]);
 			}
 
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(environment.getEnv(GlobalEnv.class).GetDaemonManager(), queue, new Runnable() {
@@ -220,7 +221,7 @@ public class ExecutionQueue {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1) {
-				queue = args[0].nval();
+				queue = Construct.nval(args[0]);
 			}
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().remove(queue);
 			return CVoid.VOID;
@@ -270,7 +271,7 @@ public class ExecutionQueue {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1) {
-				queue = args[0].nval();
+				queue = Construct.nval(args[0]);
 			}
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().removeFront(queue);
 			return CVoid.VOID;
@@ -321,7 +322,7 @@ public class ExecutionQueue {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1) {
-				queue = args[0].nval();
+				queue = Construct.nval(args[0]);
 			}
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().clear(queue);
 			return CVoid.VOID;
@@ -372,7 +373,7 @@ public class ExecutionQueue {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1) {
-				queue = args[0].nval();
+				queue = Construct.nval(args[0]);
 			}
 			return CBoolean.get(environment.getEnv(GlobalEnv.class).GetExecutionQueue().isRunning(queue));
 		}
@@ -421,7 +422,7 @@ public class ExecutionQueue {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 2) {
-				queue = args[1].nval();
+				queue = Construct.nval(args[1]);
 			}
 			final long delay = Static.getInt(args[0], t);
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(environment.getEnv(GlobalEnv.class).GetDaemonManager(), queue, new Runnable() {
@@ -483,7 +484,7 @@ public class ExecutionQueue {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 2) {
-				queue = args[1].nval();
+				queue = Construct.nval(args[1]);
 			}
 			final long delay = Static.getInt(args[0], t);
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(environment.getEnv(GlobalEnv.class).GetDaemonManager(), queue, new Runnable() {

@@ -10,14 +10,14 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
  */
 public class CLabel extends Construct {
 
-	Construct label;
+	Mixed label;
 
-	public CLabel(Construct value) {
+	public CLabel(Mixed value) {
 		super(value.val(), ConstructType.LABEL, value.getTarget());
 		label = value;
 	}
 
-	public Construct cVal() {
+	public Mixed cVal() {
 		return label;
 	}
 

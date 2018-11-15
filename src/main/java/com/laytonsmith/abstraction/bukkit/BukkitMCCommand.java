@@ -12,7 +12,6 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.events.Driver;
@@ -215,7 +214,7 @@ public class BukkitMCCommand implements MCCommand {
 						new CArray(t) // reserved for an obgen style command array
 				);
 			} catch (FunctionReturnException e) {
-				Construct fret = e.getReturn();
+				Mixed fret = e.getReturn();
 				if(fret instanceof CArray) {
 					List<String> ret = new ArrayList<>();
 					if(((CArray) fret).inAssociativeMode()) {
@@ -258,7 +257,7 @@ public class BukkitMCCommand implements MCCommand {
 						new CArray(t) // reserved for an obgen style command array
 				);
 			} catch (FunctionReturnException e) {
-				Construct fret = e.getReturn();
+				Mixed fret = e.getReturn();
 				if(fret instanceof CBoolean) {
 					return ((CBoolean) fret).getBoolean();
 				}

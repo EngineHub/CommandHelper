@@ -1609,32 +1609,18 @@ public class World {
 			MCGameRule gameRule;
 			boolean success = false;
 			if(args.length == 2) {
-				try {
-					gameRule = MCGameRule.valueOf(args[0].val().toUpperCase());
-				} catch (IllegalArgumentException exception) {
-					throw new CREFormatException("The gamerule \"" + args[0].val() + "\" does not exist.", t);
-				}
-				if(!args[1].getCType().equals(gameRule.getRuleType())) {
-					throw new CREFormatException("Wrong value type for \"" + args[0].val() + "\".", t);
-				}
-				String value = args[1].val();
+				gameRule = ArgumentValidation.getEnum(args[0], MCGameRule.class, t);
+				String value = Static.getObject(args[1], t, gameRule.getRuleType()).val();
 				for(MCWorld world : Static.getServer().getWorlds()) {
 					success = world.setGameRuleValue(gameRule, value);
 				}
 			} else {
-				try {
-					gameRule = MCGameRule.valueOf(args[1].val().toUpperCase());
-				} catch (IllegalArgumentException exception) {
-					throw new CREFormatException("The gamerule \"" + args[1].val() + "\" does not exist.", t);
-				}
+				gameRule = ArgumentValidation.getEnum(args[1], MCGameRule.class, t);
 				MCWorld world = Static.getServer().getWorld(args[0].val());
 				if(world == null) {
 					throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 				}
-				if(!args[2].getCType().equals(gameRule.getRuleType())) {
-					throw new CREFormatException("Wrong value type for \"" + args[1].val() + "\".", t);
-				}
-				success = world.setGameRuleValue(gameRule, args[2].val());
+				success = world.setGameRuleValue(gameRule, Static.getObject(args[2], t, gameRule.getRuleType()).val());
 			}
 			return CBoolean.get(success);
 		}

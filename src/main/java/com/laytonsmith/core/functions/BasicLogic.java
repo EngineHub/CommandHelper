@@ -24,6 +24,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CSlice;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -637,7 +638,7 @@ public class BasicLogic {
 						&& new DataHandling.array().getName().equals(children.get(i).getData().val())) {
 					CArray data = new CArray(t);
 					for(ParseTree child : children.get(i).getChildren()) {
-						if(child.getData().isDynamic()) {
+						if(Construct.IsDynamicHelper(child.getData())) {
 							throw new ConfigCompileException(notConstant, child.getTarget());
 						}
 						data.push(child.getData(), t);
@@ -656,7 +657,7 @@ public class BasicLogic {
 								values.add(cc);
 							}
 						} else {
-							if(c.isDynamic()) {
+							if(Construct.IsDynamicHelper(c)) {
 								throw new ConfigCompileException(notConstant, c.getTarget());
 							}
 							if(values.contains(c)) {
@@ -667,7 +668,7 @@ public class BasicLogic {
 					}
 				} else {
 					Mixed c = children.get(i).getData();
-					if(c.isDynamic()) {
+					if(Construct.IsDynamicHelper(c)) {
 						throw new ConfigCompileException(notConstant, c.getTarget());
 					}
 					if(values.contains(c)) {
@@ -680,7 +681,7 @@ public class BasicLogic {
 			if((children.size() > 3 || (children.size() > 1 && children.get(1).getData() instanceof CArray))
 					//No point in doing this optimization if there are only 3 args and the case is flat.
 					//Also, doing this check prevents an inifinite loop during optimization.
-					&& (children.size() > 0 && !children.get(0).getData().isDynamic())) {
+					&& (children.size() > 0 && !Construct.IsDynamicHelper(children.get(0).getData()))) {
 				ParseTree toReturn = null;
 				//The item passed in is constant (or has otherwise been made constant)
 				//so we can go ahead and condense this down to the single code path

@@ -11,6 +11,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.Run;
@@ -62,7 +63,7 @@ public class ArrayHandlingTest {
 	public void testArraySize() throws Exception, CancelCommandException {
 		ArrayHandling.array_size a = new ArrayHandling.array_size();
 		CArray arr = commonArray;
-		Construct ret = a.exec(Target.UNKNOWN, env, arr);
+		Mixed ret = a.exec(Target.UNKNOWN, env, arr);
 		assertReturn(ret, C.INT);
 		assertCEquals(C.onstruct(3), ret);
 	}

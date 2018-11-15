@@ -36,6 +36,14 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 		this(value.toString(), t);
 	}
 
+	/**
+	 * Given the input construct, uses the val() method of it, and constructs a new string based on that.
+	 * @param val
+	 */
+	public CString(Mixed val) {
+		this(val.val(), val.getTarget());
+	}
+
 	@Override
 	public CString clone() throws CloneNotSupportedException {
 		return this;

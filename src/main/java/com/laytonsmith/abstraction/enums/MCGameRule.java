@@ -1,7 +1,9 @@
 package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
-import com.laytonsmith.core.constructs.Construct.ConstructType;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 @MEnum("com.commandhelper.GameRule")
 public enum MCGameRule {
@@ -18,26 +20,26 @@ public enum MCGameRule {
 	DOWEATHERCYCLE("doWeatherCycle"),
 	KEEPINVENTORY("keepInventory"),
 	LOGADMINCOMMANDS("logAdminCommands"),
-	MAXCOMMANDCHAINLENGTH("maxCommandChainLength", ConstructType.INT),
-	MAXENTITYCRAMMING("maxEntityCramming", ConstructType.INT),
+	MAXCOMMANDCHAINLENGTH("maxCommandChainLength", CInt.class),
+	MAXENTITYCRAMMING("maxEntityCramming", CInt.class),
 	MOBGRIEFING("mobGriefing"),
 	NATURALREGENERATION("naturalRegeneration"),
-	RANDOMTICKSPEED("randomTickSpeed", ConstructType.INT),
+	RANDOMTICKSPEED("randomTickSpeed", CInt.class),
 	REDUCEDDEBUGINFO("reducedDebugInfo"),
 	SENDCOMMANDFEEDBACK("sendCommandFeedback"),
 	SHOWDEATHMESSAGES("showDeathMessages"),
-	SPAWNRADIUS("spawnRadius", ConstructType.INT),
+	SPAWNRADIUS("spawnRadius", CInt.class),
 	SPECTATORSGENERATECHUNKS("spectatorsGenerateChunks");
 
 	private final String gameRule;
-	private final ConstructType ruleType;
+	private final Class<? extends Mixed> ruleType;
 
 	MCGameRule(String gameRule) {
 		this.gameRule = gameRule;
-		this.ruleType = ConstructType.BOOLEAN;
+		this.ruleType = CBoolean.class;
 	}
 
-	MCGameRule(String gameRule, ConstructType type) {
+	MCGameRule(String gameRule, Class<? extends Mixed> type) {
 		this.gameRule = gameRule;
 		this.ruleType = type;
 	}
@@ -46,7 +48,7 @@ public enum MCGameRule {
 		return this.gameRule;
 	}
 
-	public ConstructType getRuleType() {
+	public Class<? extends Mixed> getRuleType() {
 		return this.ruleType;
 	}
 }

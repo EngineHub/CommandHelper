@@ -396,10 +396,7 @@ public class Trades {
 
 	private static MCMerchantRecipe trade(Mixed c, Target t) {
 
-		if(!(c instanceof CArray)) {
-			throw new CRECastException("Expected array but received " + c.getCType().name(), t);
-		}
-		CArray recipe = (CArray) c;
+		CArray recipe = Static.getArray(c, t);
 
 		MCItemStack result = ObjectGenerator.GetGenerator().item(recipe.get("result", t), t);
 

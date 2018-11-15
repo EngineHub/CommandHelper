@@ -273,7 +273,7 @@ public class Debug {
 				}
 				return CVoid.VOID;
 			} else {
-				throw new CRECastException("Expecting an ivar, but recieved " + args[0].getCType() + " instead", t);
+				throw new CRECastException("Expecting an ivar, but recieved " + args[0].typeof().getSimpleName() + " instead", t);
 			}
 			//TODO: Once Prefs are no longer static, check to see if debug mode is on during compilation, and
 			//if so, remove this function entirely

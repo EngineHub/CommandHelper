@@ -6,7 +6,6 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.Target;
@@ -54,7 +53,7 @@ public abstract class CompositeFunction extends AbstractFunction {
 		IVariableList newVariables = new IVariableList();
 		newVariables.set(new IVariable(CClassType.get("array"), "@arguments", new CArray(t, args.length, args), t));
 		env.SetVarList(newVariables);
-		Construct ret = CVoid.VOID;
+		Mixed ret = CVoid.VOID;
 		try {
 			if(env.GetScript() != null) {
 				env.GetScript().eval(tree, environment);

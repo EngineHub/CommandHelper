@@ -14,6 +14,7 @@ import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -117,7 +118,7 @@ public class Regex {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(!children.get(0).getData().isDynamic()) {
+			if(!Construct.IsDynamicHelper(children.get(0).getData())) {
 				getPattern(children.get(0).getData(), t);
 			}
 			return null;
@@ -216,7 +217,7 @@ public class Regex {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(!children.get(0).getData().isDynamic()) {
+			if(!Construct.IsDynamicHelper(children.get(0).getData())) {
 				getPattern(children.get(0).getData(), t);
 			}
 			return null;
@@ -306,7 +307,7 @@ public class Regex {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree data = children.get(0);
-			if(!data.getData().isDynamic()) {
+			if(!Construct.IsDynamicHelper(data.getData())) {
 				String pattern = data.getData().val();
 				if(isLiteralRegex(pattern)) {
 					//We want to replace this with replace()
@@ -421,7 +422,7 @@ public class Regex {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree data = children.get(0);
-			if(!data.getData().isDynamic()) {
+			if(!Construct.IsDynamicHelper(data.getData())) {
 				String pattern = data.getData().val();
 				if(isLiteralRegex(pattern)) {
 					//We want to replace this with split()
@@ -506,7 +507,7 @@ public class Regex {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(!children.get(0).getData().isDynamic()) {
+			if(!Construct.IsDynamicHelper(children.get(0).getData())) {
 				getPattern(children.get(0).getData(), t);
 			}
 			return null;

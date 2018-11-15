@@ -29,6 +29,7 @@ import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CSecureString;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -881,8 +882,8 @@ public class StringHandling {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			Static.AssertNonCNull(t, args);
 
-			String teststring = args[0].nval();
-			String keyword = args[1].nval();
+			String teststring = Construct.nval(args[0]);
+			String keyword = Construct.nval(args[1]);
 			boolean ret = teststring.startsWith(keyword);
 
 			return CBoolean.get(ret);
@@ -949,8 +950,8 @@ public class StringHandling {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			Static.AssertNonCNull(t, args);
 
-			String teststring = args[0].nval();
-			String keyword = args[1].nval();
+			String teststring = Construct.nval(args[0]);
+			String keyword = Construct.nval(args[1]);
 			boolean ret = teststring.endsWith(keyword);
 
 			return CBoolean.get(ret);
@@ -1007,11 +1008,11 @@ public class StringHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(!(args[0].nval() instanceof String)) {
+			if(!(Construct.nval(args[0]) instanceof String)) {
 				throw new CRECastException(this.getName() + " expects a string as first argument, but type "
 						+ args[0].typeof() + " was found.", t);
 			}
-			String text = args[0].nval();
+			String text = Construct.nval(args[0]);
 			// Enforce the fact we are only taking the first character here
 			// Do not let the user pass an entire string (or an empty string, d'oh). Only a single character.
 			if(text.length() != 1) {
@@ -1112,8 +1113,8 @@ public class StringHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			String haystack = args[0].nval();
-			String needle = args[1].nval();
+			String haystack = Construct.nval(args[0]);
+			String needle = Construct.nval(args[1]);
 			Static.AssertNonCNull(t, args);
 			return new CInt(haystack.indexOf(needle), t);
 		}
@@ -1154,8 +1155,8 @@ public class StringHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			String haystack = args[0].nval();
-			String needle = args[1].nval();
+			String haystack = Construct.nval(args[0]);
+			String needle = Construct.nval(args[1]);
 			Static.AssertNonCNull(t, args);
 			return CBoolean.get(haystack.contains(needle));
 		}
@@ -1327,7 +1328,7 @@ public class StringHandling {
 
 			// Get the Locale.
 			Locale locale = null;
-			String countryCode = args[0].nval();
+			String countryCode = Construct.nval(args[0]);
 			if(countryCode == null) {
 				locale = Locale.getDefault();
 			} else {
@@ -1531,7 +1532,7 @@ public class StringHandling {
 				throw new ConfigCompileException(getName() + " expects 2 or more argument", t);
 			}
 			if(children.get(0).isConst()) {
-				String locale = children.get(0).getData().nval();
+				String locale = Construct.nval(children.get(0).getData());
 				if(locale != null && Static.GetLocale(locale) == null) {
 					throw new ConfigCompileException("The locale " + locale + " could not be found on this system", t);
 				}
@@ -2539,7 +2540,7 @@ public class StringHandling {
 				type = ArgumentValidation.getEnum(args[0], UUIDType.class, t);
 			}
 			if(args.length > 1) {
-				input = args[1].nval();
+				input = Construct.nval(args[1]);
 			}
 			return new CString(type.generate(input).toString(), t);
 		}

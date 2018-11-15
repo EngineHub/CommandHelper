@@ -25,6 +25,7 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -571,12 +572,12 @@ public class Scheduling {
 				now = new Date(Static.getInt(args[1], t));
 			}
 			TimeZone timezone = TimeZone.getDefault();
-			if(args.length >= 3 && args[2].nval() != null) {
+			if(args.length >= 3 && Construct.nval(args[2]) != null) {
 				timezone = TimeZone.getTimeZone(args[2].val());
 			}
 			Locale locale = Locale.getDefault();
 			if(args.length >= 4) {
-				String countryCode = args[3].nval();
+				String countryCode = Construct.nval(args[3]);
 				if(countryCode == null) {
 					locale = Locale.getDefault();
 				} else {

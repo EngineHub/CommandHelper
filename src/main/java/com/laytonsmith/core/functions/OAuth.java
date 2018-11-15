@@ -92,7 +92,7 @@ public class OAuth {
 			String clientId = options.get("clientId", t).val();
 			String clientSecret = options.get("clientSecret", t).val();
 			String scope = options.get("scope", t).val();
-			String successText = options.get("successText", t).nval();
+			String successText = Construct.nval(options.get("successText", t));
 			CArray extraHeaders1 = null;
 			if(options.containsKey("extraHeaders")) {
 				extraHeaders1 = Static.getArray(options.get("extraHeaders", t), t);

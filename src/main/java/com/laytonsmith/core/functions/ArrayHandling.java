@@ -25,6 +25,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CSlice;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -354,7 +355,7 @@ public class ArrayHandling {
 			try {
 				((CArray) array).set(index, value, t);
 			} catch (IndexOutOfBoundsException e) {
-				throw new CREIndexOverflowException("The index " + index.asString().getQuote() + " is out of bounds", t);
+				throw new CREIndexOverflowException("The index " + new CString(index).getQuote() + " is out of bounds", t);
 			}
 			return value;
 		}
@@ -1639,7 +1640,7 @@ public class ArrayHandling {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 2) {
-				if(!children.get(1).getData().isDynamic()) {
+				if(!Construct.IsDynamicHelper(children.get(1).getData())) {
 					try {
 						CArray.SortType.valueOf(children.get(1).getData().val().toUpperCase());
 					} catch (IllegalArgumentException e) {
@@ -3286,7 +3287,7 @@ public class ArrayHandling {
 		}
 
 		public boolean subsetOf(Mixed constA, Mixed constB, Target t) {
-			if(constA.getCType() != constB.getCType()) {
+			if(!constA.typeof().equals(constB.typeof())) {
 				return false;
 			}
 			if(constA instanceof CArray) {

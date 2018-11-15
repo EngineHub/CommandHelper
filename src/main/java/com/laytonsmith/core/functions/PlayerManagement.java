@@ -41,6 +41,7 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -2798,9 +2799,9 @@ public class PlayerManagement {
 
 			if(ban) {
 				if(args.length > 2) {
-					reason = args[2].nval();
+					reason = Construct.nval(args[2]);
 					if(args.length == 4) {
-						source = args[3].nval();
+						source = Construct.nval(args[3]);
 					}
 				}
 				Static.getServer().banName(target, reason, source);
@@ -3791,11 +3792,11 @@ public class PlayerManagement {
 			String listName;
 			if(args.length == 2) {
 				m = Static.GetPlayer(args[0], t);
-				listName = args[1].nval();
+				listName = Construct.nval(args[1]);
 			} else {
 				m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(m, t);
-				listName = args[0].nval();
+				listName = Construct.nval(args[0]);
 			}
 			m.setPlayerListName(listName);
 			return CVoid.VOID;
