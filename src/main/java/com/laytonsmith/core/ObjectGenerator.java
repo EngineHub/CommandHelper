@@ -1108,7 +1108,7 @@ public class ObjectGenerator {
 	 * @param t the target
 	 * @return the Vector
 	 */
-	public Vector3D vector(Construct c, Target t) {
+	public Vector3D vector(Mixed c, Target t) {
 		return vector(Vector3D.ZERO, c, t);
 	}
 
@@ -1121,7 +1121,7 @@ public class ObjectGenerator {
 	 * @param t the target
 	 * @return the Vector
 	 */
-	public Vector3D vector(Vector3D v, Construct c, Target t) {
+	public Vector3D vector(Vector3D v, Mixed c, Target t) {
 		if(c instanceof CArray) {
 			CArray va = (CArray) c;
 			double x = v.X();
@@ -1156,7 +1156,7 @@ public class ObjectGenerator {
 			// fulfilling the todo?
 			return v;
 		} else {
-			throw new CREFormatException("Expecting an array, received " + c.getCType(), t);
+			throw new CREFormatException("Expecting an array, received " + c.typeof().getSimpleName(), t);
 		}
 	}
 

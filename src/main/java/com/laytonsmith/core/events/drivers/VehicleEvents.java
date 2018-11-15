@@ -28,7 +28,6 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
@@ -42,6 +41,7 @@ import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -75,7 +75,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
 			if(event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
 				Prefilters.match(prefilter, "vehicletype", e.getVehicle().getType().name(), PrefilterType.MACRO);
@@ -91,11 +91,11 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
 				Target t = Target.UNKNOWN;
-				Map<String, Construct> ret = evaluate_helper(e);
+				Map<String, Mixed> ret = evaluate_helper(e);
 				ret.put("vehicletype", new CString(e.getVehicle().getType().name(), t));
 				ret.put("passengertype", new CString(e.getEntity().getType().name(), t));
 				ret.put("vehicle", new CString(e.getVehicle().getUniqueId().toString(), t));
@@ -117,7 +117,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 
@@ -146,7 +146,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
 			if(event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
 				Prefilters.match(prefilter, "vehicletype", e.getVehicle().getType().name(), PrefilterType.MACRO);
@@ -162,11 +162,11 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCVehicleEnterExitEvent) {
 				MCVehicleEnterExitEvent e = (MCVehicleEnterExitEvent) event;
 				Target t = Target.UNKNOWN;
-				Map<String, Construct> ret = evaluate_helper(e);
+				Map<String, Mixed> ret = evaluate_helper(e);
 				ret.put("vehicletype", new CString(e.getVehicle().getType().name(), t));
 				ret.put("passengertype", new CString(e.getEntity().getType().name(), t));
 				ret.put("vehicle", new CString(e.getVehicle().getUniqueId().toString(), t));
@@ -188,7 +188,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 
@@ -226,9 +226,9 @@ public class VehicleEvents {
 		@SuppressWarnings("deprecation")
 		public void bind(BoundEvent event) {
 			// handle deprecated prefilter
-			Map<String, Construct> prefilter = event.getPrefilter();
+			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("hittype")) {
-				Construct type = prefilter.get("hittype");
+				Mixed type = prefilter.get("hittype");
 				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
 					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The 0:0 block format in " + getName()
 							+ " is deprecated in \"hittype\".", event.getTarget());
@@ -239,7 +239,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCVehicleCollideEvent) {
 				MCVehicleCollideEvent event = (MCVehicleCollideEvent) e;
 				Prefilters.match(prefilter, "type", event.getVehicle().getType().name(), PrefilterType.MACRO);
@@ -274,16 +274,16 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCVehicleCollideEvent) {
 				MCVehicleCollideEvent e = (MCVehicleCollideEvent) event;
 				Target t = Target.UNKNOWN;
-				Map<String, Construct> ret = evaluate_helper(e);
+				Map<String, Mixed> ret = evaluate_helper(e);
 				ret.put("type", new CString(e.getVehicle().getType().name(), t));
 				ret.put("id", new CString(e.getVehicle().getUniqueId().toString(), t));
 				ret.put("collisiontype", new CString(e.getCollisionType().name(), t));
-				Construct block = CNull.NULL;
-				Construct entity = CNull.NULL;
+				Mixed block = CNull.NULL;
+				Mixed entity = CNull.NULL;
 				boolean collide = true;
 				boolean pickup = false;
 				switch(e.getCollisionType()) {
@@ -318,7 +318,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCVehicleEntityCollideEvent) {
 				MCVehicleEntityCollideEvent e = (MCVehicleEntityCollideEvent) event;
 				if(key.equals("collide")) {
@@ -390,7 +390,7 @@ public class VehicleEvents {
 		@Override
 		public void bind(BoundEvent event) {
 			int threshold = 1;
-			Map<String, Construct> prefilters = event.getPrefilter();
+			Map<String, Mixed> prefilters = event.getPrefilter();
 			if(prefilters.containsKey("threshold")) {
 				threshold = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
 			}
@@ -400,7 +400,7 @@ public class VehicleEvents {
 		@Override
 		public void unbind(BoundEvent event) {
 			int threshold = 1;
-			Map<String, Construct> prefilters = event.getPrefilter();
+			Map<String, Mixed> prefilters = event.getPrefilter();
 			if(prefilters.containsKey("threshold")) {
 				threshold = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
 			}
@@ -436,7 +436,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCVehicleMoveEvent) {
 				MCVehicleMoveEvent event = (MCVehicleMoveEvent) e;
 				if(prefilter.containsKey("threshold")) {
@@ -490,11 +490,11 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCVehicleMoveEvent) {
 				MCVehicleMoveEvent e = (MCVehicleMoveEvent) event;
 				Target t = Target.UNKNOWN;
-				Map<String, Construct> ret = new HashMap<>();
+				Map<String, Mixed> ret = new HashMap<>();
 				ret.put("world", new CString(e.getFrom().getWorld().getName(), t));
 				ret.put("from", ObjectGenerator.GetGenerator().location(e.getFrom()));
 				ret.put("to", ObjectGenerator.GetGenerator().location(e.getTo()));
@@ -533,7 +533,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			//Nothing can be modified, so always return false
 			return false;
 		}
@@ -566,7 +566,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
 			if(event instanceof MCVehicleDestroyEvent) {
 				MCVehicleDestroyEvent e = (MCVehicleDestroyEvent) event;
 				Prefilters.match(prefilter, "vehicletype", e.getVehicle().getType().name(), PrefilterType.MACRO);
@@ -581,11 +581,11 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCVehicleDestroyEvent) {
 				MCVehicleDestroyEvent e = (MCVehicleDestroyEvent) event;
 				Target t = Target.UNKNOWN;
-				Map<String, Construct> ret = evaluate_helper(e);
+				Map<String, Mixed> ret = evaluate_helper(e);
 				ret.put("vehicletype", new CString(e.getVehicle().getType().name(), t));
 				ret.put("vehicle", new CString(e.getVehicle().getUniqueId().toString(), t));
 				MCEntity damager = ((MCVehicleDestroyEvent) event).getAttacker();
@@ -617,7 +617,7 @@ public class VehicleEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 

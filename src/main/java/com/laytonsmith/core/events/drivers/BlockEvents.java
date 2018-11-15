@@ -32,7 +32,6 @@ import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
@@ -63,7 +62,7 @@ public class BlockEvents {
 	public abstract static class piston_event extends AbstractEvent {
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			return true;
 		}
 
@@ -73,14 +72,14 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
 			return false;
 		}
 
-		Map<String, Construct> evaluate_stub(BindableEvent e) throws EventException {
+		Map<String, Mixed> evaluate_stub(BindableEvent e) throws EventException {
 			MCBlockPistonEvent event = (MCBlockPistonEvent) e;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> map = evaluate_helper(event);
+			Map<String, Mixed> map = evaluate_helper(event);
 
 			MCBlock block = event.getBlock();
 
@@ -117,10 +116,10 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCBlockPistonExtendEvent event = (MCBlockPistonExtendEvent) e;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> map = evaluate_stub(e);
+			Map<String, Mixed> map = evaluate_stub(e);
 
 			CArray affected = new CArray(t);
 			for(MCBlock block : event.getPushedBlocks()) {
@@ -169,9 +168,9 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCBlockPistonRetractEvent event = (MCBlockPistonRetractEvent) e;
-			Map<String, Construct> map = evaluate_stub(e);
+			Map<String, Mixed> map = evaluate_stub(e);
 			map.put("retractedLocation", ObjectGenerator.GetGenerator().location(event.getRetractedLocation(), false));
 			return map;
 		}
@@ -215,19 +214,19 @@ public class BlockEvents {
 		@Override
 		public void bind(BoundEvent event) {
 			// handle deprecated prefilter
-			Map<String, Construct> prefilter = event.getPrefilter();
+			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("name")) {
 				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("name").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("type")) {
-				Construct cid = prefilter.get("type");
+				Mixed cid = prefilter.get("type");
 				if(cid instanceof CInt) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("data")) {
-						Construct cdata = prefilter.get("data");
+						Mixed cdata = prefilter.get("data");
 						if(cdata instanceof CInt) {
 							data = (int) ((CInt) cdata).getInt();
 						}
@@ -244,7 +243,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(!(e instanceof MCBlockBreakEvent)) {
 				return false;
 			}
@@ -270,10 +269,10 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCBlockBreakEvent event = (MCBlockBreakEvent) e;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> map = evaluate_helper(event);
+			Map<String, Mixed> map = evaluate_helper(event);
 
 			MCBlock block = event.getBlock();
 			MCMaterial mat = block.getType();
@@ -299,7 +298,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
 			MCBlockBreakEvent event = (MCBlockBreakEvent) e;
 
 			if(key.equals("drops")) {
@@ -360,19 +359,19 @@ public class BlockEvents {
 		@Override
 		public void bind(BoundEvent event) {
 			// handle deprecated prefilter
-			Map<String, Construct> prefilter = event.getPrefilter();
+			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("name")) {
 				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("name").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("type")) {
-				Construct cid = prefilter.get("type");
+				Mixed cid = prefilter.get("type");
 				if(cid instanceof CInt) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("data")) {
-						Construct cdata = prefilter.get("data");
+						Mixed cdata = prefilter.get("data");
 						if(cdata instanceof CInt) {
 							data = (int) ((CInt) cdata).getInt();
 						}
@@ -389,7 +388,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(!(e instanceof MCBlockPlaceEvent)) {
 				return false;
 			}
@@ -416,10 +415,10 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> map = evaluate_helper(e);
+			Map<String, Mixed> map = evaluate_helper(e);
 
 			MCBlock block = event.getBlock();
 			MCMaterial mat = block.getType();
@@ -443,7 +442,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
 			MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
 
 			if(key.equals("block")) {
@@ -509,19 +508,19 @@ public class BlockEvents {
 		@Override
 		public void bind(BoundEvent event) {
 			// handle deprecated prefilter
-			Map<String, Construct> prefilter = event.getPrefilter();
+			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("name")) {
 				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("name").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("type")) {
-				Construct cid = prefilter.get("type");
+				Mixed cid = prefilter.get("type");
 				if(cid instanceof CInt) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("data")) {
-						Construct cdata = prefilter.get("data");
+						Mixed cdata = prefilter.get("data");
 						if(cdata instanceof CInt) {
 							data = (int) ((CInt) cdata).getInt();
 						}
@@ -538,7 +537,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(!(e instanceof MCBlockBurnEvent)) {
 				return false;
 			}
@@ -559,10 +558,10 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCBlockBurnEvent event = (MCBlockBurnEvent) e;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> map = evaluate_helper(event);
+			Map<String, Mixed> map = evaluate_helper(event);
 
 			MCBlock block = event.getBlock();
 
@@ -573,7 +572,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
 			return false;
 		}
 	}
@@ -610,7 +609,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(!(e instanceof MCBlockIgniteEvent)) {
 				return false;
 			}
@@ -631,13 +630,13 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(!(e instanceof MCBlockIgniteEvent)) {
 				throw new EventException("Cannot convert e to MCBlockIgniteEvent");
 			}
 			MCBlockIgniteEvent event = (MCBlockIgniteEvent) e;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> map = evaluate_helper(e);
+			Map<String, Mixed> map = evaluate_helper(e);
 
 			if(event.getPlayer() != null) {
 				map.put("player", new CString(event.getPlayer().getName(), t));
@@ -660,7 +659,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 	}
@@ -695,19 +694,19 @@ public class BlockEvents {
 		@Override
 		public void bind(BoundEvent event) {
 			// handle deprecated prefilter
-			Map<String, Construct> prefilter = event.getPrefilter();
+			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("name")) {
 				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("name").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("type")) {
-				Construct cid = prefilter.get("type");
+				Mixed cid = prefilter.get("type");
 				if(cid instanceof CInt) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("data")) {
-						Construct cdata = prefilter.get("data");
+						Mixed cdata = prefilter.get("data");
 						if(cdata instanceof CInt) {
 							data = (int) ((CInt) cdata).getInt();
 						}
@@ -727,12 +726,12 @@ public class BlockEvents {
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"toname\" prefilter in " + getName()
 						+ " is deprecated for \"toblock\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("totype")) {
-				Construct cid = prefilter.get("totype");
+				Mixed cid = prefilter.get("totype");
 				if(cid instanceof CInt) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("todata")) {
-						Construct cdata = prefilter.get("todata");
+						Mixed cdata = prefilter.get("todata");
 						if(cdata instanceof CInt) {
 							data = (int) ((CInt) cdata).getInt();
 						}
@@ -749,7 +748,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(!(e instanceof MCBlockFromToEvent)) {
 				return false;
 			}
@@ -776,13 +775,13 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(!(e instanceof MCBlockFromToEvent)) {
 				throw new EventException("Cannot convert e to MCBlockFromToEvent");
 			}
 			MCBlockFromToEvent event = (MCBlockFromToEvent) e;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> map = evaluate_helper(e);
+			Map<String, Mixed> map = evaluate_helper(e);
 
 			MCBlock block = event.getBlock();
 
@@ -804,7 +803,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(!(event instanceof MCBlockFromToEvent)) {
 				return false;
 			}
@@ -954,7 +953,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(!(e instanceof MCSignChangeEvent)) {
 				return false;
 			}
@@ -975,12 +974,12 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(!(e instanceof MCSignChangeEvent)) {
 				throw new EventException("Cannot convert e to MCSignChangeEvent");
 			}
 			MCSignChangeEvent event = (MCSignChangeEvent) e;
-			Map<String, Construct> map = evaluate_helper(e);
+			Map<String, Mixed> map = evaluate_helper(e);
 
 			map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 			map.put("text", event.getLines());
@@ -990,7 +989,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(!(event instanceof MCSignChangeEvent)) {
 				return false;
 			}
@@ -1085,7 +1084,7 @@ public class BlockEvents {
 		@SuppressWarnings("deprecation")
 		public void bind(BoundEvent event) {
 			// handle deprecated prefilter
-			Map<String, Construct> prefilter = event.getPrefilter();
+			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("item")) {
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
 						+ " is deprecated for \"itemname\".", event.getTarget());
@@ -1095,7 +1094,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCBlockDispenseEvent) {
 				MCBlockDispenseEvent event = (MCBlockDispenseEvent) e;
 				Prefilters.match(prefilter, "type", event.getBlock().getType().getName(), PrefilterType.STRING_MATCH);
@@ -1111,10 +1110,10 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCBlockDispenseEvent event = (MCBlockDispenseEvent) e;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> map = evaluate_helper(e);
+			Map<String, Mixed> map = evaluate_helper(e);
 
 			MCBlock block = event.getBlock();
 
@@ -1130,7 +1129,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCBlockDispenseEvent) {
 				if("item".equals(key)) {
 					((MCBlockDispenseEvent) event).setItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
@@ -1161,19 +1160,19 @@ public class BlockEvents {
 		@Override
 		public void bind(BoundEvent event) {
 			// handle deprecated prefilter
-			Map<String, Construct> prefilter = event.getPrefilter();
+			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("oldname")) {
 				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("oldname").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"oldname\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("oldtype")) {
-				Construct cid = prefilter.get("oldtype");
+				Mixed cid = prefilter.get("oldtype");
 				if(cid instanceof CInt) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("olddata")) {
-						Construct cdata = prefilter.get("olddata");
+						Mixed cdata = prefilter.get("olddata");
 						if(cdata instanceof CInt) {
 							data = (int) ((CInt) cdata).getInt();
 						}
@@ -1193,12 +1192,12 @@ public class BlockEvents {
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"newname\" prefilter in " + getName()
 						+ " is deprecated for \"newblock\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("newtype")) {
-				Construct cid = prefilter.get("newtype");
+				Mixed cid = prefilter.get("newtype");
 				if(cid instanceof CInt) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("newdata")) {
-						Construct cdata = prefilter.get("newdata");
+						Mixed cdata = prefilter.get("newdata");
 						if(cdata instanceof CInt) {
 							data = (int) ((CInt) cdata).getInt();
 						}
@@ -1233,7 +1232,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
 			if(!(event instanceof MCBlockGrowEvent)) {
 				return false;
 			}
@@ -1258,13 +1257,13 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(!(event instanceof MCBlockGrowEvent)) {
 				throw new EventException("Cannot convert event to BlockGrowEvent");
 			}
 			MCBlockGrowEvent e = (MCBlockGrowEvent) event;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> mapEvent = evaluate_helper(e);
+			Map<String, Mixed> mapEvent = evaluate_helper(e);
 
 			mapEvent.put("block", new CString(e.getBlock().getType().getName(), t));
 			mapEvent.put("newblock", new CString(e.getNewState().getType().getName(), t));
@@ -1273,7 +1272,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
 			return false;
 		}
 	}
@@ -1308,7 +1307,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
 			return event instanceof MCNotePlayEvent;
 		}
 
@@ -1318,13 +1317,13 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(!(event instanceof MCNotePlayEvent)) {
 				throw new EventException("Cannot convert event to NotePlayEvent");
 			}
 			MCNotePlayEvent e = (MCNotePlayEvent) event;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> map = new HashMap<>();
+			Map<String, Mixed> map = new HashMap<>();
 
 			map.put("location", ObjectGenerator.GetGenerator().location(e.getBlock().getLocation(), false));
 			map.put("instrument", new CString(e.getInstrument().name(), t));
@@ -1335,7 +1334,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
 			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Modifying the instrument or note for note_play"
 					+ " events is no longer supported.", value.getTarget());
 			return false;
@@ -1375,14 +1374,14 @@ public class BlockEvents {
 		@Override
 		public void bind(BoundEvent event) {
 			// handle deprecated prefilter
-			Map<String, Construct> prefilter = event.getPrefilter();
+			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("oldname")) {
 				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("oldname").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"oldname\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("oldtype")) {
-				Construct cid = prefilter.get("oldtype");
+				Mixed cid = prefilter.get("oldtype");
 				if(cid instanceof CInt) {
 					int id = (int) ((CInt) cid).getInt();
 					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(id, 0);
@@ -1397,7 +1396,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(!(e instanceof MCBlockFadeEvent)) {
 				return false;
 			}
@@ -1408,7 +1407,7 @@ public class BlockEvents {
 					return false;
 				}
 			}
-			Construct world = prefilter.get("world");
+			Mixed world = prefilter.get("world");
 			if(world != null && !world.val().equals(oldBlock.getWorld().getName())) {
 				return false;
 			}
@@ -1421,13 +1420,13 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(!(e instanceof MCBlockFadeEvent)) {
 				throw new EventException("Cannot convert event to BlockFadeEvent");
 			}
 			MCBlockFadeEvent event = (MCBlockFadeEvent) e;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> mapEvent = evaluate_helper(event);
+			Map<String, Mixed> mapEvent = evaluate_helper(event);
 
 			mapEvent.put("block", new CString(event.getBlock().getType().getName(), t));
 			mapEvent.put("newblock", new CString(event.getNewState().getType().getName(), t));
@@ -1437,7 +1436,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 	}
