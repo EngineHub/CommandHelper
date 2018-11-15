@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("Effect")
+@MEnum("com.commandhelper.Effect")
 public enum MCEffect {
 	/**
 	 * VISUAL

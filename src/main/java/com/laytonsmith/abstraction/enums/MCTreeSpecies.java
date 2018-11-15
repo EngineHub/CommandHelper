@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("WoodType")
+@MEnum("com.commandhelper.WoodType")
 public enum MCTreeSpecies {
 	ACACIA,
 	BIRCH,

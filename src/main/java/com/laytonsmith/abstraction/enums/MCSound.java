@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-@MDynamicEnum("Sound")
+@MDynamicEnum("com.commandhelper.Sound")
 public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSound, Concrete> {
 
 	protected static final Map<String, MCSound> MAP = new HashMap<>();
@@ -71,7 +71,7 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 		return MAP.values();
 	}
 
-	@MEnum("VanillaSound")
+	@MEnum("com.commandhelper.VanillaSound")
 	public enum MCVanillaSound {
 		// After 1.9
 		AMBIENT_CAVE,

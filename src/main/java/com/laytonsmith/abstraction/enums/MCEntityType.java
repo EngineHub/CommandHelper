@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@MDynamicEnum("EntityType")
+@MDynamicEnum("com.commandhelper.EntityType")
 public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MCVanillaEntityType, Concrete> {
 
 	// To be filled by the implementer
@@ -100,7 +100,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		return MAP.values();
 	}
 
-	@MEnum("VanillaEntityType")
+	@MEnum("com.commandhelper.VanillaEntityType")
 	public enum MCVanillaEntityType {
 		AREA_EFFECT_CLOUD(true),
 		ARMOR_STAND(true),

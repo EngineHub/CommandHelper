@@ -19,7 +19,7 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 /**
- *
+ * A CClassType represent 
  */
 @typeof("ms.lang.ClassType")
 public final class CClassType extends Construct {
@@ -39,7 +39,7 @@ public final class CClassType extends Construct {
 	public static final CClassType[] EMPTY_CLASS_ARRAY = new CClassType[0];
 
 	static {
-		CACHE.put("ClassType", TYPE);
+		CACHE.put("ms.lang.ClassType", TYPE);
 	}
 
 	private final boolean isTypeUnion;

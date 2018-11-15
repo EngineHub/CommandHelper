@@ -43,8 +43,8 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 	public static final CClassType TYPE = CClassType.get("ms.lang.array");
 	private boolean associativeMode = false;
 	private long nextIndex = 0;
-	private List<Construct> array;
-	private SortedMap<String, Construct> associativeArray;
+	private List<Mixed> array;
+	private SortedMap<String, Mixed> associativeArray;
 	private String mutVal;
 	private CArray parent = null;
 	private boolean valueDirty = true;
@@ -137,7 +137,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 	 *
 	 * @return
 	 */
-	protected List<Construct> getArray() {
+	protected List<Mixed> getArray() {
 		return array;
 	}
 
@@ -155,7 +155,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 	 *
 	 * @return
 	 */
-	public List<Construct> asList() {
+	public List<Mixed> asList() {
 		if(inAssociativeMode()) {
 			throw new RuntimeException("asList can only be called on a normal array");
 		} else {
@@ -168,7 +168,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 	 *
 	 * @return
 	 */
-	protected SortedMap<String, Construct> getAssociativeArray() {
+	protected SortedMap<String, Mixed> getAssociativeArray() {
 		return associativeArray;
 	}
 
@@ -235,7 +235,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 	 * @param c
 	 * @param t
 	 */
-	public final void push(Construct c, Target t) {
+	public final void push(Mixed c, Target t) {
 		push(c, null, t);
 	}
 
@@ -249,7 +249,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 	 * @throws IllegalArgumentException If index is not null, and this is an associative array.
 	 * @throws IndexOutOfBoundsException If the index is not null, and the index specified is out of range.
 	 */
-	public void push(Construct c, Integer index, Target t) throws IllegalArgumentException, IndexOutOfBoundsException {
+	public void push(Mixed c, Integer index, Target t) throws IllegalArgumentException, IndexOutOfBoundsException {
 		if(!associativeMode) {
 			if(index != null) {
 				array.add(index, c);
@@ -288,8 +288,8 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 	 * @return
 	 */
 	@Override
-	public Set<Construct> keySet() {
-		Set<Construct> set;
+	public Set<Mixed> keySet() {
+		Set<Mixed> set;
 		if(!associativeMode) {
 			set = new LinkedHashSet<>(array.size());
 			for(int i = 0; i < array.size(); i++) {
@@ -336,7 +336,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 	 * @param index
 	 * @param c
 	 */
-	public void set(Construct index, Construct c, Target t) {
+	public void set(Mixed index, Construct c, Target t) {
 		if(!associativeMode) {
 			if(index instanceof CNull) {
 				// Invalid normal array index
@@ -367,12 +367,12 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 		setDirty();
 	}
 
-	public final void set(int index, Construct c, Target t) {
+	public final void set(int index, Mixed c, Target t) {
 		this.set(new CInt(index, t), c, t);
 	}
 
 	/* Shortcuts */
-	public final void set(String index, Construct c, Target t) {
+	public final void set(String index, Mixed c, Target t) {
 		set(new CString(index, t), c, t);
 	}
 
@@ -385,7 +385,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 	}
 
 	@Override
-	public Construct get(Construct index, Target t) {
+	public Mixed get(Mixed index, Target t) {
 		if(!associativeMode) {
 			try {
 				return array.get(Static.getInt32(index, t));
@@ -393,7 +393,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 				throw new CREIndexOverflowException("The element at index \"" + index.val() + "\" does not exist", t, e);
 			}
 		} else {
-			Construct val = associativeArray.get(normalizeConstruct(index));
+			Mixed val = associativeArray.get(normalizeConstruct(index));
 			if(val != null) {
 				if(val instanceof CEntry) {
 					return ((CEntry) val).construct();
@@ -408,17 +408,17 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Construct
 		}
 	}
 
-	public final Construct get(long index, Target t) {
+	public final Mixed get(long index, Target t) {
 		return this.get(new CInt(index, t), t);
 	}
 
 	@Override
-	public final Construct get(int index, Target t) {
+	public final Mixed get(int index, Target t) {
 		return this.get(new CInt(index, t), t);
 	}
 
 	@Override
-	public final Construct get(String index, Target t) {
+	public final Mixed get(String index, Target t) {
 		return this.get(new CString(index, t), t);
 	}
 

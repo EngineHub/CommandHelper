@@ -40,6 +40,7 @@ import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.MEnumType;
 import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.PersistenceNetwork;
 
@@ -179,17 +180,20 @@ public class Reflection {
 				if(args.length == 1) {
 					//No name provided
 					for(ClassMirror<? extends Enum> e : enums) {
-						a.push(new CString((String) e.getAnnotation(MEnum.class).getValue("value"), t), t);
+						String name = (String) e.getAnnotation(MEnum.class).getValue("value");
+						a.push(CClassType.get(name), t);
 					}
 					for(ClassMirror<? extends DynamicEnum> d : dEnums) {
-						a.push(new CString((String) d.getAnnotation(MDynamicEnum.class).getValue("value"), t), t);
+						String name = (String) d.getAnnotation(MDynamicEnum.class).getValue("value");
+						a.push(CClassType.get(name), t);
 					}
 				} else if(args.length == 2) {
 					String enumName = args[1].val();
 					for(ClassMirror<? extends Enum> e : enums) {
 						if(e.getAnnotation(MEnum.class).getValue("value").equals(enumName)) {
 							for(Enum ee : e.loadClass().getEnumConstants()) {
-								a.push(new CString(ee.name(), t), t);
+								MEnumType type = new MEnumType(CClassType.get(enumName), ee.name(), ee.ordinal());
+								a.push(type, t);
 							}
 							break;
 						}

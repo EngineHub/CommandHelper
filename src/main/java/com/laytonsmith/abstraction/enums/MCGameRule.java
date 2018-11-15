@@ -3,7 +3,7 @@ package com.laytonsmith.abstraction.enums;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.core.constructs.Construct.ConstructType;
 
-@MEnum("GameRule")
+@MEnum("com.commandhelper.GameRule")
 public enum MCGameRule {
 	ANNOUNCEADVANCEMENTS("announceAdvancements"),
 	COMMANDBLOCKOUTPUT("commandBlockOutput"),

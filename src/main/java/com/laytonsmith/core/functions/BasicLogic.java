@@ -36,6 +36,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.LoopBreakException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -646,7 +647,7 @@ public class BasicLogic {
 				}
 				//Now we validate that the values are constant and non-repeating.
 				if(children.get(i).getData() instanceof CArray) {
-					List<Construct> list = ((CArray) children.get(i).getData()).asList();
+					List<Mixed> list = ((CArray) children.get(i).getData()).asList();
 					for(Construct c : list) {
 						if(c instanceof CSlice) {
 							for(Construct cc : ((CSlice) c).asList()) {
@@ -693,7 +694,7 @@ public class BasicLogic {
 						data = new CArray(t);
 						((CArray) data).push(children.get(i).getData(), t);
 					}
-					for(Construct value : ((CArray) data).asList()) {
+					for(Mixed value : ((CArray) data).asList()) {
 						if(value instanceof CSlice) {
 							long rangeLeft = ((CSlice) value).getStart();
 							long rangeRight = ((CSlice) value).getFinish();
@@ -753,7 +754,7 @@ public class BasicLogic {
 		 * @param two
 		 * @return
 		 */
-		public static boolean doEquals(Construct one, Construct two) {
+		public static boolean doEquals(Mixed one, Mixed two) {
 			CBoolean ret = SELF.exec(Target.UNKNOWN, null, one, two);
 			return ret.getBoolean();
 		}
@@ -769,7 +770,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length <= 1) {
 				throw new CREInsufficientArgumentsException("At least two arguments must be passed to equals", t);
 			}

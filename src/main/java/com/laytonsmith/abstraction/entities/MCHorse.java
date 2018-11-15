@@ -6,12 +6,12 @@ import com.laytonsmith.annotations.MEnum;
 
 public interface MCHorse extends MCTameable, MCVehicle, MCInventoryHolder {
 
-	@MEnum("HorseColor")
+	@MEnum("com.commandhelper.HorseColor")
 	enum MCHorseColor {
 		BLACK, BROWN, CHESTNUT, CREAMY, DARK_BROWN, GRAY, WHITE
 	}
 
-	@MEnum("HorsePattern")
+	@MEnum("com.commandhelper.HorsePattern")
 	enum MCHorsePattern {
 		NONE, SOCKS, WHITEFIELD, WHITE_DOTS, BLACK_DOTS
 	}

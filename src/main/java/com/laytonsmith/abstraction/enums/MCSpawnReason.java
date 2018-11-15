@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("SpawnReason")
+@MEnum("com.commandhelper.SpawnReason")
 public enum MCSpawnReason {
 	BREEDING,
 	BUILD_IRONGOLEM,

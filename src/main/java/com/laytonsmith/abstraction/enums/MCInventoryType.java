@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("InventoryType")
+@MEnum("com.commandhelper.InventoryType")
 public enum MCInventoryType {
 	BREWING,
 	CHEST,

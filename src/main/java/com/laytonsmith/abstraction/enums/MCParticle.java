@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@MDynamicEnum("Particle")
+@MDynamicEnum("com.commandhelper.Particle")
 public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVanillaParticle, Concrete> {
 
 	protected static final Map<String, MCParticle> MAP = new HashMap<>();
@@ -70,7 +70,7 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		return MAP.values();
 	}
 
-	@MEnum("VanillaParticle")
+	@MEnum("com.commandhelper.VanillaParticle")
 	public enum MCVanillaParticle {
 		EXPLOSION_NORMAL,
 		EXPLOSION_LARGE,

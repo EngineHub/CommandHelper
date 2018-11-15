@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("ProjectileType")
+@MEnum("com.commandhelper.ProjectileType")
 public enum MCProjectileType {
 	ARROW,
 	DRAGON_FIREBALL,

@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("Tone")
+@MEnum("com.commandhelper.Tone")
 public enum MCTone {
 	G,
 	A,

@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("PigType")
+@MEnum("com.commandhelper.PigType")
 public enum MCPigType {
 	SADDLED
 }

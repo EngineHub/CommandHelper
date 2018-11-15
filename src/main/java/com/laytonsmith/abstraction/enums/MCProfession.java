@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("Profession")
+@MEnum("com.commandhelper.Profession")
 public enum MCProfession {
 	BLACKSMITH,
 	BUTCHER,

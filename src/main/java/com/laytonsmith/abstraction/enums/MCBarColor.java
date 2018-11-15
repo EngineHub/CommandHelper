@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("BarColor")
+@MEnum("com.commandhelper.BarColor")
 public enum MCBarColor {
 	PINK,
 	BLUE,

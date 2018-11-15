@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("DyeColor")
+@MEnum("com.commandhelper.DyeColor")
 public enum MCDyeColor {
 	WHITE,
 	ORANGE,

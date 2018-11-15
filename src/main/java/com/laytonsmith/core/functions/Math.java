@@ -2573,7 +2573,7 @@ public class Math {
 			return null;
 		}
 
-		@MEnum("MathConstants")
+		@MEnum("ms.lang.MathConstants")
 		public static enum MathConstants {
 			NaN(Double.NaN, "A representation of an undefinied number (Not a Number), per the IEEE 754 standard"),
 			NEGATIVE_INFINITY(Double.NEGATIVE_INFINITY, "A representation of negative infinity, per the IEEE 754 standard"),

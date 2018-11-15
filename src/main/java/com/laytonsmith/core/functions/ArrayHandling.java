@@ -3027,7 +3027,7 @@ public class ArrayHandling {
 	@seealso({array_merge.class})
 	public static class array_intersect extends AbstractFunction {
 
-		@MEnum("ArrayIntersectComparisonMode")
+		@MEnum("ms.lang.ArrayIntersectComparisonMode")
 		public static enum ArrayIntersectComparisonMode {
 			EQUALS(new equals()),
 			STRICT_EQUALS(new sequals()),

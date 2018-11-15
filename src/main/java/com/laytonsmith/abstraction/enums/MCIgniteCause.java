@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("IgniteCause")
+@MEnum("com.commandhelper.IgniteCause")
 public enum MCIgniteCause {
 	LAVA,
 	FLINT_AND_STEEL,

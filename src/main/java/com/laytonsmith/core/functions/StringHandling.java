@@ -2479,7 +2479,7 @@ public class StringHandling {
 	@api
 	public static class uuid extends AbstractFunction {
 
-		@MEnum("UUIDType")
+		@MEnum("ms.lang.UUIDType")
 		public static enum UUIDType {
 			// TODO: May wish to instead look into https://github.com/cowtowncoder/java-uuid-generator instead
 			// of rolling our own here. Most people probably only will use RANDOM anyways

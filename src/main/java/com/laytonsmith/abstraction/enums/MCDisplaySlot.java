@@ -6,7 +6,7 @@ import com.laytonsmith.annotations.MEnum;
  * Scoreboard displayslots
  *
  */
-@MEnum("DisplaySlot")
+@MEnum("com.commandhelper.DisplaySlot")
 public enum MCDisplaySlot {
 	BELOW_NAME,
 	PLAYER_LIST,

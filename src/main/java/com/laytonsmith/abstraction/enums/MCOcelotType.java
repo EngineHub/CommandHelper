@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("OcelotType")
+@MEnum("com.commandhelper.OcelotType")
 public enum MCOcelotType {
 	BLACK_CAT,
 	RED_CAT,

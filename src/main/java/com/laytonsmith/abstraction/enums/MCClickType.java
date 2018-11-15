@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("ClickType")
+@MEnum("com.commandhelper.ClickType")
 public enum MCClickType {
 	/**
 	 * The left (or primary) mouse button.

@@ -3,6 +3,8 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
+import com.laytonsmith.annotations.MDynamicEnum;
+import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.MixedInterfaceRunner;
@@ -62,6 +64,16 @@ public class NativeTypeList {
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(Mixed.class));
 		for(ClassMirror<? extends Mixed> c : ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(typeof.class, Mixed.class)) {
 			nativeTypes.add(c.loadAnnotation(typeof.class).value());
+		}
+
+		for(ClassMirror<? extends Enum> c : ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(MEnum.class, Enum.class)) {
+			String name = (String) c.getAnnotation(MEnum.class).getValue("value");
+			nativeTypes.add(name);
+		}
+
+		for(ClassMirror<? extends Enum> c : ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(MDynamicEnum.class, Enum.class)) {
+			String name = (String) c.getAnnotation(MDynamicEnum.class).getValue("value");
+			nativeTypes.add(name);
 		}
 
 		return new HashSet<>(nativeTypes);
