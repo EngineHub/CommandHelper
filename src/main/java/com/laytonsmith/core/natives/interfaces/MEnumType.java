@@ -11,6 +11,7 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -121,7 +122,7 @@ public abstract class MEnumType implements Mixed {
 
 			@Override
 			public CClassType typeof() {
-				return CClassType.get(fqcn);
+				return CClassType.TYPE;
 			}
 
 			@Override
@@ -214,6 +215,69 @@ public abstract class MEnumType implements Mixed {
 								return v.toString();
 							}
 
+							@Override
+							public CClassType typeof() {
+								return CClassType.get(fqcn);
+							}
+
+							@Override
+							public boolean isInstanceOf(CClassType type) throws ClassNotFoundException {
+								return Construct.isInstanceof(this, type);
+							}
+
+							@Override
+							public boolean isInstanceOf(Class<? extends Mixed> type) {
+								// This call doesn't make any sense?
+								throw new UnsupportedOperationException();
+							}
+
+							@Override
+							public CClassType getContainingClass() {
+								return null;
+							}
+
+							@Override
+							public Set<ObjectModifier> getObjectModifiers() {
+								return EnumSet.of(ObjectModifier.FINAL, ObjectModifier.STATIC, ObjectModifier.PUBLIC,
+										ObjectModifier.ABSTRACT);
+							}
+
+							@Override
+							public ObjectType getObjectType() {
+								return ObjectType.ENUM;
+							}
+
+							@Override
+							public CClassType[] getInterfaces() {
+								return new CClassType[0];
+							}
+
+							@Override
+							public CClassType[] getSuperclasses() {
+								return new CClassType[]{MEnumType.TYPE};
+							}
+
+							@Override
+							public Mixed clone() throws CloneNotSupportedException {
+								return this;
+							}
+
+							private Target t = Target.UNKNOWN;
+
+							@Override
+							public Target getTarget() {
+								return t;
+							}
+
+							@Override
+							public void setTarget(Target target) {
+								t = target;
+							}
+
+							@Override
+							public String val() {
+								return getName();
+							}
 						};
 					}
 
@@ -302,7 +366,8 @@ public abstract class MEnumType implements Mixed {
 
 	@Override
 	public ObjectType getObjectType() {
-		return ObjectType.ENUM;
+		// The individual values in the enum are ENUM, but the container is a class
+		return ObjectType.CLASS;
 	}
 
 	@Override

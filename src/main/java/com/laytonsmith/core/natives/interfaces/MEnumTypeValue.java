@@ -6,7 +6,7 @@ import com.laytonsmith.core.Documentation;
  *
  * @author caismith
  */
-public interface MEnumTypeValue extends Documentation {
+public interface MEnumTypeValue extends Documentation, Mixed {
 
 	/**
 	 * Returns the ordinal value for this entry. The ordinal value goes from 0 to size-1, and is defined by the

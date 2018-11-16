@@ -41,6 +41,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.MEnumType;
+import com.laytonsmith.core.natives.interfaces.MEnumTypeValue;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.PersistenceNetwork;
@@ -193,13 +194,16 @@ public class Reflection {
 					for(ClassMirror<? extends Enum> e : enums) {
 						if(e.getAnnotation(MEnum.class).getValue("value").equals(enumName)) {
 							MEnumType type = MEnumType.FromEnum(enumName, (Class<Enum<?>>) e.loadClass(), null, null);
-							a.push(type, t);
-							break;
+							for(MEnumTypeValue v : type.values()) {
+								a.push(v, t);
+							}
+							return a;
 						}
 					}
 					for(ClassMirror<? extends DynamicEnum> d : dEnums) {
 						if(d.getAnnotation(MDynamicEnum.class).getValue("value").equals(enumName)) {
 							for(DynamicEnum ee : (Collection<DynamicEnum>) ReflectionUtils.invokeMethod(d.loadClass(), null, "values")) {
+								// TODO: Not sure how to handle this now...
 								a.push(new CString(ee.name(), t), t);
 							}
 							break;
