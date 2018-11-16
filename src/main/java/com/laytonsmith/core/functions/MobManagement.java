@@ -28,7 +28,7 @@ import com.laytonsmith.abstraction.enums.MCZombieType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -131,8 +131,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -213,8 +213,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -300,8 +300,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -356,8 +356,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -414,8 +414,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -466,8 +466,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -507,8 +507,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -541,8 +541,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -580,8 +580,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -632,8 +632,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -665,8 +665,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -763,8 +763,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -793,8 +793,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -829,8 +829,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -875,8 +875,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -934,8 +934,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -959,8 +959,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -993,8 +993,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1026,8 +1026,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1074,8 +1074,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1098,8 +1098,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1123,8 +1123,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1148,8 +1148,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1173,8 +1173,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1202,8 +1202,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1238,8 +1238,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1262,8 +1262,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1287,8 +1287,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1311,8 +1311,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1336,8 +1336,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1410,8 +1410,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1448,8 +1448,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1501,8 +1501,8 @@ public class MobManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1531,7 +1531,7 @@ public class MobManagement {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 	}
 
@@ -1555,7 +1555,7 @@ public class MobManagement {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 	}
 
@@ -1579,7 +1579,7 @@ public class MobManagement {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 	}
 
@@ -1608,7 +1608,7 @@ public class MobManagement {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 	}
 
@@ -1632,7 +1632,7 @@ public class MobManagement {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_3;
+			return MSVersion.V3_3_3;
 		}
 	}
 
@@ -1659,7 +1659,7 @@ public class MobManagement {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_3;
+			return MSVersion.V3_3_3;
 		}
 	}
 }

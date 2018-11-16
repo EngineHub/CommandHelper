@@ -2,7 +2,7 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
@@ -146,7 +146,7 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_0_1;
+		return MSVersion.V3_0_1;
 	}
 
 	@Override

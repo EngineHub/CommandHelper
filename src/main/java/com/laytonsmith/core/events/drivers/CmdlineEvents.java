@@ -5,7 +5,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -123,7 +123,7 @@ public class CmdlineEvents {
 
 		@Override
 		public Version since() {
-			return CHVersion.V0_0_0;
+			return MSVersion.V0_0_0;
 		}
 
 	}
@@ -180,7 +180,7 @@ public class CmdlineEvents {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -272,7 +272,7 @@ public class CmdlineEvents {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override

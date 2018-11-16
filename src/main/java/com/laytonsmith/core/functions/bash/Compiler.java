@@ -1,7 +1,7 @@
 package com.laytonsmith.core.functions.bash;
 
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.Target;
 
 /**
@@ -41,8 +41,8 @@ public class Compiler {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}

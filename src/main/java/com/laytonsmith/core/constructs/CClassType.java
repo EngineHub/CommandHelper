@@ -4,29 +4,29 @@ import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.FullyQualifiedClassName;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
- * A CClassType represent 
+ * A CClassType represent
  */
 @typeof("ms.lang.ClassType")
 public final class CClassType extends Construct {
 
-	public static final String PATH_SEPARATOR = "::";
+	public static final String PATH_SEPARATOR = FullyQualifiedClassName.PATH_SEPARATOR;
 
-	private static final Map<String, CClassType> CACHE = new HashMap<>();
+	private static final Map<FullyQualifiedClassName, CClassType> CACHE = new HashMap<>();
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = new CClassType("ms.lang.ClassType", Target.UNKNOWN);
 	public static final CClassType AUTO = new CClassType("auto", Target.UNKNOWN);
@@ -39,18 +39,28 @@ public final class CClassType extends Construct {
 	public static final CClassType[] EMPTY_CLASS_ARRAY = new CClassType[0];
 
 	static {
-		CACHE.put("ms.lang.ClassType", TYPE);
+		CACHE.put(FullyQualifiedClassName.forFullyQualifiedClass("ms.lang.ClassType"), TYPE);
 	}
 
 	private final boolean isTypeUnion;
+	private final FullyQualifiedClassName fqcn;
 
-	private final SortedSet<String> types = new TreeSet<>(new Comparator<String>() {
+	/**
+	 * This *MUST* contain a list of non type union types.
+	 */
+	private final SortedSet<FullyQualifiedClassName> types = new TreeSet<>();
 
-		@Override
-		public int compare(String o1, String o2) {
-			return o1.compareTo(o2);
-		}
-	});
+	/**
+	 * Returns the singular instance of CClassType that represents this type.
+	 *
+	 * <p>IMPORTANT: The type MUST be fully qualified, or this will cause errors. The only time this method is
+	 * preferred vs {@link #get(com.laytonsmith.core.FullyQualifiedClassName)} is when used to define the TYPE value.
+	 * @param type
+	 * @return
+	 */
+	public static CClassType get(String type) {
+		return get(FullyQualifiedClassName.forFullyQualifiedClass(type));
+	}
 
 	/**
 	 * Returns the singular instance of CClassType that represents this type.
@@ -58,9 +68,7 @@ public final class CClassType extends Construct {
 	 * @param type
 	 * @return
 	 */
-	public static CClassType get(String type) {
-		// This must change once user types are added
-		type = NativeTypeList.resolveType(type);
+	public static CClassType get(FullyQualifiedClassName type) {
 		assert type != null;
 		if(!CACHE.containsKey(type)) {
 			CACHE.put(type, new CClassType(type, Target.UNKNOWN));
@@ -78,16 +86,13 @@ public final class CClassType extends Construct {
 	 * @param types
 	 * @return
 	 */
-	public static CClassType get(String... types) {
-		// First, we have to canonicalize this type union
-		for(int i = 0; i < types.length; i++) {
-			// This must change once user types are added
-			types[i] = NativeTypeList.resolveType(types[i]);
-		}
-		SortedSet<String> t = new TreeSet<>(Arrays.asList(types));
-		String type = StringUtils.Join(t, "|");
+	public static CClassType get(FullyQualifiedClassName... types) {
+
+		SortedSet<FullyQualifiedClassName> t = new TreeSet<>(Arrays.asList(types));
+		FullyQualifiedClassName type
+				= FullyQualifiedClassName.forFullyQualifiedClass(StringUtils.Join(t, "|", e -> e.getFQCN()));
 		if(!CACHE.containsKey(type)) {
-			CACHE.put(type, new CClassType(Target.UNKNOWN, t.toArray(new String[t.size()])));
+			CACHE.put(type, new CClassType(type, Target.UNKNOWN));
 		}
 		return CACHE.get(type);
 	}
@@ -100,13 +105,20 @@ public final class CClassType extends Construct {
 	 * @return
 	 */
 	public static CClassType get(CClassType... types) {
-		List<String> stringTypes = new ArrayList<>();
-		for(CClassType t : types) {
-			// Could be a type union, so we need to break that out
-			stringTypes.addAll(t.types);
-		}
+		return get(Stream.of(types)
+				.map(e -> e.getFQCN())
+				.sorted()
+				.collect(Collectors.toSet())
+				.toArray(new FullyQualifiedClassName[types.length]));
+	}
 
-		return get(stringTypes.toArray(new String[stringTypes.size()]));
+	/**
+	 *
+	 * @param type This must be the fully qualified string name.
+	 * @param t
+	 */
+	private CClassType(String type, Target t) {
+		this(FullyQualifiedClassName.forFullyQualifiedClass(type), t);
 	}
 
 	/**
@@ -115,22 +127,17 @@ public final class CClassType extends Construct {
 	 * @param type
 	 * @param t
 	 */
-	private CClassType(String type, Target t) {
-		super(type, ConstructType.CLASS_TYPE, t);
-		isTypeUnion = false;
-		types.add(type);
-	}
-
-	/**
-	 * Creates a type union type.
-	 *
-	 * @param t
-	 * @param types
-	 */
-	private CClassType(Target t, String... types) {
-		super(StringUtils.Join(types, "|"), ConstructType.CLASS_TYPE, t);
-		isTypeUnion = true;
-		this.types.addAll(Arrays.asList(types));
+	private CClassType(FullyQualifiedClassName type, Target t) {
+		super(type.getFQCN(), ConstructType.CLASS_TYPE, t);
+		isTypeUnion = type.isTypeUnion();
+		fqcn = type;
+		if(isTypeUnion) {
+			// Split them out
+			types.addAll(Stream.of(type.getFQCN().split("|"))
+					.map(e -> FullyQualifiedClassName.forFullyQualifiedClass(e)).collect(Collectors.toList()));
+		} else {
+			types.add(type);
+		}
 	}
 
 	@Override
@@ -166,7 +173,6 @@ public final class CClassType extends Construct {
 	 *
 	 * @param checkClass
 	 * @param superClass
-	 * @throws ClassNotFoundException If the specified class type cannot be found
 	 * @return
 	 */
 	public static boolean doesExtend(CClassType checkClass, CClassType superClass) {
@@ -179,8 +185,8 @@ public final class CClassType extends Construct {
 				try {
 					// TODO: This is currently being done in a very lazy way. It needs to be reworked.
 					// For now, this is ok, but will not work once user types are added.
-					Class cSuper = NativeTypeList.getNativeClass(tSuper.val());
-					Class cCheck = NativeTypeList.getNativeClass(tCheck.val());
+					Class cSuper = NativeTypeList.getNativeClass(tSuper.getFQCN());
+					Class cCheck = NativeTypeList.getNativeClass(tCheck.getFQCN());
 					if(!cSuper.isAssignableFrom(cCheck)) {
 						return false;
 					}
@@ -266,7 +272,7 @@ public final class CClassType extends Construct {
 	 */
 	protected Set<CClassType> getTypes() {
 		Set<CClassType> t = new HashSet<>();
-		for(String type : types) {
+		for(FullyQualifiedClassName type : types) {
 			t.add(CClassType.get(type));
 		}
 		return t;
@@ -294,12 +300,7 @@ public final class CClassType extends Construct {
 	 * @return
 	 */
 	public String getSimpleName() {
-		List<String> parts = new ArrayList<>();
-		for(CClassType t : getTypes()) {
-			String[] sparts = val().split(Pattern.quote(PATH_SEPARATOR));
-			parts.add(sparts[sparts.length - 1]);
-		}
-		return StringUtils.Join(parts, "|");
+		return fqcn.getSimpleName();
 	}
 
 	@Override
@@ -309,7 +310,11 @@ public final class CClassType extends Construct {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_1;
+		return MSVersion.V3_3_1;
+	}
+
+	public FullyQualifiedClassName getFQCN() {
+		return fqcn;
 	}
 
 }

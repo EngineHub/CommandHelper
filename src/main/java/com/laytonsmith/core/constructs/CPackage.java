@@ -8,7 +8,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 
 /**
  *
@@ -36,7 +36,7 @@ public class CPackage extends Construct {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_3;
+		return MSVersion.V3_3_3;
 	}
 
 	@Override

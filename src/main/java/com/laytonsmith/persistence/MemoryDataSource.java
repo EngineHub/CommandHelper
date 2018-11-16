@@ -3,7 +3,7 @@ package com.laytonsmith.persistence;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.annotations.datasource;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
@@ -235,8 +235,8 @@ public final class MemoryDataSource extends AbstractDataSource {
 	}
 
 	@Override
-	public CHVersion since() {
-		return CHVersion.V3_3_1;
+	public MSVersion since() {
+		return MSVersion.V3_3_1;
 	}
 
 }

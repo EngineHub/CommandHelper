@@ -9,10 +9,11 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
@@ -104,8 +105,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -186,8 +187,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -259,8 +260,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -340,8 +341,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -406,8 +407,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -467,8 +468,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -656,8 +657,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -777,8 +778,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -897,8 +898,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -1019,8 +1020,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1092,8 +1093,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -1170,8 +1171,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -1234,8 +1235,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -1286,8 +1287,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -1339,8 +1340,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -1401,8 +1402,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -1483,8 +1484,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -1564,8 +1565,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -1616,8 +1617,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -1668,8 +1669,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -1720,8 +1721,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -1772,8 +1773,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -1824,8 +1825,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -1877,7 +1878,7 @@ public class Math {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -1929,7 +1930,7 @@ public class Math {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -1981,7 +1982,7 @@ public class Math {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -2032,8 +2033,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2084,8 +2085,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2140,8 +2141,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2193,8 +2194,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2287,7 +2288,7 @@ public class Math {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -2343,8 +2344,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2466,8 +2467,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2532,8 +2533,8 @@ public class Math {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2574,7 +2575,7 @@ public class Math {
 		}
 
 		@MEnum("ms.lang.MathConstants")
-		public static enum MathConstants {
+		public static enum MathConstants implements SimpleDocumentation {
 			NaN(Double.NaN, "A representation of an undefinied number (Not a Number), per the IEEE 754 standard"),
 			NEGATIVE_INFINITY(Double.NEGATIVE_INFINITY, "A representation of negative infinity, per the IEEE 754 standard"),
 			INFINITY(Double.POSITIVE_INFINITY, "A representation of positive infinity, per the IEEE 754 standard"),
@@ -2595,12 +2596,27 @@ public class Math {
 			PHI(1.6180339887498948482045868343656381177203091798057628621, "The golden ratio"),
 			C(2.99792458e8, "The speed of light in a vacuum, in meters per second"),
 			EULER(0.5772156649015627, "The Euler-Mascheroni constant γ (not to be confused with e)");
+
+			public static String enumDocs() {
+				return "Contains a list of types of math constants";
+			}
+
+			public static Version enumSince() {
+				return new math_const().since();
+			}
+
 			private final Number value;
 			private final String doc;
+			private final Version since;
 
 			private MathConstants(Number value, String doc) {
+				this(value, doc, new math_const().since());
+			}
+
+			private MathConstants(Number value, String doc, Version since) {
 				this.value = value;
 				this.doc = doc;
+				this.since = since;
 			}
 
 			public Number getValue() {
@@ -2609,6 +2625,21 @@ public class Math {
 
 			public String getDoc() {
 				return doc;
+			}
+
+			@Override
+			public String getName() {
+				return MathConstants.class.getAnnotation(MEnum.class).value();
+			}
+
+			@Override
+			public String docs() {
+				return getDoc();
+			}
+
+			@Override
+			public Version since() {
+				return since;
 			}
 		}
 
@@ -2660,7 +2691,7 @@ public class Math {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2753,7 +2784,7 @@ public class Math {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 		@Override

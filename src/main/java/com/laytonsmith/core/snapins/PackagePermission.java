@@ -1,6 +1,6 @@
 package com.laytonsmith.core.snapins;
 
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.SimpleDocumentation;
 
 /**
@@ -38,7 +38,7 @@ public interface PackagePermission extends SimpleDocumentation {
 		}
 
 		@Override
-		public CHVersion since() {
+		public MSVersion since() {
 			return null;
 		}
 
@@ -76,24 +76,24 @@ public interface PackagePermission extends SimpleDocumentation {
 		 * If this permission is not granted, the package will not be installed
 		 */
 		CRITICAL("If this permission is not granted, the package will not be installed",
-				CHVersion.V3_3_1),
+				MSVersion.V3_3_1),
 		/**
 		 * If this permission is not granted, large portions of the code will not work, however, the main purpose of the
 		 * package will still work fine.
 		 */
 		IMPORTANT("If this permission is not granted, large portions of the code will not work, however, the main purpose"
-				+ "of the package will still work fine.", CHVersion.V3_3_1),
+				+ "of the package will still work fine.", MSVersion.V3_3_1),
 		/**
 		 * If this permission is not granted, some features of the package may not work, but all of the main features
 		 * will work. User experience may be impacted though.
 		 */
 		OPTIONAL("If this permission is not granted, some features of the package may not work, but all of the main features will work."
-				+ " User experience may be impacted though.", CHVersion.V3_3_1);
+				+ " User experience may be impacted though.", MSVersion.V3_3_1);
 
 		private final String docs;
-		private final CHVersion since;
+		private final MSVersion since;
 
-		private Requirement(String docs, CHVersion since) {
+		private Requirement(String docs, MSVersion since) {
 			this.docs = docs;
 			this.since = since;
 		}
@@ -109,7 +109,7 @@ public interface PackagePermission extends SimpleDocumentation {
 		}
 
 		@Override
-		public CHVersion since() {
+		public MSVersion since() {
 			return since;
 		}
 
@@ -122,25 +122,25 @@ public interface PackagePermission extends SimpleDocumentation {
 		/**
 		 * No security risks could be introduced by granting this permission
 		 */
-		TRIVIAL("No security risks could be introduced by granting this permission ", CHVersion.V3_3_1),
+		TRIVIAL("No security risks could be introduced by granting this permission ", MSVersion.V3_3_1),
 		/**
 		 * A malicious package may be able to cause issues for the administrator, but no permanent damage could happen
 		 * to the system
 		 */
 		CAUTIOUS("A malicious package may be able to cause issues for the administrator,"
-				+ " but no permanent damage could happen to the system ", CHVersion.V3_3_1),
+				+ " but no permanent damage could happen to the system ", MSVersion.V3_3_1),
 		/**
 		 * Malicious packages could cause serious damage to a system if this permission is granted. You should be sure
 		 * you trust this package before granting this permission.
 		 */
 		DANGEROUS("Malicious packages could cause serious damage to a system"
 				+ " if this permission is granted. You should be sure you"
-				+ " trust this package before granting this permission. ", CHVersion.V3_3_1);
+				+ " trust this package before granting this permission. ", MSVersion.V3_3_1);
 
 		private final String docs;
-		private final CHVersion since;
+		private final MSVersion since;
 
-		private ThreatLevel(String docs, CHVersion since) {
+		private ThreatLevel(String docs, MSVersion since) {
 			this.docs = docs;
 			this.since = since;
 		}
@@ -156,7 +156,7 @@ public interface PackagePermission extends SimpleDocumentation {
 		}
 
 		@Override
-		public CHVersion since() {
+		public MSVersion since() {
 			return since;
 		}
 

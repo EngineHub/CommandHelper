@@ -525,7 +525,7 @@ public final class Static {
 		}
 		// TODO: Once compiler environments are added, we would need to check to see if the value here is a custom
 		// type. However, as it stands, since we only support the native types, we will just hardcode the check here.
-		String fqType = NativeTypeList.resolveType(val);
+		String fqType = NativeTypeList.resolveNativeType(val);
 		if(fqType != null) {
 			return CClassType.get(fqType);
 		} else {

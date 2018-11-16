@@ -6,7 +6,7 @@ import com.laytonsmith.abstraction.events.MCLightningStrikeEvent;
 import com.laytonsmith.abstraction.events.MCThunderChangeEvent;
 import com.laytonsmith.abstraction.events.MCWeatherChangeEvent;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -95,7 +95,7 @@ public class WeatherEvents {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -177,7 +177,7 @@ public class WeatherEvents {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -241,7 +241,7 @@ public class WeatherEvents {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}

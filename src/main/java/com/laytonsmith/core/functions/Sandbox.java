@@ -10,7 +10,7 @@ import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.commandhelper.BukkitDirtyRegisteredListener;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Security;
@@ -89,8 +89,8 @@ public class Sandbox {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -172,8 +172,8 @@ public class Sandbox {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 	}
 
@@ -227,8 +227,8 @@ public class Sandbox {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 	}
 
@@ -418,7 +418,7 @@ public class Sandbox {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 	}
@@ -466,7 +466,7 @@ public class Sandbox {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 	}
@@ -505,8 +505,8 @@ public class Sandbox {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 		@Override

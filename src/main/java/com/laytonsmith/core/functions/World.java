@@ -22,7 +22,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -101,8 +101,8 @@ public class World {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -198,8 +198,8 @@ public class World {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -234,8 +234,8 @@ public class World {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -363,7 +363,7 @@ public class World {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -443,7 +443,7 @@ public class World {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -517,7 +517,7 @@ public class World {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -553,8 +553,8 @@ public class World {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -640,8 +640,8 @@ public class World {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -758,8 +758,8 @@ public class World {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -849,8 +849,8 @@ public class World {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -948,8 +948,8 @@ public class World {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -996,8 +996,8 @@ public class World {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1073,8 +1073,8 @@ public class World {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1142,8 +1142,8 @@ public class World {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1214,8 +1214,8 @@ public class World {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1268,7 +1268,7 @@ public class World {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1308,7 +1308,7 @@ public class World {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1358,7 +1358,7 @@ public class World {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1424,7 +1424,7 @@ public class World {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1473,7 +1473,7 @@ public class World {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1532,7 +1532,7 @@ public class World {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1579,7 +1579,7 @@ public class World {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREInvalidWorldException.class, CREFormatException.class};
+			return new Class[]{CREInvalidWorldException.class, CREFormatException.class, CRECastException.class};
 		}
 
 		@Override
@@ -1601,7 +1601,7 @@ public class World {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1665,7 +1665,7 @@ public class World {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1741,7 +1741,7 @@ public class World {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1808,7 +1808,7 @@ public class World {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1869,7 +1869,7 @@ public class World {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -1919,7 +1919,7 @@ public class World {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -1976,7 +1976,7 @@ public class World {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -2027,7 +2027,7 @@ public class World {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -2084,7 +2084,7 @@ public class World {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 	}
 
@@ -2164,7 +2164,7 @@ public class World {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 	}
 }

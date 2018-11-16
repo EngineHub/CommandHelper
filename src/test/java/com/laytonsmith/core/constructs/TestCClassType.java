@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.Before;
@@ -16,6 +17,8 @@ import static org.junit.Assert.fail;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.Ignore;
 
 /**
@@ -30,13 +33,14 @@ public class TestCClassType {
 	}
 
 	private static CClassType get(String... types) {
-		return CClassType.get(types);
+		return CClassType.get(Stream.of(types).map(e -> FullyQualifiedClassName.forName(e))
+				.collect(Collectors.toList()).toArray(new FullyQualifiedClassName[0]));
 	}
 
 	@Test
 	public void testInitial() throws Exception {
-		NativeTypeList.getNativeClass("array");
-		NativeTypeList.getNativeClass("mixed");
+		NativeTypeList.getNativeClass(FullyQualifiedClassName.forFullyQualifiedClass("ms.lang.array"));
+		NativeTypeList.getNativeClass(FullyQualifiedClassName.forFullyQualifiedClass("ms.lang.mixed"));
 	}
 
 	@Test

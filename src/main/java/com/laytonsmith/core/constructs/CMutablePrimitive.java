@@ -2,7 +2,7 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -150,7 +150,7 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_1;
+		return MSVersion.V3_3_1;
 	}
 
 	@Override

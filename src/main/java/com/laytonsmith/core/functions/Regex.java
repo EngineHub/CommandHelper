@@ -4,7 +4,7 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
@@ -78,8 +78,8 @@ public class Regex {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -178,8 +178,8 @@ public class Regex {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -277,8 +277,8 @@ public class Regex {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -387,8 +387,8 @@ public class Regex {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -484,8 +484,8 @@ public class Regex {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -572,8 +572,8 @@ public class Regex {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override

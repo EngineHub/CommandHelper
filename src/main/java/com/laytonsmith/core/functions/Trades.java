@@ -10,7 +10,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.entities.MCVillager;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -65,7 +65,7 @@ public class Trades {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_3;
+			return MSVersion.V3_3_3;
 		}
 
 		@Override
@@ -108,7 +108,7 @@ public class Trades {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_3;
+			return MSVersion.V3_3_3;
 		}
 
 		@Override
@@ -178,7 +178,7 @@ public class Trades {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_3;
+			return MSVersion.V3_3_3;
 		}
 
 		@Override
@@ -218,7 +218,7 @@ public class Trades {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_3;
+			return MSVersion.V3_3_3;
 		}
 
 		@Override
@@ -256,7 +256,7 @@ public class Trades {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_3;
+			return MSVersion.V3_3_3;
 		}
 
 		@Override
@@ -306,7 +306,7 @@ public class Trades {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_3;
+			return MSVersion.V3_3_3;
 		}
 
 		@Override
@@ -347,7 +347,7 @@ public class Trades {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_3;
+			return MSVersion.V3_3_3;
 		}
 
 		@Override

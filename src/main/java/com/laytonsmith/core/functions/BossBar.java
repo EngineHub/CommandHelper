@@ -8,7 +8,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.enums.MCBarColor;
 import com.laytonsmith.abstraction.enums.MCBarStyle;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -54,7 +54,7 @@ public class BossBar {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 	}
 

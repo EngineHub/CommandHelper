@@ -3,7 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.Target;
@@ -60,8 +60,8 @@ public class Permissions {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override

@@ -2,7 +2,7 @@ package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.abstraction.events.MCPluginIncomingMessageEvent;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CString;
@@ -99,8 +99,8 @@ public class PluginEvents {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 }

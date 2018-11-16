@@ -9,7 +9,7 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -99,8 +99,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -169,8 +169,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -230,8 +230,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -244,8 +244,8 @@ public class Echoes {
 	public static class title extends AbstractFunction {
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -445,8 +445,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -493,8 +493,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -551,8 +551,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -592,8 +592,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_2;
+		public MSVersion since() {
+			return MSVersion.V3_0_2;
 		}
 
 		@Override
@@ -646,8 +646,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -733,8 +733,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_2;
+		public MSVersion since() {
+			return MSVersion.V3_0_2;
 		}
 
 		@Override
@@ -858,8 +858,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override

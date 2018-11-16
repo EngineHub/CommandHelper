@@ -19,7 +19,7 @@ import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Profiles;
@@ -116,7 +116,7 @@ public final class SiteDeploy {
 				+ " lower folders that are created by the site deploy tool. So if /var/www is your web"
 				+ " root, then you should put /var/www/docs here. It will create an index file in /var/www, as"
 				+ " well as in /var/www/docs, but the majority of files will be put in /var/www/docs/"
-				+ CHVersion.LATEST.toString() + "."));
+				+ MSVersion.LATEST.toString() + "."));
 		defaults.add(new Preferences.Preference(PASSWORD, "false", Preferences.Type.BOOLEAN, "Whether or not to use"
 				+ " password authentication. If false, public key authentication will be used instead, and your"
 				+ " system must be pre-configured for that. The password is interactively"
@@ -234,8 +234,8 @@ public final class SiteDeploy {
 		if(!docsBase.endsWith("/")) {
 			docsBase += "/";
 		}
-		directory += CHVersion.LATEST;
-		docsBase += CHVersion.LATEST + "/";
+		directory += MSVersion.LATEST;
+		docsBase += MSVersion.LATEST + "/";
 		System.out.println("Using the following settings, loaded from " + sitedeploy.getCanonicalPath());
 		System.out.println("username: " + username);
 		System.out.println("hostname: " + hostname);
@@ -995,8 +995,8 @@ public final class SiteDeploy {
 		generateQueue.submit(new Runnable() {
 			@Override
 			public void run() {
-				writePageFromResource(CHVersion.LATEST.toString() + " - Docs", "/siteDeploy/VersionFrontPage", "index.html",
-						Arrays.asList(new String[]{CHVersion.LATEST.toString()}), "Front page for " + CHVersion.LATEST.toString());
+				writePageFromResource(MSVersion.LATEST.toString() + " - Docs", "/siteDeploy/VersionFrontPage", "index.html",
+						Arrays.asList(new String[]{MSVersion.LATEST.toString()}), "Front page for " + MSVersion.LATEST.toString());
 				currentGenerateTask.addAndGet(1);
 			}
 		});
@@ -1118,7 +1118,7 @@ public final class SiteDeploy {
 								generateFunctionDocs(f, di);
 							}
 						});
-						if(f.since().equals(CHVersion.V0_0_0)) {
+						if(f.since().equals(MSVersion.V0_0_0)) {
 							// Don't add these
 							continue;
 						}
@@ -1393,7 +1393,7 @@ public final class SiteDeploy {
 							throw new RuntimeException("While trying to construct " + eventClass + ", got the following", ex);
 						}
 						final DocGen.EventDocInfo edi = new DocGen.EventDocInfo(e.docs(), e.getName());
-						if(e.since().equals(CHVersion.V0_0_0)) {
+						if(e.since().equals(MSVersion.V0_0_0)) {
 							// Don't add these
 							continue;
 						}

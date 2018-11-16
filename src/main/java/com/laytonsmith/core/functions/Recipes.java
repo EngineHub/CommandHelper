@@ -4,7 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -116,7 +116,7 @@ public class Recipes {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -159,7 +159,7 @@ public class Recipes {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -200,7 +200,7 @@ public class Recipes {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -236,7 +236,7 @@ public class Recipes {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -272,7 +272,7 @@ public class Recipes {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}

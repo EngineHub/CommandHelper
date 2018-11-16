@@ -1,6 +1,5 @@
 package com.laytonsmith.core.events;
 
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;

@@ -17,7 +17,7 @@ import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.EmailProfile;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptFileLocations;
@@ -527,7 +527,7 @@ public class Web {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -610,7 +610,7 @@ public class Web {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -660,7 +660,7 @@ public class Web {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -716,7 +716,7 @@ public class Web {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1007,7 +1007,7 @@ public class Web {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override

@@ -1979,7 +1979,7 @@ public final class MethodScriptCompiler {
 				}
 			}
 		}
-		boolean fullyStatic = false;
+		boolean fullyStatic = true;
 		boolean hasIVars = false;
 		for(ParseTree node : children) {
 			if(node.getData() instanceof CFunction) {
@@ -1988,8 +1988,8 @@ public final class MethodScriptCompiler {
 
 			if(node.getData() instanceof Construct) {
 				Construct d = (Construct) node.getData();
-				if(!d.isDynamic() && !(d instanceof IVariable)) {
-					fullyStatic = true;
+				if(d.isDynamic() || (d instanceof IVariable)) {
+					fullyStatic = false;
 				}
 			}
 			if(node.getData() instanceof IVariable) {

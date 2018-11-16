@@ -12,7 +12,8 @@ import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.FullyQualifiedClassName;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -107,8 +108,8 @@ public class Exceptions {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -142,22 +143,22 @@ public class Exceptions {
 					throw new CRECastException("Expected argument 2 to be an IVariable", t);
 				}
 			}
-			List<String> interest = new ArrayList<String>();
+			List<FullyQualifiedClassName> interest = new ArrayList<>();
 			if(types != null) {
 				Mixed ptypes = that.seval(types, env);
 				if(ptypes instanceof CString) {
-					interest.add(ptypes.val());
+					interest.add(FullyQualifiedClassName.forName(ptypes.val()));
 				} else if(ptypes instanceof CArray) {
 					CArray ca = (CArray) ptypes;
 					for(int i = 0; i < ca.size(); i++) {
-						interest.add(ca.get(i, t).val());
+						interest.add(FullyQualifiedClassName.forName(ca.get(i, t).val()));
 					}
 				} else {
 					throw new CRECastException("Expected argument 4 to be a string, or an array of strings.", t);
 				}
 			}
 
-			for(String in : interest) {
+			for(FullyQualifiedClassName in : interest) {
 				try {
 					NativeTypeList.getNativeClass(in);
 				} catch (ClassNotFoundException e) {
@@ -246,8 +247,8 @@ public class Exceptions {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -278,7 +279,7 @@ public class Exceptions {
 				}
 				Class<? extends Mixed> c;
 				try {
-					c = NativeTypeList.getNativeClass(args[0].val());
+					c = NativeTypeList.getNativeClass(FullyQualifiedClassName.forName(args[0].val()));
 				} catch (ClassNotFoundException ex) {
 					throw new CREFormatException("Expected a valid exception type, but found \"" + args[0].val() + "\"", t);
 				}
@@ -359,8 +360,8 @@ public class Exceptions {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -491,7 +492,7 @@ public class Exceptions {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -600,7 +601,7 @@ public class Exceptions {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override

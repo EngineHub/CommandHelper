@@ -9,7 +9,8 @@ import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.FullyQualifiedClassName;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Procedure;
@@ -188,13 +189,11 @@ public class Reflection {
 						a.push(CClassType.get(name), t);
 					}
 				} else if(args.length == 2) {
-					String enumName = args[1].val();
+					FullyQualifiedClassName enumName = FullyQualifiedClassName.forName(args[1].val());
 					for(ClassMirror<? extends Enum> e : enums) {
 						if(e.getAnnotation(MEnum.class).getValue("value").equals(enumName)) {
-							for(Enum ee : e.loadClass().getEnumConstants()) {
-								MEnumType type = new MEnumType(CClassType.get(enumName), ee.name(), ee.ordinal());
-								a.push(type, t);
-							}
+							MEnumType type = MEnumType.FromEnum(enumName, (Class<Enum<?>>) e.loadClass(), null, null);
+							a.push(type, t);
 							break;
 						}
 					}
@@ -232,8 +231,8 @@ public class Reflection {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -377,8 +376,8 @@ public class Reflection {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -457,7 +456,7 @@ public class Reflection {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -507,7 +506,7 @@ public class Reflection {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -556,7 +555,7 @@ public class Reflection {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -604,7 +603,7 @@ public class Reflection {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -654,7 +653,7 @@ public class Reflection {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -695,7 +694,7 @@ public class Reflection {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
-			for(String c : NativeTypeList.getNativeTypeList()) {
+			for(FullyQualifiedClassName c : NativeTypeList.getNativeTypeList()) {
 				CClassType cct = CClassType.get(c);
 				if(cct == CNull.TYPE) {
 					continue;
@@ -724,7 +723,7 @@ public class Reflection {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_3;
+			return MSVersion.V3_3_3;
 		}
 
 	}

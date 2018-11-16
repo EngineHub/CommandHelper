@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Documentation;
+import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
@@ -114,7 +115,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 	@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
 	public static AbstractCREException getFromCArray(CArray exception, Target t) throws ClassNotFoundException {
-		String classType = exception.get("classType", t).val();
+		FullyQualifiedClassName classType = FullyQualifiedClassName.forName(exception.get("classType", t).val());
 		Class<? extends Mixed> clzz = NativeTypeList.getNativeClass(classType);
 		Throwable cause = null;
 		if(exception.get("causedBy", t) instanceof CArray) {

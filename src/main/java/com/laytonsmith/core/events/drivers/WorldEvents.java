@@ -11,7 +11,7 @@ import com.laytonsmith.abstraction.events.MCWorldLoadEvent;
 import com.laytonsmith.abstraction.events.MCWorldSaveEvent;
 import com.laytonsmith.abstraction.events.MCWorldUnloadEvent;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -71,7 +71,7 @@ public final class WorldEvents {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -119,7 +119,7 @@ public final class WorldEvents {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -167,7 +167,7 @@ public final class WorldEvents {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -216,7 +216,7 @@ public final class WorldEvents {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override

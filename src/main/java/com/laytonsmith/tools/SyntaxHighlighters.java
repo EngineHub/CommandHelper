@@ -26,6 +26,7 @@ import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.functions.Function;
 import java.lang.reflect.Field;
+import java.util.stream.Collectors;
 
 public class SyntaxHighlighters {
 
@@ -161,7 +162,9 @@ public class SyntaxHighlighters {
 				base.add(c.getAnnotation(typeof.class).value());
 			}
 		} else if(datalist.equalsIgnoreCase("types")) {
-			base.addAll(NativeTypeList.getNativeTypeList());
+			base.addAll(NativeTypeList.getNativeTypeList().stream().map(e -> e.getFQCN()).collect(Collectors.toList()));
+			base.addAll(NativeTypeList.getNativeTypeList().stream()
+					.map(e -> e.getSimpleName()).collect(Collectors.toList()));
 			base.remove("null"); // Null is technically in the list, but it shouldn't be added.
 		} else if(datalist.equalsIgnoreCase("enums")) {
 			Set<String> set = new HashSet<>();

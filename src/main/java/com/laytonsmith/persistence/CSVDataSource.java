@@ -1,6 +1,6 @@
 package com.laytonsmith.persistence;
 
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.net.URI;
 
@@ -50,8 +50,8 @@ public class CSVDataSource extends StringSerializableDataSource {
 	}
 
 	@Override
-	public CHVersion since() {
-		return CHVersion.V0_0_0;
+	public MSVersion since() {
+		return MSVersion.V0_0_0;
 	}
 
 }

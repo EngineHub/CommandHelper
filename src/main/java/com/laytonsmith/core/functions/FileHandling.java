@@ -11,7 +11,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -120,8 +120,8 @@ public class FileHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -180,7 +180,7 @@ public class FileHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -338,8 +338,8 @@ public class FileHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -387,8 +387,8 @@ public class FileHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -450,7 +450,7 @@ public class FileHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -513,7 +513,7 @@ public class FileHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -576,7 +576,7 @@ public class FileHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -627,7 +627,7 @@ public class FileHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}

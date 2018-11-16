@@ -8,7 +8,6 @@ import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;

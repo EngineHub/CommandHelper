@@ -3,7 +3,7 @@ package com.laytonsmith.core.exceptions.CRE;
 import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
@@ -40,7 +40,7 @@ public class CREThrowable extends AbstractCREException {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_1;
+		return MSVersion.V3_3_1;
 	}
 
 	/**

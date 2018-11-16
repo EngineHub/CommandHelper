@@ -3,7 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.environments.Environment;
@@ -236,7 +236,7 @@ public class CClosure extends Construct {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_1;
+		return MSVersion.V3_3_1;
 	}
 
 	@Override

@@ -6,7 +6,7 @@ import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Prefs;
@@ -92,7 +92,7 @@ public class Debug {
 //			return true;
 //		}
 //
-//		public CHVersion since() {
+//		public MSVersion since() {
 //			return "0.0.0";
 //		}
 //
@@ -223,8 +223,8 @@ public class Debug {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -302,8 +302,8 @@ public class Debug {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -339,8 +339,8 @@ public class Debug {
 //			return true;
 //		}
 //
-//		public CHVersion since() {
-//			return CHVersion.V3_3_0;
+//		public MSVersion since() {
+//			return MSVersion.V3_3_0;
 //		}
 //
 //		public Boolean runAsync() {
@@ -392,8 +392,8 @@ public class Debug {
 //			return true;
 //		}
 //
-//		public CHVersion since() {
-//			return CHVersion.V3_3_0;
+//		public MSVersion since() {
+//			return MSVersion.V3_3_0;
 //		}
 //
 //		public Boolean runAsync() {
@@ -468,8 +468,8 @@ public class Debug {
 //			return true;
 //		}
 //
-//		public CHVersion since() {
-//			return CHVersion.V3_3_0;
+//		public MSVersion since() {
+//			return MSVersion.V3_3_0;
 //		}
 //
 //		public Boolean runAsync() {
@@ -538,8 +538,8 @@ public class Debug {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -593,8 +593,8 @@ public class Debug {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -649,7 +649,7 @@ public class Debug {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_3;
+			return MSVersion.V3_3_3;
 		}
 
 	}

@@ -3,45 +3,265 @@ package com.laytonsmith.core.natives.interfaces;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.annotations.MDynamicEnum;
+import com.laytonsmith.annotations.MEnum;
+import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Documentation;
+import com.laytonsmith.core.FullyQualifiedClassName;
+import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.AbstractList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 /**
- * This class wraps an enum value inside some MEnum class
+ * This is the base class for all enums in MethodScript. Enums themselves can be automatically generated based on a
+ * real enum, or dynamically generated based on user code. Enums marked with {@link MEnum} or {@link MDynamicEnum} are
+ * automatically added to the ecosystem, however.
  */
-public class MEnumType implements Mixed {
+@typeof("ms.lang.enum")
+public abstract class MEnumType implements Mixed {
 
-	private final CClassType parentType;
-	private final String name;
-	private final int ordinal;
+
+	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
+	public static final CClassType TYPE = CClassType.get("ms.lang.enum");
+
+	/**
+	 * Generates a new MEnumType subclass
+	 * @param fqcn The fully qualified class name. Generally, this should be gathered from the typeof of the MEnum, if
+	 * applicable, but if this is an external enum, or dynamically generated, this may come from other sources.
+	 * @param enumClass The underlying java enum class
+	 * @param docs This may be null if the enum implements {@code public static String enumDocs()}, otherwise this
+	 * should be the docs for the enum class as a whole.
+	 * @param since This may be null if the enum implements {@code public static Version enumSince()}, otherwise this
+	 * should be the since tag for the enum class as a whole.
+	 * @return A subclass of MEnumType. This does not register it in the ecosystem.
+	 */
+	public static MEnumType FromEnum(FullyQualifiedClassName fqcn, final Class<Enum<?>> enumClass, String docs,
+			Version since) {
+		final Enum<?>[] constants = enumClass.getEnumConstants();
+		return new MEnumType() {
+			@Override
+			public String docs() {
+				if(docs != null) {
+					return docs;
+				}
+				Method enumDocs;
+				try {
+					enumDocs = enumClass.getDeclaredMethod("enumDocs");
+				} catch (NoSuchMethodException | SecurityException ex) {
+					return "This enum does not have documentation. Either pass in the docs, or implement public static"
+							+ " String enumDocs() in the enum.";
+				}
+				Object d;
+				try {
+					d = enumDocs.invoke(null);
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+					d = null;
+				}
+				if(d instanceof String) {
+					return (String) d;
+				}
+				return "The return type of the enumDocs method is wrong. It must return a String";
+			}
+
+			@Override
+			public Version since() {
+				if(since != null) {
+					return since;
+				}
+				Method enumSince;
+				try {
+					enumSince = enumClass.getDeclaredMethod("enumSince");
+				} catch (NoSuchMethodException | SecurityException ex) {
+					return new SimpleVersion(0, 0, 0);
+				}
+				Object d;
+				try {
+					d = enumSince.invoke(null);
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+					d = null;
+				}
+				if(d instanceof Version) {
+					return (Version) d;
+				}
+				return new SimpleVersion(0, 0, 0);
+			}
+
+			@Override
+			public CClassType[] getSuperclasses() {
+				return new CClassType[]{MEnumType.TYPE};
+			}
+
+			@Override
+			public String getName() {
+				return fqcn.getFQCN();
+			}
+
+			@Override
+			public URL getSourceJar() {
+				return ClassDiscovery.GetClassContainer(enumClass);
+			}
+
+			@Override
+			public boolean isInstanceOf(CClassType type) throws ClassNotFoundException {
+				return Mixed.TYPE.equals(type) || MEnumType.TYPE.equals(type) || this.typeof().equals(type);
+			}
+
+			@Override
+			public boolean isInstanceOf(Class<? extends Mixed> type) {
+				return type.isAssignableFrom(this.getClass());
+			}
+
+			@Override
+			public CClassType typeof() {
+				return CClassType.get(fqcn);
+			}
+
+			@Override
+			public String val() {
+				return getName();
+			}
+
+			@Override
+			public List<MEnumTypeValue> values() {
+				return new AbstractList<MEnumTypeValue>() {
+					@Override
+					public MEnumTypeValue get(int index) {
+						final Enum<?> v = constants[index];
+						return new MEnumTypeValue() {
+							@Override
+							public int ordinal() {
+								return v.ordinal();
+							}
+
+							@Override
+							public String name() {
+								return v.name();
+							}
+
+							@Override
+							public URL getSourceJar() {
+								return ClassDiscovery.GetClassContainer(enumClass);
+							}
+
+							@Override
+							public Class<? extends Documentation>[] seeAlso() {
+								if(SimpleDocumentation.class.isAssignableFrom(enumClass)) {
+									try {
+										return (Class[]) enumClass.getDeclaredMethod("seeAlso").invoke(v);
+									} catch (NoSuchMethodException | SecurityException | IllegalAccessException
+											| IllegalArgumentException | InvocationTargetException ex) {
+										throw new RuntimeException(ex);
+									}
+								} else {
+									return new Class[0];
+								}
+							}
+
+							@Override
+							public String getName() {
+								return v.name();
+							}
+
+							@Override
+							public String docs() {
+								if(SimpleDocumentation.class.isAssignableFrom(enumClass)) {
+									try {
+										return (String) enumClass.getDeclaredMethod("docs").invoke(v);
+									} catch (NoSuchMethodException | SecurityException | IllegalAccessException
+											| IllegalArgumentException | InvocationTargetException ex) {
+										throw new RuntimeException(ex);
+									}
+								} else {
+									return "";
+								}
+							}
+
+							@Override
+							public Version since() {
+								if(SimpleDocumentation.class.isAssignableFrom(enumClass)) {
+									try {
+										return (Version) enumClass.getDeclaredMethod("since").invoke(v);
+									} catch (NoSuchMethodException | SecurityException | IllegalAccessException
+											| IllegalArgumentException | InvocationTargetException ex) {
+										throw new RuntimeException(ex);
+									}
+								} else {
+									return MSVersion.V0_0_0;
+								}
+							}
+
+							@Override
+							public int hashCode() {
+								return v.hashCode();
+							}
+
+							@Override
+							@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+							public boolean equals(Object obj) {
+								return v.equals(obj);
+							}
+
+							@Override
+							public String toString() {
+								return v.toString();
+							}
+
+						};
+					}
+
+					@Override
+					public int size() {
+						return constants.length;
+					}
+				};
+			}
+
+
+		};
+	}
+
+	private static final MEnumType ROOT_TYPE = new MEnumType() {
+		@Override
+		public List<MEnumTypeValue> values() {
+			throw new UnsupportedOperationException("The root MEnumType is a meta object, and cannot be used normally."
+					+ " There are no values in the class.");
+		}
+
+	};
+
+	/**
+	 * Returns the meta object representing the ms.lang.enum type. While this is a valid type, it is not an enum per se
+	 * and cannot be used like an enum. It can be used as a class type or a documentation getter.
+	 * @return
+	 */
+	public static MEnumType getRootEnumType() {
+		return ROOT_TYPE;
+	}
+
+
 
 	private Target target;
 
-	public MEnumType(CClassType parentType, String name, int ordinal) {
-		this.parentType = parentType;
-		this.name = name;
-		this.ordinal = ordinal;
+	public MEnumType() {
+
 	}
 
-	public CClassType getType() {
-		return parentType;
-	}
-
+	@Override
 	public String getName() {
-		return name;
-	}
-
-	public int getOrdinal() {
-		return ordinal;
+		return TYPE.getName();
 	}
 
 	@Override
 	public String val() {
-		return name;
+		return TYPE.getName();
 	}
 
 	@Override
@@ -55,23 +275,24 @@ public class MEnumType implements Mixed {
 	}
 
 	@Override
+	@SuppressWarnings("CloneDoesntCallSuperClone")
 	public MEnumType clone() throws CloneNotSupportedException {
-		return new MEnumType(parentType, name, ordinal);
+		return this;
 	}
 
 	@Override
 	public String docs() {
-		return "";
+		return "This is the base type for all enums in MethodScript.";
 	}
 
 	@Override
 	public Version since() {
-		return new SimpleVersion(0, 0, 0);
+		return MSVersion.V3_3_4;
 	}
 
 	@Override
 	public CClassType[] getSuperclasses() {
-		return new CClassType[]{CClassType.get("ms.lang.enum")};
+		return new CClassType[]{};
 	}
 
 	@Override
@@ -86,7 +307,7 @@ public class MEnumType implements Mixed {
 
 	@Override
 	public Set<ObjectModifier> getObjectModifiers() {
-		return EnumSet.of(ObjectModifier.FINAL, ObjectModifier.PUBLIC);
+		return EnumSet.of(ObjectModifier.FINAL, ObjectModifier.PUBLIC, ObjectModifier.ABSTRACT);
 	}
 
 	@Override
@@ -96,7 +317,7 @@ public class MEnumType implements Mixed {
 
 	@Override
 	public boolean isInstanceOf(CClassType type) throws ClassNotFoundException {
-		return this.parentType.equals(type);
+		return TYPE.equals(type);
 	}
 
 	@Override
@@ -106,7 +327,7 @@ public class MEnumType implements Mixed {
 
 	@Override
 	public CClassType typeof() {
-		return parentType;
+		return TYPE;
 	}
 
 	@Override
@@ -118,4 +339,11 @@ public class MEnumType implements Mixed {
 	public Class<? extends Documentation>[] seeAlso() {
 		return new Class[0];
 	}
+
+	/**
+	 * Returns a list of the underlying enum values. This is roughly equivalent to a list of the Enum java class.
+	 * @return
+	 */
+	public abstract List<MEnumTypeValue> values();
+
 }

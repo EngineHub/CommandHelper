@@ -13,7 +13,7 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -113,8 +113,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
@@ -158,8 +158,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
@@ -206,8 +206,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
@@ -305,8 +305,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -410,8 +410,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -476,8 +476,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -556,8 +556,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -672,7 +672,7 @@ public class Scheduling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -745,7 +745,7 @@ public class Scheduling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 	}
@@ -1114,7 +1114,7 @@ public class Scheduling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1187,7 +1187,7 @@ public class Scheduling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}

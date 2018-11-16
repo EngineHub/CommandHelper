@@ -3,7 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Sizes;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
@@ -509,7 +509,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_1;
+		return MSVersion.V3_3_1;
 	}
 
 	@Override
@@ -604,7 +604,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -648,7 +648,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 			@Override
 			public Version since() {
-				return CHVersion.V3_3_1;
+				return MSVersion.V3_3_1;
 			}
 
 			@Override

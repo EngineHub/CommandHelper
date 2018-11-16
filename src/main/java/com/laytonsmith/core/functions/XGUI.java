@@ -7,7 +7,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CVoid;
@@ -122,7 +122,7 @@ public class XGUI {
 
 		@Override
 		public Version since() {
-			return CHVersion.V0_0_0;
+			return MSVersion.V0_0_0;
 		}
 
 	}
@@ -176,7 +176,7 @@ public class XGUI {
 
 		@Override
 		public Version since() {
-			return CHVersion.V0_0_0;
+			return MSVersion.V0_0_0;
 		}
 
 	}
@@ -241,7 +241,7 @@ public class XGUI {
 
 		@Override
 		public Version since() {
-			return CHVersion.V0_0_0;
+			return MSVersion.V0_0_0;
 		}
 
 	}
@@ -325,7 +325,7 @@ public class XGUI {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 	}

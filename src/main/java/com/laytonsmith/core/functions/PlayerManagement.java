@@ -27,7 +27,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -153,8 +153,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -226,7 +226,7 @@ public class PlayerManagement {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -281,8 +281,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -374,8 +374,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -434,8 +434,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -477,8 +477,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
@@ -577,8 +577,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_2;
+		public MSVersion since() {
+			return MSVersion.V3_0_2;
 		}
 
 		@Override
@@ -712,7 +712,7 @@ public class PlayerManagement {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -762,8 +762,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -821,8 +821,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -889,8 +889,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
@@ -1077,8 +1077,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
@@ -1133,8 +1133,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
@@ -1194,8 +1194,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -1247,8 +1247,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -1303,8 +1303,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -1373,8 +1373,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -1512,8 +1512,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -1573,8 +1573,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -1639,8 +1639,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -1693,8 +1693,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -1754,8 +1754,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -1813,8 +1813,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -1866,8 +1866,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -1924,8 +1924,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -1978,8 +1978,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -2043,8 +2043,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -2096,8 +2096,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -2165,8 +2165,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2295,8 +2295,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -2347,8 +2347,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 	}
 
@@ -2381,8 +2381,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -2432,8 +2432,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -2484,8 +2484,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -2548,8 +2548,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2605,8 +2605,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2651,8 +2651,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2714,8 +2714,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2769,8 +2769,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2842,8 +2842,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2906,8 +2906,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2964,8 +2964,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3028,8 +3028,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3085,8 +3085,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3134,8 +3134,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3192,8 +3192,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3242,8 +3242,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3293,8 +3293,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3371,8 +3371,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -3426,8 +3426,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 	private static final SortedMap<String, CString> TIME_LOOKUP = new TreeMap<>();
@@ -3486,8 +3486,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3582,8 +3582,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3634,8 +3634,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3704,7 +3704,7 @@ public class PlayerManagement {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -3764,7 +3764,7 @@ public class PlayerManagement {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -3819,8 +3819,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -3868,8 +3868,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -3929,8 +3929,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 	}
 
@@ -4013,8 +4013,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -4089,8 +4089,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -4160,8 +4160,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4226,8 +4226,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -4279,8 +4279,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -4328,8 +4328,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -4384,8 +4384,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -4442,8 +4442,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4485,8 +4485,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4608,8 +4608,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4663,8 +4663,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4731,8 +4731,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4785,8 +4785,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4849,8 +4849,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4913,8 +4913,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4977,8 +4977,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 	}
 
@@ -5023,7 +5023,7 @@ public class PlayerManagement {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -5091,8 +5091,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -5151,8 +5151,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -5215,8 +5215,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -5284,8 +5284,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 	}
@@ -5347,8 +5347,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 	}
@@ -5410,8 +5410,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 	}
@@ -5481,8 +5481,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 	}

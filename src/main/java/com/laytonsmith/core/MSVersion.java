@@ -7,7 +7,7 @@ import com.laytonsmith.PureUtilities.Version;
  *
  *
  */
-public enum CHVersion implements Version {
+public enum MSVersion implements Version {
 	V0_0_0("0.0.0"), //Unreleased version
 	V3_0_1("3.0.1"),
 	V3_0_2("3.0.2"),
@@ -18,7 +18,8 @@ public enum CHVersion implements Version {
 	V3_3_0("3.3.0"),
 	V3_3_1("3.3.1"),
 	V3_3_2("3.3.2"),
-	V3_3_3("3.3.3");
+	V3_3_3("3.3.3"),
+	V3_3_4("3.3.4");
 	final SimpleVersion version;
 
 	/**
@@ -26,12 +27,12 @@ public enum CHVersion implements Version {
 	 * <i>current</i> version, not things that are versioned. This is not an actual enum within the class, this is a
 	 * static member of the class which points to the an actual enum.
 	 */
-	public static final CHVersion LATEST;
+	public static final MSVersion LATEST;
 
 	static {
 		//Dynamically determine the latest value.
-		CHVersion latest = null;
-		for(CHVersion v : CHVersion.values()) {
+		MSVersion latest = null;
+		for(MSVersion v : MSVersion.values()) {
 			if(latest == null || v.gt(latest)) {
 				latest = v;
 			}
@@ -39,7 +40,7 @@ public enum CHVersion implements Version {
 		LATEST = latest;
 	}
 
-	CHVersion(String version) {
+	MSVersion(String version) {
 		this.version = new SimpleVersion(version);
 	}
 

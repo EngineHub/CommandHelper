@@ -6,7 +6,7 @@ import com.laytonsmith.annotations.breakable;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
@@ -119,8 +119,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 		//Doesn't matter, this function is run out of state
 
@@ -245,8 +245,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -359,8 +359,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -856,8 +856,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -919,8 +919,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -1003,8 +1003,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1057,8 +1057,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -1119,8 +1119,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -1243,7 +1243,7 @@ public class BasicLogic {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1296,8 +1296,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -1371,8 +1371,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1434,8 +1434,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -1501,8 +1501,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -1568,8 +1568,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -1636,8 +1636,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -1718,8 +1718,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -1908,7 +1908,7 @@ public class BasicLogic {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -1973,8 +1973,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -2163,7 +2163,7 @@ public class BasicLogic {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -2218,8 +2218,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -2274,8 +2274,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2342,8 +2342,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2403,8 +2403,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2464,8 +2464,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2529,8 +2529,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2605,8 +2605,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2683,8 +2683,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2757,8 +2757,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2818,8 +2818,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2881,8 +2881,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2946,8 +2946,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3023,7 +3023,7 @@ public class BasicLogic {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3092,7 +3092,7 @@ public class BasicLogic {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_3;
+			return MSVersion.V3_3_3;
 		}
 
 	}

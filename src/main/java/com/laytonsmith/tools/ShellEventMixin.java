@@ -1,6 +1,5 @@
 package com.laytonsmith.tools;
 
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.CancellableEvent;

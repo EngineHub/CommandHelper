@@ -6,7 +6,7 @@ import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CVoid;
@@ -180,7 +180,7 @@ public class ResourceManager {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -236,7 +236,7 @@ public class ResourceManager {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 }

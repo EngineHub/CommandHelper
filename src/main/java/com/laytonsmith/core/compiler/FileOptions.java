@@ -2,7 +2,7 @@ package com.laytonsmith.core.compiler;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Prefs;
 import java.net.URL;
@@ -128,7 +128,7 @@ public class FileOptions {
 		// quite nicely. Perhaps a good first candidate would be to allow string "false" coerced to boolean warning
 		// to be suppressed on a per file basis?
 		Note("There are currently no warning suppressions defined, but some will be added in the future",
-			CHVersion.V0_0_0);
+			MSVersion.V0_0_0);
 
 		private SuppressWarnings(String docs, Version version) {
 			this.docs = docs;

@@ -13,7 +13,7 @@ import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Globals;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptCompiler;
@@ -138,8 +138,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -242,8 +242,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -335,8 +335,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -470,8 +470,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 		//Doesn't matter, run out of state
 
@@ -641,8 +641,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -838,8 +838,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 		//Doesn't matter, runs out of state anyways
 
@@ -1048,8 +1048,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1092,8 +1092,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1221,8 +1221,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1306,8 +1306,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
@@ -1398,8 +1398,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
@@ -1459,8 +1459,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1520,8 +1520,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1579,8 +1579,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1639,8 +1639,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -1701,8 +1701,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1764,8 +1764,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -1825,8 +1825,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -1885,8 +1885,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -1944,8 +1944,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -2020,8 +2020,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2094,8 +2094,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2155,8 +2155,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -2345,8 +2345,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -2400,8 +2400,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -2484,8 +2484,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -2572,8 +2572,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2614,8 +2614,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -2658,8 +2658,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2732,8 +2732,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2778,8 +2778,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2849,8 +2849,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3009,7 +3009,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_0;
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3113,7 +3113,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3161,8 +3161,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -3222,8 +3222,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -3295,8 +3295,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 	}
 
@@ -3341,8 +3341,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3410,8 +3410,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3472,8 +3472,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3538,8 +3538,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3619,7 +3619,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3689,7 +3689,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3766,7 +3766,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3815,8 +3815,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
@@ -3931,8 +3931,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -4007,7 +4007,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4096,7 +4096,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override

@@ -6,7 +6,7 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -85,8 +85,8 @@ public class Persistence {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_2;
+		public MSVersion since() {
+			return MSVersion.V3_0_2;
 		}
 
 		@Override
@@ -167,8 +167,8 @@ public class Persistence {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_2;
+		public MSVersion since() {
+			return MSVersion.V3_0_2;
 		}
 
 		@Override
@@ -289,8 +289,8 @@ public class Persistence {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -330,8 +330,8 @@ public class Persistence {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -387,8 +387,8 @@ public class Persistence {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override

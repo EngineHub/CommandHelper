@@ -100,8 +100,19 @@ public final class StringUtils {
 	 * @param glue The glue to use
 	 * @return The concatenated string
 	 */
-	public static String Join(Set set, String glue) {
+	public static <T> String Join(Set<T> set, String glue) {
 		return Join(set, glue, null, null, null);
+	}
+
+	/**
+	 * Joins a set together, rendering each item with the custom renderer.
+	 * @param set
+	 * @param glue
+	 * @param r
+	 * @return
+	 */
+	public static <T> String Join(Set<T> set, String glue, Renderer<T> r) {
+		return Join(set, glue, null, null, null, r);
 	}
 
 	/**
@@ -150,7 +161,7 @@ public final class StringUtils {
 	 * @param empty If the set is completely empty, this string is simply returned. If null, an empty string is used.
 	 * @return The concatenated string
 	 */
-	public static String Join(Set set, String glue, String lastGlue, String glueForTwoItems, String empty) {
+	public static <T> String Join(Set<T> set, String glue, String lastGlue, String glueForTwoItems, String empty) {
 		return Join(set, glue, lastGlue, glueForTwoItems, empty, null);
 	}
 

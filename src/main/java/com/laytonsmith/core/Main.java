@@ -467,7 +467,7 @@ public class Main {
 				}
 				if(parsedArgs.isFlagSet("online")) {
 					String url = String.format("https://methodscript.com/docs/%s/API/functions/%s",
-							CHVersion.LATEST.toString(), f.getName());
+							MSVersion.LATEST.toString(), f.getName());
 					System.out.println("Launching browser to " + url);
 					if(!UIUtils.openWebpage(new URL(url))) {
 						System.err.println("Could not launch browser");
