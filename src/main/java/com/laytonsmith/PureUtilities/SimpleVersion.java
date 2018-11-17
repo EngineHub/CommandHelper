@@ -25,13 +25,16 @@ public class SimpleVersion implements Version {
 	public SimpleVersion(String version) {
 		Matcher m = p.matcher(version);
 		if(m.find()) {
-			major = Integer.parseInt(m.group(1) == null ? "0" : m.group(1));
-			minor = Integer.parseInt(m.group(2) == null ? "0" : m.group(2));
-			supplemental = Integer.parseInt(m.group(3) == null ? "0" : m.group(3));
-			tag = m.group(4) == null ? "" : m.group(4);
+			try {
+				major = Integer.parseInt(m.group(1) == null ? "0" : m.group(1));
+				minor = Integer.parseInt(m.group(2) == null ? "0" : m.group(2));
+				supplemental = Integer.parseInt(m.group(3) == null ? "0" : m.group(3));
+				tag = m.group(4) == null ? "" : m.group(4);
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException("Version numbers must be integers", e);
+			}
 		} else {
-			major = minor = supplemental = 0;
-			tag = "";
+			throw new IllegalArgumentException("Invalid version string provided");
 		}
 	}
 

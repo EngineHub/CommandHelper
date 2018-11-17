@@ -1,7 +1,8 @@
 CommandHelper
 =============
 
-[![Build Status](https://travis-ci.org/EngineHub/CommandHelper.svg?branch=master)](https://travis-ci.org/EngineHub/CommandHelper)
+Travis: [![Travis Build Status](https://travis-ci.org/EngineHub/CommandHelper.svg?branch=master)](https://travis-ci.org/EngineHub/CommandHelper)
+Azure: [![Azure Build Status](https://dev.azure.com/MethodScript/CommandHelper/_apis/build/status/EngineHub.CommandHelper)](https://dev.azure.com/MethodScript/CommandHelper/_build/latest?definitionId=1)
 [![Known Vulnerabilities](https://snyk.io/test/github/EngineHub/CommandHelper/badge.svg)](https://snyk.io/test/github/EngineHub/CommandHelper)
 
 CommandHelper adds simple command aliases, complex macros,
