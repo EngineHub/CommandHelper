@@ -458,7 +458,9 @@ public class Compiler {
 			for(int k = 0; k < list.size(); k++) {
 				if(list.get(k).getData() instanceof CClassType) {
 					if(k == list.size() - 1) {
-						throw new ConfigCompileException("Unexpected ClassType", list.get(k).getTarget());
+						// This is not a typed assignment
+						break;
+						//throw new ConfigCompileException("Unexpected ClassType", list.get(k).getTarget());
 					}
 					if(list.get(k + 1).getData() instanceof CFunction) {
 						switch(list.get(k + 1).getData().val()) {
