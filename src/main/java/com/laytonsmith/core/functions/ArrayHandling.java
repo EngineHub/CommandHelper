@@ -242,6 +242,8 @@ public class ArrayHandling {
 					} catch (NumberFormatException e) {
 						throw new CRECastException("Ranges must be integer numbers, i.e., [0..5]", t);
 					}
+				} else if(index.isInstanceOf(CInt.class)){
+					return aa.get(Static.getInt32(index, t), t);
 				} else {
 					return aa.get(index, t);
 				}

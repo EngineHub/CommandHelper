@@ -115,7 +115,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 	@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
 	public static AbstractCREException getFromCArray(CArray exception, Target t) throws ClassNotFoundException {
-		FullyQualifiedClassName classType = FullyQualifiedClassName.forName(exception.get("classType", t).val());
+		FullyQualifiedClassName classType = FullyQualifiedClassName.forName(exception.get("classType", t).val(), t);
 		Class<? extends Mixed> clzz = NativeTypeList.getNativeClass(classType);
 		Throwable cause = null;
 		if(exception.get("causedBy", t) instanceof CArray) {

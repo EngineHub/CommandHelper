@@ -7,6 +7,8 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.core.constructs.NativeTypeList;
+import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -37,20 +39,28 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	 * will change, unlike forDefaultClass. So, when given user input, this method should always be used, and eventually
 	 * when this method is changed, it will be a compile error, but if you know for sure it's a system class, you can
 	 * use forDefaultClass instead, and there will be no code changes required in the future.
-	 * @param unqualified
-	 * @return
+	 * @param unqualified The (potentially) unqualified type.
+	 * @param t The code target.
+	 * @return The fully qualified class name.
+	 * @throws CRECastException If the class type can't be found
 	 */
-	public static FullyQualifiedClassName forName(String unqualified) {
-		return forDefaultClasses(unqualified);
+	public static FullyQualifiedClassName forName(String unqualified, Target t) throws CRECastException {
+		return forDefaultClasses(unqualified, t);
 	}
 
 	/**
 	 * If the class is known for sure to be within the default import list, this method can be used.
-	 * @param unqualified
-	 * @return
+	 * @param unqualified The (potentially) unqualified type.
+	 * @param t The code target.
+	 * @return The FullyQualifiedClassName.
+	 * @throws CRECastException If the class type can't be found
 	 */
-	public static FullyQualifiedClassName forDefaultClasses(String unqualified) {
-		return new FullyQualifiedClassName(NativeTypeList.resolveNativeType(unqualified));
+	public static FullyQualifiedClassName forDefaultClasses(String unqualified, Target t) throws CRECastException {
+		String fqcn = NativeTypeList.resolveNativeType(unqualified);
+		if(fqcn == null) {
+			throw new CRECastException("Cannot find \"" + unqualified + "\" type", t);
+		}
+		return new FullyQualifiedClassName(fqcn);
 	}
 
 	/**

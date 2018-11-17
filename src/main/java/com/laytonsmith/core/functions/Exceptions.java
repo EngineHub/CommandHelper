@@ -147,11 +147,11 @@ public class Exceptions {
 			if(types != null) {
 				Mixed ptypes = that.seval(types, env);
 				if(ptypes instanceof CString) {
-					interest.add(FullyQualifiedClassName.forName(ptypes.val()));
+					interest.add(FullyQualifiedClassName.forName(ptypes.val(), t));
 				} else if(ptypes instanceof CArray) {
 					CArray ca = (CArray) ptypes;
 					for(int i = 0; i < ca.size(); i++) {
-						interest.add(FullyQualifiedClassName.forName(ca.get(i, t).val()));
+						interest.add(FullyQualifiedClassName.forName(ca.get(i, t).val(), t));
 					}
 				} else {
 					throw new CRECastException("Expected argument 4 to be a string, or an array of strings.", t);
@@ -279,7 +279,7 @@ public class Exceptions {
 				}
 				Class<? extends Mixed> c;
 				try {
-					c = NativeTypeList.getNativeClass(FullyQualifiedClassName.forName(args[0].val()));
+					c = NativeTypeList.getNativeClass(FullyQualifiedClassName.forName(args[0].val(), t));
 				} catch (ClassNotFoundException ex) {
 					throw new CREFormatException("Expected a valid exception type, but found \"" + args[0].val() + "\"", t);
 				}

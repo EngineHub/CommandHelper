@@ -6,6 +6,10 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.MEnumType;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,15 +26,26 @@ import java.util.stream.Stream;
  * A CClassType represent
  */
 @typeof("ms.lang.ClassType")
-public final class CClassType extends Construct {
+public final class CClassType extends Construct implements ArrayAccess {
 
 	public static final String PATH_SEPARATOR = FullyQualifiedClassName.PATH_SEPARATOR;
 
 	private static final Map<FullyQualifiedClassName, CClassType> CACHE = new HashMap<>();
+
+	// The only types that can be created here are the ones that don't have a real class associated with them, or the
+	// TYPE value itself
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = new CClassType("ms.lang.ClassType", Target.UNKNOWN);
-	public static final CClassType AUTO = new CClassType("auto", Target.UNKNOWN);
-	public static final CClassType VOID = new CClassType("void", Target.UNKNOWN);
+	public static final CClassType TYPE;
+	public static final CClassType AUTO;
+
+	static {
+		try {
+			TYPE = new CClassType("ms.lang.ClassType", Target.UNKNOWN);
+			AUTO = new CClassType("auto", Target.UNKNOWN);
+		} catch (ClassNotFoundException e) {
+			throw new Error(e);
+		}
+	}
 
 	/**
 	 * This should generally be used instead of creating a new empty array in getInterfaces, if no interfaces are
@@ -46,6 +61,12 @@ public final class CClassType extends Construct {
 	private final FullyQualifiedClassName fqcn;
 
 	/**
+	 * This is an invalid instance of the underlying type that can only be used for Documentation purposes or finding
+	 * out meta information about the class. Because these can be a type union, this is an array.
+	 */
+	private final Mixed[] invalidType;
+
+	/**
 	 * This *MUST* contain a list of non type union types.
 	 */
 	private final SortedSet<FullyQualifiedClassName> types = new TreeSet<>();
@@ -53,13 +74,20 @@ public final class CClassType extends Construct {
 	/**
 	 * Returns the singular instance of CClassType that represents this type.
 	 *
-	 * <p>IMPORTANT: The type MUST be fully qualified, or this will cause errors. The only time this method is
-	 * preferred vs {@link #get(com.laytonsmith.core.FullyQualifiedClassName)} is when used to define the TYPE value.
+	 * <p>IMPORTANT: The type MUST be fully qualified AND exist as a real, instantiable class, or this will cause
+	 * errors. The only time this method is preferred vs {@link #get(com.laytonsmith.core.FullyQualifiedClassName)} is
+	 * when used to define the TYPE value.
+	 *
+	 * Unlike the other getters, this will not throw a ClassNotFoundException, it will instead throw an Error.
 	 * @param type
 	 * @return
 	 */
 	public static CClassType get(String type) {
-		return get(FullyQualifiedClassName.forFullyQualifiedClass(type));
+		try {
+			return get(FullyQualifiedClassName.forFullyQualifiedClass(type));
+		} catch(ClassNotFoundException ex) {
+			throw new Error(ex);
+		}
 	}
 
 	/**
@@ -68,7 +96,7 @@ public final class CClassType extends Construct {
 	 * @param type
 	 * @return
 	 */
-	public static CClassType get(FullyQualifiedClassName type) {
+	public static CClassType get(FullyQualifiedClassName type) throws ClassNotFoundException {
 		assert type != null;
 		if(!CACHE.containsKey(type)) {
 			CACHE.put(type, new CClassType(type, Target.UNKNOWN));
@@ -86,7 +114,7 @@ public final class CClassType extends Construct {
 	 * @param types
 	 * @return
 	 */
-	public static CClassType get(FullyQualifiedClassName... types) {
+	public static CClassType get(FullyQualifiedClassName... types) throws ClassNotFoundException {
 
 		SortedSet<FullyQualifiedClassName> t = new TreeSet<>(Arrays.asList(types));
 		FullyQualifiedClassName type
@@ -104,7 +132,7 @@ public final class CClassType extends Construct {
 	 * @param types
 	 * @return
 	 */
-	public static CClassType get(CClassType... types) {
+	public static CClassType get(CClassType... types) throws ClassNotFoundException {
 		return get(Stream.of(types)
 				.map(e -> e.getFQCN())
 				.sorted()
@@ -117,7 +145,7 @@ public final class CClassType extends Construct {
 	 * @param type This must be the fully qualified string name.
 	 * @param t
 	 */
-	private CClassType(String type, Target t) {
+	private CClassType(String type, Target t) throws ClassNotFoundException {
 		this(FullyQualifiedClassName.forFullyQualifiedClass(type), t);
 	}
 
@@ -127,7 +155,7 @@ public final class CClassType extends Construct {
 	 * @param type
 	 * @param t
 	 */
-	private CClassType(FullyQualifiedClassName type, Target t) {
+	private CClassType(FullyQualifiedClassName type, Target t) throws ClassNotFoundException {
 		super(type.getFQCN(), ConstructType.CLASS_TYPE, t);
 		isTypeUnion = type.isTypeUnion();
 		fqcn = type;
@@ -137,6 +165,15 @@ public final class CClassType extends Construct {
 					.map(e -> FullyQualifiedClassName.forFullyQualifiedClass(e)).collect(Collectors.toList()));
 		} else {
 			types.add(type);
+		}
+		if("auto".equals(type.getFQCN())) {
+			invalidType = null;
+		} else {
+			// TODO: This must change once user types are introduced
+			invalidType = new Mixed[types.size()];
+			for(int i = 0; i < invalidType.length; i++) {
+				invalidType[i] = NativeTypeList.getInvalidInstanceForUse(fqcn);
+			}
 		}
 	}
 
@@ -263,6 +300,24 @@ public final class CClassType extends Construct {
 	}
 
 	/**
+	 * Returns the superclasses for the underlying type, not the superclasses for ClassType itself.
+	 * @return
+	 */
+	public CClassType[] getSuperclassesForType() {
+		return Stream.of(invalidType).flatMap(e -> Stream.of(e.getSuperclasses()))
+				.collect(Collectors.toSet()).toArray(CClassType.EMPTY_CLASS_ARRAY);
+	}
+
+	/**
+	 *  Returns the interfaces for the underlying type, not the interfaces for ClassType itself.
+	 * @return
+	 */
+	public CClassType[] getInterfacesForType() {
+		return Stream.of(invalidType).flatMap(e -> Stream.of(e.getInterfaces()))
+				.collect(Collectors.toSet()).toArray(CClassType.EMPTY_CLASS_ARRAY);
+	}
+
+	/**
 	 * Returns a set of individual types for this type. If it is a class union, multiple types will be returned in the
 	 * set. Each of the CClassTypes within this set are guaranteed to not be a type union.
 	 *
@@ -273,7 +328,12 @@ public final class CClassType extends Construct {
 	protected Set<CClassType> getTypes() {
 		Set<CClassType> t = new HashSet<>();
 		for(FullyQualifiedClassName type : types) {
-			t.add(CClassType.get(type));
+			try {
+				t.add(CClassType.get(type));
+			} catch(ClassNotFoundException ex) {
+				// This can't happen, because
+				throw new Error(ex);
+			}
 		}
 		return t;
 	}
@@ -316,5 +376,98 @@ public final class CClassType extends Construct {
 	public FullyQualifiedClassName getFQCN() {
 		return fqcn;
 	}
+
+	public boolean isEnum() {
+		if("ms.lang.enum".equals(fqcn.getFQCN())) {
+			// By default, this returns true when something is instanceof a thing, but in this case, we don't want
+			// that, because ironically, ms.lang.enum is itself not an enum.
+			return false;
+		}
+		return doesExtend(MEnumType.TYPE);
+	}
+
+	@Override
+	public CClassType typeof() {
+		return CClassType.TYPE;
+	}
+
+	// TODO: These getters will eventually be re-done to support static methods, but for now that is out of scope,
+	// so we just specifically support enums for now.
+	@Override
+	public Mixed get(String index, Target t) throws ConfigRuntimeException {
+		if(isEnum()) {
+			try {
+				return NativeTypeList.getNativeEnumType(fqcn).get(index, t);
+			} catch(ClassNotFoundException ex) {
+				throw new RuntimeException(ex);
+			}
+		}
+		throw new CREUnsupportedOperationException("Unsupported operation", t);
+	}
+
+	@Override
+	public Mixed get(int index, Target t) throws ConfigRuntimeException {
+		if(isEnum()) {
+			try {
+				return NativeTypeList.getNativeEnumType(fqcn).get(index, t);
+			} catch(ClassNotFoundException ex) {
+				throw new RuntimeException(ex);
+			}
+		}
+		throw new CREUnsupportedOperationException("Unsupported operation", t);
+	}
+
+	@Override
+	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
+		if(isEnum()) {
+			try {
+				return NativeTypeList.getNativeEnumType(fqcn).get(index, t);
+			} catch(ClassNotFoundException ex) {
+				throw new RuntimeException(ex);
+			}
+		}
+		throw new CREUnsupportedOperationException("Unsupported operation", t);
+	}
+
+	@Override
+	public Set<Mixed> keySet() {
+		if(isEnum()) {
+			try {
+				return NativeTypeList.getNativeEnumType(fqcn).keySet();
+			} catch(ClassNotFoundException ex) {
+				throw new RuntimeException(ex);
+			}
+		}
+		return new HashSet<>();
+	}
+
+	@Override
+	public long size() {
+		if(isEnum()) {
+			try {
+				return NativeTypeList.getNativeEnumType(fqcn).size();
+			} catch(ClassNotFoundException ex) {
+				throw new RuntimeException(ex);
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public boolean isAssociative() {
+		return true;
+	}
+
+	@Override
+	public boolean canBeAssociative() {
+		return true;
+	}
+
+	@Override
+	public Mixed slice(int begin, int end, Target t) {
+		throw new CREUnsupportedOperationException("Unsupported operation", t);
+	}
+
+
 
 }

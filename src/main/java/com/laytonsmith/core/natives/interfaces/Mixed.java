@@ -7,6 +7,7 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import java.util.Set;
 
 /**
@@ -125,5 +126,25 @@ public interface Mixed extends Cloneable, Documentation {
 	 * @throws IllegalArgumentException If the class isn't public facing.
 	 */
 	public CClassType typeof();
+
+	/**
+	 * Casts the class to the specified type. This only works with Java types, and so for dynamic elements, this
+	 * may throw a RuntimeException. For dynamic types, use the other castTo.
+	 *
+	 * <p>For classes that are instanceof this class, (or vice versa) no logic is done, it is just cast, though if
+	 * it can't be cast, it will throw a ClassCastException. For classes that are cross castable, they will be first
+	 * cross casted.
+	 *
+	 * An important note, while it seems like you can just cast from the value using standard java cast notation,
+	 * the object model is not 1:1, and so dynamic classes may logically extend the java class, but due to restrictions
+	 * in java, that can't actually happen in java's object model, so we cannot rely on java's casting functionality
+	 * either. Add to that that user types don't exist in the java anyways.
+	 * @param <T>
+	 * @param clazz
+	 * @return
+	 * @throws ClassCastException if the class can't be cast
+	 */
+	// The whole argument validation/Static.get* methods needs to be moved to this mechanism.
+	//public <T extends Mixed> T castTo(Class<T> clazz) throws ClassCastException;
 
 }

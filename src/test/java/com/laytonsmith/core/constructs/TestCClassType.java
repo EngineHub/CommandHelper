@@ -32,8 +32,8 @@ public class TestCClassType {
 		StaticTest.InstallFakeServerFrontend();
 	}
 
-	private static CClassType get(String... types) {
-		return CClassType.get(Stream.of(types).map(e -> FullyQualifiedClassName.forName(e))
+	private static CClassType get(String... types) throws ClassNotFoundException {
+		return CClassType.get(Stream.of(types).map(e -> FullyQualifiedClassName.forName(e, Target.UNKNOWN))
 				.collect(Collectors.toList()).toArray(new FullyQualifiedClassName[0]));
 	}
 

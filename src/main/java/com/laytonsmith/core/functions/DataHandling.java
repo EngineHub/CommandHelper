@@ -4071,7 +4071,14 @@ public class DataHandling {
 			if(args[0] instanceof CNull) {
 				return CBoolean.FALSE;
 			}
-			boolean b = InstanceofUtil.isInstanceof(args[0], args[1].val());
+			CClassType type;
+			if(args[1] instanceof CClassType) {
+				type = (CClassType) args[1];
+			} else {
+				throw new RuntimeException("This should have been optimized out, this is a bug in instanceof,"
+						+ " please report it");
+			}
+			boolean b = InstanceofUtil.isInstanceof(args[0], type);
 			return CBoolean.get(b);
 		}
 

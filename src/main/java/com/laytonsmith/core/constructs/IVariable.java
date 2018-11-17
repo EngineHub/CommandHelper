@@ -32,7 +32,7 @@ public class IVariable extends Construct implements Cloneable {
 	public IVariable(CClassType type, String name, Mixed value, Target t) {
 		super(name, ConstructType.IVARIABLE, t);
 		if(!type.equals(Auto.TYPE) && !(value instanceof CNull)) {
-			if(!InstanceofUtil.isInstanceof(value, type.val())) {
+			if(!InstanceofUtil.isInstanceof(value, type)) {
 				throw new CRECastException(name + " is of type " + type.val() + ", but a value of type "
 						+ value.typeof() + " was assigned to it.", t);
 			}

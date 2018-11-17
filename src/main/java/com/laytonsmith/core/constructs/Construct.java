@@ -485,18 +485,23 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	/**
-	 * Returns the typeof this Construct, as a string. Not all constructs are annotated with the @typeof annotation, in
-	 * which case this is considered a "private" object, which can't be directly accessed via MethodScript. In this
+	 * Returns the typeof this Construct, as a CClassType. Not all constructs are annotated with the @typeof annotation,
+	 * in which case this is considered a "private" object, which can't be directly accessed via MethodScript. In this
 	 * case, an IllegalArgumentException is thrown.
 	 *
+	 * This method may be overridden in special cases, such as dynamic types, but for most types, this
 	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
 	 */
 	@Override
-	public final CClassType typeof() {
+	public CClassType typeof() {
 		return typeof(this);
 	}
 
+	/**
+	 * Returns the typeof for the given class, using the same mechanism as the default. (Whether or not that subtype
+	 * overrode the original typeof() method.
+	 */
 	public static CClassType typeof(Mixed that) {
 		typeof ann = that.getClass().getAnnotation(typeof.class);
 		if(ann == null) {

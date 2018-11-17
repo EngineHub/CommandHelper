@@ -33,6 +33,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventList;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
@@ -56,6 +57,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -190,24 +193,14 @@ public class Reflection {
 						a.push(CClassType.get(name), t);
 					}
 				} else if(args.length == 2) {
-					FullyQualifiedClassName enumName = FullyQualifiedClassName.forName(args[1].val());
-					for(ClassMirror<? extends Enum> e : enums) {
-						if(e.getAnnotation(MEnum.class).getValue("value").equals(enumName.getFQCN())) {
-							MEnumType type = MEnumType.FromEnum(enumName, (Class<Enum<?>>) e.loadClass(), null, null);
-							for(MEnumTypeValue v : type.values()) {
-								a.push(v, t);
-							}
-							return a;
+					FullyQualifiedClassName enumName = FullyQualifiedClassName.forName(args[1].val(), t);
+					try {
+						for(MEnumTypeValue v : NativeTypeList.getNativeEnumType(enumName).values()) {
+							a.push(v, t);
 						}
-					}
-					for(ClassMirror<? extends DynamicEnum> d : dEnums) {
-						if(d.getAnnotation(MDynamicEnum.class).getValue("value").equals(enumName.getFQCN())) {
-							for(DynamicEnum ee : (Collection<DynamicEnum>) ReflectionUtils.invokeMethod(d.loadClass(), null, "values")) {
-								// TODO: Not sure how to handle this now...
-								a.push(new CString(ee.name(), t), t);
-							}
-							break;
-						}
+					} catch(ClassNotFoundException ex) {
+						// Actually, I don't think this can
+						throw new CRECastException("Cannot find enum of type " + enumName, t, ex);
 					}
 				}
 				return a;
@@ -699,7 +692,12 @@ public class Reflection {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(FullyQualifiedClassName c : NativeTypeList.getNativeTypeList()) {
-				CClassType cct = CClassType.get(c);
+				CClassType cct;
+				try {
+					cct = CClassType.get(c);
+				} catch(ClassNotFoundException ex) {
+					throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
+				}
 				if(cct == CNull.TYPE) {
 					continue;
 				}

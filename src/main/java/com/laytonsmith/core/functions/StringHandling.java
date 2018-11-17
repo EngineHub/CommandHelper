@@ -248,7 +248,7 @@ public class StringHandling {
 					// sconcat only returns a string (except in the special case above) so we need to
 					// return the string value if it's not already a string
 					try {
-						if(InstanceofUtil.isInstanceof(child.getData(), "string")) {
+						if(InstanceofUtil.isInstanceof(child.getData(), CString.TYPE)) {
 							return child;
 						}
 					} catch (IllegalArgumentException ex) {

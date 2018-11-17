@@ -11,8 +11,13 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
+import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
+import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -20,6 +25,9 @@ import java.util.AbstractList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * This is the base class for all enums in MethodScript. Enums themselves can be automatically generated based on a
@@ -27,7 +35,7 @@ import java.util.Set;
  * automatically added to the ecosystem, however.
  */
 @typeof("ms.lang.enum")
-public abstract class MEnumType implements Mixed {
+public abstract class MEnumType implements Mixed, ArrayAccess {
 
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
@@ -141,7 +149,11 @@ public abstract class MEnumType implements Mixed {
 
 			@Override
 			public CClassType typeof() {
-				return CClassType.TYPE;
+				try {
+					return CClassType.get(fqcn);
+				} catch(ClassNotFoundException ex) {
+					throw new Error(ex);
+				}
 			}
 
 			@Override
@@ -150,7 +162,7 @@ public abstract class MEnumType implements Mixed {
 			}
 
 			@Override
-			public List<MEnumTypeValue> values() {
+			public List<MEnumTypeValue> getValues() {
 				return new AbstractList<MEnumTypeValue>() {
 					@Override
 					public MEnumTypeValue get(int index) {
@@ -236,7 +248,11 @@ public abstract class MEnumType implements Mixed {
 
 							@Override
 							public CClassType typeof() {
-								return CClassType.get(fqcn);
+								try {
+									return CClassType.get(fqcn);
+								} catch(ClassNotFoundException ex) {
+									throw new Error(ex);
+								}
 							}
 
 							@Override
@@ -313,7 +329,7 @@ public abstract class MEnumType implements Mixed {
 
 	private static final MEnumType ROOT_TYPE = new MEnumType() {
 		@Override
-		public List<MEnumTypeValue> values() {
+		protected List<MEnumTypeValue> getValues() {
 			throw new UnsupportedOperationException("The root MEnumType is a meta object, and cannot be used normally."
 					+ " There are no values in the class.");
 		}
@@ -424,10 +440,77 @@ public abstract class MEnumType implements Mixed {
 		return new Class[0];
 	}
 
+	private volatile List<MEnumTypeValue> values = null;
+	private final Object lock = new Object();
+	/**
+	 * Unlike
+	 * @return
+	 */
+	public List<MEnumTypeValue> values() {
+		@SuppressWarnings("LocalVariableHidesMemberVariable")
+		List<MEnumTypeValue> values = this.values;
+		if(values == null) {
+			synchronized(lock) {
+				values = this.values;
+				if(values == null) {
+					this.values = values = getValues();
+				}
+			}
+		}
+		return values;
+	}
+	@Override
+	public Mixed get(String index, Target t) throws ConfigRuntimeException {
+		for(MEnumTypeValue v : values()) {
+			if(v.name().equals(index)) {
+				return v;
+			}
+		}
+		throw new CREIllegalArgumentException(index + " cannot be found in " + typeof(), t);
+	}
+
+	@Override
+	public Mixed get(int index, Target t) throws ConfigRuntimeException {
+		if(index >= values().size()) {
+			throw new CREIndexOverflowException("The index " + index + " is out of bounds", t);
+		}
+		return values().get(index);
+	}
+
+	@Override
+	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
+		return get(index.val(), t);
+	}
+
+	@Override
+	public Set<Mixed> keySet() {
+		return values().stream().collect(Collectors.toSet());
+	}
+
+	@Override
+	public long size() {
+		return values().size();
+	}
+
+	@Override
+	public boolean isAssociative() {
+		return true;
+	}
+
+	@Override
+	public boolean canBeAssociative() {
+		return true;
+	}
+
+	@Override
+	public Mixed slice(int begin, int end, Target t) {
+		throw new CREUnsupportedOperationException("Cannot slice an enum", t);
+	}
+
 	/**
 	 * Returns a list of the underlying enum values. This is roughly equivalent to a list of the Enum java class.
 	 * @return
 	 */
-	public abstract List<MEnumTypeValue> values();
+	protected abstract List<MEnumTypeValue> getValues();
 
 }

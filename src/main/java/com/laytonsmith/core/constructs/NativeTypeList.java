@@ -123,6 +123,11 @@ public class NativeTypeList {
 	 * be thrown.
 	 */
 	public static Class<? extends Mixed> getNativeClass(FullyQualifiedClassName fqcn) throws ClassNotFoundException {
+		if("auto".equals(fqcn.getFQCN())) {
+			// This is an error, as auto is not a real type, but a meta type. Thus this method should never be called
+			// with this input, and we can give a more specific error message.
+			throw new ClassNotFoundException("auto is not a real type, and cannot be retrieved");
+		}
 		// Don't use nativeTypes, because we need the class, not the string name.
 		for(ClassMirror<? extends Mixed> c : ClassDiscovery.getDefaultInstance()
 				.getClassesWithAnnotationThatExtend(typeof.class, Mixed.class)) {
