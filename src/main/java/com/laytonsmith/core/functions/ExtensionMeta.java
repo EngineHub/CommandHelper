@@ -314,7 +314,7 @@ public class ExtensionMeta {
 							funcs.push(new CString(func.getName(), t), t);
 						}
 					}
-					funcs.sort(CArray.SortType.STRING_IC);
+					funcs.sort(CArray.ArraySortType.STRING_IC);
 					trkdata.set("functions", funcs, t);
 
 					CArray events;
@@ -326,7 +326,7 @@ public class ExtensionMeta {
 					for(Event event : trk.getEvents()) {
 						events.push(new CString(event.getName(), t), t);
 					}
-					events.sort(CArray.SortType.STRING_IC);
+					events.sort(CArray.ArraySortType.STRING_IC);
 					trkdata.set("events", events, t);
 
 					trkdata.set("version", trk.getVersion().toString());
@@ -350,7 +350,7 @@ public class ExtensionMeta {
 								functions.push(new CString(function.getName(), t), t);
 							}
 						}
-						functions.sort(CArray.SortType.STRING_IC);
+						functions.sort(CArray.ArraySortType.STRING_IC);
 						retn.set("functions", functions, t);
 						CArray events = (retn.containsKey("events")) ? (CArray) retn.get("events", t) : new CArray(t);
 						for(Event event : tracker.getEvents()) {
@@ -358,7 +358,7 @@ public class ExtensionMeta {
 								events.push(new CString(event.getName(), t), t);
 							}
 						}
-						events.sort(CArray.SortType.STRING_IC);
+						events.sort(CArray.ArraySortType.STRING_IC);
 						retn.set("events", events, t);
 						retn.set("version", tracker.getVersion().toString(), t);
 					}

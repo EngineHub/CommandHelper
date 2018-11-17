@@ -26,6 +26,7 @@ import java.util.stream.Stream;
  * A CClassType represent
  */
 @typeof("ms.lang.ClassType")
+@SuppressWarnings("checkstyle:overloadmethodsdeclarationorder")
 public final class CClassType extends Construct implements ArrayAccess {
 
 	public static final String PATH_SEPARATOR = FullyQualifiedClassName.PATH_SEPARATOR;
@@ -61,10 +62,16 @@ public final class CClassType extends Construct implements ArrayAccess {
 	private final FullyQualifiedClassName fqcn;
 
 	/**
+	 * Used to differentiate between null and uninitialized.
+	 */
+	private static final Mixed[] UNINITIALIZED = new Mixed[0];
+	/**
 	 * This is an invalid instance of the underlying type that can only be used for Documentation purposes or finding
 	 * out meta information about the class. Because these can be a type union, this is an array.
+	 *
+	 * DO NOT USE THIS VALUE WITHOUT FIRST CALLING {@link #instantiateInvalidType()}
 	 */
-	private final Mixed[] invalidType;
+	private Mixed[] invalidType = UNINITIALIZED;
 
 	/**
 	 * This *MUST* contain a list of non type union types.
@@ -85,7 +92,7 @@ public final class CClassType extends Construct implements ArrayAccess {
 	public static CClassType get(String type) {
 		try {
 			return get(FullyQualifiedClassName.forFullyQualifiedClass(type));
-		} catch(ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -155,25 +162,82 @@ public final class CClassType extends Construct implements ArrayAccess {
 	 * @param type
 	 * @param t
 	 */
+	@SuppressWarnings("ConvertToStringSwitch")
 	private CClassType(FullyQualifiedClassName type, Target t) throws ClassNotFoundException {
 		super(type.getFQCN(), ConstructType.CLASS_TYPE, t);
 		isTypeUnion = type.isTypeUnion();
 		fqcn = type;
 		if(isTypeUnion) {
 			// Split them out
-			types.addAll(Stream.of(type.getFQCN().split("|"))
-					.map(e -> FullyQualifiedClassName.forFullyQualifiedClass(e)).collect(Collectors.toList()));
+			types.addAll(Stream.of(type.getFQCN().split("\\|"))
+					.map(e -> FullyQualifiedClassName.forFullyQualifiedClass(e.trim())).collect(Collectors.toList()));
 		} else {
 			types.add(type);
 		}
-		if("auto".equals(type.getFQCN())) {
-			invalidType = null;
-		} else {
-			// TODO: This must change once user types are introduced
-			invalidType = new Mixed[types.size()];
-			for(int i = 0; i < invalidType.length; i++) {
-				invalidType[i] = NativeTypeList.getInvalidInstanceForUse(fqcn);
+
+		boolean found = false;
+		String localFQCN = fqcn.getFQCN();
+		if(localFQCN.equals("auto") || localFQCN.equals("ms.lang.ClassType")) {
+			// If we get here, we are within this class, and calling resolveNativeType won't work,
+			// but anyways, we know we exist, so mark it as found. It is important to note, however,
+			// if we end up defining more magic types within this class, this block needs to be updated.
+			found = true;
+		}
+		// Do this to ensure at construction time that the class really does exist. We can't actually construct
+		// the instance yet, because this might be the stack for the TYPE assignment, which means that this class
+		// is not initialized yet. See the docs for instantiateInvalidType().
+		// This works because we assume that resolveNativeTypes only uses the ClassMirror system. If that assumption
+		// changes, we will need to basically re-implement that ourselves.
+		if(!found) {
+			if(isTypeUnion) {
+				// For type unions, we need to find all component parts
+				boolean foundAllTypeUnion = true;
+				for(FullyQualifiedClassName c : types) {
+					if(null == NativeTypeList.resolveNativeType(c.getFQCN())) {
+						foundAllTypeUnion = false;
+						break;
+					}
+				}
+				if(foundAllTypeUnion) {
+					found = true;
+				}
+			} else {
+				found = null != NativeTypeList.resolveNativeType(fqcn.getFQCN());
 			}
+		}
+		// TODO: When user types are added, we will need to do some more digging here
+
+		if(!found) {
+			throw new ClassNotFoundException("Could not find class of type " + type);
+		}
+	}
+
+	/**
+	 * While we would prefer to instantiate invalidType in the constructor, we can't, because this initializes the type,
+	 * which occurs first when TYPE is initialized, that is, before the class is valid. Therefore, we cannot actually
+	 * do that in the constructor, we need to lazy load it. We do take pains in the constructor to ensure that there is
+	 * at least no way this will throw a ClassCastException, so given that, we are able to supress that exception here.
+	 */
+	private void instantiateInvalidType() {
+		if(invalidType != UNINITIALIZED) {
+			return;
+		}
+		@SuppressWarnings("LocalVariableHidesMemberVariable")
+		String fqcn = this.fqcn.getFQCN();
+		try {
+			if("auto".equals(fqcn)) {
+				invalidType = null;
+			} else if("ms.lang.ClassType".equals(fqcn)) {
+				invalidType = new Mixed[]{this};
+			} else {
+				// TODO: This must change once user types are introduced
+				invalidType = new Mixed[types.size()];
+				for(int i = 0; i < invalidType.length; i++) {
+					invalidType[i] = NativeTypeList.getInvalidInstanceForUse(this.fqcn);
+				}
+			}
+		} catch (ClassNotFoundException ex) {
+			throw new Error(ex);
 		}
 	}
 
@@ -304,6 +368,7 @@ public final class CClassType extends Construct implements ArrayAccess {
 	 * @return
 	 */
 	public CClassType[] getSuperclassesForType() {
+		instantiateInvalidType();
 		return Stream.of(invalidType).flatMap(e -> Stream.of(e.getSuperclasses()))
 				.collect(Collectors.toSet()).toArray(CClassType.EMPTY_CLASS_ARRAY);
 	}
@@ -313,6 +378,7 @@ public final class CClassType extends Construct implements ArrayAccess {
 	 * @return
 	 */
 	public CClassType[] getInterfacesForType() {
+		instantiateInvalidType();
 		return Stream.of(invalidType).flatMap(e -> Stream.of(e.getInterfaces()))
 				.collect(Collectors.toSet()).toArray(CClassType.EMPTY_CLASS_ARRAY);
 	}
@@ -330,7 +396,7 @@ public final class CClassType extends Construct implements ArrayAccess {
 		for(FullyQualifiedClassName type : types) {
 			try {
 				t.add(CClassType.get(type));
-			} catch(ClassNotFoundException ex) {
+			} catch (ClassNotFoundException ex) {
 				// This can't happen, because
 				throw new Error(ex);
 			}
@@ -398,7 +464,7 @@ public final class CClassType extends Construct implements ArrayAccess {
 		if(isEnum()) {
 			try {
 				return NativeTypeList.getNativeEnumType(fqcn).get(index, t);
-			} catch(ClassNotFoundException ex) {
+			} catch (ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -410,7 +476,7 @@ public final class CClassType extends Construct implements ArrayAccess {
 		if(isEnum()) {
 			try {
 				return NativeTypeList.getNativeEnumType(fqcn).get(index, t);
-			} catch(ClassNotFoundException ex) {
+			} catch (ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -422,7 +488,7 @@ public final class CClassType extends Construct implements ArrayAccess {
 		if(isEnum()) {
 			try {
 				return NativeTypeList.getNativeEnumType(fqcn).get(index, t);
-			} catch(ClassNotFoundException ex) {
+			} catch (ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -434,7 +500,7 @@ public final class CClassType extends Construct implements ArrayAccess {
 		if(isEnum()) {
 			try {
 				return NativeTypeList.getNativeEnumType(fqcn).keySet();
-			} catch(ClassNotFoundException ex) {
+			} catch (ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -446,7 +512,7 @@ public final class CClassType extends Construct implements ArrayAccess {
 		if(isEnum()) {
 			try {
 				return NativeTypeList.getNativeEnumType(fqcn).size();
-			} catch(ClassNotFoundException ex) {
+			} catch (ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
 		}

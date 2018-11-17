@@ -3,7 +3,6 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.annotations.MEnum;
@@ -41,7 +40,6 @@ import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.natives.interfaces.MEnumType;
 import com.laytonsmith.core.natives.interfaces.MEnumTypeValue;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistence.DataSourceFactory;
@@ -49,7 +47,6 @@ import com.laytonsmith.persistence.PersistenceNetwork;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,8 +54,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -198,7 +193,7 @@ public class Reflection {
 						for(MEnumTypeValue v : NativeTypeList.getNativeEnumType(enumName).values()) {
 							a.push(v, t);
 						}
-					} catch(ClassNotFoundException ex) {
+					} catch (ClassNotFoundException ex) {
 						// Actually, I don't think this can
 						throw new CRECastException("Cannot find enum of type " + enumName, t, ex);
 					}
@@ -482,7 +477,7 @@ public class Reflection {
 			for(Event event : EventList.GetEvents()) {
 				ret.push(new CString(event.getName(), t), t);
 			}
-			ret.sort(CArray.SortType.STRING_IC);
+			ret.sort(CArray.ArraySortType.STRING_IC);
 			return ret;
 		}
 
@@ -531,7 +526,7 @@ public class Reflection {
 			for(Script s : Static.getAliasCore().getScripts()) {
 				ret.push(new CString(s.getSignature(), t), t);
 			}
-			ret.sort(CArray.SortType.STRING_IC);
+			ret.sort(CArray.ArraySortType.STRING_IC);
 			return ret;
 		}
 
@@ -629,7 +624,7 @@ public class Reflection {
 			for(Map.Entry<String, Procedure> p : environment.getEnv(GlobalEnv.class).GetProcs().entrySet()) {
 				ret.push(new CString(p.getKey(), t), t);
 			}
-			ret.sort(CArray.SortType.STRING_IC);
+			ret.sort(CArray.ArraySortType.STRING_IC);
 			return ret;
 		}
 
@@ -695,7 +690,7 @@ public class Reflection {
 				CClassType cct;
 				try {
 					cct = CClassType.get(c);
-				} catch(ClassNotFoundException ex) {
+				} catch (ClassNotFoundException ex) {
 					throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
 				}
 				if(cct == CNull.TYPE) {

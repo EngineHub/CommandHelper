@@ -242,7 +242,7 @@ public class ArrayHandling {
 					} catch (NumberFormatException e) {
 						throw new CRECastException("Ranges must be integer numbers, i.e., [0..5]", t);
 					}
-				} else if(index.isInstanceOf(CInt.class)){
+				} else if(index.isInstanceOf(CInt.class)) {
 					return aa.get(Static.getInt32(index, t), t);
 				} else {
 					return aa.get(index, t);
@@ -1491,7 +1491,7 @@ public class ArrayHandling {
 				throw new CRECastException("The first parameter to array_sort must be an array", t);
 			}
 			CArray ca = (CArray) args[0];
-			CArray.SortType sortType = CArray.SortType.REGULAR;
+			CArray.ArraySortType sortType = CArray.ArraySortType.REGULAR;
 			CClosure customSort = null;
 			if(ca.size() <= 1) {
 				return ca;
@@ -1502,11 +1502,11 @@ public class ArrayHandling {
 						sortType = null;
 						customSort = (CClosure) args[1];
 					} else {
-						sortType = CArray.SortType.valueOf(args[1].val());
+						sortType = ArgumentValidation.getEnum(args[1], CArray.ArraySortType.class, t);
 					}
 				}
 			} catch (IllegalArgumentException e) {
-				throw new CREFormatException("The sort type must be one of either: " + StringUtils.Join(CArray.SortType.values(), ", ", " or "), t);
+				throw new CREFormatException("The sort type must be one of either: " + StringUtils.Join(CArray.ArraySortType.values(), ", ", " or "), t);
 			}
 			if(sortType == null) {
 				// It's a custom sort, which we have implemented below.
@@ -1607,7 +1607,7 @@ public class ArrayHandling {
 					+ " an array that is passed in as a variable, the contents of that variable will be sorted, even if"
 					+ " you don't re-assign the returned array back to the variable. If you really need the old array,"
 					+ " you should create a copy of the array first, like so: assign(@sorted, array_sort(@array[]))."
-					+ " The sort type may be one of the following: " + StringUtils.Join(CArray.SortType.values(), ", ", " or ")
+					+ " The sort type may be one of the following: " + StringUtils.Join(CArray.ArraySortType.values(), ", ", " or ")
 					+ ", or it may be a closure, if the sort should follow custom rules (explained below). A regular"
 					+ " sort sorts the elements without changing types first. A numeric sort always converts numeric"
 					+ " values to numbers first (so 001 becomes 1). A string sort compares values as strings, and a"
@@ -1644,9 +1644,9 @@ public class ArrayHandling {
 			if(children.size() == 2) {
 				if(!Construct.IsDynamicHelper(children.get(1).getData())) {
 					try {
-						CArray.SortType.valueOf(children.get(1).getData().val().toUpperCase());
+						CArray.ArraySortType.valueOf(children.get(1).getData().val().toUpperCase());
 					} catch (IllegalArgumentException e) {
-						throw new ConfigCompileException("The sort type must be one of either: " + StringUtils.Join(CArray.SortType.values(), ", ", " or "), t);
+						throw new ConfigCompileException("The sort type must be one of either: " + StringUtils.Join(CArray.ArraySortType.values(), ", ", " or "), t);
 					}
 				}
 			}
@@ -1725,7 +1725,7 @@ public class ArrayHandling {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			startup();
 			final CArray array = Static.getArray(args[0], t);
-			final CString sortType = new CString(args.length > 2 ? args[1].val() : CArray.SortType.REGULAR.name(), t);
+			final CString sortType = new CString(args.length > 2 ? args[1].val() : CArray.ArraySortType.REGULAR.name(), t);
 			final CClosure callback = Static.getObject((args.length == 2 ? args[1] : args[2]), t, CClosure.class);
 			queue.invokeLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
@@ -1753,7 +1753,7 @@ public class ArrayHandling {
 			return "void {array, [sortType], closure(array)} Works like array_sort, but does the sort on another"
 					+ " thread, then calls the closure and sends it the sorted array. This is useful if the array"
 					+ " is large enough to actually \"stall\" the server when doing the sort. Sort type should be"
-					+ " one of " + StringUtils.Join(CArray.SortType.values(), ", ", " or ");
+					+ " one of " + StringUtils.Join(CArray.ArraySortType.values(), ", ", " or ");
 		}
 
 		@Override

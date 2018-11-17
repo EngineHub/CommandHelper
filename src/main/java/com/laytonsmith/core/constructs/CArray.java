@@ -1,6 +1,7 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.MSVersion;
@@ -826,7 +827,8 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Mixed> {
 		}
 	}
 
-	public enum SortType {
+	@MEnum("ms.lang.ArraySortType")
+	public enum ArraySortType {
 		/**
 		 * Sorts the elements without converting types first. If a non-numeric string is compared to a numeric string,
 		 * it is compared as a string, otherwise, it's compared as a natural ordering.
@@ -846,7 +848,7 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Mixed> {
 		STRING_IC
 	}
 
-	public void sort(final SortType sort) {
+	public void sort(final ArraySortType sort) {
 		if(this.associativeMode) {
 			array = new ArrayList(associativeArray.values());
 			this.associativeArray.clear();

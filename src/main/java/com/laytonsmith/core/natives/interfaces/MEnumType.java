@@ -11,7 +11,6 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
-import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
@@ -25,8 +24,6 @@ import java.util.AbstractList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -151,7 +148,7 @@ public abstract class MEnumType implements Mixed, ArrayAccess {
 			public CClassType typeof() {
 				try {
 					return CClassType.get(fqcn);
-				} catch(ClassNotFoundException ex) {
+				} catch (ClassNotFoundException ex) {
 					throw new Error(ex);
 				}
 			}
@@ -250,7 +247,7 @@ public abstract class MEnumType implements Mixed, ArrayAccess {
 							public CClassType typeof() {
 								try {
 									return CClassType.get(fqcn);
-								} catch(ClassNotFoundException ex) {
+								} catch (ClassNotFoundException ex) {
 									throw new Error(ex);
 								}
 							}

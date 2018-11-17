@@ -5,12 +5,7 @@
  */
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.core.FullyQualifiedClassName;
-import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.natives.interfaces.MEnumType;
 import com.laytonsmith.core.natives.interfaces.MEnumTypeValue;
 import org.junit.After;
@@ -31,7 +26,6 @@ public class EnumTest {
 
 	@BeforeClass
 	public static void setUpClass() {
-		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(EnumTest.class));
 	}
 
 	@AfterClass
@@ -54,21 +48,21 @@ public class EnumTest {
 
 	@Test
 	public void testEnumIsFound() throws ClassNotFoundException {
-		NativeTypeList.getNativeEnum(FullyQualifiedClassName.forFullyQualifiedClass("ms.lang.TestEnum"));
+		NativeTypeList.getNativeEnum(FullyQualifiedClassName.forFullyQualifiedClass("ms.lang.ArraySortType"));
 	}
 
 	@Test
 	public void testEnumTypeIsFound() throws ClassNotFoundException {
-		NativeTypeList.getNativeEnumType(FullyQualifiedClassName.forFullyQualifiedClass("ms.lang.TestEnum"));
+		NativeTypeList.getNativeEnumType(FullyQualifiedClassName.forFullyQualifiedClass("ms.lang.ArraySortType"));
 	}
 
 	@Test
 	public void testEnumTypeValueIsCorrect() throws ClassNotFoundException {
 		MEnumType t = NativeTypeList.getNativeEnumType(FullyQualifiedClassName
-				.forFullyQualifiedClass("ms.lang.TestEnum"));
+				.forFullyQualifiedClass("ms.lang.ArraySortType"));
 		MEnumTypeValue v = t.values().get(0);
 		assertEquals(0, v.ordinal());
-		assertEquals("ONE", v.name());
+		assertEquals("REGULAR", v.name());
 		try {
 			t.values().set(0, v);
 			fail();
@@ -77,35 +71,35 @@ public class EnumTest {
 		}
 	}
 
-	@MEnum("ms.lang.TestEnum")
-	public static enum TestEnum implements SimpleDocumentation {
-		ONE,
-		TWO,
-		THREE;
-
-
-		public static String enumDocs() {
-			return "enum docs";
-		}
-
-		public static Version enumSince() {
-			return MSVersion.V0_0_0;
-		}
-
-		@Override
-		public String docs() {
-			return "docs for value";
-		}
-
-		@Override
-		public String getName() {
-			return name();
-		}
-
-		@Override
-		public Version since() {
-			return MSVersion.V0_0_0;
-		}
-
-	}
+//	@MEnum("ms.lang.TestEnum")
+//	public static enum TestEnum implements SimpleDocumentation {
+//		ONE,
+//		TWO,
+//		THREE;
+//
+//
+//		public static String enumDocs() {
+//			return "enum docs";
+//		}
+//
+//		public static Version enumSince() {
+//			return MSVersion.V0_0_0;
+//		}
+//
+//		@Override
+//		public String docs() {
+//			return "docs for value";
+//		}
+//
+//		@Override
+//		public String getName() {
+//			return name();
+//		}
+//
+//		@Override
+//		public Version since() {
+//			return MSVersion.V0_0_0;
+//		}
+//
+//	}
 }

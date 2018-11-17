@@ -7,7 +7,6 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import java.util.Set;
 
 /**

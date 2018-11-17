@@ -71,6 +71,9 @@ public class NativeTypeList {
 	 * @return
 	 */
 	public static Set<FullyQualifiedClassName> getNativeTypeList() {
+		// NOTE: We have to be incredibly careful here to not actually load the underlying classes, because
+		// this method is used very early in the startup process, and loading the classes may interfere with
+		// the bootstrapping process.
 		@SuppressWarnings("LocalVariableHidesMemberVariable")
 		Set<String> nativeTypes = NativeTypeList.nativeTypes;
 		if(nativeTypes == null) {
@@ -84,9 +87,10 @@ public class NativeTypeList {
 					// in production, this should actually be redundant.
 					ClassDiscovery.getDefaultInstance()
 							.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Mixed.class));
+
 					for(ClassMirror<? extends Mixed> c : ClassDiscovery.getDefaultInstance()
 							.getClassesWithAnnotationThatExtend(typeof.class, Mixed.class)) {
-						nativeTypes.add(c.loadAnnotation(typeof.class).value());
+						nativeTypes.add((String) c.getAnnotation(typeof.class).getValue("value"));
 					}
 
 					for(ClassMirror<? extends Enum> c : ClassDiscovery.getDefaultInstance()
