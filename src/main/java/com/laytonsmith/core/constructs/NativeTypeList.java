@@ -2,23 +2,33 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
+import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
 import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.natives.interfaces.MEnumType;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.MixedInterfaceRunner;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * A utility class for managing the native class lists.
  */
 public class NativeTypeList {
+
+	// TODO: These methods should add caching, they are called too freqently, and have such a high complexity,
+	// that this needs to be done.
 
 	private static final Object NATIVE_TYPE_LOCK = new Object();
 	private static volatile Set<String> nativeTypes;
@@ -85,7 +95,11 @@ public class NativeTypeList {
 						nativeTypes.add(name);
 					}
 
-					//TODO: How do DynamicEnums fit into this?
+					for(ClassMirror<? extends DynamicEnum> c : ClassDiscovery.getDefaultInstance()
+							.getClassesWithAnnotationThatExtend(MDynamicEnum.class, DynamicEnum.class)) {
+						String name = (String) c.getAnnotation(MDynamicEnum.class).getValue("value");
+						nativeTypes.add(name);
+					}
 
 					for(String s : nativeTypes) {
 						fqNativeTypes.add(FullyQualifiedClassName.forFullyQualifiedClass(s));
@@ -125,7 +139,7 @@ public class NativeTypeList {
 	}
 
 	/**
-	 * Returns the java enum type for the given MethodScript enum name.
+	 * Returns the java enum type for the given MethodScript enum name. This does not work with DynamicEnums.
 	 * @param fqcn
 	 * @return
 	 * @throws ClassNotFoundException
@@ -140,7 +154,6 @@ public class NativeTypeList {
 				return (Class<Enum<?>>) c.loadClass();
 			}
 		}
-		// TODO: How do DynamicEnums fit into this?
 		throw new ClassNotFoundException("Could not find the class of type " + fqcn);
 	}
 
@@ -154,8 +167,53 @@ public class NativeTypeList {
 		if("ms.lang.enum".equals(fqcn.getFQCN())) {
 			return MEnumType.getRootEnumType();
 		}
-		Class<? extends Enum<?>> e = getNativeEnum(fqcn);
-		return MEnumType.FromEnum(fqcn, (Class<Enum<?>>) e, null, null);
+		try {
+			Class<? extends Enum<?>> e = getNativeEnum(fqcn);
+			return MEnumType.FromEnum(fqcn, (Class<Enum<?>>) e, null, null);
+		} catch (ClassNotFoundException ex) {
+			// Try DynamicEnums
+			for(ClassMirror<? extends DynamicEnum> c : ClassDiscovery.getDefaultInstance()
+					.getClassesWithAnnotationThatExtend(MDynamicEnum.class, DynamicEnum.class)) {
+				if(c.getAnnotation(MDynamicEnum.class).getProxy(MDynamicEnum.class).value().equals(fqcn.getFQCN())) {
+					ArrayList<?> values;
+					try {
+						// This cast currently holds true, which is what we need to access the raw enum value anyways,
+						// so if this becomes untrue, the change here should be done carefully.
+						values = (ArrayList<?>) c.getMethod("values", new Class[0])
+								.loadMethod().invoke(null);
+					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+							| NoSuchMethodException ex1) {
+						throw new RuntimeException(ex1);
+					}
+					Enum[] constants = values.stream()
+							.map(new Function<Object, Enum<?>>() {
+								@Override
+								public Enum<?> apply(Object e) {
+									Class<?> cl = e.getClass();
+									Field candidate = null;
+									for(Field f : cl.getDeclaredFields()) {
+										if(Enum.class.isAssignableFrom(f.getType())) {
+											if(candidate != null) {
+												throw new RuntimeException("While processing " + c.getClassName()
+														+ " got multiple instances of Enum candidates");
+											}
+											candidate = f;
+											// Don't break, check all, so we fail fast
+										}
+									}
+									if(candidate == null) {
+										throw new RuntimeException("While processing " + c.getClassName() + " found no"
+												+ " instances of Enum");
+									}
+									return (Enum<?>) ReflectionUtils.get(cl, e, candidate.getName());
+								}
+							})
+							.collect(Collectors.toList()).toArray(new Enum[values.size()]);
+					return MEnumType.FromPartialEnum(fqcn, c.loadClass(), constants, null, null);
+				}
+			}
+		}
+		throw new ClassNotFoundException("Could not find the class of type " + fqcn);
 	}
 
 	/**

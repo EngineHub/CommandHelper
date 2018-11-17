@@ -192,7 +192,7 @@ public class Reflection {
 				} else if(args.length == 2) {
 					FullyQualifiedClassName enumName = FullyQualifiedClassName.forName(args[1].val());
 					for(ClassMirror<? extends Enum> e : enums) {
-						if(e.getAnnotation(MEnum.class).getValue("value").equals(enumName)) {
+						if(e.getAnnotation(MEnum.class).getValue("value").equals(enumName.getFQCN())) {
 							MEnumType type = MEnumType.FromEnum(enumName, (Class<Enum<?>>) e.loadClass(), null, null);
 							for(MEnumTypeValue v : type.values()) {
 								a.push(v, t);
@@ -201,7 +201,7 @@ public class Reflection {
 						}
 					}
 					for(ClassMirror<? extends DynamicEnum> d : dEnums) {
-						if(d.getAnnotation(MDynamicEnum.class).getValue("value").equals(enumName)) {
+						if(d.getAnnotation(MDynamicEnum.class).getValue("value").equals(enumName.getFQCN())) {
 							for(DynamicEnum ee : (Collection<DynamicEnum>) ReflectionUtils.invokeMethod(d.loadClass(), null, "values")) {
 								// TODO: Not sure how to handle this now...
 								a.push(new CString(ee.name(), t), t);

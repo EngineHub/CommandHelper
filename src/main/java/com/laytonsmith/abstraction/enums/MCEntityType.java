@@ -3,7 +3,6 @@ package com.laytonsmith.abstraction.enums;
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.annotations.MDynamicEnum;
-import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.core.Static;
 
 import java.util.ArrayList;
@@ -100,7 +99,6 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		return MAP.values();
 	}
 
-	@MEnum("com.commandhelper.VanillaEntityType")
 	public enum MCVanillaEntityType {
 		AREA_EFFECT_CLOUD(true),
 		ARMOR_STAND(true),

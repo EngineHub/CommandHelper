@@ -34,7 +34,7 @@ public abstract class MEnumType implements Mixed {
 	public static final CClassType TYPE = CClassType.get("ms.lang.enum");
 
 	/**
-	 * Generates a new MEnumType subclass
+	 * Generates a new MEnumType subclass.
 	 * @param fqcn The fully qualified class name. Generally, this should be gathered from the typeof of the MEnum, if
 	 * applicable, but if this is an external enum, or dynamically generated, this may come from other sources.
 	 * @param enumClass The underlying java enum class
@@ -44,9 +44,28 @@ public abstract class MEnumType implements Mixed {
 	 * should be the since tag for the enum class as a whole.
 	 * @return A subclass of MEnumType. This does not register it in the ecosystem.
 	 */
-	public static MEnumType FromEnum(FullyQualifiedClassName fqcn, final Class<Enum<?>> enumClass, String docs,
-			Version since) {
-		final Enum<?>[] constants = enumClass.getEnumConstants();
+	public static MEnumType FromEnum(FullyQualifiedClassName fqcn, final Class<Enum<?>> enumClass,
+			String docs, Version since) {
+		return FromPartialEnum(fqcn, enumClass, enumClass.getEnumConstants(), docs, since);
+	}
+
+	/**
+	 * Generates a new MEnumType subclass.
+	 * @param fqcn The fully qualified class name. Generally, this should be gathered from the typeof of the MEnum, if
+	 * applicable, but if this is an external enum, or dynamically generated, this may come from other sources.
+	 * @param enumClass The underlying java enum class
+	 * @param values The list of enum constants. This does not have to be the full list of Enum values in the type, or
+	 * indeed, even the enum values from the enumClass. It does have to be an Enum type, however, as we need a
+	 * customizable type for documentation purposes.
+	 * @param docs This may be null if the enum implements {@code public static String enumDocs()}, otherwise this
+	 * should be the docs for the enum class as a whole.
+	 * @param since This may be null if the enum implements {@code public static Version enumSince()}, otherwise this
+	 * should be the since tag for the enum class as a whole.
+	 * @return A subclass of MEnumType. This does not register it in the ecosystem.
+	 */
+	public static MEnumType FromPartialEnum(FullyQualifiedClassName fqcn, final Class<?> enumClass,
+			Enum<?>[] values, String docs, Version since) {
+		final Enum<?>[] constants = values;
 		return new MEnumType() {
 			@Override
 			public String docs() {
@@ -139,7 +158,7 @@ public abstract class MEnumType implements Mixed {
 						return new MEnumTypeValue() {
 							@Override
 							public int ordinal() {
-								return v.ordinal();
+								return index;
 							}
 
 							@Override
@@ -154,9 +173,9 @@ public abstract class MEnumType implements Mixed {
 
 							@Override
 							public Class<? extends Documentation>[] seeAlso() {
-								if(SimpleDocumentation.class.isAssignableFrom(enumClass)) {
+								if(SimpleDocumentation.class.isAssignableFrom(v.getDeclaringClass())) {
 									try {
-										return (Class[]) enumClass.getDeclaredMethod("seeAlso").invoke(v);
+										return (Class[]) v.getDeclaringClass().getDeclaredMethod("seeAlso").invoke(v);
 									} catch (NoSuchMethodException | SecurityException | IllegalAccessException
 											| IllegalArgumentException | InvocationTargetException ex) {
 										throw new RuntimeException(ex);
@@ -173,9 +192,9 @@ public abstract class MEnumType implements Mixed {
 
 							@Override
 							public String docs() {
-								if(SimpleDocumentation.class.isAssignableFrom(enumClass)) {
+								if(SimpleDocumentation.class.isAssignableFrom(v.getDeclaringClass())) {
 									try {
-										return (String) enumClass.getDeclaredMethod("docs").invoke(v);
+										return (String) v.getDeclaringClass().getDeclaredMethod("docs").invoke(v);
 									} catch (NoSuchMethodException | SecurityException | IllegalAccessException
 											| IllegalArgumentException | InvocationTargetException ex) {
 										throw new RuntimeException(ex);
@@ -187,9 +206,9 @@ public abstract class MEnumType implements Mixed {
 
 							@Override
 							public Version since() {
-								if(SimpleDocumentation.class.isAssignableFrom(enumClass)) {
+								if(SimpleDocumentation.class.isAssignableFrom(v.getDeclaringClass())) {
 									try {
-										return (Version) enumClass.getDeclaredMethod("since").invoke(v);
+										return (Version) v.getDeclaringClass().getDeclaredMethod("since").invoke(v);
 									} catch (NoSuchMethodException | SecurityException | IllegalAccessException
 											| IllegalArgumentException | InvocationTargetException ex) {
 										throw new RuntimeException(ex);

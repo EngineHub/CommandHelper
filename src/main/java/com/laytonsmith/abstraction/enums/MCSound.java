@@ -2,7 +2,6 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
 import com.laytonsmith.annotations.MDynamicEnum;
-import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.core.Static;
 
 import java.util.ArrayList;
@@ -71,7 +70,6 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 		return MAP.values();
 	}
 
-	@MEnum("com.commandhelper.VanillaSound")
 	public enum MCVanillaSound {
 		// After 1.9
 		AMBIENT_CAVE,

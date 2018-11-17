@@ -2,7 +2,6 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
 import com.laytonsmith.annotations.MDynamicEnum;
-import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.core.Static;
 
 import java.util.ArrayList;
@@ -70,7 +69,6 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 		return MAP.values();
 	}
 
-	@MEnum("com.commandhelper.VanillaBiomeType")
 	public enum MCVanillaBiomeType {
 		OCEAN,
 		PLAINS,
