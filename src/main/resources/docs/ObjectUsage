@@ -14,35 +14,40 @@ understand that there is a difference between what is currently stored in a vari
 is. Normally, when using an instance, you will not need to understand static members, which are elements
 (fields or methods) that are shared across all instances of that particular object, as so in this section,
 we will only discuss objects that do not have static methods. In order to access an instance method or field,
-we use the arrow operator <%PRE|->%>. This is a binary operator, meaning that there must be something on both
+we use the dot operator (period, '.'). This is a binary operator, meaning that there must be something on both
 the right and left of the operator. The thing on the left is the instance that we are wanting to operate on,
 and the right is the name of the method or field that we want to access. The left hand side may be either an
 object itself, or a variable containing some instance.
 
 <%CODE|
 int @value = 10;
-string @s = 5->toString(); // "5"
-string @r = @value->toString(); // "10"
+string @s = 5.toString(); // "5"
+string @r = @value.toString(); // "10"
 %>
 
 Both of these examples call the method "toString", which is defined in the int class. The first example calls
 it directly on an instance of the object, the second calls it on the variable, which in this case contains
 an instance of the int value 10.
 
+<%NOTE|It is important to note that the dot operator also means concatenation, so you should be careful to note
+that there is no @ in front of toString in the above examples. ''@v.@f'' means something different
+than ''@v.f''. In the first case, that means to concatenate the values of @v and @f, and in the second, it means
+to get the field named f from the value in @v.%>
+
 Fields are accessed the same way, but without the () at the end. Methods can be chained as well, the return value
 on the first is used in the second, and so on.
 
 <%CODE|
 array @value = array('VALUE', 'value');
-string @lowercased = @value->toString()->toLowerCase();
+string @lowercased = @value.toString().toLowerCase();
 %>
 
 In this example, the intermediate string is directly used again. This is the same as writing:
 
 <%CODE|
 array @value = array('VALUE', 'value');
-string @valueString = @value->toString();
-string @lowercased = @valueString->toLowerCase();
+string @valueString = @value.toString();
+string @lowercased = @valueString.toLowerCase();
 %>
 
 == Static Elements ==
@@ -94,10 +99,29 @@ a further discussion.%>
 
 It is worth pointing out that ClassTypes are themselves instances, and have instance methods, thus the need for
 different operators for accessing instance methods vs static methods. To access the instance methods defined in
-ClassType itself, use the -&gt; operator.
+ClassType itself, use the . operator.
 
 <%CODE|
-msg(int->getSuperclasses()); // Accesses the instance method getSuperclasses defined in ClassType
+msg(int.getSuperclasses()); // Accesses the instance method getSuperclasses defined in ClassType
 msg(int::GetMax()); // Access the static method GetMax defined in int
 %>
 
+== Reflective access ==
+
+It is possible to access elements in a class using reflection. This mechanism bypasses the compiler, however, and
+should generally not be used, unless working with objects more generally. To access a method or field reflectively,
+use the -> operator.
+
+<%CODE|
+string @method = "toString";
+msg(@myObject->@method()); // Equivalent to @myObject.toString()
+%>
+
+When using ->, this works similarly to using the dot operator, but the value in the string @method is resolved at
+runtime. The value returned by ''@myObject-&gt;@method'' is typed as auto, thus bypassing any compile time checks
+that could otherwise have been done, so in general, this should be avoided where possible. The value on the right
+hand side of -> must be a string, or this is a compile error. Since the return value is auto, any further chaining
+would also be auto, i.e. ''@myObject-&gt;@method().toLowerCase()'' would work if @method were "toString", but could
+not be caught at compile time if there were an error. In cases where the method or field can't be found, an
+ElementNotFoundException is thrown. Using this mechanism also disregards the access restrictions on the element,
+though the security manager is first consulted, and a SecurityException is thrown.
