@@ -80,3 +80,19 @@ and ask me which host to use, you would just select one. However, if one were br
 I would have to go out of my way to tell you to use the one on the left, but this
 is an exceptional circumstance, and I shouldn't have to explicitely tell you every
 detail in the typical case.
+
+== Try not to special case things ==
+
+When creating a new feature, first check to make sure that there is no design that
+fits into existing paradigms. If there truly isn't, or there are justifiable exceptional
+circumstances, then it's ok to special case it, but don't special case by default. When
+this happens, it makes users have to learn a new paradigm, thus increasing the
+complexity of the system, and making it take longer for users to become proficient.
+One example of this in MethodScript is that almost everything is a function, so at
+least when learning things initially, you don't need to know about operators.
+
+This principal is quite deeply embedded into the language as a whole, for instance,
+keywords are not implemented in the compiler, they are added to a list, and the compiler
+processes them generically. This leads to increased ability to expand functionality,
+and makes it easier to add new keywords to the language, without having to worry about
+whether this will break any other code.
