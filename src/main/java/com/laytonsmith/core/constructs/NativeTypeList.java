@@ -35,6 +35,13 @@ public class NativeTypeList {
 	private static Set<FullyQualifiedClassName> fqNativeTypes;
 
 	/**
+	 * The name of the static method in all Mixed classes, which if present, is called when
+	 * getInvalidInstanceForUse is called on that class. The method should return a value of
+	 * that type, and should accept no parameters. The method name is "ConstructInvalidInstance".
+	 */
+	public static String INVALID_INSTANCE_METHOD_NAME = "ConstructInvalidInstance";
+
+	/**
 	 * Given a simple name of a class, attempts to resolve
 	 * within the native types (not user defined types). If the class can't be found, null is returned,
 	 * but that just means that it's not defined in the native types, not that it doesn't exist at all.
@@ -283,6 +290,9 @@ public class NativeTypeList {
 	 */
 	public static Mixed getInvalidInstanceForUse(FullyQualifiedClassName fqcn) throws ClassNotFoundException {
 		Class<? extends Mixed> c = getNativeClassOrInterfaceRunner(fqcn);
+		if(ReflectionUtils.hasMethod(c, INVALID_INSTANCE_METHOD_NAME, Mixed.class)) {
+			return (Mixed) ReflectionUtils.invokeMethod(c, null, INVALID_INSTANCE_METHOD_NAME);
+		}
 		if(MEnumType.class.isAssignableFrom(c)) {
 			return getNativeEnumType(fqcn);
 		} else {
