@@ -26,18 +26,22 @@ do <code>_func('NORTH')</code>, but it is not acceptable to first define a strin
 then attempt to cross cast:
 
 <pre>
-string @val = 'NORTH';
-_func(@val); # Compile error, expecting Compass type, but found string
+string @val1 = 'NORTH';
+_func(@val1); # Compile error, expecting Compass type, but found string
 
 auto @val2 = 'NORTH';
 _func(@val2); # Not a compile error, because cross casting occurs
 
-Compass @val3 = 'NORTH';
-_func(@val3);   # Also not a compile error, because cross casting occurs during 
+auto @val3 = 'NOT A REAL ENUM';
+_func(@val3); # Not a compile error, but a runtime error
+
+Compass @val4 = 'NORTH';
+_func(@val4);   # Also not a compile error, because cross casting occurs during 
 				# the declaration of @val3
 </pre>
 
-This is because while string constants are declared as auto, variables declared
+This is because while string constants (and indeed all values that are not
+contained in a variable) are declared as auto, variables declared
 as string are not. This is because when hardcoding the string in, it is quite
 obvious what the intention is; you are intending for the string to take on the 
 enum constant value. However, when you declare it in a variable first, it is assumed
@@ -63,6 +67,46 @@ string @v = 'NORTH';
 
 This runs the risk of a CastException however, in the event the value cannot be cast or
 cross cast.
+
+It is also worth noting that when using the auto keyword explicitly, this can open the
+door to failure to catch errors at compile time, as demonstrated in the above example
+with the auto keyword usage. Generally speaking, well maintainable software should not
+need to use the auto keyword explictly, though it is ok to take advantage of the cross casting
+features when using hardcoded instances of objects, such as in example 4 above.
+
+<%NOTE|It is important to ensure that classes are cross-castable amongst themselves, and
+that they are lossless in the process.%>
+
+Assume we have 2 classes, A and B, and they can each be cross cast to the other.
+
+<%CODE|
+auto @a = new A();
+B @b = @a;
+A @a2 = @b;
+%>
+
+Then it must be true that @a == @a2. Put more succinctly:
+
+<%CODE|
+auto @a = new A();
+msg(((@a as B) as A) == @a); // True
+%>
+
+If data loss would occur when cross casting, this is a violation of the underlying
+contract, and in that case, cross casting should not be used. It does not have to
+be true that (@a as B) == @a, however. A good example of this would be temperature
+classes.
+
+<%CODE|
+auto @f = new Fahrenheit(32);
+Celsius @c = @f;
+msg(@c == @f); // false
+msg((@c as Fahrenheit) == @f); // true
+%>
+
+This demonstrates that the equals operator does not attempt cross casting before
+attempting the equality check. TODO: Should it though? If so, then the above paragraph
+should be changed to state that it @c == @f must be true.
 
 == Cross Casting User Classes ==
 
