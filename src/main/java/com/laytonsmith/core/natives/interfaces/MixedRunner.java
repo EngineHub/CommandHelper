@@ -27,12 +27,12 @@ public class MixedRunner extends AbstractMixedInterfaceRunner {
 	// of these methods.
 	@Override
 	public CClassType[] getSuperclasses() {
-		return new CClassType[]{};
+		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{};
+		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 
 	@Override

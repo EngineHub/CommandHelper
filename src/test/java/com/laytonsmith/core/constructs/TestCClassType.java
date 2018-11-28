@@ -1,20 +1,14 @@
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -77,16 +71,27 @@ public class TestCClassType {
 	}
 
 	@Test
-	@Ignore("Ignored for now, but must come back to this soon")
+	//@Ignore("Ignored for now, but must come back to this soon")
 	public void testThatNonImplementsReturnsEMPTY_CLASS_ARRAY() throws Exception {
 		SortedSet<String> oops = new TreeSet<>();
-		Set<Class<? extends Mixed>> cc = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, Mixed.class);
-		for(Class<? extends Mixed> c : cc) {
-			Mixed m = ReflectionUtils.instantiateUnsafe(c);
-			CClassType[] ct = m.getInterfaces();
-			if(ct.length == 0) {
-				if(ct != CClassType.EMPTY_CLASS_ARRAY) {
-					oops.add(c.getName() + " creates a new empty array in getInterfaces, and needs to be changed to return"
+		for(FullyQualifiedClassName fqcn : NativeTypeList.getNativeTypeList()) {
+			if("void".equals(fqcn.getFQCN()) || "null".equals(fqcn.getFQCN())) {
+				continue;
+			}
+			Mixed m = NativeTypeList.getInvalidInstanceForUse(fqcn);
+			CClassType[] cti = m.getInterfaces();
+			if(cti.length == 0) {
+				if(cti != CClassType.EMPTY_CLASS_ARRAY) {
+					oops.add(fqcn + "(" + m.getClass() + ") creates a new empty array in getInterfaces,"
+							+ " and needs to be changed to return"
+							+ " CClassType.EMPTY_CLASS_ARRAY");
+				}
+			}
+			CClassType[] cts = m.getSuperclasses();
+			if(cts.length == 0) {
+				if(cts != CClassType.EMPTY_CLASS_ARRAY) {
+					oops.add(fqcn + "(" + m.getClass() + ") creates a new empty array in getSuperclasses,"
+							+ " and needs to be changed to return"
 							+ " CClassType.EMPTY_CLASS_ARRAY");
 				}
 			}
@@ -94,5 +99,16 @@ public class TestCClassType {
 		if(!oops.isEmpty()) {
 			fail(StringUtils.Join(oops, "\n"));
 		}
+	}
+
+
+	@Test
+	public void testEnumDereference() throws Exception {
+//		assertEquals("REGULAR", StaticTest.SRun("ms.lang.ArraySortType[0]", null));
+//		assertEquals("REGULAR", StaticTest.SRun("ms.lang.ArraySortType['REGULAR']", null));
+		assertEquals("REGULAR", StaticTest.SRun("ArraySortType[0]", null));
+		assertEquals("REGULAR", StaticTest.SRun("ArraySortType['REGULAR']", null));
+		assertEquals("ms.lang.ClassType", StaticTest.SRun("typeof(ArraySortType)", null));
+		assertEquals("ms.lang.ArraySortType", StaticTest.SRun("typeof(ArraySortType['REGULAR'])", null));
 	}
 }

@@ -9,6 +9,8 @@ import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.KeywordList;
 import com.laytonsmith.core.compiler.TokenStream;
+import com.laytonsmith.core.constructs.CBareString;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDecimal;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
@@ -24,6 +26,7 @@ import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
@@ -1240,6 +1243,7 @@ public final class MethodScriptCompiler {
 
 			//Array notation handling
 			if(t.type.equals(TType.LSQUARE_BRACKET)) {
+				//tree.addChild(new ParseTree(new CFunction("__cbracket__", t.getTarget()), fileOptions));
 				arrayStack.push(new AtomicInteger(tree.getChildren().size() - 1));
 				continue;
 			} else if(t.type.equals(TType.RSQUARE_BRACKET)) {
@@ -1484,10 +1488,8 @@ public final class MethodScriptCompiler {
 					throw new ConfigCompileException(ex);
 				}
 			} else if(t.type == TType.LIT) {
-				Construct c = Static.resolveConstruct(t.val(), t.target);
-				if(c instanceof CString && fileOptions.isStrict()) {
-					compilerErrors.add(new ConfigCompileException("Bare strings are not allowed in strict mode", t.target));
-				} else if((c instanceof CInt || c instanceof CDecimal) && next1.type == TType.DOT && next2.type == TType.LIT) {
+				Construct c = Static.resolveConstruct(t.val(), t.target, true);
+				if((c instanceof CInt || c instanceof CDecimal) && next1.type == TType.DOT && next2.type == TType.LIT) {
 					// make CDouble/CDecimal here because otherwise Long.parseLong() will remove
 					// minus zero before decimals and leading zeroes after decimals
 					try {
@@ -1623,7 +1625,7 @@ public final class MethodScriptCompiler {
 		}
 
 		Stack<List<Procedure>> procs = new Stack<>();
-		procs.add(new ArrayList<Procedure>());
+		procs.add(new ArrayList<>());
 		processKeywords(tree);
 		optimizeAutoconcats(tree, compilerErrors);
 		optimize(tree, procs, compilerErrors);
@@ -1745,6 +1747,121 @@ public final class MethodScriptCompiler {
 			checkBreaks0(child, currentLoops, lastUnbreakable, compilerErrors);
 		}
 	}
+
+//	private static void processLinearComponents(ParseTree tree, Set<ConfigCompileException> compilerErrors) {
+//		if(tree.hasChildren()) {
+//			for(ParseTree child : tree.getChildren()) {
+//				processLinearComponents(child, compilerErrors);
+//			}
+//			// Process bare string "concatenation"
+//			for(int i = 0; i < tree.getChildren().size(); i++) {
+//				ParseTree data = tree.getChildAt(i);
+//				ParseTree data2 = null;
+//				if(i < tree.getChildren().size() - 1) {
+//					data2 = tree.getChildAt(i + 1);
+//				}
+//				if(data2 != null) {
+//					if(data.getData() instanceof CBareString && data2.getData() instanceof CSymbol
+//							&& ((CSymbol) data2.getData()).isConcatenation()) {
+//
+//					}
+//				}
+//			}
+//		}
+//		// If there are no children, there's nothing to do right now, so just skip this invocation
+//	}
+
+//	private static void processBareStrings(ParseTree root, Set<ConfigCompileException> compilerExceptions) {
+//		if(root.hasChildren()) {
+//			for(ParseTree child : root.getChildren()) {
+//				processBareStrings(child, compilerExceptions);
+//			}
+//		}
+//		// We need to first remove the CBareStrings, and convert them to CStrings (or CClassType or issue a compiler
+//		// warning, depending on the case), as the rest of these methods assume CStrings.
+//		List<ParseTree> temp = new ArrayList<>(root.getChildren());
+//		checkClassType: for(int i = 0; i < temp.size() - 1; i++) {
+//			ParseTree node = temp.get(i);
+//			ParseTree next = temp.get(i + 1);
+//			if(node.getData() instanceof CBareString && next.getData() instanceof CSymbol
+//					&& ((CSymbol) next.getData()).isConcatenation()) {
+//				// Concatenation of bare strings. We need to look at the whole chain and see if it's a valid
+//				// type or not, and if not, issue an error.
+//				String type = node.getData().val() + ".";
+//				temp.remove(i);
+//				temp.remove(i);
+//				for(int j = i; j < temp.size(); j++) {
+//					ParseTree jNode = temp.get(j);
+//					ParseTree jNext = null;
+//					if(j < temp.size() - 1) {
+//						jNext = temp.get(j + 1);
+//					}
+//					if(jNode.getData() instanceof CBareString) {
+//						type += jNode.getData().val();
+//						temp.remove(j);
+//						if(jNext != null && jNext.getData() instanceof CSymbol
+//								&& ((CSymbol) jNext.getData()).isConcatenation()) {
+//							// Continue the chain
+//							type += ".";
+//							temp.remove(j);
+//							j--;
+//						} else {
+//							// End of the chain, break here.
+//							break;
+//						}
+//					} else {
+//						// This is completely unexpected, and means that we are concatenating a bare string with
+//						// some other data type. We'll reset list, and let the rest of the code take over.
+//						temp = root.getChildren();
+//						break checkClassType;
+//					}
+//				}
+//				// TODO: Once compiler environments are added, we would need to check to see if the value here is a custom
+//				// type. However, as it stands, since we only support the native types, we will just hardcode the check here.
+//				String fqType = NativeTypeList.resolveNativeType(type);
+//				if(fqType != null) {
+//					try {
+//						temp.add(i, new ParseTree(CClassType.get(FullyQualifiedClassName
+//								.forFullyQualifiedClass(fqType)), node.getFileOptions()));
+//					} catch(ClassNotFoundException ex) {
+//						throw new RuntimeException(ex);
+//					}
+//				} else {
+//					compilerExceptions.add(new ConfigCompileException("Invalid/Unknown type: " + type, node.getTarget()));
+//					return;
+//				}
+//				i--;
+//			}
+//		}
+//		root.setChildren(temp);
+//		// Now, any bare strings that remain are an error in strict mode, or need to be converted to CStrings
+//		// in non-strict mode. There is one exception though, if the string is a class type, then it was a
+//		// not fully qualified class name, which is allowed, so in that case, we convert it to CClassType.
+//		for(int i = 0; i < root.getChildren().size(); i++) {
+//			ParseTree node = root.getChildren().get(i);
+//			if(node.getData() instanceof CBareString) {
+//				String fqType = NativeTypeList.resolveNativeType(node.getData().val());
+//				if(fqType != null) {
+//					root.getChildren().remove(i);
+//					try {
+//						root.getChildren().add(i, new ParseTree(CClassType.get(FullyQualifiedClassName
+//								.forFullyQualifiedClass(fqType)), node.getFileOptions()));
+//					} catch(ClassNotFoundException ex) {
+//						throw new RuntimeException(ex);
+//					}
+//					continue;
+//				}
+//				if(node.getFileOptions().isStrict()) {
+//					compilerExceptions.add(new ConfigCompileException("Bare strings are not allowed in strict mode.",
+//							node.getTarget()));
+//				} else {
+//					root.getChildren().remove(i);
+//					root.getChildren().add(i, new ParseTree(new CString(node.getData().val(), node.getTarget()),
+//							node.getFileOptions()));
+//				}
+//			}
+//		}
+//	}
 
 	/**
 	 * Optimizing __autoconcat__ out should happen early, and should happen regardless of whether or not optimizations

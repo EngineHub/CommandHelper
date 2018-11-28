@@ -388,12 +388,12 @@ public abstract class MEnumType implements Mixed, ArrayAccess {
 
 	@Override
 	public CClassType[] getSuperclasses() {
-		return new CClassType[]{};
+		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[0];
+		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 
 	@Override

@@ -1241,4 +1241,14 @@ public class MethodScriptCompilerTest {
 		verify(player).sendMessage(expectedResponse);
 		this.env.getEnv(CommandHelperEnvironment.class).SetPlayer(temp);
 	}
+
+	@Test
+	@Ignore
+	public void testFullyQualifiedNames() throws Exception {
+		assertEquals("ms.lang.ClassType", StaticTest.SRun("typeof(ms.lang.ArraySortType)", null));
+		assertEquals("ms.lang.ClassType", StaticTest.SRun("typeof(ArraySortType)", null));
+		assertEquals("ms.lang.ArraySortType", StaticTest.SRun("ArraySortType", null));
+		assertEquals("null", StaticTest.SRun("ArraySortType @s = null;", null));
+		assertEquals("null", StaticTest.SRun("ms.lang.ArraySortType @s = null;", null));
+	}
 }

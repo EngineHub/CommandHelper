@@ -65,6 +65,9 @@ public interface Mixed extends Cloneable, Documentation {
 	 *
 	 * If this is an interface, this should return an empty array always.
 	 *
+	 * It's also important to note that for performance reasons, if an empty array is returned, the code should prefer
+	 * to use {@link CClassType#EMPTY_CLASS_ARRAY}, and for core code, this is required by a unit test.
+	 *
 	 * @return
 	 */
 	@ForceImplementation

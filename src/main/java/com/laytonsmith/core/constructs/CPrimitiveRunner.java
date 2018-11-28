@@ -30,6 +30,6 @@ public class CPrimitiveRunner extends AbstractMixedInterfaceRunner {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{};
+		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 }

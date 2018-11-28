@@ -22,6 +22,7 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CClassType;
@@ -458,6 +459,7 @@ public final class Static {
 	private static final Pattern VALID_DECIMAL = Pattern.compile("-?0m[0-9]+");
 	private static final Pattern INVALID_DECIMAL = Pattern.compile("-?0m[0-9]*[^0-9]+[0-9]*");
 
+
 	/**
 	 * Given a string input, creates and returns a Construct of the appropriate type. This takes into account that null,
 	 * true, and false are keywords.
@@ -468,6 +470,22 @@ public final class Static {
 	 * @throws ConfigRuntimeException If the value is a hex or binary value, but has invalid characters in it.
 	 */
 	public static Construct resolveConstruct(String val, Target t) throws ConfigRuntimeException {
+		return resolveConstruct(val, t, false);
+	}
+
+	/**
+	 * Given a string input, creates and returns a Construct of the appropriate type. This takes into account that null,
+	 * true, and false are keywords.
+	 *
+	 * If returnBareStrings is true, then we don't return CString, we return CBareString.
+	 * @param val
+	 * @param t
+	 * @param returnBareStrings
+	 * @return
+	 * @throws ConfigRuntimeException
+	 */
+	public static Construct resolveConstruct(String val, Target t, boolean returnBareStrings)
+			throws ConfigRuntimeException {
 		if(val == null) {
 			return new CString("", t);
 		}
@@ -523,11 +541,12 @@ public final class Static {
 				// Not a double either
 			}
 		}
-		// TODO: Once compiler environments are added, we would need to check to see if the value here is a custom
-		// type. However, as it stands, since we only support the native types, we will just hardcode the check here.
 		String fqType = NativeTypeList.resolveNativeType(val);
 		if(fqType != null) {
 			return CClassType.get(fqType);
+		}
+		if(returnBareStrings) {
+			return new CBareString(val, t);
 		} else {
 			return new CString(val, t);
 		}

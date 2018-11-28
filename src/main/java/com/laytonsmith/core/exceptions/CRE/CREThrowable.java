@@ -67,7 +67,7 @@ public class CREThrowable extends AbstractCREException {
 		if(this.getClass() == CREThrowable.class) {
 			return new CClassType[]{ArrayAccess.TYPE};
 		} else {
-			return new CClassType[]{};
+			return CClassType.EMPTY_CLASS_ARRAY;
 		}
 	}
 

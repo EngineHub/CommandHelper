@@ -609,7 +609,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 		@Override
 		public CClassType[] getInterfaces() {
-			return new CClassType[0];
+			return CClassType.EMPTY_CLASS_ARRAY;
 		}
 
 		@Override

@@ -137,7 +137,7 @@ public class CSecureString extends CString {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{};
+		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 
 	@Override

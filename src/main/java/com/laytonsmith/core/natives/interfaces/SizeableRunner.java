@@ -9,7 +9,7 @@ import com.laytonsmith.core.constructs.CClassType;
  *
  */
 @InterfaceRunnerFor(Sizeable.class)
-public class SizableRunner extends AbstractMixedInterfaceRunner {
+public class SizeableRunner extends AbstractMixedInterfaceRunner {
 
 	@Override
 	public String docs() {
@@ -28,7 +28,7 @@ public class SizableRunner extends AbstractMixedInterfaceRunner {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{};
+		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 
 }

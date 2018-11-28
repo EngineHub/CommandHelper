@@ -101,6 +101,10 @@ public class CSymbol extends Construct {
 		return conversion;
 	}
 
+	public boolean isConcatenation() {
+		return symbolType.equals(Token.TType.CONCAT);
+	}
+
 	public boolean isPostfix() {
 		return symbolType.isPostfix();
 	}

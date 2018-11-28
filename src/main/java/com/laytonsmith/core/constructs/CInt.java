@@ -63,7 +63,7 @@ public class CInt extends CNumber implements Cloneable {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{};
+		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 
 }
