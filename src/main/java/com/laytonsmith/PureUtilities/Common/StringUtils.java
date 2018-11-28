@@ -254,6 +254,7 @@ public final class StringUtils {
 	/**
 	 * Joins an array together (using StringBuilder's {
 	 *
+	 * @param <T> The array type
 	 * @see StringBuilder#append(Object)} method to "toString" the Object) using the specified string for glue. If
 	 * lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
 	 * which is useful for lists that are being read by a human, to have a proper conjunction at the end.
@@ -267,11 +268,11 @@ public final class StringUtils {
 	 * used by default on each item.
 	 * @return The concatenated string
 	 */
-	public static String Join(final Object[] list, String glue, String lastGlue, String glueForTwoItems, String empty, Renderer<Object> renderer) {
-		return doJoin(new ItemGetter<Object>() {
+	public static <T> String Join(final T[] list, String glue, String lastGlue, String glueForTwoItems, String empty, Renderer<T> renderer) {
+		return doJoin(new ItemGetter<T>() {
 
 			@Override
-			public Object get(int index) {
+			public T get(int index) {
 				return list[index];
 			}
 

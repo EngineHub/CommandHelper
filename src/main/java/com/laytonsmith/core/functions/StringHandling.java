@@ -2563,9 +2563,8 @@ public class StringHandling {
 					+ " type, some types do not require an argument, in which case, this parameter will be ignored."
 					+ " <code>type</code> may be one of:\n- " + StringUtils.Join(UUIDType.values(), "\n- ", "\n- ",
 							"\n- ", "",
-							(Object item) -> {
-								UUIDType type = (UUIDType) item;
-								return type.description + ". This type takes "
+							(UUIDType type) -> {
+								return type.name() + " - " + type.description + ". This type takes "
 										+ StringUtils.PluralTemplateHelper(type.parameters, "%d argument.",
 												"%d arguments.");
 							});
