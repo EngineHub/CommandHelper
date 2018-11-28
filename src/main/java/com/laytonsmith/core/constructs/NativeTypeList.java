@@ -39,7 +39,7 @@ public class NativeTypeList {
 	 * getInvalidInstanceForUse is called on that class. The method should return a value of
 	 * that type, and should accept no parameters. The method name is "ConstructInvalidInstance".
 	 */
-	public static String INVALID_INSTANCE_METHOD_NAME = "ConstructInvalidInstance";
+	public static final String INVALID_INSTANCE_METHOD_NAME = "ConstructInvalidInstance";
 
 	/**
 	 * Given a simple name of a class, attempts to resolve
