@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("ParrotType")
+@MEnum("com.commandhelper.ParrotType")
 public enum MCParrotType {
 	RED,
 	BLUE,

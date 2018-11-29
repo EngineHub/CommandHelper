@@ -13,7 +13,7 @@ import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Globals;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptCompiler;
@@ -66,6 +66,7 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopBreakException;
 import com.laytonsmith.core.exceptions.LoopContinueException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.tools.docgen.templates.ArrayIteration;
 import com.laytonsmith.tools.docgen.templates.Loops;
 
@@ -117,7 +118,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CArray(t, args);
 		}
 
@@ -137,8 +138,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -174,7 +175,7 @@ public class DataHandling {
 					if(((CLabel) child.getChildAt(0).getData()).cVal() instanceof IVariable) {
 						String array = "@a";
 						String valueName = ((IVariable) ((CLabel) child.getChildAt(0).getData()).cVal()).getVariableName();
-						Construct value = child.getChildAt(1).getData();
+						Mixed value = child.getChildAt(1).getData();
 						String v;
 						if(value instanceof IVariable) {
 							v = ((IVariable) value).getVariableName();
@@ -217,7 +218,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray array = CArray.GetAssociativeArray(t, args);
 			return array;
 		}
@@ -241,8 +242,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -270,7 +271,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			IVariableList list = env.getEnv(GlobalEnv.class).GetVarList();
 			int offset;
 			CClassType type;
@@ -300,7 +301,7 @@ public class DataHandling {
 				name = ((IVariable) args[offset]).getVariableName();
 				type = list.get(name, t, true).getDefinedType();
 			}
-			Construct c = args[offset + 1];
+			Mixed c = args[offset + 1];
 			while(c instanceof IVariable) {
 				IVariable cur = (IVariable) c;
 				c = list.get(cur.getVariableName(), cur.getTarget()).ival();
@@ -334,8 +335,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -352,7 +353,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+		public Mixed optimize(Target t, Mixed... args) throws ConfigCompileException {
 			//We can't really optimize, but we can check that we are
 			//getting an ivariable.
 			int offset = 0;
@@ -436,7 +437,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) {
+		public Mixed exec(Target t, Environment env, Mixed... args) {
 			return CVoid.VOID;
 		}
 
@@ -446,7 +447,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			return new forelse(true).execs(t, env, parent, nodes);
 		}
 
@@ -469,8 +470,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 		//Doesn't matter, run out of state
 
@@ -567,12 +568,12 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return null;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) throws ConfigRuntimeException {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) throws ConfigRuntimeException {
 			ParseTree assign = nodes[0];
 			ParseTree condition = nodes[1];
 			ParseTree expression = nodes[2];
@@ -583,7 +584,7 @@ public class DataHandling {
 			}
 			boolean hasRunOnce = false;
 
-			Construct counter = parent.eval(assign, env);
+			Mixed counter = parent.eval(assign, env);
 			if(!(counter instanceof IVariable)) {
 				throw new CRECastException("First parameter of for must be an ivariable", t);
 			}
@@ -640,8 +641,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -662,12 +663,12 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			if(nodes.length < 3) {
 				throw new CREInsufficientArgumentsException("Insufficient arguments passed to " + getName(), t);
 			}
@@ -681,15 +682,15 @@ public class DataHandling {
 			}
 			ParseTree value = nodes[1 + offset];
 			ParseTree code = nodes[2 + offset];
-			Construct arr = parent.seval(array, env);
-			Construct ik = null;
+			Mixed arr = parent.seval(array, env);
+			Mixed ik = null;
 			if(key != null) {
 				ik = parent.eval(key, env);
 				if(!(ik instanceof IVariable)) {
 					throw new CRECastException("Parameter 2 of " + getName() + " must be an ivariable", t);
 				}
 			}
-			Construct iv = parent.eval(value, env);
+			Mixed iv = parent.eval(value, env);
 			if(arr instanceof CSlice) {
 				long start = ((CSlice) arr).getStart();
 				long finish = ((CSlice) arr).getFinish();
@@ -714,12 +715,12 @@ public class DataHandling {
 
 				//Clone the set, so changes in the array won't cause changes in
 				//the iteration order.
-				Set<Construct> keySet = new LinkedHashSet<>(one.keySet());
+				Set<Mixed> keySet = new LinkedHashSet<>(one.keySet());
 				//Continues in an associative array are slightly different, so
 				//we have to track this differently. Basically, we skip the
 				//next element in the array key set.
 				int continues = 0;
-				for(Construct c : keySet) {
+				for(Mixed c : keySet) {
 					if(continues > 0) {
 						//If continues is greater than 0, continue in the loop,
 						//however many times necessary to make it 0.
@@ -837,8 +838,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 		//Doesn't matter, runs out of state anyways
 
@@ -1006,12 +1007,12 @@ public class DataHandling {
 	public static class foreachelse extends foreach {
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			ParseTree array = nodes[0];
 			//The last one
 			ParseTree elseCode = nodes[nodes.length - 1];
 
-			Construct data = parent.seval(array, env);
+			Mixed data = parent.seval(array, env);
 
 			if(!(data instanceof CArray) && !(data instanceof CSlice)) {
 				throw new CRECastException(getName() + " expects an array for parameter 1", t);
@@ -1047,8 +1048,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1091,8 +1092,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1116,7 +1117,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			try {
 				while(Static.getBoolean(parent.seval(nodes[0], env), t)) {
 					//We allow while(thing()); to be done. This makes certain
@@ -1143,7 +1144,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CNull.NULL;
 		}
 
@@ -1196,7 +1197,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CNull.NULL;
 		}
 
@@ -1220,8 +1221,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1230,7 +1231,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			try {
 				do {
 					try {
@@ -1305,8 +1306,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
@@ -1315,7 +1316,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if(args.length == 1) {
 				num = Static.getInt32(args[0], t);
@@ -1397,8 +1398,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
@@ -1407,7 +1408,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if(args.length == 1) {
 				num = Static.getInt32(args[0], t);
@@ -1458,8 +1459,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1468,7 +1469,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(!(args[0] instanceof CArray));
 		}
 
@@ -1519,8 +1520,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1529,7 +1530,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(args[0] instanceof CString);
 		}
 
@@ -1578,8 +1579,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1588,7 +1589,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(args[0] instanceof CByteArray);
 		}
 
@@ -1638,8 +1639,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -1648,7 +1649,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(args[0] instanceof CArray);
 		}
 
@@ -1700,8 +1701,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1710,7 +1711,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(args[0] instanceof CInt || args[0] instanceof CDouble);
 		}
 
@@ -1763,8 +1764,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -1773,7 +1774,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(args[0] instanceof CDouble);
 		}
 
@@ -1824,8 +1825,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -1834,7 +1835,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(args[0] instanceof CInt);
 		}
 
@@ -1884,8 +1885,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -1894,7 +1895,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(args[0] instanceof CBoolean);
 		}
 
@@ -1943,8 +1944,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -1953,7 +1954,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(args[0] instanceof CNull);
 		}
 
@@ -2008,7 +2009,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			boolean b = true;
 			try {
 				Static.getNumber(args[0], t);
@@ -2019,8 +2020,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2082,7 +2083,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			double d;
 			try {
 				d = Static.getDouble(args[0], t);
@@ -2093,8 +2094,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2154,8 +2155,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -2164,7 +2165,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			Procedure myProc = getProcedure(t, env, parent, nodes);
 			env.getEnv(GlobalEnv.class).GetProcs().put(myProc.getName(), myProc);
 			return CVoid.VOID;
@@ -2195,14 +2196,14 @@ public class DataHandling {
 					if(nodes[i].getData() instanceof CFunction) {
 						if(((CFunction) nodes[i].getData()).getValue().equals("assign")) {
 							thisNodeIsAssign = true;
-							if((nodes[i].getChildren().size() == 3 && nodes[i].getChildAt(0).getData().isDynamic())
-									|| nodes[i].getChildAt(1).getData().isDynamic()) {
+							if((nodes[i].getChildren().size() == 3 && Construct.IsDynamicHelper(nodes[i].getChildAt(0).getData()))
+									|| Construct.IsDynamicHelper(nodes[i].getChildAt(1).getData())) {
 								usesAssign = true;
 							}
 						}
 					}
 					env.getEnv(GlobalEnv.class).SetFlag("no-check-duplicate-assign", true);
-					Construct cons = parent.eval(nodes[i], env);
+					Mixed cons = parent.eval(nodes[i], env);
 					env.getEnv(GlobalEnv.class).ClearFlag("no-check-duplicate-assign");
 					if(i == 0 && cons instanceof IVariable) {
 						throw new CREInvalidProcedureException("Anonymous Procedures are not allowed", t);
@@ -2213,7 +2214,7 @@ public class DataHandling {
 					} else {
 						IVariable ivar = null;
 						try {
-							Construct c = cons;
+							Mixed c = cons;
 							if(c instanceof IVariable) {
 								String varName = ((IVariable) c).getVariableName();
 								if(varNames.contains(varName)) {
@@ -2247,7 +2248,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -2257,7 +2258,7 @@ public class DataHandling {
 		}
 
 		/**
-		 * Returns either null to indicate that the procedure is not const, or returns a single Construct, which should
+		 * Returns either null to indicate that the procedure is not const, or returns a single Mixed, which should
 		 * replace the call to the procedure.
 		 *
 		 * @param t
@@ -2266,7 +2267,7 @@ public class DataHandling {
 		 * @return
 		 * @throws ConfigRuntimeException
 		 */
-		public static Construct optimizeProcedure(Target t, Procedure myProc, List<ParseTree> children) throws ConfigRuntimeException {
+		public static Mixed optimizeProcedure(Target t, Procedure myProc, List<ParseTree> children) throws ConfigRuntimeException {
 			if(myProc.isPossiblyConstant()) {
 				//Oooh, it's possibly constant. So, let's run it with our children.
 				try {
@@ -2278,7 +2279,7 @@ public class DataHandling {
 					Script fakeScript = Script.GenerateScript(root, Static.GLOBAL_PERMISSION);
 					Environment env = Static.GenerateStandaloneEnvironment();
 					env.getEnv(GlobalEnv.class).SetScript(fakeScript);
-					Construct c = myProc.cexecute(children, env, t);
+					Mixed c = myProc.cexecute(children, env, t);
 					//Yup! It worked. It's a const proc.
 					return c;
 				} catch (ConfigRuntimeException e) {
@@ -2344,8 +2345,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -2361,8 +2362,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			Construct ret = (args.length == 1 ? args[0] : CVoid.VOID);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			Mixed ret = (args.length == 1 ? args[0] : CVoid.VOID);
 			throw new FunctionReturnException(ret, t);
 		}
 	}
@@ -2399,8 +2400,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -2409,14 +2410,14 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public CVoid exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public CVoid execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			ParseTree tree = nodes[0];
-			Construct arg = parent.seval(tree, env);
+			Mixed arg = parent.seval(tree, env);
 			String location = arg.val();
 			File file = Static.GetFileFromArgument(location, env, t, null);
 			ParseTree include = IncludeCache.get(file, t);
@@ -2440,7 +2441,7 @@ public class DataHandling {
 //		}
 //
 //		@Override
-//		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+//		public Mixed optimize(Target t, Mixed... args) throws ConfigCompileException {
 //			//We can't optimize per se, but if the path is constant, and the code is uncompilable, we
 //			//can give a warning, and go ahead and cache the tree.
 //			String path = args[0].val();
@@ -2483,8 +2484,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -2493,13 +2494,13 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 1) {
 				throw new CREInsufficientArgumentsException("Expecting at least one argument to " + getName(), t);
 			}
 			Procedure proc = env.getEnv(GlobalEnv.class).GetProcs().get(args[0].val());
 			if(proc != null) {
-				List<Construct> vars = new ArrayList<Construct>(Arrays.asList(args));
+				List<Mixed> vars = new ArrayList<>(Arrays.asList(args));
 				vars.remove(0);
 				Environment newEnv = null;
 				try {
@@ -2535,12 +2536,12 @@ public class DataHandling {
 	public static class call_proc_array extends call_proc {
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray ca = Static.getArray(args[1], t);
 			if(ca.inAssociativeMode()) {
 				throw new CRECastException("Expected the array passed to " + getName() + " to be non-associative.", t);
 			}
-			Construct[] args2 = new Construct[(int) ca.size() + 1];
+			Mixed[] args2 = new Mixed[(int) ca.size() + 1];
 			args2[0] = args[0];
 			for(int i = 1; i < args2.length; i++) {
 				args2[i] = ca.get(i - 1, t);
@@ -2571,8 +2572,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2613,8 +2614,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -2623,7 +2624,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) {
+		public Mixed exec(Target t, Environment env, Mixed... args) {
 			return CBoolean.get(env.getEnv(GlobalEnv.class).GetProcs().get(args[0].val()) != null);
 		}
 	}
@@ -2657,8 +2658,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2667,7 +2668,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CArray) {
 				return CBoolean.get(((CArray) args[0]).inAssociativeMode());
 			} else {
@@ -2726,13 +2727,13 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(args[0] instanceof CClosure);
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2777,8 +2778,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2787,7 +2788,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String key;
 			if(args[0] instanceof CString) {
 				key = args[0].val();
@@ -2799,7 +2800,7 @@ public class DataHandling {
 			} else {
 				throw new CREIllegalArgumentException("Argument 1 in " + this.getName() + " must be a string or array.", t);
 			}
-			Construct c = Globals.GetGlobalConstruct(key);
+			Mixed c = Globals.GetGlobalConstruct(key);
 			if(args.length == 2 && c instanceof CNull) {
 				c = args[1];
 			}
@@ -2848,8 +2849,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2858,7 +2859,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String key;
 			if(args[0] instanceof CString) {
 				key = args[0].val();
@@ -2870,7 +2871,7 @@ public class DataHandling {
 			} else {
 				throw new CREIllegalArgumentException("Argument 1 in " + this.getName() + " must be a string or array.", t);
 			}
-			Construct c = args[1];
+			Mixed c = args[1];
 			Globals.SetGlobal(key, c);
 			return CVoid.VOID;
 		}
@@ -2950,15 +2951,15 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			if(nodes.length == 0) {
 				//Empty closure, do nothing.
-				return new CClosure(null, env, Auto.TYPE, new String[]{}, new Construct[]{}, new CClassType[]{}, t);
+				return new CClosure(null, env, Auto.TYPE, new String[]{}, new Mixed[]{}, new CClassType[]{}, t);
 			}
 			// Handle the closure type first thing
 			CClassType returnType = Auto.TYPE;
@@ -2971,7 +2972,7 @@ public class DataHandling {
 				nodes = newNodes;
 			}
 			String[] names = new String[nodes.length - 1];
-			Construct[] defaults = new Construct[nodes.length - 1];
+			Mixed[] defaults = new Mixed[nodes.length - 1];
 			CClassType[] types = new CClassType[nodes.length - 1];
 			// We clone the enviornment at this point, because we don't want the values
 			// that are assigned here to overwrite values in the main scope.
@@ -2989,7 +2990,7 @@ public class DataHandling {
 				newNode.setChildren(children);
 				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel());
 				myEnv.getEnv(GlobalEnv.class).SetFlag("closure-warn-overwrite", true);
-				Construct ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
+				Mixed ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
 				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
 				if(!(ret instanceof IVariable)) {
 					throw new CRECastException("Arguments sent to " + getName() + " barring the last) must be ivariables", t);
@@ -3008,7 +3009,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_0;
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3059,10 +3060,10 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			if(nodes.length == 0) {
 				//Empty closure, do nothing.
-				return new CClosure(null, env, Auto.TYPE, new String[]{}, new Construct[]{}, new CClassType[]{}, t);
+				return new CClosure(null, env, Auto.TYPE, new String[]{}, new Mixed[]{}, new CClassType[]{}, t);
 			}
 			// Handle the closure type first thing
 			CClassType returnType = Auto.TYPE;
@@ -3075,7 +3076,7 @@ public class DataHandling {
 				nodes = newNodes;
 			}
 			String[] names = new String[nodes.length - 1];
-			Construct[] defaults = new Construct[nodes.length - 1];
+			Mixed[] defaults = new Mixed[nodes.length - 1];
 			CClassType[] types = new CClassType[nodes.length - 1];
 			// We clone the enviornment at this point, because we don't want the values
 			// that are assigned here to overwrite values in the main scope.
@@ -3093,7 +3094,7 @@ public class DataHandling {
 				newNode.setChildren(children);
 				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel());
 				myEnv.getEnv(GlobalEnv.class).SetFlag("closure-warn-overwrite", true);
-				Construct ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
+				Mixed ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
 				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
 				if(!(ret instanceof IVariable)) {
 					throw new CRECastException("Arguments sent to " + getName() + " barring the last) must be ivariables", t);
@@ -3112,7 +3113,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3160,8 +3161,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -3204,9 +3205,9 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[args.length - 1] instanceof CClosure) {
-				Construct[] vals = new Construct[args.length - 1];
+				Mixed[] vals = new Mixed[args.length - 1];
 				System.arraycopy(args, 0, vals, 0, args.length - 1);
 				CClosure closure = (CClosure) args[args.length - 1];
 				try {
@@ -3221,8 +3222,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -3264,11 +3265,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(!(args[args.length - 1] instanceof CClosure)) {
 				throw new CRECastException("Only a closure (created from the closure function) can be sent to executeas()", t);
 			}
-			Construct[] vals = new Construct[args.length - 3];
+			Mixed[] vals = new Mixed[args.length - 3];
 			System.arraycopy(args, 2, vals, 0, args.length - 3);
 			CClosure closure = (CClosure) args[args.length - 1];
 			CommandHelperEnvironment cEnv = closure.getEnv().getEnv(CommandHelperEnvironment.class);
@@ -3294,8 +3295,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 	}
 
@@ -3335,13 +3336,13 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(Static.getBoolean(args[0], t));
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3404,13 +3405,13 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CInt((long) Static.getDouble(args[0], t), t);
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3466,13 +3467,13 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CDouble(Static.getDouble(args[0], t), t);
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3529,7 +3530,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CString) {
 				return args[0];
 			}
@@ -3537,8 +3538,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3581,7 +3582,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			int radix = Static.getInt32(args[1], t);
 			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
 				throw new CRERangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
@@ -3618,7 +3619,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3653,7 +3654,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String value = args[0].val();
 			int radix = Static.getInt32(args[1], t);
 			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
@@ -3688,7 +3689,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3738,7 +3739,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
 				return args[0].typeof();
 			} catch (IllegalArgumentException ex) {
@@ -3765,7 +3766,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3814,17 +3815,17 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			boolean oldDynamicScriptMode = env.getEnv(GlobalEnv.class).GetDynamicScriptingMode();
 			ParseTree node = nodes[0];
 			try {
 				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(true);
-				Construct script = parent.seval(node, env);
+				Mixed script = parent.seval(node, env);
 				if(script instanceof CClosure) {
 					throw new CRECastException("Closures cannot be eval'd directly. Use execute() instead.", t);
 				}
@@ -3832,7 +3833,7 @@ public class DataHandling {
 				StringBuilder b = new StringBuilder();
 				int count = 0;
 				for(ParseTree child : root.getChildren()) {
-					Construct s = parent.seval(child, env);
+					Mixed s = parent.seval(child, env);
 					if(!s.val().trim().isEmpty()) {
 						if(count > 0) {
 							b.append(" ");
@@ -3857,7 +3858,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 		//Doesn't matter, run out of state anyways
@@ -3907,7 +3908,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			for(int i = 0; i < args.length; i++) {
 				args[i].val();
 			}
@@ -3930,8 +3931,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -3971,8 +3972,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Construct val = CNull.NULL;
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			Mixed val = CNull.NULL;
 			if(args.length > 0) {
 				val = args[0];
 			}
@@ -4006,7 +4007,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4066,11 +4067,18 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CNull) {
 				return CBoolean.FALSE;
 			}
-			boolean b = InstanceofUtil.isInstanceof(args[0], args[1].val());
+			CClassType type;
+			if(args[1] instanceof CClassType) {
+				type = (CClassType) args[1];
+			} else {
+				throw new RuntimeException("This should have been optimized out, this is a bug in instanceof,"
+						+ " please report it");
+			}
+			boolean b = InstanceofUtil.isInstanceof(args[0], type);
 			return CBoolean.get(b);
 		}
 
@@ -4095,7 +4103,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override

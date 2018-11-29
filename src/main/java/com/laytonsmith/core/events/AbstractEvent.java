@@ -11,7 +11,6 @@ import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -23,6 +22,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
 
 import java.net.URL;
@@ -86,7 +86,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 		preExecution(env, activeEvent);
 		// Various events have a player to put into the env.
 		// Do this after preExcecution() in case the particular event needs to inject the player first.
-		Construct c = activeEvent.getParsedEvent().get("player");
+		Mixed c = activeEvent.getParsedEvent().get("player");
 		if(c != null) {
 			try {
 				MCPlayer p = Static.GetPlayer(c, Target.UNKNOWN);
@@ -185,14 +185,14 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 	 * @return
 	 */
 	public static Object DoConvert(CArray manualObject) {
-		Map<String, Construct> map = new HashMap<String, Construct>();
+		Map<String, Mixed> map = new HashMap<>();
 		for(String key : manualObject.stringKeySet()) {
 			map.put(key, manualObject.get(key, Target.UNKNOWN));
 		}
 		return map;
 	}
 
-	public Map<String, Construct> evaluate_helper(BindableEvent e) throws EventException {
+	public Map<String, Mixed> evaluate_helper(BindableEvent e) throws EventException {
 		return mixin.evaluate_helper(e);
 	}
 

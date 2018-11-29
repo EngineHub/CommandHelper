@@ -9,7 +9,7 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -28,6 +28,7 @@ import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -52,12 +53,12 @@ public class Echoes {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException {
 			if(args.length == 0) {
 				throw new CancelCommandException("", t);
 			}
 			StringBuilder b = new StringBuilder();
-			for(Construct arg : args) {
+			for(Mixed arg : args) {
 				b.append(arg.val());
 			}
 			try {
@@ -98,8 +99,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -132,9 +133,9 @@ public class Echoes {
 		}
 
 		@Override
-		public Construct exec(final Target t, Environment env, final Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, Environment env, final Mixed... args) throws ConfigRuntimeException {
 			StringBuilder b = new StringBuilder();
-			for(Construct arg : args) {
+			for(Mixed arg : args) {
 				b.append(arg.val());
 			}
 			if(env.hasEnv(CommandHelperEnvironment.class)) {
@@ -168,8 +169,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -193,7 +194,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREInsufficientArgumentsException("You must send at least 2 arguments to tmsg", t);
 			}
@@ -229,8 +230,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -243,8 +244,8 @@ public class Echoes {
 	public static class title extends AbstractFunction {
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -281,7 +282,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			int fadein = 10;
 			int stay = 70;
@@ -302,7 +303,7 @@ public class Echoes {
 				fadeout = Static.getInt32(args[4 + offset], t);
 			}
 
-			player.sendTitle(args[offset].nval(), args[1 + offset].nval(), fadein, stay, fadeout);
+			player.sendTitle(Construct.nval(args[offset]), Construct.nval(args[1 + offset]), fadein, stay, fadeout);
 			return CVoid.VOID;
 		}
 	}
@@ -333,9 +334,9 @@ public class Echoes {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String color = null;
-			String val = args[0].nval();
+			String val = Construct.nval(args[0]);
 			if(val == null) {
 				return new CString(MCChatColor.WHITE.toString(), t);
 			}
@@ -444,8 +445,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -492,8 +493,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -502,7 +503,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CString(MCChatColor.stripColor(args[0].val()), t);
 		}
 
@@ -522,7 +523,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Construct exec(final Target t, final Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
 				p.chat(args[0].val());
@@ -550,8 +551,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -591,12 +592,12 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_2;
+		public MSVersion since() {
+			return MSVersion.V3_0_2;
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			final MCPlayer player = Static.GetPlayer(args[0], t);
 			player.chat(args[1].val());
 			return CVoid.VOID;
@@ -645,16 +646,16 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			final MCServer server = Static.getServer();
 
 			// Handle "broadcast(message, [null])".
-			if(args.length == 1 || args[1].nval() == null) { // args.length can only be 1 or 2 due to the numArgs().
+			if(args.length == 1 || Construct.nval(args[1]) == null) { // args.length can only be 1 or 2 due to the numArgs().
 				server.broadcastMessage(args[0].val());
 				return CVoid.VOID;
 			}
@@ -671,7 +672,7 @@ public class Echoes {
 
 				// Get the recipients from the array.
 				Set<MCCommandSender> recipients = new HashSet<>();
-				for(Construct p : array.asList()) {
+				for(Mixed p : array.asList()) {
 					if(p.val().equalsIgnoreCase("~console")) {
 						recipients.add(server.getConsole());
 					} else {
@@ -689,7 +690,7 @@ public class Echoes {
 			}
 
 			// Handle "broadcast(message, permission)".
-			String permission = args[1].nval();
+			String permission = Construct.nval(args[1]);
 			server.broadcastMessage(args[0].val(), permission);
 			return CVoid.VOID;
 		}
@@ -732,12 +733,12 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_2;
+		public MSVersion since() {
+			return MSVersion.V3_0_2;
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String mes = Static.MCToANSIColors(args[0].val());
 			boolean prefix = true;
 			if(args.length > 1) {
@@ -782,8 +783,8 @@ public class Echoes {
 		color color = new color();
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Construct text = args[0];
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			Mixed text = args[0];
 			String symbol = "&";
 			if(args.length == 2) {
 				symbol = args[1].val();
@@ -857,8 +858,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override

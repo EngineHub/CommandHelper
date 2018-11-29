@@ -24,7 +24,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -37,7 +37,6 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
@@ -53,6 +52,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -83,7 +83,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
@@ -106,8 +106,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_3;
+		public MSVersion since() {
+			return MSVersion.V3_3_3;
 		}
 
 		@Override
@@ -136,7 +136,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			boolean physics = true;
@@ -163,8 +163,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_3;
+		public MSVersion since() {
+			return MSVersion.V3_3_3;
 		}
 
 		@Override
@@ -193,7 +193,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
@@ -215,8 +215,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_3;
+		public MSVersion since() {
+			return MSVersion.V3_3_3;
 		}
 
 		@Override
@@ -245,7 +245,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
@@ -278,8 +278,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_3;
+		public MSVersion since() {
+			return MSVersion.V3_3_3;
 		}
 
 		@Override
@@ -324,12 +324,12 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_2;
+		public MSVersion since() {
+			return MSVersion.V3_0_2;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
 			int x;
 			int y;
@@ -425,12 +425,12 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_2;
+		public MSVersion since() {
+			return MSVersion.V3_0_2;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
 			int x;
 			int y;
@@ -542,8 +542,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -552,7 +552,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			if(sender instanceof MCPlayer) {
@@ -635,8 +635,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -645,7 +645,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCWorld w = null;
 			if(sender instanceof MCPlayer) {
@@ -694,8 +694,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -704,7 +704,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCWorld w = null;
 			if(sender instanceof MCPlayer) {
@@ -744,8 +744,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -754,7 +754,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCLocation l;
 			MCPlayer p;
 			p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -802,7 +802,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
 			int x;
 			int z;
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
@@ -840,8 +840,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -851,7 +851,7 @@ public class Environment {
 			if(children.size() < 1) {
 				return null;
 			}
-			Construct c = children.get(children.size() - 1).getData();
+			Mixed c = children.get(children.size() - 1).getData();
 			if(c instanceof CString) {
 				try {
 					MCBiomeType.valueOf(c.val());
@@ -905,7 +905,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
 			int x;
 			int z;
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
@@ -936,8 +936,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -973,12 +973,12 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			double x = 0;
 			double z = 0;
 			MCWorld w = null;
@@ -1056,12 +1056,12 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			double x = 0;
 			double y = 0;
 			double z = 0;
@@ -1133,7 +1133,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCInstrument i = null;
 			MCNote n = null;
@@ -1225,8 +1225,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1235,8 +1235,8 @@ public class Environment {
 	public static class spawn_particle extends AbstractFunction {
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_3;
+		public MSVersion since() {
+			return MSVersion.V3_3_3;
 		}
 
 		@Override
@@ -1287,7 +1287,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			MCParticle p;
 			int count = 0;
@@ -1339,7 +1339,7 @@ public class Environment {
 					data = ObjectGenerator.GetGenerator().item(pa.get("item", t), t);
 
 				} else if(pa.containsKey("color")) {
-					Construct c = pa.get("color", t);
+					Mixed c = pa.get("color", t);
 					if(c instanceof CArray) {
 						data = ObjectGenerator.GetGenerator().color((CArray) c, t);
 					} else {
@@ -1359,7 +1359,7 @@ public class Environment {
 				if(args.length == 3) {
 					MCPlayer player;
 					if(args[2] instanceof CArray) {
-						for(Construct playerName : ((CArray) args[2]).asList()) {
+						for(Mixed playerName : ((CArray) args[2]).asList()) {
 							player = Static.GetPlayer(playerName, t);
 							player.spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, data);
 						}
@@ -1398,9 +1398,9 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t,
+		public Mixed exec(Target t,
 				com.laytonsmith.core.environments.Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			MCSound sound;
@@ -1490,8 +1490,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1547,9 +1547,9 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t,
+		public Mixed exec(Target t,
 				com.laytonsmith.core.environments.Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			String path;
@@ -1632,8 +1632,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -1657,7 +1657,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t);
 			MCBlock b = l.getBlock();
@@ -1711,8 +1711,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1752,11 +1752,11 @@ public class Environment {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -1807,11 +1807,11 @@ public class Environment {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -1895,11 +1895,11 @@ public class Environment {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -1949,11 +1949,11 @@ public class Environment {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCTreeType treeType;
 			if(args.length == 1) {
 				treeType = MCTreeType.TREE;
@@ -2005,11 +2005,11 @@ public class Environment {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			if(loc.getBlock().isCommandBlock()) {
@@ -2057,11 +2057,11 @@ public class Environment {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
 			String cmd = null;
 			if(args.length == 2 && !(args[1] instanceof CNull)) {
@@ -2117,11 +2117,11 @@ public class Environment {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			if(loc.getBlock().isCommandBlock()) {
@@ -2169,11 +2169,11 @@ public class Environment {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args
 		) throws ConfigRuntimeException {
 			String name = null;
 			if(args.length == 2 && !(args[1] instanceof CNull)) {

@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("TreeType")
+@MEnum("com.commandhelper.TreeType")
 public enum MCTreeType {
 	TREE,
 	BIG_TREE,

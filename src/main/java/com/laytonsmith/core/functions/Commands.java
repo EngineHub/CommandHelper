@@ -7,7 +7,7 @@ import com.laytonsmith.abstraction.MCCommandMap;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -15,7 +15,6 @@ import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -23,6 +22,7 @@ import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,7 +62,7 @@ public class Commands {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			MCCommandMap map = s.getCommandMap();
 			if(map == null) {
@@ -84,7 +84,7 @@ public class Commands {
 		 * @param cmd
 		 * @param arg
 		 */
-		public static void customExec(Target t, Environment environment, MCCommand cmd, Construct arg) {
+		public static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
 			if(arg instanceof CClosure) {
 				onTabComplete.remove(cmd.getName());
 				onTabComplete.put(cmd.getName(), (CClosure) arg);
@@ -114,7 +114,7 @@ public class Commands {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -137,7 +137,7 @@ public class Commands {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map == null) {
 				throw new CRENotFoundException(this.getName() + " is not supported in this mode (CommandMap not found).", t);
@@ -166,7 +166,7 @@ public class Commands {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -190,7 +190,7 @@ public class Commands {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map == null) {
 				throw new CRENotFoundException(this.getName() + " is not supported in this mode (CommandMap not found).", t);
@@ -217,9 +217,9 @@ public class Commands {
 				}
 				if(ops.containsKey("aliases")) {
 					if(ops.get("aliases", t) instanceof CArray) {
-						List<Construct> ca = ((CArray) ops.get("aliases", t)).asList();
+						List<Mixed> ca = ((CArray) ops.get("aliases", t)).asList();
 						List<String> aliases = new ArrayList<String>();
-						for(Construct c : ca) {
+						for(Mixed c : ca) {
 							aliases.add(c.val().toLowerCase());
 						}
 						cmd.setAliases(aliases);
@@ -270,7 +270,7 @@ public class Commands {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -328,7 +328,7 @@ public class Commands {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map == null) {
 				throw new CRENotFoundException(this.getName() + " is not supported in this mode (CommandMap not found).", t);
@@ -349,7 +349,7 @@ public class Commands {
 		 * @param cmd
 		 * @param arg
 		 */
-		public static void customExec(Target t, Environment environment, MCCommand cmd, Construct arg) {
+		public static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
 			if(arg instanceof CClosure) {
 				onCommand.remove(cmd.getName());
 				onCommand.put(cmd.getName(), (CClosure) arg);
@@ -378,7 +378,7 @@ public class Commands {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -401,7 +401,7 @@ public class Commands {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map == null) {
 				return CNull.NULL;
@@ -412,7 +412,7 @@ public class Commands {
 				CArray ca = CArray.GetAssociativeArray(t);
 				ca.set("name", new CString(command.getName(), t), t);
 				ca.set("description", new CString(command.getDescription(), t), t);
-				Construct permission;
+				Mixed permission;
 				if(command.getPermission() == null) {
 					permission = CNull.NULL;
 				} else {
@@ -449,7 +449,7 @@ public class Commands {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -472,7 +472,7 @@ public class Commands {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map != null) {
 				map.clearCommands();
@@ -498,7 +498,7 @@ public class Commands {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 }

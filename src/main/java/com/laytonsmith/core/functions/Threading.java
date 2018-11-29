@@ -8,7 +8,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
@@ -18,7 +18,6 @@ import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -31,6 +30,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -68,7 +68,7 @@ public class Threading {
 		}
 
 		@Override
-		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			if(!(args[1] instanceof CClosure)) {
 				throw new CRECastException("Expected closure for arg 2", t);
@@ -122,7 +122,7 @@ public class Threading {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -163,7 +163,7 @@ public class Threading {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CString(Thread.currentThread().getName(), t);
 		}
 
@@ -184,7 +184,7 @@ public class Threading {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -217,7 +217,7 @@ public class Threading {
 		}
 
 		@Override
-		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			final CClosure closure = Static.getObject(args[0], t, CClosure.class);
 			StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
@@ -254,7 +254,7 @@ public class Threading {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -280,7 +280,7 @@ public class Threading {
 		}
 
 		@Override
-		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			final CClosure closure = Static.getObject(args[0], t, CClosure.class);
 			Object ret;
 			try {
@@ -305,7 +305,7 @@ public class Threading {
 			if(ret instanceof RuntimeException) {
 				throw (RuntimeException) ret;
 			} else {
-				return (Construct) ret;
+				return (Mixed) ret;
 			}
 		}
 
@@ -330,7 +330,7 @@ public class Threading {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -368,14 +368,14 @@ public class Threading {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 
 			// Get the sync object tree and the code to synchronize.
 			ParseTree syncObjectTree = nodes[0];
 			ParseTree code = nodes[1];
 
-			// Get the sync object (CArray or String value of the Construct).
-			Construct cSyncObject = parent.seval(syncObjectTree, env);
+			// Get the sync object (CArray or String value of the Mixed).
+			Mixed cSyncObject = parent.seval(syncObjectTree, env);
 			if(cSyncObject instanceof CNull) {
 				throw new CRENullPointerException("Synchronization object may not be null in " + getName() + "().", t);
 			}
@@ -434,7 +434,7 @@ public class Threading {
 		}
 
 		@Override
-		public Construct exec(final Target t, final Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -462,7 +462,7 @@ public class Threading {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 		@Override

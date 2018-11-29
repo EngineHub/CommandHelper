@@ -28,4 +28,10 @@ public enum ObjectModifier {
 	 * This in not useable in top level classes, as it wouldn't make sense otherwise.
 	 */
 	STATIC,
+	/**
+	 * An abstract class is one that cannot be instantiated directly, only non-abstract subclasses can be. It is an
+	 * error for a class to be both final and abstract in user code, though this restriction is not enforced for system
+	 * level code (which is taken advantage of by enums, so that ms.lang.enum cannot be subclassed or instantiated).
+	 */
+	ABSTRACT,
 }

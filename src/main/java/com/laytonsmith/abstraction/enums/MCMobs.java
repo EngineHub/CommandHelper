@@ -6,7 +6,7 @@ import com.laytonsmith.annotations.MEnum;
  * Not all of these directly map to entity types.
  * These should be considered aliases for the spawn_mob() function and all living entity types.
  */
-@MEnum("Mobs")
+@MEnum("com.commandhelper.Mobs")
 public enum MCMobs {
 	BAT,
 	BLAZE,

@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("Rotation")
+@MEnum("com.commandhelper.Rotation")
 public enum MCRotation {
 	CLOCKWISE,
 	CLOCKWISE_135,

@@ -2,9 +2,10 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.Sizeable;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,13 +20,13 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get("ms.lang.mutable_primitive");
 
-	private Construct value = CNull.NULL;
+	private Mixed value = CNull.NULL;
 
 	public CMutablePrimitive(Target t) {
 		this(null, t);
 	}
 
-	public CMutablePrimitive(Construct value, Target t) {
+	public CMutablePrimitive(Mixed value, Target t) {
 		super(t, 0);
 		set(value, t);
 	}
@@ -41,7 +42,7 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 	 * @param value
 	 * @param t
 	 */
-	public void set(Construct value, Target t) {
+	public void set(Mixed value, Target t) {
 		if(value instanceof CArray) {
 			throw new CREFormatException("mutable_primitives can only store primitive values.", t);
 		}
@@ -49,30 +50,30 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 	}
 
 	@Override
-	public void set(Construct index, Construct c, Target t) {
+	public void set(Mixed index, Mixed c, Target t) {
 		throw new CRECastException("mutable_primitives cannot have values set in them", t);
 	}
 
 	/**
 	 * Sets the value as if
-	 * {@link #set(com.laytonsmith.core.constructs.Construct, com.laytonsmith.core.constructs.Target)} were called, then
+	 * {@link #set(Mixed, com.laytonsmith.core.constructs.Target)} were called, then
 	 * returns a reference to this object.
 	 *
 	 * @param value
 	 * @param t
 	 * @return
 	 */
-	public CMutablePrimitive setAndReturn(Construct value, Target t) {
+	public CMutablePrimitive setAndReturn(Mixed value, Target t) {
 		set(value, t);
 		return this;
 	}
 
-	public Construct get() {
+	public Mixed get() {
 		return value;
 	}
 
 	@Override
-	public Construct get(Construct index, Target t) {
+	public Mixed get(Mixed index, Target t) {
 		return value;
 	}
 
@@ -93,7 +94,7 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 
 	@Override
 	protected String getQuote() {
-		return value.getQuote();
+		return new CString(value.val(), Target.UNKNOWN).getQuote();
 	}
 
 	@Override
@@ -111,7 +112,7 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 	}
 
 	@Override
-	public List<Construct> asList() {
+	public List<Mixed> asList() {
 		return getArray();
 	}
 
@@ -126,8 +127,8 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 	}
 
 	@Override
-	protected List<Construct> getArray() {
-		List<Construct> array = new ArrayList<>();
+	protected List<Mixed> getArray() {
+		List<Mixed> array = new ArrayList<>();
 		array.add(value);
 		return array;
 	}
@@ -138,7 +139,7 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 	}
 
 	@Override
-	public void push(Construct c, Integer i, Target t) {
+	public void push(Mixed c, Integer i, Target t) {
 		set(c, t);
 	}
 
@@ -149,7 +150,7 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_1;
+		return MSVersion.V3_3_1;
 	}
 
 	@Override

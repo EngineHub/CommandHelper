@@ -7,7 +7,7 @@ import java.util.Map;
 /**
  * All supported color values for chat
  */
-@MEnum("ChatColor")
+@MEnum("com.commandhelper.ChatColor")
 public enum MCChatColor {
 
 	/**

@@ -1,6 +1,6 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 
 /**
@@ -34,8 +34,8 @@ public abstract class DummyFunction extends AbstractFunction {
 	}
 
 	@Override
-	public CHVersion since() {
-		return CHVersion.V0_0_0;
+	public MSVersion since() {
+		return MSVersion.V0_0_0;
 	}
 
 	@Override

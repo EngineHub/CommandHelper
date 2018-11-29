@@ -13,7 +13,7 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -38,6 +38,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.taskmanager.CoreTaskType;
 import com.laytonsmith.core.taskmanager.TaskManager;
@@ -112,8 +113,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
@@ -122,7 +123,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CInt(System.currentTimeMillis(), t);
 		}
 	}
@@ -157,8 +158,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
@@ -167,7 +168,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CInt(System.nanoTime(), t);
 		}
 	}
@@ -205,13 +206,13 @@ public class Scheduling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			Construct x = args[0];
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			Mixed x = args[0];
 			double time = Static.getNumber(x, t);
 			try {
 				Thread.sleep((int) (time * 1000));
@@ -266,7 +267,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			long time = Static.getInt(args[0], t);
 			int offset = 0;
 			long delay = time;
@@ -304,8 +305,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -359,7 +360,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			final TaskManager taskManager = environment.getEnv(GlobalEnv.class).GetTaskManager();
 			long time = Static.getInt(args[0], t);
 			if(!(args[1] instanceof CClosure)) {
@@ -409,8 +410,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -463,7 +464,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 0 && environment.getEnv(GlobalEnv.class).GetCustom("timeout-id") != null) {
 				StaticLayer.ClearFutureRunnable((Integer) environment.getEnv(GlobalEnv.class).GetCustom("timeout-id"));
 			} else if(args.length == 1) {
@@ -475,8 +476,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -555,8 +556,8 @@ public class Scheduling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -565,18 +566,18 @@ public class Scheduling {
 		}
 
 		@Override
-		public CString exec(Target t, Environment env, Construct... args) {
+		public CString exec(Target t, Environment env, Mixed... args) {
 			Date now = new Date();
 			if(args.length >= 2 && !(args[1] instanceof CNull)) {
 				now = new Date(Static.getInt(args[1], t));
 			}
 			TimeZone timezone = TimeZone.getDefault();
-			if(args.length >= 3 && args[2].nval() != null) {
+			if(args.length >= 3 && Construct.nval(args[2]) != null) {
 				timezone = TimeZone.getTimeZone(args[2].val());
 			}
 			Locale locale = Locale.getDefault();
 			if(args.length >= 4) {
-				String countryCode = args[3].nval();
+				String countryCode = Construct.nval(args[3]);
 				if(countryCode == null) {
 					locale = Locale.getDefault();
 				} else {
@@ -636,7 +637,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			SimpleDateFormat dateFormat;
 			try {
 				dateFormat = new SimpleDateFormat(args[0].toString());
@@ -671,7 +672,7 @@ public class Scheduling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -704,7 +705,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String[] timezones = ArrayUtils.EMPTY_STRING_ARRAY;
 			try {
 				timezones = TimeZone.getAvailableIDs();
@@ -744,7 +745,7 @@ public class Scheduling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 	}
@@ -791,7 +792,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			//First things first, check the format of the arguments.
 			if(!(args[0] instanceof CString)) {
 				throw new CRECastException("Expected string for argument 1 in " + getName(), t);
@@ -1113,7 +1114,7 @@ public class Scheduling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1152,7 +1153,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Integer id = (Integer) environment.getEnv(GlobalEnv.class).GetCustom("cron-task-id");
 			if(args.length == 1) {
 				id = (int) Static.getInt(args[0], t);
@@ -1186,7 +1187,7 @@ public class Scheduling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}

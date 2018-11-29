@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("PatternShape")
+@MEnum("com.commandhelper.PatternShape")
 public enum MCPatternShape {
 	BASE,
 	BORDER,

@@ -3,13 +3,13 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.FullyQualifiedClassName;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Procedure;
@@ -24,7 +24,6 @@ import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
@@ -33,6 +32,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventList;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
@@ -40,12 +40,13 @@ import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.MEnumTypeValue;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.PersistenceNetwork;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -76,7 +77,7 @@ public class Reflection {
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class reflect_pull extends AbstractFunction {
 
-		private static Set<Construct> protocols;
+		private static Set<Mixed> protocols;
 
 		@Override
 		public String getName() {
@@ -127,7 +128,7 @@ public class Reflection {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 1) {
 				throw new CREInsufficientArgumentsException("Not enough parameters was sent to " + getName(), t);
 			}
@@ -166,7 +167,7 @@ public class Reflection {
 				return new CInt(t.col(), t);
 			} else if("datasources".equalsIgnoreCase(param)) {
 				if(protocols == null) {
-					protocols = new HashSet<Construct>();
+					protocols = new HashSet<>();
 					for(String s : DataSourceFactory.GetSupportedProtocols()) {
 						protocols.add(new CString(s, Target.UNKNOWN));
 					}
@@ -179,28 +180,22 @@ public class Reflection {
 				if(args.length == 1) {
 					//No name provided
 					for(ClassMirror<? extends Enum> e : enums) {
-						a.push(new CString((String) e.getAnnotation(MEnum.class).getValue("value"), t), t);
+						String name = (String) e.getAnnotation(MEnum.class).getValue("value");
+						a.push(CClassType.get(name), t);
 					}
 					for(ClassMirror<? extends DynamicEnum> d : dEnums) {
-						a.push(new CString((String) d.getAnnotation(MDynamicEnum.class).getValue("value"), t), t);
+						String name = (String) d.getAnnotation(MDynamicEnum.class).getValue("value");
+						a.push(CClassType.get(name), t);
 					}
 				} else if(args.length == 2) {
-					String enumName = args[1].val();
-					for(ClassMirror<? extends Enum> e : enums) {
-						if(e.getAnnotation(MEnum.class).getValue("value").equals(enumName)) {
-							for(Enum ee : e.loadClass().getEnumConstants()) {
-								a.push(new CString(ee.name(), t), t);
-							}
-							break;
+					FullyQualifiedClassName enumName = FullyQualifiedClassName.forName(args[1].val(), t);
+					try {
+						for(MEnumTypeValue v : NativeTypeList.getNativeEnumType(enumName).values()) {
+							a.push(v, t);
 						}
-					}
-					for(ClassMirror<? extends DynamicEnum> d : dEnums) {
-						if(d.getAnnotation(MDynamicEnum.class).getValue("value").equals(enumName)) {
-							for(DynamicEnum ee : (Collection<DynamicEnum>) ReflectionUtils.invokeMethod(d.loadClass(), null, "values")) {
-								a.push(new CString(ee.name(), t), t);
-							}
-							break;
-						}
+					} catch (ClassNotFoundException ex) {
+						// Actually, I don't think this can
+						throw new CRECastException("Cannot find enum of type " + enumName, t, ex);
 					}
 				}
 				return a;
@@ -228,8 +223,8 @@ public class Reflection {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -268,7 +263,7 @@ public class Reflection {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String element = args[0].val();
 			DocField docField;
 			try {
@@ -373,8 +368,8 @@ public class Reflection {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -419,7 +414,7 @@ public class Reflection {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = CArray.GetAssociativeArray(t);
 			if(FUNCS.keySet().size() < 10) {
 				initf();
@@ -453,7 +448,7 @@ public class Reflection {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -476,13 +471,13 @@ public class Reflection {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment,
+				Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(Event event : EventList.GetEvents()) {
 				ret.push(new CString(event.getName(), t), t);
 			}
-			ret.sort(CArray.SortType.STRING_IC);
+			ret.sort(CArray.ArraySortType.STRING_IC);
 			return ret;
 		}
 
@@ -503,7 +498,7 @@ public class Reflection {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -526,12 +521,12 @@ public class Reflection {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(Script s : Static.getAliasCore().getScripts()) {
 				ret.push(new CString(s.getSignature(), t), t);
 			}
-			ret.sort(CArray.SortType.STRING_IC);
+			ret.sort(CArray.ArraySortType.STRING_IC);
 			return ret;
 		}
 
@@ -552,7 +547,7 @@ public class Reflection {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -575,7 +570,7 @@ public class Reflection {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			PersistenceNetwork pn = environment.getEnv(GlobalEnv.class).GetPersistenceNetwork();
 			return new CString(pn.getKeySource(args[0].val().split("\\.")).toString(), t);
 		}
@@ -600,7 +595,7 @@ public class Reflection {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -624,12 +619,12 @@ public class Reflection {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
 			for(Map.Entry<String, Procedure> p : environment.getEnv(GlobalEnv.class).GetProcs().entrySet()) {
 				ret.push(new CString(p.getKey(), t), t);
 			}
-			ret.sort(CArray.SortType.STRING_IC);
+			ret.sort(CArray.ArraySortType.STRING_IC);
 			return ret;
 		}
 
@@ -650,7 +645,7 @@ public class Reflection {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -689,10 +684,15 @@ public class Reflection {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
-			for(String c : NativeTypeList.getNativeTypeList()) {
-				CClassType cct = CClassType.get(c);
+			for(FullyQualifiedClassName c : NativeTypeList.getNativeTypeList()) {
+				CClassType cct;
+				try {
+					cct = CClassType.get(c);
+				} catch (ClassNotFoundException ex) {
+					throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
+				}
 				if(cct == CNull.TYPE) {
 					continue;
 				}
@@ -720,7 +720,7 @@ public class Reflection {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_3;
+			return MSVersion.V3_3_3;
 		}
 
 	}

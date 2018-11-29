@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-@MDynamicEnum("PotionEffectType")
+@MDynamicEnum("com.commandhelper.PotionEffectType")
 public abstract class MCPotionEffectType<Concrete> extends DynamicEnum<MCPotionEffectType.MCVanillaPotionEffectType, Concrete> {
 
 	protected static final Map<String, MCPotionEffectType> MAP = new HashMap<>();

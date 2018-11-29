@@ -14,6 +14,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CEntry;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CNull;
@@ -50,6 +51,7 @@ import com.laytonsmith.core.extensions.ExtensionTracker;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
 
 import java.util.ArrayList;
@@ -184,7 +186,7 @@ public class Script {
 				if(rootNode == null) {
 					continue;
 				}
-				for(Construct tempNode : rootNode.getAllData()) {
+				for(Mixed tempNode : rootNode.getAllData()) {
 					if(tempNode instanceof Variable) {
 						if(leftVars == null) {
 							throw ConfigRuntimeException.CreateUncatchableException("$variables may not be used in this context."
@@ -243,8 +245,8 @@ public class Script {
 	 * @param env
 	 * @return
 	 */
-	public Construct seval(ParseTree c, final Environment env) {
-		Construct ret = eval(c, env);
+	public Mixed seval(ParseTree c, final Environment env) {
+		Mixed ret = eval(c, env);
 		while(ret instanceof IVariable) {
 			IVariable cur = (IVariable) ret;
 			ret = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget()).ival();
@@ -260,20 +262,23 @@ public class Script {
 	 * @return
 	 * @throws CancelCommandException
 	 */
-	public Construct eval(ParseTree c, final Environment env) throws CancelCommandException {
+	public Mixed eval(ParseTree c, final Environment env) throws CancelCommandException {
 		if(env.getEnv(GlobalEnv.class).IsInterrupted()) {
 			//First things first, if we're interrupted, kill the script
 			//unconditionally.
 			throw new CancelCommandException("", Target.UNKNOWN);
 		}
 
-		final Construct m = c.getData();
+		final Mixed m = c.getData();
 		currentEnv = env;
-		if(m.getCType() != ConstructType.FUNCTION) {
-			if(m.getCType() == ConstructType.VARIABLE) {
-				return new CString(m.val(), m.getTarget());
-			} else {
-				return m;
+		if(m instanceof Construct) {
+			Construct co = (Construct) m;
+			if(co.getCType() != ConstructType.FUNCTION) {
+				if(co.getCType() == ConstructType.VARIABLE) {
+					return new CString(m.val(), m.getTarget());
+				} else {
+					return m;
+				}
 			}
 		}
 
@@ -299,7 +304,7 @@ public class Script {
 				} catch (CloneNotSupportedException e) {
 				}
 				ProfilePoint pp = env.getEnv(GlobalEnv.class).GetProfiler().start(m.val() + " execution", LogLevel.INFO);
-				Construct ret;
+				Mixed ret;
 				try {
 					if(debugOutput) {
 						doDebugOutput(p.getName(), c.getChildren());
@@ -312,13 +317,13 @@ public class Script {
 			}
 			final Function f;
 			try {
-				f = (Function) FunctionList.getFunction(m);
-			} catch (ConfigCompileException e) {
+				f = (Function) FunctionList.getFunction((CFunction) m);
+			} catch (ConfigCompileException | ClassCastException e) {
 				//Turn it into a config runtime exception. This shouldn't ever happen though.
 				throw ConfigRuntimeException.CreateUncatchableException("Unable to find function " + m.val(), m.getTarget());
 			}
 
-			ArrayList<Construct> args = new ArrayList<>();
+			ArrayList<Mixed> args = new ArrayList<>();
 			try {
 				if(f.isRestricted() && !Static.hasCHPermission(f.getName(), env)) {
 					throw new CREInsufficientPermissionException("You do not have permission to use the "
@@ -334,7 +339,7 @@ public class Script {
 							&& env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())) {
 						p = env.getEnv(GlobalEnv.class).GetProfiler().start(f.profileMessageS(c.getChildren()), f.profileAt());
 					}
-					Construct ret;
+					Mixed ret;
 					try {
 						ret = f.execs(m.getTarget(), env, this, c.getChildren().toArray(new ParseTree[]{}));
 					} finally {
@@ -349,16 +354,16 @@ public class Script {
 					args.add(eval(c2, env));
 				}
 				Object[] a = args.toArray();
-				Construct[] ca = new Construct[a.length];
+				Mixed[] ca = new Mixed[a.length];
 				for(int i = 0; i < a.length; i++) {
-					ca[i] = (Construct) a[i];
+					ca[i] = (Mixed) a[i];
 					//CArray, CBoolean, CDouble, CInt, CNull, CString, CVoid, CEntry, CLabel (only to sconcat).
 					if(!(ca[i] instanceof CArray || ca[i] instanceof CBoolean || ca[i] instanceof CDouble
 							|| ca[i] instanceof CInt || ca[i] instanceof CNull
 							|| ca[i] instanceof CString || ca[i] instanceof CVoid
 							|| ca[i] instanceof IVariable || ca[i] instanceof CEntry || ca[i] instanceof CLabel)
 							&& (!f.getName().equals("__autoconcat__") && (ca[i] instanceof CLabel))) {
-						throw new CRECastException("Invalid Construct ("
+						throw new CRECastException("Invalid Mixed ("
 								+ ca[i].getClass() + ") being passed as an argument to a function ("
 								+ f.getName() + ")", m.getTarget());
 					}
@@ -376,7 +381,7 @@ public class Script {
 							&& env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())) {
 						p = env.getEnv(GlobalEnv.class).GetProfiler().start(f.profileMessage(ca), f.profileAt());
 					}
-					Construct ret;
+					Mixed ret;
 					try {
 						ret = f.exec(m.getTarget(), env, ca);
 					} finally {
@@ -424,19 +429,19 @@ public class Script {
 
 				List<String> args2 = new ArrayList<>();
 				Map<String, String> vars = new HashMap<>();
-				for(Construct cc : args) {
+				for(Mixed cc : args) {
 					if(cc instanceof IVariable) {
-						Construct ccc = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) cc).getVariableName(), cc.getTarget()).ival();
+						Mixed ccc = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) cc).getVariableName(), cc.getTarget()).ival();
 						String vval = ccc.val();
 						if(ccc instanceof CString) {
-							vval = ccc.asString().getQuote();
+							vval = new CString(ccc.val(), Target.UNKNOWN).getQuote();
 						}
 						vars.put(((IVariable) cc).getVariableName(), vval);
 					}
 					if(cc == null) {
 						args2.add("java-null");
 					} else if(cc instanceof CString) {
-						args2.add(cc.asString().getQuote());
+						args2.add(new CString(cc.val(), Target.UNKNOWN).getQuote());
 					} else if(cc instanceof IVariable) {
 						args2.add(((IVariable) cc).getVariableName());
 					} else {
@@ -498,7 +503,7 @@ public class Script {
 		for(ParseTree t : children) {
 			if(t.isConst()) {
 				if(t.getData() instanceof CString) {
-					args.add(t.getData().asString().getQuote());
+					args.add(new CString(t.getData().val(), Target.UNKNOWN).getQuote());
 				} else {
 					args.add(t.getData().val());
 				}
@@ -531,15 +536,15 @@ public class Script {
 				break;
 			}
 			lastJ = j;
-			Construct c = cleft.get(j);
+			Mixed c = cleft.get(j);
 			if(args.size() <= j) {
-				if(c.getCType() != ConstructType.VARIABLE || !((Variable) c).isOptional()) {
+				if(!Construct.IsCType(c, ConstructType.VARIABLE) || !((Variable) c).isOptional()) {
 					isAMatch = false;
 				}
 				break;
 			}
 			String arg = args.get(j);
-			if(c.getCType() != ConstructType.VARIABLE) {
+			if(!Construct.IsCType(c, ConstructType.VARIABLE)) {
 				if(caseSensitive && !c.val().equals(arg) || !caseSensitive && !c.val().equalsIgnoreCase(arg)) {
 					isAMatch = false;
 					continue;
@@ -551,7 +556,7 @@ public class Script {
 					if(args.size() <= cleft.size()) {
 						return true;
 					} else {
-						Construct fin = cleft.get(cleft.size() - 1);
+						Mixed fin = cleft.get(cleft.size() - 1);
 						if(fin instanceof Variable) {
 							if(((Variable) fin).isFinal()) {
 								return true;
@@ -562,7 +567,7 @@ public class Script {
 				}
 			}
 			if(j == cleft.size() - 1) {
-				if(cleft.get(j).getCType() == ConstructType.VARIABLE) {
+				if(Construct.IsCType(cleft.get(j), ConstructType.VARIABLE)) {
 					Variable lv = (Variable) cleft.get(j);
 					if(lv.isFinal()) {
 						for(int a = j; a < args.size(); a++) {
@@ -603,7 +608,7 @@ public class Script {
 		Variable v = null;
 		for(int j = 0; j < cleft.size(); j++) {
 			try {
-				if(cleft.get(j).getCType() == ConstructType.VARIABLE) {
+				if(Construct.IsCType(cleft.get(j), ConstructType.VARIABLE)) {
 					if(((Variable) cleft.get(j)).getVariableName().equals("$")) {
 						for(int k = j; k < args.size(); k++) {
 							lastVar.append(args.get(k).trim()).append(" ");
@@ -884,7 +889,8 @@ public class Script {
 						// the same argument position.
 						if(c1.getCType() == c2.getCType()
 								&& (c1.getCType() == ConstructType.STRING || c1.getCType() == ConstructType.COMMAND)) {
-							if(c1.nval() != c2.nval() && (c1.nval() == null || !c1.nval().equals(c2.nval()))) {
+							if(Construct.nval(c1) != Construct.nval(c2) && (Construct.nval(c1) == null
+									|| !Construct.nval(c1).equals(Construct.nval(c2)))) {
 								break matchScope;
 							}
 						}

@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("FireworkType")
+@MEnum("com.commandhelper.FireworkType")
 public enum MCFireworkType {
 	BALL,
 	BALL_LARGE,

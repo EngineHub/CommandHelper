@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("EntityEffect")
+@MEnum("com.commandhelper.EntityEffect")
 public enum MCEntityEffect {
 	ARROW_PARTICLES,
 	RABBIT_JUMP,

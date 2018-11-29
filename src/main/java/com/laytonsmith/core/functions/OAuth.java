@@ -11,7 +11,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CNull;
@@ -28,6 +28,7 @@ import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.ReadOnlyException;
@@ -83,7 +84,7 @@ public class OAuth {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args) throws ConfigRuntimeException {
 			// TODO: Make this part support profiles
 			CArray options = Static.getArray(args[0], t);
 			String authorizationUrl = options.get("authorizationUrl", t).val();
@@ -91,7 +92,7 @@ public class OAuth {
 			String clientId = options.get("clientId", t).val();
 			String clientSecret = options.get("clientSecret", t).val();
 			String scope = options.get("scope", t).val();
-			String successText = options.get("successText", t).nval();
+			String successText = Construct.nval(options.get("successText", t));
 			CArray extraHeaders1 = null;
 			if(options.containsKey("extraHeaders")) {
 				extraHeaders1 = Static.getArray(options.get("extraHeaders", t), t);
@@ -393,7 +394,7 @@ public class OAuth {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 	}
@@ -417,7 +418,7 @@ public class OAuth {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			PersistenceNetwork pn = environment.getEnv(GlobalEnv.class).GetPersistenceNetwork();
 			String namespace = "oauth";
 			if(args.length >= 1) {
@@ -458,7 +459,7 @@ public class OAuth {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 	}

@@ -6,7 +6,7 @@ import com.laytonsmith.annotations.MEnum;
  * Criteria names which trigger an objective to be modified by actions in-game
  *
  */
-@MEnum("Criteria")
+@MEnum("com.commandhelper.Criteria")
 public enum MCCriteria {
 	DEATHCOUNT("deathCount"),
 	HEALTH("health"),

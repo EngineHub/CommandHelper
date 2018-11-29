@@ -2,7 +2,7 @@ package com.laytonsmith.core.natives.interfaces;
 
 import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CClassType;
 import java.util.EnumSet;
 import java.util.Set;
@@ -20,19 +20,19 @@ public class MixedRunner extends AbstractMixedInterfaceRunner {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_0_1;
+		return MSVersion.V3_0_1;
 	}
 
 	// Interestingly, this is the only class that will return empty arrays for both
 	// of these methods.
 	@Override
 	public CClassType[] getSuperclasses() {
-		return new CClassType[]{};
+		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{};
+		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 
 	@Override

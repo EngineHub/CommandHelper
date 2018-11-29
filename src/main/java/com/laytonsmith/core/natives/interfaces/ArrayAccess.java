@@ -3,7 +3,6 @@ package com.laytonsmith.core.natives.interfaces;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.CClassType;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.Arrays;
@@ -26,7 +25,7 @@ public interface ArrayAccess extends Mixed, Sizeable {
 	 * @param t
 	 * @return
 	 */
-	public Construct get(String index, Target t) throws ConfigRuntimeException;
+	public Mixed get(String index, Target t) throws ConfigRuntimeException;
 
 	/**
 	 * Returns the mixed at this location. This should throw an exception if the index does not exist. This method will
@@ -37,7 +36,7 @@ public interface ArrayAccess extends Mixed, Sizeable {
 	 * @return
 	 * @throws ConfigRuntimeException
 	 */
-	public Construct get(int index, Target t) throws ConfigRuntimeException;
+	public Mixed get(int index, Target t) throws ConfigRuntimeException;
 
 	/**
 	 * Returns the mixed at this location. This should throw an exception if the index does not exist. This method may
@@ -48,7 +47,7 @@ public interface ArrayAccess extends Mixed, Sizeable {
 	 * @return
 	 * @throws ConfigRuntimeException
 	 */
-	public Construct get(Construct index, Target t) throws ConfigRuntimeException;
+	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException;
 
 	/**
 	 * If {@link #isAssociative()} returns true, this should return a set of all keys. If {@link #isAssociative()}
@@ -56,7 +55,7 @@ public interface ArrayAccess extends Mixed, Sizeable {
 	 *
 	 * @return
 	 */
-	public Set<Construct> keySet();
+	public Set<Mixed> keySet();
 
 	/**
 	 * Return the size of the array
@@ -94,7 +93,7 @@ public interface ArrayAccess extends Mixed, Sizeable {
 	 * @param t
 	 * @return
 	 */
-	public Construct slice(int begin, int end, Target t);
+	public Mixed slice(int begin, int end, Target t);
 
 	/**
 	 * This class contains iteration information for the ArrayAccess object as it is being iterated. This assumes that

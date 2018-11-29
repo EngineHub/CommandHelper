@@ -3,12 +3,13 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Sizes;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.ObjectModifier;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -480,7 +481,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	}
 
 	@Override
-	public Construct slice(int begin, int end, Target t) {
+	public Mixed slice(int begin, int end, Target t) {
 		return getBytes(end - begin, begin);
 	}
 
@@ -490,12 +491,12 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	}
 
 	@Override
-	public Set<Construct> keySet() {
+	public Set<Mixed> keySet() {
 		throw new UnsupportedOperationException("Not supported.");
 	}
 
 	@Override
-	public Construct get(Construct index, Target t) throws ConfigRuntimeException {
+	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
 		int i = Static.getInt32(index, t);
 		byte b = getByte(i);
 		return new CInt(b, t);
@@ -508,7 +509,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_1;
+		return MSVersion.V3_3_1;
 	}
 
 	@Override
@@ -543,17 +544,17 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		}
 
 		@Override
-		public void push(Construct c, Integer i, Target t) {
+		public void push(Mixed c, Integer i, Target t) {
 			throw new CREByteArrayReadOnlyException("Arrays copied from ByteArrays are read only", t);
 		}
 
 		@Override
-		public void set(Construct index, Construct c, Target t) {
+		public void set(Mixed index, Mixed c, Target t) {
 			throw new CREByteArrayReadOnlyException("Arrays copied from ByteArrays are read only", t);
 		}
 
 		@Override
-		public Construct get(Construct index, Target t) {
+		public Mixed get(Mixed index, Target t) {
 			int i = Static.getInt32(index, t);
 			try {
 				return new CInt(backing[i], t);
@@ -585,13 +586,13 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		}
 
 		@Override
-		protected List<Construct> getArray() {
+		protected List<Mixed> getArray() {
 			//I'm not sure what cases this would happen in, but it should not happen normally.
 			throw new RuntimeException("This error should not happen. Please report this bug to the developers");
 		}
 
 		@Override
-		protected SortedMap<String, Construct> getAssociativeArray() {
+		protected SortedMap<String, Mixed> getAssociativeArray() {
 			//This is even more serious, because it shouldn't ever happen.
 			throw new Error("This error should not happen. Please report this bug to the developers");
 		}
@@ -603,12 +604,12 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
 		public CClassType[] getInterfaces() {
-			return new CClassType[0];
+			return CClassType.EMPTY_CLASS_ARRAY;
 		}
 
 		@Override
@@ -647,7 +648,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 			@Override
 			public Version since() {
-				return CHVersion.V3_3_1;
+				return MSVersion.V3_3_1;
 			}
 
 			@Override

@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("FishingState")
+@MEnum("com.commandhelper.FishingState")
 public enum MCFishingState {
 	CAUGHT_ENTITY,
 	CAUGHT_FISH,

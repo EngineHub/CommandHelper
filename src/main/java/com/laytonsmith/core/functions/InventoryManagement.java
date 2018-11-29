@@ -20,7 +20,7 @@ import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -50,6 +50,7 @@ import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -107,8 +108,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -117,7 +118,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			Integer index = -1;
 			boolean all;
 			MCPlayer m;
@@ -152,7 +153,7 @@ public class InventoryManagement {
 			}
 		}
 
-		private Construct getInvSlot(MCPlayer m, Integer slot, Target t) {
+		private Mixed getInvSlot(MCPlayer m, Integer slot, Target t) {
 			MCPlayerInventory inv = m.getInventory();
 			if(inv == null) {
 				throw new CRENotFoundException(
@@ -212,7 +213,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 
 			if(args.length == 1) {
@@ -243,8 +244,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -268,7 +269,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 
 			if(args.length == 1) {
@@ -303,8 +304,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -327,7 +328,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			MCPlayer other;
 
@@ -367,8 +368,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -391,7 +392,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 
 			if(args.length == 1) {
@@ -424,8 +425,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -471,8 +472,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -481,9 +482,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m;
-			Construct arg;
+			Mixed arg;
 			if(args.length == 3) {
 				// Single item
 				m = Static.GetPlayer(args[0], t);
@@ -575,8 +576,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -585,7 +586,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 0) {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -641,10 +642,10 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			MCItemStack is;
-			Construct c;
+			Mixed c;
 			CArray ca = null;
 			if(args.length == 1) {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -693,8 +694,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -748,9 +749,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
-			Construct item;
+			Mixed item;
 			CArray ca = null;
 			if(args.length == 1) {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -801,8 +802,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -863,7 +864,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			MCItemStack is;
 			int itemOffset = 0;
@@ -917,8 +918,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -974,7 +975,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			MCItemStack is;
 			int itemOffset = 0;
@@ -1036,8 +1037,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -1098,7 +1099,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			MCItemStack is;
 			int itemOffset = 0;
@@ -1150,8 +1151,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1206,7 +1207,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			MCItemStack is;
 			int itemOffset = 0;
@@ -1267,8 +1268,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1327,8 +1328,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1337,7 +1338,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 
 			MCPlayer m = null;
@@ -1346,7 +1347,7 @@ public class InventoryManagement {
 				m = (MCPlayer) p;
 			}
 
-			Construct arg;
+			Mixed arg;
 
 			if(args.length == 2) {
 				m = Static.GetPlayer(args[0], t);
@@ -1427,8 +1428,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1437,7 +1438,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 
 			Integer index = -1;
@@ -1480,7 +1481,7 @@ public class InventoryManagement {
 			}
 		}
 
-		private Construct getInvSlot(MCPlayer m, Integer slot, Target t) {
+		private Mixed getInvSlot(MCPlayer m, Integer slot, Target t) {
 			MCInventory inv = m.getEnderChest();
 			if(inv == null) {
 				throw new CRENotFoundException(
@@ -1514,7 +1515,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
@@ -1551,8 +1552,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -1577,7 +1578,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
@@ -1613,8 +1614,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -1639,7 +1640,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
@@ -1669,8 +1670,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -1695,7 +1696,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 				w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
@@ -1721,8 +1722,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -1747,7 +1748,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
@@ -1774,8 +1775,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 	}
@@ -1799,7 +1800,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p1 = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCPlayer p2;
 			if(args.length == 2) {
@@ -1829,8 +1830,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -1870,8 +1871,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1880,7 +1881,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 
 			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
 
@@ -1949,8 +1950,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1959,7 +1960,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 
 			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
 			Integer size = inventory.getSize();
@@ -2028,7 +2029,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
 			MCItemStack is;
 			if(args.length == 2) {
@@ -2055,8 +2056,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2112,7 +2113,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
 			Integer size = inventory.getSize();
 			CArray ca = null;
@@ -2149,8 +2150,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2204,7 +2205,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			switch(args.length) {
 				case 1: {
@@ -2245,8 +2246,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -2286,7 +2287,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			switch(args.length) {
 				case 0: {
@@ -2317,8 +2318,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -2342,7 +2343,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			MCInventory inv;
 			if(args.length == 2) {
@@ -2375,8 +2376,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 	}
 
@@ -2402,7 +2403,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
@@ -2435,8 +2436,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 	}
 
@@ -2460,7 +2461,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCInventory inv = GetInventory(args[0], null, t);
 			CArray list = new CArray(t);
 			for(MCHumanEntity viewer : inv.getViewers()) {
@@ -2486,8 +2487,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 	}
 
@@ -2510,7 +2511,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			CArray list = new CArray(t);
 			for(String id : VIRTUAL_INVENTORIES.keySet()) {
 				list.push(new CString(id, t), t);
@@ -2534,8 +2535,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 	}
 
@@ -2573,7 +2574,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			if(VIRTUAL_INVENTORIES.get(id) != null) {
 				throw new CREIllegalArgumentException("An inventory using the id \"" + id + "\" already exists.", t);
@@ -2601,7 +2602,7 @@ public class InventoryManagement {
 					}
 				}
 				if(args.length > 2) {
-					title = args[2].nval();
+					title = Construct.nval(args[2]);
 				}
 			}
 
@@ -2656,8 +2657,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 	}
 
@@ -2681,7 +2682,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			MCInventory inv = VIRTUAL_INVENTORIES.get(id);
 			if(inv != null) {
@@ -2710,8 +2711,8 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 	}
 
@@ -2723,7 +2724,7 @@ public class InventoryManagement {
 	 * @param t
 	 * @return
 	 */
-	private static MCInventory GetInventory(Construct specifier, MCWorld w, Target t) {
+	private static MCInventory GetInventory(Mixed specifier, MCWorld w, Target t) {
 		MCInventory inv;
 		if(specifier instanceof CArray) {
 			MCLocation l = ObjectGenerator.GetGenerator().location(specifier, w, t);
@@ -2759,7 +2760,7 @@ public class InventoryManagement {
 	 * @param t
 	 * @return The construct representation of the inventory holder
 	 */
-	public static Construct GetInventoryHolder(MCInventory inv, Target t) {
+	public static Mixed GetInventoryHolder(MCInventory inv, Target t) {
 		MCInventoryHolder h = inv.getHolder();
 		if(h instanceof MCEntity) {
 			return new CString(((MCEntity) h).getUniqueId().toString(), t);
@@ -2792,7 +2793,7 @@ public class InventoryManagement {
 			return false;
 		}
 		if(map != null && map.containsKey("meta")) {
-			Construct c = map.get("meta", t);
+			Mixed c = map.get("meta", t);
 			if(c instanceof CNull) {
 				if(iis.hasItemMeta()) {
 					return false;

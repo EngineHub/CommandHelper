@@ -6,7 +6,7 @@ import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.MemoryMapFileUtil;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.annotations.datasource;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -323,8 +323,8 @@ public class SerializedPersistence extends AbstractDataSource {
 	}
 
 	@Override
-	public CHVersion since() {
-		return CHVersion.V3_0_2;
+	public MSVersion since() {
+		return MSVersion.V3_0_2;
 	}
 
 	@Override

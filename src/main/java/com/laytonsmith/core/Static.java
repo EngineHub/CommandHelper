@@ -22,6 +22,7 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CClassType;
@@ -52,6 +53,7 @@ import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.core.taskmanager.TaskManager;
 import com.laytonsmith.persistence.DataSourceException;
@@ -122,7 +124,7 @@ public final class Static {
 	 * @param t
 	 * @return
 	 */
-	public static CArray getArray(Construct construct, Target t) {
+	public static CArray getArray(Mixed construct, Target t) {
 		return ArgumentValidation.getArray(construct, t);
 	}
 
@@ -137,7 +139,7 @@ public final class Static {
 	 * @param clazz The type expected.
 	 * @return The properly cast object.
 	 */
-	public static <T extends Construct> T getObject(Construct construct, Target t, Class<T> clazz) {
+	public static <T extends Mixed> T getObject(Mixed construct, Target t, Class<T> clazz) {
 		return ArgumentValidation.getObject(construct, t, clazz);
 	}
 
@@ -162,7 +164,7 @@ public final class Static {
 	 * @param c
 	 * @return
 	 */
-	public static double getNumber(Construct c, Target t) {
+	public static double getNumber(Mixed c, Target t) {
 		return ArgumentValidation.getNumber(c, t);
 	}
 
@@ -172,11 +174,11 @@ public final class Static {
 	 * @param c
 	 * @return
 	 */
-	public static double getDouble(Construct c, Target t) {
+	public static double getDouble(Mixed c, Target t) {
 		return ArgumentValidation.getDouble(c, t);
 	}
 
-	public static float getDouble32(Construct c, Target t) {
+	public static float getDouble32(Mixed c, Target t) {
 		return ArgumentValidation.getDouble32(c, t);
 	}
 
@@ -186,7 +188,7 @@ public final class Static {
 	 * @param c
 	 * @return
 	 */
-	public static long getInt(Construct c, Target t) {
+	public static long getInt(Mixed c, Target t) {
 		return ArgumentValidation.getInt(c, t);
 	}
 
@@ -199,7 +201,7 @@ public final class Static {
 	 * @param t
 	 * @return
 	 */
-	public static int getInt32(Construct c, Target t) {
+	public static int getInt32(Mixed c, Target t) {
 		return ArgumentValidation.getInt32(c, t);
 	}
 
@@ -212,7 +214,7 @@ public final class Static {
 	 * @param t
 	 * @return
 	 */
-	public static short getInt16(Construct c, Target t) {
+	public static short getInt16(Mixed c, Target t) {
 		return ArgumentValidation.getInt16(c, t);
 	}
 
@@ -225,7 +227,7 @@ public final class Static {
 	 * @param t
 	 * @return
 	 */
-	public static byte getInt8(Construct c, Target t) {
+	public static byte getInt8(Mixed c, Target t) {
 		return ArgumentValidation.getInt8(c, t);
 	}
 
@@ -238,7 +240,7 @@ public final class Static {
 	 * @param t
 	 * @return
 	 */
-	public static boolean getBoolean(Construct c, Target t) {
+	public static boolean getBoolean(Mixed c, Target t) {
 		return ArgumentValidation.getBoolean(c, t);
 	}
 
@@ -250,12 +252,12 @@ public final class Static {
 	 * @param c
 	 * @return
 	 * @deprecated Use
-	 * {@link #getBoolean(com.laytonsmith.core.constructs.Construct, com.laytonsmith.core.constructs.Target)}
+	 * {@link #getBoolean(Mixed, com.laytonsmith.core.constructs.Target)}
 	 * instead, as it provides better error messages for users that use the string "false" as a boolean. This method
 	 * should be removed in version 3.3.3 or above.
 	 */
 	@Deprecated
-	public static boolean getBoolean(Construct c) {
+	public static boolean getBoolean(Mixed c) {
 		return getBoolean(c, Target.UNKNOWN);
 	}
 
@@ -266,7 +268,7 @@ public final class Static {
 	 * @param t
 	 * @return
 	 */
-	public static CPrimitive getPrimitive(Construct c, Target t) {
+	public static CPrimitive getPrimitive(Mixed c, Target t) {
 		return ArgumentValidation.getObject(c, t, CPrimitive.class);
 	}
 
@@ -277,7 +279,7 @@ public final class Static {
 	 * @param t
 	 * @return
 	 */
-	public static CByteArray getByteArray(Construct c, Target t) {
+	public static CByteArray getByteArray(Mixed c, Target t) {
 		return ArgumentValidation.getByteArray(c, t);
 	}
 
@@ -287,7 +289,7 @@ public final class Static {
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyDoubles(Construct... c) {
+	public static boolean anyDoubles(Mixed... c) {
 		return ArgumentValidation.anyDoubles(c);
 	}
 
@@ -297,7 +299,7 @@ public final class Static {
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyStrings(Construct... c) {
+	public static boolean anyStrings(Mixed... c) {
 		return ArgumentValidation.anyStrings(c);
 	}
 
@@ -307,7 +309,7 @@ public final class Static {
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyBooleans(Construct... c) {
+	public static boolean anyBooleans(Mixed... c) {
 		return ArgumentValidation.anyBooleans(c);
 	}
 
@@ -317,7 +319,7 @@ public final class Static {
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyNulls(Construct... c) {
+	public static boolean anyNulls(Mixed... c) {
 		return ArgumentValidation.anyNulls(c);
 	}
 
@@ -457,6 +459,7 @@ public final class Static {
 	private static final Pattern VALID_DECIMAL = Pattern.compile("-?0m[0-9]+");
 	private static final Pattern INVALID_DECIMAL = Pattern.compile("-?0m[0-9]*[^0-9]+[0-9]*");
 
+
 	/**
 	 * Given a string input, creates and returns a Construct of the appropriate type. This takes into account that null,
 	 * true, and false are keywords.
@@ -467,6 +470,22 @@ public final class Static {
 	 * @throws ConfigRuntimeException If the value is a hex or binary value, but has invalid characters in it.
 	 */
 	public static Construct resolveConstruct(String val, Target t) throws ConfigRuntimeException {
+		return resolveConstruct(val, t, false);
+	}
+
+	/**
+	 * Given a string input, creates and returns a Construct of the appropriate type. This takes into account that null,
+	 * true, and false are keywords.
+	 *
+	 * If returnBareStrings is true, then we don't return CString, we return CBareString.
+	 * @param val
+	 * @param t
+	 * @param returnBareStrings
+	 * @return
+	 * @throws ConfigRuntimeException
+	 */
+	public static Construct resolveConstruct(String val, Target t, boolean returnBareStrings)
+			throws ConfigRuntimeException {
 		if(val == null) {
 			return new CString("", t);
 		}
@@ -522,11 +541,12 @@ public final class Static {
 				// Not a double either
 			}
 		}
-		// TODO: Once compiler environments are added, we would need to check to see if the value here is a custom
-		// type. However, as it stands, since we only support the native types, we will just hardcode the check here.
-		String fqType = NativeTypeList.resolveType(val);
+		String fqType = NativeTypeList.resolveNativeType(val);
 		if(fqType != null) {
 			return CClassType.get(fqType);
+		}
+		if(returnBareStrings) {
+			return new CBareString(val, t);
 		} else {
 			return new CString(val, t);
 		}
@@ -675,11 +695,11 @@ public final class Static {
 		}
 	}
 
-	public static UUID GetUUID(Construct subject, Target t) {
+	public static UUID GetUUID(Mixed subject, Target t) {
 		return GetUUID(subject.val(), t);
 	}
 
-	public static MCOfflinePlayer GetUser(Construct search, Target t) {
+	public static MCOfflinePlayer GetUser(Mixed search, Target t) {
 		return GetUser(search.val(), t);
 	}
 
@@ -755,7 +775,7 @@ public final class Static {
 		return p;
 	}
 
-	public static MCPlayer GetPlayer(Construct player, Target t) throws ConfigRuntimeException {
+	public static MCPlayer GetPlayer(Mixed player, Target t) throws ConfigRuntimeException {
 		return GetPlayer(player.val(), t);
 	}
 
@@ -805,7 +825,7 @@ public final class Static {
 		}
 	}
 
-	public static boolean isNull(Construct construct) {
+	public static boolean isNull(Mixed construct) {
 		return construct instanceof CNull;
 	}
 
@@ -813,11 +833,11 @@ public final class Static {
 		return java.lang.Math.min(max, java.lang.Math.max(min, i));
 	}
 
-	public static MCEntity getEntity(Construct id, Target t) {
+	public static MCEntity getEntity(Mixed id, Target t) {
 		return getEntityByUuid(GetUUID(id.val(), t), t);
 	}
 
-	public static MCLivingEntity getLivingEntity(Construct id, Target t) {
+	public static MCLivingEntity getLivingEntity(Mixed id, Target t) {
 		return getLivingByUUID(GetUUID(id.val(), t), t);
 	}
 
@@ -887,7 +907,7 @@ public final class Static {
 	 * @param t
 	 * @return
 	 */
-	public static MCWorld getWorld(Construct name, Target t) {
+	public static MCWorld getWorld(Mixed name, Target t) {
 		return getWorld(name.val(), t);
 	}
 
@@ -907,7 +927,7 @@ public final class Static {
 		}
 	}
 
-	public static MCPlugin getPlugin(Construct name, Target t) {
+	public static MCPlugin getPlugin(Mixed name, Target t) {
 		return getPlugin(name.val(), t);
 	}
 
@@ -919,7 +939,7 @@ public final class Static {
 	 * @param t
 	 * @return
 	 */
-	public static MCMetadatable getMetadatable(Construct construct, Target t) {
+	public static MCMetadatable getMetadatable(Mixed construct, Target t) {
 		if(construct instanceof CArray) {
 			return ObjectGenerator.GetGenerator().location(construct, null, t).getBlock();
 		} else if(construct instanceof CString) {
@@ -1221,8 +1241,8 @@ public final class Static {
 	 * @param args
 	 * @throws ConfigRuntimeException
 	 */
-	public static void AssertNonCNull(Target t, Construct... args) throws ConfigRuntimeException {
-		for(Construct arg : args) {
+	public static void AssertNonCNull(Target t, Mixed... args) throws ConfigRuntimeException {
+		for(Mixed arg : args) {
 			if(arg instanceof CNull) {
 				throw new CRENullPointerException("Argument was null, and nulls are not allowed.", t);
 			}
@@ -1298,8 +1318,8 @@ public final class Static {
 	 * @param t The code target
 	 * @return The value, cast to the desired type.
 	 */
-	public static <T extends Construct> T AssertType(Class<T> type, Construct[] args, int argNumber, Function func, Target t) {
-		Construct value = args[argNumber];
+	public static <T extends Mixed> T AssertType(Class<T> type, Mixed[] args, int argNumber, Function func, Target t) {
+		Mixed value = args[argNumber];
 		if(!type.isAssignableFrom(value.getClass())) {
 			typeof todesired = type.getAnnotation(typeof.class);
 			CClassType toactual = value.typeof();
@@ -1424,7 +1444,7 @@ public final class Static {
 	 * @param construct
 	 * @return
 	 */
-	public static Object getJavaObject(Construct construct) {
+	public static Object getJavaObject(Mixed construct) {
 		if((construct == null) || (construct instanceof CNull)) {
 			return null;
 		} else if(construct instanceof CVoid) {
@@ -1445,8 +1465,8 @@ public final class Static {
 			CArray array = (CArray) construct;
 			if(array.isAssociative()) {
 				HashMap<String, Object> map = new HashMap<>();
-				for(Construct key : array.keySet()) {
-					Construct c = array.get(key.val(), Target.UNKNOWN);
+				for(Mixed key : array.keySet()) {
+					Mixed c = array.get(key.val(), Target.UNKNOWN);
 					map.put(key.val(), (c == array) ? map : getJavaObject(c));
 				}
 				return map;
@@ -1455,7 +1475,7 @@ public final class Static {
 				boolean nullable = false;
 				Class<?> clazz = null;
 				for(int i = 0; i < array.size(); i++) {
-					Construct c = array.get(i, Target.UNKNOWN);
+					Mixed c = array.get(i, Target.UNKNOWN);
 					if(c == array) {
 						a[i] = a;
 					} else {

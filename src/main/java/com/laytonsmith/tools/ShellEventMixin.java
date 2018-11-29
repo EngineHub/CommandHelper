@@ -1,11 +1,11 @@
 package com.laytonsmith.tools;
 
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.CancellableEvent;
 import com.laytonsmith.core.events.EventMixinInterface;
 import com.laytonsmith.core.exceptions.EventException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,8 +33,8 @@ public class ShellEventMixin implements EventMixinInterface {
 	}
 
 	@Override
-	public Map<String, Construct> evaluate_helper(BindableEvent e) throws EventException {
-		return new HashMap<String, Construct>();
+	public Map<String, Mixed> evaluate_helper(BindableEvent e) throws EventException {
+		return new HashMap<>();
 	}
 
 	@Override

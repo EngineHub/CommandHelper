@@ -5,7 +5,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.DynamicClassLoader;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Event;
@@ -53,7 +53,7 @@ public class ExtensionTracker {
 
 		this.events = new EnumMap<>(Driver.class);
 		this.allExtensions = new ArrayList<>();
-		this.version = CHVersion.V0_0_0;
+		this.version = MSVersion.V0_0_0;
 
 		this.container = container;
 		this.cd = cd;

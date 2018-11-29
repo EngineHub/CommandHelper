@@ -1,7 +1,7 @@
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.ObjectModifier;
 import com.laytonsmith.core.natives.interfaces.ObjectType;
@@ -30,8 +30,8 @@ public class ClassInfoTest {
 	@Test
 	public void testAllInterfacesReturnNothingForGetInterfaces() throws Exception {
 		List<String> failures = new ArrayList<>();
-		for(String t : NativeTypeList.getNativeTypeList()) {
-			Mixed m = ReflectionUtils.instantiateUnsafe(NativeTypeList.getNativeClassOrInterfaceRunner(t));
+		for(FullyQualifiedClassName t : NativeTypeList.getNativeTypeList()) {
+			Mixed m = NativeTypeList.getInvalidInstanceForUse(t);
 			if(m.getObjectType() == ObjectType.INTERFACE) {
 				try {
 					if(m.getInterfaces() != null && m.getInterfaces().length > 0) {
@@ -50,13 +50,14 @@ public class ClassInfoTest {
 	@Test
 	public void testOnlyContainedClassesHaveVariousModifiers() throws Exception {
 		List<String> failures = new ArrayList<>();
-		Set<ObjectModifier> allowed = EnumSet.of(ObjectModifier.PUBLIC, ObjectModifier.PACKAGE, ObjectModifier.FINAL);
-		for(String t : NativeTypeList.getNativeTypeList()) {
-			Mixed m = ReflectionUtils.instantiateUnsafe(NativeTypeList.getNativeClassOrInterfaceRunner(t));
+		Set<ObjectModifier> allowed = EnumSet.of(ObjectModifier.PUBLIC, ObjectModifier.PACKAGE, ObjectModifier.FINAL,
+				ObjectModifier.ABSTRACT);
+		for(FullyQualifiedClassName t : NativeTypeList.getNativeTypeList()) {
+			Mixed m = NativeTypeList.getInvalidInstanceForUse(t);
 			if(m.getContainingClass() == null) {
 				for(ObjectModifier i : m.getObjectModifiers()) {
 					if(!allowed.contains(i)) {
-						failures.add(m.getClass().getName() + " contains an illegal modifier, because it is an outer"
+						failures.add(m.getClass().getName() + " contains an illegal modifier (" + i + "), because it is an outer"
 								+ " class, but the only allowed modifiers are: " + allowed.toString());
 					}
 				}

@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api.Platforms;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.compiler.Keyword;
@@ -164,9 +165,9 @@ public class APIBuilder {
 		{
 			//objects
 			Map<String, Map<String, Object>> objects = new TreeMap<>();
-			for(String t : NativeTypeList.getNativeTypeList()) {
+			for(FullyQualifiedClassName t : NativeTypeList.getNativeTypeList()) {
 				try {
-					if("void".equals(t) || "null".equals(t)) {
+					if("void".equals(t.getFQCN()) || "null".equals(t.getFQCN())) {
 						// These are super special, and aren't really
 						// "real" datatypes, so shouldn't be included.
 						continue;

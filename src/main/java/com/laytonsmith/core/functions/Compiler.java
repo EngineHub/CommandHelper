@@ -6,7 +6,7 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.noprofile;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
@@ -28,6 +28,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -67,7 +68,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			switch(nodes.length) {
 				case 0:
 					return CVoid.VOID;
@@ -79,7 +80,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 	}
@@ -96,7 +97,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CEntry(args[0], args[1], t);
 		}
 	}
@@ -123,7 +124,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			throw new Error("Should not have gotten here, __autoconcat__ was not removed before runtime.");
 		}
 
@@ -457,7 +458,9 @@ public class Compiler {
 			for(int k = 0; k < list.size(); k++) {
 				if(list.get(k).getData() instanceof CClassType) {
 					if(k == list.size() - 1) {
-						throw new ConfigCompileException("Unexpected ClassType", list.get(k).getTarget());
+						// This is not a typed assignment
+						break;
+						//throw new ConfigCompileException("Unexpected ClassType", list.get(k).getTarget());
 					}
 					if(list.get(k + 1).getData() instanceof CFunction) {
 						switch(list.get(k + 1).getData().val()) {
@@ -520,7 +523,7 @@ public class Compiler {
 				return list.get(0);
 			} else {
 				for(int i = 0; i < list.size(); i++) {
-					if(list.get(i).getData().getCType() == Construct.ConstructType.IDENTIFIER) {
+					if(Construct.IsCType(list.get(i).getData(), Construct.ConstructType.IDENTIFIER)) {
 						if(i == 0) {
 							//Yup, it's an identifier
 							CFunction identifier = new CFunction(list.get(i).getData().val(), list.get(i).getTarget());
@@ -578,7 +581,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String s = null;
 			if(args.length == 1) {
 				s = args[0].val();
@@ -604,7 +607,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 0) {
 				return CVoid.VOID;
 			}
@@ -617,7 +620,7 @@ public class Compiler {
 	public static class __cbracket__ extends DummyFunction implements Optimizable {
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
@@ -648,7 +651,7 @@ public class Compiler {
 	public static class __cbrace__ extends DummyFunction implements Optimizable {
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
@@ -685,7 +688,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException(getName() + " should have been compiled out. If you are reaching this, an error has occured in the parser."
 					+ " Please report this error to the developers.");
 		}
@@ -707,7 +710,7 @@ public class Compiler {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override

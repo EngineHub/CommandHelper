@@ -4,7 +4,7 @@ import com.laytonsmith.annotations.MEnum;
 
 public interface MCLlama extends MCChestedHorse {
 
-	@MEnum("LlamaColor")
+	@MEnum("com.commandhelper.LlamaColor")
 	enum MCLlamaColor {
 		CREAMY, WHITE, BROWN, GRAY
 	}

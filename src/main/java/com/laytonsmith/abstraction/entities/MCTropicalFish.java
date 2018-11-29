@@ -13,7 +13,7 @@ public interface MCTropicalFish extends MCLivingEntity {
 	MCTropicalFish.MCPattern getPattern();
 	void setPattern(MCTropicalFish.MCPattern pattern);
 
-	@MEnum("TropicalFishPattern")
+	@MEnum("com.commandhelper.TropicalFishPattern")
 	enum MCPattern {
 		KOB,
 		SUNSTREAK,

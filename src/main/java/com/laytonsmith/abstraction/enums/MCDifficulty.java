@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("Difficulty")
+@MEnum("com.commandhelper.Difficulty")
 public enum MCDifficulty {
 	PEACEFUL(0),
 	EASY(1),

@@ -1,7 +1,7 @@
 package com.laytonsmith.persistence;
 
 import com.laytonsmith.annotations.datasource;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.net.URI;
 import java.util.Map;
@@ -43,8 +43,8 @@ public class YMLDataSource extends StringSerializableDataSource {
 	}
 
 	@Override
-	public CHVersion since() {
-		return CHVersion.V3_3_1;
+	public MSVersion since() {
+		return MSVersion.V3_3_1;
 	}
 
 	@Override

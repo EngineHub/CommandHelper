@@ -2,7 +2,7 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 
 /**
  * Represents a MethodScript null value.
@@ -67,11 +67,6 @@ public final class CNull extends Construct implements Cloneable {
 	}
 
 	@Override
-	public String nval() {
-		return null;
-	}
-
-	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof CNull;
 	}
@@ -94,7 +89,7 @@ public final class CNull extends Construct implements Cloneable {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_0_1;
+		return MSVersion.V3_0_1;
 	}
 
 	// null is so special, that if some code tries to call these methods on it, we

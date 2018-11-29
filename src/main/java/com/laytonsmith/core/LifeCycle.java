@@ -13,6 +13,6 @@ public class LifeCycle extends AbstractExtension {
 
 	@Override
 	public Version getVersion() {
-		return CHVersion.LATEST;
+		return MSVersion.LATEST;
 	}
 }

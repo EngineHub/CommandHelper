@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("BarStyle")
+@MEnum("com.commandhelper.BarStyle")
 public enum MCBarStyle {
 	SOLID,
 	SEGMENTED_6,

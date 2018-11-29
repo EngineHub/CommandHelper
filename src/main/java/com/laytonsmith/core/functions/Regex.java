@@ -4,7 +4,7 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
@@ -22,6 +22,7 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -77,8 +78,8 @@ public class Regex {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -87,7 +88,7 @@ public class Regex {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			Pattern pattern = getPattern(args[0], t);
 			String subject = args[1].val();
 			CArray ret = CArray.GetAssociativeArray(t);
@@ -117,7 +118,7 @@ public class Regex {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(!children.get(0).getData().isDynamic()) {
+			if(!Construct.IsDynamicHelper(children.get(0).getData())) {
 				getPattern(children.get(0).getData(), t);
 			}
 			return null;
@@ -177,8 +178,8 @@ public class Regex {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -187,7 +188,7 @@ public class Regex {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			Pattern pattern = getPattern(args[0], t);
 			String subject = args[1].val();
 			CArray fret = new CArray(t);
@@ -216,7 +217,7 @@ public class Regex {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(!children.get(0).getData().isDynamic()) {
+			if(!Construct.IsDynamicHelper(children.get(0).getData())) {
 				getPattern(children.get(0).getData(), t);
 			}
 			return null;
@@ -276,8 +277,8 @@ public class Regex {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -286,7 +287,7 @@ public class Regex {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			Pattern pattern = getPattern(args[0], t);
 			String replacement = args[1].val();
 			String subject = args[2].val();
@@ -306,7 +307,7 @@ public class Regex {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree data = children.get(0);
-			if(!data.getData().isDynamic()) {
+			if(!Construct.IsDynamicHelper(data.getData())) {
 				String pattern = data.getData().val();
 				if(isLiteralRegex(pattern)) {
 					//We want to replace this with replace()
@@ -386,8 +387,8 @@ public class Regex {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -396,7 +397,7 @@ public class Regex {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			Pattern pattern = getPattern(args[0], t);
 			String subject = args[1].val();
 			/**
@@ -421,7 +422,7 @@ public class Regex {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree data = children.get(0);
-			if(!data.getData().isDynamic()) {
+			if(!Construct.IsDynamicHelper(data.getData())) {
 				String pattern = data.getData().val();
 				if(isLiteralRegex(pattern)) {
 					//We want to replace this with split()
@@ -483,8 +484,8 @@ public class Regex {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -493,7 +494,7 @@ public class Regex {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			Pattern pattern = getPattern(args[0], t);
 			String subject = args[1].val();
 			long ret = 0;
@@ -506,7 +507,7 @@ public class Regex {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(!children.get(0).getData().isDynamic()) {
+			if(!Construct.IsDynamicHelper(children.get(0).getData())) {
 				getPattern(children.get(0).getData(), t);
 			}
 			return null;
@@ -549,7 +550,7 @@ public class Regex {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CString(java.util.regex.Pattern.quote(args[0].val()), t);
 		}
 
@@ -571,8 +572,8 @@ public class Regex {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -593,7 +594,7 @@ public class Regex {
 
 	}
 
-	private static Pattern getPattern(Construct c, Target t) throws ConfigRuntimeException {
+	private static Pattern getPattern(Mixed c, Target t) throws ConfigRuntimeException {
 		String regex = "";
 		int flags = 0;
 		String sflags = "";

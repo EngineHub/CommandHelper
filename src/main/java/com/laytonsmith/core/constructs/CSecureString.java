@@ -3,7 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import java.lang.reflect.Constructor;
@@ -127,7 +127,7 @@ public class CSecureString extends CString {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_2;
+		return MSVersion.V3_3_2;
 	}
 
 	@Override
@@ -137,7 +137,7 @@ public class CSecureString extends CString {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{};
+		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 
 	@Override
