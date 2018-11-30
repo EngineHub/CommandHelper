@@ -403,7 +403,11 @@ public class Script {
 					e.setData(f.getName());
 				}
 				throw e;
-			} catch (Exception e) {
+			} catch (Throwable e) {
+				if(e instanceof ThreadDeath) {
+					// Bail quickly in this case
+					throw e;
+				}
 				String brand = Implementation.GetServerType().getBranding();
 				SimpleVersion version = Static.getVersion();
 
