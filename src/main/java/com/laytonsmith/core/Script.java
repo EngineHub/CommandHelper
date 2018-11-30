@@ -428,6 +428,7 @@ public class Script {
 
 				String emsg = TermColors.RED + "Uh oh! You've found an error in " + TermColors.CYAN + culprit + TermColors.RED + ".\n"
 						+ "This happened while running your code, so you may be able to find a workaround,"
+						+ (!(e instanceof Exception) ? " (though since this is an Error, maybe not)" : "")
 						+ " but is ultimately an issue in " + culprit + ".\n"
 						+ "The following code caused the error:\n" + TermColors.WHITE;
 
