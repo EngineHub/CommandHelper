@@ -31,6 +31,8 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -1710,11 +1712,15 @@ public final class MethodScriptCompiler {
 		if(func instanceof DataHandling._break) {
 			// First grab the counter in the break function. If the break function doesn't
 			// have any children, then 1 is implied. break() requires the argument to be
-			// a CInt, so if it weren't, there would already have been a compile error, so
-			// we can assume it will be a CInt.
+			// a CInt, so if it weren't, there should be a compile error.
 			long breakCounter = 1;
 			if(tree.getChildren().size() == 1) {
-				breakCounter = ((CInt) tree.getChildAt(0).getData()).getInt();
+				try {
+					breakCounter = Static.getInt32(tree.getChildAt(0).getData(), tree.getChildAt(0).getTarget());
+				} catch(CRECastException | CRERangeException e) {
+					compilerErrors.add(new ConfigCompileException(e));
+					return;
+				}
 			}
 			if(breakCounter > currentLoops) {
 				// Throw an exception, as this would break above a loop. Different error messages

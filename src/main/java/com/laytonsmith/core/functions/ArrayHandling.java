@@ -3126,7 +3126,7 @@ public class ArrayHandling {
 									throw new CRECastException("The closure passed to " + getName() + " must return a"
 											+ " boolean value", t);
 								} catch (FunctionReturnException fre) {
-									boolean res = Static.getBoolean(fre.getReturn());
+									boolean res = Static.getBoolean(fre.getReturn(), fre.getTarget());
 									if(res) {
 										ret.push(one.get(k1[i], t), t);
 										continue i;

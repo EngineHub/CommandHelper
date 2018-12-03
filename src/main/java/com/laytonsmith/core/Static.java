@@ -51,6 +51,7 @@ import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -186,6 +187,8 @@ public final class Static {
 	 * Returns an integer from any given construct.
 	 *
 	 * @param c
+	 * @throws CRERangeException If the value would be truncated
+	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
 	public static long getInt(Mixed c, Target t) {
@@ -199,6 +202,8 @@ public final class Static {
 	 *
 	 * @param c
 	 * @param t
+	 * @throws CRERangeException If the value would be truncated
+	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
 	public static int getInt32(Mixed c, Target t) {
@@ -212,6 +217,8 @@ public final class Static {
 	 *
 	 * @param c
 	 * @param t
+	 * @throws CRERangeException If the value would be truncated
+	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
 	public static short getInt16(Mixed c, Target t) {
@@ -225,6 +232,8 @@ public final class Static {
 	 *
 	 * @param c
 	 * @param t
+	 * @throws CRERangeException If the value would be truncated
+	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
 	public static byte getInt8(Mixed c, Target t) {
@@ -242,23 +251,6 @@ public final class Static {
 	 */
 	public static boolean getBoolean(Mixed c, Target t) {
 		return ArgumentValidation.getBoolean(c, t);
-	}
-
-	/**
-	 * Returns a boolean from any given construct. Depending on the type of the construct being converted, it follows
-	 * the following rules: If it is an integer or a double, it is false if 0, true otherwise. If it is a string, if it
-	 * is empty, it is false, otherwise it is true.
-	 *
-	 * @param c
-	 * @return
-	 * @deprecated Use
-	 * {@link #getBoolean(Mixed, com.laytonsmith.core.constructs.Target)}
-	 * instead, as it provides better error messages for users that use the string "false" as a boolean. This method
-	 * should be removed in version 3.3.3 or above.
-	 */
-	@Deprecated
-	public static boolean getBoolean(Mixed c) {
-		return getBoolean(c, Target.UNKNOWN);
 	}
 
 	/**

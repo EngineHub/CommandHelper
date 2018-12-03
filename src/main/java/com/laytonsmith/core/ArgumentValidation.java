@@ -75,29 +75,6 @@ public final class ArgumentValidation {
 	}
 
 	/**
-	 * Works like the other get* methods, but works in a more generic way for other types of Mixeds.
-	 *
-	 * @param <T> The type expected.
-	 * @param construct The generic object
-	 * @param t Code target
-	 * @param expectedClassName The expected class type, for use in the error message if the construct is the wrong
-	 * type.
-	 * @param clazz The type expected.
-	 * @return The properly cast object.
-	 * @deprecated Use
-	 * {@link #getObject(Mixed, com.laytonsmith.core.constructs.Target, java.lang.Class)}
-	 * instead, as that gets the expected class name automatically.
-	 */
-	@Deprecated
-	public static <T extends Mixed> T getObject(Mixed construct, Target t, String expectedClassName, Class<T> clazz) {
-		if(clazz.isAssignableFrom(construct.getClass())) {
-			return (T) construct;
-		} else {
-			throw new CRECastException("Expecting " + expectedClassName + " but receieved " + construct.val() + " instead.", t);
-		}
-	}
-
-	/**
 	 * Works like the other get* methods, but works in a more generic way for other types of Mixeds. It also assumes
 	 * that the class specified is tagged with a typeof annotation, thereby preventing the need for the
 	 * expectedClassName like the deprecated version uses.
@@ -244,6 +221,7 @@ public final class ArgumentValidation {
 	 *
 	 * @param c
 	 * @param t
+	 * @throws CRECastException If the value cannot be converted to a long
 	 * @return
 	 */
 	public static long getInt(Mixed c, Target t) {
@@ -279,6 +257,8 @@ public final class ArgumentValidation {
 	 *
 	 * @param c
 	 * @param t
+	 * @throws CRERangeException If the value would be truncated
+	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
 	public static int getInt32(Mixed c, Target t) {
@@ -300,6 +280,8 @@ public final class ArgumentValidation {
 	 *
 	 * @param c
 	 * @param t
+	 * @throws CRERangeException If the value would be truncated
+	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
 	public static short getInt16(Mixed c, Target t) {
@@ -321,6 +303,8 @@ public final class ArgumentValidation {
 	 *
 	 * @param c
 	 * @param t
+	 * @throws CRERangeException If the value would be truncated
+	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
 	public static byte getInt8(Mixed c, Target t) {
