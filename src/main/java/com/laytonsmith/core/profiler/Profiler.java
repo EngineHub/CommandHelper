@@ -46,7 +46,7 @@ public final class Profiler {
 	}
 
 	private static Preferences GetPrefs(File initFile) throws IOException {
-		List<Preference> defaults = new ArrayList<Preference>(Arrays.asList(new Preference[]{
+		List<Preference> defaults = new ArrayList<>(Arrays.asList(new Preference[]{
 			new Preference("profiler-on", "false", Preferences.Type.BOOLEAN, "Turns the profiler on or off. The profiler can cause a slight amount of lag, so generally speaking"
 			+ " you don't leave it on during normal operation."),
 			new Preference("profiler-granularity", "1", Preferences.Type.INT, "Sets the granularity of the profiler. 1 logs some things, while 5 logs everything possible."),
@@ -85,14 +85,15 @@ public final class Profiler {
 		}
 	}
 
+	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public Profiler(File initFile) throws IOException {
 		this();
 		prefs = GetPrefs(initFile);
 		//We want speed here, not memory usage, so lets put an excessively large capacity, and excessively low load factor
-		operations = new HashMap<ProfilePoint, Long>(1024, 0.25f);
+		operations = new HashMap<>(1024, 0.25f);
 		this.initFile = initFile;
 
-		configGranularity = LogLevel.getEnum((Integer) prefs.getPreference("profiler-granularity"));
+		configGranularity = LogLevel.getEnum(prefs.getIntegerPreference("profiler-granularity"));
 		if(configGranularity == null) {
 			configGranularity = LogLevel.ERROR;
 		}
@@ -215,24 +216,20 @@ public final class Profiler {
 	 * @param message
 	 */
 	public void doLog(final String message) {
-		outputQueue.push(null, null, new Runnable() {
-			@Override
-			public void run() {
-				if(writeToScreen) {
-					StreamUtils.GetSystemOut().println(message);
+		outputQueue.push(null, null, () -> {
+			if(writeToScreen) {
+				StreamUtils.GetSystemOut().println(message);
+			}
+			if(writeToFile) {
+				File file = new File(initFile.getParentFile(), DateUtils.ParseCalendarNotation(logFile));
+				try {
+					FileUtil.write(DateUtils.ParseCalendarNotation("%Y-%M-%D %h:%m.%s") + ": " + message + Static.LF(), //Message to log
+							file, //File to output to
+							FileUtil.APPEND, //We want to append
+							true); //Create it for us if it doesn't exist
+				} catch (IOException ex) {
+					StreamUtils.GetSystemErr().println("While trying to write to the profiler log file (" + file.getAbsolutePath() + "), recieved an IOException: " + ex.getMessage());
 				}
-				if(writeToFile) {
-					File file = new File(initFile.getParentFile(), DateUtils.ParseCalendarNotation(logFile));
-					try {
-						FileUtil.write(DateUtils.ParseCalendarNotation("%Y-%M-%D %h:%m.%s") + ": " + message + Static.LF(), //Message to log
-								file, //File to output to
-								FileUtil.APPEND, //We want to append
-								true); //Create it for us if it doesn't exist
-					} catch (IOException ex) {
-						StreamUtils.GetSystemErr().println("While trying to write to the profiler log file (" + file.getAbsolutePath() + "), recieved an IOException: " + ex.getMessage());
-					}
-				}
-
 			}
 		});
 	}

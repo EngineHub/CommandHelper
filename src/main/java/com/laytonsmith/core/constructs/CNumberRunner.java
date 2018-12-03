@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.natives.interfaces.AbstractMixedInterfaceRunner;
+import com.laytonsmith.core.natives.interfaces.ObjectType;
 
 /**
  *
@@ -31,5 +32,12 @@ public class CNumberRunner extends AbstractMixedInterfaceRunner {
 	public CClassType[] getInterfaces() {
 		return CClassType.EMPTY_CLASS_ARRAY;
 	}
+
+	@Override
+	public ObjectType getObjectType() {
+		return ObjectType.ABSTRACT;
+	}
+
+
 
 }

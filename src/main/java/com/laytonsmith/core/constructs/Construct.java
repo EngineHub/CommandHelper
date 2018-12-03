@@ -77,18 +77,6 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		this.target = target;
 	}
 
-	/**
-	 * Duplicate of {@link #val()}
-	 * @return
-	 *
-	 * @deprecated Use {@link #val()]
-	 *
-	 */
-	@Deprecated
-	public final String getValue() {
-		return val();
-	}
-
 	public int getLineNum() {
 		return target.line();
 	}

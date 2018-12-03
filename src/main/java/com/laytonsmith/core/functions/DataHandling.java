@@ -2194,7 +2194,7 @@ public class DataHandling {
 				} else {
 					boolean thisNodeIsAssign = false;
 					if(nodes[i].getData() instanceof CFunction) {
-						if(((CFunction) nodes[i].getData()).getValue().equals("assign")) {
+						if(((CFunction) nodes[i].getData()).val().equals("assign")) {
 							thisNodeIsAssign = true;
 							if((nodes[i].getChildren().size() == 3 && Construct.IsDynamicHelper(nodes[i].getChildAt(0).getData()))
 									|| Construct.IsDynamicHelper(nodes[i].getChildAt(1).getData())) {

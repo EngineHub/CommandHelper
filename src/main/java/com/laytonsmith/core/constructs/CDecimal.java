@@ -32,6 +32,11 @@ public class CDecimal extends CPrimitive implements Cloneable {
 		val = new BigDecimal(value);
 	}
 
+	public CDecimal(BigDecimal value, Target t) {
+		super(value.toPlainString(), ConstructType.INT, t);
+		val = value;
+	}
+
 	@Override
 	public boolean isDynamic() {
 		return false;
@@ -71,6 +76,11 @@ public class CDecimal extends CPrimitive implements Cloneable {
 	@Override
 	public CClassType[] getInterfaces() {
 		return CClassType.EMPTY_CLASS_ARRAY;
+	}
+
+	@Override
+	public CDecimal duplicate() {
+		return new CDecimal(val, getTarget());
 	}
 
 }

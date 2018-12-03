@@ -83,6 +83,10 @@ public class AnnotationChecks {
 			Set<Class<?>> s = ClassDiscovery.getDefaultInstance().loadClassesThatExtend(superClass);
 			checkImplements:
 			for(Class<?> c : s) {
+				if((c.getModifiers() & Modifier.ABSTRACT) != 0) {
+					// Abstract classes are not required to implement any ForceImplementation methods
+					continue;
+				}
 				if(c.isInterface()) {
 					// Interfaces are exempt from the requirement
 					continue;

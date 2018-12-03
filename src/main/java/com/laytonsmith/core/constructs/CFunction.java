@@ -24,7 +24,7 @@ public class CFunction extends Construct {
 
 	@Override
 	public String toString() {
-		return getValue();
+		return val();
 	}
 
 	@Override

@@ -22,8 +22,10 @@ public class FieldMirror extends AbstractElementMirror {
 		super(field);
 		Object value = null;
 		try {
+			// Try to get the value. This will work if the value is hardcoded, i.e. public int i = 5; but will fail
+			// in some cases. In those cases, that's ok, we just will have a null value here.
 			value = field.get(null);
-		} catch (IllegalArgumentException | IllegalAccessException ex) {
+		} catch (IllegalArgumentException | IllegalAccessException | NullPointerException ex) {
 			//
 		}
 		this.value = value;

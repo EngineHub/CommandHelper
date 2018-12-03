@@ -3,12 +3,13 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.natives.interfaces.ValueType;
 
 /**
  *
  */
 @typeof("ms.lang.primitive")
-public abstract class CPrimitive extends Construct {
+public abstract class CPrimitive extends Construct implements ValueType {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get("ms.lang.primitive");
@@ -19,11 +20,13 @@ public abstract class CPrimitive extends Construct {
 
 	@Override
 	public CClassType[] getSuperclasses() {
+		// Implemented in the Runner
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public CClassType[] getInterfaces() {
+		// Implemented in the Runner
 		throw new UnsupportedOperationException();
 	}
 

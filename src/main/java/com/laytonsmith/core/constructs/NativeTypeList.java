@@ -295,7 +295,7 @@ public class NativeTypeList {
 		}
 		if(MEnumType.class.isAssignableFrom(c)) {
 			return getNativeEnumType(fqcn);
-		} else {
+		} else { // Not abstract
 			return ReflectionUtils.instantiateUnsafe(c);
 		}
 	}

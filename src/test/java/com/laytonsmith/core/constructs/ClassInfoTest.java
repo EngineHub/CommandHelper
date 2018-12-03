@@ -67,4 +67,31 @@ public class ClassInfoTest {
 			fail("One or more failures has occured:\n" + StringUtils.Join(failures, "\n"));
 		}
 	}
+
+	@Test
+	public void testAllTypeofClassesDoNotThrowUnsupportedOperationException() throws Exception {
+		List<String> failures = new ArrayList<>();
+		for(FullyQualifiedClassName fqcn : NativeTypeList.getNativeTypeList()) {
+			if(CVoid.TYPE.getFQCN().equals(fqcn) || CNull.TYPE.getFQCN().equals(fqcn)) {
+				continue;
+			}
+			Mixed m = NativeTypeList.getInvalidInstanceForUse(fqcn);
+			try {
+				m.getSuperclasses();
+			} catch (UnsupportedOperationException e) {
+				failures.add("getSuperclasses in " + m.getClass() + " throws an UnsupportedOperationException. This"
+						+ " is only allowed in phantom classes.");
+			}
+			try {
+				m.getInterfaces();
+			} catch (UnsupportedOperationException e) {
+				failures.add("getInterfaces in " + m.getClass() + " throws an UnsupportedOperationException. This"
+						+ " is only allowed in phantom classes.");
+			}
+		}
+
+		if(!failures.isEmpty()) {
+			fail("One or more failures has occured:\n" + StringUtils.Join(failures, "\n"));
+		}
+	}
 }

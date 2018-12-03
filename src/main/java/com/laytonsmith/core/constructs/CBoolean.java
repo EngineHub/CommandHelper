@@ -134,4 +134,9 @@ public final class CBoolean extends CPrimitive implements Cloneable {
 		return EnumSet.of(ObjectModifier.FINAL, ObjectModifier.PUBLIC);
 	}
 
+	@Override
+	public CBoolean duplicate() {
+		return new CBoolean(val, getTarget());
+	}
+
 }

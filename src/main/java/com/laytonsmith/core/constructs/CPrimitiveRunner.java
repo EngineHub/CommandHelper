@@ -5,6 +5,8 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.natives.interfaces.AbstractMixedInterfaceRunner;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.natives.interfaces.ObjectType;
+import com.laytonsmith.core.natives.interfaces.ValueType;
 
 /**
  *
@@ -30,6 +32,13 @@ public class CPrimitiveRunner extends AbstractMixedInterfaceRunner {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return CClassType.EMPTY_CLASS_ARRAY;
+		return new CClassType[]{ValueType.TYPE};
 	}
+
+	@Override
+	public ObjectType getObjectType() {
+		return ObjectType.ABSTRACT;
+	}
+
+
 }

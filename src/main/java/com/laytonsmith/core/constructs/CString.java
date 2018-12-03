@@ -164,4 +164,8 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 		return ObjectType.CLASS;
 	}
 
+	@Override
+	public CString duplicate() {
+		return new CString(val(), getTarget());
+	}
 }

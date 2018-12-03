@@ -45,7 +45,9 @@ public class InstanceofUtil {
 				blacklist.addAll(getAllCastableClassesWithBlacklist(iface, blacklist));
 			}
 		} catch (UnsupportedOperationException ex) {
-			// This is a phantom class, which is allowed
+			if(c.getClass().getAnnotation(typeof.class) != null) {
+				throw new RuntimeException("Unexpected UnsupportedOperationException from " + c.getName());
+			}
 		}
 		return blacklist;
 	}

@@ -49,6 +49,15 @@ public class CSecureString extends CString {
 		construct(CArrayToByteArray(val, t));
 	}
 
+	// duplicate constructor
+	private CSecureString(byte[] encrypted, Cipher decrypter, int encLength, int actualLength, Target t) {
+		super("**secure string**", t);
+		this.encrypted = encrypted;
+		this.decrypter = decrypter;
+		this.encLength = encLength;
+		this.actualLength = actualLength;
+	}
+
 	private void construct(byte[] val) {
 		try {
 			actualLength = val.length;
@@ -202,6 +211,11 @@ public class CSecureString extends CString {
 		if(newMaxKeyLength < 256) {
 			throw new RuntimeException(errorString); // hack failed
 		}
+	}
+
+	@Override
+	public CSecureString duplicate() {
+		return new CSecureString(encrypted, decrypter, encLength, actualLength, getTarget());
 	}
 
 }

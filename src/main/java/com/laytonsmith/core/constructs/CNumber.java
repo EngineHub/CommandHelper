@@ -19,11 +19,13 @@ public abstract class CNumber extends CPrimitive {
 
 	@Override
 	public CClassType[] getSuperclasses() {
+		// Implemented in the Runner
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public CClassType[] getInterfaces() {
+		// Implemented in the Runner
 		throw new UnsupportedOperationException();
 	}
 

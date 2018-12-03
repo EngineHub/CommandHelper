@@ -66,4 +66,8 @@ public class CInt extends CNumber implements Cloneable {
 		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 
+	@Override
+	public CInt duplicate() {
+		return new CInt(val, getTarget());
+	}
 }

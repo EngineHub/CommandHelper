@@ -32,4 +32,8 @@ public class CBareString extends CString {
 		return new CClassType[]{};
 	}
 
+	@Override
+	public CBareString duplicate() {
+		return new CBareString(val(), getTarget());
+	}
 }

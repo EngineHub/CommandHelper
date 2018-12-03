@@ -48,4 +48,8 @@ public class CKeyword extends CBareString {
 		return new CClassType[]{};
 	}
 
+	@Override
+	public CKeyword duplicate() {
+		throw new UnsupportedOperationException("Should have been removed at compile time");
+	}
 }

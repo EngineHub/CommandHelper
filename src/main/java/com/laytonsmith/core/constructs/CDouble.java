@@ -67,4 +67,9 @@ public class CDouble extends CNumber implements Cloneable {
 		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 
+	@Override
+	public CDouble duplicate() {
+		return new CDouble(val, getTarget());
+	}
+
 }
