@@ -1717,7 +1717,7 @@ public final class MethodScriptCompiler {
 			if(tree.getChildren().size() == 1) {
 				try {
 					breakCounter = Static.getInt32(tree.getChildAt(0).getData(), tree.getChildAt(0).getTarget());
-				} catch(CRECastException | CRERangeException e) {
+				} catch (CRECastException | CRERangeException e) {
 					compilerErrors.add(new ConfigCompileException(e));
 					return;
 				}
