@@ -77,7 +77,7 @@ public class NewExceptionHandlingTest {
 				/* 3 */ + "} catch (IOException @e){ \n"
 				/* 4 */ + "msg(@e); \n"
 				/* 5 */ + "}", fakePlayer);
-		verify(fakePlayer).sendMessage("{causedBy: null, classType: ms.lang.IOException, message: message, stackTrace: {{file: Unknown file, id: <<main code>>, line: 2}}}");
+		verify(fakePlayer).sendMessage("{causedBy: null, classType: ms.lang.IOException, message: message, stackTrace: {{col: 2, file: Unknown file, id: <<main code>>, line: 2}}}");
 	}
 
 	@Test
@@ -100,10 +100,10 @@ public class NewExceptionHandlingTest {
 				/* 14 */ + "}", fakePlayer);
 		verify(fakePlayer).sendMessage("{causedBy: null, classType: ms.lang.IOException, message: message, stackTrace:"
 				+ " {"
-				+ "{file: Unknown file, id: proc _c, line: 8}, "
-				+ "{file: Unknown file, id: proc _b, line: 5}, "
-				+ "{file: Unknown file, id: proc _a, line: 2}, "
-				+ "{file: Unknown file, id: <<main code>>, line: 11}}"
+				+ "{col: 2, file: Unknown file, id: proc _c, line: 8}, "
+				+ "{col: 2, file: Unknown file, id: proc _b, line: 5}, "
+				+ "{col: 2, file: Unknown file, id: proc _a, line: 2}, "
+				+ "{col: 2, file: Unknown file, id: <<main code>>, line: 11}}"
 				+ "}");
 	}
 
@@ -127,10 +127,10 @@ public class NewExceptionHandlingTest {
 				/* 14 */ + "}", fakePlayer);
 		verify(fakePlayer).sendMessage("{causedBy: null, classType: ms.lang.RangeException, message: Division by 0!, stackTrace:"
 				+ " {"
-				+ "{file: Unknown file, id: proc _c, line: 8}, "
-				+ "{file: Unknown file, id: proc _b, line: 5}, "
-				+ "{file: Unknown file, id: proc _a, line: 2}, "
-				+ "{file: Unknown file, id: <<main code>>, line: 11}}"
+				+ "{col: 12, file: Unknown file, id: proc _c, line: 8}, "
+				+ "{col: 2, file: Unknown file, id: proc _b, line: 5}, "
+				+ "{col: 2, file: Unknown file, id: proc _a, line: 2}, "
+				+ "{col: 2, file: Unknown file, id: <<main code>>, line: 11}}"
 				+ "}");
 	}
 
@@ -257,14 +257,17 @@ public class NewExceptionHandlingTest {
 				+ "message: original, "
 				+ "stackTrace: {"
 				+ "{"
+				+ "col: 4, "
 				+ "file: Unknown file, "
 				+ "id: proc _a, "
 				+ "line: 2"
 				+ "}, {"
+				+ "col: 4, "
 				+ "file: Unknown file, "
 				+ "id: proc _b, "
 				+ "line: 5"
 				+ "}, {"
+				+ "col: 5, "
 				+ "file: Unknown file, "
 				+ "id: <<main code>>, "
 				+ "line: 9"
@@ -275,6 +278,7 @@ public class NewExceptionHandlingTest {
 				+ "message: new, "
 				+ "stackTrace: {"
 				+ "{"
+				+ "col: 5, "
 				+ "file: Unknown file, "
 				+ "id: <<main code>>, "
 				+ "line: 11"

@@ -128,7 +128,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 			CArray stElement = Static.getArray(consStElement, t);
 			int line = Static.getInt32(stElement.get("line", t), t);
 			File f = new File(stElement.get("file", t).val());
-			int col = 0; //
+			int col = Static.getInt32(stElement.get("col", t), t);
 			st.add(new StackTraceElement(stElement.get("id", t).val(), new Target(line, f, col)));
 		}
 		// Now we have parsed everything into POJOs
