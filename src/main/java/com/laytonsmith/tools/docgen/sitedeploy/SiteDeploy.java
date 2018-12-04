@@ -45,6 +45,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -67,7 +68,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
@@ -98,7 +98,7 @@ public final class SiteDeploy {
 	private static final String INSTALL_PUB_KEYS = "install-pub-keys";
 
 	public static void run(boolean generatePrefs, boolean useLocalCache, File sitedeploy, String password,
-			boolean doValidation) throws Exception {
+			boolean doValidation, boolean clearProgressBar) throws Exception {
 		List<Preferences.Preference> defaults = new ArrayList<>();
 		// SCP Options
 		defaults.add(new Preferences.Preference(USERNAME, "", Preferences.Type.STRING, "The username to scp with"));
@@ -278,14 +278,15 @@ public final class SiteDeploy {
 
 		// Ok, all the configuration details are input and correct, so lets deploy now.
 		deploy(useLocalCache, siteBase, docsBase, deploymentMethod, doValidation,
-				showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript);
+				showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript, clearProgressBar);
 	}
 
 	private static void deploy(boolean useLocalCache, String siteBase, String docsBase,
 			DeploymentMethod deploymentMethod, boolean doValidation, boolean showTemplateCredit,
-			String githubBaseUrl, String validatorUrl, File finalizerScript) throws IOException, InterruptedException {
+			String githubBaseUrl, String validatorUrl, File finalizerScript, boolean clearProgressBar)
+			throws IOException, InterruptedException {
 		new SiteDeploy(siteBase, docsBase, useLocalCache, deploymentMethod, doValidation,
-				showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript).deploy();
+				showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript, clearProgressBar).deploy();
 	}
 
 	String apiJson;
@@ -459,6 +460,7 @@ public final class SiteDeploy {
 	private final String githubBaseUrl;
 	private final String validatorUrl;
 	private final File finalizerScript;
+	private final boolean clearProgressBar;
 
 	private static final String EDIT_THIS_PAGE_PREAMBLE = "Find a bug in this page? <a rel=\"noopener noreferrer\" target=\"_blank\" href=\"";
 	private static final String EDIT_THIS_PAGE_POSTAMBLE = "\">Edit this page yourself, then submit a pull request.</a>";
@@ -467,7 +469,8 @@ public final class SiteDeploy {
 	@SuppressWarnings("unchecked")
 	private SiteDeploy(String siteBase, String docsBase, boolean useLocalCache,
 			DeploymentMethod deploymentMethod, boolean doValidation, boolean showTemplateCredit,
-			String githubBaseUrl, String validatorUrl, File finalizerScript) throws IOException {
+			String githubBaseUrl, String validatorUrl, File finalizerScript, boolean clearProgressBar)
+			throws IOException {
 		this.siteBase = siteBase;
 		this.docsBase = docsBase;
 		this.resourceBase = docsBase + "resources/";
@@ -500,6 +503,7 @@ public final class SiteDeploy {
 			githubBaseUrl = DEFAULT_GITHUB_BASE_URL;
 		}
 		this.githubBaseUrl = githubBaseUrl;
+		this.clearProgressBar = clearProgressBar;
 		pn = getPersistenceNetwork();
 		if(pn != null) {
 			try {
@@ -509,7 +513,7 @@ public final class SiteDeploy {
 				}
 				lc = (Map<String, String>) JSONValue.parse(localCache);
 			} catch (DataSourceException | IllegalArgumentException ex) {
-				Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Could not read in local cache", ex);
+				writeLog("Could not read in local cache", ex);
 				notificationAboutLocalCache = false;
 			}
 		}
@@ -534,8 +538,28 @@ public final class SiteDeploy {
 	}
 
 	private void resetLine() throws IOException {
-		reader.getOutput().write("\u001b[1G\u001b[K");
-		reader.flush();
+		if(clearProgressBar) {
+			reader.getOutput().write("\u001b[1G\u001b[K");
+			reader.flush();
+		} else {
+			reader.getOutput().write("\n");
+			reader.flush();
+		}
+	}
+
+	private synchronized void writeLog(String log, Throwable e) {
+		try {
+			reader.getOutput().write("\n" + log + "\n");
+			e.printStackTrace(new PrintWriter(reader.getOutput()));
+			reader.getOutput().write("\n");
+			reader.flush();
+		} catch (IOException ex) {
+			System.err.println("Failure while logging exception!");
+			System.err.println("Original exception:");
+			e.printStackTrace(System.err);
+			System.err.println("Logging exception:");
+			ex.printStackTrace(System.err);
+		}
 	}
 
 	private synchronized void writeStatus(String additionalInfo) {
@@ -620,7 +644,7 @@ public final class SiteDeploy {
 					}
 					hash = getLocalMD5(in);
 				} catch (IOException ex) {
-					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
+					writeLog(null, ex);
 				}
 				return resourceLoc + "?v=" + hash;
 			}
@@ -745,7 +769,7 @@ public final class SiteDeploy {
 									}
 								}
 							} catch (IllegalArgumentException ex) {
-								Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Could not use local cache", ex);
+								writeLog("Could not use local cache", ex);
 								notificationAboutLocalCache = false;
 							}
 						}
@@ -758,14 +782,14 @@ public final class SiteDeploy {
 							lc.put(deploymentMethod.getID() + toLocation, hash);
 							pn.set(dm, new String[]{"site_deploy", "local_cache"}, JSONValue.toJSONString(lc));
 						} catch (DataSourceException | ReadOnlyException | IllegalArgumentException ex) {
-							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
+							writeLog(null, ex);
 							notificationAboutLocalCache = false;
 						}
 					}
 					currentUploadTask.addAndGet(1);
 					writeStatus("");
 				} catch (Throwable ex) {
-					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Failed while uploading " + toLocation, ex);
+					writeLog("Failed while uploading " + toLocation, ex);
 					generateQueue.shutdownNow();
 					uploadQueue.shutdownNow();
 				}
@@ -882,11 +906,12 @@ public final class SiteDeploy {
 						b = DocGenTemplates.DoTemplateReplacement(bW, standard);
 					} catch (Exception ex) {
 						if(ex instanceof GenerateException) {
-							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Failed to substitute template"
+							writeLog("Failed to substitute template"
 									+ " while trying to upload resource to " + toLocation, ex);
 						} else {
-							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
+							writeLog(null, ex);
 						}
+						reader.flush();
 						generateQueue.shutdownNow();
 						uploadQueue.shutdownNow();
 						return;
@@ -943,7 +968,7 @@ public final class SiteDeploy {
 					currentGenerateTask.addAndGet(1);
 					writeStatus("");
 				} catch (Exception ex) {
-					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While writing " + toLocation + " the following error occured:", ex);
+					writeLog("While writing " + toLocation + " the following error occured:", ex);
 				}
 			}
 		});
@@ -974,13 +999,13 @@ public final class SiteDeploy {
 						}
 					}
 				} catch (IOException ex) {
-					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
+					writeLog(null, ex);
 				}
 				String indexJs = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/index.js"));
 				try {
 					writeFromString(DocGenTemplates.DoTemplateReplacement(indexJs, getStandardGenerators()), "resources/js/index.js");
 				} catch (Generator.GenerateException ex) {
-					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "GenerateException in /siteDeploy/index.js", ex);
+					writeLog("GenerateException in /siteDeploy/index.js", ex);
 				}
 				currentGenerateTask.addAndGet(1);
 			}
@@ -1064,7 +1089,7 @@ public final class SiteDeploy {
 								Arrays.asList(new String[]{r.getName().replace("_", " ")}), "Learning trail page for " + r.getName().replace("_", " "));
 					}
 				} catch (IOException ex) {
-					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
+					writeLog(null, ex);
 				}
 				currentGenerateTask.addAndGet(1);
 			}
@@ -1146,7 +1171,7 @@ public final class SiteDeploy {
 								desc.append("<br>([[API/functions/").append(f.getName()).append("#Examples|Examples...]])\n");
 							}
 						} catch (ConfigCompileException | NoClassDefFoundError ex) {
-							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
+							writeLog(null, ex);
 						}
 						c.add(desc.toString());
 						c.add("<span class=\"api_" + (f.isRestricted() ? "yes" : "no") + "\">" + (f.isRestricted() ? "Yes" : "No")
@@ -1194,7 +1219,7 @@ public final class SiteDeploy {
 							b.append("|}\n");
 							b.append("<p><a href=\"#TOC\">Back to top</a></p>\n");
 						} catch (Error ex) {
-							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While processing " + clazz + " got:", ex);
+							writeLog("While processing " + clazz + " got:", ex);
 						}
 					}
 
@@ -1459,7 +1484,7 @@ public final class SiteDeploy {
 							b.append("|}\n");
 							b.append("<p><a href=\"#TOC\">Back to top</a></p>\n");
 						} catch (Error ex) {
-							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While processing " + clazz + " got:", ex);
+							writeLog("While processing " + clazz + " got:", ex);
 						}
 					}
 					writePage("Event API", b.toString(), "Event_API.html",

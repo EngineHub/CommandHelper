@@ -1,8 +1,9 @@
 Please choose the version of %%branding%% you wish to view:
 
 <ul>
-    <li><a href="%%siteRoot%%docs/3.3.2">3.3.2</a></li>
+	<li><a href="%%siteRoot%%docs/3.3.4">3.3.4</a></li>
 	<li><a href="%%siteRoot%%docs/3.3.3">3.3.3</a></li>
+    <li><a href="%%siteRoot%%docs/3.3.2">3.3.2</a></li>
 </ul>
 
 <script type="text/javascript">

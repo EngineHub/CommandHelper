@@ -1,5 +1,7 @@
 Welcome to the official site for %%branding%%! For docs, <a href="%%siteRoot%%docs/">click here</a>.
 
+For the docs for the latest version, see <a href="%%siteRoot%%docs/3.3.4">here</a>.
+
 <script type="text/javascript">
     showLearningTrail = false;
 </script>

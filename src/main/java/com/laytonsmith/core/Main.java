@@ -238,7 +238,9 @@ public class Main {
 				.addFlag("clear-local-cache", "Clears the local cache of all entries, then exits.")
 				.addFlag('d', "do-validation", "Validates all of the uploaded web pages, and prints out a summary of the results."
 						+ " This requires internet connection.")
-				.addFlag("install", "When installing a fresh server, it is useful to have the setup completely automated. If this flag"
+				.addFlag("no-progress-clear", "When set, does not clear the progress bar line. This is mostly useful"
+						+ " when debugging the site-deploy tool itself.");
+				/*.addFlag("install", "When installing a fresh server, it is useful to have the setup completely automated. If this flag"
 						+ " is set, then the server is assumed to be a fresh ubuntu server, with nothing else on it. In that case,"
 						+ " the server will be installed from scratch automatically. NOTE: This will not account for the fact that"
 						+ " the documentation website is generally configured to allow for multiple versions of documentation. Old"
@@ -249,7 +251,8 @@ public class Main {
 						+ " that the instance will not attempt to be redeployed, making it safe to always add the install"
 						+ " flag. If this flag is set, additional options need to be added to the config file. The remote server"
 						+ " is assumed to be an already running AWS ubuntu instance, with security groups configured and a pem"
-						+ " file available, but no login is necessary.");
+						+ " file available, but no login is necessary.")*/
+
 		suite.addMode("site-deploy", SITE_DEPLOY);
 		NEW_MODE = ArgumentParser.GetParser()
 				.addDescription("Creates a blank script in the specified location with the appropriate permissions, having the correct hashbang, and ready to be executed. If"
@@ -699,13 +702,14 @@ public class Main {
 				boolean generatePrefs = parsedArgs.isFlagSet("generate-prefs");
 				boolean useLocalCache = parsedArgs.isFlagSet("use-local-cache");
 				boolean doValidation = parsedArgs.isFlagSet("do-validation");
+				boolean noProgressClear = parsedArgs.isFlagSet("no-progress-clear");
 				String configString = parsedArgs.getStringArgument("config");
 				if("".equals(configString)) {
 					System.err.println("Config file missing, check command and try again");
 					System.exit(1);
 				}
 				File config = new File(configString);
-				SiteDeploy.run(generatePrefs, useLocalCache, config, "", doValidation);
+				SiteDeploy.run(generatePrefs, useLocalCache, config, "", doValidation, !noProgressClear);
 			} else if(mode == NEW_MODE) {
 				String li = OSUtils.GetLineEnding();
 				for(String file : parsedArgs.getStringListArgument()) {

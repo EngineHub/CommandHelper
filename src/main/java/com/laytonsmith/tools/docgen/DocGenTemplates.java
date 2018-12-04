@@ -558,6 +558,7 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String... args) throws GenerateException {
 			String code = StringUtils.Join(args, "|");
+			code = code.replace("\r\n", "\n");
 			if(code.endsWith("\n")) {
 				code = code.replaceAll("\n$", "");
 			}

@@ -7,11 +7,12 @@ For floating point values, that is, numbers with a decimal, the max value is
 %%CONST|java.lang.Long.MIN_VALUE%%. Undefined numbers and Infinite values
 are not supported.
 
-Integral numbers may be written in source as binary or hexadecimal values.
+Integral numbers may be written in source as binary or hexadecimal or octal values.
 For instance, 15 may be written as either <code>15</code>, <code>0b1111</code>,
-or <code>0xF</code>. Binary values must start with "0b" and may only contain
-the numbers "1" or "0". Hexadecimal numbers start with "0x" and may only contain
-the numbers 0-9, and a-f, either lowercase or uppercase. Binary and hexadecimal
-values may only be integral values.
+<code>0xF</code>, or <code>0o17</code>. Binary values must start with "0b" and may only contain
+the numbers "1" or "0" (base 2). Hexadecimal numbers start with "0x" and may only contain
+the numbers 0-9, and a-f, either lowercase or uppercase (base 16). Octal numbers must start
+with "0o" (zero, lowercase letter o), and may only contain 0-7 (base 8). Binary, hexadecimal,
+and octal values may only be integral values.
 
 {{LearningTrail}}

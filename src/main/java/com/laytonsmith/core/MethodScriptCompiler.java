@@ -37,6 +37,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.functions.ArrayHandling;
 import com.laytonsmith.core.functions.Compiler;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
@@ -1146,7 +1147,7 @@ public final class MethodScriptCompiler {
 		constructCount.push(new AtomicInteger(0));
 		parents.push(tree);
 
-		tree.addChild(new ParseTree(new CFunction("__autoconcat__", unknown), fileOptions));
+		tree.addChild(new ParseTree(new CFunction(__autoconcat__, unknown), fileOptions));
 		parents.push(tree.getChildAt(0));
 		tree = tree.getChildAt(0);
 		constructCount.push(new AtomicInteger(0));
@@ -1176,7 +1177,7 @@ public final class MethodScriptCompiler {
 
 			// Brace handling
 			if(t.type == TType.LCURLY_BRACKET) {
-				ParseTree b = new ParseTree(new CFunction("__cbrace__", t.getTarget()), fileOptions);
+				ParseTree b = new ParseTree(new CFunction(__cbrace__, t.getTarget()), fileOptions);
 				tree.addChild(b);
 				tree = b;
 				parents.push(b);
@@ -1191,7 +1192,7 @@ public final class MethodScriptCompiler {
 					//We need to autoconcat some stuff
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
-					ParseTree c = new ParseTree(new CFunction("__autoconcat__", tree.getTarget()), fileOptions);
+					ParseTree c = new ParseTree(new CFunction(__autoconcat__, tree.getTarget()), fileOptions);
 					List<ParseTree> subChildren = new ArrayList<>();
 					for(int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
@@ -1260,10 +1261,11 @@ public final class MethodScriptCompiler {
 				if(!tree.hasChildren() || array == -1) {
 					throw new ConfigCompileException("Brackets are illegal here", t.target);
 				}
+
 				ParseTree myArray = tree.getChildAt(array);
 				ParseTree myIndex;
 				if(!emptyArray) {
-					myIndex = new ParseTree(new CFunction("__autoconcat__", myArray.getTarget()), fileOptions);
+					myIndex = new ParseTree(new CFunction(__autoconcat__, myArray.getTarget()), fileOptions);
 
 					for(int j = index; j < tree.numberOfChildren(); j++) {
 						myIndex.addChild(tree.getChildAt(j));
@@ -1272,7 +1274,7 @@ public final class MethodScriptCompiler {
 					myIndex = new ParseTree(new CSlice("0..-1", t.target), fileOptions);
 				}
 				tree.setChildren(tree.getChildren().subList(0, array));
-				ParseTree arrayGet = new ParseTree(new CFunction("array_get", t.target), fileOptions);
+				ParseTree arrayGet = new ParseTree(new CFunction(array_get, t.target), fileOptions);
 				arrayGet.addChild(myArray);
 				arrayGet.addChild(myIndex);
 
@@ -1968,8 +1970,13 @@ public final class MethodScriptCompiler {
 		}
 	}
 
-	@SuppressWarnings("checkstyle:constantname") // Variable is more clear when named after the function it represents.
+	// Variable is more clear when named after the function it represents.
+	@SuppressWarnings("checkstyle:constantname")
 	private static final String __autoconcat__ = new Compiler.__autoconcat__().getName();
+	@SuppressWarnings("checkstyle:constantname")
+	private static final String array_get = new ArrayHandling.array_get().getName();
+	@SuppressWarnings("checkstyle:constantname")
+	private static final String __cbrace__ = new Compiler.__cbrace__().getName();
 
 	/**
 	 * Recurses down into the tree, attempting to optimize where possible. A few things have strong coupling, for
@@ -1992,7 +1999,7 @@ public final class MethodScriptCompiler {
 		}
 		//If it is a proc definition, we need to go ahead and see if we can add it to the const proc stack
 		if(tree.getData().val().equals("proc")) {
-			procs.push(new ArrayList<Procedure>());
+			procs.push(new ArrayList<>());
 		}
 		CFunction cFunction = (CFunction) tree.getData();
 		Function func;
