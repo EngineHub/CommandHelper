@@ -10,6 +10,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
@@ -207,9 +208,8 @@ public class CClosure extends Construct {
 					((AbstractCREException) ex).freezeStackTraceElements(stManager);
 				}
 				throw ex;
-			} catch (Throwable t) {
-				// Not sure. Pop and re-throw.
-				throw t;
+			} catch (StackOverflowError e) {
+				throw new CREStackOverflowError(null, node.getTarget(), e);
 			} finally {
 				stManager.popStackTraceElement();
 			}
