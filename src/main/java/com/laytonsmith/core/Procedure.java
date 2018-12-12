@@ -17,6 +17,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
@@ -222,7 +223,6 @@ public class Procedure implements Cloneable {
 			}
 		} catch (FunctionReturnException e) {
 			// Normal exit
-			stManager.popStackTraceElement();
 			Mixed ret = e.getReturn();
 			if(!InstanceofUtil.isInstanceof(ret, returnType)) {
 				throw new CRECastException("Expected procedure \"" + name + "\" to return a value of type " + returnType.val()
@@ -230,8 +230,6 @@ public class Procedure implements Cloneable {
 			}
 			return ret;
 		} catch (LoopManipulationException ex) {
-			// Not exactly normal, but pop anyways
-			stManager.popStackTraceElement();
 			// These cannot bubble up past procedure calls. This will eventually be
 			// a compile error.
 			throw ConfigRuntimeException.CreateUncatchableException("Loop manipulation operations (e.g. break() or continue()) cannot"
@@ -240,16 +238,16 @@ public class Procedure implements Cloneable {
 			if(e instanceof AbstractCREException) {
 				((AbstractCREException) e).freezeStackTraceElements(stManager);
 			}
-			stManager.popStackTraceElement();
 			throw e;
-		} catch (Throwable th) {
-			// Not sure. Pop, but rethrow
+		} catch (StackOverflowError e) {
+			throw new CREStackOverflowError(null, t, e);
+		} finally {
 			stManager.popStackTraceElement();
-			throw th;
 		}
 		// Normal exit, but no return.
-		stManager.popStackTraceElement();
 		// If we got here, then there was no return value. This is fine, but only for returnType void or auto.
+		// TODO: Once strong typing is implemented at a compiler level, this should be removed to increase runtime
+		// performance.
 		if(!(returnType.equals(Auto.TYPE) || returnType.equals(CVoid.TYPE))) {
 			throw new CRECastException("Expecting procedure \"" + name + "\" to return a value of type " + returnType.val() + ","
 					+ " but no value was returned.", tree.getTarget());
