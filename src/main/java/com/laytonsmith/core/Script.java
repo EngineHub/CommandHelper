@@ -36,6 +36,7 @@ import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
+import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
@@ -92,6 +93,8 @@ public class Script {
 	private String label;
 	private Environment currentEnv;
 	private FileOptions fileOptions;
+
+	private static final SimpleVersion GARBAGE_VERSION = new SimpleVersion(0, 0, 0, "version-error");
 
 	@Override
 	public String toString() {
@@ -262,6 +265,7 @@ public class Script {
 	 * @return
 	 * @throws CancelCommandException
 	 */
+	@SuppressWarnings("UseSpecificCatch")
 	public Mixed eval(ParseTree c, final Environment env) throws CancelCommandException {
 		if(env.getEnv(GlobalEnv.class).IsInterrupted()) {
 			//First things first, if we're interrupted, kill the script
@@ -403,13 +407,24 @@ public class Script {
 					e.setData(f.getName());
 				}
 				throw e;
+			} catch (StackOverflowError e) {
+				// This handles this in all cases that weren't previously considered. But it still should
+				// be individually handled by other cases to ensure that the stack trace is more correct
+				throw new CREStackOverflowError(null, c.getTarget(), e);
 			} catch (Throwable e) {
 				if(e instanceof ThreadDeath) {
 					// Bail quickly in this case
 					throw e;
 				}
 				String brand = Implementation.GetServerType().getBranding();
-				SimpleVersion version = Static.getVersion();
+				SimpleVersion version;
+
+				try {
+					version = Static.getVersion();
+				} catch (Throwable ex) {
+					// This failing should not be a dealbreaker, so fill it with default data
+					version = GARBAGE_VERSION;
+				}
 
 				String culprit = brand;
 				outer:

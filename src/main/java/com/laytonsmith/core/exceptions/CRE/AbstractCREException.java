@@ -222,6 +222,17 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		return obj;
 	}
 
+	/**
+	 * Freezes the stack trace. This should be called when an element that has added a frame to the stack
+	 * trace gets an AbstractCREException thrown. This will record the current stack trace, which is then
+	 * returned by {@link #getCREStackTrace()}. If this isn't called, then the stack trace will continue
+	 * to change as the elements are popped, leading to an invalid stacktrace.
+	 *
+	 * Exception handlers up the stack should always call this method anyways, only the first call will
+	 * cause the stacktrace to be recorded, and there's no way for up stack code to know if it had already
+	 * been called.
+	 * @param manager
+	 */
 	public void freezeStackTraceElements(StackTraceManager manager) {
 		if(this.stackTrace == null) {
 			this.stackTrace = manager.getCurrentStackTrace();

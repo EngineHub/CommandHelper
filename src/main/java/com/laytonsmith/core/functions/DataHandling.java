@@ -49,6 +49,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
@@ -57,6 +58,7 @@ import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -65,6 +67,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopBreakException;
 import com.laytonsmith.core.exceptions.LoopContinueException;
+import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.tools.docgen.templates.ArrayIteration;
@@ -2423,7 +2426,18 @@ public class DataHandling {
 			ParseTree include = IncludeCache.get(file, t);
 			if(include != null) {
 				// It could be an empty file
-				parent.eval(include.getChildAt(0), env);
+				StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
+				stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<include " + arg.val() + ">>", t));
+				try {
+					parent.eval(include.getChildAt(0), env);
+				} catch (AbstractCREException e) {
+					e.freezeStackTraceElements(stManager);
+					throw e;
+				} catch (StackOverflowError e) {
+					throw new CREStackOverflowError(null, t, e);
+				} finally {
+					stManager.popStackTraceElement();
+				}
 			}
 			return CVoid.VOID;
 		}
@@ -2449,6 +2463,23 @@ public class DataHandling {
 //			IncludeCache.get(file, t);
 //			return null;
 //		}
+
+		@Override
+		public LogLevel profileAt() {
+			return LogLevel.ERROR;
+		}
+
+		@Override
+		public String profileMessageS(List<ParseTree> args) {
+			String m = "Executing function: include(";
+			if(args.get(0).isConst()) {
+				m += args.get(0).getData().val();
+			} else {
+				m += "<dynamic input>";
+			}
+			return m + ")";
+		}
+
 	}
 
 	@api
