@@ -18,8 +18,17 @@ place, you would see a similar error to this:
 
 %%PRE|
 CastException: Expecting a double, but received string instead
-        <<main code>>:Interpreter:2
+		at proc _throw:/home/user/include2.ms:13.3
+        at <<include include2.ms>>:/home/user/include2.ms:16.2
+        at <<include include1.ms>>:/home/user/include1.ms:10.2
+        at <<closure>>:/home/user/test.ms:12.3
 %%
+
+The stack trace can help you trace back the actual error, as the error itself is not necessarily with the top
+line in the stacktrace, which is where the actual exception was thrown. Instead, it might be because you're
+passing in an invalid paramter to a proc, so it may be useful to step back a few items in the stack trace to
+see what's calling what. Several things are added to the stack trace, particularly procedure stack, but also
+closures and includes.
 
 This is the default exception handling mechanism. It prints out the exception type, exception message, and a
 stacktrace. But perhaps we want to print a custom message to the user. In this case, we can trap the exception
