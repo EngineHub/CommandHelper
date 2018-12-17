@@ -5,9 +5,9 @@ import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.core.Static;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -46,7 +46,7 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 		return new TreeSet<>(MAP.keySet());
 	}
 
-	public static Collection<MCSound> values() {
+	public static List<MCSound> values() {
 		if(NULL == null) { // docs mode
 			ArrayList<MCSound> dummy = new ArrayList<>();
 			for(final MCVanillaSound s : MCVanillaSound.values()) {
@@ -67,7 +67,7 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 			}
 			return dummy;
 		}
-		return MAP.values();
+		return new ArrayList<>(MAP.values());
 	}
 
 	public enum MCVanillaSound {

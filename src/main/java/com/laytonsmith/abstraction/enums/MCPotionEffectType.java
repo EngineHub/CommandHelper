@@ -5,9 +5,9 @@ import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.core.Static;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -43,7 +43,7 @@ public abstract class MCPotionEffectType<Concrete> extends DynamicEnum<MCPotionE
 		return new TreeSet<>(MAP.keySet());
 	}
 
-	public static Collection<MCPotionEffectType> values() {
+	public static List<MCPotionEffectType> values() {
 		if(MAP.isEmpty()) { // docs mode
 			ArrayList<MCPotionEffectType> dummy = new ArrayList<>();
 			for(final MCVanillaPotionEffectType s : MCVanillaPotionEffectType.values()) {
@@ -64,7 +64,7 @@ public abstract class MCPotionEffectType<Concrete> extends DynamicEnum<MCPotionE
 			}
 			return dummy;
 		}
-		return MAP.values();
+		return new ArrayList<>(MAP.values());
 	}
 
 	public static MCPotionEffectType getById(int id) {
