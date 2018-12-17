@@ -5,9 +5,9 @@ import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.core.Static;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,7 +48,7 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 	/**
 	 * @return Our own MCParticle list
 	 */
-	public static Collection<MCParticle> values() {
+	public static List<MCParticle> values() {
 		if(NULL == null) { // docs mode
 			ArrayList<MCParticle> dummy = new ArrayList<>();
 			for(final MCParticle.MCVanillaParticle p : MCParticle.MCVanillaParticle.values()) {
@@ -66,7 +66,7 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 			}
 			return dummy;
 		}
-		return MAP.values();
+		return new ArrayList<>(MAP.values());
 	}
 
 	public enum MCVanillaParticle {

@@ -5,9 +5,9 @@ import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.core.Static;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,7 +48,7 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 	/**
 	 * @return Our own MCBiomeType list
 	 */
-	public static Collection<MCBiomeType> values() {
+	public static List<MCBiomeType> values() {
 		if(NULL == null) { // docs mode
 			ArrayList<MCBiomeType> dummy = new ArrayList<>();
 			for(final MCVanillaBiomeType t : MCVanillaBiomeType.values()) {
@@ -66,7 +66,7 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 			}
 			return dummy;
 		}
-		return MAP.values();
+		return new ArrayList<>(MAP.values());
 	}
 
 	public enum MCVanillaBiomeType {

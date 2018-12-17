@@ -12,14 +12,12 @@ import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.natives.interfaces.MEnumType;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.MixedInterfaceRunner;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -191,39 +189,18 @@ public class NativeTypeList {
 			for(ClassMirror<? extends DynamicEnum> c : ClassDiscovery.getDefaultInstance()
 					.getClassesWithAnnotationThatExtend(MDynamicEnum.class, DynamicEnum.class)) {
 				if(c.getAnnotation(MDynamicEnum.class).getProxy(MDynamicEnum.class).value().equals(fqcn.getFQCN())) {
-					ArrayList<?> values;
+					List<?> values;
 					try {
 						// This cast currently holds true, which is what we need to access the raw enum value anyways,
 						// so if this becomes untrue, the change here should be done carefully.
-						values = (ArrayList<?>) c.getMethod("values", new Class[0])
+						values = (List<?>) c.getMethod("values", new Class[0])
 								.loadMethod().invoke(null);
 					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
 							| NoSuchMethodException ex1) {
 						throw new RuntimeException(ex1);
 					}
 					Enum[] constants = values.stream()
-							.map(new Function<Object, Enum<?>>() {
-								@Override
-								public Enum<?> apply(Object e) {
-									Class<?> cl = e.getClass();
-									Field candidate = null;
-									for(Field f : cl.getDeclaredFields()) {
-										if(Enum.class.isAssignableFrom(f.getType())) {
-											if(candidate != null) {
-												throw new RuntimeException("While processing " + c.getClassName()
-														+ " got multiple instances of Enum candidates");
-											}
-											candidate = f;
-											// Don't break, check all, so we fail fast
-										}
-									}
-									if(candidate == null) {
-										throw new RuntimeException("While processing " + c.getClassName() + " found no"
-												+ " instances of Enum");
-									}
-									return (Enum<?>) ReflectionUtils.get(cl, e, candidate.getName());
-								}
-							})
+							.map((Object e) -> (Enum<?>) ReflectionUtils.get(DynamicEnum.class, e, "abstracted"))
 							.collect(Collectors.toList()).toArray(new Enum[values.size()]);
 					return MEnumType.FromPartialEnum(fqcn, c.loadClass(), constants, null, null);
 				}

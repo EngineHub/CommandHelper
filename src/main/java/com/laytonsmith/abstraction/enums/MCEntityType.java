@@ -6,9 +6,9 @@ import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.core.Static;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -73,7 +73,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	/**
 	 * @return Our own EntityType list
 	 */
-	public static Collection<MCEntityType> values() {
+	public static List<MCEntityType> values() {
 		if(NULL == null) { // docs mode
 			ArrayList<MCEntityType> dummy = new ArrayList<>();
 			for(final MCVanillaEntityType t : MCVanillaEntityType.values()) {
@@ -96,7 +96,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 			}
 			return dummy;
 		}
-		return MAP.values();
+		return new ArrayList<>(MAP.values());
 	}
 
 	public enum MCVanillaEntityType {
