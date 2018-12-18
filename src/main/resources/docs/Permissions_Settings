@@ -24,7 +24,7 @@ These commands are provided by the plugin itself and are not aliases:
 | Gain meta information about CommandHelper.
 |-
 | '''/runalias ''&lt;alias&gt;'''''
-| Run an alias. Can be used by other plugins to call aliases. '''''&lt;alias&gt;''''' includes the forward slash. 
+| Run an alias. Can be used by other plugins to call aliases. '''''&lt;alias&gt;''''' includes the forward slash. \
 ''Example:'' '''/runalias /eat cake''' would always fire off the alias '''/eat cake'''
 |-
 | '''commandhelper.reloadaliases'''
