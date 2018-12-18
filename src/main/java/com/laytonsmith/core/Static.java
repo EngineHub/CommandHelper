@@ -1258,7 +1258,10 @@ public final class Static {
 	 *
 	 * This generally condenses a 5 or 6 line operation into 1 line.
 	 *
-	 * @param arg
+	 * @param arg The path to parse. May be null.
+	 * @param env The environment, required to properly resolve relative paths.
+	 * @param t Code target, for errors.
+	 * @param def The default file, which is returned if {@code arg} is null. (Maybe also be null).
 	 * @return
 	 */
 	public static File GetFileFromArgument(String arg, Environment env, Target t, File def) throws ConfigRuntimeException {

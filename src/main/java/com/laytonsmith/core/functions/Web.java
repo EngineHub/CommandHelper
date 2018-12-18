@@ -391,7 +391,7 @@ public class Web {
 						settings.setDownloadTo(null);
 					} else { // TODO: Remove this check and tie into the VFS once that is complete.
 						if(Static.InCmdLine(environment)) {
-							File file = new File(download.val());
+							File file = Static.GetFileFromArgument(Construct.nval(download), environment, t, null);
 							if(!file.isAbsolute()) {
 								file = new File(t.file(), file.getPath());
 							}
