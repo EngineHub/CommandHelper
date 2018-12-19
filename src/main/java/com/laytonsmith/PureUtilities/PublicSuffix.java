@@ -96,7 +96,7 @@ public final class PublicSuffix {
 	private static final Pattern WHITESPACE = Pattern.compile("\\s+");
 	private static final char DOT = '.';
 
-	private static final String DATA_FILENAME = "public-suffix.txt";
+	private static final String DATA_FILENAME = "public-suffix.dat";
 
 	private static PublicSuffix defaultInstance;
 
