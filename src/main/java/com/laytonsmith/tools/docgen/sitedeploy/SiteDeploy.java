@@ -927,7 +927,8 @@ public final class SiteDeploy {
 					g.put("bodyEscaped", new Generator() {
 						@Override
 						public String generate(String... args) {
-							String s = b.replaceAll("\\\\", "\\\\\\\\").replaceAll("'", "\\\\'").replaceAll("\r?\n", "\\\\n");
+							String s = b.replaceAll("\\\\", "\\\\\\\\").replaceAll("'", "\\\\'")
+									.replaceAll("\r", "").replaceAll("\n", "\\\\n");
 							s = s.replaceAll("<script.*?</script>", "");
 							return s;
 						}
@@ -1378,7 +1379,7 @@ public final class SiteDeploy {
 				+ " (Note this page is automatically generated from the documentation in the source code.)</p>";
 		page.append(bW);
 		String description = "";
-		writePage(f.getName(), page.toString(), "API/functions/" + f.getName(), Arrays.asList(new String[]{f.getName(),
+		writePage(f.getName(), page.toString(), "API/functions/" + f.getName() + ".html", Arrays.asList(new String[]{f.getName(),
 			f.getName() + " api", f.getName() + " example", f.getName() + " description"}), description);
 	}
 

@@ -5,11 +5,11 @@ for the master alias file, but in general will work for LocalPackages as well.
 ===General===
 
 In general, an alias is specified as such:
-%%CODE|
+%%ALIAS|
 /alias_command = /real_command
 %%
 and macros are specified as such:
-%%CODE|
+%%ALIAS|
 /alias_command = /real1 \ /real2 \ /real3 \ etc...
 %%
 
@@ -18,7 +18,7 @@ each other. The exception to this rule is that when using macros, each macro can
 the previous line ends in a backslash. (Another exception is when you use the "multiline construct", which is covered
 below.) Global aliases go in the aliases.msa file, located at the root of the CommandHelper folder, and everybody can
 use them.
-%%CODE|
+%%ALIAS|
 /alias_command = /real1 \
 /real2 \
 /real3
@@ -29,13 +29,13 @@ each other, so things like variable declarations and such won't carry over from 
 script, consider using multiline scripts and the {{function|run}} function. In general, you should use the best practice
 method of writing scripts, even for simple scripts:
 
-%%CODE|
+%%ALIAS|
 /alias = run('/real_command');
 %%
 
 This corresponds to the same simple script:
 
-%%CODE|
+%%ALIAS|
 /alias = /real_command
 %%
 
@@ -44,8 +44,8 @@ however, the less verbose method is acceptable. The rest of the examples in the 
 will generally conform to the best practice method.
 
 In the config file, lines that begin with a <code>#</code> or <code>//</code> are comments, and are ignored by the 
-compiler. This is useful for 
-commenting complex scripts, to show what exactly they do. When the plugin starts, it attempts to compile all the 
+compiler. This is useful for commenting complex scripts, and being able to add freeform text within the code
+to show what exactly they do. When the plugin starts, it attempts to compile all the 
 scripts. If the compilation fails, it will try to give you a useful error message to let you know where the error was in 
 your script. Commands on the right side must be commands that the player could have simply typed in themselves. 
 CommandHelper does no permission checking at all before running commands using run(), but simply runs commands as that 
@@ -59,7 +59,7 @@ which will give you a line number and file to look at, and see what it is that y
 
 A simple alias maps one command to another. For example, in the vanilla server, there is the command /save-all, 
 which for brevity sake, we may want to shorten to /save. The alias for this command would be:
-%%CODE|
+%%ALIAS|
 /save = run('/save-all');
 %%
 
@@ -70,7 +70,7 @@ symbol would cause a compile error otherwise.
 
 Since complex alias scripts would be hard to read if they were only on one line, the multiline construct allows you to 
 put as many newlines in the middle of your alias definition as you want. To use the multiline construct, use the following syntax:
-%%CODE|
+%%ALIAS|
 /cmd = >>>
 #As many newlines as you want
 <<<
@@ -94,11 +94,12 @@ compile time, but since these symbols are part of the lexer, they cannot be used
 
 ===Macros===
 
-{{TakeNote|text=Macros are not recommended for use, see below for alternate syntax to do the same thing, see below}}
+{{TakeNote|text=Macros are not recommended for use, as they become difficult to read if the command becomes more than,
+just a few lines. See below for alternate syntax to do the same thing with a more programmatic approach.}}
 
 Macros allow you to run several commands with only having typed in one command. One common use may be to create "kits" 
 for players to use, which spawn several items at once. Here is an example for that:
-%%CODE|
+%%ALIAS|
 /kit gold = /give player() 284 64 \ /give player() 285 64 \ /give player() 286 64
 %%
 
@@ -112,7 +113,7 @@ is fairly simple; all it does is give you the name of the player issuing the com
 In general, macros are not recommended for use. Instead, use the multiline construct and multiple <code>run()</code>
 calls. The same code from above can be written as such (using full strict syntax with operators):
 
-%%CODE|
+%%ALIAS|
 /kit gold = >>>
 	run('/give '.player().' 284 64');
 	run('/give '.player().' 285 64');
@@ -127,7 +128,7 @@ The advantage of this is that the code is easier to read, and details like varia
 Sometimes we want to use the input provided by the user to put into our aliased command. For instance, if we wanted to 
 shorten a /give command, we could do this:
 
-%%CODE|
+%%ALIAS|
 /i $data $qty = run('/give' player() $data $qty);
 %%
 
@@ -136,7 +137,7 @@ would be assigned 64. Note that all variables start with a dollar sign ($).
 
 What if we want to provide a default value for a variable? We can do that too. Suppose the player by default would 
 want 64 of an item. We can do that with the following syntax:
-%%CODE|
+%%ALIAS|
 /i $data [$qty=64] = run('/give' player() $data $qty);
 %%
 
@@ -148,7 +149,7 @@ Only static values can be assigned as default. Function calls or other dynamic c
 (with or without special symbols) may be assigned using <code>[$var='the-string']</code>. If literal portions of the alias
 have special symbols in them, they may also be quoted, for instance:
 
-%%CODE|
+%%ALIAS|
 '//alias-with-special-characters' = run('/command');
 %%
 
@@ -157,7 +158,7 @@ have special symbols in them, they may also be quoted, for instance:
 Final variables allow you to specify a variable number of arguments be assigned to one variable. There is a special 
 variable defined for this purpose, "$". This is particularly useful for writing some sort of message alias. Say we want 
 to create an alias for /tell.
-%%CODE|
+%%ALIAS|
 /msg $player $ = >>>
 	// Only allow the player 'player' to receive messages
 	if($player == 'player'){
@@ -170,14 +171,14 @@ Note that a user's command is parsed into sections based on spaces but any argum
 variables will be put in the final variable. Another common approach is to trigger an alias based on the first command
 verb, and ignore the rest of the arguments, whether or not they provided them.
 
-%%CODE|
+%%ALIAS|
 /command [$] = msg('Runs this command no matter what extra parameters were sent in');
 %%
 
 Another common use is to accept the entirety of the user's command into the $ var, and use the {{function|parse_args}}
 function to use a more "standard" command line type argument.
 
-%%CODE|
+%%ALIAS|
 /command [$] = >>>
 	@array = parse_args($); // Now the arguments will be separated into various parameters.
 <<<
@@ -200,13 +201,13 @@ For a command to "match" an alias, the following factors are taken into consider
 Non-optional variables must be present, but can be anything. Optional variables may be present, but extra arguments will 
 make the match fail. (Except in the case of a final variable being present.) Let's look at the following two command 
 signatures:
-%%CODE|
+%%ALIAS|
 /cmd $var1 [$var2]
 /cmd $var1 $var2
 %%
 
 Both of these signatures are ambiguous, because the command "/cmd one two" would match both signatures. 
-%%CODE|
+%%ALIAS|
 /cmd $var1
 /cmd $var1 $var2
 %%

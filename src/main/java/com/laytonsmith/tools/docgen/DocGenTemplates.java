@@ -2,6 +2,7 @@ package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.HTMLUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
@@ -12,6 +13,7 @@ import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Main;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
@@ -453,7 +455,11 @@ public class DocGenTemplates {
 
 		@Override
 		public String generate(String... args) {
-			Class c = ClassDiscovery.getDefaultInstance().forFuzzyName(args[0], args[1]).loadClass();
+			ClassMirror m = ClassDiscovery.getDefaultInstance().forFuzzyName(args[0], args[1]);
+			if(m == null) {
+				throw new NullPointerException("Could not find class " + args[0] + " " + args[1]);
+			}
+			Class c = m.loadClass();
 			return "[" + GITHUB_BASE_URL + "/" + c.getName().replace('.', '/') + ".java " + c.getSimpleName() + "]";
 		}
 	};
@@ -769,6 +775,8 @@ public class DocGenTemplates {
 			return new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString("yyyy", Target.UNKNOWN)).val();
 		}
 	};
+
+	public static final Generator CURRENT_VERSION = (String... args) -> MSVersion.LATEST.toString();
 
 	/**
 	 * Returns the standard {{unimplemented}} template

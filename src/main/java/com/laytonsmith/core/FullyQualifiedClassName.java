@@ -111,9 +111,13 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 
 	public String getSimpleName() {
 		List<String> parts = new ArrayList<>();
-		for(String t : fullyQualifiedName.split("|")) {
+		for(String t : fullyQualifiedName.split("\\|")) {
 			String[] sparts = t.split(Pattern.quote(PATH_SEPARATOR));
-			parts.add(sparts[sparts.length - 1]);
+			try {
+				parts.add(sparts[sparts.length - 1]);
+			} catch (ArrayIndexOutOfBoundsException e) {
+				throw new ArrayIndexOutOfBoundsException("Could not properly get simple name for " + fullyQualifiedName);
+			}
 		}
 		return StringUtils.Join(parts, "|");
 	}

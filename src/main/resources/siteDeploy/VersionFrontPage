@@ -20,7 +20,42 @@ Remember that [https://github.com/EngineHub/commandhelper CommandHelper is open 
 
 == Installation ==
 
-{{:CommandHelper/Installation}}
+Only the latest development build is officially supported, but there is some community support for older builds, which
+you can get by joining IRC or Discord. For the latest build, head to 
+[http://builds.enginehub.org/job/commandhelper?branch=master the build site], click the blue download button to the
+right of the topmost build, and then download the <code>commandhelper-%%CURRENT_VERSION%%-SNAPSHOT-full.jar</code> file.
+(Don't download the one without -full.)
+
+Alternatively, for advanced users, you could download the sources and build it yourself locally. To do that, you need
+git, maven, and jdk >= 8. Pull down the code with <code>git clone git@github.com:EngineHub/CommandHelper.git</code>,
+then follow the directions in [https://github.com/EngineHub/CommandHelper/blob/master/README.md the README].
+
+=== Bukkit ===
+If you're using bukkit, throw the jar file in the plugins directory, and start your server. On first boot, the proper
+directory structure with placeholder files will be created, which you can then edit. The configuration directory will
+be called CommandHelper, and will be in the same directory as the jar.
+
+=== Cmdline ===
+If you're using the cmdline version, run "java -jar commandhelper-%%CURRENT_VERSION%%-SNAPSHOT-full.jar help" for a
+listing of the possible commands, and "java -jar commandhelper-%%CURRENT_VERSION%%-SNAPSHOT-full.jar install-cmdline"
+to install.
+The configuration directory will be called MethodScript, and will be in the same directory as the jar. If the name or
+path of the jar file changes, you'll need to re-install, so it may be prudent to name the jar with a neutral name that
+does not include the version number.
+
+==== Linux/MacOS ====
+On Unix systems, you'll need to run the command with sudo. The installer will install an mscript bash file in
+/usr/local/bin/mscript, which simply wraps the jar. Running ''mscript'' will launch the interpreter, running it with
+a file will run that file, and using ''mscript --'' followed by a verb (such as help) will run the cmdline utilities.
+
+==== Windows ====
+<%NOTE|Windows support is still fairly experimental, and is not recommended
+for normal use at this time. The uninstallation is unstable, and may require manual registry changes and other
+manual work to uninstall or update, so use it at your own risk.%>
+
+On Windows systems, you'll need to have launched your command prompt as Administrator. (To install on Windows
+Subsystem for Linux, follow the same instructions as for Unix.) On Windows, an additional installer will run, which will
+allow you to double click .ms files to run them.
 
 == Usage ==
 
@@ -30,7 +65,9 @@ How do you use CommandHelper? We have a set of easy to follow articles that you 
 * '''Want to script completely new features?''' Follow the ''Learning Trail'' at the bottom of the page.
 * '''Just want the API?''' See the [[API.html|API reference]].
 
-Need more help? Visit the [http://forum.sk89q.com/forums/commandhelper.20/ forums], or chat with us on IRC in [http://skq.me/irc/irc.esper.net/commandhelper/ #CommandHelper on irc.esper.net].
+Need more help? Visit the [http://forum.sk89q.com/forums/commandhelper.20/ forums], or chat with us on IRC in
+[http://skq.me/irc/irc.esper.net/commandhelper/ #CommandHelper on irc.esper.net], or
+[https://discord.gg/Z7jpHed Discord].
 {{LearningTrail}}
 
 == Tools ==
@@ -56,23 +93,40 @@ For more detailed instructions, [[SyntaxHighlighting.html|see here]]}}
 
 === Feature requests and bugs ===
 
-Long-term planned features can be found on the [[Roadmap.html|roadmap]], and short term features can be found on the issue tracker. To request your own features or file a bug, use [http://youtrack.sk89q.com/issues/CMDHELPER our issue tracker]. Known bugs can be found on the issue tracker.
+Long-term planned features can be found on the [[Roadmap.html|roadmap]], and short term features can be found on the
+issue tracker. To request your own features or file a bug, use
+[http://youtrack.sk89q.com/issues/CMDHELPER our issue tracker]. Known bugs can be found on the issue tracker.
 
-If you would to request new functions, it is typically easy to add those, so please post your feature request in the issue tracker. If you happen to find a bug in the program, please let us know so we can fix it!
+If you would to request new functions, it is typically easy to add those, so please post your feature request in the
+issue tracker. If you happen to find a bug in the program, please let us know so we can fix it!
 
 === Want to help? ===
 
-CommandHelper is turning into a large project, and I would love for more people to help work on it. Don't know java? Great! There are things for you to do too! If you're interested in any of the following tasks, feel free to get in touch with me, and we can get you started!
+CommandHelper is turning into a large project, and I would love for more people to help work on it. Don't know java?
+Great! There are things for you to do too! If you're interested in any of the following tasks, feel free to get in touch
+with me, and we can get you started!
 
-* '''Documentation:''' There's lots of complexity in the plugin, and without solid documentation, it is nearly worthless. While some of the documentation is generated programmatically, many pages are not. The auto documentation generator leaves room for more detailed information too -- none of which is currently filled in :( From writing examples for each function, to working on the main documentation, and keeping the current documentation up to speed, there's actually alot to do that has nothing to do with coding!
-* '''Testing:''' While a large portion of CommandHelper has automated tests, there is still no substitute for running [http://builds.enginehub.org/ beta] versions of CommandHelper on a real server. It would be nice to know that several servers have put it through the ringer before a version goes to full release status.
-* '''Programming:''' From adding functions, to writing test cases, to working on the core aspects of CommandHelper, there are many different tasks to conquer.
+* '''Documentation:''' There's lots of complexity in the plugin, and without solid documentation, it is nearly \
+worthless. While some of the documentation is generated programmatically, many pages are not. The auto documentation \
+generator leaves room for more detailed information too -- none of which is currently filled in :( From writing \
+examples \
+for each function, to working on the main documentation, and keeping the current documentation up to speed, there's \
+actually a lot to do that has nothing to do with coding!
+* '''Testing:''' While a large portion of CommandHelper has automated tests, there is still no substitute for running \
+[http://builds.enginehub.org/ beta] versions of CommandHelper on a real server. It would be nice to know that several \
+servers have put it through the ringer before a version goes to full release status.
+* '''Programming:''' From adding functions, to writing test cases, to working on the core aspects of CommandHelper, \
+there are many different tasks to conquer.
 
 === Donations ===
 
-Do you like the plugin a lot? I certainly don't expect donations, and the any money I receive won't influence the amount of time I spend on the plugin (well, maybe it will), however I do spend a lot of time working on it, and I certainly won't turn anything down if you want to say thank you! If you reeeeally want a feature added to Command Helper, and you're willing to pay money, get in contact with me, and we can discuss contract work, and we can discuss your needs, but otherwise, donations are just a way for you to tell me thanks!
+Do you like the plugin a lot? I certainly don't expect donations, and the any money I receive won't necessarily
+influence the amount of time I spend on the plugin (well, maybe it will), however I do spend a lot of time working on
+it, and I certainly won't turn anything down if you want to say thank you! If you reeeeally want a feature added to
+CommandHelper, and you're willing to pay money, get in contact with me, and we can discuss contract work, and we can
+discuss your needs, but otherwise, donations are just a way for you to tell me thanks!
 
-[http://www.laytonsmith.com/#donations Donations]
+[http://patreon.com/MethodScript Donations]
 
 == Changelog ==
 

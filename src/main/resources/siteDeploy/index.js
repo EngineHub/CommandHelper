@@ -128,12 +128,15 @@
             if (text === null) {
                 text = link.replace(/_/g, " ");
             }
+			if(!link.endsWith(".html")) {
+				link += ".html";
+			}
             if (link.slice(0, 6) === "Image:") {
                 // image
                 html = html.replace(replacement, "<img class= \"maxWidth100Percent\" src=\"" + resourceBase + "images/" + link.substring(6) + "\" alt=\"" + link + "\" />");
             } else {
                 // plain link
-                html = html.replace(replacement, "<a href=\"" + link + "\">" + text + "</a>");
+                html = html.replace(replacement, "<a href=\"" + docsBase + link + "\">" + text + "</a>");
             }
         }
         if (/\{\{LearningTrail\}\}/.exec(html)) {

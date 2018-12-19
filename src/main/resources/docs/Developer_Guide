@@ -114,7 +114,7 @@ many of these annotations, and where possible, will provide the same functionali
 to be caught more quickly. 
 
 The annotations that are supported by either the compiler or runtime are listed below, but all of them must implement 
-%%GET_SIMPLE_CLASS|.*compiler|CompilerAwareAnnotation%% to be valid parameter annotations. Each annotation has it's own
+GET_SIMPLE_CLASS|.*compiler|CompilerAwareAnnotation to be valid parameter annotations. Each annotation has it's own
 documentation in the normal API.
 
 ==== @{NonNull} ====
