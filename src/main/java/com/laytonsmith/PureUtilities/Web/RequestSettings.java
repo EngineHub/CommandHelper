@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities.Web;
 
+import com.laytonsmith.PureUtilities.Common.FileWriteMode;
 import java.io.File;
 import java.net.Proxy;
 import java.util.Arrays;
@@ -25,6 +26,7 @@ public class RequestSettings {
 	private Proxy proxy = null;
 	private byte[] rawParameter;
 	private File downloadTo;
+	private FileWriteMode downloadStrategy = FileWriteMode.SAFE_WRITE;
 	private boolean blocking = false;
 	private boolean disableCertChecking = false;
 	private boolean useDefaultTrustStore = true;
@@ -243,11 +245,29 @@ public class RequestSettings {
 	}
 
 	/**
+	 * Sets the download strategy.
+	 * @param downloadStrategy
+	 * @return
+	 */
+	public RequestSettings setDownloadStrategy(FileWriteMode downloadStrategy) {
+		this.downloadStrategy = downloadStrategy;
+		return this;
+	}
+
+	/**
 	 *
 	 * @return The file location to download to, or null if this shouldn't save the request as a file.
 	 */
 	public File getDownloadTo() {
 		return this.downloadTo;
+	}
+
+	/**
+	 * Returns the configured download strategy. The default is {@link FileWriteMode#SAFE_WRITE}
+	 * @return
+	 */
+	public FileWriteMode getDownloadStrategy() {
+		return this.downloadStrategy;
 	}
 
 	/**

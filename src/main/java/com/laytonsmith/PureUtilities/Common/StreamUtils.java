@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,6 +86,7 @@ public class StreamUtils {
 
 	/**
 	 * Fully reads in a stream, as efficiently as possible, and returns a byte array.
+	 * The input stream is not closed afterwards.
 	 *
 	 * @param in
 	 * @return
@@ -92,7 +94,7 @@ public class StreamUtils {
 	 */
 	public static byte[] GetBytes(InputStream in) throws IOException {
 		BufferedInputStream bis = new BufferedInputStream(in);
-		List<Byte> bytes = new ArrayList<Byte>();
+		List<Byte> bytes = new ArrayList<>();
 		int i;
 		while((i = bis.read()) != -1) {
 			bytes.add(((byte) i));

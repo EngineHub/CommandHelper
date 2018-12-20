@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.core.FileWriteMode;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
@@ -578,38 +579,6 @@ public class Sandbox {
 	@api
 	@noboilerplate
 	public static class x_write extends AbstractFunction {
-
-		@MEnum("FileWriteMode")
-		public static enum FileWriteMode implements SimpleDocumentation {
-			OVERWRITE("Overwrites the content in the given file.", MSVersion.V3_3_4),
-			APPEND("Appends the content to the existing file.", MSVersion.V3_3_4),
-			SAFE_WRITE("Writes the content, but only if the file does not currently exist. If the file exists, an"
-					+ " IOException is thrown.", MSVersion.V3_3_4);
-
-			final String docs;
-			final Version since;
-			private FileWriteMode(String docs, Version since) {
-				this.docs = docs;
-				this.since = since;
-			}
-
-			@Override
-			public String docs() {
-				return docs;
-			}
-
-			@Override
-			public Version since() {
-				return since;
-			}
-
-			@Override
-			public String getName() {
-				return name();
-			}
-
-		}
-
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRESecurityException.class, CREIOException.class};
@@ -686,4 +655,5 @@ public class Sandbox {
 		}
 
 	}
+
 }

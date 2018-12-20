@@ -1,11 +1,14 @@
 package com.laytonsmith.PureUtilities.Web;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class wraps all the data that an HTTP response contains.
@@ -13,10 +16,10 @@ import java.util.Set;
 public final class HTTPResponse {
 
 	private String rawResponse = null;
-	private final List<HTTPHeader> headers = new LinkedList<HTTPHeader>();
+	private final List<HTTPHeader> headers = new LinkedList<>();
 	private final String responseText;
 	private final int responseCode;
-	private final String content;
+	private final byte[] content;
 	private final String httpVersion;
 
 	/**
@@ -30,7 +33,7 @@ public final class HTTPResponse {
 	 * @param httpVersion The HTTP version that the server is using, for instance "1.0"
 	 */
 	public HTTPResponse(String responseText, int responseCode, Map<String, List<String>> headers,
-			String response, String httpVersion) {
+			byte[] response, String httpVersion) {
 		this.responseText = responseText;
 		this.responseCode = responseCode;
 		for(String key : headers.keySet()) {
@@ -47,8 +50,30 @@ public final class HTTPResponse {
 	 *
 	 * @return
 	 */
-	public String getContent() {
+	public byte[] getContent() {
 		return this.content;
+	}
+
+	/**
+	 * Returns the content as UTF-8 text.
+	 * @return
+	 */
+	public String getContentAsString() {
+		try {
+			return getContentAsString("UTF-8");
+		} catch(UnsupportedEncodingException ex) {
+			throw new Error(ex);
+		}
+	}
+
+	/**
+	 * Returns the content as text with the specified encoding.
+	 * @param encoding
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 */
+	public String getContentAsString(String encoding) throws UnsupportedEncodingException {
+		return new String(getContent(), encoding);
 	}
 
 	/**
@@ -81,7 +106,7 @@ public final class HTTPResponse {
 	 * @return
 	 */
 	public Set<String> getHeaderNames() {
-		Set<String> set = new HashSet<String>();
+		Set<String> set = new HashSet<>();
 		for(HTTPHeader h : headers) {
 			if(h.getHeader() != null) {
 				set.add(h.getHeader());
@@ -97,7 +122,7 @@ public final class HTTPResponse {
 	 * @return
 	 */
 	public List<String> getHeaders(String key) {
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		for(HTTPHeader header : headers) {
 			if((header.getHeader() == null && key == null) || (header.getHeader() != null && header.getHeader().equalsIgnoreCase(key))) {
 				list.add(header.getValue());
@@ -134,7 +159,7 @@ public final class HTTPResponse {
 				}
 				rawResponse += h.getHeader() + ": " + h.getValue() + "\n";
 			}
-			rawResponse += "\n" + content;
+			rawResponse += "\n" + "<bytes of length " + content.length + ">";
 		}
 		return rawResponse;
 	}

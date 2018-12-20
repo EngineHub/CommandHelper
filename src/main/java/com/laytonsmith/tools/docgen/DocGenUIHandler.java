@@ -425,7 +425,7 @@ public class DocGenUIHandler {
 
 	private static XMLDocument getXML(URL url, Map<String, String> params, boolean useURL) throws APIException {
 		try {
-			XMLDocument doc = new XMLDocument(getPage(url, params, useURL).getContent());
+			XMLDocument doc = new XMLDocument(getPage(url, params, useURL).getContentAsString());
 			if(doc.nodeExists("/api/error")) {
 				//Doh.
 				throw new APIException(doc.getNode("/api/error/@info"));

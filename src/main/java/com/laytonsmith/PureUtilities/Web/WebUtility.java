@@ -1,8 +1,11 @@
 package com.laytonsmith.PureUtilities.Web;
 
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.FileWriteMode;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import java.io.BufferedInputStream;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -101,47 +104,55 @@ public final class WebUtility {
 	/**
 	 * Gets a web page based on the parameters specified. This is a blocking call, if you wish for it to be event
 	 * driven, consider using the GetPage that requires a HTTPResponseCallback.
-	 *
+	 * <p>
+	 * The settings may have the following parameters:
+	 * <ul>
+	 * <li>method - The HTTP method to use</li>
+	 * <li>parameters - The parameters to be sent. Parameters can be also specified directly in the URL, and they will
+	 * be merged. May be null.</li>
+	 * <li>cookieStash - An instance of a cookie stash to use, or null if none is needed. Cookies will automatically be
+	 * added and used from this instance.</li>
+	 * <li>followRedirects - If 300 code responses should automatically be followed.</li>
+	 * <li>timeout - Sets the timeout in ms for this connection. 0 means no timeout. If the timeout is reached, a
+	 * SocketTimeoutException will be thrown.</li>
+	 * <li>username - The username to use in response to HTTP Basic authentication. Null ignores this parameter.</li>
+	 * <li>password - The password to use in response to HTTP Basic authentication. Null ignores this parameter.</li>
+	 * </ul>
 	 * @param url The url to navigate to
-	 * @param method The HTTP method to use
-	 * @param parameters The parameters to be sent. Parameters can be also specified directly in the URL, and they will
-	 * be merged. May be null.
-	 * @param cookieStash An instance of a cookie stash to use, or null if none is needed. Cookies will automatically be
-	 * added and used from this instance.
-	 * @param followRedirects If 300 code responses should automatically be followed.
-	 * @param timeout Sets the timeout in ms for this connection. 0 means no timeout. If the timeout is reached, a
-	 * SocketTimeoutException will be thrown.
-	 * @param username The username to use in response to HTTP Basic authentication. Null ignores this parameter.
-	 * @param password The password to use in response to HTTP Basic authentication. Null ignores this parameter.
+	 * @param settings The settings to use for this request
 	 * @return
-	 * @throws IOException
+	 * @throws SocketTimeoutException If the request took longer than the configured timeout
+	 * @throws IOException If the connection could not be made properly
 	 */
 	public static HTTPResponse GetPage(URL url, RequestSettings settings) throws SocketTimeoutException, IOException {
+		// If SAFE_WRITE is set, there's no reason to do the download given we know it will fail later, so let's fail
+		// fast, and do the check here
+		if(settings.getDownloadTo() != null && settings.getDownloadStrategy() == FileWriteMode.SAFE_WRITE) {
+			if(settings.getDownloadTo().exists()) {
+				throw new IOException("Refusing to download file, destination path already exists ["
+						+ settings.getDownloadTo() + "]");
+			}
+		}
 		CookieJar cookieStash = settings.getCookieJar();
 		RawHTTPResponse response = getWebStream(url, settings);
-		StringBuilder b = null;
-		BufferedReader in = new BufferedReader(new InputStreamReader(response.getStream()));
+		byte[] b = null;
+		InputStream in = new BufferedInputStream(response.getStream());
 		if(settings.getDownloadTo() == null) {
 			if(settings.getLogger() != null) {
 				settings.getLogger().log(Level.INFO, "Reading in response body");
 			}
-			b = new StringBuilder();
-			String line;
-			while((line = in.readLine()) != null) {
-				b.append(line).append("\n");
+			try {
+				b = StreamUtils.GetBytes(in);
+			} finally {
+				in.close();
 			}
-			in.close();
 		} else {
 			if(settings.getLogger() != null) {
-				settings.getLogger().log(Level.INFO, "Saving file to {0}", settings.getDownloadTo());
-			}
-			int r;
-			OutputStream out = new BufferedOutputStream(new FileOutputStream(settings.getDownloadTo()));
-			while((r = in.read()) != -1) {
-				out.write(r);
+				settings.getLogger().log(Level.INFO, "Saving file to [{0}] using {1} strategy",
+						new Object[]{settings.getDownloadTo(), settings.getDownloadStrategy()});
 			}
 			try {
-				out.close();
+				FileUtil.write(StreamUtils.GetBytes(in), settings.getDownloadTo(), settings.getDownloadStrategy(), true);
 			} finally {
 				in.close();
 			}
@@ -153,7 +164,7 @@ public final class WebUtility {
 			httpVersion = m.group(1);
 		}
 		HTTPResponse resp = new HTTPResponse(response.getConnection().getResponseMessage(),
-				response.getConnection().getResponseCode(), response.getConnection().getHeaderFields(), b == null ? null : b.toString(), httpVersion);
+				response.getConnection().getResponseCode(), response.getConnection().getHeaderFields(), b, httpVersion);
 		if(cookieStash != null && resp.getHeaderNames().contains("Set-Cookie")) {
 			//We need to add the cookie to the stash
 			for(String h : resp.getHeaders("Set-Cookie")) {
@@ -543,31 +554,51 @@ public final class WebUtility {
 		return b.toString();
 	}
 
-	private static void WriteStringToOutputStream(String data, BufferedWriter bw) throws IOException {
-		for(Character c : data.toCharArray()) {
-			bw.write((int) c.charValue());
-		}
-	}
-
 	/**
 	 * A very simple convenience method to get a page. Only the contents are returned by this method.
+	 * It is assumed that the content is a UTF-8 formatted string, and is not binary content.
 	 *
 	 * @param url
 	 * @return
 	 * @throws IOException
 	 */
 	public static String GetPageContents(URL url) throws IOException {
-		return GetPage(url).getContent();
+		return new String(GetPage(url).getContent(), "UTF-8");
 	}
 
 	/**
 	 * A very simple convenience method to get a page. Only the contents are returned by this method.
+	 * It is assumed that the content is a UTF-8 formatted string, and is not binary content.
 	 *
 	 * @param url
 	 * @return
 	 * @throws IOException
 	 */
 	public static String GetPageContents(String url) throws IOException {
+		return new String(GetPage(url).getContent(), "UTF-8");
+	}
+
+	/**
+	 * A very simple convenience method to get a page. Only the contents are returned by this method.
+	 * This supports returning binary content.
+	 *
+	 * @param url
+	 * @return
+	 * @throws IOException
+	 */
+	public static byte[] GetPageContentsBinary(URL url) throws IOException {
+		return GetPage(url).getContent();
+	}
+
+	/**
+	 * A very simple convenience method to get a page. Only the contents are returned by this method.
+	 * This supports returning binary content.
+	 *
+	 * @param url
+	 * @return
+	 * @throws IOException
+	 */
+	public static byte[] GetPageContentsBinary(String url) throws IOException {
 		return GetPage(url).getContent();
 	}
 

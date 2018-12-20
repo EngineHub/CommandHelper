@@ -239,6 +239,24 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		}
 	}
 
+	/**
+	 * NOTE!!! This is probably not what you're looking for, you're probably looking for
+	 * {@link #freezeStackTraceElements(com.laytonsmith.core.exceptions.StackTraceManager)}.
+	 * <p>
+	 * Sets the stacktrace if it is not already frozen. For asynchronous processing, it may sometimes be needed
+	 * to get the stacktrace before going asynchronous, for if an exception is thrown in the asynchronous code,
+	 * at which point, this can be set in the newly generated exception.
+	 * <p>
+	 * If the stacktrace was already set, this is an Error, because this should never happen in the usual case.
+	 * @param st
+	 */
+	public void setStackTraceElements(List<StackTraceElement> st) {
+		if(this.stackTrace != null) {
+			throw new RuntimeException("The stacktrace was already set, and it cannot be set again");
+		}
+		this.stackTrace = st;
+	}
+
 	public List<StackTraceElement> getCREStackTrace() {
 		if(this.stackTrace == null) {
 			return new ArrayList<>();

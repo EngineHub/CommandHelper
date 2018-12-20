@@ -143,7 +143,7 @@ public class OAuth {
 							tokenParameters.put("redirect_uri", redirectUrl);
 							settings.setParameters(tokenParameters);
 							HTTPResponse tokenResponse = WebUtility.GetPage(new URL(tokenUrl), settings);
-							CArray tokenJson = (CArray) new DataTransformations.json_decode().exec(t, env, new CString(tokenResponse.getContent(), t));
+							CArray tokenJson = (CArray) new DataTransformations.json_decode().exec(t, env, new CString(tokenResponse.getContentAsString(), t));
 							storeRefreshToken(env, clientId, tokenJson.get("refresh_token", t).val());
 							accessToken = tokenJson.get("access_token", t).val();
 							storeAccessToken(env, clientId, new AccessToken(accessToken, Static.getInt32(tokenJson.get("expires_in", t), t) * 1000));
@@ -161,7 +161,7 @@ public class OAuth {
 							tokenParameters.put("grant_type", "refresh_token");
 							settings.setParameters(tokenParameters);
 							HTTPResponse tokenResponse = WebUtility.GetPage(new URL(tokenUrl), settings);
-							CArray tokenJson = (CArray) new DataTransformations.json_decode().exec(t, env, new CString(tokenResponse.getContent(), t));
+							CArray tokenJson = (CArray) new DataTransformations.json_decode().exec(t, env, new CString(tokenResponse.getContentAsString(), t));
 							accessToken = tokenJson.get("access_token", t).val();
 							storeAccessToken(env, clientId, new AccessToken(accessToken, Static.getInt32(tokenJson.get("expires_in", t), t) * 1000));
 						}

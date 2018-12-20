@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.core.FileWriteMode;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
@@ -228,10 +229,14 @@ public class Web {
 			final CClosure success;
 			final CClosure error;
 			final CArray arrayJar;
+			final boolean binary;
+			final String textEncoding;
 			if(args[1] instanceof CClosure) {
 				success = (CClosure) args[1];
 				error = null;
 				arrayJar = null;
+				binary = false;
+				textEncoding = "UTF-8";
 			} else {
 				CArray csettings = Static.getArray(args[1], t);
 				if(csettings.containsKey("method")) {
@@ -399,6 +404,33 @@ public class Web {
 						}
 					}
 				}
+				if(csettings.containsKey("downloadStrategy")) {
+					com.laytonsmith.core.FileWriteMode mode
+							= ArgumentValidation.getEnum(csettings.get("downloadStrategy", t), FileWriteMode.class, t);
+					com.laytonsmith.PureUtilities.Common.FileWriteMode puMode;
+					if(mode == com.laytonsmith.core.FileWriteMode.APPEND) {
+						puMode = com.laytonsmith.PureUtilities.Common.FileWriteMode.APPEND;
+					} else if(mode == com.laytonsmith.core.FileWriteMode.OVERWRITE) {
+						puMode = com.laytonsmith.PureUtilities.Common.FileWriteMode.OVERWRITE;
+					} else if(mode == com.laytonsmith.core.FileWriteMode.SAFE_WRITE) {
+						puMode = com.laytonsmith.PureUtilities.Common.FileWriteMode.SAFE_WRITE;
+					} else {
+						throw new Error("Unhandled case");
+					}
+					settings.setDownloadStrategy(puMode);
+				}
+				if(csettings.containsKey("binary")) {
+					binary = Static.getBoolean(csettings.get("binary", t), t);
+				} else {
+					binary = false;
+				}
+
+				if(csettings.containsKey("textEncoding")) {
+					textEncoding = csettings.get("textEncoding", t).val();
+				} else {
+					textEncoding = "UTF-8";
+				}
+
 				if(csettings.containsKey("blocking")) {
 					boolean blocking = Static.getBoolean(csettings.get("blocking", t), t);
 					settings.setBlocking(blocking);
@@ -408,15 +440,28 @@ public class Web {
 				}
 				settings.setAuthenticationDetails(username, password);
 			}
-			environment.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
+
+			List<ConfigRuntimeException.StackTraceElement> st
+					= environment.getEnv(GlobalEnv.class).GetStackTraceManager().getCurrentStackTrace();
 			Runnable task = new Runnable() {
 
 				@Override
 				public void run() {
 					try {
+						environment.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
 						HTTPResponse resp = WebUtility.GetPage(url, settings);
 						final CArray array = CArray.GetAssociativeArray(t);
-						array.set("body", new CString(resp.getContent(), t), t);
+						if(settings.getDownloadTo() == null) {
+							if(binary) {
+								array.set("data", CByteArray.wrap(resp.getContent(), t), t);
+							} else {
+								try {
+									array.set("body", new CString(new String(resp.getContent(), textEncoding), t), t);
+								} catch (UnsupportedEncodingException ex) {
+									throw new CREFormatException("Unsupported encoding [" + textEncoding + "]", t, ex);
+								}
+							}
+						}
 						CArray headers = CArray.GetAssociativeArray(t);
 						for(String key : resp.getHeaderNames()) {
 							CArray h = new CArray(t);
@@ -441,11 +486,11 @@ public class Web {
 							}
 						});
 					} catch (IOException e) {
-						final ConfigRuntimeException ex = new CREIOException((e instanceof UnknownHostException ? "Unknown host: " : "")
-								+ e.getMessage(), t);
+						final CREIOException ex = new CREIOException((e instanceof UnknownHostException ? "Unknown host: " : "")
+							+ e.getMessage(), t);
+						ex.setStackTraceElements(st);
 						if(error != null) {
 							StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
-
 								@Override
 								public void run() {
 									executeFinish(error, ObjectGenerator.GetGenerator().exception(ex, environment, t), t, environment);

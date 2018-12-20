@@ -144,21 +144,44 @@ public final class FileUtil {
 	}
 
 	/**
-	 * Writes out a String to the given file, either appending or overwriting, depending on the selected mode. If create
+	 * Writes out byte data to the given file, either appending or overwriting, depending on the selected mode. If create
+	 * is true, will attempt to create the file and parent directories if need be.
+	 *
+	 * @param data The string to write to the file
+	 * @param file The File to write to
+	 * @param mode The mode in which to write the file
+	 * @param create If true, will create the parent directories
+	 * @throws IOException If the File cannot be written to
+	 */
+	public static void write(byte[] data, File file, FileWriteMode mode, boolean create) throws IOException {
+		if(mode == FileWriteMode.SAFE_WRITE) {
+			if(file.exists()) {
+				throw new IOException("Cannot create file, SAFE_WRITE set, and file already exists [" + file + "]");
+			}
+			mode = FileWriteMode.OVERWRITE;
+		}
+		if(mode == FileWriteMode.OVERWRITE) {
+			write(data, file, OVERWRITE, create);
+		} else if(mode == FileWriteMode.APPEND) {
+			write(data, file, APPEND, create);
+		} else {
+			throw new Error("Unaccounted for FileWriteMode");
+		}
+	}
+
+	/**
+	 * Writes out byte data to the given file, either appending or overwriting, depending on the selected mode. If create
 	 * is true, will attempt to create the file and parent directories if need be.
 	 *
 	 * @param data The string to write to the file
 	 * @param file The File to write to
 	 * @param mode Either OVERWRITE or APPEND
+	 * @param create If true, will create the parent directories
 	 * @throws IOException If the File f cannot be written to
 	 */
 	public static void write(byte[] data, File file, int mode, boolean create) throws IOException {
 		boolean append;
-		if(mode == OVERWRITE) {
-			append = false;
-		} else {
-			append = true;
-		}
+		append = mode != OVERWRITE;
 		if(create && !file.exists()) {
 			if(file.getAbsoluteFile().getParentFile() != null) {
 				file.getAbsoluteFile().getParentFile().mkdirs();

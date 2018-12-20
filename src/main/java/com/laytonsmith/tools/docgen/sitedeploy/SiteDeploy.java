@@ -368,7 +368,7 @@ public final class SiteDeploy {
 						throw new IOException("Response was non-200, refusing to continue with validation");
 					}
 
-					String[] errors = response.getContent().split("\n");
+					String[] errors = response.getContentAsString().split("\n");
 					int errorsDisplayed = 0;
 					for(String error : errors) {
 						GNUErrorMessageFormat gnuError = new GNUErrorMessageFormat(error);
