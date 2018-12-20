@@ -12,6 +12,7 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CEntry;
 import com.laytonsmith.core.constructs.CFunction;
@@ -60,7 +61,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 
 /**
  * A script is a section of code that has been preprocessed and split into separate commands/actions. For instance, the
@@ -464,6 +464,8 @@ public class Script {
 						args2.add(new CString(cc.val(), Target.UNKNOWN).getQuote());
 					} else if(cc instanceof IVariable) {
 						args2.add(((IVariable) cc).getVariableName());
+					} else if(cc instanceof CClosure) {
+						args2.add("<closure>");
 					} else {
 						args2.add(cc.val());
 					}
@@ -508,7 +510,7 @@ public class Script {
 						+ TermColors.CYAN + brand + TermColors.RED + " version: " + TermColors.RESET + version + TermColors.RED + ";\n"
 						+ "Loaded extensions and versions:\n" + extensionData
 						+ "Here's the stacktrace:\n" + TermColors.RESET + Static.GetStacktraceString(e);
-				Static.getLogger().log(Level.SEVERE, emsg);
+				System.err.println(emsg);
 				throw new CancelCommandException(null, Target.UNKNOWN);
 			}
 		} finally {

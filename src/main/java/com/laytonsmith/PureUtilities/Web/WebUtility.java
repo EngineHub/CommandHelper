@@ -512,7 +512,7 @@ public final class WebUtility {
 			is = conn.getErrorStream();
 		}
 
-		if(settings.getDisableCompressionHandling()) {
+		if(!settings.getDisableCompressionHandling() && conn.getContentEncoding() != null) {
 			/*
 			The HTTP spec for Content-Encoding specifies that multiple comma separated values can be provided. Where
 			more than one is provided, this means that the content was compressed multiple times, in the specified order.

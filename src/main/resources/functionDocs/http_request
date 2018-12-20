@@ -123,7 +123,8 @@ of web requests that can be running concurrently.
 | boolean
 | true
 | Automatically adds the default headers to this request, unless specifically overridden. Note that some headers
-simply cannot be overridden, for instance Host and User-Agent will ALWAYS be set. 
+simply cannot be overridden, for instance Host and User-Agent will ALWAYS be set. The default headers are: 
+<%DEFAULT_HEADERS%>
 |- 
 | trustStore
 | boolean or array

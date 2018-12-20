@@ -231,12 +231,18 @@ public class Web {
 			final CArray arrayJar;
 			final boolean binary;
 			final String textEncoding;
+			boolean useDefaultHeaders = true;
 			if(args[1] instanceof CClosure) {
 				success = (CClosure) args[1];
 				error = null;
 				arrayJar = null;
 				binary = false;
 				textEncoding = "UTF-8";
+				Map<String, List<String>> headers = new HashMap<>();
+				for(String key : DEFAULT_HEADERS.keySet()) {
+					headers.put(key, Arrays.asList(DEFAULT_HEADERS.get(key)));
+				}
+				settings.setHeaders(headers);
 			} else {
 				CArray csettings = Static.getArray(args[1], t);
 				if(csettings.containsKey("method")) {
@@ -246,7 +252,6 @@ public class Web {
 						throw new CREFormatException(e.getMessage(), t);
 					}
 				}
-				boolean useDefaultHeaders = true;
 				if(csettings.containsKey("useDefaultHeaders")) {
 					useDefaultHeaders = Static.getBoolean(csettings.get("useDefaultHeaders", t), t);
 				}
@@ -267,7 +272,7 @@ public class Web {
 					}
 					settings.setHeaders(mheaders);
 				} else {
-					settings.setHeaders(new HashMap<String, List<String>>());
+					settings.setHeaders(new HashMap<>());
 				}
 				if(useDefaultHeaders) {
 					outer:
@@ -561,6 +566,7 @@ public class Web {
 				}
 			});
 			templates.put("CODE", DocGenTemplates.CODE);
+			templates.put("DEFAULT_HEADERS", (e) -> DEFAULT_HEADERS.toString());
 			try {
 				return super.getBundledDocs(templates);
 			} catch (DocGenTemplates.Generator.GenerateException ex) {
