@@ -7,8 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This class wraps all the data that an HTTP response contains.
@@ -61,7 +59,7 @@ public final class HTTPResponse {
 	public String getContentAsString() {
 		try {
 			return getContentAsString("UTF-8");
-		} catch(UnsupportedEncodingException ex) {
+		} catch (UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}

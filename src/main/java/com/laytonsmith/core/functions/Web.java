@@ -443,12 +443,12 @@ public class Web {
 
 			List<ConfigRuntimeException.StackTraceElement> st
 					= environment.getEnv(GlobalEnv.class).GetStackTraceManager().getCurrentStackTrace();
+			environment.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
 			Runnable task = new Runnable() {
 
 				@Override
 				public void run() {
 					try {
-						environment.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
 						HTTPResponse resp = WebUtility.GetPage(url, settings);
 						final CArray array = CArray.GetAssociativeArray(t);
 						if(settings.getDownloadTo() == null) {
