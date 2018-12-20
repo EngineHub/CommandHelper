@@ -7,7 +7,9 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Prefs;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,15 +29,17 @@ public class FileOptions {
 	private final String author;
 	private final String created;
 	private final String description;
+	private final Set<String> requiredExtensions;
 	//TODO: Make this non-public once this is all finished.
 
 	public FileOptions(Map<String, String> parsedOptions) {
 		strict = parseBoolean(getDefault(parsedOptions, "strict", null));
 		suppressWarnings = parseEnumSet(getDefault(parsedOptions, "suppresswarnings", ""), SuppressWarnings.class);
-		name = getDefault(parsedOptions, "name", "");
-		author = getDefault(parsedOptions, "author", "");
-		created = getDefault(parsedOptions, "created", "");
-		description = getDefault(parsedOptions, "description", null);
+		name = getDefault(parsedOptions, "name", "").trim();
+		author = getDefault(parsedOptions, "author", "").trim();
+		created = getDefault(parsedOptions, "created", "").trim();
+		description = getDefault(parsedOptions, "description", "").trim();
+		requiredExtensions = Collections.unmodifiableSet(parseSet(getDefault(parsedOptions, "requiredextensions", "")));
 	}
 
 	private String getDefault(Map<String, String> map, String key, String defaultIfNone) {
@@ -61,6 +65,10 @@ public class FileOptions {
 			}
 		}
 		return l;
+	}
+
+	private Set<String> parseSet(String list) {
+		return new HashSet<>(parseList(list));
 	}
 
 	private <T extends Enum<T>> Set<T> parseEnumSet(String list, Class<T> type) {
@@ -92,24 +100,63 @@ public class FileOptions {
 		}
 	}
 
+	/**
+	 * Returns true if the specified warning has been suppressed.
+	 * @param warning
+	 * @return
+	 */
 	public boolean isWarningSuppressed(SuppressWarnings warning) {
 		return suppressWarnings.contains(warning);
 	}
 
+	/**
+	 * Gets the file name. If the actual file name and this value do not match, this is a compiler warning. The default
+	 * is an empty string, which should suppress the warning.
+	 * @return
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Gets the file author(s). This is not used programmatically, and is only for reference.
+	 * @return
+	 */
 	public String getAuthor() {
 		return author;
 	}
 
+	/**
+	 * Gets the file creation date. This is not used programmatically, and is only for reference.
+	 * @return
+	 */
 	public String getCreated() {
 		return created;
 	}
 
+	/**
+	 * Gets the file description. This is not used programmatically, and is only for reference.
+	 * @return
+	 */
 	public String getDescription() {
 		return description;
+	}
+
+	/**
+	 * Returns whether or not this file has required extensions.
+	 * @return
+	 */
+	public boolean requiresExtensions() {
+		return !requiredExtensions.isEmpty();
+	}
+
+	/**
+	 * Returns the list of required extensions for this file. It should be a compile error if the file requires an
+	 * extension, but the extension is not present.
+	 * @return
+	 */
+	public Set<String> getRequiredExtensions() {
+		return requiredExtensions;
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.breakable;
 import com.laytonsmith.annotations.nolinking;
@@ -37,6 +38,8 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
+import com.laytonsmith.core.extensions.ExtensionManager;
+import com.laytonsmith.core.extensions.ExtensionTracker;
 import com.laytonsmith.core.functions.ArrayHandling;
 import com.laytonsmith.core.functions.Compiler;
 import com.laytonsmith.core.functions.DataHandling;
@@ -52,6 +55,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EmptyStackException;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -895,6 +899,42 @@ public final class MethodScriptCompiler {
 				if(!t.type.isComment() && !t.type.isWhitespace()) {
 					foundCode = true;
 				}
+			}
+		}
+
+		{
+			// Filename check
+			String fileName = tokenList.getFileOptions().getName();
+			if(!fileName.isEmpty()) {
+				if(!file.getAbsolutePath().replace("\\", "/").endsWith(fileName.replace("\\", "/"))) {
+					CHLog.GetLogger().w(CHLog.Tags.COMPILER, file + " has the wrong file name in the file options ("
+							+ fileName + ")",
+							new Target(0, file, 0));
+				}
+			}
+		}
+		{
+			// Required extension check
+			// TODO: Add support for specifying required versions
+			Collection<ExtensionTracker> exts = ExtensionManager.getTrackers().values();
+			Set<String> notFound = new HashSet<>();
+			for(String extension : tokenList.getFileOptions().getRequiredExtensions()) {
+				boolean found = false;
+				for(ExtensionTracker t : exts) {
+					if(t.getIdentifier().equalsIgnoreCase(extension)) {
+						found = true;
+						break;
+					}
+				}
+				if(!found) {
+					notFound.add(extension);
+				}
+			}
+			if(!notFound.isEmpty()) {
+				throw new ConfigCompileException("Could not compile file, because one or more required"
+						+ " extensions are not loaded: " + StringUtils.Join(notFound, ", ")
+						+ ". These extensions must be provided before compilation can continue.",
+						new Target(0, file, 0));
 			}
 		}
 
