@@ -347,11 +347,16 @@ public class RandomTests {
 
 	@Test
 	public void testVoidAndReturnedVoidAreTheExactSame() throws Exception {
-		Environment env = Static.GenerateStandaloneEnvironment(false);
-		Mixed returnedVoid = new ArrayHandling.array_insert().exec(Target.UNKNOWN, env,
-				C.Array(), C.String(""), C.Int(0));
-		Construct voidKeyword = Static.resolveConstruct("void", Target.UNKNOWN);
-		assertTrue(returnedVoid == voidKeyword);
+		try {
+			Environment env = Static.GenerateStandaloneEnvironment(false);
+			Mixed returnedVoid = new ArrayHandling.array_insert().exec(Target.UNKNOWN, env,
+					C.Array(), C.String(""), C.Int(0));
+			Construct voidKeyword = Static.resolveConstruct("void", Target.UNKNOWN);
+			assertTrue(returnedVoid == voidKeyword);
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+			throw e;
+		}
 	}
 
 	@Test
