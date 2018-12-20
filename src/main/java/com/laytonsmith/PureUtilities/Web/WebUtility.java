@@ -29,10 +29,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -40,15 +44,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import org.apache.commons.codec.binary.Base64;
+import org.brotli.dec.BrotliInputStream;
 
 /**
  * Contains methods to simplify web connections.
@@ -62,6 +70,15 @@ public final class WebUtility {
 		HTTPResponse resp = GetPage(new URL("http://www.google.com/"), HTTPMethod.GET, null, null, stash, true, 60000);
 		StreamUtils.GetSystemOut().println(stash.getCookies(new URL("http://www.google.com")));
 	}
+
+	/**
+	 * This is the list of encodings that this class supports. Generally speaking, this is the list that you should
+	 * provide in the Accept-Encoding list. If you wish to support something other than this list, you should
+	 * disable encoding support, and manage the decompression entirely yourself.
+	 */
+	public static final Set<String> SUPPORTED_ENCODINGS
+			= Collections.unmodifiableSet(new HashSet<>(
+					Arrays.asList(new String[]{"gzip", "deflate", "br", "identity"})));
 
 	private WebUtility() {
 	}
@@ -487,26 +504,49 @@ public final class WebUtility {
 			if(logger != null) {
 				logger.log(Level.SEVERE, "Exception occurred, {0} response from server", conn.getResponseCode());
 			}
+			if(e instanceof SSLHandshakeException) {
+				// The certificate was not valid, and the input stream will be null anyways, so just throw at this
+				// point.
+				throw new IOException("Invalid SSL certificate for " + url.getHost() + ". Refusing to connect.");
+			}
 			is = conn.getErrorStream();
 		}
-		if("x-gzip".equals(conn.getContentEncoding()) || "gzip".equals(conn.getContentEncoding())) {
-			if(logger != null) {
-				logger.log(Level.INFO, "Response is gzipped, using a GZIPInputStream");
-			}
-			is = new GZIPInputStream(is);
-		} else if("deflate".equals(conn.getContentEncoding())) {
-			if(logger != null) {
-				logger.log(Level.INFO, "Response is zipped, using a InflaterInputStream");
-			}
-			is = new InflaterInputStream(is);
-		} else if("identity".equals(conn.getContentEncoding())) {
-			//This is the default, meaning no transformation is needed.
-			if(logger != null) {
-				logger.log(Level.INFO, "Response is not compressed");
+
+		if(settings.getDisableCompressionHandling()) {
+			/*
+			The HTTP spec for Content-Encoding specifies that multiple comma separated values can be provided. Where
+			more than one is provided, this means that the content was compressed multiple times, in the specified order.
+			Given that, we must loop through the list, wrapping the input stream in the given decompression handlers.
+			In practice, this will only loop once though.
+			*/
+			List<String> compression
+					= Stream.of(conn.getContentEncoding().split(",")).map((e) -> e.trim()).collect(Collectors.toList());
+			for(String scheme : compression) {
+				if("x-gzip".equals(scheme) || "gzip".equals(scheme)) {
+					if(logger != null) {
+						logger.log(Level.INFO, "Response is gzipped, using a GZIPInputStream");
+					}
+					is = new GZIPInputStream(is);
+				} else if("deflate".equals(scheme)) {
+					if(logger != null) {
+						logger.log(Level.INFO, "Response is zipped, using an InflaterInputStream");
+					}
+					is = new InflaterInputStream(is);
+				} else if("br".equals(scheme)) {
+					if(logger != null) {
+						logger.log(Level.INFO, "Response is Brotli compressed, using a BrotliInputStream");
+					}
+					is = new BrotliInputStream(is);
+				} else if("identity".equals(scheme)) {
+					//This is the default, meaning no transformation is needed.
+					if(logger != null) {
+						logger.log(Level.INFO, "Response is not compressed");
+					}
+				}
 			}
 		}
 		if(is == null) {
-			throw new IOException("Could not connnect to " + url);
+			throw new IOException("Could not connect to " + url);
 		}
 		return new RawHTTPResponse(conn, is);
 	}

@@ -196,7 +196,7 @@ public class Web {
 
 		static {
 			DEFAULT_HEADERS.put("Accept", "text/*, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8");
-			DEFAULT_HEADERS.put("Accept-Encoding", "gzip, deflate, identity");
+			DEFAULT_HEADERS.put("Accept-Encoding", StringUtils.Join(WebUtility.SUPPORTED_ENCODINGS, ", "));
 			DEFAULT_HEADERS.put("User-Agent", "Java/" + System.getProperty("java.version") + "/" + Implementation.GetServerType().getBranding());
 			DEFAULT_HEADERS.put("DNT", "1");
 			DEFAULT_HEADERS.put("Connection", "close");

@@ -302,13 +302,19 @@
 			<artifactId>jchardet</artifactId>
 			<version>1.0</version>
 		</dependency>
-			<!-- https://mvnrepository.com/artifact/org.apache.oltu.oauth2/org.apache.oltu.oauth2.client -->
-			<dependency>
-				<!-- Apache License 2.0 -->
-				<groupId>org.apache.oltu.oauth2</groupId>
-				<artifactId>org.apache.oltu.oauth2.client</artifactId>
-				<version>1.0.2</version>
-			</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.oltu.oauth2/org.apache.oltu.oauth2.client -->
+		<dependency>
+			<!-- Apache License 2.0 -->
+			<groupId>org.apache.oltu.oauth2</groupId>
+			<artifactId>org.apache.oltu.oauth2.client</artifactId>
+			<version>1.0.2</version>
+		</dependency>
+		<dependency>
+			<!-- MIT -->
+			<groupId>org.brotli</groupId>
+			<artifactId>dec</artifactId>
+			<version>0.1.2</version>
+		</dependency>
 		<!-- Test libraries -->
 		<!-- Hamcrest must come before powermock -->
 		<dependency>
@@ -514,6 +520,7 @@
 									<include>javax.activation:activation:jar:*</include>
 									<include>postgresql:postgresql:jar:*</include>
 									<include>org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:jar:*</include>
+									<include>org.brotli:dec:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -612,6 +619,10 @@
 								<relocation>
 									<pattern>org.apache.oltu.oauth2</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.apache.oltu.oauth2</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.brotli</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.brotli</shadedPattern>
 								</relocation>
 							</relocations>
 							<filters>
@@ -908,6 +919,14 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-checkstyle-plugin</artifactId>
 						<version>3.0.0</version>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>0.8.2</version>
 						<configuration>
 							<skip>true</skip>
 						</configuration>

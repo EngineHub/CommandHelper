@@ -33,6 +33,7 @@ public class RequestSettings {
 	private LinkedHashMap<String, String> trustStore = new LinkedHashMap<>();
 	@SuppressWarnings("NonConstantLogger")
 	private Logger logger;
+	private boolean disableDecompressionHandling = false;
 
 	/**
 	 *
@@ -372,6 +373,25 @@ public class RequestSettings {
 	 */
 	public LinkedHashMap<String, String> getTrustStore() {
 		return new LinkedHashMap<>(trustStore);
+	}
+
+	/**
+	 * Sets the disableCompressionHandling flag. If true, the content will be returned as is, no matter what the
+	 * value of the Content-Encoding header is, and must be processed manually.
+	 * @param disableCompressionHandling
+	 * @return
+	 */
+	public RequestSettings setDisableCompressionHandling(boolean disableCompressionHandling) {
+		this.disableDecompressionHandling = disableCompressionHandling;
+		return this;
+	}
+
+	/**
+	 * Returns the disableCompressionHandling flag. Defaults to false.
+	 * @return
+	 */
+	public boolean getDisableCompressionHandling() {
+		return this.disableDecompressionHandling;
 	}
 
 }
