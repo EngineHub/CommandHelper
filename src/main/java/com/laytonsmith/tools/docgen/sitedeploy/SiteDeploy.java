@@ -1357,10 +1357,10 @@ public final class SiteDeploy {
 				first = false;
 				if(Function.class.isAssignableFrom(c)) {
 					Function f2 = (Function) ReflectionUtils.newInstance(c);
-					seeAlsoText += "<code>[[" + f2.getName() + "|" + f2.getName() + "]]</code>";
+					seeAlsoText += "<code>[[API/functions/" + f2.getName() + ".html|" + f2.getName() + "]]</code>";
 				} else if(Template.class.isAssignableFrom(c)) {
 					Template t = (Template) ReflectionUtils.newInstance(c);
-					seeAlsoText += "[[" + t.getName() + "|Learning Trail: " + t.getDisplayName() + "]]";
+					seeAlsoText += "[[" + t.getPath() + t.getName() + "|Learning Trail: " + t.getDisplayName() + "]]";
 				} else {
 					throw new Error("Unsupported class found in @seealso annotation: " + c.getName());
 				}

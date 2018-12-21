@@ -22,4 +22,14 @@ public abstract class Template {
 		return getName();
 	}
 
+	/**
+	 * If the template should be located at a different path on the website, then this should be overridden
+	 * to provide the path. By default, empty string is returned, which means the root path. If this is not
+	 * the empty string, the path returned should end with {@code /}
+	 * @return
+	 */
+	public String getPath() {
+		return "";
+	}
+
 }
