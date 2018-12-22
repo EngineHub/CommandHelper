@@ -121,10 +121,8 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -251,7 +249,7 @@ public class EntityManagement {
 		public String docs() {
 			return "array {[world, [x, z]] | [locationArray]} Returns an array of IDs for all entities in the given"
 					+ " scope. With no args, this will return all entities loaded on the entire server. If the first"
-					+ " argument is given and is a location, only entities in the chunk containin that location will"
+					+ " argument is given and is a location, only entities in the chunk containing that location will"
 					+ " be returned, or if it is a world only entities in that world will be returned. If all three"
 					+ " arguments are given, only entities in the chunk with those coords will be returned. This can"
 					+ " take chunk coords (ints) or location coords (doubles).";
@@ -891,6 +889,10 @@ public class EntityManagement {
 			loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
 			dist = Static.getInt32(args[1], t);
 
+			if(dist < 0) {
+				throw new CRERangeException("Distance cannot be negative.", t);
+			}
+
 			if(args.length == 3) {
 				if(args[2] instanceof CArray) {
 					CArray ta = (CArray) args[2];
@@ -903,37 +905,33 @@ public class EntityManagement {
 				types = prepareTypes(t, types);
 			}
 
-			// The idea and code comes from skore87 (http://forums.bukkit.org/members/skore87.105075/)
-			// http://forums.bukkit.org/threads/getnearbyentities-of-a-location.101499/#post-1341141
-			int chunkRadius = dist < 16 ? 1 : (dist - (dist % 16)) / 16;
+			MCWorld world = loc.getWorld();
+			int chunkRadius = (dist + 16) / 16;
+			int distanceSquared = dist * dist;
+			int centerX = loc.getBlockX() >> 4;
+			int centerZ = loc.getBlockZ() >> 4;
 
-			Set<UUID> eSet = new HashSet<>();
-			for(int chX = 0 - chunkRadius; chX <= chunkRadius; chX++) {
-				for(int chZ = 0 - chunkRadius; chZ <= chunkRadius; chZ++) {
-					MCLocation nl = StaticLayer.GetLocation(loc.getWorld(), loc.getX() + (chX * 16), loc.getY(), loc.getZ() + (chZ * 16));
-					for(MCEntity e : nl.getChunk().getEntities()) {
-						if(!e.getWorld().equals(loc.getWorld())) {
-							// We can't measure entity distances that are in different worlds!
-							continue;
-						}
-						if(e.getLocation().distance(loc) <= dist && e.getLocation().getBlock() != loc.getBlock()) {
+			CArray entities = new CArray(t);
+			for(int offsetX = 0 - chunkRadius; offsetX <= chunkRadius; offsetX++) {
+				for(int offsetZ = 0 - chunkRadius; offsetZ <= chunkRadius; offsetZ++) {
+					if(!world.isChunkLoaded(centerX + offsetX, centerZ + offsetZ)) {
+						continue;
+					}
+					for(MCEntity e : world.getChunkAt(centerX + offsetX, centerZ + offsetZ).getEntities()) {
+						if(e.getLocation().distanceSquared(loc) <= distanceSquared) {
 							if(types.isEmpty() || types.contains(e.getType().name())) {
-								eSet.add(e.getUniqueId());
+								entities.push(new CString(e.getUniqueId().toString(), t), t);
 							}
 						}
 					}
 				}
 			}
-			CArray entities = new CArray(t);
-			for(UUID e : eSet) {
-				entities.push(new CString(e.toString(), t), t);
-			}
 			return entities;
 		}
 
 		private List<String> prepareTypes(Target t, List<String> types) {
-			List<String> newTypes = new ArrayList<String>();
-			MCEntityType entityType = null;
+			List<String> newTypes = new ArrayList<>();
+			MCEntityType entityType;
 			for(String type : types) {
 				try {
 					entityType = MCEntityType.valueOf(type.toUpperCase());
@@ -947,15 +945,16 @@ public class EntityManagement {
 
 		@Override
 		public String docs() {
-			return "array {location array, distance, [type] | location array, distance, [arrayTypes]} Returns an array of"
-					+ " all entities within the given radius. Set type argument to filter entities to a specific type. You"
-					+ " can pass an array of types. Valid types (case doesn't matter): "
+			return "array {locationArray, distance, [type] | locationArray, distance, [arrayTypes]} Returns an array of"
+					+ " all entities within the given distance from the location. Set type argument to filter entities"
+					+ " to a specific entity type. You can pass an array of types. Valid types (case doesn't matter): "
 					+ StringUtils.Join(MCEntityType.types(), ", ", ", or ", " or ");
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREBadEntityException.class, CREFormatException.class};
+			return new Class[]{CRECastException.class, CREBadEntityException.class, CREFormatException.class,
+					CRERangeException.class};
 		}
 
 		@Override

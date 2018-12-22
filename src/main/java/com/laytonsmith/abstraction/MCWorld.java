@@ -72,6 +72,8 @@ public interface MCWorld extends MCMetadatable {
 
 	MCChunk[] getLoadedChunks();
 
+	boolean isChunkLoaded(int x, int z);
+
 	boolean regenerateChunk(int x, int y);
 
 	MCEntity spawn(MCLocation l, Class mobType);

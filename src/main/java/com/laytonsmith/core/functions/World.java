@@ -574,8 +574,8 @@ public class World {
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
 
 				world = l.getWorld();
-				x = l.getChunk().getX();
-				z = l.getChunk().getZ();
+				x = l.getBlockX() >> 4;
+				z = l.getBlockZ() >> 4;
 			} else if(args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 1
 				if(args[0] instanceof CArray) {
@@ -585,8 +585,8 @@ public class World {
 					}
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
 
-					x = l.getChunk().getX();
-					z = l.getChunk().getZ();
+					x = l.getBlockX() >> 4;
+					z = l.getBlockZ() >> 4;
 				} else {
 					if(m == null) {
 						throw new CREInvalidWorldException("No world specified", t);
@@ -661,8 +661,8 @@ public class World {
 				//Location array provided
 				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
 				world = l.getWorld();
-				x = l.getChunk().getX();
-				z = l.getChunk().getZ();
+				x = l.getBlockX() >> 4;
+				z = l.getBlockZ() >> 4;
 			} else if(args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 1
 				if(args[0] instanceof CArray) {
@@ -671,8 +671,8 @@ public class World {
 						throw new CREInvalidWorldException("The given world (" + args[1].val() + ") does not exist.", t);
 					}
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
-					x = l.getChunk().getX();
-					z = l.getChunk().getZ();
+					x = l.getBlockX() >> 4;
+					z = l.getBlockZ() >> 4;
 				} else {
 					if(m == null) {
 						throw new CREInvalidWorldException("No world specified", t);
@@ -1045,13 +1045,13 @@ public class World {
 				}
 			}
 
-			CArray chunk = new CArray(t,
-					new CInt(l.getChunk().getX(), t),
-					new CInt(l.getChunk().getZ(), t),
-					new CString(l.getChunk().getWorld().getName(), t));
-			chunk.set("x", new CInt(l.getChunk().getX(), t), t);
-			chunk.set("z", new CInt(l.getChunk().getZ(), t), t);
-			chunk.set("world", l.getChunk().getWorld().getName(), t);
+			CArray chunk = CArray.GetAssociativeArray(t);
+			chunk.set(0, new CInt(l.getBlockX() >> 4, t), t);
+			chunk.set(1, new CInt(l.getBlockZ() >> 4, t), t);
+			chunk.set(2, new CString(l.getWorld().getName(), t), t);
+			chunk.set("x", new CInt(l.getBlockX() >> 4, t), t);
+			chunk.set("z", new CInt(l.getBlockZ() >> 4, t), t);
+			chunk.set("world", l.getWorld().getName(), t);
 			return chunk;
 		}
 

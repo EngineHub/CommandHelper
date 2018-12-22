@@ -927,6 +927,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
+	public boolean isChunkLoaded(int x, int z) {
+		return w.isChunkLoaded(x, z);
+	}
+
+	@Override
 	public void setThundering(boolean b) {
 		w.setThundering(b);
 	}
