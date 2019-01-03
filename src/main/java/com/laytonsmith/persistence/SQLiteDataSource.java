@@ -3,7 +3,9 @@ package com.laytonsmith.persistence;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.annotations.datasource;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.persistence.io.ConnectionMixin;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.IOException;
@@ -148,7 +150,12 @@ public class SQLiteDataSource extends SQLDataSource {
 								// This one only happens with SETs
 								|| ex.getMessage().equals("cannot commit transaction - SQL statements in progress")) {
 							try {
-								Thread.sleep(getRandomSleepTime());
+								int sleepTime = getRandomSleepTime();
+								CHLog.GetLogger().d(CHLog.Tags.PERSISTENCE, "Got recoverable error from SQLite DB,"
+										+ " sleeping for " + sleepTime + " then potentially retrying. ("
+										+ ex.getMessage() + ")",
+										Target.UNKNOWN);
+								Thread.sleep(sleepTime);
 							} catch (InterruptedException ex1) {
 								//
 							}
@@ -242,7 +249,12 @@ public class SQLiteDataSource extends SQLDataSource {
 				} catch (SQLException ex) {
 					if(ex.getMessage().startsWith("[SQLITE_BUSY]")) {
 						try {
-							Thread.sleep(getRandomSleepTime());
+							int sleepTime = getRandomSleepTime();
+								CHLog.GetLogger().d(CHLog.Tags.PERSISTENCE, "Got recoverable error from SQLite DB,"
+										+ " sleeping for " + sleepTime + " then potentially retrying. ("
+										+ ex.getMessage() + ")",
+										Target.UNKNOWN);
+							Thread.sleep(sleepTime);
 						} catch (InterruptedException ex1) {
 							//
 						}
