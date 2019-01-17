@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
@@ -23,13 +24,17 @@ import java.util.Map;
 /**
  * A CompositeFunction is a function that executes MethodScript ultimately. It is written entirely in MethodScript, and
  * does not directly run any java.
+ *
+ * CompositeFunctions benefit from the fact that assuming the underlying functions
+ * exist on a given platform, the function can be automatically provided on that platform.
+ * This prevents rewrites for straightforward functions.
  */
 public abstract class CompositeFunction extends AbstractFunction {
 
 	private static final Map<Class<? extends CompositeFunction>, ParseTree> CACHED_SCRIPTS = new HashMap<>();
 
 	@Override
-	public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+	public final Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 		ParseTree tree;
 		if(!CACHED_SCRIPTS.containsKey(this.getClass())) {
 			try {
@@ -48,23 +53,33 @@ public abstract class CompositeFunction extends AbstractFunction {
 		} else {
 			tree = CACHED_SCRIPTS.get(this.getClass());
 		}
-		GlobalEnv env = environment.getEnv(GlobalEnv.class);
-		IVariableList oldVariables = env.GetVarList();
+		// It's actually possible that the environment is null, which happens during optimization. If the subclass
+		// declares that it can be optimized at compile time, then this will occur, and we want to allow it, so
+		// we need to create a throwaway environment for the "proc".
+		GlobalEnv env = null;
+		if(environment != null) {
+			env = environment.getEnv(GlobalEnv.class);
+		}
+		IVariableList oldVariables = env == null ? new IVariableList() : env.GetVarList();
 		IVariableList newVariables = new IVariableList();
-		newVariables.set(new IVariable(CClassType.get("array"), "@arguments", new CArray(t, args.length, args), t));
-		env.SetVarList(newVariables);
+		newVariables.set(new IVariable(CArray.TYPE, "@arguments", new CArray(t, args.length, args), t));
+		if(env != null) {
+			env.SetVarList(newVariables);
+		}
 		Mixed ret = CVoid.VOID;
 		try {
-			if(env.GetScript() != null) {
+			if(env != null && env.GetScript() != null) {
 				env.GetScript().eval(tree, environment);
 			} else {
-				// This can happen when the environment is not fully setup during tests.
+				// This can happen when the environment is not fully setup during tests, in addition to optimization
 				Script.GenerateScript(null, null).eval(tree, environment);
 			}
 		} catch (FunctionReturnException ex) {
 			ret = ex.getReturn();
 		}
-		env.SetVarList(oldVariables);
+		if(env != null) {
+			env.SetVarList(oldVariables);
+		}
 		return ret;
 	}
 
@@ -73,10 +88,22 @@ public abstract class CompositeFunction extends AbstractFunction {
 	 * with the function inputs. Variables set in this script will not leak to the actual script environment, but in
 	 * general, the rest of the environment is identical, and so any other changes to the environment will persist. To
 	 * return a value, use return().
+	 * <p>
+	 * In complex cases, it will be easier to just return {@link #getBundledCode()}.
 	 *
 	 * @return
 	 */
 	protected abstract String script();
+
+	/**
+	 * For more complex functions, it's probably useful to write the code in an external file. The general contract
+	 * is that for functions, they should go in the function_impl resources folder with
+	 * {@code function_name.ms}, and then the script method can just {@code return getBundledCode();}
+	 * @return
+	 */
+	protected String getBundledCode() {
+		return StreamUtils.GetString(CompositeFunction.class.getResourceAsStream("/function_impl/" + getName() + ".ms"));
+	}
 
 	/**
 	 * This method can be overridden to return false if the script should not be compiled and cached.

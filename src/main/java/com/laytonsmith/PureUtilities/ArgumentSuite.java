@@ -4,7 +4,6 @@ import com.laytonsmith.PureUtilities.ArgumentParser.ArgumentParserResults;
 import com.laytonsmith.PureUtilities.ArgumentParser.ResultUseException;
 import com.laytonsmith.PureUtilities.ArgumentParser.ValidationException;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -26,8 +25,8 @@ public class ArgumentSuite {
 	private String description;
 
 	public ArgumentSuite() {
-		suite = new LinkedHashMap<String, ArgumentParser>();
-		aliases = new LinkedHashMap<String, String>();
+		suite = new LinkedHashMap<>();
+		aliases = new LinkedHashMap<>();
 	}
 
 	/**
@@ -36,6 +35,7 @@ public class ArgumentSuite {
 	 *
 	 * @param modeName The name of this mode. This may not contain spaces.
 	 * @param mode The sub-ArgumentParser that will be used when in this mode.
+	 * @return
 	 * @throws IllegalArgumentException if the name of the mode contains spaces
 	 */
 	public ArgumentSuite addMode(String modeName, ArgumentParser mode) {
@@ -99,6 +99,7 @@ public class ArgumentSuite {
 	 * @param defaultMode The default mode, which will be used only if no arguments were passed in.
 	 * @return
 	 * @throws ResultUseException if the mode cannot be found, or if the sub-ArgumentParser throws an exception.
+	 * @throws com.laytonsmith.PureUtilities.ArgumentParser.ValidationException
 	 */
 	public ArgumentSuiteResults match(String[] args, String defaultMode) throws ResultUseException, ValidationException {
 		String[] nonModeArgs = ArrayUtils.EMPTY_STRING_ARRAY;
@@ -129,6 +130,7 @@ public class ArgumentSuite {
 	 * @param defaultMode The default mode, which will be used only if no arguments were passed in.
 	 * @return
 	 * @throws ResultUseException if the mode cannot be found, or if the sub-ArgumentParser throws an exception.
+	 * @throws com.laytonsmith.PureUtilities.ArgumentParser.ValidationException
 	 */
 	public ArgumentSuiteResults match(String args, String defaultMode) throws ResultUseException, ValidationException {
 		//We're going to use ArgumentParser's parse method to get a string list, then
@@ -248,58 +250,6 @@ public class ArgumentSuite {
 		public ArgumentParserResults getResults() {
 			return results;
 		}
-	}
-
-	public static void main(String[] args) {
-		ArgumentSuite suite = new ArgumentSuite();
-		ArgumentParser mode1 = ArgumentParser.GetParser();
-		ArgumentParser mode2 = ArgumentParser.GetParser();
-		mode1.addArgument("arg1", ArgumentParser.Type.STRING, "Argument 1", "arg1", false);
-		mode1.addArgument("arg2", ArgumentParser.Type.STRING, "Argument 2", "arg2", false);
-		mode1.addDescription("A description of Mode 1");
-		mode2.addArgument("arg1", ArgumentParser.Type.STRING, "Argument 1", "arg1", false);
-		mode2.addArgument("arg2", ArgumentParser.Type.STRING, "Argument 2", "arg2", false);
-		mode2.addDescription("A description of Mode 2");
-		suite.addModeAlias("mode-2", "mode2");
-		suite.addModeAlias("mode--2", "mode2");
-		ArgumentParser help = ArgumentParser.GetParser();
-		help.addDescription("Displays the help for a mode, then exits.")
-				.addArgument("The mode name", "mode name", true);
-		suite.addDescription("A description of the suite")
-				.addMode("help", help)
-				.addMode("mode1", mode1)
-				.addMode("mode2", mode2);
-		try {
-			ArgumentSuiteResults results = suite.match("wat", "help");
-			ArgumentParser mode = results.getMode();
-			ArgumentParserResults modeResults = results.getResults();
-			if(mode == help) {
-				String modeHelp = modeResults.getStringArgument();
-				ArgumentParser selectedMode = suite.getModeFromName(suite.getModeFromAlias(modeHelp));
-				if(selectedMode != null) {
-					StreamUtils.GetSystemOut().println(selectedMode.getBuiltDescription());
-					System.exit(0);
-				} else {
-					showHelp(suite);
-				}
-			} else if(mode == mode1 || mode == mode2) {
-				String argument;
-				if((argument = modeResults.getStringArgument("arg1")) != null) {
-					StreamUtils.GetSystemOut().println("You selected " + argument + " for arg1");
-				}
-				if((argument = modeResults.getStringArgument("arg2")) != null) {
-					StreamUtils.GetSystemOut().println("You selected " + argument + " for arg2");
-				}
-				System.exit(0);
-			}
-		} catch (ResultUseException | ValidationException ex) {
-			showHelp(suite);
-		}
-	}
-
-	private static void showHelp(ArgumentSuite suite) {
-		StreamUtils.GetSystemOut().println(suite.getBuiltDescription());
-		System.exit(1);
 	}
 
 }

@@ -63,7 +63,7 @@ public class StreamUtils {
 			encoding = "UTF-8";
 		}
 		if(in == null) {
-			throw new NullPointerException();
+			throw new NullPointerException("InputStream is null");
 		}
 		InputStreamReader input;
 		input = new InputStreamReader(new BufferedInputStream(in), encoding);
