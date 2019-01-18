@@ -35,6 +35,8 @@ public abstract class CompositeFunction extends AbstractFunction {
 	@Override
 	public final Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 		ParseTree tree;
+		// TODO: Ultimately, this is not scalable. We need to compile and cache these scripts at Java compile time,
+		// not at runtime the first time a function is used. This is an easier first step though.
 		if(!CACHED_SCRIPTS.containsKey(this.getClass())) {
 			try {
 
@@ -52,22 +54,15 @@ public abstract class CompositeFunction extends AbstractFunction {
 		} else {
 			tree = CACHED_SCRIPTS.get(this.getClass());
 		}
-		// It's actually possible that the environment is null, which happens during optimization. If the subclass
-		// declares that it can be optimized at compile time, then this will occur, and we want to allow it, so
-		// we need to create a throwaway environment for the "proc".
-		GlobalEnv env = null;
-		if(environment != null) {
-			env = environment.getEnv(GlobalEnv.class);
-		}
-		IVariableList oldVariables = env == null ? new IVariableList() : env.GetVarList();
+
+		GlobalEnv env = environment.getEnv(GlobalEnv.class);
+		IVariableList oldVariables = env.GetVarList();
 		IVariableList newVariables = new IVariableList();
 		newVariables.set(new IVariable(CArray.TYPE, "@arguments", new CArray(t, args.length, args), t));
-		if(env != null) {
-			env.SetVarList(newVariables);
-		}
+		env.SetVarList(newVariables);
 		Mixed ret = CVoid.VOID;
 		try {
-			if(env != null && env.GetScript() != null) {
+			if(env.GetScript() != null) {
 				env.GetScript().eval(tree, environment);
 			} else {
 				// This can happen when the environment is not fully setup during tests, in addition to optimization
@@ -76,9 +71,8 @@ public abstract class CompositeFunction extends AbstractFunction {
 		} catch (FunctionReturnException ex) {
 			ret = ex.getReturn();
 		}
-		if(env != null) {
-			env.SetVarList(oldVariables);
-		}
+		env.SetVarList(oldVariables);
+
 		return ret;
 	}
 

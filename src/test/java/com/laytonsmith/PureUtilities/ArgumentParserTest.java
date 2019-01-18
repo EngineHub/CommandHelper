@@ -296,19 +296,20 @@ public class ArgumentParserTest {
 					.setRequiredAndDefault())
 				.addDescription("This is the \ndescription");
 		String expected = "\tThis is the \ndescription\n\n"
-				+ "Usage:\n\t[-xyz] [--flag] [-a <array, ...>] -i <input> -n <#number> --numbers <#numbers, ...> <arguments, ...>\n\n"
-				+ "Options:\n\n"
+				+ "Usage:\n\t[-xyz] [--flag] [-a <array, ...>] [-b <array> (default \"defaultValue\")] -i <input> -n <#number> --numbers <#numbers, ...> <arguments, ...>\n\n"
 				+ "\t<arguments>: This is the default argument\n"
 				+ "Flags (Short flags may be combined):\n"
 				+ "\t-x: Flag x\n"
 				+ "\t-y: Flag y\n"
 				+ "\t-z: Flag z\n"
 				+ "\t--flag: Big flag\n"
-				+ "\n"
+				+ "\nOptions:\n"
 				+ "\t-a: Optional. A list. Array\n"
+				+ "\t-b: Optional. This is an optional value with a default\n"
 				+ "\t-i: Required. Input\n"
 				+ "\t-n: Required. A numeric value. This is a single \n\t\tnumber\n"
 				+ "\t--array: Alias to -a\n"
+				+ "\t--array2: Alias to -b\n"
 				+ "\t--numbers: Required. A list of numbers. A list\n";
 		String actual = p.getBuiltDescription();
 //		System.out.println("Expected:\n\n" + expected);

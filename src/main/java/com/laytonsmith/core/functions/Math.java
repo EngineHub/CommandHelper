@@ -2731,37 +2731,6 @@ public class Math {
 			return getBundledCode();
 		}
 
-//		@Override
-//		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-//			double value = Static.getDouble(args[0], t);
-//			double min = Static.getDouble(args[1], t);
-//			double max = Static.getDouble(args[2], t);
-//			double v;
-//			if(min == max) {
-//				v = min;
-//			} else if(min < max) {
-//				// Normal mode
-//				if(value < min) {
-//					v = min;
-//				} else if(value > max) {
-//					v = max;
-//				} else {
-//					v = value;
-//				}
-//			} else if(value < max) { // Reverse mode
-//				// Actually min
-//				v = value;
-//			} else if(value > min) {
-//				// Actually max
-//				v = value;
-//			} else if(value - max <= min - value) { // Special handling, find the closer value
-//				v = max;
-//			} else {
-//				v = min;
-//			}
-//			return new CDouble(v, t);
-//		}
-
 		@Override
 		public String getName() {
 			return "clamp";
