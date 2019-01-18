@@ -17,6 +17,7 @@ import com.laytonsmith.PureUtilities.Common.UIUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -102,8 +103,10 @@ public class Main {
 	private static final ArgumentParser UI_MODE;
 	private static final ArgumentParser NEW_MODE;
 	private static final ArgumentParser SITE_DEPLOY;
+	private static final ArgumentParser EXTENSION_BUILDER_MODE;
 
 	static {
+		Implementation.setServerType(Implementation.Type.SHELL);
 		MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
 		ArgumentSuite suite = new ArgumentSuite()
 				.addDescription("These are the command line tools for CommandHelper. For more information about a"
@@ -396,13 +399,30 @@ public class Main {
 						.asFlag().setName('f', "force"));
 		suite.addMode("new", NEW_MODE);
 
+		EXTENSION_BUILDER_MODE = ArgumentParser.GetParser()
+				.addDescription("Given a path to the git source repo, pulls down the code, builds the extension with"
+						+ " maven, and places the artifact in the extension folder. Git, Maven, and the JDK must all"
+						+ " be pre-installed on your system for this to work, but once those are configued and working"
+						+ " so you can run git and mvn from the cmdline, the rest of the build system should work.")
+				.addArgument("source", ArgumentParser.Type.STRING, "The path to the git repo (ending in .git usually)."
+						+ " May be either http or ssh, this parameter is just passed through to git.", "git repo path",
+						true)
+				.addArgument("branch", ArgumentParser.Type.STRING, "master", "The branch to check out. Defaults to"
+						+ " \"master\".", "branch", false)
+				.addArgument("extension-dir", ArgumentParser.Type.STRING,
+						MethodScriptFileLocations.getDefault().getExtensionsDirectory().getAbsolutePath(),
+						"The extension directory you want to install the built artifact to, by default, this"
+						+ " installation's extension directory.", "dir", false)
+				.addFlag("force", "If the checkout folder already exists, it is first deleted, then cloned again.");
+		suite.addMode("build-extension", EXTENSION_BUILDER_MODE);
+
+
 		ARGUMENT_SUITE = suite;
 	}
 
 	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public static void main(String[] args) throws Exception {
 		try {
-			Implementation.setServerType(Implementation.Type.SHELL);
 
 			CHLog.initialize(MethodScriptFileLocations.getDefault().getJarDirectory());
 			Prefs.init(MethodScriptFileLocations.getDefault().getPreferencesFile());
@@ -865,6 +885,92 @@ public class Main {
 							+ "\tdescription: " + ";" + li
 							+ ">" + li + li, f, true);
 				}
+			} else if(mode == EXTENSION_BUILDER_MODE) {
+
+				try {
+					new CommandExecutor("git --version").start().waitFor();
+					new CommandExecutor("mvn --version").start().waitFor();
+				} catch (IOException e)  {
+					System.err.println("Git and Maven are required (and Maven requires the JDK). These three"
+							+ " components must be already installed to use this tool.");
+					System.exit(1);
+				}
+
+				String branch = parsedArgs.getStringArgument("branch");
+				String source = parsedArgs.getStringArgument("source");
+				boolean force = parsedArgs.isFlagSet("force");
+				File extensionDir = new File(parsedArgs.getStringArgument("extension-dir"));
+
+				File checkoutPath;
+				checkoutPath = new File(MethodScriptFileLocations.getDefault().getTempDir(),
+						source.replaceAll("^.*/(.*?)(?:.git)*?$", "$1"));
+
+				System.out.println("Cloning " + source);
+				System.out.println("Using branch " + branch);
+				System.out.println("Checkout path is " + checkoutPath);
+				System.out.println("Deploying to " + extensionDir);
+				System.out.println("------------------------------------------------");
+
+				if(!extensionDir.exists()) {
+					if(force) {
+						extensionDir.mkdirs();
+					} else {
+						System.err.println("Extension directory does not exist, refusing to continue."
+								+ " If " + extensionDir.getAbsolutePath() + " is the correct"
+								+ " directory, manually create it and try again, or use --force.");
+						System.exit(1);
+					}
+				}
+				try {
+					if(checkoutPath.exists()) {
+						if(!force) {
+							System.err.println("Checkout path already exists (" + checkoutPath.getAbsolutePath()
+									+ "), refusing to continue.");
+							System.exit(1);
+						} else {
+							System.out.println("Deleting " + checkoutPath + " directory...");
+							if(!FileUtil.recursiveDelete(checkoutPath)) {
+								System.err.println("Could not fully delete checkout path, refusing to continue. Please"
+										+ " manually delete " + checkoutPath + ", and try again.");
+								System.exit(1);
+							}
+						}
+					}
+
+					new CommandExecutor(new String[]{"git", "clone",
+						"--depth=1", source, checkoutPath.getAbsolutePath()})
+							.setSystemInputsAndOutputs()
+							.start().waitFor();
+					System.out.println("Building extension...");
+					int mvnBuild = new CommandExecutor(new String[]{"mvn", "package", "-DskipTests"})
+							.setSystemInputsAndOutputs()
+							.setWorkingDir(checkoutPath)
+							.start().waitFor();
+					if(mvnBuild != 0) {
+						System.err.println("Something went wrong in the maven build, unable to continue. Please correct"
+								+ " the listed error, and then try again.");
+						System.err.flush();
+						System.exit(1);
+					}
+					System.out.println("Extension built, moving artifact to extension directory...");
+					// Read the POM for information about what the jar is named
+					XMLDocument pom = new XMLDocument(new FileInputStream(new File(checkoutPath, "pom.xml")));
+					String artifactId = pom.getNode("/project/artifactId");
+					String version = pom.getNode("/project/version");
+					String artifactName = artifactId + "-" + version + ".jar";
+					System.out.println("Identified " + artifactName + " as the artifact to use");
+					FileUtil.copy(new File(checkoutPath, "target/" + artifactName),
+							new File(extensionDir, artifactName), null);
+					System.out.println("Build complete, cleaning up...");
+					if(!FileUtil.recursiveDelete(checkoutPath)) {
+						System.err.println("Could not delete " + checkoutPath + ", but build completed successfully.");
+						System.exit(1);
+					}
+					System.exit(0);
+				} catch(Exception e) {
+					e.printStackTrace(System.err);
+				}
+
 			} else {
 				throw new Error("Should not have gotten here");
 			}
