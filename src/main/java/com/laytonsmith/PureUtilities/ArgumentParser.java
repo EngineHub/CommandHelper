@@ -1178,7 +1178,8 @@ public final class ArgumentParser {
 			}
 			b.append(usage.toString());
 		}
-		b.append("\n\nOptions:\n\n");
+
+		b.append("\n\n");
 		Argument def = getArgument();
 		if(def != null && def.description != null) {
 			b.append(def.generateDescription(false));
@@ -1201,6 +1202,8 @@ public final class ArgumentParser {
 				b.append("\tNo options.\n");
 			} else if(flags.length() == 0) {
 				b.append("\tNo flags.\n");
+			} else {
+				b.append("Options:\n");
 			}
 		}
 

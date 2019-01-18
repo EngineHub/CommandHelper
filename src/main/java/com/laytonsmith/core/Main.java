@@ -404,16 +404,32 @@ public class Main {
 						+ " maven, and places the artifact in the extension folder. Git, Maven, and the JDK must all"
 						+ " be pre-installed on your system for this to work, but once those are configued and working"
 						+ " so you can run git and mvn from the cmdline, the rest of the build system should work.")
-				.addArgument("source", ArgumentParser.Type.STRING, "The path to the git repo (ending in .git usually)."
-						+ " May be either http or ssh, this parameter is just passed through to git.", "git repo path",
-						true)
-				.addArgument("branch", ArgumentParser.Type.STRING, "master", "The branch to check out. Defaults to"
-						+ " \"master\".", "branch", false)
-				.addArgument("extension-dir", ArgumentParser.Type.STRING,
-						MethodScriptFileLocations.getDefault().getExtensionsDirectory().getAbsolutePath(),
-						"The extension directory you want to install the built artifact to, by default, this"
-						+ " installation's extension directory.", "dir", false)
-				.addFlag("force", "If the checkout folder already exists, it is first deleted, then cloned again.");
+				.addArgument(new ArgumentBuilder()
+					.setDescription("The path to the git repo (ending in .git usually)."
+						+ " May be either http or ssh, this parameter is just passed through to git.")
+					.setUsageName("git repo path")
+					.setRequired()
+					.setName('s', "source")
+					.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
+				.addArgument(new ArgumentBuilder()
+					.setDescription("The branch to check out. Defaults to \"master\".")
+					.setUsageName("branch")
+					.setOptional()
+					.setName('b', "branch")
+					.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
+					.setDefaultVal("master"))
+				.addArgument(new ArgumentBuilder()
+					.setDescription("The extension directory you want to install the built artifact to, by default, this"
+						+ " installation's extension directory.")
+					.setUsageName("dir")
+					.setOptional()
+					.setName('e', "extension-dir")
+					.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
+					.setDefaultVal(MethodScriptFileLocations.getDefault().getExtensionsDirectory().getAbsolutePath()))
+				.addArgument(new ArgumentBuilder()
+					.setDescription("If the checkout folder already exists, it is first deleted, then cloned again.")
+					.asFlag()
+					.setName('f', "force"));
 		suite.addMode("build-extension", EXTENSION_BUILDER_MODE);
 
 
@@ -938,6 +954,7 @@ public class Main {
 					}
 
 					new CommandExecutor(new String[]{"git", "clone",
+						"--single-branch", "--branch", branch,
 						"--depth=1", source, checkoutPath.getAbsolutePath()})
 							.setSystemInputsAndOutputs()
 							.start().waitFor();
