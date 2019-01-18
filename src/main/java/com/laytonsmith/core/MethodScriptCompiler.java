@@ -2308,7 +2308,20 @@ public final class MethodScriptCompiler {
 									+ tree.getData().val(), tree.getData().getTarget()));
 							result = null;
 						} else {
-							result = func.exec(tree.getData().getTarget(), null, constructs);
+							// TODO: This should probably be moved up outside of this single method, and create a
+							// compiler environment, which would be used by the functions that can do specific
+							// optimizations, i.e. compile time type checking, etc. This is a good first start
+							// though.
+							Environment env = null;
+							try {
+								env = Static.GenerateStandaloneEnvironment(false);
+							} catch (IOException | DataSourceException | URISyntaxException
+									| Profiles.InvalidProfileException e) {
+								// Print the stacktrace and move on. Not sure how to deal with this right now, or
+								// what cases it would occur in.
+								e.printStackTrace(System.err);
+							}
+							result = func.exec(tree.getData().getTarget(), env, constructs);
 						}
 					} else {
 						result = ((Optimizable) func).optimize(tree.getData().getTarget(), constructs);

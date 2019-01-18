@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
+import com.laytonsmith.PureUtilities.ArgumentParser.ArgumentBuilder;
 import com.laytonsmith.PureUtilities.ArgumentSuite;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
@@ -113,7 +114,11 @@ public class Main {
 						+ "\tjava -jar " + MethodScriptFileLocations.getDefault().getJarFile().getName() + " <mode name> <[mode specific arguments]>\n");
 		HELP_MODE = ArgumentParser.GetParser()
 				.addDescription("Displays help for all modes, or the given mode if one is provided.")
-				.addArgument("Displays help for the given mode.", "mode name", false);
+				.addArgument(new ArgumentBuilder().setDescription("Displays help for the given mode.")
+						.setUsageName("mode name")
+						.setOptionalAndDefault()
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
+				.setErrorOnUnknownArgs(false);
 		suite.addMode("help", HELP_MODE).addModeAlias("--help", "help").addModeAlias("-help", "help")
 				.addModeAlias("/?", "help");
 		MANAGER_MODE = ArgumentParser.GetParser()
@@ -121,13 +126,22 @@ public class Main {
 		suite.addMode("manager", MANAGER_MODE);
 		INTERPRETER_MODE = ArgumentParser.GetParser()
 				.addDescription("Launches the minimal cmdline interpreter.")
-				.addArgument("location-----", ArgumentParser.Type.STRING, ".", "Sets the initial working directory of the interpreter. This is optional, but"
-						+ " is automatically set by the mscript program. The option name is strange, to avoid any conflicts with"
-						+ " script arguments.", "location-----", false);
+				.addArgument(new ArgumentBuilder().setDescription("Sets the initial working directory of the"
+						+ " interpreter. This is optional, but"
+						+ " is automatically set by the mscript program. The option name is strange, to avoid any"
+						+ " conflicts with"
+						+ " script arguments.")
+						.setUsageName("location")
+						.setOptional()
+						.setName("location-----")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
+						.setDefaultVal("."));
 		suite.addMode("interpreter", INTERPRETER_MODE);
 		MSLP_MODE = ArgumentParser.GetParser()
 				.addDescription("Creates an MSLP file based on the directory specified.")
-				.addArgument("The path to the folder", "path/to/folder", true);
+				.addArgument(new ArgumentBuilder().setDescription("The path to the folder")
+						.setUsageName("path/to/folder")
+						.setRequiredAndDefault());
 		suite.addMode("mslp", MSLP_MODE);
 		VERSION_MODE = ArgumentParser.GetParser()
 				.addDescription("Prints the version of CommandHelper, and exits.");
@@ -141,12 +155,21 @@ public class Main {
 		suite.addMode("print-db", PRINT_DB_MODE);
 		DOCS_MODE = ArgumentParser.GetParser()
 				.addDescription("Prints documentation for the functions that CommandHelper knows about, then exits.")
-				.addArgument("html", "The type of the documentation, defaulting to html. It may be one of the following: " + StringUtils.Join(DocGen.MarkupType.values(), ", ", ", or "), "type", false);
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The type of the documentation, defaulting to html."
+							+ " It may be one of the following: "
+							+ StringUtils.Join(DocGen.MarkupType.values(), ", ", ", or "))
+						.setUsageName("type")
+						.setOptionalAndDefault()
+						.setDefaultVal("html"));
 		suite.addMode("docs", DOCS_MODE);
 		VERIFY_MODE = ArgumentParser.GetParser()
 				.addDescription("Compiles the given file, returning a json describing the errors in the file, or returning"
 						+ " nothing if the file compiles cleanly.")
-				.addArgument("The file to check", "<file>", true);
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The file to check")
+						.setUsageName("file")
+						.setRequiredAndDefault());
 		suite.addMode("verify", VERIFY_MODE);
 		INSTALL_CMDLINE_MODE = ArgumentParser.GetParser()
 				.addDescription("Installs MethodScript to your system, so that commandline scripts work. (Currently only unix is supported.)");
@@ -156,93 +179,198 @@ public class Main {
 		suite.addMode("uninstall-cmdline", UNINSTALL_CMDLINE_MODE);
 		SYNTAX_MODE = ArgumentParser.GetParser()
 				.addDescription("Generates the syntax highlighter for the specified editor (if available).")
-				.addArgument("The type of the syntax file to generate. Don't specify a type to see the available options.", "[type]", false);
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The type of the syntax file to generate. Don't specify a type to see the"
+								+ " available options.")
+						.setUsageName("type")
+						.setOptionalAndDefault()
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
 		suite.addMode("syntax", SYNTAX_MODE);
 		DOCGEN_MODE = ArgumentParser.GetParser()
 				.addDescription("Starts the automatic wiki uploader GUI.");
 		suite.addMode("docgen", DOCGEN_MODE);
 		API_MODE = ArgumentParser.GetParser()
 				.addDescription("Prints documentation for the function specified, then exits.")
-				.addArgument("The name of the function to print the information for", "function", true)
-				.addFlag('o', "online", "Instead of displaying the results in the console, launches the website with this function highlighted. The local documentation is guaranteed to be consistent with your"
-						+ " local version of MethodScript, while the online results may be slightly stale, or may be from a different build, but the results are generally richer.")
-				.addFlag('e', "examples", "Also prints out the examples for the function (if any).");
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The name of the function to print the information for")
+						.setUsageName("function")
+						.setRequiredAndDefault())
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Instead of displaying the results in the console, launches the website with"
+								+ " this function highlighted. The local documentation is guaranteed to be consistent"
+								+ " with your local version of MethodScript, while the online results may be slightly"
+								+ " stale, or may be from a different build, but the results are generally richer.")
+						.asFlag().setName('o', "online"))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Also prints out the examples for the function (if any).")
+						.asFlag().setName('e', "examples"));
 		suite.addMode("api", API_MODE);
 		EXAMPLES_MODE = ArgumentParser.GetParser()
 				.addDescription("Installs one of the built in LocalPackage examples, which may in and of itself be useful.")
-				.addArgument("The name of the package to install. Leave blank to see a list of examples to choose from.", "[packageName]", true);
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The name of the package to install. Leave blank to see a list of examples to"
+								+ " choose from.")
+						.setUsageName("packageName")
+						.setOptionalAndDefault());
 		suite.addMode("examples", EXAMPLES_MODE);
 		OPTIMIZER_TEST_MODE = ArgumentParser.GetParser()
 				.addDescription("Given a source file, reads it in and outputs the \"optimized\" version. This is meant as a debug"
 						+ " tool, but could be used as an obfuscation tool as well.")
-				.addArgument("File path", "file", true);
+				.addArgument(new ArgumentBuilder()
+						.setDescription("File path")
+						.setUsageName("file")
+						.setRequiredAndDefault());
 		suite.addMode("optimizer-test", OPTIMIZER_TEST_MODE);
 		CMDLINE_MODE = ArgumentParser.GetParser()
 				.addDescription("Given a source file, runs it in cmdline mode. This is similar to"
 						+ " the interpreter mode, but allows for tty input (which is required for some functions,"
 						+ " like the prompt_* functions) and provides better information for errors, as the"
 						+ " file is known.")
-				.addArgument("File path/arguments", "fileAndArgs", true);
+				.addArgument(new ArgumentBuilder()
+						.setDescription("File path/arguments")
+						.setUsageName("file and args")
+						.setRequiredAndDefault());
 		suite.addMode("cmdline", CMDLINE_MODE);
 		EXTENSION_DOCS_MODE = ArgumentParser.GetParser()
-				.addDescription("Generates markdown documentation for the specified extension utilizing its code, to be used most likely on the extensions github page.")
-				.addArgument('i', "input-jar", ArgumentParser.Type.STRING, "The extension jar to generate doucmenation for.", "input-jar", true)
-				.addArgument('o', "output-file", ArgumentParser.Type.STRING, "The file to output the generated documentation to.", "output-file", false);
+				.addDescription("Generates markdown documentation for the specified extension utilizing its code, to be"
+						+ " used most likely on the extensions github page.")
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The extension jar to generate documentation for.")
+						.setUsageName("path to jar file")
+						.setRequired()
+						.setName('i', "input-jar")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The file to output the generated documentation to. (Should probably end in"
+								+ " .md, but is not required to.) This argument is optional, and if left off, the"
+								+ " output will instead print to stdout.")
+						.setUsageName("output file name")
+						.setOptional()
+						.setName('o', "output-file"));
 		suite.addMode("extension-docs", EXTENSION_DOCS_MODE);
 		DOC_EXPORT_MODE = ArgumentParser.GetParser()
 				.addDescription("Outputs all known function documentation as a json. This includes known extensions"
 						+ " as well as the built in functions.")
-				.addArgument("extension-dir", ArgumentParser.Type.STRING, "./CommandHelper/extensions", "Provides the path to your extension directory, if not the default, \"./CommandHelper/extensions\"", "extension-dir", false)
-				.addArgument('o', "output-file", ArgumentParser.Type.STRING, "The file to output the generated json to. If this parameter is missing, it is simply printed to screen.", "output-file", false);
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Provides the path to your extension directory.")
+						.setUsageName("extension folder")
+						.setOptional()
+						.setName("extension-dir")
+						.setDefaultVal("./CommandHelper/extensions")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The file to output the generated json to. If this parameter is missing, it is"
+								+ " simply printed to screen.")
+						.setUsageName("output file")
+						.setOptional()
+						.setName('o', "output-file")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
 		suite.addMode("doc-export", DOC_EXPORT_MODE);
 		PROFILER_SUMMARY_MODE = ArgumentParser.GetParser()
 				.addDescription("Analyzes the output file for a profiler session, and generates a summary report of the results.")
-				.addArgument('i', "ignore-percentage", ArgumentParser.Type.NUMBER, "0", "This value dictates how much of the lower end data is ignored."
-						+ " If the function took less time than this percentage of the total time, it is omitted from the"
-						+ " results.", "ignore-percentage", false)
-				.addArgument("Path to the profiler file to use", "input-file", true);
+				.addArgument(new ArgumentBuilder()
+						.setDescription("This value dictates how much of the lower end data is ignored."
+							+ " If the function took less time than this percentage of the total time, it is omitted from the"
+							+ " results.")
+						.setUsageName("ignore-percentage")
+						.setOptional()
+						.setName('i', "ignore-percentage")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.NUMBER)
+						.setDefaultVal("0"))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Path to the profiler file to use.")
+						.setUsageName("input-file")
+						.setRequiredAndDefault());
 		suite.addMode("profiler-summary", PROFILER_SUMMARY_MODE);
 		RSA_KEY_GEN_MODE = ArgumentParser.GetParser()
-				.addDescription("Creates an ssh compatible rsa key pair. This is used with the Federation system, but is useful with other tools as well.")
-				.addArgument('o', "output-file", ArgumentParser.Type.STRING, "Output file for the keys. For instance, \"/home/user/.ssh/id_rsa\"."
-						+ " The public key will have the same name, with \".pub\" appended.", "output-file", true)
-				.addArgument('l', "label", ArgumentParser.Type.STRING, "Label for the public key. For instance, \"user@localhost\"", "label", true);
+				.addDescription("Creates an ssh compatible rsa key pair. This is used with the Federation system, but"
+						+ " is useful with other tools as well.")
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Output file for the keys. For instance, \"/home/user/.ssh/id_rsa\"."
+							+ " The public key will have the same name, with \".pub\" appended.")
+						.setUsageName("file")
+						.setRequired()
+						.setName('o', "output-file")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Label for the public key. For instance, \"user@localhost\" or an email"
+								+ " address.")
+						.setUsageName("label")
+						.setRequired()
+						.setName('l', "label")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
 		suite.addMode("key-gen", RSA_KEY_GEN_MODE);
 		PM_VIEWER_MODE = ArgumentParser.GetParser()
-				.addDescription("Launches the Persistence Network viewer. This is a GUI tool that can help you visualize your databases.")
-				.addFlag("server", "Sets up a server running on this machine, that can be accessed by remote Persistence Network Viewers."
-						+ " If this is set, you must also provide the --port and --password options.")
-				.addArgument("port", ArgumentParser.Type.NUMBER, "The port for the server to listen on.", "port", false)
-				.addArgument("password", ArgumentParser.Type.STRING, "The password that remote clients will need to provide to connect. Leave the field blank to be prompted for a password.", "password", false);
+				.addDescription("Launches the Persistence Network viewer. This is a GUI tool that can help you"
+						+ " visualize your databases.")
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Sets up a server running on this machine, that can be accessed by remote"
+								+ " Persistence Network Viewers. If this is set, you must also provide the --port and"
+								+ " --password options.")
+						.asFlag()
+						.setName("server"))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The port for the server to listen on.")
+						.setUsageName("port")
+						.setOptional()
+						.setName("port")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.NUMBER))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The password that remote clients will need to provide to connect. Leave the"
+								+ " field blank to be prompted for a password.")
+						.setUsageName("password")
+						.setOptional()
+						.setName("password")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
 		suite.addMode("pn-viewer", PM_VIEWER_MODE);
 		CORE_FUNCTIONS_MODE = ArgumentParser.GetParser()
 				.addDescription("Prints a list of functions tagged with the @core annotation, then exits.");
 		suite.addMode("core-functions", CORE_FUNCTIONS_MODE);
 		UI_MODE = ArgumentParser.GetParser()
-				.addDescription("Launches a GUI that provides a list of all the sub GUI tools provided, and allows selection of a module. This"
-						+ " command creates a subshell to run the launcher in, so that the original cmdline shell returns.")
-				.addFlag("in-shell", "Runs the launcher in the same shell process. By default, it creates a new process and causes the initial shell to return.");
+				.addDescription("Launches a GUI that provides a list of all the sub GUI tools provided, and allows"
+						+ " selection of a module. This command creates a subshell to run the launcher in, so that the"
+						+ " original cmdline shell returns.")
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Runs the launcher in the same shell process. By default, it creates a new"
+								+ " process and causes the initial shell to return.")
+						.asFlag().setName("in-shell"));
 		suite.addMode("ui", UI_MODE);
 		SITE_DEPLOY = ArgumentParser.GetParser()
-				.addDescription("Deploys the documentation site, using the preferences specified in the configuration file. This mechanism completely re-writes"
+				.addDescription("Deploys the documentation site, using the preferences specified in the configuration"
+						+ " file. This mechanism completely re-writes"
 						+ " the remote site, so that builds are totally reproduceable.")
-				.addArgument('c', "config", ArgumentParser.Type.STRING,
-						MethodScriptFileLocations.getDefault().getSiteDeployFile().getAbsolutePath(),
-						"The path to the config file for deployment", "configFile", false)
-				.addFlag("generate-prefs", "Generates the preferences file initially, which you can then fill in.")
-				.addFlag("use-local-cache", "Generally, when the uploader runs, it checks the remote server to see if"
-						+ " the file already exists there (and is unchanged compared to the local file). If it is unchanged,"
-						+ " the upload is skipped. However, even checking with the remote to see what the status of the"
-						+ " remote file is takes time. If you are the only one uploading files, then we can simply use"
-						+ " a local cache of what the remote system has, and we can skip the step of checking with the"
-						+ " remote server for any given file. The cache is always populated, whether or not this flag"
-						+ " is set, so if you aren't sure if you can trust the cache, run once without this flag, then"
-						+ " for future runs, you can be sure that the local cache is up to date.")
-				.addFlag("clear-local-cache", "Clears the local cache of all entries, then exits.")
-				.addFlag('d', "do-validation", "Validates all of the uploaded web pages, and prints out a summary of the results."
-						+ " This requires internet connection.")
-				.addFlag("no-progress-clear", "When set, does not clear the progress bar line. This is mostly useful"
-						+ " when debugging the site-deploy tool itself.");
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The path to the config file for deployment")
+						.setUsageName("config file")
+						.setOptional()
+						.setName('c', "config")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
+						.setDefaultVal(MethodScriptFileLocations.getDefault().getSiteDeployFile().getAbsolutePath()))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Generates the preferences file initially, which you can then fill in.")
+						.asFlag().setName("generate-prefs"))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Generally, when the uploader runs, it checks the remote server to see if"
+							+ " the file already exists there (and is unchanged compared to the local file). If it is"
+							+ " unchanged, the upload is skipped. However, even checking with the remote to see"
+							+ " what the status of the remote file is takes time. If you are the only one uploading"
+							+ " files, then we can simply use a local cache of what the remote system has, and we"
+							+ " can skip the step of checking with the remote server for any given file. The cache is"
+							+ " always populated, whether or not this flag is set, so if you aren't sure if you can"
+							+ " trust the cache, run once without this flag, then for future runs, you can be sure that"
+							+ " the local cache is up to date.")
+						.asFlag().setName("use-local-cache"))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Clears the local cache of all entries, then exits.")
+						.asFlag().setName("clear-local-cache"))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Validates all of the uploaded web pages, and prints out a summary of the"
+								+ " results. This uses the value defined in the config file for validation.")
+						.asFlag().setName('d', "do-validation"))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("When set, does not clear the progress bar line. This is mostly useful"
+							+ " when debugging the site-deploy tool itself.")
+						.asFlag().setName("no-progress-clear"));
 				/*.addFlag("install", "When installing a fresh server, it is useful to have the setup completely automated. If this flag"
 						+ " is set, then the server is assumed to be a fresh ubuntu server, with nothing else on it. In that case,"
 						+ " the server will be installed from scratch automatically. NOTE: This will not account for the fact that"
@@ -258,10 +386,17 @@ public class Main {
 
 		suite.addMode("site-deploy", SITE_DEPLOY);
 		NEW_MODE = ArgumentParser.GetParser()
-				.addDescription("Creates a blank script in the specified location with the appropriate permissions, having the correct hashbang, and ready to be executed. If"
+				.addDescription("Creates a blank script in the specified location with the appropriate permissions,"
+						+ " having the correct hashbang, and ready to be executed. If"
 						+ " the specified file already exists, it will refuse to create it, unless --force is set.")
-				.addArgument("Location and name to create the script as. Multiple arguments can be provided, and they will create multiple files.", "<file>", true)
-				.addFlag('f', "force", "Forces the file to be overwritten, even if it already exists");
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Location and name to create the script as. Multiple arguments can be provided,"
+								+ " and they will create multiple files.")
+						.setUsageName("file")
+						.setRequiredAndDefault())
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Forces the file to be overwritten, even if it already exists.")
+						.asFlag().setName('f', "force"));
 		suite.addMode("new", NEW_MODE);
 
 		EXTENSION_BUILDER_MODE = ArgumentParser.GetParser()
@@ -269,16 +404,32 @@ public class Main {
 						+ " maven, and places the artifact in the extension folder. Git, Maven, and the JDK must all"
 						+ " be pre-installed on your system for this to work, but once those are configued and working"
 						+ " so you can run git and mvn from the cmdline, the rest of the build system should work.")
-				.addArgument("source", ArgumentParser.Type.STRING, "The path to the git repo (ending in .git usually)."
-						+ " May be either http or ssh, this parameter is just passed through to git.", "git repo path",
-						true)
-				.addArgument("branch", ArgumentParser.Type.STRING, "master", "The branch to check out. Defaults to"
-						+ " \"master\".", "branch", false)
-				.addArgument("extension-dir", ArgumentParser.Type.STRING,
-						MethodScriptFileLocations.getDefault().getExtensionsDirectory().getAbsolutePath(),
-						"The extension directory you want to install the built artifact to, by default, this"
-						+ " installation's extension directory.", "dir", false)
-				.addFlag("force", "If the checkout folder already exists, it is first deleted, then cloned again.");
+				.addArgument(new ArgumentBuilder()
+					.setDescription("The path to the git repo (ending in .git usually)."
+						+ " May be either http or ssh, this parameter is just passed through to git.")
+					.setUsageName("git repo path")
+					.setRequired()
+					.setName('s', "source")
+					.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
+				.addArgument(new ArgumentBuilder()
+					.setDescription("The branch to check out. Defaults to \"master\".")
+					.setUsageName("branch")
+					.setOptional()
+					.setName('b', "branch")
+					.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
+					.setDefaultVal("master"))
+				.addArgument(new ArgumentBuilder()
+					.setDescription("The extension directory you want to install the built artifact to, by default, this"
+						+ " installation's extension directory.")
+					.setUsageName("dir")
+					.setOptional()
+					.setName('e', "extension-dir")
+					.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
+					.setDefaultVal(MethodScriptFileLocations.getDefault().getExtensionsDirectory().getAbsolutePath()))
+				.addArgument(new ArgumentBuilder()
+					.setDescription("If the checkout folder already exists, it is first deleted, then cloned again.")
+					.asFlag()
+					.setName('f', "force"));
 		suite.addMode("build-extension", EXTENSION_BUILDER_MODE);
 
 
@@ -803,6 +954,7 @@ public class Main {
 					}
 
 					new CommandExecutor(new String[]{"git", "clone",
+						"--single-branch", "--branch", branch,
 						"--depth=1", source, checkoutPath.getAbsolutePath()})
 							.setSystemInputsAndOutputs()
 							.start().waitFor();
