@@ -267,7 +267,7 @@ public class Script {
 	 */
 	@SuppressWarnings("UseSpecificCatch")
 	public Mixed eval(ParseTree c, final Environment env) throws CancelCommandException {
-		if(env != null && env.getEnv(GlobalEnv.class).IsInterrupted()) {
+		if(env.getEnv(GlobalEnv.class).IsInterrupted()) {
 			//First things first, if we're interrupted, kill the script
 			//unconditionally.
 			throw new CancelCommandException("", Target.UNKNOWN);
