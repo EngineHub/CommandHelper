@@ -832,7 +832,7 @@ public class Main {
 						System.exit(1);
 					}
 					System.exit(0);
-				} catch(Exception e) {
+				} catch (Exception e) {
 					e.printStackTrace(System.err);
 				}
 
