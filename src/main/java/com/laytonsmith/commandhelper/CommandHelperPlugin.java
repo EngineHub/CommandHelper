@@ -49,7 +49,6 @@ import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Installer;
-import com.laytonsmith.core.Main;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Prefs;
@@ -145,7 +144,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			@Override
 			public boolean doRun() {
 				try {
-					version = "versionUpgrade-" + Main.loadSelfVersion();
+					version = "versionUpgrade-" + Static.loadSelfVersion();
 					return !hasBreadcrumb(version);
 				} catch (Exception ex) {
 					Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);

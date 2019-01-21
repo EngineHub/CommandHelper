@@ -8,17 +8,14 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.Common.Misc;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.RSAEncrypt;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Common.UIUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
-import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.XMLDocument;
-import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
@@ -52,7 +49,6 @@ import com.laytonsmith.tools.pnviewer.PNViewer;
 import java.awt.HeadlessException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -68,7 +64,6 @@ import java.util.Map;
 import java.util.Set;
 import jline.console.ConsoleReader;
 import org.json.simple.JSONValue;
-import org.yaml.snakeyaml.Yaml;
 
 /**
  *
@@ -540,7 +535,10 @@ public class Main {
 				MSLPMaker.start(mslp);
 				System.exit(0);
 			} else if(mode == VERSION_MODE) {
-				StreamUtils.GetSystemOut().println("You are running " + Implementation.GetServerType().getBranding() + " version " + loadSelfVersion());
+				// TODO: This should eventually be changed to load versions of all extensions, and use an independent
+				// versioning scheme for CH and MS.
+				StreamUtils.GetSystemOut().println("You are running "
+						+ Implementation.GetServerType().getBranding() + " version " + Static.loadSelfVersion());
 				System.exit(0);
 			} else if(mode == COPYRIGHT_MODE) {
 				StreamUtils.GetSystemOut().println("The MIT License (MIT)\n"
@@ -992,37 +990,7 @@ public class Main {
 				throw new Error("Should not have gotten here");
 			}
 		} catch (NoClassDefFoundError error) {
-			StreamUtils.GetSystemErr().println(getNoClassDefFoundErrorMessage(error));
-		}
-	}
-
-	public static String getNoClassDefFoundErrorMessage(NoClassDefFoundError error) {
-		String ret = "The main class requires craftbukkit or bukkit to be included in order to run. If you are seeing"
-				+ " this message, you have two options. First, it seems you have renamed your craftbukkit jar, or"
-				+ " you are altogether not using craftbukkit. If this is the case, you can download craftbukkit and place"
-				+ " it in the correct directory (one above this one) or you can download bukkit, rename it to bukkit.jar,"
-				+ " and put it in the CommandHelper directory.";
-		//if(Prefs.DebugMode()) {
-		ret += " If you're dying for more details, here:\n";
-		ret += Misc.GetStacktrace(error);
-		//}
-		return ret;
-	}
-
-	@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
-	public static SimpleVersion loadSelfVersion() throws Exception {
-		File file = new File(new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()), "plugin.yml");
-		ZipReader reader = new ZipReader(file);
-		if(!reader.exists()) {
-			throw new FileNotFoundException(String.format("%s does not exist", file.getPath()));
-		}
-		try {
-			String contents = reader.getFileContents();
-			Yaml yaml = new Yaml();
-			Map<String, Object> map = (Map<String, Object>) yaml.load(contents);
-			return new SimpleVersion((String) map.get("version"));
-		} catch (RuntimeException | IOException ex) {
-			throw new Exception(ex);
+			StreamUtils.GetSystemErr().println(Static.getNoClassDefFoundErrorMessage(error));
 		}
 	}
 }

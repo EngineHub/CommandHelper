@@ -1,10 +1,12 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Common.DateUtils;
+import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.XMLDocument;
+import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
@@ -62,6 +64,7 @@ import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -81,6 +84,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * This class contains several static methods to get various objects that really should be static in the first place,
@@ -364,7 +368,7 @@ public final class Static {
 			v = com.laytonsmith.commandhelper.CommandHelperPlugin.version;
 		} else {
 			try {
-				v = Main.loadSelfVersion();
+				v = loadSelfVersion();
 			} catch (Exception ex) {
 				//Ignored
 			}
@@ -373,6 +377,36 @@ public final class Static {
 			throw new NotInitializedYetException("The plugin has not been initialized yet");
 		}
 		return v;
+	}
+
+	@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
+	public static SimpleVersion loadSelfVersion() throws Exception {
+		File file = new File(new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()), "plugin.yml");
+		ZipReader reader = new ZipReader(file);
+		if(!reader.exists()) {
+			throw new FileNotFoundException(String.format("%s does not exist", file.getPath()));
+		}
+		try {
+			String contents = reader.getFileContents();
+			Yaml yaml = new Yaml();
+			Map<String, Object> map = (Map<String, Object>) yaml.load(contents);
+			return new SimpleVersion((String) map.get("version"));
+		} catch (RuntimeException | IOException ex) {
+			throw new Exception(ex);
+		}
+	}
+
+	public static String getNoClassDefFoundErrorMessage(NoClassDefFoundError error) {
+		String ret = "The main class requires craftbukkit or bukkit to be included in order to run. If you are seeing"
+				+ " this message, you have two options. First, it seems you have renamed your craftbukkit jar, or"
+				+ " you are altogether not using craftbukkit. If this is the case, you can download craftbukkit and place"
+				+ " it in the correct directory (one above this one) or you can download bukkit, rename it to bukkit.jar,"
+				+ " and put it in the CommandHelper directory.";
+		//if(Prefs.DebugMode()) {
+		ret += " If you're dying for more details, here:\n";
+		ret += StackTraceUtils.GetStacktrace(error);
+		//}
+		return ret;
 	}
 
 	private static String debugLogFileCurrent = null;

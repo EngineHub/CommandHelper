@@ -1,7 +1,7 @@
 package com.laytonsmith.persistence;
 
 import com.laytonsmith.PureUtilities.Common.FileUtil;
-import com.laytonsmith.PureUtilities.Common.Misc;
+import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.ZipReader;
@@ -302,7 +302,7 @@ public class TestPersistence {
 				return null;
 			}
 		} catch (Exception ex) {
-			fail(Misc.GetStacktrace(ex));
+			fail(StackTraceUtils.GetStacktrace(ex));
 			return null;
 		}
 	}

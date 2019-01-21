@@ -45,7 +45,6 @@ import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.LogLevel;
-import com.laytonsmith.core.Main;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.MethodScriptFileLocations;
@@ -735,7 +734,7 @@ public final class Interpreter {
 								System.exit(1);
 							}
 						} catch (NoClassDefFoundError e) {
-							StreamUtils.GetSystemErr().println(RED + Main.getNoClassDefFoundErrorMessage(e) + reset());
+							StreamUtils.GetSystemErr().println(RED + Static.getNoClassDefFoundErrorMessage(e) + reset());
 							StreamUtils.GetSystemErr().println("Since you're running from standalone interpreter mode, this is not a fatal error, but one of the functions you just used required"
 									+ " an actual backing engine that isn't currently loaded. (It still might fail even if you load the engine though.) You simply won't be"
 									+ " able to use that function here.");
