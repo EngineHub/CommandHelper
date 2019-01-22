@@ -17,6 +17,7 @@ http_request('https://publicsuffix.org/list/public_suffix_list.dat', array(
 		'cache-control': 'max-age=0'
 	),
 	download: './src/main/resources/public-suffix.dat',
+	downloadStrategy: 'OVERWRITE',
 	blocking: true,
 	log: true
 ));

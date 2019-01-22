@@ -698,7 +698,7 @@ ac.ci
 net.ci
 go.ci
 asso.ci
-a�roport.ci
+aéroport.ci
 int.ci
 presse.ci
 md.ci
@@ -732,9 +732,9 @@ gov.cn
 net.cn
 org.cn
 mil.cn
-l�.cn
-Q�.cn
-�a.cn
+公司.cn
+网络.cn
+網絡.cn
 // cn geographic names
 ah.cn
 bj.cn
@@ -1155,21 +1155,21 @@ gov.hk
 idv.hk
 net.hk
 org.hk
-l�.hk
-Y�.hk
-N�.hk
-?�.hk
-�.hk
-*�.hk
-��.hk
-��.hk
-Q�.hk
-�T.hk
-�a.hk
-Qa.hk
-��.hk
-DT.hk
-D�.hk
+公司.hk
+教育.hk
+敎育.hk
+政府.hk
+個人.hk
+个人.hk
+箇人.hk
+網络.hk
+网络.hk
+组織.hk
+網絡.hk
+网絡.hk
+组织.hk
+組織.hk
+組织.hk
 
 // hm : https://en.wikipedia.org/wiki/.hm
 hm
@@ -1340,9 +1340,9 @@ net.ir
 org.ir
 sch.ir
 // xn--mgba3a4f16a.ir (<iran>.ir, Persian YEH)
-'�1'F.ir
+ایران.ir
 // xn--mgba3a4fra.ir (<iran>.ir, Arabic YEH)
-'J1'F.ir
+ايران.ir
 
 // is : http://www.isnic.is/domain/rules.php
 // Confirmed by registry <marius@isgate.is> 2008-12-06
@@ -1414,9 +1414,9 @@ taa.it
 tos.it
 toscana.it
 trentin-sud-tirol.it
-trentin-sud-tirol.it
+trentin-süd-tirol.it
 trentin-sudtirol.it
-trentin-sudtirol.it
+trentin-südtirol.it
 trentin-sued-tirol.it
 trentin-suedtirol.it
 trentino-a-adige.it
@@ -1426,9 +1426,9 @@ trentino-altoadige.it
 trentino-s-tirol.it
 trentino-stirol.it
 trentino-sud-tirol.it
-trentino-sud-tirol.it
+trentino-süd-tirol.it
 trentino-sudtirol.it
-trentino-sudtirol.it
+trentino-südtirol.it
 trentino-sued-tirol.it
 trentino-suedtirol.it
 trentino.it
@@ -1439,15 +1439,15 @@ trentinoaltoadige.it
 trentinos-tirol.it
 trentinostirol.it
 trentinosud-tirol.it
-trentinosud-tirol.it
+trentinosüd-tirol.it
 trentinosudtirol.it
-trentinosudtirol.it
+trentinosüdtirol.it
 trentinosued-tirol.it
 trentinosuedtirol.it
 trentinsud-tirol.it
-trentinsud-tirol.it
+trentinsüd-tirol.it
 trentinsudtirol.it
-trentinsudtirol.it
+trentinsüdtirol.it
 trentinsued-tirol.it
 trentinsuedtirol.it
 tuscany.it
@@ -1464,13 +1464,13 @@ valleaosta.it
 valled-aosta.it
 valledaosta.it
 vallee-aoste.it
-vallee-aoste.it
+vallée-aoste.it
 vallee-d-aoste.it
-vallee-d-aoste.it
+vallée-d-aoste.it
 valleeaoste.it
-valleeaoste.it
+valléeaoste.it
 valleedaoste.it
-valleedaoste.it
+valléedaoste.it
 vao.it
 vda.it
 ven.it
@@ -1504,7 +1504,7 @@ av.it
 avellino.it
 ba.it
 balsan-sudtirol.it
-balsan-sudtirol.it
+balsan-südtirol.it
 balsan-suedtirol.it
 balsan.it
 bari.it
@@ -1523,7 +1523,7 @@ bologna.it
 bolzano-altoadige.it
 bolzano.it
 bozen-sudtirol.it
-bozen-sudtirol.it
+bozen-südtirol.it
 bozen-suedtirol.it
 bozen.it
 br.it
@@ -1532,7 +1532,7 @@ brindisi.it
 bs.it
 bt.it
 bulsan-sudtirol.it
-bulsan-sudtirol.it
+bulsan-südtirol.it
 bulsan-suedtirol.it
 bulsan.it
 bz.it
@@ -1552,9 +1552,9 @@ catanzaro.it
 cb.it
 ce.it
 cesena-forli.it
-cesena-forli .it
+cesena-forlì.it
 cesenaforli.it
-cesenaforli .it
+cesenaforlì.it
 ch.it
 chieti.it
 ci.it
@@ -1585,9 +1585,9 @@ florence.it
 fm.it
 foggia.it
 forli-cesena.it
-forli -cesena.it
+forlì-cesena.it
 forlicesena.it
-forli cesena.it
+forlìcesena.it
 fr.it
 frosinone.it
 ge.it
@@ -1718,7 +1718,7 @@ sp.it
 sr.it
 ss.it
 suedtirol.it
-sudtirol.it
+südtirol.it
 sv.it
 ta.it
 taranto.it
@@ -1853,53 +1853,53 @@ wakayama.jp
 yamagata.jp
 yamaguchi.jp
 yamanashi.jp
-(.jp
-�.jp
-�.jp
-u�.jp
-�,.jp
-(�.jp
-wS.jp
-CI.jp
-�Lq.jp
-w.jp
-w�.jp
-�_.jp
-R�.jp
-Y�.jp
-q�.jp
-��.jp
-��.jp
-	�.jp
-��.jp
-P�.jp
-'.jp
-'*.jp
-Ho.jp
-��.jp
-�.jp
-�q.jp
-q�.jp
-qb.jp
-q�.jp
-�K.jp
-�.jp
-�q.jp
-�9.jp
-��.jp
-��.jp
-�.jp
-��.jp
-^H�.jp
-��.jp
-��.jp
-��.jp
-�0.jp
-��.jp
-��.jp
-��.jp
-��.jp
-P�.jp
+栃木.jp
+愛知.jp
+愛媛.jp
+兵庫.jp
+熊本.jp
+茨城.jp
+北海道.jp
+千葉.jp
+和歌山.jp
+長崎.jp
+長野.jp
+新潟.jp
+青森.jp
+静岡.jp
+東京.jp
+石川.jp
+埼玉.jp
+三重.jp
+京都.jp
+佐賀.jp
+大分.jp
+大阪.jp
+奈良.jp
+宮城.jp
+宮崎.jp
+富山.jp
+山口.jp
+山形.jp
+山梨.jp
+岩手.jp
+岐阜.jp
+岡山.jp
+島根.jp
+広島.jp
+徳島.jp
+沖縄.jp
+滋賀.jp
+神奈川.jp
+福井.jp
+福岡.jp
+福島.jp
+秋田.jp
+群馬.jp
+香川.jp
+高知.jp
+鳥取.jp
+鹿児島.jp
 // jp geographic type names
 // http://jprs.jp/doc/rule/saisoku-1.html
 *.kawasaki.jp
@@ -4085,13 +4085,13 @@ communications.museum
 community.museum
 computer.museum
 computerhistory.museum
-comunica��es.museum
+comunicações.museum
 contemporary.museum
 contemporaryart.museum
 convent.museum
 copenhagen.museum
 corporation.museum
-correios-e-telecomunica��es.museum
+correios-e-telecomunicações.museum
 corvette.museum
 costume.museum
 countryestate.museum
@@ -4240,7 +4240,7 @@ lajolla.museum
 lancashire.museum
 landes.museum
 lans.museum
-l�ns.museum
+läns.museum
 larsson.museum
 lewismiller.museum
 lincoln.museum
@@ -4502,8 +4502,8 @@ yosemite.museum
 youth.museum
 zoological.museum
 zoology.museum
-�������.museum
-8:><.museum
+ירושלים.museum
+иком.museum
 
 // mv : https://en.wikipedia.org/wiki/.mv
 // "mv" included because, contra Wikipedia, google.mv exists.
@@ -4721,161 +4721,161 @@ gs.va.no
 gs.vf.no
 // cities
 akrehamn.no
-�krehamn.no
+åkrehamn.no
 algard.no
-�lg�rd.no
+ålgård.no
 arna.no
 brumunddal.no
 bryne.no
 bronnoysund.no
-br�nn�ysund.no
+brønnøysund.no
 drobak.no
-dr�bak.no
+drøbak.no
 egersund.no
 fetsund.no
 floro.no
-flor�.no
+florø.no
 fredrikstad.no
 hokksund.no
 honefoss.no
-h�nefoss.no
+hønefoss.no
 jessheim.no
 jorpeland.no
-j�rpeland.no
+jørpeland.no
 kirkenes.no
 kopervik.no
 krokstadelva.no
 langevag.no
-langev�g.no
+langevåg.no
 leirvik.no
 mjondalen.no
-mj�ndalen.no
+mjøndalen.no
 mo-i-rana.no
 mosjoen.no
-mosj�en.no
+mosjøen.no
 nesoddtangen.no
 orkanger.no
 osoyro.no
-os�yro.no
+osøyro.no
 raholt.no
-r�holt.no
+råholt.no
 sandnessjoen.no
-sandnessj�en.no
+sandnessjøen.no
 skedsmokorset.no
 slattum.no
 spjelkavik.no
 stathelle.no
 stavern.no
 stjordalshalsen.no
-stj�rdalshalsen.no
+stjørdalshalsen.no
 tananger.no
 tranby.no
 vossevangen.no
 // communities
 afjord.no
-�fjord.no
+åfjord.no
 agdenes.no
 al.no
-�l.no
+ål.no
 alesund.no
-�lesund.no
+ålesund.no
 alstahaug.no
 alta.no
-�lt�.no
+áltá.no
 alaheadju.no
-�laheadju.no
+álaheadju.no
 alvdal.no
 amli.no
-�mli.no
+åmli.no
 amot.no
-�mot.no
+åmot.no
 andebu.no
 andoy.no
-and�y.no
+andøy.no
 andasuolo.no
 ardal.no
-�rdal.no
+årdal.no
 aremark.no
 arendal.no
-�s.no
+ås.no
 aseral.no
-�seral.no
+åseral.no
 asker.no
 askim.no
 askvoll.no
 askoy.no
-ask�y.no
+askøy.no
 asnes.no
-�snes.no
+åsnes.no
 audnedaln.no
 aukra.no
 aure.no
 aurland.no
 aurskog-holand.no
-aurskog-h�land.no
+aurskog-høland.no
 austevoll.no
 austrheim.no
 averoy.no
-aver�y.no
+averøy.no
 balestrand.no
 ballangen.no
 balat.no
-b�l�t.no
+bálát.no
 balsfjord.no
 bahccavuotna.no
-b�hccavuotna.no
+báhccavuotna.no
 bamble.no
 bardu.no
 beardu.no
 beiarn.no
 bajddar.no
-b�jddar.no
+bájddar.no
 baidar.no
-b�id�r.no
+báidár.no
 berg.no
 bergen.no
 berlevag.no
-berlev�g.no
+berlevåg.no
 bearalvahki.no
-bearalv�hki.no
+bearalváhki.no
 bindal.no
 birkenes.no
 bjarkoy.no
-bjark�y.no
+bjarkøy.no
 bjerkreim.no
 bjugn.no
 bodo.no
-bod�.no
+bodø.no
 badaddja.no
-b�d�ddj�.no
+bådåddjå.no
 budejju.no
 bokn.no
 bremanger.no
 bronnoy.no
-br�nn�y.no
+brønnøy.no
 bygland.no
 bykle.no
 barum.no
-b�rum.no
+bærum.no
 bo.telemark.no
-b�.telemark.no
+bø.telemark.no
 bo.nordland.no
-b�.nordland.no
+bø.nordland.no
 bievat.no
-biev�t.no
+bievát.no
 bomlo.no
-b�mlo.no
+bømlo.no
 batsfjord.no
-b�tsfjord.no
+båtsfjord.no
 bahcavuotna.no
-b�hcavuotna.no
+báhcavuotna.no
 dovre.no
 drammen.no
 drangedal.no
 dyroy.no
-dyr�y.no
+dyrøy.no
 donna.no
-d�nna.no
+dønna.no
 eid.no
 eidfjord.no
 eidsberg.no
@@ -4889,7 +4889,7 @@ etne.no
 etnedal.no
 evenes.no
 evenassi.no
-even�aai.no
+evenášši.no
 evje-og-hornnes.no
 farsund.no
 fauske.no
@@ -4898,7 +4898,7 @@ fuoisku.no
 fedje.no
 fet.no
 finnoy.no
-finn�y.no
+finnøy.no
 fitjar.no
 fjaler.no
 fjell.no
@@ -4908,7 +4908,7 @@ flekkefjord.no
 flesberg.no
 flora.no
 fla.no
-fl�.no
+flå.no
 folldal.no
 forsand.no
 fosnes.no
@@ -4917,27 +4917,27 @@ frogn.no
 froland.no
 frosta.no
 frana.no
-fr�na.no
+fræna.no
 froya.no
-fr�ya.no
+frøya.no
 fusa.no
 fyresdal.no
 forde.no
-f�rde.no
+førde.no
 gamvik.no
 gangaviika.no
-g�Kgaviika.no
+gáŋgaviika.no
 gaular.no
 gausdal.no
 gildeskal.no
-gildesk�l.no
+gildeskål.no
 giske.no
 gjemnes.no
 gjerdrum.no
 gjerstad.no
 gjesdal.no
 gjovik.no
-gj�vik.no
+gjøvik.no
 gloppen.no
 gol.no
 gran.no
@@ -4947,7 +4947,7 @@ gratangen.no
 grimstad.no
 grong.no
 kraanghke.no
-kr�anghke.no
+kråanghke.no
 grue.no
 gulen.no
 hadsel.no
@@ -4956,18 +4956,18 @@ halsa.no
 hamar.no
 hamaroy.no
 habmer.no
-h�bmer.no
+hábmer.no
 hapmir.no
-h�pmir.no
+hápmir.no
 hammerfest.no
 hammarfeasta.no
-h�mm�rfeasta.no
+hámmárfeasta.no
 haram.no
 hareid.no
 harstad.no
 hasvik.no
 aknoluokta.no
-�kKoluokta.no
+ákŋoluokta.no
 hattfjelldal.no
 aarborte.no
 haugesund.no
@@ -4975,20 +4975,20 @@ hemne.no
 hemnes.no
 hemsedal.no
 heroy.more-og-romsdal.no
-her�y.m�re-og-romsdal.no
+herøy.møre-og-romsdal.no
 heroy.nordland.no
-her�y.nordland.no
+herøy.nordland.no
 hitra.no
 hjartdal.no
 hjelmeland.no
 hobol.no
-hob�l.no
+hobøl.no
 hof.no
 hol.no
 hole.no
 holmestrand.no
 holtalen.no
-holt�len.no
+holtålen.no
 hornindal.no
 horten.no
 hurdal.no
@@ -4996,67 +4996,67 @@ hurum.no
 hvaler.no
 hyllestad.no
 hagebostad.no
-h�gebostad.no
+hægebostad.no
 hoyanger.no
-h�yanger.no
+høyanger.no
 hoylandet.no
-h�ylandet.no
+høylandet.no
 ha.no
-h�.no
+hå.no
 ibestad.no
 inderoy.no
-inder�y.no
+inderøy.no
 iveland.no
 jevnaker.no
 jondal.no
 jolster.no
-j�lster.no
+jølster.no
 karasjok.no
 karasjohka.no
-k�r�ajohka.no
+kárášjohka.no
 karlsoy.no
 galsa.no
-g�ls�.no
+gálsá.no
 karmoy.no
-karm�y.no
+karmøy.no
 kautokeino.no
 guovdageaidnu.no
 klepp.no
 klabu.no
-kl�bu.no
+klæbu.no
 kongsberg.no
 kongsvinger.no
 kragero.no
-krager�.no
+kragerø.no
 kristiansand.no
 kristiansund.no
 krodsherad.no
-kr�dsherad.no
+krødsherad.no
 kvalsund.no
 rahkkeravju.no
-r�hkker�vju.no
+ráhkkerávju.no
 kvam.no
 kvinesdal.no
 kvinnherad.no
 kviteseid.no
 kvitsoy.no
-kvits�y.no
+kvitsøy.no
 kvafjord.no
-kv�fjord.no
+kvæfjord.no
 giehtavuoatna.no
 kvanangen.no
-kv�nangen.no
+kvænangen.no
 navuotna.no
-n�vuotna.no
+návuotna.no
 kafjord.no
-k�fjord.no
+kåfjord.no
 gaivuotna.no
-g�ivuotna.no
+gáivuotna.no
 larvik.no
 lavangen.no
 lavagis.no
 loabat.no
-loab�t.no
+loabát.no
 lebesby.no
 davvesiida.no
 leikanger.no
@@ -5065,7 +5065,7 @@ leka.no
 leksvik.no
 lenvik.no
 leangaviika.no
-leaKgaviika.no
+leaŋgaviika.no
 lesja.no
 levanger.no
 lier.no
@@ -5074,33 +5074,33 @@ lillehammer.no
 lillesand.no
 lindesnes.no
 lindas.no
-lind�s.no
+lindås.no
 lom.no
 loppa.no
 lahppi.no
-l�hppi.no
+láhppi.no
 lund.no
 lunner.no
 luroy.no
-lur�y.no
+lurøy.no
 luster.no
 lyngdal.no
 lyngen.no
 ivgu.no
 lardal.no
 lerdal.no
-l�rdal.no
+lærdal.no
 lodingen.no
-l�dingen.no
+lødingen.no
 lorenskog.no
-l�renskog.no
+lørenskog.no
 loten.no
-l�ten.no
+løten.no
 malvik.no
 masoy.no
-m�s�y.no
+måsøy.no
 muosat.no
-muos�t.no
+muosát.no
 mandal.no
 marker.no
 marnardal.no
@@ -5109,11 +5109,11 @@ meland.no
 meldal.no
 melhus.no
 meloy.no
-mel�y.no
+meløy.no
 meraker.no
-mer�ker.no
+meråker.no
 moareke.no
-mo�reke.no
+moåreke.no
 midsund.no
 midtre-gauldal.no
 modalen.no
@@ -5123,15 +5123,15 @@ moskenes.no
 moss.no
 mosvik.no
 malselv.no
-m�lselv.no
+målselv.no
 malatvuopmi.no
-m�latvuopmi.no
+málatvuopmi.no
 namdalseid.no
 aejrie.no
 namsos.no
 namsskogan.no
 naamesjevuemie.no
-n��mesjevuemie.no
+nååmesjevuemie.no
 laakesvuemie.no
 nannestad.no
 narvik.no
@@ -5144,7 +5144,7 @@ nesna.no
 nesodden.no
 nesseby.no
 unjarga.no
-unj�rga.no
+unjárga.no
 nesset.no
 nissedal.no
 nittedal.no
@@ -5154,52 +5154,52 @@ nord-odal.no
 norddal.no
 nordkapp.no
 davvenjarga.no
-davvenj�rga.no
+davvenjárga.no
 nordre-land.no
 nordreisa.no
 raisa.no
-r�isa.no
+ráisa.no
 nore-og-uvdal.no
 notodden.no
 naroy.no
-n�r�y.no
+nærøy.no
 notteroy.no
-n�tter�y.no
+nøtterøy.no
 odda.no
 oksnes.no
-�ksnes.no
+øksnes.no
 oppdal.no
 oppegard.no
-oppeg�rd.no
+oppegård.no
 orkdal.no
 orland.no
-�rland.no
+ørland.no
 orskog.no
-�rskog.no
+ørskog.no
 orsta.no
-�rsta.no
+ørsta.no
 os.hedmark.no
 os.hordaland.no
 osen.no
 osteroy.no
-oster�y.no
+osterøy.no
 ostre-toten.no
-�stre-toten.no
+østre-toten.no
 overhalla.no
 ovre-eiker.no
-�vre-eiker.no
+øvre-eiker.no
 oyer.no
-�yer.no
+øyer.no
 oygarden.no
-�ygarden.no
+øygarden.no
 oystre-slidre.no
-�ystre-slidre.no
+øystre-slidre.no
 porsanger.no
 porsangu.no
-pors�Kgu.no
+porsáŋgu.no
 porsgrunn.no
 radoy.no
-rad�y.no
+radøy.no
 rakkestad.no
 rana.no
 ruovat.no
@@ -5208,47 +5208,47 @@ rauma.no
 rendalen.no
 rennebu.no
 rennesoy.no
-rennes�y.no
+rennesøy.no
 rindal.no
 ringebu.no
 ringerike.no
 ringsaker.no
 rissa.no
 risor.no
-ris�r.no
+risør.no
 roan.no
 rollag.no
 rygge.no
 ralingen.no
-r�lingen.no
+rælingen.no
 rodoy.no
-r�d�y.no
+rødøy.no
 romskog.no
-r�mskog.no
+rømskog.no
 roros.no
-r�ros.no
+røros.no
 rost.no
-r�st.no
+røst.no
 royken.no
-r�yken.no
+røyken.no
 royrvik.no
-r�yrvik.no
+røyrvik.no
 rade.no
-r�de.no
+råde.no
 salangen.no
 siellak.no
 saltdal.no
 salat.no
-s�l�t.no
-s�lat.no
+sálát.no
+sálat.no
 samnanger.no
 sande.more-og-romsdal.no
-sande.m�re-og-romsdal.no
+sande.møre-og-romsdal.no
 sande.vestfold.no
 sandefjord.no
 sandnes.no
 sandoy.no
-sand�y.no
+sandøy.no
 sarpsborg.no
 sauda.no
 sauherad.no
@@ -5265,24 +5265,24 @@ ski.no
 skien.no
 skiptvet.no
 skjervoy.no
-skjerv�y.no
+skjervøy.no
 skierva.no
-skierv�.no
+skiervá.no
 skjak.no
-skj�k.no
+skjåk.no
 skodje.no
 skanland.no
-sk�nland.no
+skånland.no
 skanit.no
-sk�nit.no
+skánit.no
 smola.no
-sm�la.no
+smøla.no
 snillfjord.no
 snasa.no
-sn�sa.no
+snåsa.no
 snoasa.no
 snaase.no
-sn�ase.no
+snåase.no
 sogndal.no
 sokndal.no
 sola.no
@@ -5295,7 +5295,7 @@ stavanger.no
 steigen.no
 steinkjer.no
 stjordal.no
-stj�rdal.no
+stjørdal.no
 stokke.no
 stor-elvdal.no
 stord.no
@@ -5314,27 +5314,27 @@ sveio.no
 svelvik.no
 sykkylven.no
 sogne.no
-s�gne.no
+søgne.no
 somna.no
-s�mna.no
+sømna.no
 sondre-land.no
-s�ndre-land.no
+søndre-land.no
 sor-aurdal.no
-s�r-aurdal.no
+sør-aurdal.no
 sor-fron.no
-s�r-fron.no
+sør-fron.no
 sor-odal.no
-s�r-odal.no
+sør-odal.no
 sor-varanger.no
-s�r-varanger.no
+sør-varanger.no
 matta-varjjat.no
-m�tta-v�rjjat.no
+mátta-várjjat.no
 sorfold.no
-s�rfold.no
+sørfold.no
 sorreisa.no
-s�rreisa.no
+sørreisa.no
 sorum.no
-s�rum.no
+sørum.no
 tana.no
 deatnu.no
 time.no
@@ -5343,23 +5343,23 @@ tinn.no
 tjeldsund.no
 dielddanuorri.no
 tjome.no
-tj�me.no
+tjøme.no
 tokke.no
 tolga.no
 torsken.no
 tranoy.no
-tran�y.no
+tranøy.no
 tromso.no
-troms�.no
+tromsø.no
 tromsa.no
 romsa.no
 trondheim.no
 troandin.no
 trysil.no
 trana.no
-tr�na.no
+træna.no
 trogstad.no
-tr�gstad.no
+trøgstad.no
 tvedestrand.no
 tydal.no
 tynset.no
@@ -5368,30 +5368,30 @@ divtasvuodna.no
 divttasvuotna.no
 tysnes.no
 tysvar.no
-tysv�r.no
+tysvær.no
 tonsberg.no
-t�nsberg.no
+tønsberg.no
 ullensaker.no
 ullensvang.no
 ulvik.no
 utsira.no
 vadso.no
-vads�.no
+vadsø.no
 cahcesuolo.no
-�hcesuolo.no
+čáhcesuolo.no
 vaksdal.no
 valle.no
 vang.no
 vanylven.no
 vardo.no
-vard�.no
+vardø.no
 varggat.no
-v�rgg�t.no
+várggát.no
 vefsn.no
 vaapste.no
 vega.no
 vegarshei.no
-veg�rshei.no
+vegårshei.no
 vennesla.no
 verdal.no
 verran.no
@@ -5400,7 +5400,7 @@ vestnes.no
 vestre-slidre.no
 vestre-toten.no
 vestvagoy.no
-vestv�g�y.no
+vestvågøy.no
 vevelstad.no
 vik.no
 vikna.no
@@ -5408,18 +5408,18 @@ vindafjord.no
 volda.no
 voss.no
 varoy.no
-v�r�y.no
+værøy.no
 vagan.no
-v�gan.no
+vågan.no
 voagat.no
 vagsoy.no
-v�gs�y.no
+vågsøy.no
 vaga.no
-v�g�.no
+vågå.no
 valer.ostfold.no
-v�ler.�stfold.no
+våler.østfold.no
 valer.hedmark.no
-v�ler.hedmark.no
+våler.hedmark.no
 
 // np : http://www.mos.com.np/register.html
 *.np
@@ -5452,7 +5452,7 @@ iwi.nz
 kiwi.nz
 maori.nz
 mil.nz
-mori.nz
+māori.nz
 net.nz
 org.nz
 parliament.nz
@@ -6251,9 +6251,9 @@ idv.tw
 game.tw
 ebiz.tw
 club.tw
-��.tw
-DT.tw
-Fm.tw
+網路.tw
+組織.tw
+商業.tw
 
 // tz : http://www.tznic.or.tz/index.php/domains
 // Submitted by registry <manager@tznic.or.tz>
@@ -6744,261 +6744,261 @@ yt
 
 // xn--mgbaam7a8h ("Emerat", Arabic) : AE
 // http://nic.ae/english/arabicdomain/rules.jsp
-'E'1'*
+امارات
 
 // xn--y9a3aq ("hye", Armenian) : AM
 // ISOC AM (operated by .am Registry)
-pau
+հայ
 
 // xn--54b7fta0cc ("Bangla", Bangla) : BD
-�����
+বাংলা
 
 // xn--90ae ("bg", Bulgarian) : BG
-13
+бг
 
 // xn--90ais ("bel", Belarusian/Russian Cyrillic) : BY
 // Operated by .by registry
-15;
+бел
 
 // xn--fiqs8s ("Zhongguo/China", Chinese, Simplified) : CN
 // CNNIC
 // http://cnnic.cn/html/Dir/2005/10/11/3218.htm
--�
+中国
 
 // xn--fiqz9s ("Zhongguo/China", Chinese, Traditional) : CN
 // CNNIC
 // http://cnnic.cn/html/Dir/2005/10/11/3218.htm
--
+中國
 
 // xn--lgbbat1ad8j ("Algeria/Al Jazair", Arabic) : DZ
-'D,2'&1
+الجزائر
 
 // xn--wgbh1c ("Egypt/Masr", Arabic) : EG
 // http://www.dotmasr.eg/
-E51
+مصر
 
 // xn--e1a4c ("eu", Cyrillic) : EU
-5N
+ею
 
 // xn--node ("ge", Georgian Mkhedruli) : GE
-��
+გე
 
 // xn--qxam ("el", Greek) : GR
 // Hellenic Ministry of Infrastructure, Transport, and Networks
-��
+ελ
 
 // xn--j6w193g ("Hong Kong", Chinese) : HK
 // https://www.hkirc.hk
 // Submitted by registry <hk.tech@hkirc.hk>
 // https://www.hkirc.hk/content.jsp?id=30#!/34
-�/
-l�.�/
-Y�.�/
-?�.�/
-�.�/
-�a.�/
-DT.�/
+香港
+公司.香港
+教育.香港
+政府.香港
+個人.香港
+網絡.香港
+組織.香港
 
 // xn--2scrj9c ("Bharat", Kannada) : IN
 // India
-����
+ಭಾರತ
 
 // xn--3hcrj9c ("Bharat", Oriya) : IN
 // India
-->0$
+ଭାରତ
 
 // xn--45br5cyl ("Bharatam", Assamese) : IN
 // India
-���
+ভাৰত
 
 // xn--h2breg3eve ("Bharatam", Sanskrit) : IN
 // India
-->0$.M
+भारतम्
 
 // xn--h2brj9c8c ("Bharot", Santali) : IN
 // India
-->0K$
+भारोत
 
 // xn--mgbgu82a ("Bharat", Sindhi) : IN
 // India
-�'1*
+ڀارت
 
 // xn--rvc1e0am3e ("Bharatam", Malayalam) : IN
 // India
-->0$
+ഭാരതം
 
 // xn--h2brj9c ("Bharat", Devanagari) : IN
 // India
-->0$
+भारत
 
 // xn--mgbbh1a ("Bharat", Kashmiri) : IN
 // India
-('1*
+بارت
 
 // xn--mgbbh1a71e ("Bharat", Arabic) : IN
 // India
-(�'1*
+بھارت
 
 // xn--fpcrj9c3d ("Bharat", Telugu) : IN
 // India
-->0$M
+భారత్
 
 // xn--gecrj9c ("Bharat", Gujarati) : IN
 // India
-����
+ભારત
 
 // xn--s9brj9c ("Bharat", Gurmukhi) : IN
 // India
-->0$
+ਭਾਰਤ
 
 // xn--45brj9c ("Bharat", Bengali) : IN
 // India
-����
+ভারত
 
 // xn--xkc2dl3a5ee0h ("India", Tamil) : IN
 // India
-��ͤ���
+இந்தியா
 
 // xn--mgba3a4f16a ("Iran", Persian) : IR
-'�1'F
+ایران
 
 // xn--mgba3a4fra ("Iran", Arabic) : IR
-'J1'F
+ايران
 
 // xn--mgbtx2b ("Iraq", Arabic) : IQ
 // Communications and Media Commission
-91'B
+عراق
 
 // xn--mgbayh7gpa ("al-Ordon", Arabic) : JO
 // National Information Technology Center (NITC)
 // Royal Scientific Society, Al-Jubeiha
-'D'1/F
+الاردن
 
 // xn--3e0b707e ("Republic of Korea", Hangul) : KR
-\m
+한국
 
 // xn--80ao21a ("Kaz", Kazakh) : KZ
-�07
+қаз
 
 // xn--fzc2c9e2c ("Lanka", Sinhalese-Sinhala) : LK
 // http://nic.lk
-����
+ලංකා
 
 // xn--xkc2al3hye2a ("Ilangai", Tamil) : LK
 // http://nic.lk
-���͕�
+இலங்கை
 
 // xn--mgbc0a9azcg ("Morocco/al-Maghrib", Arabic) : MA
-'DE:1(
+المغرب
 
 // xn--d1alf ("mkd", Macedonian) : MK
 // MARnet
-<:4
+мкд
 
 // xn--l1acc ("mon", Mongolian) : MN
-<>=
+мон
 
 // xn--mix891f ("Macao", Chinese, Traditional) : MO
 // MONIC / HNET Asia (Registry Operator for .mo)
-��
+澳門
 
 // xn--mix082f ("Macao", Chinese, Simplified) : MO
-��
+澳门
 
 // xn--mgbx4cd0ab ("Malaysia", Malay) : MY
-EDJ3J'
+مليسيا
 
 // xn--mgb9awbf ("Oman", Arabic) : OM
-9E'F
+عمان
 
 // xn--mgbai9azgqp6j ("Pakistan", Urdu/Arabic) : PK
-~'�3*'F
+پاکستان
 
 // xn--mgbai9a5eva00b ("Pakistan", Urdu/Arabic, variant) : PK
-~'C3*'F
+پاكستان
 
 // xn--ygbi2ammx ("Falasteen", Arabic) : PS
 // The Palestinian National Internet Naming Authority (PNINA)
 // http://www.pnina.ps
-AD37JF
+فلسطين
 
 // xn--90a3ac ("srb", Cyrillic) : RS
 // https://www.rnids.rs/en/domains/national-domains
-A@1
-?@.A@1
->@3.A@1
->1@.A@1
->4.A@1
-C?@.A@1
-0:.A@1
+срб
+пр.срб
+орг.срб
+обр.срб
+од.срб
+упр.срб
+ак.срб
 
 // xn--p1ai ("rf", Russian-Cyrillic) : RU
 // http://www.cctld.ru/en/docs/rulesrf.php
-@D
+рф
 
 // xn--wgbl6a ("Qatar", Arabic) : QA
 // http://www.ict.gov.qa/
-B71
+قطر
 
 // xn--mgberp4a5d4ar ("AlSaudiah", Arabic) : SA
 // http://www.nic.net.sa/
-'D39H/J)
+السعودية
 
 // xn--mgberp4a5d4a87g ("AlSaudiah", Arabic, variant)  : SA
-'D39H/�)
+السعودیة
 
 // xn--mgbqly7c0a67fbc ("AlSaudiah", Arabic, variant) : SA
-'D39H/��
+السعودیۃ
 
 // xn--mgbqly7cvafr ("AlSaudiah", Arabic, variant) : SA
-'D39H/JG
+السعوديه
 
 // xn--mgbpl2fh ("sudan", Arabic) : SD
 // Operated by .sd registry
-3H/'F
+سودان
 
 // xn--yfro4i67o Singapore ("Singapore", Chinese) : SG
-��a
+新加坡
 
 // xn--clchc0ea0b2g2a9gcd ("Singapore", Tamil) : SG
-���͕�ͪ°�
+சிங்கப்பூர்
 
 // xn--ogbpf8fl ("Syria", Arabic) : SY
-3H1J)
+سورية
 
 // xn--mgbtf8fl ("Syria", Arabic, variant) : SY
-3H1J'
+سوريا
 
 // xn--o3cw4h ("Thai", Thai) : TH
 // http://www.thnic.co.th
-D"
-(6)2.D"
-8#4.D"
-#12%.D"
-+2#.D"
-@G.D"
--L#.D"
+ไทย
+ศึกษา.ไทย
+ธุรกิจ.ไทย
+รัฐบาล.ไทย
+ทหาร.ไทย
+เน็ต.ไทย
+องค์กร.ไทย
 
 // xn--pgbs0dh ("Tunisia", Arabic) : TN
 // http://nic.tn
-*HF3
+تونس
 
 // xn--kpry57d ("Taiwan", Chinese, Traditional) : TW
 // http://www.twnic.net/english/dn/dn_07a.htm
-�c
+台灣
 
 // xn--kprw13d ("Taiwan", Chinese, Simplified) : TW
 // http://www.twnic.net/english/dn/dn_07a.htm
-�~
+台湾
 
 // xn--nnx388a ("Taiwan", Chinese, variant) : TW
-�c
+臺灣
 
 // xn--j1amh ("ukr", Cyrillic) : UA
-C:@
+укр
 
 // xn--mgb2ddes ("AlYemen", Arabic) : YE
-'DJEF
+اليمن
 
 // xxx : http://icmregistry.com
 xxx
@@ -7162,7 +7162,7 @@ alibaba
 // alipay : 2015-01-15 Alibaba Group Holding Limited
 alipay
 
-// allfinanz : 2014-07-03 Allfinanz Deutsche Verm�gensberatung Aktiengesellschaft
+// allfinanz : 2014-07-03 Allfinanz Deutsche Vermögensberatung Aktiengesellschaft
 allfinanz
 
 // allstate : 2015-07-31 Allstate Fire and Casualty Insurance Company
@@ -7237,7 +7237,7 @@ army
 // art : 2016-03-24 UK Creative Ideas Limited
 art
 
-// arte : 2014-12-11 Association Relative � la T�l�vision Europ�enne G.E.I.E.
+// arte : 2014-12-11 Association Relative à la Télévision Européenne G.E.I.E.
 arte
 
 // asda : 2015-07-31 Wal-Mart Stores, Inc.
@@ -7270,7 +7270,7 @@ auspost
 // author : 2014-12-18 Amazon Registry Services, Inc.
 author
 
-// auto : 2014-11-13 Cars�Registry Limited
+// auto : 2014-11-13 Cars Registry Limited
 auto
 
 // autos : 2014-01-09 DERAutos, LLC
@@ -7327,7 +7327,7 @@ bargains
 // baseball : 2015-10-29 MLB Advanced Media DH, LLC
 baseball
 
-// basketball : 2015-08-20 F�d�ration Internationale de Basketball (FIBA)
+// basketball : 2015-08-20 Fédération Internationale de Basketball (FIBA)
 basketball
 
 // bauhaus : 2014-04-17 Werkhaus GmbH
@@ -7354,7 +7354,7 @@ bcn
 // beats : 2015-05-14 Beats Electronics, LLC
 beats
 
-// beauty : 2015-12-03 L'Or�al
+// beauty : 2015-12-03 L'Oréal
 beauty
 
 // beer : 2014-01-09 Minds + Machines Group Limited
@@ -7438,7 +7438,7 @@ boehringer
 // bofa : 2015-07-31 Bank of America Corporation
 bofa
 
-// bom : 2014-10-16 N�cleo de Informa��o e Coordena��o do Ponto BR - NIC.br
+// bom : 2014-10-16 Núcleo de Informação e Coordenação do Ponto BR - NIC.br
 bom
 
 // bond : 2014-06-05 Bond University Limited
@@ -7552,7 +7552,7 @@ capital
 // capitalone : 2015-08-06 Capital One Financial Corporation
 capitalone
 
-// car : 2015-01-22 Cars�Registry Limited
+// car : 2015-01-22 Cars Registry Limited
 car
 
 // caravan : 2013-12-12 Caravan International, Inc.
@@ -7570,7 +7570,7 @@ career
 // careers : 2013-10-02 Binky Moon, LLC
 careers
 
-// cars : 2014-11-13 Cars�Registry Limited
+// cars : 2014-11-13 Cars Registry Limited
 cars
 
 // cartier : 2014-06-23 Richemont DNS Inc.
@@ -7696,7 +7696,7 @@ click
 // clinic : 2014-03-20 Binky Moon, LLC
 clinic
 
-// clinique : 2015-10-01 The Est�e Lauder Companies Inc.
+// clinique : 2015-10-01 The Estée Lauder Companies Inc.
 clinique
 
 // clothing : 2013-08-27 Binky Moon, LLC
@@ -7708,7 +7708,7 @@ cloud
 // club : 2013-11-08 .CLUB DOMAINS, LLC
 club
 
-// clubmed : 2015-06-25 Club M�diterran�e S.A.
+// clubmed : 2015-06-25 Club Méditerranée S.A.
 clubmed
 
 // coach : 2014-10-09 Binky Moon, LLC
@@ -7771,7 +7771,7 @@ cookingchannel
 // cool : 2013-11-14 Binky Moon, LLC
 cool
 
-// corsica : 2014-09-25 Collectivit� de Corse
+// corsica : 2014-09-25 Collectivité de Corse
 corsica
 
 // country : 2013-12-19 DotCountry LLC
@@ -7975,7 +7975,7 @@ dupont
 // durban : 2014-03-24 ZA Central Registry NPC trading as ZA Central Registry
 durban
 
-// dvag : 2014-06-23 Deutsche Verm�gensberatung Aktiengesellschaft DVAG
+// dvag : 2014-06-23 Deutsche Vermögensberatung Aktiengesellschaft DVAG
 dvag
 
 // dvr : 2016-05-26 Hughes Satellite Systems Corporation
@@ -7990,7 +7990,7 @@ eat
 // eco : 2016-07-08 Big Room Inc.
 eco
 
-// edeka : 2014-12-18 EDEKA Verband kaufm�nnischer Genossenschaften e.V.
+// edeka : 2014-12-18 EDEKA Verband kaufmännischer Genossenschaften e.V.
 edeka
 
 // education : 2013-11-07 Binky Moon, LLC
@@ -8125,7 +8125,7 @@ fido
 // film : 2015-01-08 Motion Picture Domain Registry Pty Ltd
 film
 
-// final : 2014-10-16 N�cleo de Informa��o e Coordena��o do Ponto BR - NIC.br
+// final : 2014-10-16 Núcleo de Informação e Coordenação do Ponto BR - NIC.br
 final
 
 // finance : 2014-03-20 Binky Moon, LLC
@@ -8245,7 +8245,7 @@ futbol
 // fyi : 2015-04-02 Binky Moon, LLC
 fyi
 
-// gal : 2013-11-07 Asociaci�n puntoGAL
+// gal : 2013-11-07 Asociación puntoGAL
 gal
 
 // gallery : 2013-09-13 Binky Moon, LLC
@@ -8314,7 +8314,7 @@ gle
 // global : 2014-04-17 Dot Global Domain Registry Limited
 global
 
-// globo : 2013-12-19 Globo Comunica��o e Participa��es S.A
+// globo : 2013-12-19 Globo Comunicação e Participações S.A
 globo
 
 // gmail : 2014-05-01 Charleston Road Registry Inc.
@@ -8398,7 +8398,7 @@ guitars
 // guru : 2013-08-27 Binky Moon, LLC
 guru
 
-// hair : 2015-12-03 L'Or�al
+// hair : 2015-12-03 L'Oréal
 hair
 
 // hamburg : 2014-02-20 Hamburg Top-Level-Domain GmbH
@@ -8737,7 +8737,7 @@ kuokgroup
 // kyoto : 2014-11-07 Academic Institution: Kyoto Jyoho Gakuen
 kyoto
 
-// lacaixa : 2014-01-09 Fundaci�n Bancaria Caixa dEstalvis i Pensions de Barcelona, la Caixa
+// lacaixa : 2014-01-09 Fundación Bancaria Caixa d’Estalvis i Pensions de Barcelona, “la Caixa”
 lacaixa
 
 // ladbrokes : 2015-08-06 LADBROKES INTERNATIONAL PLC
@@ -8746,7 +8746,7 @@ ladbrokes
 // lamborghini : 2015-06-04 Automobili Lamborghini S.p.A.
 lamborghini
 
-// lamer : 2015-10-01 The Est�e Lauder Companies Inc.
+// lamer : 2015-10-01 The Estée Lauder Companies Inc.
 lamer
 
 // lancaster : 2015-02-12 LANCASTER
@@ -8755,7 +8755,7 @@ lancaster
 // lancia : 2015-07-31 Fiat Chrysler Automobiles N.V.
 lancia
 
-// lancome : 2015-07-23 L'Or�al
+// lancome : 2015-07-23 L'Oréal
 lancome
 
 // land : 2013-09-10 Binky Moon, LLC
@@ -8770,7 +8770,7 @@ lanxess
 // lasalle : 2015-04-02 Jones Lang LaSalle Incorporated
 lasalle
 
-// lat : 2014-10-16 ECOM-LAC Federaci�n de Latinoam�rica y el Caribe para Internet y el Comercio Electr�nico
+// lat : 2014-10-16 ECOM-LAC Federaciòn de Latinoamèrica y el Caribe para Internet y el Comercio Electrònico
 lat
 
 // latino : 2015-07-30 Dish DBS Corporation
@@ -8929,7 +8929,7 @@ maif
 // maison : 2013-12-05 Binky Moon, LLC
 maison
 
-// makeup : 2015-01-15 L'Or�al
+// makeup : 2015-01-15 L'Oréal
 makeup
 
 // man : 2014-12-04 MAN SE
@@ -9079,7 +9079,7 @@ mov
 // movie : 2015-02-05 Binky Moon, LLC
 movie
 
-// movistar : 2014-10-16 Telef�nica S.A.
+// movistar : 2014-10-16 Telefónica S.A.
 movistar
 
 // msd : 2015-07-23 MSD Registry Holdings, Inc.
@@ -9106,7 +9106,7 @@ nagoya
 // nationwide : 2015-07-23 Nationwide Mutual Insurance Company
 nationwide
 
-// natura : 2015-03-12 NATURA COSM�TICOS S.A.
+// natura : 2015-03-12 NATURA COSMÉTICOS S.A.
 natura
 
 // navy : 2014-03-06 United TLD Holdco Ltd.
@@ -9265,7 +9265,7 @@ orange
 // organic : 2014-03-27 Afilias plc
 organic
 
-// origins : 2015-10-01 The Est�e Lauder Companies Inc.
+// origins : 2015-10-01 The Estée Lauder Companies Inc.
 origins
 
 // osaka : 2014-09-04 Osaka Registry Co., Ltd.
@@ -9388,7 +9388,7 @@ plus
 // pnc : 2015-07-02 PNC Domain Co., LLC
 pnc
 
-// pohl : 2014-06-23 Deutsche Verm�gensberatung Aktiengesellschaft DVAG
+// pohl : 2014-06-23 Deutsche Vermögensberatung Aktiengesellschaft DVAG
 pohl
 
 // poker : 2014-07-03 Afilias plc
@@ -9451,7 +9451,7 @@ pwc
 // qpon : 2013-11-14 dotCOOL, Inc.
 qpon
 
-// quebec : 2013-12-19 PointQu�bec Inc
+// quebec : 2013-12-19 PointQuébec Inc
 quebec
 
 // quest : 2015-03-26 Quest ION Limited
@@ -9556,7 +9556,7 @@ rightathome
 // ril : 2015-04-02 Reliance Industries Limited
 ril
 
-// rio : 2014-02-27 Empresa Municipal de Inform�tica SA - IPLANRIO
+// rio : 2014-02-27 Empresa Municipal de Informática SA - IPLANRIO
 rio
 
 // rip : 2014-07-10 United TLD Holdco Ltd.
@@ -9706,7 +9706,7 @@ seek
 // select : 2015-10-08 iSelect Ltd
 select
 
-// sener : 2014-10-24 Sener Ingenier�a y Sistemas, S.A.
+// sener : 2014-10-24 Sener Ingeniería y Sistemas, S.A.
 sener
 
 // services : 2014-02-27 Binky Moon, LLC
@@ -9730,7 +9730,7 @@ sexy
 // sfr : 2015-08-13 Societe Francaise du Radiotelephone - SFR
 sfr
 
-// shangrila : 2015-09-03 ShangriLa International Hotel Management Limited
+// shangrila : 2015-09-03 Shangri‐La International Hotel Management Limited
 shangrila
 
 // sharp : 2014-05-01 Sharp Corporation
@@ -9784,7 +9784,7 @@ site
 // ski : 2015-04-09 Afilias plc
 ski
 
-// skin : 2015-01-15 L'Or�al
+// skin : 2015-01-15 L'Oréal
 skin
 
 // sky : 2014-06-19 Sky International AG
@@ -9802,7 +9802,7 @@ smart
 // smile : 2014-12-18 Amazon Registry Services, Inc.
 smile
 
-// sncf : 2015-02-19 Soci�t� Nationale des Chemins de fer Francais S N C F
+// sncf : 2015-02-19 Société Nationale des Chemins de fer Francais S N C F
 sncf
 
 // soccer : 2015-03-26 Binky Moon, LLC
@@ -9988,7 +9988,7 @@ tech
 // technology : 2013-09-13 Binky Moon, LLC
 technology
 
-// telefonica : 2014-10-16 Telef�nica S.A.
+// telefonica : 2014-10-16 Telefónica S.A.
 telefonica
 
 // temasek : 2014-08-07 Temasek Holdings (Private) Limited
@@ -10349,290 +10349,289 @@ xihuan
 xin
 
 // xn--11b4c3d : 2015-01-15 VeriSign Sarl
-I.
+कॉम
 
 // xn--1ck2e1b : 2015-02-26 Amazon Registry Services, Inc.
-���
+セール
 
 // xn--1qqw23a : 2014-01-09 Guangzhou YU Wei Information Technology Co., Ltd.
-[q
+佛山
 
 // xn--30rr7y : 2014-06-12 Excellent First Limited
-H�
+慈善
 
 // xn--3bst00m : 2013-09-13 Eagle Horizon Limited
-��
+集团
 
 // xn--3ds443g : 2013-09-08 TLD REGISTRY LIMITED
-(�
+在线
 
 // xn--3oq18vl8pn36a : 2015-07-02 Volkswagen (China) Investment Co., Ltd.
-'}f
+大众汽车
 
 // xn--3pxu8k : 2015-01-15 VeriSign Sarl
-�
+点看
 
 // xn--42c2d9a : 2015-01-15 VeriSign Sarl
--!
+คอม
 
 // xn--45q11c : 2013-11-21 Zodiac Gemini Ltd
-kf
+八卦
 
 // xn--4gbrim : 2013-10-04 Suhub Electronic Establishment
-EHB9
+موقع
 
 // xn--55qw42g : 2013-11-08 China Organizational Name Administration Center
-l�
+公益
 
 // xn--55qx5d : 2013-11-14 China Internet Network Information Center (CNNIC)
-l�
+公司
 
-// xn--5su34j936bgsg : 2015-09-03 ShangriLa International Hotel Management Limited
-�<��
+// xn--5su34j936bgsg : 2015-09-03 Shangri‐La International Hotel Management Limited
+香格里拉
 
 // xn--5tzm5g : 2014-12-22 Global Website TLD Asia Limited
-Q�
+网站
 
 // xn--6frz82g : 2013-09-23 Afilias plc
-��
+移动
 
 // xn--6qq986b3xl : 2013-09-13 Tycoon Treasure Limited
-1`
+我爱你
 
 // xn--80adxhks : 2013-12-19 Foundation for Assistance for Internet Technologies and Infrastructure Development (FAITID)
-<>A:20
+москва
 
 // xn--80aqecdr1a : 2015-10-21 Pontificium Consilium de Comunicationibus Socialibus (PCCS) (Pontifical Council for Social Communication)
-:0B>;8:
+католик
 
 // xn--80asehdb : 2013-07-14 CORE Association
->=;09=
+онлайн
 
 // xn--80aswg : 2013-07-14 CORE Association
-A09B
+сайт
 
 // xn--8y0a063a : 2015-03-26 China United Network Communications Corporation Limited
-T
+联通
 
 // xn--9dbq2a : 2015-01-15 VeriSign Sarl
-���
+קום
 
 // xn--9et52u : 2014-06-12 RISE VICTORY LIMITED
-�
+时尚
 
 // xn--9krt00a : 2015-03-12 Sina Corporation
-�Z
+微博
 
 // xn--b4w605ferd : 2014-08-07 Temasek Holdings (Private) Limited
-�l!
+淡马锡
 
 // xn--bck1b9a5dre4c : 2015-02-26 Amazon Registry Services, Inc.
-ա÷��
+ファッション
 
 // xn--c1avg : 2013-11-14 Public Interest Registry
->@3
+орг
 
 // xn--c2br7g : 2015-01-15 VeriSign Sarl
-(G
+नेट
 
 // xn--cck2b3b : 2015-02-26 Amazon Registry Services, Inc.
-�Ȣ
+ストア
 
 // xn--cg4bki : 2013-09-27 SAMSUNG SDS CO., LTD
-�1
+삼성
 
 // xn--czr694b : 2014-01-16 Dot Trademark TLD Holding Company Limited
-F
+商标
 
 // xn--czrs0t : 2013-12-19 Binky Moon, LLC
-F�
+商店
 
 // xn--czru2d : 2013-11-21 Zodiac Aquarius Limited
-F�
+商城
 
-// xn--d1acj3b : 2013-11-20 The Foundation for Network Initiatives The Smart Internet
-45B8
+// xn--d1acj3b : 2013-11-20 The Foundation for Network Initiatives “The Smart Internet”
+дети
 
 // xn--eckvdtc9d : 2014-12-18 Amazon Registry Services, Inc.
-ݤ��
+ポイント
 
 // xn--efvy88h : 2014-08-22 Guangzhou YU Wei Information Technology Co., Ltd.
-��
+新闻
 
 // xn--estv75g : 2015-02-19 Industrial and Commercial Bank of China Limited
-�L
+工行
 
 // xn--fct429k : 2015-04-09 Amazon Registry Services, Inc.
-��
+家電
 
 // xn--fhbei : 2015-01-15 VeriSign Sarl
-CHE
+كوم
 
 // xn--fiq228c5hs : 2013-09-08 TLD REGISTRY LIMITED
--�Q
+中文网
 
 // xn--fiq64b : 2013-10-14 CITIC Group Corporation
--�
+中信
 
 // xn--fjq720a : 2014-05-22 Binky Moon, LLC
-1P
+娱乐
 
 // xn--flw351e : 2014-07-31 Charleston Road Registry Inc.
-7L
+谷歌
 
 // xn--fzys8d69uvgm : 2015-05-14 PCCW Enterprises Limited
-�
-��
+電訊盈科
 
 // xn--g2xx48c : 2015-01-30 Minds + Machines Group Limited
--i
+购物
 
 // xn--gckr3f0f : 2015-02-26 Amazon Registry Services, Inc.
-���
+クラウド
 
 // xn--gk3at1e : 2015-10-08 Amazon Registry Services, Inc.
-�
+通販
 
 // xn--hxt814e : 2014-05-15 Zodiac Taurus Limited
-Q�
+网店
 
 // xn--i1b6b1a6a2e : 2013-11-14 Public Interest Registry
-8 (
+संगठन
 
 // xn--imr513n : 2014-12-11 Dot Trademark TLD Holding Company Limited
-�
+餐厅
 
 // xn--io0a7i : 2013-11-14 China Internet Network Information Center (CNNIC)
-Q�
+网络
 
 // xn--j1aef : 2015-01-15 VeriSign Sarl
-:><
+ком
 
 // xn--jlq61u9w7b : 2015-01-08 Nokia Corporation
-���
+诺基亚
 
 // xn--jvr189m : 2015-02-26 Amazon Registry Services, Inc.
-��
+食品
 
 // xn--kcrx77d1x4a : 2014-11-07 Koninklijke Philips N.V.
-�)f
+飞利浦
 
 // xn--kpu716f : 2014-12-22 Richemont DNS Inc.
-Kh
+手表
 
 // xn--kput3i : 2014-02-13 Beijing RITT-Net Technology Development Co., Ltd
-K:
+手机
 
 // xn--mgba3a3ejt : 2014-11-20 Aramco Services Company
-'1'ECH
+ارامكو
 
 // xn--mgba7c0bbn0a : 2015-05-14 Crescent Holding GmbH
-'D9DJ'F
+العليان
 
 // xn--mgbaakc7dvf : 2015-09-03 Emirates Telecommunications Corporation (trading as Etisalat)
-'*5'D'*
+اتصالات
 
 // xn--mgbab2bd : 2013-10-31 CORE Association
-('2'1
+بازار
 
 // xn--mgbb9fbpob : 2014-12-18 GreenTech Consultancy Company W.L.L.
-EH('JDJ
+موبايلي
 
 // xn--mgbca7dzdo : 2015-07-30 Abu Dhabi Systems and Information Centre
-'(H8(J
+ابوظبي
 
 // xn--mgbi4ecexp : 2015-10-21 Pontificium Consilium de Comunicationibus Socialibus (PCCS) (Pontifical Council for Social Communication)
-C'+HDJC
+كاثوليك
 
 // xn--mgbt3dhd : 2014-09-04 Asia Green IT System Bilgisayar San. ve Tic. Ltd. Sti.
-GE1'G
+همراه
 
 // xn--mk1bu44c : 2015-01-15 VeriSign Sarl
-��
+닷컴
 
 // xn--mxtq1m : 2014-03-06 Net-Chinese Co., Ltd.
-?�
+政府
 
 // xn--ngbc5azd : 2013-07-13 International Domain Registry Pty. Ltd.
-4(C)
+شبكة
 
 // xn--ngbe9e0a : 2014-12-04 Kuwait Finance House
-(J*C
+بيتك
 
 // xn--ngbrx : 2015-11-12 League of Arab States
-91(
+عرب
 
 // xn--nqv7f : 2013-11-14 Public Interest Registry
-:�
+机构
 
 // xn--nqv7fs00ema : 2013-11-14 Public Interest Registry
-��:�
+组织机构
 
 // xn--nyqy26a : 2014-11-07 Stable Tone Limited
-e�
+健康
 
 // xn--otu796d : 2017-08-06 Dot Trademark TLD Holding Company Limited
-�X
+招聘
 
 // xn--p1acf : 2013-12-12 Rusnames Limited
-@CA
+рус
 
 // xn--pbt977c : 2014-12-22 Richemont DNS Inc.
-��
+珠宝
 
 // xn--pssy2u : 2015-01-15 VeriSign Sarl
-'�
+大拿
 
 // xn--q9jyb4c : 2013-09-17 Charleston Road Registry Inc.
-�j
+みんな
 
 // xn--qcka1pmc : 2014-07-31 Charleston Road Registry Inc.
-����
+グーグル
 
 // xn--rhqv96g : 2013-09-11 Stable Tone Limited
-L
+世界
 
 // xn--rovu88b : 2015-02-26 Amazon Registry Services, Inc.
-�M
+書籍
 
 // xn--ses554g : 2014-01-16 KNET Co., Ltd.
-Q@
+网址
 
 // xn--t60b56a : 2015-01-15 VeriSign Sarl
-�7
+닷넷
 
 // xn--tckwe : 2015-01-15 VeriSign Sarl
-��
+コム
 
 // xn--tiq49xqyj : 2015-10-21 Pontificium Consilium de Comunicationibus Socialibus (PCCS) (Pontifical Council for Social Communication)
-);Y
+天主教
 
 // xn--unup4y : 2013-07-14 Binky Moon, LLC
-8
+游戏
 
-// xn--vermgensberater-ctb : 2014-06-23 Deutsche Verm�gensberatung Aktiengesellschaft DVAG
-verm�gensberater
+// xn--vermgensberater-ctb : 2014-06-23 Deutsche Vermögensberatung Aktiengesellschaft DVAG
+vermögensberater
 
-// xn--vermgensberatung-pwb : 2014-06-23 Deutsche Verm�gensberatung Aktiengesellschaft DVAG
-verm�gensberatung
+// xn--vermgensberatung-pwb : 2014-06-23 Deutsche Vermögensberatung Aktiengesellschaft DVAG
+vermögensberatung
 
 // xn--vhquv : 2013-08-27 Binky Moon, LLC
-
+企业
 
 // xn--vuq861b : 2014-10-16 Beijing Tele-info Network Technology Co., Ltd.
-�o
+信息
 
 // xn--w4r85el8fhu5dnra : 2015-04-30 Kerry Trading Co. Limited
-	�'R�
+嘉里大酒店
 
 // xn--w4rs40l : 2015-07-30 Kerry Trading Co. Limited
-	�
+嘉里
 
 // xn--xhq521b : 2013-11-14 Guangzhou YU Wei Information Technology Co., Ltd.
-
+广东
 
 // xn--zfr164b : 2013-11-08 China Organizational Name Administration Center
-?�
+政务
 
 // xyz : 2013-12-05 XYZ.COM LLC
 xyz
@@ -10670,7 +10669,7 @@ yun
 // zappos : 2015-06-25 Amazon Registry Services, Inc.
 zappos
 
-// zara : 2014-11-07 Industria de Dise�o Textil, S.A. (INDITEX, S.A.)
+// zara : 2014-11-07 Industria de Diseño Textil, S.A. (INDITEX, S.A.)
 zara
 
 // zero : 2014-12-18 Amazon Registry Services, Inc.
@@ -10685,7 +10684,7 @@ zippo
 // zone : 2013-11-14 Binky Moon, LLC
 zone
 
-// zuerich : 2014-11-07 Kanton Z�rich (Canton of Zurich)
+// zuerich : 2014-11-07 Kanton Zürich (Canton of Zurich)
 zuerich
 
 
@@ -10821,7 +10820,7 @@ apigee.io
 // Submitted by Thomas Orozco <thomas@aptible.com>
 on-aptible.com
 
-// Asociaci�n Amigos de la Inform�tica "Euskalamiga" : http://encounter.eus/
+// Asociación Amigos de la Informática "Euskalamiga" : http://encounter.eus/
 // Submitted by Hector Martin <marcan@euskalencounter.org>
 user.party.eus
 
@@ -11981,12 +11980,12 @@ miniserver.com
 memset.net
 
 // MetaCentrum, CESNET z.s.p.o. : https://www.metacentrum.cz/en/
-// Submitted by Zdenk `ustr <zdenek.sustr@cesnet.cz>
+// Submitted by Zdeněk Šustr <zdenek.sustr@cesnet.cz>
 cloud.metacentrum.cz
 custom.metacentrum.cz
 
 // MetaCentrum, CESNET z.s.p.o. : https://www.metacentrum.cz/en/
-// Submitted by Radim Jana <janca@cesnet.cz>
+// Submitted by Radim Janča <janca@cesnet.cz>
 flt.cloud.muni.cz
 usr.cloud.muni.cz
 
@@ -12291,7 +12290,7 @@ gotpantheon.com
 mypep.link
 
 // Planet-Work : https://www.planet-work.com/
-// Submitted by Fr�d�ric VANNI�RE <f.vanniere@planet-work.com>
+// Submitted by Frédéric VANNIÈRE <f.vanniere@planet-work.com>
 on-web.fr
 
 // Platform.sh : https://platform.sh
@@ -12373,7 +12372,7 @@ logoip.de
 logoip.com
 
 // schokokeks.org GbR : https://schokokeks.org/
-// Submitted by Hanno B�ck <hanno@schokokeks.org>
+// Submitted by Hanno Böck <hanno@schokokeks.org>
 schokokeks.net
 
 // Scry Security : http://www.scrysec.com
@@ -12502,7 +12501,7 @@ bloxcms.com
 townnews-staging.com
 
 // TrafficPlex GmbH : https://www.trafficplex.de/
-// Submitted by Phillipp R�ll <phillipp.roell@trafficplex.de>
+// Submitted by Phillipp Röll <phillipp.roell@trafficplex.de>
 12hp.at
 2ix.at
 4lima.at
