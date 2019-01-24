@@ -47,6 +47,7 @@ if [[ "$(jdk_version)" -gt "8" ]]; then
 read -r -d '' MODULES <<MODS
 java.base/java.lang.reflect
 java.base/java.lang
+java.base/java.util
 MODS
 MPATH=$(echo "$MODULES" | sed 's/\(.*\)/--add-opens \1=ALL-UNNAMED/' | tr '\n' ' ')
 else
