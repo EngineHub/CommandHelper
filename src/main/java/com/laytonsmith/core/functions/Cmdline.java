@@ -13,6 +13,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
@@ -629,7 +630,7 @@ public class Cmdline {
 			}
 			boolean mask = true;
 			if(args.length > 1) {
-				mask = Static.getBoolean(args[1], t);
+				mask = ArgumentValidation.getBoolean(args[1], t);
 			}
 
 			String prompt = args[0].val();
@@ -978,7 +979,7 @@ public class Cmdline {
 				exit = (options.containsKey("exit") && !(options.get("exit", t) instanceof CNull)
 						? Static.getObject(options.get("exit", t), t, CClosure.class) : null);
 				subshell = (options.containsKey("subshell")
-						? Static.getBoolean(options.get("subshell", t), t) : false);
+						? ArgumentValidation.getBoolean(options.get("subshell", t), t) : false);
 			} else {
 				stdout = null;
 				stderr = null;
@@ -1487,7 +1488,7 @@ public class Cmdline {
 			}
 			boolean binary = false;
 			if(args.length > 0) {
-				binary = Static.getBoolean(args[0], t);
+				binary = ArgumentValidation.getBoolean(args[0], t);
 			}
 			try {
 				if(binary) {

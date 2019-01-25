@@ -23,6 +23,7 @@ import com.laytonsmith.abstraction.enums.MCTreeType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -141,7 +142,7 @@ public class Environment {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			boolean physics = true;
 			if(args.length == 3) {
-				physics = Static.getBoolean(args[2], t);
+				physics = ArgumentValidation.getBoolean(args[2], t);
 			}
 			MCMaterial mat = StaticLayer.GetMaterial(args[1].val());
 			if(mat == null) {
@@ -260,7 +261,7 @@ public class Environment {
 			}
 			boolean physics = true;
 			if(args.length == 3) {
-				physics = Static.getBoolean(args[2], t);
+				physics = ArgumentValidation.getBoolean(args[2], t);
 			}
 			b.setBlockData(bd, physics);
 			return CVoid.VOID;
@@ -450,7 +451,7 @@ public class Environment {
 				w = l.getWorld();
 				id = args[1].val();
 				if(args.length == 3) {
-					physics = Static.getBoolean(args[2], t);
+					physics = ArgumentValidation.getBoolean(args[2], t);
 				}
 
 			} else {
@@ -464,7 +465,7 @@ public class Environment {
 						throw new CREInvalidWorldException("The specified world " + args[4].val() + " doesn't exist", t);
 					}
 					if(args.length == 6) {
-						physics = Static.getBoolean(args[5], t);
+						physics = ArgumentValidation.getBoolean(args[5], t);
 					}
 				} else if(w == null) {
 					throw new CREInvalidWorldException("No world was provided", t);
@@ -1071,7 +1072,7 @@ public class Environment {
 			boolean safe = false;
 
 			if(args.length >= 3) {
-				safe = Static.getBoolean(args[2], t);
+				safe = ArgumentValidation.getBoolean(args[2], t);
 			}
 			if(args.length >= 2) {
 				if(!(args[1] instanceof CNull)) {

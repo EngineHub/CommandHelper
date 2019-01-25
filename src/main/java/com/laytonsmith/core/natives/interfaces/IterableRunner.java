@@ -1,3 +1,8 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.laytonsmith.core.natives.interfaces;
 
 import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
@@ -7,10 +12,10 @@ import com.laytonsmith.core.constructs.CClassType;
 
 /**
  *
- * @author cailin
+ * @author caismith
  */
-@InterfaceRunnerFor(ArrayAccess.class)
-public class ArrayAccessRunner extends AbstractMixedInterfaceRunner {
+@InterfaceRunnerFor(Iterable.class)
+public class IterableRunner extends AbstractMixedInterfaceRunner {
 
 	@Override
 	public String docs() {
@@ -24,12 +29,17 @@ public class ArrayAccessRunner extends AbstractMixedInterfaceRunner {
 
 	@Override
 	public CClassType[] getSuperclasses() {
-		return new CClassType[]{Mixed.TYPE};
+		return new CClassType[]{ArrayAccess.TYPE, Sizeable.TYPE};
 	}
 
 	@Override
 	public CClassType[] getInterfaces() {
 		return CClassType.EMPTY_CLASS_ARRAY;
+	}
+
+	@Override
+	public ObjectType getObjectType() {
+		return ObjectType.INTERFACE;
 	}
 
 }

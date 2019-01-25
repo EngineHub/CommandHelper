@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Static;
@@ -742,7 +743,7 @@ public class Echoes {
 			String mes = Static.MCToANSIColors(args[0].val());
 			boolean prefix = true;
 			if(args.length > 1) {
-				prefix = Static.getBoolean(args[1], t);
+				prefix = ArgumentValidation.getBoolean(args[1], t);
 			}
 			if(prefix) {
 				mes = "CommandHelper: " + mes;

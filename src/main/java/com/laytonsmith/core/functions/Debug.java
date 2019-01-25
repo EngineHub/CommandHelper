@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptFileLocations;
@@ -351,7 +352,7 @@ public class Debug {
 //			if(!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //				throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //			}
-//			boolean on = Static.getBoolean(args[0]);
+//			boolean on = ArgumentValidation.getBoolean(args[0]);
 //			int level = 1;
 //			if(args.length >= 2){
 //				level = Static.Normalize(Static.getInt32(args[1]), 1, 5);
@@ -359,7 +360,7 @@ public class Debug {
 //			Debug.EVENT_LOGGING = on;
 //			Debug.EVENT_LOGGING_LEVEL = level;
 //			if(args.length >= 3){
-//				Debug.LOG_TO_SCREEN = Static.getBoolean(args[2]);
+//				Debug.LOG_TO_SCREEN = ArgumentValidation.getBoolean(args[2]);
 //			}
 //			return CVoid.VOID;
 //		}
@@ -620,7 +621,7 @@ public class Debug {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			Script.debugOutput = Static.getBoolean(args[0], t);
+			Script.debugOutput = ArgumentValidation.getBoolean(args[0], t);
 			if(Script.debugOutput) {
 				StreamUtils.GetSystemOut().println(TermColors.BG_RED + "[[DEBUG]] set_debug_output(true)"
 						+ TermColors.RESET);

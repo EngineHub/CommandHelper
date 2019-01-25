@@ -104,7 +104,7 @@ public class InventoryEvents {
 
 				if(prefilter.containsKey("virtual")) {
 					boolean isVirtual = e.getInventory().getHolder() instanceof MCVirtualInventoryHolder;
-					if(isVirtual != Static.getBoolean(prefilter.get("virtual"), Target.UNKNOWN)) {
+					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN)) {
 						return false;
 					}
 				}
@@ -246,7 +246,7 @@ public class InventoryEvents {
 
 				if(prefilter.containsKey("virtual")) {
 					boolean isVirtual = e.getInventory().getHolder() instanceof MCVirtualInventoryHolder;
-					if(isVirtual != Static.getBoolean(prefilter.get("virtual"), Target.UNKNOWN)) {
+					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN)) {
 						return false;
 					}
 				}
@@ -361,7 +361,7 @@ public class InventoryEvents {
 				MCInventoryOpenEvent e = (MCInventoryOpenEvent) event;
 				if(prefilter.containsKey("virtual")) {
 					boolean isVirtual = e.getInventory().getHolder() instanceof MCVirtualInventoryHolder;
-					if(isVirtual != Static.getBoolean(prefilter.get("virtual"), Target.UNKNOWN)) {
+					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN)) {
 						return false;
 					}
 				}
@@ -443,7 +443,7 @@ public class InventoryEvents {
 				MCInventoryCloseEvent e = (MCInventoryCloseEvent) event;
 				if(prefilter.containsKey("virtual")) {
 					boolean isVirtual = e.getInventory().getHolder() instanceof MCVirtualInventoryHolder;
-					if(isVirtual != Static.getBoolean(prefilter.get("virtual"), Target.UNKNOWN)) {
+					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN)) {
 						return false;
 					}
 				}

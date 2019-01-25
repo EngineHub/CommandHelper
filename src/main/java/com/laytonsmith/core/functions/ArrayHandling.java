@@ -47,6 +47,7 @@ import com.laytonsmith.core.functions.BasicLogic.equals_ic;
 import com.laytonsmith.core.functions.BasicLogic.sequals;
 import com.laytonsmith.core.functions.DataHandling.array;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.Iterator;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -225,7 +226,8 @@ public class ArrayHandling {
 					}
 				}
 			} else if(args[0] instanceof ArrayAccess) {
-				ArrayAccess aa = (ArrayAccess) args[0];
+				com.laytonsmith.core.natives.interfaces.Iterable aa
+						= (com.laytonsmith.core.natives.interfaces.Iterable) args[0];
 				if(index instanceof CSlice) {
 					//It's a range
 					int start = (int) ((CSlice) index).getStart();
@@ -441,7 +443,7 @@ public class ArrayHandling {
 				int initialSize = (int) array.size();
 				for(int i = 1; i < args.length; i++) {
 					array.push(args[i], t);
-					for(ArrayAccess.ArrayAccessIterator iterator : env.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(((ArrayAccess) args[0]))) {
+					for(Iterator iterator : env.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(((ArrayAccess) args[0]))) {
 						//This is always pushing after the current index.
 						//Given that this is the last one, we don't need to waste
 						//time with a call to increment the blacklist items either.
@@ -529,7 +531,7 @@ public class ArrayHandling {
 				array.push(value, index, t);
 				//If the push succeeded (actually an insert) we need to check to see if we are currently iterating
 				//and act appropriately.
-				for(ArrayAccess.ArrayAccessIterator iterator : environment.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)) {
+				for(Iterator iterator : environment.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)) {
 					if(index <= iterator.getCurrent()) {
 						//The insertion happened before (or at) this index, so we need to increment the
 						//iterator, as well as increment all the blacklist items above this one.
@@ -1231,7 +1233,8 @@ public class ArrayHandling {
 			}
 			for(Mixed arg : args) {
 				if(arg instanceof ArrayAccess) {
-					ArrayAccess cur = (ArrayAccess) arg;
+					com.laytonsmith.core.natives.interfaces.Iterable cur
+							= (com.laytonsmith.core.natives.interfaces.Iterable) arg;
 					if(!cur.isAssociative()) {
 						for(int j = 0; j < cur.size(); j++) {
 							newArray.push(cur.get(j, t), t);
@@ -1316,7 +1319,7 @@ public class ArrayHandling {
 				int index = Static.getInt32(args[1], t);
 				Mixed removed = array.remove(args[1]);
 				//If the removed index is <= the current index, we need to decrement the counter.
-				for(ArrayAccess.ArrayAccessIterator iterator : environment.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)) {
+				for(Iterator iterator : environment.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)) {
 					if(index <= iterator.getCurrent()) {
 						iterator.decrementCurrent();
 					}
@@ -2109,7 +2112,7 @@ public class ArrayHandling {
 				throw new CRERangeException("Overflow detected. Number cannot be larger than " + Integer.MAX_VALUE, t);
 			}
 			if(args.length > 2) {
-				getKeys = Static.getBoolean(args[2], t);
+				getKeys = ArgumentValidation.getBoolean(args[2], t);
 			}
 
 			LinkedHashSet<Integer> randoms = new LinkedHashSet<>();
@@ -2200,7 +2203,7 @@ public class ArrayHandling {
 			CArray array = Static.getArray(args[0], t);
 			boolean compareTypes = true;
 			if(args.length == 2) {
-				compareTypes = Static.getBoolean(args[1], t);
+				compareTypes = ArgumentValidation.getBoolean(args[1], t);
 			}
 			final boolean fCompareTypes = compareTypes;
 			if(array.inAssociativeMode()) {
@@ -2212,8 +2215,8 @@ public class ArrayHandling {
 
 					@Override
 					public boolean checkIfEquals(Mixed item1, Mixed item2) {
-						return (fCompareTypes && Static.getBoolean(sequals.exec(t, environment, item1, item2), t))
-								|| (!fCompareTypes && Static.getBoolean(equals.exec(t, environment, item1, item2), t));
+						return (fCompareTypes && ArgumentValidation.getBoolean(sequals.exec(t, environment, item1, item2), t))
+								|| (!fCompareTypes && ArgumentValidation.getBoolean(equals.exec(t, environment, item1, item2), t));
 					}
 				});
 				for(Mixed c : set) {
@@ -2284,15 +2287,15 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			ArrayAccess array;
+			com.laytonsmith.core.natives.interfaces.Iterable array;
 			CClosure closure;
-			if(!(args[0] instanceof ArrayAccess)) {
+			if(!(args[0] instanceof com.laytonsmith.core.natives.interfaces.Iterable)) {
 				throw new CRECastException("Expecting an array for argument 1", t);
 			}
 			if(!(args[1] instanceof CClosure)) {
 				throw new CRECastException("Expecting a closure for argument 2", t);
 			}
-			array = (ArrayAccess) args[0];
+			array = (com.laytonsmith.core.natives.interfaces.Iterable) args[0];
 			closure = (CClosure) args[1];
 			CArray newArray;
 			if(array.isAssociative()) {
@@ -2308,7 +2311,7 @@ public class ArrayHandling {
 					if(ret == null) {
 						ret = CBoolean.FALSE;
 					}
-					boolean bret = Static.getBoolean(ret, t);
+					boolean bret = ArgumentValidation.getBoolean(ret, t);
 					if(bret) {
 						newArray.set(key, value, t);
 					}
@@ -2327,7 +2330,7 @@ public class ArrayHandling {
 					if(ret == null) {
 						ret = CBoolean.FALSE;
 					}
-					boolean bret = Static.getBoolean(ret, t);
+					boolean bret = ArgumentValidation.getBoolean(ret, t);
 					if(bret) {
 						newArray.push(value, t);
 					}
@@ -2810,7 +2813,7 @@ public class ArrayHandling {
 					closure.execute(array.get(c, t));
 				} catch (FunctionReturnException ex) {
 					hasReturn = true;
-					boolean ret = Static.getBoolean(ex.getReturn(), t);
+					boolean ret = ArgumentValidation.getBoolean(ex.getReturn(), t);
 					if(ret == false) {
 						return CBoolean.FALSE;
 					}
@@ -2891,7 +2894,7 @@ public class ArrayHandling {
 					closure.execute(array.get(c, t));
 				} catch (FunctionReturnException ex) {
 					hasReturn = true;
-					boolean ret = Static.getBoolean(ex.getReturn(), t);
+					boolean ret = ArgumentValidation.getBoolean(ex.getReturn(), t);
 					if(ret == true) {
 						return CBoolean.TRUE;
 					}
@@ -3111,7 +3114,7 @@ public class ArrayHandling {
 						} else {
 							if(closure == null) {
 								if(comparisonFunction != null) {
-									if(Static.getBoolean(comparisonFunction.exec(t, environment,
+									if(ArgumentValidation.getBoolean(comparisonFunction.exec(t, environment,
 											one.get(k1[i], t), two.get(k2[j], t)
 									), t)) {
 										ret.push(one.get(k1[i], t), t);
@@ -3126,7 +3129,7 @@ public class ArrayHandling {
 									throw new CRECastException("The closure passed to " + getName() + " must return a"
 											+ " boolean value", t);
 								} catch (FunctionReturnException fre) {
-									boolean res = Static.getBoolean(fre.getReturn(), fre.getTarget());
+									boolean res = ArgumentValidation.getBoolean(fre.getReturn(), fre.getTarget());
 									if(res) {
 										ret.push(one.get(k1[i], t), t);
 										continue i;

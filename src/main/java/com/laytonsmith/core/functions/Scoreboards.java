@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.enums.MCDisplaySlot;
 import com.laytonsmith.abstraction.enums.MCOption;
 import com.laytonsmith.abstraction.enums.MCOptionStatus;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.NotInitializedYetException;
@@ -920,7 +921,7 @@ public class Scoreboards {
 			String id = args[0].val();
 			boolean nullify = true;
 			if(args.length == 2) {
-				nullify = Static.getBoolean(args[1], t);
+				nullify = ArgumentValidation.getBoolean(args[1], t);
 			}
 			if(nullify) {
 				MCScoreboard s = getBoard(id, t);
@@ -1175,10 +1176,10 @@ public class Scoreboards {
 			if(args[1] instanceof CArray) {
 				CArray options = (CArray) args[1];
 				if(options.containsKey("friendlyfire")) {
-					team.setAllowFriendlyFire(Static.getBoolean(options.get("friendlyfire", t), t));
+					team.setAllowFriendlyFire(ArgumentValidation.getBoolean(options.get("friendlyfire", t), t));
 				}
 				if(options.containsKey("friendlyinvisibles")) {
-					team.setCanSeeFriendlyInvisibles(Static.getBoolean(options.get("friendlyinvisibles", t), t));
+					team.setCanSeeFriendlyInvisibles(ArgumentValidation.getBoolean(options.get("friendlyinvisibles", t), t));
 				}
 				if(options.containsKey("nametagvisibility")) {
 					MCOptionStatus namevisibility;

@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
@@ -86,7 +87,7 @@ public class Performance {
 			if(!Prefs.AllowProfiling()) {
 				throw new CRESecurityException("allow-profiling is currently off, you must set it to true in your preferences.", t);
 			}
-			performanceLogging = Static.getBoolean(args[0], t);
+			performanceLogging = ArgumentValidation.getBoolean(args[0], t);
 			return CVoid.VOID;
 		}
 

@@ -3,6 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
@@ -15,7 +16,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.ArrayHandling;
 import com.laytonsmith.core.functions.BasicLogic;
 import com.laytonsmith.core.functions.DataHandling;
-import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -39,7 +40,8 @@ import java.util.TreeMap;
  * methods in this class, you need only to override the non-final ones for the same effect.
  */
 @typeof("ms.lang.array")
-public class CArray extends Construct implements ArrayAccess, Iterable<Mixed> {
+public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
+		com.laytonsmith.core.natives.interfaces.Iterable {
 
 	public static final CClassType TYPE = CClassType.get("ms.lang.array");
 	private boolean associativeMode = false;
@@ -887,11 +889,11 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Mixed> {
 					}
 				}
 				if(o1 instanceof CBoolean || o2 instanceof CBoolean) {
-					if(Static.getBoolean(o1, Target.UNKNOWN) == Static.getBoolean(o2, Target.UNKNOWN)) {
+					if(ArgumentValidation.getBoolean(o1, Target.UNKNOWN) == ArgumentValidation.getBoolean(o2, Target.UNKNOWN)) {
 						return 0;
 					} else {
-						int oo1 = Static.getBoolean(o1, Target.UNKNOWN) ? 1 : 0;
-						int oo2 = Static.getBoolean(o2, Target.UNKNOWN) ? 1 : 0;
+						int oo1 = ArgumentValidation.getBoolean(o1, Target.UNKNOWN) ? 1 : 0;
+						int oo2 = ArgumentValidation.getBoolean(o2, Target.UNKNOWN) ? 1 : 0;
 						return (oo1 < oo2) ? -1 : 1;
 					}
 				}
@@ -910,13 +912,13 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Mixed> {
 			}
 
 			public int compareRegular(Mixed o1, Mixed o2) {
-				if(Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1), Target.UNKNOWN)
-						&& Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2), Target.UNKNOWN)) {
+				if(ArgumentValidation.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1), Target.UNKNOWN)
+						&& ArgumentValidation.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2), Target.UNKNOWN)) {
 					return compareNumeric(o1, o2);
-				} else if(Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1), Target.UNKNOWN)) {
+				} else if(ArgumentValidation.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1), Target.UNKNOWN)) {
 					//The first is a number, the second is a string
 					return -1;
-				} else if(Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2), Target.UNKNOWN)) {
+				} else if(ArgumentValidation.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2), Target.UNKNOWN)) {
 					//The second is a number, the first is a string
 					return 1;
 				} else {
@@ -964,7 +966,12 @@ public class CArray extends Construct implements ArrayAccess, Iterable<Mixed> {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{ArrayAccess.TYPE};
+		return new CClassType[]{Booleanish.TYPE, com.laytonsmith.core.natives.interfaces.Iterable.TYPE};
+	}
+
+	@Override
+	public boolean getBooleanValue(Target t) {
+		return size() > 0;
 	}
 
 }

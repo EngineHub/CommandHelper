@@ -72,4 +72,9 @@ public class CDouble extends CNumber implements Cloneable {
 		return new CDouble(val, getTarget());
 	}
 
+	@Override
+	public double getNumber() {
+		return val;
+	}
+
 }

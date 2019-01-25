@@ -5,8 +5,8 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
@@ -155,7 +155,7 @@ public class CmdlineEvents {
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
 			CmdlinePromptInput cpi = new CmdlinePromptInput(manualObject.get("command", t).val(),
-					Static.getBoolean(manualObject.get("shellMode", t), t));
+					ArgumentValidation.getBoolean(manualObject.get("shellMode", t), t));
 			return cpi;
 		}
 

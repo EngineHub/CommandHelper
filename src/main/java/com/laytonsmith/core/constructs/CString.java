@@ -2,12 +2,12 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.ObjectType;
 import java.util.AbstractSet;
@@ -19,7 +19,8 @@ import java.util.Set;
  *
  */
 @typeof("ms.lang.string")
-public class CString extends CPrimitive implements Cloneable, ArrayAccess {
+public class CString extends CPrimitive implements Cloneable,
+		com.laytonsmith.core.natives.interfaces.Iterable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get("ms.lang.string");
@@ -156,7 +157,7 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{ArrayAccess.TYPE};
+		return new CClassType[]{com.laytonsmith.core.natives.interfaces.Iterable.TYPE};
 	}
 
 	@Override
@@ -167,5 +168,15 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 	@Override
 	public CString duplicate() {
 		return new CString(val(), getTarget());
+	}
+
+	@Override
+	public boolean getBooleanValue(Target t) {
+		if(val().equals("false")) {
+			CHLog.GetLogger().e(CHLog.Tags.FALSESTRING, "String \"false\" evaluates as true (non-empty strings are"
+					+ " true). This is most likely not what you meant to do. This warning can globally be disabled"
+					+ " with the logger-preferences.ini file.", t);
+		}
+		return val().length() > 0;
 	}
 }

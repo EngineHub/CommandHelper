@@ -4,11 +4,11 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -374,7 +374,7 @@ public class EventBinding {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			boolean cancelled = true;
 			if(args.length == 1) {
-				cancelled = Static.getBoolean(args[0], t);
+				cancelled = ArgumentValidation.getBoolean(args[0], t);
 			}
 
 			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
@@ -496,7 +496,7 @@ public class EventBinding {
 			}
 			boolean serverWide = false;
 			if(args.length == 3) {
-				serverWide = Static.getBoolean(args[2], t);
+				serverWide = ArgumentValidation.getBoolean(args[2], t);
 			}
 			EventUtils.ManualTrigger(args[0].val(), obj, t, serverWide);
 			return CVoid.VOID;
@@ -557,7 +557,7 @@ public class EventBinding {
 			Mixed value = args[1];
 			boolean throwOnFailure = false;
 			if(args.length == 3) {
-				throwOnFailure = Static.getBoolean(args[3], t);
+				throwOnFailure = ArgumentValidation.getBoolean(args[3], t);
 			}
 			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException(this.getName() + " must be called from within an event handler", t);

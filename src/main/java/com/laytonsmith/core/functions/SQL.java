@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
@@ -202,7 +203,7 @@ public class SQL {
 							} else if(params[i] instanceof CByteArray) {
 								ps.setBytes(i + 1, ((CByteArray) params[i]).asByteArrayCopy());
 							} else if(params[i] instanceof CBoolean) {
-								ps.setBoolean(i + 1, Static.getBoolean(params[i], t));
+								ps.setBoolean(i + 1, ArgumentValidation.getBoolean(params[i], t));
 							} else {
 								throw new CRECastException("The type " + params[i].getClass().getSimpleName()
 										+ " of parameter " + (i + 1) + " is not supported.", t);

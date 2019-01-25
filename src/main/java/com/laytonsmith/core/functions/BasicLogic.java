@@ -82,7 +82,7 @@ public class BasicLogic {
 				__else = nodes[2];
 			}
 
-			if(Static.getBoolean(parent.seval(condition, env), t)) {
+			if(ArgumentValidation.getBoolean(parent.seval(condition, env), t)) {
 				return parent.seval(__if, env);
 			} else {
 				if(__else == null) {
@@ -155,7 +155,7 @@ public class BasicLogic {
 			}
 			if(args.get(0).isConst()) {
 				// We can optimize this one way or the other, since the condition is const
-				if(Static.getBoolean(args.get(0).getData(), t)) {
+				if(ArgumentValidation.getBoolean(args.get(0).getData(), t)) {
 					// It's true, return the true condition
 					return args.get(1);
 				} else // If there are three args, return the else condition, otherwise,
@@ -271,7 +271,7 @@ public class BasicLogic {
 				if(evalStatement instanceof CIdentifier) {
 					evalStatement = parent.seval(((CIdentifier) evalStatement).contained(), env);
 				}
-				if(Static.getBoolean(evalStatement, t)) {
+				if(ArgumentValidation.getBoolean(evalStatement, t)) {
 					Mixed ret = env.getEnv(GlobalEnv.class).GetScript().eval(code, env);
 					return ret;
 				}
@@ -796,8 +796,8 @@ public class BasicLogic {
 			if(Static.anyBooleans(args)) {
 				boolean equals = true;
 				for(int i = 1; i < args.length; i++) {
-					boolean arg1 = Static.getBoolean(args[i - 1], t);
-					boolean arg2 = Static.getBoolean(args[i], t);
+					boolean arg1 = ArgumentValidation.getBoolean(args[i - 1], t);
+					boolean arg2 = ArgumentValidation.getBoolean(args[i], t);
 					if(arg1 != arg2) {
 						equals = false;
 						break;
@@ -1136,8 +1136,8 @@ public class BasicLogic {
 			if(Static.anyBooleans(args)) {
 				boolean equals = true;
 				for(int i = 1; i < args.length; i++) {
-					boolean arg1 = Static.getBoolean(args[i - 1], t);
-					boolean arg2 = Static.getBoolean(args[i], t);
+					boolean arg1 = ArgumentValidation.getBoolean(args[i - 1], t);
+					boolean arg2 = ArgumentValidation.getBoolean(args[i], t);
 					if(arg1 != arg2) {
 						equals = false;
 						break;
@@ -1681,7 +1681,7 @@ public class BasicLogic {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
 			for(Mixed c : args) {
-				if(!Static.getBoolean(c, t)) {
+				if(!ArgumentValidation.getBoolean(c, t)) {
 					return CBoolean.FALSE;
 				}
 			}
@@ -1692,7 +1692,7 @@ public class BasicLogic {
 		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for(ParseTree tree : nodes) {
 				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				boolean b = Static.getBoolean(c, t);
+				boolean b = ArgumentValidation.getBoolean(c, t);
 				if(b == false) {
 					return CBoolean.FALSE;
 				}
@@ -1749,7 +1749,7 @@ public class BasicLogic {
 					continue;
 				}
 				if(child.isConst()) {
-					if(Static.getBoolean(child.getData(), t) == true) {
+					if(ArgumentValidation.getBoolean(child.getData(), t) == true) {
 						it.remove();
 					} else {
 						foundFalse = true;
@@ -1773,7 +1773,7 @@ public class BasicLogic {
 //			}
 			// At this point, it could be that there are some conditions with side effects, followed by a final false. However,
 			// if false is the only remaining condition (which could be) then we can simply return false here.
-			if(children.size() == 1 && children.get(0).isConst() && Static.getBoolean(children.get(0).getData(), t) == false) {
+			if(children.size() == 1 && children.get(0).isConst() && ArgumentValidation.getBoolean(children.get(0).getData(), t) == false) {
 				return new ParseTree(CBoolean.FALSE, fileOptions);
 			}
 			if(children.isEmpty()) {
@@ -1830,7 +1830,7 @@ public class BasicLogic {
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for(ParseTree tree : nodes) {
 				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if(!Static.getBoolean(c, t)) {
+				if(!ArgumentValidation.getBoolean(c, t)) {
 					return c;
 				}
 			}
@@ -1854,7 +1854,7 @@ public class BasicLogic {
 					continue;
 				}
 				if(child.isConst()) {
-					if(Static.getBoolean(child.getData(), t) == true) {
+					if(ArgumentValidation.getBoolean(child.getData(), t) == true) {
 						it.remove();
 					} else {
 						foundFalse = true;
@@ -1878,7 +1878,7 @@ public class BasicLogic {
 //			}
 			// At this point, it could be that there are some conditions with side effects, followed by a final false. However,
 			// if false is the only remaining condition (which could be) then we can simply return false here.
-			if(children.size() == 1 && children.get(0).isConst() && Static.getBoolean(children.get(0).getData(), t) == false) {
+			if(children.size() == 1 && children.get(0).isConst() && ArgumentValidation.getBoolean(children.get(0).getData(), t) == false) {
 				return new ParseTree(children.get(0).getData(), fileOptions);
 			}
 			if(children.isEmpty()) {
@@ -1937,7 +1937,7 @@ public class BasicLogic {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
 			for(Mixed c : args) {
-				if(Static.getBoolean(c, t)) {
+				if(ArgumentValidation.getBoolean(c, t)) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -1948,7 +1948,7 @@ public class BasicLogic {
 		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for(ParseTree tree : nodes) {
 				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if(Static.getBoolean(c, t)) {
+				if(ArgumentValidation.getBoolean(c, t)) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -2004,7 +2004,7 @@ public class BasicLogic {
 					continue;
 				}
 				if(child.isConst()) {
-					if(Static.getBoolean(child.getData(), t) == false) {
+					if(ArgumentValidation.getBoolean(child.getData(), t) == false) {
 						it.remove();
 					} else {
 						foundTrue = true;
@@ -2028,7 +2028,7 @@ public class BasicLogic {
 //			}
 			// At this point, it could be that there are some conditions with side effects, followed by a final true. However,
 			// if true is the only remaining condition (which could be) then we can simply return true here.
-			if(children.size() == 1 && children.get(0).isConst() && Static.getBoolean(children.get(0).getData(), t) == true) {
+			if(children.size() == 1 && children.get(0).isConst() && ArgumentValidation.getBoolean(children.get(0).getData(), t) == true) {
 				return new ParseTree(CBoolean.TRUE, fileOptions);
 			}
 			if(children.isEmpty()) {
@@ -2085,7 +2085,7 @@ public class BasicLogic {
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for(ParseTree tree : nodes) {
 				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if(Static.getBoolean(c, t)) {
+				if(ArgumentValidation.getBoolean(c, t)) {
 					return c;
 				}
 			}
@@ -2109,7 +2109,7 @@ public class BasicLogic {
 					continue;
 				}
 				if(child.isConst()) {
-					if(Static.getBoolean(child.getData(), t) == false) {
+					if(ArgumentValidation.getBoolean(child.getData(), t) == false) {
 						it.remove();
 					} else {
 						foundTrue = true;
@@ -2133,7 +2133,7 @@ public class BasicLogic {
 //			}
 			// At this point, it could be that there are some conditions with side effects, followed by a final true. However,
 			// if true is the only remaining condition (which could be) then we can simply return true here.
-			if(children.size() == 1 && children.get(0).isConst() && Static.getBoolean(children.get(0).getData(), t) == true) {
+			if(children.size() == 1 && children.get(0).isConst() && ArgumentValidation.getBoolean(children.get(0).getData(), t) == true) {
 				return new ParseTree(children.get(0).getData(), fileOptions);
 			}
 			if(children.isEmpty()) {
@@ -2199,7 +2199,7 @@ public class BasicLogic {
 			if(args.length != 1) {
 				throw new CREFormatException(this.getName() + " expects 1 argument.", t);
 			}
-			return CBoolean.get(!Static.getBoolean(args[0], t));
+			return CBoolean.get(!ArgumentValidation.getBoolean(args[0], t));
 		}
 
 		@Override
@@ -2288,8 +2288,8 @@ public class BasicLogic {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			boolean val1 = Static.getBoolean(args[0], t);
-			boolean val2 = Static.getBoolean(args[1], t);
+			boolean val1 = ArgumentValidation.getBoolean(args[0], t);
+			boolean val2 = ArgumentValidation.getBoolean(args[1], t);
 			return CBoolean.get(val1 ^ val2);
 		}
 

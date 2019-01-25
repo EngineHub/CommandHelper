@@ -43,6 +43,7 @@ import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.AliasCore;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptComplete;
@@ -364,25 +365,25 @@ public class StaticTest {
 	}
 
 	/**
-	 * Verifies that the given construct <em>resolves</em> to true. The resolution uses Static.getBoolean to do the
+	 * Verifies that the given construct <em>resolves</em> to true. The resolution uses ArgumentValidation.getBoolean to do the
 	 * resolution.
 	 *
 	 * @param actual
 	 */
 	public static void assertCTrue(Mixed actual) {
-		if(!Static.getBoolean(actual, Target.UNKNOWN)) {
+		if(!ArgumentValidation.getBoolean(actual, Target.UNKNOWN)) {
 			fail("Expected '" + actual.val() + "' to resolve to true, but it did not");
 		}
 	}
 
 	/**
-	 * Verifies that the given construct <em>resolves</em> to false. The resolution uses Static.getBoolean to do the
+	 * Verifies that the given construct <em>resolves</em> to false. The resolution uses ArgumentValidation.getBoolean to do the
 	 * resolution.
 	 *
 	 * @param actual
 	 */
 	public static void assertCFalse(Mixed actual) {
-		if(Static.getBoolean(actual, Target.UNKNOWN)) {
+		if(ArgumentValidation.getBoolean(actual, Target.UNKNOWN)) {
 			fail("Expected '" + actual.val() + "' to resolve to false, but it did not");
 		}
 	}

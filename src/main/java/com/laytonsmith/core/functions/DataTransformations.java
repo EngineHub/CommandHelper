@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -168,7 +169,7 @@ public class DataTransformations {
 			CArray ca = Static.getArray(args[0], t);
 			boolean prettyPrint = false;
 			if(args.length == 2) {
-				prettyPrint = Static.getBoolean(args[1], t);
+				prettyPrint = ArgumentValidation.getBoolean(args[1], t);
 			}
 			DumperOptions options = new DumperOptions();
 			if(prettyPrint) {

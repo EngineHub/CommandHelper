@@ -70,4 +70,10 @@ public class CInt extends CNumber implements Cloneable {
 	public CInt duplicate() {
 		return new CInt(val, getTarget());
 	}
+
+	@Override
+	public double getNumber() {
+		return (double) val;
+	}
+
 }

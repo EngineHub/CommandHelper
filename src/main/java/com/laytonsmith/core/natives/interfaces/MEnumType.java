@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  * automatically added to the ecosystem, however.
  */
 @typeof("ms.lang.enum")
-public abstract class MEnumType implements Mixed, ArrayAccess {
+public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.interfaces.Iterable {
 
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
@@ -393,7 +393,7 @@ public abstract class MEnumType implements Mixed, ArrayAccess {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return CClassType.EMPTY_CLASS_ARRAY;
+		return new CClassType[]{Iterable.TYPE};
 	}
 
 	@Override

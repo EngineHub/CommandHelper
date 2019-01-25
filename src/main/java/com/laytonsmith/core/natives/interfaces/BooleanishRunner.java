@@ -1,3 +1,8 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.laytonsmith.core.natives.interfaces;
 
 import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
@@ -7,19 +12,17 @@ import com.laytonsmith.core.constructs.CClassType;
 
 /**
  *
- * @author cailin
  */
-@InterfaceRunnerFor(ArrayAccess.class)
-public class ArrayAccessRunner extends AbstractMixedInterfaceRunner {
-
+@InterfaceRunnerFor(Booleanish.class)
+public class BooleanishRunner extends AbstractMixedInterfaceRunner {
 	@Override
 	public String docs() {
-		return "Provides access to an object using the square bracket notation.";
+		return "A value that is Booleanish is a non-boolean value, that can be converted to boolean.";
 	}
 
 	@Override
 	public Version since() {
-		return MSVersion.V3_3_1;
+		return MSVersion.V3_3_4;
 	}
 
 	@Override
@@ -32,4 +35,8 @@ public class ArrayAccessRunner extends AbstractMixedInterfaceRunner {
 		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 
+	@Override
+	public ObjectType getObjectType() {
+		return ObjectType.INTERFACE;
+	}
 }

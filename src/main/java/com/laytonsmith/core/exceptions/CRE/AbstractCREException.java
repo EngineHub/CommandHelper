@@ -196,11 +196,6 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	}
 
 	@Override
-	public long size() {
-		return exceptionObject.size();
-	}
-
-	@Override
 	public boolean isAssociative() {
 		return exceptionObject.isAssociative();
 	}

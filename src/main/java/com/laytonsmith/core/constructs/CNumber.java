@@ -39,4 +39,10 @@ public abstract class CNumber extends CPrimitive {
 		return MSVersion.V3_0_1;
 	}
 
+	public abstract double getNumber();
+
+	@Override
+	public boolean getBooleanValue(Target t) {
+		return getNumber() != 0.0;
+	}
 }

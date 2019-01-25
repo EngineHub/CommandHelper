@@ -19,7 +19,7 @@ import com.laytonsmith.core.constructs.CNumber;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.regex.Pattern;
@@ -112,6 +112,7 @@ public final class ArgumentValidation {
 	 * @return
 	 */
 	public static double getNumber(Mixed c, Target t) {
+		// TODO: Formalize this in the same way that Booleanish is formalized.
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
@@ -119,10 +120,8 @@ public final class ArgumentValidation {
 		if(c == null || c instanceof CNull) {
 			return 0.0;
 		}
-		if(c instanceof CInt) {
-			d = ((CInt) c).getInt();
-		} else if(c instanceof CDouble) {
-			d = ((CDouble) c).getDouble();
+		if(c instanceof CNumber) {
+			d = ((CNumber) c).getNumber();
 		} else if(c instanceof CString) {
 			try {
 				d = Double.parseDouble(c.val());
@@ -320,37 +319,55 @@ public final class ArgumentValidation {
 	}
 
 	/**
-	 * Returns a boolean from any given construct. Depending on the type of the construct being converted, it follows
-	 * the following rules: If it is an integer or a double, it is false if 0, true otherwise. If it is a string, array,
-	 * or other ArrayAccess value, if it is empty, it is false, otherwise it is true.
+	 * <s>Returns a the boolean value from the underlying CBoolean, or throws a CastException if the underlying type is
+	 * not a CBoolean.</s>
+	 * <p>
+	 * Until auto cross casting is implemented, this has the same behavior as {@link #getBooleanish}, however, once
+	 * strong typing is implemented, this will have the behavior described above. In the meantime, if you truly wish
+	 * to validate the type, use {@link #getObject(Mixed, Target, Class)}
+	 * @param c
+	 * @param t
+	 * @return
+	 */
+	public static boolean getBooleanObject(Mixed c, Target t) {
+		return getBooleanish(c, t);
+	}
+
+	/**
+	 * Currently forwards the call to
+	 * {@link #getBooleanish},
+	 * to keep backwards compatible behavior, but will be removed in a future release. Explicitely use either
+	 * {@link #getBooleanish} or {@link #getBooleanObject}.
+	 * @param c
+	 * @param t
+	 * @return
+	 * @deprecated Use {@link #getBooleanish} for current behavior, or {@link #getBooleanObject} for strict behavior.
+	 */
+	@Deprecated
+	public static boolean getBoolean(Mixed c, Target t) {
+		return getBooleanish(c, t);
+	}
+
+	/**
+	 * Returns a boolean from any given construct. Depending on the type of the construct being converted, it will
+	 * return true or false. For actual booleans, the value is returned, but for Booleanish values, the value itself
+	 * determines the rules for if it is determined to be trueish or falseish.
 	 *
 	 * @param c
 	 * @param t
 	 * @return
 	 */
-	public static boolean getBoolean(Mixed c, Target t) {
+	public static boolean getBooleanish(Mixed c, Target t) {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
-		boolean b = false;
 		if(c == null) {
 			return false;
 		}
-		if(c instanceof CBoolean) {
-			b = ((CBoolean) c).getBoolean();
-		} else if(c instanceof CString) {
-			if(((CString) c).val().equals("false")) {
-				CHLog.GetLogger().e(CHLog.Tags.FALSESTRING, "String \"false\" evaluates as true (non-empty strings are"
-						+ " true). This is most likely not what you meant to do. This warning can globally be disabled"
-						+ " with the logger-preferences.ini file.", t);
-			}
-			b = (c.val().length() > 0);
-		} else if(c instanceof CInt || c instanceof CDouble) {
-			b = !(getNumber(c, t) == 0);
-		} else if(c instanceof ArrayAccess) {
-			b = !(((ArrayAccess) c).size() == 0);
+		if(c instanceof Booleanish) {
+			return ((Booleanish) c).getBooleanValue(t);
 		}
-		return b;
+		throw new CRECastException("Could not convert value of type " + c.typeof() + " to a " + Booleanish.TYPE, t);
 	}
 
 	/**

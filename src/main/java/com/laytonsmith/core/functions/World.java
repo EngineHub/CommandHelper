@@ -1241,7 +1241,7 @@ public class World {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			boolean save = true;
 			if(args.length == 2) {
-				save = Static.getBoolean(args[1], t);
+				save = ArgumentValidation.getBoolean(args[1], t);
 			}
 			MCWorld world = Static.getServer().getWorld(args[0].val());
 			if(world == null) {
@@ -1479,7 +1479,7 @@ public class World {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 1) {
-				boolean pvp = Static.getBoolean(args[0], t);
+				boolean pvp = ArgumentValidation.getBoolean(args[0], t);
 				for(MCWorld world : Static.getServer().getWorlds()) {
 					world.setPVP(pvp);
 				}
@@ -1488,7 +1488,7 @@ public class World {
 				if(world == null) {
 					throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 				}
-				world.setPVP(Static.getBoolean(args[1], t));
+				world.setPVP(ArgumentValidation.getBoolean(args[1], t));
 			}
 			return CVoid.VOID;
 		}

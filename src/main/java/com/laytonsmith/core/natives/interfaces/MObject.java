@@ -1,6 +1,7 @@
 package com.laytonsmith.core.natives.interfaces;
 
 import com.laytonsmith.annotations.nofield;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CNull;
@@ -120,7 +121,7 @@ public class MObject {
 							val = value.val().charAt(0);
 						}
 					} else if(fType == boolean.class) {
-						val = Static.getBoolean(value, t);
+						val = ArgumentValidation.getBoolean(value, t);
 					} else if(fType == float.class) {
 						val = Static.getDouble32(value, t);
 					} else if(fType == double.class) {

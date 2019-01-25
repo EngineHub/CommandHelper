@@ -14,6 +14,7 @@ import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.Iterator;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.core.taskmanager.TaskManager;
 import com.laytonsmith.persistence.PersistenceNetwork;
@@ -56,7 +57,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private final Profiles profiles;
 	private BoundEvent.ActiveEvent event = null;
 	private boolean interrupt = false;
-	private final List<ArrayAccess.ArrayAccessIterator> arrayAccessList = Collections.synchronizedList(new ArrayList<ArrayAccess.ArrayAccessIterator>());
+	private final List<Iterator> arrayAccessList = Collections.synchronizedList(new ArrayList<Iterator>());
 	private final MutableObject<TaskManager> taskManager = new MutableObject<>();
 	private final WeakHashMap<Thread, StackTraceManager> stackTraceManagers = new WeakHashMap<>();
 
@@ -344,7 +345,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 *
 	 * @return
 	 */
-	public List<ArrayAccess.ArrayAccessIterator> GetArrayAccessIterators() {
+	public List<Iterator> GetArrayAccessIterators() {
 		return arrayAccessList;
 	}
 
@@ -354,10 +355,10 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * @param array
 	 * @return
 	 */
-	public List<ArrayAccess.ArrayAccessIterator> GetArrayAccessIteratorsFor(ArrayAccess array) {
-		List<ArrayAccess.ArrayAccessIterator> list = new ArrayList<>();
+	public List<Iterator> GetArrayAccessIteratorsFor(ArrayAccess array) {
+		List<Iterator> list = new ArrayList<>();
 		synchronized(arrayAccessList) {
-			for(ArrayAccess.ArrayAccessIterator value : arrayAccessList) {
+			for(Iterator value : arrayAccessList) {
 				if(value.underlyingArray() == array) {
 					list.add(value);
 				}

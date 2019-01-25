@@ -26,6 +26,7 @@ import com.laytonsmith.abstraction.enums.MCWeather;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
@@ -193,7 +194,7 @@ public class PlayerManagement {
 				}
 			}
 			if(args.length == 2) {
-				dashless = Static.getBoolean(args[1], t);
+				dashless = ArgumentValidation.getBoolean(args[1], t);
 			}
 			if(pl == null) {
 				throw new CREPlayerOfflineException("No matching player could be found.", t);
@@ -2211,13 +2212,13 @@ public class PlayerManagement {
 					}
 
 					if(args.length >= 5) {
-						ambient = Static.getBoolean(args[4], t);
+						ambient = ArgumentValidation.getBoolean(args[4], t);
 
 						if(args.length >= 6) {
-							particles = Static.getBoolean(args[5], t);
+							particles = ArgumentValidation.getBoolean(args[5], t);
 
 							if(args.length == 7) {
-								icon = Static.getBoolean(args[6], t);
+								icon = ArgumentValidation.getBoolean(args[6], t);
 							}
 						}
 					}
@@ -2663,7 +2664,7 @@ public class PlayerManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
-			boolean whitelist = Static.getBoolean(args[1], t);
+			boolean whitelist = ArgumentValidation.getBoolean(args[1], t);
 			if(pl == null) {
 				throw new CRENotFoundException(
 						this.getName() + " could not get the offline player (are you running in cmdline mode?)", t);
@@ -2781,7 +2782,7 @@ public class PlayerManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String target = args[0].val();
-			boolean ban = Static.getBoolean(args[1], t);
+			boolean ban = ArgumentValidation.getBoolean(args[1], t);
 			String reason = "";
 			String source = "";
 
@@ -3415,10 +3416,10 @@ public class PlayerManagement {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			boolean flight;
 			if(args.length == 1) {
-				flight = Static.getBoolean(args[0], t);
+				flight = ArgumentValidation.getBoolean(args[0], t);
 			} else {
 				p = Static.GetPlayer(args[0], t);
-				flight = Static.getBoolean(args[1], t);
+				flight = ArgumentValidation.getBoolean(args[1], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			p.setAllowFlight(flight);
@@ -3506,7 +3507,7 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 			if(args.length == 3) {
-				relative = Static.getBoolean(args[2], t);
+				relative = ArgumentValidation.getBoolean(args[2], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			long time = 0;
@@ -3737,7 +3738,7 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(m, t);
 			if(args[offset] instanceof CNull) {
 				m.resetPlayerWeather();
-			} else if(Static.getBoolean(args[offset], t)) {
+			} else if(ArgumentValidation.getBoolean(args[offset], t)) {
 				m.setPlayerWeather(MCWeather.DOWNFALL);
 			} else {
 				m.setPlayerWeather(MCWeather.CLEAR);
@@ -4521,7 +4522,7 @@ public class PlayerManagement {
 						m = ((MCPlayer) p);
 					}
 					locationIndex = 0;
-					forced = Static.getBoolean(args[1], t);
+					forced = ArgumentValidation.getBoolean(args[1], t);
 				} else {
 					throw new CRECastException("Expecting an array in set_pbed_location", t);
 				}
@@ -4529,7 +4530,7 @@ public class PlayerManagement {
 				if(args[1] instanceof CArray) {
 					pname = args[0].val();
 					locationIndex = 1;
-					forced = Static.getBoolean(args[2], t);
+					forced = ArgumentValidation.getBoolean(args[2], t);
 				} else {
 					if(p instanceof MCPlayer) {
 						m = (MCPlayer) p;
@@ -4545,12 +4546,12 @@ public class PlayerManagement {
 						m = (MCPlayer) p;
 					}
 					locationIndex = 0;
-					forced = Static.getBoolean(args[3], t);
+					forced = ArgumentValidation.getBoolean(args[3], t);
 				}
 			} else {
 				m = Static.GetPlayer(args[0], t);
 				locationIndex = 1;
-				forced = Static.getBoolean(args[4], t);
+				forced = ArgumentValidation.getBoolean(args[4], t);
 			}
 
 			if(m == null && pname != null) {
@@ -5067,10 +5068,10 @@ public class PlayerManagement {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			boolean flight;
 			if(args.length == 1) {
-				flight = Static.getBoolean(args[0], t);
+				flight = ArgumentValidation.getBoolean(args[0], t);
 			} else {
 				p = Static.GetPlayer(args[0], t);
-				flight = Static.getBoolean(args[1], t);
+				flight = ArgumentValidation.getBoolean(args[1], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			if(!p.getAllowFlight()) {

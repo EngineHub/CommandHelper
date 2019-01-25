@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.AliasCore;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
@@ -778,10 +779,10 @@ public class Meta {
 			if(args.length == 1) {
 				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(player, t);
-				state = Static.getBoolean(args[0], t);
+				state = ArgumentValidation.getBoolean(args[0], t);
 			} else {
 				player = Static.GetPlayer(args[0].val(), t);
-				state = Static.getBoolean(args[1], t);
+				state = ArgumentValidation.getBoolean(args[1], t);
 			}
 			player.setOp(state);
 			return CVoid.VOID;
