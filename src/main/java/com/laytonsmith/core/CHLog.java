@@ -254,7 +254,7 @@ public class CHLog {
 	 * @param t
 	 */
 	public void e(Tags modules, Throwable throwable, Target t) {
-		Log(modules, LogLevel.ERROR, StackTraceUtils.GetStacktrace(throwable), t);
+		Log(modules, LogLevel.ERROR, StackTraceUtils.GetStacktrace(throwable), t, true);
 	}
 
 	/**
@@ -265,7 +265,7 @@ public class CHLog {
 	 * @param t
 	 */
 	public void e(Tags modules, String message, Target t) {
-		Log(modules, LogLevel.ERROR, message, t);
+		Log(modules, LogLevel.ERROR, message, t, true);
 	}
 
 	/**
@@ -276,7 +276,7 @@ public class CHLog {
 	 * @param t
 	 */
 	public void w(Tags modules, String message, Target t) {
-		Log(modules, LogLevel.WARNING, message, t);
+		Log(modules, LogLevel.WARNING, message, t, true);
 	}
 
 	/**
@@ -287,7 +287,7 @@ public class CHLog {
 	 * @param t
 	 */
 	public void i(Tags modules, String message, Target t) {
-		Log(modules, LogLevel.INFO, message, t);
+		Log(modules, LogLevel.INFO, message, t, true);
 	}
 
 	/**
@@ -298,7 +298,7 @@ public class CHLog {
 	 * @param t
 	 */
 	public void d(Tags modules, String message, Target t) {
-		Log(modules, LogLevel.DEBUG, message, t);
+		Log(modules, LogLevel.DEBUG, message, t, true);
 	}
 
 	/**
@@ -309,7 +309,7 @@ public class CHLog {
 	 * @param t
 	 */
 	public void v(Tags modules, String message, Target t) {
-		Log(modules, LogLevel.VERBOSE, message, t);
+		Log(modules, LogLevel.VERBOSE, message, t, true);
 	}
 
 	public static class MsgBundle {

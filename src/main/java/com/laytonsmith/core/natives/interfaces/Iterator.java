@@ -8,7 +8,7 @@ package com.laytonsmith.core.natives.interfaces;
 import java.util.Arrays;
 
 /**
- * This class contains iteration information for the ArrayAccess object as it is being iterated. This assumes that
+ * This class contains iteration information for the Iterator object as it is being iterated. This assumes that
  * the object being iterated is not associative. Associative arrays have far simpler handling, and can therefore
  * skip the handling needed for non-associative arrays.
  */
@@ -105,7 +105,7 @@ public class Iterator {
 	}
 
 	/**
-	 * Gets the underlying ArrayAccess object.
+	 * Gets the underlying Iterable object.
 	 *
 	 * @return
 	 */
