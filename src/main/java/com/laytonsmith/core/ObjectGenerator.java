@@ -675,7 +675,7 @@ public class ObjectGenerator {
 						meta.setDamage(Static.getInt32(ma.get("damage", t), t));
 					}
 					if(ma.containsKey("unbreakable")) {
-						meta.setUnbreakable(Static.getBoolean(ma.get("unbreakable", t), t));
+						meta.setUnbreakable(ArgumentValidation.getBoolean(ma.get("unbreakable", t), t));
 					}
 				}
 
@@ -1256,13 +1256,13 @@ public class ObjectGenerator {
 					}
 				}
 				if(effect.containsKey("ambient")) {
-					ambient = Static.getBoolean(effect.get("ambient", t), t);
+					ambient = ArgumentValidation.getBoolean(effect.get("ambient", t), t);
 				}
 				if(effect.containsKey("particles")) {
-					particles = Static.getBoolean(effect.get("particles", t), t);
+					particles = ArgumentValidation.getBoolean(effect.get("particles", t), t);
 				}
 				if(effect.containsKey("icon")) {
-					icon = Static.getBoolean(effect.get("icon", t), t);
+					icon = ArgumentValidation.getBoolean(effect.get("icon", t), t);
 				}
 				ret.add(new MCLivingEntity.MCEffect(type, strength, (int) (seconds * 20), ambient, particles, icon));
 			} else {
@@ -1340,10 +1340,10 @@ public class ObjectGenerator {
 	public MCFireworkEffect fireworkEffect(CArray fe, Target t) {
 		MCFireworkBuilder builder = StaticLayer.GetConvertor().GetFireworkBuilder();
 		if(fe.containsKey("flicker")) {
-			builder.setFlicker(Static.getBoolean(fe.get("flicker", t), t));
+			builder.setFlicker(ArgumentValidation.getBoolean(fe.get("flicker", t), t));
 		}
 		if(fe.containsKey("trail")) {
-			builder.setTrail(Static.getBoolean(fe.get("trail", t), t));
+			builder.setTrail(ArgumentValidation.getBoolean(fe.get("trail", t), t));
 		}
 		if(fe.containsKey("colors")) {
 			Mixed colors = fe.get("colors", t);

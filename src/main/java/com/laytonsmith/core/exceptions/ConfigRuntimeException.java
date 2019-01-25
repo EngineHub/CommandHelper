@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
@@ -104,7 +105,7 @@ public class ConfigRuntimeException extends RuntimeException {
 					return Reaction.REPORT; // Closure returned null or scream-errors was set in the config.
 				} else {
 					// Closure returned a boolean. TRUE -> IGNORE and FALSE -> FATAL.
-					return (Static.getBoolean(ret, Target.UNKNOWN) ? Reaction.IGNORE : Reaction.FATAL);
+					return (ArgumentValidation.getBoolean(ret, Target.UNKNOWN) ? Reaction.IGNORE : Reaction.FATAL);
 				}
 			} catch (ConfigRuntimeException cre) {
 

@@ -3,12 +3,13 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.natives.interfaces.Booleanish;
 
 /**
  * Represents a MethodScript null value.
  */
 @typeof("null")
-public final class CNull extends Construct implements Cloneable {
+public final class CNull extends Construct implements Cloneable, Booleanish {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get("null");
@@ -104,4 +105,11 @@ public final class CNull extends Construct implements Cloneable {
 	public CClassType[] getInterfaces() {
 		throw new RuntimeException("Cannot call getInterfaces on null");
 	}
+
+	@Override
+	public boolean getBooleanValue(Target t) {
+		return false;
+	}
+
+
 }

@@ -245,16 +245,23 @@ public final class Static {
 	}
 
 	/**
-	 * Returns a boolean from any given construct. Depending on the type of the construct being converted, it follows
-	 * the following rules: If it is an integer or a double, it is false if 0, true otherwise. If it is a string, if it
-	 * is empty, it is false, otherwise it is true.
-	 *
+	 * Currently forwards the call to
+	 * {@link ArgumentValidation#getBooleanish},
+	 * to keep backwards compatible behavior, but will be removed in a future release. Explicitely use either
+	 * {@link ArgumentValidation#getBooleanish} or {@link ArgumentValidation#getBooleanObject}.
 	 * @param c
 	 * @param t
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getBooleanish} for current behavior, or
+	 * {@link ArgumentValidation#getBooleanObject} for strict behavior. Note: While this is deprecated, and will be
+	 * removed from Static, it will not be removed until all the other methods that are duplicated here and in
+	 * {@link ArgumentValidation} are officially deprecated and removed, so there is no immediate need to backport older
+	 * code, as it will probably be easier to do it all at once later. However, new code should no longer use this
+	 * method. (Or any of the other methods that are duplicated.)
 	 */
+	@Deprecated
 	public static boolean getBoolean(Mixed c, Target t) {
-		return ArgumentValidation.getBoolean(c, t);
+		return ArgumentValidation.getBooleanish(c, t);
 	}
 
 	/**

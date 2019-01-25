@@ -83,4 +83,9 @@ public class CDecimal extends CPrimitive implements Cloneable {
 		return new CDecimal(val, getTarget());
 	}
 
+	@Override
+	public boolean getBooleanValue(Target t) {
+		return val.compareTo(new BigDecimal(0)) != 0;
+	}
+
 }

@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.entities.MCVillager;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -295,7 +296,7 @@ public class Trades {
 				player = Static.getPlayer(env, t);
 			}
 			if(args.length == 3) {
-				force = Static.getBoolean(args[2], t);
+				force = ArgumentValidation.getBoolean(args[2], t);
 			}
 			MCMerchant merchant = GetMerchant(args[0], t);
 			if(!force && merchant.isTrading()) {
@@ -409,7 +410,7 @@ public class Trades {
 			mer.setUses(Static.getInt32(recipe.get("uses", t), t));
 		}
 		if(recipe.containsKey("hasxpreward")) {
-			mer.setHasExperienceReward(Static.getBoolean(recipe.get("hasxpreward", t), t));
+			mer.setHasExperienceReward(ArgumentValidation.getBoolean(recipe.get("hasxpreward", t), t));
 		}
 
 		CArray ingredients = Static.getArray(recipe.get("ingredients", t), t);

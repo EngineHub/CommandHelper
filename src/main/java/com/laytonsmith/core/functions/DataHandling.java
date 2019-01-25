@@ -68,7 +68,7 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopBreakException;
 import com.laytonsmith.core.exceptions.LoopContinueException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
-import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.Iterator;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.tools.docgen.templates.ArrayIteration;
 import com.laytonsmith.tools.docgen.templates.Loops;
@@ -593,7 +593,7 @@ public class DataHandling {
 			}
 			int _continue = 0;
 			while(true) {
-				boolean cond = Static.getBoolean(parent.seval(condition, env), t);
+				boolean cond = ArgumentValidation.getBoolean(parent.seval(condition, env), t);
 				if(cond == false) {
 					break;
 				}
@@ -703,13 +703,14 @@ public class DataHandling {
 					arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish + 1, t));
 				}
 			}
-			if(!(arr instanceof ArrayAccess)) {
-				throw new CRECastException("Parameter 1 of " + getName() + " must be an array or array like data structure", t);
+			if(!(arr instanceof Iterable)) {
+				throw new CRECastException("Parameter 1 of " + getName() + " must be an Iterable data structure", t);
 			}
 			if(!(iv instanceof IVariable)) {
 				throw new CRECastException("Parameter " + (2 + offset) + " of " + getName() + " must be an ivariable", t);
 			}
-			ArrayAccess one = (ArrayAccess) arr;
+			com.laytonsmith.core.natives.interfaces.Iterable one
+				= (com.laytonsmith.core.natives.interfaces.Iterable) arr;
 			IVariable kkey = (IVariable) ik;
 			IVariable two = (IVariable) iv;
 			if(one.isAssociative()) {
@@ -762,8 +763,8 @@ public class DataHandling {
 				//is to avoid cloning the array, and iterating that. Arrays may be extremely large, and cloning the
 				//entire array is wasteful in that case. We are essentially tracking deltas this way, which prevents
 				//memory usage from getting out of hand.
-				ArrayAccess.ArrayAccessIterator iterator = new ArrayAccess.ArrayAccessIterator(one);
-				List<ArrayAccess.ArrayAccessIterator> arrayAccessList = env.getEnv(GlobalEnv.class).GetArrayAccessIterators();
+				Iterator iterator = new Iterator(one);
+				List<Iterator> arrayAccessList = env.getEnv(GlobalEnv.class).GetArrayAccessIterators();
 				try {
 					arrayAccessList.add(iterator);
 					int continues = 0;
@@ -1122,7 +1123,7 @@ public class DataHandling {
 		@Override
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			try {
-				while(Static.getBoolean(parent.seval(nodes[0], env), t)) {
+				while(ArgumentValidation.getBoolean(parent.seval(nodes[0], env), t)) {
 					//We allow while(thing()); to be done. This makes certain
 					//types of coding styles possible.
 					if(nodes.length > 1) {
@@ -1242,7 +1243,7 @@ public class DataHandling {
 					} catch (LoopContinueException e) {
 						//ok. No matter how many times it tells us to continue, we're only going to continue once.
 					}
-				} while(Static.getBoolean(parent.seval(nodes[1], env), t));
+				} while(ArgumentValidation.getBoolean(parent.seval(nodes[1], env), t));
 			} catch (LoopBreakException e) {
 				if(e.getTimes() > 1) {
 					throw new LoopBreakException(e.getTimes() - 1, t);
@@ -3368,7 +3369,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(Static.getBoolean(args[0], t));
+			return CBoolean.get(ArgumentValidation.getBoolean(args[0], t));
 		}
 
 		@Override

@@ -3,6 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.ObjectModifier;
 import java.util.EnumSet;
 import java.util.Set;
@@ -11,7 +12,7 @@ import java.util.Set;
  * Represents a MethodScript boolean.
  */
 @typeof("ms.lang.boolean")
-public final class CBoolean extends CPrimitive implements Cloneable {
+public final class CBoolean extends CPrimitive implements Cloneable, Booleanish {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get("ms.lang.boolean");
@@ -88,6 +89,13 @@ public final class CBoolean extends CPrimitive implements Cloneable {
 	public boolean getBoolean() {
 		return val;
 	}
+
+	@Override
+	public boolean getBooleanValue(Target t) {
+		return val;
+	}
+
+
 
 	/**
 	 * Negates this CBoolean.

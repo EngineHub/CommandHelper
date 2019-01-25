@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -757,7 +758,7 @@ public class ByteArrays {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CByteArray ba = Static.getByteArray(args[0], t);
-			boolean setLittle = Static.getBoolean(args[1], t);
+			boolean setLittle = ArgumentValidation.getBoolean(args[1], t);
 			ba.setOrder(setLittle ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
 			return CVoid.VOID;
 		}

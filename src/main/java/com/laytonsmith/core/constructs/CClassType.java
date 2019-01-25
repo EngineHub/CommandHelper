@@ -8,7 +8,6 @@ import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.MEnumType;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Arrays;
@@ -27,7 +26,7 @@ import java.util.stream.Stream;
  */
 @typeof("ms.lang.ClassType")
 @SuppressWarnings("checkstyle:overloadmethodsdeclarationorder")
-public final class CClassType extends Construct implements ArrayAccess {
+public final class CClassType extends Construct implements com.laytonsmith.core.natives.interfaces.Iterable {
 
 	public static final String PATH_SEPARATOR = FullyQualifiedClassName.PATH_SEPARATOR;
 

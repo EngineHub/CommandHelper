@@ -2,6 +2,7 @@ package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -152,7 +153,7 @@ public final class Prefilters {
 	}
 
 	private static void BooleanMatch(Mixed bool1, Mixed bool2) throws PrefilterNonMatchException {
-		if(Static.getBoolean(bool1, Target.UNKNOWN) != Static.getBoolean(bool2, Target.UNKNOWN)) {
+		if(ArgumentValidation.getBoolean(bool1, Target.UNKNOWN) != ArgumentValidation.getBoolean(bool2, Target.UNKNOWN)) {
 			throw new PrefilterNonMatchException();
 		}
 	}

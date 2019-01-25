@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.enums.MCBarColor;
 import com.laytonsmith.abstraction.enums.MCBarStyle;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -150,7 +151,7 @@ public class BossBar {
 					}
 				}
 				if(ca.containsKey("visible")) {
-					visible = Static.getBoolean(ca.get("visible", t), t);
+					visible = ArgumentValidation.getBoolean(ca.get("visible", t), t);
 				}
 				if(ca.containsKey("percent")) {
 					try {
@@ -233,7 +234,7 @@ public class BossBar {
 					}
 				}
 				if(ca.containsKey("visible")) {
-					bar.setVisible(Static.getBoolean(ca.get("visible", t), t));
+					bar.setVisible(ArgumentValidation.getBoolean(ca.get("visible", t), t));
 				}
 				if(ca.containsKey("percent")) {
 					try {

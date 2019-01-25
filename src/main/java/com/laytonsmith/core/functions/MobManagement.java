@@ -27,6 +27,7 @@ import com.laytonsmith.abstraction.enums.MCWolfType;
 import com.laytonsmith.abstraction.enums.MCZombieType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -517,7 +518,7 @@ public class MobManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			boolean breed = Static.getBoolean(args[1], t);
+			boolean breed = ArgumentValidation.getBoolean(args[1], t);
 
 			MCEntity ent = Static.getEntity(args[0], t);
 
@@ -599,7 +600,7 @@ public class MobManagement {
 			int age = Static.getInt32(args[1], t);
 			boolean lock = false;
 			if(args.length == 3) {
-				lock = Static.getBoolean(args[2], t);
+				lock = ArgumentValidation.getBoolean(args[2], t);
 			}
 			MCLivingEntity ent = Static.getLivingEntity(args[0], t);
 			if(ent == null) {
@@ -742,13 +743,13 @@ public class MobManagement {
 					}
 
 					if(args.length >= 5) {
-						ambient = Static.getBoolean(args[4], t);
+						ambient = ArgumentValidation.getBoolean(args[4], t);
 
 						if(args.length >= 6) {
-							particles = Static.getBoolean(args[5], t);
+							particles = ArgumentValidation.getBoolean(args[5], t);
 
 							if(args.length == 7) {
-								icon = Static.getBoolean(args[6], t);
+								icon = ArgumentValidation.getBoolean(args[6], t);
 							}
 						}
 					}
@@ -1108,7 +1109,7 @@ public class MobManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			Static.getLivingEntity(args[0], t).setCanPickupItems(Static.getBoolean(args[1], t));
+			Static.getLivingEntity(args[0], t).setCanPickupItems(ArgumentValidation.getBoolean(args[1], t));
 			return CVoid.VOID;
 		}
 
@@ -1158,7 +1159,7 @@ public class MobManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			Static.getLivingEntity(args[0], t).setRemoveWhenFarAway(!Static.getBoolean(args[1], t));
+			Static.getLivingEntity(args[0], t).setRemoveWhenFarAway(!ArgumentValidation.getBoolean(args[1], t));
 			return CVoid.VOID;
 		}
 
@@ -1522,7 +1523,7 @@ public class MobManagement {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
-			boolean glide = Static.getBoolean(args[1], t);
+			boolean glide = ArgumentValidation.getBoolean(args[1], t);
 
 			e.setGliding(glide);
 
@@ -1599,7 +1600,7 @@ public class MobManagement {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
-			boolean ai = Static.getBoolean(args[1], t);
+			boolean ai = ArgumentValidation.getBoolean(args[1], t);
 
 			e.setAI(ai);
 
@@ -1652,7 +1653,7 @@ public class MobManagement {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity e = Static.getLivingEntity(args[0], t);
-			boolean collidable = Static.getBoolean(args[1], t);
+			boolean collidable = ArgumentValidation.getBoolean(args[1], t);
 			e.setCollidable(collidable);
 			return CVoid.VOID;
 		}

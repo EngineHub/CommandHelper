@@ -163,10 +163,10 @@ public class Web {
 				expiration = Static.getInt(cookie.get("expiration", t), t);
 			}
 			if(cookie.containsKey("httpOnly")) {
-				httpOnly = Static.getBoolean(cookie.get("httpOnly", t), t);
+				httpOnly = ArgumentValidation.getBoolean(cookie.get("httpOnly", t), t);
 			}
 			if(cookie.containsKey("secureOnly")) {
-				secureOnly = Static.getBoolean(cookie.get("secureOnly", t), t);
+				secureOnly = ArgumentValidation.getBoolean(cookie.get("secureOnly", t), t);
 			}
 			Cookie c = new Cookie(name, value, domain, path, expiration, httpOnly, secureOnly);
 			ret.addCookie(c);
@@ -253,7 +253,7 @@ public class Web {
 					}
 				}
 				if(csettings.containsKey("useDefaultHeaders")) {
-					useDefaultHeaders = Static.getBoolean(csettings.get("useDefaultHeaders", t), t);
+					useDefaultHeaders = ArgumentValidation.getBoolean(csettings.get("useDefaultHeaders", t), t);
 				}
 				if(csettings.containsKey("headers") && !(csettings.get("headers", t) instanceof CNull)) {
 					CArray headers = Static.getArray(csettings.get("headers", t), t);
@@ -324,7 +324,7 @@ public class Web {
 					arrayJar = null;
 				}
 				if(csettings.containsKey("followRedirects")) {
-					settings.setFollowRedirects(Static.getBoolean(csettings.get("followRedirects", t), t));
+					settings.setFollowRedirects(ArgumentValidation.getBoolean(csettings.get("followRedirects", t), t));
 				}
 				//Only required parameter
 				if(csettings.containsKey("success")) {
@@ -374,7 +374,7 @@ public class Web {
 				}
 				if(csettings.containsKey("trustStore")) {
 					Mixed trustStore = csettings.get("trustStore", t);
-					if(trustStore instanceof CBoolean && Static.getBoolean(trustStore, t) == false) {
+					if(trustStore instanceof CBoolean && ArgumentValidation.getBoolean(trustStore, t) == false) {
 						settings.setDisableCertChecking(true);
 					} else if(trustStore instanceof CArray) {
 						CArray trustStoreA = ((CArray) trustStore);
@@ -425,7 +425,7 @@ public class Web {
 					settings.setDownloadStrategy(puMode);
 				}
 				if(csettings.containsKey("binary")) {
-					binary = Static.getBoolean(csettings.get("binary", t), t);
+					binary = ArgumentValidation.getBoolean(csettings.get("binary", t), t);
 				} else {
 					binary = false;
 				}
@@ -437,10 +437,10 @@ public class Web {
 				}
 
 				if(csettings.containsKey("blocking")) {
-					boolean blocking = Static.getBoolean(csettings.get("blocking", t), t);
+					boolean blocking = ArgumentValidation.getBoolean(csettings.get("blocking", t), t);
 					settings.setBlocking(blocking);
 				}
-				if(csettings.containsKey("log") && Static.getBoolean(csettings.get("log", t), t)) {
+				if(csettings.containsKey("log") && ArgumentValidation.getBoolean(csettings.get("log", t), t)) {
 					settings.setLogger(Logger.getLogger(Web.class.getName()));
 				}
 				settings.setAuthenticationDetails(username, password);
@@ -835,8 +835,8 @@ public class Web {
 			final String mailUser = ArgumentValidation.getItemFromArray(options, "user", t, new CString("", t)).val();
 			final String mailPassword = ArgumentValidation.getItemFromArray(options, "password", t, new CString("", t)).val();
 			int mailPort = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "port", t, new CInt(587, t)), t);
-			boolean useSSL = ArgumentValidation.getBoolean(ArgumentValidation.getItemFromArray(options, "use_ssl", t, CBoolean.FALSE), t);
-			boolean useStartTLS = ArgumentValidation.getBoolean(ArgumentValidation.getItemFromArray(options, "use_start_tls", t, CBoolean.FALSE), t);
+			boolean useSSL = ArgumentValidation.getBooleanObject(ArgumentValidation.getItemFromArray(options, "use_ssl", t, CBoolean.FALSE), t);
+			boolean useStartTLS = ArgumentValidation.getBooleanObject(ArgumentValidation.getItemFromArray(options, "use_start_tls", t, CBoolean.FALSE), t);
 			int timeout = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "timeout", t, new CInt(10000, t)), t);
 
 			//Standard email options

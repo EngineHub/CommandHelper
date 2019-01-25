@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -81,7 +82,7 @@ public class Weather {
 				safeIndex = 3;
 			}
 			if(args.length >= safeIndex + 1) {
-				safe = Static.getBoolean(args[safeIndex], t);
+				safe = ArgumentValidation.getBoolean(args[safeIndex], t);
 			}
 			if(w != null) {
 				if(!safe) {
@@ -136,7 +137,7 @@ public class Weather {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			boolean b = Static.getBoolean(args[0], t);
+			boolean b = ArgumentValidation.getBoolean(args[0], t);
 			MCWorld w = null;
 			int duration = -1;
 			if(args.length == 2) {
@@ -232,7 +233,7 @@ public class Weather {
 				w = Static.getServer().getWorld(args[1].val());
 			}
 			if(w != null) {
-				w.setThundering(Static.getBoolean(args[0], t));
+				w.setThundering(ArgumentValidation.getBoolean(args[0], t));
 			} else {
 				throw new CREInvalidWorldException("No existing world specified!", t);
 			}

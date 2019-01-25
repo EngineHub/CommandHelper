@@ -7,6 +7,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CInt;
@@ -152,7 +153,7 @@ public class XGUI {
 			int id = Static.getInt32(args[0], t);
 			boolean show = true;
 			if(args.length > 1) {
-				show = Static.getBoolean(args[1], t);
+				show = ArgumentValidation.getBoolean(args[1], t);
 			}
 			Window w = windows.get(id);
 			w.setVisible(show);
