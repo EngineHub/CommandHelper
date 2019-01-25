@@ -44,14 +44,12 @@ jdk_version() {
 }
 
 if [[ "$(jdk_version)" -gt "8" ]]; then
-read -r -d '' MODULES <<MODS
-java.base/java.lang.reflect
-java.base/java.lang
-java.base/java.util
-MODS
-MPATH=$(echo "$MODULES" | sed 's/\(.*\)/--add-opens \1=ALL-UNNAMED/' | tr '\n' ' ')
+	# Read the required modules from the jar itself, so that each jar can have different dependencies, without requiring
+	# a re-install.
+	MODULES=$(unzip -p "%%LOCATION%%" interpreter-helpers/modules)
+	MPATH=$(echo "$MODULES" | sed 's/\(.*\)/--add-opens \1=ALL-UNNAMED/' | tr '\n' ' ')
 else
-MPATH=""
+	MPATH=""
 fi
 
 if [ "$#" -eq 0 ]; then
