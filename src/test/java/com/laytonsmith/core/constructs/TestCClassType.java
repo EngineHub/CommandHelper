@@ -58,6 +58,7 @@ public class TestCClassType {
 		assertTrue(get("array").doesExtend(get("ArrayAccess")));
 		assertFalse(get("array").doesExtend(get("string")));
 		assertTrue(get("array").doesExtend(get("array")));
+		assertTrue(get("array").doesExtend(get("Booleanish")));
 	}
 
 	@Test
