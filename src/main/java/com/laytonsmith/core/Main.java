@@ -40,7 +40,6 @@ import com.laytonsmith.tools.SyntaxHighlighters;
 import com.laytonsmith.tools.UILauncher;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenExportTool;
-import com.laytonsmith.tools.docgen.DocGenUI;
 import com.laytonsmith.tools.docgen.ExtensionDocGen;
 import com.laytonsmith.tools.docgen.sitedeploy.SiteDeploy;
 import com.laytonsmith.tools.pnviewer.PNViewer;
@@ -526,9 +525,6 @@ public class Main {
 			} else if(mode == UNINSTALL_CMDLINE_MODE) {
 				Interpreter.uninstall();
 				System.exit(0);
-			} else if(mode == DOCGEN_MODE) {
-				DocGenUI.main(args);
-				System.exit(0);
 			} else if(mode == MSLP_MODE) {
 				String mslp = parsedArgs.getStringArgument();
 				if(mslp.isEmpty()) {
@@ -824,9 +820,17 @@ public class Main {
 				} else {
 					// Relaunch the jar in a new process with the --run flag set,
 					// so that the process will be in its own subshell
-					CommandExecutor ce = new CommandExecutor("java -jar "
-							+ ClassDiscovery.GetClassContainer(Main.class).getPath() + " "
-							+ StringUtils.Join(args, " ") + " --in-shell");
+					List<String> largs = new ArrayList<>();
+					largs.add("java");
+					largs.add("-jar");
+					String jarPath = ClassDiscovery.GetClassContainer(Main.class).getPath();
+					if(OSUtils.GetOS().isWindows() && jarPath.startsWith("/")) {
+						jarPath = jarPath.substring(1);
+					}
+					largs.add(jarPath);
+					largs.addAll(Arrays.asList(args));
+					largs.add("--in-shell");
+					CommandExecutor ce = new CommandExecutor(largs.toArray(new String[largs.size()]));
 					ce.start();
 					System.exit(0);
 				}

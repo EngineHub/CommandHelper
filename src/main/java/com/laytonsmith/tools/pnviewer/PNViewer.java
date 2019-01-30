@@ -265,7 +265,7 @@ public class PNViewer extends javax.swing.JFrame {
 
 					@Override
 					public String generate(String... args) {
-						return "http://wiki.sk89q.com/wiki/CommandHelper/Staged/" + args[0];
+						return "https://methodscript.com/docs/" + MSVersion.LATEST + "/" + args[0] + ".html";
 					}
 				});
 				builder.addTemplate("jarName", new TemplateBuilder.Generator() {
