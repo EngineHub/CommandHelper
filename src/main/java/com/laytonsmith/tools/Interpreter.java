@@ -201,7 +201,8 @@ public final class Interpreter {
 				+ "If $$ is on a line by itself, it puts the shell in shell_adv mode, and each line is taken as if it started\n"
 				+ "with $$. Use - on a line by itself to exit this mode as well.\n\n"
 				+ "For more information about a specific function, type \"help function\"\n"
-				+ "and for documentation plus examples, type \"examples function\".";
+				+ "and for documentation plus examples, type \"examples function\". See the api tool\n"
+				+ "for more information about this feature.";
 		try {
 			msg += "\nYour current working directory is: " + env.getEnv(GlobalEnv.class).GetRootFolder().getCanonicalPath();
 		} catch (IOException ex) {
@@ -583,32 +584,30 @@ public final class Interpreter {
 				break;
 			default:
 				{
-					Pattern p = Pattern.compile("help (.*)");
+					Pattern p = Pattern.compile("(help|examples) (.*)");
 					Matcher m;
 					if((m = p.matcher(line)).find()) {
-						String helpCommand = m.group(1);
+						String helpCommand = m.group(2);
 						try {
-							StreamUtils.GetSystemOut().println(formatDocsForCmdline(helpCommand, false));
-						} catch (ConfigCompileException e) {
-							StreamUtils.GetSystemErr().println("Could not find function of name " + helpCommand);
+							List<FunctionBase> fl = new ArrayList<>();
+							for(FunctionBase fb : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
+								if(fb.getName().matches("^" + helpCommand + "$")) {
+									fl.add(fb);
+								}
+							}
+							if(fl.isEmpty()) {
+								StreamUtils.GetSystemErr().println("Could not find function of name " + helpCommand);
+							} else if(fl.size() == 1) {
+								StreamUtils.GetSystemOut().println(formatDocsForCmdline(helpCommand,
+										m.group(1).equals("examples")));
+							} else {
+								StreamUtils.GetSystemOut().println("Multiple function matches found:");
+								for(FunctionBase fb : fl) {
+									StreamUtils.GetSystemOut().println(fb.getName());
+								}
+							}
 						} catch (IOException | DataSourceException | URISyntaxException
-								| DocGenTemplates.Generator.GenerateException e) {
-							e.printStackTrace(StreamUtils.GetSystemErr());
-						}
-						break;
-					}
-				}
-				{
-					Pattern p = Pattern.compile("examples (.*)");
-					Matcher m;
-					if((m = p.matcher(line)).find()) {
-						String helpCommand = m.group(1);
-						try {
-							StreamUtils.GetSystemOut().println(formatDocsForCmdline(helpCommand, true));
-						} catch (ConfigCompileException e) {
-							StreamUtils.GetSystemErr().println("Could not find function of name " + helpCommand);
-						} catch (IOException | DataSourceException | URISyntaxException
-								| DocGenTemplates.Generator.GenerateException e) {
+								| DocGenTemplates.Generator.GenerateException | ConfigCompileException e) {
 							e.printStackTrace(StreamUtils.GetSystemErr());
 						}
 						break;

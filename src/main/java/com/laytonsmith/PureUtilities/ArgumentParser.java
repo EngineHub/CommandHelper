@@ -1160,7 +1160,16 @@ public final class ArgumentParser {
 
 		//Now, if the default switch exists, put it here too
 		if(getArgument() != null) {
-			parts.add("<" + getArgument().usageName + ", ...>");
+			String s = "<";
+			if(getArgument().isNumeric()) {
+				s += "#";
+			}
+			s += getArgument().usageName;
+			if(getArgument().isArray()) {
+				s += ", ...";
+			}
+			s += ">";
+			parts.add(s);
 		}
 
 		{

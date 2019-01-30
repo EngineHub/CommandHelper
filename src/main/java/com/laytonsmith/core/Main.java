@@ -183,11 +183,16 @@ public class Main {
 				.addDescription("Starts the automatic wiki uploader GUI.");
 		suite.addMode("docgen", DOCGEN_MODE);
 		API_MODE = ArgumentParser.GetParser()
-				.addDescription("Prints documentation for the function specified, then exits.")
+				.addDescription("Prints documentation for the function specified, then exits. The argument is actually"
+						+ " a regex, with ^ and $ added to it, so if you would like to search the function list,"
+						+ " you can instead provide the rest of the regex. If multiple matches are found, the full"
+						+ " list of matches is printed out. For instance \"array.*\" will return all the functions"
+						+ " that start with the word \"array\".")
 				.addArgument(new ArgumentBuilder()
 						.setDescription("The name of the function to print the information for")
-						.setUsageName("function")
-						.setRequiredAndDefault())
+						.setUsageName("functionRegex")
+						.setRequiredAndDefault()
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
 				.addArgument(new ArgumentBuilder()
 						.setDescription("Instead of displaying the results in the console, launches the website with"
 								+ " this function highlighted. The local documentation is guaranteed to be consistent"
@@ -624,26 +629,35 @@ public class Main {
 				String function = parsedArgs.getStringArgument();
 				boolean examples = parsedArgs.isFlagSet('e');
 				if("".equals(function)) {
-					StreamUtils.GetSystemErr().println("Usage: java -jar CommandHelper.jar --api <function name>");
+					StreamUtils.GetSystemErr().println("Usage: java -jar CommandHelper.jar api <function name>");
 					System.exit(1);
 				}
-				FunctionBase f;
-				try {
-					f = FunctionList.getFunction(function, Target.UNKNOWN);
-				} catch (ConfigCompileException e) {
+				List<FunctionBase> fl = new ArrayList<>();
+				for(FunctionBase fb : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
+					if(fb.getName().matches("^" + function + "$")) {
+						fl.add(fb);
+					}
+				}
+				if(fl.isEmpty()) {
 					StreamUtils.GetSystemErr().println("The function '" + function + "' was not found.");
 					System.exit(1);
-					throw new Error();
-				}
-				if(parsedArgs.isFlagSet("online")) {
-					String url = String.format("https://methodscript.com/docs/%s/API/functions/%s",
-							MSVersion.LATEST.toString(), f.getName());
-					System.out.println("Launching browser to " + url);
-					if(!UIUtils.openWebpage(new URL(url))) {
-						System.err.println("Could not launch browser");
+				} else if(fl.size() == 1) {
+					FunctionBase f = fl.get(0);
+					if(parsedArgs.isFlagSet("online")) {
+						String url = String.format("https://methodscript.com/docs/%s/API/functions/%s",
+								MSVersion.LATEST.toString(), f.getName());
+						System.out.println("Launching browser to " + url);
+						if(!UIUtils.openWebpage(new URL(url))) {
+							System.err.println("Could not launch browser");
+						}
+					} else {
+						StreamUtils.GetSystemOut().println(Interpreter.formatDocsForCmdline(f.getName(), examples));
 					}
 				} else {
-					StreamUtils.GetSystemOut().println(Interpreter.formatDocsForCmdline(f.getName(), examples));
+					StreamUtils.GetSystemOut().println("Multiple function matches found:");
+					for(FunctionBase fb : fl) {
+						StreamUtils.GetSystemOut().println(fb.getName());
+					}
 				}
 				System.exit(0);
 			} else if(mode == SYNTAX_MODE) {
