@@ -608,7 +608,8 @@ public class StringHandling {
 
 		@Override
 		public String docs() {
-			return "int {str | array} Returns the character length of str, if the value is castable to a string, or the length of the array, if an array is given";
+			return "int {str | Sizeable} Returns the character length of str, if the value is castable to a string, or"
+					+ " the length of the ms.lang.Sizeable object, if an array or other Sizeable object is given.";
 		}
 
 		@Override
