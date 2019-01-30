@@ -915,7 +915,8 @@ public class Meta {
 
 		@Override
 		public String docs() {
-			return "void {[...]} An operation that does nothing. Any arguments passed in are ignored entirely.";
+			return "void {[...]} An operation that does nothing. Any arguments passed in are ignored entirely, though"
+					+ " they will be evaluated first.";
 		}
 
 		@Override

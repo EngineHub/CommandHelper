@@ -586,14 +586,14 @@ public class Web {
 			return new ExampleScript[]{
 				new ExampleScript("Getting headers from a website", "http_request('http://www.google.com', array(\n"
 				+ "\tsuccess: closure(@response,\n"
-				+ "\t\tmsg(@response['headers']['Server'][0])\n"
+				+ "\t\tmsg(@response['headers']['Server'][0]);\n"
 				+ "\t)\n"
 				+ "));\n", "gws"),
 				new ExampleScript("Using a cookie jar", "@cookiejar = array()\n"
 				+ "http_request('http://www.google.com', array(\n"
-				+ "\tcookiejar: @cookiejar, success: closure(@resp,\n"
-				+ "\t\tmsg(@cookiejar)\n"
-				+ "\t)\n"
+				+ "\tcookiejar: @cookiejar, success: closure(@resp) {\n"
+				+ "\t\tmsg(@cookiejar);\n"
+				+ "\t}\n"
 				+ "));\n", "<cookie jar would now have cookies in it>"),
 				new ExampleScript("Sending some json to the server",
 				"http_request('http://example.com', array(\n"

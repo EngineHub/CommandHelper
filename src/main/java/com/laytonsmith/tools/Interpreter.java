@@ -3,6 +3,7 @@ package com.laytonsmith.tools;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.HTMLUtils;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
@@ -97,20 +98,28 @@ import static com.laytonsmith.PureUtilities.TermColors.p;
 import static com.laytonsmith.PureUtilities.TermColors.pl;
 import static com.laytonsmith.PureUtilities.TermColors.reset;
 import com.laytonsmith.PureUtilities.ZipReader;
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.functions.Cmdline;
 import com.laytonsmith.core.functions.Echoes;
+import com.laytonsmith.core.functions.ExampleScript;
+import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.tools.docgen.DocGen;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This is a command line implementation of the in game interpreter mode. This should only be run while the server is
@@ -190,7 +199,9 @@ public final class Interpreter {
 				+ "If the line starts with $$, then the rest of the line is taken to be a shell command. The command is taken as a string, wrapped\n"
 				+ "in shell_adv(), (where system out and system err are piped to the corresponding outputs).\n"
 				+ "If $$ is on a line by itself, it puts the shell in shell_adv mode, and each line is taken as if it started\n"
-				+ "with $$. Use - on a line by itself to exit this mode as well.";
+				+ "with $$. Use - on a line by itself to exit this mode as well.\n\n"
+				+ "For more information about a specific function, type \"help function\"\n"
+				+ "and for documentation plus examples, type \"examples function\".";
 		try {
 			msg += "\nYour current working directory is: " + env.getEnv(GlobalEnv.class).GetRootFolder().getCanonicalPath();
 		} catch (IOException ex) {
@@ -571,6 +582,38 @@ public final class Interpreter {
 				inShellMode = true;
 				break;
 			default:
+				{
+					Pattern p = Pattern.compile("help (.*)");
+					Matcher m;
+					if((m = p.matcher(line)).find()) {
+						String helpCommand = m.group(1);
+						try {
+							StreamUtils.GetSystemOut().println(formatDocsForCmdline(helpCommand, false));
+						} catch (ConfigCompileException e) {
+							StreamUtils.GetSystemErr().println("Could not find function of name " + helpCommand);
+						} catch (IOException | DataSourceException | URISyntaxException
+								| DocGenTemplates.Generator.GenerateException e) {
+							e.printStackTrace(StreamUtils.GetSystemErr());
+						}
+						break;
+					}
+				}
+				{
+					Pattern p = Pattern.compile("examples (.*)");
+					Matcher m;
+					if((m = p.matcher(line)).find()) {
+						String helpCommand = m.group(1);
+						try {
+							StreamUtils.GetSystemOut().println(formatDocsForCmdline(helpCommand, true));
+						} catch (ConfigCompileException e) {
+							StreamUtils.GetSystemErr().println("Could not find function of name " + helpCommand);
+						} catch (IOException | DataSourceException | URISyntaxException
+								| DocGenTemplates.Generator.GenerateException e) {
+							e.printStackTrace(StreamUtils.GetSystemErr());
+						}
+						break;
+					}
+				}
 				if(multilineMode) {
 					//Queue multiline
 					script = script + line + "\n";
@@ -587,6 +630,155 @@ public final class Interpreter {
 				break;
 		}
 		return true;
+	}
+
+	public static String formatDocsForCmdline(String function, boolean showExamples) throws ConfigCompileException,
+			IOException, DataSourceException, URISyntaxException, DocGenTemplates.Generator.GenerateException {
+		StringBuilder b = new StringBuilder();
+		FunctionBase f = FunctionList.getFunction(function, Target.UNKNOWN);
+		DocGen.DocInfo d = new DocGen.DocInfo(f.docs());
+		b.append(TermColors.CYAN).append(d.ret).append(" ");
+		b.append(TermColors.MAGENTA).append(d.originalArgs).append(TermColors.RESET).append("\n");
+		if(f instanceof Function) {
+			Class<? extends CREThrowable>[] thrown = ((Function) f).thrown();
+			if(thrown != null && thrown.length > 0) {
+				b.append("Throws: ");
+				Set<String> th = new HashSet<>();
+				for(Class<? extends CREThrowable> c : thrown) {
+					if(c.getAnnotation(typeof.class) != null) {
+						typeof t = c.getAnnotation(typeof.class);
+						th.add(t.value());
+					}
+				}
+				b.append(TermColors.RED).append(StringUtils.Join(th, ", ")).append(TermColors.RESET).append("\n");
+			}
+		}
+		b.append("\n");
+		{
+			String desc = reverseHTML(d.desc);
+			b.append(TermColors.WHITE).append(desc).append("\n");
+		}
+		if(d.extendedDesc != null) {
+			String desc = reverseHTML(d.extendedDesc);
+			b.append(TermColors.WHITE).append(desc).append("\n");
+		}
+		if(f instanceof Function && showExamples) {
+			ExampleScript[] examples = ((Function) f).examples();
+			if(examples != null && examples.length > 0) {
+				b.append(TermColors.BOLD).append("\nExamples").append(TermColors.RESET).append("\n");
+				b.append("----------------------------------------------\n\n");
+				for(int i = 0; i < examples.length; i++) {
+					b.append(TermColors.BRIGHT_WHITE).append(TermColors.BOLD).append(TermColors.UNDERLINE)
+							.append("Example ").append(i + 1).append(TermColors.RESET).append("\n");
+					if(i > 0) {
+						b.append("\n\n");
+					}
+					ExampleScript e = examples[i];
+					b.append(e.getDescription()).append("\n\n");
+					b.append(TermColors.UNDERLINE).append("Code").append(TermColors.RESET).append("\n")
+							.append(reverseHTML(DocGenTemplates.CODE.generate(e.getScript()))).append("\n\n");
+					b.append(TermColors.UNDERLINE).append("Output").append(TermColors.RESET).append("\n")
+							.append(e.getOutput()).append("\n\n");
+				}
+			}
+		}
+		b.append(TermColors.RESET).append("\n");
+		return b.toString();
+	}
+
+	private static String reverseHTML(String input) {
+		input = input
+				.replaceAll("\\<br(.*?)>", "\n")
+				.replaceAll("</div>", "\n")
+				.replaceAll("\\<.*?>", "")
+				.replaceAll("(?s)\\<!--.*?-->", "");
+		input = HTMLUtils.unescapeHTML(input);
+		input = input.replaceAll("\\{\\{function\\|(.*?)\\}\\}", TermColors.GREEN + "$1" + TermColors.RESET);
+		input = input.replaceAll("\\{\\{keyword\\|(.*?)\\}\\}", TermColors.BLUE + "$1" + TermColors.RESET);
+		input = input.replaceAll("\\\\\n", "\n");
+		input = input.replaceAll("(?s)\\{\\{Warning\\|text=(.*?)\\}\\}", TermColors.RED + "$1" + TermColors.RESET);
+		{
+			StringBuilder b = new StringBuilder();
+			StringBuilder headerLine = new StringBuilder();
+			boolean inTable = false;
+			boolean inTableHeader = false;
+			boolean inTableHeaderField = false;
+			for(int i = 0; i < input.length(); i++) {
+				char c = input.charAt(i);
+				char c2 = '\0';
+				char c3 = '\0';
+				if(i < input.length() - 1) {
+					c2 = input.charAt(i + 1);
+				}
+				if(i < input.length() - 2) {
+					c3 = input.charAt(i + 2);
+				}
+				if(c == '{' && c2 == '|') {
+					inTable = true;
+					inTableHeader = true;
+					b.append("\n");
+					i++;
+					continue;
+				}
+				if(c == '|' && c2 == '}') {
+					inTable = false;
+					i++;
+					b.append('\n');
+					continue;
+				}
+				if(inTable) {
+					if(inTableHeader) {
+						if(c == '|' && c2 == '-') {
+							b.append("\n");
+							i++;
+							continue;
+						}
+						if(c == '\n') {
+							inTableHeader = false;
+						}
+						continue;
+					}
+					if(inTableHeaderField) {
+						if(c == '|') {
+							inTableHeaderField = false;
+							b.append(TermColors.RESET).append("\n|").append(TermColors.MAGENTA);
+						} else if(c == '\n') {
+							b.append(TermColors.RESET).append("| ").append(TermColors.MAGENTA)
+									.append(headerLine.toString()).append(TermColors.RESET)
+									.append("\n");
+							if(c2 != '!') {
+								inTableHeaderField = false;
+							} else {
+								headerLine = new StringBuilder();
+								i++;
+							}
+							continue;
+						}
+						headerLine.append(c);
+						continue;
+					}
+					if(c == '\n' && c2 == '!') {
+						headerLine = new StringBuilder();
+						inTableHeaderField = true;
+						i++;
+						continue;
+					}
+					if((c == '\n' && c2 == '|' && c3 == '-') || (c == '|' && c2 == '-')) {
+						b.append(TermColors.RESET).append("\n").append(StringUtils.stringMultiply(80, "-"));
+						if(c == '\n') {
+							i += 2;
+						} else {
+							i++;
+							b.append("\n");
+						}
+						continue;
+					}
+				}
+				b.append(c);
+			}
+			input = b.toString() + "\n";
+		}
+		return input;
 	}
 
 	/**

@@ -26,8 +26,6 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.extensions.ExtensionManager;
-import com.laytonsmith.core.functions.ExampleScript;
-import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.Scheduling;
@@ -645,42 +643,7 @@ public class Main {
 						System.err.println("Could not launch browser");
 					}
 				} else {
-					DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
-					String ret = di.ret.replaceAll("</?[a-z].*?>", "");
-					String args2 = di.args.replaceAll("</?[a-z].*?>", "");
-					String desc = (di.desc + (di.extendedDesc != null ? "\n\n" + di.extendedDesc : "")).replaceAll("</?[a-z].*?>", "");
-					StreamUtils.GetSystemOut().println(StringUtils.Join(new String[]{
-						function,
-						"Returns " + ret,
-						"Expects " + args2,
-						desc
-					}, " // "));
-					if(examples) {
-						System.out.println("\nExamples:\n");
-						ExampleScript[] ex = null;
-						if(f instanceof Function) {
-							ex = ((Function) f).examples();
-						}
-						if(ex == null || ex.length == 0) {
-							StreamUtils.GetSystemOut().println("This function doesn't have any examples :(");
-						} else {
-							for(int i = 0; i < ex.length; i++) {
-								if(i > 0) {
-									System.out.println("\n\n");
-								}
-								ExampleScript e = ex[i];
-								StreamUtils.GetSystemOut().println(TermColors.BRIGHT_WHITE + TermColors.BOLD
-										+ TermColors.UNDERLINE
-										+ "Example " + (i + 1)
-										+ TermColors.RESET);
-								StreamUtils.GetSystemOut().println(e.getDescription() + "\n");
-								StreamUtils.GetSystemOut().println(TermColors.UNDERLINE + "Code" + TermColors.RESET
-										+ "\n" + e.getScript() + "\n");
-								StreamUtils.GetSystemOut().println(TermColors.UNDERLINE + "Output" + TermColors.RESET
-										+ "\n" + e.getOutput());
-							}
-						}
-					}
+					StreamUtils.GetSystemOut().println(Interpreter.formatDocsForCmdline(f.getName(), examples));
 				}
 				System.exit(0);
 			} else if(mode == SYNTAX_MODE) {

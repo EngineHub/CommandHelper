@@ -95,6 +95,8 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 
 	/**
 	 * Returns an array of example scripts, which are used for documentation purposes.
+	 * <p>
+	 * If there are no examples, null or empty array should be returned.
 	 *
 	 * @return
 	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException If the script could not be compiled
