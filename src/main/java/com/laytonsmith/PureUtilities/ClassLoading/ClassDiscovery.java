@@ -49,6 +49,9 @@ import org.objectweb.asm.ClassReader;
  */
 public class ClassDiscovery {
 
+	private static final boolean IS_DEBUG = java.lang.management.ManagementFactory.getRuntimeMXBean()
+			.getInputArguments().toString().contains("jdwp");
+
 	/**
 	 * The default instance.
 	 */
@@ -794,8 +797,15 @@ public class ClassDiscovery {
 			try {
 				set.add(cm.loadClass(loader, initialize));
 			} catch (NoClassDefFoundError e) {
-				//Ignore this for now?
-				//throw new Error("While trying to process " + cm.toString() + ", an error occurred.", e);
+				if(IS_DEBUG) {
+					// This is tough. Normally, we really want to ignore this error, but during development, it can be
+					// a critical error to see to diagnose a very hard to find error. So we compromize here, and only
+					// print error details out while in debug mode.
+					System.err.println("While trying to process " + cm.toString() + ", an error occurred. It it"
+							+ " probably safe to ignore this error, but if you're debugging to figure out why an"
+							+ " expected class is not showing up, then this is probably why.");
+					e.printStackTrace(System.err);
+				}
 			}
 		}
 		return set;

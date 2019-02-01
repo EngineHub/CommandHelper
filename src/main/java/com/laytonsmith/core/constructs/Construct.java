@@ -493,7 +493,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	public static CClassType typeof(Mixed that) {
 		typeof ann = that.getClass().getAnnotation(typeof.class);
 		if(ann == null) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Missing typeof annotation for " + that.getClass());
 		}
 		return CClassType.get(ann.value());
 	}

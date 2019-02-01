@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Properties;
 
@@ -52,13 +53,13 @@ public class INIDataSource extends StringSerializableDataSource {
 	}
 
 	@Override
-	public DataSourceModifier[] implicitModifiers() {
+	public EnumSet<DataSourceModifier> implicitModifiers() {
 		return null;
 	}
 
 	@Override
-	public DataSourceModifier[] invalidModifiers() {
-		return new DataSourceModifier[]{DataSourceModifier.PRETTYPRINT};
+	public EnumSet<DataSourceModifier> invalidModifiers() {
+		return EnumSet.of(DataSourceModifier.PRETTYPRINT);
 	}
 
 	@Override

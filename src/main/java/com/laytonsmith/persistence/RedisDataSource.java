@@ -8,6 +8,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -36,6 +37,7 @@ public class RedisDataSource extends AbstractDataSource {
 
 	}
 
+	@SuppressWarnings("UseSpecificCatch")
 	public RedisDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
 		super(uri, options);
 		try {
@@ -163,7 +165,7 @@ public class RedisDataSource extends AbstractDataSource {
 		} catch (JedisConnectionException e) {
 			throw new DataSourceException(e);
 		}
-		Set<String[]> parsed = new HashSet<String[]>();
+		Set<String[]> parsed = new HashSet<>();
 		for(String s : ret) {
 			parsed.add(s.split("\\."));
 		}
@@ -176,20 +178,18 @@ public class RedisDataSource extends AbstractDataSource {
 	}
 
 	@Override
-	public DataSourceModifier[] implicitModifiers() {
-		return new DataSourceModifier[]{
-			DataSourceModifier.TRANSIENT
-		};
+	public EnumSet<DataSourceModifier> implicitModifiers() {
+		return EnumSet.of(DataSourceModifier.TRANSIENT);
 	}
 
 	@Override
-	public DataSourceModifier[] invalidModifiers() {
-		return new DataSourceModifier[]{
+	public EnumSet<DataSourceModifier> invalidModifiers() {
+		return EnumSet.of(
 			DataSourceModifier.HTTP,
 			DataSourceModifier.HTTPS,
 			DataSourceModifier.PRETTYPRINT,
 			DataSourceModifier.SSH
-		};
+		);
 	}
 
 	@Override

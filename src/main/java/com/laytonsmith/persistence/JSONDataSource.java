@@ -6,6 +6,7 @@ import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,13 +50,13 @@ public class JSONDataSource extends StringSerializableDataSource {
 	}
 
 	@Override
-	public DataSourceModifier[] implicitModifiers() {
+	public EnumSet<DataSourceModifier> implicitModifiers() {
 		return null;
 	}
 
 	@Override
-	public DataSourceModifier[] invalidModifiers() {
-		return new DataSourceModifier[]{DataSourceModifier.PRETTYPRINT};
+	public EnumSet<DataSourceModifier> invalidModifiers() {
+		return EnumSet.of(DataSourceModifier.PRETTYPRINT);
 	}
 
 	@Override

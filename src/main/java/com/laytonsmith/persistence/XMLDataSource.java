@@ -3,6 +3,7 @@ package com.laytonsmith.persistence;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.net.URI;
+import java.util.EnumSet;
 
 /**
  *
@@ -30,12 +31,12 @@ public class XMLDataSource extends StringSerializableDataSource {
 	}
 
 	@Override
-	public DataSourceModifier[] implicitModifiers() {
+	public EnumSet<DataSourceModifier> implicitModifiers() {
 		return null;
 	}
 
 	@Override
-	public DataSourceModifier[] invalidModifiers() {
+	public EnumSet<DataSourceModifier> invalidModifiers() {
 		return null;
 	}
 

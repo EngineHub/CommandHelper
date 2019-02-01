@@ -10,6 +10,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -206,15 +207,15 @@ public abstract class SQLDataSource extends AbstractDataSource {
 	}
 
 	@Override
-	public DataSourceModifier[] implicitModifiers() {
-		return new DataSourceModifier[]{DataSourceModifier.TRANSIENT};
+	public EnumSet<DataSourceModifier> implicitModifiers() {
+		return EnumSet.of(DataSourceModifier.TRANSIENT);
 	}
 
 	@Override
-	public DataSourceModifier[] invalidModifiers() {
-		return new DataSourceModifier[]{DataSourceModifier.HTTP, DataSourceModifier.HTTPS, DataSourceModifier.SSH,
+	public EnumSet<DataSourceModifier> invalidModifiers() {
+		return EnumSet.of(DataSourceModifier.HTTP, DataSourceModifier.HTTPS, DataSourceModifier.SSH,
 			DataSourceModifier.PRETTYPRINT
-		};
+		);
 	}
 
 	protected void updateLastConnected() {

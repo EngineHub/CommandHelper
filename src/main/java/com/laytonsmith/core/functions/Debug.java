@@ -6,13 +6,17 @@ import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptFileLocations;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -24,10 +28,13 @@ import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.File;
 import java.io.IOException;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -247,7 +254,40 @@ public class Debug {
 	}
 
 	@api
-	public static class trace extends AbstractFunction {
+	@seealso(always_trace.class)
+	public static class trace extends always_trace {
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			//TODO: Once Prefs are no longer static, check to see if debug mode is on during compilation, and
+			//if so, remove this function entirely
+			if(Prefs.DebugMode()) {
+				return always_trace.doTrace(t, environment, args);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "trace";
+		}
+
+		@Override
+		public String docs() {
+			return "void {ivar} Works like {{function|always_trace}}, but only if debug-mode is enabled in the"
+					+ " preferences. See {{function|always_trace}} for details of the output.";
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
+		}
+
+	}
+
+	@api
+	@seealso(trace.class)
+	public static class always_trace extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -266,18 +306,7 @@ public class Debug {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[0] instanceof IVariable) {
-				if(Prefs.DebugMode()) {
-					IVariable ivar = (IVariable) args[0];
-					Mixed val = environment.getEnv(GlobalEnv.class).GetVarList().get(ivar.getVariableName(), t);
-					StreamUtils.GetSystemOut().println(ivar.getVariableName() + ": " + val.val());
-				}
-				return CVoid.VOID;
-			} else {
-				throw new CRECastException("Expecting an ivar, but recieved " + args[0].typeof().getSimpleName() + " instead", t);
-			}
-			//TODO: Once Prefs are no longer static, check to see if debug mode is on during compilation, and
-			//if so, remove this function entirely
+			return doTrace(t, environment, args);
 		}
 
 		@Override
@@ -287,7 +316,7 @@ public class Debug {
 
 		@Override
 		public String getName() {
-			return "trace";
+			return "always_trace";
 		}
 
 		@Override
@@ -297,14 +326,62 @@ public class Debug {
 
 		@Override
 		public String docs() {
-			return "void {ivar} If debug mode is on, outputs debug information about a variable. Unlike debug, this only accepts an ivar; it is a meta function."
-					+ " The runtime will then take the variable, and output information about it, in a human readable format, including"
-					+ " the variable's name and value. If debug mode is off, the function is ignored.";
+			return "void {ivar} Outputs debug information about a variable to standard out. Unlike {{function|debug}},"
+					+ " this only accepts an ivar; it is a meta function. The runtime will then take the variable,"
+					+ " and output information about it, in a human readable format, including the variable's"
+					+ " defined type, actual type, name and value.";
 		}
 
 		@Override
 		public MSVersion since() {
-			return MSVersion.V3_3_1;
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			// We have to hardcode the output here, because otherwise it just prints to stdout, and we don't curently
+			// capture that.
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage with auto type", "@m = 2;\n"
+						+ "always_trace(@m);", "auto (actual type ms.lang.int) @m: 2"),
+				new ExampleScript("With defined type", "int @i = 1;\n"
+						+ "always_trace(@i);", "ms.lang.int (actual type ms.lang.int) @i: 1"),
+				new ExampleScript("With subtype", "number @n = 2.0;\n"
+						+ "always_trace(@n);", "ms.lang.number (actual type ms.lang.double) @n: 2.0")
+			};
+		}
+
+		public static CVoid doTrace(Target t, Environment environment, Mixed... args) {
+			if(args[0] instanceof IVariable) {
+				IVariable ivar = environment.getEnv(GlobalEnv.class).GetVarList()
+						.get(((IVariable) args[0]).getVariableName(), t);
+				Mixed val = ivar.ival();
+				StreamUtils.GetSystemOut().println(ivar.getDefinedType() + " (actual type " + val.typeof() + ") "
+						+ ivar.getVariableName() + ": " + val.val());
+				return CVoid.VOID;
+			} else {
+				throw new CRECastException("Expecting an ivar, but recieved " + args[0].typeof().getSimpleName()
+						+ " instead", t);
+			}
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() != 1) {
+				throw new ConfigCompileException(getName() + " expects 1 parameter, but " + children.size()
+						+ " were provided.", t);
+			}
+			ParseTree child = children.get(0);
+			if(!(child.getData() instanceof IVariable)) {
+				throw new ConfigCompileException(getName() + " can only accept an ivar as the argument.", t);
+			}
+			return null;
 		}
 
 	}

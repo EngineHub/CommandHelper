@@ -5,6 +5,7 @@ import com.laytonsmith.annotations.MustUseOverride;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.SimpleDocumentation;
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -98,10 +99,9 @@ public interface DataSource extends SimpleDocumentation {
 	 * display configuration warnings, if a modifier is used in cases where it is implied. If the array would be empty,
 	 * null may be returned.
 	 *
-	 * @param modifier
 	 * @return
 	 */
-	public DataSourceModifier[] implicitModifiers();
+	public EnumSet<DataSourceModifier> implicitModifiers();
 
 	/**
 	 * If a data source has no possible way of acting on a modifier, it should return those here. This is used to
@@ -110,7 +110,7 @@ public interface DataSource extends SimpleDocumentation {
 	 *
 	 * @return
 	 */
-	public DataSourceModifier[] invalidModifiers();
+	public EnumSet<DataSourceModifier> invalidModifiers();
 
 	/**
 	 * Returns a list of modifiers attached to this data source instance.

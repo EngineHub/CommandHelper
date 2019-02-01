@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -213,14 +214,14 @@ public final class MemoryDataSource extends AbstractDataSource {
 	}
 
 	@Override
-	public DataSourceModifier[] implicitModifiers() {
-		return new DataSourceModifier[]{};
+	public EnumSet<DataSourceModifier> implicitModifiers() {
+		return null;
 	}
 
 	@Override
-	public DataSourceModifier[] invalidModifiers() {
+	public EnumSet<DataSourceModifier> invalidModifiers() {
 		//No modifiers are appropriate on here
-		return DataSourceModifier.values();
+		return EnumSet.allOf(DataSourceModifier.class);
 	}
 
 	@Override

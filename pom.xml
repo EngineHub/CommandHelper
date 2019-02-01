@@ -462,7 +462,7 @@
 				<configuration>
 					<archive>
 						<addMavenDescriptor>true</addMavenDescriptor>
-						<pomPropertiesFile>true</pomPropertiesFile>
+						<pomPropertiesFile>pom.properties</pomPropertiesFile>
 						<manifest>
 							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>

@@ -58,10 +58,6 @@ public class CacheAnnotations {
 		Set<Class> apiClasses = new HashSet<>();
 		apiClasses.addAll(ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(api.class));
 		apiClasses.addAll(ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(typeof.class));
-		if(apiClasses.isEmpty()) {
-			// Sanity check
-			throw new Exception("API classes should not be empty");
-		}
 		for(Class c : apiClasses) {
 			boolean isGetNameExempt = false;
 			if(c.isInterface()) {
