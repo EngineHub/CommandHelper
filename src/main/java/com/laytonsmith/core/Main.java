@@ -26,6 +26,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.extensions.ExtensionManager;
+import com.laytonsmith.core.extensions.ExtensionTracker;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.Scheduling;
@@ -70,10 +71,7 @@ public class Main {
 
 	public static final ArgumentSuite ARGUMENT_SUITE;
 	private static final ArgumentParser HELP_MODE;
-	private static final ArgumentParser MANAGER_MODE;
-	private static final ArgumentParser INTERPRETER_MODE;
-	private static final ArgumentParser MSLP_MODE;
-	private static final ArgumentParser VERSION_MODE;
+
 	private static final ArgumentParser COPYRIGHT_MODE;
 	private static final ArgumentParser PRINT_DB_MODE;
 	private static final ArgumentParser DOCS_MODE;
@@ -93,13 +91,17 @@ public class Main {
 	private static final ArgumentParser PM_VIEWER_MODE;
 	private static final ArgumentParser CORE_FUNCTIONS_MODE;
 	private static final ArgumentParser UI_MODE;
-	private static final ArgumentParser NEW_MODE;
 	private static final ArgumentParser SITE_DEPLOY;
 	private static final ArgumentParser EXTENSION_BUILDER_MODE;
+	// DO NOT ADD MORE TO THIS LIST. These will eventually all be ported to the @tool/CommandLineTool mechanism, which
+	// allows far more flexibility, and provides better grouping anyways. Plus, it allows Main to be referenced
+	// statically, without causing exceptions.
 
 	static {
+		// TODO: Remove these two lines, once all these are removed, and uncomment them within main()
 		Implementation.setServerType(Implementation.Type.SHELL);
 		MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
+
 		ArgumentSuite suite = new ArgumentSuite()
 				.addDescription("These are the command line tools for CommandHelper. For more information about a"
 						+ " particular mode, run help <mode name>. To run a command, in general, use the command:\n\n"
@@ -113,32 +115,6 @@ public class Main {
 				.setErrorOnUnknownArgs(false);
 		suite.addMode("help", HELP_MODE).addModeAlias("--help", "help").addModeAlias("-help", "help")
 				.addModeAlias("/?", "help");
-		MANAGER_MODE = ArgumentParser.GetParser()
-				.addDescription("Launches the built in interactive data manager, which will allow command line access to the full persistence database.");
-		suite.addMode("manager", MANAGER_MODE);
-		INTERPRETER_MODE = ArgumentParser.GetParser()
-				.addDescription("Launches the minimal cmdline interpreter.")
-				.addArgument(new ArgumentBuilder().setDescription("Sets the initial working directory of the"
-						+ " interpreter. This is optional, but"
-						+ " is automatically set by the mscript program. The option name is strange, to avoid any"
-						+ " conflicts with"
-						+ " script arguments.")
-						.setUsageName("location")
-						.setOptional()
-						.setName("location-----")
-						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
-						.setDefaultVal("."));
-		suite.addMode("interpreter", INTERPRETER_MODE);
-		MSLP_MODE = ArgumentParser.GetParser()
-				.addDescription("Creates an MSLP file based on the directory specified.")
-				.addArgument(new ArgumentBuilder().setDescription("The path to the folder")
-						.setUsageName("path/to/folder")
-						.setRequiredAndDefault());
-		suite.addMode("mslp", MSLP_MODE);
-		VERSION_MODE = ArgumentParser.GetParser()
-				.addDescription("Prints the version of CommandHelper, and exits.");
-		suite.addMode("version", VERSION_MODE).addModeAlias("--version", "version").addModeAlias("-version", "version")
-				.addModeAlias("-v", "version");
 		COPYRIGHT_MODE = ArgumentParser.GetParser()
 				.addDescription("Prints the copyright and exits.");
 		suite.addMode("copyright", COPYRIGHT_MODE);
@@ -382,19 +358,7 @@ public class Main {
 						+ " file available, but no login is necessary.")*/
 
 		suite.addMode("site-deploy", SITE_DEPLOY);
-		NEW_MODE = ArgumentParser.GetParser()
-				.addDescription("Creates a blank script in the specified location with the appropriate permissions,"
-						+ " having the correct hashbang, and ready to be executed. If"
-						+ " the specified file already exists, it will refuse to create it, unless --force is set.")
-				.addArgument(new ArgumentBuilder()
-						.setDescription("Location and name to create the script as. Multiple arguments can be provided,"
-								+ " and they will create multiple files.")
-						.setUsageName("file")
-						.setRequiredAndDefault())
-				.addArgument(new ArgumentBuilder()
-						.setDescription("Forces the file to be overwritten, even if it already exists.")
-						.asFlag().setName('f', "force"));
-		suite.addMode("new", NEW_MODE);
+
 
 		EXTENSION_BUILDER_MODE = ArgumentParser.GetParser()
 				.addDescription("Given a path to the git source repo, pulls down the code, builds the extension with"
@@ -458,16 +422,31 @@ public class Main {
 			ExtensionManager.Initialize(cd);
 			ExtensionManager.Startup();
 
+//			Implementation.setServerType(Implementation.Type.SHELL);
+//			MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
+
 			if(args.length == 0) {
 				args = new String[]{"--help"};
 			}
 
-			// I'm not sure why this is in Main, but if this breaks something, it needs to be put back.
-			// However, if it is put back, then it needs to be figured out why this causes the terminal
-			// to lose focus on mac.
-			//AnnotationChecks.checkForceImplementation();
 			ArgumentParser mode;
 			ArgumentParser.ArgumentParserResults parsedArgs;
+
+			Map<ArgumentParser, CommandLineTool> dynamicTools = new HashMap<>();
+			for(Class<? extends CommandLineTool> ctool : ClassDiscovery.getDefaultInstance()
+					.loadClassesWithAnnotationThatExtend(tool.class, CommandLineTool.class)) {
+				CommandLineTool tool = ctool.newInstance();
+				ArgumentParser ap = tool.getArgumentParser();
+				String toolName = ctool.getAnnotation(tool.class).value();
+				ARGUMENT_SUITE.addMode(toolName, ap);
+				String[] aliases = ctool.getAnnotation(tool.class).aliases();
+				if(aliases != null) {
+					for(String alias : aliases) {
+						ARGUMENT_SUITE.addModeAlias(alias, toolName);
+					}
+				}
+				dynamicTools.put(ap, tool);
+			}
 
 			try {
 				ArgumentSuite.ArgumentSuiteResults results = ARGUMENT_SUITE.match(args, "help");
@@ -501,10 +480,7 @@ public class Main {
 			//if it were, the help command would have run.
 			assert parsedArgs != null;
 
-			if(mode == MANAGER_MODE) {
-				Manager.start();
-				System.exit(0);
-			} else if(mode == CORE_FUNCTIONS_MODE) {
+			if(mode == CORE_FUNCTIONS_MODE) {
 				List<String> core = new ArrayList<>();
 				for(api.Platforms platform : api.Platforms.values()) {
 					for(FunctionBase f : FunctionList.getFunctionList(platform)) {
@@ -516,28 +492,11 @@ public class Main {
 				Collections.sort(core);
 				StreamUtils.GetSystemOut().println(StringUtils.Join(core, ", "));
 				System.exit(0);
-			} else if(mode == INTERPRETER_MODE) {
-				new Interpreter(parsedArgs.getStringListArgument(), parsedArgs.getStringArgument("location-----"));
-				System.exit(0);
 			} else if(mode == INSTALL_CMDLINE_MODE) {
 				Interpreter.install();
 				System.exit(0);
 			} else if(mode == UNINSTALL_CMDLINE_MODE) {
 				Interpreter.uninstall();
-				System.exit(0);
-			} else if(mode == MSLP_MODE) {
-				String mslp = parsedArgs.getStringArgument();
-				if(mslp.isEmpty()) {
-					StreamUtils.GetSystemOut().println("Usage: --mslp path/to/folder");
-					System.exit(0);
-				}
-				MSLPMaker.start(mslp);
-				System.exit(0);
-			} else if(mode == VERSION_MODE) {
-				// TODO: This should eventually be changed to load versions of all extensions, and use an independent
-				// versioning scheme for CH and MS.
-				StreamUtils.GetSystemOut().println("You are running "
-						+ Implementation.GetServerType().getBranding() + " version " + Static.loadSelfVersion());
 				System.exit(0);
 			} else if(mode == COPYRIGHT_MODE) {
 				StreamUtils.GetSystemOut().println("The MIT License (MIT)\n"
@@ -860,26 +819,6 @@ public class Main {
 				}
 				File config = new File(configString);
 				SiteDeploy.run(generatePrefs, useLocalCache, config, "", doValidation, !noProgressClear);
-			} else if(mode == NEW_MODE) {
-				String li = OSUtils.GetLineEnding();
-				for(String file : parsedArgs.getStringListArgument()) {
-					File f = new File(file);
-					if(f.exists() && !parsedArgs.isFlagSet('f')) {
-						System.out.println(file + " already exists, refusing to create");
-						continue;
-					}
-					f.createNewFile();
-					f.setExecutable(true);
-					FileUtil.write("#!/usr/bin/env /usr/local/bin/mscript"
-							+ li
-							+ "<!" + li
-							+ "\tstrict;" + li
-							+ "\tname: " + f.getName() + ";" + li
-							+ "\tauthor: " + StaticLayer.GetConvertor().GetUser(null) + ";" + li
-							+ "\tcreated: " + new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString("yyyy-MM-dd", Target.UNKNOWN)).val() + ";" + li
-							+ "\tdescription: " + ";" + li
-							+ ">" + li + li, f, true);
-				}
 			} else if(mode == EXTENSION_BUILDER_MODE) {
 
 				try {
@@ -966,12 +905,148 @@ public class Main {
 				} catch (Exception e) {
 					e.printStackTrace(System.err);
 				}
-
+			} else if(dynamicTools.containsKey(mode)) {
+				dynamicTools.get(mode).execute(parsedArgs);
+				System.exit(0);
 			} else {
 				throw new Error("Should not have gotten here");
 			}
 		} catch (NoClassDefFoundError error) {
 			StreamUtils.GetSystemErr().println(Static.getNoClassDefFoundErrorMessage(error));
 		}
+	}
+
+	@tool(value = "version", aliases = {"-v", "--v", "-version", "--version"})
+	public static class VersionMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Prints the version of CommandHelper, and exits.");
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			// TODO: This should eventually be changed to use an independent
+			// versioning scheme for CH and MS.
+			StreamUtils.GetSystemOut().println("You are running "
+					+ Implementation.GetServerType().getBranding() + " version " + Static.loadSelfVersion());
+			for(ExtensionTracker e : ExtensionManager.getTrackers().values()) {
+				StreamUtils.GetSystemOut().println(e.getIdentifier() + ": " + e.getVersion());
+			}
+		}
+
+	}
+
+	@tool("manager")
+	public static class ManagerMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Launches the built in interactive data manager, which will allow command line access"
+						+ " to the full persistence database.");
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			Manager.start();
+		}
+
+	}
+
+	@tool("mslp")
+	public static class MSLPMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Creates an MSLP file based on the directory specified.")
+				.addArgument(new ArgumentBuilder().setDescription("The path to the folder")
+						.setUsageName("path/to/folder")
+						.setRequiredAndDefault());
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			String mslp = parsedArgs.getStringArgument();
+			if(mslp.isEmpty()) {
+				StreamUtils.GetSystemOut().println("Usage: --mslp path/to/folder");
+				System.exit(1);
+			}
+			MSLPMaker.start(mslp);
+		}
+
+	}
+
+	@tool("interpreter")
+	public static class InterpreterMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Launches the minimal cmdline interpreter.")
+				.addArgument(new ArgumentBuilder().setDescription("Sets the initial working directory of the"
+						+ " interpreter. This is optional, but"
+						+ " is automatically set by the mscript program. The option name is strange, to avoid any"
+						+ " conflicts with"
+						+ " script arguments.")
+						.setUsageName("location")
+						.setOptional()
+						.setName("location-----")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
+						.setDefaultVal("."));
+		}
+
+		@Override
+		@SuppressWarnings("ResultOfObjectAllocationIgnored")
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			new Interpreter(parsedArgs.getStringListArgument(), parsedArgs.getStringArgument("location-----"));
+		}
+
+	}
+
+	@tool("new")
+	public static class NewMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Creates a blank script in the specified location with the appropriate permissions,"
+						+ " having the correct hashbang, and ready to be executed. If"
+						+ " the specified file already exists, it will refuse to create it, unless --force is set.")
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Location and name to create the script as. Multiple arguments can be provided,"
+								+ " and they will create multiple files.")
+						.setUsageName("file")
+						.setRequiredAndDefault())
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Forces the file to be overwritten, even if it already exists.")
+						.asFlag().setName('f', "force"));
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws IOException {
+			String li = OSUtils.GetLineEnding();
+			for(String file : parsedArgs.getStringListArgument()) {
+				File f = new File(file);
+				if(f.exists() && !parsedArgs.isFlagSet('f')) {
+					System.out.println(file + " already exists, refusing to create");
+					continue;
+				}
+				f.createNewFile();
+				f.setExecutable(true);
+				FileUtil.write("#!/usr/bin/env /usr/local/bin/mscript"
+						+ li
+						+ "<!" + li
+						+ "\tstrict;" + li
+						+ "\tname: " + f.getName() + ";" + li
+						+ "\tauthor: " + StaticLayer.GetConvertor().GetUser(null) + ";" + li
+						+ "\tcreated: " + new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString("yyyy-MM-dd", Target.UNKNOWN)).val() + ";" + li
+						+ "\tdescription: " + ";" + li
+						+ ">" + li + li, f, true);
+			}
+		}
+
 	}
 }
