@@ -712,23 +712,30 @@ public class Cmdline {
 			requireCmdlineMode(environment, this, t);
 
 			String prompt = args[0].val();
-			StreamUtils.GetSystemOut().print(Static.MCToANSIColors(prompt));
-			StreamUtils.GetSystemOut().flush();
-			jline.console.ConsoleReader reader = null;
 			try {
-				reader = new jline.console.ConsoleReader();
-				reader.setExpandEvents(false);
-				char c = (char) reader.readCharacter();
-				StreamUtils.GetSystemOut().println(c);
+				char c = promptChar(Static.MCToANSIColors(prompt));
 				return new CString(c, t);
 			} catch (IOException ex) {
 				throw new CREIOException(ex.getMessage(), t);
-			} finally {
-				if(reader != null) {
-					reader.close();
-				}
 			}
 
+		}
+
+		/**
+		 * Prompts for a single char from the console. The character typed is returned.
+		 * @param prompt
+		 * @return
+		 * @throws IOException
+		 */
+		public static char promptChar(String prompt) throws IOException {
+			StreamUtils.GetSystemOut().print(prompt);
+			StreamUtils.GetSystemOut().flush();
+			try(jline.console.ConsoleReader reader = new jline.console.ConsoleReader()) {
+				reader.setExpandEvents(false);
+				char c = (char) reader.readCharacter();
+				StreamUtils.GetSystemOut().println(c);
+				return c;
+			}
 		}
 
 		@Override
