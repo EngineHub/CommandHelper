@@ -415,7 +415,7 @@ public final class ArgumentValidation {
 	 */
 	public static boolean anyDoubles(Mixed... c) {
 		for(Mixed c1 : c) {
-			if(c1 instanceof CDouble) {
+			if(c1 instanceof CDouble || c1 instanceof CString && c1.val().indexOf(".", 1) > -1) {
 				return true;
 			}
 		}
