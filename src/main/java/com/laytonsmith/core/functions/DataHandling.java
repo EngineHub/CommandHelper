@@ -703,7 +703,7 @@ public class DataHandling {
 					arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish + 1, t));
 				}
 			}
-			if(!(arr instanceof Iterable)) {
+			if(!(arr instanceof com.laytonsmith.core.natives.interfaces.Iterable)) {
 				throw new CRECastException("Parameter 1 of " + getName() + " must be an Iterable data structure", t);
 			}
 			if(!(iv instanceof IVariable)) {
