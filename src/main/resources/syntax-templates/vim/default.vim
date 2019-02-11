@@ -16,6 +16,7 @@ syn region smartstring start=/"/ skip=/\\"/ end=/"/
 	\ contains=ivariable,smartIVariable
 syn region smartIVariable start="@{" end="}" contained
 syn match ivariable /@[a-zA-Z0-9_]\+/
+syn match argumentsVar /@arguments/
 syn region fileOptions start="<!" end='>'
 syn match fileOptionsLabel /\v(%%pipe:fileOptions%%)(:|;)/ containedin=fileOptions
 syn match variable /\$[a-zA-Z0-9_]\+/
@@ -35,6 +36,7 @@ highlight blockcomment ctermfg=LightGray guifg=LightGray
 highlight stringlit ctermfg=3 guifg=orange
 highlight smartstring ctermfg=3 guifg=orange
 highlight ivariable ctermfg=green guifg=green
+highlight argumentsVar ctermfg=blue guifg=blue
 highlight smartIVariable ctermfg=green guifg=green
 highlight variable ctermfg=LightCyan guifg=LightCyan
 highlight finalvar ctermfg=DarkCyan guifg=DarkCyan
