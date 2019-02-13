@@ -345,9 +345,8 @@ public class ExtensionManager {
 
 		// Grab files from the cache if on Windows. Otherwise just load
 		// directly from the stored locations.
-		boolean onWindows = (OSUtils.GetOS() == OSUtils.OS.WINDOWS);
 
-		if(onWindows) {
+		if(OSUtils.GetOS().isWindows()) {
 			toProcess.addAll(getFiles(CommandHelperFileLocations.getDefault().getExtensionCacheDirectory()));
 		} else {
 			for(File location : LOCATIONS) {
@@ -423,14 +422,7 @@ public class ExtensionManager {
 			// use it.
 			if(trk.identifier == null) {
 				trk.identifier = ext.getName();
-				try {
-					trk.version = ext.getVersion();
-				} catch (AbstractMethodError ex) {
-					// getVersion() was added later. This is a temporary fix
-					// to allow extension authors some time to update.
-					// TODO: Remove this soon.
-					trk.version = new SimpleVersion("0.0.0");
-				}
+				trk.version = ext.getVersion();
 			}
 
 			trk.allExtensions.add(ext);

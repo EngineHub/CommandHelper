@@ -11,8 +11,10 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
+import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CFunction;
@@ -56,7 +58,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class _if extends AbstractFunction implements Optimizable {
+	public static class _if extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
 
 		@Override
 		public String getName() {
@@ -207,10 +209,27 @@ public class BasicLogic {
 				new ExampleScript("With braces, false condition", "msg('Start')\nif(false){\n\tmsg('This will not show')\n}\nmsg('Finish')")};
 		}
 
+		@Override
+		public List<Boolean> isBranch(List<ParseTree> children) {
+			List<Boolean> branches = new ArrayList<>(children.size());
+			// Only the first child is not a branch. Everything else is a branch.
+			branches.add(false);
+			for(int i = 1; i < children.size(); i++) {
+				branches.add(true);
+			}
+			return branches;
+		}
+
+		@Override
+		public List<Boolean> isScope(List<ParseTree> children) {
+			// It's the exact same logic as the branches
+			return isBranch(children);
+		}
+
 	}
 
 	@api(environments = {GlobalEnv.class})
-	public static class ifelse extends AbstractFunction implements Optimizable {
+	public static class ifelse extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
 
 		@Override
 		public String getName() {
@@ -313,11 +332,28 @@ public class BasicLogic {
 				new ExampleScript("With braces, with else if", "if(false){\n\tmsg('This will not show')\n} else if(false){\n"
 				+ "\n\tmsg('This will not show')\n} else {\n\tmsg('This will show')\n}")};
 		}
+
+		@Override
+		public List<Boolean> isBranch(List<ParseTree> children) {
+			List<Boolean> branches = new ArrayList<>(children.size());
+			// Only the first child is not a branch. Everything else is a branch.
+			branches.add(false);
+			for(int i = 1; i < children.size(); i++) {
+				branches.add(true);
+			}
+			return branches;
+		}
+
+		@Override
+		public List<Boolean> isScope(List<ParseTree> children) {
+			// It's the exact same logic as the branches
+			return isBranch(children);
+		}
 	}
 
 	@api
 	@breakable
-	public static class _switch extends AbstractFunction implements Optimizable {
+	public static class _switch extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
 
 		@Override
 		public String getName() {
@@ -737,6 +773,29 @@ public class BasicLogic {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC, OptimizationOption.PRIORITY_OPTIMIZATION);
+		}
+
+		@Override
+		public List<Boolean> isBranch(List<ParseTree> children) {
+			List<Boolean> branches = new ArrayList<>(children.size());
+			// The first and second arguments are not
+			if(children.size() > 1) {
+				branches.add(false);
+			}
+			for(int i = 1; i < children.size(); i++) {
+				branches.add(false);
+				if(children.size() > 2) {
+					branches.add(true);
+					i++;
+				}
+			}
+			return branches;
+		}
+
+		@Override
+		public List<Boolean> isScope(List<ParseTree> children) {
+			// It's the exact same logic as the branches
+			return isBranch(children);
 		}
 	}
 
