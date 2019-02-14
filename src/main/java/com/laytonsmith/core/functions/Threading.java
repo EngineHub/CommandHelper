@@ -12,6 +12,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
@@ -31,7 +32,9 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
@@ -338,7 +341,7 @@ public class Threading {
 	@api
 	@noboilerplate
 	@seealso({x_new_thread.class})
-	public static class _synchronized extends AbstractFunction {
+	public static class _synchronized extends AbstractFunction implements VariableScope {
 
 		private static final Map<Object, Integer> SYNC_OBJECT_MAP = new HashMap<Object, Integer>();
 
@@ -508,6 +511,14 @@ public class Threading {
 				"Some new log message from Thread1.\nSome new log message from Thread2.\n"
 				+ "\nOR\nSome new log message from Thread2.\nSome new log message from Thread1.\n")
 			};
+		}
+
+		@Override
+		public List<Boolean> isScope(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>(2);
+			ret.add(false);
+			ret.add(true);
+			return ret;
 		}
 
 	}

@@ -9,7 +9,9 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CNull;
@@ -54,7 +56,7 @@ public class EventBinding {
 	private static final AtomicInteger BIND_COUNTER = new AtomicInteger(0);
 
 	@api(environments = CommandHelperEnvironment.class)
-	public static class bind extends AbstractFunction implements Optimizable {
+	public static class bind extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
 
 		@Override
 		public String getName() {
@@ -209,6 +211,21 @@ public class EventBinding {
 			} catch (IllegalArgumentException ex) {
 				throw new ConfigCompileException(ex.getMessage(), t);
 			}
+		}
+
+		@Override
+		public List<Boolean> isBranch(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>(children.size());
+			for(int i = 0; i < children.size() - 1; i++) {
+				ret.add(false);
+			}
+			ret.add(true);
+			return ret;
+		}
+
+		@Override
+		public List<Boolean> isScope(List<ParseTree> children) {
+			return isBranch(children);
 		}
 
 	}

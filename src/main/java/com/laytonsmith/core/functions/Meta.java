@@ -21,6 +21,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
@@ -46,6 +47,8 @@ import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.jar.JarFile;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -501,7 +504,7 @@ public class Meta {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
-	public static class scriptas extends AbstractFunction {
+	public static class scriptas extends AbstractFunction implements VariableScope {
 
 		@Override
 		public String getName() {
@@ -576,6 +579,17 @@ public class Meta {
 		@Override
 		public boolean useSpecialExec() {
 			return true;
+		}
+
+		@Override
+		public List<Boolean> isScope(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>(children.size());
+			ret.add(false);
+			if(children.size() == 3) {
+				ret.add(false);
+			}
+			ret.add(true);
+			return ret;
 		}
 	}
 

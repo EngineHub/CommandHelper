@@ -22,7 +22,9 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.compiler.keywords.InKeyword;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
@@ -427,7 +429,7 @@ public class DataHandling {
 	@noboilerplate
 	@breakable
 	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class, com.laytonsmith.tools.docgen.templates.ArrayIteration.class})
-	public static class _for extends AbstractFunction implements Optimizable {
+	public static class _for extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
 
 		@Override
 		public String getName() {
@@ -534,12 +536,32 @@ public class DataHandling {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 
+		@Override
+		public List<Boolean> isBranch(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>();
+			ret.add(false);
+			ret.add(false);
+			ret.add(true);
+			ret.add(true);
+			return ret;
+		}
+
+		@Override
+		public List<Boolean> isScope(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>();
+			ret.add(true);
+			ret.add(false);
+			ret.add(false);
+			ret.add(true);
+			return ret;
+		}
+
 	}
 
 	@api
 	@noboilerplate
 	@breakable
-	public static class forelse extends AbstractFunction {
+	public static class forelse extends AbstractFunction implements BranchStatement, VariableScope {
 
 		public forelse() {
 		}
@@ -648,12 +670,22 @@ public class DataHandling {
 			return MSVersion.V3_3_1;
 		}
 
+		@Override
+		public List<Boolean> isBranch(List<ParseTree> children) {
+			return Arrays.asList(false, false, true, true, true);
+		}
+
+		@Override
+		public List<Boolean> isScope(List<ParseTree> children) {
+			return Arrays.asList(true, false, false, true, true);
+		}
+
 	}
 
 	@api(environments = CommandHelperEnvironment.class)
 	@breakable
 	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class, ArrayIteration.class})
-	public static class foreach extends AbstractFunction implements Optimizable {
+	public static class foreach extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
 
 		@Override
 		public String getName() {
@@ -1002,6 +1034,28 @@ public class DataHandling {
 			return null;
 		}
 
+		@Override
+		public List<Boolean> isBranch(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>(children.size());
+			ret.add(false);
+			if(children.size() == 4) {
+				// 3 and 4 arguments are the only actually possible ones here
+				ret.add(false);
+			}
+			ret.add(false);
+			ret.add(true);
+			return ret;
+		}
+
+		@Override
+		public List<Boolean> isScope(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>(children.size());
+			for(ParseTree c : children) {
+				ret.add(true);
+			}
+			return ret;
+		}
+
 	}
 
 	@api
@@ -1075,13 +1129,27 @@ public class DataHandling {
 				+ ")")};
 		}
 
+		@Override
+		public List<Boolean> isBranch(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>(children.size());
+			ret.add(false);
+			if(children.size() == 5) {
+				// 4 and 5 arguments are the only actually possible ones here
+				ret.add(false);
+			}
+			ret.add(false);
+			ret.add(true);
+			ret.add(true);
+			return ret;
+		}
+
 	}
 
 	@api
 	@noboilerplate
 	@breakable
 	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class})
-	public static class _while extends AbstractFunction {
+	public static class _while extends AbstractFunction implements BranchStatement, VariableScope {
 
 		@Override
 		public String getName() {
@@ -1177,13 +1245,26 @@ public class DataHandling {
 					+ args.get(0).toStringVerbose() + ", <code>)";
 		}
 
+		@Override
+		public List<Boolean> isBranch(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>();
+			ret.add(false);
+			ret.add(true);
+			return ret;
+		}
+
+		@Override
+		public List<Boolean> isScope(List<ParseTree> children) {
+			return isBranch(children);
+		}
+
 	}
 
 	@api
 	@noboilerplate
 	@breakable
 	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class})
-	public static class _dowhile extends AbstractFunction {
+	public static class _dowhile extends AbstractFunction implements BranchStatement, VariableScope {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -1274,6 +1355,19 @@ public class DataHandling {
 		public String profileMessageS(List<ParseTree> args) {
 			return "Executing function: " + this.getName() + "(<code>, "
 					+ args.get(1).toStringVerbose() + ")";
+		}
+
+		@Override
+		public List<Boolean> isBranch(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>(2);
+			ret.add(true);
+			ret.add(false);
+			return ret;
+		}
+
+		@Override
+		public List<Boolean> isScope(List<ParseTree> children) {
+			return isBranch(children);
 		}
 	}
 
@@ -2124,7 +2218,7 @@ public class DataHandling {
 
 	@api
 	@unbreakable
-	public static class proc extends AbstractFunction {
+	public static class proc extends AbstractFunction implements BranchStatement, VariableScope {
 
 		@Override
 		public String getName() {
@@ -2318,6 +2412,25 @@ public class DataHandling {
 //			//that here. If we don't, we lose the information
 //			return ;
 //		}
+
+		@Override
+		public List<Boolean> isBranch(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>(children.size());
+			for(int i = 0; i < children.size() - 1; i++) {
+				ret.add(false);
+			}
+			ret.add(true);
+			return ret;
+		}
+
+		@Override
+		public List<Boolean> isScope(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>(children.size());
+			for(ParseTree child : children) {
+				ret.add(true);
+			}
+			return ret;
+		}
 	}
 
 	@api
@@ -2934,7 +3047,7 @@ public class DataHandling {
 	@api(environments = CommandHelperEnvironment.class)
 	@unbreakable
 	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class})
-	public static class closure extends AbstractFunction {
+	public static class closure extends AbstractFunction implements BranchStatement, VariableScope {
 
 		@Override
 		public String getName() {
@@ -3059,6 +3172,21 @@ public class DataHandling {
 				+ "\tmsg('Hello World!');\n"
 				+ "});")
 			};
+		}
+
+		@Override
+		public List<Boolean> isBranch(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>(children.size());
+			for(int i = 0; i < children.size() - 1; i++) {
+				ret.add(false);
+			}
+			ret.add(true);
+			return ret;
+		}
+
+		@Override
+		public List<Boolean> isScope(List<ParseTree> children) {
+			return isBranch(children);
 		}
 
 	}
