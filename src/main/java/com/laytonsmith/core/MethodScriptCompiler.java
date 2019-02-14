@@ -1,6 +1,5 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.breakable;
