@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.breakable;
@@ -7,6 +8,7 @@ import com.laytonsmith.annotations.nolinking;
 import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
+import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.KeywordList;
 import com.laytonsmith.core.compiler.TokenStream;
@@ -1673,6 +1675,7 @@ public final class MethodScriptCompiler {
 		link(tree, compilerErrors);
 		checkLabels(tree, compilerErrors);
 		checkBreaks(tree, compilerErrors);
+		eliminateDeadCode(tree);
 		if(!compilerErrors.isEmpty()) {
 			if(compilerErrors.size() == 1) {
 				// Just throw the one CCE
@@ -2080,72 +2083,7 @@ public final class MethodScriptCompiler {
 				return;
 			}
 		}
-		//Loop through the children, and if any of them are functions that are terminal, truncate.
-		//To explain this further, consider the following:
-		//For the code: concat(die(), msg('')), this diagram shows the abstract syntax tree:
-		//         (concat)
-		//        /        \
-		//       /          \
-		//     (die)       (msg)
-		//By looking at the code, we can tell that msg() will never be called, because die() will run first,
-		//and since it is a "terminal" function, any code after it will NEVER run. However, consider a more complex condition:
-		// if(@input){ die() msg('1') } else { msg('2') msg('3') }
-		//              if(@input)
-		//        [true]/         \[false]
-		//             /           \
-		//         (sconcat)     (sconcat)
-		//           /   \         /    \
-		//          /     \       /      \
-		//       (die) (msg[1])(msg[2]) (msg[3])
-		//In this case, only msg('1') is guaranteed not to run, msg('2') and msg('3') will still run in some cases.
-		//So, we can optimize out msg('1') in this case, which would cause the tree to become much simpler, therefore a worthwile optimization:
-		//              if(@input)
-		//        [true]/        \[false]
-		//             /          \
-		//          (die)      (sconcat)
-		//                      /    \
-		//                     /      \
-		//                 (msg[2]) (msg[3])
-		//We do have to be careful though, because of functions like if, which actually work like this:
-		//if(@var){ die() } else { msg('') }
-		//                (if)
-		//              /  |  \
-		//             /   |   \
-		//          @var (die) (msg)
-		//We can't git rid of the msg() here, because it is actually in another branch.
-		//For the time being, we will simply say that if a function uses execs, it
-		//is a branch (branches always use execs, though using execs doesn't strictly
-		//mean you are a branch type function).
 
-		for(int i = 0; i < children.size(); i++) {
-			ParseTree t = children.get(i);
-			if(t.getData() instanceof CFunction) {
-				if(t.getData().val().startsWith("_") || (func != null && func.useSpecialExec())) {
-					continue;
-				}
-				Function f;
-				try {
-					f = (Function) FunctionList.getFunction(((CFunction) t.getData()));
-				} catch (ConfigCompileException | ClassCastException ex) {
-					continue;
-				}
-				Set<OptimizationOption> options = NO_OPTIMIZATIONS;
-				if(f instanceof Optimizable) {
-					options = ((Optimizable) f).optimizationOptions();
-				}
-				if(options.contains(OptimizationOption.TERMINAL)) {
-					if(children.size() > i + 1) {
-						//First, a compiler warning
-						CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Unreachable code. Consider removing this code.", children.get(i + 1).getTarget());
-						//Now, truncate the children
-						for(int j = children.size() - 1; j > i; j--) {
-							children.remove(j);
-						}
-						break;
-					}
-				}
-			}
-		}
 		boolean fullyStatic = true;
 		boolean hasIVars = false;
 		for(ParseTree node : children) {
@@ -2343,6 +2281,106 @@ public final class MethodScriptCompiler {
 		}
 
 		//It doesn't know how to optimize. Oh well.
+	}
+
+	private static boolean eliminateDeadCode(ParseTree tree) {
+		//Loop through the children, and if any of them are functions that are terminal, truncate.
+		//To explain this further, consider the following:
+		//For the code: concat(die(), msg('')), this diagram shows the abstract syntax tree:
+		//         (concat)
+		//        /        \
+		//       /          \
+		//     (die)       (msg)
+		//By looking at the code, we can tell that msg() will never be called, because die() will run first,
+		//and since it is a "terminal" function, any code after it will NEVER run. However, consider a more complex condition:
+		// if(@input){ die() msg('1') } else { msg('2') msg('3') }
+		//              if(@input)
+		//        [true]/         \[false]
+		//             /           \
+		//         (sconcat)     (sconcat)
+		//           /   \         /    \
+		//          /     \       /      \
+		//       (die) (msg[1])(msg[2]) (msg[3])
+		//In this case, only msg('1') is guaranteed not to run, msg('2') and msg('3') will still run in some cases.
+		//So, we can optimize out msg('1') in this case, which would cause the tree to become much simpler, therefore a worthwile optimization:
+		//              if(@input)
+		//        [true]/        \[false]
+		//             /          \
+		//          (die)      (sconcat)
+		//                      /    \
+		//                     /      \
+		//                 (msg[2]) (msg[3])
+		//We do have to be careful though, because of functions like if, which actually work like this:
+		//if(@var){ die() } else { msg('') }
+		//                (if)
+		//              /  |  \
+		//             /   |   \
+		//          @var (die) (msg)
+		//We can't git rid of the msg() here, because it is actually in another branch.
+		//For the time being, we will simply say that if a function uses execs, it
+		//is a branch (branches always use execs, though using execs doesn't strictly
+		//mean you are a branch type function).
+		if(tree.getData() instanceof CFunction) {
+			Function f;
+			try {
+				f = (Function) FunctionList.getFunction(((CFunction) tree.getData()));
+			} catch (ConfigCompileException | ClassCastException ex) {
+				return false;
+			}
+			List<ParseTree> children = tree.getChildren();
+			List<Boolean> branches;
+			if(f instanceof BranchStatement) {
+				branches = ((BranchStatement) f).isBranch(children);
+				if(branches.size() != children.size()) {
+					throw new Error(f.getName() + " does not properly implement isBranch. It does not return a value"
+							+ " with the same count as the actual children. Expected: " + children.size() + ";"
+									+ " Actual: " + branches.size());
+				}
+			} else {
+				branches = new ArrayList<>(children.size());
+				for(ParseTree child : children) {
+					branches.add(false);
+				}
+			}
+			boolean doDeletion = false;
+			for(int m = 0; m < children.size(); m++) {
+				boolean isBranch = branches.get(m);
+				if(doDeletion) {
+					if(isBranch) {
+						doDeletion = false;
+					} else {
+						CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Unreachable code. Consider"
+												+ " removing this code.", children.get(m).getTarget());
+						children.remove(m);
+						m--;
+						continue;
+					}
+				}
+				ParseTree child = children.get(m);
+				if(child.getData() instanceof CFunction) {
+					Function c;
+					try {
+						c = (Function) FunctionList.getFunction(((CFunction) child.getData()));
+					} catch (ConfigCompileException | ClassCastException ex) {
+						continue;
+					}
+					Set<OptimizationOption> options = NO_OPTIMIZATIONS;
+					if(c instanceof Optimizable) {
+						options = ((Optimizable) c).optimizationOptions();
+					}
+					doDeletion = options.contains(OptimizationOption.TERMINAL);
+					boolean subDoDelete = eliminateDeadCode(child);
+					if(subDoDelete) {
+						doDeletion = true;
+					}
+				}
+				if(isBranch) {
+					doDeletion = false;
+				}
+			}
+			return doDeletion;
+		}
+		return false;
 	}
 
 	/**

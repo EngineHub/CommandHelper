@@ -778,15 +778,16 @@ public class BasicLogic {
 		@Override
 		public List<Boolean> isBranch(List<ParseTree> children) {
 			List<Boolean> branches = new ArrayList<>(children.size());
-			// The first and second arguments are not
-			if(children.size() > 1) {
-				branches.add(false);
-			}
-			for(int i = 1; i < children.size(); i++) {
-				branches.add(false);
-				if(children.size() > 2) {
+			branches.add(false);
+			if(children.size() == 2) {
+				branches.add(true);
+			} else {
+				for(int i = 1; i < children.size() - 1; i += 2) {
+					branches.add(false);
 					branches.add(true);
-					i++;
+				}
+				if(children.size() % 2 == 0) {
+					branches.add(true);
 				}
 			}
 			return branches;
