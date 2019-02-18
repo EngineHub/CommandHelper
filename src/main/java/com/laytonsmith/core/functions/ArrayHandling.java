@@ -849,18 +849,30 @@ public class ArrayHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CArray) {
-				CArray ca = (CArray) args[0];
-				if(!ca.inAssociativeMode()) {
-					try {
-						int index = Static.getInt32(args[1], t);
-						return CBoolean.get(index < ca.size());
-					} catch (ConfigRuntimeException e) {
-						//They probably sent a key that can't be translated into an int, so it doesn't exist here.
+				Mixed m = args[0];
+				for(int i = 1; i < args.length; i++) {
+					if(!(m instanceof CArray)) {
 						return CBoolean.FALSE;
 					}
-				} else {
-					return CBoolean.get(ca.containsKey(args[1].val()));
+					CArray ca = (CArray) m;
+					if(!ca.inAssociativeMode()) {
+						try {
+							int index = Static.getInt32(args[i], t);
+							if(index >= ca.size()) {
+								return CBoolean.FALSE;
+							}
+						} catch (ConfigRuntimeException e) {
+							//They probably sent a key that can't be translated into an int, so it doesn't exist here.
+							return CBoolean.FALSE;
+						}
+					} else {
+						if(!ca.containsKey(args[i].val())) {
+							return CBoolean.FALSE;
+						}
+					}
+					m = ca.get(args[i], t);
 				}
+				return CBoolean.TRUE;
 			} else {
 				throw new CRECastException("Expecting argument 1 to be an array", t);
 			}
@@ -882,7 +894,12 @@ public class ArrayHandling {
 				new ExampleScript("Demonstrates an associative array", "array_index_exists(array(a: 'A', b: 'B'), 'a')"),
 				new ExampleScript("Demonstrates an associative array", "array_index_exists(array(a: 'A', b: 'B'), 'c')"),
 				new ExampleScript("Demonstrates nested arrays", "// Check to make sure that @array['a']['b']['c'] would work\n"
-				+ "array_index_exists(array(a: array(b: array(c: null))), 'a', 'b', 'c');")
+				+ "@array = array(a: array(b: array(c: null)));\n"
+				+ "msg(array_index_exists(@array, 'a', 'b', 'c'));"),
+				new ExampleScript("Demonstrates nested arrays, where the value is not an array (if the first element is"
+						+ " not an array an exception will be thrown, but inner values need not be arrays).",
+						"@array = array(a: array(b: 1));\n"
+						+ "msg(array_index_exists(@array, 'a', 'b', 'c'));")
 			};
 		}
 
