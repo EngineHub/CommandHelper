@@ -52,7 +52,7 @@ creative:/i $itemname [$amount=1] = pgive_item(player(), array('name': $itemname
 
 # Creates a simple way to control the weather
 # The equals comparison here evaluates to true if the $value argument is "true". All other words would be false.
-rain:/rain [$value] = storm($value == 'true')
+/storm [$value] = storm($value == 'true')
 
 # Sets the time on the server with a function that accepts english words like "sunrise"
 /time $time = set_world_time($time)
