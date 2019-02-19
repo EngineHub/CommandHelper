@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -836,6 +837,41 @@ public class ClassDiscovery {
 	}
 
 	/**
+	 * Unlike {@link #getFieldsWithAnnotation(java.lang.Class)}, this actually loads the matching field's containing
+	 * classes into PermGen, and returns a Set of Field objects. This is useful if you are for sure going to use these
+	 * fields immediately, and don't want to have to lazy load them individually.
+	 *
+	 * @param annotation
+	 * @return
+	 */
+	public Set<Field> loadFieldsWithAnnotation(Class<? extends Annotation> annotation) {
+		return loadFieldsWithAnnotation(annotation, ClassDiscovery.class.getClassLoader(), true);
+	}
+
+	/**
+	 * Unlike {@link #getFieldsWithAnnotation(java.lang.Class)}, this actually loads the matching field's containing
+	 * classes into PermGen, and returns a Set of Field objects. This is useful if you are for sure going to use these
+	 * fields immediately, and don't want to have to lazy load them individually.
+	 *
+	 * @param annotation
+	 * @param loader
+	 * @param initialize
+	 * @return
+	 */
+	public Set<Field> loadFieldsWithAnnotation(Class<? extends Annotation> annotation, ClassLoader loader, boolean initialize) {
+		Set<Field> ret = new HashSet<>();
+		for(FieldMirror fm : getFieldsWithAnnotation(annotation)) {
+			try {
+				Field f = fm.loadField(loader, initialize);
+				ret.add(f);
+			} catch (ClassNotFoundException ex) {
+				throw new NoClassDefFoundError(ex.getMessage());
+			}
+		}
+		return ret;
+	}
+
+	/**
 	 * Returns all methods, including constructors, with the specified annotations
 	 *
 	 * @param annotation
@@ -888,7 +924,7 @@ public class ClassDiscovery {
 			}
 			return set;
 		} catch (ClassNotFoundException ex) {
-			throw new NoClassDefFoundError();
+			throw new NoClassDefFoundError(ex.getMessage());
 		}
 	}
 

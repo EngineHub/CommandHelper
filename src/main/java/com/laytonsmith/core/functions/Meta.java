@@ -21,6 +21,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -1147,6 +1148,105 @@ public class Meta {
 		@Override
 		public Version since() {
 			return MSVersion.V3_3_1;
+		}
+
+	}
+
+	@api
+	public static class get_compiler_options extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray ret = new CArray(t);
+			for(FileOptions.CompilerOption s : FileOptions.CompilerOption.values()) {
+				ret.push(new CString(s.getName(), t), t);
+			}
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "get_compiler_options";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "array {} Returns a list of all defined compiler options, which can be set using the"
+					+ " compilerOptions file option";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api
+	public static class get_compiler_warnings extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray ret = new CArray(t);
+			for(FileOptions.SuppressWarning s : FileOptions.SuppressWarning.values()) {
+				ret.push(new CString(s.getName(), t), t);
+			}
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "get_compiler_warnings";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "array {} Returns a list of all defined compiler warnings, which can be suppressed using the"
+					+ " suppressWarnings file option";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
 		}
 
 	}

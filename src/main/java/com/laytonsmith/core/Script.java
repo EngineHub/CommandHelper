@@ -890,6 +890,9 @@ public class Script {
 	public void checkAmbiguous(List<Script> scripts) throws ConfigCompileException {
 		List<Construct> thisCommand = this.cleft;
 		for(Script script : scripts) {
+			if(script.fileOptions.hasCompilerOption(FileOptions.CompilerOption.AllowAmbiguousCommands)) {
+				continue;
+			}
 			List<Construct> thatCommand = script.cleft;
 			if(thatCommand == null) {
 				// It hasn't been compiled yet.

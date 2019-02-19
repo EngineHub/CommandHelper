@@ -43,7 +43,7 @@ mode actually does.
 Suppresses the given compiler warnings for this file. The list should be comma separated, but can contain multiple 
 types.
 
-<%SupressWarningsList%>
+<%SUPPRESS_WARNINGS_LIST%>
 
 == name ==
 
@@ -73,3 +73,9 @@ readers of the script. This will eventually be available in the reflection infor
 A comma separated list of extensions that must be loaded in order to compile this file. While it is possible to be
 more granular by using {{function|function_exists}} and {{function|event_exists}}, if the file cannot be useful without
 a given extension, this directive is preferred.
+
+== compilerOptions ==
+
+A comma separated list of compiler options. These options are considered to be unset if not present, and set if present.
+
+<%COMPILER_OPTIONS_LIST%>

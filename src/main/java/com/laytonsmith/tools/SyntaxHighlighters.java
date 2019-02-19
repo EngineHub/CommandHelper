@@ -25,7 +25,6 @@ import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.functions.Function;
-import java.lang.reflect.Field;
 import java.util.stream.Collectors;
 
 public class SyntaxHighlighters {
@@ -179,9 +178,7 @@ public class SyntaxHighlighters {
 			}
 			base.addAll(set);
 		} else if(datalist.equalsIgnoreCase("fileOptions")) {
-			for(Field f : FileOptions.class.getDeclaredFields()) {
-				base.add(f.getName());
-			}
+			base.addAll(FileOptions.getKnownOptions());
 		}
 		String header = "";
 		String spliter = "IMPROPER FORMATTING";

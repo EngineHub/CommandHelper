@@ -805,14 +805,28 @@ public class DocGenTemplates {
 
 	public static final Generator SUPPRESS_WARNINGS_LIST = (args) -> {
 		StringBuilder b = new StringBuilder();
-		for(FileOptions.SuppressWarnings s : FileOptions.SuppressWarnings.values()) {
+		for(FileOptions.SuppressWarning s : FileOptions.SuppressWarning.values()) {
 			b.append("* ")
 					.append(s.getName())
 					.append(" - ")
 					.append(s.docs())
 					.append(" (added ")
 					.append(s.since())
-					.append(")");
+					.append(")\n");
+		}
+		return b.toString();
+	};
+
+	public static final Generator COMPILER_OPTIONS_LIST = (args) -> {
+		StringBuilder b = new StringBuilder();
+		for(FileOptions.CompilerOption s : FileOptions.CompilerOption.values()) {
+			b.append("* ")
+					.append(s.getName())
+					.append(" - ")
+					.append(s.docs())
+					.append(" (added ")
+					.append(s.since())
+					.append(")\n");
 		}
 		return b.toString();
 	};
