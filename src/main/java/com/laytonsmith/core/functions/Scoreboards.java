@@ -724,6 +724,7 @@ public class Scoreboards {
 				try {
 					o.setDisplayName(dname);
 				} catch (IllegalArgumentException ex) {
+					// defined by the server api, not by minecraft
 					throw new CRELengthException(ex.getMessage(), t);
 				}
 			}
@@ -737,6 +738,7 @@ public class Scoreboards {
 				try {
 					o.setPrefix(prefix);
 				} catch (IllegalArgumentException ex) {
+					// defined by the server api, not by minecraft
 					throw new CRELengthException(ex.getMessage(), t);
 				}
 			}
@@ -750,6 +752,7 @@ public class Scoreboards {
 				try {
 					o.setSuffix(suffix);
 				} catch (IllegalArgumentException ex) {
+					// defined by the server api, not by minecraft
 					throw new CRELengthException(ex.getMessage(), t);
 				}
 			}
@@ -1049,11 +1052,19 @@ public class Scoreboards {
 	public static class get_pscore extends SBFunction {
 
 		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREScoreboardException.class};
+		}
+
+		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(2, t, args);
 			MCObjective o = s.getObjective(args[0].val());
 			if(o == null) {
 				throw new CREScoreboardException("The given objective does not exist.", t);
+			}
+			if(args[1].val().length() > 40) {
+				throw new CRELengthException("Score name must be 40 characters or less.", t);
 			}
 			return new CInt(o.getScore(args[1].val()).getScore(), t);
 		}
@@ -1070,7 +1081,8 @@ public class Scoreboards {
 
 		@Override
 		public String docs() {
-			return "int {objectiveName, player, [scoreboard]} Returns the player's score for the given objective."
+			return "int {objectiveName, name, [scoreboard]} Returns the player's score for the given objective."
+					+ " A LengthException is thrown if the name is longer than 40 characters."
 					+ DEF_MSG;
 		}
 
@@ -1095,11 +1107,10 @@ public class Scoreboards {
 			if(o == null) {
 				throw new CREScoreboardException("The given objective does not exist.", t);
 			}
-			try {
-				o.getScore(args[1].val()).setScore(Static.getInt32(args[2], t));
-			} catch (IllegalArgumentException ex) {
-				throw new CRELengthException(ex.getMessage(), t);
+			if(args[1].val().length() > 40) {
+				throw new CRELengthException("Score name must be 40 characters or less.", t);
 			}
+			o.getScore(args[1].val()).setScore(Static.getInt32(args[2], t));
 			return CVoid.VOID;
 		}
 
@@ -1116,7 +1127,7 @@ public class Scoreboards {
 		@Override
 		public String docs() {
 			return "void {objectiveName, name, int, [scoreboard]} Sets the player's score for the given objective."
-					+ " The name can be anything, not just player names. An LengthException is thrown if it's too long."
+					+ " The name can be anything, not just player names. A LengthException is thrown if it's too long."
 					+ " The max length may differ based on server implementation, but will probably be 128."
 					+ DEF_MSG;
 		}
