@@ -222,8 +222,12 @@ public class DataSourceFilter {
 		// match.
 		Pattern closest = null;
 		if(matches.isEmpty()) {
-			// Trivial case
-			return null;
+			//This shouldn't happen unless there's an errant new line character in the key
+			if(key.contains("\\n")) {
+				throw new IllegalArgumentException("Invalid new line character found in persistence key here:"
+						+ key.substring(0, key.indexOf("\\n")) + " <---");
+			}
+			throw new RuntimeException("Persistence mappings missing match for key: " + key);
 		} else if(matches.size() == 1) {
 			// Yay! Also a trivial case!
 			closest = matches.get(0);
@@ -245,9 +249,6 @@ public class DataSourceFilter {
 		}
 
 		try {
-			if(closest == null) {
-				return null;
-			}
 			String uri = mappings.get(closest);
 			URI u = new URI(uri);
 			// Store it in our cache
