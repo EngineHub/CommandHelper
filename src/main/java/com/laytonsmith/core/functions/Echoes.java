@@ -14,12 +14,14 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
@@ -719,8 +721,10 @@ public class Echoes {
 
 		@Override
 		public String docs() {
-			return "void {message, [prefix]} Logs a message to the console. If prefix is true, prepends \"CommandHelper:\""
-					+ " to the message. Default is true.";
+			return "void {message, [prefix]} Logs a message to the console. If prefix is true, prepends "
+					+ "\"CommandHelper:\""
+					+ " to the message. Default is true. If you wish to set the default value of prefix to false,"
+					+ " use set_runtime_setting('function.console.prefix_default', false).";
 		}
 
 		@Override
@@ -741,10 +745,12 @@ public class Echoes {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String mes = Static.MCToANSIColors(args[0].val());
-			boolean prefix = true;
+			boolean prefix = ArgumentValidation.getBooleanish(env.getEnv(GlobalEnv.class)
+					.GetRuntimeSetting("function.console.prefix_default", CBoolean.TRUE), t);
 			if(args.length > 1) {
 				prefix = ArgumentValidation.getBoolean(args[1], t);
 			}
+
 			if(prefix) {
 				mes = "CommandHelper: " + mes;
 			}

@@ -11,6 +11,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.CHLog;
@@ -35,6 +36,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
@@ -1248,6 +1250,214 @@ public class Meta {
 		public Version since() {
 			return MSVersion.V3_3_4;
 		}
+	}
 
+	@api
+//	@seealso({has_runtime_setting.class, remove_runtime_setting.class, get_runtime_setting.class})
+	public static class set_runtime_setting extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			String name = ArgumentValidation.getString(args[0], t);
+			Mixed setting = args[1];
+			environment.getEnv(GlobalEnv.class).SetRuntimeSetting(name, setting);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "set_runtime_setting";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {name, setting} Sets the value of a particular runtime setting. Various system components can"
+					+ " define these differently, so see the documentation for a particular component to see if it has"
+					+ " a runtime setting that can be changed, and what the name and setting should be.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api
+//	@seealso({set_runtime_setting.class, has_runtime_setting.class, get_runtime_setting.class})
+	public static class remove_runtime_setting extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			String name = ArgumentValidation.getString(args[0], t);
+			GlobalEnv env = environment.getEnv(GlobalEnv.class);
+			if(env.GetRuntimeSetting(name) != null) {
+				env.SetRuntimeSetting(name, null);
+			} else {
+				if(!ArgumentValidation.getBooleanish(
+						env.GetRuntimeSetting("function.remove_runtime_setting.no_warn_on_removing_blank",
+								CBoolean.FALSE), t)) {
+					CHLog.GetLogger().e(CHLog.Tags.META, "Attempting to remove a runtime setting that doesn't exist,"
+							+ " '" + name + "'", t);
+				}
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "remove_runtime_setting";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {name} Removes the previously set runtime setting. If the setting wasn't already set, then"
+					+ " a warning is issued, unless"
+					+ " 'function.remove_runtime_setting.no_warn_on_removing_blank' is set to true.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api
+//	@seealso({set_runtime_setting.class, has_runtime_setting.class, remove_runtime_setting.class})
+	public static class get_runtime_setting extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			String name = ArgumentValidation.getString(args[0], t);
+			GlobalEnv env = environment.getEnv(GlobalEnv.class);
+			Mixed setting = env.GetRuntimeSetting(name);
+			if(setting == null) {
+				setting = CNull.NULL;
+			}
+			return setting;
+		}
+
+		@Override
+		public String getName() {
+			return "get_runtime_setting";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "mixed {name} Given a name, returns the current value for the runtime setting. Null is returned if"
+					+ " the setting doesn't exist, or if null was previously set as the value. If you need to"
+					+ " distinguish these two cases, use {{function|has_runtime_setting}}.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api
+//	@seealso({set_runtime_setting.class, remove_runtime_setting.class, get_runtime_setting.class})
+	public static class has_runtime_setting extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			String name = ArgumentValidation.getString(args[0], t);
+			return CBoolean.get(environment.getEnv(GlobalEnv.class).GetRuntimeSetting(name) != null);
+		}
+
+		@Override
+		public String getName() {
+			return "has_runtime_setting";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {name} Returns true if the runtime setting is set. This will also return true if the value"
+					+ " of the setting is null.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
 	}
 }
