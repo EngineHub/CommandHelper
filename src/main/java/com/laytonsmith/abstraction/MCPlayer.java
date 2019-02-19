@@ -38,6 +38,10 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 
 	String getPlayerListName();
 
+	String getPlayerListHeader();
+
+	String getPlayerListFooter();
+
 	long getPlayerTime();
 
 	MCWeather getPlayerWeather();
@@ -90,6 +94,10 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 	void setLevel(int xp);
 
 	void setPlayerListName(String listName);
+
+	void setPlayerListHeader(String header);
+
+	void setPlayerListFooter(String footer);
 
 	void setPlayerTime(Long time, boolean relative);
 

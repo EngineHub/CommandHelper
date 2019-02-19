@@ -455,6 +455,26 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
+	public void setPlayerListHeader(String header) {
+		p.setPlayerListHeader(header);
+	}
+
+	@Override
+	public String getPlayerListHeader() {
+		return p.getPlayerListHeader();
+	}
+
+	@Override
+	public void setPlayerListFooter(String footer) {
+		p.setPlayerListFooter(footer);
+	}
+
+	@Override
+	public String getPlayerListFooter() {
+		return p.getPlayerListFooter();
+	}
+
+	@Override
 	public boolean isNewPlayer() {
 		//Note the reversed logic here. If they have NOT played before, they are
 		//a new player.

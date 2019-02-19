@@ -5487,4 +5487,224 @@ public class PlayerManagement {
 		}
 
 	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_plist_header extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_plist_header";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {[player]} Gets the player list header for a player."
+					+ " This is the text that appears above the player list that appears when hitting the tab key.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			if(args.length == 2) {
+				p = Static.GetPlayer(args[0], t);
+			} else {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+			}
+			return new CString(p.getPlayerListHeader(), t);
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_plist_header extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_plist_header";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], header} Sets the player list header for a player."
+					+ " This is the text that appears above the player list that appears when hitting the tab key."
+					+ " Colors and new lines are accepted. Only the given player (or current player if none is given)"
+					+ " will see these changes.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			String header;
+			if(args.length == 2) {
+				p = Static.GetPlayer(args[0], t);
+				header = args[1].val();
+			} else {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				header = args[0].val();
+			}
+			p.setPlayerListHeader(header);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_plist_footer extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_plist_footer";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {[player]} Gets the player list footer for a player."
+					+ " This is the text that appears below the player list that appears when hitting the tab key.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			if(args.length == 2) {
+				p = Static.GetPlayer(args[0], t);
+			} else {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+			}
+			return new CString(p.getPlayerListFooter(), t);
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_plist_footer extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_plist_footer";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], footer} Sets the player list footer for a player."
+					+ " This is the text that appears below the player list that appears when hitting the tab key."
+					+ " Colors and new lines are accepted. Only the given player (or current player if none is given)"
+					+ " will see these changes.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			String footer;
+			if(args.length == 2) {
+				p = Static.GetPlayer(args[0], t);
+				footer = args[1].val();
+			} else {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				footer = args[0].val();
+			}
+			p.setPlayerListFooter(footer);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
 }
