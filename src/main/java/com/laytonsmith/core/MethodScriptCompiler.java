@@ -1552,10 +1552,12 @@ public final class MethodScriptCompiler {
 				}
 			} else if(t.type == TType.LIT) {
 				Construct c = Static.resolveConstruct(t.val(), t.target, true);
-				if(c instanceof CBareString && StrictMode.isStrictMode(fileOptions, environment, unknown)) {
-					compilerErrors.add(new ConfigCompileException("Bare strings are not allowed in strict mode",
-							c.getTarget()));
-				}
+				// We need to consider other contexts, such as array(key: 'value'), which should be allowed. Thus
+				// this can't be implemented like this.
+//				if(c instanceof CBareString && StrictMode.isStrictMode(fileOptions, environment, unknown)) {
+//					compilerErrors.add(new ConfigCompileException("Bare strings are not allowed in strict mode",
+//							c.getTarget()));
+//				}
 				if((c instanceof CInt || c instanceof CDecimal) && next1.type == TType.DOT && next2.type == TType.LIT) {
 					// make CDouble/CDecimal here because otherwise Long.parseLong() will remove
 					// minus zero before decimals and leading zeroes after decimals
