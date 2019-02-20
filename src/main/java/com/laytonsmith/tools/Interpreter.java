@@ -531,7 +531,15 @@ public final class Interpreter {
 					Object i = ReflectionUtils.newInstance(c);
 					if(i instanceof Documentation) {
 						Documentation seeAlsoDocumentation = (Documentation) i;
-						seeAlso.add(TermColors.GREEN + seeAlsoDocumentation.getName() + TermColors.RESET);
+						String color = TermColors.YELLOW;
+						if(i instanceof Function) {
+							if(((Function) f).isRestricted()) {
+								color = TermColors.CYAN;
+							} else {
+								color = TermColors.GREEN;
+							}
+						}
+						seeAlso.add(color + seeAlsoDocumentation.getName() + TermColors.RESET);
 					}
 					// TODO: also support Templates at some point, though this method will have to also be able
 					// to support the display of them, which it currently is unable to do.
@@ -573,10 +581,34 @@ public final class Interpreter {
 				.replaceAll("\\<.*?>", "")
 				.replaceAll("(?s)\\<!--.*?-->", "");
 		input = HTMLUtils.unescapeHTML(input);
-		input = input.replaceAll("\\{\\{function\\|(.*?)\\}\\}", TermColors.GREEN + "$1" + TermColors.RESET);
 		input = input.replaceAll("\\{\\{keyword\\|(.*?)\\}\\}", TermColors.BLUE + "$1" + TermColors.RESET);
 		input = input.replaceAll("\\\\\n", "\n");
 		input = input.replaceAll("(?s)\\{\\{Warning\\|text=(.*?)\\}\\}", TermColors.RED + "$1" + TermColors.RESET);
+		while(true) {
+			Matcher functionMatcher = Pattern.compile("\\{\\{function\\|(.*?)\\}\\}").matcher(input);
+			if(functionMatcher.find()) {
+				String function = functionMatcher.group(1);
+				String color;
+				try {
+					FunctionBase f = FunctionList.getFunction(function, Target.UNKNOWN);
+					if(f instanceof Function) {
+						if(((Function) f).isRestricted()) {
+							color = TermColors.CYAN;
+						} else {
+							color = TermColors.GREEN;
+						}
+					} else {
+						color = TermColors.YELLOW;
+					}
+				} catch (ConfigCompileException ex) {
+					color = TermColors.YELLOW;
+				}
+				input = input.replaceAll("\\{\\{function\\|" + function + "\\}\\}", color + function
+						+ TermColors.RESET);
+			} else {
+				break;
+			}
+		}
 		{
 			StringBuilder b = new StringBuilder();
 			StringBuilder headerLine = new StringBuilder();
