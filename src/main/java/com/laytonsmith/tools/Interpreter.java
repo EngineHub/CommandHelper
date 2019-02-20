@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.HTMLUtils;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Common.WinRegistry;
@@ -98,7 +99,9 @@ import static com.laytonsmith.PureUtilities.TermColors.p;
 import static com.laytonsmith.PureUtilities.TermColors.pl;
 import static com.laytonsmith.PureUtilities.TermColors.reset;
 import com.laytonsmith.PureUtilities.ZipReader;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
@@ -304,163 +307,9 @@ public final class Interpreter {
 					break;
 				}
 			}
-
-			//Perhaps this code will be revisited in the future, so that more things
-			//can be done, like syntax highlighting, function keys, etc, but in order
+			//TODO: Add syntax highlighting, function keys, etc, but in order
 			//to do that, history, command completion, etc, will all have to be re-implemented,
 			//and implemented around readCharacter, which is a lot of work.
-//			p(getPrompt());
-//			boolean exit = false;
-//			while(true){
-//				jline.console.ConsoleReader reader = new jline.console.ConsoleReader();
-//				StringBuilder line = new StringBuilder();
-//				while(true){
-//					int c = reader.readCharacter();
-//					if(c == 27){
-//						//Escape sequence
-//						int c2 = reader.readCharacter();
-//						if(c2 == 79){
-//							//F1-F4
-//							int c3 = reader.readCharacter();
-//							if(c3 == 80){
-//								//F1
-//								StreamUtils.GetSystemOut().println("F1");
-//								continue;
-//							} else if(c3 == 81){
-//								//F2
-//								StreamUtils.GetSystemOut().println("F2");
-//								continue;
-//							} else if(c3 == 82){
-//								//F3
-//								StreamUtils.GetSystemOut().println("F3");
-//								continue;
-//							} else if(c3 == 83){
-//								//F4
-//								StreamUtils.GetSystemOut().println("F4");
-//								continue;
-//							}
-//						} else if(c2 == 91){
-//							//At least 3 characters
-//							int c3 = reader.readCharacter();
-//							if(c3 == 68){
-//								//Left arrow
-//								StreamUtils.GetSystemOut().println("Left Arrow");
-//								continue;
-//							} else if(c3 == 65){
-//								//Up Arrow
-//								StreamUtils.GetSystemOut().println("Up Arrow");
-//								continue;
-//							} else if(c3 == 66){
-//								//Down Arrow
-//								StreamUtils.GetSystemOut().println("Down Arrow");
-//								continue;
-//							} else if(c3 == 67){
-//								//Right Arrow
-//								StreamUtils.GetSystemOut().println("Right Arrow");
-//								continue;
-//							} else if(c3 == 72){
-//								//Home
-//								StreamUtils.GetSystemOut().println("Home");
-//								continue;
-//							} else if(c3 == 70){
-//								//End
-//								StreamUtils.GetSystemOut().println("End");
-//								continue;
-//							} else {
-//								//At least 4 characters
-//								int c4 = reader.readCharacter();
-//								if(c4 == 126){
-//									if(c3 == 50){
-//										//Insert
-//										StreamUtils.GetSystemOut().println("Insert");
-//										continue;
-//									} else if(c3 == 51){
-//										//Delete
-//										StreamUtils.GetSystemOut().println("Delete");
-//										continue;
-//									} else if(c3 == 53){
-//										//Page Up
-//										StreamUtils.GetSystemOut().println("Page Up");
-//										continue;
-//									} else if(c3 == 54){
-//										//Page Down
-//										StreamUtils.GetSystemOut().println("Page Down");
-//										continue;
-//									}
-//								} else {
-//									//At least 5 characters
-//									int c5 = reader.readCharacter();
-//									if(c5 == 126){
-//										if(c3 == 49){
-//											if(c4 == 53){
-//												//F5
-//												StreamUtils.GetSystemOut().println("F5");
-//												continue;
-//											} else if(c4 == 55){
-//												//F6
-//												StreamUtils.GetSystemOut().println("F6");
-//												continue;
-//											} else if(c4 == 56){
-//												//F7
-//												StreamUtils.GetSystemOut().println("F7");
-//												continue;
-//											} else if(c4 == 57){
-//												//F8
-//												StreamUtils.GetSystemOut().println("F8");
-//												continue;
-//											}
-//										} else if(c3 == 50){
-//											if(c4 == 48){
-//												//F9
-//												StreamUtils.GetSystemOut().println("F9");
-//												continue;
-//											} else if(c4 == 49){
-//												//F10
-//												StreamUtils.GetSystemOut().println("F10");
-//												continue;
-//											} else if(c4 == 51){
-//												//F11
-//												StreamUtils.GetSystemOut().println("F11");
-//												continue;
-//											} else if(c4 == 52){
-//												//F12
-//												StreamUtils.GetSystemOut().println("F12");
-//												continue;
-//											}
-//										} else {
-//											//Unknown
-//											continue;
-//										}
-//									} else {
-//										//Unknown. This hopefully won't ever happen.
-//										continue;
-//									}
-//								}
-//							}
-//						} else {
-//							continue; //Unrecognized. Hopefully this will be fine?
-//						}
-//					}
-//					if(c == 13){ //"Enter" character
-//						//done, send the line in for processing
-//						StreamUtils.GetSystemOut().println();
-//						break;
-//					}
-//					if(c == 127){
-//						reader.moveCursor(-1);
-//					}
-//					line.append((char)c);
-//					reader.putString(Character.toString((char)c));
-//				}
-//				if(!textLine(line.toString())){
-//					exit = true;
-//				}
-//				if(multilineMode){
-//					p(">");
-//				} else {
-//					p(getPrompt());
-//				}
-//			}
 		}
 	}
 
@@ -631,13 +480,27 @@ public final class Interpreter {
 		return true;
 	}
 
+	/**
+	 * Given a function name, returns a string that is suitable for printing to the command line. This mechanism
+	 * is standardized, so that the display of this information is standardized across different methods. The returned
+	 * string will contain usages of {@link TermColors}.
+	 * @param function
+	 * @param showExamples
+	 * @return
+	 * @throws ConfigCompileException
+	 * @throws IOException
+	 * @throws DataSourceException
+	 * @throws URISyntaxException
+	 * @throws com.laytonsmith.tools.docgen.DocGenTemplates.Generator.GenerateException
+	 */
 	public static String formatDocsForCmdline(String function, boolean showExamples) throws ConfigCompileException,
 			IOException, DataSourceException, URISyntaxException, DocGenTemplates.Generator.GenerateException {
 		StringBuilder b = new StringBuilder();
 		FunctionBase f = FunctionList.getFunction(function, Target.UNKNOWN);
 		DocGen.DocInfo d = new DocGen.DocInfo(f.docs());
 		b.append(TermColors.CYAN).append(d.ret).append(" ");
-		b.append(TermColors.MAGENTA).append(d.originalArgs).append(TermColors.RESET).append("\n");
+		b.append(TermColors.RESET).append(f.getName()).append("(")
+				.append(TermColors.MAGENTA).append(d.originalArgs).append(TermColors.RESET).append(")\n");
 		if(f instanceof Function) {
 			Class<? extends CREThrowable>[] thrown = ((Function) f).thrown();
 			if(thrown != null && thrown.length > 0) {
@@ -660,6 +523,24 @@ public final class Interpreter {
 		if(d.extendedDesc != null) {
 			String desc = reverseHTML(d.extendedDesc);
 			b.append(TermColors.WHITE).append(desc).append("\n");
+		}
+		if(f instanceof Function) {
+			if(f.getClass().getAnnotation(seealso.class) != null) {
+				List<String> seeAlso = new ArrayList<>();
+				for(Class c : ((Function) f).seeAlso()) {
+					Object i = ReflectionUtils.newInstance(c);
+					if(i instanceof Documentation) {
+						Documentation seeAlsoDocumentation = (Documentation) i;
+						seeAlso.add(TermColors.GREEN + seeAlsoDocumentation.getName() + TermColors.RESET);
+					}
+					// TODO: also support Templates at some point, though this method will have to also be able
+					// to support the display of them, which it currently is unable to do.
+				}
+				if(!seeAlso.isEmpty()) {
+					b.append("See also: ");
+					b.append(StringUtils.Join(seeAlso, ", ")).append("\n");
+				}
+			}
 		}
 		if(f instanceof Function && showExamples) {
 			ExampleScript[] examples = ((Function) f).examples();

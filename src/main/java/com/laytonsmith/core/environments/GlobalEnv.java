@@ -423,24 +423,6 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	}
 
 	/**
-	 * Works like {@link #GetRuntimeSetting(java.lang.String)} but if the value is not set in the map, the defaultValue
-	 * is returned. Note that if the value is set to CNull by the user, this will return CNull, not your default value.
-	 * If you want CNull to be considered the same as totally missing, use
-	 * {@link #GetRuntimeSetting(java.lang.String, com.laytonsmith.core.natives.interfaces.Mixed)}.
-	 * @param name The setting name. See the stipulations for naming conventions in
-	 * {@link #GetRuntimeSetting(java.lang.String)}
-	 * @param defaultValue The value to return if the value was totally missing from the map.
-	 * @return Either the user specified value, if present, or the defaultValue.
-	 */
-	public Mixed GetRuntimeSettingOrCNull(String name, Mixed defaultValue) {
-		if(runtimeSettings.getObject().containsKey(name)) {
-			return runtimeSettings.getObject().get(name);
-		} else {
-			return defaultValue;
-		}
-	}
-
-	/**
 	 * Works like {@link #GetRuntimeSetting(java.lang.String)} but if the value is not set, or is set to CNull, the
 	 * default value is returned. If a totally missing value has a different meaning than a CNull value, you should use
 	 * {@link #GetRuntimeSettingOrCNull(java.lang.String, com.laytonsmith.core.natives.interfaces.Mixed)}.
@@ -458,6 +440,23 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		}
 	}
 
+	/**
+	 * Works like {@link #GetRuntimeSetting(java.lang.String)} but if the value is not set in the map, the defaultValue
+	 * is returned. Note that if the value is set to CNull by the user, this will return CNull, not your default value.
+	 * If you want CNull to be considered the same as totally missing, use
+	 * {@link #GetRuntimeSetting(java.lang.String, com.laytonsmith.core.natives.interfaces.Mixed)}.
+	 * @param name The setting name. See the stipulations for naming conventions in
+	 * {@link #GetRuntimeSetting(java.lang.String)}
+	 * @param defaultValue The value to return if the value was totally missing from the map.
+	 * @return Either the user specified value, if present, or the defaultValue.
+	 */
+	public Mixed GetRuntimeSettingOrCNull(String name, Mixed defaultValue) {
+		if(runtimeSettings.getObject().containsKey(name)) {
+			return runtimeSettings.getObject().get(name);
+		} else {
+			return defaultValue;
+		}
+	}
 
 	/**
 	 * Sets the value of a runtime setting. If value is java null (CNull.NULL is different), then the value is simply

@@ -1253,7 +1253,8 @@ public class Meta {
 	}
 
 	@api
-//	@seealso({has_runtime_setting.class, remove_runtime_setting.class, get_runtime_setting.class})
+	@seealso({has_runtime_setting.class, remove_runtime_setting.class, DataHandling._import.class,
+		DataHandling._export.class})
 	public static class set_runtime_setting extends AbstractFunction {
 
 		@Override
@@ -1293,7 +1294,10 @@ public class Meta {
 		public String docs() {
 			return "void {name, setting} Sets the value of a particular runtime setting. Various system components can"
 					+ " define these differently, so see the documentation for a particular component to see if it has"
-					+ " a runtime setting that can be changed, and what the name and setting should be.";
+					+ " a runtime setting that can be changed, and what the name and setting should be. Note that there"
+					+ " is intentionally no mechanism provided to get the value of a setting, as this is not meant to"
+					+ " be used for user settings, just system level settings. To set your own user based settings,"
+					+ " use {{function|import}}/{{function|export}}.";
 		}
 
 		@Override
@@ -1303,7 +1307,7 @@ public class Meta {
 	}
 
 	@api
-//	@seealso({set_runtime_setting.class, has_runtime_setting.class, get_runtime_setting.class})
+	@seealso({set_runtime_setting.class, has_runtime_setting.class})
 	public static class remove_runtime_setting extends AbstractFunction {
 
 		@Override
@@ -1362,60 +1366,7 @@ public class Meta {
 	}
 
 	@api
-//	@seealso({set_runtime_setting.class, has_runtime_setting.class, remove_runtime_setting.class})
-	public static class get_runtime_setting extends AbstractFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
-
-		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			String name = ArgumentValidation.getString(args[0], t);
-			GlobalEnv env = environment.getEnv(GlobalEnv.class);
-			Mixed setting = env.GetRuntimeSetting(name);
-			if(setting == null) {
-				setting = CNull.NULL;
-			}
-			return setting;
-		}
-
-		@Override
-		public String getName() {
-			return "get_runtime_setting";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
-		@Override
-		public String docs() {
-			return "mixed {name} Given a name, returns the current value for the runtime setting. Null is returned if"
-					+ " the setting doesn't exist, or if null was previously set as the value. If you need to"
-					+ " distinguish these two cases, use {{function|has_runtime_setting}}.";
-		}
-
-		@Override
-		public Version since() {
-			return MSVersion.V3_3_4;
-		}
-	}
-
-	@api
-//	@seealso({set_runtime_setting.class, remove_runtime_setting.class, get_runtime_setting.class})
+	@seealso({set_runtime_setting.class, remove_runtime_setting.class})
 	public static class has_runtime_setting extends AbstractFunction {
 
 		@Override
