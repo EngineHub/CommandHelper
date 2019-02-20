@@ -58,6 +58,7 @@ import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREIncludeException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
@@ -3961,12 +3962,13 @@ public class DataHandling {
 		@Override
 		public String docs() {
 			return "string {script_string} Executes arbitrary MethodScript. Note that this function is very experimental, and is subject to changing or "
-					+ "removal.";
+					+ "removal. To globally disable use of eval, set the runtime setting \"function.eval.disable\" to"
+					+ " true, which will cause use of the function to throw an exception.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CREInsufficientPermissionException.class};
 		}
 
 		@Override
@@ -3981,6 +3983,10 @@ public class DataHandling {
 
 		@Override
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			if(ArgumentValidation.getBooleanish(env.getEnv(GlobalEnv.class).GetRuntimeSetting("function.eval.disable",
+					CBoolean.FALSE), t)) {
+				throw new CREInsufficientPermissionException("eval is disabled", t);
+			}
 			boolean oldDynamicScriptMode = env.getEnv(GlobalEnv.class).GetDynamicScriptingMode();
 			ParseTree node = nodes[0];
 			try {
