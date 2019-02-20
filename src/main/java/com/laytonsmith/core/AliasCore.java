@@ -743,7 +743,8 @@ public class AliasCore {
 			for(FileInfo fi : ms) {
 				boolean exception = false;
 				try {
-					MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file, true)), env, null, null);
+					MethodScriptCompiler.execute(MethodScriptCompiler.compile(
+							MethodScriptCompiler.lex(fi.contents, fi.file, true), env), env, null, null);
 				} catch (ConfigCompileGroupException e) {
 					exception = true;
 					ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath() + " could not be compiled, due to compile errors.", player);

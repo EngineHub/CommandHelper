@@ -45,7 +45,7 @@ public class MSLPMaker {
 		boolean error = false;
 		for(AliasCore.LocalPackage.FileInfo fi : localPackage.getMSFiles()) {
 			try {
-				MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents(), fi.file(), true));
+				MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents(), fi.file(), true), null);
 			} catch (ConfigCompileException e) {
 				error = true;
 				ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", null);

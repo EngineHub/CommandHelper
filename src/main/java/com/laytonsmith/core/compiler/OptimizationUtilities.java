@@ -50,7 +50,7 @@ public class OptimizationUtilities {
 	 * @throws ConfigCompileException
 	 */
 	public static String optimize(String script, File source) throws ConfigCompileException, ConfigCompileGroupException {
-		ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, source, true));
+		ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, source, true), null);
 		StringBuilder b = new StringBuilder();
 		//The root always contains null.
 		for(ParseTree child : tree.getChildren()) {

@@ -2538,7 +2538,7 @@ public class DataHandling {
 			Mixed arg = parent.seval(tree, env);
 			String location = arg.val();
 			File file = Static.GetFileFromArgument(location, env, t, null);
-			ParseTree include = IncludeCache.get(file, t);
+			ParseTree include = IncludeCache.get(file, env, t);
 			if(include != null) {
 				// It could be an empty file
 				StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
@@ -3995,7 +3995,8 @@ public class DataHandling {
 				if(script instanceof CClosure) {
 					throw new CRECastException("Closures cannot be eval'd directly. Use execute() instead.", t);
 				}
-				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file(), true));
+				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file(), true),
+						env);
 				StringBuilder b = new StringBuilder();
 				int count = 0;
 				for(ParseTree child : root.getChildren()) {

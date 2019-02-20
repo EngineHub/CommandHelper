@@ -767,7 +767,7 @@ public final class Interpreter {
 		final ParseTree tree;
 		try {
 			TokenStream stream = MethodScriptCompiler.lex(script, fromFile, true);
-			tree = MethodScriptCompiler.compile(stream);
+			tree = MethodScriptCompiler.compile(stream, env);
 		} finally {
 			compile.stop();
 		}

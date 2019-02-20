@@ -3,16 +3,21 @@ package com.laytonsmith.core.environments;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.IVariableList;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import com.laytonsmith.core.events.BoundEvent;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Iterator;
@@ -437,6 +442,26 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 			return defaultValue;
 		} else {
 			return value;
+		}
+	}
+
+	/**
+	 * As many runtime settings are just booleans, this convenience method can be used to deal directly with java
+	 * booleans. If the value supplied is not a Booleanish though, the default value is returned, with a warning
+	 * issued. See {@link #GetRuntimeSetting(java.lang.String)} for details on the parameters.
+	 * @param name
+	 * @param defaultValue
+	 * @param t
+	 * @return
+	 */
+	public boolean GetRuntimeSetting(String name, boolean defaultValue, Target t) {
+		Mixed b = GetRuntimeSetting(name, CBoolean.get(defaultValue));
+		try {
+			return ArgumentValidation.getBooleanish(b, t);
+		} catch (CRECastException ex) {
+			CHLog.GetLogger().w(CHLog.Tags.RUNTIME, "Runtime setting \"" + name + "\" is not a boolean value, but was"
+					+ " expected to be. The default value is being used instead.", t);
+			return defaultValue;
 		}
 	}
 

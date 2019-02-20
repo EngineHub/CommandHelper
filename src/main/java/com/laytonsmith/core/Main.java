@@ -559,7 +559,7 @@ public class Main {
 				String script = FileUtil.read(f);
 				try {
 					try {
-						MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, f, file.endsWith("ms")));
+						MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, f, file.endsWith("ms")), null);
 					} catch (ConfigCompileException ex) {
 						Set<ConfigCompileException> s = new HashSet<>(1);
 						s.add(ex);

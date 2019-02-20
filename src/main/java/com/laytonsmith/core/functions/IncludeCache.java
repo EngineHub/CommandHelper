@@ -33,7 +33,7 @@ public class IncludeCache {
 		return CACHE.containsKey(file);
 	}
 
-	public static ParseTree get(File file, Target t) {
+	public static ParseTree get(File file, com.laytonsmith.core.environments.Environment env, Target t) {
 		CHLog.GetLogger().Log(TAG, LogLevel.DEBUG, "Loading " + file, t);
 		if(CACHE.containsKey(file)) {
 			CHLog.GetLogger().Log(TAG, LogLevel.INFO, "Returning " + file + " from cache", t);
@@ -48,7 +48,7 @@ public class IncludeCache {
 		CHLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Security check passed", t);
 		try {
 			String s = new ZipReader(file).getFileContents();
-			ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, file, true));
+			ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, file, true), env);
 			CHLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Compilation succeeded, adding to cache.", t);
 			IncludeCache.add(file, tree);
 			return tree;

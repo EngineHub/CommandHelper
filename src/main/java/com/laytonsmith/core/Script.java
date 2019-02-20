@@ -883,7 +883,7 @@ public class Script {
 		right.add(temp);
 		cright = new ArrayList<>();
 		for(List<Token> l : right) {
-			cright.add(MethodScriptCompiler.compile(new TokenStream(l, fileOptions)));
+			cright.add(MethodScriptCompiler.compile(new TokenStream(l, fileOptions), null));
 		}
 	}
 

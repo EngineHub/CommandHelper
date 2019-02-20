@@ -108,7 +108,8 @@ public class ExampleScript {
 		String consoleErrorOutput = Static.MCToANSIColors(MCChatColor.RED.toString() + "Unintentional compile error in "
 				+ c.getEnclosingClass().getSimpleName() + ":" + functionName + "(): \"" + description + "\"\n" + MCChatColor.PLAIN_WHITE);
 		try {
-			this.script = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File((OSUtils.GetOS() == OSUtils.OS.WINDOWS ? "C:\\" : "/") + "Examples.ms"), true));
+			this.script = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script,
+					new File((OSUtils.GetOS() == OSUtils.OS.WINDOWS ? "C:\\" : "/") + "Examples.ms"), true), null);
 			this.output = output;
 		} catch (ConfigCompileException e) {
 			if(intentionalCompileError) {

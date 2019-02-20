@@ -524,11 +524,11 @@ public class Sandbox {
 			int num = 0;
 			if(Security.CheckSecurity(file)) {
 				if(file.isDirectory()) {
-					HashMap<File, ParseTree> files = compileDirectory(file, t);
+					HashMap<File, ParseTree> files = compileDirectory(file, env, t);
 					IncludeCache.addAll(files);
 					num = files.size();
 				} else if(IncludeCache.has(file)) {
-					IncludeCache.add(file, compileFile(file, t));
+					IncludeCache.add(file, compileFile(file, env, t));
 					num = 1;
 				}
 			} else {
@@ -538,25 +538,25 @@ public class Sandbox {
 			return new CInt(num, t);
 		}
 
-		private HashMap<File, ParseTree> compileDirectory(File file, Target t) {
+		private HashMap<File, ParseTree> compileDirectory(File file, Environment env, Target t) {
 			HashMap<File, ParseTree> newFiles = new HashMap<>();
 			File[] files = file.listFiles();
 			if(files != null) {
 				for(File f : files) {
 					if(f.isDirectory()) {
-						newFiles.putAll(compileDirectory(f, t));
+						newFiles.putAll(compileDirectory(f, env, t));
 					} else if(IncludeCache.has(f)) {
-						newFiles.put(f, compileFile(f, t));
+						newFiles.put(f, compileFile(f, env, t));
 					}
 				}
 			}
 			return newFiles;
 		}
 
-		private ParseTree compileFile(File file, Target t) {
+		private ParseTree compileFile(File file, Environment env, Target t) {
 			try {
 				String s = new ZipReader(file).getFileContents();
-				return MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, file, true));
+				return MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, file, true), env);
 			} catch (ConfigCompileException ex) {
 				throw new CREIncludeException("There was a compile error when trying to recompile the script at "
 						+ file + "\n" + ex.getMessage() + " :: " + file.getName() + ":" + ex.getLineNum(), t);
