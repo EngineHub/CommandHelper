@@ -172,7 +172,7 @@ public final class WebUtility {
 		}
 		//Assume 1.0 if something breaks
 		String httpVersion = "1.0";
-		Matcher m = Pattern.compile("HTTP/(\\d\\+.\\d+).*").matcher(response.getConnection().getHeaderField(0));
+		Matcher m = Pattern.compile("HTTP/(\\d+.\\d+).*").matcher(response.getConnection().getHeaderField(0));
 		if(m.find()) {
 			httpVersion = m.group(1);
 		}
