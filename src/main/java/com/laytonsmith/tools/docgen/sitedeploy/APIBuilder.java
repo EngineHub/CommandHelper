@@ -1,7 +1,6 @@
 package com.laytonsmith.tools.docgen.sitedeploy;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api.Platforms;
@@ -173,15 +172,14 @@ public class APIBuilder {
 						continue;
 					}
 					Map<String, Object> obj = new TreeMap<>();
-					Class<? extends Mixed> tt = NativeTypeList.getNativeClassOrInterfaceRunner(t);
 					String name;
 					String docs;
 					Version since;
 					URL source;
 					CClassType[] interfaces;
 					CClassType[] supers;
-					// else just use the real class
-					Mixed m = ReflectionUtils.instantiateUnsafe(tt);
+
+					Mixed m = NativeTypeList.getInvalidInstanceForUse(t);
 					name = m.getName();
 					docs = m.docs();
 					since = m.since();

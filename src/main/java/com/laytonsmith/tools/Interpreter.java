@@ -582,6 +582,7 @@ public final class Interpreter {
 				.replaceAll("(?s)\\<!--.*?-->", "");
 		input = HTMLUtils.unescapeHTML(input);
 		input = input.replaceAll("\\{\\{keyword\\|(.*?)\\}\\}", TermColors.BLUE + "$1" + TermColors.RESET);
+		input = input.replaceAll("\\{\\{object\\|(.*?)\\}\\}", TermColors.BRIGHT_BLUE + "$1" + TermColors.RESET);
 		input = input.replaceAll("\\\\\n", "\n");
 		input = input.replaceAll("(?s)\\{\\{Warning\\|text=(.*?)\\}\\}", TermColors.RED + "$1" + TermColors.RESET);
 		while(true) {

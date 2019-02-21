@@ -260,7 +260,8 @@ public class NativeTypeList {
 	 * For documentation and other purposes, it is useful to have a default, invalid instance of the underlying type.
 	 * For enums and non-enums, the process of instantiating the value is different (MEnums are actually valid as is).
 	 *
-	 * This method abstracts away the difference, and you can call this instead.
+	 * This method abstracts away the difference, and you can call this instead. This should never be exposed to user
+	 * code, to actually construct an instance of an object, but should only be used internally.
 	 * @param fqcn
 	 * @return
 	 * @throws java.lang.ClassNotFoundException

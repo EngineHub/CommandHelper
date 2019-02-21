@@ -417,7 +417,10 @@ public class DataHandling {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "assign(@variable, 5);\nmsg(@variable);"),
 				new ExampleScript("Array assignment", "assign(@variable, associative_array());\nassign(@variable['associative'], 5);\nmsg(@variable);"),
+				new ExampleScript("String assignment with type", "assign(string, @s, 'string');"),
+				new ExampleScript("String assignment with invalid type", "assign(int, @i, 'string');", true),
 				new ExampleScript("Operator syntax", "@variable = 5;\nmsg(@variable);"),
+				new ExampleScript("Operator syntax with type", "string @s = 'string';"),
 				new ExampleScript("Operator syntax using combined operators", "@variable = 'string';\n@variable .= ' more string';\nmsg(@variable);"),
 				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable += 10;\nmsg(@variable);"),
 				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable -= 10;\nmsg(@variable);"),

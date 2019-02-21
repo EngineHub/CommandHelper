@@ -75,7 +75,6 @@ public class TestCClassType {
 	}
 
 	@Test
-	//@Ignore("Ignored for now, but must come back to this soon")
 	public void testThatNonImplementsReturnsEMPTY_CLASS_ARRAY() throws Exception {
 		SortedSet<String> oops = new TreeSet<>();
 		for(FullyQualifiedClassName fqcn : NativeTypeList.getNativeTypeList()) {
