@@ -45,6 +45,7 @@ public class HTMLUtils {
 				.replace("&rsqb;", "]")
 				.replace("&equals;", "=")
 				.replace("&num;", "#")
+				.replace("&ast;", "*")
 				.replace("&amp;", "&");
 	}
 }
