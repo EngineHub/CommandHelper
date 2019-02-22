@@ -1,6 +1,7 @@
 package com.laytonsmith.tools.docgen.sitedeploy;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api.Platforms;
@@ -39,14 +40,23 @@ import org.json.simple.JSONValue;
  */
 public class APIBuilder {
 
+	/**
+	 * Can be run independently, or by the programmer, but this will always print out to System.out the json. Extensions
+	 * are loaded first.
+	 * @param args Ignored.
+	 */
 	public static void main(String[] args) {
-		Implementation.setServerType(Implementation.Type.SHELL);
+		try {
+			Implementation.setServerType(Implementation.Type.SHELL);
+		} catch (RuntimeException e) {
+			// Eh.. in most cases this is wrong, but this will happen when json-api is called, and that's ok.
+		}
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(APIBuilder.class));
 		ExtensionManager.AddDiscoveryLocation(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
 		ExtensionManager.Cache(MethodScriptFileLocations.getDefault().getExtensionCacheDirectory());
 		ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
 		ExtensionManager.Startup();
-		System.out.println(JSONValue.toJSONString(new APIBuilder().build().get("objects")));
+		StreamUtils.GetSystemOut().println(JSONValue.toJSONString(new APIBuilder().build()));
 	}
 
 	/**

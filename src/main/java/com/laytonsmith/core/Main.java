@@ -42,6 +42,7 @@ import com.laytonsmith.tools.UILauncher;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenExportTool;
 import com.laytonsmith.tools.docgen.ExtensionDocGen;
+import com.laytonsmith.tools.docgen.sitedeploy.APIBuilder;
 import com.laytonsmith.tools.docgen.sitedeploy.SiteDeploy;
 import com.laytonsmith.tools.pnviewer.PNViewer;
 import java.awt.HeadlessException;
@@ -1049,4 +1050,22 @@ public class Main {
 		}
 
 	}
+
+	@tool("json-api")
+	public static class JsonTool extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+					.addDescription("Prints the api.json file to stdout. This takes no parameters.");
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			APIBuilder.main(null);
+			System.exit(0);
+		}
+
+	}
+
 }
