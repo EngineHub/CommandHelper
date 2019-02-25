@@ -29,6 +29,7 @@ import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.extensions.ExtensionTracker;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.functions.Meta;
 import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
@@ -73,11 +74,9 @@ public class Main {
 	public static final ArgumentSuite ARGUMENT_SUITE;
 	private static final ArgumentParser HELP_MODE;
 
-	private static final ArgumentParser COPYRIGHT_MODE;
 	private static final ArgumentParser PRINT_DB_MODE;
 	private static final ArgumentParser DOCS_MODE;
 	private static final ArgumentParser VERIFY_MODE;
-	private static final ArgumentParser INSTALL_CMDLINE_MODE;
 	private static final ArgumentParser UNINSTALL_CMDLINE_MODE;
 	private static final ArgumentParser SYNTAX_MODE;
 	private static final ArgumentParser DOCGEN_MODE;
@@ -116,9 +115,6 @@ public class Main {
 				.setErrorOnUnknownArgs(false);
 		suite.addMode("help", HELP_MODE).addModeAlias("--help", "help").addModeAlias("-help", "help")
 				.addModeAlias("/?", "help");
-		COPYRIGHT_MODE = ArgumentParser.GetParser()
-				.addDescription("Prints the copyright and exits.");
-		suite.addMode("copyright", COPYRIGHT_MODE);
 		PRINT_DB_MODE = ArgumentParser.GetParser()
 				.addDescription("Prints out the built in database in a human readable form, then exits.");
 		suite.addMode("print-db", PRINT_DB_MODE);
@@ -140,9 +136,6 @@ public class Main {
 						.setUsageName("file")
 						.setRequiredAndDefault());
 		suite.addMode("verify", VERIFY_MODE);
-		INSTALL_CMDLINE_MODE = ArgumentParser.GetParser()
-				.addDescription("Installs MethodScript to your system, so that commandline scripts work. (Currently only unix is supported.)");
-		suite.addMode("install-cmdline", INSTALL_CMDLINE_MODE);
 		UNINSTALL_CMDLINE_MODE = ArgumentParser.GetParser()
 				.addDescription("Uninstalls the MethodScript interpreter from your system.");
 		suite.addMode("uninstall-cmdline", UNINSTALL_CMDLINE_MODE);
@@ -427,7 +420,7 @@ public class Main {
 //			MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
 
 			if(args.length == 0) {
-				args = new String[]{"--help"};
+				args = new String[]{"help"};
 			}
 
 			ArgumentParser mode;
@@ -493,33 +486,8 @@ public class Main {
 				Collections.sort(core);
 				StreamUtils.GetSystemOut().println(StringUtils.Join(core, ", "));
 				System.exit(0);
-			} else if(mode == INSTALL_CMDLINE_MODE) {
-				Interpreter.install();
-				System.exit(0);
 			} else if(mode == UNINSTALL_CMDLINE_MODE) {
 				Interpreter.uninstall();
-				System.exit(0);
-			} else if(mode == COPYRIGHT_MODE) {
-				StreamUtils.GetSystemOut().println("The MIT License (MIT)\n"
-						+ "\n"
-						+ "Copyright (c) 2012-2017 Methodscript Contributors\n"
-						+ "\n"
-						+ "Permission is hereby granted, free of charge, to any person obtaining a copy of \n"
-						+ "this software and associated documentation files (the \"Software\"), to deal in \n"
-						+ "the Software without restriction, including without limitation the rights to \n"
-						+ "use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of \n"
-						+ "the Software, and to permit persons to whom the Software is furnished to do so, \n"
-						+ "subject to the following conditions:\n"
-						+ "\n"
-						+ "The above copyright notice and this permission notice shall be included in all \n"
-						+ "copies or substantial portions of the Software.\n"
-						+ "\n"
-						+ "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR \n"
-						+ "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS \n"
-						+ "FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR \n"
-						+ "COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER \n"
-						+ "IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN \n"
-						+ "CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.");
 				System.exit(0);
 			} else if(mode == PRINT_DB_MODE) {
 				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
@@ -915,6 +883,70 @@ public class Main {
 		} catch (NoClassDefFoundError error) {
 			StreamUtils.GetSystemErr().println(Static.getNoClassDefFoundErrorMessage(error));
 		}
+	}
+
+	@tool("copyright")
+	public static class CopyrightMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Prints the copyright and exits.");
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			String buildYear = new Scheduling.simple_date().exec(Target.UNKNOWN, null,
+					new CString("yyyy", Target.UNKNOWN),
+					new Meta.engine_build_date().exec(Target.UNKNOWN, null)).val();
+			StreamUtils.GetSystemOut().println("The MIT License (MIT)\n"
+					+ "\n"
+					+ "Copyright (c) 2012-" + buildYear + " Methodscript Contributors\n"
+					+ "\n"
+					+ "Permission is hereby granted, free of charge, to any person obtaining a copy of \n"
+					+ "this software and associated documentation files (the \"Software\"), to deal in \n"
+					+ "the Software without restriction, including without limitation the rights to \n"
+					+ "use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of \n"
+					+ "the Software, and to permit persons to whom the Software is furnished to do so, \n"
+					+ "subject to the following conditions:\n"
+					+ "\n"
+					+ "The above copyright notice and this permission notice shall be included in all \n"
+					+ "copies or substantial portions of the Software.\n"
+					+ "\n"
+					+ "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR \n"
+					+ "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS \n"
+					+ "FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR \n"
+					+ "COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER \n"
+					+ "IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN \n"
+					+ "CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.");
+			System.exit(0);
+		}
+
+	}
+
+	@tool("install-cmdline")
+	public static class InstallCmdlineMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+					.addDescription("Installs MethodScript to your system, so that commandline scripts work. (Currently only unix is supported.)")
+					.addArgument(new ArgumentBuilder()
+						.setDescription("Sets the name of the command. This allows support for multiple installations per system.")
+						.setUsageName("command name")
+						.setOptional()
+						.setName("command")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
+						.setDefaultVal("mscript"));
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			String commandName = parsedArgs.getStringArgument("command");
+			Interpreter.install(commandName);
+			System.exit(0);
+		}
+
 	}
 
 	@tool(value = "version", aliases = {"-v", "--v", "-version", "--version"})

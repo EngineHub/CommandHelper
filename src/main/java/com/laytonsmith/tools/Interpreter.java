@@ -136,7 +136,7 @@ public final class Interpreter {
 	 *
 	 * BAD THINGS WILL HAPPEN TO EVERYBODY YOU LOVE IF THIS IS CHANGED!
 	 */
-	private static final String INTERPRETER_INSTALLATION_LOCATION = "/usr/local/bin/mscript";
+	private static final String INTERPRETER_INSTALLATION_LOCATION = "/usr/local/bin/";
 
 	private boolean inTTYMode = false;
 	private boolean multilineMode = false;
@@ -954,7 +954,7 @@ public final class Interpreter {
 		return false;
 	}
 
-	public static void install() {
+	public static void install(String commandName) {
 		if(null == OSUtils.GetOS()) {
 			StreamUtils.GetSystemErr().println("Cmdline MethodScript is only supported on Unix and Windows");
 			return;
@@ -964,7 +964,7 @@ public final class Interpreter {
 			case MAC:
 				try {
 					URL jar = Interpreter.class.getProtectionDomain().getCodeSource().getLocation();
-					File exe = new File(INTERPRETER_INSTALLATION_LOCATION);
+					File exe = new File(INTERPRETER_INSTALLATION_LOCATION + commandName);
 					String bashScript = Static.GetStringResource("/interpreter-helpers/bash.sh");
 					try {
 						bashScript = bashScript.replaceAll("%%LOCATION%%", jar.toURI().getPath());
@@ -983,7 +983,7 @@ public final class Interpreter {
 						String manPage = Static.GetStringResource("/interpreter-helpers/manpage");
 						try {
 							manPage = DocGenTemplates.DoTemplateReplacement(manPage, DocGenTemplates.GetGenerators());
-							File manPageFile = new File(manDir, "mscript.1");
+							File manPageFile = new File(manDir, commandName + ".1");
 							FileUtil.write(manPage, manPageFile);
 						} catch (DocGenTemplates.Generator.GenerateException ex) {
 							Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
@@ -1025,8 +1025,8 @@ public final class Interpreter {
 				break;
 		}
 		StreamUtils.GetSystemOut().println("MethodScript has successfully been installed on your system. Note that you may need to rerun the install command"
-				+ " if you change locations of the jar, or rename it. Be sure to put \"#!" + INTERPRETER_INSTALLATION_LOCATION + "\" at the top of all your scripts,"
-				+ " if you wish them to be executable on unix systems, and set the execution bit with chmod +x <script name> on unix systems. (Or use the 'mscript -- new' cmdline utility.)");
+				+ " if you change locations of the jar, or rename it. Be sure to put \"#!" + INTERPRETER_INSTALLATION_LOCATION + commandName + "\" at the top of all your scripts,"
+				+ " if you wish them to be executable on unix systems, and set the execution bit with chmod +x <script name> on unix systems. (Or use the '" + commandName + " -- new' cmdline utility.)");
 		StreamUtils.GetSystemOut().println("Try this script to test out the basic features of the scripting system:\n");
 		StreamUtils.GetSystemOut().println(Static.GetStringResource("/interpreter-helpers/sample.ms"));
 	}
