@@ -1,0 +1,202 @@
+{{unimplemented}}
+
+Unit testing is an important part of writing maintainable and correct code. In most programming languages, unit testing
+is bolted on after the fact, but MethodScript elevates the concept of unit testing to a first class part of the language
+specification itself.
+
+At the lowest level, MethodScript provides the core resources needed to properly do unit testing, using special language
+support for things like mocks, private member access, and other common unit test paradigms, that require unwieldy and
+cumbersome third party libraries to support.
+
+== What is Unit Testing? ==
+
+In general, unit testing is a mechanism to test individual units of code (hence the name). This is opposed to
+integration testing or functional testing, though the unit testing framework can be used to do integration testing as
+well. 
+
+In a unit test, the block of code that is under test is the only thing that should actually be run. Functions often have
+external side effects though, (such as when calling a method that makes an http call, the server would actually be hit
+with an http call) which is usually undesirable. There are a number of solutions to this, and the correct one depends
+heavily on what type of test you're writing, and what your desired outcome is. In general, there are three main types
+of ''test doubles'':
+
+* '''Fake objects''' (or ''fakes'') actually have working implementations, but usually take some shortcut which makes \
+them not suitable for production (an in memory database is a good example).
+* '''Stubs''' provide canned answers to calls made during the test, usually not responding at all to anything outside \
+what's programmed in for the test. Stubs may also record information about calls, such as an email gateway stub that \
+remembers the messages it 'sent', or maybe only how many messages it 'sent'.
+* '''Mocks''' are objects pre-programmed with expectations which form a specification of the calls they are expected \
+to receive. 
+
+Fakes and stubs are already possible to achieve if your code is written in such a way as to take full advantage of
+interfaces and dependency injection. For instance:
+
+<%CODE|
+public interface MyInterface {}
+
+public class MyImplementation implements MyInterface {}
+
+public class MyStub implements MyInterface {}
+
+public class MyFake implements MyInterface {}
+
+MyInterface @mi = getNewImplementation();
+%>
+
+Assuming that during unit testing, you provide a new instance of MyStub or MyFake, then the rest of the code in the real
+methods will work as intended. This pattern is often times useful when you have more complex objects, or for integration
+tests, where creating mocks over and over is tiresome. However, the downside of this approach is that you have to write
+your code in such a way as to support this, and anyways, if you are writing integrations with third party code which you
+cannot change, this might be impossible anyways.
+
+=== In come mocks ===
+
+In general, a mock framework is a framework that allows easy yet powerful stubbing/faking, but instead of using real
+objects such as MyStub or MyFake in the above example, the framework generates what can be thought of as a stub or a
+fake on the fly. In addition, a mock framework usually contains mechanisms for verifying that the mocked object was
+called in a certain way, with certain parameters. Additionally, the "code" in the mock can easily be modified at runtime
+by the test code, so that the behavior can mimic realistic scenarios, with relatively little effort.
+
+For existing mock frameworks in other languages, they are usually quite good, but due to various limitations in the
+language, there are some key drawbacks. For instance, final classes cannot be mocked, because mocks in these
+languages are just classes that are created on the fly, and extend a given class, so if the class cannot be extended, it
+requires even more cumbersome and more complex frameworks to do the mocking. Private methods and fields cannot be
+accessed by the mocks, and static methods cannot be mocked. These limitations make mocks useless in some cases, and
+makes it impossible to do a proper unit test. Often, this code is tested in integration or functional tests, but it
+can be quite a large process to do so, and in theory, if a mock would work, it would be ideal. Given that, MethodScript
+provides built in support for mocks, including support for mocking final classes, private methods, and static methods.
+
+In addition, global functions can be easily mocked as well.
+
+== Unit Test Framework ==
+In addition to support for mocks, MethodScript provides a mechanism for running unit tests. Most importantly,
+MethodScript defines some generic annotations, which can be used by all test code, but it also provides a basic runner
+for the tests. Third party libraries could provide alternative runners, and in fact, when integrating with an IDE, the
+default runner is not used. Much of the unit test framework is inspired by JUnit 5, so if you are familiar with unit
+testing in Java, these concepts should not be much of a leap.
+
+=== Example ===
+
+Let us suppose we are writing a Calculator class. The following code could be used to unit test the calculator. Let us
+first take a look at the abbreviated Calculator class.
+
+<%CODE|
+public final class Calculator {
+	private double @memory = null;
+	private double @currentValue = null;
+	public double add(double @a, double @b) {
+		double @r = @a + @b;
+		this->setCurrentValue(@r);
+		return(@r);
+	}
+
+	public double subtract(double @a, double @b) {
+		// ...
+	}
+
+	public void clearMem() {
+		@memory = null;
+	}
+
+	public void setMem() {
+		@memory = @currentValue;
+	}
+
+	private void setCurrentValue(@currentValue) {
+		this->currentValue = @currentValue;
+	}
+
+	// ...
+}
+%>
+
+Our unit test code that tests the add method might look like this:
+
+<%CODE|
+// Note the TestSuite annotation here, which adds the test class to the framework
+@{TestSuite}
+public class CalculatorTest {
+	
+	// The Test annotation tells the framework that this method is a test method
+	@{Test}
+	public void testAdd() {
+		// assert([message], expected, actual)
+		assert("Add is broken!", 4.0, new Calculator().add(2, 2));
+	}
+}
+%>
+
+You may name the test method whatever you like, but the return value should be void, and the method should not take
+any parameters.
+
+The testAdd method shows that we expect a return value of 4.0 when we add 2 and 2. If these values are not equal, then
+the test method will throw an AssertException, which will signal to the unit test framework that this test has failed,
+and the test will end. The other tests in the suite will continue to run, however. We can also mock methods, using
+the mock framework, which may be useful to bypass some methods that are not under test. The when() function is used
+to assign mock functionality for a particular method, and is a method with special runtime support, which does not
+actually execute the parameter passed to it. verify() is special in the same way.
+
+<%CODE|
+
+	@{Test}
+	public void testMock() {
+		// First, we need to create a mock of the calculator. mock() returns a new mock object of the appropriate type,
+		// using type inference, but it is possible to specify a subclass, if that is desired, i.e. mock(SubCalculator);
+		Calculator @c = mock();
+		// By default, methods do nothing, and return a default value depending on the
+		// return type. In the case of a method with a double return type, 0.0 is returned. This line demonstrates that,
+		// but doesn't actually test the calculator class
+		assert(0.0, @c->add(2, 2));
+		// Next, we set up the mock methods, so they return some different value when 2 and 2 are passed in.
+		when(@c->add(2, 2)).thenReturn(4.0);
+		assert(4.0, @c->add(2, 2));
+		// For other inputs though, we still will get the default, because we haven't specified it.
+		assert(0.0, @c->add(100, 100));
+		// We can make it not care about parameters with the any() type:
+		when(@c->add(any(), any())).thenReturn(42.0);
+		// This is a shorter but functional equivalent:
+		when(@c->add).thenReturn(42.0);
+		// Now 42.0 is returned for any combination
+		assert(42.0, @c->add(1, 1));
+		assert(42.0, @c->add(12, 5));
+	}
+%>
+
+This example is not useful, because we are not passing the Calculator object to another object, but merely demonstrates
+how mocks work. In this case, it's more useful to use a ''spy'' instead. A ''spy'' works more or less like a mock, but
+unless otherwise instructed, will execute the real method in the underlying object.
+
+<%CODE|
+	@{Test}
+	public void testSpy() {
+		// Create the spy first
+		Calculator @c = spy();
+		// Here, unlike the mock, you can see that the method returns the valid value
+		assert(4.0, @c->add(2, 2));
+		// We can still mock a method though, to override the functionality, in exactly the same way as a mock
+		when(@c->add(2, 2)).thenReturn(42.0);
+		assert(4.0, @c->add(3, 1));
+		assert(42.0, @c->add(2, 2));
+		// We can revert back to the default behavior both for mocks and spies using remove_when.
+		remove_when(@c->add(2, 2));
+		// We can also verify that certain methods are called from the mock or spy, including private methods.
+		// Note that setCurrentValue is private, yet from within the test code, we can access it anyways. We set the
+		// number of times we expect this method to be invoked, with the given arguments, in this case, any() (We could
+		// leave that off, and just do verify(@c->setCurrentValue) as well.
+		verify(@c->setCurrentValue(any())).times(3);
+		// Given that we called add 3 times in this test, this test should pass. 0 is a valid option, meaning that we
+		// don't expect to have called the given method at all during the course of the lifetime of the mock.
+	}
+%>
+
+== Integration Testing ==
+In general, the unit test framework can be used without mocking, and across larger sets of objects to accomplish what
+is known as integration testing. The line between this and unit tests can be blurry anyways, but strictly speaking,
+unit tests should not interact with external objects (other than through mocks). But often times, there is little value
+in doing such a limited test, as the real test lies in the interaction between various objects. In this case, you can
+use the unit test framework, minus perhaps the mocks, and this is a perfectly acceptable use of the framework.
+
+== Functional Testing ==
+Functional testing, on the other hand, works more like a black box test. The program as a whole is run, as if run by a
+user. In some cases, this is the most desirable test type, but the unit testing framework does not provide support for
+this.
