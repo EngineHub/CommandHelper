@@ -2777,6 +2777,64 @@ public class Math {
 				new ExampleScript("Reverse mode, clamping to minimum due to equal distance", "clamp(15, 20, 10);")
 			};
 		}
+	}
+
+	@api
+	public static class hypot extends CompositeFunction {
+
+		@Override
+		protected String script() {
+			return "if(double(@arguments[0]) <= 0 || double(@arguments[1]) <= 0) {"
+					+	"throw(RangeException, 'The values passed to hypot may not be negative');"
+					+ "}"
+					+ "return(sqrt((@arguments[0] ** 2) + (@arguments[1] ** 2)));";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public String getName() {
+			return "hypot";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "number {a, b} Given two sides of a right triangle, returns the length of the hypotenuse, using the"
+					+ " equation a² + b² = c², where a and b are the arguments provided.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Standard usage", "hypot(3, 4)"),
+				new ExampleScript("Standard usage", "hypot(1, 1)"),
+				new ExampleScript("Standard usage", "hypot(2.5, 4.6)"),
+				new ExampleScript("Values may not be negative", "hypot(-1, -1)", true)
+			};
+		}
 
 	}
 
