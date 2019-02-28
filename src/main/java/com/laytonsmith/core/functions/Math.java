@@ -2784,10 +2784,7 @@ public class Math {
 
 		@Override
 		protected String script() {
-			return "if(double(@arguments[0]) <= 0 || double(@arguments[1]) <= 0) {"
-					+	"throw(RangeException, 'The values passed to hypot may not be negative');"
-					+ "}"
-					+ "return(sqrt((@arguments[0] ** 2) + (@arguments[1] ** 2)));";
+			return getBundledCode();
 		}
 
 		@Override
