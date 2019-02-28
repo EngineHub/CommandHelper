@@ -639,7 +639,7 @@ public class Sandbox {
 			return "void {path, content, [mode]} Writes a file to the file system. This method only works from the"
 					+ " cmdline,"
 					+ " if not in cmdline, a SecurityExcpetion is thrown. Because of this, there is no check against"
-					+ " the base-dir path. The path, if relative, is relative to this script"
+					+ " the base-dir path. ---- The path, if relative, is relative to this script"
 					+ " file. If the path already exists, and is a directory, an IOException is thrown."
 					+ " The content may be a string, in which case it is written out as UTF-8 text. It could also"
 					+ " be a byte_array, in which cases it is written as is. Mode can be one of the following, but"

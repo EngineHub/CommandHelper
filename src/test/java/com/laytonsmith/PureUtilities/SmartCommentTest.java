@@ -56,14 +56,8 @@ public class SmartCommentTest {
 
 	@Test
 	public void testEmbeddedAnnotations() {
-		Map<String, SmartComment.Replacement> reps = new HashMap<String, SmartComment.Replacement>();
-		reps.put("code", new SmartComment.Replacement() {
-
-			@Override
-			public String replace(String data) {
-				return "<code>" + data + "</code>";
-			}
-		});
+		Map<String, SmartComment.Replacement> reps = new HashMap<>();
+		reps.put("code", (SmartComment.Replacement) (String data) -> "<code>" + data + "</code>");
 		SmartComment c = new SmartComment(
 				"/**\n"
 				+ " * {@code code}\n"
@@ -79,14 +73,8 @@ public class SmartCommentTest {
 
 	@Test
 	public void testEmbeddedAnnotationsInAnnotations() {
-		Map<String, SmartComment.Replacement> reps = new HashMap<String, SmartComment.Replacement>();
-		reps.put("code", new SmartComment.Replacement() {
-
-			@Override
-			public String replace(String data) {
-				return "<code>" + data + "</code>";
-			}
-		});
+		Map<String, SmartComment.Replacement> reps = new HashMap<>();
+		reps.put("code", (SmartComment.Replacement) (String data) -> "<code>" + data + "</code>");
 		SmartComment c = new SmartComment(
 				"/**\n"
 				+ " * {@code code}\n"
