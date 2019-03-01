@@ -145,6 +145,7 @@ public final class MethodScriptCompiler {
 		boolean inMultiline = false;
 		boolean inSmartComment = false;
 		boolean inFileOptions = false;
+		boolean inAnnotation = false;
 		int fileOptionsLineNumberStart = 1;
 
 		StringBuilder buf = new StringBuilder();
@@ -278,7 +279,7 @@ public final class MethodScriptCompiler {
 			}
 
 			// If we are in a comment, add the character to the buffer.
-			if(inComment) {
+			if(inComment || (inAnnotation && c != '}')) {
 				buf.append(c);
 				continue;
 			}
@@ -488,6 +489,14 @@ public final class MethodScriptCompiler {
 							break;
 						}
 						case '}': {
+							if(inAnnotation) {
+								// Eventually, this will no longer be a comment type, but for now, we just want
+								// to totally ignore annotations, as if they were comments.
+								inAnnotation = false;
+								token = new Token(/*TType.ANNOTATION*/TType.COMMENT, "@{" + buf.toString() + "}", target);
+								buf = new StringBuilder();
+								break;
+							}
 							token = new Token(TType.RCURLY_BRACKET, "}", target);
 							break;
 						}
@@ -570,6 +579,14 @@ public final class MethodScriptCompiler {
 						case '\t': { // Whitespace case #2 (TAB).
 							token = new Token(TType.WHITESPACE, "\t", target);
 							break;
+						}
+						case '@': {
+							if(c2 == '{') {
+								inAnnotation = true;
+								i++;
+								continue;
+							}
+							break matched;
 						}
 						default: {
 							// No match was found at this point, so continue matching below.

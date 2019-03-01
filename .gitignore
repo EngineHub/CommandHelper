@@ -335,3 +335,5 @@ ASALocalRun/
 
 .checkstyle
 
+# MethodScript
+persistence.db

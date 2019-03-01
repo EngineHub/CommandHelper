@@ -118,14 +118,14 @@ Our unit test code that tests the add method might look like this:
 
 <%CODE|
 // Note the TestSuite annotation here, which adds the test class to the framework
-@{TestSuite}
+@{TestSuite(allowSideEffects: true)}
 public class CalculatorTest {
 	
 	// The Test annotation tells the framework that this method is a test method
 	@{Test}
 	public void testAdd() {
 		// assert([message], expected, actual)
-		assert("Add is broken!", 4.0, new Calculator().add(2, 2));
+		assert("Add is broken!", 4.0, new Calculator()->add(2, 2));
 	}
 }
 %>
@@ -266,6 +266,7 @@ Furthermore, the persistence network is backed by a
 memory based implementation, the actual persistence.ini file is completely ignored. {{function|read}} and 
 {{function|write}} go to a memory backed VFS, and http_request is blocked from making actual http calls (the function
 may be mocked to simulate a web request, however.)
+
 
 However, there may be legitimate reasons to allow side effects. This is allowed by using the allowSideEffects parameter
 of the @{TestSuite} annotation. This is false by default, but if set to true, then for that test suite only, none of

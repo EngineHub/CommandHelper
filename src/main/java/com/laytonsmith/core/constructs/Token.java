@@ -94,7 +94,8 @@ public class Token {
 		KEYWORD(TokenVariant.KEYWORD),
 		FILE_OPTIONS_START(TokenVariant.SEPARATOR, TokenVariant.FILE_OPTION),
 		FILE_OPTIONS_STRING(TokenVariant.FILE_OPTION),
-		FILE_OPTIONS_END(TokenVariant.SEPARATOR, TokenVariant.FILE_OPTION);
+		FILE_OPTIONS_END(TokenVariant.SEPARATOR, TokenVariant.FILE_OPTION),
+		ANNOTATION(TokenVariant.COMMENT);
 
 		private final Set<TokenVariant> variants = EnumSet.noneOf(TokenVariant.class);
 
