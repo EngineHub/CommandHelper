@@ -106,6 +106,10 @@ public final class Calculator {
 		this->currentValue = @currentValue;
 	}
 
+	private static void printMsg() {
+		msg('Hello from a static method!');
+	}
+
 	// ...
 }
 %>
@@ -148,33 +152,46 @@ actually execute the parameter passed to it. verify() is special in the same way
 		// but doesn't actually test the calculator class
 		assert(0.0, @c->add(2, 2));
 		// Next, we set up the mock methods, so they return some different value when 2 and 2 are passed in.
-		when(@c->add(2, 2)).thenReturn(4.0);
+		when(@c->add(2, 2))->thenReturn(4.0);
 		assert(4.0, @c->add(2, 2));
 		// For other inputs though, we still will get the default, because we haven't specified it.
 		assert(0.0, @c->add(100, 100));
 		// We can make it not care about parameters with the any() type:
-		when(@c->add(any(), any())).thenReturn(42.0);
+		when(@c->add(any(), any()))->thenReturn(42.0);
 		// This is a shorter but functional equivalent:
-		when(@c->add).thenReturn(42.0);
+		when(@c->add)->thenReturn(42.0);
 		// Now 42.0 is returned for any combination
 		assert(42.0, @c->add(1, 1));
 		assert(42.0, @c->add(12, 5));
+		// We can also mock static methods
+		Calculator::printMsg(); // Hello from a static method!
+		when(Calculator::printMsg).thenDo(closure() {
+			msg('Hello from a mocked static method!');
+		});
+		Calculator::printMsg(); // Hello from a mocked static method!
 	}
 %>
 
 This example is not useful, because we are not passing the Calculator object to another object, but merely demonstrates
 how mocks work. In this case, it's more useful to use a ''spy'' instead. A ''spy'' works more or less like a mock, but
-unless otherwise instructed, will execute the real method in the underlying object.
+unless otherwise instructed, will execute the real method in the underlying object. Unlike a mock, however, creating
+a spy does need a real instance of the class. If the class has a no arg constructor (even a private one), and this is
+the appropriate constructor to call for the test, then nothing additional needs doing. However, if you wish the object
+to be constructed with another constructor, you can provide the instance to the spy function.
 
 <%CODE|
 	@{Test}
 	public void testSpy() {
 		// Create the spy first
 		Calculator @c = spy();
+		// If we wanted to construct our own custom instance
+		Calculator @c2 = spy(new Calculator('string', 1, 2));
+		// Create a subclass of Calculator instead
+		Calculator @c3 = spy(SubCalculator);
 		// Here, unlike the mock, you can see that the method returns the valid value
 		assert(4.0, @c->add(2, 2));
 		// We can still mock a method though, to override the functionality, in exactly the same way as a mock
-		when(@c->add(2, 2)).thenReturn(42.0);
+		when(@c->add(2, 2))->thenReturn(42.0);
 		assert(4.0, @c->add(3, 1));
 		assert(42.0, @c->add(2, 2));
 		// We can revert back to the default behavior both for mocks and spies using remove_when.
@@ -183,11 +200,81 @@ unless otherwise instructed, will execute the real method in the underlying obje
 		// Note that setCurrentValue is private, yet from within the test code, we can access it anyways. We set the
 		// number of times we expect this method to be invoked, with the given arguments, in this case, any() (We could
 		// leave that off, and just do verify(@c->setCurrentValue) as well.
-		verify(@c->setCurrentValue(any())).times(3);
+		verify(@c->setCurrentValue(any()))->times(3);
 		// Given that we called add 3 times in this test, this test should pass. 0 is a valid option, meaning that we
 		// don't expect to have called the given method at all during the course of the lifetime of the mock.
 	}
 %>
+
+Global functions can also easily be mocked, using the same general syntax, with the exception that all arguments must
+be mocked, there is no shortcut for leaving off the arguments.
+
+<%CODE|
+	@{Test}
+	public void test() {
+		when(read('file.txt')).thenReturn('fake file text');
+		assert('fake file text', read('file.txt'));
+		// Bad:
+		// when(read).thenReturn('');
+	}
+%>
+
+In some cases, a more complex mechanism needs to be used, particularly when the item under test does not return a value,
+but interacts with a value passed in, most generally a closure. In that case, you can use thenDo to give it an action to
+do when it is called, rather than having it return a value. The closure sent to thenDo will recieve the arguments that
+were passed in to the original function.
+
+<%CODE|
+	@{Test}
+	public void test() {
+		// Assume that we expect MyObject->myMethod to call http_request, but we don't actually want to make a real web
+		// request. This is the pattern we can use.
+		MyObject @o = spy();
+		// distinguish between http_request(string, closure) and http_request(string, array) by providing the type
+		WhenMeta @http_request = when(http_request(any(), any(closure)))
+			// The type of any() is mixed, so we must accept mixed as the url. Since we specified the second argument
+			// is a closure, however, we can define that as such here as well.
+			->thenDo(closure(mixed @url, closure @callback) {
+				execute(array('body': 'http request body'), @callback);
+			});
+		@o->myMethod();
+		// We can verify that the method was called. when() actually returns a WhenMeta object, which we can use to
+		// verify interactions.
+		verify(@http_request)->times(1);
+	}
+%>
+
+Private methods may be called directly from within the test code, and this is not a compile error.
+
+<%CODE|
+	@{Test}
+	public void test() {
+		Calculator @c = new Calculator();
+		@c->setCurrentValue(10); // Not an error
+		assert(10, @c->currentValue); // Also not an error
+	}
+%>
+
+== Scoping ==
+In general, tests should be isolated activities. This allows for tests to be run in parallel, prevents dependencies on
+test run order, and makes writing tests easier to visualize. To support this notion, MethodScript enforces test
+isolation at a low level. TestSuites are mostly just a logical grouping of tests, but if a method in the test suite
+is marked as @{BeforeTest} or @{AfterTest}, then these methods will be called before and after each @{Test} method.
+However, each test is run within its own environment, which is not shared with other test runs. Any changes made to
+static values (including mocking the behavior of static methods) or other memory based structures are not saved.
+Furthermore, the persistence network is backed by a
+memory based implementation, the actual persistence.ini file is completely ignored. {{function|read}} and 
+{{function|write}} go to a memory backed VFS, and http_request is blocked from making actual http calls (the function
+may be mocked to simulate a web request, however.)
+
+However, there may be legitimate reasons to allow side effects. This is allowed by using the allowSideEffects parameter
+of the @{TestSuite} annotation. This is false by default, but if set to true, then for that test suite only, none of
+the external restrictions are enforced (persistence network, read/write, http_request). Additionally, within the test
+suite, the state of the environment is not reset before each test, though @{BeforeTest} and @{AfterTest} are still run
+before and after the test. There is also a guarantee that tests will run in order, from top to bottom, and they will
+not run in parallel. In general, this has many drawbacks, however, and will considerably slow down your unit tests, so
+should be used sparingly, if ever. Generally, the better solution is to refactor your actual code and tests such that 
+the tests can run indepenedently of each other.
 
 == Integration Testing ==
 In general, the unit test framework can be used without mocking, and across larger sets of objects to accomplish what
