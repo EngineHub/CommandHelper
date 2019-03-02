@@ -3,6 +3,9 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.natives.interfaces.ObjectModifier;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  *
@@ -72,4 +75,8 @@ public final class CVoid extends Construct implements Cloneable {
 		throw new RuntimeException("Cannot call getInterfaces on void");
 	}
 
+	@Override
+	public Set<ObjectModifier> getObjectModifiers() {
+		return EnumSet.of(ObjectModifier.FINAL);
+	}
 }

@@ -117,6 +117,10 @@
         html = wiky.process(html);
         html = html.replace(/{{TakeNote\|text=([\s\S]*?)}}/g, "<div class=\"TakeNote\"><strong>Note:</strong> $1</div>");
         html = html.replace(/{{Warning\|text=([\s\S]*?)}}/g, "<div class=\"Warning\"><strong>Warning:</strong> $1</div>");
+		var unimplemented = "These features are not implemented yet, and this page should only serve as a design document,"
+			+ " and is not necessarily an indication of how the feature will end up working once it is implemented.";
+		html = html.replace(/{{unimplemented}}/g, "<div class=\"Warning\"><strong>Warning: " + unimplemented 
+				+ "</strong></div>");
         html = html.replace(/\[(https?:\/\/.*?) (.*)\]/g, "<a href=\"$1\">$2</a>");
         html = html.replace(/__NOTOC__/g, "");
         var internalLink = /\[\[(.*?)(?:\|(.*?))?\]\]/g;
@@ -128,7 +132,8 @@
             if (text === null) {
                 text = link.replace(/_/g, " ");
             }
-			if(!link.endsWith(".html")) {
+			// If the link doesn't have an extension, add .html
+			if(link.indexOf(".") === -1) {
 				link += ".html";
 			}
             if (link.slice(0, 6) === "Image:") {

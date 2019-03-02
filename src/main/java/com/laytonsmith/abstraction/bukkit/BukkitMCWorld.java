@@ -63,7 +63,6 @@ import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
 import org.bukkit.Chunk;
 import org.bukkit.Effect;
 import org.bukkit.FireworkEffect;
@@ -306,9 +305,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 			MCEntity temp = BukkitConvertor.BukkitGetCorrectEntity(entity);
 			Static.InjectEntity(temp);
 			try {
-				closure.execute(new CString(entity.getUniqueId().toString(), Target.UNKNOWN));
-			} catch (FunctionReturnException ex) {
-				// do nothing
+				closure.executeClosure(new CString(entity.getUniqueId().toString(), Target.UNKNOWN));
 			} finally {
 				Static.UninjectEntity(temp);
 			}

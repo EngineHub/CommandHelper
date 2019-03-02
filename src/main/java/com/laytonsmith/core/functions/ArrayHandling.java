@@ -40,7 +40,6 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.BasicLogic.equals_ic;
@@ -1573,12 +1572,7 @@ public class ArrayHandling {
 					// Compare the first two elements of each side
 					Mixed l = left.get(0, t);
 					Mixed r = right.get(0, t);
-					Mixed c = null;
-					try {
-						closure.execute(l, r);
-					} catch (FunctionReturnException ex) {
-						c = ex.getReturn();
-					}
+					Mixed c = closure.executeClosure(l, r);
 					int value;
 					if(c instanceof CNull) {
 						value = 0;
@@ -1589,7 +1583,8 @@ public class ArrayHandling {
 							value = -1;
 						}
 					} else {
-						throw new CRECastException("The custom closure did not return a value. It must always return true, false, or null.", t);
+						throw new CRECastException("The custom closure did not return a value (or returned an invalid"
+								+ " type). It must always return true, false, or null.", t);
 					}
 					if(value <= 0) {
 						result.push(left.get(0, t), t);
@@ -1752,7 +1747,7 @@ public class ArrayHandling {
 				@Override
 				public void run() {
 					Mixed c = new array_sort().exec(Target.UNKNOWN, null, array, sortType);
-					callback.execute(new Mixed[]{c});
+					callback.executeClosure(new Mixed[]{c});
 				}
 			});
 			return CVoid.VOID;
@@ -2319,16 +2314,8 @@ public class ArrayHandling {
 				newArray = CArray.GetAssociativeArray(t);
 				for(Mixed key : array.keySet()) {
 					Mixed value = array.get(key, t);
-					Mixed ret = null;
-					try {
-						closure.execute(key, value);
-					} catch (FunctionReturnException ex) {
-						ret = ex.getReturn();
-					}
-					if(ret == null) {
-						ret = CBoolean.FALSE;
-					}
-					boolean bret = ArgumentValidation.getBoolean(ret, t);
+					Mixed ret = closure.executeClosure(key, value);
+					boolean bret = ArgumentValidation.getBooleanish(ret, t);
 					if(bret) {
 						newArray.set(key, value, t);
 					}
@@ -2338,16 +2325,11 @@ public class ArrayHandling {
 				for(int i = 0; i < array.size(); i++) {
 					Mixed key = new CInt(i, t);
 					Mixed value = array.get(i, t);
-					Mixed ret = null;
-					try {
-						closure.execute(key, value);
-					} catch (FunctionReturnException ex) {
-						ret = ex.getReturn();
-					}
-					if(ret == null) {
+					Mixed ret = closure.executeClosure(key, value);
+					if(ret == CNull.NULL) {
 						ret = CBoolean.FALSE;
 					}
-					boolean bret = ArgumentValidation.getBoolean(ret, t);
+					boolean bret = ArgumentValidation.getBooleanish(ret, t);
 					if(bret) {
 						newArray.push(value, t);
 					}
@@ -2565,7 +2547,7 @@ public class ArrayHandling {
 			CClosure closure = Static.getObject(args[1], t, CClosure.class);
 			for(Mixed key : array.keySet()) {
 				try {
-					closure.execute(key, array.get(key, t));
+					closure.executeClosure(key, array.get(key, t));
 				} catch (ProgramFlowManipulationException ex) {
 					// Ignored
 				}
@@ -2647,18 +2629,9 @@ public class ArrayHandling {
 			List<Mixed> keys = new ArrayList<>(array.keySet());
 			Mixed lastValue = array.get(keys.get(0), t);
 			for(int i = 1; i < keys.size(); ++i) {
-				boolean hadReturn = false;
-				try {
-					closure.execute(lastValue, array.get(keys.get(i), t));
-				} catch (FunctionReturnException ex) {
-					lastValue = ex.getReturn();
-					if(lastValue instanceof CVoid) {
-						throw new CREIllegalArgumentException("The closure passed to " + getName() + " cannot return void.", t);
-					}
-					hadReturn = true;
-				}
-				if(!hadReturn) {
-					throw new CREIllegalArgumentException("The closure passed to " + getName() + " must return a value, but one was not returned.", t);
+				lastValue = closure.executeClosure(lastValue, array.get(keys.get(i), t));
+				if(lastValue instanceof CVoid) {
+					throw new CREIllegalArgumentException("The closure passed to " + getName() + " cannot return void.", t);
 				}
 			}
 			return lastValue;
@@ -2741,18 +2714,9 @@ public class ArrayHandling {
 			List<Mixed> keys = new ArrayList<>(array.keySet());
 			Mixed lastValue = array.get(keys.get(keys.size() - 1), t);
 			for(int i = keys.size() - 2; i >= 0; --i) {
-				boolean hadReturn = false;
-				try {
-					closure.execute(lastValue, array.get(keys.get(i), t));
-				} catch (FunctionReturnException ex) {
-					lastValue = ex.getReturn();
-					if(lastValue instanceof CVoid) {
-						throw new CREIllegalArgumentException("The closure passed to " + getName() + " cannot return void.", t);
-					}
-					hadReturn = true;
-				}
-				if(!hadReturn) {
-					throw new CREIllegalArgumentException("The closure passed to " + getName() + " must return a value, but one was not returned.", t);
+				lastValue = closure.executeClosure(lastValue, array.get(keys.get(i), t));
+				if(lastValue instanceof CVoid) {
+					throw new CREIllegalArgumentException("The closure passed to " + getName() + " cannot return void.", t);
 				}
 			}
 			return lastValue;
@@ -2825,18 +2789,10 @@ public class ArrayHandling {
 			CArray array = Static.getArray(args[0], t);
 			CClosure closure = Static.getObject(args[1], t, CClosure.class);
 			for(Mixed c : array.keySet()) {
-				boolean hasReturn = false;
-				try {
-					closure.execute(array.get(c, t));
-				} catch (FunctionReturnException ex) {
-					hasReturn = true;
-					boolean ret = ArgumentValidation.getBoolean(ex.getReturn(), t);
-					if(ret == false) {
-						return CBoolean.FALSE;
-					}
-				}
-				if(!hasReturn) {
-					throw new CREIllegalArgumentException("The closure passed to " + getName() + " must return a boolean.", t);
+				Mixed fr = closure.executeClosure(array.get(c, t));
+				boolean ret = ArgumentValidation.getBooleanish(fr, t);
+				if(ret == false) {
+					return CBoolean.FALSE;
 				}
 			}
 			return CBoolean.TRUE;
@@ -2906,18 +2862,10 @@ public class ArrayHandling {
 			CArray array = Static.getArray(args[0], t);
 			CClosure closure = Static.getObject(args[1], t, CClosure.class);
 			for(Mixed c : array.keySet()) {
-				boolean hasReturn = false;
-				try {
-					closure.execute(array.get(c, t));
-				} catch (FunctionReturnException ex) {
-					hasReturn = true;
-					boolean ret = ArgumentValidation.getBoolean(ex.getReturn(), t);
-					if(ret == true) {
-						return CBoolean.TRUE;
-					}
-				}
-				if(!hasReturn) {
-					throw new CREIllegalArgumentException("The closure passed to " + getName() + " must return a boolean.", t);
+				Mixed fr = closure.executeClosure(array.get(c, t));
+				boolean ret = ArgumentValidation.getBooleanish(fr, t);
+				if(ret == true) {
+					return CBoolean.TRUE;
 				}
 			}
 			return CBoolean.FALSE;
@@ -2989,16 +2937,12 @@ public class ArrayHandling {
 			CArray newArray = (array.isAssociative() ? CArray.GetAssociativeArray(t) : new CArray(t, (int) array.size()));
 
 			for(Mixed c : array.keySet()) {
-				boolean hasReturn = false;
-				try {
-					closure.execute(array.get(c, t));
-				} catch (FunctionReturnException ex) {
-					hasReturn = true;
-					newArray.set(c, ex.getReturn(), t);
+				Mixed fr = closure.executeClosure(array.get(c, t));
+				if(fr.isInstanceOf(CVoid.class)) {
+					throw new CREIllegalArgumentException("The closure passed to " + getName()
+							+ " must return a value.", t);
 				}
-				if(!hasReturn) {
-					throw new CREIllegalArgumentException("The closure passed to " + getName() + " must return a value.", t);
-				}
+				newArray.set(c, fr, t);
 			}
 
 			return newArray;
@@ -3141,16 +3085,11 @@ public class ArrayHandling {
 									throw new Error();
 								}
 							} else {
-								try {
-									closure.execute(one.get(k1[i], t), two.get(k2[j], t));
-									throw new CRECastException("The closure passed to " + getName() + " must return a"
-											+ " boolean value", t);
-								} catch (FunctionReturnException fre) {
-									boolean res = ArgumentValidation.getBoolean(fre.getReturn(), fre.getTarget());
-									if(res) {
-										ret.push(one.get(k1[i], t), t);
-										continue i;
-									}
+								Mixed fre = closure.executeClosure(one.get(k1[i], t), two.get(k2[j], t));
+								boolean res = ArgumentValidation.getBoolean(fre, fre.getTarget());
+								if(res) {
+									ret.push(one.get(k1[i], t), t);
+									continue i;
 								}
 							}
 						}

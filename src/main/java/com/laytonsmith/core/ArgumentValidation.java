@@ -342,6 +342,8 @@ public final class ArgumentValidation {
 	 * @param t
 	 * @return
 	 * @deprecated Use {@link #getBooleanish} for current behavior, or {@link #getBooleanObject} for strict behavior.
+	 * Generally speaking, if it seems reasonable for the user to send a non-boolean data type in this parameter, then
+	 * getBooleanish should be used. If it indicates a probable error, getBooleanObject should be used.
 	 */
 	@Deprecated
 	public static boolean getBoolean(Mixed c, Target t) {
@@ -353,8 +355,8 @@ public final class ArgumentValidation {
 	 * return true or false. For actual booleans, the value is returned, but for Booleanish values, the value itself
 	 * determines the rules for if it is determined to be trueish or falseish.
 	 *
-	 * @param c
-	 * @param t
+	 * @param c The value to convert
+	 * @param t The code target
 	 * @return
 	 */
 	public static boolean getBooleanish(Mixed c, Target t) {

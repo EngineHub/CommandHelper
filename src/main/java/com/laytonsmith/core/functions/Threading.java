@@ -28,7 +28,6 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -84,9 +83,7 @@ public class Threading {
 					DaemonManager dm = environment.getEnv(GlobalEnv.class).GetDaemonManager();
 					dm.activateThread(Thread.currentThread());
 					try {
-						closure.execute();
-					} catch (FunctionReturnException ex) {
-						// Do nothing
+						closure.executeClosure();
 					} catch (LoopManipulationException ex) {
 						ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Unexpected loop manipulation"
 								+ " operation was triggered inside the closure.", t), environment);
@@ -227,7 +224,7 @@ public class Threading {
 				@Override
 				public void run() {
 					try {
-						closure.execute();
+						closure.executeClosure();
 					} catch (ConfigRuntimeException e) {
 						ConfigRuntimeException.HandleUncaughtException(e, environment);
 					} catch (ProgramFlowManipulationException e) {
@@ -292,13 +289,10 @@ public class Threading {
 					@Override
 					public Object call() throws Exception {
 						try {
-							closure.execute();
-						} catch (FunctionReturnException e) {
-							return e.getReturn();
+							return closure.executeClosure();
 						} catch (ConfigRuntimeException | ProgramFlowManipulationException e) {
 							return e;
 						}
-						return CNull.NULL;
 					}
 				});
 

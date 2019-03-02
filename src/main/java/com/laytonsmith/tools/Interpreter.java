@@ -71,7 +71,6 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.profiler.ProfilePoint;
@@ -317,9 +316,7 @@ public final class Interpreter {
 		CClosure c = (CClosure) env.getEnv(GlobalEnv.class).GetCustom("cmdline_prompt");
 		if(c != null) {
 			try {
-				c.execute(CBoolean.get(inShellMode));
-			} catch (FunctionReturnException ex) {
-				String val = ex.getReturn().val();
+				String val = c.executeClosure(CBoolean.get(inShellMode)).val();
 				return Static.MCToANSIColors(val) + TermColors.RESET;
 			} catch (ConfigRuntimeException ex) {
 				ConfigRuntimeException.HandleUncaughtException(ex, env);

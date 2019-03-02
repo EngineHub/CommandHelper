@@ -16,6 +16,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -34,9 +35,28 @@ import java.util.List;
 public class ConfigRuntimeException extends RuntimeException {
 
 	/**
-	 * Creates a new instance of <code>ConfigRuntimeException</code> without detail message.
+	 * Creates a new ConfigRuntimeException.
+	 *
+	 * @param msg The message to be displayed
+	 * @param t The code target this exception is being thrown from
 	 */
-	protected ConfigRuntimeException() {
+	protected ConfigRuntimeException(String msg, Target t) {
+		super(msg);
+		createException(t);
+	}
+
+	/**
+	 * Creates a new ConfigRuntimeException.
+	 *
+	 * @param msg The message to be displayed
+	 * @param t The code target this exception is being thrown from
+	 * @param cause The chained cause. This is not used for normal execution, but is helpful when debugging errors.
+	 * Where exceptions are triggered by Java code (as opposed to organic MethodScript errors) this version should
+	 * always be preferred.
+	 */
+	protected ConfigRuntimeException(String msg, Target t, Throwable cause) {
+		super(msg, cause);
+		createException(t);
 	}
 
 	/**
@@ -97,16 +117,12 @@ public class ConfigRuntimeException extends RuntimeException {
 				c.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
 			}
 			try {
-				c.execute(new Mixed[]{ex});
-				return Reaction.REPORT; // Closure returned nothing -> REPORT.
-			} catch (FunctionReturnException retException) {
-				Mixed ret = retException.getReturn();
-				if(ret instanceof CNull || Prefs.ScreamErrors()) {
+				Mixed ret = c.executeClosure(new Mixed[]{ex});
+				if(ret.isInstanceOf(CNull.class) || ret.isInstanceOf(CVoid.class) || Prefs.ScreamErrors()) {
 					return Reaction.REPORT; // Closure returned null or scream-errors was set in the config.
-				} else {
-					// Closure returned a boolean. TRUE -> IGNORE and FALSE -> FATAL.
-					return (ArgumentValidation.getBoolean(ret, Target.UNKNOWN) ? Reaction.IGNORE : Reaction.FATAL);
 				}
+				// Closure returned a boolean. TRUE -> IGNORE and FALSE -> FATAL.
+				return (ArgumentValidation.getBooleanObject(ret, Target.UNKNOWN) ? Reaction.IGNORE : Reaction.FATAL);
 			} catch (ConfigRuntimeException cre) {
 
 				// A CRE occurred in the exception handler. Report both exceptions.
@@ -372,39 +388,6 @@ public class ConfigRuntimeException extends RuntimeException {
 
 	private Environment env;
 	private Target target;
-
-	/**
-	 * Creates a new ConfigRuntimeException. If the exception is intended to be uncatchable, use
-	 * {@link #CreateUncatchableException} instead.
-	 *
-	 * @param msg The message to be displayed
-	 * @param t The code target this exception is being thrown from
-	 * @deprecated Use the {@link #BuildException(java.lang.String, com.laytonsmith.core.functions.Exceptions.ExceptionType, com.laytonsmith.core.constructs.Target)
-	 * } method instead.
-	 */
-	@Deprecated
-	public ConfigRuntimeException(String msg, Target t) {
-		this(msg, t, null);
-	}
-
-	/**
-	 * Creates a new ConfigRuntimeException. If the exception is intended to be uncatchable, use {@link #CreateUncatchableException(java.lang.String, com.laytonsmith.core.constructs.Target, java.lang.Throwable)
-	 * }
-	 * instead.
-	 *
-	 * @param msg The message to be displayed
-	 * @param t The code target this exception is being thrown from
-	 * @param cause The chained cause. This is not used for normal execution, but is helpful when debugging errors.
-	 * Where exceptions are triggered by Java code (as opposed to organic MethodScript errors) this version should
-	 * always be preferred.
-	 * @deprecated Use the {@link #BuildException(java.lang.String, com.laytonsmith.core.functions.Exceptions.ExceptionType, com.laytonsmith.core.constructs.Target, java.lang.Throwable)
-	 * } method instead.
-	 */
-	@Deprecated
-	public ConfigRuntimeException(String msg, Target t, Throwable cause) {
-		super(msg, cause);
-		createException(t);
-	}
 
 	private void createException(Target t) {
 		this.target = t;

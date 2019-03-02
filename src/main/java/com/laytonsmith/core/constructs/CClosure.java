@@ -133,12 +133,37 @@ public class CClosure extends Construct {
 	 * </pre>
 	 *
 	 * @param values The values to be passed to the closure
+	 * @return The return value of the closure, or VOID if nothing was returned
 	 * @throws ConfigRuntimeException If any call inside the closure causes a CRE
 	 * @throws ProgramFlowManipulationException If any ProgramFlowManipulationException is thrown (other than a
 	 * LoopManipulationException) within the closure
-	 * @throws FunctionReturnException If the closure has a return() call in it.
 	 */
-	public void execute(Mixed... values) throws ConfigRuntimeException, ProgramFlowManipulationException, FunctionReturnException, CancelCommandException {
+	public Mixed executeClosure(Mixed... values) throws ConfigRuntimeException, ProgramFlowManipulationException, CancelCommandException {
+		try {
+			execute(values);
+		} catch (FunctionReturnException e) {
+			return e.getReturn();
+		}
+		return CVoid.VOID;
+	}
+
+	/**
+	 * @deprecated This method suffers from the fact that a FunctionReturnException may end up bubbling up past the
+	 * point of intended handling, given an error in the code that forgets to catch FunctionReturnException
+	 * (or a superclass), but may be
+	 * hard to detect. Instead, use {@link #ExecuteClosure} which unconditionally catches the exception, and then
+	 * returns it. This also simplifies the code. This will not be removed earlier than 3.3.5.
+	 * @param values
+	 * @throws ConfigRuntimeException
+	 * @throws ProgramFlowManipulationException
+	 * @throws FunctionReturnException
+	 * @throws CancelCommandException
+	 */
+	// This method actually shouldn't be removed when the deprecation period is over, it should just be made protected,
+	// since it is still the foundation of executeClosure.
+	@Deprecated
+	public void execute(Mixed... values) throws ConfigRuntimeException, ProgramFlowManipulationException,
+			FunctionReturnException, CancelCommandException {
 		if(node == null) {
 			return;
 		}

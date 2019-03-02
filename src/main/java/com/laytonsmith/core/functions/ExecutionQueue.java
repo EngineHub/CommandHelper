@@ -75,7 +75,7 @@ public class ExecutionQueue {
 							@Override
 							public Object call() throws Exception {
 								try {
-									c.execute();
+									c.executeClosure();
 								} catch (ConfigRuntimeException ex) {
 									ConfigRuntimeException.HandleUncaughtException(ex, environment);
 								} catch (ProgramFlowManipulationException ex) {
@@ -157,7 +157,7 @@ public class ExecutionQueue {
 							@Override
 							public Object call() throws Exception {
 								try {
-									c.execute();
+									c.executeClosure();
 								} catch (ConfigRuntimeException ex) {
 									ConfigRuntimeException.HandleUncaughtException(ex, environment);
 								} catch (ProgramFlowManipulationException ex) {

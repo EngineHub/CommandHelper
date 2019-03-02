@@ -3374,15 +3374,10 @@ public class DataHandling {
 				Mixed[] vals = new Mixed[args.length - 1];
 				System.arraycopy(args, 0, vals, 0, args.length - 1);
 				CClosure closure = (CClosure) args[args.length - 1];
-				try {
-					closure.execute(vals);
-				} catch (FunctionReturnException e) {
-					return e.getReturn();
-				}
+				return closure.executeClosure(vals);
 			} else {
 				throw new CRECastException("Only a closure (created from the closure function) can be sent to execute()", t);
 			}
-			return CVoid.VOID;
 		}
 
 		@Override
@@ -3448,14 +3443,11 @@ public class DataHandling {
 			}
 
 			try {
-				closure.execute(vals);
-			} catch (FunctionReturnException e) {
-				return e.getReturn();
+				return closure.executeClosure(vals);
 			} finally {
 				cEnv.SetCommandSender(originalSender);
 				gEnv.SetLabel(originalLabel);
 			}
-			return CVoid.VOID;
 		}
 
 		@Override

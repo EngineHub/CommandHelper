@@ -501,7 +501,7 @@ public class SQL {
 
 						@Override
 						public void run() {
-							closure.execute(new Mixed[]{cret, cex});
+							closure.executeClosure(new Mixed[]{cret, cex});
 						}
 					});
 				}

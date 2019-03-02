@@ -18,12 +18,33 @@ public final class Prefs {
 	 * @param name
 	 * @return
 	 */
-	public static Object pref(PNames name) {
+	public static Boolean prefB(PNames name) {
 		if(prefs == null) {
 			//Uh oh.
 			throw new RuntimeException("Preferences have not been initialized!");
 		}
-		return prefs.getPreference(name.config());
+		return prefs.getBooleanPreference(name.config());
+	}
+
+	public static String prefS(PNames name) {
+		if(prefs == null) {
+			throw new RuntimeException("Preferences have not been initialized!");
+		}
+		return prefs.getStringPreference(name.config());
+	}
+
+	public static Integer prefI(PNames name) {
+		if(prefs == null) {
+			throw new RuntimeException("Preferences have not been initialized!");
+		}
+		return prefs.getIntegerPreference(name.config());
+	}
+
+	public static Double prefD(PNames name) {
+		if(prefs == null) {
+			throw new RuntimeException("Preferences have not been initialized!");
+		}
+		return prefs.getDoublePreference(name.config());
 	}
 
 	private static Preferences prefs;
@@ -34,33 +55,35 @@ public final class Prefs {
 	 * but they will not be listed here.
 	 */
 	public static enum PNames {
-		DEBUG_MODE("debug-mode"),
-		SHOW_WARNINGS("show-warnings"),
-		CONSOLE_LOG_COMMANDS("console-log-commands"),
-		SCRIPT_NAME("script-name"),
-		ENABLE_INTERPRETER("enable-interpreter"),
-		BASE_DIR("base-dir"),
-		PLAY_DIRTY("play-dirty"),
-		CASE_SENSITIVE("case-sensitive"),
-		MAIN_FILE("main-file"),
-		ALLOW_DEBUG_LOGGING("allow-debug-logging"),
-		DEBUG_LOG_FILE("debug-log-file"),
-		STANDARD_LOG_FILE("standard-log-file"),
-		ALLOW_PROFILING("allow-profiling"),
-		PROFILING_FILE("profiling-file"),
-		SHOW_SPLASH_SCREEN("show-splash-screen"),
-		USE_COLORS("use-colors"),
-		HALT_ON_FAILURE("halt-on-failure"),
-		USE_SUDO_FALLBACK("use-sudo-fallback"),
-		ALLOW_SHELL_COMMANDS("allow-shell-commands"),
-		ALLOW_DYNAMIC_SHELL("allow-dynamic-shell"),
-		SCREAM_ERRORS("scream-errors"),
-		INTERPRETER_TIMEOUT("interpreter-timeout"),
-		STRICT_MODE("strict-mode");
+		DEBUG_MODE("debug-mode", Preferences.Type.BOOLEAN),
+		SHOW_WARNINGS("show-warnings", Preferences.Type.BOOLEAN),
+		CONSOLE_LOG_COMMANDS("console-log-commands", Preferences.Type.BOOLEAN),
+		SCRIPT_NAME("script-name", Preferences.Type.STRING),
+		ENABLE_INTERPRETER("enable-interpreter", Preferences.Type.BOOLEAN),
+		BASE_DIR("base-dir", Preferences.Type.FILE),
+		PLAY_DIRTY("play-dirty", Preferences.Type.BOOLEAN),
+		CASE_SENSITIVE("case-sensitive", Preferences.Type.BOOLEAN),
+		MAIN_FILE("main-file", Preferences.Type.FILE),
+		ALLOW_DEBUG_LOGGING("allow-debug-logging", Preferences.Type.BOOLEAN),
+		DEBUG_LOG_FILE("debug-log-file", Preferences.Type.FILE),
+		STANDARD_LOG_FILE("standard-log-file", Preferences.Type.FILE),
+		ALLOW_PROFILING("allow-profiling", Preferences.Type.BOOLEAN),
+		PROFILING_FILE("profiling-file", Preferences.Type.FILE),
+		SHOW_SPLASH_SCREEN("show-splash-screen", Preferences.Type.BOOLEAN),
+		USE_COLORS("use-colors", Preferences.Type.BOOLEAN),
+		HALT_ON_FAILURE("halt-on-failure", Preferences.Type.BOOLEAN),
+		USE_SUDO_FALLBACK("use-sudo-fallback", Preferences.Type.BOOLEAN),
+		ALLOW_SHELL_COMMANDS("allow-shell-commands", Preferences.Type.BOOLEAN),
+		ALLOW_DYNAMIC_SHELL("allow-dynamic-shell", Preferences.Type.BOOLEAN),
+		SCREAM_ERRORS("scream-errors", Preferences.Type.BOOLEAN),
+		INTERPRETER_TIMEOUT("interpreter-timeout", Preferences.Type.INT),
+		STRICT_MODE("strict-mode", Preferences.Type.BOOLEAN);
 		private final String name;
+		private final Preferences.Type type;
 
-		private PNames(String name) {
+		private PNames(String name, Preferences.Type type) {
 			this.name = name;
+			this.type = type;
 		}
 
 		/**
@@ -70,6 +93,10 @@ public final class Prefs {
 		 */
 		public String config() {
 			return name;
+		}
+
+		public Preferences.Type type() {
+			return this.type;
 		}
 	}
 
@@ -188,95 +215,95 @@ public final class Prefs {
 	}
 
 	public static Boolean DebugMode() {
-		return (Boolean) pref(PNames.DEBUG_MODE) || ScreamErrors();
+		return prefs.getBooleanPreference(PNames.DEBUG_MODE.config()) || ScreamErrors();
 	}
 
 	public static Boolean ShowWarnings() {
-		return (Boolean) pref(PNames.SHOW_WARNINGS);
+		return prefB(PNames.SHOW_WARNINGS);
 	}
 
 	public static Boolean ConsoleLogCommands() {
-		return (Boolean) pref(PNames.CONSOLE_LOG_COMMANDS);
+		return prefB(PNames.CONSOLE_LOG_COMMANDS);
 	}
 
 	public static String ScriptName() {
-		return (String) pref(PNames.SCRIPT_NAME);
+		return prefS(PNames.SCRIPT_NAME);
 	}
 
 	public static Boolean EnableInterpreter() {
-		return (Boolean) pref(PNames.ENABLE_INTERPRETER);
+		return prefB(PNames.ENABLE_INTERPRETER);
 	}
 
 	public static String BaseDir() {
-		return (String) pref(PNames.BASE_DIR);
+		return prefS(PNames.BASE_DIR);
 	}
 
 	public static Boolean PlayDirty() {
-		return (Boolean) pref(PNames.PLAY_DIRTY);
+		return prefB(PNames.PLAY_DIRTY);
 	}
 
 	public static Boolean CaseSensitive() {
-		return (Boolean) pref(PNames.CASE_SENSITIVE);
+		return prefB(PNames.CASE_SENSITIVE);
 	}
 
 	public static String MainFile() {
-		return (String) pref(PNames.MAIN_FILE);
+		return prefS(PNames.MAIN_FILE);
 	}
 
 	public static Boolean AllowDebugLogging() {
-		return (Boolean) pref(PNames.ALLOW_DEBUG_LOGGING);
+		return prefB(PNames.ALLOW_DEBUG_LOGGING);
 	}
 
 	public static String DebugLogFile() {
-		return (String) pref(PNames.DEBUG_LOG_FILE);
+		return prefS(PNames.DEBUG_LOG_FILE);
 	}
 
 	public static String StandardLogFile() {
-		return (String) pref(PNames.STANDARD_LOG_FILE);
+		return prefS(PNames.STANDARD_LOG_FILE);
 	}
 
 	public static Boolean AllowProfiling() {
-		return (Boolean) pref(PNames.ALLOW_PROFILING);
+		return prefB(PNames.ALLOW_PROFILING);
 	}
 
 	public static String ProfilingFile() {
-		return (String) pref(PNames.PROFILING_FILE);
+		return prefS(PNames.PROFILING_FILE);
 	}
 
 	public static Boolean ShowSplashScreen() {
-		return (Boolean) pref(PNames.SHOW_SPLASH_SCREEN);
+		return prefB(PNames.SHOW_SPLASH_SCREEN);
 	}
 
 	public static Boolean UseColors() {
-		return (Boolean) pref(PNames.USE_COLORS);
+		return prefB(PNames.USE_COLORS);
 	}
 
 	public static Boolean HaltOnFailure() {
-		return (Boolean) pref(PNames.HALT_ON_FAILURE);
+		return prefB(PNames.HALT_ON_FAILURE);
 	}
 
 	public static Boolean UseSudoFallback() {
-		return (Boolean) pref(PNames.USE_SUDO_FALLBACK);
+		return prefB(PNames.USE_SUDO_FALLBACK);
 	}
 
 	public static Boolean AllowShellCommands() {
-		return (Boolean) pref(PNames.ALLOW_SHELL_COMMANDS);
+		return prefB(PNames.ALLOW_SHELL_COMMANDS);
 	}
 
 	public static Boolean AllowDynamicShell() {
-		return (Boolean) pref(PNames.ALLOW_DYNAMIC_SHELL);
+		return prefB(PNames.ALLOW_DYNAMIC_SHELL);
 	}
 
 	public static Boolean ScreamErrors() {
-		return (Boolean) pref(PNames.SCREAM_ERRORS);
+		return prefB(PNames.SCREAM_ERRORS);
 	}
 
 	public static Boolean StrictMode() {
-		return (Boolean) pref(PNames.STRICT_MODE);
+		return prefB(PNames.STRICT_MODE);
 	}
 
 	public static Integer InterpreterTimeout() {
-		Integer i = (Integer) pref(PNames.INTERPRETER_TIMEOUT);
+		Integer i = prefI(PNames.INTERPRETER_TIMEOUT);
 		if(i < 0) {
 			i = 0;
 		}

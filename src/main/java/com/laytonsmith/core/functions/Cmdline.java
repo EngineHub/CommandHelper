@@ -422,7 +422,26 @@ public class Cmdline {
 		private Map<String, String> getMethodScriptProperties() {
 			Map<String, String> map = new HashMap<>();
 			for(Prefs.PNames name : Prefs.PNames.values()) {
-				map.put("methodscript.preference." + name.config(), Prefs.pref(name).toString());
+				Object o;
+				switch(name.type()) {
+					case BOOLEAN:
+						o = Prefs.prefB(name);
+						break;
+					case DOUBLE:
+					case NUMBER:
+						o = Prefs.prefD(name);
+						break;
+					case FILE:
+					case STRING:
+						o = Prefs.prefS(name);
+						break;
+					case INT:
+						o = Prefs.prefI(name);
+						break;
+					default:
+						throw new Error("switch is not exhaustive");
+				}
+				map.put("methodscript.preference." + name.config(), o.toString());
 			}
 			return map;
 		}
@@ -1010,7 +1029,7 @@ public class Cmdline {
 
 								@Override
 								public Object call() throws Exception {
-									stdout.execute(new CString(sbout.getObject(), t));
+									stdout.executeClosure(new CString(sbout.getObject(), t));
 									return null;
 								}
 							});
@@ -1036,7 +1055,7 @@ public class Cmdline {
 
 								@Override
 								public Object call() throws Exception {
-									stderr.execute(new CString(sberr.getObject(), t));
+									stderr.executeClosure(new CString(sberr.getObject(), t));
 									return null;
 								}
 							});
@@ -1084,7 +1103,7 @@ public class Cmdline {
 
 									@Override
 									public Object call() throws Exception {
-										exit.execute(new CInt(exitCode, t));
+										exit.executeClosure(new CInt(exitCode, t));
 										return null;
 									}
 								});

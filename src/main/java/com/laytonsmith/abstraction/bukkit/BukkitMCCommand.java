@@ -17,7 +17,6 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.functions.Commands;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
@@ -210,11 +209,9 @@ public class BukkitMCCommand implements MCCommand {
 			}
 			CClosure closure = Commands.onTabComplete.get(cmd.getName().toLowerCase());
 			try {
-				closure.execute(new CString(alias, t), new CString(sender.getName(), t), cargs,
+				Mixed fret = closure.executeClosure(new CString(alias, t), new CString(sender.getName(), t), cargs,
 						new CArray(t) // reserved for an obgen style command array
 				);
-			} catch (FunctionReturnException e) {
-				Mixed fret = e.getReturn();
 				if(fret instanceof CArray) {
 					List<String> ret = new ArrayList<>();
 					if(((CArray) fret).inAssociativeMode()) {
@@ -253,11 +250,9 @@ public class BukkitMCCommand implements MCCommand {
 			cEnv.SetCommand("/" + label + StringUtils.Join(args, " "));
 
 			try {
-				closure.execute(new CString(label, t), new CString(sender.getName(), t), cargs,
+				Mixed fret = closure.executeClosure(new CString(label, t), new CString(sender.getName(), t), cargs,
 						new CArray(t) // reserved for an obgen style command array
 				);
-			} catch (FunctionReturnException e) {
-				Mixed fret = e.getReturn();
 				if(fret instanceof CBoolean) {
 					return ((CBoolean) fret).getBoolean();
 				}

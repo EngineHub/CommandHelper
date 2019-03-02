@@ -6,6 +6,7 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import java.util.Set;
 
@@ -100,6 +101,10 @@ public interface Mixed extends Cloneable, Documentation {
 	 *
 	 * This method works with CClassTypes.
 	 *
+	 * Implementation note: The implementation of this should just be
+	 * {@link Construct#isInstanceof(com.laytonsmith.core.natives.interfaces.Mixed,
+	 * com.laytonsmith.core.constructs.CClassType)} which supports Mixed values.
+	 *
 	 * @param type
 	 * @return
 	 * @throws ClassNotFoundException If the CClassType does not reflect a known type
@@ -113,6 +118,10 @@ public interface Mixed extends Cloneable, Documentation {
 	 * Java's keyword.
 	 *
 	 * This method works with class type directly.
+	 *
+	 * Implementation note: The implementation of this should just be
+	 * {@link Construct#isInstanceof(com.laytonsmith.core.natives.interfaces.Mixed, java.lang.Class)} which supports
+	 * Mixed values.
 	 *
 	 * @param type
 	 * @return

@@ -238,27 +238,14 @@ public class Preferences {
 		}
 	}
 
-	/**
-	 * Returns the value of a preference, cast to the appropriate type.
-	 *
-	 * @deprecated Instead of using this type-unsafe version, you should use the typesafe versions instead, which add an
-	 * extra check to make sure the values will be returned correctly, and throw a more meaningful exception if not.
-	 * @param name
-	 * @return
-	 */
-	@Deprecated
-	public Object getPreference(String name) {
-		if(prefs.get(name).objectValue == null) {
-			prefs.get(name).objectValue = getObject(prefs.get(name).value, prefs.get(name));
-		}
-		return prefs.get(name).objectValue;
-	}
-
 	private Object getSafePreference(String name, Type type) {
 		if(prefs.get(name).allowed != type) {
 			throw new IllegalArgumentException("Expecting " + prefs.get(name).allowed + " but " + type + " was requested");
 		}
-		return getPreference(name);
+		if(prefs.get(name).objectValue == null) {
+			prefs.get(name).objectValue = getObject(prefs.get(name).value, prefs.get(name));
+		}
+		return prefs.get(name).objectValue;
 	}
 
 	/**

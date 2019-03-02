@@ -45,7 +45,6 @@ import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -521,11 +520,10 @@ public class Web {
 
 		private void executeFinish(CClosure closure, Mixed arg, Target t, Environment environment) {
 			try {
-				closure.execute(new Mixed[]{arg});
-			} catch (FunctionReturnException e) {
+				Mixed ret = closure.executeClosure(new Mixed[]{arg});
 				//Just ignore this if it's returning void. Otherwise, warn.
 				//TODO: Eventually, this should be taggable as a compile error
-				if(!(e.getReturn() instanceof CVoid)) {
+				if(!(ret instanceof CVoid)) {
 					CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.WARNING, "Returning a value from the closure. The value is"
 							+ " being ignored.", t);
 				}
