@@ -25,6 +25,7 @@ import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CSlice;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -2064,6 +2065,9 @@ public class BasicLogic {
 					continue;
 				}
 				if(child.isConst()) {
+					if(child.getData() instanceof CSymbol) {
+						throw new ConfigCompileException("Unexpected symbol: \"" + child.getData().val() + "\"", t);
+					}
 					if(ArgumentValidation.getBoolean(child.getData(), t) == false) {
 						it.remove();
 					} else {

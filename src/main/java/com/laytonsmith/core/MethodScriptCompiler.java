@@ -2242,6 +2242,9 @@ public final class MethodScriptCompiler {
 				} //else it wasn't an optimization, but a compile check
 			} catch (ConfigCompileException ex) {
 				compilerErrors.add(ex);
+				// Also turn off optimizations for the rest of this flow, so we don't try the other optimization
+				// mechanisms, which are also bound to fail.
+				options = NO_OPTIMIZATIONS;
 			}
 		}
 		if(!fullyStatic) {
