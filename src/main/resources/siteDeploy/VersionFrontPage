@@ -74,14 +74,22 @@ Need more help? Visit the [http://forum.sk89q.com/forums/commandhelper.20/ forum
 
 === Syntax-coloring editors ===
 
-Tired of writing your scripts in a plain black and white text editor? Try these syntax hightlighters!
+Tired of writing your scripts in a plain black and white text editor? Try a syntax Highlighter!
+
+The Visual Studio Code 
+[https://marketplace.visualstudio.com/items?itemName=MethodScriptVSC.methodscriptvsc MethodScriptVSC]
+IDE is the only officially supported IDE/Syntax Highlighter, and is most likely the most feature rich and up-to-date 
+version, so it is highly recommeneded. To install, [https://code.visualstudio.com/Download download Visual Studio Code] 
+(free, on all platforms), and install the MethodScriptVSC extension from the extensions tab.
+
+If you prefer other text editors, there is community support for other text editors:
 
 * TextWrangler and BBEdit - Mac OS X [http://forum.sk89q.com/threads/textwrangler-bbedit-language-module.382/ Forum Link] - Created by Connor Griffin (Very Outdated)
 * Notepad++ (Default Theme) - Windows [http://forum.sk89q.com/threads/syntax-highlighting-for-notepad.399/ Forum Link] - Created by MrMagical
 * Notepad++ (Obsidian Theme) - Windows [http://forum.sk89q.com/threads/notepad-syntax-highlighter-obsidian-theme.1033/ Forum Link] - Created by TTSDA (based on MrMagical's Highlighter)
 * gedit - GNOME/Cross-platform [http://forum.sk89q.com/threads/gedit-syntax-highlighting.1102/ Forum Link] - Created by MrMagical
 
-If you create a syntax highlighter for your favorite text editor, put a link in the forum, and I'll add it to the wiki!
+If you create a syntax highlighter for your favorite text editor, contact us, and we can add it here!
 
 {{TakeNote|text=To generate up-to-the-minute syntax colors you can also run CommandHelper from the command line using
 <br>
