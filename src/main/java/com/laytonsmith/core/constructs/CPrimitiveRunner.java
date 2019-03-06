@@ -6,7 +6,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.natives.interfaces.AbstractMixedInterfaceRunner;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import com.laytonsmith.core.natives.interfaces.ObjectType;
+import com.laytonsmith.core.objects.ObjectType;
 import com.laytonsmith.core.natives.interfaces.ValueType;
 
 /**

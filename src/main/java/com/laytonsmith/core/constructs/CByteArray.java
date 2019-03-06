@@ -10,7 +10,7 @@ import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import com.laytonsmith.core.natives.interfaces.ObjectModifier;
+import com.laytonsmith.core.objects.ObjectModifier;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -619,7 +619,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 		@Override
 		public Set<ObjectModifier> getObjectModifiers() {
-			return EnumSet.of(ObjectModifier.PUBLIC, ObjectModifier.STATIC);
+			return EnumSet.of(ObjectModifier.STATIC);
 		}
 
 		@Override
@@ -663,7 +663,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 			@Override
 			public Set<ObjectModifier> getObjectModifiers() {
-				return EnumSet.of(ObjectModifier.PUBLIC, ObjectModifier.STATIC);
+				return EnumSet.of(ObjectModifier.STATIC);
 			}
 
 			@Override

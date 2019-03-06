@@ -9,7 +9,7 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import com.laytonsmith.core.natives.interfaces.ObjectType;
+import com.laytonsmith.core.objects.ObjectType;
 import java.util.AbstractSet;
 import java.util.Iterator;
 import java.util.Set;

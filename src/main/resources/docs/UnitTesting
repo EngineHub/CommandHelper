@@ -32,15 +32,15 @@ Fakes and stubs are already possible to achieve if your code is written in such 
 interfaces and dependency injection. For instance:
 
 <%CODE|
-public interface MyInterface {}
+	public interface MyInterface {}
 
-public class MyImplementation implements MyInterface {}
+	public class MyImplementation implements MyInterface {}
 
-public class MyStub implements MyInterface {}
+	public class MyStub implements MyInterface {}
 
-public class MyFake implements MyInterface {}
+	public class MyFake implements MyInterface {}
 
-MyInterface @mi = getNewImplementation();
+	MyInterface @mi = getNewImplementation();
 %>
 
 Assuming that during unit testing, you provide a new instance of MyStub or MyFake, then the rest of the code in the real
@@ -68,12 +68,12 @@ provides built in support for mocks, including support for mocking final classes
 
 In addition, global functions can be easily mocked as well.
 
-== Unit Test Framework ==
-In addition to support for mocks, MethodScript provides a mechanism for running unit tests. Most importantly,
+== Unit Test Framework (MSUnit) ==
+In addition to support for mocks, MethodScript provides a mechanism for running unit tests ''MSUnit''. Most importantly,
 MethodScript defines some generic annotations, which can be used by all test code, but it also provides a basic runner
 for the tests. Third party libraries could provide alternative runners, and in fact, when integrating with an IDE, the
-default runner is not used. Much of the unit test framework is inspired by JUnit 5, so if you are familiar with unit
-testing in Java, these concepts should not be much of a leap.
+default runner is not used. Much of the unit test framework is inspired by xUnit, so if you are familiar with unit
+testing in general, these concepts should not be much of a leap, though there are some extremely notable improvements.
 
 === Example ===
 

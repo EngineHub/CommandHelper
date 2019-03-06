@@ -3,8 +3,8 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import com.laytonsmith.core.natives.interfaces.ObjectModifier;
-import com.laytonsmith.core.natives.interfaces.ObjectType;
+import com.laytonsmith.core.objects.ObjectModifier;
+import com.laytonsmith.core.objects.ObjectType;
 import com.laytonsmith.testing.StaticTest;
 
 import static org.junit.Assert.fail;
@@ -50,8 +50,7 @@ public class ClassInfoTest {
 	@Test
 	public void testOnlyContainedClassesHaveVariousModifiers() throws Exception {
 		List<String> failures = new ArrayList<>();
-		Set<ObjectModifier> allowed = EnumSet.of(ObjectModifier.PUBLIC, ObjectModifier.PACKAGE, ObjectModifier.FINAL,
-				ObjectModifier.ABSTRACT);
+		Set<ObjectModifier> allowed = EnumSet.of(ObjectModifier.FINAL, ObjectModifier.ABSTRACT);
 		for(FullyQualifiedClassName t : NativeTypeList.getNativeTypeList()) {
 			Mixed m = NativeTypeList.getInvalidInstanceForUse(t);
 			if(m.getContainingClass() == null) {

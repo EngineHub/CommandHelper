@@ -18,9 +18,12 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.objects.AccessModifier;
+import com.laytonsmith.core.objects.ObjectModifier;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
@@ -64,6 +67,16 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		} else {
 			return to.value();
 		}
+	}
+
+	@Override
+	public AccessModifier getAccessModifier() {
+		return AccessModifier.PUBLIC;
+	}
+
+	@Override
+	public Set<ObjectModifier> getObjectModifiers() {
+		return EnumSet.noneOf(ObjectModifier.class);
 	}
 
 	/**

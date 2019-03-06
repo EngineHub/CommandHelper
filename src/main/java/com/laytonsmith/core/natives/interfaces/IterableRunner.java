@@ -5,6 +5,7 @@
  */
 package com.laytonsmith.core.natives.interfaces;
 
+import com.laytonsmith.core.objects.ObjectType;
 import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.MSVersion;

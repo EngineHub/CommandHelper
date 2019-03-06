@@ -1,9 +1,12 @@
 package com.laytonsmith.core.natives.interfaces;
 
+import com.laytonsmith.core.objects.ObjectType;
+import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.objects.AccessModifier;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -41,8 +44,8 @@ public class MixedRunner extends AbstractMixedInterfaceRunner {
 	}
 
 	@Override
-	public Set<ObjectModifier> getObjectModifiers() {
-		return EnumSet.of(ObjectModifier.PUBLIC);
+	public AccessModifier getAccessModifier() {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
 }

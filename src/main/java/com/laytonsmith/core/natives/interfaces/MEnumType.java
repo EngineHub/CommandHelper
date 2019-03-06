@@ -1,5 +1,7 @@
 package com.laytonsmith.core.natives.interfaces;
 
+import com.laytonsmith.core.objects.ObjectType;
+import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.Version;
@@ -17,6 +19,7 @@ import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.objects.AccessModifier;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -269,8 +272,13 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 							}
 
 							@Override
+							public AccessModifier getAccessModifier() {
+								return AccessModifier.PUBLIC;
+							}
+
+							@Override
 							public Set<ObjectModifier> getObjectModifiers() {
-								return EnumSet.of(ObjectModifier.FINAL, ObjectModifier.STATIC, ObjectModifier.PUBLIC,
+								return EnumSet.of(ObjectModifier.FINAL, ObjectModifier.STATIC,
 										ObjectModifier.ABSTRACT);
 							}
 
@@ -404,7 +412,12 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 
 	@Override
 	public Set<ObjectModifier> getObjectModifiers() {
-		return EnumSet.of(ObjectModifier.FINAL, ObjectModifier.PUBLIC, ObjectModifier.ABSTRACT);
+		return EnumSet.of(ObjectModifier.FINAL, ObjectModifier.ABSTRACT);
+	}
+
+	@Override
+	public AccessModifier getAccessModifier() {
+		return AccessModifier.PUBLIC;
 	}
 
 	@Override

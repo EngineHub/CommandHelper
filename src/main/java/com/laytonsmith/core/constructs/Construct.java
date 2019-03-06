@@ -8,8 +8,9 @@ import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import com.laytonsmith.core.natives.interfaces.ObjectModifier;
-import com.laytonsmith.core.natives.interfaces.ObjectType;
+import com.laytonsmith.core.objects.AccessModifier;
+import com.laytonsmith.core.objects.ObjectModifier;
+import com.laytonsmith.core.objects.ObjectType;
 import java.io.File;
 import java.math.BigInteger;
 import java.net.URL;
@@ -559,7 +560,12 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 */
 	@Override
 	public Set<ObjectModifier> getObjectModifiers() {
-		return EnumSet.of(ObjectModifier.PUBLIC);
+		return EnumSet.noneOf(ObjectModifier.class);
+	}
+
+	@Override
+	public AccessModifier getAccessModifier() {
+		return AccessModifier.PUBLIC;
 	}
 
 	@Override

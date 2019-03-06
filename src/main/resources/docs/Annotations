@@ -5,10 +5,10 @@ in various places, and can also be defined and used by your code as well.
 The basic syntax for an annotation uses the <code>@{}</code> syntax. If the annotation
 were named Annotation, and you were tagging a variable declaration, it might look like this:
 
-<pre>
-@{Annotation}
-string @s = 'The string';
-</pre>
+<%CODE|
+	@{Annotation}
+	string @s = 'The string';
+%>
 
 Annotations may also have annotation parameters. The parameters must be immutable,
 and fully defined at compile time, which means that you can either hardcode the values
@@ -19,29 +19,29 @@ if the annotation is defined with only one parameter, and that parameter's name 
 otherwise you must label the parameters the same as you would when creating an array. 
 Here are some valid examples:
 
-<pre>
-# Assuming no parameters
-@{Annotation}
-# Also valid, for no parameters
-@{Annotation()}
+<%CODE|
+	# Assuming no parameters
+	@{Annotation}
+	# Also valid, for no parameters
+	@{Annotation()}
 
-# Assuming the one parameter is to be assigned to 'value'
-@{Annotation('the value')}
-# The same thing, only explicit
-@{Annotation(value: 'the value')}
+	# Assuming the one parameter is to be assigned to 'value'
+	@{Annotation('the value')}
+	# The same thing, only explicit
+	@{Annotation(value: 'the value')}
 
-# With multiple parameters
-@{Annotation(value: 'the value', number: 3)}
+	# With multiple parameters
+	@{Annotation(value: 'the value', number: 3)}
 
-# Assuming 'numbers' is an array
-@{Annotation(numbers: 3)}
-# Now with an actual array
-@{Annotation(numbers: array(1, 2, 3))}
+	# Assuming 'numbers' is an array
+	@{Annotation(numbers: 3)}
+	# Now with an actual array
+	@{Annotation(numbers: array(1, 2, 3))}
 
-# With external, but constant variables
-immutable int @a = 4;
-@{Annotation(numbers: array(1, 2, 3, @a)}
-</pre>
+	# With external, but constant variables
+	immutable int @a = 4;
+	@{Annotation(numbers: array(1, 2, 3, @a)}
+%>
 
 The key principal to take away here, is that annotations require immutable data, and
 are ways to add meta information to your code. They do not "execute" ever, that is,
@@ -51,44 +51,52 @@ itself uses the annotations itself to do certain things.
 == Defining custom annotations ==
 To define your own annotation, define the public values in an <code>annotations</code>
 block in a class-like structure, and
-include default values if you like. Methods may also be defined in the annotation,
-but constructors are not allowed, therefore preventing direct instantiations of
-an annotation.
+include default values if you like. Methods and constructors are not allowed, and you
+can in many ways think of an annotation like an interface, though there are some key
+differences. Annotations may extend from one another. All properties declared on an
+annotation are inherently immutable.
 
-<pre>
-annotation Annotation {
-	annotations {
-		string @value = 'default',
-		int @number = 5,
-		array<number> @numbers = array(1, 2, 3),
+<%CODE|
+	annotation Annotation extends ParentAnnotation {
+		// Public immutable fields 
+		public string @value = 'default';
+		// This one doesn't have a value set, so it is required. To make values optional, provide a default
+		public int @number;
+		// Values are inherently immutable, so adding the keyword is a compile error.
+		public /*immutable*/ array<number> @numbers = array(1, 2, 3);
 	}
-}
-</pre>
+%>
 
 To use the annotation on an element, you must use the reflection methods. Since multiple
 annotations may be present on an element, you must select the annotations specifically
 (or you can iterate through all of them dynamically). Annotation parameters are immutable,
 though they do not work exactly the same as immutable class types, because the default value
-is not used if the value is provided by the user.
+is not used if the value is provided by the user. Annotations may be applied to an element
+multiple times, (if the annotation is so configured) so reflect_annotation returns an array<? extends T>.
 
-<pre>
-@{Annotation(number: 10)}
-string @var = 'the string';
+<%CODE|
+	@{Annotation(number: 10)}
+	@{Annotation(number: 12)}
+	string @var = 'the string';
 
-Annotation @a = reflect_annotation(Annotation, @var);
-msg(@a->number) # msg's 10
+	Annotation @a = reflect_annotation(Annotation, @var)[0];
+	msg(@a->number) // msg's 10
 
-foreach(reflect_annotations(@var), @annotation){
-	msg(typeof(@annotation)) # In this case, "Annotation"
-}
-</pre>
+	foreach(array<Annotation> @annotations in reflect_annotations(@var)){
+		foreach(Annotation @annotation in @annotations) {
+			msg(typeof(@annotation)); // Annotation
+			msg(@annotation->number); // 10 the first time, 12 the second time
+		}
+	}
+%>
 
 == Meta annotations ==
 Annotation declarations (not the annotation usages) can be themselves annotated
 with various annotations. All annotations are available at runtime, so unlike Java,
 there is no Retention annotation. There is however the ability to restrict ''where''
-an annotation is placed, based on the type of code structure being annotated. The
-Target annotation, which takes a ElementType enum, can be used to restrict what elements
-this annotation is added to.
+an annotation is placed, (and if it can be placed more than once) based on the type of code structure being annotated. 
+The Target annotation, which takes a ElementType enum, can be used to restrict what elements
+this annotation is added to, and the Multiple annotation can be added to indicate that the annotation can be applied
+multiple times.
 
 %%EnumDocs|ElementType%%

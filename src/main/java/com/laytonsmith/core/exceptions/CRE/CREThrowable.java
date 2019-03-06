@@ -8,10 +8,7 @@ import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import com.laytonsmith.core.natives.interfaces.ObjectModifier;
-import com.laytonsmith.core.natives.interfaces.ObjectType;
-import java.util.EnumSet;
-import java.util.Set;
+import com.laytonsmith.core.objects.ObjectType;
 
 /**
  *
@@ -74,11 +71,6 @@ public class CREThrowable extends AbstractCREException {
 	@Override
 	public ObjectType getObjectType() {
 		return ObjectType.CLASS;
-	}
-
-	@Override
-	public Set<ObjectModifier> getObjectModifiers() {
-		return EnumSet.of(ObjectModifier.PUBLIC);
 	}
 
 	@Override
