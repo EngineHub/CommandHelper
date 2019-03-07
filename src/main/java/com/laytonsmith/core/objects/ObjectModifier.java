@@ -1,9 +1,5 @@
 package com.laytonsmith.core.objects;
 
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.Set;
-
 /**
  *
  * @author cailin

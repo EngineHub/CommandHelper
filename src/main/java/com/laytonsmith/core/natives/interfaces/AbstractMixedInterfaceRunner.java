@@ -116,7 +116,7 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 	 */
 	@Override
 	public final CClassType typeof() {
-		return Construct.typeof(this);
+		return CClassType.get(getName());
 	}
 
 	@Override

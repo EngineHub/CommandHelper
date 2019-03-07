@@ -713,7 +713,7 @@ public class ArrayUtils {
 	 * @param <T>
 	 * @param array Despite being an Object, instead of an Object[], this will throw a ClassCastException if it is not
 	 * an array type.
-	 * @param toClass
+	 * @param toArrayClass Should be an array type, i.e. {@code String[].class}
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")

@@ -1,10 +1,14 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.annotations.ExposedProperty;
+import com.laytonsmith.annotations.NonInheritImplements;
+import com.laytonsmith.annotations.ParamDocs;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -19,6 +23,7 @@ import java.util.Set;
  *
  */
 @typeof("ms.lang.string")
+@NonInheritImplements(value = POJOConversion.class, parameterTypes = {CString.class, String.class})
 public class CString extends CPrimitive implements Cloneable,
 		com.laytonsmith.core.natives.interfaces.Iterable {
 
@@ -178,5 +183,43 @@ public class CString extends CPrimitive implements Cloneable,
 					+ " with the logger-preferences.ini file.", t);
 		}
 		return val().length() > 0;
+	}
+
+	@ExposedProperty(
+			docs = "Returns a new string that has been lowercased, per the current locale definition of \"lowercase\"",
+			returnDoc = "A lowercased string",
+			since = MSVersion.V3_3_4
+	)
+	public CString toLowerCase(Environment env, Target t) {
+		return new CString(val().toLowerCase(), getTarget());
+	}
+
+	@ExposedProperty(
+			docs = "Returns a new string that has been uppercased, per the current locale definition of \"uppercase\"",
+			returnDoc = "An uppercased string",
+			since = MSVersion.V3_3_4
+	)
+	public CString toUpperCase(Environment env, Target t) {
+		return new CString(val().toUpperCase(), getTarget());
+	}
+
+	@ExposedProperty(
+			docs = "Returns true if the string matches the given regex, false otherwise.",
+			returnDoc = "",
+			since = MSVersion.V3_3_4
+	)
+	public boolean matches(
+			Environment env, Target t,
+			@ParamDocs("The regex to test against")
+			String regex) {
+		return val().matches(regex);
+	}
+
+	public CString construct(String s, Target t) {
+		return new CString(s, t);
+	}
+
+	public String convert() {
+		return val();
 	}
 }

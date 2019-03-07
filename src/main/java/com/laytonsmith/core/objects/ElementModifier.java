@@ -1,9 +1,5 @@
 package com.laytonsmith.core.objects;
 
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.Set;
-
 /**
  * These are the list of modifers that are valid on an Element (i.e. property or method).
  */
