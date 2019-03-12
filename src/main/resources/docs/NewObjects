@@ -1,3 +1,5 @@
+{{unimplemented}}
+
 Objects in MethodScript allow for object oriented approaches to designing your 
 code. Object in MethodScript are extremely flexible and powerful, yet easy to use 
 and understand.
@@ -17,25 +19,24 @@ Before getting into the details about objects, lets look at an example:
 %%CODE|
 class A {
 
-    members {
-        protected @b, 
-        private static int @c = 0
-    }
-    public A(@b = 0){
-        this->@b = @b;
-        @c++
+	protected @b;
+	private static int @C = 0;
+
+    public A(int @b = 0){
+        @this->b = @b;
+        @C++;
     }
     
-    public static int method1(int @a){
-        return(@a + 1)
+    public static int Method1(int @a){
+        return(@a + 1);
     }
 
     public method2(int @b){
-        return(@b + this->@b)
+        return(@b + @this->b);
     }
 
-    public static final int instantiations(){
-        return(@c)
+    public static final int Instantiations(){
+        return(@C);
     }
 }
 %%
@@ -44,15 +45,23 @@ This example will be used in the explanation below.
 
 === Members and Methods ===
 
-An object contains any number of '''members''' and '''methods'''. A member is a 
-variable, and a method is a function. Both members and variables can have various 
+An object contains any number of '''members''' and '''methods''', collectively
+called '''elements'''. A member is a variable, and a method is a function. Both
+members and variables can have various 
 '''modifiers''', which affect behavior in various ways. In the example, you can 
-see that we are defining @b as a member variable, and method1 and method2 
+see that we are defining @b as a member variable, and Method1 and method2 
 are methods. The modifiers in use include '''public''', '''static''', '''final''', 
-'''int''', '''protected''' and '''private''' though there are others too. Members 
-are defined in the '''member block''', <code>members{ }</code>. The member block 
-may appear anywhere in the class, but there may be only one block. The rest of 
-the class definition should be method definitions.
+'''int''', '''protected''' and '''private''' though there are others too.
+
+Additionally in this example, there is one '''constructor''', which is the code that
+is called when a new instance of the object is created (see below). The constructor (or constructors,
+there can be several). A constructor is defined by creating a method with the same name
+as the object it's contained in, with no return type. The constructor is where you
+may place code that is necessary for initial configuration of the object.
+
+By convention, static elements are named with capital first letters, and
+non-static elements are named with lowercase first letters, and all elements
+use camel case.
 
 === Basic Type Manipulation ===
 Before moving on to using objects, it is important to understand the type system 
@@ -76,14 +85,14 @@ instantiated. To instantiate our object that we defined above, we would use
 the following code:
 
 %%CODE|
-@A = new A()
+A @A = new A();
 %%
 
 Now, we can use the '''dereference operator''' to access members or methods in 
 the object, for instance,
 
 %%CODE|
-msg(@A->method2(2))
+msg(@A->method2(2));
 %%
 
 would output 2, since we called the method that returns our input plus @b, 
@@ -103,10 +112,10 @@ object B, which extends A.
 %%CODE|
 class B extends A {
     public B(){
-        super()
+        @super();
     }
     public method2(int @b){
-        return(@b + 3)
+        return(@b + 3);
     }
 }
 %%
@@ -116,43 +125,43 @@ override a method, you simply name it the same as the method in the parent
 class. However, it is important to note that the method signatures must be 
 '''type compatible''', that is, it cannot completely redefine the types of the 
 variables that are passed in, but it can use ''more specificity''. For instance, 
-if class A defined the method <code>public f(Object @o)</code> it would be 
-invalid to define in class B the method <code>public f(int @i)</code>, however, 
-if class A instead defined f as <code>public f(mixed @o)</code>, it would be 
-valid for B to '''narrow''' the type required. 
+if class A defined the method <code>public mixed f(number @o)</code> it would be 
+invalid to define in class B the method <code>public mixed f(int @i)</code>, however, 
+if class A instead defined f as <code>public f(int @o)</code>, it would be 
+valid for B to '''expand''' the type required to <code>public f(number @o)</code>.
 
 Examining the constructor, there is the new function, <code>super()</code>, 
 which is used to call the parent's constructor. <code>super</code> is optional, 
 however, in the case where a call to <code>super()</code> is omitted, it is 
 implied to have been called at the top of the child's constructor. If 
-<code>super()</code> is called, it must be called ''before'' manipulating the 
+<code>@super()</code> is called, it must be called ''before'' manipulating the 
 parent's members, even transiently, otherwise it is a compiler error. For 
 instance, consider the following:
 
 %%CODE|
-class A{
-    members{
-        private @a
-    }
+class A {
+
+	private int @a;
+
     public A(){
-        @a = 0
+        @a = 0;
     }
 
     public void initA(){
-        @a = 9000
+        @a = 9000;
     }
 
     public int getA(){
         if(time() &percnt; 2 == 0){
-            initA()
+            initA();
         }
     }
 }
 
-class B{
+class B extends A {
     public B(){
-        @var = getA()
-        super()
+        int @var = getA();
+        @super(); // Compile error
     }
 }
 %%
@@ -165,10 +174,65 @@ allowed to run its initialization. Had we left off the call to super, it would
 have been automatically placed at the top of the constructor, and this would not 
 have been a compile error.
 
+This works differently if there are no default constructors defined in the superclass,
+and the subclass defines constructors with different signatures (which is allowed).
+If so, in that case, it is required to call any constructor on the superclass
+manually. For instance:
+
+<%CODE|
+class A {
+	public A(int @a) {
+		// Note we are defining a constructor that accepts an int
+	}
+}
+
+class B extends A {
+	public B(int @b) {
+		// @super(@b);
+		// No call to super is required, it will be added automatically for us
+		// at the top, because we are defining a constructor with the same signature
+		// as one defined in A. It may be necessary to make a call to the superclass
+		// anyways, however, if you wish to change the value that is sent to the
+		// superclass's constructor. However, by default, the one added automatically
+		// will simply re-call super with the list of arguments that were passed in
+		// to this constructor.
+	}
+	public B() {
+		// In this case, we are defining a constructor that accepts no
+		// argument. But there is no constructor defined with no arguments
+		// in A, so we must manually call it ourselves, and provide a value.
+		@super(0);
+	}
+}
+
+%>
+
 ==== Default Constructors ====
 
 If no constructors are provided, a default constructor is always provided, with 
-the definition <code>public A(){ }</code> (assuming the class name is A).
+the definition:
+
+<%CODE|
+/**
+ * @{InheritDoc}
+ */
+@{Inject}
+public A(){
+	if(@self != mixed) {
+		@super();
+	}
+}
+%>
+
+(Assuming the class name is A). However,
+if a superclass defined a constructor that accepted parameters, without also
+defining a constructor that takes no arguments, this will not happen, and you
+must manually define a constructor which calls <code>super</code> with the appropriate
+inputs.
+
+Note that the default constructor is annotated with the @{Inject} annotation. If you do not
+wish your class to be automatically injectable, you need to implement a no-arg constructor yourself, with
+the @{NoInject} annotation. (This is used in the [[Dependency Injection|DependencyInjection]] framework.)
 
 ==== Destructors ====
 
@@ -221,14 +285,81 @@ it is not possible to call a static method by dereferencing an instance. If you 
 a pure utility class, that only has methods (no members), then consider using
 a namespace instead.
 
-==== <code>self</code> keyword ====
-The <code>self</code> keyword is 
+==== <code>@this</code>, <code>@self</code>, and <code>@super</code> variables ====
+There are two variables that are specially defined within code inside a class,
+<code>@this</code> and <code>@self</code>. <code>@this</code> refers to the
+current instance of the class, and while not usually necessary, can be used in
+all cases to provide clarity to the code. In some cases, however, it is necessary,
+when a local variable hides a member variable. In our original class example, we
+have the following code:
+
+<%CODE|
+	protected @b;
+	
+    public method2(int @b){
+        return(@b + @this->b);
+    }
+%>
+
+In this case, we must use the @this keyword, as we are naming the method's argument
+<code>@b</code>, and so to differentiate between that and the member variable, we must
+use <code>@this->b</code>. <code>@this->b</code> refers to the member variable, and
+<code>@b</code> refers to the variable that is passed in to the method.
+
+<code>@self</code> works in somewhat the same way, but it ALWAYS refers to the class
+that it is used in. To be very precise, <code>@this</code> refers to the current
+instance of the class, which may be an instance of the current class, or it may be
+an instance of a subclass. However, <code>@self</code> always refers to the current
+class. This can be useful to call a method that is not private, when you want to ensure
+that the code being called is not code that is overridden by a subclass. This feature
+should generally speaking be used sparingly, as it is a violation of the Liskov Substitution
+Principal, though it can be used in meta cases, for instance, to dynamically get the current
+class definition for reflective purposes. It can also be useful when calling static methods.
+
+<%CODE|
+// This will ALWAYS call the method defined in this class, and may be easier to type
+// than the full name of the current class name.
+@self::StaticMethod();
+
+// If the subclass does not redefine the StaticMethod method, then using @this is the
+// same thing. However, if a subclass redefines this method, and the instance was
+// constructed as that subclass, this will refer to a different method.
+@this::StaticMethod();
+%>
+
+The <code>@super</code> variable refers to the direct superclass. In the above examples,
+we used it to call the superclass's constructor, but it can more generally be used to
+refer to an element defined within a superclass.
+
+<%CODE|
+class A {
+	public string @x = 'a';
+	public string method() {
+		return(@x);
+	}
+}
+
+class B {
+	@{Override} // It is good practice to use this annotation, and is required in strict mode
+	public string method() {
+		return(@super->method()->toUpperCase());
+	}
+}
+
+A @a = new A();
+msg(@a->method()); // 'a'
+B @b = new B();
+msg(@b->method()); // 'A'
+@b->x = 'xyz'; // Note we are changing @x which is defined and only referenced in A
+msg(@b->method()); // 'XYZ'
+%>
 
 === Access Modifiers ===
-'''public''', '''private''', and '''protected''' are the three modifiers that 
+'''public''', '''private''', '''package''', '''internal''', and '''protected''' are the five modifiers that 
 control what can access an object's methods or members. If something is public, 
 anything can access it. If it is private, only that class can access it, and if 
-it is protected, only that class, or subclasses can access it.
+it is protected, only that class, or subclasses can access it. '''package''' and '''internal''' are currently
+reserved, but not used.
 
 === Explicit namespacing ===
 In an instance, we can always using explicit namespacing to reference a parent's 
@@ -239,10 +370,10 @@ instance, assume class B had been defined this way:
 %%CODE|
 class B extends A {
     public B(){
-        A::super()
+        A::@super()
     }
     public method2(int @b){
-        return(A::super->method2(@b))
+        return(A::@super->method2(@b))
     }
 }
 %%
@@ -252,11 +383,12 @@ and A's method2. If there had been several parents, this could be used to
 "un-override" a call, or otherwise explicitely selected a method that had been 
 overriden by multiple children. This is useful outside of diamond inheritance, 
 but is more often used when dealing with multiple inheritance. Note that in the 
-case of super() constructors, it is always an error to cause a child's 
+case of @super() constructors, it is always an error to cause a child's 
 constructor to be invoked before the parent's constructor. Calling a parent's
 method is only valid inside the class, an overridden method is not callable
 from outside of the instance.
 
+<!--
 === Reflection ===
 Using reflection, you are able to access all members and methods reflectively, 
 using simple, array-like notation. Using reflection bypasses the safeguards put 
@@ -270,7 +402,7 @@ will be runtime errors, so code that uses reflection must be very careful.
 Consider our class A, defined above, and instantiated as such:
 
 %%CODE|
-@a = new A()
+A @a = new A();
 %%
 
 We can access both the protected and private static variables in the class by 
@@ -312,9 +444,62 @@ This mechanism of reflection is useful for setting and getting variables in an
 ''instance'', but if you are interested in information about the Class itself 
 (not an instance of it, or you are interested in static variables) 
 you can use the functions that are provided in the reflection namespace.
-
+-->
 
 === Interfaces ===
+
+Interfaces are a way to define the methods and constructors in an object, without actually implementing them. Thus, an
+interface is not allowed to have code, but merely provides the definitions. Since all methods in an interface are only
+useful as publicly accessible from outside classes, no access modifiers are allowed in the "instance" and unimplemented
+static methods in the interface definition, everything is implied to be public. The exception is that static elements 
+are allowed to be defined and implemented within an interface.
+
+<%CODE|
+interface MyInterface {
+	/**
+	 * It is extremely useful to be sure to add comments in interfaces, since they are the ideal thing to program
+	 * against.
+	 */
+	void method();
+
+	void method2();
+
+	/**
+	 * This method being static and unimplemented means that it is an error to call MyInterface::method3(), but
+	 * it is allowed to call @a::method3() where @a is an instance of MyInterface, because in reality, @a would
+	 * be some concrete class, as interfaces cannot be instantiated.
+	 */
+	static void method3();
+	
+	/**
+	 * Since this is implemented, it is allowed to call MyInterface::method4();
+	 */
+	static void method4() {
+		msg();
+	}
+
+	/**
+	 * This is a constructor definition. This enforces that all implementing classes must provide a constructor
+	 * with this signature (though it can have others as well).
+	 */
+	MyInterface(int @a);
+}
+%>
+
+It is not allowed to construct a new instance of an interface. Instead, you must instantiate an instance of a
+'''concrete class''', or an object that is defined with the '''class''' keyword. However, if an interface was
+defined with a constructor, it is allowed to dynamically construct classes that implement this interface, for
+instance:
+
+<%CODE|
+// One may often use <? extends MyInterface> which can refer to any interface, class, enum, etc, but
+// restricting it further to class means that only concrete classes can be provided. This is useful
+// when implementing a factory pattern, though consider dependency injection instead.
+ClassType<class extends MyInterface> @c = MyClass;
+MyInterface @a;
+//@a = new @c(); // Compile error, because MyInterface does not define a no-arg constructor
+@a = new @c(1); // Correct, as MyInterface defined a constructor that takes 1 int argument.
+%>
 
 === Abstract Classes ===
 
@@ -332,18 +517,18 @@ delegate behavior to the correct super class's method, for instance:
 %%CODE|
 class A {
 	public mixed method(){
-		return(1)
+		return(1);
 	}
 }
 
 class B {
 	public mixed method(){
-		return(2)
+		return(2);
 	}
 }
 class C extends A, B {
 	public mixed method(){
-		return(B::method())
+		return(B::method());
 	}
 }
 %%
@@ -355,7 +540,7 @@ defining it as such:
 
 %%CODE|
 class C extends A, B {
-	inherit B::method()
+	inherit B::method();
 }
 %%
 
@@ -384,7 +569,7 @@ the various types we will accept. To specify a type union, use the
 '''%%NOWIKI||%%''' character.
 
 %%CODE|
-D | C @var
+D | C @var;
 %%
 
 As many types as required can be chained this way. As far as the inferred type of
@@ -393,5 +578,131 @@ case, the code using the variable @var must assume that it is of type A, unless 
 does an explicit cast first. So, as far as code that ''uses'' the variable, it will
 work as if it were defined as <code>A @var</code>, but with the guarantee that only
 a D or C type instance will have been assigned to it.
+
+=== <code>use</code> statements ===
+
+If classes were not arranged in a hierarchical structure, we would quickly find
+ourselves being overwhelmed with naming conflicts, if two classes had the same
+name. Therefore, MethodScript supports a hierarchical naming system. To define 
+a class within this
+hierarchy, simply add the package name to the class when defining it.
+
+<%CODE|
+// Instead of this:
+class A {}
+// do this:
+class organization.project.B {}
+%>
+
+In general, the naming convention should follow the convention of
+organizationIdentifier.projectName, which, if followed correctly, will prevent
+overlapping class names.
+
+When creating a class like this, references to that class must be the '''fully qualifed \
+class name''', for instance, following the above class definitions:
+
+<%CODE|
+A @a = new A();
+organization.project.B @b = new organization.project.B();
+%>
+
+All classes should be within a hierarchy, but having to type the fully qualified class
+name every time is very cumbersome. Instead, you can use the '''use''' keyword to tell
+the compiler to imply a package name.
+
+<%CODE|
+// This tells the compiler to look in the organization.project package if it can't find a class
+use organization2.project;
+use organization.project;
+
+// So far so good, we have a class named A
+A @a = new A();
+
+// Uh oh, we don't actually have a class named B, but we do have one named organization.project.B.
+// The compiler will see that we don't have a class named B, but will not give up yet, it will see
+// if there is a class named "organization2.project.B" and "organization.project.B". There is one
+// named organization.project.B, so it will internally change this line to
+// organization.project.B @b = new organization.project.B();
+// for us, then get rid of the use statements.
+B @b = new B();
+%>
+
+Since this is just syntax sugar, rather than a runtime setting, this is why you will always
+see references to a class's fully qualified class name when reading error messages and things.
+So, are system level classes in a hierarchy? Yes, they are! So why do you not need use
+statments for them? The system automatically adds some use statements for you. Particularly,
+it always adds <code>ms.lang</code>, but others may be added as well. Regardless, the ones
+that are added automatically are added as if they are below all of your use statements. This
+allows you to define classes with the same name as system classes, without having to fully
+qualify them. On the flip side, if you have duplicate class names, and you use both within
+a file, at least one of them would have to be fully qualified anyhow, but the consolation is
+that at least '''ms.lang.''' is relatively little to type. Otherwise, the search pattern for
+classes always goes from top to bottom in the use statements, if there are duplicate class
+names.
+
+You don't have to provide the full package for the class names either. If you have a class
+named com.project.util.MyClass, you can <code>use com.project;</code>, and then refer to the
+class as <code>util.MyClass</code>, though it's usually just as well to
+<code>use com.project.util;</code>.
+
+=== Class Library ===
+In general, MethodScript prefers to work with classes that are defined in the '''Class \
+Library'''. When using the class library, this prevents complex management of include
+statements, and also provides an easier and more straightforward mechanism of managing
+the classes within the class library, as well as enabling certain features in the compiler
+that expect to know about all classes beforehand. '''Virtual Classes''' are discussed below,
+but are not expected to be used in normal use. Multiple class libraries may be defined, 
+but they must all be known at compile time, and may not be added to later.
+
+So what is the Class Library? It is simply a folder in your project directory that contains
+several .ms files, which define classes. Your "default" class library is defined within
+the classLibrary/ folder in your installation, but each LocalPackage may have their own
+classLibrary folder as well. MSLP files will have their own class library bundled in
+as well. When an .ms file is defined within a class library, the rest of your code does
+not have to do anything extra to load them in; at compile time, they will all be loaded
+automatically, and added to the object definition table that is useable at runtime
+throughout the rest of your code. There can be no directly executable code within these
+file, however, and this is enforced by the compiler. There may be only one outer class
+definition per file, and the fully qualified class name will be the path of the class,
+starting at the root of the class library folder. For instance, if we have the following
+file structure:
+
+<pre>
+classLibrary/
+----organization/
+--------project/
+------------MyClass1.ms
+------------MyClass2.ms
+</pre>
+
+Then we would have 2 classes defined, '''organization.project.MyClass1''' and '''organization.project.MyClass2'''.
+The namespace for both of these classes must be defined as "organization.project", since they are within the
+'''organization/project''' folder structure.
+The name of the file must correspond to the name of the class, this will be a compile
+error otherwise.
+
+If we looked at MyClass1.ms, we might see the following:
+
+<%CODE|
+use my.project;
+
+class organization.project.MyClass1 {
+	// OtherClass is defined in my.project
+	public OtherClass @a;
+}
+%>
+
+=== Virtual Classes ===
+Virtual classes are classes that are defined not through the class library, but dynamically 
+at runtime. These classes are defined more or less the same, but are not eligible for many
+compiler checks. Things like ExhaustiveVisitors cannot be made to work with these classes,
+they cannot be pre-compiled, and they cannot be used in the Dependency Injection system, among
+other things. Having said all that, if you are ok with the downsides, these classes can be
+defined anywhere, and then that file {{function|include}}'d (or dynamically loaded from other
+sources, such as eval, or even the interpreter). Once loaded, they will work mostly just
+as if they had been loaded at compile time. Existing, static code cannot reference the
+classes, of course, as they would have already triggered a compile error for not being able
+to find the class, but code that works generically with objects, or if the virtual class
+extends/implements existing classes, this can be useful when doing dynamic things.
 
 {{LearningTrail}}

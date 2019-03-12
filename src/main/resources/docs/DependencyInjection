@@ -1,0 +1,451 @@
+{{unimplemented}}
+
+[https://en.wikipedia.org/wiki/Dependency_injection Dependency Injection] (not to be confused with 
+[https://en.wikipedia.org/wiki/Dependency_inversion_principle Dependency Inversion] despite going hand in hand), is a
+general programming paradigm that supports more flexible and maintainable code. Generally speaking, dependency injection
+is the practice of programming against a contract, which defines a set of behaviors, rather than the implementation,
+(known as a service)
+which implements the prescribed behaviors. As this is a good programming practice, MethodScript has direct support for
+following these practices.
+
+In MethodScript, a contract must be an interface. Every registration of the contract must be
+accompanied by one or more service (otherwise, it is useless). A concrete class may also be registered as a service in
+and of itself, though it's generally more flexible to use a contract/service pair. There are 2 ways to declare this
+setup, using autoconfiguration with annotations, or configuration using a
+config file, and can be modified further at runtime. In general, for your own code, using the annotations is preferred,
+but when working across multiple
+libraries, you may find it more useful to use a config instead. The actual system configuration is loaded
+in this order: annotations, then config. If a value is defined in annotations and config, then the config definition
+stands. This
+makes it possible to provide expected configuration through annotations, but still allows flexibility to override these
+assumptions later, as well as providing a config at all for library code that doesn't natively provide the
+configuration.
+
+All classes where exactly one constructor is marked as @{Inject} are considered a contract and service in and of 
+themselves.
+The default constructor provided if no constructor is defined in the class is automatically marked as injectable.
+
+== Usage ==
+
+Once set up, this makes it possible to remove most/all uses of the '''new''' keyword in your code, which makes your
+code more flexible and easier to write. Every use of the '''new''' keyword adds a point of 
+'''[https://en.wikipedia.org/wiki/Coupling_%28computer_programming%29 tight coupling]]''', which makes your program
+less flexible down the road. Instead, using dependency injection essentially allows you to delegate the creation of
+objects to a centralized place, allowing for easy and quick changes down the road. However, in order to make use of
+these features, the code you write must explicitely opt in to this system, using the built in dependency injection
+framework. Configuration will be covered below, but let's assume that we have already configured the system, in that
+case, we can use the following in our normal code to take advantage of it.
+
+<%CODE|
+class Main {
+	// We can create an injection here
+	@{Inject}
+	public Color @color;
+
+	// And/or in the constructor
+	@{Inject}
+	public Main(Color @c) {}
+
+	// This is a compile error, because mixed is defined with the @{NoInject} annotation, and we do not
+	
+	// @{Inject}
+	// public Main(mixed @c) {}
+
+	public void printColor() {
+		msg(@color);
+	}
+}
+// Usually, there should only be one usage of DI::construct per entry point to your program.
+Main @m = DI::construct(Main);
+@m->printColor(); // Following the configuration examples below, this should be red
+%>
+
+If exactly one constructor is marked with @{Inject}, or only one constructor is defined (default constructors are
+considered to "use injection" for this purpose) 
+and all the parameters of the constructor are themselves injectable, a neat feature is that that class is itself
+injectable in other places, with no additional configuration needed. It is a compile 
+error to try to inject a parameter of a type that is not injectable. To sum up, a class is considered injectable if 
+exactly one constructor is injectable, it has only a default constructor, or it is correctly configured using the below
+configuration mechanisms. Members marked with the <code>@{Inject}</code> annotation are injected one by one after the
+constructor is executed. They may be private and final, and the DI system ignores these modifiers. It is guaranteed
+that between the constructor code being run, and the members being injected, no other code in the class will run, the
+object isn't considered being done constructed until both phases are complete. This is normally not possible, but the
+runtime itself provides support for this particular case. Still though, it is possible to construct a class without
+DI, so the final value must nonetheless be provided with a default value, though this will be ignored if the DI system
+is doing the object construction.
+
+When DI::construct is called on a class, the parameters are automatically constructed, using the rules defined in the
+configuration. Classes that have the default injectability are constructed using the <code>@{Inject}</code>able
+constructor. This process happens recursively, until all paramters required are constructed. In general, there should
+only be one call to DI::construct per entry point in your program. This helps ensure that your entire ecosystem is
+correctly configured to handle DI properly, though there are a few legitimate reasons to call this manually.
+
+
+== Annotation Configuration ==
+Let us assume we have the following ecosystem:
+
+<%CODE|
+interface Color {
+	void printColor();
+}
+
+annotation R {}
+annotation G {}
+annotation B {}
+
+class Red implements Color {
+	// Some methods would be defined here in real life, but we will skip these implementations for the sake of brevity.
+	// Assume the printColor method simply prints the name of the current color
+}
+class Green implements Color {}
+class Blue implements Color {}
+
+%>
+
+We have an interface, Color, three classes, Red, Green, Blue, and three annotations, R, G, and B. If we want to make
+these globally available to the DI system, we can instead add the following annotations:
+
+<%CODE|
+// For brevity, all code implementation has been removed.
+@{Contract}
+interface Color {}
+
+
+@{Qualifier}
+annotation R {}
+
+@{Qualifier}
+annotation G {}
+
+@{Qualifier}
+annotation B {}
+
+
+@{Service}
+@{DefaultService}
+@{R}
+class Red implements Color {}
+
+@{Service}
+@{G}
+class Green implements Color {}
+
+@{Service}
+@{B}
+class Blue implements Color {}
+
+%>
+
+
+And voila! We are done configuring the system. Let's discuss each annotation in a bit more detail, however:
+
+=== Contract ===
+This can only be placed on an interface, and declares that this interface is Injectable. That means that code can use
+this as an injectable interface. Only Services (that is, concrete classes) can be injected without configuration, so if
+we want to expose an annotation to the ecosystem, we must label it with the Contract annotation.
+
+=== Qualifier ===
+Qualifiers are optional if there is only one service that implements a contract, though they are required when more than
+one Service implements a Contract. (We can nonetheless do more complex selection with code during runtime using the
+addSelector method, though this bypasses the helpful compile errors. See below.) The Qualifier is placed on other
+annotations, which are themselves placed on Services. They are then used along with an Inject annotation in the main
+code to provide a "selection strategy" for a deciding which of a Service to use for the injected Contract. For instance:
+
+<%CODE|
+class Main {
+	@{Inject} 
+	@{R}
+	private Color @red; // This will be injected with a new Red() instance, barring runtime tweaks
+
+	@{Inject}
+	public Main(
+		// This will be injected with a new Blue() instance.
+		@{B} Color @blue
+	) {
+		//...
+	}
+}
+%>
+
+=== Service ===
+The Service annotation can only be applied to a concrete class, though in some cases, is optional. The required case is
+when there is a Contract, at least one Service must implement that Contract. However, you may have Services without
+a Contract, and in many cases, even without the configuration, a class is useable as a Service. When it comes to using
+the DI framework (rather than configuring it), Services (explicitely declared or assumed) can be used as a Contract, so
+the following is valid:
+
+<%CODE|
+class A {
+	@{Inject}
+	public A(Red @r) {
+		// ...
+	}
+}
+class B {
+	@{Inject}
+	public B(@{R} Color @r) {
+		// ...
+	}
+}
+%>
+
+Keep in mind that using a Service as a Contract is less flexible though. In the above example, in class A, we can only
+provide an instance of Red, regardless. In class B, the system will normally provide an instance of Red, but the runtime
+and general configuration can be tweaked to provide something other than Red, including providing classes that have yet
+to be defined, but will be defined in the future.
+
+=== Default Service ===
+This annotation is required to be placed on a single Service, if there are more than one. This is the instance that will
+be provided if no Qualifiers are specified.
+
+<%CODE|
+class A {
+	@{Inject}
+	public A(Color @c) {
+		// ...
+	}
+}
+%>
+
+In this example, given the above configuration, where Red is the default service, the injected instance would be Red. It
+is possible to change this value separately at runtime, so that future injections will be a different value.
+
+=== Inaccessible Services ===
+In general, if multiple Services are defined which implement a Contract, and none of them provide qualifiers, then when
+attempting to inject the Contract, it may not be possible to ever be provided an instance of a particular Service. This
+is not strictly an error, however, because this can be changed dynamically at runtime, as well as libraries providing
+multiple implementations of a Contract, which are intended to be selected from by the user as a configuration (either
+in a config file, or at runtime.)
+
+=== Singleton and Eager Singleton ===
+
+Consider this configuration:
+
+<%CODE|
+@{Contract}
+interface Counter {
+	void increaseCount();
+	void decreaseCount();
+}
+
+@{Service}
+@{Singleton}
+class CounterImpl implements Counter {
+	private int @count = 0;
+	public void increaseCount() {
+		@this->count++;
+	}
+
+	public void decreaseCount() {
+		@this->count--;
+	}
+}
+%>
+
+In this configuration, we define a Counter Contract, and a CounterImpl Service. In general, we could implement this as
+a static methods, but that becomes less flexible down the road, particularly if we end up changing our design later.
+Instead, we mark it as @{Singleton}, which means 2 things. One, it is lazily constructed, i.e. it won't be
+constructed until we actually need it, and two, we will only ever construct it once. We could instead label it with
+<code>@{EagerSingleton}</code>, which means that it will be constructed at startup, even if nothing requires it yet, but
+otherwise works the same as Singleton.
+
+== Configuration File Setup ==
+
+All of the concepts described in the section on annotations can instead be configured via a configuration file. There
+are a few cases where this is desirable. First, if you are wanting to backport a third party library to use Dependency
+Injection, and it doesn't provide the annotations natively. Secondly, if a library does provide annotations, but you
+wish to override their selections, or third, if you wish to reconfigure your own code, without having to make code
+changes. It is more difficult to configure using a text file, however, which is why annotations are preferred. However,
+in some cases, it is the only option.
+
+Configuration files may be inherited, so multiple config files may be created, and the final config is a composition of
+all of the config files combined. However, the first location that the DI system looks at is the prefs folder, in a file
+named dependency_injection.json. Ultimately, existing annotations are read in first, then the config files that are
+inherited, and finally, the dependency_injection.json file. Thus, if information is overridden, this is the order of
+priority.
+
+Below is a sample file, which demonstrates the configuration.
+
+<%SYNTAX|javascript|
+{
+	// Optional, but if provided, should point to another file of this same type. The path is relative to the
+	// current file.
+	"inherits": "file.json",
+	// An array of contract definitions.
+	"contracts": [{
+		// The fully qualified class name
+		"name": "fully.qualified.class.name",
+		// An array of fully qualified class names that implement this contract.
+		// Services defined in this array may also be defined below, where more
+		// information (such as qualifiers) may be added.
+		"services": ["fully.qualified.service.name", "fully.qualified.service.name2"],
+		// The default service, which is required if more than one service is defined.
+		"defaultService": "fully.qualified.service.name"
+	}],
+	// A list of annotations that are meant as qualifiers. The classes listed here must be annotations,
+	// or this will cause a startup failure.
+	"qualifiers": [{
+		"name": "fully.qualified.name.of.annotation",
+	}],
+	// A list of services. These can be standalone, or implement a contract.
+	"services": [{
+		// The name of the service
+		"name": "fully.qualified.class.name",
+		// Optional. An array of qualifiers that apply to this service. This may contain zero or more elements.
+		"qualifiers": ["fully.qualified.name.of.annotation"],
+		// Optional, if left off, is false. If true, is considered a singleton.
+		"singleton": boolean,
+		// Optional, if left off, is false. If true, and this is a singleton, it is loaded eagerly,
+		// rather than lazily.
+		"loadEagerly": boolean
+	}]
+}
+%>
+
+== Runtime Configuration ==
+
+While the bulk of the setup for the system must be done with annotations or a config file, as this information must
+be available at compile time, there are a few settings that can be tweaked at runtime. Particularly, for contracts,
+the services available may be changed, though they must be changed in a compatible way (i.e. contracts can't be removed,
+and services with various qualifiers can only be replaced if they have the same qualifiers.). This is mostly useful
+for unit tests, but it can be used for non-test code as well, if the occasion demands it.
+
+We can also add a dynamic service selector, which is only possible using a runtime configuration. The parameter that
+is attempted to be loaded will sent to the closure, and based on that, the runtime may dynamically select the service
+that is selected:
+
+<%CODE|
+// Note that this is only allowed on contracts that are not singletons. Singleton contracts
+// follow a different pattern.
+DI::ForContract(Color)->addSelector(Color closure(Parameter<Color> @parameter){
+	if(@parameter->name == 'red') {
+		return(new Red());
+	} else if(@parameter->name == 'green') {
+		return(new Green());
+	} else {
+		return(new Blue());
+	}
+});
+%>
+
+We can also much more easily provide stubs to a unit test, by overriding the value that is configured to be constructed.
+Assume we have a contract that defines a Mailer, along with a service that implements that contract.
+
+<%CODE|
+interface Email {
+	// Methods and properties that represent an email
+}
+
+@{Contract}
+interface Mailer {
+	/**
+	 * Sends an email.
+	 */
+	void sendMail(Email @e);
+}
+
+@{Service}
+class MailerService implements Mailer {
+	public void sendMail(Email @e) {
+		email(...);
+	}
+}
+
+class Main {
+	// Since there is only one Service configured for Mailer, we know that, unless we override this at runtime,
+	// we will get an instance of MailerService
+	@{Inject}
+	private final Mailer @mailer = null;
+
+	void main() {
+		Email @e = new Email(/*...*/);
+		@mailer->sendMail(@e);
+	}
+}
+
+new Main()->main();
+%>
+
+Now, if we try to test this code, we don't actually want to send an email every time we run the test, so we can create
+a stub, and then at runtime in our test code setup, replace the MailerService with a new MailerServiceStub, which does
+nothing.
+
+<%CODE|
+@{TestSuite}
+class MainTest {
+	
+	// No annotation here, because we don't want it to normally be useable in the DI system, though it does need
+	// to implement the Mailer interface
+	class MailerServiceStub implements Mailer {
+		public void sendMail(Email @e) {
+			msg('Would be sending email to ' . @e->to);
+		}
+	}
+
+	@{Before}
+	public void setup() {
+		DI::ForContract(Mailer)
+			// This makes it drop in the new service in place of the specified service. Any qualifiers or other
+			// modifiers on MailerService would be applied to MailerServiceStub.
+			// Do note that this won't work for singletons that have already been constructed, during normal runtime,
+			// however, it will work in unit tests, because each test is run within its own pristine environment.
+			->replaceService(MailerService, MailerServiceStub);
+	}
+
+	@{Test}
+	public void testMail {
+		// Now, when the constructor of Main is called, we will inject an instance of MailerServiceStub, rather than
+		// the MailerService, and we can run main() without actually sending a real email.
+		Main @m = new Main();
+		@m->main(); // Does not send an email!
+	}
+%>
+
+We could also not use DI at all, and simply manually construct an instance of the MailerServiceStub, and pass that in,
+but that would require a change to the class itself, to accept that parameter in the constructor of Main.
+
+While the above example is demonstrating stubbing in unit tests, this feature can be used at runtime as well, and as you
+can see, it makes your code much more flexible than when you use the '''new''' keyword all over the place.
+
+== Circular Dependencies ==
+
+Circular dependencies are not allowed in the DI system. Consider the following example:
+
+<%CODE|
+class A {
+	@{Inject}
+	public A(B @b) {}
+}
+
+class B {
+	@{Inject}
+	public B(A @a) {}
+}
+%>
+
+In this example, in order to construct A, we must first construct an instance of B. But in order to construct an
+instance of B, we must first construct an instance of A! This cycle is detected at compile time, and if such a cycle
+is detected, it will cause a compile error.
+
+== Weak Typing and DI ==
+
+Since DI relies heavily on use of the type system, it is not usually allowed to leave off types. There is one exception
+to this, if there are qualifiers provided, and there is no ambiguity, it is allowed to leave off types. In the color
+example, for instance, we could do the following with no problems:
+
+<%CODE|
+class A {
+	@{Inject}
+	public A(@{R} auto @red) {
+		// @red is actually going to be of type Red, and this is allowed.
+	}
+}
+
+class B {
+	@{Inject}
+	public B(auto @red) {
+		// Compile error, because auto typed value (either explicitely or implicitely typed as such)
+		// are not injectable.
+	}
+}
+%>

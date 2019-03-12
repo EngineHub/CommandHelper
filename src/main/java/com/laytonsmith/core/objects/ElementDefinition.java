@@ -18,8 +18,8 @@ public class ElementDefinition {
 	private final Set<ElementModifier> elementModifiers;
 	private final CClassType type;
 	private final String name;
-	private final Mixed defaultValue;
 
+	private final Mixed defaultValue;
 	private Method nativeMethod = null;
 	private Field nativeField = null;
 
