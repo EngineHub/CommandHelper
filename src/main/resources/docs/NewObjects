@@ -104,6 +104,60 @@ type unions.
 The constructor is simply a method that is defined with the same name of the 
 class, and no return type.
 
+=== Overloaded Methods ===
+
+Unlike procs, it is allowed to have multiple methods with the same name, so long
+as they are distinguishable between each other based on the parameter lists.
+This is allowed, for instance:
+
+<%CODE|
+class A {
+	int method(){ return(1); }
+	int method(int @a) { return(@a); }
+}
+%>
+
+We can easily determine which method to call, based on whether or not we pass an int
+to the method when we call it.
+
+<%CODE|
+	new A()->method(); // calls the first method
+	new A()->method(1); // calls the second method
+%>
+
+Where this becomes a problem is when two parameter lists are indistinguishable from
+each other.
+
+<%CODE|
+class A {
+	void method(int @a, number @b) {}
+	void method(number @a, int @b) {}
+}
+
+// This is a compile error, because which method should we be calling here, the first
+// or the second? Both parameters match both methods.
+new A()->method(1, 1);
+
+// TODO: Actually, should this be allowed? When it comes to inheritance, we will
+// probably run into the same problem as with varied return types.
+
+// This is allowed, however, because we are explicitely typing the method, which allows
+// us to exactly distinguish the method. This notation is in general allowed for any
+// method, though is not necessary most of the time.
+new A()->method<void, int, number>(1, 1);
+
+// By the way, this is how you reference the Callable object, if you want to get
+// a reference to the method dynamically, and there are multiple methods with the
+// same name.
+Callable<void, int, number> @m = A->method<void, int, number>;
+%>
+
+A method may be overridden with simply changing the return type, but then, just as
+in the above example, would require fully qualifying the method each time it were
+called. Due to this, anytime you define a method that would require disambiguation
+every time it's called, a compiler warning is issued for the definition. This can
+be suppressed, however.
+
 === Inheritance ===
 
 An object can '''inherit''' from, or ''extend'' another object. Let's define the 
@@ -124,11 +178,53 @@ In this case, we are extending A, and '''overriding''' method2. In order to
 override a method, you simply name it the same as the method in the parent 
 class. However, it is important to note that the method signatures must be 
 '''type compatible''', that is, it cannot completely redefine the types of the 
-variables that are passed in, but it can use ''more specificity''. For instance, 
-if class A defined the method <code>public mixed f(number @o)</code> it would be 
-invalid to define in class B the method <code>public mixed f(int @i)</code>, however, 
-if class A instead defined f as <code>public f(int @o)</code>, it would be 
-valid for B to '''expand''' the type required to <code>public f(number @o)</code>.
+variables that are passed in, and there are specific rules for '''narrowing''' and
+'''broadening''' types. Take the following examples:
+
+<%CODE|
+class A {
+	number f(number @a) { /*...*/ }
+}
+
+class B extends A {
+	// We are allowed to "narrow" the return type of a method, and this still
+	// overrides the A->f method. Note that the Override annotation is in place
+	// to ensure this method does indeed override a parent method. If it does
+	// not, it will cause a compile error, and actually, it is a required annotation
+	// if the method does override a parent method.
+	@{Override}
+	int f(number @a) { /*...*/ }
+}
+
+class C extends A {
+	// Not allowed! Actually, the only reason this isn't allowed is because we have
+	// added the @{Override} tag. It is possible to create this method anyways,
+	// (without the Override tag), but then if the method were called, it would
+	// follow the normal overloading rules of deciding which method to call, as
+	// if we had simply created both methods within the same class.
+	@{Override}
+	number f(int @a) { /*...*/ }
+}
+
+class D extends A {
+	// This is not allowed, (with or without the Override annotation, it's a compiler error with it), 
+	// because the rules governing inheritance do not allow for return type changes.
+	string f(number @a) { /*...*/ }
+}
+%>
+
+In the last example, it is shown that return type changes are not allowed (only narrowing is).
+Why is this, when return type changes are allowed within a single class? Consider the following code.
+
+<%CODE|
+// We are creating a new D, but the variable @a is defined as type A
+A @a = new D();
+// One might think this should work, because D defines a method with return type
+// string, accepting one number parameter. However, the variable is defined as A, not D!
+// It is entirely possible that instead of an object of type D, we have an object of
+// type A, which does not define a method<string, number>.
+@a->f<string, number>(1);
+%>
 
 Examining the constructor, there is the new function, <code>super()</code>, 
 which is used to call the parent's constructor. <code>super</code> is optional, 
@@ -209,7 +305,7 @@ class B extends A {
 
 ==== Default Constructors ====
 
-If no constructors are provided, a default constructor is always provided, with 
+If zero constructors are provided, a default constructor is always provided, with 
 the definition:
 
 <%CODE|
@@ -355,11 +451,34 @@ msg(@b->method()); // 'XYZ'
 %>
 
 === Access Modifiers ===
-'''public''', '''private''', '''package''', '''internal''', and '''protected''' are the five modifiers that 
-control what can access an object's methods or members. If something is public, 
+'''public''', '''protected''', '''internal''', '''package''', and '''private''' are the five modifiers that 
+control what can access an object's methods or members (in order of visibility). If something is public, 
 anything can access it. If it is private, only that class can access it, and if 
-it is protected, only that class, or subclasses can access it. '''package''' and '''internal''' are currently
-reserved, but not used.
+it is protected, only that class, or subclasses can access it. '''package''' means
+that only classes defined within the same folder (or subfolders) may access it, and '''internal'''
+means that only classes within that project (or class library, depending on how the class
+library is set up) can access it.
+
+The access modifier may be left off. In that case, the behavior is a bit dynamic. If the method
+is defined in a parent class or interface, then the method will adopt the overridden
+method's access modifier. For classes, it will be whatever the parent specifically set
+it as, and for methods defined in an interface, they will be public. (They are necessarily
+public anyways, because all methods in an interface are public.) If the defined method
+is not overriding a method in a parent class, then the method is considered internal.
+Fields that have the default visibility default to internal.
+
+In general, when overriding methods in a parent class, it is only possible to grant it
+a higher visibility state. For instance, if the parent class defines a method as public,
+the child class cannot make it private. However, the opposite is allowed. If a parent
+class defines a method as protected, a child class can make it public.
+
+The modifier can be applied to methods and fields, but also to classes. This leads
+to an interesting effect, however. If there is a class defined with a lower visibility
+than a method which returns or has parameters of a type that has a lower visibility, then
+it means that the method cannot in fact be called by code that is not of the appropriate
+visibility. If this occurs, then a compiler error will be issued. To fix it, you may either
+make the class the same visibility as the method, or you can reduce the visibility of the
+method.
 
 === Explicit namespacing ===
 In an instance, we can always using explicit namespacing to reference a parent's 
@@ -516,19 +635,19 @@ delegate behavior to the correct super class's method, for instance:
 
 %%CODE|
 class A {
-	public mixed method(){
-		return(1);
+	public mixed method(int @a){
+		return(@a + 1);
 	}
 }
 
 class B {
-	public mixed method(){
-		return(2);
+	public mixed method(int @a){
+		return(@a);
 	}
 }
 class C extends A, B {
-	public mixed method(){
-		return(B::method());
+	public mixed method(int @a){
+		return(B::method(@a));
 	}
 }
 %%
@@ -540,7 +659,7 @@ defining it as such:
 
 %%CODE|
 class C extends A, B {
-	inherit B::method();
+	inherit B::method(int @a);
 }
 %%
 
@@ -645,6 +764,9 @@ named com.project.util.MyClass, you can <code>use com.project;</code>, and then 
 class as <code>util.MyClass</code>, though it's usually just as well to
 <code>use com.project.util;</code>.
 
+=== Inner Classes ===
+// TODO
+
 === Class Library ===
 In general, MethodScript prefers to work with classes that are defined in the '''Class \
 Library'''. When using the class library, this prevents complex management of include
@@ -691,6 +813,22 @@ class organization.project.MyClass1 {
 	public OtherClass @a;
 }
 %>
+
+==== classLibrary Manifest ====
+In addition to providing a project structure, a class library may contain one or more '''manifest''' files,
+(named simply "manifest.json"). There must be one manifest at the root of the classLibrary, but there may be more within
+subfolders, if it makes sense to organize multiple projects within the same classLibrary. The manifest defines
+certain information about the class library as a whole, and turns it into a "project". The manifest includes
+information such as project versions, author information, changelogs, etc. The manifest.json file has a
+specific format, which is described [Manifests|here]. One of the most useful features of the manifest is
+the version number, and dependency information. The project should define what dependencies and versions
+of dependencies are needed, but not where to find them. Meanwhile, as a system level configuration, the
+system should define where to look for dependencies. This may be on the local system, or it may be in a
+package manager. Regardless, at minimum, every classLibrary must have at least one manifest file within
+the file structure that defines the organization name, project name, and project version. This ensures
+that the dependency fulfillment mechanisms are always able to uniquely identify a project. A default
+manifest.json file is created for you when running the system for the first time, but you must
+change the values in it, if you intend on shipping your code, or re-using it in a more modular fashion.
 
 === Virtual Classes ===
 Virtual classes are classes that are defined not through the class library, but dynamically 

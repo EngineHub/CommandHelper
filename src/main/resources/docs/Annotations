@@ -1,5 +1,7 @@
 Annotations allow for meta data to be added to elements, and are used by the system
-in various places, and can also be defined and used by your code as well.
+in various places, and can also be defined and used by your code as well. Annotations
+are also referred to "tags" in MethodScript, and adding an annotation to an item
+is known as "tagging" an item.
 
 == Usage ==
 The basic syntax for an annotation uses the <code>@{}</code> syntax. If the annotation

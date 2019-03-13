@@ -1,0 +1,17 @@
+{{unimplemented}}
+
+A manifest file describes information about the project as a whole, including things like the version number,
+author name, etc.
+
+== Comments in the manifest ==
+
+It is often times useful to add comments to a configuration item, but alas, manifests use json, not xml, and you
+can't put comments! Not to worry though! Every element is defined with a "comment" field, which is totally
+ignored by the manifest system, but can be added anywhere you wish in your configuration to add information
+for the reader of the config file.
+
+== Manifest Objects ==
+
+The root object is defined as such:
+
+// TODO just link to the ms.lang.manifest.ManifestRoot file.
