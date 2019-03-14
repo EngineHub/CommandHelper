@@ -428,8 +428,7 @@ public final class Interpreter {
 			case "$$":
 				inShellMode = true;
 				break;
-			default:
-				{
+			default: {
 					Pattern p = Pattern.compile("(help|examples) (.*)");
 					Matcher m;
 					if((m = p.matcher(line)).find()) {
@@ -458,21 +457,21 @@ public final class Interpreter {
 						}
 						break;
 					}
-				}
-				if(multilineMode) {
-					//Queue multiline
-					script = script + line + "\n";
-				} else {
-					try {
-						//Execute single line
-						execute(line, null);
-					} catch (ConfigCompileException ex) {
-						ConfigRuntimeException.HandleUncaughtException(ex, null, null);
-					} catch (ConfigCompileGroupException ex) {
-						ConfigRuntimeException.HandleUncaughtException(ex, null);
+					if(multilineMode) {
+						//Queue multiline
+						script = script + line + "\n";
+					} else {
+						try {
+							//Execute single line
+							execute(line, null);
+						} catch (ConfigCompileException ex) {
+							ConfigRuntimeException.HandleUncaughtException(ex, null, null);
+						} catch (ConfigCompileGroupException ex) {
+							ConfigRuntimeException.HandleUncaughtException(ex, null);
+						}
 					}
+					break;
 				}
-				break;
 		}
 		return true;
 	}
