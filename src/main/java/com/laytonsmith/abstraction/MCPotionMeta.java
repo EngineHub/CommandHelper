@@ -22,4 +22,10 @@ public interface MCPotionMeta extends MCItemMeta {
 	boolean hasCustomEffects();
 
 	boolean removeCustomEffect(MCPotionEffectType type);
+
+	boolean hasColor();
+
+	MCColor getColor();
+
+	void setColor(MCColor color);
 }

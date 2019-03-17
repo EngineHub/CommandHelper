@@ -567,6 +567,11 @@ public class ObjectGenerator {
 				if(potiondata != null) {
 					ma.set("base", potionData(potiondata, t), t);
 				}
+				if(potionmeta.hasColor()) {
+					ma.set("color", color(potionmeta.getColor(), t), t);
+				} else {
+					ma.set("color", CNull.NULL, t);
+				}
 			} else if(meta instanceof MCBannerMeta) {
 				MCBannerMeta bannermeta = (MCBannerMeta) meta;
 				CArray patterns = new CArray(t, bannermeta.numberOfPatterns());
@@ -929,6 +934,14 @@ public class ObjectGenerator {
 						if(potiondata instanceof CArray) {
 							CArray pd = (CArray) potiondata;
 							((MCPotionMeta) meta).setBasePotionData(potionData((CArray) potiondata, t));
+						}
+					}
+					if(ma.containsKey("color")) {
+						Mixed color = ma.get("color", t);
+						if(color instanceof CArray) {
+							((MCPotionMeta) meta).setColor(color((CArray) color, t));
+						} else if(color instanceof CString) {
+							((MCPotionMeta) meta).setColor(StaticLayer.GetConvertor().GetColor(color.val(), t));
 						}
 					}
 				} else if(meta instanceof MCBannerMeta) {

@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCLivingEntity.MCEffect;
 import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.MCPotionMeta;
@@ -69,4 +70,16 @@ public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta
 		return pm.removeCustomEffect((PotionEffectType) type.getConcrete());
 	}
 
+	public boolean hasColor() {
+		return pm.hasColor();
+	}
+
+	public MCColor getColor() {
+		return BukkitMCColor.GetMCColor(pm.getColor());
+	}
+
+	@Override
+	public void setColor(MCColor color) {
+		pm.setColor(BukkitMCColor.GetColor(color));
+	}
 }

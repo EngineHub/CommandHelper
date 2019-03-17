@@ -120,21 +120,11 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 		private boolean icon;
 
 		public MCEffect(MCPotionEffectType type, int strength, int ticks, boolean ambient) {
-			this.type = type;
-			this.strength = strength;
-			this.ticksRemaining = ticks;
-			this.ambient = ambient;
-			this.particles = true;
-			this.icon = true;
+			this(type, strength, ticks, ambient, true, true);
 		}
 
 		public MCEffect(MCPotionEffectType type, int strength, int ticks, boolean ambient, boolean particles) {
-			this.type = type;
-			this.strength = strength;
-			this.ticksRemaining = ticks;
-			this.ambient = ambient;
-			this.particles = particles;
-			this.icon = particles;
+			this(type, strength, ticks, ambient, particles, particles);
 		}
 
 		public MCEffect(MCPotionEffectType type, int strength, int ticks, boolean ambient, boolean particles, boolean icon) {
