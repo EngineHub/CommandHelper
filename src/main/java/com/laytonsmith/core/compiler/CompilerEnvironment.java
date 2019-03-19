@@ -6,6 +6,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
+import com.laytonsmith.core.objects.ObjectDefinitionTable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,6 +41,8 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl {
 	 * a compiler error.
 	 */
 	private final Stack<Set<String>> knownVars = new Stack<Set<String>>();
+
+	private final ObjectDefinitionTable objectDefinitionTable = ObjectDefinitionTable.GetBlankInstance();
 
 	//TODO: Need to figure out how to do known procs.
 	public void setConstant(String name, Construct value) {

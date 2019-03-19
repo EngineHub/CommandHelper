@@ -150,7 +150,7 @@ public class TestPersistence {
 
 	@Test
 	public void testHasValue() throws Exception {
-		PersistenceNetwork network = new PersistenceNetwork("**=json://folder/default.json", new URI("default"), options);
+		PersistenceNetworkImpl network = new PersistenceNetworkImpl("**=json://folder/default.json", new URI("default"), options);
 		network.set(dm, new String[]{"key"}, "value");
 		dm.waitForThreads();
 		assertTrue(network.hasKey(new String[]{"key"}));
@@ -172,7 +172,7 @@ public class TestPersistence {
 //	}
 	@Test
 	public void testNotTransient() throws Exception {
-		PersistenceNetwork network = new PersistenceNetwork("**=json://folder/default.json", new URI("default"), options);
+		PersistenceNetworkImpl network = new PersistenceNetworkImpl("**=json://folder/default.json", new URI("default"), options);
 		network.set(dm, new String[]{"key"}, "value");
 		dm.waitForThreads();
 		assertEquals("value", network.get(new String[]{"key"}));
@@ -184,7 +184,7 @@ public class TestPersistence {
 
 	@Test
 	public void testTransient() throws Exception {
-		PersistenceNetwork network = new PersistenceNetwork("**=transient:json://folder/default.json", new URI("default"), options);
+		PersistenceNetworkImpl network = new PersistenceNetworkImpl("**=transient:json://folder/default.json", new URI("default"), options);
 		network.set(dm, new String[]{"key"}, "value1");
 		dm.waitForThreads();
 		assertEquals("value1", network.get(new String[]{"key"}));
@@ -198,7 +198,7 @@ public class TestPersistence {
 	public void testSer() throws Exception {
 		//This is hard to test, since it's binary data. Instead, we just check for the file's existance, and to see if
 		//contains the key and value somewhere in the data
-		PersistenceNetwork network = new PersistenceNetwork("**=ser://folder/default.ser", new URI("default"), options);
+		PersistenceNetworkImpl network = new PersistenceNetworkImpl("**=ser://folder/default.ser", new URI("default"), options);
 		network.set(dm, new String[]{"key"}, "value");
 		dm.waitForThreads();
 		String contents = FileUtil.read(new File("folder/default.ser"));
@@ -209,7 +209,7 @@ public class TestPersistence {
 	@Test
 	public void testConflictingKeys() throws Exception {
 		//If two data sources have the same key, only one should be currently operated on.
-		PersistenceNetwork network = new PersistenceNetwork("**=transient:json://folder/default.json\nkey.*=transient:json://folder/other.json\n", new URI("default"), options);
+		PersistenceNetworkImpl network = new PersistenceNetworkImpl("**=transient:json://folder/default.json\nkey.*=transient:json://folder/other.json\n", new URI("default"), options);
 		FileUtil.write("{\"key\":{\"key\":\"value1\"}}", new File("folder/other.json"), true);
 		FileUtil.write("{\"key\":{\"key\":\"nope\"}}", new File("folder/default.json"), true);
 		assertEquals("value1", network.get(new String[]{"key", "key"}));
@@ -227,7 +227,7 @@ public class TestPersistence {
 //	}
 	@Test(expected = IllegalArgumentException.class)
 	public void testNamespaceWithUnderscore() throws Exception {
-		PersistenceNetwork network = new PersistenceNetwork("**=sqlite://folder/sqlite.db", new URI("default"), options);
+		PersistenceNetworkImpl network = new PersistenceNetworkImpl("**=sqlite://folder/sqlite.db", new URI("default"), options);
 		try {
 			network.set(dm, new String[]{"Bad", "_", "Key"}, "value");
 			dm.waitForThreads();
@@ -238,7 +238,7 @@ public class TestPersistence {
 
 	@Test
 	public void testMemoryDataSource() throws Exception {
-		PersistenceNetwork network = new PersistenceNetwork("**=mem:default", new URI("default"), options);
+		PersistenceNetworkImpl network = new PersistenceNetworkImpl("**=mem:default", new URI("default"), options);
 		String[] key = new String[]{"a", "b"};
 		network.set(dm, key, "value");
 		dm.waitForThreads();
@@ -258,7 +258,7 @@ public class TestPersistence {
 
 	@Test
 	public void testGetValues() throws Exception {
-		PersistenceNetwork network = new PersistenceNetwork("**=json://folder/persistence.json", new URI("default"), options);
+		PersistenceNetworkImpl network = new PersistenceNetworkImpl("**=json://folder/persistence.json", new URI("default"), options);
 		try {
 			network.set(dm, new String[]{"t", "test1"}, "test");
 			network.set(dm, new String[]{"t", "test2"}, "test");

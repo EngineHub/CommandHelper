@@ -11,7 +11,7 @@ use ms.lang.validators;
 /**
  * Provides information about an organization.
  */
-interface ms.lang.manifest.OrganizationInfo {
+public interface ms.lang.manifest.OrganizationInfo {
     /**
      * This is the human readable organization name.
      */

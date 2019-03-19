@@ -12,7 +12,7 @@
  * contain spaces or dots. It is intended that version numbers of this type follow the
  * Symantic Versioning standard, which can be found here: https://semver.org/
  */
-class ms.lang.util.Version {
+public class ms.lang.util.Version {
     public int @major {get;};
     public int @minor {get;};
     public int @patch {get;};

@@ -83,7 +83,7 @@ public class Threading {
 					DaemonManager dm = environment.getEnv(GlobalEnv.class).GetDaemonManager();
 					dm.activateThread(Thread.currentThread());
 					try {
-						closure.executeClosure();
+						closure.executeCallable();
 					} catch (LoopManipulationException ex) {
 						ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Unexpected loop manipulation"
 								+ " operation was triggered inside the closure.", t), environment);
@@ -224,7 +224,7 @@ public class Threading {
 				@Override
 				public void run() {
 					try {
-						closure.executeClosure();
+						closure.executeCallable();
 					} catch (ConfigRuntimeException e) {
 						ConfigRuntimeException.HandleUncaughtException(e, environment);
 					} catch (ProgramFlowManipulationException e) {
@@ -289,7 +289,7 @@ public class Threading {
 					@Override
 					public Object call() throws Exception {
 						try {
-							return closure.executeClosure();
+							return closure.executeCallable();
 						} catch (ConfigRuntimeException | ProgramFlowManipulationException e) {
 							return e;
 						}

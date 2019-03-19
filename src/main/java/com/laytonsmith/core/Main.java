@@ -32,6 +32,7 @@ import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.Meta;
 import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import com.laytonsmith.tools.ExampleLocalPackageInstaller;
 import com.laytonsmith.tools.Interpreter;
@@ -492,7 +493,7 @@ public class Main {
 			} else if(mode == PRINT_DB_MODE) {
 				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 				options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
-				PersistenceNetwork pn = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
+				PersistenceNetwork pn = new PersistenceNetworkImpl(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 						new URI("sqlite://" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile().getCanonicalPath()
 								//This replace is required on Windows.
 								.replace('\\', '/')), options);

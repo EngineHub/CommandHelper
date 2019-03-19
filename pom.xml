@@ -426,6 +426,22 @@
 					<exclude>plugin.yml</exclude>
 				</excludes>
 			</resource>
+			<resource>
+				<targetPath>./nativeSource</targetPath>
+				<filtering>false</filtering>
+				<directory>${basedir}/src/main/methodscript/</directory>
+				<excludes>
+					<exclude>workspace.code-workspace</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<targetPath>./nativeSource</targetPath>
+				<filtering>false</filtering>
+				<directory>${basedir}/src/main/ms-resources/</directory>
+				<includes>
+					<include>**</include>
+				</includes>
+			</resource>
 		</resources>
 		<testResources>
 			<testResource>

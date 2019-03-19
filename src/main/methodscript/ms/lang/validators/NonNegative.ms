@@ -11,6 +11,6 @@
  * negative. Zero is allowed, however.
  */
 @{Target(value: DECLARATION, type: number)}
-annotation ms.lang.validators.NonNegative {
+public annotation ms.lang.validators.NonNegative {
 
 }

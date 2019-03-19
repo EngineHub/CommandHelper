@@ -11,7 +11,7 @@
  * for this project. Plugins for IDEs may be able to use this
  * to integrate with the IDE's issue tracker GUI.
  */
-interface ms.lang.manifest.IssueManagement {
+public interface ms.lang.manifest.IssueManagement {
     /**
      * The name of the system. While this is a freeform string, so that new
      * issue trackers can be added, for a few well known issue trackers, there

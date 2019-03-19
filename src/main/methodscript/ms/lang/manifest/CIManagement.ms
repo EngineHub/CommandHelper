@@ -13,7 +13,7 @@ use ms.lang.validators;
  * Plugins for IDEs may be able to use this
  * to integrate with the IDE's issue tracker GUI.
  */
-interface ms.lang.manifest.CIManagement {
+public interface ms.lang.manifest.CIManagement {
     /**
      * The name of the system. While this is a freeform string, so that new
      * CI systems can be added, for a few well known CI systems, there

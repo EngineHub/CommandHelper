@@ -9,7 +9,7 @@
 /**
  * Provides information about a contributor.
  */
-interface ms.lang.manifest.Contributor {
+public interface ms.lang.manifest.Contributor {
     /**
      * The contributor id, which should be unique for the user. Usually,
      * this should be the username registered with the official

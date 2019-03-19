@@ -11,6 +11,6 @@
  * it will trigger an error.
  */
 @{Target(FIELD)}
-annotation ms.lang.JsonSerializer.Required {
+public annotation ms.lang.JsonSerializer.Required {
 
 }

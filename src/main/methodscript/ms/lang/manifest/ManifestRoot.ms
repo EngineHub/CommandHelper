@@ -10,7 +10,7 @@ use ms.lang.JsonSerializer;
 use ms.lang.util;
 use ms.lang.validators;
 
-interface ms.lang.manifest.ManifestRoot {
+public interface ms.lang.manifest.ManifestRoot {
 	/**
 	 * The manifest version. Should be 1.0.0.
 	 */

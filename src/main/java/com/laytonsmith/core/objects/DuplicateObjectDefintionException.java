@@ -1,21 +1,20 @@
 package com.laytonsmith.core.objects;
 
+import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
+
 /**
  * Thrown if an ObjectDefintion is attempted to be redefined. An ObjectDefinition is uniquely identified by its fully
  * qualified class name, as a String.
  */
-public class DuplicateObjectDefintionException extends Exception {
+public class DuplicateObjectDefintionException extends ConfigCompileException {
 	private final boolean wasCopy;
-	public DuplicateObjectDefintionException(boolean isCopy) {
-		this(null, null, isCopy);
+	public DuplicateObjectDefintionException(Target t, boolean isCopy) {
+		this(null, t, isCopy);
 	}
 
-	public DuplicateObjectDefintionException(String message, boolean isCopy) {
-		this(message, null, isCopy);
-	}
-
-	public DuplicateObjectDefintionException(String message, Throwable cause, boolean isCopy) {
-		super(message, cause);
+	public DuplicateObjectDefintionException(String message, Target t, boolean isCopy) {
+		super(message, t);
 		this.wasCopy = isCopy;
 	}
 

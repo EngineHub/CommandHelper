@@ -19,6 +19,7 @@ import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -707,7 +708,7 @@ public class PNViewer extends javax.swing.JFrame {
 		File config = new File(configPath);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(config.getParentFile().getParentFile());
-		return new PersistenceNetwork(config, new URI("sqlite://" + new File(config.getParentFile().getParentFile(), "persistence.db").toString().replace('\\', '/')), options);
+		return new PersistenceNetworkImpl(config, new URI("sqlite://" + new File(config.getParentFile().getParentFile(), "persistence.db").toString().replace('\\', '/')), options);
 	}
 
 	/**

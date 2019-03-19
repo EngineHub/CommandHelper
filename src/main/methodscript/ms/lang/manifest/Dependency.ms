@@ -12,7 +12,7 @@
  * be listed, transient dependencies (that is, dependencies of dependencies) will
  * automatically be calculated and populated in the final dependency graph.
  */
-interface ms.lang.manifest.Dependency {
+public interface ms.lang.manifest.Dependency {
 
     // TODO
 

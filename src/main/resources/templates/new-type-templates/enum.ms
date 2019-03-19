@@ -1,3 +1,3 @@
-enum %s {
+public enum %s {
 
 }

@@ -1,4 +1,4 @@
 @{Target()}
-annotation %s {
+public annotation %s {
 
 }

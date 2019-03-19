@@ -29,6 +29,7 @@ import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Profiles;
+import com.laytonsmith.core.ProfilesImpl;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -39,12 +40,13 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.core.taskmanager.TaskManager;
+import com.laytonsmith.core.taskmanager.TaskManagerImpl;
 import com.laytonsmith.persistence.DataSource;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.DataSourceFilter;
 import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.ReadOnlyException;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.File;
@@ -81,14 +83,14 @@ public class Manager {
 		Implementation.forceServerType(Implementation.Type.BUKKIT);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(CH_DIRECTORY);
-		persistenceNetwork = new PersistenceNetwork(CommandHelperFileLocations.getDefault().getPersistenceConfig(),
+		persistenceNetwork = new PersistenceNetworkImpl(CommandHelperFileLocations.getDefault().getPersistenceConfig(),
 				CommandHelperFileLocations.getDefault().getDefaultPersistenceDBFile().toURI(), options);
 		Installer.Install(CH_DIRECTORY);
 		CHLog.initialize(CH_DIRECTORY);
 		profiler = new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile());
 		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistenceNetwork,
-				CH_DIRECTORY, new Profiles(MethodScriptFileLocations.getDefault().getProfilesFile()),
-				new TaskManager());
+				CH_DIRECTORY, new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile()),
+				new TaskManagerImpl());
 		cls();
 		pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
 
@@ -587,8 +589,8 @@ public class Manager {
 			try {
 				DaemonManager dm = new DaemonManager();
 				mixinOptions.setWorkingDirectory(CH_DIRECTORY);
-				PersistenceNetwork pninput = new PersistenceNetwork(input, defaultURI, mixinOptions);
-				PersistenceNetwork pnoutput = new PersistenceNetwork(output, defaultURI, mixinOptions);
+				PersistenceNetwork pninput = new PersistenceNetworkImpl(input, defaultURI, mixinOptions);
+				PersistenceNetwork pnoutput = new PersistenceNetworkImpl(output, defaultURI, mixinOptions);
 				Pattern p = Pattern.compile(DataSourceFilter.toRegex(filter));
 				Map<String[], String> inputData = pninput.getNamespace(new String[]{});
 				boolean errors = false;

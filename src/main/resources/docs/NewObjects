@@ -715,7 +715,12 @@ class organization.project.B {}
 
 In general, the naming convention should follow the convention of
 organizationIdentifier.projectName, which, if followed correctly, will prevent
-overlapping class names.
+overlapping class names, but if the organization represents a single
+project, it can be ok to leave off the project name. In general, the
+organization name should be based on a domain you control, in reverse
+domain order. For instance, if you own me.example.com, your organization
+name should be "me.example.com". This is not required, but substantially
+reduces confusion, especially when distributing your code.
 
 When creating a class like this, references to that class must be the '''fully qualifed \
 class name''', for instance, following the above class definitions:
@@ -749,8 +754,9 @@ B @b = new B();
 Since this is just syntax sugar, rather than a runtime setting, this is why you will always
 see references to a class's fully qualified class name when reading error messages and things.
 So, are system level classes in a hierarchy? Yes, they are! So why do you not need use
-statments for them? The system automatically adds some use statements for you. Particularly,
-it always adds <code>ms.lang</code>, but others may be added as well. Regardless, the ones
+statements for them? The system automatically adds some use statements for you. Particularly,
+it always adds <code>ms.lang</code>, as well as the current package,
+but others may be added as well. Regardless, the ones
 that are added automatically are added as if they are below all of your use statements. This
 allows you to define classes with the same name as system classes, without having to fully
 qualify them. On the flip side, if you have duplicate class names, and you use both within
@@ -763,6 +769,25 @@ You don't have to provide the full package for the class names either. If you ha
 named com.project.util.MyClass, you can <code>use com.project;</code>, and then refer to the
 class as <code>util.MyClass</code>, though it's usually just as well to
 <code>use com.project.util;</code>.
+
+Additionally, you can use the asterisk notation in a use statement, to ''use'' all
+the subdirectories, for instance, if we have 3 classes, named com.org.util.class1,
+com.org.class2, com.org.folder.class3, we can do:
+
+<%CODE|
+// This line is equivalent
+use com.org.*;
+
+// to these lines:
+use com.org;
+use com.org.util;
+use com.org.folder;
+%>
+
+In general, this is not advised, as this may cause problems down the road if,
+within the * structure, any class names are duplicated, and you're using one
+of them, it will become a compile error. Therefore, it is still recommended that
+you fully qualify the package name. Nevertheless, this functionality is available.
 
 === Inner Classes ===
 // TODO

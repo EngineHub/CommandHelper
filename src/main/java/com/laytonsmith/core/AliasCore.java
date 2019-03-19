@@ -26,10 +26,10 @@ import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.core.taskmanager.TaskManager;
+import com.laytonsmith.core.taskmanager.TaskManagerImpl;
 import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.MemoryDataSource;
-import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 
 import java.io.BufferedReader;
@@ -137,7 +137,7 @@ public class AliasCore {
 
 						GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
 								MethodScriptFileLocations.getDefault().getConfigDirectory(),
-								parent.profiles, new TaskManager());
+								parent.profiles, new TaskManagerImpl());
 						CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 						cEnv.SetCommandSender(player);
 						Environment env = Environment.createEnvironment(gEnv, cEnv);
@@ -285,7 +285,7 @@ public class AliasCore {
 					MemoryDataSource.ClearDatabases();
 					ConnectionMixinFactory.ConnectionMixinOptions mixinOptions = new ConnectionMixinFactory.ConnectionMixinOptions();
 					mixinOptions.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
-					parent.persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
+					parent.persistenceNetwork = new PersistenceNetworkImpl(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 							new URI("sqlite:/" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile()
 									.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace('\\', '/')), mixinOptions);
 				} finally {
@@ -293,14 +293,14 @@ public class AliasCore {
 				}
 			}
 			try {
-				parent.profiles = new Profiles(MethodScriptFileLocations.getDefault().getProfilesFile());
+				parent.profiles = new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile());
 			} catch (IOException | Profiles.InvalidProfileException ex) {
 				CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
 				return;
 			}
 			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
 					MethodScriptFileLocations.getDefault().getConfigDirectory(),
-					parent.profiles, new TaskManager());
+					parent.profiles, new TaskManagerImpl());
 			gEnv.SetLabel(Static.GLOBAL_PERMISSION);
 			if(options.reloadExecutionQueue()) {
 				ProfilePoint stoppingExecutionQueue = parent.profiler.start("Stopping execution queues", LogLevel.VERBOSE);

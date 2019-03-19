@@ -14,7 +14,7 @@
  * than having the project know where to find its dependencies, it should instead
  * configure the user's system to know where to look.
  */
-interface ms.lang.manifest.Repository {
+public interface ms.lang.manifest.Repository {
 
     // TODO
 

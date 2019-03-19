@@ -1,9 +1,7 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.annotations.ExposedProperty;
 import com.laytonsmith.annotations.NonInheritImplements;
-import com.laytonsmith.annotations.ParamDocs;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.MSVersion;
@@ -16,7 +14,9 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.ObjectType;
 import java.util.AbstractSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Set;
+import com.laytonsmith.annotations.ExposedElement;
 
 /**
  *
@@ -185,32 +185,19 @@ public class CString extends CPrimitive implements Cloneable,
 		return val().length() > 0;
 	}
 
-	@ExposedProperty(
-			docs = "Returns a new string that has been lowercased, per the current locale definition of \"lowercase\"",
-			returnDoc = "A lowercased string",
-			since = MSVersion.V3_3_4
-	)
-	public CString toLowerCase(Environment env, Target t) {
-		return new CString(val().toLowerCase(), getTarget());
+	@ExposedElement
+	public String toLowerCase(Environment env, Target t, Locale locale) {
+		return val().toLowerCase(locale);
 	}
 
-	@ExposedProperty(
-			docs = "Returns a new string that has been uppercased, per the current locale definition of \"uppercase\"",
-			returnDoc = "An uppercased string",
-			since = MSVersion.V3_3_4
-	)
-	public CString toUpperCase(Environment env, Target t) {
-		return new CString(val().toUpperCase(), getTarget());
+	@ExposedElement
+	public String toUpperCase(Environment env, Target t, Locale locale) {
+		return val().toUpperCase(locale);
 	}
 
-	@ExposedProperty(
-			docs = "Returns true if the string matches the given regex, false otherwise.",
-			returnDoc = "",
-			since = MSVersion.V3_3_4
-	)
+	@ExposedElement
 	public boolean matches(
 			Environment env, Target t,
-			@ParamDocs("The regex to test against")
 			String regex) {
 		return val().matches(regex);
 	}

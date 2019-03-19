@@ -31,6 +31,7 @@ import com.laytonsmith.core.functions.ExampleScript;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.ReadOnlyException;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import com.laytonsmith.tools.Interpreter;
@@ -527,7 +528,7 @@ public final class SiteDeploy {
 	public static PersistenceNetwork getPersistenceNetwork() {
 		PersistenceNetwork p;
 		try {
-			p = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
+			p = new PersistenceNetworkImpl(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 					new URI("sqlite://" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile()
 							.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace('\\', '/')),
 					new ConnectionMixinFactory.ConnectionMixinOptions());

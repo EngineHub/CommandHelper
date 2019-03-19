@@ -1,3 +1,3 @@
-class %s {
+public class %s {
 	
 }

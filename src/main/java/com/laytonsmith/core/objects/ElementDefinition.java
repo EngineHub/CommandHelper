@@ -4,7 +4,7 @@ import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -20,21 +20,54 @@ public class ElementDefinition {
 	private final String name;
 
 	private final Mixed defaultValue;
-	private Method nativeMethod = null;
+	private java.lang.reflect.Method nativeMethod = null;
 	private Field nativeField = null;
+	private final com.laytonsmith.core.Method method;
 
+	/**
+	 * Constructs a new element definition. If this is a native method or field,
+	 * you must also call {@link #setNativeField(java.lang.reflect.Field)} or
+	 * {@link #setNativeMethod(java.lang.reflect.Method)} immediately after construction.
+	 * @param accessModifier The access modifier of the element
+	 * @param elementModifiers The modifiers of the element
+	 * @param type The type of the element (variable type for fields, return type
+	 * for methods)
+	 * @param name The name of the element (should start with @ if this is a
+	 * variable declaration).
+	 * @param defaultValue The default value, if this is a field, and null if this
+	 * is a method. If the default value is MethodScript null, or is not set, you MUST
+	 * send either {@link CNull#NULL} or {@link CNull#UNDEFINED}, rather than java
+	 * null.
+	 * @param method The method, if this is a method.
+	 * @throws NullPointerException If one of the required fields is null
+	 * @throws IllegalArgumentException If both defaultValue and method are non-null.
+	 */
 	public ElementDefinition(
 			AccessModifier accessModifier,
 			Set<ElementModifier> elementModifiers,
 			CClassType type,
 			String name,
-			Mixed defaultValue
+			Mixed defaultValue,
+			com.laytonsmith.core.Method method
 	) {
+		Objects.requireNonNull(accessModifier);
+		Objects.requireNonNull(elementModifiers);
+		Objects.requireNonNull(type);
+		Objects.requireNonNull(name);
+		if(defaultValue == null && method == null) {
+			throw new NullPointerException("Either defaultValue must be"
+					+ " set, or method must be set.");
+		}
+		if(defaultValue != null && method != null) {
+			throw new IllegalArgumentException("Both default value and"
+					+ " method cannot be set, one must be null.");
+		}
 		this.accessModifier = accessModifier;
 		this.elementModifiers = elementModifiers;
 		this.type = type;
 		this.name = name;
 		this.defaultValue = defaultValue;
+		this.method = method;
 	}
 
 	/**
@@ -43,7 +76,7 @@ public class ElementDefinition {
 	 * well as all arguments.
 	 * @param m
 	 */
-	public void setNativeMethod(Method m) {
+	public void setNativeMethod(java.lang.reflect.Method m) {
 		this.nativeMethod = m;
 	}
 
@@ -131,7 +164,7 @@ public class ElementDefinition {
 	 * fact should not be relied on, use {@link #isNative()} to determine that for sure.
 	 * @return
 	 */
-	public Method getNativeMethod() {
+	public java.lang.reflect.Method getNativeMethod() {
 		return nativeMethod;
 	}
 
@@ -143,6 +176,15 @@ public class ElementDefinition {
 	 */
 	public Field getNativeField() {
 		return nativeField;
+	}
+
+	/**
+	 * Returns the MethodScript Method reference. If this is a field, this
+	 * will be null.
+	 * @return
+	 */
+	public com.laytonsmith.core.Method getMethod() {
+		return method;
 	}
 
 }

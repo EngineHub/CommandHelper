@@ -14,7 +14,7 @@
 // compiler has to have special handling to help bootstrap
 // this particular annotation.
 @{Target(ANNOTATION)}
-annotation ms.lang.Target {
+public annotation ms.lang.Target {
     /**
      * A list of TargetTypes where the tagged annotation can
      * be placed. If this is empty, that means that it can

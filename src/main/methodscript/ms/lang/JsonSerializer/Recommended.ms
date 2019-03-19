@@ -11,6 +11,6 @@
  * this will cause a warning to be issued.
  */
 @{Target(FIELD)}
-annotation ms.lang.JsonSerializer.Recommended {
+public annotation ms.lang.JsonSerializer.Recommended {
 
 }

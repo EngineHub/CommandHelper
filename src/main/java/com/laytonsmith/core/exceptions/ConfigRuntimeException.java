@@ -117,7 +117,7 @@ public class ConfigRuntimeException extends RuntimeException {
 				c.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
 			}
 			try {
-				Mixed ret = c.executeClosure(new Mixed[]{ex});
+				Mixed ret = c.executeCallable(env, Target.UNKNOWN, new Mixed[]{ex});
 				if(ret.isInstanceOf(CNull.class) || ret.isInstanceOf(CVoid.class) || Prefs.ScreamErrors()) {
 					return Reaction.REPORT; // Closure returned null or scream-errors was set in the config.
 				}

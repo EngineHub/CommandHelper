@@ -209,7 +209,7 @@ public class BukkitMCCommand implements MCCommand {
 			}
 			CClosure closure = Commands.onTabComplete.get(cmd.getName().toLowerCase());
 			try {
-				Mixed fret = closure.executeClosure(new CString(alias, t), new CString(sender.getName(), t), cargs,
+				Mixed fret = closure.executeCallable(null, t, new CString(alias, t), new CString(sender.getName(), t), cargs,
 						new CArray(t) // reserved for an obgen style command array
 				);
 				if(fret instanceof CArray) {
@@ -250,7 +250,7 @@ public class BukkitMCCommand implements MCCommand {
 			cEnv.SetCommand("/" + label + StringUtils.Join(args, " "));
 
 			try {
-				Mixed fret = closure.executeClosure(new CString(label, t), new CString(sender.getName(), t), cargs,
+				Mixed fret = closure.executeCallable(null, t, new CString(label, t), new CString(sender.getName(), t), cargs,
 						new CArray(t) // reserved for an obgen style command array
 				);
 				if(fret instanceof CBoolean) {

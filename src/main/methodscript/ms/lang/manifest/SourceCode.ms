@@ -10,7 +10,7 @@
  * Links to a project's public source code system. This can be integrated with in the
  * GUI, if there is support for the specified source control system.
  */
-interface ms.lang.manifest.SourceCode {
+public interface ms.lang.manifest.SourceCode {
 
     /**
      * The name of the source control system. While this is a freeform string, so that new

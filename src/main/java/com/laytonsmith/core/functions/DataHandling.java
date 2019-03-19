@@ -3374,7 +3374,7 @@ public class DataHandling {
 				Mixed[] vals = new Mixed[args.length - 1];
 				System.arraycopy(args, 0, vals, 0, args.length - 1);
 				CClosure closure = (CClosure) args[args.length - 1];
-				return closure.executeClosure(vals);
+				return closure.executeCallable(vals);
 			} else {
 				throw new CRECastException("Only a closure (created from the closure function) can be sent to execute()", t);
 			}
@@ -3443,7 +3443,7 @@ public class DataHandling {
 			}
 
 			try {
-				return closure.executeClosure(vals);
+				return closure.executeCallable(vals);
 			} finally {
 				cEnv.SetCommandSender(originalSender);
 				gEnv.SetLabel(originalLabel);

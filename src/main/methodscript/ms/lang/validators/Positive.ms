@@ -10,6 +10,6 @@
  * Indicates that the value is not allowed to be negative, or zero.
  */
 @{Target(value: DECLARATION, type: number)}
-annotation ms.lang.validators.Positive {
+public annotation ms.lang.validators.Positive {
 
 }

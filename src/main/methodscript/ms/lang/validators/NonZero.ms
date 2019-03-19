@@ -11,6 +11,6 @@
  * to be zero.
  */
 @{Target(value: DECLARATION, type: number)}
-annotation ms.lang.validators.NonZero {
+public annotation ms.lang.validators.NonZero {
 
 }

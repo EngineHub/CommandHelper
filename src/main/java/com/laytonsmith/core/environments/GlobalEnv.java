@@ -27,6 +27,8 @@ import com.laytonsmith.core.taskmanager.TaskManager;
 import com.laytonsmith.persistence.PersistenceNetwork;
 
 import java.io.File;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -78,7 +80,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * @param profiler The Profiler to use
 	 * @param network The pre-configured PersistenecNetwork object to use
 	 * @param root The root working directory to use
-	 * @param profiles The SQL SQLProfiles object to use
+	 * @param profiles The Profiles object to use
 	 * @param taskManager The TaskManager object to use
 	 */
 	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistenceNetwork network,
@@ -97,6 +99,71 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		}
 		this.profiles = profiles;
 		this.taskManager.setObject(taskManager);
+	}
+
+	/**
+	 * Thrown if one of the no-op classes is used.
+	 */
+	public static class GlobalEnvNoOpException extends RuntimeException {
+		public GlobalEnvNoOpException(String message) {
+			super(message);
+		}
+	}
+
+	/**
+	 * When constructing a GlobalEnv in meta circumstances, it may be helpful to provide
+	 * a no-op execution queue. This value is set up for that purpose. However, it's
+	 * not truly no-op, as an exception is thrown if any method in the interface are
+	 * used, as this points to a situation where something is being called that isn't
+	 * compatible with a no op execution.
+	 */
+	public static final ExecutionQueue NO_OP_EXECUTION_QUEUE
+			= GetErrorNoOp(ExecutionQueue.class, "NO_OP_EXECUTION_QUEUE");
+
+	/**
+	 * When constructing a GlobalEnv in meta circumstances, it may be helpful to provide
+	 * a no-op profiler. This value is set up for that purpose. It is
+	 * truly no-op, and no exception is thrown if a method in the interface is
+	 * used.
+	 */
+	public static final Profiler NO_OP_PROFILER = Profiler.FakeProfiler();
+
+	/**
+	 * When constructing a GlobalEnv in meta circumstances, it may be helpful to provide
+	 * a no-op persistence network. This value is set up for that purpose. However, it's
+	 * not truly no-op, as an exception is thrown if any method in the interface are
+	 * used, as this points to a situation where something is being called that isn't
+	 * compatible with a no op execution.
+	 */
+	public static final PersistenceNetwork NO_OP_PN = GetErrorNoOp(PersistenceNetwork.class, "NO_OP_PN");
+
+	/**
+	 * When constructing a GlobalEnv in meta circumstances, it may be helpful to provide
+	 * a no-op Profiles object. This value is set up for that purpose. However, it's
+	 * not truly no-op, as an exception is thrown if any method in the interface are
+	 * used, as this points to a situation where something is being called that isn't
+	 * compatible with a no op execution.
+	 */
+	public static final Profiles NO_OP_PROFILES = GetErrorNoOp(Profiles.class, "NO_OP_PROFILES");
+
+	/**
+	 * When constructing a GlobalEnv in meta circumstances, it may be helpful to provide
+	 * a no-op profiler. This value is set up for that purpose. It is
+	 * truly no-op, and no exception is thrown if a method in the interface is
+	 * used.
+	 */
+	public static final TaskManager NO_OP_TASK_MANAGER = GetNoOp(TaskManager.class);
+
+	private static <T> T GetErrorNoOp(Class<T> iface, String identifier) {
+		return (T) Proxy.newProxyInstance(GlobalEnv.class.getClassLoader(),
+				new Class[]{iface}, (Object proxy, Method method, Object[] args) -> {
+					throw new GlobalEnvNoOpException(identifier);
+				});
+	}
+
+	private static <T> T GetNoOp(Class<T> iface) {
+		return (T) Proxy.newProxyInstance(GlobalEnv.class.getClassLoader(),
+				new Class[]{iface}, (Object proxy, Method method, Object[] args) -> null);
 	}
 
 	public ExecutionQueue GetExecutionQueue() {

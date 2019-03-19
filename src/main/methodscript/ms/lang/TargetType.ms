@@ -10,7 +10,7 @@
  * These are mostly used in the @{Target} annotation, and define the location
  * on which a given annotation is valid.
  */
-enum ms.lang.TargetType {
+public enum ms.lang.TargetType {
     /**
      * A CLASSTYPE is anything that creates a new object type, including
      * annotations, enums, interfaces, and others.

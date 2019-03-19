@@ -2,6 +2,7 @@ package com.laytonsmith.database;
 
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.core.ProfilesImpl;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -51,7 +52,7 @@ public class ProfilesTest {
 				+ "		<password>password2</password>"
 				+ "	</profile>"
 				+ "</profiles>";
-		Profiles profiles = new Profiles(good);
+		Profiles profiles = new ProfilesImpl(good);
 
 	}
 

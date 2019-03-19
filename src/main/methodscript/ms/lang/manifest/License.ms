@@ -11,7 +11,7 @@ use ms.lang.validators;
 /**
  * Represents a license that the source code is released under.
  */
-interface ms.lang.manifest.License {
+public interface ms.lang.manifest.License {
     /**
      * The name of the license.
      */

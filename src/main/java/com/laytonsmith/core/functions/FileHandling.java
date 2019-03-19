@@ -303,7 +303,7 @@ public class FileHandling {
 
 						@Override
 						public void run() {
-							callback.executeClosure(new Mixed[]{cret, cex});
+							callback.executeCallable(new Mixed[]{cret, cex});
 						}
 					});
 				}

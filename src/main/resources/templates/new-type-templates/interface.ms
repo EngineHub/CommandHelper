@@ -1,3 +1,3 @@
-interface %s {
+public interface %s {
 
 }

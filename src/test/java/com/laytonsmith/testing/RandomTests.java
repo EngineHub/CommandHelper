@@ -40,7 +40,7 @@ import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import org.bukkit.entity.Player;
 import org.junit.Before;
@@ -327,7 +327,7 @@ public class RandomTests {
 			ConnectionMixinFactory.ConnectionMixinOptions options;
 			options = new ConnectionMixinFactory.ConnectionMixinOptions();
 			options.setWorkingDirectory(new File("."));
-			PersistenceNetwork network = new PersistenceNetwork("**=json://persistence.json", new URI("default"), options);
+			PersistenceNetworkImpl network = new PersistenceNetworkImpl("**=json://persistence.json", new URI("default"), options);
 			ReflectionUtils.set(GlobalEnv.class, g, "persistenceNetwork", network);
 			Run("store_value('t.test1', 'test')\n"
 					+ "store_value('t.test2', 'test')\n"
