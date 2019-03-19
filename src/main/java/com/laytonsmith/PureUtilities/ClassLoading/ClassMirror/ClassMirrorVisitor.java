@@ -1,5 +1,7 @@
 package com.laytonsmith.PureUtilities.ClassLoading.ClassMirror;
 
+import com.laytonsmith.PureUtilities.Common.ArrayUtils;
+import com.laytonsmith.PureUtilities.Common.ClassUtils;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -226,5 +228,52 @@ public class ClassMirrorVisitor extends ClassVisitor {
 			mirror.addAnnotationValue(name, value);
 			super.visit(name, value);
 		}
+
+		@Override
+		public AnnotationVisitor visitArray(String name) {
+			return new ArrayAnnotationVisitor(name, mirror);
+		}
+
+	}
+
+	private static class ArrayAnnotationVisitor extends AnnotationVisitor {
+		private final AnnotationMirror mirror;
+		private final List<Object> types = new ArrayList<>();
+		private final String name;
+		private Class<?> type;
+
+		public ArrayAnnotationVisitor(String name, AnnotationMirror mirror) {
+			super(ASM5);
+			this.name = name;
+			this.mirror = mirror;
+		}
+
+
+
+		@Override
+		public void visit(String name, Object value) {
+			type = value.getClass();
+			if(value instanceof Type) {
+				value = ((Type) value).getClassName();
+				type = String.class;
+			}
+			types.add(value);
+			super.visit(name, value);
+		}
+
+		@Override
+		public void visitEnd() {
+			// The underlying type is necessarily null if we did not get any values. This should still be ok,
+			// but code needs to check for this value in array types.
+			Object array = null;
+			if(type != null) {
+				array = ArrayUtils.cast(types.toArray(new Object[types.size()]),
+					ClassUtils.getArrayClassFromType(type));
+			}
+			mirror.addAnnotationValue(name, array);
+			super.visitEnd();
+		}
+
+
 	}
 }

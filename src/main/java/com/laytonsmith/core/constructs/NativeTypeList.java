@@ -259,9 +259,11 @@ public class NativeTypeList {
 	/**
 	 * For documentation and other purposes, it is useful to have a default, invalid instance of the underlying type.
 	 * For enums and non-enums, the process of instantiating the value is different (MEnums are actually valid as is).
-	 *
+	 * <p>
 	 * This method abstracts away the difference, and you can call this instead. This should never be exposed to user
 	 * code, to actually construct an instance of an object, but should only be used internally.
+	 * <p>
+	 * If you need a reference to a native class, it may be easier to use {@link #getNativeInvalidInstanceForUse}.
 	 * @param fqcn
 	 * @return
 	 * @throws java.lang.ClassNotFoundException
@@ -275,6 +277,30 @@ public class NativeTypeList {
 			return getNativeEnumType(fqcn);
 		} else { // Not abstract
 			return ReflectionUtils.instantiateUnsafe(c);
+		}
+	}
+
+	/**
+	 * For documentation and other purposes, it is useful to have a default, invalid instance of the underlying type.
+	 * For enums and non-enums, the process of instantiating the value is different (MEnums are actually valid as is).
+	 * <p>
+	 * This method abstracts away the difference, and you can call this instead. This should never be exposed to user
+	 * code, to actually construct an instance of an object, but should only be used internally.
+	 * <p>
+	 * Unlike {@link #getInvalidInstanceForUse(com.laytonsmith.core.FullyQualifiedClassName)} this rewraps the
+	 * underlying exception as an Error, because native classes should always be found.
+	 * @param clazz
+	 * @return
+	 */
+	public static Mixed getNativeInvalidInstanceForUse(Class<? extends Mixed> clazz) {
+		if(clazz.getAnnotation(typeof.class) == null) {
+			throw new RuntimeException(clazz + " is missing typeof annotation!");
+		}
+		try {
+			return getInvalidInstanceForUse(FullyQualifiedClassName
+					.forFullyQualifiedClass(clazz.getAnnotation(typeof.class).value()));
+		} catch (ClassNotFoundException e) {
+			throw new Error(e);
 		}
 	}
 

@@ -1,6 +1,7 @@
 package com.laytonsmith.PureUtilities.Common;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,6 +54,9 @@ public class ClassUtils {
 	 * @throws ClassNotFoundException
 	 */
 	private static Class forCanonicalName(String className, boolean useInitializer, boolean initialize, ClassLoader classLoader) throws ClassNotFoundException {
+		if("void".equals(className)) {
+			return void.class;
+		}
 		className = StringUtils.replaceLast(className, "\\.\\.\\.", "[]");
 		//Of course primitives all need to be dealt with specially.
 		int arrays = 0;
@@ -176,6 +180,23 @@ public class ClassUtils {
 			return "C";
 		} else {
 			return "L" + clazz.getName().replace('.', '/') + ";";
+		}
+	}
+
+	/**
+	 * Generically and dynamically returns the array class type for the given class type. The dynamic equivalent of
+	 * sending {@code String.class} and getting {@code String[].class}. Works with array types as well.
+	 * @param clazz The class to convert to an array type.
+	 * @return The array type of the input class.
+	 */
+	public static Class<?> getArrayClassFromType(Class<?> clazz) {
+		Objects.requireNonNull(clazz);
+		try {
+			return Class.forName("[" + getJVMName(clazz).replace('/', '.'));
+		} catch (ClassNotFoundException ex) {
+			// This cannot naturally happen, as we are simply creating an array type for a real type that has
+			// clearly already been loaded.
+			throw new NoClassDefFoundError(ex.getMessage());
 		}
 	}
 

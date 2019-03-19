@@ -305,7 +305,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 			MCEntity temp = BukkitConvertor.BukkitGetCorrectEntity(entity);
 			Static.InjectEntity(temp);
 			try {
-				closure.executeClosure(new CString(entity.getUniqueId().toString(), Target.UNKNOWN));
+				closure.executeCallable(null, Target.UNKNOWN, new CString(entity.getUniqueId().toString(), Target.UNKNOWN));
 			} finally {
 				Static.UninjectEntity(temp);
 			}

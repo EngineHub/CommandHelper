@@ -1,4 +1,4 @@
-package com.laytonsmith.core.natives.interfaces;
+package com.laytonsmith.core.objects;
 
 /**
  *

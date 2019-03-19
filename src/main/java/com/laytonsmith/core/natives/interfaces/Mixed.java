@@ -1,5 +1,7 @@
 package com.laytonsmith.core.natives.interfaces;
 
+import com.laytonsmith.core.objects.ObjectType;
+import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
@@ -8,6 +10,7 @@ import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.objects.AccessModifier;
 import java.util.Set;
 
 /**
@@ -85,6 +88,12 @@ public interface Mixed extends Cloneable, Documentation {
 	 * @return
 	 */
 	public Set<ObjectModifier> getObjectModifiers();
+
+	/**
+	 * Gets the access level for this object, i.e. public, private...
+	 * @return
+	 */
+	public AccessModifier getAccessModifier();
 
 	/**
 	 * Returns the containing class for this object. If null is returned, that means this is a top level class.

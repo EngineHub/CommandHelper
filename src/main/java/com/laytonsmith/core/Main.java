@@ -32,6 +32,7 @@ import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.Meta;
 import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import com.laytonsmith.tools.ExampleLocalPackageInstaller;
 import com.laytonsmith.tools.Interpreter;
@@ -492,7 +493,7 @@ public class Main {
 			} else if(mode == PRINT_DB_MODE) {
 				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 				options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
-				PersistenceNetwork pn = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
+				PersistenceNetwork pn = new PersistenceNetworkImpl(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 						new URI("sqlite://" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile().getCanonicalPath()
 								//This replace is required on Windows.
 								.replace('\\', '/')), options);
@@ -1045,7 +1046,7 @@ public class Main {
 		@Override
 		public ArgumentParser getArgumentParser() {
 			return ArgumentParser.GetParser()
-				.addDescription("Creates a blank script in the specified location with the appropriate permissions,"
+				.addDescription("Creates a blank, executable script in the specified location with the appropriate permissions,"
 						+ " having the correct hashbang, and ready to be executed. If"
 						+ " the specified file already exists, it will refuse to create it, unless --force is set.")
 				.addArgument(new ArgumentBuilder()
@@ -1079,6 +1080,62 @@ public class Main {
 						+ "\tdescription: " + ";" + li
 						+ ">" + li + li, f, true);
 			}
+		}
+
+	}
+
+	@tool("new-type")
+	public static class NewTypeTool extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+					.addDescription("Creates a new type. This command should only be run at the root of a classLibrary,"
+							+ " and given the class name, will create the appropriate folder structure (as necessary)"
+							+ " as well as providing a default file prepopulated with a reasonable template. If the"
+							+ " file already exists, will refuse to continue.")
+					.addArgument(new ArgumentBuilder()
+						.setDescription("The template type to use")
+						.setUsageName("template")
+						.setOptional()
+						.setName('t', "type")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
+						.setDefaultVal("class"))
+					.addArgument(new ArgumentBuilder()
+						.setDescription("The class name to create. This should be the fully qualified class"
+								+ " name.")
+						.setUsageName("fully qualified class name")
+						.setRequiredAndDefault()
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			String clazz = parsedArgs.getStringArgument();
+			String template = parsedArgs.getStringArgument('t').toLowerCase();
+			List<String> validTemplates = Arrays.asList("annotation", "class", "enum", "interface");
+			if(!validTemplates.contains(template)) {
+				System.err.println("Invalid template type specified. Valid template types are: "
+						+ validTemplates.toString());
+			}
+			String classSimpleName;
+			{
+				String[] split = clazz.split("\\.");
+				classSimpleName = split[split.length - 1];
+			}
+			String author = StaticLayer.GetConvertor().GetUser(null);
+			String created = new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString("yyyy-MM-dd", Target.UNKNOWN)).val();
+			File file = new File(clazz.replace(".", "/") + ".ms");
+			if(file.exists()) {
+				System.err.println("File " + file + " already exists. Refusing to continue.");
+				System.exit(1);
+			}
+			file.getParentFile().mkdirs();
+			String allTemplate = StreamUtils.GetResource("/templates/new-type-templates/all.ms");
+			String typeTemplate = StreamUtils.GetResource("/templates/new-type-templates/" + template + ".ms");
+			allTemplate = String.format(allTemplate, classSimpleName, author, created, clazz);
+			typeTemplate = String.format(typeTemplate, clazz);
+			FileUtil.write(allTemplate + typeTemplate, file);
 		}
 
 	}

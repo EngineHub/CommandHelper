@@ -316,7 +316,7 @@ public final class Interpreter {
 		CClosure c = (CClosure) env.getEnv(GlobalEnv.class).GetCustom("cmdline_prompt");
 		if(c != null) {
 			try {
-				String val = c.executeClosure(CBoolean.get(inShellMode)).val();
+				String val = c.executeCallable(CBoolean.get(inShellMode)).val();
 				return Static.MCToANSIColors(val) + TermColors.RESET;
 			} catch (ConfigRuntimeException ex) {
 				ConfigRuntimeException.HandleUncaughtException(ex, env);

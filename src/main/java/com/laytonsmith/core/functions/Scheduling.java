@@ -289,7 +289,7 @@ public class Scheduling {
 						ProfilePoint p = environment.getEnv(GlobalEnv.class).GetProfiler().start("Executing timeout"
 								+ " with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
 						try {
-							c.executeClosure();
+							c.executeCallable();
 						} finally {
 							p.stop();
 						}
@@ -380,7 +380,7 @@ public class Scheduling {
 						ProfilePoint p = environment.getEnv(GlobalEnv.class).GetProfiler().start("Executing timeout"
 								+ " with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
 						try {
-							c.executeClosure();
+							c.executeCallable();
 						} finally {
 							p.stop();
 						}
@@ -852,7 +852,7 @@ public class Scheduling {
 													@Override
 													public void run() {
 														try {
-															f.job.executeClosure();
+															f.job.executeCallable();
 														} catch (ConfigRuntimeException ex) {
 															ConfigRuntimeException.HandleUncaughtException(ex, f.job.getEnv());
 														}

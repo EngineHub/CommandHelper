@@ -1029,7 +1029,7 @@ public class Cmdline {
 
 								@Override
 								public Object call() throws Exception {
-									stdout.executeClosure(new CString(sbout.getObject(), t));
+									stdout.executeCallable(new CString(sbout.getObject(), t));
 									return null;
 								}
 							});
@@ -1055,7 +1055,7 @@ public class Cmdline {
 
 								@Override
 								public Object call() throws Exception {
-									stderr.executeClosure(new CString(sberr.getObject(), t));
+									stderr.executeCallable(new CString(sberr.getObject(), t));
 									return null;
 								}
 							});
@@ -1103,7 +1103,7 @@ public class Cmdline {
 
 									@Override
 									public Object call() throws Exception {
-										exit.executeClosure(new CInt(exitCode, t));
+										exit.executeCallable(new CInt(exitCode, t));
 										return null;
 									}
 								});

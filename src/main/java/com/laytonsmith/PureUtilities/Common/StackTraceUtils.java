@@ -13,6 +13,11 @@ public final class StackTraceUtils {
 	private StackTraceUtils() {
 	}
 
+	/**
+	 * Gets the stack trace of an exception, as if it were being printed to the console.
+	 * @param t The Throwable instance. May have a causedBy reason.
+	 * @return
+	 */
 	public static String GetStacktrace(Throwable t) {
 		final Writer result = new StringWriter();
 		final PrintWriter printWriter = new PrintWriter(result);
@@ -28,6 +33,12 @@ public final class StackTraceUtils {
 		return result.toString();
 	}
 
+	/**
+	 * Returns the name of the class that called the method that is using this code. I.e., if
+	 * the method a in class A calls the method b in class B, and the method b in class B
+	 * calls getCallingClass(), then a reference to class A would be returned.
+	 * @return
+	 */
 	public static Class<?> getCallingClass() {
 		try {
 			// This is the class that called us. Calls may bounce around that class,

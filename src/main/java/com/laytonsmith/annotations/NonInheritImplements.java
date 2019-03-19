@@ -27,7 +27,17 @@ import java.lang.reflect.Proxy;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface NonInheritImplements {
+	/**
+	 * The interface that this class implements
+	 * @return
+	 */
 	Class<?> value();
+
+	/**
+	 * If the interface has generic types, these can be specified here, in order.
+	 * @return
+	 */
+	Class[] parameterTypes() default {};
 
 
 	/**

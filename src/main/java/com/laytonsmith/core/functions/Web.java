@@ -520,7 +520,7 @@ public class Web {
 
 		private void executeFinish(CClosure closure, Mixed arg, Target t, Environment environment) {
 			try {
-				Mixed ret = closure.executeClosure(new Mixed[]{arg});
+				Mixed ret = closure.executeCallable(new Mixed[]{arg});
 				//Just ignore this if it's returning void. Otherwise, warn.
 				//TODO: Eventually, this should be taggable as a compile error
 				if(!(ret instanceof CVoid)) {

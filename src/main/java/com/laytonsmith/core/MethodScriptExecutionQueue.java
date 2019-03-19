@@ -1,6 +1,6 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.ExecutionQueue;
+import com.laytonsmith.PureUtilities.ExecutionQueueImpl;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
@@ -15,7 +15,7 @@ import com.laytonsmith.core.functions.Echoes;
  * A subclass of ExecutionQueue, which knows how to handle uncaught exceptions in a MethodScript specific way.
  *
  */
-public class MethodScriptExecutionQueue extends ExecutionQueue {
+public class MethodScriptExecutionQueue extends ExecutionQueueImpl {
 
 	GlobalEnv env;
 

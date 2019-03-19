@@ -1,5 +1,7 @@
 package com.laytonsmith.core.natives.interfaces;
 
+import com.laytonsmith.core.objects.ObjectType;
+import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
 import com.laytonsmith.PureUtilities.Version;
@@ -8,6 +10,7 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.objects.AccessModifier;
 import java.net.URL;
 import java.util.EnumSet;
 import java.util.Set;
@@ -65,7 +68,12 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 
 	@Override
 	public Set<ObjectModifier> getObjectModifiers() {
-		return EnumSet.of(ObjectModifier.PUBLIC);
+		return EnumSet.noneOf(ObjectModifier.class);
+	}
+
+	@Override
+	public AccessModifier getAccessModifier() {
+		return AccessModifier.PUBLIC;
 	}
 
 	@Override
@@ -108,7 +116,7 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 	 */
 	@Override
 	public final CClassType typeof() {
-		return Construct.typeof(this);
+		return CClassType.get(getName());
 	}
 
 	@Override

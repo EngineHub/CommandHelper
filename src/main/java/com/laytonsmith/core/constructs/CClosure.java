@@ -3,6 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.Callable;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
@@ -29,7 +30,7 @@ import java.util.logging.Logger;
  *
  */
 @typeof("ms.lang.closure")
-public class CClosure extends Construct {
+public class CClosure extends Construct implements Callable {
 
 	public static final long serialVersionUID = 1L;
 	protected ParseTree node;
@@ -114,6 +115,22 @@ public class CClosure extends Construct {
 	}
 
 	/**
+	 * Shorthand for calling
+	 * {@link #executeCallable(com.laytonsmith.core.environments.Environment,
+	 * com.laytonsmith.core.constructs.Target, com.laytonsmith.core.natives.interfaces.Mixed...)}
+	 * with a null environment, and Target.UNKNOWN. Since closures don't need these parameters,
+	 * this is easier, however, Callables do not have this.
+	 * @param values
+	 * @return
+	 * @throws ConfigRuntimeException
+	 * @throws ProgramFlowManipulationException
+	 * @throws CancelCommandException
+	 */
+	public Mixed executeCallable(Mixed... values) {
+		return executeCallable(null, Target.UNKNOWN, values);
+	}
+
+	/**
 	 * Executes the closure, giving it the supplied arguments. {@code values} may be null, which means that no arguments
 	 * are being sent.
 	 *
@@ -132,13 +149,18 @@ public class CClosure extends Construct {
 	 * }
 	 * </pre>
 	 *
+	 * @param env Unused, since the environment is fixed at time of definition,
+	 * not at execution time.
+	 * @param t The target at which the closure is executed.
 	 * @param values The values to be passed to the closure
 	 * @return The return value of the closure, or VOID if nothing was returned
 	 * @throws ConfigRuntimeException If any call inside the closure causes a CRE
 	 * @throws ProgramFlowManipulationException If any ProgramFlowManipulationException is thrown (other than a
 	 * LoopManipulationException) within the closure
 	 */
-	public Mixed executeClosure(Mixed... values) throws ConfigRuntimeException, ProgramFlowManipulationException, CancelCommandException {
+	@Override
+	public Mixed executeCallable(Environment env, Target t, Mixed... values)
+			throws ConfigRuntimeException, ProgramFlowManipulationException, CancelCommandException {
 		try {
 			execute(values);
 		} catch (FunctionReturnException e) {

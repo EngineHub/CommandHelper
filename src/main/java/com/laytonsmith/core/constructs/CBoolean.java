@@ -3,7 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.natives.interfaces.ObjectModifier;
+import com.laytonsmith.core.objects.ObjectModifier;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -138,7 +138,7 @@ public final class CBoolean extends CPrimitive implements Cloneable {
 
 	@Override
 	public Set<ObjectModifier> getObjectModifiers() {
-		return EnumSet.of(ObjectModifier.FINAL, ObjectModifier.PUBLIC);
+		return EnumSet.of(ObjectModifier.FINAL);
 	}
 
 	@Override

@@ -82,7 +82,7 @@ public class Marquee {
 
 							@Override
 							public Object call() throws Exception {
-								callback.executeClosure(new Mixed[]{new CString(portion, t)});
+								callback.executeCallable(new Mixed[]{new CString(portion, t)});
 								return null;
 							}
 						});

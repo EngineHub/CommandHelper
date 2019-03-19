@@ -49,7 +49,7 @@ import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import com.laytonsmith.core.taskmanager.TaskManager;
+import com.laytonsmith.core.taskmanager.TaskManagerImpl;
 import com.laytonsmith.persistence.DataSourceException;
 import java.io.File;
 import java.io.IOException;
@@ -2182,7 +2182,7 @@ public final class MethodScriptCompiler {
 					if(Implementation.GetServerType().equals(Implementation.Type.BUKKIT)) {
 						CommandHelperPlugin plugin = CommandHelperPlugin.self;
 						GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler, plugin.persistenceNetwork,
-								MethodScriptFileLocations.getDefault().getConfigDirectory(), plugin.profiles, new TaskManager());
+								MethodScriptFileLocations.getDefault().getConfigDirectory(), plugin.profiles, new TaskManagerImpl());
 						env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
 					} else {
 						env = Static.GenerateStandaloneEnvironment(false);

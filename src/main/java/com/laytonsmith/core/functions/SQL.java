@@ -34,6 +34,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.Profiles;
+import com.laytonsmith.core.ProfilesImpl;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRESQLException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -154,7 +155,7 @@ public class SQL {
 					for(String key : ((CArray) args[0]).stringKeySet()) {
 						data.put(key, ((CArray) args[0]).get(key, t).val());
 					}
-					profile = Profiles.getProfile(data);
+					profile = ProfilesImpl.getProfile(data);
 				} else {
 					Profiles profiles = environment.getEnv(GlobalEnv.class).getProfiles();
 					profile = profiles.getProfileById(args[0].val());
@@ -501,7 +502,7 @@ public class SQL {
 
 						@Override
 						public void run() {
-							closure.executeClosure(new Mixed[]{cret, cex});
+							closure.executeCallable(new Mixed[]{cret, cex});
 						}
 					});
 				}

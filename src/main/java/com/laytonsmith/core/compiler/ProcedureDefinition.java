@@ -8,7 +8,7 @@ import com.laytonsmith.core.constructs.DocComment;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import com.laytonsmith.core.natives.interfaces.ObjectType;
+import com.laytonsmith.core.objects.ObjectType;
 import java.util.List;
 
 /**

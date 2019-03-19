@@ -1,24 +1,29 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.annotations.NonInheritImplements;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import com.laytonsmith.core.natives.interfaces.ObjectType;
+import com.laytonsmith.core.objects.ObjectType;
 import java.util.AbstractSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Set;
+import com.laytonsmith.annotations.ExposedElement;
 
 /**
  *
  *
  */
 @typeof("ms.lang.string")
+@NonInheritImplements(value = POJOConversion.class, parameterTypes = {CString.class, String.class})
 public class CString extends CPrimitive implements Cloneable,
 		com.laytonsmith.core.natives.interfaces.Iterable {
 
@@ -178,5 +183,30 @@ public class CString extends CPrimitive implements Cloneable,
 					+ " with the logger-preferences.ini file.", t);
 		}
 		return val().length() > 0;
+	}
+
+	@ExposedElement
+	public String toLowerCase(Environment env, Target t, Locale locale) {
+		return val().toLowerCase(locale);
+	}
+
+	@ExposedElement
+	public String toUpperCase(Environment env, Target t, Locale locale) {
+		return val().toUpperCase(locale);
+	}
+
+	@ExposedElement
+	public boolean matches(
+			Environment env, Target t,
+			String regex) {
+		return val().matches(regex);
+	}
+
+	public CString construct(String s, Target t) {
+		return new CString(s, t);
+	}
+
+	public String convert() {
+		return val();
 	}
 }
