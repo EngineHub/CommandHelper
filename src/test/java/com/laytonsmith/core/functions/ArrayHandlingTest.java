@@ -308,6 +308,8 @@ public class ArrayHandlingTest {
 	public void testArrayRemoveValues() throws Exception {
 		Run("assign(@array, array(1, 2, 2, 3)) array_remove_values(@array, 2) msg(@array)", fakePlayer);
 		verify(fakePlayer).sendMessage("{1, 3}");
+		Run("@array = array(array(1, 2, 3)); array_remove_values(@array, array(1, 2, 3)); msg(@array);", fakePlayer);
+		verify(fakePlayer).sendMessage("{}");
 	}
 
 	@Test

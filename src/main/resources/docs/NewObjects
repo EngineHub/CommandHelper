@@ -166,7 +166,7 @@ object B, which extends A.
 %%CODE|
 class B extends A {
     public B(){
-        @super();
+        super();
     }
     public method2(int @b){
         return(@b + 3);
@@ -230,7 +230,7 @@ Examining the constructor, there is the new function, <code>super()</code>,
 which is used to call the parent's constructor. <code>super</code> is optional, 
 however, in the case where a call to <code>super()</code> is omitted, it is 
 implied to have been called at the top of the child's constructor. If 
-<code>@super()</code> is called, it must be called ''before'' manipulating the 
+<code>super()</code> is called, it must be called ''before'' manipulating the 
 parent's members, even transiently, otherwise it is a compiler error. For 
 instance, consider the following:
 
@@ -257,7 +257,7 @@ class A {
 class B extends A {
     public B(){
         int @var = getA();
-        @super(); // Compile error
+        super(); // Compile error
     }
 }
 %%
@@ -284,7 +284,7 @@ class A {
 
 class B extends A {
 	public B(int @b) {
-		// @super(@b);
+		// super(@b);
 		// No call to super is required, it will be added automatically for us
 		// at the top, because we are defining a constructor with the same signature
 		// as one defined in A. It may be necessary to make a call to the superclass
@@ -297,7 +297,7 @@ class B extends A {
 		// In this case, we are defining a constructor that accepts no
 		// argument. But there is no constructor defined with no arguments
 		// in A, so we must manually call it ourselves, and provide a value.
-		@super(0);
+		super(0);
 	}
 }
 
@@ -315,7 +315,7 @@ the definition:
 @{Inject}
 public A(){
 	if(@self != mixed) {
-		@super();
+		super();
 	}
 }
 %>
@@ -381,7 +381,7 @@ it is not possible to call a static method by dereferencing an instance. If you 
 a pure utility class, that only has methods (no members), then consider using
 a namespace instead.
 
-==== <code>@this</code>, <code>@self</code>, and <code>@super</code> variables ====
+==== <code>@this</code>, <code>@self</code> variables, and <code>super</code> keyword ====
 There are two variables that are specially defined within code inside a class,
 <code>@this</code> and <code>@self</code>. <code>@this</code> refers to the
 current instance of the class, and while not usually necessary, can be used in
