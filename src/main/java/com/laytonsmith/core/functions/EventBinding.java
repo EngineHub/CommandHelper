@@ -191,7 +191,7 @@ public class EventBinding {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 5) {
 				throw new CREInsufficientArgumentsException("bind accepts 5 or more parameters", t);
 			}

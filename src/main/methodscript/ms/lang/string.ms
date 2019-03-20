@@ -4,6 +4,7 @@
     author: cailin;
     created: 2019-03-15;
     description: The file containing the type ms.lang.string;
+    compilerOptions: UltraStrict;
 >
 
 use ms.lang.util;
@@ -13,6 +14,16 @@ use ms.lang.util;
  * @since 3.0.1
  */
 public native class ms.lang.string {
+
+    /**
+     * Creates a new, empty string.
+     */
+    public native string();
+
+    /**
+     * Creates a new string, equal to the provided string. The two instances will be equal, but not ref_equal.
+     */
+    public native string(string @copy);
 	
     /**
      * Returns a new string that has been lowercased, per the current locale definition of "lowercase".

@@ -124,7 +124,7 @@ public class Math {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			return null;
 		}
@@ -270,7 +270,7 @@ public class Math {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			return null;
 		}
@@ -677,7 +677,7 @@ public class Math {
 		}
 
 		@Override
-		public Mixed optimize(Target t, Mixed... args) throws ConfigCompileException {
+		public Mixed optimize(Target t, Environment env, Mixed... args) throws ConfigCompileException {
 			if(args[0] instanceof IVariable) {
 				return null;
 			} else {
@@ -788,7 +788,7 @@ public class Math {
 		}
 
 		@Override
-		public Mixed optimize(Target t, Mixed... args) throws ConfigCompileException {
+		public Mixed optimize(Target t, Environment env, Mixed... args) throws ConfigCompileException {
 			if(args[0] instanceof IVariable) {
 				return null;
 			} else {
@@ -908,7 +908,7 @@ public class Math {
 		}
 
 		@Override
-		public Mixed optimize(Target t, Mixed... args) throws ConfigCompileException {
+		public Mixed optimize(Target t, Environment env, Mixed... args) throws ConfigCompileException {
 			if(args[0] instanceof IVariable) {
 				return null;
 			} else {
@@ -1030,7 +1030,7 @@ public class Math {
 		}
 
 		@Override
-		public Mixed optimize(Target t, Mixed... args) throws ConfigCompileException {
+		public Mixed optimize(Target t, Environment env, Mixed... args) throws ConfigCompileException {
 			if(args[0] instanceof IVariable) {
 				return null;
 			} else {

@@ -287,7 +287,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Mixed optimize(Target t, Mixed... args) throws ConfigCompileException {
+		public Mixed optimize(Target t, Environment env, Mixed... args) throws ConfigCompileException {
 			if(args.length == 0) {
 				throw new CRECastException("Argument 1 of array_get must be an array", t);
 			}
@@ -878,7 +878,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 2) {
 				throw new ConfigCompileException(getName() + " must have 2 or more arguments", t);
 			}
@@ -1655,7 +1655,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 2) {
 				if(!Construct.IsDynamicHelper(children.get(1).getData())) {
 					try {

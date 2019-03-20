@@ -380,7 +380,7 @@ public class Environment {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The function get_block_at() is deprecated. Use get_block().", t);
 			return null;
 		}
@@ -500,7 +500,7 @@ public class Environment {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The function set_block_at() is deprecated. Use set_block().", t);
 			return null;
 		}
@@ -846,7 +846,7 @@ public class Environment {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 
 			if(children.size() < 1) {
@@ -1496,7 +1496,7 @@ public class Environment {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 
 			if(children.size() < 2) {

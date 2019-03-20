@@ -168,7 +168,7 @@ public class DataHandling {
 		FileOptions lastFileOptions = null;
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			//We need to check here to ensure that
 			//we aren't getting a slice in a label, which is used in switch
 			//statements, but doesn't make sense here.
@@ -359,7 +359,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed optimize(Target t, Mixed... args) throws ConfigCompileException {
+		public Mixed optimize(Target t, Environment env, Mixed... args) throws ConfigCompileException {
 			//We can't really optimize, but we can check that we are
 			//getting an ivariable.
 			int offset = 0;
@@ -376,7 +376,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			//Check for too few arguments
 			if(children.size() < 2) {
 				return null;
@@ -513,7 +513,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			//In for(@i = 0, @i < @x, @i++, ...), the @i++ is more optimally written as ++@i, but
 			//it is commonplace to use postfix operations, so if the condition is in fact that simple,
 			//let's reverse it.
@@ -958,7 +958,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 2) {
 				throw new ConfigCompileException("Invalid number of arguments passed to " + getName(), t);
 			}
@@ -1443,7 +1443,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 1) {
 				if(children.get(0).isDynamic()) {
 					//This is absolutely a bad design, if there is a variable here
@@ -2668,7 +2668,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 1) {
 				throw new CREInsufficientArgumentsException("Expecting at least one argument to " + getName(), t);
 			}
@@ -2726,7 +2726,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			//If they hardcode the name, that's fine, because the variables may just be the only thing that's variable.
 			return null;
 		}
@@ -4041,7 +4041,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() != 1) {
 				throw new ConfigCompileException(getName() + " expects only one argument", t);
 			}
@@ -4274,7 +4274,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			// There are two specific cases here where we will give more precise error messages.
 			// If it's a string, yell at them
 			if(children.get(1).getData() instanceof CString) {

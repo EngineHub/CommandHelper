@@ -1,9 +1,13 @@
 package com.laytonsmith.core.objects;
 
+import com.laytonsmith.annotations.ExposedElement;
+import com.laytonsmith.annotations.MEnum;
+
 /**
  *
  * @author cailin
  */
+@MEnum("ms.lang.ObjectModifier")
 public enum ObjectModifier {
 	/**
 	 * A final class is one that cannot be extended by subclasses. Only a non-abstract class can use this keyword, as
@@ -20,5 +24,11 @@ public enum ObjectModifier {
 	 * error for a class to be both final and abstract in user code, though this restriction is not enforced for system
 	 * level code (which is taken advantage of by enums, so that ms.lang.enum cannot be subclassed or instantiated).
 	 */
-	ABSTRACT;
+	ABSTRACT,
+	/**
+	 * A native class maps to a class defined in the java code. This modifier is required on the class if any of the
+	 * methods or fields are defined as native. Additionally, the signatures of the methods and fields that are defined
+	 * in this class must match the elements tagged with the {@link ExposedElement} annotations, or it will be an error.
+	 */
+	NATIVE;
 }

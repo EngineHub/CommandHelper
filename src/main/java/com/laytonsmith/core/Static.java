@@ -23,6 +23,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -1261,7 +1262,7 @@ public final class Static {
 				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork, platformFolder,
 				new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile()), new TaskManagerImpl());
 		gEnv.SetLabel(GLOBAL_PERMISSION);
-		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
+		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment(), new CompilerEnvironment());
 	}
 
 	public static Environment GenerateStandaloneEnvironment() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {

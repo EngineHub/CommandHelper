@@ -1,5 +1,6 @@
 package com.laytonsmith.core.objects;
 
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -16,10 +17,11 @@ import java.util.Set;
 public class ElementDefinition {
 	private final AccessModifier accessModifier;
 	private final Set<ElementModifier> elementModifiers;
+	private final CClassType definedIn;
 	private final CClassType type;
 	private final String name;
 
-	private final Mixed defaultValue;
+	private final ParseTree defaultValue;
 	private java.lang.reflect.Method nativeMethod = null;
 	private Field nativeField = null;
 	private final com.laytonsmith.core.Method method;
@@ -30,8 +32,9 @@ public class ElementDefinition {
 	 * {@link #setNativeMethod(java.lang.reflect.Method)} immediately after construction.
 	 * @param accessModifier The access modifier of the element
 	 * @param elementModifiers The modifiers of the element
+	 * @param definedIn The class that this element is defined in
 	 * @param type The type of the element (variable type for fields, return type
-	 * for methods)
+	 * for methods, java null for constructors)
 	 * @param name The name of the element (should start with @ if this is a
 	 * variable declaration).
 	 * @param defaultValue The default value, if this is a field, and null if this
@@ -45,14 +48,14 @@ public class ElementDefinition {
 	public ElementDefinition(
 			AccessModifier accessModifier,
 			Set<ElementModifier> elementModifiers,
+			CClassType definedIn,
 			CClassType type,
 			String name,
-			Mixed defaultValue,
+			ParseTree defaultValue,
 			com.laytonsmith.core.Method method
 	) {
 		Objects.requireNonNull(accessModifier);
 		Objects.requireNonNull(elementModifiers);
-		Objects.requireNonNull(type);
 		Objects.requireNonNull(name);
 		if(defaultValue == null && method == null) {
 			throw new NullPointerException("Either defaultValue must be"
@@ -64,6 +67,7 @@ public class ElementDefinition {
 		}
 		this.accessModifier = accessModifier;
 		this.elementModifiers = elementModifiers;
+		this.definedIn = definedIn;
 		this.type = type;
 		this.name = name;
 		this.defaultValue = defaultValue;
@@ -147,14 +151,18 @@ public class ElementDefinition {
 
 	/**
 	 * The default value of the element. This will be {@link CNull#UNDEFINED} if this was a property of the class with
-	 * no assignment at all, and {@link CNull#NULL} if it was defined as null. For methods, this should be the actual
-	 * Callable instance.
-	 *
+	 * no assignment at all, and {@link CNull#NULL} if it was defined as null. For methods, this will be java null.
+	 * <p>
+	 * Because this is the prototype of the element, we can't simply define this as a Mixed, we need
+	 * to evaluate the prototypical value when we instantiate the object. Therefore, the ParseTree is stored here. For
+	 * atomic values, it's ok to just pull them out and use them, but for others, you must invoke the ParseTree to get
+	 * the value.
+	 * <p>
 	 * Iff this is a native type, this will this return (java) null, though that fact should not be relied on,
 	 * use {@link #isNative()} to determine that for sure.
 	 * @return
 	 */
-	public Mixed getDefaultValue() {
+	public ParseTree getDefaultValue() {
 		return defaultValue;
 	}
 

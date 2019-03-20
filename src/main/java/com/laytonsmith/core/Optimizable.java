@@ -1,7 +1,9 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Function;
@@ -151,10 +153,13 @@ public interface Optimizable extends Function {
 	 * ConfigCompileException.
 	 *
 	 * @param t
+	 * @param env The environment. The only guaranteed useable environment is the {@link CompilerEnvironment}.
 	 * @param args
 	 * @return
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 */
-	public Mixed optimize(Target t, Mixed... args) throws ConfigRuntimeException, ConfigCompileException;
+	public Mixed optimize(Target t, Environment env, Mixed... args)
+			throws ConfigRuntimeException, ConfigCompileException;
 
 	/**
 	 * If the function indicates it can optimize dynamic values, this method is called. It may also throw a compile
@@ -162,11 +167,14 @@ public interface Optimizable extends Function {
 	 * the default).
 	 *
 	 * @param t
+	 * @param env The environment. The only guaranteed useable environment is the {@link CompilerEnvironment}.
 	 * @param children The children that are being passed to this function
 	 * @param fileOptions The file options for the top level function
 	 * @return
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 */
-	public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException;
+	public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+			throws ConfigCompileException, ConfigRuntimeException;
 
 	/**
 	 * Does custom linking in a given function. This is called if the {@link OptimizationOption#CUSTOM_LINK} option is
@@ -176,6 +184,7 @@ public interface Optimizable extends Function {
 	 *
 	 * @param t
 	 * @param children
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 */
 	public void link(Target t, List<ParseTree> children) throws ConfigCompileException;
 

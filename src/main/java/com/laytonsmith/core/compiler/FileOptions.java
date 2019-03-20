@@ -44,6 +44,10 @@ public final class FileOptions {
 	private final Set<String> requiredExtensions;
 	@Option("Compiler Options")
 	private final Set<CompilerOption> compilerOptions;
+	@Option("Copyright information")
+	private final String copyright;
+	@Option("Distribution License Information")
+	private final String license;
 
 	private final Map<String, String> rawOptions;
 	//TODO: Make this non-public once this is all finished.
@@ -58,6 +62,8 @@ public final class FileOptions {
 		description = getDefault(parsedOptions, "description", "").trim();
 		requiredExtensions = Collections.unmodifiableSet(parseSet(getDefault(parsedOptions, "requiredextensions", "")));
 		compilerOptions = parseEnumSet(getDefault(parsedOptions, "compileroptions", ""), CompilerOption.class);
+		copyright = getDefault(parsedOptions, "copyright", "").trim();
+		license = getDefault(parsedOptions, "license", "").trim();
 	}
 
 	private String getDefault(Map<String, String> map, String key, String defaultIfNone) {
@@ -187,6 +193,22 @@ public final class FileOptions {
 	}
 
 	/**
+	 * Gets the license that this file is released under. This is not used programmatically, and is only for reference.
+	 * @return
+	 */
+	public String getLicense() {
+		return license;
+	}
+
+	/**
+	 * Gets the copyright data that pertains to this file. This is not used programmatically, and is only for reference.
+	 * @return
+	 */
+	public String getCopyright() {
+		return copyright;
+	}
+
+	/**
 	 * The specification for FileOptions states that options that are not recognized are not an error. Given that,
 	 * it should be possible to retrieve these unknown options from the list of options. In general, fully supported
 	 * options should be accessed using the other methods in this class, but extensions and some other code may benefit
@@ -226,7 +248,14 @@ public final class FileOptions {
 
 	public static enum CompilerOption implements Documentation {
 		AllowAmbiguousCommands("Disables compiler validation for ambigous commands (only applicable to MSA files).",
-			MSVersion.V3_3_4);
+			MSVersion.V3_3_4),
+		UltraStrict("Provides an extra strict programming environment. Nitpicky details may be covered in ultra strict"
+				+ " mode, and will turn almost all warnings into compiler errors. This will also apply all lint"
+				+ " settings that would be warnings into errors as well, and is generally the most pedantic"
+				+ " version of strict mode available. This is used in native code, but is not necessarily recommened,"
+				+ " since it offers no flexibility, however, code that passes ultra strict mode will generally be"
+				+ " considered \"ideal\" code, and enshrines the standard code layout. Warnings that"
+				+ " are explicitely suppressed are not errors in this mode.", MSVersion.V3_3_4);
 
 		private final String docs;
 		private final Version version;

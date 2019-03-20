@@ -49,6 +49,7 @@ public abstract class AbstractFunction implements Function {
 	 *
 	 * @param t
 	 * @param env
+	 * @param parent
 	 * @param nodes
 	 * @return
 	 */
@@ -82,10 +83,12 @@ public abstract class AbstractFunction implements Function {
 	 * Just return null by default. Most functions won't get to this anyways, since canOptimize is returning false.
 	 *
 	 * @param t
+	 * @param env
 	 * @param args
 	 * @return
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 */
-	public Mixed optimize(Target t, Mixed... args) throws ConfigCompileException {
+	public Mixed optimize(Target t, Environment env, Mixed... args) throws ConfigCompileException {
 		return null;
 	}
 
@@ -95,10 +98,14 @@ public abstract class AbstractFunction implements Function {
 	 * case where it can optimize anyways, even if some values are undetermined at the moment.
 	 *
 	 * @param t
+	 * @param env
 	 * @param children
+	 * @param fileOptions
 	 * @return
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 */
-	public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+	public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+			throws ConfigCompileException, ConfigRuntimeException {
 		return null;
 	}
 
@@ -193,7 +200,8 @@ public abstract class AbstractFunction implements Function {
 	 * @return
 	 */
 	protected String getBundledDocs(Map<String, DocGenTemplates.Generator> map) throws GenerateException {
-		String template = StreamUtils.GetString(AbstractFunction.class.getResourceAsStream("/functionDocs/" + getName()));
+		String template = StreamUtils.GetString(AbstractFunction.class.getResourceAsStream("/functionDocs/"
+				+ getName()));
 		if(map == null) {
 			map = new HashMap<>();
 		}

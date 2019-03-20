@@ -116,7 +116,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			for(ParseTree child : children) {
 				if(child.getData() instanceof CLabel) {
@@ -204,7 +204,7 @@ public class StringHandling {
 		public static final String STRING = new DataHandling._string().getName();
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			for(ParseTree child : children) {
 				if(child.getData() instanceof CLabel) {
@@ -1528,7 +1528,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 2) {
 				throw new ConfigCompileException(getName() + " expects 2 or more argument", t);
 			}
@@ -1796,12 +1796,12 @@ public class StringHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 1) {
 				throw new ConfigCompileException(getName() + " expects at least 1 argument", t);
 			}
 			children.add(0, new ParseTree(CNull.NULL, fileOptions)); // Add a default locale to the arguments.
-			return super.optimizeDynamic(t, children, fileOptions);
+			return super.optimizeDynamic(t, env, children, fileOptions);
 		}
 
 		@Override

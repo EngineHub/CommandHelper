@@ -5,9 +5,12 @@
  */
 package com.laytonsmith.core.objects;
 
+import com.laytonsmith.annotations.MEnum;
+
 /**
  * An AccessModifier describes the state of
  */
+@MEnum("ms.lang.AccessModifier")
 public enum AccessModifier {
 		/**
 	 * A public class is one that can be accessed from any other class.

@@ -4,6 +4,7 @@
     author: cailin;
     created: 2019-03-15;
     description: The file containing the type ms.lang.validators.ValidRegex;
+    compilerOptions: UltraStrict;
 >
 
 /**

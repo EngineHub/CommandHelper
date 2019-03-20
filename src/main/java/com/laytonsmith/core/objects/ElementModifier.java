@@ -1,23 +1,29 @@
 package com.laytonsmith.core.objects;
 
+import com.laytonsmith.annotations.MEnum;
+
 /**
  * These are the list of modifers that are valid on an Element (i.e. property or method).
  */
+@MEnum("ms.lang.ElementModifier")
 public enum ElementModifier {
 	/**
-	 * A final class is one that cannot be extended by subclasses. Only a non-abstract class can use this keyword, as
-	 * interfaces and abstract classes must be extended/implemented for its existence to make sense.
+	 * A final method is one that cannot be overridden in subclasses.
 	 */
 	FINAL,
 	/**
-	 * A static class is one that is not tied to the containing class's instance scope, but is tied to the static scope.
-	 * This in not useable in top level classes, as it wouldn't make sense otherwise.
+	 * A static element is one that is not tied to the containing class's instance scope, but is tied to the static
+	 * scope. It is available by dereferencing the ClassType with the :: operator.
 	 */
 	STATIC,
 	/**
-	 * An abstract class is one that cannot be instantiated directly, only non-abstract subclasses can be. It is an
-	 * error for a class to be both final and abstract in user code, though this restriction is not enforced for system
-	 * level code.
+	 * An abstract method is one that is not defined in the class. Only abstract classes may contain these
+	 * methods. This is not allowed on fields.
 	 */
-	ABSTRACT;
+	ABSTRACT,
+	/**
+	 * A native element is one whose value is drawn from the native code. This is only valid in a class that is itself
+	 * marked as native.
+	 */
+	NATIVE;
 }

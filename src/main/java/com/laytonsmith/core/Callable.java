@@ -10,7 +10,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 /**
  * A Callable represents something that is executable.
  */
-public interface Callable {
+public interface Callable extends Mixed {
 
 	/**
 	 * Executes the callable, giving it the supplied arguments. {@code values} may be null, which means that no

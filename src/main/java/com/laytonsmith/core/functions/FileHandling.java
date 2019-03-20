@@ -16,7 +16,6 @@ import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
@@ -37,13 +36,11 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import com.laytonsmith.persistence.DataSourceException;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -189,15 +186,9 @@ public class FileHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.get(0).isDynamic()) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded paths.", t);
-			}
-			Environment env;
-			try {
-				env = Static.GenerateStandaloneEnvironment();
-			} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
-				throw new ConfigCompileException(ex.getMessage(), t, ex);
 			}
 			String ret = new read().exec(t, env, children.get(0).getData()).val();
 			ParseTree tree = new ParseTree(new CString(ret, t), fileOptions);

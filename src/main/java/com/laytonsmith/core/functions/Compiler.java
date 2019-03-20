@@ -141,7 +141,7 @@ public class Compiler {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> list, FileOptions fileOptions) throws ConfigCompileException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> list, FileOptions fileOptions) throws ConfigCompileException {
 			return optimizeSpecial(list, true);
 		}
 
@@ -631,7 +631,7 @@ public class Compiler {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree node;
 			if(children.isEmpty()) {
 				node = new ParseTree(CVoid.VOID, fileOptions);
@@ -662,7 +662,7 @@ public class Compiler {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			throw new ConfigCompileException("Unexpected use of braces", t);
 		}
 	}
@@ -719,7 +719,7 @@ public class Compiler {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() != 1) {
 				throw new ConfigCompileException(getName() + " can only take one parameter", t);
 			}

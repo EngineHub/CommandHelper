@@ -634,7 +634,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, getName() + " is deprecated for can_enchant_item()", t);
 			return null;
@@ -810,7 +810,7 @@ public class Enchantments {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 1
 					&& (children.get(0).getData() instanceof CString || children.get(0).getData() instanceof CInt)) {

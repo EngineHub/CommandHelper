@@ -28,19 +28,19 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl {
 	/**
 	 * A constant is a construct that is defined in source like ${this}. The value must be passed in at compile time.
 	 */
-	private final Map<String, Construct> constants = new HashMap<String, Construct>();
+	private final Map<String, Construct> constants = new HashMap<>();
 
 	/**
 	 * A list of included parse trees. These likely will have come from other files, but the compilation result should
 	 * have been cached.
 	 */
-	private final List<ParseTree> includes = new ArrayList<ParseTree>();
+	private final List<ParseTree> includes = new ArrayList<>();
 
 	/**
 	 * A list of assigned vars are kept here, so when in strict mode, if a variable hasn't been declared yet, it will be
 	 * a compiler error.
 	 */
-	private final Stack<Set<String>> knownVars = new Stack<Set<String>>();
+	private final Stack<Set<String>> knownVars = new Stack<>();
 
 	private final ObjectDefinitionTable objectDefinitionTable = ObjectDefinitionTable.GetBlankInstance();
 
@@ -58,7 +58,7 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl {
 	}
 
 	public void pushVariableStack() {
-		knownVars.push(new HashSet<String>());
+		knownVars.push(new HashSet<>());
 	}
 
 	public void popVariableStack() {
@@ -83,12 +83,18 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl {
 	}
 
 	public List<ParseTree> getIncludes() {
-		return new ArrayList<ParseTree>(includes);
+		return new ArrayList<>(includes);
 	}
 
 	@Override
+	@SuppressWarnings("CloneDoesntCallSuperClone")
 	public EnvironmentImpl clone() throws CloneNotSupportedException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		// There should always only be one CompilerEnvironment.
+		return this;
+	}
+
+	public ObjectDefinitionTable getObjectDefinitionTable() {
+		return this.objectDefinitionTable;
 	}
 
 }

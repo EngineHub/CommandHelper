@@ -1,11 +1,9 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.breakable;
 import com.laytonsmith.annotations.nolinking;
 import com.laytonsmith.annotations.unbreakable;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
@@ -30,7 +28,6 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.constructs.Variable;
-import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -49,11 +46,7 @@ import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import com.laytonsmith.core.taskmanager.TaskManagerImpl;
-import com.laytonsmith.persistence.DataSourceException;
 import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1697,8 +1690,8 @@ public final class MethodScriptCompiler {
 		Stack<List<Procedure>> procs = new Stack<>();
 		procs.add(new ArrayList<>());
 		processKeywords(tree);
-		optimizeAutoconcats(tree, compilerErrors);
-		optimize(tree, procs, compilerErrors);
+		optimizeAutoconcats(tree, environment, compilerErrors);
+		optimize(tree, environment, procs, compilerErrors);
 		link(tree, compilerErrors);
 		checkLabels(tree, compilerErrors);
 		checkBreaks(tree, compilerErrors);
@@ -1946,15 +1939,15 @@ public final class MethodScriptCompiler {
 	 * @param root
 	 * @param compilerExceptions
 	 */
-	private static void optimizeAutoconcats(ParseTree root, Set<ConfigCompileException> compilerExceptions) {
+	private static void optimizeAutoconcats(ParseTree root, Environment env, Set<ConfigCompileException> compilerExceptions) {
 		for(ParseTree child : root.getChildren()) {
 			if(child.hasChildren()) {
-				optimizeAutoconcats(child, compilerExceptions);
+				optimizeAutoconcats(child, env, compilerExceptions);
 			}
 		}
 		if(root.getData() instanceof CFunction && root.getData().val().equals(__autoconcat__)) {
 			try {
-				ParseTree ret = ((Compiler.__autoconcat__) ((CFunction) root.getData()).getFunction()).optimizeDynamic(root.getTarget(), root.getChildren(), root.getFileOptions());
+				ParseTree ret = ((Compiler.__autoconcat__) ((CFunction) root.getData()).getFunction()).optimizeDynamic(root.getTarget(), env, root.getChildren(), root.getFileOptions());
 				root.setData(ret.getData());
 				root.setChildren(ret.getChildren());
 			} catch (ConfigCompileException ex) {
@@ -2055,7 +2048,7 @@ public final class MethodScriptCompiler {
 	 * @param tree
 	 * @return
 	 */
-	private static void optimize(ParseTree tree, Stack<List<Procedure>> procs, Set<ConfigCompileException> compilerErrors) {
+	private static void optimize(ParseTree tree, Environment env, Stack<List<Procedure>> procs, Set<ConfigCompileException> compilerErrors) {
 		if(tree.isOptimized()) {
 			return; //Don't need to re-run this
 		}
@@ -2100,7 +2093,7 @@ public final class MethodScriptCompiler {
 			// if this function is expecting the precense of soem code element, but the child gets optimized out, this
 			// would cause an error, even though the user did in fact provide code in that section.
 			try {
-				((Optimizable) func).optimizeDynamic(tree.getTarget(), children, tree.getFileOptions());
+				((Optimizable) func).optimizeDynamic(tree.getTarget(), env, children, tree.getFileOptions());
 			} catch (ConfigCompileException ex) {
 				// If an error occurs, we will skip the rest of this element
 				compilerErrors.add(ex);
@@ -2115,7 +2108,7 @@ public final class MethodScriptCompiler {
 		boolean hasIVars = false;
 		for(ParseTree node : children) {
 			if(node.getData() instanceof CFunction) {
-				optimize(node, procs, compilerErrors);
+				optimize(node, env, procs, compilerErrors);
 			}
 
 			if(node.getData() instanceof Construct) {
@@ -2177,19 +2170,19 @@ public final class MethodScriptCompiler {
 			try {
 				ParseTree root = new ParseTree(new CFunction(__autoconcat__, Target.UNKNOWN), tree.getFileOptions());
 				Script fakeScript = Script.GenerateScript(root, "*");
-				Environment env = null;
-				try {
-					if(Implementation.GetServerType().equals(Implementation.Type.BUKKIT)) {
-						CommandHelperPlugin plugin = CommandHelperPlugin.self;
-						GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler, plugin.persistenceNetwork,
-								MethodScriptFileLocations.getDefault().getConfigDirectory(), plugin.profiles, new TaskManagerImpl());
-						env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
-					} else {
-						env = Static.GenerateStandaloneEnvironment(false);
-					}
-				} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException e) {
-					//
-				}
+//				Environment env = null;
+//				try {
+//					if(Implementation.GetServerType().equals(Implementation.Type.BUKKIT)) {
+//						CommandHelperPlugin plugin = CommandHelperPlugin.self;
+//						GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler, plugin.persistenceNetwork,
+//								MethodScriptFileLocations.getDefault().getConfigDirectory(), plugin.profiles, new TaskManagerImpl());
+//						env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
+//					} else {
+//						env = Static.GenerateStandaloneEnvironment(false);
+//					}
+//				} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException e) {
+//					//
+//				}
 				Procedure myProc = DataHandling.proc.getProcedure(tree.getTarget(), env, fakeScript, children.toArray(new ParseTree[children.size()]));
 				procs.peek().add(myProc); //Yep. So, we can move on with our lives now, and if it's used later, it could possibly be static.
 			} catch (ConfigRuntimeException e) {
@@ -2212,7 +2205,7 @@ public final class MethodScriptCompiler {
 			try {
 				ParseTree tempNode;
 				try {
-					tempNode = ((Optimizable) func).optimizeDynamic(tree.getData().getTarget(), tree.getChildren(), tree.getFileOptions());
+					tempNode = ((Optimizable) func).optimizeDynamic(tree.getData().getTarget(), env, tree.getChildren(), tree.getFileOptions());
 				} catch (ConfigRuntimeException e) {
 					//Turn it into a compile exception, then rethrow
 					throw new ConfigCompileException(e);
@@ -2232,7 +2225,7 @@ public final class MethodScriptCompiler {
 					tree.setOptimized(tempNode.isOptimized());
 					tree.setChildren(tempNode.getChildren());
 					Construct.SetWasIdentifierHelper(tree.getData(), tempNode.getData(), false);
-					optimize(tree, procs, compilerErrors);
+					optimize(tree, env, procs, compilerErrors);
 					tree.setOptimized(true);
 					//Some functions can actually make static the arguments, for instance, by pulling up a hardcoded
 					//array, so if they have reversed this, make note of that now
@@ -2276,23 +2269,23 @@ public final class MethodScriptCompiler {
 									+ tree.getData().val(), tree.getData().getTarget()));
 							result = null;
 						} else {
-							// TODO: This should probably be moved up outside of this single method, and create a
-							// compiler environment, which would be used by the functions that can do specific
-							// optimizations, i.e. compile time type checking, etc. This is a good first start
-							// though.
-							Environment env = null;
-							try {
-								env = Static.GenerateStandaloneEnvironment(false);
-							} catch (IOException | DataSourceException | URISyntaxException
-									| Profiles.InvalidProfileException e) {
-								// Print the stacktrace and move on. Not sure how to deal with this right now, or
-								// what cases it would occur in.
-								e.printStackTrace(System.err);
-							}
+//							// TODO: This should probably be moved up outside of this single method, and create a
+//							// compiler environment, which would be used by the functions that can do specific
+//							// optimizations, i.e. compile time type checking, etc. This is a good first start
+//							// though.
+//							Environment env = null;
+//							try {
+//								env = Static.GenerateStandaloneEnvironment(false);
+//							} catch (IOException | DataSourceException | URISyntaxException
+//									| Profiles.InvalidProfileException e) {
+//								// Print the stacktrace and move on. Not sure how to deal with this right now, or
+//								// what cases it would occur in.
+//								e.printStackTrace(System.err);
+//							}
 							result = func.exec(tree.getData().getTarget(), env, constructs);
 						}
 					} else {
-						result = ((Optimizable) func).optimize(tree.getData().getTarget(), constructs);
+						result = ((Optimizable) func).optimize(tree.getData().getTarget(), env, constructs);
 					}
 
 					//If the result is null, it was just a check, it can't optimize further.

@@ -523,7 +523,7 @@ public class Exceptions {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			List<CClassType> types = new ArrayList<>();
 			for(int i = 1; i < children.size() - 1; i += 2) {
 				// TODO: Eh.. should probably move this check into the keyword, since techincally

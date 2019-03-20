@@ -1125,7 +1125,7 @@ public class Scheduling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.get(0).isConst()) {
 				if(children.get(0).getData() instanceof CString) {
 					validateFormat(children.get(0).getData().val(), t);

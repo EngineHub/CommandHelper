@@ -1147,7 +1147,7 @@ public class World {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 1 && children.get(1).getData().val().contains(":")) {
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The 1:1 format is deprecated in spawn_falling_block()", t);

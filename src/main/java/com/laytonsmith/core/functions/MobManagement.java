@@ -258,7 +258,7 @@ public class MobManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The function tame_mob() is deprecated for set_mob_owner().", t);
 			return null;

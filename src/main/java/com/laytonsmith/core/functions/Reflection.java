@@ -15,6 +15,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.compiler.KeywordList;
@@ -42,6 +43,8 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.MEnumTypeValue;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.objects.ObjectDefinition;
+import com.laytonsmith.core.objects.ObjectDefinitionTable;
 import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.PersistenceNetwork;
 
@@ -340,7 +343,7 @@ public class Reflection {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.isEmpty()) {
 				//They are requesting this function's documentation. We can just return a string,
 				//and then it will never actually get called, so we handle it entirely in here.
@@ -715,18 +718,26 @@ public class Reflection {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = new CArray(t);
-			for(FullyQualifiedClassName c : NativeTypeList.getNativeTypeList()) {
-				CClassType cct;
+			ObjectDefinitionTable odt = environment.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
+			for(ObjectDefinition od : odt.getObjectDefinitionSet()) {
 				try {
-					cct = CClassType.get(c);
+					ret.push(CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(od.getClassName())), t);
 				} catch (ClassNotFoundException ex) {
 					throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
 				}
-				if(cct == CNull.TYPE) {
-					continue;
-				}
-				ret.push(cct, t);
 			}
+//			for(FullyQualifiedClassName c : NativeTypeList.getNativeTypeList()) {
+//				CClassType cct;
+//				try {
+//					cct = CClassType.get(c);
+//				} catch (ClassNotFoundException ex) {
+//					throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
+//				}
+//				if(cct == CNull.TYPE) {
+//					continue;
+//				}
+//				ret.push(cct, t);
+//			}
 			return ret;
 		}
 

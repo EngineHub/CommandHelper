@@ -699,7 +699,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 0 && children.get(children.size() - 1).getData() instanceof CString) {
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
@@ -807,7 +807,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 0 && children.get(children.size() - 1).getData() instanceof CString) {
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
@@ -923,7 +923,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
 					&& (children.get(1).getData() instanceof CString || children.get(1).getData() instanceof CInt)) {
@@ -1042,7 +1042,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
 					&& (children.get(1).getData() instanceof CString || children.get(1).getData() instanceof CInt)) {
@@ -1156,7 +1156,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
 					&& (children.get(1).getData() instanceof CString || children.get(1).getData() instanceof CInt)) {
@@ -1273,7 +1273,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
 					&& (children.get(1).getData() instanceof CString || children.get(1).getData() instanceof CInt)) {
@@ -2061,7 +2061,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2) {
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
@@ -2155,7 +2155,7 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 3) {
 				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);

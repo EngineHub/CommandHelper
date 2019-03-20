@@ -105,7 +105,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	public static CClassType get(FullyQualifiedClassName type) throws ClassNotFoundException {
 		assert type != null;
 		if(!CACHE.containsKey(type)) {
-			CACHE.put(type, new CClassType(type, Target.UNKNOWN));
+			CACHE.put(type, new CClassType(type, Target.UNKNOWN, false));
 		}
 		return CACHE.get(type);
 	}
@@ -126,7 +126,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		FullyQualifiedClassName type
 				= FullyQualifiedClassName.forFullyQualifiedClass(StringUtils.Join(t, "|", e -> e.getFQCN()));
 		if(!CACHE.containsKey(type)) {
-			CACHE.put(type, new CClassType(type, Target.UNKNOWN));
+			CACHE.put(type, new CClassType(type, Target.UNKNOWN, false));
 		}
 		return CACHE.get(type);
 	}
@@ -147,12 +147,29 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	/**
+	 * This function defines a brand new class type. This should exclusively be used in a class
+	 * definition scenario, and never when simply looking up an existing class. The created
+	 * CClassType is returned.
+	 * @param fqcn
+	 * @return
+	 */
+	public static CClassType defineClass(FullyQualifiedClassName fqcn) {
+		try {
+			CClassType type = new CClassType(fqcn, Target.UNKNOWN, true);
+			CACHE.put(fqcn, type);
+			return type;
+		} catch (ClassNotFoundException ex) {
+			throw new Error(ex);
+		}
+	}
+
+	/**
 	 *
 	 * @param type This must be the fully qualified string name.
 	 * @param t
 	 */
 	private CClassType(String type, Target t) throws ClassNotFoundException {
-		this(FullyQualifiedClassName.forFullyQualifiedClass(type), t);
+		this(FullyQualifiedClassName.forFullyQualifiedClass(type), t, false);
 	}
 
 	/**
@@ -160,9 +177,10 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 *
 	 * @param type
 	 * @param t
+	 * @param newDefinition If true, this function MUST NOT throw a ClassNotFoundException.
 	 */
 	@SuppressWarnings("ConvertToStringSwitch")
-	private CClassType(FullyQualifiedClassName type, Target t) throws ClassNotFoundException {
+	private CClassType(FullyQualifiedClassName type, Target t, boolean newDefinition) throws ClassNotFoundException {
 		super(type.getFQCN(), ConstructType.CLASS_TYPE, t);
 		isTypeUnion = type.isTypeUnion();
 		fqcn = type;
@@ -174,40 +192,43 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 			types.add(type);
 		}
 
-		boolean found = false;
-		String localFQCN = fqcn.getFQCN();
-		if(localFQCN.equals("auto") || localFQCN.equals("ms.lang.ClassType")) {
-			// If we get here, we are within this class, and calling resolveNativeType won't work,
-			// but anyways, we know we exist, so mark it as found. It is important to note, however,
-			// if we end up defining more magic types within this class, this block needs to be updated.
-			found = true;
-		}
-		// Do this to ensure at construction time that the class really does exist. We can't actually construct
-		// the instance yet, because this might be the stack for the TYPE assignment, which means that this class
-		// is not initialized yet. See the docs for instantiateInvalidType().
-		// This works because we assume that resolveNativeTypes only uses the ClassMirror system. If that assumption
-		// changes, we will need to basically re-implement that ourselves.
-		if(!found) {
-			if(isTypeUnion) {
-				// For type unions, we need to find all component parts
-				boolean foundAllTypeUnion = true;
-				for(FullyQualifiedClassName c : types) {
-					if(null == NativeTypeList.resolveNativeType(c.getFQCN())) {
-						foundAllTypeUnion = false;
-						break;
-					}
-				}
-				if(foundAllTypeUnion) {
-					found = true;
-				}
-			} else {
-				found = null != NativeTypeList.resolveNativeType(fqcn.getFQCN());
+		if(!newDefinition) {
+			boolean found = false;
+			String localFQCN = fqcn.getFQCN();
+			if(localFQCN.equals("auto") || localFQCN.equals("ms.lang.ClassType")) {
+				// If we get here, we are within this class, and calling resolveNativeType won't work,
+				// but anyways, we know we exist, so mark it as found. It is important to note, however,
+				// if we end up defining more magic types within this class, this block needs to be updated.
+				found = true;
 			}
-		}
-		// TODO: When user types are added, we will need to do some more digging here
+			// Do this to ensure at construction time that the class really does exist. We can't actually construct
+			// the instance yet, because this might be the stack for the TYPE assignment, which means that this class
+			// is not initialized yet. See the docs for instantiateInvalidType().
+			// This works because we assume that resolveNativeTypes only uses the ClassMirror system. If that assumption
+			// changes, we will need to basically re-implement that ourselves.
+			if(!found) {
+				if(isTypeUnion) {
+					// For type unions, we need to find all component parts
+					boolean foundAllTypeUnion = true;
+					for(FullyQualifiedClassName c : types) {
+						if(null == NativeTypeList.resolveNativeType(c.getFQCN())) {
+							foundAllTypeUnion = false;
+							break;
+						}
+					}
+					if(foundAllTypeUnion) {
+						found = true;
+					}
+				} else {
+					found = null != NativeTypeList.resolveNativeType(fqcn.getFQCN());
+				}
+			}
+			// TODO: When user types are added, we will need to do some more digging here, and probably need
+			// to pass in the CompilerEnvironment somehow.
 
-		if(!found) {
-			throw new ClassNotFoundException("Could not find class of type " + type);
+			if(!found) {
+				throw new ClassNotFoundException("Could not find class of type " + type);
+			}
 		}
 	}
 

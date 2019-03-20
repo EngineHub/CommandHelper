@@ -41,12 +41,12 @@ public class ObjectDefinition {
 	private final CClassType[] interfaces;
 	private final CClassType containingClass;
 	private final Target definitionTarget;
-	private final Map<String, ElementDefinition> properties;
+	private final Map<String, List<ElementDefinition>> properties;
 
 	public ObjectDefinition(AccessModifier accessModifier, Set<ObjectModifier> objectModifiers, ObjectType objectType,
 			CClassType type,
 			CClassType[] superclasses, CClassType[] interfaces, CClassType containingClass, Target t,
-			Map<String, ElementDefinition> properties, List<MAnnotation> annotations) {
+			Map<String, List<ElementDefinition>> properties, List<MAnnotation> annotations) {
 		this.accessModifier = accessModifier;
 		this.objectModifiers = objectModifiers;
 		this.objectType = objectType;
@@ -205,14 +205,12 @@ public class ObjectDefinition {
 		return definitionTarget;
 	}
 
-	public Map<String, ElementDefinition> getProperties() {
+	public Map<String, List<ElementDefinition>> getElements() {
 		return properties;
 	}
 
 	public List<MAnnotation> getAnnotations() {
 		return annotations;
 	}
-
-
 
 }
