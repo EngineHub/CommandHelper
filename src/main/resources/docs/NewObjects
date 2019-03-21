@@ -392,18 +392,20 @@ have the following code:
 <%CODE|
 	protected @b;
 	
-    public method2(int @b){
-        return(@b + @this->b);
-    }
+	public method2(int @b){
+		return(@b + @this->b);
+	}
 %>
 
 In this case, we must use the @this keyword, as we are naming the method's argument
 <code>@b</code>, and so to differentiate between that and the member variable, we must
 use <code>@this->b</code>. <code>@this->b</code> refers to the member variable, and
-<code>@b</code> refers to the variable that is passed in to the method.
+<code>@b</code> refers to the variable that is passed in to the method, that is,
+the local variable.
 
 <code>@self</code> works in somewhat the same way, but it ALWAYS refers to the class
-that it is used in. To be very precise, <code>@this</code> refers to the current
+that it is used in, whereas <code>@this</code> refers to the instance that the type
+is at runtime. To be very precise, <code>@this</code> refers to the current
 instance of the class, which may be an instance of the current class, or it may be
 an instance of a subclass. However, <code>@self</code> always refers to the current
 class. This can be useful to call a method that is not private, when you want to ensure
@@ -423,7 +425,7 @@ class definition for reflective purposes. It can also be useful when calling sta
 @this::StaticMethod();
 %>
 
-The <code>@super</code> variable refers to the direct superclass. In the above examples,
+The <code>super</code> keyword refers to the direct superclass. In the above examples,
 we used it to call the superclass's constructor, but it can more generally be used to
 refer to an element defined within a superclass.
 
@@ -438,7 +440,7 @@ class A {
 class B {
 	@{Override} // It is good practice to use this annotation, and is required in strict mode
 	public string method() {
-		return(@super->method()->toUpperCase());
+		return(super->method()->toUpperCase());
 	}
 }
 
@@ -489,10 +491,10 @@ instance, assume class B had been defined this way:
 %%CODE|
 class B extends A {
     public B(){
-        A::@super()
+        A::super()
     }
     public method2(int @b){
-        return(A::@super->method2(@b))
+        return(A::super->method2(@b))
     }
 }
 %%
@@ -502,7 +504,7 @@ and A's method2. If there had been several parents, this could be used to
 "un-override" a call, or otherwise explicitely selected a method that had been 
 overriden by multiple children. This is useful outside of diamond inheritance, 
 but is more often used when dealing with multiple inheritance. Note that in the 
-case of @super() constructors, it is always an error to cause a child's 
+case of super() constructors, it is always an error to cause a child's 
 constructor to be invoked before the parent's constructor. Calling a parent's
 method is only valid inside the class, an overridden method is not callable
 from outside of the instance.
@@ -790,14 +792,115 @@ of them, it will become a compile error. Therefore, it is still recommended that
 you fully qualify the package name. Nevertheless, this functionality is available.
 
 === Inner Classes ===
-// TODO
+An inner class is a class that is defined within another class, for instance:
+
+<%CODE|
+class my.project.A {
+	static class B {}
+}
+%>
+
+There are two types of inner classes, however, unlike an outer class, an instance based
+class, and a static class. The above example shows an static inner class being defined.
+
+A static inner class is easier to explain, as it is essentially just a way of further
+containing other classes, and is nearly purely an organizational mechanism. (Though
+there are a few access differences.) The inner class is
+defined as if the outer class is simply a package, so the fully qualified class name of
+B in this example is <code>my.project.A.B</code> and creating a new instance of class B
+works the same as other usual cases: <code>new my.project.A.B();</code>. You can also
+'''use''' the outer class, same as if it were a package, and then no longer need to
+fully qualify the inner class.
+
+<%CODE|
+// If we simply use the actual package, we can do A.B to fully qualify it
+use my.project;
+
+new A.B();
+
+// Or we can use the outer class, and just use the simple name
+use my.project.A;
+
+new B();
+%>
+
+On the other hand, an instance based class is one that can only exist in the context of an instance of the
+parent class. You cannot create a new instance of class B without creating an instance of
+class A, then using that to create the new class B. To define the instance based class,
+leave off the static keyword.
+
+<%CODE|
+class A {
+	class B{}
+}
+%>
+
+In this example, we have to first create a new instance of the outer class, in order to create
+an instance of the inner class. We can dereference the instance of A, and use the new keyword,
+such as this:
+
+<%CODE|
+new A()->new B();
+// Or create it later
+A @a = new A();
+@a->new B();
+%>
+
+Within the class A, in non-static methods, we can create a new instance of the class B
+in the usual manner, since <code>@this</code> is implied. This is the most common use
+of instance classes.
+
+<%CODE|
+class A {
+	class B {}
+	
+	public B newInstanceOfB() {
+		return(new B());
+	}
+}
+
+B @b = new A()->newInstanceOfB();
+%>
+
+Within the inner class, we have access to all elements of the outer class, and vice-versa, 
+including private elements, though an inner static class only has access to the static
+context, and therefore cannot call instance (non-static) elements. 
+However, if it has an instance of the outer class, it may access private elements on the instance.
+
+Inner classes are allowed to create elements named the same as the outer class, therefore it
+is sometimes useful to differentiate between what exactly <code>@this</code> refers to.
+
+<%CODE|
+class A {
+	string @myProperty = "A->myProperty";
+	string @a = "A->a";
+	
+	class B {
+		string @myProperty = "B->myProperty";
+		string @b = "B->b";
+		
+		public void method() {
+			msg(@a); // Definitely refers to A->a
+			msg(@b); // Definitely refers to B->b
+			// Overload! In general, accessing any
+			// class element is the same as using an
+			// implied @this, so both @myProperty
+			// and @this->myProperty refer to the
+			// same thing, B->myProperty.
+			msg(@myProperty); // B->myProperty
+			msg(@this->myProperty); // B->myProperty
+			msg(A::this->myProperty); // A->myProperty
+		}
+	}
+}
+%>
 
 === Class Library ===
 In general, MethodScript prefers to work with classes that are defined in the '''Class \
 Library'''. When using the class library, this prevents complex management of include
 statements, and also provides an easier and more straightforward mechanism of managing
 the classes within the class library, as well as enabling certain features in the compiler
-that expect to know about all classes beforehand. '''Virtual Classes''' are discussed below,
+that expect to know about all classes beforehand. '''Dynamic Classes''' are discussed below,
 but are not expected to be used in normal use. Multiple class libraries may be defined, 
 but they must all be known at compile time, and may not be added to later.
 
@@ -855,8 +958,8 @@ that the dependency fulfillment mechanisms are always able to uniquely identify 
 manifest.json file is created for you when running the system for the first time, but you must
 change the values in it, if you intend on shipping your code, or re-using it in a more modular fashion.
 
-=== Virtual Classes ===
-Virtual classes are classes that are defined not through the class library, but dynamically 
+=== Dynamic Classes ===
+Dynamic classes are classes that are defined not through the class library, but dynamically 
 at runtime. These classes are defined more or less the same, but are not eligible for many
 compiler checks. Things like ExhaustiveVisitors cannot be made to work with these classes,
 they cannot be pre-compiled, and they cannot be used in the Dependency Injection system, among
@@ -866,6 +969,101 @@ sources, such as eval, or even the interpreter). Once loaded, they will work mos
 as if they had been loaded at compile time. Existing, static code cannot reference the
 classes, of course, as they would have already triggered a compile error for not being able
 to find the class, but code that works generically with objects, or if the virtual class
-extends/implements existing classes, this can be useful when doing dynamic things.
+extends/implements existing classes, this can be useful when doing dynamic things. Defining
+a class outside of a class library, then causing it to be loaded will do this.
 
+<!--
+
+TODO Consider if this is actually good.
+
+=== Hot Swapping ===
+Hot swapping is when elements of a class, or indeed, the class itself, are redefined at runtime.
+The unit test framework in part makes use of this to implement mocks and spies, but this functionality
+is available during normal execution as well. Hot swapping is a dangerous mechanism, however,
+and so strict security checks are in place to ensure that the code doing the hot swapping is
+properly authorized to do so. In general, the reflection mechanism
+can be used to "hot swap" field values, so this is not covered in this section. Instead, we
+focus on swapping method code and entire classes.
+
+==== Permissions ====
+Hot swapping must be allowed in the config settings of the system, and if disabled (which is the
+default) the hot swapping mechanism is totally disabled during the non-test runtime. Even if
+enabled, the manifest of the code must request hot swap permissions, and they must be granted
+specifically to the package by the system administrator. (See the manifest section for details.)
+
+If permission is not granted this will cause a SecurityException to be thrown at runtime.
+
+==== Possible Errors ====
+The system in general is somewhat fault tolerant, and will not shut down if a class definition
+is changed in an incompatible way, though the code that was attempting to run will throw
+a IncompatibleClassChangeError if the new ObjectDefinition was changed in an unrecoverable way. This
+Error can be caught, but generally it should be taken as a fatal error, and the system should be
+fully restarted, as it probably will begin to point to a larger cascade of errors. (This is a good
+use case for returning <code>false</code> from {{function|set_uncaught_exception_handler}}.)
+
+It may be possible to manually recover the system, by ensuring all instances of the old ObjectDefinition
+are lost, and that no other code references invalid elements, but it's often times not worth it,
+and rebooting the process is certainly the easiest solution.
+
+What is an example of an incompatible change? If a method changes a previously public method to private,
+code that was previously allowed to call this method will fail. This won't be caught by the compiler,
+as the code that is accessing the new object will have already been compiled without errors.
+
+There are a number of subclasses of the IncompatibleClassChangeError, but they all stem from the same
+underlying problem - something that previously compiled is no longer valid.
+
+==== Full Class Swaps ====
+A full class swap is when the ObjectDefinition is fully replaced at runtime. Existing instances
+of the class will retain the old ObjectDefinition, but new instances will get the new one. It is
+impossible to access the old ObjectDefinition object, but internally, those instances will continue
+on. Doing a full class swap does not restrict what can be done, fields may change, method definitions
+may change, etc.
+
+There are two ways to do a class swap, using the hotswap keyword in the class definition, and defining it in
+a dynamic source, changing the source file.
+
+Original A.ms:
+<%CODE|
+public class A {
+	public void method() {
+		msg("First class A");
+	}
+}
+%>
+
+Modified A.ms:
+<%CODE|
+public class A {
+	public void method() {
+		msg("Modified class A");
+	}
+}
+%>
+
+To "activate" the modified class, use the {{function|hotswap}} function, either from a previously defined
+source, or from a dynamic source, such as a command, etc.
+
+<%CODE|
+A @old = new A();
+@old->method(); // Original class A
+// Now make the changes in the code, and then run
+hotswap(A); // Recompiles A.ms
+@old->method(); // Original class A, since it was instantiated before the hotswap
+A @new = new A();
+@new->method(); // Modified class A, since it was instantiated after the hotswap
+%>
+
+We can also use the hotswap keyword in a class definition. Defining a class twice is a compile error, so
+if we are intentionally re-defining a class definition, we need to specially tell the compiler that, so
+it doesn't think you just accidentally redefined it. Say we are running from the terminal:
+
+<%CODE|
+mscript> class A {} // Define the class originally
+mscript> class A {} // Try to define it again
+COMPILE ERROR: Class A already defined!
+mscript> hotswap class A {} // This is allowed, and the definition is replaced!
+%>
+
+The hotswap class may come from somewhere besides the terminal of course, it can be included, eval'd, etc.
+-->
 {{LearningTrail}}
