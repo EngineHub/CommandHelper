@@ -11,6 +11,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -311,7 +312,8 @@ public class AliasCore {
 				}
 			}
 			CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
-			Environment env = Environment.createEnvironment(gEnv, cEnv);
+			CompilerEnvironment compEnv = new CompilerEnvironment();
+			Environment env = Environment.createEnvironment(gEnv, cEnv, compEnv);
 			if(options.reloadGlobals()) {
 				ProfilePoint clearingGlobals = parent.profiler.start("Clearing globals", LogLevel.VERBOSE);
 				try {
