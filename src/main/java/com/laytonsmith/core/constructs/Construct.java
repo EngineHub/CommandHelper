@@ -578,10 +578,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	public static boolean isInstanceof(Mixed that, Class<? extends Mixed> type) {
-		if(that instanceof CFunction || that instanceof CSymbol) {
+		if(that.getClass().getAnnotation(typeof.class) == null) {
 			// This can happen in cases where we are in the middle of optimization.
 			// This can perhaps be improved in the future, when we store the return
-			// type with the CFunction, but anyways, for now, just return false.
+			// type with the CFunction, and we can at least handle those cases,
+			// but anyways, for now, just return false.
 			return false;
 		}
 		return that.typeof().doesExtend(CClassType.get(type.getAnnotation(typeof.class).value()));
