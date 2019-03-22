@@ -23,7 +23,7 @@ import static com.laytonsmith.PureUtilities.TermColors.prompt;
 import static com.laytonsmith.PureUtilities.TermColors.reset;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
@@ -86,7 +86,7 @@ public class Manager {
 		persistenceNetwork = new PersistenceNetworkImpl(CommandHelperFileLocations.getDefault().getPersistenceConfig(),
 				CommandHelperFileLocations.getDefault().getDefaultPersistenceDBFile().toURI(), options);
 		Installer.Install(CH_DIRECTORY);
-		CHLog.initialize(CH_DIRECTORY);
+		MSLog.initialize(CH_DIRECTORY);
 		profiler = new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile());
 		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistenceNetwork,
 				CH_DIRECTORY, new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile()),

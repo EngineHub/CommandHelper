@@ -21,7 +21,7 @@ import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemEnchantEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -91,7 +91,7 @@ public class InventoryEvents {
 				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("slotitem").val(), 1, event.getTarget());
 					prefilter.put("slotitem", new CString(is.getType().getName(), event.getTarget()));
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The item notation format for the \"slotitem\" prefilter"
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format for the \"slotitem\" prefilter"
 							+ " in " + getName() + " is deprecated. Converted to " + is.getType().getName(), event.getTarget());
 				}
 			}
@@ -233,7 +233,7 @@ public class InventoryEvents {
 				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("cursoritem").val(), 1, event.getTarget());
 					prefilter.put("cursoritem", new CString(is.getType().getName(), event.getTarget()));
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The item notation format for the \"cursoritem\" prefilter"
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format for the \"cursoritem\" prefilter"
 							+ " in " + getName() + " is deprecated. Converted to " + is.getType().getName(), event.getTarget());
 				}
 			}
@@ -811,7 +811,7 @@ public class InventoryEvents {
 			if(prefilter.containsKey("main_hand")) {
 				Mixed type = prefilter.get("main_hand");
 				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The item notation format in the \"main_hand\""
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format in the \"main_hand\""
 							+ " prefilter in " + getName() + " is deprecated.", event.getTarget());
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("main_hand").val(), 1, event.getTarget());
 					prefilter.put("main_hand", new CString(is.getType().getName(), event.getTarget()));
@@ -820,7 +820,7 @@ public class InventoryEvents {
 			if(prefilter.containsKey("off_hand")) {
 				Mixed type = prefilter.get("off_hand");
 				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The item notation format in the \"off_hand\""
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format in the \"off_hand\""
 							+ " prefilter in " + getName() + " is deprecated.", event.getTarget());
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("off_hand").val(), 1, event.getTarget());
 					prefilter.put("off_hand", new CString(is.getType().getName(), event.getTarget()));

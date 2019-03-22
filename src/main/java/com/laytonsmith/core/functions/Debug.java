@@ -354,7 +354,7 @@ public class Debug {
 		public static CVoid doTrace(Target t, Environment environment, Mixed... args) {
 			if(args[0] instanceof IVariable) {
 				IVariable ivar = environment.getEnv(GlobalEnv.class).GetVarList()
-						.get(((IVariable) args[0]).getVariableName(), t);
+						.get(((IVariable) args[0]).getVariableName(), t, environment);
 				Mixed val = ivar.ival();
 				StreamUtils.GetSystemOut().println(ivar.getDefinedType() + " (actual type " + val.typeof() + ") "
 						+ ivar.getVariableName() + ": " + val.val());

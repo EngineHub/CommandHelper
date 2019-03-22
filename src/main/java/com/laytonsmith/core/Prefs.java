@@ -101,8 +101,7 @@ public final class Prefs {
 	}
 
 	/**
-	 * Initializes the global Prefs to this file. A file change watcher is registered at this point as well, and changes
-	 * to the file specified will result in the preferences immediately updated.
+	 * Initializes the global Prefs to this file.
 	 *
 	 * @param f
 	 * @throws IOException

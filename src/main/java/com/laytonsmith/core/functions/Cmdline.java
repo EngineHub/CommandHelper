@@ -14,7 +14,7 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
@@ -586,13 +586,13 @@ public class Cmdline {
 				} catch (Exception e2) {
 					ret = false;
 					if(Prefs.DebugMode()) {
-						CHLog.GetLogger().e(CHLog.Tags.GENERAL, e2, t);
+						MSLog.GetLogger().e(MSLog.Tags.GENERAL, e2, t);
 					}
 				}
 			} catch (Exception e1) {
 				ret = false;
 				if(Prefs.DebugMode()) {
-					CHLog.GetLogger().e(CHLog.Tags.GENERAL, e1, t);
+					MSLog.GetLogger().e(MSLog.Tags.GENERAL, e1, t);
 				}
 			}
 			return CBoolean.get(ret);

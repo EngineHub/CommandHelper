@@ -13,7 +13,7 @@ import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.core.AliasCore;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
@@ -236,7 +236,7 @@ public class ExtensionManager {
 
 				// Skip files already processed.
 				if(done.contains(f)) {
-					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.WARNING,
+					MSLog.GetLogger().Log(MSLog.Tags.EXTENSIONS, LogLevel.WARNING,
 							f.getAbsolutePath() + " contains more than one extension"
 							+ " descriptor. Bug someone about it!", Target.UNKNOWN);
 
@@ -254,7 +254,7 @@ public class ExtensionManager {
 					name += "-" + i;
 					namecount.put(name.toLowerCase(), i++);
 
-					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.WARNING,
+					MSLog.GetLogger().Log(MSLog.Tags.EXTENSIONS, LogLevel.WARNING,
 							f.getAbsolutePath() + " contains a duplicate internally"
 							+ " named extension (" + name + "). Bug someone"
 							+ " about it!", Target.UNKNOWN);
@@ -300,7 +300,7 @@ public class ExtensionManager {
 				if(cd.doesClassExtend(klass, Event.class)
 						|| cd.doesClassExtend(klass, Function.class)) {
 					// We're processing it here instead of above, complain about it.
-					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.WARNING,
+					MSLog.GetLogger().Log(MSLog.Tags.EXTENSIONS, LogLevel.WARNING,
 							f.getAbsolutePath() + " is an old-style extension!"
 							+ " Bug the author to update it to the new extension system!",
 							Target.UNKNOWN);
@@ -365,7 +365,7 @@ public class ExtensionManager {
 					dcl.addJar(jar);
 					cd.addDiscoveryLocation(jar);
 
-					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.DEBUG, "Loaded " + f.getAbsolutePath(), Target.UNKNOWN);
+					MSLog.GetLogger().Log(MSLog.Tags.EXTENSIONS, LogLevel.DEBUG, "Loaded " + f.getAbsolutePath(), Target.UNKNOWN);
 				} catch (MalformedURLException ex) {
 					Static.getLogger().log(Level.SEVERE, null, ex);
 				}
@@ -473,7 +473,7 @@ public class ExtensionManager {
 							// Abstract? Looks like they accidently @api'd
 							// a cheater class. We can't be sure that it is fully
 							// defined, so complain to the console.
-							CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR,
+							MSLog.GetLogger().Log(MSLog.Tags.EXTENSIONS, LogLevel.ERROR,
 									"Class " + c.getName() + " in " + url + " is"
 									+ " marked as an event but is also abstract."
 									+ " Bugs might occur! Bug someone about this!",
@@ -491,7 +491,7 @@ public class ExtensionManager {
 							// Abstract? Looks like they accidently @api'd
 							// a cheater class. We can't be sure that it is fully
 							// defined, so complain to the console.
-							CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR,
+							MSLog.GetLogger().Log(MSLog.Tags.EXTENSIONS, LogLevel.ERROR,
 									"Class " + c.getName() + " in " + url + " is"
 									+ " marked as a function but is also abstract."
 									+ " Bugs might occur! Bug someone about this!",

@@ -14,6 +14,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
@@ -63,7 +64,8 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	public String getName() {
 		typeof to = this.getClass().getAnnotation(typeof.class);
 		if(to == null) {
-			throw new Error("ConfigRuntimeException subtypes must annotate themselves with @typeof, if they are instantiateable.");
+			throw new Error("ConfigRuntimeException subtypes must annotate themselves with @typeof, if they are"
+					+ " instantiateable.");
 		} else {
 			return to.value();
 		}
@@ -125,8 +127,10 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	}
 
 	@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
-	public static AbstractCREException getFromCArray(CArray exception, Target t) throws ClassNotFoundException {
-		FullyQualifiedClassName classType = FullyQualifiedClassName.forName(exception.get("classType", t).val(), t);
+	public static AbstractCREException getFromCArray(CArray exception, Target t, Environment env)
+			throws ClassNotFoundException {
+		FullyQualifiedClassName classType = FullyQualifiedClassName
+				.forName(exception.get("classType", t).val(), t, env);
 		Class<? extends Mixed> clzz = NativeTypeList.getNativeClass(classType);
 		Throwable cause = null;
 		if(exception.get("causedBy", t) instanceof CArray) {

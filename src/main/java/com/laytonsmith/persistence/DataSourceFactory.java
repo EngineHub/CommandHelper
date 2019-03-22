@@ -2,7 +2,7 @@ package com.laytonsmith.persistence;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.annotations.datasource;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
@@ -84,7 +84,7 @@ public class DataSourceFactory {
 				//Warning, for invalid modifiers. This isn't an error, invalid modifiers will just be
 				//ignored, but the user probably meant something else if they're getting this warning,
 				//so we still alert them to the issue.
-				CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.WARNING, e.getMessage(), Target.UNKNOWN);
+				MSLog.GetLogger().Log(MSLog.Tags.PERSISTENCE, LogLevel.WARNING, e.getMessage(), Target.UNKNOWN);
 			}
 			//If the data source is transient, it will populate itself later, as needed.
 			//Otherwise, we can go ahead and populate it now.
@@ -139,7 +139,7 @@ public class DataSourceFactory {
 			try {
 				ds.disconnect();
 			} catch (DataSourceException ex) {
-				CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.WARNING, ex.getMessage(), Target.UNKNOWN);
+				MSLog.GetLogger().Log(MSLog.Tags.PERSISTENCE, LogLevel.WARNING, ex.getMessage(), Target.UNKNOWN);
 			}
 		}
 		DATA_SOURCE_POOL.clear();

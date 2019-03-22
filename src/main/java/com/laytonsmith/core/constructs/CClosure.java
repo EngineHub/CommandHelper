@@ -2,7 +2,8 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Callable;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
@@ -43,7 +44,8 @@ public class CClosure extends Construct implements Callable {
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get("ms.lang.closure");
 
-	public CClosure(ParseTree node, Environment env, CClassType returnType, String[] names, Mixed[] defaults, CClassType[] types, Target t) {
+	public CClosure(ParseTree node, Environment env, CClassType returnType, String[] names, Mixed[] defaults,
+			CClassType[] types, Target t) {
 		super(node != null ? node.toString() : "", ConstructType.CLOSURE, t);
 		this.node = node;
 		this.env = env;
@@ -53,7 +55,7 @@ public class CClosure extends Construct implements Callable {
 		this.returnType = returnType;
 		for(String pName : names) {
 			if(pName.equals("@arguments")) {
-				CHLog.GetLogger().w(CHLog.Tags.COMPILER, "This closure overrides the builtin @arguments parameter", t);
+				MSLog.GetLogger().w(MSLog.Tags.COMPILER, "This closure overrides the builtin @arguments parameter", t);
 				break;
 			}
 		}
@@ -80,9 +82,10 @@ public class CClosure extends Construct implements Callable {
 			}
 			b.append(")");
 		} else if(node.getData() instanceof CString) {
-			CString data = (CString) node.getData();
+			String data = ArgumentValidation.getString(node.getData(), node.getTarget());
 			// Convert: \ -> \\ and ' -> \'
-			b.append("'").append(data.val().replace("\\", "\\\\").replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n").replace("'", "\\'")).append("'");
+			b.append("'").append(data.replace("\\", "\\\\").replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n")
+					.replace("'", "\\'")).append("'");
 		} else if(node.getData() instanceof IVariable) {
 			b.append(((IVariable) node.getData()).getVariableName());
 		} else {
@@ -205,7 +208,8 @@ public class CClosure extends Construct implements Callable {
 					} catch (Exception e) {
 						value = defaults[i].clone();
 					}
-					environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value, getTarget()));
+					environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value,
+							getTarget(), environment));
 				}
 			}
 			boolean hasArgumentsParam = false;
@@ -223,7 +227,8 @@ public class CClosure extends Construct implements Callable {
 						arguments.push(value, node.getData().getTarget());
 					}
 				}
-				environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, node.getData().getTarget()));
+				environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
+						node.getData().getTarget(), environment));
 			}
 
 			ParseTree newNode = new ParseTree(new CFunction("g", getTarget()), node.getFileOptions());
@@ -231,18 +236,20 @@ public class CClosure extends Construct implements Callable {
 			children.add(node);
 			newNode.setChildren(children);
 			try {
-				MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class).GetScript());
+				MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class)
+						.GetScript());
 			} catch (LoopManipulationException e) {
 				//This shouldn't ever happen.
 				LoopManipulationException lme = ((LoopManipulationException) e);
 				Target t = lme.getTarget();
-				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("A " + lme.getName() + "() bubbled up to the top of"
+				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("A "
+						+ lme.getName() + "() bubbled up to the top of"
 						+ " a closure, which is unexpected behavior.", t), environment);
 			} catch (FunctionReturnException ex) {
 				// Check the return type of the closure to see if it matches the defined type
 				// Normal execution.
 				Mixed ret = ex.getReturn();
-				if(!InstanceofUtil.isInstanceof(ret, returnType)) {
+				if(!InstanceofUtil.isInstanceof(ret, returnType, environment)) {
 					throw new CRECastException("Expected closure to return a value of type " + returnType.val()
 							+ " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
 				}
@@ -277,7 +284,8 @@ public class CClosure extends Construct implements Callable {
 
 	@Override
 	public String docs() {
-		return "A closure is a data type that contains executable code. This is similar to a procedure, but the value is first class,"
+		return "A closure is a data type that contains executable code. This is similar to a procedure, but the value"
+				+ " is first class,"
 				+ " and can be stored in variables, and executed.";
 	}
 

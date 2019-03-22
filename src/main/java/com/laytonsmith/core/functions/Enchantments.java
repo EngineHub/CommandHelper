@@ -6,7 +6,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -636,7 +636,7 @@ public class Enchantments {
 		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
-			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, getName() + " is deprecated for can_enchant_item()", t);
+			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, getName() + " is deprecated for can_enchant_item()", t);
 			return null;
 		}
 
@@ -814,7 +814,7 @@ public class Enchantments {
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 1
 					&& (children.get(0).getData() instanceof CString || children.get(0).getData() instanceof CInt)) {
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
 			}
 			return null;
 		}

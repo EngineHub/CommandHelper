@@ -252,7 +252,7 @@ public class Script {
 		Mixed ret = eval(c, env);
 		while(ret instanceof IVariable) {
 			IVariable cur = (IVariable) ret;
-			ret = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget()).ival();
+			ret = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget(), env).ival();
 		}
 		return ret;
 	}
@@ -373,7 +373,8 @@ public class Script {
 					}
 					while(f.preResolveVariables() && ca[i] instanceof IVariable) {
 						IVariable cur = (IVariable) ca[i];
-						ca[i] = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget()).ival();
+						ca[i] = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget(),
+								env).ival();
 					}
 				}
 
@@ -451,7 +452,8 @@ public class Script {
 				Map<String, String> vars = new HashMap<>();
 				for(Mixed cc : args) {
 					if(cc instanceof IVariable) {
-						Mixed ccc = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) cc).getVariableName(), cc.getTarget()).ival();
+						Mixed ccc = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) cc).getVariableName(),
+								cc.getTarget(), env).ival();
 						String vval = ccc.val();
 						if(ccc instanceof CString) {
 							vval = new CString(ccc.val(), Target.UNKNOWN).getQuote();

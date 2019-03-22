@@ -694,7 +694,7 @@ public final class Static {
 			throw new CREFormatException("Invalid item format: " + notation, t);
 		}
 		MCItemStack is = StaticLayer.GetItemStack(mat, qty);
-		CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Item notation is deprecated."
+		MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Item notation is deprecated."
 				+ " Converting '" + notation + "' to '" + is.getType().getName() + "'.", t);
 		return is;
 	}

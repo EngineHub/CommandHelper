@@ -30,12 +30,15 @@ public class CIClosure extends CClosure {
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get("ms.lang.iclosure");
 
-	public CIClosure(ParseTree node, Environment env, CClassType returnType, String[] names, Mixed[] defaults, CClassType[] types, Target t) {
+	public CIClosure(ParseTree node, Environment env, CClassType returnType, String[] names, Mixed[] defaults,
+			CClassType[] types, Target t) {
 		super(node, env, returnType, names, defaults, types, t);
 	}
 
 	@Override
-	public void execute(Mixed... values) throws ConfigRuntimeException, ProgramFlowManipulationException, FunctionReturnException, CancelCommandException {
+	public void execute(Mixed... values)
+			throws ConfigRuntimeException, ProgramFlowManipulationException, FunctionReturnException,
+			CancelCommandException {
 		if(node == null) {
 			return;
 		}
@@ -59,7 +62,8 @@ public class CIClosure extends CClosure {
 					} catch (Exception e) {
 						value = defaults[i].clone();
 					}
-					environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value, getTarget()));
+					environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value,
+							getTarget(), environment));
 				}
 			}
 			boolean hasArgumentsParam = false;
@@ -77,29 +81,32 @@ public class CIClosure extends CClosure {
 						arguments.push(value, node.getData().getTarget());
 					}
 				}
-				environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, node.getData().getTarget()));
+				environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
+						node.getData().getTarget(), environment));
 			}
 
 			ParseTree newNode = new ParseTree(new CFunction("g", getTarget()), node.getFileOptions());
-			List<ParseTree> children = new ArrayList<ParseTree>();
+			List<ParseTree> children = new ArrayList<>();
 			children.add(node);
 			newNode.setChildren(children);
 			try {
-				MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class).GetScript());
+				MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class)
+						.GetScript());
 			} catch (LoopManipulationException e) {
 				// Not normal, but pop anyways
 				stManager.popStackTraceElement();
 				//This shouldn't ever happen.
 				LoopManipulationException lme = ((LoopManipulationException) e);
 				Target t = lme.getTarget();
-				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("A " + lme.getName() + "() bubbled up to the top of"
+				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("A "
+						+ lme.getName() + "() bubbled up to the top of"
 						+ " a closure, which is unexpected behavior.", t), environment);
 			} catch (FunctionReturnException ex) {
 				// Normal. Pop element
 				stManager.popStackTraceElement();
 				// Check the return type of the closure to see if it matches the defined type
 				Mixed ret = ex.getReturn();
-				if(!InstanceofUtil.isInstanceof(ret, returnType)) {
+				if(!InstanceofUtil.isInstanceof(ret, returnType, environment)) {
 					throw new CRECastException("Expected closure to return a value of type " + returnType.val()
 							+ " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
 				}
@@ -129,7 +136,8 @@ public class CIClosure extends CClosure {
 
 	@Override
 	public String docs() {
-		return "An iclosure is an isolated scope closure. This is more efficient than a regular closure, but it doesn't allow"
+		return "An iclosure is an isolated scope closure. This is more efficient than a regular closure, but it"
+				+ " doesn't allow"
 				+ " for access of variables outside of the scope of the closure, other than values passed in.";
 	}
 

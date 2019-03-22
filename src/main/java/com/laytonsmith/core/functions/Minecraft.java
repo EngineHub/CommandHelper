@@ -17,7 +17,7 @@ import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -156,7 +156,7 @@ public class Minecraft {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "data_values() is deprecated.", t);
+			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "data_values() is deprecated.", t);
 			return null;
 		}
 
@@ -379,7 +379,7 @@ public class Minecraft {
 			}
 			if(children.get(0).getData() instanceof CString && children.get(0).getData().val().contains(":")
 					|| ArgumentValidation.isNumber(children.get(0).getData())) {
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Numeric ids are deprecated in max_stack_size()", t);
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Numeric ids are deprecated in max_stack_size()", t);
 			}
 			return null;
 		}
@@ -453,7 +453,7 @@ public class Minecraft {
 			try {
 				e = MCEffect.valueOf(preEff.toUpperCase());
 			} catch (IllegalArgumentException ex) {
-				CHLog.GetLogger().e(CHLog.Tags.GENERAL, "The effect type " + args[1].val() + " is not valid", t);
+				MSLog.GetLogger().e(MSLog.Tags.GENERAL, "The effect type " + args[1].val() + " is not valid", t);
 				return CVoid.VOID;
 			}
 			if(e.equals(MCEffect.STEP_SOUND)) {
@@ -482,7 +482,7 @@ public class Minecraft {
 				try {
 					MCEffect.valueOf(effectName);
 				} catch (IllegalArgumentException ex) {
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The effect type " + effectName + " is not valid", t);
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The effect type " + effectName + " is not valid", t);
 				}
 			}
 			return null;
@@ -1181,7 +1181,7 @@ public class Minecraft {
 				return null;
 			}
 			if(ArgumentValidation.isNumber(children.get(0).getData())) {
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Numeric ids are deprecated in material_info()", t);
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Numeric ids are deprecated in material_info()", t);
 			}
 			return null;
 		}

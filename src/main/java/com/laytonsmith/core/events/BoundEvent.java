@@ -248,11 +248,13 @@ public class BoundEvent implements Comparable<BoundEvent> {
 			for(Map.Entry<String, Mixed> entry : activeEvent.parsedEvent.entrySet()) {
 				ca.set(new CString(entry.getKey(), Target.UNKNOWN), entry.getValue(), Target.UNKNOWN);
 			}
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, ca, Target.UNKNOWN));
+			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, ca, Target.UNKNOWN,
+					env));
 			env.getEnv(GlobalEnv.class).SetEvent(activeEvent);
 			activeEvent.addHistory("Triggering bound event: " + this);
 			try {
-				ProfilePoint p = env.getEnv(GlobalEnv.class).GetProfiler().start("Executing event handler for " + this.getEventName() + " defined at " + this.getTarget(), LogLevel.ERROR);
+				ProfilePoint p = env.getEnv(GlobalEnv.class).GetProfiler().start("Executing event handler for "
+						+ this.getEventName() + " defined at " + this.getTarget(), LogLevel.ERROR);
 				try {
 					this.execute(env, activeEvent);
 				} finally {
@@ -278,7 +280,8 @@ public class BoundEvent implements Comparable<BoundEvent> {
 	public void manual_trigger(CArray event) throws EventException {
 		try {
 			Environment env = originalEnv.clone();
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, event, Target.UNKNOWN));
+			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, event, Target.UNKNOWN,
+					env));
 			Map<String, Mixed> map = new HashMap<>();
 			for(String key : event.stringKeySet()) {
 				map.put(key, event.get(key, Target.UNKNOWN));

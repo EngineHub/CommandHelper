@@ -121,7 +121,8 @@ public class EventBinding {
 					throw new CRECastException("The custom parameters must be ivariables", t);
 				}
 				IVariable cur = (IVariable) var;
-				custom_params.set(env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget()));
+				custom_params.set(env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(),
+						cur.getTarget(), env));
 			}
 			Environment newEnv = env;
 			try {

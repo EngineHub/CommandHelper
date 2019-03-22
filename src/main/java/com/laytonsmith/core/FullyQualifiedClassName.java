@@ -6,9 +6,13 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.objects.ObjectDefinitionNotFoundException;
+import com.laytonsmith.core.objects.ObjectDefinitionTable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -41,10 +45,27 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	 * use forDefaultClass instead, and there will be no code changes required in the future.
 	 * @param unqualified The (potentially) unqualified type.
 	 * @param t The code target.
+	 * @param env The environment, from which the ObjectDefinitionTable for this runtime is pulled,
+	 * which is where classes are looked up.
 	 * @return The fully qualified class name.
 	 * @throws CRECastException If the class type can't be found
 	 */
-	public static FullyQualifiedClassName forName(String unqualified, Target t) throws CRECastException {
+	public static FullyQualifiedClassName forName(String unqualified, Target t, Environment env)
+			throws CRECastException {
+		ObjectDefinitionTable odt = env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
+		try {
+			// Try first, if this is a fully qualified name
+			FullyQualifiedClassName fqcn = new FullyQualifiedClassName(unqualified);
+			odt.get(fqcn);
+			// It is, this would have thrown an exception otherwise
+			return fqcn;
+		} catch (ObjectDefinitionNotFoundException ex) {
+			// nope
+			// TODO
+		}
+		// TODO: This need to be removed eventually, but for now is fine, and is needed to make live code work.
+		// Eventually, however, this should just end with throwing a CastException (or something), because the
+		// class could not be resolved. Native classes should be loaded through the same mechanism as user classes.
 		return forDefaultClasses(unqualified, t);
 	}
 

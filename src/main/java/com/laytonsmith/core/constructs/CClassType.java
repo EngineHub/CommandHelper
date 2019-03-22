@@ -6,10 +6,16 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.MEnumType;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.objects.ObjectDefinition;
+import com.laytonsmith.core.objects.ObjectDefinitionNotFoundException;
+import com.laytonsmith.core.objects.ObjectDefinitionTable;
+import com.laytonsmith.core.objects.UserObject;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -238,7 +244,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * do that in the constructor, we need to lazy load it. We do take pains in the constructor to ensure that there is
 	 * at least no way this will throw a ClassCastException, so given that, we are able to supress that exception here.
 	 */
-	private void instantiateInvalidType() {
+	private void instantiateInvalidType(Environment env) {
 		if(invalidType != UNINITIALIZED) {
 			return;
 		}
@@ -250,13 +256,20 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 			} else if("ms.lang.ClassType".equals(fqcn)) {
 				invalidType = new Mixed[]{this};
 			} else {
-				// TODO: This must change once user types are introduced
+				ObjectDefinitionTable odt = env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
 				invalidType = new Mixed[types.size()];
 				for(int i = 0; i < invalidType.length; i++) {
-					invalidType[i] = NativeTypeList.getInvalidInstanceForUse(this.fqcn);
+					// TODO: For now, we must use this mechanism, since we don't populate the ODT with
+					// all the native classes. But once we do, we should remove this check entirely here.
+					if(NativeTypeList.getNativeTypeList().contains(this.fqcn)) {
+						invalidType[i] = NativeTypeList.getInvalidInstanceForUse(this.fqcn);
+					} else {
+						ObjectDefinition od = odt.get(this.fqcn);
+						invalidType[i] = new UserObject(Target.UNKNOWN, null, env, od, null);
+					}
 				}
 			}
-		} catch (ClassNotFoundException ex) {
+		} catch (ClassNotFoundException | ObjectDefinitionNotFoundException ex) {
 			throw new Error(ex);
 		}
 	}
@@ -385,20 +398,22 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 
 	/**
 	 * Returns the superclasses for the underlying type, not the superclasses for ClassType itself.
+	 * @param env
 	 * @return
 	 */
-	public CClassType[] getSuperclassesForType() {
-		instantiateInvalidType();
+	public CClassType[] getSuperclassesForType(Environment env) {
+		instantiateInvalidType(env);
 		return Stream.of(invalidType).flatMap(e -> Stream.of(e.getSuperclasses()))
 				.collect(Collectors.toSet()).toArray(CClassType.EMPTY_CLASS_ARRAY);
 	}
 
 	/**
 	 *  Returns the interfaces for the underlying type, not the interfaces for ClassType itself.
+	 * @param env
 	 * @return
 	 */
-	public CClassType[] getInterfacesForType() {
-		instantiateInvalidType();
+	public CClassType[] getInterfacesForType(Environment env) {
+		instantiateInvalidType(env);
 		return Stream.of(invalidType).flatMap(e -> Stream.of(e.getInterfaces()))
 				.collect(Collectors.toSet()).toArray(CClassType.EMPTY_CLASS_ARRAY);
 	}

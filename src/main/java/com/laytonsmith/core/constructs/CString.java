@@ -3,7 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.NonInheritImplements;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.Environment;
@@ -178,7 +178,7 @@ public class CString extends CPrimitive implements Cloneable,
 	@Override
 	public boolean getBooleanValue(Target t) {
 		if(val().equals("false")) {
-			CHLog.GetLogger().e(CHLog.Tags.FALSESTRING, "String \"false\" evaluates as true (non-empty strings are"
+			MSLog.GetLogger().e(MSLog.Tags.FALSESTRING, "String \"false\" evaluates as true (non-empty strings are"
 					+ " true). This is most likely not what you meant to do. This warning can globally be disabled"
 					+ " with the logger-preferences.ini file.", t);
 		}

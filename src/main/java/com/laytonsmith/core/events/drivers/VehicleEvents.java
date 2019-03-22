@@ -20,7 +20,7 @@ import com.laytonsmith.abstraction.events.MCVehicleMoveEvent;
 import com.laytonsmith.abstraction.events.MCVehicleDestroyEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -230,7 +230,7 @@ public class VehicleEvents {
 			if(prefilter.containsKey("hittype")) {
 				Mixed type = prefilter.get("hittype");
 				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The 0:0 block format in " + getName()
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The 0:0 block format in " + getName()
 							+ " is deprecated in \"hittype\".", event.getTarget());
 					MCItemStack is = Static.ParseItemNotation(null, type.val(), 1, event.getTarget());
 					prefilter.put("hittype", new CString(is.getType().getName(), event.getTarget()));

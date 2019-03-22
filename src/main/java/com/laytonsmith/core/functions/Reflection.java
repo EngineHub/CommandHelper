@@ -181,7 +181,7 @@ public class Reflection {
 				} else if(args.length == 2) {
 					//The name was provided
 					String name = args[1].val();
-					return env.getEnv(GlobalEnv.class).GetVarList().get(name, t).ival();
+					return env.getEnv(GlobalEnv.class).GetVarList().get(name, t, env).ival();
 				}
 			} else if("line_num".equalsIgnoreCase(param)) {
 				return new CInt(t.line(), t);
@@ -220,7 +220,7 @@ public class Reflection {
 						a.push(CClassType.get(name), t);
 					}
 				} else if(args.length == 2) {
-					FullyQualifiedClassName enumName = FullyQualifiedClassName.forName(args[1].val(), t);
+					FullyQualifiedClassName enumName = FullyQualifiedClassName.forName(args[1].val(), t, env);
 					try {
 						for(MEnumTypeValue v : NativeTypeList.getNativeEnumType(enumName).values()) {
 							a.push(v, t);
@@ -295,7 +295,7 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String element = args[0].val();
 			DocField docField;
 			try {
@@ -306,12 +306,12 @@ public class Reflection {
 			//For now, we have special handling, since functions are actually the only thing that will work,
 			//but eventually this will be a generic interface.
 			if(element.startsWith("@")) {
-				IVariable var = environment.getEnv(GlobalEnv.class).GetVarList().get(element, t);
+				IVariable var = env.getEnv(GlobalEnv.class).GetVarList().get(element, t, env);
 				if(var == null) {
 					throw new CREFormatException("Invalid variable provided: " + element + " does not exist in the current scope", t);
 				}
 			} else if(element.startsWith("_")) {
-				if(!environment.getEnv(GlobalEnv.class).GetProcs().containsKey(element)) {
+				if(!env.getEnv(GlobalEnv.class).GetProcs().containsKey(element)) {
 					throw new CREFormatException("Invalid procedure name provided: " + element + " does not exist in the current scope", t);
 				}
 			} else {

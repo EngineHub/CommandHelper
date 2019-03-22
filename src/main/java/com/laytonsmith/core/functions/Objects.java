@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
@@ -40,6 +41,7 @@ import com.laytonsmith.core.objects.UserObject;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -178,24 +180,46 @@ public class Objects {
 			return (CString) d;
 		}
 
+		private Mixed evaluateMixed(ParseTree data, Target t) {
+			if(data.isDynamic()) {
+				throw new CREClassDefinitionError("Expected a non-dynamic value, but " + data.getData()
+						+ " was found.", t);
+			}
+			return data.getData();
+		}
+
 		@Override
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			// 0 - Access Modifier
 			AccessModifier accessModifier = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[0], t),
 					AccessModifier.class, t);
+
 			// 1 - Object Modifiers
 			CArray om = evaluateArrayNoNull(nodes[1], t);
 			Set<ObjectModifier> objectModifiers = om.asList().stream()
-					.map((item) -> ArgumentValidation.getEnum(item, ObjectModifier.class, t)).collect(Collectors.toSet());
+					.map((item) -> ArgumentValidation.getEnum(item, ObjectModifier.class, t))
+					.collect(Collectors.toSet());
+
 			// 2 - Object Type
 			ObjectType type = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[2], t), ObjectType.class, t);
+
 			// 3 - Object Name
 			FullyQualifiedClassName name
 					= FullyQualifiedClassName.forFullyQualifiedClass(evaluateStringNoNull(nodes[3], t).val());
+
 			// 4 - Superclasses
+			Set<CClassType> superclasses = new HashSet<>();
 			// TODO
+
+			if(superclasses.isEmpty()) {
+				// Everything extends Mixed.
+				superclasses.add(Mixed.TYPE);
+			}
+
 			// 5 - Interfaces
+			Set<CClassType> interfaces = new HashSet<>();
 			// TODO
+
 			// 6- Enum list
 			Mixed el = evaluateArray(nodes[6], t);
 			if(type != ObjectType.ENUM && el != CNull.NULL) {
@@ -206,12 +230,25 @@ public class Objects {
 			} else {
 				// TODO
 			}
+
 			// 7 - map<property->element>
-			// TODO
 			Map<String, List<ElementDefinition>> elementDefinitions = new HashMap<>();
-			// 8 - array<annotations>
 			// TODO
+
+			// 8 - array<annotations>
 			List<MAnnotation> annotations = new ArrayList<>();
+			// TODO
+
+			// 9 - containing class
+			CClassType containingClass;
+			if(nodes[9].getData() instanceof CNull) {
+				containingClass = null;
+			} else {
+				containingClass = ArgumentValidation.getClassType(evaluateMixed(nodes[9], t), t);
+			}
+
+			// 10 - Class Comment
+			SmartComment classComment = null;
 
 			Class<? extends Mixed> nativeClass = null;
 			if(objectModifiers.contains(ObjectModifier.NATIVE)) {
@@ -223,6 +260,13 @@ public class Objects {
 						+ " the native class associated with it.", t);
 				}
 			}
+
+			// 11 - Generic Parameter declarations
+			// TODO This should of course not be Object, but I need
+			// to create a new class first.
+			List<Object> genericDeclarations = new ArrayList<>();
+
+			// TODO Populate the native elements in the ElementDefinition
 
 			// Native classes MUST define a constructor, they are not allowed to use the default
 			// constructor. They *may* define a native constructor, but they must explicitly do
@@ -246,12 +290,14 @@ public class Objects {
 					objectModifiers,
 					type,
 					CClassType.defineClass(name),
-					null, // superclasses
-					null, // interfaces
-					null, // containing class
+					superclasses,
+					interfaces,
+					containingClass,
 					t,
 					elementDefinitions,
-					annotations);
+					annotations,
+					classComment,
+					genericDeclarations);
 			if(env == null) {
 				throw new Error("Environment may not be null");
 			}
@@ -279,7 +325,7 @@ public class Objects {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{Integer.MAX_VALUE};
+			return new Integer[]{11};
 		}
 
 		@Override
@@ -366,7 +412,12 @@ public class Objects {
 			}
 			// Construct the object!
 			// This is the native construction.
-			Mixed obj = new UserObject(t, parent, env, od);
+			Mixed nativeObject = null;
+			if(od.isNative()) {
+				// TODO If this is a native object, we need to intercept the call to the native constructor,
+				// and grab the object generated there.
+			}
+			Mixed obj = new UserObject(t, parent, env, od, null);
 			// This is the MethodScript construction.
 			if(constructor != null) {
 				Mixed[] values = new Mixed[args.length - 1];
@@ -389,7 +440,7 @@ public class Objects {
 			if(children.get(0).isDynamic()) {
 				throw new ConfigCompileException("The first parameter to new_object must be hardcoded.", t);
 			}
-			FullyQualifiedClassName fqcn = FullyQualifiedClassName.forName(children.get(0).getData().val(), t);
+			FullyQualifiedClassName fqcn = FullyQualifiedClassName.forName(children.get(0).getData().val(), t, env);
 			ObjectDefinition od;
 			try {
 				od = odt.get(fqcn);
@@ -406,7 +457,7 @@ public class Objects {
 			}
 			List<ElementDefinition> constructors = od.getElements().get("<constructor>");
 			int id;
-			if(constructors.isEmpty()) {
+			if(constructors == null || constructors.isEmpty()) {
 				// Default constructor
 				if(children.size() > 1) {
 					throw new ConfigCompileException("No suitable constructor found for " + fqcn + " only the default"

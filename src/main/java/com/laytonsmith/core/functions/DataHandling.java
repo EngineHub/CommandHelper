@@ -12,7 +12,7 @@ import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Globals;
 import com.laytonsmith.core.LogLevel;
@@ -290,12 +290,12 @@ public class DataHandling {
 				name = ((IVariable) args[offset]).getVariableName();
 				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag("no-check-duplicate-assign") == null) {
 					if(env.getEnv(GlobalEnv.class).GetFlag("closure-warn-overwrite") != null) {
-						CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR,
+						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR,
 								"The variable " + name + " is hiding another value of the"
 								+ " same name in the main scope.", t);
 					} else {
-						CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, name + " was already defined at "
-								+ list.get(name, t, true).getDefinedTarget() + " but is being redefined.", t);
+						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, name + " was already defined at "
+								+ list.get(name, t, true, env).getDefinedTarget() + " but is being redefined.", t);
 					}
 				}
 				type = ArgumentValidation.getClassType(args[0], t);
@@ -305,14 +305,14 @@ public class DataHandling {
 					throw new CRECastException(getName() + " with 2 arguments only accepts an ivariable as the second argument.", t);
 				}
 				name = ((IVariable) args[offset]).getVariableName();
-				type = list.get(name, t, true).getDefinedType();
+				type = list.get(name, t, true, env).getDefinedType();
 			}
 			Mixed c = args[offset + 1];
 			while(c instanceof IVariable) {
 				IVariable cur = (IVariable) c;
-				c = list.get(cur.getVariableName(), cur.getTarget()).ival();
+				c = list.get(cur.getVariableName(), cur.getTarget(), env).ival();
 			}
-			IVariable v = new IVariable(type, name, c, t);
+			IVariable v = new IVariable(type, name, c, t, env);
 			list.set(v);
 			return v;
 		}
@@ -385,7 +385,7 @@ public class DataHandling {
 					&& children.get(1).getData() instanceof IVariable) {
 				if(((IVariable) children.get(0).getData()).getVariableName().equals(
 						((IVariable) children.get(1).getData()).getVariableName())) {
-					CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Assigning a variable to itself", t);
+					MSLog.GetLogger().Log(MSLog.Tags.COMPILER, LogLevel.WARNING, "Assigning a variable to itself", t);
 				}
 			}
 			if(children.get(0).getData() instanceof CFunction && array_get.equals(children.get(0).getData().val())) {
@@ -769,10 +769,12 @@ public class DataHandling {
 					}
 					//If the key isn't null, set that in the variable table.
 					if(kkey != null) {
-						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(), kkey.getVariableName(), c, t));
+						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(),
+								kkey.getVariableName(), c, t, env));
 					}
 					//Set the value in the variable table
-					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(), two.getVariableName(), one.get(c.val(), t), t));
+					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(),
+							two.getVariableName(), one.get(c.val(), t), t, env));
 					try {
 						//Execute the code
 						parent.eval(code, env);
@@ -825,9 +827,11 @@ public class DataHandling {
 						//If the item is blacklisted, we skip it.
 						if(!iterator.isBlacklisted(current)) {
 							if(kkey != null) {
-								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(), kkey.getVariableName(), new CInt(current, t), t));
+								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(),
+										kkey.getVariableName(), new CInt(current, t), t, env));
 							}
-							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(), two.getVariableName(), one.get(current, t), t));
+							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(),
+									two.getVariableName(), one.get(current, t), t, env));
 							try {
 								parent.eval(code, env);
 							} catch (LoopBreakException e) {
@@ -2325,7 +2329,8 @@ public class DataHandling {
 								varNames.add(varName);
 							}
 							while(c instanceof IVariable) {
-								c = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getVariableName(), t, true).ival();
+								c = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getVariableName(), t,
+										true, env).ival();
 							}
 							if(!thisNodeIsAssign) {
 								//This is required because otherwise a default value that's already in the environment
@@ -2333,7 +2338,8 @@ public class DataHandling {
 								//into this proc, if the call to the proc didn't have a value in this slot.
 								c = new CString("", t);
 							}
-							ivar = new IVariable(((IVariable) cons).getDefinedType(), ((IVariable) cons).getVariableName(), c.clone(), t);
+							ivar = new IVariable(((IVariable) cons).getDefinedType(),
+									((IVariable) cons).getVariableName(), c.clone(), t, env);
 						} catch (CloneNotSupportedException ex) {
 							//
 						}
@@ -2673,7 +2679,7 @@ public class DataHandling {
 				throw new CREInsufficientArgumentsException("Expecting at least one argument to " + getName(), t);
 			}
 			if(children.get(0).isConst()) {
-				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Hardcoding procedure name in " + getName() + ", which is inefficient."
+				MSLog.GetLogger().Log(MSLog.Tags.COMPILER, LogLevel.WARNING, "Hardcoding procedure name in " + getName() + ", which is inefficient."
 						+ " Consider calling the procedure directly if the procedure name is known at compile time.", t);
 			}
 			return null;
@@ -4046,7 +4052,7 @@ public class DataHandling {
 				throw new ConfigCompileException(getName() + " expects only one argument", t);
 			}
 			if(children.get(0).isConst()) {
-				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Eval'd code is hardcoded, consider simply using the code directly, as wrapping"
+				MSLog.GetLogger().Log(MSLog.Tags.COMPILER, LogLevel.WARNING, "Eval'd code is hardcoded, consider simply using the code directly, as wrapping"
 						+ " hardcoded code in " + getName() + " is much less efficient.", t);
 			}
 			return null;
@@ -4240,7 +4246,7 @@ public class DataHandling {
 				throw new RuntimeException("This should have been optimized out, this is a bug in instanceof,"
 						+ " please report it");
 			}
-			boolean b = InstanceofUtil.isInstanceof(args[0], type);
+			boolean b = InstanceofUtil.isInstanceof(args[0], type, environment);
 			return CBoolean.get(b);
 		}
 

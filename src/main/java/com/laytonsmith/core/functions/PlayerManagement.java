@@ -27,7 +27,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
@@ -613,7 +613,7 @@ public class PlayerManagement {
 					try {
 						material = StaticLayer.GetMaterialFromLegacy(Static.getInt16(mat, t), 0);
 						if(material != null) {
-							CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The id \"" + mat.val() + "\" is deprecated."
+							MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The id \"" + mat.val() + "\" is deprecated."
 									+ " Converted to \"" + material.getName() + "\"", t);
 							trans.add(material);
 							continue;
@@ -3984,7 +3984,7 @@ public class PlayerManagement {
 					throw new RuntimeException();
 			}
 			if(v.length() > 10) {
-				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING,
+				MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.WARNING,
 						"The call to " + getName() + " has been cancelled, because the magnitude was greater than 10."
 						+ " (It was " + v.length() + ")", t);
 				return CBoolean.FALSE;
@@ -4172,7 +4172,7 @@ public class PlayerManagement {
 			}
 			String value = children.get(children.size() - 1).getData().val();
 			if(value.contains(":") && value.length() <= 6) { // longest valid item format without being blockdata string
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The 1:1 format is deprecated in psend_block_change()", t);
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The 1:1 format is deprecated in psend_block_change()", t);
 			}
 			return null;
 		}

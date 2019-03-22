@@ -188,7 +188,8 @@ public class RandomTests {
 	}
 
 	@Test
-	public void testClone() throws CloneNotSupportedException {
+	public void testClone() throws Exception {
+		Environment env = Static.GenerateStandaloneEnvironment(false);
 		CArray c1 = C.Array(C.Void(), C.Void()).clone();
 		CBoolean c2 = C.Boolean(true).clone();
 		CDouble c4 = C.Double(1).clone();
@@ -198,7 +199,7 @@ public class RandomTests {
 		CString c8 = C.String("").clone();
 		Construct c9 = C.Void().clone();
 		Command c10 = new Command("/c", Target.UNKNOWN).clone();
-		IVariable c12 = new IVariable(Auto.TYPE, "@name", C.Null(), Target.UNKNOWN).clone();
+		IVariable c12 = new IVariable(Auto.TYPE, "@name", C.Null(), Target.UNKNOWN, env).clone();
 		Variable c13 = new Variable("$name", "", false, false, Target.UNKNOWN);
 	}
 

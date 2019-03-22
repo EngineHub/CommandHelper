@@ -3,6 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,9 +20,9 @@ public class InstanceofUtil {
 	 * @param c The class to search for.
 	 * @return
 	 */
-	public static Set<CClassType> getAllCastableClasses(CClassType c) {
+	public static Set<CClassType> getAllCastableClasses(CClassType c, Environment env) {
 		Set<CClassType> ret = new HashSet<>();
-		getAllCastableClassesWithBlacklist(c, ret);
+		getAllCastableClassesWithBlacklist(c, ret, env);
 		return ret;
 	}
 
@@ -32,17 +33,18 @@ public class InstanceofUtil {
 	 * @param blacklist
 	 * @return
 	 */
-	private static Set<CClassType> getAllCastableClassesWithBlacklist(CClassType c, Set<CClassType> blacklist) {
+	private static Set<CClassType> getAllCastableClassesWithBlacklist(CClassType c, Set<CClassType> blacklist,
+			Environment env) {
 		if(blacklist.contains(c)) {
 			return blacklist;
 		}
 		blacklist.add(c);
 		try {
-			for(CClassType s : c.getSuperclassesForType()) {
-				blacklist.addAll(getAllCastableClassesWithBlacklist(s, blacklist));
+			for(CClassType s : c.getSuperclassesForType(env)) {
+				blacklist.addAll(getAllCastableClassesWithBlacklist(s, blacklist, env));
 			}
-			for(CClassType iface : c.getInterfacesForType()) {
-				blacklist.addAll(getAllCastableClassesWithBlacklist(iface, blacklist));
+			for(CClassType iface : c.getInterfacesForType(env)) {
+				blacklist.addAll(getAllCastableClassesWithBlacklist(iface, blacklist, env));
 			}
 		} catch (UnsupportedOperationException ex) {
 			if(c.getClass().getAnnotation(typeof.class) != null) {
@@ -57,14 +59,15 @@ public class InstanceofUtil {
 	 *
 	 * @param value The value to check for
 	 * @param instanceofThis The string type to check. This must be the fully qualified name.
+	 * @param env
 	 * @return
 	 */
-	public static boolean isInstanceof(Mixed value, FullyQualifiedClassName instanceofThis) {
+	public static boolean isInstanceof(Mixed value, FullyQualifiedClassName instanceofThis, Environment env) {
 		Static.AssertNonNull(instanceofThis, "instanceofThis may not be null");
 		if(instanceofThis.getFQCN().equals("auto")) {
 			return true;
 		}
-		for(CClassType c : getAllCastableClasses(value.typeof())) {
+		for(CClassType c : getAllCastableClasses(value.typeof(), env)) {
 			FullyQualifiedClassName typeof = c.getFQCN();
 			if(typeof != null && typeof.equals(instanceofThis)) {
 				return true;
@@ -77,11 +80,12 @@ public class InstanceofUtil {
 	 * Returns whether or not a given MethodScript value is an instanceof the specified MethodScript type.
 	 * @param value
 	 * @param instanceofThis
+	 * @param env
 	 * @return
 	 */
-	public static boolean isInstanceof(Mixed value, Class<? extends Mixed> instanceofThis) {
+	public static boolean isInstanceof(Mixed value, Class<? extends Mixed> instanceofThis, Environment env) {
 		FullyQualifiedClassName typeof = typeof(instanceofThis);
-		return typeof == null ? false : isInstanceof(value, typeof);
+		return typeof == null ? false : isInstanceof(value, typeof, env);
 	}
 
 	/**
@@ -89,10 +93,11 @@ public class InstanceofUtil {
 	 *
 	 * @param value The value to check for
 	 * @param instanceofThis The CClassType to check
+	 * @param env
 	 * @return
 	 */
-	public static boolean isInstanceof(Mixed value, CClassType instanceofThis) {
-		return isInstanceof(value, instanceofThis.getFQCN());
+	public static boolean isInstanceof(Mixed value, CClassType instanceofThis, Environment env) {
+		return isInstanceof(value, instanceofThis.getFQCN(), env);
 	}
 
 	private static FullyQualifiedClassName typeof(Class<?> c) {

@@ -1,7 +1,7 @@
 package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.abstractionenum;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.constructs.Target;
 
@@ -107,6 +107,6 @@ public abstract class EnumConvertor<Abstracted extends Enum, Concrete extends En
 		if(useError) {
 			level = LogLevel.ERROR;
 		}
-		CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, level, message, Target.UNKNOWN);
+		MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, level, message, Target.UNKNOWN);
 	}
 }

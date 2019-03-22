@@ -22,7 +22,7 @@ import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
 import com.laytonsmith.abstraction.events.MCNotePlayEvent;
 import com.laytonsmith.abstraction.events.MCSignChangeEvent;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -218,7 +218,7 @@ public class BlockEvents {
 			if(prefilter.containsKey("name")) {
 				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("name").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("type")) {
 				Mixed cid = prefilter.get("type");
@@ -236,7 +236,7 @@ public class BlockEvents {
 						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
 					}
 					prefilter.put("block", new CString(mat.getName(), event.getTarget()));
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"type\" and \"data\" prefilters in " + getName()
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"type\" and \"data\" prefilters in " + getName()
 							+ " are deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 				}
 			}
@@ -363,7 +363,7 @@ public class BlockEvents {
 			if(prefilter.containsKey("name")) {
 				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("name").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("type")) {
 				Mixed cid = prefilter.get("type");
@@ -381,7 +381,7 @@ public class BlockEvents {
 						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
 					}
 					prefilter.put("block", new CString(mat.getName(), event.getTarget()));
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"type\" and \"data\" prefilters in " + getName()
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"type\" and \"data\" prefilters in " + getName()
 							+ " are deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 				}
 			}
@@ -458,19 +458,19 @@ public class BlockEvents {
 					throw new CREFormatException("Material name \"" + value.val() + "\" not found.", value.getTarget());
 				}
 				event.getBlock().setType(mat);
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Mutable data key \"name\" in " + getName()
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Mutable data key \"name\" in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), value.getTarget());
 				return true;
 			} else if(key.equals("type")) {
 				if(value instanceof CInt) {
 					MCMaterial mat = StaticLayer.GetMaterialFromLegacy((int) ((CInt) value).getInt(), 0);
 					event.getBlock().setType(mat);
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Mutable data key \"type\" in " + getName()
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Mutable data key \"type\" in " + getName()
 							+ " is deprecated for \"block\". Converted to " + mat.getName(), value.getTarget());
 					return true;
 				}
 			} else if(key.equals("data")) {
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Mutable data key \"data\" in " + getName()
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Mutable data key \"data\" in " + getName()
 						+ " is deprecated for \"block\".", value.getTarget());
 			}
 			return false;
@@ -512,7 +512,7 @@ public class BlockEvents {
 			if(prefilter.containsKey("name")) {
 				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("name").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("type")) {
 				Mixed cid = prefilter.get("type");
@@ -530,7 +530,7 @@ public class BlockEvents {
 						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
 					}
 					prefilter.put("block", new CString(mat.getName(), event.getTarget()));
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"type\" and \"data\" prefilters in " + getName()
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"type\" and \"data\" prefilters in " + getName()
 							+ " are deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 				}
 			}
@@ -698,7 +698,7 @@ public class BlockEvents {
 			if(prefilter.containsKey("name")) {
 				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("name").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("type")) {
 				Mixed cid = prefilter.get("type");
@@ -716,14 +716,14 @@ public class BlockEvents {
 						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
 					}
 					prefilter.put("block", new CString(mat.getName(), event.getTarget()));
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"type\" and \"data\" prefilters in " + getName()
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"type\" and \"data\" prefilters in " + getName()
 							+ " are deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 				}
 			}
 			if(prefilter.containsKey("toname")) {
 				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("toname").val(), 0);
 				prefilter.put("toblock", new CString(mat.getName(), event.getTarget()));
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"toname\" prefilter in " + getName()
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"toname\" prefilter in " + getName()
 						+ " is deprecated for \"toblock\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("totype")) {
 				Mixed cid = prefilter.get("totype");
@@ -741,7 +741,7 @@ public class BlockEvents {
 						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
 					}
 					prefilter.put("toblock", new CString(mat.getName(), event.getTarget()));
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"totype\" and \"todata\" prefilters in " + getName()
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"totype\" and \"todata\" prefilters in " + getName()
 							+ " are deprecated for \"toblock\". Converted to " + mat.getName(), event.getTarget());
 				}
 			}
@@ -827,7 +827,7 @@ public class BlockEvents {
 							throw new CREFormatException("Material name \"" + name.val() + "\" not found.", value.getTarget());
 						}
 						block.setType(mat);
-						CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Mutable data key \"block\" in " + getName()
+						MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Mutable data key \"block\" in " + getName()
 								+ " is deprecated when using an array. Converted to " + mat.getName(), value.getTarget());
 						return true;
 					}
@@ -851,7 +851,7 @@ public class BlockEvents {
 							throw new CREFormatException("Material type \"" + type + "\" not found.", value.getTarget());
 						}
 						block.setType(mat);
-						CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Mutable data key \"block\" in " + getName()
+						MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Mutable data key \"block\" in " + getName()
 								+ " is deprecated when using an array. Converted to " + mat.getName(), value.getTarget());
 						return true;
 					}
@@ -883,7 +883,7 @@ public class BlockEvents {
 							throw new CREFormatException("Material name \"" + name.val() + "\" not found.", value.getTarget());
 						}
 						block.setType(mat);
-						CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Mutable data key \"toblock\" in " + getName()
+						MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Mutable data key \"toblock\" in " + getName()
 								+ " is deprecated when using an array. Converted to " + mat.getName(), value.getTarget());
 						return true;
 					}
@@ -907,7 +907,7 @@ public class BlockEvents {
 							throw new CREFormatException("Material type \"" + type + "\" not found.", value.getTarget());
 						}
 						block.setType(mat);
-						CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Mutable data key \"toblock\" in " + getName()
+						MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Mutable data key \"toblock\" in " + getName()
 								+ " is deprecated when using an array. Converted to " + mat.getName(), value.getTarget());
 						return true;
 					}
@@ -1086,7 +1086,7 @@ public class BlockEvents {
 			// handle deprecated prefilter
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("item")) {
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
 						+ " is deprecated for \"itemname\".", event.getTarget());
 				MCItemStack is = Static.ParseItemNotation(null, prefilter.get("item").val(), 1, event.getTarget());
 				prefilter.put("itemname", new CString(is.getType().getName(), event.getTarget()));
@@ -1164,7 +1164,7 @@ public class BlockEvents {
 			if(prefilter.containsKey("oldname")) {
 				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("oldname").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"oldname\" prefilter in " + getName()
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"oldname\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("oldtype")) {
 				Mixed cid = prefilter.get("oldtype");
@@ -1182,14 +1182,14 @@ public class BlockEvents {
 						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
 					}
 					prefilter.put("block", new CString(mat.getName(), event.getTarget()));
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"oldtype\" and \"olddata\" prefilters in " + getName()
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"oldtype\" and \"olddata\" prefilters in " + getName()
 							+ " are deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 				}
 			}
 			if(prefilter.containsKey("newname")) {
 				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("newname").val(), 0);
 				prefilter.put("newblock", new CString(mat.getName(), event.getTarget()));
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"newname\" prefilter in " + getName()
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"newname\" prefilter in " + getName()
 						+ " is deprecated for \"newblock\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("newtype")) {
 				Mixed cid = prefilter.get("newtype");
@@ -1207,7 +1207,7 @@ public class BlockEvents {
 						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
 					}
 					prefilter.put("newname", new CString(mat.getName(), event.getTarget()));
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"newtype\" and \"newdata\" prefilters in " + getName()
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"newtype\" and \"newdata\" prefilters in " + getName()
 							+ " are deprecated for \"newname\". Converted to " + mat.getName(), event.getTarget());
 				}
 			}
@@ -1335,7 +1335,7 @@ public class BlockEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
-			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Modifying the instrument or note for note_play"
+			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Modifying the instrument or note for note_play"
 					+ " events is no longer supported.", value.getTarget());
 			return false;
 		}
@@ -1378,7 +1378,7 @@ public class BlockEvents {
 			if(prefilter.containsKey("oldname")) {
 				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("oldname").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"oldname\" prefilter in " + getName()
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"oldname\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("oldtype")) {
 				Mixed cid = prefilter.get("oldtype");
@@ -1389,7 +1389,7 @@ public class BlockEvents {
 						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
 					}
 					prefilter.put("block", new CString(mat.getName(), event.getTarget()));
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"oldtype\" prefilter in " + getName()
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"oldtype\" prefilter in " + getName()
 							+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 				}
 			}

@@ -3,7 +3,7 @@ package com.laytonsmith.persistence;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.annotations.datasource;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.persistence.io.ConnectionMixin;
@@ -151,7 +151,7 @@ public class SQLiteDataSource extends SQLDataSource {
 								|| ex.getMessage().equals("cannot commit transaction - SQL statements in progress")) {
 							try {
 								int sleepTime = getRandomSleepTime();
-								CHLog.GetLogger().d(CHLog.Tags.PERSISTENCE, "Got recoverable error from SQLite DB,"
+								MSLog.GetLogger().d(MSLog.Tags.PERSISTENCE, "Got recoverable error from SQLite DB,"
 										+ " sleeping for " + sleepTime + " then potentially retrying. ("
 										+ ex.getMessage() + ")",
 										Target.UNKNOWN);
@@ -250,7 +250,7 @@ public class SQLiteDataSource extends SQLDataSource {
 					if(ex.getMessage().startsWith("[SQLITE_BUSY]")) {
 						try {
 							int sleepTime = getRandomSleepTime();
-								CHLog.GetLogger().d(CHLog.Tags.PERSISTENCE, "Got recoverable error from SQLite DB,"
+								MSLog.GetLogger().d(MSLog.Tags.PERSISTENCE, "Got recoverable error from SQLite DB,"
 										+ " sleeping for " + sleepTime + " then potentially retrying. ("
 										+ ex.getMessage() + ")",
 										Target.UNKNOWN);

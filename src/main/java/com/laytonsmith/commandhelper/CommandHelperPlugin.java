@@ -47,7 +47,7 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.core.AliasCore;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.MethodScriptFileLocations;
@@ -269,18 +269,18 @@ public class CommandHelperPlugin extends JavaPlugin {
 		}
 
 		Prefs.SetColors();
-		CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
-		Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
-		if(new SimpleVersion(System.getProperty("java.version")).lt(new SimpleVersion("1.8"))) {
-			CHLog.GetLogger().e(CHLog.Tags.GENERAL, "CommandHelper does not support a Java version older than 8!", Target.UNKNOWN);
-		}
-
-		self = this;
-
 		ClassDiscoveryCache cdc = new ClassDiscoveryCache(CommandHelperFileLocations.getDefault().getCacheDirectory());
 		cdc.setLogger(Logger.getLogger(CommandHelperPlugin.class.getName()));
 		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(cdc);
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(CommandHelperPlugin.class));
+		MSLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
+		Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
+		if(new SimpleVersion(System.getProperty("java.version")).lt(new SimpleVersion("1.8"))) {
+			MSLog.GetLogger().e(MSLog.Tags.GENERAL, "CommandHelper does not support a Java version older than 8!", Target.UNKNOWN);
+		}
+
+		self = this;
+
 
 		StreamUtils.GetSystemOut().println("[CommandHelper] Running initial class discovery,"
 				+ " this will probably take a few seconds...");
@@ -347,7 +347,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		if(Prefs.UseSudoFallback()) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.WARNING, "In your preferences, use-sudo-fallback is turned on. Consider turning this off if you can.");
 		}
-		CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
+		MSLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
 		version = new SimpleVersion(getDescription().getVersion());
 
@@ -467,7 +467,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				try {
 					eventClass = (Class<? extends Event>) Class.forName(identifier.className());
 				} catch (ClassNotFoundException | ClassCastException e) {
-					CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
+					MSLog.GetLogger().e(MSLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
 							+ " because the class " + identifier.className() + " could not be found."
 							+ " This problem is not expected to occur, so please report it on the bug"
 							+ " tracker if it does.", Target.UNKNOWN);
@@ -483,7 +483,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 					try {
 						handler = (HandlerList) ReflectionUtils.invokeMethod(eventSuperClass, null, "getHandlerList");
 					} catch (ReflectionUtils.ReflectionException refInner) {
-						CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
+						MSLog.GetLogger().e(MSLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
 								+ " because the handler for class " + identifier.className()
 								+ " could not be found. An attempt has already been made to find the"
 								+ " correct handler, but" + eventSuperClass.getName()
@@ -492,7 +492,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 						continue;
 					}
 				} else {
-					CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
+					MSLog.GetLogger().e(MSLog.Tags.RUNTIME, "Could not listen for " + identifier.event().name()
 							+ " because the handler for class " + identifier.className()
 							+ " could not be found. An attempt has already been made to find the"
 							+ " correct handler, but no superclass could be found."

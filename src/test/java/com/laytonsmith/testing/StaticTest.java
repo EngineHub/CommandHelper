@@ -44,7 +44,7 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.Optimizable;
@@ -632,7 +632,7 @@ public class StaticTest {
 		} catch (IOException ex) {
 			Logger.getLogger(StaticTest.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		CHLog.initialize(new File("."));
+		MSLog.initialize(new File("."));
 	}
 
 	/**
@@ -974,9 +974,9 @@ public class StaticTest {
 	 *
 	 * @return
 	 */
-	public static CHLog InstallFakeLogger() {
-		CHLog l = mock(CHLog.class);
-		SetPrivate(CHLog.class, "instance", l, CHLog.class);
+	public static MSLog InstallFakeLogger() {
+		MSLog l = mock(MSLog.class);
+		SetPrivate(MSLog.class, "instance", l, MSLog.class);
 		return l;
 	}
 

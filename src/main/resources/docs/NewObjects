@@ -721,7 +721,7 @@ overlapping class names, but if the organization represents a single
 project, it can be ok to leave off the project name. In general, the
 organization name should be based on a domain you control, in reverse
 domain order. For instance, if you own me.example.com, your organization
-name should be "me.example.com". This is not required, but substantially
+name should be "com.example.me". This is not required, but substantially
 reduces confusion, especially when distributing your code.
 
 When creating a class like this, references to that class must be the '''fully qualifed \

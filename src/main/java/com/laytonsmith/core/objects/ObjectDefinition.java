@@ -4,11 +4,14 @@ import com.laytonsmith.PureUtilities.ObjectHelpers;
 import com.laytonsmith.PureUtilities.ObjectHelpers.Equals;
 import com.laytonsmith.PureUtilities.ObjectHelpers.HashCode;
 import com.laytonsmith.PureUtilities.ObjectHelpers.ToString;
+import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.natives.interfaces.Commentable;
 import com.laytonsmith.core.natives.interfaces.MAnnotation;
-import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -20,11 +23,11 @@ import java.util.Set;
  * read only.
  *
  * Everything is an object at the core, but there are subtypes of Object that have special handling, such as enums or
- * annotations, but those are non-the-less represented in this class.
+ * annotations, but those are none-the-less represented in this class.
  */
 @HashCode
 @Equals
-public class ObjectDefinition {
+public class ObjectDefinition implements Commentable {
 	@ToString
 	private final List<MAnnotation> annotations;
 	@ToString
@@ -36,17 +39,20 @@ public class ObjectDefinition {
 	@ToString
 	private final CClassType type;
 	@ToString
-	private final CClassType[] superclasses;
+	private final Set<CClassType> superclasses;
 	@ToString
-	private final CClassType[] interfaces;
+	private final Set<CClassType> interfaces;
 	private final CClassType containingClass;
 	private final Target definitionTarget;
 	private final Map<String, List<ElementDefinition>> properties;
+	private final SmartComment classComment;
+	private final List<Object> genericParameters;
 
 	public ObjectDefinition(AccessModifier accessModifier, Set<ObjectModifier> objectModifiers, ObjectType objectType,
 			CClassType type,
-			CClassType[] superclasses, CClassType[] interfaces, CClassType containingClass, Target t,
-			Map<String, List<ElementDefinition>> properties, List<MAnnotation> annotations) {
+			Set<CClassType> superclasses, Set<CClassType> interfaces, CClassType containingClass, Target t,
+			Map<String, List<ElementDefinition>> properties, List<MAnnotation> annotations,
+			SmartComment classComment, List<Object> genericParameters) {
 		this.accessModifier = accessModifier;
 		this.objectModifiers = objectModifiers;
 		this.objectType = objectType;
@@ -57,6 +63,8 @@ public class ObjectDefinition {
 		this.definitionTarget = t;
 		this.properties = properties;
 		this.annotations = annotations;
+		this.classComment = classComment;
+		this.genericParameters = genericParameters;
 	}
 
 //	@SuppressWarnings("LocalVariableHidesMemberVariable")
@@ -175,16 +183,16 @@ public class ObjectDefinition {
 	 * Returns a List of superclasses.
 	 * @return
 	 */
-	public List<CClassType> getSuperclasses() {
-		return Arrays.asList(superclasses);
+	public Set<CClassType> getSuperclasses() {
+		return new HashSet<>(superclasses);
 	}
 
 	/**
 	 * Returns a list of implementing interfaces.
 	 * @return
 	 */
-	public List<CClassType> getInterfaces() {
-		return Arrays.asList(interfaces);
+	public Set<CClassType> getInterfaces() {
+		return new HashSet<>(interfaces);
 	}
 
 	/**
@@ -211,6 +219,36 @@ public class ObjectDefinition {
 
 	public List<MAnnotation> getAnnotations() {
 		return annotations;
+	}
+
+	@Override
+	public SmartComment getElementComment() {
+		return classComment;
+	}
+
+	public List<Object> getGenericParameters() {
+		return genericParameters;
+	}
+
+	/**
+	 * Checks if this is a native class, and can be properly cast to an actual native java class. If this
+	 * returns true, then calling one of the methods in {@link NativeTypeList} will most certainly succeed.
+	 * @return True if this is a native class, false otherwise.
+	 */
+	public boolean isNative() {
+		if(!getObjectModifiers().contains(ObjectModifier.NATIVE)) {
+			// If it doesn't claim to be native, it certainly isn't.
+			return false;
+		}
+		try {
+			// We want to ensure that if we attempt to instantiate this
+			// through the native type list, it will succeed, so we actually
+			// do that test here.
+			NativeTypeList.getNativeClassOrInterfaceRunner(type.getFQCN());
+			return true;
+		} catch (ClassNotFoundException ex) {
+			return false;
+		}
 	}
 
 }

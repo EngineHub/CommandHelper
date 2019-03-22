@@ -7,7 +7,7 @@ import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.Optimizable;
@@ -55,7 +55,7 @@ public class DocGen {
 			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
 			Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
 			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
-			CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
+			MSLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
 			//StreamUtils.GetSystemOut().println(functions("wiki", api.Platforms.INTERPRETER_JAVA, true));
 			StreamUtils.GetSystemOut().println(examples("if", true));

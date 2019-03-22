@@ -1,7 +1,7 @@
 package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.enums.MCSound;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.Sound;
 
@@ -34,7 +34,7 @@ public class BukkitMCSound extends MCSound<Sound> {
 				try {
 					sound = getBukkitType(v);
 				} catch (IllegalArgumentException | NoSuchFieldError ex) {
-					CHLog.GetLogger().w(CHLog.Tags.RUNTIME, "Could not find a Bukkit Sound for " + v.name(), Target.UNKNOWN);
+					MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Could not find a Bukkit Sound for " + v.name(), Target.UNKNOWN);
 					continue;
 				}
 				BukkitMCSound wrapper = new BukkitMCSound(v, sound);

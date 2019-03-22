@@ -550,6 +550,8 @@ public class DocGenTemplates {
 				out = SimpleSyntaxHighlighter.Highlight(code, false);
 			} catch (ConfigCompileException ex) {
 				throw new GenerateException(ex.getMessage() + "\nFor code: " + code, ex);
+			} catch (Exception ex) {
+				throw new RuntimeException(ex);
 			}
 			return out;
 		}
@@ -573,6 +575,8 @@ public class DocGenTemplates {
 				out = SimpleSyntaxHighlighter.Highlight(code, true);
 			} catch (ConfigCompileException ex) {
 				throw new GenerateException(ex.getMessage() + "\nFor code: " + code, ex);
+			} catch (Exception ex) {
+				throw new RuntimeException(ex);
 			}
 			return out;
 		}

@@ -232,7 +232,7 @@ public class AliasCore {
 		}
 		try {
 			if(Prefs.AllowDynamicShell()) {
-				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING, "allow-dynamic-shell is set to true in "
+				MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.WARNING, "allow-dynamic-shell is set to true in "
 						+ CommandHelperFileLocations.getDefault().getProfilerConfigFile().getName() + " you should set this to false, except during development.", Target.UNKNOWN);
 			}
 
@@ -264,7 +264,7 @@ public class AliasCore {
 				}
 			}
 
-			CHLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
+			MSLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
 
 			//Clear out the data source cache
 			DataSourceFactory.DisconnectAll();
@@ -278,7 +278,7 @@ public class AliasCore {
 					extensionManagerStartup.stop();
 				}
 			}
-			CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
+			MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
 			if(parent.persistenceNetwork == null || options.reloadPersistenceConfig()) {
 				ProfilePoint persistenceConfigReload = parent.profiler.start("Reloading persistence configuration", LogLevel.VERBOSE);
 				try {
@@ -295,7 +295,7 @@ public class AliasCore {
 			try {
 				parent.profiles = new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile());
 			} catch (IOException | Profiles.InvalidProfileException ex) {
-				CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
+				MSLog.GetLogger().e(MSLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
 				return;
 			}
 			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,

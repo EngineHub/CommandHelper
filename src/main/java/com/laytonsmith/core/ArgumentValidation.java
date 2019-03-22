@@ -21,6 +21,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.objects.UserObject;
 
 import java.util.regex.Pattern;
 
@@ -67,11 +68,7 @@ public final class ArgumentValidation {
 	 * @return
 	 */
 	public static CArray getArray(Mixed construct, Target t) {
-		if(construct instanceof CArray) {
-			return ((CArray) construct);
-		} else {
-			throw new CRECastException("Expecting array, but received " + construct.val(), t);
-		}
+		return getObject(construct, t, CArray.class);
 	}
 
 	/**
@@ -83,7 +80,8 @@ public final class ArgumentValidation {
 	 *
 	 * User classes are not supported here, because user classes cannot be managed directly in the java,
 	 * it must be castable to an actual Java class to work, though it can work
-	 * with classes that are defined in extensions.
+	 * with classes that are defined in extensions. However, user classes that are based on a native type will
+	 * be converted here.
 	 *
 	 * @param <T> The type expected.
 	 * @param construct The generic object
@@ -92,6 +90,15 @@ public final class ArgumentValidation {
 	 * @return The properly cast object.
 	 */
 	public static <T extends Mixed> T getObject(Mixed construct, Target t, Class<T> clazz) {
+		// TODO do the conversion for user classes that are native
+		if(construct instanceof UserObject) {
+			T m = ((UserObject) construct).getNativeObject(clazz);
+			if(m != null) {
+				return m;
+			} else {
+				// TODO: Does this need something here?
+			}
+		}
 		if(clazz.isAssignableFrom(construct.getClass())) {
 			return (T) construct;
 		} else {
@@ -120,21 +127,21 @@ public final class ArgumentValidation {
 		if(c == null || c instanceof CNull) {
 			return 0.0;
 		}
-		if(c instanceof CNumber) {
-			d = ((CNumber) c).getNumber();
-		} else if(c instanceof CString) {
+		if(c.isInstanceOf(CNumber.class)) {
+			d = getObject(c, t, CNumber.class).getNumber();
+		} else if(c.isInstanceOf(CString.class)) {
 			try {
 				d = Double.parseDouble(c.val());
 			} catch (NumberFormatException e) {
 				throw new CRECastException("Expecting a number, but received \"" + c.val() + "\" instead", t);
 			}
-		} else if(c instanceof CBoolean) {
+		} else if(c.isInstanceOf(CBoolean.class)) {
 			if(((CBoolean) c).getBoolean()) {
 				d = 1;
 			} else {
 				d = 0;
 			}
-		} else if(c instanceof CDecimal) {
+		} else if(c.isInstanceOf(CDecimal.class)) {
 			throw new CRECastException("Expecting a number, but received a decimal value instead. This cannot be"
 					+ " automatically cast, please use double(@decimal) to manually cast down to a double.", t);
 		} else {
@@ -171,7 +178,7 @@ public final class ArgumentValidation {
 	 * @return boolean
 	 */
 	public static boolean isNumber(Mixed c) {
-		return c instanceof CNumber || VALID_DOUBLE.matcher(c.val()).matches();
+		return c.isInstanceOf(CNumber.class) || VALID_DOUBLE.matcher(c.val()).matches();
 	}
 
 	/**
@@ -231,10 +238,10 @@ public final class ArgumentValidation {
 		if(c == null || c instanceof CNull) {
 			return 0;
 		}
-		if(c instanceof CInt) {
-			i = ((CInt) c).getInt();
+		if(c.isInstanceOf(CInt.class)) {
+			i = getObject(c, t, CInt.class).getInt();
 		} else if(c instanceof CBoolean) {
-			if(((CBoolean) c).getBoolean()) {
+			if(getObject(c, t, CBoolean.class).getBoolean()) {
 				i = 1;
 			} else {
 				i = 0;
@@ -366,8 +373,8 @@ public final class ArgumentValidation {
 		if(c == null) {
 			return false;
 		}
-		if(c instanceof Booleanish) {
-			return ((Booleanish) c).getBooleanValue(t);
+		if(c.isInstanceOf(Booleanish.class)) {
+			return getObject(c, t, Booleanish.class).getBooleanValue(t);
 		}
 		throw new CRECastException("Could not convert value of type " + c.typeof() + " to a " + Booleanish.TYPE, t);
 	}
@@ -380,8 +387,8 @@ public final class ArgumentValidation {
 	 * @return
 	 */
 	public static CByteArray getByteArray(Mixed c, Target t) {
-		if(c instanceof CByteArray) {
-			return (CByteArray) c;
+		if(c.isInstanceOf(CByteArray.class)) {
+			return getObject(c, t, CByteArray.class);
 		} else if(c instanceof CNull) {
 			return new CByteArray(t, 0);
 		} else {
@@ -390,8 +397,8 @@ public final class ArgumentValidation {
 	}
 
 	public static CClassType getClassType(Mixed c, Target t) {
-		if(c instanceof CClassType) {
-			return (CClassType) c;
+		if(c.isInstanceOf(CClassType.class)) {
+			return getObject(c, t, CClassType.class);
 		} else {
 			throw new CRECastException("Expecting a ClassType, but found " + c.typeof() + " instead.", t);
 		}
@@ -417,7 +424,7 @@ public final class ArgumentValidation {
 	 */
 	public static boolean anyDoubles(Mixed... c) {
 		for(Mixed c1 : c) {
-			if(c1 instanceof CDouble || c1 instanceof CString && c1.val().indexOf(".", 1) > -1) {
+			if(c1.isInstanceOf(CDouble.class) || c1.isInstanceOf(CString.class) && c1.val().indexOf(".", 1) > -1) {
 				return true;
 			}
 		}
@@ -432,7 +439,7 @@ public final class ArgumentValidation {
 	 */
 	public static boolean anyStrings(Mixed... c) {
 		for(Mixed c1 : c) {
-			if(c1 instanceof CString) {
+			if(c1.isInstanceOf(CString.class)) {
 				return true;
 			}
 		}
@@ -462,7 +469,7 @@ public final class ArgumentValidation {
 	 */
 	public static boolean anyBooleans(Mixed... c) {
 		for(Mixed c1 : c) {
-			if(c1 instanceof CBoolean) {
+			if(c1.isInstanceOf(CBoolean.class)) {
 				return true;
 			}
 		}

@@ -24,7 +24,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -381,7 +381,7 @@ public class Environment {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The function get_block_at() is deprecated. Use get_block().", t);
+			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The function get_block_at() is deprecated. Use get_block().", t);
 			return null;
 		}
 
@@ -501,7 +501,7 @@ public class Environment {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The function set_block_at() is deprecated. Use set_block().", t);
+			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The function set_block_at() is deprecated. Use set_block().", t);
 			return null;
 		}
 
@@ -857,7 +857,7 @@ public class Environment {
 				try {
 					MCBiomeType.valueOf(c.val());
 				} catch (IllegalArgumentException ex) {
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, ex.getMessage(), t);
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, ex.getMessage(), t);
 				}
 			}
 			return null;
@@ -1418,7 +1418,7 @@ public class Environment {
 			try {
 				sound = MCSound.valueOf(sa.get("sound", t).val().toUpperCase());
 			} catch (IllegalArgumentException iae) {
-				CHLog.GetLogger().e(CHLog.Tags.GENERAL, "Sound name '" + sa.get("sound", t).val()
+				MSLog.GetLogger().e(MSLog.Tags.GENERAL, "Sound name '" + sa.get("sound", t).val()
 						+ "' is invalid.", t);
 				return CVoid.VOID;
 			}
@@ -1512,7 +1512,7 @@ public class Environment {
 							try {
 								MCSound.MCVanillaSound.valueOf(children.get(1).getData().val().toUpperCase());
 							} catch (IllegalArgumentException ex) {
-								CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, ex.getMessage(), t);
+								MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, ex.getMessage(), t);
 							}
 						}
 					}

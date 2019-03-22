@@ -4,7 +4,7 @@ import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Profiles;
@@ -526,7 +526,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		try {
 			return ArgumentValidation.getBooleanish(b, t);
 		} catch (CRECastException ex) {
-			CHLog.GetLogger().w(CHLog.Tags.RUNTIME, "Runtime setting \"" + name + "\" is not a boolean value, but was"
+			MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Runtime setting \"" + name + "\" is not a boolean value, but was"
 					+ " expected to be. The default value is being used instead.", t);
 			return defaultValue;
 		}

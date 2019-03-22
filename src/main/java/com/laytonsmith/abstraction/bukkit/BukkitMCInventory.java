@@ -7,8 +7,8 @@ import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
-import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHLog.Tags;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSLog.Tags;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
@@ -51,7 +51,7 @@ public class BukkitMCInventory implements MCInventory {
 			return new BukkitMCItemStack(i.getItem(slot));
 		} catch (ArrayIndexOutOfBoundsException aioobe) {
 			if(slot > 0 && slot < getSize()) {
-				CHLog.GetLogger().Log(Tags.RUNTIME, LogLevel.WARNING, "The API claims that a particular slot is"
+				MSLog.GetLogger().Log(Tags.RUNTIME, LogLevel.WARNING, "The API claims that a particular slot is"
 						+ " accessible, however the server implementation does not give access."
 						+ " This is the fault of the server and can't be helped by "
 						+ Implementation.GetServerType().getBranding() + ".", Target.UNKNOWN);
@@ -68,7 +68,7 @@ public class BukkitMCInventory implements MCInventory {
 			this.i.setItem(slot, stack == null ? null : ((BukkitMCItemStack) stack).is);
 		} catch (ArrayIndexOutOfBoundsException aioobe) {
 			if(slot > 0 && slot < getSize()) {
-				CHLog.GetLogger().Log(Tags.RUNTIME, LogLevel.WARNING, "The API claims that a particular slot is"
+				MSLog.GetLogger().Log(Tags.RUNTIME, LogLevel.WARNING, "The API claims that a particular slot is"
 						+ " accessible, however the server implementation does not give access."
 						+ " This is the fault of the server and can't be helped by "
 						+ Implementation.GetServerType().getBranding() + ".", Target.UNKNOWN);

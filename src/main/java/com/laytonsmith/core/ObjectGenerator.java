@@ -338,7 +338,7 @@ public class ObjectGenerator {
 			}
 
 			ret = StaticLayer.GetItemStack(material, qty);
-			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Converted \"" + mat + "\" with data \""
+			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Converted \"" + mat + "\" with data \""
 					+ data + "\" to " + material.getName(), t);
 
 		} else {
@@ -1016,8 +1016,8 @@ public class ObjectGenerator {
 		return ex.getExceptionObject();
 	}
 
-	public AbstractCREException exception(CArray exception, Target t) throws ClassNotFoundException {
-		return AbstractCREException.getFromCArray(exception, t);
+	public AbstractCREException exception(CArray exception, Target t, Environment env) throws ClassNotFoundException {
+		return AbstractCREException.getFromCArray(exception, t, env);
 	}
 
 	/**
@@ -1531,12 +1531,12 @@ public class ObjectGenerator {
 								} else {
 									mat = StaticLayer.GetMaterialFromLegacy(Integer.valueOf(ingredient.val()), 0);
 								}
-								CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Numeric item formats (eg. \"0:0\" are deprecated.", t);
+								MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Numeric item formats (eg. \"0:0\" are deprecated.", t);
 							} catch (NumberFormatException ex) {}
 						}
 					} else if(ingredient instanceof CInt) {
 						mat = StaticLayer.GetMaterialFromLegacy(Static.getInt32(ingredient, t), 0);
-						CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Numeric item ingredients are deprecated.", t);
+						MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Numeric item ingredients are deprecated.", t);
 					} else if(ingredient instanceof CArray) {
 						mat = item(ingredient, t).getType();
 					}
@@ -1564,7 +1564,7 @@ public class ObjectGenerator {
 								} else {
 									mat = StaticLayer.GetMaterialFromLegacy(Integer.valueOf(ingredient.val()), 0);
 								}
-								CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Numeric item formats (eg. \"0:0\" are deprecated.", t);
+								MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Numeric item formats (eg. \"0:0\" are deprecated.", t);
 							} catch (NumberFormatException ex) {}
 							if(mat == null) {
 								throw new CREFormatException("Ingredient is invalid: " + ingredient.val(), t);

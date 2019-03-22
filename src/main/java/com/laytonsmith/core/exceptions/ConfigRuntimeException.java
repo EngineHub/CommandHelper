@@ -7,7 +7,7 @@ import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Prefs;
@@ -181,7 +181,7 @@ public class ConfigRuntimeException extends RuntimeException {
 	private static void HandleUncaughtException(ConfigRuntimeException e, Environment env, Reaction r) {
 		if(r == Reaction.IGNORE) {
 			//Welp, you heard the man.
-			CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.DEBUG, "An exception bubbled to the top, but was instructed by an event handler to not cause output.", e.getTarget());
+			MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.DEBUG, "An exception bubbled to the top, but was instructed by an event handler to not cause output.", e.getTarget());
 		} else if(r == ConfigRuntimeException.Reaction.REPORT) {
 			ConfigRuntimeException.DoReport(e, env);
 		} else if(r == ConfigRuntimeException.Reaction.FATAL) {
@@ -291,7 +291,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		}
 		//Log
 		//Don't log to screen though, since we're ALWAYS going to do that ourselves.
-		CHLog.GetLogger().Log("COMPILE ERROR".equals(exceptionType) ? CHLog.Tags.COMPILER : CHLog.Tags.RUNTIME,
+		MSLog.GetLogger().Log("COMPILE ERROR".equals(exceptionType) ? MSLog.Tags.COMPILER : MSLog.Tags.RUNTIME,
 				LogLevel.ERROR, log.toString(), top, false);
 		//Console
 		StreamUtils.GetSystemOut().println(console.toString() + TermColors.reset());
@@ -381,7 +381,7 @@ public class ConfigRuntimeException extends RuntimeException {
 				exceptionMessage = MCChatColor.YELLOW + e.getMessage();
 			}
 			String message = exceptionMessage + MCChatColor.WHITE + optionalMessage;
-			CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING, Static.MCToANSIColors(message) + TermColors.reset(), t);
+			MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.WARNING, Static.MCToANSIColors(message) + TermColors.reset(), t);
 			//Warnings are not shown to players ever
 		}
 	}

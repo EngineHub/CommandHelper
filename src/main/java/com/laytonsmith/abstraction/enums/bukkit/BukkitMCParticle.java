@@ -1,7 +1,7 @@
 package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.enums.MCParticle;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.Particle;
 
@@ -47,7 +47,7 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 				try {
 					type = getBukkitType(v);
 				} catch (IllegalArgumentException | NoSuchFieldError ex) {
-					CHLog.GetLogger().w(CHLog.Tags.RUNTIME, "Could not find a Bukkit Particle for " + v.name(), Target.UNKNOWN);
+					MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Could not find a Bukkit Particle for " + v.name(), Target.UNKNOWN);
 					continue;
 				}
 				BukkitMCParticle wrapper = new BukkitMCParticle(v, type);

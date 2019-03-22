@@ -11,7 +11,7 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
@@ -148,11 +148,11 @@ public class Exceptions {
 			if(types != null) {
 				Mixed ptypes = that.seval(types, env);
 				if(ptypes instanceof CString) {
-					interest.add(FullyQualifiedClassName.forName(ptypes.val(), t));
+					interest.add(FullyQualifiedClassName.forName(ptypes.val(), t, env));
 				} else if(ptypes instanceof CArray) {
 					CArray ca = (CArray) ptypes;
 					for(int i = 0; i < ca.size(); i++) {
-						interest.add(FullyQualifiedClassName.forName(ca.get(i, t).val(), t));
+						interest.add(FullyQualifiedClassName.forName(ca.get(i, t).val(), t, env));
 					}
 				} else {
 					throw new CRECastException("Expected argument 4 to be a string, or an array of strings.", t);
@@ -296,7 +296,7 @@ public class Exceptions {
 				try {
 					// Exception type
 					// We need to reverse the excpetion into an object
-					throw ObjectGenerator.GetGenerator().exception(Static.getArray(args[0], t), t);
+					throw ObjectGenerator.GetGenerator().exception(Static.getArray(args[0], t), t, env);
 				} catch (ClassNotFoundException ex) {
 					throw new CRECastException(ex.getMessage(), t);
 				}
@@ -306,7 +306,7 @@ public class Exceptions {
 				}
 				Class<? extends Mixed> c;
 				try {
-					c = NativeTypeList.getNativeClass(FullyQualifiedClassName.forName(args[0].val(), t));
+					c = NativeTypeList.getNativeClass(FullyQualifiedClassName.forName(args[0].val(), t, env));
 				} catch (ClassNotFoundException ex) {
 					throw new CREFormatException("Expected a valid exception type, but found \"" + args[0].val() + "\"", t);
 				}
@@ -465,7 +465,8 @@ public class Exceptions {
 							// This should eventually be changed to be of the appropriate type. Unfortunately, that will
 							// require reworking basically everything. We need all functions to accept Mixed, instead of Mixed.
 							// This will have to do in the meantime.
-							varList.set(new IVariable(CArray.TYPE, var.getVariableName(), e.getExceptionObject(), t));
+							varList.set(new IVariable(CArray.TYPE, var.getVariableName(), e.getExceptionObject(), t,
+									env));
 							parent.eval(nodes[i + 1], env);
 							varList.remove(var.getVariableName());
 						} catch (ConfigRuntimeException | FunctionReturnException newEx) {
@@ -489,7 +490,7 @@ public class Exceptions {
 						parent.eval(nodes[nodes.length - 1], env);
 					} catch (ConfigRuntimeException | FunctionReturnException ex) {
 						if(exceptionCaught && (doScreamError || Prefs.ScreamErrors() || Prefs.DebugMode())) {
-							CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.WARNING, "Exception was thrown and"
+							MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.WARNING, "Exception was thrown and"
 									+ " unhandled in any catch clause,"
 									+ " but is being hidden by a new exception being thrown in the finally clause.", t);
 							ConfigRuntimeException.HandleUncaughtException(caughtException, env);

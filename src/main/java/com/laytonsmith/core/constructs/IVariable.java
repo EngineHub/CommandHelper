@@ -1,6 +1,7 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -29,10 +30,10 @@ public class IVariable extends Construct implements Cloneable {
 		this.definedTarget = t;
 	}
 
-	public IVariable(CClassType type, String name, Mixed value, Target t) {
+	public IVariable(CClassType type, String name, Mixed value, Target t, Environment env) {
 		super(name, ConstructType.IVARIABLE, t);
 		if(!type.equals(Auto.TYPE) && !(value instanceof CNull)) {
-			if(!InstanceofUtil.isInstanceof(value, type)) {
+			if(!InstanceofUtil.isInstanceof(value, type, env)) {
 				throw new CRECastException(name + " is of type " + type.val() + ", but a value of type "
 						+ value.typeof() + " was assigned to it.", t);
 			}

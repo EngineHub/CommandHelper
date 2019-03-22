@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Preferences;
@@ -8,9 +9,16 @@ import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.core.constructs.Target;
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The Log class simplifies logging for a user. Log messages are categorized by module and urgency, and the user
@@ -18,11 +26,14 @@ import java.util.List;
  * to the system, they may each specify logging granularity, but the default is to use the preferences file and output
  * to the debug log file.
  *
+ * Extensions may add modules (Tags) easily, and more generally, tags may be defined anywhere in the code. To
+ * do so,
+ *
  */
 @SuppressWarnings("checkstyle:finalclass") // StaticTest.InstallFakeLogger() mocks this class, so it cannot be final.
-public class CHLog {
+public class MSLog {
 
-	private CHLog() {
+	private MSLog() {
 	}
 
 	private static final String HEADER = "The logger preferences allow you to granularly define what information\n"
@@ -43,45 +54,97 @@ public class CHLog {
 			+ "";
 
 	private static Preferences prefs;
-	private static final EnumMap<Tags, LogLevel> LOOKUP = new EnumMap<Tags, LogLevel>(Tags.class);
+	private static final Map<Tag, LogLevel> LOOKUP = new HashMap<>();
 
-	public enum Tags {
+	private static final Set<Tag> KNOWN_TAGS = new HashSet<>();
+
+	/**
+	 * Statically defined, static instances of a {@link Tag} object tagged with the {@link LogTag} are gathered
+	 * at startup, and represent the possible tags that can be logged. Extensions and other code may implement
+	 * additional values. Generally, these are implemented as an enum that implements {@link Tag}, but they
+	 * may be normal class members as well.
+	 */
+	public static interface Tag {
+		String getName();
+		String getDescription();
+		LogLevel getLevel();
+	}
+
+	/**
+	 * Tagged to accessible, statically defined, static instances of a {@link Tag} object. These are gathered
+	 * at startup, and represent the possible tags that can be logged. Extensions and other code may implement
+	 * additional values. Generally, these are implemented as an enum that implements {@link Tag}, but they
+	 * may be normal class members as well.
+	 */
+	@java.lang.annotation.Target(ElementType.FIELD)
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface LogTag {}
+
+	/**
+	 * These are the default tags. However, new ones should generally not be added here, but instead
+	 * added near the code that would use the tag (using the Tag interface and @LogTag annotation.)
+	 */
+	public enum Tags implements Tag {
+		@LogTag
 		COMPILER("compiler", "Logs compiler errors (but not runtime errors)", LogLevel.WARNING),
+		@LogTag
 		RUNTIME("runtime", "Logs runtime errors, (exceptions that bubble all the way to the top)", LogLevel.ERROR),
+		@LogTag
 		FALSESTRING("falsestring", "Logs coersion of the string \"false\" to boolean, which is actually true",
 			LogLevel.ERROR),
+		@LogTag
 		DEPRECATION("deprecation", "Shows deprecation warnings", LogLevel.WARNING),
+		@LogTag
 		PERSISTENCE("persistence", "Logs when any persistence actions occur.", LogLevel.ERROR),
 		//TODO Add the rest of these hooks into the code
 		//        IO("IO", "Logs when the filesystem is accessed.", Level.OFF),
 		//        EVENTS("events", "Logs bindings and use of an event.", Level.OFF),
 		//        PROCEDURES("procedures", "Logs when a procedure is created", Level.OFF),
+		@LogTag
 		INCLUDES("includes", "Logs what file is requested when include() is used", LogLevel.ERROR),
+		@LogTag
 		GENERAL("general", "Anything that doesn't fit in a more specific category is logged here.", LogLevel.ERROR),
+		@LogTag
 		META("meta", "Functions in the meta class use this tag", LogLevel.ERROR),
+		@LogTag
 		EXTENSIONS("extensions", "Extension related logs use this tag", LogLevel.ERROR);
 
-		String name;
-		String description;
-		LogLevel level;
+		private final String name;
+		private final String description;
+		private final LogLevel level;
 
 		private Tags(String name, String description, LogLevel defaultLevel) {
 			this.name = name;
 			this.description = description;
 			this.level = defaultLevel;
 		}
+
+		@Override
+		public String getName() {
+			return name;
+		}
+
+		@Override
+		public String getDescription() {
+			return description;
+		}
+
+		@Override
+		public LogLevel getLevel() {
+			return level;
+		}
 	}
 
 	private static File root = null;
 	// Do not rename this field, it is used reflectively in tests
-	private static CHLog instance = null;
+	private static MSLog instance = null;
 
-	public static CHLog GetLogger() {
+	public static MSLog GetLogger() {
 		if(root == null) {
 			throw new RuntimeException("Logger is not initialized! Call CHLog.initialize before using the logger.");
 		}
 		if(instance == null) {
-			instance = new CHLog();
+			instance = new MSLog();
 		}
 		return instance;
 	}
@@ -93,14 +156,29 @@ public class CHLog {
 	 * @param root The root
 	 */
 	public static void initialize(File root) {
-		CHLog.root = root;
-		List<Preference> myPrefs = new ArrayList<Preference>();
-		for(Tags t : Tags.values()) {
-			myPrefs.add(new Preference(t.name, t.level.name(), Preferences.Type.STRING, t.description));
+		MSLog.root = root;
+		List<Preference> myPrefs = new ArrayList<>();
+		List<Tag> tags = new ArrayList<>();
+		for(Field f : ClassDiscovery.getDefaultInstance().loadFieldsWithAnnotation(MSLog.LogTag.class)) {
+			try {
+				Object o = f.get(null);
+				if(o instanceof Tag) {
+					tags.add((Tag) o);
+				} else {
+					System.err.println("Element tagged with LogTag, but is not an instance of Tag: "
+						+ f.getDeclaringClass() + "." + f.getName());
+				}
+			} catch (IllegalArgumentException | IllegalAccessException ex) {
+				System.err.println("Could not properly configure logger tag: " + ex.getMessage());
+			}
 		}
-		CHLog.prefs = new Preferences("CommandHelper", Static.getLogger(), myPrefs, HEADER);
+		for(Tag t : tags) {
+			myPrefs.add(new Preference(t.getName(), t.getLevel().name(), Preferences.Type.STRING, t.getDescription()));
+		}
+		KNOWN_TAGS.addAll(tags);
+		MSLog.prefs = new Preferences("CommandHelper", Static.getLogger(), myPrefs, HEADER);
 		try {
-			CHLog.prefs.init(MethodScriptFileLocations.getDefault().getLoggerPreferencesFile());
+			MSLog.prefs.init(MethodScriptFileLocations.getDefault().getLoggerPreferencesFile());
 		} catch (IOException e) {
 			Static.getLogger().log(java.util.logging.Level.SEVERE, "Could not create logger preferences", e);
 		}
@@ -112,13 +190,21 @@ public class CHLog {
 	 * @param tag
 	 * @return
 	 */
-	private static LogLevel GetLevel(Tags tag) {
+	private static LogLevel GetLevel(Tag tag) {
+		if(!KNOWN_TAGS.contains(tag)) {
+			String message = "Logging tag that was not properly configured: " + tag.getName()
+					+ ". Tags must be registered with the @LogTag annotation, otherwise they"
+					+ " are not configurable by the user!";
+			// Log this everywhere, since this is a problem for the developer.
+			System.err.println(message);
+			GetLogger().e(Tags.GENERAL, message, Target.UNKNOWN);
+		}
 		if(LOOKUP.containsKey(tag)) {
 			return LOOKUP.get(tag);
 		}
 		LogLevel level;
 		try {
-			String pref = prefs.getStringPreference(tag.name);
+			String pref = prefs.getStringPreference(tag.getName());
 			if("ON".equals(pref)) {
 				level = LogLevel.ERROR;
 			} else {
@@ -138,7 +224,7 @@ public class CHLog {
 	 * @param l
 	 * @return
 	 */
-	public boolean WillLog(Tags tag, LogLevel l) {
+	public boolean WillLog(Tag tag, LogLevel l) {
 		LogLevel level = GetLevel(tag);
 		if(level == LogLevel.OFF) {
 			return false;
@@ -159,7 +245,7 @@ public class CHLog {
 	 * @param t
 	 * @param messages
 	 */
-	public void LogOne(Tags tag, Target t, MsgBundle... messages) {
+	public void LogOne(Tag tag, Target t, MsgBundle... messages) {
 		if(GetLevel(tag) == LogLevel.OFF) {
 			return; //Bail!
 		}
@@ -184,7 +270,7 @@ public class CHLog {
 	 * @param t
 	 * @param messages
 	 */
-	public void LogAll(Tags tag, Target t, MsgBundle... messages) {
+	public void LogAll(Tag tag, Target t, MsgBundle... messages) {
 		if(GetLevel(tag) == LogLevel.OFF) {
 			return; //For efficiency sake, go ahead and bail.
 		}
@@ -200,7 +286,7 @@ public class CHLog {
 	 * @param message
 	 * @param t
 	 */
-	public void Log(Tags module, String message, Target t) {
+	public void Log(Tag module, String message, Target t) {
 		Log(module, LogLevel.ERROR, message, t);
 	}
 
@@ -212,7 +298,7 @@ public class CHLog {
 	 * @param message
 	 * @param t
 	 */
-	public void Log(Tags modules, LogLevel level, String message, Target t) {
+	public void Log(Tag modules, LogLevel level, String message, Target t) {
 		Log(modules, level, message, t, true);
 	}
 
@@ -225,7 +311,7 @@ public class CHLog {
 	 * @param t
 	 * @param printScreen
 	 */
-	public void Log(Tags modules, LogLevel level, String message, Target t, boolean printScreen) {
+	public void Log(Tag modules, LogLevel level, String message, Target t, boolean printScreen) {
 		LogLevel moduleLevel = GetLevel(modules);
 		if(moduleLevel == LogLevel.OFF && !Prefs.ScreamErrors()) {
 			return; //Bail as quick as we can!
@@ -233,7 +319,8 @@ public class CHLog {
 		if(moduleLevel.level >= level.level || (moduleLevel == LogLevel.ERROR && Prefs.ScreamErrors())) {
 			//We want to do the log
 			try {
-				Static.LogDebug(root, "[" + Implementation.GetServerType().getBranding() + "][" + level.name() + "][" + modules.name() + "] " + message + (t != Target.UNKNOWN ? " " + t.toString() : ""),
+				Static.LogDebug(root, "[" + Implementation.GetServerType().getBranding() + "][" + level.name()
+						+ "][" + modules.getName() + "] " + message + (t != Target.UNKNOWN ? " " + t.toString() : ""),
 						level, printScreen);
 			} catch (IOException e) {
 				//Well, shoot.
@@ -253,7 +340,7 @@ public class CHLog {
 	 * @param throwable
 	 * @param t
 	 */
-	public void e(Tags modules, Throwable throwable, Target t) {
+	public void e(Tag modules, Throwable throwable, Target t) {
 		Log(modules, LogLevel.ERROR, StackTraceUtils.GetStacktrace(throwable), t, true);
 	}
 
@@ -264,7 +351,7 @@ public class CHLog {
 	 * @param message
 	 * @param t
 	 */
-	public void e(Tags modules, String message, Target t) {
+	public void e(Tag modules, String message, Target t) {
 		Log(modules, LogLevel.ERROR, message, t, true);
 	}
 
@@ -275,7 +362,7 @@ public class CHLog {
 	 * @param message
 	 * @param t
 	 */
-	public void w(Tags modules, String message, Target t) {
+	public void w(Tag modules, String message, Target t) {
 		Log(modules, LogLevel.WARNING, message, t, true);
 	}
 
@@ -286,7 +373,7 @@ public class CHLog {
 	 * @param message
 	 * @param t
 	 */
-	public void i(Tags modules, String message, Target t) {
+	public void i(Tag modules, String message, Target t) {
 		Log(modules, LogLevel.INFO, message, t, true);
 	}
 
@@ -297,7 +384,7 @@ public class CHLog {
 	 * @param message
 	 * @param t
 	 */
-	public void d(Tags modules, String message, Target t) {
+	public void d(Tag modules, String message, Target t) {
 		Log(modules, LogLevel.DEBUG, message, t, true);
 	}
 
@@ -308,7 +395,7 @@ public class CHLog {
 	 * @param message
 	 * @param t
 	 */
-	public void v(Tags modules, String message, Target t) {
+	public void v(Tag modules, String message, Target t) {
 		Log(modules, LogLevel.VERBOSE, message, t, true);
 	}
 

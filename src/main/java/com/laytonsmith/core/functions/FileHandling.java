@@ -10,7 +10,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
@@ -91,7 +91,7 @@ public class FileHandling {
 				s = s.replaceAll("\n|\r\n", "\n");
 				return new CString(s, t);
 			} catch (Exception ex) {
-				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.INFO, "Could not read in file while attempting to find "
+				MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.INFO, "Could not read in file while attempting to find "
 						+ location.getAbsolutePath()
 						+ "\nFile " + (location.exists() ? "exists" : "does not exist"), t);
 				throw new CREIOException("File could not be read in.", t);

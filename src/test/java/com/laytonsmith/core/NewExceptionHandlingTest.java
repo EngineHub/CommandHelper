@@ -157,7 +157,7 @@ public class NewExceptionHandlingTest {
 
 	@Test
 	public void testHiddenThrowSetsOffLog() throws Exception {
-		CHLog log = StaticTest.InstallFakeLogger();
+		MSLog log = StaticTest.InstallFakeLogger();
 		StaticTest.SetPrivate(Exceptions.complex_try.class, "doScreamError", true, boolean.class);
 		try {
 			SRun("try { throw(IOException, 'hidden'); } finally { throw(CastException, 'shown'); }", fakePlayer);
@@ -166,7 +166,7 @@ public class NewExceptionHandlingTest {
 		} catch (Exception ex) {
 			fail("Expected an exception, but of type CRECastException");
 		}
-		verify(log).Log(eq(CHLog.Tags.RUNTIME), eq(LogLevel.WARNING), anyString(), any(Target.class));
+		verify(log).Log(eq(MSLog.Tags.RUNTIME), eq(LogLevel.WARNING), anyString(), any(Target.class));
 	}
 
 	@Test(expected = ConfigCompileException.class)

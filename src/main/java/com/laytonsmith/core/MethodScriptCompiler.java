@@ -918,7 +918,7 @@ public final class MethodScriptCompiler {
 			String fileName = tokenList.getFileOptions().getName();
 			if(!fileName.isEmpty()) {
 				if(!file.getAbsolutePath().replace("\\", "/").endsWith(fileName.replace("\\", "/"))) {
-					CHLog.GetLogger().w(CHLog.Tags.COMPILER, file + " has the wrong file name in the file options ("
+					MSLog.GetLogger().w(MSLog.Tags.COMPILER, file + " has the wrong file name in the file options ("
 							+ fileName + ")",
 							new Target(0, file, 0));
 				}
@@ -2372,7 +2372,7 @@ public final class MethodScriptCompiler {
 					if(isBranch) {
 						doDeletion = false;
 					} else {
-						CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Unreachable code. Consider"
+						MSLog.GetLogger().Log(MSLog.Tags.COMPILER, LogLevel.WARNING, "Unreachable code. Consider"
 												+ " removing this code.", children.get(m).getTarget());
 						children.remove(m);
 						m--;

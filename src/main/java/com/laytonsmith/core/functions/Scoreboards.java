@@ -13,7 +13,7 @@ import com.laytonsmith.abstraction.enums.MCOption;
 import com.laytonsmith.abstraction.enums.MCOptionStatus;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.NotInitializedYetException;
 import com.laytonsmith.core.Static;
@@ -1202,7 +1202,7 @@ public class Scoreboards {
 							name = name.substring(5);
 							try {
 								namevisibility = MCOptionStatus.valueOf(name);
-								CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "Found old value for NameTagVisibility: \""
+								MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Found old value for NameTagVisibility: \""
 										+ "HIDE_" + name + "\". This should be: \"" + name + "\"", t);
 							} catch (IllegalArgumentException ex) {
 								throw new CREFormatException("Unknown nametagvisibility: "

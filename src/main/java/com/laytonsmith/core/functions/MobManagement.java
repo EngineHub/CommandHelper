@@ -28,7 +28,7 @@ import com.laytonsmith.abstraction.enums.MCZombieType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -260,7 +260,7 @@ public class MobManagement {
 		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
-			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The function tame_mob() is deprecated for set_mob_owner().", t);
+			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The function tame_mob() is deprecated for set_mob_owner().", t);
 			return null;
 		}
 
@@ -1389,7 +1389,7 @@ public class MobManagement {
 					try {
 						material = StaticLayer.GetMaterialFromLegacy(Static.getInt16(mat, t), 0);
 						if(material != null) {
-							CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The id \"" + mat.val() + "\" is deprecated."
+							MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The id \"" + mat.val() + "\" is deprecated."
 									+ " Converted to \"" + material.getName() + "\"", t);
 							transparents.add(material);
 							continue;

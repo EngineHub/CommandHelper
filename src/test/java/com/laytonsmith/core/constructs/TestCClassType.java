@@ -2,6 +2,8 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.core.FullyQualifiedClassName;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.Before;
@@ -24,13 +26,16 @@ import org.junit.Ignore;
  */
 public class TestCClassType {
 
+	static Environment env;
+
 	@Before
-	public void load() {
+	public void load() throws Exception {
 		StaticTest.InstallFakeServerFrontend();
+		env = Static.GenerateStandaloneEnvironment(false);
 	}
 
 	private static CClassType get(String... types) throws ClassNotFoundException {
-		return CClassType.get(Stream.of(types).map(e -> FullyQualifiedClassName.forName(e, Target.UNKNOWN))
+		return CClassType.get(Stream.of(types).map(e -> FullyQualifiedClassName.forName(e, Target.UNKNOWN, env))
 				.collect(Collectors.toList()).toArray(new FullyQualifiedClassName[0]));
 	}
 

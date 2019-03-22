@@ -48,7 +48,7 @@ import com.laytonsmith.abstraction.events.MCProjectileHitEvent;
 import com.laytonsmith.abstraction.events.MCProjectileLaunchEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -112,7 +112,7 @@ public class EntityEvents {
 			// handle deprecated prefilter
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("item")) {
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
 						+ " is deprecated for \"itemname\".", event.getTarget());
 				MCItemStack is = Static.ParseItemNotation(null, prefilter.get("item").val(), 1, event.getTarget());
 				prefilter.put("itemname", new CString(is.getType().getName(), event.getTarget()));
@@ -190,7 +190,7 @@ public class EntityEvents {
 			// handle deprecated prefilter
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("item")) {
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
 						+ " is deprecated for \"itemname\".", event.getTarget());
 				MCItemStack is = Static.ParseItemNotation(null, prefilter.get("item").val(), 1, event.getTarget());
 				prefilter.put("itemname", new CString(is.getType().getName(), event.getTarget()));
@@ -1130,7 +1130,7 @@ public class EntityEvents {
 			// handle deprecated prefilter
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("item")) {
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
 						+ " is deprecated for \"itemname\".", event.getTarget());
 				MCItemStack is = Static.ParseItemNotation(null, prefilter.get("item").val(), 1, event.getTarget());
 				prefilter.put("itemname", new CString(is.getType().getName(), event.getTarget()));
@@ -1208,7 +1208,7 @@ public class EntityEvents {
 			// handle deprecated prefilter
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("item")) {
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
 						+ " is deprecated for \"itemname\".", event.getTarget());
 				MCItemStack is = Static.ParseItemNotation(null, prefilter.get("item").val(), 1, event.getTarget());
 				prefilter.put("itemname", new CString(is.getType().getName(), event.getTarget()));
@@ -1576,7 +1576,7 @@ public class EntityEvents {
 			if(prefilter.containsKey("from")) {
 				Mixed type = prefilter.get("from");
 				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The 0:0 block format in " + getName()
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The 0:0 block format in " + getName()
 							+ " is deprecated in \"from\" prefilter.", event.getTarget());
 					MCItemStack is = Static.ParseItemNotation(null, type.val(), 1, event.getTarget());
 					prefilter.put("from", new CString(is.getType().getName(), event.getTarget()));
@@ -1585,7 +1585,7 @@ public class EntityEvents {
 			if(prefilter.containsKey("to")) {
 				Mixed type = prefilter.get("to");
 				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The 0:0 block format in " + getName()
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The 0:0 block format in " + getName()
 							+ " is deprecated in \"to\" prefilter.", event.getTarget());
 					MCItemStack is = Static.ParseItemNotation(null, type.val(), 1, event.getTarget());
 					prefilter.put("to", new CString(is.getType().getName(), event.getTarget()));
@@ -1671,7 +1671,7 @@ public class EntityEvents {
 			if(prefilter.containsKey("blockname")) {
 				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("blockname").val(), 0);
 				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"blockname\" prefilter in " + getName()
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"blockname\" prefilter in " + getName()
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("block")) {
 				Mixed ctype = prefilter.get("block");
@@ -1689,7 +1689,7 @@ public class EntityEvents {
 						throw new CREBindException("Cannot find material by the id '" + notation + "'", event.getTarget());
 					}
 					prefilter.put("block", new CString(mat.getName(), event.getTarget()));
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The block notation format in the \"block\" prefilter"
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The block notation format in the \"block\" prefilter"
 							+ " in " + getName() + " is deprecated. Converted to " + mat.getName(), event.getTarget());
 				}
 			}

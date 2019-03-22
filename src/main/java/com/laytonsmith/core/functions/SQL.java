@@ -9,7 +9,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
@@ -134,7 +134,7 @@ public class SQL {
 					// isValid is added in later versions. We want to continue working, (as if the connection
 					// is not valid) but still warn the user that this will
 					// be slower.
-					CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING, "SQL driver does not support the \"isValid\" method, which"
+					MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.WARNING, "SQL driver does not support the \"isValid\" method, which"
 							+ " is causing " + Implementation.GetServerType().getBranding() + " to use a slower method.", t);
 				}
 				if(c.isClosed() || !isValid) {
@@ -319,7 +319,7 @@ public class SQL {
 			if(queryData instanceof CFunction) {
 				//If it's a concat or sconcat, warn them that this is bad
 				if(doWarn && ("sconcat".equals(queryData.val()) || "concat".equals(queryData.val()))) {
-					CHLog.GetLogger().w(CHLog.Tags.COMPILER, "Use of concatenated query detected! This"
+					MSLog.GetLogger().w(MSLog.Tags.COMPILER, "Use of concatenated query detected! This"
 							+ " is very bad practice, and could lead to SQL injection vulnerabilities"
 							+ " in your code. It is highly recommended that you use prepared queries,"
 							+ " which ensure that your parameters are properly escaped. If you really"

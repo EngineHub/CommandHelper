@@ -607,13 +607,14 @@ public class Math {
 			if(args.length == 2) {
 				if(args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
-					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget());
+					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget(),
+							env);
 				}
 				value = Static.getInt(args[1], t);
 			}
 			if(args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget());
+				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget(), env);
 				Mixed newVal;
 				if(Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival(), t) + value, t);
@@ -623,7 +624,7 @@ public class Math {
 				if(v.ival() instanceof CMutablePrimitive) {
 					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
 				}
-				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t);
+				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t, env);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return v;
 			} else if(Static.anyDoubles(args[0])) {
@@ -723,13 +724,14 @@ public class Math {
 			if(args.length == 2) {
 				if(args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
-					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget());
+					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget(),
+							env);
 				}
 				value = Static.getInt(args[1], t);
 			}
 			if(args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget());
+				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget(), env);
 				Mixed newVal;
 				if(Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival(), t) + value, t);
@@ -745,7 +747,7 @@ public class Math {
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t);
+				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t, env);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return oldVal;
 			} else if(Static.anyDoubles(args[0])) {
@@ -849,13 +851,14 @@ public class Math {
 			if(args.length == 2) {
 				if(args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
-					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget());
+					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget(),
+							env);
 				}
 				value = Static.getInt(args[1], t);
 			}
 			if(args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget());
+				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget(), env);
 				Mixed newVal;
 				if(Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival(), t) - value, t);
@@ -865,7 +868,7 @@ public class Math {
 				if(v.ival() instanceof CMutablePrimitive) {
 					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
 				}
-				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t);
+				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t, env);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return v;
 			} else if(Static.anyDoubles(args[0])) {
@@ -965,13 +968,14 @@ public class Math {
 			if(args.length == 2) {
 				if(args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
-					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget());
+					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getVariableName(), cur2.getTarget(),
+							env);
 				}
 				value = Static.getInt(args[1], t);
 			}
 			if(args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget());
+				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget(), env);
 				Mixed newVal;
 				if(Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival(), t) - value, t);
@@ -987,7 +991,7 @@ public class Math {
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t);
+				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t, env);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return oldVal;
 			} else if(Static.anyDoubles(args[0])) {

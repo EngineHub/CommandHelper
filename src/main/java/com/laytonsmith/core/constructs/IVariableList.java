@@ -1,7 +1,8 @@
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.environments.Environment;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -27,9 +28,9 @@ public class IVariableList {
 		varList.put(v.getVariableName(), v);
 	}
 
-	public IVariable get(String name, Target t, boolean bypassAssignedCheck) {
+	public IVariable get(String name, Target t, boolean bypassAssignedCheck, Environment env) {
 		if(!varList.containsKey(name)) {
-			this.set(new IVariable(Auto.TYPE, name, CNull.UNDEFINED, t));
+			this.set(new IVariable(Auto.TYPE, name, CNull.UNDEFINED, t, env));
 		}
 		IVariable v = varList.get(name);
 
@@ -38,14 +39,14 @@ public class IVariableList {
 		// non-strict mode it will be a compiler warning.
 		// ==, not .equals
 		if(v.ival() == CNull.UNDEFINED && !bypassAssignedCheck) {
-			CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, "Using undefined variable: " + name, t);
+			MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, "Using undefined variable: " + name, t);
 		}
 		v.setTarget(t);
 		return v;
 	}
 
-	public IVariable get(String name, Target t) {
-		return get(name, t, false);
+	public IVariable get(String name, Target t, Environment env) {
+		return get(name, t, false, env);
 	}
 
 	/**

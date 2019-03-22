@@ -41,7 +41,6 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.LoopBreakException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
@@ -653,15 +652,11 @@ public class BasicLogic {
 			String notConstant = "Cases for a switch statement must be constant, not variable";
 			String alreadyContains = "The switch statement already contains a case for this value, remove the duplicate value";
 			final equals equals = new equals();
-			Set<Mixed> values = new TreeSet<>(new Comparator<Mixed>() {
-
-				@Override
-				public int compare(Mixed t, Mixed t1) {
-					if(equals.exec(Target.UNKNOWN, null, t, t1).getBoolean()) {
-						return 0;
-					} else {
-						return t.val().compareTo(t1.val());
-					}
+			Set<Mixed> values = new TreeSet<>((Mixed t1, Mixed t2) -> {
+				if(equals.exec(Target.UNKNOWN, null, t1, t2).getBoolean()) {
+					return 0;
+				} else {
+					return t1.val().compareTo(t2.val());
 				}
 			});
 			final boolean hasDefaultCase = (children.size() & 0b00000001) == 0; // size % 2 == 0 -> Even number means there is a default.

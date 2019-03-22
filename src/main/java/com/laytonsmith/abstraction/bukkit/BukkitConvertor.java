@@ -74,7 +74,7 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPatternShape;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionType;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -426,7 +426,7 @@ public class BukkitConvertor extends AbstractConvertor {
 		try {
 			return BukkitConvertor.BukkitGetCorrectEntity(be);
 		} catch (IllegalArgumentException iae) {
-			CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.INFO, iae.getMessage(), Target.UNKNOWN);
+			MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.INFO, iae.getMessage(), Target.UNKNOWN);
 			return e;
 		}
 	}

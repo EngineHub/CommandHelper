@@ -1,7 +1,7 @@
 package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.potion.PotionEffectType;
 
@@ -36,7 +36,7 @@ public class BukkitMCPotionEffectType extends MCPotionEffectType<PotionEffectTyp
 			if(v.existsInCurrent()) {
 				PotionEffectType effect = getBukkitType(v);
 				if(effect == null) {
-					CHLog.GetLogger().w(CHLog.Tags.RUNTIME, "Could not find a Bukkit potion effect type for " + v.name(), Target.UNKNOWN);
+					MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Could not find a Bukkit potion effect type for " + v.name(), Target.UNKNOWN);
 					continue;
 				}
 				BukkitMCPotionEffectType wrapper = new BukkitMCPotionEffectType(v, effect);

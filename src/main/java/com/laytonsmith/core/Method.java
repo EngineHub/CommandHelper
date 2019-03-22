@@ -67,6 +67,20 @@ public class Method extends Construct implements Callable {
 		return MSVersion.V3_3_4;
 	}
 
+	public CClassType[] getParameters() {
+		return parameters;
+	}
 
+	public String getMethodName() {
+		return name;
+	}
+
+	public CClassType getReturnType() {
+		return returnType;
+	}
+
+	public ParseTree getTree() {
+		return tree;
+	}
 
 }

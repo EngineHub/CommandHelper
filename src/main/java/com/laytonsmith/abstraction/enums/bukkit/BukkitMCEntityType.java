@@ -11,7 +11,7 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCStorageMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCTNT;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCThrownPotion;
 import com.laytonsmith.abstraction.enums.MCEntityType;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.entity.EntityType;
 
@@ -35,7 +35,7 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 				try {
 					type = getBukkitType(v);
 				} catch (IllegalArgumentException | NoSuchFieldError ex) {
-					CHLog.GetLogger().w(CHLog.Tags.RUNTIME, "Could not find a Bukkit EntityType for " + v.name(), Target.UNKNOWN);
+					MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Could not find a Bukkit EntityType for " + v.name(), Target.UNKNOWN);
 					continue;
 				}
 				BukkitMCEntityType wrapper = new BukkitMCEntityType(type, v);
@@ -152,7 +152,7 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 				} catch (ClassNotFoundException e) {
 					String url = "https://github.com/sk89q/CommandHelper/tree/master/src/main/java/"
 							+ "com/laytonsmith/abstraction/bukkit/entities";
-					CHLog.GetLogger().d(CHLog.Tags.RUNTIME, "While trying to find the correct entity class for "
+					MSLog.GetLogger().d(MSLog.Tags.RUNTIME, "While trying to find the correct entity class for "
 							+ getAbstracted().name() + "(attempted " + name + "), we could not find a wrapper class."
 							+ " This is not necessarily an error, we just don't have any special handling for"
 							+ " this entity yet, and will treat it generically. If there is a matching file at"

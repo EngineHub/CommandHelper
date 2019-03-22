@@ -183,7 +183,7 @@ public class Procedure implements Cloneable {
 		CArray arguments = new CArray(Target.UNKNOWN);
 		for(String key : originals.keySet()) {
 			Mixed c = originals.get(key);
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, key, c, Target.UNKNOWN));
+			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, key, c, Target.UNKNOWN, env));
 			arguments.push(c, t);
 		}
 		Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel()); // new Script(null, null);
@@ -192,8 +192,10 @@ public class Procedure implements Cloneable {
 			arguments.set(i, c, t);
 			if(varIndex.size() > i) {
 				String varname = varIndex.get(i).getVariableName();
-				if(c instanceof CNull || InstanceofUtil.isInstanceof(c, varIndex.get(i).getDefinedType()) || varIndex.get(i).getDefinedType().equals(Auto.TYPE)) {
-					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(varIndex.get(i).getDefinedType(), varname, c, c.getTarget()));
+				if(c instanceof CNull || InstanceofUtil.isInstanceof(c, varIndex.get(i).getDefinedType(), env)
+						|| varIndex.get(i).getDefinedType().equals(Auto.TYPE)) {
+					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(varIndex.get(i).getDefinedType(),
+							varname, c, c.getTarget(), env));
 				} else {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
 							+ varIndex.get(i).getDefinedType().val() + " in argument " + (i + 1) + ", but"
@@ -201,7 +203,8 @@ public class Procedure implements Cloneable {
 				}
 			}
 		}
-		env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, Target.UNKNOWN));
+		env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, Target.UNKNOWN,
+				env));
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
 		try {
@@ -224,7 +227,7 @@ public class Procedure implements Cloneable {
 		} catch (FunctionReturnException e) {
 			// Normal exit
 			Mixed ret = e.getReturn();
-			if(!InstanceofUtil.isInstanceof(ret, returnType)) {
+			if(!InstanceofUtil.isInstanceof(ret, returnType, env)) {
 				throw new CRECastException("Expected procedure \"" + name + "\" to return a value of type " + returnType.val()
 						+ " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
 			}

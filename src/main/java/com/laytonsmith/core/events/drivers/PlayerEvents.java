@@ -45,7 +45,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -197,7 +197,7 @@ public class PlayerEvents {
 			// handle deprecated prefilter
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("item")) {
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
 						+ " is deprecated for \"itemname\".", event.getTarget());
 				MCItemStack is = Static.ParseItemNotation(null, prefilter.get("item").val(), 1, event.getTarget());
 				prefilter.put("itemname", new CString(is.getType().getName(), event.getTarget()));
@@ -806,7 +806,7 @@ public class PlayerEvents {
 			// handle deprecated prefilters
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("item")) {
-				CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
 						+ " is deprecated for \"itemname\".", event.getTarget());
 				MCItemStack is = Static.ParseItemNotation(null, prefilter.get("item").val(), 1, event.getTarget());
 				prefilter.put("itemname", new CString(is.getType().getName(), event.getTarget()));
@@ -827,7 +827,7 @@ public class PlayerEvents {
 						throw new CREBindException("Invalid material '" + notation + "'", event.getTarget());
 					}
 					prefilter.put("block", new CString(mat.getName(), event.getTarget()));
-					CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The notation format in the \"block\" prefilter in "
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The notation format in the \"block\" prefilter in "
 							+ getName() + " is deprecated. Converted to " + mat.getName(), event.getTarget());
 				}
 			}

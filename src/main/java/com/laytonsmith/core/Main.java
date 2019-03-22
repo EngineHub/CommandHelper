@@ -396,7 +396,11 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		try {
 
-			CHLog.initialize(MethodScriptFileLocations.getDefault().getJarDirectory());
+			ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
+			cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
+			ClassDiscoveryCache cdcCache
+					= new ClassDiscoveryCache(MethodScriptFileLocations.getDefault().getCacheDirectory());
+			MSLog.initialize(MethodScriptFileLocations.getDefault().getJarDirectory());
 			Prefs.init(MethodScriptFileLocations.getDefault().getPreferencesFile());
 
 			Prefs.SetColors();
@@ -405,10 +409,6 @@ public class Main {
 				org.fusesource.jansi.AnsiConsole.systemInstall();
 			}
 
-			ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
-			cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
-			ClassDiscoveryCache cdcCache
-					= new ClassDiscoveryCache(MethodScriptFileLocations.getDefault().getCacheDirectory());
 			cd.setClassDiscoveryCache(cdcCache);
 			cd.addAllJarsInFolder(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
 

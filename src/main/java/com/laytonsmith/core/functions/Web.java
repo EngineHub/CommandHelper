@@ -17,7 +17,7 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.EmailProfile;
 import com.laytonsmith.core.LogLevel;
@@ -524,17 +524,17 @@ public class Web {
 				//Just ignore this if it's returning void. Otherwise, warn.
 				//TODO: Eventually, this should be taggable as a compile error
 				if(!(ret instanceof CVoid)) {
-					CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.WARNING, "Returning a value from the closure. The value is"
+					MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.WARNING, "Returning a value from the closure. The value is"
 							+ " being ignored.", t);
 				}
 			} catch (ProgramFlowManipulationException e) {
 				//This is an error
-				CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.WARNING, "Only return may be used inside the closure.", t);
+				MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.WARNING, "Only return may be used inside the closure.", t);
 			} catch (ConfigRuntimeException e) {
 				ConfigRuntimeException.HandleUncaughtException(e, environment);
 			} catch (Throwable e) {
 				//Other throwables we just need to report
-				CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, "An unexpected exception has occurred. No extra"
+				MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, "An unexpected exception has occurred. No extra"
 						+ " information is available, but please report this error:\n" + StackTraceUtils.GetStacktrace(e), t);
 			}
 		}

@@ -2,6 +2,7 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -99,8 +100,8 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 
 	@Override
 	public long size() {
-		if(value instanceof CString) {
-			return ((CString) value).size();
+		if(value.isInstanceOf(Sizeable.class)) {
+			return ArgumentValidation.getObject(value, Target.UNKNOWN, Sizeable.class).size();
 		} else {
 			return 0;
 		}
