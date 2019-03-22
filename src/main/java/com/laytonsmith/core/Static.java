@@ -1256,11 +1256,15 @@ public final class Static {
 		}
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(platformFolder);
+		Profiles profiles = null;
+		if(MethodScriptFileLocations.getDefault().getProfilesFile().exists()) {
+			profiles = new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile());
+		}
 		PersistenceNetwork persistenceNetwork = new PersistenceNetworkImpl(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 				new URI(URLEncoder.encode("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace('\\', '/'), "UTF-8")), options);
 		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"),
 				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork, platformFolder,
-				new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile()), new TaskManagerImpl());
+				profiles, new TaskManagerImpl());
 		gEnv.SetLabel(GLOBAL_PERMISSION);
 		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment(), new CompilerEnvironment());
 	}
