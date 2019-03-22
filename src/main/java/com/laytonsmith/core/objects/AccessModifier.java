@@ -8,14 +8,18 @@ package com.laytonsmith.core.objects;
 import com.laytonsmith.annotations.MEnum;
 
 /**
- * An AccessModifier describes the state of
+ * An AccessModifier describes the state of visibility of an item.
  */
 @MEnum("ms.lang.AccessModifier")
 public enum AccessModifier {
-		/**
+	/**
 	 * A public class is one that can be accessed from any other class.
 	 */
 	PUBLIC,
+	/**
+	 * An internal class is one that can be accessed from within just this project.
+	 */
+	INTERNAL,
 	/**
 	 * A package level class is one that can be accessed from other classes that are within the same package
 	 */

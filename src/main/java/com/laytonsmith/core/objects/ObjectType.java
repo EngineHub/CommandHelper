@@ -1,9 +1,12 @@
 package com.laytonsmith.core.objects;
 
+import com.laytonsmith.annotations.MEnum;
+
 /**
  *
  * @author cailin
  */
+@MEnum("ms.lang.ObjectType")
 public enum ObjectType {
 	/**
 	 * A class is defined with the {@code class} keyword and represents a class that is instantiatable (in general) and

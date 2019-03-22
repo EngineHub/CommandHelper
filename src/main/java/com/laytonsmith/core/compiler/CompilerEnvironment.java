@@ -42,6 +42,12 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl {
 	 */
 	private final Stack<Set<String>> knownVars = new Stack<>();
 
+	/**
+	 * Classes are generally defined at compile time, and anyways, the object definitions that are available are
+	 * compiled into the ObjectDefinitionTable. Methods and internal pieces may not be fully defined yet, however,
+	 * but at runtime these will be fully useable mechanisms. During compile time, care must be taken not to use
+	 * a potentially partially defined class.
+	 */
 	private final ObjectDefinitionTable objectDefinitionTable = ObjectDefinitionTable.GetBlankInstance();
 
 	//TODO: Need to figure out how to do known procs.

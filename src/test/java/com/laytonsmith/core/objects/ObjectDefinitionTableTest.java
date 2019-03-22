@@ -1,5 +1,7 @@
 package com.laytonsmith.core.objects;
 
+import com.laytonsmith.core.FullyQualifiedClassName;
+import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.constructs.CPrimitive;
 import com.laytonsmith.core.constructs.CString;
@@ -18,10 +20,22 @@ import org.junit.Ignore;
 /**
  *
  */
-@Ignore("Ignored for now, while the features are being slowly rolled out")
 public class ObjectDefinitionTableTest {
 
 	Environment env;
+
+	private void doCompile(String script) throws Exception {
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("Test.ms"), true), env);
+	}
+
+	private ObjectDefinition getObjectDefinition(String fqcn) throws Exception {
+		return env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable()
+				.get(FullyQualifiedClassName.forFullyQualifiedClass(fqcn));
+	}
+
+	private void addNatives() {
+		env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable().addNativeTypes(env);
+	}
 
 	@Before
 	public void Before() {
@@ -32,6 +46,7 @@ public class ObjectDefinitionTableTest {
 	}
 
 	@Test
+	@Ignore("Ignored for now, while the features are being slowly rolled out")
 	public void testNativeTypeListIsProperlyAdded() {
 		ObjectDefinitionTable table = ObjectDefinitionTable.GetNewInstance(env);
 		try {
@@ -48,6 +63,7 @@ public class ObjectDefinitionTableTest {
 	}
 
 	@Test
+	@Ignore("Ignored for now, while the features are being slowly rolled out")
 	public void testStringIsProperlyDefined() {
 		ObjectDefinitionTable table1 = ObjectDefinitionTable.GetNewInstance(env);
 		ObjectDefinition string1 = table1.get(CString.class);
@@ -65,8 +81,17 @@ public class ObjectDefinitionTableTest {
 	}
 
 	@Test
+	@Ignore("Ignored for now, while the features are being slowly rolled out")
 	public void testExposedPropertiesAreProperlyDefined() {
 
+	}
+
+	@Test
+	@Ignore
+	public void testEmptyClassIsDefined() throws Exception {
+		String clazz = "class Test implements A, B {}";
+		doCompile(clazz);
+		getObjectDefinition("Test");
 	}
 
 }
