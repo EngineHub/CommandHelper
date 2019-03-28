@@ -94,7 +94,7 @@ public class FileHandling {
 				MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.INFO, "Could not read in file while attempting to find "
 						+ location.getAbsolutePath()
 						+ "\nFile " + (location.exists() ? "exists" : "does not exist"), t);
-				throw new CREIOException("File could not be read in.", t);
+				throw new CREIOException("File \"" + location + "\" could not be read in.", t);
 			}
 		}
 

@@ -414,6 +414,32 @@ public final class FileUtil {
 		}
 	}
 
+	public static interface FileHandler {
+		/**
+		 * Handles a file.
+		 * @param f
+		 * @throws java.io.IOException If the some operation on the file errored.
+		 */
+		void handle(File f) throws IOException;
+	}
+	/**
+	 * Recursively iterates through all files in this directory and all subdirectories. It takes a callback, which is
+	 * sent each file, in turn. The parent directory (the one passed in) is also sent to the handler. The callback
+	 * may throw an IOException, which stops further processing, and is rethrown.
+	 * @param file The file to start with
+	 * @param handler The handler to use to process the file
+	 * @throws java.io.IOException If the underlying handler throws an IOException. If the handler does not throw
+	 * an IOException, then this function will never otherwise do so. (SecurityExceptions may be thrown, however.)
+	 */
+	public static void recursiveFind(File file, FileHandler handler) throws IOException {
+		handler.handle(file);
+		if(file.isDirectory()) {
+			for(File f : file.listFiles()) {
+				recursiveFind(f, handler);
+			}
+		}
+	}
+
 	/**
 	 * Recursively deletes a file/folder structure on exit. This will not delete the file immediately, but it is not
 	 * an error to delete the file first.

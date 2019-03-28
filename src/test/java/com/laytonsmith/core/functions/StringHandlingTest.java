@@ -63,11 +63,15 @@ public class StringHandlingTest {
 		assertCEquals(C.onstruct(2), a.exec(Target.UNKNOWN, null, C.Array(C.onstruct(0), C.onstruct(1))));
 	}
 
-	@Test(timeout = 10000)
-	public void testParseArgs() {
+	@Test//(timeout = 10000)
+	public void testParseArgs() throws Exception {
+		SRun("msg(parse_args('o \"\\\\t\"', true))", fakePlayer);
+		verify(fakePlayer).sendMessage("{o, \\t}");
 		StringHandling.parse_args a = new StringHandling.parse_args();
 		assertCEquals(C.Array(C.onstruct("one"), C.onstruct("two")), a.exec(Target.UNKNOWN, null, C.onstruct("one   two")));
 		assertCEquals(C.Array(C.onstruct("one"), C.onstruct("two")), a.exec(Target.UNKNOWN, null, C.onstruct("one two")));
+		SRun("msg(parse_args('one \"two\"', true))", fakePlayer);
+		verify(fakePlayer).sendMessage("{one, two}");
 	}
 
 	@Test(timeout = 10000)

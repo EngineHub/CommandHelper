@@ -2,7 +2,7 @@ Array iteration is an often overlooked aspect of programming. At first glance, i
 modifications to it as you are iterating it seems like a trivial operation. However, this is not the case,
 as several unrelated operations can cause the iteration to cause undefined behavior. MethodScript has some
 automatic controls to make this operation easier in straightforward cases, while preventing accidental behavior
-caused by concurrent modification operations. All the specified operations involve the builtin foreach loop,
+caused by concurrent modification operations. All the specified operations involve the builtin foreach loop;
 for loops, while, and do/while loops do not support these behaviors, as it is up to the programmer to manage the
 counter loops in those cases.
 

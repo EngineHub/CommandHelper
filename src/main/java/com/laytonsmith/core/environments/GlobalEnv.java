@@ -408,7 +408,9 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	}
 
 	/**
-	 * Returns true if this script has been interrupted, and should immediately halt execution.
+	 * Returns true if this script has been interrupted, and should immediately halt execution. This is monitored
+	 * in the core execution engine, however, if a function could be particularly long running, this value should
+	 * be manually checked, since the engine is not pre-emptive.
 	 *
 	 * @return
 	 */

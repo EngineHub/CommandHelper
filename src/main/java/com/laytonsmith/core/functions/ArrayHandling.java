@@ -419,7 +419,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	@seealso({array_set.class})
+	@seealso({array_set.class, array_push_all.class})
 	public static class array_push extends AbstractFunction {
 
 		@Override
@@ -3285,5 +3285,53 @@ public class ArrayHandling {
 			}
 			return true;
 		}
+	}
+
+	@api
+	@seealso(array_push.class)
+	public static class array_push_all extends CompositeFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public String getName() {
+			return "array_push_all";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {array, values} Pushes all the values of an array individually. If you try to push an array"
+					+ " onto array_push, this will give you a two dimensional array, this method pushes the sub values"
+					+ " of the values array into the destination array.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		protected String script() {
+			return getBundledCode();
+		}
+
 	}
 }

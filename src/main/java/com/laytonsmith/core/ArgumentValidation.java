@@ -21,8 +21,10 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import java.util.EnumSet;
 
 import java.util.regex.Pattern;
+import java.util.Set;
 
 /**
  * This class provides a way to validate, parse, and manipulate arguments passed to functions in a standard, minimalist
@@ -495,5 +497,32 @@ public final class ArgumentValidation {
 			throw new CRECastException("Cannot find enum of type " + name + " with value \"" + val + "\"."
 					+ " Valid options are: " + StringUtils.Join(enumClass.getEnumConstants(), ", ", ", or "), t);
 		}
+	}
+
+	/**
+	 * Returns a set of the given enum value. The input value may be either a single value or an array. If
+	 * it is a single value, the set will be of size 1. Null is also supported, and will return a set of size
+	 * 0. Internally, uses {@link #getEnum}, so the behavior will generally be consistent with that.
+	 * @param <T>
+	 * @param c
+	 * @param enumClass
+	 * @param t
+	 * @return
+	 */
+	public static <T extends Enum<T>> Set<T> getEnumSet(Mixed c, Class<T> enumClass, Target t) {
+		if(c instanceof CNull) {
+			return EnumSet.noneOf(enumClass);
+		}
+		if(!c.isInstanceOf(CArray.class)) {
+			Mixed val = c;
+			c = new CArray(t);
+			((CArray) c).push(val, t);
+		}
+		CArray ca = (CArray) c;
+		Set<T> set = EnumSet.noneOf(enumClass);
+		for(Mixed v : ca.asList()) {
+			set.add(getEnum(v, enumClass, t));
+		}
+		return set;
 	}
 }

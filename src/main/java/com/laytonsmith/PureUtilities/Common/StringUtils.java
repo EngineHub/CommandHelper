@@ -526,13 +526,17 @@ public final class StringUtils {
 	 * @return
 	 */
 	public static List<String> ArgParser(String args) {
-		List<String> arguments = new ArrayList<String>();
+		List<String> arguments = new ArrayList<>();
 		StringBuilder buf = new StringBuilder();
 		char escape = 0;
 		char quote = 0;
 		boolean wasQuote = false;
 		for(int i = 0; i < args.length(); i++) {
 			char ch = args.charAt(i);
+			char ch2 = 0;
+			if(args.length() > i + 1) {
+				ch2 = args.charAt(i + 1);
+			}
 			if(quote != 0) {  // we're in a quote
 				if(escape != 0) {  // we're in an escape too
 					if(ch == quote) {  // escaping the same quote gives just that quote
@@ -571,13 +575,19 @@ public final class StringUtils {
 				}
 			}
 			// escape handling and default handling can fall through from either branch to here
-			switch(ch) {
-				case '\\':
-					escape = ch;
-					break;
-				default:
-					buf.append(ch);
+			if(ch == '\\' && ch2 == quote) {
+				buf.append(ch2);
+				i++;
+			} else {
+				buf.append(ch);
 			}
+//			switch(ch) {
+//				case '\\':
+//					escape = ch;
+//					break;
+//				default:
+//					buf.append(ch);
+//			}
 		}
 		if(escape != 0) {  // makes trailing escapes be appended (erroneous string, though, IMO)
 			buf.append(escape);

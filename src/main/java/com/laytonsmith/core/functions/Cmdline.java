@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
@@ -9,6 +10,7 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
@@ -18,6 +20,7 @@ import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -35,10 +38,12 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.CRE.CREShellException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -1943,6 +1948,131 @@ public class Cmdline {
 		@Override
 		public Version since() {
 			return MSVersion.V3_3_2;
+		}
+
+	}
+
+	@api
+	public static class x_find extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIllegalArgumentException.class, CREInsufficientPermissionException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			requireCmdlineMode(environment, this, t);
+			final CArray a = new CArray(t);
+			String regex = ArgumentValidation.getString(args[0], t);
+			String startFrom = environment.getEnv(GlobalEnv.class).GetRootFolder().getAbsolutePath();
+			Set<FindType> findTypes = EnumSet.allOf(FindType.class);
+			if(args.length == 2) {
+				if(args[1].isInstanceOf(CArray.class)) {
+					findTypes = ArgumentValidation.getEnumSet(args[1], FindType.class, t);
+				} else {
+					startFrom = ArgumentValidation.getString(args[1], t);
+				}
+			} else if(args.length > 2) {
+				startFrom = ArgumentValidation.getString(args[1], t);
+				findTypes = ArgumentValidation.getEnumSet(args[2], FindType.class, t);
+			}
+			if(findTypes.isEmpty()) {
+				throw new CREIllegalArgumentException("types must be a non-empty array, and not null", t);
+			}
+			File startFromF = new File(startFrom);
+			final Set<FindType> types = findTypes;
+			try {
+				FileUtil.recursiveFind(startFromF, (file) -> {
+					// We are such a potentially long running process, that we want to specially provide support
+					// for Ctrl-C, so we check for interruption here.
+					if(environment.getEnv(GlobalEnv.class).IsInterrupted()) {
+						throw new CancelCommandException("", Target.UNKNOWN);
+					}
+					if(!types.contains(FindType.FILE) && file.isHidden()) {
+						return;
+					}
+					if(!types.contains(FindType.DIRECTORY) && file.isDirectory()) {
+						return;
+					}
+					if(!types.contains(FindType.FILE) && file.isFile()) {
+						return;
+					}
+					if(file.getName().matches(regex)) {
+						a.push(new CString(file.getAbsolutePath(), t), t);
+					}
+				});
+			} catch (IOException ex) {
+				//
+			}
+			return a;
+		}
+
+		@Override
+		public String getName() {
+			return "x_find";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@MEnum("ms.lang.FindType")
+		public static enum FindType implements SimpleDocumentation {
+			DIRECTORY("Only processes directory names, not files.", MSVersion.V3_3_4),
+			FILE("Only processes files, not directories.", MSVersion.V3_3_4),
+			HIDDEN("Only processes files/folders that are hidden. Leave this off to ignore hidden files.",
+				MSVersion.V3_3_4);
+
+			String docs;
+			Version since;
+			private FindType(String docs, Version since) {
+				this.docs = docs;
+				this.since = since;
+			}
+			@Override
+			public String getName() {
+				return name();
+			}
+
+			@Override
+			public String docs() {
+				return docs;
+			}
+
+			@Override
+			public Version since() {
+				return since;
+			}
+		}
+
+		@Override
+		public String docs() {
+			return "array<string> {regex, [startFrom], [type] | regex, [startFrom], types} Returns a list of absolute"
+					+ " paths of files whose name"
+					+ " matches the given regex, searching recursively. Only available in cmdline mode."
+					+ " ---- Type may be a single value, or an array of values from the"
+					+ " following list:\n" + createEnumTable(FindType.class) + "\n\nIf the type is not specified,"
+					+ " this is the same as specifying all types. If an empty array is used, this causes an error. If"
+					+ " you wish to use the current directory as the starting point, use null as startFrom. Note"
+					+ " that if you only send two arguments to this function, the second one must be an array if it"
+					+ " is the types (it may contain a single value).";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
 		}
 
 	}

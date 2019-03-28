@@ -1,0 +1,1 @@
+return(string_position(to_lower(@arguments[0]), to_lower(@arguments[1])) != -1);
