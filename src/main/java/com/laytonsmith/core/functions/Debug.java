@@ -18,6 +18,7 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.IVariable;
@@ -31,6 +32,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.natives.interfaces.Sizeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.EnumSet;
@@ -356,8 +358,21 @@ public class Debug {
 				IVariable ivar = environment.getEnv(GlobalEnv.class).GetVarList()
 						.get(((IVariable) args[0]).getVariableName(), t, environment);
 				Mixed val = ivar.ival();
-				StreamUtils.GetSystemOut().println(ivar.getDefinedType() + " (actual type " + val.typeof() + ") "
-						+ ivar.getVariableName() + ": " + val.val());
+				StreamUtils.GetSystemOut().println(
+						TermColors.GREEN + environment.getEnv(GlobalEnv.class).GetStackTraceManager()
+								.getCurrentStackTrace().get(0).getProcedureName()
+						+ TermColors.RESET + ":"
+						+ TermColors.YELLOW + t.file().getName()
+						+ TermColors.RESET + ":"
+						+ TermColors.CYAN + t.line() + "." + t.col()
+						+ TermColors.RESET + ": "
+						+ TermColors.BRIGHT_WHITE + ivar.getDefinedType()
+						+ TermColors.RESET + " (actual type "
+						+ TermColors.BRIGHT_WHITE + val.typeof()
+						+ (val.isInstanceOf(Sizeable.class) ? ", length: " + ((Sizeable) val).size() : "")
+						+ TermColors.RESET + ") "
+						+ TermColors.CYAN + ivar.getVariableName()
+						+ TermColors.RESET + ": " + val.val());
 				return CVoid.VOID;
 			} else {
 				throw new CRECastException("Expecting an ivar, but recieved " + args[0].typeof().getSimpleName()

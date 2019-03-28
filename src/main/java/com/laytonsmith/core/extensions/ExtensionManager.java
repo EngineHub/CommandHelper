@@ -514,17 +514,8 @@ public class ExtensionManager {
 		// Lets print out the details to the console, if we are in debug mode.
 		try {
 			if(Prefs.DebugMode()) {
-				Collections.sort(events);
-				String eventString = StringUtils.Join(events, ", ", ", and ", " and ");
-				Collections.sort(functions);
-				String functionString = StringUtils.Join(functions, ", ", ", and ", " and ");
-
-				StreamUtils.GetSystemOut().println(Implementation.GetServerType().getBranding()
-						+ ": Loaded the following functions: " + functionString.trim());
 				StreamUtils.GetSystemOut().println(Implementation.GetServerType().getBranding()
 						+ ": Loaded " + functions.size() + " function" + (functions.size() == 1 ? "." : "s."));
-				StreamUtils.GetSystemOut().println(Implementation.GetServerType().getBranding()
-						+ ": Loaded the following events: " + eventString.trim());
 				StreamUtils.GetSystemOut().println(Implementation.GetServerType().getBranding()
 						+ ": Loaded " + events.size() + " event" + (events.size() == 1 ? "." : "s."));
 			}
