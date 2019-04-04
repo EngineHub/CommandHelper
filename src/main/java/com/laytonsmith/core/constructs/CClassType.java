@@ -88,15 +88,21 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 *
 	 * <p>IMPORTANT: The type MUST be fully qualified AND exist as a real, instantiable class, or this will cause
 	 * errors. The only time this method is preferred vs {@link #get(com.laytonsmith.core.FullyQualifiedClassName)} is
-	 * when used to define the TYPE value.
+	 * when used to define the TYPE value. The native class must also be provided at the same time, which is used
+	 * for various operations to increase efficiency when dealing with native classes.
 	 *
 	 * Unlike the other getters, this will not throw a ClassNotFoundException, it will instead throw an Error.
 	 * @param type
 	 * @return
 	 */
-	public static CClassType get(String type) {
+	public static CClassType get(Class<? extends Mixed> type) {
 		try {
-			return get(FullyQualifiedClassName.forFullyQualifiedClass(type));
+			typeof typeof = type.getAnnotation(typeof.class);
+			if(typeof == null) {
+				throw new IllegalArgumentException("Missing typeof annotation for " + type);
+			}
+			String fqcn = typeof.value();
+			return get(FullyQualifiedClassName.forFullyQualifiedClass(fqcn));
 		} catch (ClassNotFoundException ex) {
 			throw new Error(ex);
 		}

@@ -1367,7 +1367,7 @@ public class EntityEvents {
 			MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
 
 			if(key.equals("amount")) {
-				if(value instanceof CInt) {
+				if(value.isInstanceOf(CInt.class)) {
 					event.setDamage(Integer.parseInt(value.val()));
 
 					return true;
@@ -1451,7 +1451,7 @@ public class EntityEvents {
 					if(value instanceof CNull) {
 						ete.setTarget(null);
 						return true;
-					} else if(value instanceof CString) {
+					} else if(value.isInstanceOf(CString.class)) {
 						MCPlayer p = Static.GetPlayer(value.val(), value.getTarget());
 
 						if(p.isOnline()) {
@@ -1575,7 +1575,7 @@ public class EntityEvents {
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("from")) {
 				Mixed type = prefilter.get("from");
-				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+				if(type.isInstanceOf(CString.class) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The 0:0 block format in " + getName()
 							+ " is deprecated in \"from\" prefilter.", event.getTarget());
 					MCItemStack is = Static.ParseItemNotation(null, type.val(), 1, event.getTarget());
@@ -1584,7 +1584,7 @@ public class EntityEvents {
 			}
 			if(prefilter.containsKey("to")) {
 				Mixed type = prefilter.get("to");
-				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+				if(type.isInstanceOf(CString.class) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The 0:0 block format in " + getName()
 							+ " is deprecated in \"to\" prefilter.", event.getTarget());
 					MCItemStack is = Static.ParseItemNotation(null, type.val(), 1, event.getTarget());
@@ -1675,7 +1675,7 @@ public class EntityEvents {
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("block")) {
 				Mixed ctype = prefilter.get("block");
-				if(ctype instanceof CString && ctype.val().contains(":") || ArgumentValidation.isNumber(ctype)) {
+				if(ctype.isInstanceOf(CString.class) && ctype.val().contains(":") || ArgumentValidation.isNumber(ctype)) {
 					int type;
 					String notation = ctype.val();
 					int separatorIndex = notation.indexOf(':');

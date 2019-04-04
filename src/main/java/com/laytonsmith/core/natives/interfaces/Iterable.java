@@ -15,6 +15,6 @@ import com.laytonsmith.core.constructs.CClassType;
 public interface Iterable extends ArrayAccess, Sizeable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.Iterable");
+	public static final CClassType TYPE = CClassType.get(Iterable.class);
 
 }

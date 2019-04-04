@@ -13,7 +13,7 @@ import com.laytonsmith.core.constructs.Target;
 public class CREPluginChannelException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("com.commandhelper.PluginChannelException");
+	public static final CClassType TYPE = CClassType.get(CREPluginChannelException.class);
 
 	public CREPluginChannelException(String msg, Target t) {
 		super(msg, t);

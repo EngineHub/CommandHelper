@@ -17,7 +17,9 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -119,6 +121,9 @@ public class NativeTypeList {
 		return new HashSet<>(fqNativeTypes);
 	}
 
+
+	private static final Map<FullyQualifiedClassName, Class<? extends Mixed>> NATIVE_CLASS_CACHE
+			= new ConcurrentHashMap<>();
 	/**
 	 * Returns the java class for the given MethodScript object name. This cannot return anything of a type more
 	 * specific than Mixed. For classes that represent enums, an anonymous subclass of {@link MEnumType} will be
@@ -132,6 +137,16 @@ public class NativeTypeList {
 	 * be thrown.
 	 */
 	public static Class<? extends Mixed> getNativeClass(FullyQualifiedClassName fqcn) throws ClassNotFoundException {
+		// This is super super expensive, so we cannot afford to run this more than once per class. Even more
+		// ideally, this information should be stored WITH the class, so there's no runtime penalty whatsoever,
+		// but having a local cache is at least an improvement.
+		if(NATIVE_CLASS_CACHE.containsKey(fqcn)) {
+			Class<? extends Mixed> c = NATIVE_CLASS_CACHE.get(fqcn);
+			if(c == null) {
+				// Storing null means it can't be found
+				throw new ClassNotFoundException("Could not find the class of type " + fqcn);
+			}
+		}
 		if("auto".equals(fqcn.getFQCN())) {
 			// This is an error, as auto is not a real type, but a meta type. Thus this method should never be called
 			// with this input, and we can give a more specific error message.
@@ -141,14 +156,18 @@ public class NativeTypeList {
 		for(ClassMirror<? extends Mixed> c : ClassDiscovery.getDefaultInstance()
 				.getClassesWithAnnotationThatExtend(typeof.class, Mixed.class)) {
 			if(c.getAnnotation(typeof.class).getProxy(typeof.class).value().equals(fqcn.getFQCN())) {
+				NATIVE_CLASS_CACHE.put(fqcn, c.loadClass());
 				return c.loadClass();
 			}
 		}
 		try {
-			return getNativeEnumType(fqcn).getClass();
+			Class<? extends Mixed> c = getNativeEnumType(fqcn).getClass();
+			NATIVE_CLASS_CACHE.put(fqcn, c);
+			return c;
 		} catch (ClassNotFoundException e) {
 			//
 		}
+		NATIVE_CLASS_CACHE.put(fqcn, null);
 		throw new ClassNotFoundException("Could not find the class of type " + fqcn);
 	}
 

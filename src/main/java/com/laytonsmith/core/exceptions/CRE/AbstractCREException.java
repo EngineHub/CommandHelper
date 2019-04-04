@@ -87,7 +87,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 * @return
 	 */
 	public CClassType getExceptionType() {
-		return CClassType.get(getName());
+		return Construct.typeof(this);
 	}
 
 	/**

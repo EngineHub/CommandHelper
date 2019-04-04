@@ -523,7 +523,7 @@ public class Math {
 				}
 				long delta = Static.getInt(cdelta, t);
 				//First, error check, then get the old value, and store it in temp.
-				if(!(array instanceof CArray) && !(array instanceof ArrayAccess)) {
+				if(!(array instanceof CArray) && !(array.isInstanceOf(ArrayAccess.class))) {
 					//Let's just evaluate this like normal with array_get, so it will
 					//throw the appropriate exception.
 					new ArrayHandling.array_get().exec(t, env, array, index);
@@ -539,7 +539,7 @@ public class Math {
 				Mixed value = myArray.get(index, t);
 
 				//Alright, now let's actually perform the increment, and store that in the array.
-				if(value instanceof CInt) {
+				if(value.isInstanceOf(CInt.class)) {
 					CInt newVal;
 					if(inc) {
 						newVal = new CInt(Static.getInt(value, t) + delta, t);
@@ -552,7 +552,7 @@ public class Math {
 					} else {
 						return value;
 					}
-				} else if(value instanceof CDouble) {
+				} else if(value.isInstanceOf(CDouble.class)) {
 					CDouble newVal;
 					if(inc) {
 						newVal = new CDouble(Static.getDouble(value, t) + delta, t);
@@ -1186,7 +1186,7 @@ public class Math {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CInt) {
+			if(args[0].isInstanceOf(CInt.class)) {
 				return new CInt(java.lang.Math.abs(Static.getInt(args[0], t)), t);
 			} else {
 				return new CDouble(java.lang.Math.abs(Static.getDouble(args[0], t)), t);
@@ -2463,7 +2463,7 @@ public class Math {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CInt) {
+			if(args[0].isInstanceOf(CInt.class)) {
 				return new CInt(-(Static.getInt(args[0], t)), t);
 			} else {
 				return new CDouble(-(Static.getDouble(args[0], t)), t);

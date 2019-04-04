@@ -88,7 +88,7 @@ public class InventoryEvents {
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("slotitem")) {
 				Mixed type = prefilter.get("slotitem");
-				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+				if(type.isInstanceOf(CString.class) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("slotitem").val(), 1, event.getTarget());
 					prefilter.put("slotitem", new CString(is.getType().getName(), event.getTarget()));
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format for the \"slotitem\" prefilter"
@@ -230,7 +230,7 @@ public class InventoryEvents {
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("cursoritem")) {
 				Mixed type = prefilter.get("cursoritem");
-				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+				if(type.isInstanceOf(CString.class) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("cursoritem").val(), 1, event.getTarget());
 					prefilter.put("cursoritem", new CString(is.getType().getName(), event.getTarget()));
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format for the \"cursoritem\" prefilter"
@@ -689,7 +689,7 @@ public class InventoryEvents {
 							int[] expCosts = e.getExpLevelCostsOffered();
 
 							for(int i = 0; i <= 2; i++) {
-								if(cExpCosts.get(i, value.getTarget()) instanceof CInt) {
+								if(cExpCosts.get(i, value.getTarget()).isInstanceOf(CInt.class)) {
 									expCosts[i] = (int) ((CInt) cExpCosts.get(i, value.getTarget())).getInt();
 								} else {
 									throw new CREFormatException("Expected an intger at index " + i + "!", value.getTarget());
@@ -810,7 +810,7 @@ public class InventoryEvents {
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("main_hand")) {
 				Mixed type = prefilter.get("main_hand");
-				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+				if(type.isInstanceOf(CString.class) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format in the \"main_hand\""
 							+ " prefilter in " + getName() + " is deprecated.", event.getTarget());
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("main_hand").val(), 1, event.getTarget());
@@ -819,7 +819,7 @@ public class InventoryEvents {
 			}
 			if(prefilter.containsKey("off_hand")) {
 				Mixed type = prefilter.get("off_hand");
-				if(type instanceof CString && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+				if(type.isInstanceOf(CString.class) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format in the \"off_hand\""
 							+ " prefilter in " + getName() + " is deprecated.", event.getTarget());
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("off_hand").val(), 1, event.getTarget());

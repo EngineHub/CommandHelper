@@ -39,7 +39,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.enum");
+	public static final CClassType TYPE = CClassType.get(MEnumType.class);
 
 	/**
 	 * Generates a new MEnumType subclass.

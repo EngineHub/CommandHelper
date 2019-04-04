@@ -13,7 +13,7 @@ import com.laytonsmith.core.constructs.Target;
 public class CREEnchantmentException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("com.commandhelper.EnchantmentException");
+	public static final CClassType TYPE = CClassType.get(CREEnchantmentException.class);
 
 	public CREEnchantmentException(String msg, Target t) {
 		super(msg, t);

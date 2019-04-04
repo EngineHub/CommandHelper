@@ -14,7 +14,7 @@ import java.util.Set;
 public final class CBoolean extends CPrimitive implements Cloneable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.boolean");
+	public static final CClassType TYPE = CClassType.get(CBoolean.class);
 
 	public static final long serialVersionUID = 1L;
 

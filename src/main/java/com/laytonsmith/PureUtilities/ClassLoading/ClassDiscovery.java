@@ -11,6 +11,7 @@ import com.laytonsmith.PureUtilities.Common.ClassUtils;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.ProgressIterator;
 import com.laytonsmith.PureUtilities.ZipIterator;
 import java.io.File;
@@ -139,6 +140,8 @@ public class ClassDiscovery {
 	 * Cache for constructor annotations. Whenever a new URL is added to the URL cache, this is cleared.
 	 */
 	private final Map<Class<? extends Annotation>, Set<ConstructorMirror<?>>> constructorAnnotationCache = new HashMap<>();
+	private final Map<Pair<Class<? extends Annotation>, Class<?>>, Set<ClassMirror<?>>>
+			classesWithAnnotationThatExtendCache = new HashMap<>();
 	/**
 	 * By default null, but this can be set per instance.
 	 */
@@ -462,6 +465,7 @@ public class ClassDiscovery {
 		fieldAnnotationCache.clear();
 		methodAnnotationCache.clear();
 		constructorAnnotationCache.clear();
+		classesWithAnnotationThatExtendCache.clear();
 		dirtyURLs.addAll(urlCache);
 	}
 
@@ -717,6 +721,15 @@ public class ClassDiscovery {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> Set<ClassMirror<? extends T>> getClassesWithAnnotationThatExtend(Class<? extends Annotation> annotation, Class<T> superClass) {
+		Pair<Class<? extends Annotation>, Class<?>> id = new Pair<>(annotation, superClass);
+		if(classesWithAnnotationThatExtendCache.containsKey(id)) {
+			// This (insane) double cast is necessary, because the cache will certainly contain the value of the
+			// correct type,
+			// but there's no way for us to encode T into the generic type of the definition, so we just do this,
+			// lie to the compiler, and go about our merry way. We do the same below.
+			// I'm totally open to a better approach though.
+			return (Set<ClassMirror<? extends T>>)(Object) classesWithAnnotationThatExtendCache.get(id);
+		}
 		Set<ClassMirror<? extends T>> mirrors = new HashSet<>();
 		for(ClassMirror<?> c : getClassesWithAnnotation(annotation)) {
 			if(doesClassExtend(c, superClass)) {
@@ -728,6 +741,7 @@ public class ClassDiscovery {
 			// ourselves here.
 			mirrors.add(new ClassMirror<>(superClass));
 		}
+		classesWithAnnotationThatExtendCache.put(id, (Set<ClassMirror<?>>)(Object)mirrors);
 		return mirrors;
 	}
 

@@ -253,7 +253,7 @@ public class BukkitMCCommand implements MCCommand {
 				Mixed fret = closure.executeCallable(null, t, new CString(label, t), new CString(sender.getName(), t), cargs,
 						new CArray(t) // reserved for an obgen style command array
 				);
-				if(fret instanceof CBoolean) {
+				if(fret.isInstanceOf(CBoolean.class)) {
 					return ((CBoolean) fret).getBoolean();
 				}
 			} catch (ConfigRuntimeException cre) {

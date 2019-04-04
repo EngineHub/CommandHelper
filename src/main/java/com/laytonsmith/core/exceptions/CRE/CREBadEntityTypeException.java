@@ -13,7 +13,7 @@ import com.laytonsmith.core.constructs.Target;
 public class CREBadEntityTypeException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("com.commandhelper.BadEntityTypeException");
+	public static final CClassType TYPE = CClassType.get(CREBadEntityTypeException.class);
 
 	public CREBadEntityTypeException(String msg, Target t) {
 		super(msg, t);

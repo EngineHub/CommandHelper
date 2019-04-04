@@ -497,7 +497,7 @@ public class Debug {
 //				throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //			}
 //			Set<Event.Type> set = new HashSet<Event.Type>();
-//			if(args[0] instanceof CString) {
+//			if(args[0].isInstanceOf(CString.class)) {
 //				if(args[0].val().equals("*")) {
 //					for(Event.Type t : Event.Type.values()) {
 //						set.add(t);
@@ -572,7 +572,7 @@ public class Debug {
 //			if(!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //				throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //			}
-//			if(args[0] instanceof CString) {
+//			if(args[0].isInstanceOf(CString.class)) {
 //				EVENT_PLUGIN_FILTER.clear();
 //				EVENT_PLUGIN_FILTER.add(args[0].val().toUpperCase());
 //			} else if(args[0] instanceof CArray) {

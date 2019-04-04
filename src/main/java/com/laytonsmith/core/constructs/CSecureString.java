@@ -32,7 +32,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class CSecureString extends CString {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.secure_string");
+	public static final CClassType TYPE = CClassType.get(CSecureString.class);
 
 	private byte[] encrypted;
 	private Cipher decrypter;

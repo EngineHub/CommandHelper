@@ -3,12 +3,15 @@ package com.laytonsmith.core.exceptions.CRE;
 import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.ObjectType;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -17,7 +20,7 @@ import com.laytonsmith.core.objects.ObjectType;
 public class CREThrowable extends AbstractCREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.Throwable");
+	public static final CClassType TYPE = CClassType.get(CREThrowable.class);
 
 	@ForceImplementation
 	public CREThrowable(String msg, Target t) {
@@ -51,7 +54,16 @@ public class CREThrowable extends AbstractCREException {
 		if(this.getClass() == CREThrowable.class) {
 			return new CClassType[]{Mixed.TYPE};
 		} else {
-			return new CClassType[]{CClassType.get(this.getClass().getSuperclass().getAnnotation(typeof.class).value())};
+			try {
+				return new CClassType[]{
+					CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(
+							this.getClass().getSuperclass().getAnnotation(typeof.class).value()))
+				};
+			} catch(ClassNotFoundException ex) {
+				throw new Error("Subclasses can reliably return super.getSuperclasses() for this, ONLY if it follows"
+						+ " the rule that it only has one superclass, and that superclass is the underlying java"
+						+ " object as well. This appears to be wrong in " + this.getClass());
+			}
 		}
 	}
 

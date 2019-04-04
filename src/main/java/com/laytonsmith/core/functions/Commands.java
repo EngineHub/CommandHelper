@@ -85,7 +85,7 @@ public class Commands {
 		 * @param arg
 		 */
 		public static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
-			if(arg instanceof CClosure) {
+			if(arg.isInstanceOf(CClosure.class)) {
 				onTabComplete.remove(cmd.getName());
 				onTabComplete.put(cmd.getName(), (CClosure) arg);
 			} else {
@@ -350,7 +350,7 @@ public class Commands {
 		 * @param arg
 		 */
 		public static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
-			if(arg instanceof CClosure) {
+			if(arg.isInstanceOf(CClosure.class)) {
 				onCommand.remove(cmd.getName());
 				onCommand.put(cmd.getName(), (CClosure) arg);
 			} else {

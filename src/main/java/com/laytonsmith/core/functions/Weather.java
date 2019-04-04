@@ -141,9 +141,9 @@ public class Weather {
 			MCWorld w = null;
 			int duration = -1;
 			if(args.length == 2) {
-				if(args[1] instanceof CString) {
+				if(args[1].isInstanceOf(CString.class)) {
 					w = Static.getServer().getWorld(args[1].val());
-				} else if(args[1] instanceof CInt) {
+				} else if(args[1].isInstanceOf(CInt.class)) {
 					duration = Static.getInt32(args[1], t);
 				} else {
 					throw new CREFormatException("", t);

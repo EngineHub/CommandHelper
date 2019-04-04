@@ -13,7 +13,7 @@ import com.laytonsmith.core.constructs.Target;
 public class CREUnageableMobException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("com.commandhelper.UnageableMobException");
+	public static final CClassType TYPE = CClassType.get(CREUnageableMobException.class);
 
 	public CREUnageableMobException(String msg, Target t) {
 		super(msg, t);

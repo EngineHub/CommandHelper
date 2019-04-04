@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 public class CDecimal extends CPrimitive implements Cloneable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.decimal");
+	public static final CClassType TYPE = CClassType.get(CDecimal.class);
 
 	private final BigDecimal val;
 

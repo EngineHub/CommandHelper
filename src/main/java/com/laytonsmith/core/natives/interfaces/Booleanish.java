@@ -13,7 +13,7 @@ import com.laytonsmith.core.constructs.Target;
 public interface Booleanish extends Mixed {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.Booleanish");
+	public static final CClassType TYPE = CClassType.get(Booleanish.class);
 
 	/**
 	 * Returns true if this value is a trueish value. Each implementation is free to define this as they wish. In

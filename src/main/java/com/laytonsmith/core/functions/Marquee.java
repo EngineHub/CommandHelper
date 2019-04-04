@@ -68,7 +68,7 @@ public class Marquee {
 			text = args[1 + offset].val();
 			stringWidth = Static.getInt32(args[2 + offset], t);
 			delayTime = Static.getInt32(args[3 + offset], t);
-			if(args[4 + offset] instanceof CClosure) {
+			if(args[4 + offset].isInstanceOf(CClosure.class)) {
 				callback = ((CClosure) args[4 + offset]);
 			} else {
 				throw new CRECastException("Expected argument " + (4 + offset + 1) + " to be a closure, but was not.", t);

@@ -14,7 +14,7 @@ import com.laytonsmith.annotations.typeof;
 public class CBareString extends CString {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.barestring");
+	public static final CClassType TYPE = CClassType.get(CBareString.class);
 
 	public CBareString(String value, Target t) {
 		super(value, t);

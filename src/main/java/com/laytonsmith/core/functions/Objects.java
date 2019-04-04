@@ -167,7 +167,7 @@ public class Objects {
 			if(data.getData() instanceof CNull) {
 				return CNull.NULL;
 			}
-			if(!(data.getData() instanceof CString)) {
+			if(!(data.getData().isInstanceOf(CString.class))) {
 				throw new CREClassDefinitionError("Expected a string, but found " + data.getData() + " instead", t);
 			}
 			return data.getData();

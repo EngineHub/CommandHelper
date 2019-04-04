@@ -22,7 +22,7 @@ import com.laytonsmith.core.constructs.CClassType;
 public interface ValueType extends Mixed {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.ValueType");
+	public static final CClassType TYPE = CClassType.get(ValueType.class);
 
 	/**
 	 * Returns a duplicated value of this object. The duplicate MUST be equals(), and it MUST NOT be ref_equals(). The

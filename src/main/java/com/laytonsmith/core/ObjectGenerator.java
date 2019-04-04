@@ -286,7 +286,7 @@ public class ObjectGenerator {
 				}
 			} else {
 				Mixed type = item.get("type", t);
-				if(type instanceof CString) {
+				if(type.isInstanceOf(CString.class)) {
 					int seperatorIndex = type.val().indexOf(':');
 					if(seperatorIndex != -1) {
 						try {
@@ -634,7 +634,7 @@ public class ObjectGenerator {
 					Mixed li = ma.get("lore", t);
 					if(li instanceof CNull) {
 						//do nothing
-					} else if(li instanceof CString) {
+					} else if(li.isInstanceOf(CString.class)) {
 						List<String> ll = new ArrayList<>();
 						ll.add(li.val());
 						meta.setLore(ll);
@@ -940,7 +940,7 @@ public class ObjectGenerator {
 						Mixed color = ma.get("color", t);
 						if(color instanceof CArray) {
 							((MCPotionMeta) meta).setColor(color((CArray) color, t));
-						} else if(color instanceof CString) {
+						} else if(color.isInstanceOf(CString.class)) {
 							((MCPotionMeta) meta).setColor(StaticLayer.GetConvertor().GetColor(color.val(), t));
 						}
 					}
@@ -1193,7 +1193,7 @@ public class ObjectGenerator {
 			Mixed value = enchantArray.get(key, t);
 			if(enchantArray.isAssociative()) {
 				etype = StaticLayer.GetEnchantmentByName(key);
-				if(etype != null && value instanceof CInt) {
+				if(etype != null && value.isInstanceOf(CInt.class)) {
 					ret.put(etype, Static.getInt32(value, t));
 					continue;
 				}
@@ -1304,7 +1304,7 @@ public class ObjectGenerator {
 		boolean upgraded = false;
 		if(pd.containsKey("extended")) {
 			Mixed cext = pd.get("extended", t);
-			if(cext instanceof CBoolean) {
+			if(cext.isInstanceOf(CBoolean.class)) {
 				extended = ((CBoolean) cext).getBoolean();
 			} else {
 				throw new CREFormatException(
@@ -1313,7 +1313,7 @@ public class ObjectGenerator {
 		}
 		if(pd.containsKey("upgraded")) {
 			Mixed cupg = pd.get("upgraded", t);
-			if(cupg instanceof CBoolean) {
+			if(cupg.isInstanceOf(CBoolean.class)) {
 				upgraded = ((CBoolean) cupg).getBoolean();
 			} else {
 				throw new CREFormatException(
@@ -1367,11 +1367,11 @@ public class ObjectGenerator {
 				} else {
 					for(Mixed color : ccolors.asList()) {
 						MCColor mccolor;
-						if(color instanceof CString) {
+						if(color.isInstanceOf(CString.class)) {
 							mccolor = StaticLayer.GetConvertor().GetColor(color.val(), t);
 						} else if(color instanceof CArray) {
 							mccolor = color((CArray) color, t);
-						} else if(color instanceof CInt && ccolors.size() == 3) {
+						} else if(color.isInstanceOf(CInt.class) && ccolors.size() == 3) {
 							// Appears to be a single color
 							builder.addColor(color(ccolors, t));
 							break;
@@ -1382,7 +1382,7 @@ public class ObjectGenerator {
 						builder.addColor(mccolor);
 					}
 				}
-			} else if(colors instanceof CString) {
+			} else if(colors.isInstanceOf(CString.class)) {
 				String split[] = colors.val().split("\\|");
 				if(split.length == 0) {
 					builder.addColor(MCColor.WHITE);
@@ -1406,9 +1406,9 @@ public class ObjectGenerator {
 					MCColor mccolor;
 					if(color instanceof CArray) {
 						mccolor = color((CArray) color, t);
-					} else if(color instanceof CString) {
+					} else if(color.isInstanceOf(CString.class)) {
 						mccolor = StaticLayer.GetConvertor().GetColor(color.val(), t);
-					} else if(color instanceof CInt && ccolors.size() == 3) {
+					} else if(color.isInstanceOf(CInt.class) && ccolors.size() == 3) {
 						// Appears to be a single color
 						builder.addFadeColor(color(ccolors, t));
 						break;
@@ -1418,7 +1418,7 @@ public class ObjectGenerator {
 					}
 					builder.addFadeColor(mccolor);
 				}
-			} else if(colors instanceof CString) {
+			} else if(colors.isInstanceOf(CString.class)) {
 				String split[] = colors.val().split("\\|");
 				for(String s : split) {
 					builder.addFadeColor(StaticLayer.GetConvertor().GetColor(s, t));
@@ -1504,7 +1504,7 @@ public class ObjectGenerator {
 				}
 				int i = 0;
 				for(Mixed row : shaped.asList()) {
-					if(row instanceof CString && row.val().length() >= 1 && row.val().length() <= 3) {
+					if(row.isInstanceOf(CString.class) && row.val().length() >= 1 && row.val().length() <= 3) {
 						shape[i] = row.val();
 						i++;
 					} else {
@@ -1520,7 +1520,7 @@ public class ObjectGenerator {
 				for(String key : shapedIngredients.stringKeySet()) {
 					MCMaterial mat = null;
 					Mixed ingredient = shapedIngredients.get(key, t);
-					if(ingredient instanceof CString) {
+					if(ingredient.isInstanceOf(CString.class)) {
 						mat = StaticLayer.GetMaterial(ingredient.val());
 						if(mat == null) {
 							// maybe legacy item format
@@ -1534,7 +1534,7 @@ public class ObjectGenerator {
 								MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Numeric item formats (eg. \"0:0\" are deprecated.", t);
 							} catch (NumberFormatException ex) {}
 						}
-					} else if(ingredient instanceof CInt) {
+					} else if(ingredient.isInstanceOf(CInt.class)) {
 						mat = StaticLayer.GetMaterialFromLegacy(Static.getInt32(ingredient, t), 0);
 						MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Numeric item ingredients are deprecated.", t);
 					} else if(ingredient instanceof CArray) {
@@ -1553,7 +1553,7 @@ public class ObjectGenerator {
 					throw new CREFormatException("Ingredients array is invalid.", t);
 				}
 				for(Mixed ingredient : ingredients.asList()) {
-					if(ingredient instanceof CString) {
+					if(ingredient.isInstanceOf(CString.class)) {
 						MCMaterial mat = StaticLayer.GetMaterial(ingredient.val());
 						if(mat == null) {
 							// maybe legacy item format
@@ -1581,7 +1581,7 @@ public class ObjectGenerator {
 
 			case FURNACE:
 				Mixed input = recipe.get("input", t);
-				if(input instanceof CString) {
+				if(input.isInstanceOf(CString.class)) {
 					MCMaterial mat = StaticLayer.GetMaterial(input.val());
 					if(mat == null) {
 						throw new CREFormatException("Furnace input is invalid: " + input.val(), t);

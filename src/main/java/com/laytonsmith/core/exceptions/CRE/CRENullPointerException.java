@@ -13,7 +13,7 @@ import com.laytonsmith.core.constructs.Target;
 public class CRENullPointerException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.NullPointerException");
+	public static final CClassType TYPE = CClassType.get(CRENullPointerException.class);
 
 	public CRENullPointerException(String msg, Target t) {
 		super(msg, t);

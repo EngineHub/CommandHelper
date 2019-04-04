@@ -853,7 +853,7 @@ public class Environment {
 				return null;
 			}
 			Mixed c = children.get(children.size() - 1).getData();
-			if(c instanceof CString) {
+			if(c.isInstanceOf(CString.class)) {
 				try {
 					MCBiomeType.valueOf(c.val());
 				} catch (IllegalArgumentException ex) {
@@ -1508,7 +1508,7 @@ public class Environment {
 					if(node.getData() instanceof CFunction && node.getData().val().equals("centry")) {
 						children = node.getChildren();
 						if(children.get(0).getData().val().equals("sound")
-								&& children.get(1).getData() instanceof CString) {
+								&& children.get(1).getData().isInstanceOf(CString.class)) {
 							try {
 								MCSound.MCVanillaSound.valueOf(children.get(1).getData().val().toUpperCase());
 							} catch (IllegalArgumentException ex) {
@@ -2066,7 +2066,7 @@ public class Environment {
 				throws ConfigRuntimeException {
 			String cmd = null;
 			if(args.length == 2 && !(args[1] instanceof CNull)) {
-				if(!(args[1] instanceof CString)) {
+				if(!(args[1].isInstanceOf(CString.class))) {
 					throw new CRECastException("Parameter 2 of " + getName() + " must be a string or null", t);
 				}
 				cmd = args[1].val();
@@ -2178,7 +2178,7 @@ public class Environment {
 		) throws ConfigRuntimeException {
 			String name = null;
 			if(args.length == 2 && !(args[1] instanceof CNull)) {
-				if(!(args[1] instanceof CString)) {
+				if(!(args[1].isInstanceOf(CString.class))) {
 					throw new CRECastException("Parameter 2 of " + getName() + " must be a string or null", t);
 				}
 				name = args[1].val();

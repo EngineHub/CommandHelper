@@ -1395,7 +1395,7 @@ public class PlayerManagement {
 					}
 				} else {
 					//if it's a number, we are setting F. Otherwise, it's a getter for the MCPlayer specified.
-					if(!(args[0] instanceof CInt)) {
+					if(!(args[0].isInstanceOf(CInt.class))) {
 						MCPlayer p2 = Static.GetPlayer(args[0], t);
 						l = p2.getLocation();
 					}
@@ -2180,7 +2180,7 @@ public class PlayerManagement {
 			MCPlayer m = Static.GetPlayer(args[0].val(), t);
 
 			MCPotionEffectType type = null;
-			if(args[1] instanceof CString) {
+			if(args[1].isInstanceOf(CString.class)) {
 				try {
 					type = MCPotionEffectType.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException ex) {
@@ -3314,7 +3314,7 @@ public class PlayerManagement {
 				ticks = args[0];
 			}
 			int tick = 0;
-			if(ticks instanceof CBoolean) {
+			if(ticks.isInstanceOf(CBoolean.class)) {
 				boolean value = ((CBoolean) ticks).getBoolean();
 				if(value) {
 					tick = 20;

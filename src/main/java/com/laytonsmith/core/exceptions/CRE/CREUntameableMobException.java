@@ -13,7 +13,7 @@ import com.laytonsmith.core.constructs.Target;
 public class CREUntameableMobException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("com.commandhelper.UntameableMobException");
+	public static final CClassType TYPE = CClassType.get(CREUntameableMobException.class);
 
 	public CREUntameableMobException(String msg, Target t) {
 		super(msg, t);

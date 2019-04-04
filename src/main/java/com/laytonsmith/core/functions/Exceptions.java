@@ -147,7 +147,7 @@ public class Exceptions {
 			List<FullyQualifiedClassName> interest = new ArrayList<>();
 			if(types != null) {
 				Mixed ptypes = that.seval(types, env);
-				if(ptypes instanceof CString) {
+				if(ptypes.isInstanceOf(CString.class)) {
 					interest.add(FullyQualifiedClassName.forName(ptypes.val(), t, env));
 				} else if(ptypes instanceof CArray) {
 					CArray ca = (CArray) ptypes;
@@ -347,7 +347,7 @@ public class Exceptions {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CClosure) {
+			if(args[0].isInstanceOf(CClosure.class)) {
 				CClosure old = environment.getEnv(GlobalEnv.class).GetExceptionHandler();
 				environment.getEnv(GlobalEnv.class).SetExceptionHandler((CClosure) args[0]);
 				if(old == null) {
@@ -530,7 +530,7 @@ public class Exceptions {
 				// TODO: Eh.. should probably move this check into the keyword, since techincally
 				// catch (Exception @e = null) { } would work.
 				ParseTree assign = children.get(i);
-				if(assign.getChildAt(0).getData() instanceof CString) {
+				if(assign.getChildAt(0).getData().isInstanceOf(CString.class)) {
 					// This is an unknown exception type, because otherwise it would have been cast to a CClassType
 					throw new ConfigCompileException("Unknown class type: " + assign.getChildAt(0).getData().val(), t);
 				}

@@ -1145,7 +1145,7 @@ public class EntityManagement {
 			if(args.length >= 3) {
 				l = ObjectGenerator.GetGenerator().location(args[2], null, t);
 				if(args.length == 4) {
-					if(args[3] instanceof CClosure) {
+					if(args[3].isInstanceOf(CClosure.class)) {
 						consumer = (CClosure) args[3];
 					} else {
 						throw new CREIllegalArgumentException("Expected a closure as last argument for spawn_entity().", t);

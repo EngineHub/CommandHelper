@@ -701,7 +701,7 @@ public class InventoryManagement {
 		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() > 0 && children.get(children.size() - 1).getData() instanceof CString) {
+			if(children.size() > 0 && children.get(children.size() - 1).getData().isInstanceOf(CString.class)) {
 				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
 			}
 			return null;
@@ -809,7 +809,7 @@ public class InventoryManagement {
 		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() > 0 && children.get(children.size() - 1).getData() instanceof CString) {
+			if(children.size() > 0 && children.get(children.size() - 1).getData().isInstanceOf(CString.class)) {
 				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
 			}
 			return null;
@@ -877,7 +877,7 @@ public class InventoryManagement {
 					itemOffset = 1;
 				}
 			} else if(args.length == 3) {
-				if(args[0] instanceof CString) { // we assume player here, apparently
+				if(args[0].isInstanceOf(CString.class)) { // we assume player here, apparently
 					itemOffset = 1;
 				}
 			} else if(args.length == 4) {
@@ -926,7 +926,7 @@ public class InventoryManagement {
 		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
-					&& (children.get(1).getData() instanceof CString || children.get(1).getData() instanceof CInt)) {
+					&& (children.get(1).getData().isInstanceOf(CString.class) || children.get(1).getData().isInstanceOf(CInt.class))) {
 				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
 			}
 			return null;
@@ -1045,7 +1045,7 @@ public class InventoryManagement {
 		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
-					&& (children.get(1).getData() instanceof CString || children.get(1).getData() instanceof CInt)) {
+					&& (children.get(1).getData().isInstanceOf(CString.class) || children.get(1).getData().isInstanceOf(CInt.class))) {
 				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
 			}
 			return null;
@@ -1112,7 +1112,7 @@ public class InventoryManagement {
 					itemOffset = 1;
 				}
 			} else if(args.length == 3) {
-				if(args[0] instanceof CString) { // we assume player here, apparently
+				if(args[0].isInstanceOf(CString.class)) { // we assume player here, apparently
 					itemOffset = 1;
 				}
 			} else if(args.length == 4) {
@@ -1159,7 +1159,7 @@ public class InventoryManagement {
 		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
-					&& (children.get(1).getData() instanceof CString || children.get(1).getData() instanceof CInt)) {
+					&& (children.get(1).getData().isInstanceOf(CString.class) || children.get(1).getData().isInstanceOf(CInt.class))) {
 				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
 			}
 			return null;
@@ -1276,7 +1276,7 @@ public class InventoryManagement {
 		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
-					&& (children.get(1).getData() instanceof CString || children.get(1).getData() instanceof CInt)) {
+					&& (children.get(1).getData().isInstanceOf(CString.class) || children.get(1).getData().isInstanceOf(CInt.class))) {
 				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
 			}
 			return null;
@@ -2584,7 +2584,7 @@ public class InventoryManagement {
 			int size = 54;
 			String title = null;
 			if(args.length > 1) {
-				if(args[1] instanceof CNumber) {
+				if(args[1].isInstanceOf(CNumber.class)) {
 					size = Static.getInt32(args[1], t);
 					if(size < 9) {
 						size = 9; // minimum

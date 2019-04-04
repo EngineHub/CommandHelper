@@ -18,12 +18,14 @@ import com.laytonsmith.core.functions.BasicLogic;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.objects.ObjectModifier;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -43,7 +45,7 @@ import java.util.TreeMap;
 public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		com.laytonsmith.core.natives.interfaces.Iterable {
 
-	public static final CClassType TYPE = CClassType.get("ms.lang.array");
+	public static final CClassType TYPE = CClassType.get(CArray.class);
 	private boolean associativeMode = false;
 	private long nextIndex = 0;
 	private List<Mixed> array;
@@ -622,11 +624,11 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	private String normalizeConstruct(Mixed c) {
 		if(c instanceof CArray) {
 			throw new CRECastException("Arrays cannot be used as the key in an associative array", c.getTarget());
-		} else if(c instanceof CString || c instanceof CInt) {
+		} else if(c.isInstanceOf(CString.class) || c.isInstanceOf(CInt.class)) {
 			return c.val();
 		} else if(c instanceof CNull) {
 			return "";
-		} else if(c instanceof CBoolean) {
+		} else if(c.isInstanceOf(CBoolean.class)) {
 			if(((CBoolean) c).getBoolean()) {
 				return "1";
 			} else {
@@ -874,8 +876,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 					if(c instanceof CArray) {
 						throw new CRECastException("Cannot sort an array of arrays.", CArray.this.getTarget());
 					}
-					if(!(c instanceof CBoolean || c instanceof CString || c instanceof CInt
-							|| c instanceof CDouble || c instanceof CNull || c instanceof CClassType)) {
+					if(!(c.isInstanceOf(CBoolean.class) || c.isInstanceOf(CString.class) || c.isInstanceOf(CInt.class)
+							|| c.isInstanceOf(CDouble.class) || c instanceof CNull || c.isInstanceOf(CClassType.class))) {
 						throw new CREFormatException("Unsupported type being sorted: " + c.typeof(), CArray.this.getTarget());
 					}
 				}
@@ -888,7 +890,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 						return o1.val().compareTo("");
 					}
 				}
-				if(o1 instanceof CBoolean || o2 instanceof CBoolean) {
+				if(o1.isInstanceOf(CBoolean.class) || o2.isInstanceOf(CBoolean.class)) {
 					if(ArgumentValidation.getBoolean(o1, Target.UNKNOWN) == ArgumentValidation.getBoolean(o2, Target.UNKNOWN)) {
 						return 0;
 					} else {
@@ -957,6 +959,11 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 
 	public void ensureCapacity(int capacity) {
 		((ArrayList) array).ensureCapacity(capacity);
+	}
+
+	@Override
+	public Set<ObjectModifier> getObjectModifiers() {
+		return EnumSet.of(ObjectModifier.FINAL);
 	}
 
 	@Override
