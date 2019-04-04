@@ -79,7 +79,7 @@ public class FileHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
-			if(!Static.InCmdLine(env)) {
+			if(!Static.InCmdLine(env, true)) {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
 				if(!Security.CheckSecurity(location)) {
@@ -250,7 +250,7 @@ public class FileHandling {
 			} else {
 				callback = ((CClosure) args[1]);
 			}
-			if(!Static.InCmdLine(environment)) {
+			if(!Static.InCmdLine(environment, true)) {
 				if(!Security.CheckSecurity(file)) {
 					throw new CRESecurityException("You do not have permission to access the file '" + file + "'", t);
 				}
@@ -356,7 +356,7 @@ public class FileHandling {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), environment, t, null);
-			if(!Security.CheckSecurity(location) && !Static.InCmdLine(environment)) {
+			if(!Security.CheckSecurity(location) && !Static.InCmdLine(environment, true)) {
 				throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 			}
 			return new CInt(location.length(), t);
@@ -405,7 +405,7 @@ public class FileHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
-			if(!Static.InCmdLine(env)) {
+			if(!Static.InCmdLine(env, true)) {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
 				if(!Security.CheckSecurity(location)) {
@@ -467,7 +467,7 @@ public class FileHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
-			if(!Static.InCmdLine(env)) {
+			if(!Static.InCmdLine(env, true)) {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
 				if(!Security.CheckSecurity(location)) {

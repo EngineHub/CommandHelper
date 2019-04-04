@@ -594,7 +594,7 @@ public class Sandbox {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(!Static.InCmdLine(environment)) {
+			if(!Static.InCmdLine(environment, true)) {
 				throw new CRESecurityException(getName() + " is only available in cmdline mode.", t);
 			}
 			File location = Static.GetFileFromArgument(args[0].val(), environment, t, null);

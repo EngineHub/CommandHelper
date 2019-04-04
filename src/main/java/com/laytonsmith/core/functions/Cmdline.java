@@ -61,7 +61,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -78,6 +77,7 @@ public class Cmdline {
 
 	@api
 	@noboilerplate
+	@seealso(print_out.class)
 	public static class sys_out extends AbstractFunction {
 
 		@Override
@@ -141,6 +141,7 @@ public class Cmdline {
 
 	@api
 	@noboilerplate
+	@seealso(print_err.class)
 	public static class sys_err extends AbstractFunction {
 
 		@Override
@@ -204,6 +205,7 @@ public class Cmdline {
 
 	@api
 	@noboilerplate
+	@seealso(sys_out.class)
 	public static class print_out extends AbstractFunction {
 
 		@Override
@@ -247,7 +249,8 @@ public class Cmdline {
 					+ " cases they will behave the same. Unlike other print methdods, colors and other formatting characters WILL"
 					+ " \"bleed\" through, so"
 					+ " print_out(color(RED) . 'This is red') will also cause the next line to also be red,"
-					+ " so if you need to print multiple lines out, you should manually reset the color with print_out(color(RESET)).";
+					+ " so if you need to print multiple lines out, you should manually reset the color with print_out(color(RESET)),"
+					+ " or use sys_out..";
 		}
 
 		@Override
@@ -259,6 +262,7 @@ public class Cmdline {
 
 	@api
 	@noboilerplate
+	@seealso(sys_err.class)
 	public static class print_err extends AbstractFunction {
 
 		@Override
@@ -301,7 +305,8 @@ public class Cmdline {
 					+ " cases they will behave the same. Unlike other print methdods, colors and other formatting characters WILL"
 					+ " \"bleed\" through, so"
 					+ " print_err(color(RED) . 'This is red') will also cause the next line to also be red,"
-					+ " so if you need to print multiple lines out, you should manually reset the color with print_out(color(RESET)).";
+					+ " so if you need to print multiple lines out, you should manually reset the color with print_out(color(RESET)),"
+					+ " or use sys_err.";
 		}
 
 		@Override
@@ -336,7 +341,7 @@ public class Cmdline {
 			if(args.length == 1) {
 				exit_code = Static.getInt32(args[0], t);
 			}
-			if(Static.InCmdLine(environment)) {
+			if(Static.InCmdLine(environment, true)) {
 				System.exit(exit_code);
 			}
 			return new Echoes.die().exec(t, environment, args);
@@ -559,7 +564,7 @@ public class Cmdline {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			//TODO: Make this more robust by having a local cache of the environment which we modify, and get_env returns from.
-			Map<String, String> newenv = new HashMap<String, String>(System.getenv());
+			Map<String, String> newenv = new HashMap<>(System.getenv());
 			newenv.put(args[0].val(), args[1].val());
 			boolean ret;
 			try {
@@ -649,7 +654,7 @@ public class Cmdline {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(!Static.InCmdLine(environment)) {
+			if(!Static.InCmdLine(environment, true)) {
 				throw new CREInsufficientPermissionException(getName() + " cannot be used outside of cmdline mode.", t);
 			}
 			boolean mask = true;
@@ -658,21 +663,15 @@ public class Cmdline {
 			}
 
 			String prompt = args[0].val();
-			Character cha = new Character((char) 0);
+			Character cha = (char) 0;
 			if(mask) {
-				cha = new Character('*');
+				cha = '*';
 			}
-			jline.console.ConsoleReader reader = null;
-			try {
-				reader = new jline.console.ConsoleReader();
+			try(jline.console.ConsoleReader reader = new jline.console.ConsoleReader()) {
 				reader.setExpandEvents(false);
 				return new CSecureString(reader.readLine(Static.MCToANSIColors(prompt), cha).toCharArray(), t);
 			} catch (IOException ex) {
 				throw new CREIOException(ex.getMessage(), t);
-			} finally {
-				if(reader != null) {
-					reader.close();
-				}
 			}
 
 		}
@@ -806,23 +805,17 @@ public class Cmdline {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(!Static.InCmdLine(environment)) {
+			if(!Static.InCmdLine(environment, true)) {
 				throw new CREInsufficientPermissionException(getName() + " cannot be used outside of cmdline mode.", t);
 			}
 
 			String prompt = args[0].val();
-			jline.console.ConsoleReader reader = null;
-			try {
-				reader = new jline.console.ConsoleReader();
+			try(jline.console.ConsoleReader reader = new jline.console.ConsoleReader()) {
 				reader.setExpandEvents(false);
 				String line = reader.readLine(Static.MCToANSIColors(prompt));
 				return new CString(line, t);
 			} catch (IOException ex) {
 				throw new CREIOException(ex.getMessage(), t);
-			} finally {
-				if(reader != null) {
-					reader.close();
-				}
 			}
 
 		}
@@ -918,7 +911,7 @@ public class Cmdline {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(Static.InCmdLine(environment)) {
+			if(Static.InCmdLine(environment, true)) {
 				try {
 					new jline.console.ConsoleReader().clearScreen();
 				} catch (IOException ex) {
@@ -972,7 +965,7 @@ public class Cmdline {
 
 		@Override
 		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(!Static.InCmdLine(environment)) {
+			if(!Static.InCmdLine(environment, true)) {
 				if(!Prefs.AllowShellCommands()) {
 					throw new CREInsufficientPermissionException("Shell commands are not allowed. Enable them in preferences.ini.", t);
 				}
@@ -1030,13 +1023,9 @@ public class Cmdline {
 					char c = (char) b;
 					if(c == '\n' || b == -1) {
 						try {
-							StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
-
-								@Override
-								public Object call() throws Exception {
-									stdout.executeCallable(new CString(sbout.getObject(), t));
-									return null;
-								}
+							StaticLayer.GetConvertor().runOnMainThreadAndWait(() -> {
+								stdout.executeCallable(new CString(sbout.getObject(), t));
+								return null;
 							});
 						} catch (Exception ex) {
 							Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
@@ -1056,13 +1045,9 @@ public class Cmdline {
 					char c = (char) b;
 					if(c == '\n' || b == -1) {
 						try {
-							StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
-
-								@Override
-								public Object call() throws Exception {
-									stderr.executeCallable(new CString(sberr.getObject(), t));
-									return null;
-								}
+							StaticLayer.GetConvertor().runOnMainThreadAndWait(() -> {
+								stderr.executeCallable(new CString(sberr.getObject(), t));
+								return null;
 							});
 						} catch (Exception ex) {
 							Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
@@ -1079,48 +1064,40 @@ public class Cmdline {
 				throw new CREIOException(ex.getMessage(), t);
 			}
 
-			Runnable run = new Runnable() {
-
-				@Override
-				public void run() {
-					environment.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
+			Runnable run = () -> {
+				environment.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
+				try {
+					final int exitCode = cmd.waitFor();
 					try {
-						final int exitCode = cmd.waitFor();
-						try {
-							cmd.getSystemOut().flush();
-							if(cmd.getSystemOut() != StreamUtils.GetSystemOut()) {
-								cmd.getSystemOut().close();
-							}
-						} catch (IOException ex) {
-							Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
+						cmd.getSystemOut().flush();
+						if(cmd.getSystemOut() != StreamUtils.GetSystemOut()) {
+							cmd.getSystemOut().close();
 						}
-						try {
-							cmd.getSystemErr().flush();
-							if(cmd.getSystemErr() != StreamUtils.GetSystemErr()) {
-								cmd.getSystemErr().close();
-							}
-						} catch (IOException ex) {
-							Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
-						}
-						if(exit != null) {
-							try {
-								StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
-
-									@Override
-									public Object call() throws Exception {
-										exit.executeCallable(new CInt(exitCode, t));
-										return null;
-									}
-								});
-							} catch (Exception ex) {
-								Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
-							}
-						}
-					} catch (InterruptedException ex) {
-						throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
-					} finally {
-						environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
+					} catch (IOException ex) {
+						Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
 					}
+					try {
+						cmd.getSystemErr().flush();
+						if(cmd.getSystemErr() != StreamUtils.GetSystemErr()) {
+							cmd.getSystemErr().close();
+						}
+					} catch (IOException ex) {
+						Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
+					}
+					if(exit != null) {
+						try {
+							StaticLayer.GetConvertor().runOnMainThreadAndWait(() -> {
+								exit.executeCallable(new CInt(exitCode, t));
+								return null;
+							});
+						} catch (Exception ex) {
+							Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
+						}
+					}
+				} catch (InterruptedException ex) {
+					throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
+				} finally {
+					environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
 				}
 			};
 			if(subshell) {
@@ -1190,7 +1167,7 @@ public class Cmdline {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(!Static.InCmdLine(environment)) {
+			if(!Static.InCmdLine(environment, true)) {
 				if(!Prefs.AllowShellCommands()) {
 					throw new CREInsufficientPermissionException("Shell commands are not allowed. Enable them in preferences.ini.", t);
 				}
@@ -1511,7 +1488,7 @@ public class Cmdline {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(!Static.InCmdLine(environment)) {
+			if(!Static.InCmdLine(environment, true)) {
 				throw new CREInsufficientPermissionException(getName() + " cannot be used outside of cmdline mode.", t);
 			}
 			if(System.console() != null) {
@@ -1596,7 +1573,7 @@ public class Cmdline {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			File root;
-			if(Static.InCmdLine(environment)) {
+			if(Static.InCmdLine(environment, true)) {
 				root = environment.getEnv(GlobalEnv.class).GetRootFolder();
 			} else if(t.file() == null) {
 				root = null;
@@ -1927,7 +1904,7 @@ public class Cmdline {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.GenerateCBoolean(Static.InCmdLine(environment), t);
+			return CBoolean.GenerateCBoolean(Static.InCmdLine(environment, true), t);
 		}
 
 		@Override
@@ -2086,7 +2063,7 @@ public class Cmdline {
 	 * @throws ConfigRuntimeException If not in cmdline mode.
 	 */
 	public static void requireCmdlineMode(Environment environment, Function f, Target t) throws ConfigRuntimeException {
-		if(!Static.InCmdLine(environment)) {
+		if(!Static.InCmdLine(environment, true)) {
 			throw new CREInsufficientPermissionException(f.getName() + " cannot be used outside of cmdline mode.", t);
 		}
 	}

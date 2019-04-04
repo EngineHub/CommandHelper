@@ -1324,7 +1324,7 @@ public final class Static {
 		}
 		//Ok, it's not absolute, so we need to see if we're in cmdline mode or not.
 		//If so, we use the root directory, not the target.
-		if(env != null && InCmdLine(env)) {
+		if(env != null && InCmdLine(env, true)) {
 			return new File(env.getEnv(GlobalEnv.class).GetRootFolder(), arg);
 		} else if(t.file() == null) {
 			throw new CREIOException("Unable to receive a non-absolute file with an unknown target", t);
@@ -1334,12 +1334,18 @@ public final class Static {
 	}
 
 	/**
-	 * Returns true if currently running in cmdline mode.
+	 * Returns true if currently running in cmdline mode. If the environment is null, or the GlobalEnv is
+	 * not available, then defaultValue is returned.
 	 *
 	 * @param environment
+	 * @param defaultValue What should be returned if the environment is null or GlobalEnv is not present. (Happens
+	 * during compile time.)
 	 * @return
 	 */
-	public static boolean InCmdLine(Environment environment) {
+	public static boolean InCmdLine(Environment environment, boolean defaultValue) {
+		if(environment == null || !environment.hasEnv(GlobalEnv.class)) {
+			return defaultValue;
+		}
 		return environment.getEnv(GlobalEnv.class).GetCustom("cmdline") instanceof Boolean
 				&& (Boolean) environment.getEnv(GlobalEnv.class).GetCustom("cmdline");
 	}
