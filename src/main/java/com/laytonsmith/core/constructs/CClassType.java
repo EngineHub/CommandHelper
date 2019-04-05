@@ -262,7 +262,6 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 			} else if("ms.lang.ClassType".equals(fqcn)) {
 				invalidType = new Mixed[]{this};
 			} else {
-				ObjectDefinitionTable odt = env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
 				invalidType = new Mixed[types.size()];
 				for(int i = 0; i < invalidType.length; i++) {
 					// TODO: For now, we must use this mechanism, since we don't populate the ODT with
@@ -270,6 +269,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 					if(NativeTypeList.getNativeTypeList().contains(this.fqcn)) {
 						invalidType[i] = NativeTypeList.getInvalidInstanceForUse(this.fqcn);
 					} else {
+						ObjectDefinitionTable odt = env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
 						ObjectDefinition od = odt.get(this.fqcn);
 						invalidType[i] = new UserObject(Target.UNKNOWN, null, env, od, null);
 					}

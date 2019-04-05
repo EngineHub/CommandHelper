@@ -1,8 +1,10 @@
 package com.laytonsmith.PureUtilities.Common;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,6 +45,7 @@ public class ClassUtils {
 		return forCanonicalName(className, true, initialize, classLoader);
 	}
 
+	private static final Map<String, Class> CANONICAL_CLASS_CACHE = new ConcurrentHashMap<>();
 	/**
 	 * Private version, which accepts the useInitializer parameter.
 	 *
@@ -53,7 +56,11 @@ public class ClassUtils {
 	 * @return
 	 * @throws ClassNotFoundException
 	 */
-	private static Class forCanonicalName(String className, boolean useInitializer, boolean initialize, ClassLoader classLoader) throws ClassNotFoundException {
+	private static Class forCanonicalName(String className, boolean useInitializer, boolean initialize,
+			ClassLoader classLoader) throws ClassNotFoundException {
+		if(CANONICAL_CLASS_CACHE.containsKey(className)) {
+			return CANONICAL_CLASS_CACHE.get(className);
+		}
 		if("void".equals(className)) {
 			return void.class;
 		}
@@ -144,6 +151,7 @@ public class ClassUtils {
 				throw ex;
 			}
 		}
+		CANONICAL_CLASS_CACHE.put(className, c);
 		return c;
 	}
 

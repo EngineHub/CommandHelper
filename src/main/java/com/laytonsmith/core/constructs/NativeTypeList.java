@@ -41,6 +41,8 @@ public class NativeTypeList {
 	 */
 	public static final String INVALID_INSTANCE_METHOD_NAME = "ConstructInvalidInstance";
 
+	private static final Map<FullyQualifiedClassName, Mixed> INVALID_INSTANCE_CACHE = new ConcurrentHashMap<>();
+
 	/**
 	 * Given a simple name of a class, attempts to resolve
 	 * within the native types (not user defined types). If the class can't be found, null is returned,
@@ -288,15 +290,23 @@ public class NativeTypeList {
 	 * @throws java.lang.ClassNotFoundException
 	 */
 	public static Mixed getInvalidInstanceForUse(FullyQualifiedClassName fqcn) throws ClassNotFoundException {
+		if(INVALID_INSTANCE_CACHE.containsKey(fqcn)) {
+			return INVALID_INSTANCE_CACHE.get(fqcn);
+		}
 		Class<? extends Mixed> c = getNativeClassOrInterfaceRunner(fqcn);
 		if(ReflectionUtils.hasMethod(c, INVALID_INSTANCE_METHOD_NAME, Mixed.class)) {
-			return (Mixed) ReflectionUtils.invokeMethod(c, null, INVALID_INSTANCE_METHOD_NAME);
+			Mixed m = (Mixed) ReflectionUtils.invokeMethod(c, null, INVALID_INSTANCE_METHOD_NAME);
+			INVALID_INSTANCE_CACHE.put(fqcn, m);
+			return m;
 		}
+		Mixed m;
 		if(MEnumType.class.isAssignableFrom(c)) {
-			return getNativeEnumType(fqcn);
+			m = getNativeEnumType(fqcn);
 		} else { // Not abstract
-			return ReflectionUtils.instantiateUnsafe(c);
+			m =  ReflectionUtils.instantiateUnsafe(c);
 		}
+		INVALID_INSTANCE_CACHE.put(fqcn, m);
+		return m;
 	}
 
 	/**
