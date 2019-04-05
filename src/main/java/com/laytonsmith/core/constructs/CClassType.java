@@ -79,6 +79,13 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	private Mixed[] invalidType = UNINITIALIZED;
 
 	/**
+	 * If this was constructed against a native class, we can do some optimizations in the course
+	 * of operation. This may be null, and all code in this class must support the mechanisms if this
+	 * is null anyways, but if it isn't null, then this can perhaps be used to help optimize.
+	 */
+	private Class<? extends Mixed> nativeClass = null;
+
+	/**
 	 * This *MUST* contain a list of non type union types.
 	 */
 	private final SortedSet<FullyQualifiedClassName> types = new TreeSet<>();
@@ -102,7 +109,9 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 				throw new IllegalArgumentException("Missing typeof annotation for " + type);
 			}
 			String fqcn = typeof.value();
-			return get(FullyQualifiedClassName.forFullyQualifiedClass(fqcn));
+			CClassType t = get(FullyQualifiedClassName.forFullyQualifiedClass(fqcn));
+			t.nativeClass = type;
+			return t;
 		} catch (ClassNotFoundException ex) {
 			throw new Error(ex);
 		}
@@ -318,6 +327,15 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	public static boolean doesExtend(CClassType checkClass, CClassType superClass) {
 		if(checkClass.equals(superClass)) {
 			// more efficient check
+			return true;
+		}
+		if(checkClass.nativeClass != null && superClass.nativeClass != null
+				&& superClass.nativeClass.isAssignableFrom(checkClass.nativeClass)) {
+			// Since native classes are not allowed to extend multiple superclasees, but
+			// in general, they are allowed to advertise that they do, for the sake of
+			// methodscript, this can only be used to return true, if it returns true, it
+			// definitely is, but if it returns false, that does not explicitely mean that
+			// it doesn't.
 			return true;
 		}
 		for(CClassType tCheck : checkClass.getTypes()) {
