@@ -3,7 +3,6 @@ package com.laytonsmith.abstraction.enums.bukkit;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.material.MaterialData;
 
 import java.util.HashMap;
 
@@ -518,9 +517,9 @@ public enum BukkitMCLegacyMaterial {
 		if(legacymat.getMaxDurability() == 0) {
 			if(legacymat.equals(Material.LEGACY_ANVIL)) {
 				// special cases where we prioritize item conversion
-				return Bukkit.getUnsafe().fromLegacy(new MaterialData(legacymat, (byte) data), true);
+				return Bukkit.getUnsafe().fromLegacy(new org.bukkit.material.MaterialData(legacymat, (byte) data), true);
 			}
-			return Bukkit.getUnsafe().fromLegacy(new MaterialData(legacymat, (byte) data));
+			return Bukkit.getUnsafe().fromLegacy(new org.bukkit.material.MaterialData(legacymat, (byte) data));
 		} else {
 			// ignore data when it's actually durability
 			return Bukkit.getUnsafe().fromLegacy(legacymat);
