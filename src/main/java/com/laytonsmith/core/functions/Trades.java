@@ -100,6 +100,9 @@ public class Trades {
 			MCMerchant merchant = GetMerchant(args[0], t);
 			CArray trades = Static.getArray(args[1], t);
 			List<MCMerchantRecipe> recipes = new ArrayList<>();
+			if(trades.isAssociative()) {
+				throw new CRECastException("Expected non-associative array for list of trade arrays.", t);
+			}
 			for(Mixed trade : trades.asList()) {
 				recipes.add(trade(trade, t));
 			}
