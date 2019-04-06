@@ -1485,7 +1485,7 @@ public class EntityEvents {
 		public String docs() {
 			return "{type: <macro> the type of entity"
 					+ " | portaltype: <string match> The type of portal (PORTAL or END_PORTAL)"
-					+ " world: <macro> the world in which the portal was entered }"
+					+ " | world: <macro> the world in which the portal was entered }"
 					+ " Fires when an entity touches a portal block."
 					+ " {id: the entityID of the entity | location: the location of the block touched | type"
 					+ " | portaltype }"
@@ -2019,9 +2019,9 @@ public class EntityEvents {
 			return "{reason: <macro>}"
 					+ " Fired when an entity regained the health."
 					+ " {id: The entity ID of regained entity"
-					+ " amount: The amount of regained the health |"
-					+ " cause: The cause of regain, one of " + StringUtils.Join(MCRegainReason.values(), ", ")
-					+ " player: The regained player}"
+					+ " | amount: The amount of regained the health"
+					+ " | cause: The cause of regain, one of " + StringUtils.Join(MCRegainReason.values(), ", ")
+					+ " | player: The regained player}"
 					+ " {amount}"
 					+ " {}";
 		}

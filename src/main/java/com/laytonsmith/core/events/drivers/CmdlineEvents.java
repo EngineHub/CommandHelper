@@ -142,7 +142,7 @@ public class CmdlineEvents {
 					+ " Fired when a command is issued from the interactive prompt. If the event is not"
 					+ " cancelled, the interpreter will handle it as normal. Otherwise, the event can"
 					+ " be cancelled, and custom handling can be triggered."
-					+ " {command: The command that was triggered, shellMode: If the shell is in shell mode (activated with $$)}"
+					+ " {command: The command that was triggered | shellMode: If the shell is in shell mode (activated with $$)}"
 					+ " {}"
 					+ " {}";
 		}

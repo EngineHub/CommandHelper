@@ -778,7 +778,7 @@ public class PlayerEvents {
 					+ " hand: <string match> The hand the player clicked with |"
 					+ " player: <macro> The player that triggered the event} "
 					+ "Fires when a player left or right clicks a block or the air"
-					+ "{action: One of either: left_click_block, right_click_block, left_click_air, or right_click_air"
+					+ "{action: One of either left_click_block, right_click_block, left_click_air, or right_click_air"
 					+ " | block: The type of block they clicked, or null if they clicked air. If they clicked air,"
 					+ " neither facing nor location will be present."
 					+ " | item: The item array the player used to click, or null if not holding anything in that hand"
@@ -1448,8 +1448,8 @@ public class PlayerEvents {
 					+ "{message|recipients: An array of"
 					+ " players that will recieve the chat message. If a player doesn't exist"
 					+ " or is offline, and is in the array, it is simply ignored, no"
-					+ " exceptions will be thrown.|format: The \"printf\" format string, by "
-					+ " default: \"<%1$s> %2$s\". The first parameter is the player's display"
+					+ " exceptions will be thrown. | format: The \"printf\" format string, by "
+					+ " default \"<%1$s> %2$s\". The first parameter is the player's display"
 					+ " name, and the second one is the message.}"
 					+ "{player|message|format}";
 		}
@@ -1580,7 +1580,7 @@ public class PlayerEvents {
 					+ " players that will recieve the chat message. If a player doesn't exist"
 					+ " or is offline, and is in the array, it is simply ignored, no"
 					+ " exceptions will be thrown.|format: The \"printf\" format string, by "
-					+ " default: \"<%1$s> %2$s\". The first parameter is the player's display"
+					+ " default \"<%1$s> %2$s\". The first parameter is the player's display"
 					+ " name, and the second one is the message.}"
 					+ "{}";
 		}

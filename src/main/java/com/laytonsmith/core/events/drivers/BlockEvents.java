@@ -934,7 +934,7 @@ public class BlockEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <string match> | 1: <regex> | 2: regex> | 3: <regex> | 4: <regex> }"
+			return "{player: <string match> | 1: <regex> | 2: <regex> | 3: <regex> | 4: <regex> }"
 					+ "This event is called when a player changes a sign. Cancelling the event cancels any edits completely."
 					+ "{player: The player's name | location: an array usable as a locationArray while also compatible"
 					+ " with X,Y,Z,world indices | text: An array with keys 0 thru 3 defining every line on the sign}"

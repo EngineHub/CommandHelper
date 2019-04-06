@@ -67,7 +67,7 @@ public class ServerEvents {
 					+ " before CommandHelper aliases, allowing you to insert control beforehand. Be careful with this"
 					+ " event, because it can override ALL server commands, potentially creating all sorts of havoc."
 					+ "{command: The entire command | prefix: The prefix of the command"
-					+ " | sendertype: The command sender type. This is one of: console, command_block,"
+					+ " | sendertype: The command sender type. This is one of console, command_block,"
 					+ " command_minecart or null if the sender is unknown to CommandHelper.}"
 					+ "{command}"
 					+ "{}";
