@@ -7,5 +7,7 @@
 			"path": "../ms-resources"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"editor.rulers": [120]
+	}
 }

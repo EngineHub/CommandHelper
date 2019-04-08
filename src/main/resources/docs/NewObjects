@@ -188,26 +188,24 @@ class A {
 
 class B extends A {
 	// We are allowed to "narrow" the return type of a method, and this still
-	// overrides the A->f method. Note that the Override annotation is in place
+	// overrides the A->f method. Note that the override keyword is in place
 	// to ensure this method does indeed override a parent method. If it does
-	// not, it will cause a compile error, and actually, it is a required annotation
+	// not, it will cause a compile error, and actually, it is required
 	// if the method does override a parent method.
-	@{Override}
-	int f(number @a) { /*...*/ }
+	override int f(number @a) { /*...*/ }
 }
 
 class C extends A {
 	// Not allowed! Actually, the only reason this isn't allowed is because we have
-	// added the @{Override} tag. It is possible to create this method anyways,
-	// (without the Override tag), but then if the method were called, it would
+	// added the override keyword. It is possible to create this method anyways,
+	// (without the override keyword), but then if the method were called, it would
 	// follow the normal overloading rules of deciding which method to call, as
 	// if we had simply created both methods within the same class.
-	@{Override}
-	number f(int @a) { /*...*/ }
+	override number f(int @a) { /*...*/ }
 }
 
 class D extends A {
-	// This is not allowed, (with or without the Override annotation, it's a compiler error with it), 
+	// This is not allowed, (with or without the override keyword, it's a compiler error with it), 
 	// because the rules governing inheritance do not allow for return type changes.
 	string f(number @a) { /*...*/ }
 }
@@ -330,33 +328,6 @@ Note that the default constructor is annotated with the @{Inject} annotation. If
 wish your class to be automatically injectable, you need to implement a no-arg constructor yourself, with
 the @{NoInject} annotation. (This is used in the [[Dependency Injection|DependencyInjection]] framework.)
 
-==== Destructors ====
-
-A destructor is automatically called when an object goes out of scope, and can 
-be used to do various things. It is never required to implement, however. It is 
-implemented in a '''destructor block''', much like member blocks.
-
-%%CODE|
-class A{
-    members{
-        private static int @instances = 0
-    }
-
-    public static int totalInstances(){
-        return(@instances)
-    }
-
-    public A(){
-        @instances++
-    }
-
-    destructor{
-        @instances--
-    }
-}
-%%
-
-
 === Static members and methods ===
 You may have noticed that the keyword '''static''' has been used a few times.
 A ''static'' variable is one that is usable outside of any instances, often times
@@ -381,7 +352,7 @@ it is not possible to call a static method by dereferencing an instance. If you 
 a pure utility class, that only has methods (no members), then consider using
 a namespace instead.
 
-==== <code>@this</code>, <code>@self</code> variables, and <code>super</code> keyword ====
+==== <code>@this</code> and <code>@self</code> variables, and <code>super</code> and <code>self</code> keywords ====
 There are two variables that are specially defined within code inside a class,
 <code>@this</code> and <code>@self</code>. <code>@this</code> refers to the
 current instance of the class, and while not usually necessary, can be used in
@@ -451,6 +422,36 @@ msg(@b->method()); // 'A'
 @b->x = 'xyz'; // Note we are changing @x which is defined and only referenced in A
 msg(@b->method()); // 'XYZ'
 %>
+
+The <code>self</code> keyword refers to the ClassType of the currently defining class. This is a shortcut
+to listing the current defining type, and can generally be thought of as simply replacing the self keyword
+at compile time with the ClassType of the currently defining class. (Though this isn't exactly the case.)
+This is mostly useful when defining method signatures. For instance:
+
+<%CODE|
+class A {
+	/**
+	 * If this method is overridden by a subclass, it must return an object of its own class (or a subclass). As it
+	 * stands in this method, the return type must be of class A.
+	 */
+	self newInstance() {
+		return(new A());
+	}
+}
+
+class B extends A {
+	/**
+	 * Since the return type was defined as self, we MUST also define the return type here as self, for this
+	 * to be a proper override. But in this case, we must return a value of type B, not type A.
+	 */
+	override self newInstance() {
+		return(new B());
+	}
+}
+%>
+
+The self keyword can also be used in generic definitions, such as <code>ClassType<? extends self></code>, and within
+general code, such as <code>self @a = new self();</code> or <code>msg(self);</code>.
 
 === Access Modifiers ===
 '''public''', '''protected''', '''internal''', '''package''', and '''private''' are the five modifiers that 
@@ -667,7 +668,26 @@ class C extends A, B {
 
 By default, methods with multiple overrides in parent classes inherit from the
 primary parent, in this case, A, though you can also be explicit and inherit a
-method individually.
+method individually. If no access modifier is provided, the method is inherited with
+the same access level as the parent method. However, the visibility of the method
+may also be increased:
+
+<%CODE|
+class A {
+	protected void method(int @a) {
+		//...
+	}
+}
+
+class B extends A {
+	/**
+	 * This increases the visibility of the method, but changes nothing else. Note that in general,
+	 * it is not allowed to decrease the visibility of any method, whether or not it is inherited using
+	 * the inherit keyword.
+	 */
+	inherit public method(int @a);
+}
+%>
 
 === Type Unions ===
 
