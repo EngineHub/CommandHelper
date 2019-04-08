@@ -57,8 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -216,13 +214,13 @@ public class Reflection {
 						//No name provided
 						for(ClassMirror<? extends Enum> e : enums) {
 							String name = (String) e.getAnnotation(MEnum.class).getValue("value");
-							a.push(CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(name)), t);
+							a.push(CClassType.get(FullyQualifiedClassName.forNativeEnum(e.loadClass())), t);
 						}
 						for(ClassMirror<? extends DynamicEnum> d : dEnums) {
 							String name = (String) d.getAnnotation(MDynamicEnum.class).getValue("value");
 							a.push(CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(name)), t);
 						}
-					} catch(ClassNotFoundException ex) {
+					} catch (ClassNotFoundException ex) {
 						throw new Error(ex);
 					}
 				} else if(args.length == 2) {

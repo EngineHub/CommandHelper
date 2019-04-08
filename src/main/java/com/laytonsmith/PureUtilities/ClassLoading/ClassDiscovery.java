@@ -728,7 +728,7 @@ public class ClassDiscovery {
 			// but there's no way for us to encode T into the generic type of the definition, so we just do this,
 			// lie to the compiler, and go about our merry way. We do the same below.
 			// I'm totally open to a better approach though.
-			return (Set<ClassMirror<? extends T>>)(Object) classesWithAnnotationThatExtendCache.get(id);
+			return (Set<ClassMirror<? extends T>>) (Object) classesWithAnnotationThatExtendCache.get(id);
 		}
 		Set<ClassMirror<? extends T>> mirrors = new HashSet<>();
 		for(ClassMirror<?> c : getClassesWithAnnotation(annotation)) {
@@ -741,7 +741,7 @@ public class ClassDiscovery {
 			// ourselves here.
 			mirrors.add(new ClassMirror<>(superClass));
 		}
-		classesWithAnnotationThatExtendCache.put(id, (Set<ClassMirror<?>>)(Object)mirrors);
+		classesWithAnnotationThatExtendCache.put(id, (Set<ClassMirror<?>>) (Object) mirrors);
 		return mirrors;
 	}
 

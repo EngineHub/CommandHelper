@@ -3,15 +3,12 @@ package com.laytonsmith.core.exceptions.CRE;
 import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.ObjectType;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -54,16 +51,19 @@ public class CREThrowable extends AbstractCREException {
 		if(this.getClass() == CREThrowable.class) {
 			return new CClassType[]{Mixed.TYPE};
 		} else {
-			try {
+//			try {
 				return new CClassType[]{
-					CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(
-							this.getClass().getSuperclass().getAnnotation(typeof.class).value()))
+					CClassType.get(
+							// The superclass of a subclass to this class will always be of type Mixed,
+							// so this cast will never fail, but we need it to convince the compiler this is ok.
+							(Class<? extends Mixed>) this.getClass().getSuperclass()
+					)
 				};
-			} catch(ClassNotFoundException ex) {
-				throw new Error("Subclasses can reliably return super.getSuperclasses() for this, ONLY if it follows"
-						+ " the rule that it only has one superclass, and that superclass is the underlying java"
-						+ " object as well. This appears to be wrong in " + this.getClass());
-			}
+//			} catch(ClassNotFoundException ex) {
+//				throw new Error("Subclasses can reliably return super.getSuperclasses() for this, ONLY if it follows"
+//						+ " the rule that it only has one superclass, and that superclass is the underlying java"
+//						+ " object as well. This appears to be wrong in " + this.getClass());
+//			}
 		}
 	}
 

@@ -100,12 +100,12 @@ public class InstanceofUtil {
 		return isInstanceof(value, instanceofThis.getFQCN(), env);
 	}
 
-	private static FullyQualifiedClassName typeof(Class<?> c) {
+	private static FullyQualifiedClassName typeof(Class<? extends Mixed> c) {
 		typeof type = c.getAnnotation(typeof.class);
 		if(type == null) {
 			return null;
 		} else {
-			return FullyQualifiedClassName.forFullyQualifiedClass(type.value());
+			return FullyQualifiedClassName.forNativeClass(c);
 		}
 	}
 

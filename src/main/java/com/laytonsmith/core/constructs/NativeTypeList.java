@@ -100,22 +100,21 @@ public class NativeTypeList {
 					for(ClassMirror<? extends Mixed> c : ClassDiscovery.getDefaultInstance()
 							.getClassesWithAnnotationThatExtend(typeof.class, Mixed.class)) {
 						nativeTypes.add((String) c.getAnnotation(typeof.class).getValue("value"));
+						fqNativeTypes.add(FullyQualifiedClassName.forNativeClass(c.loadClass()));
 					}
 
 					for(ClassMirror<? extends Enum> c : ClassDiscovery.getDefaultInstance()
 							.getClassesWithAnnotationThatExtend(MEnum.class, Enum.class)) {
 						String name = (String) c.getAnnotation(MEnum.class).getValue("value");
 						nativeTypes.add(name);
+						fqNativeTypes.add(FullyQualifiedClassName.forNativeEnum(c.loadClass()));
 					}
 
 					for(ClassMirror<? extends DynamicEnum> c : ClassDiscovery.getDefaultInstance()
 							.getClassesWithAnnotationThatExtend(MDynamicEnum.class, DynamicEnum.class)) {
 						String name = (String) c.getAnnotation(MDynamicEnum.class).getValue("value");
 						nativeTypes.add(name);
-					}
-
-					for(String s : nativeTypes) {
-						fqNativeTypes.add(FullyQualifiedClassName.forFullyQualifiedClass(s));
+						fqNativeTypes.add(FullyQualifiedClassName.forFullyQualifiedClass(name));
 					}
 				}
 			}
@@ -139,6 +138,9 @@ public class NativeTypeList {
 	 * be thrown.
 	 */
 	public static Class<? extends Mixed> getNativeClass(FullyQualifiedClassName fqcn) throws ClassNotFoundException {
+		if(fqcn.getNativeClass() != null) {
+			return fqcn.getNativeClass();
+		}
 		// This is super super expensive, so we cannot afford to run this more than once per class. Even more
 		// ideally, this information should be stored WITH the class, so there's no runtime penalty whatsoever,
 		// but having a local cache is at least an improvement.
@@ -326,8 +328,7 @@ public class NativeTypeList {
 			throw new RuntimeException(clazz + " is missing typeof annotation!");
 		}
 		try {
-			return getInvalidInstanceForUse(FullyQualifiedClassName
-					.forFullyQualifiedClass(clazz.getAnnotation(typeof.class).value()));
+			return getInvalidInstanceForUse(FullyQualifiedClassName.forNativeClass(clazz));
 		} catch (ClassNotFoundException e) {
 			throw new Error(e);
 		}

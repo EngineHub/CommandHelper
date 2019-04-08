@@ -60,7 +60,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	public static final CClassType[] EMPTY_CLASS_ARRAY = new CClassType[0];
 
 	static {
-		CACHE.put(FullyQualifiedClassName.forFullyQualifiedClass("ms.lang.ClassType"), TYPE);
+		CACHE.put(FullyQualifiedClassName.forNativeClass(CClassType.class), TYPE);
 	}
 
 	private final boolean isTypeUnion;
@@ -104,12 +104,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 */
 	public static CClassType get(Class<? extends Mixed> type) {
 		try {
-			typeof typeof = type.getAnnotation(typeof.class);
-			if(typeof == null) {
-				throw new IllegalArgumentException("Missing typeof annotation for " + type);
-			}
-			String fqcn = typeof.value();
-			CClassType t = get(FullyQualifiedClassName.forFullyQualifiedClass(fqcn));
+			CClassType t = get(FullyQualifiedClassName.forNativeClass(type));
 			t.nativeClass = type;
 			return t;
 		} catch (ClassNotFoundException ex) {
@@ -241,7 +236,11 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 						found = true;
 					}
 				} else {
-					found = null != NativeTypeList.resolveNativeType(fqcn.getFQCN());
+					if(fqcn.getNativeClass() != null) {
+						found = true;
+					} else {
+						found = null != NativeTypeList.resolveNativeType(fqcn.getFQCN());
+					}
 				}
 			}
 			// TODO: When user types are added, we will need to do some more digging here, and probably need
@@ -593,6 +592,14 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		throw new CREUnsupportedOperationException("Unsupported operation", t);
 	}
 
-
+	/**
+	 * If this was constructed against a native class, we can do some optimizations in the course
+	 * of operation. This may be null, and all code that uses this method must support the mechanisms if this
+	 * is null anyways, but if it isn't null, then this can perhaps be used to help optimize.
+	 * @return
+	 */
+	public Class<? extends Mixed> getNativeType() {
+		return nativeClass;
+	}
 
 }

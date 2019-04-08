@@ -6,11 +6,14 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.annotations.MEnum;
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.ObjectDefinitionNotFoundException;
 import com.laytonsmith.core.objects.ObjectDefinitionTable;
 import java.util.ArrayList;
@@ -26,6 +29,7 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	public static final String PATH_SEPARATOR = ".";
 
 	private final String fullyQualifiedName;
+	private Class<? extends Mixed> nativeClass;
 
 	private FullyQualifiedClassName(String name) {
 		Objects.requireNonNull(name, "The name passed in may not be null");
@@ -70,13 +74,56 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	}
 
 	/**
-	 * If the class is known for sure to be within the default import list, this method can be used.
+	 * If the type represents an enum tagged with {@link MEnum}, then this method should be used, but is otherwise
+	 * identical to {@link #forNativeClass(java.lang.Class)}.
+	 * @param clazz
+	 * @return
+	 */
+	public static FullyQualifiedClassName forNativeEnum(Class<? extends Enum> clazz) {
+		MEnum m = clazz.getAnnotation(MEnum.class);
+		if(m == null) {
+			throw new Error("Native enum " + clazz + " does not provide an MEnum annotation");
+		}
+		String fqcn = m.value();
+		FullyQualifiedClassName f = new FullyQualifiedClassName(fqcn);
+		try {
+			f.nativeClass = NativeTypeList.getNativeEnumType(f).typeof().getNativeType();
+		} catch (ClassNotFoundException ex) {
+			// This can't happen, it would have already been the above error.
+			throw new Error(ex);
+		}
+		return f;
+	}
+
+	/**
+	 * If the type represents a native class, this method can be used. Not only does it never throw an exception
+	 * (except an Error, if the class does not define a typeof annotation), getNativeClass will return a reference
+	 * to the Class object, which is useful for shortcutting various operations.
+	 * @param clazz
+	 * @return
+	 */
+	public static FullyQualifiedClassName forNativeClass(Class<? extends Mixed> clazz) {
+		typeof t = clazz.getAnnotation(typeof.class);
+		if(t == null) {
+			throw new Error("Native class " + clazz + " does not provide a typeof annotation");
+		}
+		String fqcn = t.value();
+		FullyQualifiedClassName f = new FullyQualifiedClassName(fqcn);
+		f.nativeClass = clazz;
+		return f;
+	}
+
+	/**
+	 * If the class is known for sure to be within the default import list, this method can be used. If the native
+	 * class is available, this MUST not be used, as it causes too much of a performance hit. Instead, use
+	 * {@link #forNativeClass(java.lang.Class)} or {@link #forNativeEnum(java.lang.Class)}. DynamicEnums are not
+	 * specially supported, but they can safely use this method, though their use should be very limited.
 	 * @param unqualified The (potentially) unqualified type.
 	 * @param t The code target.
 	 * @return The FullyQualifiedClassName.
 	 * @throws CRECastException If the class type can't be found
 	 */
-	public static FullyQualifiedClassName forDefaultClasses(String unqualified, Target t) throws CRECastException {
+	private static FullyQualifiedClassName forDefaultClasses(String unqualified, Target t) throws CRECastException {
 		String fqcn = NativeTypeList.resolveNativeType(unqualified);
 		if(fqcn == null) {
 			throw new CRECastException("Cannot find \"" + unqualified + "\" type", t);
@@ -88,6 +135,8 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	 * If you know for a fact that the name is already fully qualified, this step skips qualification. If you aren't
 	 * sure whether or not the name is fully qualified, don't use the method, the other methods will accept a fully
 	 * qualified class name, but not change it, but if it isn't fully qualified, then it will do so.
+	 *
+	 * If this represents a native class, use {@link #forNativeClass(java.lang.Class)} instead.
 	 * @param qualified
 	 * @return
 	 */
@@ -128,6 +177,14 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 
 	public boolean isTypeUnion() {
 		return this.fullyQualifiedName.contains("|");
+	}
+
+	/**
+	 * Returns the underlying native class, iff this is a native class.
+	 * @return
+	 */
+	public Class<? extends Mixed> getNativeClass() {
+		return nativeClass;
 	}
 
 	public String getSimpleName() {

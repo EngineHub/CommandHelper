@@ -581,7 +581,7 @@ public final class Static {
 		if(fqType != null) {
 			try {
 				return CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(fqType));
-			} catch(ClassNotFoundException ex) {
+			} catch (ClassNotFoundException ex) {
 				// Can't happen, because we just resolved the type, and it wasn't null.
 				throw new Error(ex);
 			}
