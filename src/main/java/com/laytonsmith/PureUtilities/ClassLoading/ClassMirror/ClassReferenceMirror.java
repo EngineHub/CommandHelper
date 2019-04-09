@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities.ClassLoading.ClassMirror;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ClassUtils;
 import java.io.Serializable;
 
@@ -50,7 +51,7 @@ public class ClassReferenceMirror<T> implements Serializable {
 	 * @throws java.lang.ClassNotFoundException If the class can't be found
 	 */
 	public Class<T> loadClass() throws ClassNotFoundException {
-		return loadClass(ClassReferenceMirror.class.getClassLoader(), true);
+		return loadClass(ClassDiscovery.getDefaultInstance().getDefaultClassLoader(), true);
 	}
 
 	/**
