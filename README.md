@@ -5,6 +5,12 @@ CommandHelper
 | Travis | [![Travis Build Status](https://travis-ci.org/EngineHub/CommandHelper.svg?branch=master)](https://travis-ci.org/EngineHub/CommandHelper) |
 | Azure | [![Azure Build Status](https://dev.azure.com/MethodScript/CommandHelper/_apis/build/status/EngineHub.CommandHelper)](https://dev.azure.com/MethodScript/CommandHelper/_build/latest?definitionId=1) |
 | Snyk.io | [![Known Vulnerabilities](https://snyk.io/test/github/EngineHub/CommandHelper/badge.svg)](https://snyk.io/test/github/EngineHub/CommandHelper) |
+| Discord | [![Discord](https://img.shields.io/discord/446057847428481044.svg)](https://img.shields.io/discord/446057847428481044.svg) |
+| Code Size | [![Code Size](https://img.shields.io/github/languages/code-size/EngineHub/CommandHelper.svg)](https://img.shields.io/github/languages/code-size/EngineHub/CommandHelper.svg) |
+| Stars | [![Stars](https://img.shields.io/github/stars/EngineHub/CommandHelper.svg?style=social)](https://img.shields.io/github/stars/EngineHub/CommandHelper.svg?style=social) |
+| Website | [![Website](https://img.shields.io/website/https/methodscript.com.svg?down_color=red&down_message=offline&up_color=green&up_message=online)](https://methodscript.com) |
+| Contributors | [![Contributors](https://img.shields.io/github/contributors/EngineHub/CommandHelper.svg)](https://img.shields.io/github/contributors/EngineHub/CommandHelper.svg) |
+| Last Commit | [![Last Commit](https://img.shields.io/github/last-commit/EngineHub/CommandHelper.svg)](https://img.shields.io/github/last-commit/EngineHub/CommandHelper.svg) |
 
 CommandHelper adds simple command aliases, complex macros,
 and the ability to script your own commands and events into Minecraft,
