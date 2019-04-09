@@ -141,6 +141,7 @@ public class AliasCore {
 								MethodScriptFileLocations.getDefault().getConfigDirectory(),
 								parent.profiles, new TaskManagerImpl());
 						CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
+						cEnv.SetCommandSender(player);
 						Environment env = Environment.createEnvironment(gEnv, cEnv, compilerEnv);
 
 						try {
