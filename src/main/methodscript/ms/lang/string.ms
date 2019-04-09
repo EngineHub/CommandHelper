@@ -62,4 +62,5 @@ public native class ms.lang.string {
      * @param regex The regex to test against.
      */
     public native boolean matches(@{ValidRegex} string @regex);
+    
 }

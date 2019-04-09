@@ -74,6 +74,7 @@ public class AliasCore {
 	private List<Script> scripts;
 	static final Logger LOGGER = Logger.getLogger("Minecraft");
 	private final Set<String> echoCommand = new HashSet<String>();
+	private CompilerEnvironment compilerEnv;
 	public List<File> autoIncludes;
 	public static CommandHelperPlugin parent;
 
@@ -140,8 +141,7 @@ public class AliasCore {
 								MethodScriptFileLocations.getDefault().getConfigDirectory(),
 								parent.profiles, new TaskManagerImpl());
 						CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
-						cEnv.SetCommandSender(player);
-						Environment env = Environment.createEnvironment(gEnv, cEnv);
+						Environment env = Environment.createEnvironment(gEnv, cEnv, compilerEnv);
 
 						try {
 							env.getEnv(CommandHelperEnvironment.class).SetCommand(command);
@@ -232,6 +232,9 @@ public class AliasCore {
 			return;
 		}
 		try {
+			// TODO: Maybe consider adding a ReloadOption for this? Probably not though, that would cause
+			// a huge headache.
+			compilerEnv = new CompilerEnvironment();
 			if(Prefs.AllowDynamicShell()) {
 				MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.WARNING, "allow-dynamic-shell is set to true in "
 						+ CommandHelperFileLocations.getDefault().getProfilerConfigFile().getName() + " you should set this to false, except during development.", Target.UNKNOWN);
@@ -312,8 +315,7 @@ public class AliasCore {
 				}
 			}
 			CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
-			CompilerEnvironment compEnv = new CompilerEnvironment();
-			Environment env = Environment.createEnvironment(gEnv, cEnv, compEnv);
+			Environment env = Environment.createEnvironment(gEnv, cEnv, compilerEnv);
 			if(options.reloadGlobals()) {
 				ProfilePoint clearingGlobals = parent.profiler.start("Clearing globals", LogLevel.VERBOSE);
 				try {
