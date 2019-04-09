@@ -67,6 +67,10 @@ public class InstanceofUtil {
 		if(instanceofThis.getFQCN().equals("auto")) {
 			return true;
 		}
+		if(value instanceof CFunction) {
+			// TODO: Need to put the return type here, so we can work with this, but for now, just always return false
+			return false;
+		}
 		for(CClassType c : getAllCastableClasses(value.typeof(), env)) {
 			FullyQualifiedClassName typeof = c.getFQCN();
 			if(typeof != null && typeof.equals(instanceofThis)) {
