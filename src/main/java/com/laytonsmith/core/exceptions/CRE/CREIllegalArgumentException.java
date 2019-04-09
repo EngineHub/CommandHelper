@@ -13,7 +13,7 @@ import com.laytonsmith.core.constructs.Target;
 public class CREIllegalArgumentException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.IllegalArgumentException");
+	public static final CClassType TYPE = CClassType.get(CREIllegalArgumentException.class);
 
 	public CREIllegalArgumentException(String msg, Target t) {
 		super(msg, t);

@@ -18,7 +18,7 @@ import com.laytonsmith.core.MSVersion;
 public class CPackage extends Construct {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.Package");
+	public static final CClassType TYPE = CClassType.get(CPackage.class);
 
 	public CPackage(Target t, String... parts) {
 		super(StringUtils.Join(parts, CClassType.PATH_SEPARATOR), Construct.ConstructType.IDENTIFIER, t);

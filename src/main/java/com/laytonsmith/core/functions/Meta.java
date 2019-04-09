@@ -859,7 +859,7 @@ public class Meta {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CString s;
-			if(args[0] instanceof CString) {
+			if(args[0].isInstanceOf(CString.class)) {
 				s = (CString) args[0];
 			} else {
 				s = new CString(args[0].val(), t);

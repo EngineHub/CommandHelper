@@ -42,7 +42,7 @@ public class CClosure extends Construct implements Callable {
 	protected final CClassType returnType;
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.closure");
+	public static final CClassType TYPE = CClassType.get(CClosure.class);
 
 	public CClosure(ParseTree node, Environment env, CClassType returnType, String[] names, Mixed[] defaults,
 			CClassType[] types, Target t) {
@@ -81,7 +81,7 @@ public class CClosure extends Construct implements Callable {
 				}
 			}
 			b.append(")");
-		} else if(node.getData() instanceof CString) {
+		} else if(node.getData().isInstanceOf(CString.class)) {
 			String data = ArgumentValidation.getString(node.getData(), node.getTarget());
 			// Convert: \ -> \\ and ' -> \'
 			b.append("'").append(data.replace("\\", "\\\\").replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n")

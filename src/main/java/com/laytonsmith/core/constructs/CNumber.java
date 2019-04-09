@@ -11,7 +11,7 @@ import com.laytonsmith.core.MSVersion;
 public abstract class CNumber extends CPrimitive {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.number");
+	public static final CClassType TYPE = CClassType.get(CNumber.class);
 
 	public CNumber(String value, ConstructType type, Target t) {
 		super(value, type, t);

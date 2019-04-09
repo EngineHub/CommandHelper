@@ -13,7 +13,7 @@ import com.laytonsmith.core.constructs.Target;
 public class CREInvalidProcedureException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.InvalidProcedureException");
+	public static final CClassType TYPE = CClassType.get(CREInvalidProcedureException.class);
 
 	public CREInvalidProcedureException(String msg, Target t) {
 		super(msg, t);

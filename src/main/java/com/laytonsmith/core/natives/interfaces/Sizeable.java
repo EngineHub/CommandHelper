@@ -10,7 +10,7 @@ import com.laytonsmith.core.constructs.CClassType;
 public interface Sizeable extends Mixed {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.Sizeable");
+	public static final CClassType TYPE = CClassType.get(Sizeable.class);
 
 	/**
 	 * Returns the size of this object.

@@ -711,7 +711,7 @@ public class MobManagement {
 			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
 
 			MCPotionEffectType type = null;
-			if(args[1] instanceof CString) {
+			if(args[1].isInstanceOf(CString.class)) {
 				try {
 					type = MCPotionEffectType.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException ex) {

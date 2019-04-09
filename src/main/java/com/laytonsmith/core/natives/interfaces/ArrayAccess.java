@@ -14,7 +14,7 @@ import java.util.Set;
 public interface ArrayAccess extends Mixed {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.ArrayAccess");
+	public static final CClassType TYPE = CClassType.get(ArrayAccess.class);
 
 	/**
 	 * Return the mixed at this location. This should throw an exception if the index does not exist. This method will

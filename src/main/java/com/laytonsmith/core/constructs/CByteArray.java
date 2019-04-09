@@ -28,7 +28,7 @@ import java.util.EnumSet;
 public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.byte_array");
+	public static final CClassType TYPE = CClassType.get(CByteArray.class);
 
 	/**
 	 * Initial size of the ByteBuffer
@@ -529,7 +529,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	private static class CArrayByteBacking extends CArray {
 
 		@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-		public static final CClassType TYPE = CClassType.get("ms.lang.ByteBackingArray");
+		public static final CClassType TYPE = CClassType.get(CArrayByteBacking.class);
 		private final byte[] backing;
 		private String value = null;
 
@@ -631,7 +631,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		public static class CREByteArrayReadOnlyException extends CREReadOnlyException {
 
 			@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-			public static final CClassType TYPE = CClassType.get("ms.lang.ByteArrayReadOnlyException");
+			public static final CClassType TYPE = CClassType.get(CREByteArrayReadOnlyException.class);
 
 			public CREByteArrayReadOnlyException(java.lang.String msg, com.laytonsmith.core.constructs.Target t) {
 				super(msg, t);

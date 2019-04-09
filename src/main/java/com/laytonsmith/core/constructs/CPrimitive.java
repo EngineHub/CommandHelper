@@ -13,7 +13,7 @@ import com.laytonsmith.core.natives.interfaces.ValueType;
 public abstract class CPrimitive extends Construct implements ValueType, Booleanish {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.primitive");
+	public static final CClassType TYPE = CClassType.get(CPrimitive.class);
 
 	public CPrimitive(String value, ConstructType type, Target t) {
 		super(value, type, t);

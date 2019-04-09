@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class CResource<T> extends Construct {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.resource");
+	public static final CClassType TYPE = CClassType.get(CResource.class);
 
 	private static final AtomicLong RESOURCE_POOL = new AtomicLong(0);
 

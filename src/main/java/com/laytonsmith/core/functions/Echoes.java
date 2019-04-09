@@ -796,7 +796,7 @@ public class Echoes {
 			if(args.length == 2) {
 				symbol = args[1].val();
 			}
-			if(text instanceof CString) {
+			if(text.isInstanceOf(CString.class)) {
 				String stext = text.val();
 				StringBuilder b = new StringBuilder();
 				int sl = symbol.length();

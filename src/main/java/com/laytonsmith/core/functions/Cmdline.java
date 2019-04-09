@@ -1748,7 +1748,7 @@ public class Cmdline {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			requireCmdlineMode(environment, this, t);
-			if(!(args[0] instanceof CClosure)) {
+			if(!(args[0].isInstanceOf(CClosure.class))) {
 				throw new CRECastException("Expecting a closure for argument 1 of " + getName(), t);
 			}
 			environment.getEnv(GlobalEnv.class).SetCustom("cmdline_prompt", args[0]);

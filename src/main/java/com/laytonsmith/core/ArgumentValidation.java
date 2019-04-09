@@ -233,10 +233,10 @@ public final class ArgumentValidation {
 		if(c == null || c instanceof CNull) {
 			return 0;
 		}
-		if(c instanceof CInt) {
-			i = ((CInt) c).getInt();
-		} else if(c instanceof CBoolean) {
-			if(((CBoolean) c).getBoolean()) {
+		if(c.isInstanceOf(CInt.class)) {
+			i = getObject(c, t, CInt.class).getInt();
+		} else if(c.isInstanceOf(CBoolean.class)) {
+			if(getObject(c, t, CBoolean.class).getBoolean()) {
 				i = 1;
 			} else {
 				i = 0;

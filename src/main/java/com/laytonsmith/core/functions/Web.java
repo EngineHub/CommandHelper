@@ -231,7 +231,7 @@ public class Web {
 			final boolean binary;
 			final String textEncoding;
 			boolean useDefaultHeaders = true;
-			if(args[1] instanceof CClosure) {
+			if(args[1].isInstanceOf(CClosure.class)) {
 				success = (CClosure) args[1];
 				error = null;
 				arrayJar = null;
@@ -304,7 +304,7 @@ public class Web {
 						}
 						settings.setComplexParameters(mparams);
 					} else {
-						if(csettings.get("params", t) instanceof CByteArray) {
+						if(csettings.get("params", t).isInstanceOf(CByteArray.class)) {
 							CByteArray b = (CByteArray) csettings.get("params", t);
 							settings.setRawParameter(b.asByteArrayCopy());
 						} else {
@@ -327,7 +327,7 @@ public class Web {
 				}
 				//Only required parameter
 				if(csettings.containsKey("success")) {
-					if(csettings.get("success", t) instanceof CClosure) {
+					if(csettings.get("success", t).isInstanceOf(CClosure.class)) {
 						success = (CClosure) csettings.get("success", t);
 					} else {
 						throw new CRECastException("Expecting the success parameter to be a closure.", t);
@@ -336,7 +336,7 @@ public class Web {
 					throw new CRECastException("Missing the success parameter, which is required.", t);
 				}
 				if(csettings.containsKey("error")) {
-					if(csettings.get("error", t) instanceof CClosure) {
+					if(csettings.get("error", t).isInstanceOf(CClosure.class)) {
 						error = (CClosure) csettings.get("error", t);
 					} else {
 						throw new CRECastException("Expecting the error parameter to be a closure.", t);
@@ -373,7 +373,7 @@ public class Web {
 				}
 				if(csettings.containsKey("trustStore")) {
 					Mixed trustStore = csettings.get("trustStore", t);
-					if(trustStore instanceof CBoolean && ArgumentValidation.getBoolean(trustStore, t) == false) {
+					if(trustStore.isInstanceOf(CBoolean.class) && ArgumentValidation.getBoolean(trustStore, t) == false) {
 						settings.setDisableCertChecking(true);
 					} else if(trustStore instanceof CArray) {
 						CArray trustStoreA = ((CArray) trustStore);
@@ -843,7 +843,7 @@ public class Web {
 			String body = ArgumentValidation.getItemFromArray(options, "body", t, new CString("", t)).val();
 			Mixed cto = ArgumentValidation.getItemFromArray(options, "to", t, null);
 			CArray to;
-			if(cto instanceof CString) {
+			if(cto.isInstanceOf(CString.class)) {
 				to = new CArray(t);
 				to.push(cto, t);
 			} else {
@@ -1029,9 +1029,9 @@ public class Web {
 		 * @return
 		 */
 		private Object getContent(Mixed c, Target t) {
-			if(c instanceof CString) {
+			if(c.isInstanceOf(CString.class)) {
 				return c.val();
-			} else if(c instanceof CByteArray) {
+			} else if(c.isInstanceOf(CByteArray.class)) {
 				CByteArray cb = (CByteArray) c;
 				return cb.asByteArrayCopy();
 			} else {

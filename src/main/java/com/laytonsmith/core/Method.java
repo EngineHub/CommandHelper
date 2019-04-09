@@ -20,7 +20,7 @@ import java.util.Arrays;
 public class Method extends Construct implements Callable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.Method");
+	public static final CClassType TYPE = CClassType.get(Method.class);
 
 	private final CClassType returnType;
 	private final String name;

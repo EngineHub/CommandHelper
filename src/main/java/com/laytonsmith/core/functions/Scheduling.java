@@ -275,7 +275,7 @@ public class Scheduling {
 				offset = 1;
 				delay = Static.getInt(args[1], t);
 			}
-			if(!(args[1 + offset] instanceof CClosure)) {
+			if(!(args[1 + offset].isInstanceOf(CClosure.class))) {
 				throw new CRECastException(getName() + " expects a closure to be sent as the second argument", t);
 			}
 			final CClosure c = (CClosure) args[1 + offset];
@@ -364,7 +364,7 @@ public class Scheduling {
 		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			final TaskManager taskManager = environment.getEnv(GlobalEnv.class).GetTaskManager();
 			long time = Static.getInt(args[0], t);
-			if(!(args[1] instanceof CClosure)) {
+			if(!(args[1].isInstanceOf(CClosure.class))) {
 				throw new CRECastException(getName() + " expects a closure to be sent as the second argument", t);
 			}
 			final CClosure c = (CClosure) args[1];
@@ -796,10 +796,10 @@ public class Scheduling {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			//First things first, check the format of the arguments.
-			if(!(args[0] instanceof CString)) {
+			if(!(args[0].isInstanceOf(CString.class))) {
 				throw new CRECastException("Expected string for argument 1 in " + getName(), t);
 			}
-			if(!(args[1] instanceof CClosure)) {
+			if(!(args[1].isInstanceOf(CClosure.class))) {
 				throw new CRECastException("Expected closure for argument 2 in " + getName(), t);
 			}
 			CronFormat format = validateFormat(args[0].val(), t);
@@ -1127,7 +1127,7 @@ public class Scheduling {
 		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.get(0).isConst()) {
-				if(children.get(0).getData() instanceof CString) {
+				if(children.get(0).getData().isInstanceOf(CString.class)) {
 					validateFormat(children.get(0).getData().val(), t);
 				}
 			}

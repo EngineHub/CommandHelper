@@ -17,7 +17,9 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -38,6 +40,8 @@ public class NativeTypeList {
 	 * that type, and should accept no parameters. The method name is "ConstructInvalidInstance".
 	 */
 	public static final String INVALID_INSTANCE_METHOD_NAME = "ConstructInvalidInstance";
+
+	private static final Map<FullyQualifiedClassName, Mixed> INVALID_INSTANCE_CACHE = new ConcurrentHashMap<>();
 
 	/**
 	 * Given a simple name of a class, attempts to resolve
@@ -96,22 +100,21 @@ public class NativeTypeList {
 					for(ClassMirror<? extends Mixed> c : ClassDiscovery.getDefaultInstance()
 							.getClassesWithAnnotationThatExtend(typeof.class, Mixed.class)) {
 						nativeTypes.add((String) c.getAnnotation(typeof.class).getValue("value"));
+						fqNativeTypes.add(FullyQualifiedClassName.forNativeClass(c.loadClass()));
 					}
 
 					for(ClassMirror<? extends Enum> c : ClassDiscovery.getDefaultInstance()
 							.getClassesWithAnnotationThatExtend(MEnum.class, Enum.class)) {
 						String name = (String) c.getAnnotation(MEnum.class).getValue("value");
 						nativeTypes.add(name);
+						fqNativeTypes.add(FullyQualifiedClassName.forNativeEnum(c.loadClass()));
 					}
 
 					for(ClassMirror<? extends DynamicEnum> c : ClassDiscovery.getDefaultInstance()
 							.getClassesWithAnnotationThatExtend(MDynamicEnum.class, DynamicEnum.class)) {
 						String name = (String) c.getAnnotation(MDynamicEnum.class).getValue("value");
 						nativeTypes.add(name);
-					}
-
-					for(String s : nativeTypes) {
-						fqNativeTypes.add(FullyQualifiedClassName.forFullyQualifiedClass(s));
+						fqNativeTypes.add(FullyQualifiedClassName.forFullyQualifiedClass(name));
 					}
 				}
 			}
@@ -119,6 +122,9 @@ public class NativeTypeList {
 		return new HashSet<>(fqNativeTypes);
 	}
 
+
+	private static final Map<FullyQualifiedClassName, Class<? extends Mixed>> NATIVE_CLASS_CACHE
+			= new ConcurrentHashMap<>();
 	/**
 	 * Returns the java class for the given MethodScript object name. This cannot return anything of a type more
 	 * specific than Mixed. For classes that represent enums, an anonymous subclass of {@link MEnumType} will be
@@ -132,6 +138,19 @@ public class NativeTypeList {
 	 * be thrown.
 	 */
 	public static Class<? extends Mixed> getNativeClass(FullyQualifiedClassName fqcn) throws ClassNotFoundException {
+		if(fqcn.getNativeClass() != null) {
+			return fqcn.getNativeClass();
+		}
+		// This is super super expensive, so we cannot afford to run this more than once per class. Even more
+		// ideally, this information should be stored WITH the class, so there's no runtime penalty whatsoever,
+		// but having a local cache is at least an improvement.
+		if(NATIVE_CLASS_CACHE.containsKey(fqcn)) {
+			Class<? extends Mixed> c = NATIVE_CLASS_CACHE.get(fqcn);
+			if(c == null) {
+				// Storing null means it can't be found
+				throw new ClassNotFoundException("Could not find the class of type " + fqcn);
+			}
+		}
 		if("auto".equals(fqcn.getFQCN())) {
 			// This is an error, as auto is not a real type, but a meta type. Thus this method should never be called
 			// with this input, and we can give a more specific error message.
@@ -141,14 +160,18 @@ public class NativeTypeList {
 		for(ClassMirror<? extends Mixed> c : ClassDiscovery.getDefaultInstance()
 				.getClassesWithAnnotationThatExtend(typeof.class, Mixed.class)) {
 			if(c.getAnnotation(typeof.class).getProxy(typeof.class).value().equals(fqcn.getFQCN())) {
+				NATIVE_CLASS_CACHE.put(fqcn, c.loadClass());
 				return c.loadClass();
 			}
 		}
 		try {
-			return getNativeEnumType(fqcn).getClass();
+			Class<? extends Mixed> c = getNativeEnumType(fqcn).getClass();
+			NATIVE_CLASS_CACHE.put(fqcn, c);
+			return c;
 		} catch (ClassNotFoundException e) {
 			//
 		}
+		NATIVE_CLASS_CACHE.put(fqcn, null);
 		throw new ClassNotFoundException("Could not find the class of type " + fqcn);
 	}
 
@@ -269,15 +292,23 @@ public class NativeTypeList {
 	 * @throws java.lang.ClassNotFoundException
 	 */
 	public static Mixed getInvalidInstanceForUse(FullyQualifiedClassName fqcn) throws ClassNotFoundException {
+		if(INVALID_INSTANCE_CACHE.containsKey(fqcn)) {
+			return INVALID_INSTANCE_CACHE.get(fqcn);
+		}
 		Class<? extends Mixed> c = getNativeClassOrInterfaceRunner(fqcn);
 		if(ReflectionUtils.hasMethod(c, INVALID_INSTANCE_METHOD_NAME, Mixed.class)) {
-			return (Mixed) ReflectionUtils.invokeMethod(c, null, INVALID_INSTANCE_METHOD_NAME);
+			Mixed m = (Mixed) ReflectionUtils.invokeMethod(c, null, INVALID_INSTANCE_METHOD_NAME);
+			INVALID_INSTANCE_CACHE.put(fqcn, m);
+			return m;
 		}
+		Mixed m;
 		if(MEnumType.class.isAssignableFrom(c)) {
-			return getNativeEnumType(fqcn);
+			m = getNativeEnumType(fqcn);
 		} else { // Not abstract
-			return ReflectionUtils.instantiateUnsafe(c);
+			m =  ReflectionUtils.instantiateUnsafe(c);
 		}
+		INVALID_INSTANCE_CACHE.put(fqcn, m);
+		return m;
 	}
 
 	/**
@@ -297,8 +328,7 @@ public class NativeTypeList {
 			throw new RuntimeException(clazz + " is missing typeof annotation!");
 		}
 		try {
-			return getInvalidInstanceForUse(FullyQualifiedClassName
-					.forFullyQualifiedClass(clazz.getAnnotation(typeof.class).value()));
+			return getInvalidInstanceForUse(FullyQualifiedClassName.forNativeClass(clazz));
 		} catch (ClassNotFoundException e) {
 			throw new Error(e);
 		}

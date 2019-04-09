@@ -19,7 +19,7 @@ import com.laytonsmith.core.constructs.Target;
 public class CREUnsupportedOperationException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.UnsupportedOperationException");
+	public static final CClassType TYPE = CClassType.get(CREUnsupportedOperationException.class);
 
 	public CREUnsupportedOperationException(String msg, Target t) {
 		super(msg, t);

@@ -13,7 +13,7 @@ import com.laytonsmith.core.constructs.Target;
 public class CREEventException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.EventException");
+	public static final CClassType TYPE = CClassType.get(CREEventException.class);
 
 	public CREEventException(String msg, Target t) {
 		super(msg, t);

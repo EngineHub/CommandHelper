@@ -13,7 +13,7 @@ import com.laytonsmith.core.constructs.Target;
 public class CREShellException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.ShellException");
+	public static final CClassType TYPE = CClassType.get(CREShellException.class);
 
 	public CREShellException(String msg, Target t) {
 		super(msg, t);

@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 public class CIClosure extends CClosure {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.iclosure");
+	public static final CClassType TYPE = CClassType.get(CIClosure.class);
 
 	public CIClosure(ParseTree node, Environment env, CClassType returnType, String[] names, Mixed[] defaults,
 			CClassType[] types, Target t) {

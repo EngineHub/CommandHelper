@@ -205,7 +205,7 @@ public class ResourceManager {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CResource) {
+			if(args[0].isInstanceOf(CResource.class)) {
 				CResource<?> resource = (CResource<?>) args[0];
 				if(RESOURCES.containsKey(resource.getId())) {
 					RESOURCES.remove(resource.getId());

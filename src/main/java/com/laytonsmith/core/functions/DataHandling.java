@@ -185,7 +185,7 @@ public class DataHandling {
 						String v;
 						if(value instanceof IVariable) {
 							v = ((IVariable) value).getVariableName();
-						} else if(value instanceof CString) {
+						} else if(value.isInstanceOf(CString.class)) {
 							v = ((CString) value).getQuote();
 						} else {
 							v = "@value";
@@ -365,7 +365,7 @@ public class DataHandling {
 			int offset = 0;
 			if(args.length == 3) {
 				offset = 1;
-				if(!(args[0] instanceof CClassType)) {
+				if(!(args[0].isInstanceOf(CClassType.class))) {
 					throw new ConfigCompileException("Expecting a ClassType for parameter 1 to assign", t);
 				}
 			}
@@ -1456,7 +1456,7 @@ public class DataHandling {
 							+ " be hard coded, and should not be dynamically determinable, since this is always a sign"
 							+ " of loose code flow, which should be avoided.", t);
 				}
-				if(!(children.get(0).getData() instanceof CInt)) {
+				if(!(children.get(0).getData().isInstanceOf(CInt.class))) {
 					throw new ConfigCompileException("break() only accepts integer values.", t);
 				}
 			}
@@ -1637,7 +1637,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0] instanceof CString);
+			return CBoolean.get(args[0].isInstanceOf(CString.class));
 		}
 
 		@Override
@@ -1696,7 +1696,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0] instanceof CByteArray);
+			return CBoolean.get(args[0].isInstanceOf(CByteArray.class));
 		}
 
 		@Override
@@ -1818,7 +1818,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0] instanceof CInt || args[0] instanceof CDouble);
+			return CBoolean.get(args[0].isInstanceOf(CInt.class) || args[0].isInstanceOf(CDouble.class));
 		}
 
 		@Override
@@ -1881,7 +1881,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0] instanceof CDouble);
+			return CBoolean.get(args[0].isInstanceOf(CDouble.class));
 		}
 
 		@Override
@@ -1942,7 +1942,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0] instanceof CInt);
+			return CBoolean.get(args[0].isInstanceOf(CInt.class));
 		}
 
 		@Override
@@ -2002,7 +2002,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0] instanceof CBoolean);
+			return CBoolean.get(args[0].isInstanceOf(CBoolean.class));
 		}
 
 		@Override
@@ -2284,7 +2284,7 @@ public class DataHandling {
 			List<String> varNames = new ArrayList<>();
 			boolean usesAssign = false;
 			CClassType returnType = Auto.TYPE;
-			if(nodes[0].getData() instanceof CClassType) {
+			if(nodes[0].getData().isInstanceOf(CClassType.class)) {
 				returnType = (CClassType) nodes[0].getData();
 				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
 				for(int i = 1; i < nodes.length; i++) {
@@ -2379,7 +2379,7 @@ public class DataHandling {
 			if(myProc.isPossiblyConstant()) {
 				//Oooh, it's possibly constant. So, let's run it with our children.
 				try {
-					FileOptions options = new FileOptions(new HashMap<String, String>());
+					FileOptions options = new FileOptions(new HashMap<>());
 					if(!children.isEmpty()) {
 						options = children.get(0).getFileOptions();
 					}
@@ -2391,7 +2391,8 @@ public class DataHandling {
 					//Yup! It worked. It's a const proc.
 					return c;
 				} catch (ConfigRuntimeException e) {
-					if(e instanceof CREInvalidProcedureException) {
+					if(e instanceof CREThrowable
+							&& ((CREThrowable) e).isInstanceOf(CREInvalidProcedureException.class)) {
 						//This is the only valid exception that doesn't strictly mean it's a bad
 						//call.
 						return null;
@@ -2883,7 +2884,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0] instanceof CClosure);
+			return CBoolean.get(args[0].isInstanceOf(CClosure.class));
 		}
 
 		@Override
@@ -2945,7 +2946,7 @@ public class DataHandling {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String key;
-			if(args[0] instanceof CString) {
+			if(args[0].isInstanceOf(CString.class)) {
 				key = args[0].val();
 			} else if(args[0] instanceof CArray) {
 				if(((CArray) args[0]).isAssociative()) {
@@ -3016,7 +3017,7 @@ public class DataHandling {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String key;
-			if(args[0] instanceof CString) {
+			if(args[0].isInstanceOf(CString.class)) {
 				key = args[0].val();
 			} else if(args[0] instanceof CArray) {
 				if(((CArray) args[0]).isAssociative()) {
@@ -3118,7 +3119,7 @@ public class DataHandling {
 			}
 			// Handle the closure type first thing
 			CClassType returnType = Auto.TYPE;
-			if(nodes[0].getData() instanceof CClassType) {
+			if(nodes[0].getData().isInstanceOf(CClassType.class)) {
 				returnType = (CClassType) nodes[0].getData();
 				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
 				for(int i = 1; i < nodes.length; i++) {
@@ -3237,7 +3238,7 @@ public class DataHandling {
 			}
 			// Handle the closure type first thing
 			CClassType returnType = Auto.TYPE;
-			if(nodes[0].getData() instanceof CClassType) {
+			if(nodes[0].getData().isInstanceOf(CClassType.class)) {
 				returnType = (CClassType) nodes[0].getData();
 				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
 				for(int i = 1; i < nodes.length; i++) {
@@ -3376,7 +3377,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[args.length - 1] instanceof CClosure) {
+			if(args[args.length - 1].isInstanceOf(CClosure.class)) {
 				Mixed[] vals = new Mixed[args.length - 1];
 				System.arraycopy(args, 0, vals, 0, args.length - 1);
 				CClosure closure = (CClosure) args[args.length - 1];
@@ -3431,7 +3432,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(!(args[args.length - 1] instanceof CClosure)) {
+			if(!(args[args.length - 1].isInstanceOf(CClosure.class))) {
 				throw new CRECastException("Only a closure (created from the closure function) can be sent to executeas()", t);
 			}
 			Mixed[] vals = new Mixed[args.length - 3];
@@ -3693,7 +3694,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CString) {
+			if(args[0].isInstanceOf(CString.class)) {
 				return args[0];
 			}
 			return new CString(args[0].val(), t);
@@ -3993,7 +3994,7 @@ public class DataHandling {
 			try {
 				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(true);
 				Mixed script = parent.seval(node, env);
-				if(script instanceof CClosure) {
+				if(script.isInstanceOf(CClosure.class)) {
 					throw new CRECastException("Closures cannot be eval'd directly. Use execute() instead.", t);
 				}
 				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file(), true),
@@ -4240,7 +4241,7 @@ public class DataHandling {
 				return CBoolean.FALSE;
 			}
 			CClassType type;
-			if(args[1] instanceof CClassType) {
+			if(args[1].isInstanceOf(CClassType.class)) {
 				type = (CClassType) args[1];
 			} else {
 				throw new RuntimeException("This should have been optimized out, this is a bug in instanceof,"
@@ -4283,7 +4284,7 @@ public class DataHandling {
 		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			// There are two specific cases here where we will give more precise error messages.
 			// If it's a string, yell at them
-			if(children.get(1).getData() instanceof CString) {
+			if(children.get(1).getData().isInstanceOf(CString.class)) {
 				throw new ConfigCompileException("Unexpected string type passed to \"instanceof\"", t);
 			}
 			// If it's a variable, also yell at them
@@ -4291,7 +4292,7 @@ public class DataHandling {
 				throw new ConfigCompileException("Variable types are not allowed in \"instanceof\"", t);
 			}
 			// Unknown error, but this is still never valid.
-			if(!(children.get(1).getData() instanceof CClassType)) {
+			if(!(children.get(1).getData().isInstanceOf(CClassType.class))) {
 				throw new ConfigCompileException("Unexpected type for \"instanceof\": " + children.get(1).getData(), t);
 			}
 			// null is technically a type, but instanceof shouldn't work with that

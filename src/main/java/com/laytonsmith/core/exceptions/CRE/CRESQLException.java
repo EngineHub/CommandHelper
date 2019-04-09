@@ -13,7 +13,7 @@ import com.laytonsmith.core.constructs.Target;
 public class CRESQLException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.SQLException");
+	public static final CClassType TYPE = CClassType.get(CRESQLException.class);
 
 	public CRESQLException(String msg, Target t) {
 		super(msg, t);

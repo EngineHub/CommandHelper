@@ -14,7 +14,7 @@ import java.util.Set;
 public final class CVoid extends Construct implements Cloneable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("void");
+	public static final CClassType TYPE = CClassType.get(CVoid.class);
 
 	/**
 	 * Void values do not normally need to be duplicated, since they are immutable, and for values that have an unknown

@@ -190,7 +190,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	private static Object json_encode0(Mixed c, Target t) throws MarshalException {
-		if(c instanceof CString || c instanceof Command) {
+		if(c.isInstanceOf(CString.class) || c instanceof Command) {
 			return c.val();
 		} else if(c instanceof CVoid) {
 			return "";
@@ -490,13 +490,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	/**
 	 * Returns the typeof for the given class, using the same mechanism as the default. (Whether or not that subtype
 	 * overrode the original typeof() method.
+	 * @param that
+	 * @return
 	 */
 	public static CClassType typeof(Mixed that) {
-		typeof ann = that.getClass().getAnnotation(typeof.class);
-		if(ann == null) {
-			throw new IllegalArgumentException("Missing typeof annotation for " + that.getClass());
-		}
-		return CClassType.get(ann.value());
+		return CClassType.get(that.getClass());
 	}
 
 	/**
@@ -554,8 +552,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	/**
-	 * By default, all native methodscript objects are public. If this is not true, this method must be overridden.
-	 *
+	 * By default, all native methodscript objects have no modifiers.
 	 * @return
 	 */
 	@Override
@@ -563,6 +560,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		return EnumSet.noneOf(ObjectModifier.class);
 	}
 
+	/**
+	 * By default, all native methodscript objects are public. If this is not true, this method must be overridden.
+	 *
+	 * @return
+	 */
 	@Override
 	public AccessModifier getAccessModifier() {
 		return AccessModifier.PUBLIC;
@@ -585,7 +587,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			// but anyways, for now, just return false.
 			return false;
 		}
-		return that.typeof().doesExtend(CClassType.get(type.getAnnotation(typeof.class).value()));
+		return that.typeof().doesExtend(CClassType.get(type));
 	}
 
 	@Override

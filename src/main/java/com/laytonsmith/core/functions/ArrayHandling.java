@@ -205,7 +205,8 @@ public class ArrayHandling {
 							return ca.get(index, t);
 						}
 					} catch (ConfigRuntimeException e) {
-						if(e instanceof CREIndexOverflowException) {
+						if(e instanceof CREThrowable
+								&& ((CREThrowable) e).isInstanceOf(CREIndexOverflowException.class)) {
 							if(defaultConstruct != null) {
 								return defaultConstruct;
 							}
@@ -224,7 +225,7 @@ public class ArrayHandling {
 						throw e;
 					}
 				}
-			} else if(args[0] instanceof ArrayAccess) {
+			} else if(args[0].isInstanceOf(ArrayAccess.class)) {
 				com.laytonsmith.core.natives.interfaces.Iterable aa
 						= (com.laytonsmith.core.natives.interfaces.Iterable) args[0];
 				if(index instanceof CSlice) {
@@ -291,10 +292,10 @@ public class ArrayHandling {
 			if(args.length == 0) {
 				throw new CRECastException("Argument 1 of array_get must be an array", t);
 			}
-			if(args[0] instanceof ArrayAccess) {
+			if(args[0].isInstanceOf(ArrayAccess.class)) {
 				ArrayAccess aa = (ArrayAccess) args[0];
 				if(!aa.canBeAssociative()) {
-					if(!(args[1] instanceof CInt) && !(args[1] instanceof CSlice)) {
+					if(!(args[1].isInstanceOf(CInt.class)) && !(args[1] instanceof CSlice)) {
 						throw new ConfigCompileException("Accessing an element as an associative array,"
 								+ " when it can only accept integers.", t);
 					}
@@ -952,7 +953,7 @@ public class ArrayHandling {
 
 		@Override
 		public CArray exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CArray && args[1] instanceof CInt) {
+			if(args[0] instanceof CArray && args[1].isInstanceOf(CInt.class)) {
 				CArray original = (CArray) args[0];
 				int size = (int) ((CInt) args[1]).getInt();
 				Mixed fill = CNull.NULL;
@@ -1109,7 +1110,7 @@ public class ArrayHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			// As an exception, strings aren't supported here. There's no reason to do this for a string that isn't accidental.
-			if(args[0] instanceof ArrayAccess && !(args[0] instanceof CString)) {
+			if(args[0].isInstanceOf(ArrayAccess.class) && !(args[0].isInstanceOf(CString.class))) {
 				ArrayAccess ca = (ArrayAccess) args[0];
 				CArray ca2 = new CArray(t);
 				for(Mixed c : ca.keySet()) {
@@ -1248,7 +1249,7 @@ public class ArrayHandling {
 				throw new CREInsufficientArgumentsException("array_merge must be called with at least two parameters", t);
 			}
 			for(Mixed arg : args) {
-				if(arg instanceof ArrayAccess) {
+				if(arg.isInstanceOf(ArrayAccess.class)) {
 					com.laytonsmith.core.natives.interfaces.Iterable cur
 							= (com.laytonsmith.core.natives.interfaces.Iterable) arg;
 					if(!cur.isAssociative()) {
@@ -1257,7 +1258,7 @@ public class ArrayHandling {
 						}
 					} else {
 						for(Mixed key : cur.keySet()) {
-							if(key instanceof CInt) {
+							if(key.isInstanceOf(CInt.class)) {
 								newArray.set(key, cur.get((int) ((CInt) key).getInt(), t), t);
 							} else {
 								newArray.set(key, cur.get(key.val(), t), t);
@@ -1392,7 +1393,7 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(!(args[0] instanceof ArrayAccess)) {
+			if(!(args[0].isInstanceOf(ArrayAccess.class))) {
 				throw new CRECastException("Expecting argument 1 to be an ArrayAccess type object", t);
 			}
 			StringBuilder b = new StringBuilder();
@@ -1517,7 +1518,7 @@ public class ArrayHandling {
 			}
 			try {
 				if(args.length == 2) {
-					if(args[1] instanceof CClosure) {
+					if(args[1].isInstanceOf(CClosure.class)) {
 						sortType = null;
 						customSort = (CClosure) args[1];
 					} else {
@@ -1576,7 +1577,7 @@ public class ArrayHandling {
 					int value;
 					if(c instanceof CNull) {
 						value = 0;
-					} else if(c instanceof CBoolean) {
+					} else if(c.isInstanceOf(CBoolean.class)) {
 						if(((CBoolean) c).getBoolean()) {
 							value = 1;
 						} else {
@@ -2304,7 +2305,7 @@ public class ArrayHandling {
 			if(!(args[0] instanceof com.laytonsmith.core.natives.interfaces.Iterable)) {
 				throw new CRECastException("Expecting an array for argument 1", t);
 			}
-			if(!(args[1] instanceof CClosure)) {
+			if(!(args[1].isInstanceOf(CClosure.class))) {
 				throw new CRECastException("Expecting a closure for argument 2", t);
 			}
 			array = (com.laytonsmith.core.natives.interfaces.Iterable) args[0];
@@ -3037,7 +3038,7 @@ public class ArrayHandling {
 					throw new CREIllegalArgumentException("For associative arrays, only 2 parameters may be provided,"
 							+ " the comparison mode value is not used.", t);
 				}
-				if(args[2] instanceof CClosure) {
+				if(args[2].isInstanceOf(CClosure.class)) {
 					closure = Static.getObject(args[2], t, CClosure.class);
 				} else {
 					mode = ArgumentValidation.getEnum(args[2], ArrayIntersectComparisonMode.class, t);

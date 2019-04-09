@@ -31,12 +31,14 @@ public class MainSandbox {
 					|| m.getSimpleName().equals("CLabel")
 					|| m.getSimpleName().equals("CLabel")
 					|| m.getSimpleName().equals("AbstractCREException")
+					|| m.getSimpleName().equals("CSlice")
+					|| m.getSimpleName().equals("CArray")
 					) {
 				continue;
 			}
 			l.add(m.getSimpleName());
 		}
-		System.out.println(" instanceof (" + StringUtils.Join(l, "|") + ")([^a-zA-Z0-9])");
+		System.out.println(" instanceof (" + StringUtils.Join(l, "|") + ")(?![a-zA-Z0-9])");
 		System.out.println(".isInstanceOf($1.class)$2");
 	}
 

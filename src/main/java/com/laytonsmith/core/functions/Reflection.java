@@ -210,14 +210,18 @@ public class Reflection {
 				Set<ClassMirror<? extends Enum>> enums = ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(MEnum.class, Enum.class);
 				Set<ClassMirror<? extends DynamicEnum>> dEnums = ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(MDynamicEnum.class, DynamicEnum.class);
 				if(args.length == 1) {
-					//No name provided
-					for(ClassMirror<? extends Enum> e : enums) {
-						String name = (String) e.getAnnotation(MEnum.class).getValue("value");
-						a.push(CClassType.get(name), t);
-					}
-					for(ClassMirror<? extends DynamicEnum> d : dEnums) {
-						String name = (String) d.getAnnotation(MDynamicEnum.class).getValue("value");
-						a.push(CClassType.get(name), t);
+					try {
+						//No name provided
+						for(ClassMirror<? extends Enum> e : enums) {
+							String name = (String) e.getAnnotation(MEnum.class).getValue("value");
+							a.push(CClassType.get(FullyQualifiedClassName.forNativeEnum(e.loadClass())), t);
+						}
+						for(ClassMirror<? extends DynamicEnum> d : dEnums) {
+							String name = (String) d.getAnnotation(MDynamicEnum.class).getValue("value");
+							a.push(CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(name)), t);
+						}
+					} catch (ClassNotFoundException ex) {
+						throw new Error(ex);
 					}
 				} else if(args.length == 2) {
 					FullyQualifiedClassName enumName = FullyQualifiedClassName.forName(args[1].val(), t, env);

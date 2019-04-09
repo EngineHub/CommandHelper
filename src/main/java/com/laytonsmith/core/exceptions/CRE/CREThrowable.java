@@ -17,7 +17,7 @@ import com.laytonsmith.core.objects.ObjectType;
 public class CREThrowable extends AbstractCREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.Throwable");
+	public static final CClassType TYPE = CClassType.get(CREThrowable.class);
 
 	@ForceImplementation
 	public CREThrowable(String msg, Target t) {
@@ -51,7 +51,19 @@ public class CREThrowable extends AbstractCREException {
 		if(this.getClass() == CREThrowable.class) {
 			return new CClassType[]{Mixed.TYPE};
 		} else {
-			return new CClassType[]{CClassType.get(this.getClass().getSuperclass().getAnnotation(typeof.class).value())};
+//			try {
+				return new CClassType[]{
+					CClassType.get(
+							// The superclass of a subclass to this class will always be of type Mixed,
+							// so this cast will never fail, but we need it to convince the compiler this is ok.
+							(Class<? extends Mixed>) this.getClass().getSuperclass()
+					)
+				};
+//			} catch(ClassNotFoundException ex) {
+//				throw new Error("Subclasses can reliably return super.getSuperclasses() for this, ONLY if it follows"
+//						+ " the rule that it only has one superclass, and that superclass is the underlying java"
+//						+ " object as well. This appears to be wrong in " + this.getClass());
+//			}
 		}
 	}
 

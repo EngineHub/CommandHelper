@@ -913,7 +913,7 @@ public class World {
 				creator.type(type).environment(environment);
 			}
 			if((args.length >= 4) && !(args[3] instanceof CNull)) {
-				if(args[3] instanceof CInt) {
+				if(args[3].isInstanceOf(CInt.class)) {
 					creator.seed(Static.getInt(args[3], t));
 				} else {
 					creator.seed(args[3].val().hashCode());

@@ -13,7 +13,7 @@ import com.laytonsmith.core.constructs.Target;
 public class CREStackOverflowError extends CREError {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.StackOverflowError");
+	public static final CClassType TYPE = CClassType.get(CREStackOverflowError.class);
 
 	public CREStackOverflowError(String msg, Target t) {
 		super(msg, t);

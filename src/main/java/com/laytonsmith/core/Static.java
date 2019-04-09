@@ -55,6 +55,7 @@ import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -578,7 +579,12 @@ public final class Static {
 		}
 		String fqType = NativeTypeList.resolveNativeType(val);
 		if(fqType != null) {
-			return CClassType.get(fqType);
+			try {
+				return CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(fqType));
+			} catch (ClassNotFoundException ex) {
+				// Can't happen, because we just resolved the type, and it wasn't null.
+				throw new Error(ex);
+			}
 		}
 		if(returnBareStrings) {
 			return new CBareString(val, t);
@@ -755,7 +761,7 @@ public final class Static {
 			try {
 				ofp = getServer().getOfflinePlayer(GetUUID(search, t));
 			} catch (ConfigRuntimeException cre) {
-				if(cre instanceof CRELengthException) {
+				if(cre instanceof CREThrowable && ((CREThrowable) cre).isInstanceOf(CRELengthException.class)) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
 				} else {
@@ -789,7 +795,7 @@ public final class Static {
 			try {
 				m = getServer().getPlayer(GetUUID(player, t));
 			} catch (ConfigRuntimeException cre) {
-				if(cre instanceof CRELengthException) {
+				if(cre instanceof CREThrowable && ((CREThrowable) cre).isInstanceOf(CRELengthException.class)) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
 				} else {

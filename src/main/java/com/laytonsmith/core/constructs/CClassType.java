@@ -60,7 +60,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	public static final CClassType[] EMPTY_CLASS_ARRAY = new CClassType[0];
 
 	static {
-		CACHE.put(FullyQualifiedClassName.forFullyQualifiedClass("ms.lang.ClassType"), TYPE);
+		CACHE.put(FullyQualifiedClassName.forNativeClass(CClassType.class), TYPE);
 	}
 
 	private final boolean isTypeUnion;
@@ -79,6 +79,13 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	private Mixed[] invalidType = UNINITIALIZED;
 
 	/**
+	 * If this was constructed against a native class, we can do some optimizations in the course
+	 * of operation. This may be null, and all code in this class must support the mechanisms if this
+	 * is null anyways, but if it isn't null, then this can perhaps be used to help optimize.
+	 */
+	private Class<? extends Mixed> nativeClass = null;
+
+	/**
 	 * This *MUST* contain a list of non type union types.
 	 */
 	private final SortedSet<FullyQualifiedClassName> types = new TreeSet<>();
@@ -88,15 +95,18 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 *
 	 * <p>IMPORTANT: The type MUST be fully qualified AND exist as a real, instantiable class, or this will cause
 	 * errors. The only time this method is preferred vs {@link #get(com.laytonsmith.core.FullyQualifiedClassName)} is
-	 * when used to define the TYPE value.
+	 * when used to define the TYPE value. The native class must also be provided at the same time, which is used
+	 * for various operations to increase efficiency when dealing with native classes.
 	 *
 	 * Unlike the other getters, this will not throw a ClassNotFoundException, it will instead throw an Error.
 	 * @param type
 	 * @return
 	 */
-	public static CClassType get(String type) {
+	public static CClassType get(Class<? extends Mixed> type) {
 		try {
-			return get(FullyQualifiedClassName.forFullyQualifiedClass(type));
+			CClassType t = get(FullyQualifiedClassName.forNativeClass(type));
+			t.nativeClass = type;
+			return t;
 		} catch (ClassNotFoundException ex) {
 			throw new Error(ex);
 		}
@@ -226,7 +236,11 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 						found = true;
 					}
 				} else {
-					found = null != NativeTypeList.resolveNativeType(fqcn.getFQCN());
+					if(fqcn.getNativeClass() != null) {
+						found = true;
+					} else {
+						found = null != NativeTypeList.resolveNativeType(fqcn.getFQCN());
+					}
 				}
 			}
 			// TODO: When user types are added, we will need to do some more digging here, and probably need
@@ -256,7 +270,6 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 			} else if("ms.lang.ClassType".equals(fqcn)) {
 				invalidType = new Mixed[]{this};
 			} else {
-				ObjectDefinitionTable odt = env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
 				invalidType = new Mixed[types.size()];
 				for(int i = 0; i < invalidType.length; i++) {
 					// TODO: For now, we must use this mechanism, since we don't populate the ODT with
@@ -264,6 +277,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 					if(NativeTypeList.getNativeTypeList().contains(this.fqcn)) {
 						invalidType[i] = NativeTypeList.getInvalidInstanceForUse(this.fqcn);
 					} else {
+						ObjectDefinitionTable odt = env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
 						ObjectDefinition od = odt.get(this.fqcn);
 						invalidType[i] = new UserObject(Target.UNKNOWN, null, env, od, null);
 					}
@@ -312,6 +326,15 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	public static boolean doesExtend(CClassType checkClass, CClassType superClass) {
 		if(checkClass.equals(superClass)) {
 			// more efficient check
+			return true;
+		}
+		if(checkClass.nativeClass != null && superClass.nativeClass != null
+				&& superClass.nativeClass.isAssignableFrom(checkClass.nativeClass)) {
+			// Since native classes are not allowed to extend multiple superclasees, but
+			// in general, they are allowed to advertise that they do, for the sake of
+			// methodscript, this can only be used to return true, if it returns true, it
+			// definitely is, but if it returns false, that does not explicitely mean that
+			// it doesn't.
 			return true;
 		}
 		for(CClassType tCheck : checkClass.getTypes()) {
@@ -569,6 +592,14 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		throw new CREUnsupportedOperationException("Unsupported operation", t);
 	}
 
-
+	/**
+	 * If this was constructed against a native class, we can do some optimizations in the course
+	 * of operation. This may be null, and all code that uses this method must support the mechanisms if this
+	 * is null anyways, but if it isn't null, then this can perhaps be used to help optimize.
+	 * @return
+	 */
+	public Class<? extends Mixed> getNativeType() {
+		return nativeClass;
+	}
 
 }

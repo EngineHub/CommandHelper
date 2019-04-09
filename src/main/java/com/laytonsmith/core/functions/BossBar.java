@@ -206,9 +206,9 @@ public class BossBar {
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
-			if(args[1] instanceof CString) {
+			if(args[1].isInstanceOf(CString.class)) {
 				bar.setTitle(args[1].val());
-			} else if(args[1] instanceof CDouble) {
+			} else if(args[1].isInstanceOf(CDouble.class)) {
 				try {
 					bar.setProgress(Static.getDouble(args[1], t));
 				} catch (IllegalArgumentException ex) {

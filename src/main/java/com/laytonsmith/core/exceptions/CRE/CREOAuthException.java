@@ -14,7 +14,7 @@ import com.laytonsmith.core.constructs.Target;
 public class CREOAuthException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.auth.OAuthException");
+	public static final CClassType TYPE = CClassType.get(CREOAuthException.class);
 
 	public CREOAuthException(String msg, Target t) {
 		super(msg, t);

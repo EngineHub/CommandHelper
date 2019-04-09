@@ -12,7 +12,7 @@ import com.laytonsmith.core.natives.interfaces.Booleanish;
 public final class CNull extends Construct implements Cloneable, Booleanish {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("null");
+	public static final CClassType TYPE = CClassType.get(CNull.class);
 
 	public static final long serialVersionUID = 1L;
 

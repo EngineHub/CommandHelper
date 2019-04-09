@@ -8,6 +8,7 @@ import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.Sizeable;
+import com.laytonsmith.core.natives.interfaces.ValueType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -19,7 +20,7 @@ import java.util.Stack;
 public class CMutablePrimitive extends CArray implements Sizeable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.mutable_primitive");
+	public static final CClassType TYPE = CClassType.get(CMutablePrimitive.class);
 
 	private Mixed value = CNull.NULL;
 
@@ -44,7 +45,7 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 	 * @param t
 	 */
 	public void set(Mixed value, Target t) {
-		if(value instanceof CArray) {
+		if(!value.isInstanceOf(ValueType.class)) {
 			throw new CREFormatException("mutable_primitives can only store primitive values.", t);
 		}
 		this.value = value;

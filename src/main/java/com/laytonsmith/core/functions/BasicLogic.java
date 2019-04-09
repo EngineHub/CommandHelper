@@ -421,7 +421,7 @@ public class BasicLogic {
 					if(evalStatement instanceof CSlice) { //More specific subclass of array, we can do more optimal handling here
 						long rangeLeft = ((CSlice) evalStatement).getStart();
 						long rangeRight = ((CSlice) evalStatement).getFinish();
-						if(value instanceof CInt) {
+						if(value.isInstanceOf(CInt.class)) {
 							long v = Static.getInt(value, t);
 							if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
 									|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
@@ -435,7 +435,7 @@ public class BasicLogic {
 							if(inner instanceof CSlice) {
 								long rangeLeft = ((CSlice) inner).getStart();
 								long rangeRight = ((CSlice) inner).getFinish();
-								if(value instanceof CInt) {
+								if(value.isInstanceOf(CInt.class)) {
 									long v = Static.getInt(value, t);
 									if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
 											|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
@@ -730,7 +730,7 @@ public class BasicLogic {
 						if(value instanceof CSlice) {
 							long rangeLeft = ((CSlice) value).getStart();
 							long rangeRight = ((CSlice) value).getFinish();
-							if(children.get(0).getData() instanceof CInt) {
+							if(children.get(0).getData().isInstanceOf(CInt.class)) {
 								long v = Static.getInt(children.get(0).getData(), t);
 								if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
 										|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
@@ -990,7 +990,7 @@ public class BasicLogic {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
 			if(args[1].typeof().equals(args[0].typeof())) {
-				if(args[0] instanceof CString && args[1] instanceof CString) {
+				if(args[0].isInstanceOf(CString.class) && args[1].isInstanceOf(CString.class)) {
 					// Check for actual string equality, so we don't do type massaging
 					// for numeric strings. Thus '2' !== '2.0'
 					return CBoolean.get(args[0].val().equals(args[1].val()));

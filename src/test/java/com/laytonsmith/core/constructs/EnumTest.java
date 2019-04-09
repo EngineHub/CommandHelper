@@ -59,7 +59,7 @@ public class EnumTest {
 	@Test
 	public void testEnumTypeValueIsCorrect() throws ClassNotFoundException {
 		MEnumType t = NativeTypeList.getNativeEnumType(FullyQualifiedClassName
-				.forFullyQualifiedClass("ms.lang.ArraySortType"));
+				.forNativeEnum(CArray.ArraySortType.class));
 		MEnumTypeValue v = t.values().get(0);
 		assertEquals(0, v.ordinal());
 		assertEquals("REGULAR", v.name());

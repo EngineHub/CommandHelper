@@ -69,7 +69,7 @@ public class Enchantments {
 	 * @return
 	 */
 	public static int ConvertLevel(Mixed value) {
-		if(value instanceof CInt) {
+		if(value.isInstanceOf(CInt.class)) {
 			return (int) ((CInt) value).getInt();
 		}
 		String lc = value.val().toLowerCase().trim();
@@ -813,7 +813,7 @@ public class Enchantments {
 		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 1
-					&& (children.get(0).getData() instanceof CString || children.get(0).getData() instanceof CInt)) {
+					&& (children.get(0).getData().isInstanceOf(CString.class) || children.get(0).getData().isInstanceOf(CInt.class))) {
 				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
 			}
 			return null;

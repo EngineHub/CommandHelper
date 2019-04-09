@@ -28,7 +28,7 @@ public class CString extends CPrimitive implements Cloneable,
 		com.laytonsmith.core.natives.interfaces.Iterable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.string");
+	public static final CClassType TYPE = CClassType.get(CString.class);
 
 	public CString(String value, Target t) {
 		super(value == null ? "" : value, ConstructType.STRING, t);

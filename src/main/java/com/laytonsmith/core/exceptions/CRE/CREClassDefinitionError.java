@@ -13,7 +13,7 @@ import com.laytonsmith.core.constructs.Target;
 @typeof("ms.lang.ClassDefinitionError")
 public class CREClassDefinitionError extends CREError {
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.ClassDefinitionError");
+	public static final CClassType TYPE = CClassType.get(CREClassDefinitionError.class);
 
 	public CREClassDefinitionError(String msg, Target t) {
 		super(msg, t);

@@ -20,7 +20,7 @@ import java.util.Set;
 public interface Mixed extends Cloneable, Documentation {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("ms.lang.mixed");
+	public static final CClassType TYPE = CClassType.get(Mixed.class);
 
 	public String val();
 
