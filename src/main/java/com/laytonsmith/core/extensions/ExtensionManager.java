@@ -39,12 +39,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ExtensionManager {
 
-	private static final Map<URL, ExtensionTracker> EXTENSIONS = new HashMap<>();
+	private static final Map<URL, ExtensionTracker> EXTENSIONS = new ConcurrentHashMap<>();
 	private static final List<File> LOCATIONS = new ArrayList<>();
 
 	/**
@@ -436,7 +437,7 @@ public class ExtensionManager {
 
 		// Loop over the classes, instantiate and register functions and events,
 		// and store the instances in their trackers.
-		for(ClassMirror klass : classes) {
+		classes.stream().parallel().forEach((klass) -> {
 			URL url = klass.getContainer();
 
 			if(cd.doesClassExtend(klass, Event.class)
@@ -452,7 +453,7 @@ public class ExtensionManager {
 					Static.getLogger().log(Level.SEVERE, "Could not load class '"
 							+ klass.getClassName() + "'");
 					ex.printStackTrace();
-					continue;
+					return;
 				}
 
 				ExtensionTracker trk = EXTENSIONS.get(url);
@@ -508,7 +509,7 @@ public class ExtensionManager {
 					Static.getLogger().log(Level.SEVERE, null, ex);
 				}
 			}
-		}
+		});
 
 		// Lets print out the details to the console, if we are in debug mode.
 		try {

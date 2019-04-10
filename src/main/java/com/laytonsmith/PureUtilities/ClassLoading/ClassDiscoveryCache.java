@@ -11,8 +11,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.security.MessageDigest;
-import java.util.Enumeration;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -110,17 +108,12 @@ public class ClassDiscoveryCache {
 			try {
 				jfile = new JarFile(URLDecoder.decode(fromClassLocation.getFile(), "UTF8"));
 
-				for(Enumeration<JarEntry> ent = jfile.entries(); ent.hasMoreElements();) {
-					JarEntry entry = ent.nextElement();
-
-					if(entry.getName().equals(ClassDiscoveryCache.OUTPUT_FILENAME)) {
-						InputStream is = jfile.getInputStream(entry);
-
-						try {
-							return new ClassDiscoveryURLCache(fromClassLocation, is);
-						} catch (Exception ex) {
-							//Do nothing, we'll just re-load from disk.
-						}
+				InputStream is = jfile.getInputStream(new ZipEntry(OUTPUT_FILENAME));
+				if(is != null) {
+					try {
+						return new ClassDiscoveryURLCache(fromClassLocation, is);
+					} catch (Exception ex) {
+						//
 					}
 				}
 			} catch (IOException ex) {

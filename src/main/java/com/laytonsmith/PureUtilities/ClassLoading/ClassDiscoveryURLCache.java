@@ -66,6 +66,13 @@ public class ClassDiscoveryURLCache {
 		List<ClassMirror<?>> list;
 		ObjectInputStream ois = new ObjectInputStream(descriptor);
 		try {
+			// This is the single most inefficient call in the startup sequence. It may be worth figuring out another
+			// way of doing this that doesn't require unzipping the descriptor first, perhaps unzipping it, putting
+			// it in the cache, and using that instead? Then the complexity will be gone on the second run on. Though
+			// it's not clear to me that this will have that great of an effect. If not, it might be better to come up
+			// with a simpler protocol for describing the object, and then building it manually, instead of using the
+			// default java serialization mechanisms. Alternatively to that, it might be worth looking into alternative
+			// serialization libraries, instead of using default java serialization.
 			list = (List<ClassMirror<?>>) ois.readObject();
 		} catch (ClassNotFoundException ex) {
 			if(url != null) {
