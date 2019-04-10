@@ -41,17 +41,20 @@ public class CSecureString extends CString {
 
 	public CSecureString(char[] val, Target t) {
 		super("**secure string**", t);
+		init();
 		construct(ArrayUtils.charToBytes(val));
 	}
 
 	public CSecureString(CArray val, Target t) {
 		super("**secure string**", t);
+		init();
 		construct(CArrayToByteArray(val, t));
 	}
 
 	// duplicate constructor
 	private CSecureString(byte[] encrypted, Cipher decrypter, int encLength, int actualLength, Target t) {
 		super("**secure string**", t);
+		init();
 		this.encrypted = encrypted;
 		this.decrypter = decrypter;
 		this.encLength = encLength;
@@ -169,12 +172,24 @@ public class CSecureString extends CString {
 		throw new CREIndexOverflowException("Secure strings cannot be sliced", t);
 	}
 
-	static {
-		fixKeyLength();
-		//Security.setProperty("crypto.policy", "unlimited");
+	private static volatile boolean initialized = false;
+	private static void init() {
+		if(!initialized) {
+			synchronized(CSecureString.class) {
+				if(!initialized) {
+					fixKeyLength();
+					initialized = true;
+				}
+			}
+		}
 	}
 
-	public static void fixKeyLength() {
+	/**
+	 * This method is quite expensive, 500ms per my measurements. We want to avoid static calling
+	 * of this method unless the code is explicitely using it, so should not be called from
+	 * a static initializer.
+	 */
+	private static void fixKeyLength() {
 		String errorString = "Failed manually overriding key-length permissions.";
 		int newMaxKeyLength;
 		try {

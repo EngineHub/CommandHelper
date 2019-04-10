@@ -400,6 +400,7 @@ public class Main {
 			cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
 			ClassDiscoveryCache cdcCache
 					= new ClassDiscoveryCache(MethodScriptFileLocations.getDefault().getCacheDirectory());
+			cd.setClassDiscoveryCache(cdcCache);
 			MSLog.initialize(MethodScriptFileLocations.getDefault().getJarDirectory());
 			Prefs.init(MethodScriptFileLocations.getDefault().getPreferencesFile());
 
@@ -409,7 +410,6 @@ public class Main {
 				org.fusesource.jansi.AnsiConsole.systemInstall();
 			}
 
-			cd.setClassDiscoveryCache(cdcCache);
 			cd.addAllJarsInFolder(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
 
 			ExtensionManager.AddDiscoveryLocation(MethodScriptFileLocations.getDefault().getExtensionsDirectory());

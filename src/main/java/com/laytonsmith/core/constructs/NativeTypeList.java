@@ -80,9 +80,6 @@ public class NativeTypeList {
 	 * @return
 	 */
 	public static Set<FullyQualifiedClassName> getNativeTypeList() {
-		// NOTE: We have to be incredibly careful here to not actually load the underlying classes, because
-		// this method is used very early in the startup process, and loading the classes may interfere with
-		// the bootstrapping process.
 		@SuppressWarnings("LocalVariableHidesMemberVariable")
 		Set<String> nativeTypes = NativeTypeList.nativeTypes;
 		if(nativeTypes == null) {
