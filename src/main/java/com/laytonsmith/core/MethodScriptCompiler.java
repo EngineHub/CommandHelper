@@ -9,6 +9,7 @@ import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.KeywordList;
 import com.laytonsmith.core.compiler.TokenStream;
+import com.laytonsmith.core.compiler.keywords.ObjectDefinitionKeyword;
 import com.laytonsmith.core.constructs.CDecimal;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
@@ -1222,6 +1223,8 @@ public final class MethodScriptCompiler {
 
 		int braceCount = 0;
 
+		boolean inObjectDefinition = false;
+
 		// Create a Token array to iterate over, rather than using the LinkedList's O(n) get() method.
 		Token[] tokenArray = stream.toArray(new Token[stream.size()]);
 		for(int i = 0; i < tokenArray.length; i++) {
@@ -1233,6 +1236,7 @@ public final class MethodScriptCompiler {
 
 			// Brace handling
 			if(t.type == TType.LCURLY_BRACKET) {
+				inObjectDefinition = false;
 				ParseTree b = new ParseTree(new CFunction(__cbrace__, t.getTarget()), fileOptions);
 				tree.addChild(b);
 				tree = b;
@@ -1274,6 +1278,10 @@ public final class MethodScriptCompiler {
 					throw new ConfigCompileException("Unexpected end curly brace", t.target);
 				}
 				continue;
+			}
+
+			if(t.type == TType.KEYWORD && KeywordList.getKeywordByName(t.value) instanceof ObjectDefinitionKeyword) {
+				inObjectDefinition = true;
 			}
 
 			//Associative array/label handling
@@ -1441,6 +1449,12 @@ public final class MethodScriptCompiler {
 				}
 
 			} else if(t.type.equals(TType.COMMA)) {
+				if(inObjectDefinition) {
+					// This is not part of a function use, so we have special handling, just push this on, and
+					// carry on.
+					tree.addChild(new ParseTree(new CSymbol(",", TType.COMMA, unknown), fileOptions));
+					continue;
+				}
 				if(constructCount.peek().get() > 1) {
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
