@@ -47,6 +47,8 @@ if [[ "$(jdk_version)" -gt "8" ]]; then
 	# Read the required modules from the jar itself, so that each jar can have different dependencies, without requiring
 	# a re-install.
 	MODULES=$(unzip -p "%%LOCATION%%" interpreter-helpers/modules)
+	# Ensure that the modules file will work even if it has windows line endings
+	MODULES=$(echo "$MODULES" | sed 's/\r$//g')
 	MPATH=$(echo "$MODULES" | sed 's/\(.*\)/--add-opens \1=ALL-UNNAMED/' | tr '\n' ' ')
 else
 	MPATH=""
