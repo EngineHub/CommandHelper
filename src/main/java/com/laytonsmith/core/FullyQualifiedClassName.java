@@ -135,7 +135,12 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	 * If you know for a fact that the name is already fully qualified, this step skips qualification. If you aren't
 	 * sure whether or not the name is fully qualified, don't use the method, the other methods will accept a fully
 	 * qualified class name, but not change it, but if it isn't fully qualified, then it will do so.
-	 *
+	 * <p>
+	 * The class does not have to (yet) exist, though it should exist before usage anywhere else, such as in CClassType.
+	 * However, during compiliation, for instance, when the class is being defined, the class name will not exist
+	 * between compilation and object specification encoding, so this can be used in the meantime to represent the
+	 * class.
+	 * <p>
 	 * If this represents a native class, use {@link #forNativeClass(java.lang.Class)} instead.
 	 * @param qualified
 	 * @return
@@ -163,6 +168,14 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	 */
 	public String getFQCN() {
 		return fullyQualifiedName;
+	}
+
+	/**
+	 * Returns the {@link UnqualifiedClassName} for this fully qualified class name, using the special constructor.
+	 * @return
+	 */
+	public UnqualifiedClassName getUCN() {
+		return new UnqualifiedClassName(this);
 	}
 
 	@Override
@@ -199,6 +212,4 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 		}
 		return StringUtils.Join(parts, "|");
 	}
-
-
 }
