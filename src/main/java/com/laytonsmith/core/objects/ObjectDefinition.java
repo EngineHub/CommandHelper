@@ -5,7 +5,6 @@ import com.laytonsmith.PureUtilities.ObjectHelpers.Equals;
 import com.laytonsmith.PureUtilities.ObjectHelpers.HashCode;
 import com.laytonsmith.PureUtilities.ObjectHelpers.ToString;
 import com.laytonsmith.PureUtilities.SmartComment;
-import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.UnqualifiedClassName;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.NativeTypeList;
@@ -16,15 +15,12 @@ import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.natives.interfaces.Commentable;
 import com.laytonsmith.core.natives.interfaces.MAnnotation;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Contains the definition of an object. Within certain limits, this information is available to the runtime, and in
@@ -183,7 +179,7 @@ public class ObjectDefinition implements Commentable {
 			for(UnqualifiedClassName ucn : this.superclasses) {
 				try {
 					superclasses.add(CClassType.get(ucn.getFQCN(env)));
-				} catch(ClassNotFoundException ex) {
+				} catch (ClassNotFoundException ex) {
 					uhohs.add(new ConfigCompileException("Could not find " + ucn.getUnqualifiedClassName(),
 							ucn.getTarget(), ex));
 				}
@@ -191,7 +187,7 @@ public class ObjectDefinition implements Commentable {
 			for(UnqualifiedClassName ucn : this.interfaces) {
 				try {
 					interfaces.add(CClassType.get(ucn.getFQCN(env)));
-				} catch(ClassNotFoundException ex) {
+				} catch (ClassNotFoundException ex) {
 					uhohs.add(new ConfigCompileException("Could not find " + ucn.getUnqualifiedClassName(),
 							ucn.getTarget(), ex));
 				}
