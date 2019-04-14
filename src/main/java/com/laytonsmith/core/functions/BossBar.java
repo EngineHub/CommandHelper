@@ -129,7 +129,7 @@ public class BossBar {
 			boolean visible = true;
 			double percent = 1.0;
 			if(args.length == 2) {
-				if(!(args[1] instanceof CArray)) {
+				if(!(args[1].isInstanceOf(CArray.class))) {
 					throw new CRECastException("Expected array for parameter 2 of create_bar()", t);
 				}
 				CArray ca = (CArray) args[1];
@@ -214,7 +214,7 @@ public class BossBar {
 				} catch (IllegalArgumentException ex) {
 					throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 				}
-			} else if(args[1] instanceof CArray) {
+			} else if(args[1].isInstanceOf(CArray.class)) {
 				CArray ca = (CArray) args[1];
 				if(ca.containsKey("title")) {
 					bar.setTitle(ca.get("title", t).val());

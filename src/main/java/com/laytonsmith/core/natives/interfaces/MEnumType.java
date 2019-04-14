@@ -262,8 +262,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 
 							@Override
 							public boolean isInstanceOf(Class<? extends Mixed> type) {
-								// This call doesn't make any sense?
-								throw new UnsupportedOperationException();
+								return Construct.isInstanceof(this, type);
 							}
 
 							@Override

@@ -202,7 +202,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return ((CBoolean) c).getBoolean();
 		} else if(c instanceof CNull) {
 			return null;
-		} else if(c instanceof CArray) {
+		} else if(c.isInstanceOf(CArray.class)) {
 			CArray ca = (CArray) c;
 			if(!ca.inAssociativeMode()) {
 				List<Object> list = new ArrayList<Object>();
@@ -412,7 +412,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return Long.valueOf(((CInt) c).getInt());
 		} else if(c instanceof CDouble) {
 			return Double.valueOf(((CDouble) c).getDouble());
-		} else if(c instanceof CArray) {
+		} else if(c.isInstanceOf(CArray.class)) {
 			CArray ca = (CArray) c;
 			if(ca.inAssociativeMode()) {
 				//SortedMap
@@ -587,6 +587,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			// but anyways, for now, just return false.
 			return false;
 		}
+		// TODO: We need the compiler environment here so we can look up custom types.
 		return that.typeof().doesExtend(CClassType.get(type));
 	}
 

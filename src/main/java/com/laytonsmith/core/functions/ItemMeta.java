@@ -361,14 +361,14 @@ public class ItemMeta {
 			if(args.length == 3) {
 				p = Static.GetPlayer(args[0], t);
 				slot = Static.getInt32(args[1], t);
-				if(args[2] instanceof CArray) {
+				if(args[2].isInstanceOf(CArray.class)) {
 					color = (CArray) args[2];
 				} else {
 					throw new CREFormatException("Expected an array but received " + args[2] + " instead.", t);
 				}
 			} else {
 				slot = Static.getInt32(args[0], t);
-				if(args[1] instanceof CArray) {
+				if(args[1].isInstanceOf(CArray.class)) {
 					color = (CArray) args[1];
 				} else {
 					throw new CREFormatException("Expected an array but received " + args[1] + " instead.", t);

@@ -260,7 +260,7 @@ public class Web {
 					for(String key : headers.stringKeySet()) {
 						List<String> h = new ArrayList<String>();
 						Mixed c = headers.get(key, t);
-						if(c instanceof CArray) {
+						if(c.isInstanceOf(CArray.class)) {
 							for(String kkey : ((CArray) c).stringKeySet()) {
 								h.add(((CArray) c).get(kkey, t).val());
 							}
@@ -287,13 +287,13 @@ public class Web {
 					}
 				}
 				if(csettings.containsKey("params") && !(csettings.get("params", t) instanceof CNull)) {
-					if(csettings.get("params", t) instanceof CArray) {
+					if(csettings.get("params", t).isInstanceOf(CArray.class)) {
 						CArray params = Static.getArray(csettings.get("params", t), t);
 						Map<String, List<String>> mparams = new HashMap<>();
 						for(String key : params.stringKeySet()) {
 							Mixed c = params.get(key, t);
 							List<String> l = new ArrayList<>();
-							if(c instanceof CArray) {
+							if(c.isInstanceOf(CArray.class)) {
 								for(String kkey : ((CArray) c).stringKeySet()) {
 									l.add(((ArrayAccess) c).get(kkey, t).val());
 								}
@@ -375,7 +375,7 @@ public class Web {
 					Mixed trustStore = csettings.get("trustStore", t);
 					if(trustStore.isInstanceOf(CBoolean.class) && ArgumentValidation.getBoolean(trustStore, t) == false) {
 						settings.setDisableCertChecking(true);
-					} else if(trustStore instanceof CArray) {
+					} else if(trustStore.isInstanceOf(CArray.class)) {
 						CArray trustStoreA = ((CArray) trustStore);
 						LinkedHashMap<String, String> trustStoreJ = new LinkedHashMap<>((int) trustStoreA.size());
 						final String noDefault = "no default";
@@ -899,7 +899,7 @@ public class Web {
 				for(Mixed c : to.asList()) {
 					Message.RecipientType type = Message.RecipientType.TO;
 					String address;
-					if(c instanceof CArray) {
+					if(c.isInstanceOf(CArray.class)) {
 						CArray ca = (CArray) c;
 						String stype = ArgumentValidation.getItemFromArray(ca, "type", t, new CString("TO", t)).val();
 						switch(stype) {

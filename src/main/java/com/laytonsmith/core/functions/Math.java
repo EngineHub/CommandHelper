@@ -523,12 +523,12 @@ public class Math {
 				}
 				long delta = Static.getInt(cdelta, t);
 				//First, error check, then get the old value, and store it in temp.
-				if(!(array instanceof CArray) && !(array.isInstanceOf(ArrayAccess.class))) {
+				if(!(array.isInstanceOf(CArray.class)) && !(array.isInstanceOf(ArrayAccess.class))) {
 					//Let's just evaluate this like normal with array_get, so it will
 					//throw the appropriate exception.
 					new ArrayHandling.array_get().exec(t, env, array, index);
 					throw ConfigRuntimeException.CreateUncatchableException("Shouldn't have gotten here. Please report this error, and how you got here.", t);
-				} else if(!(array instanceof CArray)) {
+				} else if(!(array.isInstanceOf(CArray.class))) {
 					//It's an ArrayAccess type, but we can't use that here, so, throw our
 					//own exception.
 					throw new CRECastException("Cannot increment/decrement a non-array array"
@@ -1438,7 +1438,7 @@ public class Math {
 
 		public List<Mixed> recList(List<Mixed> list, Mixed... args) {
 			for(Mixed c : args) {
-				if(c instanceof CArray) {
+				if(c.isInstanceOf(CArray.class)) {
 					for(int i = 0; i < ((CArray) c).size(); i++) {
 						recList(list, ((CArray) c).get(i, Target.UNKNOWN));
 					}
@@ -1520,7 +1520,7 @@ public class Math {
 
 		public List<Mixed> recList(List<Mixed> list, Mixed... args) {
 			for(Mixed c : args) {
-				if(c instanceof CArray) {
+				if(c.isInstanceOf(CArray.class)) {
 					for(int i = 0; i < ((CArray) c).size(); i++) {
 						recList(list, ((CArray) c).get(i, Target.UNKNOWN));
 					}
@@ -2364,9 +2364,9 @@ public class Math {
 				throw new CREFormatException("Expression may not be empty", t);
 			}
 			CArray vars = null;
-			if(args.length == 2 && args[1] instanceof CArray) {
+			if(args.length == 2 && args[1].isInstanceOf(CArray.class)) {
 				vars = (CArray) args[1];
-			} else if(args.length == 2 && !(args[1] instanceof CArray)) {
+			} else if(args.length == 2 && !(args[1].isInstanceOf(CArray.class))) {
 				throw new CRECastException("The second argument of expr() should be an array", t);
 			}
 			if(vars != null && !vars.inAssociativeMode()) {

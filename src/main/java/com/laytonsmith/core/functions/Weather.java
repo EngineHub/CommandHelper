@@ -67,7 +67,7 @@ public class Weather {
 			MCWorld w = null;
 			boolean safe = false;
 			int safeIndex = 1;
-			if(args[0] instanceof CArray) {
+			if(args[0].isInstanceOf(CArray.class)) {
 				CArray a = (CArray) args[0];
 				MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				MCLocation l = ObjectGenerator.GetGenerator().location(a, p == null ? null : p.getWorld(), t);

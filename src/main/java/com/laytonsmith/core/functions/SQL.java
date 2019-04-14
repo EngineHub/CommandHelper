@@ -150,7 +150,7 @@ public class SQL {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
 				Profiles.Profile profile;
-				if(args[0] instanceof CArray) {
+				if(args[0].isInstanceOf(CArray.class)) {
 					Map<String, String> data = new HashMap<>();
 					for(String key : ((CArray) args[0]).stringKeySet()) {
 						data.put(key, ((CArray) args[0]).get(key, t).val());

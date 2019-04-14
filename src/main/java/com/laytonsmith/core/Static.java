@@ -981,7 +981,7 @@ public final class Static {
 	 * @return
 	 */
 	public static MCMetadatable getMetadatable(Mixed construct, Target t) {
-		if(construct instanceof CArray) {
+		if(construct.isInstanceOf(CArray.class)) {
 			return ObjectGenerator.GetGenerator().location(construct, null, t).getBlock();
 		} else if(construct instanceof CString) {
 			switch(construct.val().length()) {
@@ -1515,7 +1515,7 @@ public final class Static {
 			return ((CByteArray) construct).asByteArrayCopy();
 		} else if(construct instanceof CResource) {
 			return ((CResource) construct).getResource();
-		} else if(construct instanceof CArray) {
+		} else if(construct.isInstanceOf(CArray.class)) {
 			CArray array = (CArray) construct;
 			if(array.isAssociative()) {
 				HashMap<String, Object> map = new HashMap<>();

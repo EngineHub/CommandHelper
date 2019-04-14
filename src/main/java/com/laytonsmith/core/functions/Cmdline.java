@@ -979,7 +979,7 @@ public class Cmdline {
 			final CClosure stderr;
 			final CClosure exit;
 			final boolean subshell;
-			if(args[0] instanceof CArray) {
+			if(args[0].isInstanceOf(CArray.class)) {
 				CArray array = (CArray) args[0];
 				command = new String[(int) array.size()];
 				for(int i = 0; i < array.size(); i++) {
@@ -1178,7 +1178,7 @@ public class Cmdline {
 			String[] command;
 			int expectedExitCode = 0;
 			File workingDir = null;
-			if(args[0] instanceof CArray) {
+			if(args[0].isInstanceOf(CArray.class)) {
 				CArray array = (CArray) args[0];
 				command = new String[(int) array.size()];
 				for(int i = 0; i < array.size(); i++) {

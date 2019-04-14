@@ -69,7 +69,7 @@ public final class ArgumentValidation {
 	 * @return
 	 */
 	public static CArray getArray(Mixed construct, Target t) {
-		if(construct instanceof CArray) {
+		if(construct.isInstanceOf(CArray.class)) {
 			return ((CArray) construct);
 		} else {
 			throw new CRECastException("Expecting array, but received " + construct.val(), t);

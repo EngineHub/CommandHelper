@@ -32,5 +32,11 @@ public enum AccessModifier {
 	 * A private class is one that can only be accessed from other classes within the same containing class. This is not
 	 * useable in top level classes, as it wouldn't make sense otherwise.
 	 */
-	PRIVATE;
+	PRIVATE,
+	/**
+	 * A default modifier implies that the modifier was left off. This causes the behavior
+	 * of one of the other modifiers, but the behavior depends on the context in which
+	 * this is used.
+	 */
+	DEFAULT;
 }

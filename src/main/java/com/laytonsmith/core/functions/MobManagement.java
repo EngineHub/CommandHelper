@@ -895,7 +895,7 @@ public class MobManagement {
 			if(args[1] instanceof CNull) {
 				ee.clearEquipment();
 				return CVoid.VOID;
-			} else if(args[1] instanceof CArray) {
+			} else if(args[1].isInstanceOf(CArray.class)) {
 				CArray ea = (CArray) args[1];
 				for(String key : ea.stringKeySet()) {
 					try {
@@ -1046,7 +1046,7 @@ public class MobManagement {
 				for(Map.Entry<MCEquipmentSlot, Float> ent : eq.entrySet()) {
 					eq.put(ent.getKey(), 0F);
 				}
-			} else if(args[1] instanceof CArray) {
+			} else if(args[1].isInstanceOf(CArray.class)) {
 				CArray ea = (CArray) args[1];
 				for(String key : ea.stringKeySet()) {
 					try {

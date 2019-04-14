@@ -133,10 +133,10 @@ public class EventBinding {
 			ParseTree tree = nodes[nodes.length - 1];
 
 			//Check to see if our arguments are correct
-			if(!(options instanceof CNull || options instanceof CArray)) {
+			if(!(options instanceof CNull || options.isInstanceOf(CArray.class))) {
 				throw new CRECastException("The options must be an array or null", t);
 			}
-			if(!(prefilter instanceof CNull || prefilter instanceof CArray)) {
+			if(!(prefilter instanceof CNull || prefilter.isInstanceOf(CArray.class))) {
 				throw new CRECastException("The prefilters must be an array or null", t);
 			}
 			if(!(event_obj instanceof IVariable)) {
@@ -507,7 +507,7 @@ public class EventBinding {
 			CArray obj = null;
 			if(args[1] instanceof CNull) {
 				obj = new CArray(t);
-			} else if(args[1] instanceof CArray) {
+			} else if(args[1].isInstanceOf(CArray.class)) {
 				obj = (CArray) args[1];
 			} else {
 				throw new CRECastException("The eventObject must be null, or an array", t);
@@ -649,7 +649,7 @@ public class EventBinding {
 			if(args.length == 0) {
 				e.lock(null);
 			} else {
-				if(args[0] instanceof CArray) {
+				if(args[0].isInstanceOf(CArray.class)) {
 					CArray ca = (CArray) args[1];
 					for(int i = 0; i < ca.size(); i++) {
 						params.add(ca.get(i, t).val());

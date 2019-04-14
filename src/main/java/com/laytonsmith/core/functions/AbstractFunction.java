@@ -151,7 +151,7 @@ public abstract class AbstractFunction implements Function {
 				b.append(", ");
 			}
 			first = false;
-			if(ccc instanceof CArray) {
+			if(ccc.isInstanceOf(CArray.class)) {
 				//Arrays take too long to toString, so we don't want to actually toString them here if
 				//we don't need to.
 				b.append("<arrayNotShown size:").append(((CArray) ccc).size()).append(">");

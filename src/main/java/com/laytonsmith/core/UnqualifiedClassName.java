@@ -69,4 +69,9 @@ public class UnqualifiedClassName {
 	public FullyQualifiedClassName getFQCN(Environment env) throws CRECastException {
 		return this.fqcn != null ? this.fqcn : FullyQualifiedClassName.forName(unqualifedClassName, target, env);
 	}
+
+	@Override
+	public String toString() {
+		return this.unqualifedClassName != null ? unqualifedClassName : "FQCN: " + this.fqcn;
+	}
 }

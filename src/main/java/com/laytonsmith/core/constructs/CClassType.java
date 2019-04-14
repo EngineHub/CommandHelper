@@ -334,7 +334,8 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 			// in general, they are allowed to advertise that they do, for the sake of
 			// methodscript, this can only be used to return true, if it returns true, it
 			// definitely is, but if it returns false, that does not explicitely mean that
-			// it doesn't.
+			// it doesn't. However, this check is faster, so we can do it and in 99% of
+			// cases get a performance boost.
 			return true;
 		}
 		for(CClassType tCheck : checkClass.getTypes()) {

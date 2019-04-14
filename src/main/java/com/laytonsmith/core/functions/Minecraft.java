@@ -223,7 +223,7 @@ public class Minecraft {
 						throw new CREFormatException("Incorrect format for the item notation: " + args[0].val(), t);
 					}
 				}
-			} else if(args[0] instanceof CArray) {
+			} else if(args[0].isInstanceOf(CArray.class)) {
 				MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], t, true);
 				return new CString(is.getType().getName(), t);
 			}
@@ -342,7 +342,7 @@ public class Minecraft {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Mixed id = args[0];
-			if(id instanceof CArray) {
+			if(id.isInstanceOf(CArray.class)) {
 				MCItemStack is = ObjectGenerator.GetGenerator().item(id, t);
 				return new CInt(is.getType().getMaxStackSize(), t);
 			}

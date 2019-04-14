@@ -565,7 +565,7 @@ public class Environment {
 				String line2 = "";
 				String line3 = "";
 				String line4 = "";
-				if(args.length == 2 && args[1] instanceof CArray) {
+				if(args.length == 2 && args[1].isInstanceOf(CArray.class)) {
 					CArray ca = (CArray) args[1];
 					if(ca.size() >= 1) {
 						line1 = ca.get(0, t).val();
@@ -989,7 +989,7 @@ public class Environment {
 				w = ((MCPlayer) sender).getWorld();
 			}
 
-			if(args[0] instanceof CArray && !(args.length == 3)) {
+			if(args[0].isInstanceOf(CArray.class) && !(args.length == 3)) {
 				MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				x = loc.getX();
 				z = loc.getZ();
@@ -1084,7 +1084,7 @@ public class Environment {
 				throw new CRERangeException("A bit excessive, don't you think? Let's scale that back some, huh?", t);
 			}
 
-			if(!(args[0] instanceof CArray)) {
+			if(!(args[0].isInstanceOf(CArray.class))) {
 				throw new CRECastException("Expecting an array at parameter 1 of explosion", t);
 			}
 
@@ -1152,7 +1152,7 @@ public class Environment {
 				noteOffset = 2;
 				l = ObjectGenerator.GetGenerator().location(args[3], p.getWorld(), t);
 			} else {
-				if(!(args[1] instanceof CArray) && args[2] instanceof CArray) {
+				if(!(args[1].isInstanceOf(CArray.class)) && args[2].isInstanceOf(CArray.class)) {
 					//Player provided, location not
 					instrumentOffset = 1;
 					noteOffset = 2;
@@ -1173,7 +1173,7 @@ public class Environment {
 						+ StringUtils.Join(MCInstrument.values(), ", ", ", or "), t);
 			}
 			MCTone tone = null;
-			if(args[noteOffset] instanceof CArray) {
+			if(args[noteOffset].isInstanceOf(CArray.class)) {
 				int octave = Static.getInt32(((CArray) args[noteOffset]).get("octave", t), t);
 				if(octave < 0 || octave > 2) {
 					throw new CRERangeException("The octave must be 0, 1, or 2, but was " + octave, t);
@@ -1298,7 +1298,7 @@ public class Environment {
 			double speed = 0.0;
 			Object data = null;
 
-			if(args[1] instanceof CArray) {
+			if(args[1].isInstanceOf(CArray.class)) {
 				CArray pa = (CArray) args[1];
 				try {
 					p = MCParticle.valueOf(pa.get("particle", t).val().toUpperCase());
@@ -1341,7 +1341,7 @@ public class Environment {
 
 				} else if(pa.containsKey("color")) {
 					Mixed c = pa.get("color", t);
-					if(c instanceof CArray) {
+					if(c.isInstanceOf(CArray.class)) {
 						data = ObjectGenerator.GetGenerator().color((CArray) c, t);
 					} else {
 						data = StaticLayer.GetConvertor().GetColor(c.val(), t);
@@ -1359,7 +1359,7 @@ public class Environment {
 			try {
 				if(args.length == 3) {
 					MCPlayer player;
-					if(args[2] instanceof CArray) {
+					if(args[2].isInstanceOf(CArray.class)) {
 						for(Mixed playerName : ((CArray) args[2]).asList()) {
 							player = Static.GetPlayer(playerName, t);
 							player.spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, data);
@@ -1409,7 +1409,7 @@ public class Environment {
 			float volume = 1;
 			float pitch = 1;
 
-			if(!(args[1] instanceof CArray)) {
+			if(!(args[1].isInstanceOf(CArray.class))) {
 				throw new CREFormatException("An array was expected but received " + args[1], t);
 			}
 
@@ -1441,7 +1441,7 @@ public class Environment {
 
 			if(args.length == 3) {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
-				if(args[2] instanceof CArray) {
+				if(args[2].isInstanceOf(CArray.class)) {
 					for(String key : ((CArray) args[2]).stringKeySet()) {
 						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t), t));
 					}
@@ -1558,7 +1558,7 @@ public class Environment {
 			float volume = 1;
 			float pitch = 1;
 
-			if(!(args[1] instanceof CArray)) {
+			if(!(args[1].isInstanceOf(CArray.class))) {
 				throw new CREFormatException("An array was expected but received " + args[1], t);
 			}
 
@@ -1584,7 +1584,7 @@ public class Environment {
 
 			if(args.length == 3) {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
-				if(args[2] instanceof CArray) {
+				if(args[2].isInstanceOf(CArray.class)) {
 					for(String key : ((CArray) args[2]).stringKeySet()) {
 						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t), t));
 					}

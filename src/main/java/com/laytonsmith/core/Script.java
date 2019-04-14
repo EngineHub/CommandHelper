@@ -361,8 +361,9 @@ public class Script {
 				Mixed[] ca = new Mixed[a.length];
 				for(int i = 0; i < a.length; i++) {
 					ca[i] = (Mixed) a[i];
+					// TODO: This code is probably outdated and needs to be rethought.
 					//CArray, CBoolean, CDouble, CInt, CNull, CString, CVoid, CEntry, CLabel (only to sconcat).
-					if(!(ca[i] instanceof CArray || ca[i] instanceof CBoolean || ca[i] instanceof CDouble
+					if(!(ca[i].isInstanceOf(CArray.class) || ca[i] instanceof CBoolean || ca[i] instanceof CDouble
 							|| ca[i] instanceof CInt || ca[i] instanceof CNull
 							|| ca[i] instanceof CString || ca[i] instanceof CVoid
 							|| ca[i] instanceof IVariable || ca[i] instanceof CEntry || ca[i] instanceof CLabel)

@@ -197,14 +197,14 @@ public class Enchantments {
 			}
 
 			CArray enchantArray = new CArray(t);
-			if(!(args[2 - offset] instanceof CArray)) {
+			if(!(args[2 - offset].isInstanceOf(CArray.class))) {
 				enchantArray.push(args[2 - offset], t);
 			} else {
 				enchantArray = (CArray) args[2 - offset];
 			}
 
 			CArray levelArray = new CArray(t);
-			if(!(args[3 - offset] instanceof CArray)) {
+			if(!(args[3 - offset].isInstanceOf(CArray.class))) {
 				levelArray.push(args[3 - offset], t);
 			} else {
 				levelArray = (CArray) args[3 - offset];
@@ -275,7 +275,7 @@ public class Enchantments {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			int offset = 0;
-			if(args.length == 4 || args.length == 3 && args[2] instanceof CArray) {
+			if(args.length == 4 || args.length == 3 && args[2].isInstanceOf(CArray.class)) {
 				p = Static.GetPlayer(args[0].val(), t);
 				offset = 1;
 			} else {
@@ -287,7 +287,7 @@ public class Enchantments {
 				throw new CRECastException("There is no item at slot " + args[offset], t);
 			}
 
-			if(args[args.length - 1] instanceof CArray) {
+			if(args[args.length - 1].isInstanceOf(CArray.class)) {
 				CArray ca = (CArray) args[args.length - 1];
 				Map<MCEnchantment, Integer> enchants = ObjectGenerator.GetGenerator().enchants(ca, t);
 				for(Map.Entry<MCEnchantment, Integer> en : enchants.entrySet()) {
@@ -362,7 +362,7 @@ public class Enchantments {
 			}
 
 			CArray enchantArray = new CArray(t);
-			if(!(args[2 - offset] instanceof CArray) && !(args[2 - offset] instanceof CNull)) {
+			if(!(args[2 - offset].isInstanceOf(CArray.class)) && !(args[2 - offset] instanceof CNull)) {
 				enchantArray.push(args[2 - offset], t);
 			} else if(args[2 - offset] instanceof CNull) {
 				for(MCEnchantment e : is.getEnchantments().keySet()) {
@@ -437,7 +437,7 @@ public class Enchantments {
 				throw new CRECastException("There is no item at slot " + args[offset], t);
 			}
 
-			if(args[offset + 1] instanceof CArray) {
+			if(args[offset + 1].isInstanceOf(CArray.class)) {
 				for(String name : ((CArray) args[offset + 1]).stringKeySet()) {
 					MCEnchantment e = GetEnchantment(name, t);
 					is.removeEnchantment(e);
@@ -786,7 +786,7 @@ public class Enchantments {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCItemStack is;
-			if(args[0] instanceof CArray) {
+			if(args[0].isInstanceOf(CArray.class)) {
 				is = ObjectGenerator.GetGenerator().item(args[0], t);
 			} else {
 				is = Static.ParseItemNotation(null, args[0].val(), 1, t);
