@@ -1,10 +1,10 @@
 <!
-    strict;
-    name: License;
-    author: cailin;
-    created: 2019-03-13;
-    description: The file containing the type ms.lang.manifest.License;
-    compilerOptions: UltraStrict;
+	strict;
+	name: License;
+	author: cailin;
+	created: 2019-03-13;
+	description: The file containing the type ms.lang.manifest.License;
+	compilerOptions: UltraStrict;
 >
 
 use ms.lang.validators;
@@ -13,16 +13,16 @@ use ms.lang.validators;
  * Represents a license that the source code is released under.
  */
 public interface ms.lang.manifest.License {
-    /**
-     * The name of the license.
-     */
-    string @name;
+	/**
+	 * The name of the license.
+	 */
+	string @name;
 
-    /**
-     * A URL pointing to the full license text.
-     */
-    @{ValidUrl}
-    string @url;
+	/**
+	 * A URL pointing to the full license text.
+	 */
+	@{ValidUrl}
+	string @url;
 
-    string @comment;
+	string @comment;
 }

@@ -1,10 +1,10 @@
 <!
-    strict;
-    name: Negative;
-    author: cailin;
-    created: 2019-03-13;
-    description: The file containing the type ms.lang.validators.Negative;
-    compilerOptions: UltraStrict;
+	strict;
+	name: Negative;
+	author: cailin;
+	created: 2019-03-13;
+	description: The file containing the type ms.lang.validators.Negative;
+	compilerOptions: UltraStrict;
 >
 
 /**

@@ -1,10 +1,10 @@
 <!
-    strict;
-    name: ValidEmail;
-    author: cailin;
-    created: 2019-03-14;
-    description: The file containing the type ms.lang.validators.ValidEmail;
-    compilerOptions: UltraStrict;
+	strict;
+	name: ValidEmail;
+	author: cailin;
+	created: 2019-03-14;
+	description: The file containing the type ms.lang.validators.ValidEmail;
+	compilerOptions: UltraStrict;
 >
 
 /**
@@ -20,9 +20,9 @@
  */
 @{Target(value: DECLARATION, type: string)}
 @{RegexValidator(
-    // Stolen shamelessly and without looking back from
-    // http://www.ex-parrot.com/~pdw/Mail-RFC822-Address.html
-    comp_read('email_validator.txt')
+	// Stolen shamelessly and without looking back from
+	// http://www.ex-parrot.com/~pdw/Mail-RFC822-Address.html
+	comp_read('email_validator.txt')
 )}
 public annotation ms.lang.validators.ValidEmail {
 

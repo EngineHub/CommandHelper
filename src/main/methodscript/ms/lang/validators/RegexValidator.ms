@@ -1,10 +1,10 @@
 <!
-    strict;
-    name: RegexValidator;
-    author: cailin;
-    created: 2019-03-14;
-    description: The file containing the type ms.lang.validators.RegexValidator;
-    compilerOptions: UltraStrict;
+	strict;
+	name: RegexValidator;
+	author: cailin;
+	created: 2019-03-14;
+	description: The file containing the type ms.lang.validators.RegexValidator;
+	compilerOptions: UltraStrict;
 >
 
 /**
@@ -16,9 +16,9 @@
  */
 @{Target(value: ANNOTATION)}
 public annotation ms.lang.validators.RegexValidator {
-    /**
-     * The regex that the value should match.
-     */
-    @{ValidRegex}
-    string @value;
+	/**
+	 * The regex that the value should match.
+	 */
+	@{ValidRegex}
+	string @value;
 }

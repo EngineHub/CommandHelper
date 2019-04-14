@@ -1,10 +1,10 @@
 <!
-    strict;
-    name: Repository;
-    author: cailin;
-    created: 2019-03-13;
-    description: The file containing the type ms.lang.manifest.Repository;
-    compilerOptions: UltraStrict;
+	strict;
+	name: Repository;
+	author: cailin;
+	created: 2019-03-13;
+	description: The file containing the type ms.lang.manifest.Repository;
+	compilerOptions: UltraStrict;
 >
 
 /**
@@ -17,7 +17,7 @@
  */
 public interface ms.lang.manifest.Repository {
 
-    // TODO
+	// TODO
 
-    string @comment;
+	string @comment;
 }

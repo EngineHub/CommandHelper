@@ -1119,10 +1119,11 @@ public class Main {
 						+ validTemplates.toString());
 			}
 			String classSimpleName;
-			{
-				String[] split = clazz.split("\\.");
-				classSimpleName = split[split.length - 1];
-			}
+			String[] split = clazz.split("\\.");
+			classSimpleName = split[split.length - 1];
+
+			// TODO: Detect if this class is a ms.* class. If so, automatically add the compilerOptions: UltraStrict
+			// option.
 			String author = StaticLayer.GetConvertor().GetUser(null);
 			String created = new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString("yyyy-MM-dd", Target.UNKNOWN)).val();
 			File file = new File(clazz.replace(".", "/") + ".ms");
@@ -1131,7 +1132,12 @@ public class Main {
 				System.exit(1);
 			}
 			file.getParentFile().mkdirs();
-			String allTemplate = StreamUtils.GetResource("/templates/new-type-templates/all.ms");
+			String allTemplate;
+			if(split[0].equals("ms")) {
+				allTemplate = StreamUtils.GetResource("/templates/new-type-templates/native-all.ms");
+			} else {
+				allTemplate = StreamUtils.GetResource("/templates/new-type-templates/all.ms");
+			}
 			String typeTemplate = StreamUtils.GetResource("/templates/new-type-templates/" + template + ".ms");
 			allTemplate = String.format(allTemplate, classSimpleName, author, created, clazz);
 			typeTemplate = String.format(typeTemplate, clazz);

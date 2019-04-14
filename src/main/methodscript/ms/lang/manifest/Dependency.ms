@@ -1,10 +1,10 @@
 <!
-    strict;
-    name: Dependency;
-    author: cailin;
-    created: 2019-03-13;
-    description: The file containing the type ms.lang.manifest.Dependency;
-    compilerOptions: UltraStrict;
+	strict;
+	name: Dependency;
+	author: cailin;
+	created: 2019-03-13;
+	description: The file containing the type ms.lang.manifest.Dependency;
+	compilerOptions: UltraStrict;
 >
 
 /**
@@ -15,7 +15,7 @@
  */
 public interface ms.lang.manifest.Dependency {
 
-    // TODO
+	// TODO
 
-    string @comment;
+	string @comment;
 }
