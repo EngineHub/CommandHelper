@@ -122,6 +122,15 @@ public class NativeTypeList {
 
 	private static final Map<FullyQualifiedClassName, Class<? extends Mixed>> NATIVE_CLASS_CACHE
 			= new ConcurrentHashMap<>();
+
+	private static interface NullClass extends Mixed {}
+
+	/**
+	 * ConcurrentHashMap cannot accept null values (or keys) so we have to use this to put into the
+	 * map as our "null" value.
+	 */
+	private static final Class<? extends Mixed> NULL_CLASS_OBJECT = NullClass.class;
+	
 	/**
 	 * Returns the java class for the given MethodScript object name. This cannot return anything of a type more
 	 * specific than Mixed. For classes that represent enums, an anonymous subclass of {@link MEnumType} will be
@@ -143,7 +152,7 @@ public class NativeTypeList {
 		// but having a local cache is at least an improvement.
 		if(NATIVE_CLASS_CACHE.containsKey(fqcn)) {
 			Class<? extends Mixed> c = NATIVE_CLASS_CACHE.get(fqcn);
-			if(c == null) {
+			if(c == NULL_CLASS_OBJECT) {
 				// Storing null means it can't be found
 				throw new ClassNotFoundException("Could not find the class of type " + fqcn);
 			}
@@ -168,7 +177,7 @@ public class NativeTypeList {
 		} catch (ClassNotFoundException e) {
 			//
 		}
-		NATIVE_CLASS_CACHE.put(fqcn, null);
+		NATIVE_CLASS_CACHE.put(fqcn, NULL_CLASS_OBJECT);
 		throw new ClassNotFoundException("Could not find the class of type " + fqcn);
 	}
 

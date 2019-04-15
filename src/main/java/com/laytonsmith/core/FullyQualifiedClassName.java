@@ -174,7 +174,7 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	 * Returns the {@link UnqualifiedClassName} for this fully qualified class name, using the special constructor.
 	 * @return
 	 */
-	public UnqualifiedClassName getUCN() {
+	public UnqualifiedClassName asUCN() {
 		return new UnqualifiedClassName(this);
 	}
 

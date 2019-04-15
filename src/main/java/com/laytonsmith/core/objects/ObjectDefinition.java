@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.ObjectHelpers.Equals;
 import com.laytonsmith.PureUtilities.ObjectHelpers.HashCode;
 import com.laytonsmith.PureUtilities.ObjectHelpers.ToString;
 import com.laytonsmith.PureUtilities.SmartComment;
+import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.UnqualifiedClassName;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.NativeTypeList;
@@ -78,8 +79,20 @@ public class ObjectDefinition implements Commentable {
 		this.nativeClass = nativeClass;
 	}
 
+	/**
+	 * Returns the class name
+	 * @return
+	 */
 	public String getClassName() {
-		return this.type.getFQCN().getFQCN();
+		return getName();
+	}
+
+	/**
+	 * Returns the FQCN of this object.
+	 * @return
+	 */
+	public FullyQualifiedClassName getFQCN() {
+		return this.type.getFQCN();
 	}
 
 	@Override

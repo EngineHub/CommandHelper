@@ -27,7 +27,8 @@ public enum ObjectModifier {
 	ABSTRACT,
 	/**
 	 * A native class maps to a class defined in the java code. This modifier is required on the class if any of the
-	 * methods or fields are defined as native. Additionally, the signatures of the methods and fields that are defined
+	 * methods or fields are defined as native. And should generally be used for performance enhancement reasons if
+	 * there does exist a native class. Additionally, the signatures of the methods and fields that are defined
 	 * in this class must match the elements tagged with the {@link ExposedElement} annotations, or it will be an error.
 	 */
 	NATIVE;

@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
@@ -24,9 +25,11 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREClassDefinitionError;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.MAnnotation;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -197,8 +200,7 @@ public class ObjectManagement {
 					AccessModifier.class, t);
 
 			// 1 - Object Modifiers
-			CArray om = evaluateArrayNoNull(nodes[1], t);
-			Set<ObjectModifier> objectModifiers = om.asList().stream()
+			Set<ObjectModifier> objectModifiers = evaluateArrayNoNull(nodes[1], t).asList().stream()
 					.map((item) -> ArgumentValidation.getEnum(item, ObjectModifier.class, t))
 					.collect(Collectors.toSet());
 
@@ -211,16 +213,40 @@ public class ObjectManagement {
 
 			// 4 - Superclasses
 			Set<UnqualifiedClassName> superclasses = new HashSet<>();
-			// TODO
+			{
+				CArray su = evaluateArrayNoNull(nodes[4], t);
+				if(!type.canUseExtends() && !su.isEmpty()) {
+					throw new CREClassDefinitionError("An object definition of type " + type.name().toLowerCase()
+							+ " may not extend"
+							+ " another object type" + (type.canUseImplements() ? " (though it can implement"
+							+ " other types)" : "") + ".", t);
+				}
+				for(Mixed m : su) {
+					if(m instanceof CClassType) {
+						superclasses.add(new UnqualifiedClassName(((CClassType) m).getFQCN()));
+					} else {
+						superclasses.add(new UnqualifiedClassName(m.val(), t));
+					}
+				}
+			}
 
-			if(superclasses.isEmpty()) {
-				// Everything extends Mixed.
-				superclasses.add(Mixed.TYPE.getFQCN().getUCN());
+			if(type.extendsMixed() && superclasses.isEmpty()) {
+				superclasses.add(Mixed.TYPE.getFQCN().asUCN());
 			}
 
 			// 5 - Interfaces
 			Set<UnqualifiedClassName> interfaces = new HashSet<>();
-			// TODO
+			{
+				CArray su = evaluateArrayNoNull(nodes[5], t);
+				for(Mixed m : su) {
+					if(m instanceof CClassType) {
+						interfaces.add(new UnqualifiedClassName(((CClassType) m).getFQCN()));
+					} else {
+						interfaces.add(new UnqualifiedClassName(m.val(), t));
+					}
+				}
+
+			}
 
 			// 6- Enum list
 			Mixed el = evaluateArray(nodes[6], t);
@@ -310,6 +336,25 @@ public class ObjectManagement {
 				odt.add(def, t);
 			} catch (DuplicateObjectDefintionException ex) {
 				throw new CREClassDefinitionError("Class " + name + " already defined, cannot redefine!", t);
+			}
+
+			if(env.getEnv(GlobalEnv.class).GetCustom("define_object.noQualifyClasses") == null) {
+				try {
+					// During the course of initial compilation, we do not qualify classes, because the class library
+					// does its initial pass, irregardless of what order the classes are defined, and then, after
+					// all the class libraries are loaded, the loaded classes are looped through and qualified in bulk.
+					// However, during the course of normal runtime, new classes are allowed to be defined, but they
+					// are defined and qualified at the same time, so they are ready for immediate use. The bulk compilation
+					// option is set only at first load, and then unset, so normal runtime will not have this flag set.
+					def.qualifyClasses(env);
+				} catch (ConfigCompileGroupException ex) {
+					List<String> msgs = new ArrayList<>();
+					for(ConfigCompileException e : ex.getList()) {
+						msgs.add(e.getMessage() + " - " + e.getTarget());
+					}
+					throw new CREClassDefinitionError("One or more compile errors occured while trying to compile "
+							+ def.getName() + ":\n" + StringUtils.Join(msgs, "\n"), t);
+				}
 			}
 
 			return CVoid.VOID;
