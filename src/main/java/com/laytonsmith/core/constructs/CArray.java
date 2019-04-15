@@ -107,7 +107,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 							max = -1; //Special case, there are no integer indexes in here yet.
 						}
 						associativeArray.put(Integer.toString(max + 1), item);
-						if(item instanceof CArray) {
+						if(item.isInstanceOf(CArray.class)) {
 							((CArray) item).parent = this;
 						}
 					}
@@ -117,7 +117,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			if(items != null) {
 				for(Mixed item : items) {
 					array.add(item);
-					if(item instanceof CArray) {
+					if(item.isInstanceOf(CArray.class)) {
 						((CArray) item).parent = this;
 					}
 				}
@@ -280,7 +280,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				associativeArray.put(Integer.toString(max + 1), c);
 			}
 		}
-		if(c instanceof CArray) {
+		if(c.isInstanceOf(CArray.class)) {
 			((CArray) c).parent = this;
 		}
 		setDirty();
@@ -366,7 +366,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		if(associativeMode) {
 			associativeArray.put(normalizeConstruct(index), c);
 		}
-		if(c instanceof CArray) {
+		if(c.isInstanceOf(CArray.class)) {
 			((CArray) c).parent = this;
 		}
 		setDirty();
@@ -514,7 +514,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			for(int i = 0; i < this.size(); i++) {
 				Mixed value = this.get(i, t);
 				String v;
-				if(value instanceof CArray) {
+				if(value.isInstanceOf(CArray.class)) {
 					if(arrays.contains(value)) {
 						//Check for recursion
 						v = "*recursion*";
@@ -543,7 +543,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 					v = "null";
 				} else {
 					Mixed value = this.get(key, t);
-					if(value instanceof CArray) {
+					if(value.isInstanceOf(CArray.class)) {
 						if(arrays.contains(value)) {
 							v = "*recursion*";
 						} else {
@@ -613,7 +613,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		// Iterate over the array, recursively calling this method to perform a deep clone.
 		for(Mixed key : array.keySet()) {
 			Mixed value = array.get(key, t);
-			if(value instanceof CArray) {
+			if(value.isInstanceOf(CArray.class)) {
 				value = deepClone((CArray) value, t, cloneRefs);
 			}
 			clone.set(key, value, t);
@@ -622,7 +622,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	private String normalizeConstruct(Mixed c) {
-		if(c instanceof CArray) {
+		if(c.isInstanceOf(CArray.class)) {
 			throw new CRECastException("Arrays cannot be used as the key in an associative array", c.getTarget());
 		} else if(c.isInstanceOf(CString.class) || c.isInstanceOf(CInt.class)) {
 			return c.val();
@@ -873,7 +873,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 					} else {
 						c = o2;
 					}
-					if(c instanceof CArray) {
+					if(c.isInstanceOf(CArray.class)) {
 						throw new CRECastException("Cannot sort an array of arrays.", CArray.this.getTarget());
 					}
 					if(!(c.isInstanceOf(CBoolean.class) || c.isInstanceOf(CString.class) || c.isInstanceOf(CInt.class)

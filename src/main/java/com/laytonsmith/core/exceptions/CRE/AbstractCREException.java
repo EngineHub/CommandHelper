@@ -133,7 +133,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 				.forName(exception.get("classType", t).val(), t, env);
 		Class<? extends Mixed> clzz = NativeTypeList.getNativeClass(classType);
 		Throwable cause = null;
-		if(exception.get("causedBy", t) instanceof CArray) {
+		if(exception.get("causedBy", t).isInstanceOf(CArray.class)) {
 			// It has a cause
 			cause = new CRECausedByWrapper((CArray) exception.get("causedBy", t));
 		}

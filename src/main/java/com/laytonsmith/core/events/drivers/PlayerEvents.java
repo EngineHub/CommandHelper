@@ -1517,7 +1517,7 @@ public class PlayerEvents {
 					e.setMessage(Construct.nval(value));
 				}
 				if("recipients".equals(key)) {
-					if(value instanceof CArray) {
+					if(value.isInstanceOf(CArray.class)) {
 						List<MCPlayer> list = new ArrayList<MCPlayer>();
 						for(String index : ((CArray) value).stringKeySet()) {
 							Mixed v = ((CArray) value).get(index, value.getTarget());
@@ -1647,7 +1647,7 @@ public class PlayerEvents {
 					e.setMessage(Construct.nval(value));
 				}
 				if("recipients".equals(key)) {
-					if(value instanceof CArray) {
+					if(value.isInstanceOf(CArray.class)) {
 						List<MCPlayer> list = new ArrayList<>();
 						for(String index : ((CArray) value).stringKeySet()) {
 							Mixed v = ((CArray) value).get(index, value.getTarget());

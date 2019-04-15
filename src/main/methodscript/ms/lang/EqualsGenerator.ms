@@ -1,10 +1,10 @@
 <!
-    strict;
-    name: EqualsGenerator;
-    author: cailin;
-    created: 2019-04-08;
-    description: The file containing the type ms.lang.EqualsGenerator;
-    compilerOptions: UltraStrict;
+	strict;
+	name: EqualsGenerator;
+	author: cailin;
+	created: 2019-04-08;
+	description: The file containing the type ms.lang.EqualsGenerator;
+	compilerOptions: UltraStrict;
 >
 
 /**
@@ -24,7 +24,7 @@
  * be wrong (though not necessarily, which is why the annotation is not automatically inherited.)
  *
  * The default implementation of hashCode provided by this mechanism is based on the implementation suggested in
- * Josh Bloch's ''Effective Java''. Two random, large, prime numbers are picked, a, and b. The hash is set to 
+ * Josh Bloch's *Effective Java*. Two random, large, prime numbers are picked, a, and b. The hash is set to 
  * a, then, for each field that is marked with @{Equals}, the hash is multiplied by b, and then the hash code
  * of the field is added to it (0 is used if the field is null). 
  * This process is repeated, until all fields are considered. In general, this
@@ -32,7 +32,8 @@
  * runs the risk that each time the code is recompiled, the prime values selected will change. This is generally
  * desirable, as the contract for hashCode states that the hashCode across multiple runs of the program are
  * not comparable, nor are the results for the same object across two concurrently running programs. There may
- * be other reasons to wish to use a manual mechanism, however.
+ * be other reasons to wish to use a manual mechanism, however. If the class is immutable, then the constructor(s)
+ * are modified to calculate the value at construction, and the value is simply returned.
  */
 @{Target(CLASSTYPE)}
 public annotation ms.lang.EqualsGenerator {

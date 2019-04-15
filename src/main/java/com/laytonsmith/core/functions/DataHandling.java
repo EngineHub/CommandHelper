@@ -1080,7 +1080,7 @@ public class DataHandling {
 
 			Mixed data = parent.seval(array, env);
 
-			if(!(data instanceof CArray) && !(data instanceof CSlice)) {
+			if(!(data.isInstanceOf(CArray.class)) && !(data instanceof CSlice)) {
 				throw new CRECastException(getName() + " expects an array for parameter 1", t);
 			}
 
@@ -1576,7 +1576,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(!(args[0] instanceof CArray));
+			return CBoolean.get(!(args[0].isInstanceOf(CArray.class)));
 		}
 
 		@Override
@@ -1756,7 +1756,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0] instanceof CArray);
+			return CBoolean.get(args[0].isInstanceOf(CArray.class));
 		}
 
 		@Override
@@ -2825,7 +2825,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CArray) {
+			if(args[0].isInstanceOf(CArray.class)) {
 				return CBoolean.get(((CArray) args[0]).inAssociativeMode());
 			} else {
 				throw new CRECastException(this.getName() + " expects argument 1 to be an array", t);
@@ -2948,7 +2948,7 @@ public class DataHandling {
 			String key;
 			if(args[0].isInstanceOf(CString.class)) {
 				key = args[0].val();
-			} else if(args[0] instanceof CArray) {
+			} else if(args[0].isInstanceOf(CArray.class)) {
 				if(((CArray) args[0]).isAssociative()) {
 					throw new CREIllegalArgumentException("Associative arrays may not be used as keys in " + getName(), t);
 				}
@@ -3019,7 +3019,7 @@ public class DataHandling {
 			String key;
 			if(args[0].isInstanceOf(CString.class)) {
 				key = args[0].val();
-			} else if(args[0] instanceof CArray) {
+			} else if(args[0].isInstanceOf(CArray.class)) {
 				if(((CArray) args[0]).isAssociative()) {
 					throw new CREIllegalArgumentException("Associative arrays may not be used as keys in " + getName(), t);
 				}

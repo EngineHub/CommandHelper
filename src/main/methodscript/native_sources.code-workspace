@@ -8,6 +8,9 @@
 		}
 	],
 	"settings": {
-		"editor.rulers": [120]
+		"editor.rulers": [120],
+		"editor.insertSpaces": false,
+		"editor.detectIndentation": false,
+		"files.trimTrailingWhitespace": true
 	}
 }

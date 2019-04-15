@@ -339,7 +339,7 @@ public class PlayerManagement {
 				Static.AssertPlayerNonNull(p, t);
 				loc = p.getLocation();
 			} else {
-				if(!(args[0] instanceof CArray)) {
+				if(!(args[0].isInstanceOf(CArray.class))) {
 					throw new CRECastException("Expecting an array at parameter 1 of players_in_radius", t);
 				}
 
@@ -492,7 +492,7 @@ public class PlayerManagement {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l;
 			if(args.length <= 2) {
-				if(!(args[args.length - 1] instanceof CArray)) {
+				if(!(args[args.length - 1].isInstanceOf(CArray.class))) {
 					throw new CRECastException("Expecting an array at parameter " + args.length + " of set_ploc", t);
 				}
 				CArray ca = (CArray) args[args.length - 1];
@@ -588,14 +588,14 @@ public class PlayerManagement {
 			HashSet<MCMaterial> trans = null;
 			int transparentIndex = -1;
 			if(args.length == 1) {
-				if(args[0] instanceof CArray) {
+				if(args[0].isInstanceOf(CArray.class)) {
 					transparentIndex = 0;
 				} else {
 					p = Static.GetPlayer(args[0], t);
 				}
 			} else if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
-				if(args[1] instanceof CArray) {
+				if(args[1].isInstanceOf(CArray.class)) {
 					transparentIndex = 1;
 				} else {
 					throw new CREFormatException("An array was expected for argument 2 but received " + args[1], t);
@@ -4505,7 +4505,7 @@ public class PlayerManagement {
 			boolean forced = true;
 
 			if(args.length == 1) {
-				if(args[0] instanceof CArray) {
+				if(args[0].isInstanceOf(CArray.class)) {
 					if(p instanceof MCPlayer) {
 						m = ((MCPlayer) p);
 					}
@@ -4514,10 +4514,10 @@ public class PlayerManagement {
 					throw new CRECastException("Expecting an array in set_pbed_location", t);
 				}
 			} else if(args.length == 2) {
-				if(args[1] instanceof CArray) {
+				if(args[1].isInstanceOf(CArray.class)) {
 					pname = args[0].val();
 					locationIndex = 1;
-				} else if(args[0] instanceof CArray) {
+				} else if(args[0].isInstanceOf(CArray.class)) {
 					if(p instanceof MCPlayer) {
 						m = ((MCPlayer) p);
 					}
@@ -4527,7 +4527,7 @@ public class PlayerManagement {
 					throw new CRECastException("Expecting an array in set_pbed_location", t);
 				}
 			} else if(args.length == 3) {
-				if(args[1] instanceof CArray) {
+				if(args[1].isInstanceOf(CArray.class)) {
 					pname = args[0].val();
 					locationIndex = 1;
 					forced = ArgumentValidation.getBoolean(args[2], t);
@@ -4559,7 +4559,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(m, t);
 
-			if(args[locationIndex] instanceof CArray) {
+			if(args[locationIndex].isInstanceOf(CArray.class)) {
 				CArray ca = (CArray) args[locationIndex];
 				l = ObjectGenerator.GetGenerator().location(ca, m.getWorld(), t);
 				l.add(0, 1, 0); // someone decided to match ploc() here

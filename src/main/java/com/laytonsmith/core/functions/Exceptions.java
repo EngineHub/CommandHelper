@@ -149,7 +149,7 @@ public class Exceptions {
 				Mixed ptypes = that.seval(types, env);
 				if(ptypes.isInstanceOf(CString.class)) {
 					interest.add(FullyQualifiedClassName.forName(ptypes.val(), t, env));
-				} else if(ptypes instanceof CArray) {
+				} else if(ptypes.isInstanceOf(CArray.class)) {
 					CArray ca = (CArray) ptypes;
 					for(int i = 0; i < ca.size(); i++) {
 						interest.add(FullyQualifiedClassName.forName(ca.get(i, t).val(), t, env));

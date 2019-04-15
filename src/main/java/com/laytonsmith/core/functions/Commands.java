@@ -201,7 +201,7 @@ public class Commands {
 				isnew = true;
 				cmd = StaticLayer.GetConvertor().getNewCommand(args[0].val().toLowerCase());
 			}
-			if(args[1] instanceof CArray) {
+			if(args[1].isInstanceOf(CArray.class)) {
 				CArray ops = (CArray) args[1];
 				if(ops.containsKey("permission")) {
 					cmd.setPermission(ops.get("permission", t).val());
@@ -216,7 +216,7 @@ public class Commands {
 					cmd.setPermissionMessage(ops.get("noPermMsg", t).val());
 				}
 				if(ops.containsKey("aliases")) {
-					if(ops.get("aliases", t) instanceof CArray) {
+					if(ops.get("aliases", t).isInstanceOf(CArray.class)) {
 						List<Mixed> ca = ((CArray) ops.get("aliases", t)).asList();
 						List<String> aliases = new ArrayList<String>();
 						for(Mixed c : ca) {

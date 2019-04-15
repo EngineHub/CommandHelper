@@ -1,10 +1,10 @@
 <!
-    strict;
-    name: Regex;
-    author: cailin;
-    created: 2019-03-13;
-    description: The file containing the type ms.lang.util.Version;
-    compilerOptions: UltraStrict;
+	strict;
+	name: Regex;
+	author: cailin;
+	created: 2019-03-13;
+	description: The file containing the type ms.lang.util.Version;
+	compilerOptions: UltraStrict;
 >
 
 /**
@@ -14,31 +14,31 @@
  * Symantic Versioning standard, which can be found here: https://semver.org/
  */
 public class ms.lang.util.Version {
-    public int @major {get;};
-    public int @minor {get;};
-    public int @patch {get;};
-    public string @tag {get;};
+	public int @major {get;};
+	public int @minor {get;};
+	public int @patch {get;};
+	public string @tag {get;};
 
-    public Version(int @major, int @minor, int @patch) {
-        @this->major = @major;
-        @this->minor = @minor;
-        @this->patch = @patch;
-    }
+	public Version(int @major, int @minor, int @patch) {
+		@this->major = @major;
+		@this->minor = @minor;
+		@this->patch = @patch;
+	}
 
-    public Version(int @major, int @minor, int @patch, string @tag) {
-        @this(@major, @minor, @patch);
-        @this->tag = @tag;
-    }
+	public Version(int @major, int @minor, int @patch, string @tag) {
+		@this(@major, @minor, @patch);
+		@this->tag = @tag;
+	}
 
-    public Version string(
-            @{Regex('(\\d+)\\.(\\d+).(\\d+)(?:-(.*))*')}
-            string @version
-    ) {
-        array<string> @parts = reg_match('(\\d+)\\.(\\d+).(\\d+)(?:-(.*))*', @version);
-        @this(integer(@parts[0]), integer(@parts[1]), integer(@parts[2]), @parts[3]);
-    }
+	public Version string(
+			@{Regex('(\\d+)\\.(\\d+).(\\d+)(?:-(.*))*')}
+			string @version
+	) {
+		array<string> @parts = reg_match('(\\d+)\\.(\\d+).(\\d+)(?:-(.*))*', @version);
+		@this(integer(@parts[0]), integer(@parts[1]), integer(@parts[2]), @parts[3]);
+	}
 
-    public string toString() {
-        return("@major.@minor.@patch" . if(@tag, @tag, ""));
-    }
+	public string toString() {
+		return("@major.@minor.@patch" . if(@tag, @tag, ""));
+	}
 }

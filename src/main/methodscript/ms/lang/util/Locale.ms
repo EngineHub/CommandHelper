@@ -1,10 +1,10 @@
 <!
-    strict;
-    name: Locale;
-    author: cailin;
-    created: 2019-03-15;
-    description: The file containing the type ms.lang.util.Locale;
-    compilerOptions: UltraStrict;
+	strict;
+	name: Locale;
+	author: cailin;
+	created: 2019-03-15;
+	description: The file containing the type ms.lang.util.Locale;
+	compilerOptions: UltraStrict;
 >
 
 /**
@@ -12,16 +12,16 @@
  */
 public native class ms.lang.util.Locale {
 
-    // Unconstructable
-    private native Locale();
+	// Unconstructable
+	private native Locale();
 	
-    /**
-     * Returns the system default locale.
-     */
-    public static native Locale getDefault();
+	/**
+	 * Returns the system default locale.
+	 */
+	public static native Locale getDefault();
 
-    /**
-     * Given a locale string, returns the Locale 
-     */
-    public static native Locale fromLocaleString(string @locale);
+	/**
+	 * Given a locale string, returns the Locale 
+	 */
+	public static native Locale fromLocaleString(string @locale);
 }

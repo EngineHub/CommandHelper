@@ -377,7 +377,7 @@ public class Threading {
 				throw new CRENullPointerException("Synchronization object may not be null in " + getName() + "().", t);
 			}
 			Object syncObject;
-			if(cSyncObject instanceof CArray) {
+			if(cSyncObject.isInstanceOf(CArray.class)) {
 				syncObject = cSyncObject;
 			} else {
 				syncObject = cSyncObject.val();

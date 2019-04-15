@@ -429,7 +429,7 @@ public class BasicLogic {
 								return parent.seval(code, env);
 							}
 						}
-					} else if(evalStatement instanceof CArray) {
+					} else if(evalStatement.isInstanceOf(CArray.class)) {
 						for(String index : ((CArray) evalStatement).stringKeySet()) {
 							Mixed inner = ((CArray) evalStatement).get(index, t);
 							if(inner instanceof CSlice) {
@@ -678,7 +678,7 @@ public class BasicLogic {
 					children.set(i, new ParseTree(data, children.get(i).getFileOptions()));
 				}
 				//Now we validate that the values are constant and non-repeating.
-				if(children.get(i).getData() instanceof CArray) {
+				if(children.get(i).getData().isInstanceOf(CArray.class)) {
 					List<Mixed> list = ((CArray) children.get(i).getData()).asList();
 					for(Mixed c : list) {
 						if(c instanceof CSlice) {
@@ -710,7 +710,7 @@ public class BasicLogic {
 				}
 			}
 
-			if((children.size() > 3 || (children.size() > 1 && children.get(1).getData() instanceof CArray))
+			if((children.size() > 3 || (children.size() > 1 && children.get(1).getData().isInstanceOf(CArray.class)))
 					//No point in doing this optimization if there are only 3 args and the case is flat.
 					//Also, doing this check prevents an inifinite loop during optimization.
 					&& (children.size() > 0 && !Construct.IsDynamicHelper(children.get(0).getData()))) {
@@ -721,7 +721,7 @@ public class BasicLogic {
 				for(int i = 1; i < children.size(); i += 2) {
 					Mixed data = children.get(i).getData();
 
-					if(!(data instanceof CArray) || data instanceof CSlice) {
+					if(!(data.isInstanceOf(CArray.class)) || data instanceof CSlice) {
 						//Put it in an array to make the rest of this parsing easier.
 						data = new CArray(t);
 						((CArray) data).push(children.get(i).getData(), t);
@@ -1402,7 +1402,7 @@ public class BasicLogic {
 
 		@Override
 		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CArray && args[1] instanceof CArray) {
+			if(args[0].isInstanceOf(CArray.class) && args[1].isInstanceOf(CArray.class)) {
 				return CBoolean.get(args[0] == args[1]);
 			} else {
 				return new equals().exec(t, environment, args);

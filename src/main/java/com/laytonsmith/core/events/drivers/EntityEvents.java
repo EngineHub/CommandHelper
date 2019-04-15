@@ -355,7 +355,7 @@ public class EntityEvents {
 					return true;
 				}
 				if(key.equals("blocks")) {
-					if(value instanceof CArray) {
+					if(value.isInstanceOf(CArray.class)) {
 						CArray ba = (CArray) value;
 						List<MCBlock> blocks = new ArrayList<MCBlock>();
 						for(String b : ba.stringKeySet()) {
@@ -707,7 +707,7 @@ public class EntityEvents {
 					if(value instanceof CNull) {
 						value = new CArray(value.getTarget());
 					}
-					if(!(value instanceof CArray)) {
+					if(!(value.isInstanceOf(CArray.class))) {
 						throw new CRECastException("drops must be an array, or null", value.getTarget());
 					}
 					e.clearDrops();

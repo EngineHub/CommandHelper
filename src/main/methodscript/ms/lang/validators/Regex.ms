@@ -1,10 +1,10 @@
 <!
-    strict;
-    name: Regex;
-    author: cailin;
-    created: 2019-03-13;
-    description: The file containing the type ms.lang.validators.Regex;
-    compilerOptions: UltraStrict;
+	strict;
+	name: Regex;
+	author: cailin;
+	created: 2019-03-13;
+	description: The file containing the type ms.lang.validators.Regex;
+	compilerOptions: UltraStrict;
 >
 
 /**
@@ -15,9 +15,9 @@
  */
 @{Target(value: DECLARATION, type: string)}
 public annotation ms.lang.validators.Regex {
-    /**
-     * The regex that the string must match.
-     */
-    @{ValidRegex}
-    string @value;
+	/**
+	 * The regex that the string must match.
+	 */
+	@{ValidRegex}
+	string @value;
 }

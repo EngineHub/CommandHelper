@@ -503,7 +503,7 @@ public class InventoryManagement {
 				m = Static.GetPlayer(args[0], t);
 				arg = args[1];
 			}
-			if(!(arg instanceof CArray)) {
+			if(!(arg.isInstanceOf(CArray.class))) {
 				throw new CRECastException("Expecting an array as the last argument.", t);
 			}
 			CArray array = (CArray) arg;
@@ -660,7 +660,7 @@ public class InventoryManagement {
 				return new CInt(0, t);
 			}
 
-			if(c instanceof CArray) {
+			if(c.isInstanceOf(CArray.class)) {
 				ca = (CArray) c;
 				is = ObjectGenerator.GetGenerator().item(ca, t);
 			} else {
@@ -765,7 +765,7 @@ public class InventoryManagement {
 			if(item instanceof CNull) {
 				ca = null;
 				is = StaticLayer.GetItemStack("AIR", 1);
-			} else if(item instanceof CArray) {
+			} else if(item.isInstanceOf(CArray.class)) {
 				ca = (CArray) item;
 				is = ObjectGenerator.GetGenerator().item(ca, t);
 			} else {
@@ -873,7 +873,7 @@ public class InventoryManagement {
 				if(args[1] instanceof CNull) {
 					return new CInt(0, t);
 				}
-				if(args[1] instanceof CArray) {
+				if(args[1].isInstanceOf(CArray.class)) {
 					itemOffset = 1;
 				}
 			} else if(args.length == 3) {
@@ -891,7 +891,7 @@ public class InventoryManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 
-			if(args[itemOffset] instanceof CArray) {
+			if(args[itemOffset].isInstanceOf(CArray.class)) {
 				is = ObjectGenerator.GetGenerator().item(args[itemOffset], t);
 			} else if(args.length > 1) {
 				is = Static.ParseItemNotation(null, args[itemOffset].val(), Static.getInt32(args[itemOffset + 1], t), t);
@@ -985,7 +985,7 @@ public class InventoryManagement {
 				if(args[1] instanceof CNull) {
 					return new CInt(0, t);
 				}
-				if(args[1] instanceof CArray) {
+				if(args[1].isInstanceOf(CArray.class)) {
 					itemOffset = 1;
 				}
 			} else if(args.length == 3) {
@@ -999,7 +999,7 @@ public class InventoryManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 
-			if(args[itemOffset] instanceof CArray) {
+			if(args[itemOffset].isInstanceOf(CArray.class)) {
 				ca = (CArray) args[itemOffset];
 				is = ObjectGenerator.GetGenerator().item(ca, t);
 			} else {
@@ -1108,7 +1108,7 @@ public class InventoryManagement {
 				if(args[1] instanceof CNull) {
 					return new CInt(0, t);
 				}
-				if(args[1] instanceof CArray) {
+				if(args[1].isInstanceOf(CArray.class)) {
 					itemOffset = 1;
 				}
 			} else if(args.length == 3) {
@@ -1126,7 +1126,7 @@ public class InventoryManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 
-			if(args[itemOffset] instanceof CArray) {
+			if(args[itemOffset].isInstanceOf(CArray.class)) {
 				is = ObjectGenerator.GetGenerator().item(args[itemOffset], t);
 			} else {
 				is = Static.ParseItemNotation(null, args[itemOffset].val(), Static.getInt32(args[itemOffset + 1], t), t);
@@ -1217,7 +1217,7 @@ public class InventoryManagement {
 				if(args[1] instanceof CNull) {
 					return new CInt(0, t);
 				}
-				if(args[1] instanceof CArray) {
+				if(args[1].isInstanceOf(CArray.class)) {
 					itemOffset = 1;
 				}
 			} else if(args.length == 3) {
@@ -1231,7 +1231,7 @@ public class InventoryManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 
-			if(args[itemOffset] instanceof CArray) {
+			if(args[itemOffset].isInstanceOf(CArray.class)) {
 				ca = (CArray) args[itemOffset];
 				is = ObjectGenerator.GetGenerator().item(ca, t);
 			} else {
@@ -1356,7 +1356,7 @@ public class InventoryManagement {
 				arg = args[0];
 			}
 
-			if(!(arg instanceof CArray)) {
+			if(!(arg.isInstanceOf(CArray.class))) {
 				throw new CRECastException("Expecting an array as argument " + (args.length == 1 ? "1" : "2"), t);
 			}
 
@@ -1965,7 +1965,7 @@ public class InventoryManagement {
 			MCInventory inventory = InventoryManagement.GetInventory(args[0], null, t);
 			Integer size = inventory.getSize();
 
-			if(!(args[1] instanceof CArray)) {
+			if(!(args[1].isInstanceOf(CArray.class))) {
 				throw new CRECastException("Expecting an array as argument 2", t);
 			}
 
@@ -2615,7 +2615,7 @@ public class InventoryManagement {
 			}
 
 			if(args.length == 4) {
-				if(!(args[3] instanceof CArray)) {
+				if(!(args[3].isInstanceOf(CArray.class))) {
 					throw new CRECastException("Inventory argument not an array in " + getName(), t);
 				}
 				CArray array = (CArray) args[3];
@@ -2726,7 +2726,7 @@ public class InventoryManagement {
 	 */
 	private static MCInventory GetInventory(Mixed specifier, MCWorld w, Target t) {
 		MCInventory inv;
-		if(specifier instanceof CArray) {
+		if(specifier.isInstanceOf(CArray.class)) {
 			MCLocation l = ObjectGenerator.GetGenerator().location(specifier, w, t);
 			inv = StaticLayer.GetConvertor().GetLocationInventory(l);
 			if(inv == null) {

@@ -683,7 +683,7 @@ public class InventoryEvents {
 				}
 
 				if(key.equalsIgnoreCase("expcosts")) {
-					if(value instanceof CArray) {
+					if(value.isInstanceOf(CArray.class)) {
 						CArray cExpCosts = (CArray) value;
 						if(!cExpCosts.inAssociativeMode()) {
 							int[] expCosts = e.getExpLevelCostsOffered();
@@ -969,7 +969,7 @@ public class InventoryEvents {
 					return true;
 				}
 				if("matrix".equals(key)) {
-					if(value instanceof CArray) {
+					if(value.isInstanceOf(CArray.class)) {
 						CArray va = (CArray) value;
 						MCItemStack[] old = e.getInventory().getMatrix();
 						MCItemStack[] repl = new MCItemStack[old.length];

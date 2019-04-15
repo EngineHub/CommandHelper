@@ -2371,7 +2371,8 @@ public final class MethodScriptCompiler {
 				if(branches.size() != children.size()) {
 					throw new Error(f.getName() + " does not properly implement isBranch. It does not return a value"
 							+ " with the same count as the actual children. Expected: " + children.size() + ";"
-									+ " Actual: " + branches.size());
+							+ " Actual: " + branches.size() + "; Code target causing this: "
+							+ tree.getTarget());
 				}
 			} else {
 				branches = new ArrayList<>(children.size());

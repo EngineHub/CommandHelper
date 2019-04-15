@@ -664,7 +664,7 @@ public class Echoes {
 			}
 
 			// Handle "broadcast(message, recipientsArray)".
-			if(args[1] instanceof CArray) {
+			if(args[1].isInstanceOf(CArray.class)) {
 
 				// Get the CArray and validate that it is non-associative.
 				CArray array = (CArray) args[1];

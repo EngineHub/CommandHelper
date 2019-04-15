@@ -1406,7 +1406,7 @@ public class StringHandling {
 			}
 
 			List<Mixed> flattenedArgs = new ArrayList<>();
-			if(numArgs == 3 && args[2] instanceof CArray) {
+			if(numArgs == 3 && args[2].isInstanceOf(CArray.class)) {
 				if(((CArray) args[2]).inAssociativeMode()) {
 					throw new CRECastException("If the second argument to " + getName() + " is an array, it may not be associative.", t);
 				} else {
@@ -2399,7 +2399,7 @@ public class StringHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CArray) {
+			if(args[0].isInstanceOf(CArray.class)) {
 				CArray array = Static.getArray(args[0], t);
 				return new CSecureString(array, t);
 			} else {

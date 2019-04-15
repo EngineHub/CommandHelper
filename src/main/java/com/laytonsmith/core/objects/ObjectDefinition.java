@@ -5,11 +5,16 @@ import com.laytonsmith.PureUtilities.ObjectHelpers.Equals;
 import com.laytonsmith.PureUtilities.ObjectHelpers.HashCode;
 import com.laytonsmith.PureUtilities.ObjectHelpers.ToString;
 import com.laytonsmith.PureUtilities.SmartComment;
+import com.laytonsmith.core.UnqualifiedClassName;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.natives.interfaces.Commentable;
 import com.laytonsmith.core.natives.interfaces.MAnnotation;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -39,20 +44,25 @@ public class ObjectDefinition implements Commentable {
 	@ToString
 	private final CClassType type;
 	@ToString
-	private final Set<CClassType> superclasses;
+	private final Set<UnqualifiedClassName> superclasses;
 	@ToString
-	private final Set<CClassType> interfaces;
+	private final Set<UnqualifiedClassName> interfaces;
 	private final CClassType containingClass;
 	private final Target definitionTarget;
 	private final Map<String, List<ElementDefinition>> properties;
 	private final SmartComment classComment;
 	private final List<Object> genericParameters;
+	private final Class<? extends Mixed> nativeClass;
+
+	private Set<CClassType> qualifiedSuperclasses;
+	private Set<CClassType> qualifiedInterfaces;
 
 	public ObjectDefinition(AccessModifier accessModifier, Set<ObjectModifier> objectModifiers, ObjectType objectType,
 			CClassType type,
-			Set<CClassType> superclasses, Set<CClassType> interfaces, CClassType containingClass, Target t,
+			Set<UnqualifiedClassName> superclasses, Set<UnqualifiedClassName> interfaces,
+			CClassType containingClass, Target t,
 			Map<String, List<ElementDefinition>> properties, List<MAnnotation> annotations,
-			SmartComment classComment, List<Object> genericParameters) {
+			SmartComment classComment, List<Object> genericParameters, Class<? extends Mixed> nativeClass) {
 		this.accessModifier = accessModifier;
 		this.objectModifiers = objectModifiers;
 		this.objectType = objectType;
@@ -65,43 +75,8 @@ public class ObjectDefinition implements Commentable {
 		this.annotations = annotations;
 		this.classComment = classComment;
 		this.genericParameters = genericParameters;
+		this.nativeClass = nativeClass;
 	}
-
-//	@SuppressWarnings("LocalVariableHidesMemberVariable")
-//	public ObjectDefinition(FullyQualifiedClassName fqcn) throws ClassNotFoundException {
-//		// TODO: This is bad, because the object definition should be based on the
-//		// code in the methodscript folder, not based on the classes defined in java.
-//		// The classes definitions should be loaded based on those, and for native classes,
-//		// the appropriate Java class should be loaded, not the other way around.
-//		Mixed m = NativeTypeList.getInvalidInstanceForUse(fqcn);
-//		AccessModifier accessModifier = m.getAccessModifier();
-//		Set<ObjectModifier> objectModifiers = m.getObjectModifiers();
-//		ObjectType objectType = m.getObjectType();
-//		CClassType type = m.typeof();
-//		CClassType[] superclasses = m.getSuperclasses();
-//		CClassType[] interfaces = m.getInterfaces();
-//		CClassType containingClass = m.getContainingClass();
-//		Target t = new Target(0, new File("/Natives:/" + type.getFQCN().getFQCN().replace(".", "/") + ".ms"), 0);
-//		List<MAnnotation> annotations = null; // m.getAnnotations();
-//		this.accessModifier = accessModifier;
-//		this.objectModifiers = objectModifiers;
-//		this.objectType = objectType;
-//		this.type = type;
-//		this.superclasses = superclasses;
-//		this.interfaces = interfaces;
-//		this.containingClass = containingClass;
-//		this.definitionTarget = t;
-//		// For now, we just load the methods based on the @ExposedProperty annotation. But in general, in the
-//		// future, the native methods will be compiled from actual MethodScript code, and only the methods that
-//		// are defined in the code as native will be loaded from the actual Java code. However, getting to that
-//		// step requires implementing the compiler mechanisms for reading in class definitions, which will come
-//		// later. This code will be mostly re-useable anyhow, because native methods will still need to be defined
-//		// and loaded in the same way, it's just that they might be accompanied by code that was defined purely
-//		// in MethodScript.
-//		// TODO: define this
-//		this.properties = new HashMap<>();
-//		this.annotations = annotations;
-//	}
 
 	public String getClassName() {
 		return this.type.getFQCN().getFQCN();
@@ -179,12 +154,62 @@ public class ObjectDefinition implements Commentable {
 		return type.getFQCN().getFQCN();
 	}
 
+	private volatile boolean classesQualified = false;
+	/**
+	 * Qualifies the unqualified class names used internally, and allows {@link #getSuperclasses()} and
+	 * {@link #getInterfaces()} to be used. If this method is not called first, those methods will throw an Error.
+	 * Calling this method more than once does nothing, but is not an error. This normally should be done as part of
+	 * the compilation process.
+	 * @param env
+	 * @throws ConfigCompileGroupException If one or more of the classes couldn't be found.
+	 */
+	public void qualifyClasses(Environment env) throws ConfigCompileGroupException {
+		if(classesQualified) {
+			return;
+		}
+		synchronized(this) {
+			if(classesQualified) {
+				return;
+			}
+			Set<ConfigCompileException> uhohs = new HashSet<>();
+			@SuppressWarnings("LocalVariableHidesMemberVariable")
+			Set<CClassType> superclasses = new HashSet<>();
+			@SuppressWarnings("LocalVariableHidesMemberVariable")
+			Set<CClassType> interfaces = new HashSet<>();
+			for(UnqualifiedClassName ucn : this.superclasses) {
+				try {
+					superclasses.add(CClassType.get(ucn.getFQCN(env)));
+				} catch (ClassNotFoundException ex) {
+					uhohs.add(new ConfigCompileException("Could not find " + ucn.getUnqualifiedClassName(),
+							ucn.getTarget(), ex));
+				}
+			}
+			for(UnqualifiedClassName ucn : this.interfaces) {
+				try {
+					interfaces.add(CClassType.get(ucn.getFQCN(env)));
+				} catch (ClassNotFoundException ex) {
+					uhohs.add(new ConfigCompileException("Could not find " + ucn.getUnqualifiedClassName(),
+							ucn.getTarget(), ex));
+				}
+			}
+			if(!uhohs.isEmpty()) {
+				throw new ConfigCompileGroupException(uhohs);
+			}
+			this.qualifiedSuperclasses = superclasses;
+			this.qualifiedInterfaces = interfaces;
+			classesQualified = true;
+		}
+	}
+
 	/**
 	 * Returns a List of superclasses.
 	 * @return
 	 */
 	public Set<CClassType> getSuperclasses() {
-		return new HashSet<>(superclasses);
+		if(qualifiedSuperclasses == null) {
+			throw new Error("qualifyClasses() must be called before getSuperclasses can be used (" + getType() + ")");
+		}
+		return new HashSet<>(qualifiedSuperclasses);
 	}
 
 	/**
@@ -192,7 +217,10 @@ public class ObjectDefinition implements Commentable {
 	 * @return
 	 */
 	public Set<CClassType> getInterfaces() {
-		return new HashSet<>(interfaces);
+		if(qualifiedSuperclasses == null) {
+			throw new Error("qualifyClasses() must be called before getInterfaces can be used (" + getType() + ")");
+		}
+		return new HashSet<>(qualifiedInterfaces);
 	}
 
 	/**

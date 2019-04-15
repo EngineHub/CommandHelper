@@ -510,7 +510,7 @@ public class Debug {
 //						throw new ConfigRuntimeException(args[0].val() + " is not a valid filter type. The filter log has not been changed.", CREFormatException.class, t);
 //					}
 //				}
-//			} else if(args[0] instanceof CArray) {
+//			} else if(args[0].isInstanceOf(CArray.class)) {
 //				for(String c : ((CArray) args[0]).keySet()) {
 //					try {
 //						set.add(Event.Type.valueOf(((CArray) args[0]).get(c, t).val().toUpperCase()));
@@ -575,7 +575,7 @@ public class Debug {
 //			if(args[0].isInstanceOf(CString.class)) {
 //				EVENT_PLUGIN_FILTER.clear();
 //				EVENT_PLUGIN_FILTER.add(args[0].val().toUpperCase());
-//			} else if(args[0] instanceof CArray) {
+//			} else if(args[0].isInstanceOf(CArray.class)) {
 //				for(String c : ((CArray) args[0]).keySet()) {
 //					EVENT_PLUGIN_FILTER.add(((CArray) args[0]).get(c, t).val().toUpperCase());
 //				}

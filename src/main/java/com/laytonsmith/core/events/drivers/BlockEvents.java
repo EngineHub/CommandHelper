@@ -303,7 +303,7 @@ public class BlockEvents {
 
 			if(key.equals("drops")) {
 				List<MCItemStack> drops = new ArrayList<>();
-				if(value instanceof CArray) {
+				if(value.isInstanceOf(CArray.class)) {
 					CArray arr = (CArray) value;
 					for(int i = 0; i < arr.size(); i++) {
 						CArray item = (CArray) arr.get(i, value.getTarget());
@@ -810,7 +810,7 @@ public class BlockEvents {
 			MCBlockFromToEvent e = (MCBlockFromToEvent) event;
 			if(key.equals("block")) {
 				MCBlock block = e.getBlock();
-				if(value instanceof CArray) {
+				if(value.isInstanceOf(CArray.class)) {
 					CArray blockArray = (CArray) value;
 					if(blockArray.containsKey("name")) {
 						Mixed name = blockArray.get("name", value.getTarget());
@@ -866,7 +866,7 @@ public class BlockEvents {
 			}
 			if(key.equals("toblock")) {
 				MCBlock block = e.getToBlock();
-				if(value instanceof CArray) {
+				if(value.isInstanceOf(CArray.class)) {
 					CArray blockArray = (CArray) value;
 					if(blockArray.containsKey("name")) {
 						Mixed name = blockArray.get("name", value.getTarget());
@@ -997,7 +997,7 @@ public class BlockEvents {
 
 			// Allow changing everything at once.
 			if(key.equals("text")) {
-				if(!(value instanceof CArray)) {
+				if(!(value.isInstanceOf(CArray.class))) {
 					return false;
 				}
 

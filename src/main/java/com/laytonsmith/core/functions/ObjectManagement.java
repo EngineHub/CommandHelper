@@ -11,6 +11,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.UnqualifiedClassName;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
@@ -50,9 +51,10 @@ import java.util.stream.Collectors;
 /**
  *
  */
-public class Objects {
+public class ObjectManagement {
 	public static String docs() {
-		return "Provides functions for dealing with objects";
+		return "Provides functions for creating and using objects. None of these methods should normally be used,"
+				+ " all of them provide easier to use compiler support.";
 	}
 
 	@api
@@ -208,16 +210,16 @@ public class Objects {
 					= FullyQualifiedClassName.forFullyQualifiedClass(evaluateStringNoNull(nodes[3], t).val());
 
 			// 4 - Superclasses
-			Set<CClassType> superclasses = new HashSet<>();
+			Set<UnqualifiedClassName> superclasses = new HashSet<>();
 			// TODO
 
 			if(superclasses.isEmpty()) {
 				// Everything extends Mixed.
-				superclasses.add(Mixed.TYPE);
+				superclasses.add(Mixed.TYPE.getFQCN().getUCN());
 			}
 
 			// 5 - Interfaces
-			Set<CClassType> interfaces = new HashSet<>();
+			Set<UnqualifiedClassName> interfaces = new HashSet<>();
 			// TODO
 
 			// 6- Enum list
@@ -240,6 +242,7 @@ public class Objects {
 			// TODO
 
 			// 9 - containing class
+			// The containing class must have been created first, so we can just jump to using CClassType already.
 			CClassType containingClass;
 			if(nodes[9].getData() instanceof CNull) {
 				containingClass = null;
@@ -297,7 +300,8 @@ public class Objects {
 					elementDefinitions,
 					annotations,
 					classComment,
-					genericDeclarations);
+					genericDeclarations,
+					nativeClass);
 			if(env == null) {
 				throw new Error("Environment may not be null");
 			}
@@ -325,12 +329,24 @@ public class Objects {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{11};
+			return new Integer[]{12};
 		}
 
 		@Override
 		public String docs() {
-			return "void {...} Defines a new object. Not meant for normal use.";
+			return "void {AccessModifier accessModifier,"
+					+ " array<ObjectModifier> objectModifiers,"
+					+ " ObjectType objectType,"
+					+ " string objectName,"
+					+ " array<string> superclasses,"
+					+ " array<string> interfaces,"
+					+ " ? enumList,"
+					+ " map<string, element> elementList,"
+					+ " array<? extends annotation> annotations,"
+					+ " ClassType containingClass,"
+					+ " string classComment,"
+					+ " array<?> genericParameters"
+					+ "} Defines a new object. Not meant for normal use.";
 		}
 
 		@Override
