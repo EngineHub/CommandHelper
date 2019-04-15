@@ -130,7 +130,7 @@ public class NativeTypeList {
 	 * map as our "null" value.
 	 */
 	private static final Class<? extends Mixed> NULL_CLASS_OBJECT = NullClass.class;
-	
+
 	/**
 	 * Returns the java class for the given MethodScript object name. This cannot return anything of a type more
 	 * specific than Mixed. For classes that represent enums, an anonymous subclass of {@link MEnumType} will be
