@@ -513,4 +513,11 @@ public class DataHandlingTest {
 	public void testClosureReturnsFromExecute() throws Exception {
 		assertEquals("3", SRun("execute(closure(return(3)))", fakePlayer));
 	}
+
+
+	@Test
+	public void testEmptyClosureFunction() throws Exception {
+		// This should not throw an exception
+		SRun("closure()", null);
+	}
 }

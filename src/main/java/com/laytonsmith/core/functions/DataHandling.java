@@ -3188,6 +3188,10 @@ public class DataHandling {
 		@Override
 		public List<Boolean> isBranch(List<ParseTree> children) {
 			List<Boolean> ret = new ArrayList<>(children.size());
+			if(children.isEmpty()) {
+				// This is the "closure()" usage, and does not have any branches.
+				return ret;
+			}
 			for(int i = 0; i < children.size() - 1; i++) {
 				ret.add(false);
 			}

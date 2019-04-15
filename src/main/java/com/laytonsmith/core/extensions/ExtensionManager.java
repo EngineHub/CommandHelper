@@ -437,7 +437,7 @@ public class ExtensionManager {
 
 		// Loop over the classes, instantiate and register functions and events,
 		// and store the instances in their trackers.
-		classes.stream().parallel().forEach((klass) -> {
+		classes.stream().forEach((klass) -> {
 			URL url = klass.getContainer();
 
 			if(cd.doesClassExtend(klass, Event.class)
