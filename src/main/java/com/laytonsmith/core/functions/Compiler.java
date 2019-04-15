@@ -244,6 +244,9 @@ public class Compiler {
 						//code will grab it correctly that way.
 						list.add(i + 2, ac);
 					}
+					if(list.size() <= i + 2) {
+						throw new ConfigCompileException("Unexpected end of statement", list.get(0).getTarget());
+					}
 					rhs = list.get(i + 2);
 					assign.addChild(lhs);
 					assign.addChild(rhs);
