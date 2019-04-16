@@ -96,3 +96,15 @@ keywords are not implemented in the compiler, they are added to a list, and the 
 processes them generically. This leads to increased ability to expand functionality,
 and makes it easier to add new keywords to the language, without having to worry about
 whether this will break any other code.
+
+== Correctness and ease of use come before performance ==
+
+This is not to say that performance is not important, but it is to say that it is less
+of a priority than ensuring that things are correct, and that they are easy to use.
+
+Often times, this is not actually mutually exclusive, you can usually make things correct,
+easy to use, and perform well, but if one must sacrifice one or the other, the performance
+should be sacrificed. More obscure, but performant mechanisms can be added later, for the
+cases where performance really matters, but the default should be correct and easy to use.
+Having a compiler can very often provide a way to optimize automatically, take the easy
+to use input, and output a more performant, harder to read version.

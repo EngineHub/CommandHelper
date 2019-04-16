@@ -232,6 +232,9 @@ public class Compiler {
 								//Add the next two children, (the symbol then the item)
 								//and continue.
 								ac.addChild(list.get(index));
+								if(list.size() <= index + 1) {
+									throw new ConfigCompileException("Unexpected end of statement", list.get(index).getTarget());
+								}
 								ac.addChild(list.get(index + 1));
 								list.remove(index);
 								list.remove(index);
@@ -245,7 +248,7 @@ public class Compiler {
 						list.add(i + 2, ac);
 					}
 					if(list.size() <= i + 2) {
-						throw new ConfigCompileException("Unexpected end of statement", list.get(0).getTarget());
+						throw new ConfigCompileException("Unexpected end of statement", list.get(i).getTarget());
 					}
 					rhs = list.get(i + 2);
 					assign.addChild(lhs);
