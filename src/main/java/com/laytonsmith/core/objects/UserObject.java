@@ -3,7 +3,6 @@ package com.laytonsmith.core.objects;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.Method;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
@@ -65,7 +64,7 @@ public class UserObject implements Mixed {
 			if(parent == null) {
 				fieldTable.put(e.getKey(), CNull.UNDEFINED);
 			} else {
-				Mixed value = parent.eval(ed.getDefaultValue(), env);
+				Mixed value = parent.eval(ed.getTree(), env);
 				fieldTable.put(e.getKey(), value);
 			}
 		}

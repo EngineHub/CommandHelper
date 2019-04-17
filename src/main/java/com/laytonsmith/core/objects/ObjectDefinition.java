@@ -205,6 +205,16 @@ public class ObjectDefinition implements Commentable {
 							ucn.getTarget(), ex));
 				}
 			}
+			for(List<ElementDefinition> elementGroup : properties.values()) {
+				for(ElementDefinition element : elementGroup) {
+					try {
+						element.qualifyType(env);
+					} catch (ClassNotFoundException ex) {
+						uhohs.add(new ConfigCompileException("Could not find " + element.getUCN(),
+								element.getTarget(), ex));
+					}
+				}
+			}
 			if(!uhohs.isEmpty()) {
 				throw new ConfigCompileGroupException(uhohs);
 			}

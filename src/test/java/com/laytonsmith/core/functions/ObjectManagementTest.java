@@ -396,6 +396,11 @@ public class ObjectManagementTest {
 				env);
 	}
 
+	@Test
+	public void testFieldCreation() throws Exception {
+		
+	}
+
 
 
 }

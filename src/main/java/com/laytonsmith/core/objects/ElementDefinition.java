@@ -1,8 +1,13 @@
 package com.laytonsmith.core.objects;
 
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.UnqualifiedClassName;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.lang.reflect.Field;
 import java.util.Objects;
@@ -14,17 +19,20 @@ import java.util.Set;
  * should always be provided, a Callable. There is special support for native types, in which a Method/Field is
  * provided.
  */
-public class ElementDefinition {
+@typeof("ms.lang.ElementDefinition")
+public abstract class ElementDefinition extends Construct {
 	private final AccessModifier accessModifier;
 	private final Set<ElementModifier> elementModifiers;
-	private final CClassType definedIn;
-	private final CClassType type;
+	private CClassType definedIn;
+	private final UnqualifiedClassName unqualifiedDefinedIn;
+	private CClassType type;
+	private final UnqualifiedClassName unqualifiedType;
 	private final String name;
+	private final Target t;
 
-	private final ParseTree defaultValue;
+	private final ParseTree tree;
 	private java.lang.reflect.Method nativeMethod = null;
 	private Field nativeField = null;
-	private final com.laytonsmith.core.Method method;
 
 	/**
 	 * Constructs a new element definition. If this is a native method or field,
@@ -37,41 +45,48 @@ public class ElementDefinition {
 	 * for methods, java null for constructors)
 	 * @param name The name of the element (should start with @ if this is a
 	 * variable declaration).
-	 * @param defaultValue The default value, if this is a field, and null if this
+	 * @param tree The default value, if this is a field, and null if this
 	 * is a method. If the default value is MethodScript null, or is not set, you MUST
 	 * send either {@link CNull#NULL} or {@link CNull#UNDEFINED}, rather than java
 	 * null.
 	 * @param method The method, if this is a method.
+	 * @param field THe field, if this is a field.
 	 * @throws NullPointerException If one of the required fields is null
 	 * @throws IllegalArgumentException If both defaultValue and method are non-null.
 	 */
 	public ElementDefinition(
 			AccessModifier accessModifier,
 			Set<ElementModifier> elementModifiers,
-			CClassType definedIn,
-			CClassType type,
+			UnqualifiedClassName definedIn,
+			UnqualifiedClassName type,
 			String name,
-			ParseTree defaultValue,
-			com.laytonsmith.core.Method method
+			ParseTree tree,
+			String signature,
+			ConstructType constructType,
+			Target t
 	) {
+		super(signature, constructType, t);
 		Objects.requireNonNull(accessModifier);
 		Objects.requireNonNull(elementModifiers);
 		Objects.requireNonNull(name);
-		if(defaultValue == null && method == null) {
-			throw new NullPointerException("Either defaultValue must be"
-					+ " set, or method must be set.");
-		}
-		if(defaultValue != null && method != null) {
-			throw new IllegalArgumentException("Both default value and"
-					+ " method cannot be set, one must be null.");
-		}
+
 		this.accessModifier = accessModifier;
 		this.elementModifiers = elementModifiers;
-		this.definedIn = definedIn;
-		this.type = type;
+		this.unqualifiedDefinedIn = definedIn;
+		this.unqualifiedType = type;
 		this.name = name;
-		this.defaultValue = defaultValue;
-		this.method = method;
+		this.tree = tree;
+		this.t = t;
+	}
+
+	/**
+	 * Qualifies the type. Must be called before {@link #getType()} can be used.
+	 * @param env
+	 * @throws java.lang.ClassNotFoundException
+	 */
+	public void qualifyType(Environment env) throws ClassNotFoundException {
+		this.type = CClassType.get(unqualifiedType.getFQCN(env));
+		this.definedIn = CClassType.get(unqualifiedDefinedIn.getFQCN(env));
 	}
 
 	/**
@@ -138,20 +153,36 @@ public class ElementDefinition {
 	 * @return
 	 */
 	public CClassType getType() {
+		if(type == null) {
+			throw new Error("qualifyType must be called before getType can be used");
+		}
 		return type;
+	}
+
+	/**
+	 * Returns the unqualified type of this object. This is never an error to call, unlike {@link #getType()}.
+	 * @return
+	 */
+	public UnqualifiedClassName getUCN() {
+		return unqualifiedType;
 	}
 
 	/**
 	 * The name of the element.
 	 * @return
 	 */
-	public String getName() {
+	public String getElementName() {
 		return name;
+	}
+
+	public Target getTarget() {
+		return t;
 	}
 
 	/**
 	 * The default value of the element. This will be {@link CNull#UNDEFINED} if this was a property of the class with
-	 * no assignment at all, and {@link CNull#NULL} if it was defined as null. For methods, this will be java null.
+	 * no assignment at all, and {@link CNull#NULL} if it was defined as null. For methods, this will be the method
+	 * code itself.
 	 * <p>
 	 * Because this is the prototype of the element, we can't simply define this as a Mixed, we need
 	 * to evaluate the prototypical value when we instantiate the object. Therefore, the ParseTree is stored here. For
@@ -162,8 +193,8 @@ public class ElementDefinition {
 	 * use {@link #isNative()} to determine that for sure.
 	 * @return
 	 */
-	public ParseTree getDefaultValue() {
-		return defaultValue;
+	public ParseTree getTree() {
+		return tree;
 	}
 
 	/**
@@ -187,12 +218,34 @@ public class ElementDefinition {
 	}
 
 	/**
-	 * Returns the MethodScript Method reference. If this is a field, this
-	 * will be null.
+	 * Returns the class in which this element is defined. This may be null. {@link #qualifyType} must be called
+	 * before this can be used.
 	 * @return
 	 */
-	public com.laytonsmith.core.Method getMethod() {
-		return method;
+	public CClassType getDefinedIn() {
+		if(this.definedIn == null && this.unqualifiedDefinedIn != null) {
+			throw new Error("qualifyType must be called before getDefinedIn can be called");
+		}
+		return this.definedIn;
 	}
+
+	@Override
+	public boolean isDynamic() {
+		return false;
+	}
+
+	@Override
+	public CClassType[] getSuperclasses() {
+		return new CClassType[]{Mixed.TYPE};
+	}
+
+	@Override
+	public CClassType[] getInterfaces() {
+		return CClassType.EMPTY_CLASS_ARRAY;
+	}
+
+
+
+
 
 }

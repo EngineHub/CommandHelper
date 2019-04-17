@@ -36,6 +36,8 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.AccessModifier;
 import com.laytonsmith.core.objects.DuplicateObjectDefintionException;
 import com.laytonsmith.core.objects.ElementDefinition;
+import com.laytonsmith.core.objects.ElementModifier;
+import com.laytonsmith.core.objects.Field;
 import com.laytonsmith.core.objects.ObjectDefinition;
 import com.laytonsmith.core.objects.ObjectDefinitionNotFoundException;
 import com.laytonsmith.core.objects.ObjectDefinitionTable;
@@ -58,6 +60,64 @@ public class ObjectManagement {
 	public static String docs() {
 		return "Provides functions for creating and using objects. None of these methods should normally be used,"
 				+ " all of them provide easier to use compiler support.";
+	}
+
+	/**
+	 * We can't use parent in the execs function, because we are expected to work at compile time. But
+	 * that also means we can't use dynamic elements, like array. Though that is ok, so long as the
+	 * array is hardcoded. But it also means we have to manually compile the array.
+	 * @param data
+	 * @param t
+	 * @return
+	 */
+	private static Mixed evaluateArray(ParseTree data, Target t) {
+		if(data.getData() instanceof CNull) {
+			return CNull.NULL;
+		}
+		CArray n = new CArray(t);
+		if(!(data.getData() instanceof CFunction) || !data.getData().val().equals("array")) {
+			throw new CREClassDefinitionError("Expected array, but found " + data.getData() + " instead", t);
+		}
+		for(ParseTree child : data.getChildren()) {
+			if(child.isDynamic()) {
+				throw new CREClassDefinitionError("Dynamic elements may not be used in a class definition", t);
+			}
+			n.push(child.getData(), t);
+		}
+		return n;
+	}
+
+	private static CArray evaluateArrayNoNull(ParseTree data, Target t) {
+		Mixed d = evaluateArray(data, t);
+		if(d instanceof CNull) {
+			throw new CREClassDefinitionError("Unexpected null value, expected an array", t);
+		}
+		return (CArray) d;
+	}
+
+	private static Mixed evaluateString(ParseTree data, Target t) {
+		if(data.getData() instanceof CNull) {
+			return CNull.NULL;
+		}
+		if(!(data.getData().isInstanceOf(CString.class))) {
+			throw new CREClassDefinitionError("Expected a string, but found " + data.getData() + " instead", t);
+		}
+		return data.getData();
+	}
+	private static CString evaluateStringNoNull(ParseTree data, Target t) {
+		Mixed d = evaluateString(data, t);
+		if(d instanceof CNull) {
+			throw new CREClassDefinitionError("Expected a string, but found null instead", t);
+		}
+		return (CString) d;
+	}
+
+	private static Mixed evaluateMixed(ParseTree data, Target t) {
+		if(data.isDynamic()) {
+			throw new CREClassDefinitionError("Expected a non-dynamic value, but " + data.getData()
+					+ " was found.", t);
+		}
+		return data.getData();
 	}
 
 	@api
@@ -135,64 +195,6 @@ public class ObjectManagement {
 			throw new Error();
 		}
 
-		/**
-		 * We can't use parent in the execs function, because we are expected to work at compile time. But
-		 * that also means we can't use dynamic elements, like array. Though that is ok, so long as the
-		 * array is hardcoded. But it also means we have to manually compile the array.
-		 * @param data
-		 * @param t
-		 * @return
-		 */
-		private Mixed evaluateArray(ParseTree data, Target t) {
-			if(data.getData() instanceof CNull) {
-				return CNull.NULL;
-			}
-			CArray n = new CArray(t);
-			if(!(data.getData() instanceof CFunction) || !data.getData().val().equals("array")) {
-				throw new CREClassDefinitionError("Expected array, but found " + data.getData() + " instead", t);
-			}
-			for(ParseTree child : data.getChildren()) {
-				if(child.isDynamic()) {
-					throw new CREClassDefinitionError("Dynamic elements may not be used in a class definition", t);
-				}
-				n.push(child.getData(), t);
-			}
-			return n;
-		}
-
-		private CArray evaluateArrayNoNull(ParseTree data, Target t) {
-			Mixed d = evaluateArray(data, t);
-			if(d instanceof CNull) {
-				throw new CREClassDefinitionError("Unexpected null value, expected an array", t);
-			}
-			return (CArray) d;
-		}
-
-		private Mixed evaluateString(ParseTree data, Target t) {
-			if(data.getData() instanceof CNull) {
-				return CNull.NULL;
-			}
-			if(!(data.getData().isInstanceOf(CString.class))) {
-				throw new CREClassDefinitionError("Expected a string, but found " + data.getData() + " instead", t);
-			}
-			return data.getData();
-		}
-		private CString evaluateStringNoNull(ParseTree data, Target t) {
-			Mixed d = evaluateString(data, t);
-			if(d instanceof CNull) {
-				throw new CREClassDefinitionError("Expected a string, but found null instead", t);
-			}
-			return (CString) d;
-		}
-
-		private Mixed evaluateMixed(ParseTree data, Target t) {
-			if(data.isDynamic()) {
-				throw new CREClassDefinitionError("Expected a non-dynamic value, but " + data.getData()
-						+ " was found.", t);
-			}
-			return data.getData();
-		}
-
 		@Override
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			// 0 - Access Modifier
@@ -200,9 +202,8 @@ public class ObjectManagement {
 					AccessModifier.class, t);
 
 			// 1 - Object Modifiers
-			Set<ObjectModifier> objectModifiers = evaluateArrayNoNull(nodes[1], t).asList().stream()
-					.map((item) -> ArgumentValidation.getEnum(item, ObjectModifier.class, t))
-					.collect(Collectors.toSet());
+			Set<ObjectModifier> objectModifiers = ArgumentValidation.getEnumSet(evaluateArrayNoNull(nodes[1], t),
+					ObjectModifier.class, t);
 
 			// 2 - Object Type
 			ObjectType type = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[2], t), ObjectType.class, t);
@@ -553,6 +554,106 @@ public class ObjectManagement {
 		public String docs() {
 			return "<T> T {ClassType<T> type, params...} Constructs a new object of the specified type. The type must"
 					+ " be hardcoded.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+	}
+
+	@api
+	@hide("Not for normal use")
+	public static class create_field extends AbstractFunction implements Optimizable {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Field execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			AccessModifier accessModifier = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[0], t),
+					AccessModifier.class, t);
+			Set<ElementModifier> elementModifiers = ArgumentValidation.getEnumSet(evaluateArrayNoNull(nodes[1], t),
+					ElementModifier.class, t);
+			UnqualifiedClassName unqualifiedDefinedIn;
+			{
+				Mixed m = evaluateMixed(nodes[2], t);
+				if(m instanceof CClassType) {
+					unqualifiedDefinedIn = new UnqualifiedClassName(((CClassType) m).getFQCN());
+				} else {
+					unqualifiedDefinedIn = new UnqualifiedClassName(m.val(), t);
+				}
+			}
+			UnqualifiedClassName unqualifiedType;
+			{
+				Mixed m = evaluateMixed(nodes[3], t);
+				if(m instanceof CClassType) {
+					unqualifiedType = new UnqualifiedClassName(((CClassType) m).getFQCN());
+				} else {
+					unqualifiedType = new UnqualifiedClassName(m.val(), t);
+				}
+			}
+
+			String name = evaluateString(nodes[4], t).val();
+
+			ParseTree defaultValue = nodes[5];
+
+			Field ed = new Field(
+					accessModifier,
+					elementModifiers,
+					unqualifiedDefinedIn,
+					unqualifiedType,
+					name,
+					defaultValue,
+					null,
+					field);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			Field f = execs(t, env, null, children.toArray(new ParseTree[children.size()]));
+			return new ParseTree(f, fileOptions);
+		}
+
+
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... nodes) throws ConfigRuntimeException {
+			throw new Error();
+		}
+
+		@Override
+		public String getName() {
+			return "create_field";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{Integer.MAX_VALUE};
+		}
+
+		@Override
+		public String docs() {
+			return "Field {} Creates a field.";
 		}
 
 		@Override
