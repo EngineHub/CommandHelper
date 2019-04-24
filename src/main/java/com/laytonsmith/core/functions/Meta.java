@@ -18,6 +18,7 @@ import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
@@ -32,7 +33,9 @@ import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -51,9 +54,11 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.jar.JarFile;
 import java.util.Locale;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 
@@ -63,7 +68,8 @@ import java.util.zip.ZipEntry;
 public class Meta {
 
 	public static String docs() {
-		return "These functions provide a way to run other commands";
+		return "These functions provide a way to run other commands, and otherwise interact with the system in a meta"
+				+ " way.";
 	}
 
 	/*
@@ -1410,5 +1416,79 @@ public class Meta {
 		public Version since() {
 			return MSVersion.V3_3_4;
 		}
+	}
+
+	@api
+	public static class nameof extends AbstractFunction implements Optimizable {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			throw new Error();
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() != 1) {
+				throw new ConfigCompileException("Invalid number of arguments passed to " + getName(), t);
+			}
+			ParseTree d = children.get(0);
+			Mixed m = d.getData();
+			String ret = null;
+			if(m instanceof IVariable) {
+				ret = ((IVariable) m).getVariableName();
+			} else if(m instanceof Variable) {
+				ret = ((Variable) m).getVariableName();
+			}
+			if(ret == null) {
+				throw new ConfigCompileException("Invalid type passed to " + getName(), t);
+			}
+			return new ParseTree(new CString(ret, t), fileOptions);
+		}
+
+		@Override
+		public String getName() {
+			return "nameof";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "Returns the name of the item. For now, only works with variables. For instance, nameof(@var)"
+					+ " returns the string \"@var\". This is useful for avoiding hardcoding of strings of items"
+					+ " that are refactorable. This allows tools to properly refactor, without needing to manually"
+					+ " update strings that contain the names of variables or other refactorable items. This is"
+					+ " a meta function, and is fully resolved at compile time.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
 	}
 }
