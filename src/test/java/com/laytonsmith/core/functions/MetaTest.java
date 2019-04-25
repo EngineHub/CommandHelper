@@ -93,7 +93,7 @@ public class MetaTest {
 		try {
 			SRun("nameof('string')", null);
 			fail();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			// pass
 		}
 	}
