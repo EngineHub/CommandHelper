@@ -1,53 +1,43 @@
 package com.laytonsmith.core.objects;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
-import com.laytonsmith.core.UnqualifiedClassName;
-import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.natives.interfaces.Mixed;
-import java.util.Set;
+import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.CClassType;
 
 /**
- * A Field is a representation of a concrete field within an object definition.
+ *
  */
 @typeof("ms.lang.Field")
-public class Field extends ElementDefinition {
+public class Field extends Element {
 
+	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
+	public static final CClassType TYPE = CClassType.get(Field.class);
 
-	public Field(
-			AccessModifier accessModifier,
-			Set<ElementModifier> elementModifiers,
-			UnqualifiedClassName definedIn,
-			UnqualifiedClassName type,
-			String name,
-			ParseTree code,
-			String signature,
-			Construct.ConstructType constructType,
-			Target t
-	) {
-		super(
-			accessModifier,
-			elementModifiers,
-			definedIn,
-			type,
-			name,
-			code,
-			signature,
-			constructType,
-			t
-		);
+	public Field(FieldDefinition definition, CClassType definedIn) {
+		super(definition, definedIn);
 	}
 
-	/**
-	 * Calls the initialization code on the field, and returns the initial value for the field.
-	 * @param parent
-	 * @param env
-	 * @return
-	 */
-	public Mixed initialize(Script parent, Environment env) {
-		return parent.eval(getTree(), env);
+	@Override
+	public Version since() {
+		return MSVersion.V3_3_4;
 	}
+
+	@Override
+	public String docs() {
+		return "Represents a Field defined within a class.";
+	}
+
+	@Override
+	public CClassType[] getInterfaces() {
+		return CClassType.EMPTY_CLASS_ARRAY;
+	}
+
+	@Override
+	public CClassType[] getSuperclasses() {
+		return new CClassType[]{Element.TYPE};
+	}
+
+
+
 }

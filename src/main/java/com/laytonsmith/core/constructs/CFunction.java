@@ -3,7 +3,9 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.functions.DryFunction;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
@@ -80,6 +82,48 @@ public class CFunction extends Construct {
 	 */
 	public static boolean IsFunction(ParseTree tree, Class<? extends Function> ofType) {
 		return IsFunction(tree.getData(), ofType);
+	}
+
+	/**
+	 * Checks to see if a ParseTree represents a DryFunction or not.
+	 * @param data
+	 * @return
+	 */
+	public static boolean CanDryEval(ParseTree data) {
+		if(!(data.getData() instanceof CFunction)) {
+			return false;
+		}
+		try {
+			FunctionBase fb = FunctionList.getFunction((CFunction) data.getData());
+			if(fb instanceof DryFunction) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch(ConfigCompileException ex) {
+			return false;
+		}
+	}
+
+	/**
+	 * Evaluates a DryFunction, or if this is a primitive Construct, simply returns that.
+	 *
+	 * @param env The environment
+	 * @param data The ParseTree to evaluate.
+	 * @return The Mixed that this function evaluates to
+	 * @throws ConfigCompileException If the function execution throws a CCE
+	 * @throws IllegalArgumentException If the underlying function doesn't represent a DryFunction
+	 */
+	public static Mixed evaluateDryFunction(Environment env, ParseTree data) throws ConfigCompileException {
+		if(!(data.getData() instanceof CFunction) && data.getData() instanceof Construct
+				&& data.getChildren().isEmpty()) {
+			return data.getData();
+		}
+		if(!CanDryEval(data)) {
+			throw new IllegalArgumentException("Data (" + data.getData() + ") does not contain a DryFunction");
+		}
+		DryFunction f = (DryFunction) FunctionList.getFunction((CFunction) data.getData());
+		return f.dryExec(data.getTarget(), env, data.getChildren().toArray(new ParseTree[data.getChildren().size()]));
 	}
 
 	@Override

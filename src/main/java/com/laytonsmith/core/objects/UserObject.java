@@ -51,40 +51,51 @@ public class UserObject implements Mixed {
 		this.nativeObject = nativeObject;
 		this.objectId = objectIdCounter++;
 		this.fieldTable = new HashMap<>();
-		for(Map.Entry<String, List<ElementDefinition>> e : objectDefinition.getElements().entrySet()) {
-			// Fields can only have one element definition, so if the list contains more than one, it is
-			// certainly a method.
-			if(e.getValue().size() > 1) {
+		for(Element e : objectDefinition.getElements()) {
+			if(!(e instanceof Field)) {
 				continue;
 			}
-			ElementDefinition ed = e.getValue().get(0);
-			if(ed.getMethod() != null) {
-				continue;
-			}
+			Field f = (Field) e;
+
 			if(parent == null) {
-				fieldTable.put(e.getKey(), CNull.UNDEFINED);
+				fieldTable.put(f.getElementName(), CNull.UNDEFINED);
 			} else {
-				Mixed value = parent.eval(ed.getTree(), env);
-				fieldTable.put(e.getKey(), value);
+				Mixed value = parent.eval(f.getTree(), env);
+				fieldTable.put(f.getElementName(), value);
 			}
 		}
 	}
 
+//	private Method toStringMethod = null;
+	private Boolean useDefaultToString = null;
+
 	@Override
 	public String val() {
-		List<ElementDefinition> toStrings = this.objectDefinition.getElements().get("toString");
-		if(toStrings != null) {
-			for(ElementDefinition ed : toStrings) {
-				Method m = ed.getMethod();
-				if(m != null) {
-					if(m.getParameters().length == 0) {
-						return m.executeCallable(env, t).val();
-					}
+		if(useDefaultToString == null) {
+			List<Element> elements = this.objectDefinition.getElements();
+			for(Element e : elements) {
+				if(!e.getElementName().equals("toString")) {
+					continue;
 				}
+//				if(e instanceof Method) {
+//					Method m = (Method) e;
+//					if(m.getParameters().length == 0) {
+//						toStringMethod = m;
+//						useDefaultToString = false;
+//						break;
+//					}
+//				}
+			}
+			if(useDefaultToString == null) {
+				useDefaultToString = true;
 			}
 		}
-		// Use the default toString
-		return objectDefinition.getClassName() + "@" + String.format("0x%X", objectId);
+//		if(useDefaultToString) {
+			// Use the default toString
+			return objectDefinition.getClassName() + "@" + String.format("0x%X", objectId);
+//		} else {
+//			return toStringMethod.executeCallable(env, t).val();
+//		}
 	}
 
 	@Override

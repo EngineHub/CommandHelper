@@ -27,6 +27,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREClassDefinitionError;
+import com.laytonsmith.core.exceptions.CRE.CREError;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
@@ -37,7 +38,7 @@ import com.laytonsmith.core.objects.AccessModifier;
 import com.laytonsmith.core.objects.DuplicateObjectDefintionException;
 import com.laytonsmith.core.objects.ElementDefinition;
 import com.laytonsmith.core.objects.ElementModifier;
-import com.laytonsmith.core.objects.Field;
+import com.laytonsmith.core.objects.FieldDefinition;
 import com.laytonsmith.core.objects.ObjectDefinition;
 import com.laytonsmith.core.objects.ObjectDefinitionNotFoundException;
 import com.laytonsmith.core.objects.ObjectDefinitionTable;
@@ -46,12 +47,9 @@ import com.laytonsmith.core.objects.ObjectType;
 import com.laytonsmith.core.objects.UserObject;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  *
@@ -93,6 +91,32 @@ public class ObjectManagement {
 			throw new CREClassDefinitionError("Unexpected null value, expected an array", t);
 		}
 		return (CArray) d;
+	}
+
+	private static CArray evaluateArrayNullIsEmpty(ParseTree data, Target t) {
+		Mixed d = evaluateArray(data, t);
+		if(d instanceof CNull) {
+			return new CArray(t);
+		}
+		return (CArray) d;
+	}
+
+	/**
+	 * This expects an array of functions. The data itself is not executed, but returned
+	 * as a list of parse trees, which can then be evaluated. If the value is null, an empty
+	 * array is returned.
+	 * @param data
+	 * @param t
+	 * @return
+	 */
+	private static List<ParseTree> evaluateCArrayParseTrees(ParseTree data, Target t) {
+		if(data.getData() instanceof CNull) {
+			return new ArrayList<>();
+		}
+		if(!CFunction.IsFunction(data, DataHandling.array.class)) {
+			throw new CREClassDefinitionError("Expected an array, but found " + data.getData().typeof(), t);
+		}
+		return data.getChildren();
 	}
 
 	private static Mixed evaluateString(ParseTree data, Target t) {
@@ -168,7 +192,7 @@ public class ObjectManagement {
 
 	@api
 	@hide("Not meant for normal use")
-	public static class define_object extends AbstractFunction implements Optimizable {
+	public static class define_object extends AbstractFunction implements Optimizable, DryFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -197,6 +221,11 @@ public class ObjectManagement {
 
 		@Override
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			return dryExec(t, env, nodes);
+		}
+
+		@Override
+		public Mixed dryExec(Target t, Environment env, ParseTree... nodes) {
 			// 0 - Access Modifier
 			AccessModifier accessModifier = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[0], t),
 					AccessModifier.class, t);
@@ -260,9 +289,25 @@ public class ObjectManagement {
 				// TODO
 			}
 
-			// 7 - map<property->element>
-			Map<String, List<ElementDefinition>> elementDefinitions = new HashMap<>();
-			// TODO
+			// 7 - array<element>
+			List<ElementDefinition> elementDefinitions = new ArrayList<>();
+			for(ParseTree p : evaluateCArrayParseTrees(nodes[7], t)) {
+				Mixed m;
+				try {
+					m = CFunction.evaluateDryFunction(env, p);
+				} catch (ConfigCompileException ex) {
+					throw new CREClassDefinitionError("Could not compile element definition: " + ex.getMessage(),
+							ex.getTarget(), ex);
+				} catch (IllegalArgumentException ex) {
+					throw new CREClassDefinitionError("Could not compile element definition, invalid"
+							+ " function used.",
+							p.getTarget(), ex);
+				}
+				if(!(m instanceof ElementDefinition)) {
+					throw new CREClassDefinitionError("Unexpected item sent as part of element definition.", t);
+				}
+				elementDefinitions.add((ElementDefinition) m);
+			}
 
 			// 8 - array<annotations>
 			List<MAnnotation> annotations = new ArrayList<>();
@@ -305,13 +350,16 @@ public class ObjectManagement {
 			// class is unconstructable (i.e. static utility class) it must define a private constructor,
 			// and take care never to call it internally.
 			if(objectModifiers.contains(ObjectModifier.NATIVE)) {
-				if(elementDefinitions.get("<constructor>").isEmpty()) {
-					throw new CREClassDefinitionError(name + " was defined as a native class, but did not define"
-							+ " any constructors. Native classes do not get a default constructor, and so must"
-							+ " explicitely define at least one. (It may have no arguments and point to an"
-							+ " @ExposedProperty constructor in the native code, however.) At least one"
-							+ " native constructor must be defined, and called during construction.", t);
-				}
+				// TODO Need to check if native classes properly implement default constructor
+//				for(ElementDefinition d : elementDefinitions) {
+//				}
+//				if(elementDefinitions.get("<constructor>").isEmpty()) {
+//					throw new CREClassDefinitionError(name + " was defined as a native class, but did not define"
+//							+ " any constructors. Native classes do not get a default constructor, and so must"
+//							+ " explicitely define at least one. (It may have no arguments and point to an"
+//							+ " @ExposedProperty constructor in the native code, however.) At least one"
+//							+ " native constructor must be defined, and called during construction.", t);
+//				}
 				// TODO check if the non-native constructors actually call one of the native ones
 			}
 
@@ -462,9 +510,9 @@ public class ObjectManagement {
 					constructor = null;
 					break;
 				case UNDECIDEABLE:
-					for(ElementDefinition ed : od.getElements().get("<constructor>")) {
-						// TODO
-					}
+//					for(ElementDefinition ed : od.getElements().get("<constructor>")) {
+//						// TODO
+//					}
 					constructor = null; // TODO REMOVE ME
 					break;
 				default:
@@ -517,24 +565,24 @@ public class ObjectManagement {
 				// really didn't exist.
 				throw new Error(ex);
 			}
-			List<ElementDefinition> constructors = od.getElements().get("<constructor>");
-			int id;
-			if(constructors == null || constructors.isEmpty()) {
-				// Default constructor
-				if(children.size() > 1) {
-					throw new ConfigCompileException("No suitable constructor found for " + fqcn + " only the default"
-							+ " constructor is available.", t);
-				}
-				id = DEFAULT;
-			} else {
-				// Need to find the correct constructor from the list
-				int parameterCount = children.size() - 1;
-				for(ElementDefinition d : constructors) {
-					// TODO
-				}
-				id = UNDECIDEABLE;
-			}
-			children.add(1, new ParseTree(new CInt(id, t), fileOptions));
+//			List<ElementDefinition> constructors = od.getElements().get("<constructor>");
+//			int id;
+//			if(constructors == null || constructors.isEmpty()) {
+//				// Default constructor
+//				if(children.size() > 1) {
+//					throw new ConfigCompileException("No suitable constructor found for " + fqcn + " only the default"
+//							+ " constructor is available.", t);
+//				}
+//				id = DEFAULT;
+//			} else {
+//				// Need to find the correct constructor from the list
+//				int parameterCount = children.size() - 1;
+//				for(ElementDefinition d : constructors) {
+//					// TODO
+//				}
+//				id = UNDECIDEABLE;
+//			}
+//			children.add(1, new ParseTree(new CInt(id, t), fileOptions));
 			return null;
 		}
 
@@ -570,7 +618,7 @@ public class ObjectManagement {
 
 	@api
 	@hide("Not for normal use")
-	public static class create_field extends AbstractFunction implements Optimizable {
+	public static class create_field extends AbstractFunction implements Optimizable, DryFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -588,23 +636,19 @@ public class ObjectManagement {
 		}
 
 		@Override
-		public Field execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public FieldDefinition execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			return dryExec(t, env, nodes);
+		}
+
+		@Override
+		public FieldDefinition dryExec(Target t, Environment env, ParseTree... nodes) {
 			AccessModifier accessModifier = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[0], t),
 					AccessModifier.class, t);
 			Set<ElementModifier> elementModifiers = ArgumentValidation.getEnumSet(evaluateArrayNoNull(nodes[1], t),
 					ElementModifier.class, t);
-			UnqualifiedClassName unqualifiedDefinedIn;
-			{
-				Mixed m = evaluateMixed(nodes[2], t);
-				if(m instanceof CClassType) {
-					unqualifiedDefinedIn = new UnqualifiedClassName(((CClassType) m).getFQCN());
-				} else {
-					unqualifiedDefinedIn = new UnqualifiedClassName(m.val(), t);
-				}
-			}
 			UnqualifiedClassName unqualifiedType;
 			{
-				Mixed m = evaluateMixed(nodes[3], t);
+				Mixed m = evaluateMixed(nodes[2], t);
 				if(m instanceof CClassType) {
 					unqualifiedType = new UnqualifiedClassName(((CClassType) m).getFQCN());
 				} else {
@@ -612,25 +656,33 @@ public class ObjectManagement {
 				}
 			}
 
-			String name = evaluateString(nodes[4], t).val();
+			String name = evaluateString(nodes[3], t).val();
 
-			ParseTree defaultValue = nodes[5];
+			if(!name.startsWith("@")) {
+				throw new CREError("Invalid variable name definition, must start with '@'.", t);
+			}
 
-			Field ed = new Field(
+			ParseTree defaultValue = nodes[4];
+
+			String signature = (accessModifier + " " + StringUtils.Join(elementModifiers, " ") + " "
+					+ unqualifiedType.getUnqualifiedClassName() + " "
+					+ name).replaceAll(" +", " ");
+
+			FieldDefinition ed = new FieldDefinition(
 					accessModifier,
 					elementModifiers,
-					unqualifiedDefinedIn,
 					unqualifiedType,
 					name,
 					defaultValue,
-					null,
-					field);
+					signature,
+					t);
+			return ed;
 		}
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
-			Field f = execs(t, env, null, children.toArray(new ParseTree[children.size()]));
+			FieldDefinition f = execs(t, env, null, children.toArray(new ParseTree[children.size()]));
 			return new ParseTree(f, fileOptions);
 		}
 
@@ -653,7 +705,13 @@ public class ObjectManagement {
 
 		@Override
 		public String docs() {
-			return "Field {} Creates a field.";
+			return "Field {"
+					+ "AccessModifier accessModifier,"
+					+ "array<ElementModifier> elementModifiers,"
+					+ "UnqualifiedClassName type,"
+					+ "string name,"
+					+ "ParseTree defaultValue"
+					+ "} Creates a field.";
 		}
 
 		@Override
