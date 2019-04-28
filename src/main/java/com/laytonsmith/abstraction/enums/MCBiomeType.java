@@ -143,6 +143,8 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 		DEEP_LUKEWARM_OCEAN,
 		DEEP_COLD_OCEAN,
 		DEEP_FROZEN_OCEAN,
+		BAMBOO_JUNGLE(MCVersion.MC1_14),
+		BAMBOO_JUNGLE_HILLS(MCVersion.MC1_14),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

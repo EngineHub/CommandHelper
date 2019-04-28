@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCTravelAgent;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.entities.MCHanging;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -24,6 +25,7 @@ import com.laytonsmith.abstraction.enums.MCRegainReason;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
@@ -2093,11 +2095,11 @@ public class EntityEvents {
 					+ " Fired when an entity travels through a portal."
 					+ " {id: The UUID of entity | type: The type of entity"
 					+ " | from: The location the entity is coming from"
-					+ " | to: The location the entity is going to. Returns null when using Nether portal and "
-					+ " \"allow-nether\" in server.properties is set to false or when using Ender portal and "
+					+ " | to: The location the entity is going to. Returns null when using nether portal and "
+					+ " \"allow-nether\" in server.properties is set to false or when using end portal and "
 					+ " \"allow-end\" in bukkit.yml is set to false."
-					+ " | creationradius: The maximum radius from the given location to create a portal."
-					+ " | searchradius: The search radius value for finding an available portal.}"
+					+ " | creationradius: The maximum radius from the given location to create a portal. (1.13 only)"
+					+ " | searchradius: The search radius value for finding an available portal. (1.13 only)}"
 					+ " {to|creationradius|searchradius}"
 					+ " {}";
 		}
@@ -2132,8 +2134,11 @@ public class EntityEvents {
 				} else {
 					ret.put("to", ObjectGenerator.GetGenerator().location(to));
 				}
-				ret.put("creationradius", new CInt(event.getPortalTravelAgent().getCreationRadius(), t));
-				ret.put("searchradius", new CInt(event.getPortalTravelAgent().getSearchRadius(), t));
+				if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
+					MCTravelAgent ta = event.getPortalTravelAgent();
+					ret.put("creationradius", new CInt(ta.getCreationRadius(), t));
+					ret.put("searchradius", new CInt(ta.getSearchRadius(), t));
+				}
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCEntityPortalEvent");
@@ -2151,22 +2156,26 @@ public class EntityEvents {
 				MCEntityPortalEvent e = (MCEntityPortalEvent) event;
 
 				if(key.equalsIgnoreCase("to")) {
-					e.useTravelAgent(true);
+					if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
+						e.useTravelAgent(true);
+					}
 					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, value.getTarget());
 					e.setTo(loc);
 					return true;
 				}
 
-				if(key.equalsIgnoreCase("creationradius")) {
-					e.useTravelAgent(true);
-					e.getPortalTravelAgent().setCreationRadius(Static.getInt32(value, value.getTarget()));
-					return true;
-				}
+				if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
+					if(key.equalsIgnoreCase("creationradius")) {
+						e.useTravelAgent(true);
+						e.getPortalTravelAgent().setCreationRadius(Static.getInt32(value, value.getTarget()));
+						return true;
+					}
 
-				if(key.equalsIgnoreCase("searchradius")) {
-					e.useTravelAgent(true);
-					e.getPortalTravelAgent().setSearchRadius(Static.getInt32(value, value.getTarget()));
-					return true;
+					if(key.equalsIgnoreCase("searchradius")) {
+						e.useTravelAgent(true);
+						e.getPortalTravelAgent().setSearchRadius(Static.getInt32(value, value.getTarget()));
+						return true;
+					}
 				}
 			}
 			return false;

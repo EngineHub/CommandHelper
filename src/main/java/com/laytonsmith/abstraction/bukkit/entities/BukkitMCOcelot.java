@@ -1,11 +1,13 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.entities.MCOcelot;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Ocelot;
+import org.bukkit.entity.Sittable;
 
 public class BukkitMCOcelot extends BukkitMCTameable implements MCOcelot {
 
@@ -28,7 +30,10 @@ public class BukkitMCOcelot extends BukkitMCTameable implements MCOcelot {
 
 	@Override
 	public boolean isSitting() {
-		return o.isSitting();
+		if(o instanceof Sittable) {
+			return (boolean) ReflectionUtils.invokeMethod(Ocelot.class, o, "isSitting");
+		}
+		return false;
 	}
 
 	@Override
@@ -38,7 +43,10 @@ public class BukkitMCOcelot extends BukkitMCTameable implements MCOcelot {
 
 	@Override
 	public void setSitting(boolean sitting) {
-		o.setSitting(sitting);
+		if(o instanceof Sittable) {
+			ReflectionUtils.invokeMethod(Ocelot.class, o, "setSitting",
+					new Class[]{boolean.class}, new Object[]{sitting});
+		}
 	}
 
 }

@@ -7,8 +7,6 @@ import com.laytonsmith.abstraction.enums.MCProfession;
 public interface MCVillager extends MCAgeable, MCInventoryHolder {
 
 	MCMerchant asMerchant();
-	int getRiches();
-	void setRiches(int riches);
 	MCProfession getProfession();
 	void setProfession(MCProfession profession);
 }

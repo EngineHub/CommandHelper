@@ -40,12 +40,10 @@ import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCBanner;
 import com.laytonsmith.abstraction.blocks.MCBrewingStand;
-import com.laytonsmith.abstraction.blocks.MCChest;
+import com.laytonsmith.abstraction.blocks.MCContainer;
 import com.laytonsmith.abstraction.blocks.MCDispenser;
 import com.laytonsmith.abstraction.blocks.MCDropper;
 import com.laytonsmith.abstraction.blocks.MCFurnace;
-import com.laytonsmith.abstraction.blocks.MCHopper;
-import com.laytonsmith.abstraction.blocks.MCShulkerBox;
 import com.laytonsmith.abstraction.entities.MCTropicalFish;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEntityType;
@@ -433,8 +431,7 @@ public class ObjectGenerator {
 			// Specific ItemMeta
 			if(meta instanceof MCBlockStateMeta) {
 				MCBlockState bs = ((MCBlockStateMeta) meta).getBlockState();
-				if(bs instanceof MCShulkerBox || bs instanceof MCChest
-						|| bs instanceof MCDispenser || bs instanceof MCDropper || bs instanceof MCHopper) {
+				if(bs instanceof MCContainer || bs instanceof MCDispenser || bs instanceof MCDropper) {
 					// Handle InventoryHolders with inventory slots that do not have a special meaning.
 					MCInventory inv = ((MCInventoryHolder) bs).getInventory();
 					CArray box = CArray.GetAssociativeArray(t);
@@ -688,8 +685,7 @@ public class ObjectGenerator {
 				if(meta instanceof MCBlockStateMeta) {
 					MCBlockStateMeta bsm = (MCBlockStateMeta) meta;
 					MCBlockState bs = bsm.getBlockState();
-					if(bs instanceof MCShulkerBox || bs instanceof MCChest
-							|| bs instanceof MCDispenser || bs instanceof MCDropper || bs instanceof MCHopper) {
+					if(bs instanceof MCContainer || bs instanceof MCDispenser || bs instanceof MCDropper) {
 						if(ma.containsKey("inventory")) {
 							MCInventory inv = ((MCInventoryHolder) bs).getInventory();
 							Mixed cInvRaw = ma.get("inventory", t);

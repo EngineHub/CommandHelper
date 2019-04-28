@@ -123,6 +123,14 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		BUBBLE_COLUMN_UP,
 		NAUTILUS,
 		DOLPHIN,
+		SNEEZE(MCVersion.MC1_14),
+		CAMPFIRE_COSY_SMOKE(MCVersion.MC1_14),
+		CAMPFIRE_SIGNAL_SMOKE(MCVersion.MC1_14),
+		COMPOSTER(MCVersion.MC1_14),
+		FLASH(MCVersion.MC1_14),
+		FALLING_LAVA(MCVersion.MC1_14),
+		LANDING_LAVA(MCVersion.MC1_14),
+		FALLING_WATER(MCVersion.MC1_14),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

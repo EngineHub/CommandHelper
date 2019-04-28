@@ -2,14 +2,10 @@ package com.laytonsmith.abstraction.blocks;
 
 import java.util.Collection;
 
-import com.laytonsmith.abstraction.MCBeaconInventory;
-import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCLivingEntity;
 
-public interface MCBeacon extends MCBlockState, MCInventoryHolder {
+public interface MCBeacon extends MCBlockState {
 	Collection<MCLivingEntity> getEntitiesInRange();
-	@Override
-	MCBeaconInventory getInventory();
 //	MCPotionEffect getPrimaryEffect();
 //	MCPotionEffect getSecondaryEffect();
 	int getTier();

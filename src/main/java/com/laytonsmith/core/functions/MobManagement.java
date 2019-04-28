@@ -244,7 +244,7 @@ public class MobManagement {
 			MCLivingEntity e = Static.getLivingEntity(entityID, t);
 			if(e == null) {
 				return CVoid.VOID;
-			} else if(e instanceof MCTameable) {
+			} else if(e.isTameable()) {
 				MCTameable mct = ((MCTameable) e);
 				if(player != null) {
 					mct.setOwner(Static.getServer().getOfflinePlayer(player));
@@ -313,7 +313,7 @@ public class MobManagement {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
-			if(!(mob instanceof MCTameable)) {
+			if(!mob.isTameable()) {
 				throw new CREUntameableMobException("The specified entity is not tameable", t);
 			}
 			MCAnimalTamer owner = ((MCTameable) mob).getOwner();
@@ -370,7 +370,7 @@ public class MobManagement {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
 			Mixed player = args[1];
-			if(!(mob instanceof MCTameable)) {
+			if(!mob.isTameable()) {
 				throw new CREUntameableMobException("The specified entity is not tameable", t);
 			}
 			MCTameable mct = ((MCTameable) mob);

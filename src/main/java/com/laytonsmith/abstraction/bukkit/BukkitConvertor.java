@@ -32,13 +32,11 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBanner;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBeacon;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBrewingStand;
-import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCChest;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCContainer;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDispenser;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDropper;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFurnace;
-import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCHopper;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
-import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCShulkerBox;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAgeable;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
@@ -91,13 +89,11 @@ import org.bukkit.block.Banner;
 import org.bukkit.block.Beacon;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.BrewingStand;
-import org.bukkit.block.Chest;
+import org.bukkit.block.Container;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.Dropper;
 import org.bukkit.block.Furnace;
-import org.bukkit.block.Hopper;
-import org.bukkit.block.ShulkerBox;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
@@ -222,7 +218,7 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCMaterial(match);
 		}
 		// Try legacy
-		match = Material.getMaterial(name, true);
+		match = BukkitMCLegacyMaterial.getMaterial(name);
 		if(match != null) {
 			return new BukkitMCMaterial(match);
 		}
@@ -238,7 +234,7 @@ public class BukkitConvertor extends AbstractConvertor {
 	public MCItemStack GetItemStack(String type, int qty) {
 		Material mat = Material.getMaterial(type);
 		if(mat == null) {
-			mat = Material.getMaterial(type, true);
+			mat = BukkitMCLegacyMaterial.getMaterial(type);
 		}
 		if(mat == null) {
 			return null;
@@ -455,9 +451,6 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	public static MCBlockState BukkitGetCorrectBlockState(BlockState bs) {
-		if(bs instanceof ShulkerBox) {
-			return new BukkitMCShulkerBox((ShulkerBox) bs);
-		}
 		if(bs instanceof Banner) {
 			return new BukkitMCBanner((Banner) bs);
 		}
@@ -470,9 +463,6 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(bs instanceof BrewingStand) {
 			return new BukkitMCBrewingStand((BrewingStand) bs);
 		}
-		if(bs instanceof Chest) {
-			return new BukkitMCChest((Chest) bs);
-		}
 		if(bs instanceof Dispenser) {
 			return new BukkitMCDispenser((Dispenser) bs);
 		}
@@ -482,8 +472,8 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(bs instanceof Furnace) {
 			return new BukkitMCFurnace((Furnace) bs);
 		}
-		if(bs instanceof Hopper) {
-			return new BukkitMCHopper((Hopper) bs);
+		if(bs instanceof Container) { // needs to be after all specific containers
+			return new BukkitMCContainer((Container) bs);
 		}
 		return new BukkitMCBlockState(bs);
 	}

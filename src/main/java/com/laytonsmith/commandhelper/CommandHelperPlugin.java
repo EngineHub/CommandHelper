@@ -44,6 +44,7 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCParticle;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCProfession;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.core.AliasCore;
@@ -327,6 +328,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		BukkitMCParticle.build();
 		BukkitMCLegacyMaterial.build();
 		BukkitMCPotionEffectType.build();
+		BukkitMCProfession.build();
 
 		//Metrics
 		Metrics m = new Metrics(this);

@@ -23,6 +23,7 @@ array {entityID} Returns an associative array containing all the data of the giv
 | 
 * %KEY_ARROW_CRITICAL%: If this arrow is critical.
 * %KEY_ARROW_KNOCKBACK%: The knockback strength.
+* %KEY_TIPPEDARROW_POTIONMETA%: An associative array with a "base" potion array and a "potions" array of effect arrays for a tipped arrow.
 |-
 | ARMOR_STAND
 |
@@ -41,6 +42,11 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | BOAT
 |
 * %KEY_BOAT_TYPE%: Which tree species the boat is composed of. (can be %TREE_SPECIES%)
+|-
+| CAT
+|
+* %KEY_CAT_TYPE%: The type of the cat. (can be %CAT_TYPE%)
+* %KEY_GENERIC_SITTING%: Whether or not the cat is sitting.
 |-
 | CREEPER
 | 
@@ -121,7 +127,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_ITEM_FRAME_ITEM%: The item in the frame.
 * %KEY_ITEM_FRAME_ROTATION%: The rotation of the frame's item (can be %ROTATION%).
 |-
-| LLAMA
+| LLAMA, TRADER_LLAMA
 |
 * %KEY_HORSE_CHEST%: Whether the horse has a chest equipped.
 * %KEY_HORSE_DOMESTICATION%: The domestication level of the horse (can't be higher than the maximum domestication level).
@@ -132,10 +138,6 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | LIGHTNING
 | 
 * %KEY_LIGHTNING_EFFECT%: Whether the strike is an effect that does no damage. Not editable.
-|-
-| LINGERING_POTION
-|
-* %KEY_SPLASH_POTION_ITEM%: The item for the thrown potion.
 |-
 | MAGMA_CUBE
 | 
@@ -155,8 +157,8 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |- 
 | OCELOT
 | 
-* %KEY_OCELOT_SITTING%: If the ocelot is sitting.
-* %KEY_OCELOT_TYPE%: The type of the ocelot (can be %OCELOT_TYPE%).
+* %KEY_GENERIC_SITTING%: If the ocelot is sitting. (1.13 only)
+* %KEY_OCELOT_TYPE%: The type of the ocelot (can be %OCELOT_TYPE%). (1.13 only)
 |- 
 | PAINTING
 | 
@@ -164,7 +166,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |- 
 | PARROT
 | 
-* %KEY_PARROT_SITTING%: If the parrot is sitting.
+* %KEY_GENERIC_SITTING%: If the parrot is sitting.
 * %KEY_PARROT_TYPE%: The type of the parrot (can be %PARROT_TYPE%).
 |- 
 | PIG
@@ -214,13 +216,13 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_SNOWMAN_DERP%: With derp mode set to true the snowman wears no pumpkin
 |-
-| SPLASH_POTION
+| SPLASH_POTION, LINGERING_POTION
 | 
 * %KEY_SPLASH_POTION_ITEM%: The item for the thrown potion.
 |-
-| TIPPED_ARROW
+| TIPPED_ARROW (removed in 1.14, use ARROW)
 |
-* %KEY_TIPPEDARROW_POTIONMETA%: An array of potion effect arrays for the tipped arrow.
+* %KEY_TIPPEDARROW_POTIONMETA%: An associative array with a "base" potion array and a "potions" array of effect arrays for a tipped arrow.
 * %KEY_ARROW_CRITICAL%: If this arrow is critical.
 * %KEY_ARROW_KNOCKBACK%: The knockback strength.
 |-
@@ -232,7 +234,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |-
 | VILLAGER
 | 
-* %KEY_VILLAGER_PROFESSION%: The profession of the villager (can be %PROFESSION%).
+* %KEY_VILLAGER_PROFESSION%: The profession of the villager (can be %PROFESSION%). This list differs in 1.14 from 1.13.
 |-
 | WITHER_SKULL
 | 
@@ -243,7 +245,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_WOLF_ANGRY%: If the wolf is angry.
 * %KEY_WOLF_COLOR%: The collar color of the wolf (can be %DYE_COLOR%).
-* %KEY_WOLF_SITTING%: If the wolf is sitting.
+* %KEY_GENERIC_SITTING%: If the wolf is sitting.
 |- 
 | ZOMBIE, HUSK, ZOMBIE_VILLAGER, DROWNED
 | 

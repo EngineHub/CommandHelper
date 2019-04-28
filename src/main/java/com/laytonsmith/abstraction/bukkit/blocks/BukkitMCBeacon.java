@@ -1,9 +1,7 @@
 package com.laytonsmith.abstraction.bukkit.blocks;
 
-import com.laytonsmith.abstraction.MCBeaconInventory;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.blocks.MCBeacon;
-import com.laytonsmith.abstraction.bukkit.BukkitMCBeaconInventory;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLivingEntity;
 
 import java.util.Collection;
@@ -19,11 +17,6 @@ public class BukkitMCBeacon extends BukkitMCBlockState implements MCBeacon {
 	public BukkitMCBeacon(Beacon block) {
 		super(block);
 		this.beacon = block;
-	}
-
-	@Override
-	public MCBeaconInventory getInventory() {
-		return new BukkitMCBeaconInventory(this.beacon.getInventory());
 	}
 
 	@Override

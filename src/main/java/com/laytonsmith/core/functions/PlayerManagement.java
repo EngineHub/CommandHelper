@@ -3940,7 +3940,8 @@ public class PlayerManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREPlayerOfflineException.class, CREFormatException.class};
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class, CREFormatException.class,
+					CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -3990,7 +3991,11 @@ public class PlayerManagement {
 				return CBoolean.FALSE;
 			}
 			Static.AssertPlayerNonNull(p, t);
-			p.setVelocity(v);
+			try {
+				p.setVelocity(v);
+			} catch (IllegalArgumentException ex) {
+				throw new CREIllegalArgumentException(ex.getMessage(), t);
+			}
 			return CBoolean.TRUE;
 		}
 
