@@ -1,5 +1,7 @@
 package com.laytonsmith.abstraction.enums.bukkit;
 
+import com.laytonsmith.abstraction.enums.MCVersion;
+import com.laytonsmith.core.Static;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
@@ -510,8 +512,10 @@ public class BukkitMCLegacyMaterial {
 		for(LegacyMaterialId mat : LegacyMaterialId.values()) {
 			BY_ID.put(mat.getId(), mat);
 		}
-		for(LegacyMaterialName mat : LegacyMaterialName.values()) {
-			BY_NAME.put(mat.name(), mat.getNewMaterial());
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
+			for(LegacyMaterialName mat : LegacyMaterialName.values()) {
+				BY_NAME.put(mat.name(), mat.getNewMaterial());
+			}
 		}
 	}
 
