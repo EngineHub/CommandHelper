@@ -104,6 +104,12 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_FIREBALL_DIRECTION%: The direction the fireball is heading toward.
 |-
+| FOX
+| 
+* %KEY_GENERIC_SITTING%: Whether or not the fox is sitting.
+* %KEY_FOX_CROUCHING%: Whether or not the fox is crouching.
+* %KEY_FOX_TYPE%: The type of fox. (can be %FOX_TYPE%)
+|-
 | HORSE
 | 
 * %KEY_HORSE_ARMOR%: An item pertaining to the armor a horse has put on.
@@ -154,6 +160,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_MINECART_COMMAND_CUSTOMNAME%: The name of the command minecart.
 * %KEY_MINECART_BLOCK%: The material name of the block being displayed.
 * %KEY_MINECART_OFFSET%: The offset of the block being displayed.
+|- 
+| MUSHROOM_COW
+| 
+* %KEY_MUSHROOM_COW_TYPE%: The type of mushroom cow. (can be %MUSHROOM_COW_TYPE%).
 |- 
 | OCELOT
 | 

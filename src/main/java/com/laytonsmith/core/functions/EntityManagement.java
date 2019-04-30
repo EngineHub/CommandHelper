@@ -41,6 +41,7 @@ import com.laytonsmith.abstraction.entities.MCExperienceOrb;
 import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.entities.MCFireball;
 import com.laytonsmith.abstraction.entities.MCFirework;
+import com.laytonsmith.abstraction.entities.MCFox;
 import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorseColor;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorsePattern;
@@ -51,6 +52,7 @@ import com.laytonsmith.abstraction.entities.MCLightningStrike;
 import com.laytonsmith.abstraction.entities.MCLlama;
 import com.laytonsmith.abstraction.entities.MCLlama.MCLlamaColor;
 import com.laytonsmith.abstraction.entities.MCMinecart;
+import com.laytonsmith.abstraction.entities.MCMushroomCow;
 import com.laytonsmith.abstraction.entities.MCOcelot;
 import com.laytonsmith.abstraction.entities.MCPainting;
 import com.laytonsmith.abstraction.entities.MCParrot;
@@ -80,6 +82,8 @@ import com.laytonsmith.abstraction.enums.MCEnderDragonPhase;
 import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
+import com.laytonsmith.abstraction.enums.MCFoxType;
+import com.laytonsmith.abstraction.enums.MCMushroomCowType;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
 import com.laytonsmith.abstraction.enums.MCParrotType;
 import com.laytonsmith.abstraction.enums.MCParticle;
@@ -1675,6 +1679,8 @@ public class EntityManagement {
 			docs = docs.replace("%TREE_SPECIES%", StringUtils.Join(MCTreeSpecies.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%FISH_PATTERN%", StringUtils.Join(MCTropicalFish.MCPattern.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%CAT_TYPE%", StringUtils.Join(MCCatType.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%FOX_TYPE%", StringUtils.Join(MCFoxType.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%MUSHROOM_COW_TYPE%", StringUtils.Join(MCMushroomCowType.values(), ", ", ", or ", " or "));
 			for(Field field : entity_spec.class.getDeclaredFields()) {
 				try {
 					String name = field.getName();
@@ -1830,6 +1836,12 @@ public class EntityManagement {
 					MCFireball ball = (MCFireball) entity;
 					specArray.set(entity_spec.KEY_FIREBALL_DIRECTION, ObjectGenerator.GetGenerator().vector(ball.getDirection(), t), t);
 					break;
+				case FOX:
+					MCFox fox = (MCFox) entity;
+					specArray.set(entity_spec.KEY_GENERIC_SITTING, CBoolean.get(fox.isSitting()), t);
+					specArray.set(entity_spec.KEY_FOX_CROUCHING, CBoolean.get(fox.isCrouching()), t);
+					specArray.set(entity_spec.KEY_FOX_TYPE, fox.getVariant().name(), t);
+					break;
 				case HORSE:
 					MCHorse horse = (MCHorse) entity;
 					specArray.set(entity_spec.KEY_HORSE_COLOR, new CString(horse.getColor().name(), t), t);
@@ -1887,6 +1899,10 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_MINECART_COMMAND_CUSTOMNAME, new CString(commandminecart.getName(), t), t);
 					specArray.set(entity_spec.KEY_MINECART_BLOCK, new CString(commandminecart.getDisplayBlock().getMaterial().getName(), t), t);
 					specArray.set(entity_spec.KEY_MINECART_OFFSET, new CInt(commandminecart.getDisplayBlockOffset(), t), t);
+					break;
+				case MUSHROOM_COW:
+					MCMushroomCow cow = (MCMushroomCow) entity;
+					specArray.set(entity_spec.KEY_MUSHROOM_COW_TYPE, cow.getVariant().name(), t);
 					break;
 				case OCELOT:
 					if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
@@ -2056,6 +2072,8 @@ public class EntityManagement {
 		private static final String KEY_FALLING_BLOCK_DROPITEM = "dropitem";
 		private static final String KEY_FALLING_BLOCK_DAMAGE = "damage";
 		private static final String KEY_FIREBALL_DIRECTION = "direction";
+		private static final String KEY_FOX_CROUCHING = "crouching";
+		private static final String KEY_FOX_TYPE = "type";
 		private static final String KEY_HORSE_COLOR = "color";
 		private static final String KEY_HORSE_STYLE = "style";
 		private static final String KEY_HORSE_CHEST = "chest";
@@ -2072,6 +2090,7 @@ public class EntityManagement {
 		private static final String KEY_MINECART_OFFSET = "offset";
 		private static final String KEY_MINECART_COMMAND_COMMAND = "command";
 		private static final String KEY_MINECART_COMMAND_CUSTOMNAME = "customname";
+		private static final String KEY_MUSHROOM_COW_TYPE = "type";
 		private static final String KEY_OCELOT_TYPE = "type";
 		private static final String KEY_PAINTING_ART = "type";
 		private static final String KEY_PARROT_TYPE = "type";
@@ -2566,6 +2585,28 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case FOX:
+					MCFox fox = (MCFox) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_GENERIC_SITTING:
+								fox.setSitting(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_FOX_CROUCHING:
+								fox.setCrouching(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_FOX_TYPE:
+								try {
+									fox.setVariant(MCFoxType.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid fox type: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case HORSE:
 					MCHorse horse = (MCHorse) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -2733,6 +2774,22 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_MINECART_OFFSET:
 								commandminecart.setDisplayBlockOffset(Static.getInt32(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case MUSHROOM_COW:
+					MCMushroomCow cow = (MCMushroomCow) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_MUSHROOM_COW_TYPE:
+								try {
+									cow.setVariant(MCMushroomCowType.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid mushroom cow type: " + specArray.get(index, t).val(), t);
+								}
 								break;
 							default:
 								throwException(index, t);
