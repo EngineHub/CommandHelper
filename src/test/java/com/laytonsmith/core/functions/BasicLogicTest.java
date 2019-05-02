@@ -85,7 +85,6 @@ public class BasicLogicTest {
 
 	@Test(timeout = 10000)
 	public void testEquals() throws Exception {
-		BasicLogic.equals e = new BasicLogic.equals();
 
 //			 T   F   1   0  -1  '1' '0' '-1' N  {} 'CH'  '' 1.0
 //		---------------------------------------------------
@@ -251,14 +250,6 @@ public class BasicLogicTest {
 	}
 
 	@Test(timeout = 10000)
-	public void testIf() throws Exception {
-		BasicLogic._if a = new BasicLogic._if();
-		SRun("if(true, msg('correct'), msg('incorrect'))", fakePlayer);
-		SRun("if(false, msg('incorrect'), msg('correct'))", fakePlayer);
-		verify(fakePlayer, times(2)).sendMessage("correct");
-	}
-
-	@Test(timeout = 10000)
 	public void testXor() throws Exception {
 		assertEquals("false", SRun("xor(false, false)", null));
 		assertEquals("true", SRun("xor(false, true)", null));
@@ -331,99 +322,11 @@ public class BasicLogicTest {
 		assertEquals("4611686018427387901", SRun("urshift(-10, 2)", null));
 	}
 
-	@Test
-	public void testIfelse() throws Exception {
-		assertEquals("3", SRun("ifelse("
-				+ "false, 1,"
-				+ "false, 2,"
-				+ "true, 3,"
-				+ "true, 4,"
-				+ "false, 5)", null));
-		assertEquals("4", SRun("ifelse("
-				+ "false, 1,"
-				+ "false, 2,"
-				+ "false, 3,"
-				+ "add(2, 2))", null));
-	}
-
-	@Test(timeout = 10000)
-	public void testSwitch() throws Exception {
-		assertEquals("correct", SRun("switch(3,"
-				+ "1, wrong,"
-				+ "2, wrong,"
-				+ "3, correct,"
-				+ "4, wrong)", null));
-		assertEquals("correct", SRun("switch(4,"
-				+ "1, wrong,"
-				+ "2, wrong,"
-				+ "3, wrong,"
-				+ "correct)", null));
-	}
-
-	@Test
-	public void testSwitch2() throws Exception {
-		SRun("switch(2, 1, msg('nope'), 2, msg('yep'))", fakePlayer);
-		verify(fakePlayer).sendMessage("yep");
-	}
-
-	@Test
-	public void testSwitch3() throws Exception {
-		SRun("assign(@args, 'test')"
-				+ "switch(@args,"
-				+ "'test',"
-				+ "msg('test'),"
-				+ "msg('default')"
-				+ ")",
-				fakePlayer);
-		verify(fakePlayer).sendMessage("test");
-	}
-
-	@Test(timeout = 10000)
-	public void testSwitchWithArray() throws Exception {
-		assertEquals("correct", SRun("switch(3,"
-				+ "array(1, 2), wrong,"
-				+ "array(3, 4), correct,"
-				+ "5, wrong)", null));
-	}
-
-	@Test(timeout = 10000)
-	public void testSwitchWithNestedArrayAsDefaultReturn() throws Exception {
-		assertEquals("{{correct}}", SRun("switch(5,"
-				+ "'case1', wrong,"
-				+ "'case2', also wrong,"
-				+ " array(array('correct')))", null));
-	}
-
 	@Test(timeout = 10000)
 	public void testSequals() throws Exception {
 		assertEquals("true", SRun("sequals(1, 1)", null));
 		assertEquals("false", SRun("sequals(1, '1')", null));
 		assertEquals("false", SRun("sequals(1, '2')", null));
-	}
-
-	@Test(timeout = 10000)
-	public void testIf2() throws Exception {
-		SRun("assign(@true, true)\n"
-				+ "if(@true, msg('Hello World!'))", fakePlayer);
-		verify(fakePlayer).sendMessage("Hello World!");
-	}
-
-	@Test
-	public void testSwitchWithRange() throws Exception {
-		SRun("switch(dyn(1)){"
-				+ "case 0..5: msg('yes')"
-				+ "case 6..10: msg('no')"
-				+ "}"
-				+ "switch(dyn(1)){"
-				+ "case 1..5: msg('yes')"
-				+ "}"
-				+ "switch(dyn(1)){"
-				+ "case 5..0: msg('yes')"
-				+ "}"
-				+ "switch(dyn(1)){"
-				+ "case 1..2: case 3..4: msg('yes')"
-				+ "}", fakePlayer);
-		verify(fakePlayer, times(4)).sendMessage("yes");
 	}
 
 	@Test
