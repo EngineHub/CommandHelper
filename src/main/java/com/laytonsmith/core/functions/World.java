@@ -1594,7 +1594,7 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {[world], gameRule, value} Sets the value of the gamerule for the specified world. If world is"
+			return "boolean {[world], gameRule, value} Sets the value of the gamerule for the specified world. If world is"
 					+ " not given the value is set for all worlds. Returns true if successful. gameRule can be "
 					+ StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
 		}

@@ -18,8 +18,16 @@ public enum MCInventoryType {
 	PLAYER,
 	WORKBENCH,
 	ANVIL,
-	BEACON,
-	SHULKER_BOX;
+	BEACON(false),
+	SHULKER_BOX,
+	BARREL,
+	BLAST_FURNACE,
+	LECTERN(false),
+	SMOKER,
+	LOOM(false),
+	CARTOGRAPHY(false),
+	GRINDSTONE(false),
+	STONECUTTER(false);
 
 	// Whether or not this inventory type can be created and used virtually
 	private final boolean canVirtualize;

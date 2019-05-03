@@ -110,7 +110,9 @@ public abstract class MCPotionEffectType<Concrete> extends DynamicEnum<MCPotionE
 		BAD_LUCK(27),
 		SLOW_FALLING(28),
 		CONDUIT_POWER(29),
-		DOLPHINS_GRACE(30);
+		DOLPHINS_GRACE(30, MCVersion.MC1_14),
+		BAD_OMEN(31, MCVersion.MC1_14),
+		HERO_OF_THE_VILLAGE(32, MCVersion.MC1_14);
 
 		private final int id;
 		private final MCVersion since;

@@ -394,7 +394,10 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public String getServerName() {
-		return s.getServerName();
+		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
+			return (String) ReflectionUtils.invokeMethod(Server.class, s, "getServerName");
+		}
+		return "";
 	}
 
 	@Override

@@ -361,4 +361,9 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public void setCollidable(boolean collidable) {
 		le.setCollidable(collidable);
 	}
+
+	@Override
+	public boolean isTameable() {
+		return false;
+	}
 }

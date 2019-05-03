@@ -8,6 +8,9 @@ public enum MCSpawnReason {
 	BUILD_IRONGOLEM,
 	BUILD_SNOWMAN,
 	BUILD_WITHER,
+	/**
+	 * Deprecated as of 1.14, no longer used.
+	 */
 	CHUNK_GEN,
 	/**
 	 * Spawned by plugins

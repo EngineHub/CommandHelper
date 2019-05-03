@@ -28,12 +28,12 @@ public class BukkitMCVillager extends BukkitMCAgeable implements MCVillager {
 
 	@Override
 	public MCProfession getProfession() {
-		return BukkitMCProfession.getConvertor().getAbstractedEnum(getHandle().getProfession());
+		return BukkitMCProfession.valueOfConcrete(getHandle().getProfession());
 	}
 
 	@Override
 	public void setProfession(MCProfession profession) {
-		getHandle().setProfession(BukkitMCProfession.getConvertor().getConcreteEnum(profession));
+		getHandle().setProfession((Villager.Profession) profession.getConcrete());
 	}
 
 	@Override
@@ -43,16 +43,6 @@ public class BukkitMCVillager extends BukkitMCAgeable implements MCVillager {
 
 	@Override
 	public MCMerchant asMerchant() {
-		return new BukkitMCMerchant(getHandle(), getHandle().getCareer().toString());
-	}
-
-	@Override
-	public int getRiches() {
-		return getHandle().getRiches();
-	}
-
-	@Override
-	public void setRiches(int riches) {
-		getHandle().setRiches(riches);
+		return new BukkitMCMerchant(getHandle(), getHandle().getProfession().name());
 	}
 }

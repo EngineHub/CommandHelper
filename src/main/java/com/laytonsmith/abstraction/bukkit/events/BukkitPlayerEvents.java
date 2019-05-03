@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCEntity;
@@ -59,7 +60,6 @@ import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
 import com.laytonsmith.annotations.abstraction;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.TravelAgent;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -318,22 +318,24 @@ public class BukkitPlayerEvents {
 
 		@Override
 		public void useTravelAgent(boolean useTravelAgent) {
-			p.useTravelAgent(useTravelAgent);
+			ReflectionUtils.invokeMethod(PlayerPortalEvent.class, p, "useTravelAgent",
+					new Class[]{boolean.class}, new Object[]{useTravelAgent});
 		}
 
 		@Override
 		public boolean useTravelAgent() {
-			return p.useTravelAgent();
+			return (boolean) ReflectionUtils.invokeMethod(PlayerPortalEvent.class, p, "useTravelAgent");
 		}
 
 		@Override
 		public MCTravelAgent getPortalTravelAgent() {
-			return new BukkitMCTravelAgent(p.getPortalTravelAgent());
+			return new BukkitMCTravelAgent(ReflectionUtils.invokeMethod(PlayerPortalEvent.class, p,
+					"getPortalTravelAgent"));
 		}
 
 		@Override
 		public void setPortalTravelAgent(MCTravelAgent travelAgent) {
-			p.setPortalTravelAgent((TravelAgent) travelAgent.getHandle());
+			ReflectionUtils.invokeMethod(p, "setPortalTravelAgent", travelAgent);
 		}
 
 		@Override

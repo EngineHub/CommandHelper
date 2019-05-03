@@ -165,4 +165,19 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	public void setDamage(int damage) {
 		((Damageable) im).setDamage(damage);
 	}
+
+	@Override
+	public boolean hasCustomModelData() {
+		return im.hasCustomModelData();
+	}
+
+	@Override
+	public int getCustomModelData() {
+		return im.getCustomModelData();
+	}
+
+	@Override
+	public void setCustomModelData(int id) {
+		im.setCustomModelData(id);
+	}
 }

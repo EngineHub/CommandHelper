@@ -14,12 +14,20 @@ public class BukkitMCTameable extends BukkitMCAgeable implements MCTameable {
 
 	public BukkitMCTameable(Entity t) {
 		super(t);
-		this.t = (Tameable) t;
+		// sometimes an entity was previously tameable in older versions
+		if(t instanceof Tameable) {
+			this.t = (Tameable) t;
+		}
 	}
 
 	public BukkitMCTameable(AbstractionObject a) {
 		super((LivingEntity) a.getHandle());
 		this.t = ((Tameable) a.getHandle());
+	}
+
+	@Override
+	public boolean isTameable() {
+		return t != null;
 	}
 
 	@Override

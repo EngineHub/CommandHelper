@@ -1,20 +1,14 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.AbstractionObject;
-import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCTravelAgent;
-import org.bukkit.TravelAgent;
 
 public class BukkitMCTravelAgent implements MCTravelAgent {
 
-	TravelAgent a;
+	Object a;
 
-	public BukkitMCTravelAgent(TravelAgent a) {
+	public BukkitMCTravelAgent(Object a) {
 		this.a = a;
-	}
-
-	public BukkitMCTravelAgent(AbstractionObject o) {
-		a = (TravelAgent) o;
 	}
 
 	@Override
@@ -34,48 +28,23 @@ public class BukkitMCTravelAgent implements MCTravelAgent {
 	}
 
 	@Override
-	public boolean createPortal(MCLocation location) {
-		return a.createPortal(((BukkitMCLocation) location).asLocation());
-	}
-
-	@Override
-	public MCLocation findOrCreate(MCLocation location) {
-		return new BukkitMCLocation(a.findOrCreate(((BukkitMCLocation) location).asLocation()));
-	}
-
-	@Override
-	public MCLocation findPortal(MCLocation location) {
-		return new BukkitMCLocation(a.findPortal(((BukkitMCLocation) location).asLocation()));
-	}
-
-	@Override
-	public boolean getCanCreatePortal() {
-		return a.getCanCreatePortal();
-	}
-
-	@Override
-	public void setCanCreatePortal(boolean create) {
-		a.setCanCreatePortal(create);
-	}
-
-	@Override
 	public int getCreationRadius() {
-		return a.getCreationRadius();
+		return (int) ReflectionUtils.invokeMethod(a, "getCreationRadius");
 	}
 
 	@Override
-	public MCTravelAgent setCreationRadius(int radius) {
-		return new BukkitMCTravelAgent(a.setCreationRadius(radius));
+	public void setCreationRadius(int radius) {
+		ReflectionUtils.invokeMethod(a, "setCreationRadius", new Class[]{int.class}, new Object[]{radius});
 	}
 
 	@Override
 	public int getSearchRadius() {
-		return a.getSearchRadius();
+		return (int) ReflectionUtils.invokeMethod(a, "getSearchRadius");
 	}
 
 	@Override
-	public MCTravelAgent setSearchRadius(int radius) {
-		return new BukkitMCTravelAgent(a.setSearchRadius(radius));
+	public void setSearchRadius(int radius) {
+		ReflectionUtils.invokeMethod(a, "setSearchRadius", new Class[]{int.class}, new int[]{radius});
 	}
 
 	@Override

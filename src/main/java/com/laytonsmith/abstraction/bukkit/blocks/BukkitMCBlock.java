@@ -130,8 +130,7 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 
 	@Override
 	public boolean isSign() {
-		Material type = b.getType();
-		return type == Material.SIGN || type == Material.WALL_SIGN;
+		return b.getState() instanceof Sign;
 	}
 
 	@Override
@@ -198,6 +197,11 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	}
 
 	@Override
+	public boolean isPassable() {
+		return b.isPassable();
+	}
+
+	@Override
 	public MCLocation getLocation() {
 		return new BukkitMCLocation(b.getLocation());
 	}
@@ -210,6 +214,16 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	@Override
 	public int getLightLevel() {
 		return b.getLightLevel();
+	}
+
+	@Override
+	public int getLightFromSky() {
+		return b.getLightFromSky();
+	}
+
+	@Override
+	public int getLightFromBlocks() {
+		return b.getLightFromBlocks();
 	}
 
 	@Override
