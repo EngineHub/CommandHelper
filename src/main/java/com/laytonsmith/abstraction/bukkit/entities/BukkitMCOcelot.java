@@ -31,7 +31,7 @@ public class BukkitMCOcelot extends BukkitMCTameable implements MCOcelot {
 	@Override
 	public boolean isSitting() {
 		if(o instanceof Sittable) {
-			return (boolean) ReflectionUtils.invokeMethod(Ocelot.class, o, "isSitting");
+			return (boolean) ReflectionUtils.invokeMethod(Sittable.class, o, "isSitting");
 		}
 		return false;
 	}
@@ -44,7 +44,7 @@ public class BukkitMCOcelot extends BukkitMCTameable implements MCOcelot {
 	@Override
 	public void setSitting(boolean sitting) {
 		if(o instanceof Sittable) {
-			ReflectionUtils.invokeMethod(Ocelot.class, o, "setSitting",
+			ReflectionUtils.invokeMethod(Sittable.class, o, "setSitting",
 					new Class[]{boolean.class}, new Object[]{sitting});
 		}
 	}

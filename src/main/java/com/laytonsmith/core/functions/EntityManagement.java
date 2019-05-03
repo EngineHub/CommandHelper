@@ -1901,8 +1901,10 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_MINECART_OFFSET, new CInt(commandminecart.getDisplayBlockOffset(), t), t);
 					break;
 				case MUSHROOM_COW:
-					MCMushroomCow cow = (MCMushroomCow) entity;
-					specArray.set(entity_spec.KEY_MUSHROOM_COW_TYPE, cow.getVariant().name(), t);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
+						MCMushroomCow cow = (MCMushroomCow) entity;
+						specArray.set(entity_spec.KEY_MUSHROOM_COW_TYPE, cow.getVariant().name(), t);
+					}
 					break;
 				case OCELOT:
 					if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
@@ -2011,6 +2013,7 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_GENERIC_SITTING, CBoolean.get(wolf.isSitting()), t);
 					break;
 				case ZOMBIE:
+				case DROWNED:
 				case HUSK:
 					MCZombie zombie = (MCZombie) entity;
 					specArray.set(entity_spec.KEY_ZOMBIE_BABY, CBoolean.get(zombie.isBaby()), t);
@@ -2781,18 +2784,20 @@ public class EntityManagement {
 					}
 					break;
 				case MUSHROOM_COW:
-					MCMushroomCow cow = (MCMushroomCow) entity;
-					for(String index : specArray.stringKeySet()) {
-						switch(index.toLowerCase()) {
-							case entity_spec.KEY_MUSHROOM_COW_TYPE:
-								try {
-									cow.setVariant(MCMushroomCowType.valueOf(specArray.get(index, t).val().toUpperCase()));
-								} catch (IllegalArgumentException exception) {
-									throw new CREFormatException("Invalid mushroom cow type: " + specArray.get(index, t).val(), t);
-								}
-								break;
-							default:
-								throwException(index, t);
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
+						MCMushroomCow cow = (MCMushroomCow) entity;
+						for(String index : specArray.stringKeySet()) {
+							switch(index.toLowerCase()) {
+								case entity_spec.KEY_MUSHROOM_COW_TYPE:
+									try {
+										cow.setVariant(MCMushroomCowType.valueOf(specArray.get(index, t).val().toUpperCase()));
+									} catch (IllegalArgumentException exception) {
+										throw new CREFormatException("Invalid mushroom cow type: " + specArray.get(index, t).val(), t);
+									}
+									break;
+								default:
+									throwException(index, t);
+							}
 						}
 					}
 					break;
@@ -3151,6 +3156,7 @@ public class EntityManagement {
 					}
 					break;
 				case ZOMBIE:
+				case DROWNED:
 				case HUSK:
 					MCZombie zombie = (MCZombie) entity;
 					for(String index : specArray.stringKeySet()) {

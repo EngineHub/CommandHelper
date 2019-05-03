@@ -226,7 +226,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_SNOWMAN_DERP%: With derp mode set to true the snowman wears no pumpkin
 |-
-| SPLASH_POTION, LINGERING_POTION
+| SPLASH_POTION, LINGERING_POTION (removed in 1.14, use SPLASH_POTION)
 | 
 * %KEY_SPLASH_POTION_ITEM%: The item for the thrown potion.
 |-
