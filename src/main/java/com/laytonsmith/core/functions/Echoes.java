@@ -29,7 +29,6 @@ import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
-import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Collections;
@@ -44,79 +43,6 @@ public class Echoes {
 
 	public static String docs() {
 		return "These functions allow you to echo information to the screen";
-	}
-
-	@api(environments = {CommandHelperEnvironment.class})
-	@noboilerplate
-	public static class die extends AbstractFunction implements Optimizable {
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{Integer.MAX_VALUE};
-		}
-
-		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException {
-			if(args.length == 0) {
-				throw new CancelCommandException("", t);
-			}
-			StringBuilder b = new StringBuilder();
-			for(Mixed arg : args) {
-				b.append(arg.val());
-			}
-			try {
-				if(env.hasEnv(CommandHelperEnvironment.class)) {
-					Static.SendMessage(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), b.toString(), t);
-				} else {
-					String mes = Static.MCToANSIColors(b.toString());
-					if(mes.contains("\033")) {
-						//We have terminal colors, we need to reset them at the end
-						mes += TermColors.reset();
-					}
-					StreamUtils.GetSystemOut().println(mes);
-				}
-			} finally {
-				throw new CancelCommandException("", t);
-			}
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{};
-		}
-
-		@Override
-		public String getName() {
-			return "die";
-		}
-
-		@Override
-		public String docs() {
-			return "nothing {[var1, var2...,]} Kills the command immediately, without completing it. A message is"
-					+ " optional, but if provided, displayed to the user.";
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public MSVersion since() {
-			return MSVersion.V3_0_1;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(
-					OptimizationOption.TERMINAL
-			);
-		}
 	}
 
 	//Technically it needs CommandHelperEnvironment, but we have special exception handling in case we're running

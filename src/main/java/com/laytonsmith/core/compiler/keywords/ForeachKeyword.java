@@ -8,7 +8,7 @@ import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.DataHandling;
+import com.laytonsmith.core.functions.ControlFlow;
 import java.util.List;
 
 /**
@@ -17,7 +17,7 @@ import java.util.List;
 @Keyword.keyword("foreach")
 public class ForeachKeyword extends Keyword {
 
-	private static final String FOREACHELSE = new DataHandling.foreachelse().getName();
+	private static final String FOREACHELSE = new ControlFlow.foreachelse().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {

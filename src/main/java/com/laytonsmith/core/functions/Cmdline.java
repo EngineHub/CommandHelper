@@ -344,7 +344,7 @@ public class Cmdline {
 			if(Static.InCmdLine(environment, true)) {
 				System.exit(exit_code);
 			}
-			return new Echoes.die().exec(t, environment, args);
+			return new ControlFlow.die().exec(t, environment, args);
 		}
 
 		@Override
