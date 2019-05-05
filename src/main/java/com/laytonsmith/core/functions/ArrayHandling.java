@@ -62,7 +62,7 @@ public class ArrayHandling {
 	public static String docs() {
 		return "This class contains functions that provide a way to manipulate arrays. To create an array, use the"
 				+ " <code>array</code> function. For more detailed information on array usage, see the page on"
-				+ " [[CommandHelper/Arrays|arrays]]";
+				+ " [[Arrays|arrays]]";
 	}
 
 	@api

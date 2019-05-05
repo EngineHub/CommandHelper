@@ -44,7 +44,7 @@ import java.util.logging.Logger;
 public class Persistence {
 
 	public static String docs() {
-		return "Allows scripts to store data from execution to execution. See the guide on [[CommandHelper/Persistence|persistence]] for more information."
+		return "Allows scripts to store data from execution to execution. See the guide on [[Persistence|persistence]] for more information."
 				+ " In all the functions, you may send multiple arguments for the key, which will automatically"
 				+ " be concatenated with a period (the namespace separator). No magic happens here, you can"
 				+ " put periods yourself, or combine manually namespaced values or automatically namespaced values"

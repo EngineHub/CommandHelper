@@ -8,7 +8,7 @@ The query is the SQL query itself, with question marks (?) that represent input 
 input parameters themselves. Compile time checking is done, if possible, to ensure that the correct number of 
 parameters is passed, based on the number of question marks in the query. It is never a good idea to dynamically 
 create the query, so a compiler warning is issued if a query is dynamically being built. 
-See [[CommandHelper/Staged/SQL|this page]] for more details about the SQL module.
+See [[SQL|this page]] for more details about the SQL module.
 
 For SELECT queries, an array of associative arrays is returned. It is not guaranteed that the arrays themselves are 
 editable, so this returned array should be considered \"read-only\". Optimizations will be added later to make this 

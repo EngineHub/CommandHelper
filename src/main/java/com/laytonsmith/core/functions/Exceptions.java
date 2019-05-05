@@ -89,7 +89,7 @@ public class Exceptions {
 					+ " If the exception type matches one of the values listed, the exception will be caught, otherwise, the exception will continue up the stack."
 					+ " If exceptionTypes is missing, it will catch all exceptions."
 					+ " PLEASE NOTE! This function will not catch exceptions thrown by CommandHelper, only built in exceptions. "
-					+ " Please see [[CommandHelper/Exceptions|the wiki page on exceptions]] for more information about what possible "
+					+ " Please see [[Exceptions|the wiki page on exceptions]] for more information about what possible "
 					+ " exceptions can be thrown and where, and examples.";
 		}
 

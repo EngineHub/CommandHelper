@@ -385,7 +385,7 @@ public class ControlFlow {
 		public String docs() {
 			return "mixed {value, [equals, code]..., [defaultCode]} Provides a switch statement. If none of the"
 					+ " conditions match, and no default is provided, void is returned."
-					+ " See the documentation on [[CommandHelper/Logic|Logic]] for more information. ----"
+					+ " See the documentation on [[Logic|Logic]] for more information. ----"
 					+ " In addition, slices may be used to indicate ranges of integers that should trigger the"
 					+ " specified case. Slices embedded in an array are fine as well. Switch statements also support"
 					+ " brace/case/default syntax, as in most languages, althrough unlike most languages, fallthrough"
@@ -1277,7 +1277,7 @@ public class ControlFlow {
 					+ " may be used after the foreach, which will only run if the array provided is empty, that is, the"
 					+ " loop code would never run. This provides a good way to provide \"default\" handling."
 					+ " Array modifications while iterating are supported, and are well defined."
-					+ " See [[CommandHelper/Staged/Array_iteration|the page documenting array iterations]]"
+					+ " See [[Array_iteration|the page documenting array iterations]]"
 					+ " for full details.";
 		}
 

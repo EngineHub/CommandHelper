@@ -70,7 +70,7 @@ public class Reflection {
 		return "This class of functions allows scripts to hook deep into the interpreter itself,"
 				+ " and get meta information about the operations of a script. This is useful for"
 				+ " debugging, testing, and ultra dynamic scripting. See the"
-				+ " [[CommandHelper/Reflection|guide to reflection]] on the wiki for more"
+				+ " [[Reflection|guide to reflection]] on the wiki for more"
 				+ " details. In order to make the most of these functions, you should familiarize"
 				+ " yourself with the general workings of the language. These functions explore"
 				+ " extremely advanced concepts, and should normally not be used; especially"

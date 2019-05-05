@@ -1777,7 +1777,7 @@ public class DataHandling {
 					+ " only stored in memory, it isn't retained during a serialization operation."
 					+ " Also, the special variable @arguments is automatically created for you, and contains"
 					+ " an array of all the arguments passed to the closure, much like procedures."
-					+ " See the wiki article on [[CommandHelper/Staged/Closures|closures]] for more details"
+					+ " See the wiki article on [[Closures|closures]] for more details"
 					+ " and examples.";
 		}
 
@@ -1925,7 +1925,7 @@ public class DataHandling {
 					+ " from the parent code."
 					+ " The special variable @arguments is automatically created for you, and contains"
 					+ " an array of all the arguments passed to the closure, much like procedures."
-					+ " See the wiki article on [[CommandHelper/Staged/Closures|closures]] for more details"
+					+ " See the wiki article on [[Closures|closures]] for more details"
 					+ " and examples.";
 		}
 

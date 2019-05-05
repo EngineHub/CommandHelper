@@ -15,7 +15,7 @@ contribute. The code in CommandHelper is fairly well organized, follows good
 [http://en.wikipedia.org/wiki/Software_design_pattern software engineering design patterns], is unit tested, abstracted, 
 and is generally geared towards long term stability and maintainability. Generally speaking, it is not important to 
 fully understand the entirety of the code base before working on it, but you'll need to understand the 
-[[CommandHelper/Staged/Architecture|Basic Architecture]] before you'll be able to understand where to even begin. The 
+[[Architecture|Basic Architecture]] before you'll be able to understand where to even begin. The 
 purpose of this article is not to help you understand how to add code to the project, but instead is meant to help you 
 get set up and building the code locally.
 
