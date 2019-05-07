@@ -154,9 +154,15 @@ public class ProfilesImpl implements Profiles {
 		if(!profileTypes.containsKey(type)) {
 			throw new InvalidProfileException("Unknown type \"" + type + "\"");
 		}
-		Profile profile = ReflectionUtils.newInstance(profileTypes.get(type), new Class[]{String.class, Map.class},
-				new Object[]{id, data});
-		return profile;
+		try {
+			return ReflectionUtils.newInstance(profileTypes.get(type), new Class[]{String.class, Map.class},
+					new Object[]{id, data});
+		} catch (ReflectionUtils.ReflectionException ex) {
+			if(ex.getCause().getCause() instanceof InvalidProfileException) {
+				throw (InvalidProfileException) ex.getCause().getCause();
+			}
+			throw ex;
+		}
 	}
 
 	/**
