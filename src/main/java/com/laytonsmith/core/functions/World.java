@@ -1631,6 +1631,55 @@ public class World {
 	}
 
 	@api
+	public static class set_keep_spawn_loaded extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_keep_spawn_loaded";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {world, boolean} Sets whether or not the spawn chunks in the given world should stay loaded.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCWorld world = Static.getServer().getWorld(args[0].val());
+			if(world == null) {
+				throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
+			}
+			world.setKeepSpawnInMemory(ArgumentValidation.getBooleanObject(args[1], t));
+			return CVoid.VOID;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
 	public static class location_shift extends AbstractFunction {
 
 		@Override
