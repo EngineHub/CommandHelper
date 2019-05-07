@@ -16,6 +16,8 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -51,20 +53,37 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 
 	@Override
 	public double getMaxHealth() {
-		// Deprecated in 1.11
-		return le.getMaxHealth();
+		AttributeInstance maxHealth = le.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+		if(maxHealth == null) {
+			return le.getHealth();
+		}
+		return maxHealth.getValue();
 	}
 
 	@Override
 	public void setMaxHealth(double health) {
-		// Deprecated in 1.11
-		le.setMaxHealth(health);
+		AttributeInstance maxHealth = le.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+		if(maxHealth == null) {
+			le.setHealth(health);
+			return;
+		}
+		maxHealth.setBaseValue(health);
+		if(le.getHealth() > health) {
+			le.setHealth(health);
+		}
 	}
 
 	@Override
 	public void resetMaxHealth() {
-		// Deprecated in 1.11
-		le.resetMaxHealth();
+		AttributeInstance maxHealth = le.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+		if(maxHealth == null) {
+			return;
+		}
+		double defaultHealth = maxHealth.getDefaultValue();
+		maxHealth.setBaseValue(defaultHealth);
+		if(le.getHealth() > defaultHealth) {
+			le.setHealth(defaultHealth);
+		}
 	}
 
 	@Override
