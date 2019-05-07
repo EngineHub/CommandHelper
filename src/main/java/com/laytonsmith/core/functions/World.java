@@ -453,7 +453,7 @@ public class World {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREFormatException.class,
-				CREInvalidWorldException.class, CRENotFoundException.class};
+					CREInvalidWorldException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -537,9 +537,10 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {x, z, [world]| locationArray, [world]} Regenerate the chunk for a world."
+			return "boolean {x, z, [world]| locationArray, [world]} Regenerate the chunk for a world."
 					+ " The current player's world is used if one is not provided. Beware that this is destructive!"
-					+ " Any data in this chunk will be lost!";
+					+ " Any data in this chunk will be lost! Returns true if the operation was successful."
+					+ " This function is deprecated. Results will vary per platform and may not work at all.";
 		}
 
 		@Override
@@ -606,7 +607,11 @@ public class World {
 				}
 			}
 
-			return CBoolean.get(world.regenerateChunk(x, z));
+			try {
+				return CBoolean.get(world.regenerateChunk(x, z));
+			} catch (UnsupportedOperationException ex) {
+				return CBoolean.FALSE;
+			}
 		}
 	}
 
@@ -1064,7 +1069,7 @@ public class World {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREFormatException.class, CREInsufficientArgumentsException.class,
-				CRENotFoundException.class};
+					CRENotFoundException.class};
 		}
 
 		@Override
@@ -1180,8 +1185,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment,
-				Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = Static.getServer().getWorld(args[0].val());
 			if(w == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
@@ -1899,7 +1903,7 @@ public class World {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRERangeException.class, CREFormatException.class, CREInvalidWorldException.class,
-				CREIllegalArgumentException.class};
+					CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -2094,7 +2098,7 @@ public class World {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class,
-				CRERangeException.class};
+					CRERangeException.class};
 		}
 
 		@Override
