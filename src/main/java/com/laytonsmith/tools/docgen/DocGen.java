@@ -781,6 +781,8 @@ public class DocGen {
 					desc = topDesc = parts[0].trim();
 					extendedDesc = parts[1].trim();
 				}
+			} else {
+				throw new IllegalArgumentException("Could not generate DocInfo from string: " + doc);
 			}
 			args = originalArgs.replaceAll("\\|", "<hr />").replaceAll("\\[(.*?)\\]", "<strong>[</strong>$1<strong>]</strong>");
 		}

@@ -1473,7 +1473,8 @@ public class Meta {
 
 		@Override
 		public String docs() {
-			return "Returns the name of the item. For now, only works with variables. For instance, nameof(@var)"
+			return "string {component} Returns the name of the item. For now, only works with variables."
+					+ " For instance, nameof(@var)"
 					+ " returns the string \"@var\". This is useful for avoiding hardcoding of strings of items"
 					+ " that are refactorable. This allows tools to properly refactor, without needing to manually"
 					+ " update strings that contain the names of variables or other refactorable items. This is"
