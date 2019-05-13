@@ -1120,8 +1120,11 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "void {[name], [ivar...], procCode} Creates a new user defined procedure (also known as \"function\") that can be called later in code. Please see the more detailed"
-					+ " documentation on procedures for more information. In general, brace syntax and keyword usage is preferred:"
+			return "void {procName, [params...], procCode} Creates a new user defined procedure (also known as"
+					+ " \"function\"), with the given name and parameters, that can be called later in code."
+					+ " The name of the procedure must be a constant and its parameters must be variables."
+					+ " Please see the more detailed documentation on procedures for more information."
+					+ " In general, brace syntax and keyword usage is preferred:"
 					+ " proc _myProc(@a, @b){ procCode(@a, @b); }";
 		}
 
@@ -1767,7 +1770,7 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "closure {[varNames...,] code} Returns a closure on the provided code. A closure is"
+			return "closure {[params...], code} Returns a closure on the provided code. A closure is"
 					+ " a datatype that represents some code as code, not the results of some"
 					+ " code after it is run. Code placed in a closure can be used as"
 					+ " a string, or executed by other functions using the execute() function."
@@ -1913,7 +1916,7 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "iclosure {[varNames...,] code} Returns a scope isolated closure on the provided code. An iclosure is"
+			return "iclosure {[params...], code} Returns a scope isolated closure on the provided code. An iclosure is"
 					+ " a datatype that represents some code as code, not the results of some"
 					+ " code after it is run. Code placed in an iclosure can be used as"
 					+ " a string, or executed by other functions using the execute() function."
@@ -2023,7 +2026,7 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "closure {[varNames...], code} Returns a non-linking closure on the provided code. The same rules apply"
+			return "closure {[params...], code} Returns a non-linking closure on the provided code. The same rules apply"
 					+ " for closures, except the top level internal code does not check for proper linking at compile time,"
 					+ " and instead links at runtime. Lexer errors and some other compile time checks ARE done however, but"
 					+ " functions are not optimized or linked. This is used for remote code execution, since the remote platform"
@@ -2053,7 +2056,7 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "mixed {[values...,] closure} Executes the given closure. You can also send arguments"
+			return "mixed {[values...], closure} Executes the given closure. You can also send arguments"
 					+ " to the closure, which it may or may not use, depending on the particular closure's"
 					+ " definition. If the closure returns a value with return(), then that value will"
 					+ " be returned with execute. Otherwise, void is returned.";
@@ -2108,7 +2111,7 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "mixed {player, label, [values...,] closure} Executes the given closure in the context of a given"
+			return "mixed {player, label, [values...], closure} Executes the given closure in the context of a given"
 					+ " player. A closure that runs player(), for instance, would return the specified player's name."
 					+ " The label argument sets the permission label that this closure will use. If null is given,"
 					+ " the current label will be used, like with execute().";
