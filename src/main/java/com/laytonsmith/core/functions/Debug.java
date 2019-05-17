@@ -657,7 +657,7 @@ public class Debug {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			File file = new File("dump.bin");
+			File file = new File("dump.hprof");
 			try {
 				HeapDumper.dumpHeap(file.getAbsolutePath(), true);
 			} catch (Throwable tt) {
@@ -678,7 +678,7 @@ public class Debug {
 
 		@Override
 		public String docs() {
-			return "void {} Creates a heap dump file, and places it in the working directory, as \"dump.bin\". This might"
+			return "void {} Creates a heap dump file, and places it in the working directory, as \"dump.hprof\". This might"
 					+ " throw a PluginInternalException if the heap dump tools aren't available in your JVM. Once dumped,"
 					+ " the heap dump can be analyzed using tools such as jhat. More information about jhat can be found"
 					+ " [http://docs.oracle.com/javase/6/docs/technotes/tools/share/jhat.html here].";
