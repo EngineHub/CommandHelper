@@ -32,4 +32,14 @@ public class BukkitMCArrow extends BukkitMCProjectile implements MCArrow {
 	public void setCritical(boolean critical) {
 		this.arrow.setCritical(critical);
 	}
+
+	@Override
+	public double getDamage() {
+		return this.arrow.getDamage();
+	}
+
+	@Override
+	public void setDamage(double damage) {
+		this.arrow.setDamage(damage);
+	}
 }

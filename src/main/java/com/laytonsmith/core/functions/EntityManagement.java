@@ -1732,6 +1732,7 @@ public class EntityManagement {
 					MCArrow arrow = (MCArrow) entity;
 					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(arrow.isCritical()), t);
 					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(arrow.getKnockbackStrength(), t), t);
+					specArray.set(entity_spec.KEY_ARROW_DAMAGE, new CDouble(arrow.getDamage(), t), t);
 					if(arrow instanceof MCTippedArrow) {
 						MCTippedArrow tipped = (MCTippedArrow) arrow;
 						CArray tippedmeta = CArray.GetAssociativeArray(t);
@@ -1985,6 +1986,7 @@ public class EntityManagement {
 					MCTippedArrow tippedarrow = (MCTippedArrow) entity;
 					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(tippedarrow.isCritical()), t);
 					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(tippedarrow.getKnockbackStrength(), t), t);
+					specArray.set(entity_spec.KEY_ARROW_DAMAGE, new CDouble(tippedarrow.getDamage(), t), t);
 					CArray tippedmeta = CArray.GetAssociativeArray(t);
 					CArray tippedeffects = ObjectGenerator.GetGenerator().potions(tippedarrow.getCustomEffects(), t);
 					tippedmeta.set("potions", tippedeffects, t);
@@ -2047,6 +2049,7 @@ public class EntityManagement {
 		private static final String KEY_AREAEFFECTCLOUD_WAITTIME = "waittime";
 		private static final String KEY_ARROW_CRITICAL = "critical";
 		private static final String KEY_ARROW_KNOCKBACK = "knockback";
+		private static final String KEY_ARROW_DAMAGE = "damage";
 		private static final String KEY_ARMORSTAND_ARMS = "arms";
 		private static final String KEY_ARMORSTAND_BASEPLATE = "baseplate";
 		private static final String KEY_ARMORSTAND_GRAVITY = "gravity";
@@ -2256,6 +2259,13 @@ public class EntityManagement {
 								} else {
 									arrow.setKnockbackStrength(k);
 								}
+								break;
+							case entity_spec.KEY_ARROW_DAMAGE:
+								double d = Static.getDouble32(specArray.get(index, t), t);
+								if(d < 0) {
+									throw new CRERangeException("Damage cannot be negative.", t);
+								}
+								arrow.setDamage(d);
 								break;
 							case entity_spec.KEY_TIPPEDARROW_POTIONMETA:
 								if(!(arrow instanceof MCTippedArrow)) {
@@ -3041,6 +3051,13 @@ public class EntityManagement {
 								} else {
 									tippedarrow.setKnockbackStrength(k);
 								}
+								break;
+							case entity_spec.KEY_ARROW_DAMAGE:
+								double d = Static.getDouble32(specArray.get(index, t), t);
+								if(d < 0) {
+									throw new CRERangeException("Damage cannot be negative.", t);
+								}
+								tippedarrow.setDamage(d);
 								break;
 							case entity_spec.KEY_TIPPEDARROW_POTIONMETA:
 								Mixed c = specArray.get(index, t);

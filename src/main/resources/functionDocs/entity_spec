@@ -21,8 +21,9 @@ array {entityID} Returns an associative array containing all the data of the giv
 |-
 | ARROW, TRIDENT
 | 
-* %KEY_ARROW_CRITICAL%: If this arrow is critical.
-* %KEY_ARROW_KNOCKBACK%: The knockback strength.
+* %KEY_ARROW_CRITICAL%: If this arrow is critical. (boolean)
+* %KEY_ARROW_KNOCKBACK%: The knockback strength. (double)
+* %KEY_ARROW_DAMAGE%: The amount of damage. (double)
 * %KEY_TIPPEDARROW_POTIONMETA%: An associative array with a "base" potion array and a "potions" array of effect arrays for a tipped arrow.
 |-
 | ARMOR_STAND
@@ -232,9 +233,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |-
 | TIPPED_ARROW (removed in 1.14, use ARROW)
 |
+* %KEY_ARROW_CRITICAL%: If this arrow is critical. (boolean)
+* %KEY_ARROW_KNOCKBACK%: The knockback strength. (double)
+* %KEY_ARROW_DAMAGE%: The amount of damage. (double)
 * %KEY_TIPPEDARROW_POTIONMETA%: An associative array with a "base" potion array and a "potions" array of effect arrays for a tipped arrow.
-* %KEY_ARROW_CRITICAL%: If this arrow is critical.
-* %KEY_ARROW_KNOCKBACK%: The knockback strength.
 |-
 | TROPICAL_FISH
 |

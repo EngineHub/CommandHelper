@@ -9,4 +9,8 @@ public interface MCArrow extends MCProjectile {
 	boolean isCritical();
 
 	void setCritical(boolean critical);
+
+	double getDamage();
+
+	void setDamage(double damage);
 }
