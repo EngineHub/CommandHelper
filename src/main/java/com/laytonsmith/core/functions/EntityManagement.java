@@ -65,9 +65,11 @@ import com.laytonsmith.abstraction.entities.MCShulker;
 import com.laytonsmith.abstraction.entities.MCShulkerBullet;
 import com.laytonsmith.abstraction.entities.MCSlime;
 import com.laytonsmith.abstraction.entities.MCSnowman;
+import com.laytonsmith.abstraction.entities.MCSpectralArrow;
 import com.laytonsmith.abstraction.entities.MCTNT;
 import com.laytonsmith.abstraction.entities.MCThrownPotion;
 import com.laytonsmith.abstraction.entities.MCTippedArrow;
+import com.laytonsmith.abstraction.entities.MCTrident;
 import com.laytonsmith.abstraction.entities.MCTropicalFish;
 import com.laytonsmith.abstraction.entities.MCVillager;
 import com.laytonsmith.abstraction.entities.MCWitherSkull;
@@ -1728,17 +1730,15 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_AREAEFFECTCLOUD_WAITTIME, new CInt(cloud.getWaitTime(), t), t);
 					break;
 				case ARROW:
-				case TRIDENT:
 					MCArrow arrow = (MCArrow) entity;
 					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(arrow.isCritical()), t);
 					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(arrow.getKnockbackStrength(), t), t);
 					specArray.set(entity_spec.KEY_ARROW_DAMAGE, new CDouble(arrow.getDamage(), t), t);
-					if(arrow instanceof MCTippedArrow) {
-						MCTippedArrow tipped = (MCTippedArrow) arrow;
+					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
 						CArray tippedmeta = CArray.GetAssociativeArray(t);
-						CArray tippedeffects = ObjectGenerator.GetGenerator().potions(tipped.getCustomEffects(), t);
+						CArray tippedeffects = ObjectGenerator.GetGenerator().potions(arrow.getCustomEffects(), t);
 						tippedmeta.set("potions", tippedeffects, t);
-						tippedmeta.set("base", ObjectGenerator.GetGenerator().potionData(tipped.getBasePotionData(), t), t);
+						tippedmeta.set("base", ObjectGenerator.GetGenerator().potionData(arrow.getBasePotionData(), t), t);
 						specArray.set(entity_spec.KEY_TIPPEDARROW_POTIONMETA, tippedmeta, t);
 					}
 					break;
@@ -1977,6 +1977,13 @@ public class EntityManagement {
 					MCSnowman snowman = (MCSnowman) entity;
 					specArray.set(entity_spec.KEY_SNOWMAN_DERP, CBoolean.GenerateCBoolean(snowman.isDerp(), t), t);
 					break;
+				case SPECTRAL_ARROW:
+					MCSpectralArrow spectral = (MCSpectralArrow) entity;
+					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(spectral.isCritical()), t);
+					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(spectral.getKnockbackStrength(), t), t);
+					specArray.set(entity_spec.KEY_ARROW_DAMAGE, new CDouble(spectral.getDamage(), t), t);
+					specArray.set(entity_spec.KEY_SPECTRAL_ARROW_GLOWING_TICKS, new CInt(spectral.getGlowingTicks(), t), t);
+					break;
 				case SPLASH_POTION:
 				case LINGERING_POTION: // 1.13 only
 					MCThrownPotion potion = (MCThrownPotion) entity;
@@ -1992,6 +1999,12 @@ public class EntityManagement {
 					tippedmeta.set("potions", tippedeffects, t);
 					tippedmeta.set("base", ObjectGenerator.GetGenerator().potionData(tippedarrow.getBasePotionData(), t), t);
 					specArray.set(entity_spec.KEY_TIPPEDARROW_POTIONMETA, tippedmeta, t);
+					break;
+				case TRIDENT:
+					MCTrident trident = (MCTrident) entity;
+					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(trident.isCritical()), t);
+					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(trident.getKnockbackStrength(), t), t);
+					specArray.set(entity_spec.KEY_ARROW_DAMAGE, new CDouble(trident.getDamage(), t), t);
 					break;
 				case TROPICAL_FISH:
 					MCTropicalFish fish = (MCTropicalFish) entity;
@@ -2112,6 +2125,7 @@ public class EntityManagement {
 		private static final String KEY_SHULKERBULLET_TARGET = "target";
 		private static final String KEY_SLIME_SIZE = "size";
 		private static final String KEY_SNOWMAN_DERP = "derp";
+		private static final String KEY_SPECTRAL_ARROW_GLOWING_TICKS = "glowingticks";
 		private static final String KEY_SPLASH_POTION_ITEM = "item";
 		private static final String KEY_TIPPEDARROW_POTIONMETA = "potionmeta";
 		private static final String KEY_TROPICALFISH_COLOR = "color";
@@ -2245,7 +2259,6 @@ public class EntityManagement {
 					}
 					break;
 				case ARROW:
-				case TRIDENT:
 					MCArrow arrow = (MCArrow) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
@@ -2268,7 +2281,7 @@ public class EntityManagement {
 								arrow.setDamage(d);
 								break;
 							case entity_spec.KEY_TIPPEDARROW_POTIONMETA:
-								if(!(arrow instanceof MCTippedArrow)) {
+								if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
 									throwException(index, t);
 								}
 								MCTippedArrow tipped = (MCTippedArrow) arrow;
@@ -3019,6 +3032,36 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case SPECTRAL_ARROW:
+					MCSpectralArrow spectral = (MCSpectralArrow) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_ARROW_CRITICAL:
+								spectral.setCritical(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_ARROW_KNOCKBACK:
+								int k = Static.getInt32(specArray.get(index, t), t);
+								if(k < 0) {
+									throw new CRERangeException("Knockback can not be negative.", t);
+								} else {
+									spectral.setKnockbackStrength(k);
+								}
+								break;
+							case entity_spec.KEY_ARROW_DAMAGE:
+								double d = Static.getDouble32(specArray.get(index, t), t);
+								if(d < 0) {
+									throw new CRERangeException("Damage cannot be negative.", t);
+								}
+								spectral.setDamage(d);
+								break;
+							case entity_spec.KEY_SPECTRAL_ARROW_GLOWING_TICKS:
+								spectral.setGlowingTicks(Static.getInt32(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case LINGERING_POTION:
 				case SPLASH_POTION:
 					MCThrownPotion potion = (MCThrownPotion) entity;
@@ -3083,6 +3126,33 @@ public class EntityManagement {
 								} else {
 									throw new CRECastException("TippedArrow potion meta must be an array", t);
 								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case TRIDENT:
+					MCTrident trident = (MCTrident) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_ARROW_CRITICAL:
+								trident.setCritical(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_ARROW_KNOCKBACK:
+								int k = Static.getInt32(specArray.get(index, t), t);
+								if(k < 0) {
+									throw new CRERangeException("Knockback can not be negative.", t);
+								} else {
+									trident.setKnockbackStrength(k);
+								}
+								break;
+							case entity_spec.KEY_ARROW_DAMAGE:
+								double d = Static.getDouble32(specArray.get(index, t), t);
+								if(d < 0) {
+									throw new CRERangeException("Damage cannot be negative.", t);
+								}
+								trident.setDamage(d);
 								break;
 							default:
 								throwException(index, t);

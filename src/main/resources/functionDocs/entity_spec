@@ -19,7 +19,7 @@ array {entityID} Returns an associative array containing all the data of the giv
 * %KEY_AREAEFFECTCLOUD_SOURCE%: The source of the cloud. Can be living entity, dispenser location array, or null.
 * %KEY_AREAEFFECTCLOUD_WAITTIME%: The age of the cloud in ticks before effects can be applied.
 |-
-| ARROW, TRIDENT
+| ARROW
 | 
 * %KEY_ARROW_CRITICAL%: If this arrow is critical. (boolean)
 * %KEY_ARROW_KNOCKBACK%: The knockback strength. (double)
@@ -227,6 +227,13 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_SNOWMAN_DERP%: With derp mode set to true the snowman wears no pumpkin
 |-
+| SPECTRAL_ARROW
+| 
+* %KEY_ARROW_CRITICAL%: If this spectral arrow is critical. (boolean)
+* %KEY_ARROW_KNOCKBACK%: The knockback strength. (double)
+* %KEY_ARROW_DAMAGE%: The amount of damage. (double)
+* %KEY_SPECTRAL_ARROW_GLOWING_TICKS%: The number of ticks the hit entity will glow. (int)
+|-
 | SPLASH_POTION, LINGERING_POTION (removed in 1.14, use SPLASH_POTION)
 | 
 * %KEY_SPLASH_POTION_ITEM%: The item for the thrown potion.
@@ -237,6 +244,12 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_ARROW_KNOCKBACK%: The knockback strength. (double)
 * %KEY_ARROW_DAMAGE%: The amount of damage. (double)
 * %KEY_TIPPEDARROW_POTIONMETA%: An associative array with a "base" potion array and a "potions" array of effect arrays for a tipped arrow.
+|-
+| TRIDENT
+| 
+* %KEY_ARROW_CRITICAL%: If this trident is critical. (boolean)
+* %KEY_ARROW_KNOCKBACK%: The knockback strength. (double)
+* %KEY_ARROW_DAMAGE%: The amount of damage. (double)
 |-
 | TROPICAL_FISH
 |

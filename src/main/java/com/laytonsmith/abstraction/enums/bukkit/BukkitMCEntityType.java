@@ -1,7 +1,6 @@
 package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.bukkit.entities.BukkitMCArrow;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEnderSignal;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFishHook;
@@ -12,9 +11,7 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLlama;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCStorageMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCTNT;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCThrownPotion;
-import com.laytonsmith.abstraction.bukkit.entities.BukkitMCTippedArrow;
 import com.laytonsmith.abstraction.enums.MCEntityType;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
@@ -117,13 +114,6 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 	// run once on setup
 	private void setWrapperClass() {
 		switch(getAbstracted()) {
-			case ARROW:
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
-					wrapperClass = BukkitMCTippedArrow.class;
-				} else {
-					wrapperClass = BukkitMCArrow.class;
-				}
-				break;
 			case DROPPED_ITEM:
 				wrapperClass = BukkitMCItem.class;
 				break;
