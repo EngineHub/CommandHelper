@@ -836,7 +836,7 @@ public final class SiteDeploy {
 	 */
 	private void writePageFromResource(String title, String resource, String toLocation, List<String> keywords,
 			String description) {
-		String s = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream(resource));
+		String s = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream(resource.replace('\\', '/')));
 		s += "<p id=\"edit_this_page\">"
 				+ EDIT_THIS_PAGE_PREAMBLE
 				+ String.format(githubBaseUrl, "resources" + resource)
@@ -1085,8 +1085,9 @@ public final class SiteDeploy {
 				try {
 					File root = new File(SiteDeploy.class.getResource("/docs").toExternalForm());
 					ZipReader zReader = new ZipReader(root);
+					String path = Pattern.quote(zReader.getFile().getAbsolutePath());
 					for(File r : zReader.listFiles()) {
-						String filename = r.getAbsolutePath().replaceFirst(Pattern.quote(zReader.getFile().getAbsolutePath()), "");
+						String filename = r.getAbsolutePath().replaceFirst(path, "");
 						writePageFromResource(r.getName(), "/docs" + filename, r.getName() + ".html",
 								Arrays.asList(new String[]{r.getName().replace("_", " ")}), "Learning trail page for " + r.getName().replace("_", " "));
 					}
