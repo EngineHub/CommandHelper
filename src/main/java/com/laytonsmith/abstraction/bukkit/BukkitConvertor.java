@@ -36,6 +36,7 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCContainer;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDispenser;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDropper;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFurnace;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCLectern;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAgeable;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
@@ -65,6 +66,7 @@ import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
@@ -74,6 +76,7 @@ import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -94,6 +97,7 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.Dropper;
 import org.bukkit.block.Furnace;
+import org.bukkit.block.Lectern;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
@@ -474,6 +478,9 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		if(bs instanceof Container) { // needs to be after all specific containers
 			return new BukkitMCContainer((Container) bs);
+		}
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14) && bs instanceof Lectern) {
+			return new BukkitMCLectern((Lectern) bs);
 		}
 		return new BukkitMCBlockState(bs);
 	}
