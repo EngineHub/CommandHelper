@@ -1152,6 +1152,11 @@ public class EntityManagement {
 			}
 			for(int i = 0; i < qty; i++) {
 				switch(entType.getAbstracted()) {
+					case DROPPED_ITEM:
+						int itemQty = java.lang.Math.min(qty - i, 64);
+						ent = l.getWorld().dropItem(l, StaticLayer.GetItemStack("STONE", itemQty));
+						i += itemQty - 1;
+						break;
 					case FALLING_BLOCK:
 						ent = l.getWorld().spawnFallingBlock(l, StaticLayer.GetMaterial("SAND").createBlockData());
 						break;
@@ -1164,7 +1169,7 @@ public class EntityManagement {
 							} else {
 								ent = l.getWorld().spawn(l.getBlock().getLocation(), entType);
 							}
-						} catch (NullPointerException | IllegalArgumentException ex) {
+						} catch (NullPointerException | IllegalArgumentException | IllegalStateException ex) {
 							throw new CREFormatException("Unspawnable location for " + entType.getAbstracted().name(), t);
 						}
 						break;
