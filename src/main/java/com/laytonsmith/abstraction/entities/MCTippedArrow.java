@@ -1,19 +1,9 @@
 package com.laytonsmith.abstraction.entities;
 
-import com.laytonsmith.abstraction.MCLivingEntity;
-import com.laytonsmith.abstraction.MCPotionData;
-
-import java.util.List;
-
+/**
+ * @deprecated The {@link org.bukkit.entity.TippedArrow} interface has been deprecated on 30-04-2019.
+ * Use the {@link MCArrow} interface instead.
+ */
+@Deprecated
 public interface MCTippedArrow extends MCArrow {
-
-	MCPotionData getBasePotionData();
-
-	List<MCLivingEntity.MCEffect> getCustomEffects();
-
-	void addCustomEffect(MCLivingEntity.MCEffect effect);
-
-	void clearCustomEffects();
-
-	void setBasePotionData(MCPotionData data);
 }
