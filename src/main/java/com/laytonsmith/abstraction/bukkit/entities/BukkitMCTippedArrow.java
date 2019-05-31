@@ -6,7 +6,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCPotionData;
 import com.laytonsmith.abstraction.entities.MCArrow;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.TippedArrow;
+import org.bukkit.entity.Arrow;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -16,11 +16,11 @@ import java.util.List;
 
 public class BukkitMCTippedArrow extends BukkitMCArrow implements MCArrow {
 
-	TippedArrow ta;
+	Arrow ta;
 
 	public BukkitMCTippedArrow(Entity ta) {
 		super(ta);
-		this.ta = (TippedArrow) ta;
+		this.ta = (Arrow) ta;
 	}
 
 	@Override
