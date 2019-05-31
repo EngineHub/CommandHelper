@@ -289,7 +289,7 @@ public class DataHandling {
 			} else {
 				offset = 0;
 				if(!(args[offset] instanceof IVariable)) {
-					throw new CRECastException(getName() + " with 2 arguments only accepts an ivariable as the second argument.", t);
+					throw new CRECastException(getName() + " with 2 arguments only accepts an ivariable as the first argument.", t);
 				}
 				name = ((IVariable) args[offset]).getVariableName();
 				type = list.get(name, t, true, env).getDefinedType();
