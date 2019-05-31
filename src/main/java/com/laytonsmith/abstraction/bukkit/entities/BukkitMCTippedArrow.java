@@ -3,7 +3,7 @@ package com.laytonsmith.abstraction.bukkit.entities;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPotionData;
-import com.laytonsmith.abstraction.entities.MCTippedArrow;
+import com.laytonsmith.abstraction.entities.MCArrow;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.TippedArrow;
@@ -14,7 +14,7 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BukkitMCTippedArrow extends BukkitMCArrow implements MCTippedArrow {
+public class BukkitMCTippedArrow extends BukkitMCArrow implements MCArrow {
 
 	TippedArrow ta;
 

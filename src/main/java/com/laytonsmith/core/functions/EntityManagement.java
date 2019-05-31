@@ -68,7 +68,6 @@ import com.laytonsmith.abstraction.entities.MCSnowman;
 import com.laytonsmith.abstraction.entities.MCSpectralArrow;
 import com.laytonsmith.abstraction.entities.MCTNT;
 import com.laytonsmith.abstraction.entities.MCThrownPotion;
-import com.laytonsmith.abstraction.entities.MCTippedArrow;
 import com.laytonsmith.abstraction.entities.MCTrident;
 import com.laytonsmith.abstraction.entities.MCTropicalFish;
 import com.laytonsmith.abstraction.entities.MCVillager;
@@ -1995,7 +1994,7 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_SPLASH_POTION_ITEM, ObjectGenerator.GetGenerator().item(potion.getItem(), t), t);
 					break;
 				case TIPPED_ARROW: // 1.13 only
-					MCTippedArrow tippedarrow = (MCTippedArrow) entity;
+					MCArrow tippedarrow = (MCArrow) entity;
 					specArray.set(entity_spec.KEY_ARROW_CRITICAL, CBoolean.get(tippedarrow.isCritical()), t);
 					specArray.set(entity_spec.KEY_ARROW_KNOCKBACK, new CInt(tippedarrow.getKnockbackStrength(), t), t);
 					specArray.set(entity_spec.KEY_ARROW_DAMAGE, new CDouble(tippedarrow.getDamage(), t), t);
@@ -2289,7 +2288,7 @@ public class EntityManagement {
 								if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
 									throwException(index, t);
 								}
-								MCTippedArrow tipped = (MCTippedArrow) arrow;
+								MCArrow tipped = (MCArrow) arrow;
 								Mixed c = specArray.get(index, t);
 								if(c.isInstanceOf(CArray.class)) {
 									CArray meta = (CArray) c;
@@ -3086,7 +3085,7 @@ public class EntityManagement {
 					}
 					break;
 				case TIPPED_ARROW:
-					MCTippedArrow tippedarrow = (MCTippedArrow) entity;
+					MCArrow tippedarrow = (MCArrow) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_ARROW_CRITICAL:
