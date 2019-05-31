@@ -1936,7 +1936,7 @@ public class DataHandling {
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			if(nodes.length == 0) {
 				//Empty closure, do nothing.
-				return new CClosure(null, env, Auto.TYPE, new String[]{}, new Mixed[]{}, new CClassType[]{}, t);
+				return new CIClosure(null, env, Auto.TYPE, new String[]{}, new Mixed[]{}, new CClassType[]{}, t);
 			}
 			// Handle the closure type first thing
 			CClassType returnType = Auto.TYPE;
