@@ -2289,7 +2289,6 @@ public class EntityManagement {
 								if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
 									throwException(index, t);
 								}
-								MCTippedArrow tipped = (MCTippedArrow) arrow;
 								Mixed c = specArray.get(index, t);
 								if(c.isInstanceOf(CArray.class)) {
 									CArray meta = (CArray) c;
@@ -2297,16 +2296,16 @@ public class EntityManagement {
 										Mixed base = meta.get("base", t);
 										if(base.isInstanceOf(CArray.class)) {
 											MCPotionData pd = ObjectGenerator.GetGenerator().potionData((CArray) base, t);
-											tipped.setBasePotionData(pd);
+											arrow.setBasePotionData(pd);
 										}
 									}
 									if(meta.containsKey("potions")) {
-										tipped.clearCustomEffects();
+										arrow.clearCustomEffects();
 										Mixed potions = meta.get("potions", t);
 										if(potions.isInstanceOf(CArray.class)) {
 											List<MCLivingEntity.MCEffect> list = ObjectGenerator.GetGenerator().potions((CArray) potions, t);
 											for(MCLivingEntity.MCEffect effect : list) {
-												tipped.addCustomEffect(effect);
+												arrow.addCustomEffect(effect);
 											}
 										}
 									}
