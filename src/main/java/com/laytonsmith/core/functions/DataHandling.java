@@ -2041,7 +2041,7 @@ public class DataHandling {
 	}
 
 	@api
-	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class})
+	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class, execute_array.class, executeas.class})
 	public static class execute extends AbstractFunction {
 
 		@Override
@@ -2092,6 +2092,56 @@ public class DataHandling {
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_1;
+		}
+	}
+
+	@api
+	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class, execute.class})
+	public static class execute_array extends AbstractFunction {
+		@Override
+		public String getName() {
+			return "execute_array";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "mixed {valueArray, closure} Executes the given closure, expanding the value"
+					+ " array as individual arguments to the closure. If there are no arguments to be"
+					+ " sent to the closure, an empty array can be sent."
+					+ " If the closure returns a value with return(), then that value will"
+					+ " be returned with execute. Otherwise, void is returned.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			Mixed[] vals = ArgumentValidation.getArray(args[0], t).asList().toArray(new Mixed[0]);
+			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
+			return closure.executeCallable(vals);
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
 		}
 	}
 
