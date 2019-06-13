@@ -1456,10 +1456,10 @@ public class PlayerEvents {
 					+ "Fired when any player attempts to send a chat message."
 					+ "{message: The message to be sent | recipients | format}"
 					+ "{message|recipients: An array of"
-					+ " players that will recieve the chat message. If a player doesn't exist"
+					+ " players that will receive the chat message. If a player doesn't exist"
 					+ " or is offline, and is in the array, it is simply ignored, no"
 					+ " exceptions will be thrown. | format: The \"printf\" format string, by "
-					+ " default \"<%1$s> %2$s\". The first parameter is the player's display"
+					+ " default \"&lt;%1$s> %2$s\". The first parameter is the player's display"
 					+ " name, and the second one is the message.}"
 					+ "{player|message|format}";
 		}
@@ -1587,10 +1587,10 @@ public class PlayerEvents {
 					+ " why this feature is undocumented. If this event is cancelled, player_chat binds will not fire."
 					+ "{message: The message to be sent | recipients | format}"
 					+ "{message|recipients: An array of"
-					+ " players that will recieve the chat message. If a player doesn't exist"
+					+ " players that will receive the chat message. If a player doesn't exist"
 					+ " or is offline, and is in the array, it is simply ignored, no"
 					+ " exceptions will be thrown.|format: The \"printf\" format string, by "
-					+ " default \"<%1$s> %2$s\". The first parameter is the player's display"
+					+ " default \"&lt;%1$s> %2$s\". The first parameter is the player's display"
 					+ " name, and the second one is the message.}"
 					+ "{}";
 		}
