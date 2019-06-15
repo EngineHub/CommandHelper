@@ -2198,7 +2198,9 @@ public final class MethodScriptCompiler {
 //				} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException e) {
 //					//
 //				}
+				env.getEnv(GlobalEnv.class).SetFlag("no-check-undefined", true);
 				Procedure myProc = DataHandling.proc.getProcedure(tree.getTarget(), env, fakeScript, children.toArray(new ParseTree[children.size()]));
+				env.getEnv(GlobalEnv.class).ClearFlag("no-check-undefined");
 				procs.peek().add(myProc); //Yep. So, we can move on with our lives now, and if it's used later, it could possibly be static.
 			} catch (ConfigRuntimeException e) {
 				//Well, they have an error in there somewhere
