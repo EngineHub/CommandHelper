@@ -1616,7 +1616,7 @@ public class ControlFlow {
 					//types of coding styles possible.
 					if(nodes.length > 1) {
 						try {
-							parent.seval(nodes[1], env);
+							parent.eval(nodes[1], env);
 						} catch (LoopContinueException e) {
 							//ok.
 						}
@@ -1741,7 +1741,7 @@ public class ControlFlow {
 			try {
 				do {
 					try {
-						parent.seval(nodes[0], env);
+						parent.eval(nodes[0], env);
 					} catch (LoopContinueException e) {
 						//ok. No matter how many times it tells us to continue, we're only going to continue once.
 					}
