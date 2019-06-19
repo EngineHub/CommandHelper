@@ -1303,8 +1303,9 @@ public class ArrayHandling {
 		public String docs() {
 			return "mixed {array, index} Removes an index from an array. If the array is a normal"
 					+ " array, all values' indices are shifted left one. If the array is associative,"
-					+ " the index is simply removed. If the index doesn't exist, the array remains"
-					+ " unchanged. The value removed is returned.";
+					+ " the index is simply removed. If the index exists, the value removed is returned."
+					+ " If the index doesn't exist, the array remains unchanged,"
+					+ " however it'll throw a RangeException for normal arrays (returns null for associative arrays).";
 		}
 
 		@Override

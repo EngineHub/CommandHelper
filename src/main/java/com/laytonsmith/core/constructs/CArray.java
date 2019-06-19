@@ -683,6 +683,9 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			}
 		} else {
 			ret = associativeArray.remove(c);
+			if(ret == null) {
+				return CNull.NULL;
+			}
 		}
 		setDirty();
 		return ret;
