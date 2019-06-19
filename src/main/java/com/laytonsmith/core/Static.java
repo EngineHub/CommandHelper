@@ -102,7 +102,7 @@ public final class Static {
 	private Static() {
 	}
 
-	private static final Logger LOGGER = Logger.getLogger("CommandHelper");
+	private static Logger logger;
 
 	private static final Map<String, String> HOST_CACHE = new HashMap<String, String>();
 
@@ -335,7 +335,14 @@ public final class Static {
 	 * @return
 	 */
 	public static Logger getLogger() {
-		return LOGGER;
+		if(logger == null) {
+			if(Implementation.GetServerType() == Implementation.Type.BUKKIT) {
+				logger = CommandHelperPlugin.self.getLogger();
+			} else {
+				logger = Logger.getLogger("MethodScript");
+			}
+		}
+		return logger;
 	}
 
 	/**
