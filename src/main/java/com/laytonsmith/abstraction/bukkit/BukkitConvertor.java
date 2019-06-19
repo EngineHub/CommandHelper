@@ -269,10 +269,10 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public void Startup(CommandHelperPlugin chp) {
 		chp.registerEvents(BLOCK_LISTENER);
-		chp.registerEventsDynamic(ENTITY_LISTENER);
-		chp.registerEventsDynamic(INVENTORY_LISTENER);
+		chp.registerEvents(ENTITY_LISTENER);
+		chp.registerEvents(INVENTORY_LISTENER);
 		chp.registerEvents(PLAYER_LISTENER);
-		chp.registerEventsDynamic(SERVER_LISTENER);
+		chp.registerEvents(SERVER_LISTENER);
 		chp.registerEvents(VEHICLE_LISTENER);
 		chp.registerEvents(WEATHER_LISTENER);
 		chp.registerEvents(WORLD_LISTENER);
