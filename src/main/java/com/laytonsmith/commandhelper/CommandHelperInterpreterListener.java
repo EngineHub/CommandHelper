@@ -5,7 +5,6 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.MethodScriptCompiler;
-import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.TokenStream;
@@ -31,7 +30,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -39,9 +37,9 @@ import java.util.logging.Logger;
  */
 public class CommandHelperInterpreterListener implements Listener {
 
-	private final Set<String> interpreterMode = Collections.synchronizedSet(new HashSet<String>());
+	private final Set<String> interpreterMode = Collections.synchronizedSet(new HashSet<>());
 	private final CommandHelperPlugin plugin;
-	Map<String, String> multilineMode = new HashMap<String, String>();
+	private Map<String, String> multilineMode = new HashMap<>();
 
 	public boolean isInInterpreterMode(String player) {
 		return (interpreterMode.contains(player));
@@ -56,13 +54,7 @@ public class CommandHelperInterpreterListener implements Listener {
 		if(interpreterMode.contains(event.getPlayer().getName())) {
 			final MCPlayer p = new BukkitMCPlayer(event.getPlayer());
 			event.setCancelled(true);
-			StaticLayer.SetFutureRunnable(null, 0, new Runnable() {
-
-				@Override
-				public void run() {
-					textLine(p, event.getMessage());
-				}
-			});
+			StaticLayer.SetFutureRunnable(null, 0, () -> textLine(p, event.getMessage()));
 		}
 
 	}
@@ -133,9 +125,6 @@ public class CommandHelperInterpreterListener implements Listener {
 		}
 	}
 
-	public void reload() {
-	}
-
 	public void execute(String script, final MCPlayer p) throws ConfigCompileException, ConfigCompileGroupException {
 		TokenStream stream = MethodScriptCompiler.lex(script, new File("Interpreter"), true);
 		ParseTree tree = MethodScriptCompiler.compile(stream, null);
@@ -149,25 +138,21 @@ public class CommandHelperInterpreterListener implements Listener {
 		Environment env = Environment.createEnvironment(gEnv, cEnv);
 		try {
 			MethodScriptCompiler.registerAutoIncludes(env, null);
-			MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {
-
-				@Override
-				public void done(String output) {
-					output = output.trim();
-					if(output.isEmpty()) {
-						Static.SendMessage(p, ":");
+			MethodScriptCompiler.execute(tree, env, output -> {
+				output = output.trim();
+				if(output.isEmpty()) {
+					Static.SendMessage(p, ":");
+				} else {
+					if(output.startsWith("/")) {
+						//Run the command
+						Static.SendMessage(p, ":" + MCChatColor.YELLOW + output);
+						p.chat(output);
 					} else {
-						if(output.startsWith("/")) {
-							//Run the command
-							Static.SendMessage(p, ":" + MCChatColor.YELLOW + output);
-							p.chat(output);
-						} else {
-							//output the results
-							Static.SendMessage(p, ":" + MCChatColor.GREEN + output);
-						}
+						//output the results
+						Static.SendMessage(p, ":" + MCChatColor.GREEN + output);
 					}
-					interpreterMode.add(p.getName());
 				}
+				interpreterMode.add(p.getName());
 			}, null);
 		} catch (CancelCommandException e) {
 			interpreterMode.add(p.getName());
@@ -177,7 +162,7 @@ public class CommandHelperInterpreterListener implements Listener {
 			interpreterMode.add(p.getName());
 		} catch (Exception e) {
 			Static.SendMessage(p, MCChatColor.RED + e.toString());
-			Logger.getLogger(CommandHelperInterpreterListener.class.getName()).log(Level.SEVERE, null, e);
+			Static.getLogger().log(Level.SEVERE, null, e);
 			interpreterMode.add(p.getName());
 		}
 	}

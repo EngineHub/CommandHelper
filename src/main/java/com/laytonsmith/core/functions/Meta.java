@@ -139,7 +139,7 @@ public class Meta {
 			if(args[0].val().equals(Static.getConsoleName())) {
 				MSLog.GetLogger().Log(MSLog.Tags.META, LogLevel.INFO, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as console): " + args[1].val().trim(), t);
 				if(Prefs.DebugMode()) {
-					Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as : " + args[1].val().trim());
+					Static.getLogger().log(Level.INFO, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as : " + args[1].val().trim());
 				}
 				if(cmd.equalsIgnoreCase("interpreter-on")) {
 					//This isn't allowed for security reasons.
@@ -160,7 +160,7 @@ public class Meta {
 
 					MSLog.GetLogger().Log(MSLog.Tags.META, LogLevel.INFO, "Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim(), t);
 					if(Prefs.DebugMode()) {
-						Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim());
+						Static.getLogger().log(Level.INFO, "Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim());
 					}
 					//m.chat(cmd);
 					Static.getServer().dispatchCommand(m, cmd);
@@ -235,7 +235,7 @@ public class Meta {
 
 			MSLog.GetLogger().Log(MSLog.Tags.META, LogLevel.INFO, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as op): " + args[0].val().trim(), t);
 			if(Prefs.DebugMode()) {
-				Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as op): " + args[0].val().trim());
+				Static.getLogger().log(Level.INFO, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as op): " + args[0].val().trim());
 			}
 
 			//If they aren't op, op them now
@@ -303,7 +303,7 @@ public class Meta {
 				if(Prefs.UseSudoFallback()) {
 					p.setOp(value);
 				} else {
-					Static.getLogger().log(Level.WARNING, "[CommandHelper]: Failed to OP player " + player.getName() + "."
+					Static.getLogger().log(Level.WARNING, "Failed to OP player " + player.getName() + "."
 							+ " Check that your server jar ends with \".jar\" or enable \"use-sudo-fallback\" in preferences.ini.");
 					StreamUtils.GetSystemErr().println("Extra information about the error: ");
 					e.printStackTrace();
@@ -353,9 +353,9 @@ public class Meta {
 			String cmd = args[0].val().substring(1);
 			if(Prefs.DebugMode()) {
 				if(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
-					Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() + ": " + args[0].val().trim());
+					Static.getLogger().log(Level.INFO, "Executing command on " + env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() + ": " + args[0].val().trim());
 				} else {
-					Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + args[0].val().trim());
+					Static.getLogger().log(Level.INFO, "Executing command from console equivalent: " + args[0].val().trim());
 				}
 			}
 			if(cmd.equalsIgnoreCase("interpreter-on")) {
