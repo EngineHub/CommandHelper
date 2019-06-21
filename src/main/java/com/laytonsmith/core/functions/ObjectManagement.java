@@ -641,6 +641,11 @@ public class ObjectManagement {
 		}
 
 		@Override
+		public boolean useSpecialExec() {
+			return true;
+		}
+
+		@Override
 		public FieldDefinition dryExec(Target t, Environment env, ParseTree... nodes) {
 			AccessModifier accessModifier = ArgumentValidation.getEnum(evaluateStringNoNull(nodes[0], t),
 					AccessModifier.class, t);
