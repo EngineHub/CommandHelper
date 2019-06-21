@@ -100,7 +100,7 @@ public class CFunction extends Construct {
 			} else {
 				return false;
 			}
-		} catch(ConfigCompileException ex) {
+		} catch (ConfigCompileException ex) {
 			return false;
 		}
 	}

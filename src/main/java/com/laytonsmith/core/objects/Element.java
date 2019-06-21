@@ -113,6 +113,7 @@ public abstract class Element extends Construct {
 	 * The access modifier of the element.
 	 * @return
 	 */
+	@Override
 	public AccessModifier getAccessModifier() {
 		return accessModifier;
 	}
@@ -159,6 +160,7 @@ public abstract class Element extends Construct {
 		return name;
 	}
 
+	@Override
 	public Target getTarget() {
 		return t;
 	}
