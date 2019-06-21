@@ -51,7 +51,6 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDifficulty;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCOcelotType;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCProfession;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSoundCategory;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTreeType;
@@ -755,7 +754,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					for(String type : subTypes) {
 						try {
 							job = MCProfession.valueOf(type);
-							v.setProfession(BukkitMCProfession.getConvertor().getConcreteEnum(job));
+							v.setProfession((Villager.Profession) job.getConcrete());
 						} catch (IllegalArgumentException ex) {
 							throw new CREFormatException(type + " is not a valid profession", t);
 						}
@@ -804,7 +803,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							}
 							try {
 								MCProfession job = MCProfession.valueOf(type);
-								zv.setVillagerProfession(BukkitMCProfession.getConvertor().getConcreteEnum(job));
+								zv.setVillagerProfession((Villager.Profession) job.getConcrete());
 							} catch (IllegalArgumentException ex) {
 								throw new CREFormatException(type + " is not a valid profession", t);
 							}
@@ -956,5 +955,10 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	@Override
 	public void save() {
 		w.save();
+	}
+
+	@Override
+	public void setKeepSpawnInMemory(boolean keepLoaded) {
+		w.setKeepSpawnInMemory(keepLoaded);
 	}
 }

@@ -110,6 +110,8 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 	 */
 	void kill();
 
+	boolean isTameable();
+
 	class MCEffect {
 
 		private MCPotionEffectType type;

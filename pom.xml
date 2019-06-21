@@ -171,9 +171,9 @@
 		<!-- Bukkit -->
 		<dependency>
 			<!-- GPL -->
-			<groupId>org.bukkit</groupId>
-			<artifactId>bukkit</artifactId>
-			<version>1.13.1-R0.1-SNAPSHOT</version>
+			<groupId>org.spigotmc</groupId>
+			<artifactId>spigot-api</artifactId>
+			<version>1.14.2-R0.1-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Used for storing and retreiving Constructs in a storage transparent medium: JSONs -->
@@ -244,7 +244,7 @@
 			<!-- GPL -->
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.9-rc</version>
+			<version>8.0.16</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>

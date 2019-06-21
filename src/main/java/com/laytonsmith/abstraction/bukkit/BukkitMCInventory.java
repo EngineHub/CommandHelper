@@ -13,6 +13,7 @@ import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.functions.InventoryManagement;
+import org.bukkit.Nameable;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.entity.Entity;
@@ -161,6 +162,6 @@ public class BukkitMCInventory implements MCInventory {
 
 	@Override
 	public String getTitle() {
-		return i.getTitle();
+		return ((Nameable) i.getHolder()).getCustomName();
 	}
 }

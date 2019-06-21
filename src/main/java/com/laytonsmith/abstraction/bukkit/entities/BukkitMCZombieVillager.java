@@ -4,6 +4,7 @@ import com.laytonsmith.abstraction.entities.MCZombieVillager;
 import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCProfession;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Villager;
 import org.bukkit.entity.ZombieVillager;
 
 public class BukkitMCZombieVillager extends BukkitMCZombie implements MCZombieVillager {
@@ -17,12 +18,12 @@ public class BukkitMCZombieVillager extends BukkitMCZombie implements MCZombieVi
 
 	@Override
 	public MCProfession getProfession() {
-		return BukkitMCProfession.getConvertor().getAbstractedEnum(zv.getVillagerProfession());
+		return BukkitMCProfession.valueOfConcrete(zv.getVillagerProfession());
 	}
 
 	@Override
 	public void setProfession(MCProfession profession) {
-		zv.setVillagerProfession(BukkitMCProfession.getConvertor().getConcreteEnum(profession));
+		zv.setVillagerProfession((Villager.Profession) profession.getConcrete());
 	}
 
 }

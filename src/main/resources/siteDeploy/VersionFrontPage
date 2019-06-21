@@ -65,7 +65,7 @@ How do you use CommandHelper? We have a set of easy to follow articles that you 
 * '''Want to script completely new features?''' Follow the ''Learning Trail'' at the bottom of the page.
 * '''Just want the API?''' See the [[API.html|API reference]].
 
-Need more help? Visit the [http://forum.sk89q.com/forums/commandhelper.20/ forums], or chat with us on IRC in
+Need more help? Visit the [http://forum.enginehub.org/forums/commandhelper.20/ forums], or chat with us on IRC in
 [http://skq.me/irc/irc.esper.net/commandhelper/ #CommandHelper on irc.esper.net], or
 [https://discord.gg/Z7jpHed Discord].
 {{LearningTrail}}
@@ -84,10 +84,10 @@ version, so it is highly recommeneded. To install, [https://code.visualstudio.co
 
 If you prefer other text editors, there is community support for other text editors:
 
-* TextWrangler and BBEdit - Mac OS X [http://forum.sk89q.com/threads/textwrangler-bbedit-language-module.382/ Forum Link] - Created by Connor Griffin (Very Outdated)
-* Notepad++ (Default Theme) - Windows [http://forum.sk89q.com/threads/syntax-highlighting-for-notepad.399/ Forum Link] - Created by MrMagical
-* Notepad++ (Obsidian Theme) - Windows [http://forum.sk89q.com/threads/notepad-syntax-highlighter-obsidian-theme.1033/ Forum Link] - Created by TTSDA (based on MrMagical's Highlighter)
-* gedit - GNOME/Cross-platform [http://forum.sk89q.com/threads/gedit-syntax-highlighting.1102/ Forum Link] - Created by MrMagical
+* TextWrangler and BBEdit - Mac OS X [http://forum.enginehub.org/threads/textwrangler-bbedit-language-module.382/ Forum Link] - Created by Connor Griffin (Very Outdated)
+* Notepad++ (Default Theme) - Windows [http://forum.enginehub.org/threads/syntax-highlighting-for-notepad.399/ Forum Link] - Created by MrMagical
+* Notepad++ (Obsidian Theme) - Windows [http://forum.enginehub.org/threads/notepad-syntax-highlighter-obsidian-theme.1033/ Forum Link] - Created by TTSDA (based on MrMagical's Highlighter)
+* gedit - GNOME/Cross-platform [http://forum.enginehub.org/threads/gedit-syntax-highlighting.1102/ Forum Link] - Created by MrMagical
 
 If you create a syntax highlighter for your favorite text editor, contact us, and we can add it here!
 

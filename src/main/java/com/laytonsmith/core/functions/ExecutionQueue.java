@@ -31,7 +31,7 @@ public class ExecutionQueue {
 				+ " Unlike set_timeout and set_interval, there is no"
 				+ " time component, it's simply a queue of operations"
 				+ " to execute sequentially. See the"
-				+ " [[CommandHelper/Execution_Queue|article on the learning trail]]"
+				+ " [[Execution_Queue|article on the learning trail]]"
 				+ " for more information.";
 	}
 

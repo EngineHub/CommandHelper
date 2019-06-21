@@ -273,10 +273,16 @@ public class BukkitMCServer implements MCServer {
 	 * @param recipients - A list of {@link MCCommandSender command senders} to send the message to.
 	 * @return The amount of recipients that received the message.
 	 */
+	@SuppressWarnings("deprecation")
 	private int bukkitBroadcastMessage(String message, Set<CommandSender> recipients) {
 
 		// Fire a BroadcastMessageEvent for this broadcast.
-		BroadcastMessageEvent broadcastMessageEvent = new BroadcastMessageEvent(message, recipients);
+		BroadcastMessageEvent broadcastMessageEvent;
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
+			broadcastMessageEvent = new BroadcastMessageEvent(!Bukkit.isPrimaryThread(), message, recipients);
+		} else {
+			broadcastMessageEvent = new BroadcastMessageEvent(message, recipients);
+		}
 		this.s.getPluginManager().callEvent(broadcastMessageEvent);
 
 		// Return if the event was cancelled.
@@ -394,7 +400,10 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public String getServerName() {
-		return s.getServerName();
+		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
+			return (String) ReflectionUtils.invokeMethod(Server.class, s, "getServerName");
+		}
+		return "";
 	}
 
 	@Override

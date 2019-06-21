@@ -25,52 +25,73 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCProj
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCProjectileLaunchEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCTargetEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
-import com.laytonsmith.annotations.EventIdentifier;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityInteractEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.EntityPortalEnterEvent;
+import org.bukkit.event.entity.EntityPortalEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.EntityToggleGlideEvent;
+import org.bukkit.event.entity.FireworkExplodeEvent;
+import org.bukkit.event.entity.ItemDespawnEvent;
+import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.hanging.HangingBreakEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 
 public class BukkitEntityListener implements Listener {
 
-	@EventIdentifier(event = Driver.CREATURE_SPAWN, className = "org.bukkit.event.entity.CreatureSpawnEvent")
-	public void onSpawn(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onSpawn(CreatureSpawnEvent event) {
 		BukkitMCCreatureSpawnEvent cse = new BukkitMCCreatureSpawnEvent(event);
 		EventUtils.TriggerListener(Driver.CREATURE_SPAWN, "creature_spawn", cse);
 	}
 
-	@EventIdentifier(event = Driver.PLAYER_INTERACT_ENTITY, className = "org.bukkit.event.player.PlayerInteractEntityEvent")
-	public void onClickEnt(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onClickEnt(PlayerInteractEntityEvent event) {
 		BukkitMCPlayerInteractEntityEvent piee = new BukkitMCPlayerInteractEntityEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_INTERACT_ENTITY, "player_interact_entity", piee);
 	}
 
-	@EventIdentifier(event = Driver.PLAYER_INTERACT_AT_ENTITY, className = "org.bukkit.event.player.PlayerInteractAtEntityEvent")
-	public void onClickAtEnt(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onClickAtEnt(PlayerInteractAtEntityEvent event) {
 		BukkitMCPlayerInteractAtEntityEvent piaee = new BukkitMCPlayerInteractAtEntityEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_INTERACT_AT_ENTITY, "player_interact_at_entity", piaee);
 	}
 
-	@EventIdentifier(event = Driver.ITEM_DROP, className = "org.bukkit.event.player.PlayerDropItemEvent")
-	public void onItemDrop(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onItemDrop(PlayerDropItemEvent event) {
 		BukkitMCPlayerDropItemEvent pdie = new BukkitMCPlayerDropItemEvent(event);
 		EventUtils.TriggerListener(Driver.ITEM_DROP, "item_drop", pdie);
 	}
 
-	@EventIdentifier(event = Driver.ITEM_PICKUP, className = "org.bukkit.event.entity.EntityPickupItemEvent")
-	public void onItemPickup(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onItemPickup(EntityPickupItemEvent event) {
 		if(((EntityEvent) event).getEntity() instanceof Player) {
 			BukkitMCPlayerPickupItemEvent ppie = new BukkitMCPlayerPickupItemEvent(event);
 			EventUtils.TriggerListener(Driver.ITEM_PICKUP, "item_pickup", ppie);
 		}
 	}
 
-	@EventIdentifier(event = Driver.ENTITY_DEATH, className = "org.bukkit.event.entity.EntityDeathEvent")
-	public void onEntityDeath(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onEntityDeath(EntityDeathEvent event) {
 		BukkitMCEntityDeathEvent ede;
 		if(event instanceof PlayerDeathEvent) {
 			ede = new BukkitPlayerEvents.BukkitMCPlayerDeathEvent(event);
@@ -83,8 +104,8 @@ public class BukkitEntityListener implements Listener {
 		}
 	}
 
-	@EventIdentifier(event = Driver.TARGET_ENTITY, className = "org.bukkit.event.entity.EntityTargetEvent")
-	public void onTargetLiving(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onTargetLiving(EntityTargetEvent event) {
 		BukkitMCTargetEvent ete = new BukkitMCTargetEvent(event);
 		MCEntity target = ete.getTarget();
 		if(target == null || !(target instanceof MCPlayer)) {
@@ -93,8 +114,8 @@ public class BukkitEntityListener implements Listener {
 		EventUtils.TriggerListener(Driver.TARGET_ENTITY, "target_player", ete);
 	}
 
-	@EventIdentifier(event = Driver.ENTITY_DAMAGE, className = "org.bukkit.event.entity.EntityDamageEvent")
-	public void onEntityDamage(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onEntityDamage(EntityDamageEvent event) {
 		BukkitMCEntityDamageEvent ede;
 		if(event instanceof EntityDamageByEntityEvent) {
 			ede = new BukkitMCEntityDamageByEntityEvent(event);
@@ -108,80 +129,80 @@ public class BukkitEntityListener implements Listener {
 		}
 	}
 
-	@EventIdentifier(event = Driver.PROJECTILE_HIT, className = "org.bukkit.event.entity.ProjectileHitEvent")
-	public void onPHit(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPHit(ProjectileHitEvent event) {
 		BukkitMCProjectileHitEvent phe = new BukkitMCProjectileHitEvent(event);
 		EventUtils.TriggerListener(Driver.PROJECTILE_HIT, "projectile_hit", phe);
 	}
 
-	@EventIdentifier(event = Driver.PROJECTILE_LAUNCH, className = "org.bukkit.event.entity.ProjectileLaunchEvent")
-	public void onProjectileLaunch(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onProjectileLaunch(ProjectileLaunchEvent event) {
 		BukkitMCProjectileLaunchEvent ple = new BukkitMCProjectileLaunchEvent(event);
 		EventUtils.TriggerListener(Driver.PROJECTILE_LAUNCH, "projectile_launch", ple);
 	}
 
-	@EventIdentifier(event = Driver.ENTITY_ENTER_PORTAL, className = "org.bukkit.event.entity.EntityPortalEnterEvent")
-	public void onPortalEnter(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPortalEnter(EntityPortalEnterEvent event) {
 		BukkitMCEntityEnterPortalEvent pe = new BukkitMCEntityEnterPortalEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_ENTER_PORTAL, "entity_enter_portal", pe);
 	}
 
-	@EventIdentifier(event = Driver.ENTITY_EXPLODE, className = "org.bukkit.event.entity.EntityExplodeEvent")
-	public void onExplode(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onExplode(EntityExplodeEvent event) {
 		BukkitMCEntityExplodeEvent ee = new BukkitMCEntityExplodeEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_EXPLODE, "entity_explode", ee);
 	}
 
-	@EventIdentifier(event = Driver.ITEM_DESPAWN, className = "org.bukkit.event.entity.ItemDespawnEvent")
-	public void onItemDespawn(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onItemDespawn(ItemDespawnEvent event) {
 		BukkitMCItemDespawnEvent id = new BukkitMCItemDespawnEvent(event);
 		EventUtils.TriggerListener(Driver.ITEM_DESPAWN, "item_despawn", id);
 	}
 
-	@EventIdentifier(event = Driver.ITEM_SPAWN, className = "org.bukkit.event.entity.ItemSpawnEvent")
-	public void onItemSpawn(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onItemSpawn(ItemSpawnEvent event) {
 		BukkitMCItemSpawnEvent is = new BukkitMCItemSpawnEvent(event);
 		EventUtils.TriggerListener(Driver.ITEM_SPAWN, "item_spawn", is);
 	}
 
-	@EventIdentifier(event = Driver.ENTITY_CHANGE_BLOCK, className = "org.bukkit.event.entity.EntityChangeBlockEvent")
-	public void onChangeBlock(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onChangeBlock(EntityChangeBlockEvent event) {
 		BukkitMCEntityChangeBlockEvent ecbe = new BukkitMCEntityChangeBlockEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_CHANGE_BLOCK, "entity_change_block", ecbe);
 	}
 
-	@EventIdentifier(event = Driver.ENTITY_INTERACT, className = "org.bukkit.event.entity.EntityInteractEvent")
-	public void onInteract(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onInteract(EntityInteractEvent event) {
 		BukkitMCEntityInteractEvent eie = new BukkitMCEntityInteractEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_INTERACT, "entity_interact", eie);
 	}
 
-	@EventIdentifier(event = Driver.HANGING_BREAK, className = "org.bukkit.event.hanging.HangingBreakEvent")
-	public void onHangingBreak(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onHangingBreak(HangingBreakEvent event) {
 		BukkitMCHangingBreakEvent hbe = new BukkitMCHangingBreakEvent(event);
 		EventUtils.TriggerListener(Driver.HANGING_BREAK, "hanging_break", hbe);
 	}
 
-	@EventIdentifier(event = Driver.ENTITY_TOGGLE_GLIDE, className = "org.bukkit.event.entity.EntityToggleGlideEvent")
-	public void onEntityToggleGlide(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onEntityToggleGlide(EntityToggleGlideEvent event) {
 		BukkitMCEntityToggleGlideEvent etge = new BukkitMCEntityToggleGlideEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_TOGGLE_GLIDE, "entity_toggle_glide", etge);
 	}
 
-	@EventIdentifier(event = Driver.FIREWORK_EXPLODE, className = "org.bukkit.event.entity.FireworkExplodeEvent")
-	public void onFireworkExplode(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onFireworkExplode(FireworkExplodeEvent event) {
 		BukkitMCFireworkExplodeEvent fee = new BukkitMCFireworkExplodeEvent(event);
 		EventUtils.TriggerListener(Driver.FIREWORK_EXPLODE, "firework_explode", fee);
 	}
 
-	@EventIdentifier(event = Driver.ENTITY_REGAIN_HEALTH, className = "org.bukkit.event.entity.EntityRegainHealthEvent")
-	public void onRegainHealth(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onRegainHealth(EntityRegainHealthEvent event) {
 		BukkitMCEntityRegainHealthEvent erhe = new BukkitMCEntityRegainHealthEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_REGAIN_HEALTH, "entity_regain_health", erhe);
 	}
 
-	@EventIdentifier(event = Driver.ENTITY_PORTAL_TRAVEL, className = "org.bukkit.event.entity.EntityPortalEvent")
-	public void onPortalTravel(Event event) {
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPortalTravel(EntityPortalEvent event) {
 		BukkitMCEntityPortalEvent epe = new BukkitMCEntityPortalEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_PORTAL_TRAVEL, "entity_portal_travel", epe);
 	}

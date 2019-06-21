@@ -8,7 +8,7 @@ import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.BasicLogic;
+import com.laytonsmith.core.functions.ControlFlow;
 import java.util.List;
 
 /**
@@ -17,7 +17,7 @@ import java.util.List;
 @Keyword.keyword("if")
 public class IfKeyword extends Keyword {
 
-	private static final String IFELSE = new BasicLogic.ifelse().getName();
+	private static final String IFELSE = new ControlFlow.ifelse().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {

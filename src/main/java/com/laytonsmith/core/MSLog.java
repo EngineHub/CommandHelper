@@ -141,7 +141,8 @@ public class MSLog {
 
 	public static MSLog GetLogger() {
 		if(root == null) {
-			throw new RuntimeException("Logger is not initialized! Call CHLog.initialize before using the logger.");
+			throw new RuntimeException("Logger is not initialized! Call "
+					+ MSLog.class.getSimpleName() + ".initialize before using the logger.");
 		}
 		if(instance == null) {
 			instance = new MSLog();

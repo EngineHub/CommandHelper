@@ -71,6 +71,8 @@ public interface MCBlock extends MCMetadatable {
 
 	boolean isBurnable();
 
+	boolean isPassable();
+
 	Collection<MCItemStack> getDrops();
 
 	Collection<MCItemStack> getDrops(MCItemStack tool);
@@ -78,6 +80,10 @@ public interface MCBlock extends MCMetadatable {
 	double getTemperature();
 
 	int getLightLevel();
+
+	int getLightFromSky();
+
+	int getLightFromBlocks();
 
 	int getBlockPower();
 

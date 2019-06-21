@@ -453,7 +453,7 @@ public class World {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREFormatException.class,
-				CREInvalidWorldException.class, CRENotFoundException.class};
+					CREInvalidWorldException.class, CRENotFoundException.class};
 		}
 
 		@Override
@@ -537,9 +537,10 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {x, z, [world]| locationArray, [world]} Regenerate the chunk for a world."
+			return "boolean {x, z, [world]| locationArray, [world]} Regenerate the chunk for a world."
 					+ " The current player's world is used if one is not provided. Beware that this is destructive!"
-					+ " Any data in this chunk will be lost!";
+					+ " Any data in this chunk will be lost! Returns true if the operation was successful."
+					+ " This function is deprecated. Results will vary per platform and may not work at all.";
 		}
 
 		@Override
@@ -606,7 +607,11 @@ public class World {
 				}
 			}
 
-			return CBoolean.get(world.regenerateChunk(x, z));
+			try {
+				return CBoolean.get(world.regenerateChunk(x, z));
+			} catch (UnsupportedOperationException ex) {
+				return CBoolean.FALSE;
+			}
 		}
 	}
 
@@ -1064,7 +1069,7 @@ public class World {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREFormatException.class, CREInsufficientArgumentsException.class,
-				CRENotFoundException.class};
+					CRENotFoundException.class};
 		}
 
 		@Override
@@ -1180,8 +1185,7 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment,
-				Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = Static.getServer().getWorld(args[0].val());
 			if(w == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
@@ -1594,7 +1598,7 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "void {[world], gameRule, value} Sets the value of the gamerule for the specified world. If world is"
+			return "boolean {[world], gameRule, value} Sets the value of the gamerule for the specified world. If world is"
 					+ " not given the value is set for all worlds. Returns true if successful. gameRule can be "
 					+ StringUtils.Join(MCGameRule.values(), ", ", ", or ", " or ") + ".";
 		}
@@ -1623,6 +1627,55 @@ public class World {
 				success = world.setGameRuleValue(gameRule, Static.getObject(args[2], t, gameRule.getRuleType()).val());
 			}
 			return CBoolean.get(success);
+		}
+	}
+
+	@api
+	public static class set_keep_spawn_loaded extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_keep_spawn_loaded";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {world, boolean} Sets whether or not the spawn chunks in the given world should stay loaded.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCWorld world = Static.getServer().getWorld(args[0].val());
+			if(world == null) {
+				throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
+			}
+			world.setKeepSpawnInMemory(ArgumentValidation.getBooleanObject(args[1], t));
+			return CVoid.VOID;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
 		}
 	}
 
@@ -1899,7 +1952,7 @@ public class World {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRERangeException.class, CREFormatException.class, CREInvalidWorldException.class,
-				CREIllegalArgumentException.class};
+					CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -2094,7 +2147,7 @@ public class World {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class,
-				CRERangeException.class};
+					CRERangeException.class};
 		}
 
 		@Override

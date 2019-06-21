@@ -123,12 +123,13 @@
 				+ "</strong></div>");
         html = html.replace(/\[(https?:\/\/.*?) (.*)\]/g, "<a href=\"$1\">$2</a>");
         html = html.replace(/__NOTOC__/g, "");
-        var internalLink = /\[\[(.*?)(?:\|(.*?))?\]\]/g;
+        var internalLink = /\[\[(.*?)(#.*?)?(?:\|(.*?))?\]\]/g;
         var result;
         while ((result = internalLink.exec(html)) !== null) {
             var replacement = result[0];
             var link = result[1];
-            var text = result[2] || null;
+            var anchor = result[2] || "";
+            var text = result[3] || null;
             if (text === null) {
                 text = link.replace(/_/g, " ");
             }
@@ -141,7 +142,7 @@
                 html = html.replace(replacement, "<img class= \"maxWidth100Percent\" src=\"" + resourceBase + "images/" + link.substring(6) + "\" alt=\"" + link + "\" />");
             } else {
                 // plain link
-                html = html.replace(replacement, "<a href=\"" + docsBase + link + "\">" + text + "</a>");
+                html = html.replace(replacement, "<a href=\"" + docsBase + link + anchor + "\">" + text + "</a>");
             }
         }
         if (/\{\{LearningTrail\}\}/.exec(html)) {

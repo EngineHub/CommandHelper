@@ -7,6 +7,7 @@ import com.laytonsmith.PureUtilities.MemoryMapFileUtil;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -196,7 +197,7 @@ public class SerializedPersistence extends AbstractDataSource {
 			try {
 				load();
 			} catch (Exception ex) {
-				Logger.getLogger("Minecraft").log(Level.SEVERE, null, ex);
+				Static.getLogger().log(Level.SEVERE, null, ex);
 			}
 		}
 		String oldVal = data.get(key);

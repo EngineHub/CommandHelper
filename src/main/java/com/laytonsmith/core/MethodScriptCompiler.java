@@ -41,6 +41,7 @@ import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.extensions.ExtensionTracker;
 import com.laytonsmith.core.functions.ArrayHandling;
 import com.laytonsmith.core.functions.Compiler;
+import com.laytonsmith.core.functions.ControlFlow;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
@@ -1788,7 +1789,7 @@ public final class MethodScriptCompiler {
 		}
 		// We have special handling for procs and closures, and of course break and the loops.
 		// If any of these are here, we kick into special handling mode. Otherwise, we recurse.
-		if(func instanceof DataHandling._break) {
+		if(func instanceof ControlFlow._break) {
 			// First grab the counter in the break function. If the break function doesn't
 			// have any children, then 1 is implied. break() requires the argument to be
 			// a CInt, so if it weren't, there should be a compile error.
@@ -2197,7 +2198,9 @@ public final class MethodScriptCompiler {
 //				} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException e) {
 //					//
 //				}
+				env.getEnv(GlobalEnv.class).SetFlag("no-check-undefined", true);
 				Procedure myProc = DataHandling.proc.getProcedure(tree.getTarget(), env, fakeScript, children.toArray(new ParseTree[children.size()]));
+				env.getEnv(GlobalEnv.class).ClearFlag("no-check-undefined");
 				procs.peek().add(myProc); //Yep. So, we can move on with our lives now, and if it's used later, it could possibly be static.
 			} catch (ConfigRuntimeException e) {
 				//Well, they have an error in there somewhere

@@ -1755,7 +1755,11 @@ public class InventoryManagement {
 				w = p.getWorld();
 			}
 			MCInventory inventory = InventoryManagement.GetInventory(args[0], w, t);
-			return new CString(inventory.getTitle(), t);
+			try {
+				return new CString(inventory.getTitle(), t);
+			} catch (NullPointerException | ClassCastException ex) {
+				throw new CREIllegalArgumentException("This inventory is not capable of being named.", t);
+			}
 		}
 
 		@Override
@@ -1771,7 +1775,7 @@ public class InventoryManagement {
 		@Override
 		public String docs() {
 			return "string {specifier} Returns the name of the inventory specified. If the block or entity"
-					+ " can't have an inventory, a FormatException is thrown.";
+					+ " can't have an inventory or a name, an IllegalArgumentException is thrown.";
 		}
 
 		@Override
@@ -2566,7 +2570,7 @@ public class InventoryManagement {
 					+ " If the id is already in use, an IllegalArgumentException will be thrown."
 					+ " You can use this id in other inventory functions to modify the contents, among other things."
 					+ " If a size is specified instead of a type, it is rounded up to the nearest multiple of 9."
-					+ " Size may be higher than 54, but the slots on the inventory background texture will not line up."
+					+ " Size cannot be higher than 54."
 					+ " A title for the top of the inventory may be given, but it will use the default for that"
 					+ " that inventory type if null is specified."
 					+ " An optional inventory array may be specified, otherwise the inventory will start empty."
@@ -2590,6 +2594,9 @@ public class InventoryManagement {
 						size = 9; // minimum
 					} else {
 						size = (size + 8) / 9 * 9; // must be a multiple of 9
+					}
+					if(size > 54) {
+						throw new CREIllegalArgumentException("A virtual inventory size cannot be higher than 54.", t);
 					}
 				} else {
 					try {

@@ -9,5 +9,6 @@ public enum MCFishingState {
 	FAILED_ATTEMPT,
 	FISHING,
 	IN_GROUND,
-	BITE
+	BITE,
+	REEL_IN
 }

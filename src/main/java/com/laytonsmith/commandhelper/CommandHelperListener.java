@@ -23,7 +23,6 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
-import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.InternalException;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
@@ -39,7 +38,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Event listener for Hey0's server mod.
@@ -48,26 +46,10 @@ import java.util.logging.Logger;
  */
 public class CommandHelperListener implements Listener {
 
-	/**
-	 * Logger.
-	 */
-	private static final Logger LOGGER = Logger.getLogger("Minecraft");
-
-	/**
-	 * List of global aliases.
-	 */
-	private AliasCore ac;
 	private final CommandHelperPlugin plugin;
 
 	public CommandHelperListener(CommandHelperPlugin plugin) {
 		this.plugin = plugin;
-	}
-
-	/**
-	 * Load global aliases.
-	 */
-	public void loadGlobalAliases() {
-		this.ac = CommandHelperPlugin.getCore();
 	}
 
 	/**
@@ -87,8 +69,7 @@ public class CommandHelperListener implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-		if(CommandHelperPlugin.self.interpreterListener
-				.isInInterpreterMode(event.getPlayer().getName())) {
+		if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(event.getPlayer().getName())) {
 			//They are in interpreter mode, so we want it to handle this, not everything else.
 			return;
 		}
@@ -97,7 +78,6 @@ public class CommandHelperListener implements Listener {
 		if(mpce.isCancelled()) {
 			return;
 		}
-		String cmd = event.getMessage();
 		MCPlayer player = new BukkitMCPlayer(event.getPlayer());
 		BukkitDirtyRegisteredListener.PlayDirty();
 
@@ -116,9 +96,9 @@ public class CommandHelperListener implements Listener {
 				}
 			}
 		} catch (InternalException e) {
-			LOGGER.log(Level.SEVERE, e.getMessage());
+			Static.getLogger().log(Level.SEVERE, e.getMessage());
 		} catch (ConfigRuntimeException e) {
-			LOGGER.log(Level.WARNING, e.getMessage());
+			Static.getLogger().log(Level.WARNING, e.getMessage());
 		} catch (Throwable e) {
 			player.sendMessage(MCChatColor.RED + "Command failed with following reason: " + e.getMessage());
 			//Obviously the command is registered, but it somehow failed. Cancel the event.

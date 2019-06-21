@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCTravelAgent;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
@@ -18,6 +19,7 @@ import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.events.MCExpChangeEvent;
 import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
@@ -444,16 +446,17 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <macro> | from: <location match> This should be a location array (x, y, z, world)."
-					+ " | to: <location match> The location the player is coming to. This should be a location array as well."
-					+ " | type: <macro> the type of portal occuring, one of " + StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
+			return "{player: <macro> | from: <location match> An exact location array where the player is coming from."
+					+ " | to: <location match> An exact location array where the player is going to."
+					+ " | type: <macro> The type of portal occurring, either NETHER_PORTAL or END_PORTAL}"
 					+ "Fired when a player collides with portal."
 					+ "{player: The player that teleport | from: The location the player is coming from"
-					+ " | to: The location the player is coming to. Returns null when using Nether portal and \"allow-nether\""
-					+ " in server.properties is set to false or when using Ender portal and \"allow-end\" in bukkit.yml"
-					+ " is set to false. | type: the type of portal occuring | creationradius: Gets the maximum radius from"
-					+ " the given location to create a portal. | searchradius: Gets the search radius value for finding"
-					+ " an available portal.}"
+					+ " | to: The location the player is coming to. Returns null when using nether portal and"
+					+ " \"allow-nether\" in server.properties is set to false or when using end portal and"
+					+ " \"allow-end\" in bukkit.yml is set to false."
+					+ " | type: the type of portal occurring | creationradius: Gets the maximum radius from the given"
+					+ " location to create a portal. (1.13 only) | searchradius: Gets the search radius value for"
+					+ " finding an available portal. (1.13 only)}"
 					+ "{to|creationradius|searchradius}"
 					+ "{}";
 		}
@@ -500,8 +503,11 @@ public class PlayerEvents {
 					map.put("to", ObjectGenerator.GetGenerator().location(event.getTo()));
 				}
 				map.put("type", new CString(event.getCause().toString(), Target.UNKNOWN));
-				map.put("creationradius", new CInt(event.getPortalTravelAgent().getCreationRadius(), Target.UNKNOWN));
-				map.put("searchradius", new CInt(event.getPortalTravelAgent().getSearchRadius(), Target.UNKNOWN));
+				if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
+					MCTravelAgent ta = event.getPortalTravelAgent();
+					map.put("creationradius", new CInt(ta.getCreationRadius(), Target.UNKNOWN));
+					map.put("searchradius", new CInt(ta.getSearchRadius(), Target.UNKNOWN));
+				}
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to MCPlayerPortalEvent");
@@ -519,22 +525,26 @@ public class PlayerEvents {
 				MCPlayerPortalEvent e = (MCPlayerPortalEvent) event;
 
 				if(key.equalsIgnoreCase("to")) {
-					e.useTravelAgent(true);
+					if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
+						e.useTravelAgent(true);
+					}
 					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, Target.UNKNOWN);
 					e.setTo(loc);
 					return true;
 				}
 
-				if(key.equalsIgnoreCase("creationradius")) {
-					e.useTravelAgent(true);
-					e.getPortalTravelAgent().setCreationRadius(Static.getInt32(value, Target.UNKNOWN));
-					return true;
-				}
+				if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
+					if(key.equalsIgnoreCase("creationradius")) {
+						e.useTravelAgent(true);
+						e.getPortalTravelAgent().setCreationRadius(Static.getInt32(value, Target.UNKNOWN));
+						return true;
+					}
 
-				if(key.equalsIgnoreCase("searchradius")) {
-					e.useTravelAgent(true);
-					e.getPortalTravelAgent().setSearchRadius(Static.getInt32(value, Target.UNKNOWN));
-					return true;
+					if(key.equalsIgnoreCase("searchradius")) {
+						e.useTravelAgent(true);
+						e.getPortalTravelAgent().setSearchRadius(Static.getInt32(value, Target.UNKNOWN));
+						return true;
+					}
 				}
 			}
 
@@ -1446,10 +1456,10 @@ public class PlayerEvents {
 					+ "Fired when any player attempts to send a chat message."
 					+ "{message: The message to be sent | recipients | format}"
 					+ "{message|recipients: An array of"
-					+ " players that will recieve the chat message. If a player doesn't exist"
+					+ " players that will receive the chat message. If a player doesn't exist"
 					+ " or is offline, and is in the array, it is simply ignored, no"
 					+ " exceptions will be thrown. | format: The \"printf\" format string, by "
-					+ " default \"<%1$s> %2$s\". The first parameter is the player's display"
+					+ " default \"&lt;%1$s> %2$s\". The first parameter is the player's display"
 					+ " name, and the second one is the message.}"
 					+ "{player|message|format}";
 		}
@@ -1577,10 +1587,10 @@ public class PlayerEvents {
 					+ " why this feature is undocumented. If this event is cancelled, player_chat binds will not fire."
 					+ "{message: The message to be sent | recipients | format}"
 					+ "{message|recipients: An array of"
-					+ " players that will recieve the chat message. If a player doesn't exist"
+					+ " players that will receive the chat message. If a player doesn't exist"
 					+ " or is offline, and is in the array, it is simply ignored, no"
 					+ " exceptions will be thrown.|format: The \"printf\" format string, by "
-					+ " default \"<%1$s> %2$s\". The first parameter is the player's display"
+					+ " default \"&lt;%1$s> %2$s\". The first parameter is the player's display"
 					+ " name, and the second one is the message.}"
 					+ "{}";
 		}

@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCEntity;
@@ -941,12 +942,14 @@ public class BukkitEntityEvents {
 
 		@Override
 		public void useTravelAgent(boolean useTravelAgent) {
-			epe.useTravelAgent(useTravelAgent);
+			ReflectionUtils.invokeMethod(EntityPortalEvent.class, epe, "useTravelAgent",
+					new Class[]{boolean.class}, new Object[]{useTravelAgent});
 		}
 
 		@Override
 		public MCTravelAgent getPortalTravelAgent() {
-			return new BukkitMCTravelAgent(epe.getPortalTravelAgent());
+			return new BukkitMCTravelAgent(ReflectionUtils.invokeMethod(EntityPortalEvent.class, epe,
+					"getPortalTravelAgent"));
 		}
 	}
 }

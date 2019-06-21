@@ -1,0 +1,75 @@
+Strictly speaking, prefilters are not needed. A series of checks in the event itself can be used to determine if an event should run. However, using prefilters makes it much easier to control events, and allows for better optimization on the back end of the code. Each event will list what prefilters it supports, and what type the prefilter is. Prefilters add restrictions, by default if no prefilters are added, the event will run. There are 6 types of prefilters, listed below, with examples.
+
+Not all things will be doable with prefilters. For very complex filters, you may still need to use if statements inside the code itself. However, whenever possible, you should use prefilters, both for their ease of use, and their potential for code optimization.
+
+==Item Match==
+Item matches are string matches for the name of the item type. (eg. 'RED_WOOL')
+
+<%CODE|
+bind('player_interact', null, array('itemname': 'RED_WOOL'), @event) {
+     # This code will run if a player left clicks while holding red wool. 
+     #'itemname' is a prefilter of type item_match.
+}
+%>
+
+==String Match==
+String matches are exact string matches. This is pretty straightforward. 
+
+<%CODE|
+bind('player_interact', null, array('player': 'LadyCailin'), @event) {
+     # This code will run when LadyCailin interacts with any block
+}
+%>
+
+==Math Match==
+Math matches will match if two values are mathematically equivalent. 3.0 and 3 would not match in a strict string match, but they are mathematically equivalent.
+<%CODE|
+bind('player_teleport', null, array('x': 0, 'y': 60.0, 'z': 0), @event) {
+     # This code will run when a player teleports to 0, 60, 0.
+}
+%>
+
+==Regex==
+Regex matches allow for a more complex way of matching a value. Perhaps you want to do something when all players with the letters abc anywhere in their name interact with an object.
+<%CODE|
+bind('player_interact', null, array('player': '/.*abc.*/'), @event) {
+     # This code will run when a player with "abc" in their name interacts with any block
+}
+%>
+
+==Expression==
+Expressions allow for more complex mathematical expressions to be evaluated. There are two modes for expressions, inequality mode, and match mode. Match mode is just a shortcut to a normal math match, but inequality mode allows for more powerful expressions. Say we want to perform some action whenever a player teleports to some y that is greater than 90. This prefilter requires WorldEdit.
+<%CODE|
+bind('player_teleport', null, array('y': '(y > 90)'), @event) {
+     # This will occur when y is greater than 90
+}
+%>
+
+The variable in the expression is the key of the entry, in this case, y is replaced with the y value of the event. If the expression resolves to true, the filter passes, if not, the filter fails, and the event is not run. Expressions must have parenthesis around them to be considered value expressions.
+
+==Macro==
+Sometimes a parameter may makes sense to use multiple filter types. In that case, it is a macro filter. The type of filter is detected by examining the filter given. If the filter starts and ends with '/', it is a regex. If it is surrounded by parenthesis, it considered an expression, and otherwise is considered a string match.
+
+<%CODE|
+# String match
+bind('player_interact', null, array('player': 'LadyCailin'), @event) {
+     # This code will run when LadyCailin interacts with any block
+}
+
+# Regex match
+bind('player_interact', null, array('player': '/.*abc.*/'), @event) {
+     # This code will run when a player with "abc" in their name interacts with any block
+}
+%>
+
+As you can see, macros just expand the types of matches that can be done on the input data. Whenever applicable, macro is used in favor of more specific types, so you are free to use which syntax best suites your needs. Here is another example:
+ 
+<%CODE|
+bind('event_that_uses_string_match', null, array('val': '/regex/'), @event) {
+     # Matches if val exactly equals '/regex/'
+}
+
+bind('event_that_uses_macro_match', null, array('val': '/regex/'), @event) {
+     # Because this is a macro, the filter is registered as a regex, and so now it matches 'regex'
+}
+%>

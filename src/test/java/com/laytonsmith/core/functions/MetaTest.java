@@ -11,6 +11,7 @@ import static com.laytonsmith.testing.StaticTest.GetOnlinePlayer;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -83,5 +84,17 @@ public class MetaTest {
 		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
 		verify(fakePlayer2).sendMessage("newlabel");
 		verify(fakePlayer).sendMessage("*");
+	}
+
+	@Test
+	public void testNameof() throws Exception {
+		assertEquals("@var", SRun("nameof(@var)", null));
+		assertEquals("$var", SRun("nameof($var)", null));
+		try {
+			SRun("nameof('string')", null);
+			fail();
+		} catch (Exception e) {
+			// pass
+		}
 	}
 }

@@ -7,7 +7,7 @@ import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.DataHandling;
+import com.laytonsmith.core.functions.ControlFlow;
 import java.util.List;
 
 /**
@@ -16,8 +16,8 @@ import java.util.List;
 @Keyword.keyword("do")
 public class DoKeyword extends Keyword {
 
-	private static final String WHILE = new DataHandling._while().getName();
-	private static final String DOWHILE = new DataHandling._dowhile().getName();
+	private static final String WHILE = new ControlFlow._while().getName();
+	private static final String DOWHILE = new ControlFlow._dowhile().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {

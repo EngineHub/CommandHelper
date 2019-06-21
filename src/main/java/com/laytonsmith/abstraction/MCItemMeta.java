@@ -110,4 +110,10 @@ public interface MCItemMeta extends AbstractionObject {
 	int getDamage();
 
 	void setDamage(int damage);
+
+	boolean hasCustomModelData();
+
+	int getCustomModelData();
+
+	void setCustomModelData(int id);
 }

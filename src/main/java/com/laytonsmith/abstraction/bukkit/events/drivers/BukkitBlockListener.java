@@ -65,6 +65,10 @@ public class BukkitBlockListener implements Listener {
 		BukkitBlockEvents.BukkitMCBlockBreakEvent bbe = new BukkitBlockEvents.BukkitMCBlockBreakEvent(e);
 		EventUtils.TriggerListener(Driver.BLOCK_BREAK, "block_break", bbe);
 		if(bbe.isModified() && !e.isCancelled()) {
+			if(bbe.getDrops().isEmpty()) {
+				e.setDropItems(false);
+				return;
+			}
 			e.setCancelled(true);
 			// If we've modified the drops, create a new event for other plugins (eg. block loggers, region protection)
 			BlockBreakEvent chevent = new BlockBreakEvent(e.getBlock(), e.getPlayer());
@@ -81,8 +85,10 @@ public class BukkitBlockListener implements Listener {
 				block.setType(Material.AIR);
 				Location loc = block.getLocation();
 				loc.add(0.5, 0.5, 0.5);
-				for(MCItemStack item : bbe.getDrops()) {
-					block.getWorld().dropItemNaturally(loc, (ItemStack) item.getHandle());
+				if(chevent.isDropItems()) {
+					for(MCItemStack item : bbe.getDrops()) {
+						block.getWorld().dropItemNaturally(loc, (ItemStack) item.getHandle());
+					}
 				}
 				int amt = chevent.getExpToDrop();
 				if(amt > 0) {

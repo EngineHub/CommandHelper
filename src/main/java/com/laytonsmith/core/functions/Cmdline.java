@@ -72,7 +72,7 @@ public class Cmdline {
 
 	public static String docs() {
 		return "This class contains functions that are mostly only useful for command line scripts, but in general may be used by any script. For"
-				+ " more information on running MethodScript from the command line, see [[CommandHelper/Command_Line_Scripting|this wiki page]].";
+				+ " more information on running MethodScript from the command line, see [[Command_Line_Scripting|this wiki page]].";
 	}
 
 	@api
@@ -344,7 +344,7 @@ public class Cmdline {
 			if(Static.InCmdLine(environment, true)) {
 				System.exit(exit_code);
 			}
-			return new Echoes.die().exec(t, environment, args);
+			return new ControlFlow.die().exec(t, environment, args);
 		}
 
 		@Override

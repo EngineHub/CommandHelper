@@ -404,7 +404,7 @@ public class Threading {
 			// Evaluate the code, synchronized by the passed sync object.
 			try {
 				synchronized(syncObject) {
-					parent.seval(code, env);
+					parent.eval(code, env);
 				}
 			} catch (RuntimeException e) {
 				throw e;

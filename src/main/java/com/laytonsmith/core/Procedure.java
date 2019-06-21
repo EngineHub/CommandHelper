@@ -23,7 +23,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
-import com.laytonsmith.core.functions.DataHandling;
+import com.laytonsmith.core.functions.ControlFlow;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
@@ -101,7 +101,7 @@ public class Procedure implements Cloneable {
 				FunctionBase fb = FunctionList.getFunction((CFunction) tree.getData());
 				if(fb instanceof Function) {
 					Function f = (Function) fb;
-					if(f instanceof DataHandling._return) {
+					if(f instanceof ControlFlow._return) {
 						//This is a special exception. Return itself is not optimizable,
 						//but if the contents are optimizable, it is still considered constant.
 						if(!tree.hasChildren()) {

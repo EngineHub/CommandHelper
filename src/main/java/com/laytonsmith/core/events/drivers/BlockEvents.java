@@ -275,7 +275,6 @@ public class BlockEvents {
 			Map<String, Mixed> map = evaluate_helper(event);
 
 			MCBlock block = event.getBlock();
-			MCMaterial mat = block.getType();
 
 			map.put("player", new CString(event.getPlayer().getName(), t));
 			map.put("block", new CString(block.getType().getName(), t));
@@ -283,11 +282,10 @@ public class BlockEvents {
 			CArray drops = new CArray(t);
 			Collection<MCItemStack> items = event.getDrops();
 			if(items == null) {
-				items = event.getBlock().getDrops(event.getPlayer().getInventory().getItemInMainHand());
+				items = block.getDrops(event.getPlayer().getInventory().getItemInMainHand());
 			}
 			for(MCItemStack stack : items) {
-				CArray item = (CArray) ObjectGenerator.GetGenerator().item(stack, t);
-				drops.push(item, t);
+				drops.push(ObjectGenerator.GetGenerator().item(stack, t), t);
 			}
 			map.put("drops", drops);
 
@@ -306,8 +304,11 @@ public class BlockEvents {
 				if(value.isInstanceOf(CArray.class)) {
 					CArray arr = (CArray) value;
 					for(int i = 0; i < arr.size(); i++) {
-						CArray item = (CArray) arr.get(i, value.getTarget());
-						drops.add(ObjectGenerator.GetGenerator().item(item, value.getTarget()));
+						CArray item = Static.getArray(arr.get(i, value.getTarget()), value.getTarget());
+						MCItemStack stack = ObjectGenerator.GetGenerator().item(item, value.getTarget());
+						if(!stack.isEmpty()) {
+							drops.add(stack);
+						}
 					}
 				}
 				event.setDrops(drops);

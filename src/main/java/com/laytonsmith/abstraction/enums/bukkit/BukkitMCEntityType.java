@@ -7,13 +7,16 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFishHook;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHopperMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCItem;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLightningStrike;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLlama;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCStorageMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCTNT;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCThrownPotion;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Projectile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +33,7 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 	public static void build() {
 		NULL = new BukkitMCEntityType(EntityType.UNKNOWN, MCVanillaEntityType.UNKNOWN);
 		for(MCVanillaEntityType v : MCVanillaEntityType.values()) {
-			if(v.existsInCurrent()) {
+			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
 				EntityType type;
 				try {
 					type = getBukkitType(v);
@@ -66,10 +69,16 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 	@Override
 	public boolean isSpawnable() {
 		if(getAbstracted() == MCVanillaEntityType.UNKNOWN) {
-			return getConcrete() != EntityType.UNKNOWN;
+			return getConcrete() != EntityType.UNKNOWN && getConcrete().isSpawnable();
 		} else {
-			return getAbstracted().isSpawnable();
+			return getAbstracted().isSpawnable() || getConcrete().isSpawnable();
 		}
+	}
+
+	@Override
+	public boolean isProjectile() {
+		return getConcrete().getEntityClass() != null
+				&& Projectile.class.isAssignableFrom(getConcrete().getEntityClass());
 	}
 
 	public static BukkitMCEntityType valueOfConcrete(EntityType test) {
@@ -118,6 +127,7 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 				wrapperClass = BukkitMCLightningStrike.class;
 				break;
 			case LINGERING_POTION:
+			case SPLASH_POTION:
 				wrapperClass = BukkitMCThrownPotion.class;
 				break;
 			case MINECART_CHEST:
@@ -132,8 +142,8 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 			case PRIMED_TNT:
 				wrapperClass = BukkitMCTNT.class;
 				break;
-			case SPLASH_POTION:
-				wrapperClass = BukkitMCThrownPotion.class;
+			case TRADER_LLAMA:
+				wrapperClass = BukkitMCLlama.class;
 				break;
 			case UNKNOWN:
 				wrapperClass = null;

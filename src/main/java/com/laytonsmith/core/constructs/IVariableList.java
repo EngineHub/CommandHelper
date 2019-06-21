@@ -3,6 +3,8 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +40,8 @@ public class IVariableList {
 		// and moved into the compiler. In strict mode, it will be a compiler error, in
 		// non-strict mode it will be a compiler warning.
 		// ==, not .equals
-		if(v.ival() == CNull.UNDEFINED && !bypassAssignedCheck) {
+		if(v.ival() == CNull.UNDEFINED && !bypassAssignedCheck
+				&& env.getEnv(GlobalEnv.class).GetFlag("no-check-undefined") == null) {
 			MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, "Using undefined variable: " + name, t);
 		}
 		v.setTarget(t);

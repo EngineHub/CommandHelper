@@ -18,6 +18,7 @@ import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
@@ -32,7 +33,9 @@ import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -51,9 +54,11 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.jar.JarFile;
 import java.util.Locale;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 
@@ -63,7 +68,8 @@ import java.util.zip.ZipEntry;
 public class Meta {
 
 	public static String docs() {
-		return "These functions provide a way to run other commands";
+		return "These functions provide a way to run other commands, and otherwise interact with the system in a meta"
+				+ " way.";
 	}
 
 	/*
@@ -133,7 +139,7 @@ public class Meta {
 			if(args[0].val().equals(Static.getConsoleName())) {
 				MSLog.GetLogger().Log(MSLog.Tags.META, LogLevel.INFO, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as console): " + args[1].val().trim(), t);
 				if(Prefs.DebugMode()) {
-					Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as : " + args[1].val().trim());
+					Static.getLogger().log(Level.INFO, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as : " + args[1].val().trim());
 				}
 				if(cmd.equalsIgnoreCase("interpreter-on")) {
 					//This isn't allowed for security reasons.
@@ -154,7 +160,7 @@ public class Meta {
 
 					MSLog.GetLogger().Log(MSLog.Tags.META, LogLevel.INFO, "Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim(), t);
 					if(Prefs.DebugMode()) {
-						Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim());
+						Static.getLogger().log(Level.INFO, "Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim());
 					}
 					//m.chat(cmd);
 					Static.getServer().dispatchCommand(m, cmd);
@@ -229,7 +235,7 @@ public class Meta {
 
 			MSLog.GetLogger().Log(MSLog.Tags.META, LogLevel.INFO, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as op): " + args[0].val().trim(), t);
 			if(Prefs.DebugMode()) {
-				Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as op): " + args[0].val().trim());
+				Static.getLogger().log(Level.INFO, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as op): " + args[0].val().trim());
 			}
 
 			//If they aren't op, op them now
@@ -297,7 +303,7 @@ public class Meta {
 				if(Prefs.UseSudoFallback()) {
 					p.setOp(value);
 				} else {
-					Static.getLogger().log(Level.WARNING, "[CommandHelper]: Failed to OP player " + player.getName() + "."
+					Static.getLogger().log(Level.WARNING, "Failed to OP player " + player.getName() + "."
 							+ " Check that your server jar ends with \".jar\" or enable \"use-sudo-fallback\" in preferences.ini.");
 					StreamUtils.GetSystemErr().println("Extra information about the error: ");
 					e.printStackTrace();
@@ -347,9 +353,9 @@ public class Meta {
 			String cmd = args[0].val().substring(1);
 			if(Prefs.DebugMode()) {
 				if(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
-					Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() + ": " + args[0].val().trim());
+					Static.getLogger().log(Level.INFO, "Executing command on " + env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() + ": " + args[0].val().trim());
 				} else {
-					Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + args[0].val().trim());
+					Static.getLogger().log(Level.INFO, "Executing command from console equivalent: " + args[0].val().trim());
 				}
 			}
 			if(cmd.equalsIgnoreCase("interpreter-on")) {
@@ -1410,5 +1416,80 @@ public class Meta {
 		public Version since() {
 			return MSVersion.V3_3_4;
 		}
+	}
+
+	@api
+	public static class nameof extends AbstractFunction implements Optimizable {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			throw new Error();
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() != 1) {
+				throw new ConfigCompileException("Invalid number of arguments passed to " + getName(), t);
+			}
+			ParseTree d = children.get(0);
+			Mixed m = d.getData();
+			String ret = null;
+			if(m instanceof IVariable) {
+				ret = ((IVariable) m).getVariableName();
+			} else if(m instanceof Variable) {
+				ret = ((Variable) m).getVariableName();
+			}
+			if(ret == null) {
+				throw new ConfigCompileException("Invalid type passed to " + getName(), t);
+			}
+			return new ParseTree(new CString(ret, t), fileOptions);
+		}
+
+		@Override
+		public String getName() {
+			return "nameof";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {component} Returns the name of the item. For now, only works with variables."
+					+ " For instance, nameof(@var)"
+					+ " returns the string \"@var\". This is useful for avoiding hardcoding of strings of items"
+					+ " that are refactorable. This allows tools to properly refactor, without needing to manually"
+					+ " update strings that contain the names of variables or other refactorable items. This is"
+					+ " a meta function, and is fully resolved at compile time.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
 	}
 }
