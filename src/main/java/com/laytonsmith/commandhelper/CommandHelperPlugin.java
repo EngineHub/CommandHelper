@@ -37,6 +37,7 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommand;
+import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
@@ -295,7 +296,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			MSLog.GetLogger().e(MSLog.Tags.GENERAL, "CommandHelper does not support a Java version older than 8!", Target.UNKNOWN);
 		}
 
-		myServer = StaticLayer.GetServer();
+		myServer = BukkitMCServer.Get();
 		BukkitMCEntityType.build();
 		BukkitMCBiomeType.build();
 		BukkitMCSound.build();
