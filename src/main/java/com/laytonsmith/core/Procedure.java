@@ -9,7 +9,6 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
-import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -172,13 +171,23 @@ public class Procedure implements Cloneable {
 	/**
 	 * Executes this procedure, with the arguments that were passed in
 	 *
-	 * @param args
-	 * @param env
+	 * @param args The arguments passed to the procedure call.
+	 * @param oldEnv The environment to be cloned.
 	 * @param t
 	 * @return
 	 */
-	public Mixed execute(List<Mixed> args, Environment env, Target t) {
-		env.getEnv(GlobalEnv.class).SetVarList(new IVariableList());
+	public Mixed execute(List<Mixed> args, Environment oldEnv, Target t) {
+		boolean prev = oldEnv.getEnv(GlobalEnv.class).getCloneVars();
+		oldEnv.getEnv(GlobalEnv.class).setCloneVars(false);
+		Environment env;
+		try {
+			env = oldEnv.clone();
+			env.getEnv(GlobalEnv.class).setCloneVars(true);
+		} catch (CloneNotSupportedException ex) {
+			throw new RuntimeException(ex);
+		}
+		oldEnv.getEnv(GlobalEnv.class).setCloneVars(prev);
+
 		//This is what will become our @arguments var
 		CArray arguments = new CArray(Target.UNKNOWN);
 		for(String key : originals.keySet()) {

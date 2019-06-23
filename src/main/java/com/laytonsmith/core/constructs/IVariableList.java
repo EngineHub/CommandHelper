@@ -84,7 +84,7 @@ public class IVariableList {
 	@Override
 	public IVariableList clone() {
 		IVariableList clone = new IVariableList();
-		clone.varList = new HashMap<String, IVariable>(varList);
+		clone.varList = new HashMap<>(varList);
 		return clone;
 	}
 

@@ -101,8 +101,8 @@ public final class Environment implements Cloneable {
 	public Environment clone() throws CloneNotSupportedException {
 		Environment clone = (Environment) super.clone();
 		clone.environments = new HashMap<>();
-		for(Class c : environments.keySet()) {
-			clone.environments.put(c, environments.get(c).clone());
+		for(Map.Entry<Class<? extends EnvironmentImpl>, EnvironmentImpl> entry : environments.entrySet()) {
+			clone.environments.put(entry.getKey(), entry.getValue().clone());
 		}
 		return clone;
 	}

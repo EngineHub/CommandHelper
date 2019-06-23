@@ -2059,13 +2059,7 @@ public class ControlFlow {
 			if(proc != null) {
 				List<Mixed> vars = new ArrayList<>(Arrays.asList(args));
 				vars.remove(0);
-				Environment newEnv = null;
-				try {
-					newEnv = env.clone();
-				} catch (CloneNotSupportedException ex) {
-					throw new RuntimeException(ex);
-				}
-				return proc.execute(vars, newEnv, t);
+				return proc.execute(vars, env, t);
 			}
 			throw new CREInvalidProcedureException("Unknown procedure \"" + args[0].val() + "\"", t);
 		}

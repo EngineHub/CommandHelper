@@ -260,7 +260,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 			clone.procs = new HashMap<>();
 		}
 		if(cloneVars && iVariableList != null) {
-			clone.iVariableList = (IVariableList) iVariableList.clone();
+			clone.iVariableList = iVariableList.clone();
 		} else if(!cloneVars) {
 			clone.iVariableList = new IVariableList();
 		}
@@ -454,12 +454,12 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	public StackTraceManager GetStackTraceManager() {
 		Thread currentThread = Thread.currentThread();
 		synchronized(stackTraceManagers) {
-			if(!stackTraceManagers.containsKey(currentThread)) {
-				StackTraceManager manager = new StackTraceManager();
+			StackTraceManager manager = stackTraceManagers.get(currentThread);
+			if(manager == null) {
+				manager = new StackTraceManager();
 				stackTraceManagers.put(currentThread, manager);
-				return manager;
 			}
-			return stackTraceManagers.get(currentThread);
+			return manager;
 		}
 	}
 

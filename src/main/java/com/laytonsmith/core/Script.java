@@ -293,18 +293,13 @@ public class Script {
 				if(p == null) {
 					throw new CREInvalidProcedureException("Unknown procedure \"" + m.val() + "\"", m.getTarget());
 				}
-				Environment newEnv = env;
-				try {
-					newEnv = env.clone();
-				} catch (CloneNotSupportedException e) {
-				}
 				ProfilePoint pp = env.getEnv(GlobalEnv.class).GetProfiler().start(m.val() + " execution", LogLevel.INFO);
 				Mixed ret;
 				try {
 					if(debugOutput) {
 						doDebugOutput(p.getName(), c.getChildren());
 					}
-					ret = p.cexecute(c.getChildren(), newEnv, m.getTarget());
+					ret = p.cexecute(c.getChildren(), env, m.getTarget());
 				} finally {
 					pp.stop();
 				}

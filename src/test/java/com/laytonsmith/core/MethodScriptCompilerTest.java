@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -231,17 +232,6 @@ public class MethodScriptCompilerTest {
 
 	@Test
 	public void testExecute4() throws Exception {
-		String script
-				= "proc(_hello,"
-				+ "     return('hello')"
-				+ ")"
-				+ "msg(_hello())";
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
-		verify(fakePlayer).sendMessage("hello");
-	}
-
-	@Test
-	public void testExecute5() throws Exception {
 		String script
 				= "proc(_hello,"
 				+ "     return('hello')"
