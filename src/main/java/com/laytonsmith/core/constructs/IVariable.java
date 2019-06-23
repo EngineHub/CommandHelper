@@ -43,6 +43,9 @@ public class IVariable extends Construct implements Cloneable {
 		if(type.equals(CVoid.TYPE)) {
 			throw new CRECastException("Variables may not be of type void", t);
 		}
+		if(value.typeof().equals(CVoid.TYPE)) {
+			throw new CRECastException("Void may not be assigned to a variable", t);
+		}
 		if(!type.equals(Auto.TYPE) && !(value instanceof CNull)) {
 			if(!InstanceofUtil.isInstanceof(value, type, env)) {
 				throw new CRECastException(name + " is of type " + type.val() + ", but a value of type "
