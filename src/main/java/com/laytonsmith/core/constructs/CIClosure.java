@@ -82,7 +82,7 @@ public class CIClosure extends CClosure {
 					}
 				}
 				environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
-						node.getData().getTarget(), environment));
+						node.getData().getTarget()));
 			}
 
 			ParseTree newNode = new ParseTree(new CFunction("g", getTarget()), node.getFileOptions());

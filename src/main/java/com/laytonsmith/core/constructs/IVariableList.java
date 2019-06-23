@@ -31,10 +31,11 @@ public class IVariableList {
 	}
 
 	public IVariable get(String name, Target t, boolean bypassAssignedCheck, Environment env) {
-		if(!varList.containsKey(name)) {
-			this.set(new IVariable(Auto.TYPE, name, CNull.UNDEFINED, t, env));
-		}
 		IVariable v = varList.get(name);
+		if(v == null) {
+			v = new IVariable(Auto.TYPE, name, CNull.UNDEFINED, t);
+			this.set(v);
+		}
 
 		// TODO: Once the compiler can handle this, this check should be moved out of here,
 		// and moved into the compiler. In strict mode, it will be a compiler error, in

@@ -183,7 +183,7 @@ public class Procedure implements Cloneable {
 		CArray arguments = new CArray(Target.UNKNOWN);
 		for(String key : originals.keySet()) {
 			Mixed c = originals.get(key);
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, key, c, Target.UNKNOWN, env));
+			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, key, c, c.getTarget()));
 			arguments.push(c, t);
 		}
 		Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel()); // new Script(null, null);
@@ -191,20 +191,19 @@ public class Procedure implements Cloneable {
 			Mixed c = args.get(i);
 			arguments.set(i, c, t);
 			if(varIndex.size() > i) {
-				String varname = varIndex.get(i).getVariableName();
-				if(c instanceof CNull || InstanceofUtil.isInstanceof(c, varIndex.get(i).getDefinedType(), env)
-						|| varIndex.get(i).getDefinedType().equals(Auto.TYPE)) {
-					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(varIndex.get(i).getDefinedType(),
-							varname, c, c.getTarget(), env));
+				IVariable var = varIndex.get(i);
+				if(c instanceof CNull || var.getDefinedType().equals(Auto.TYPE)
+						|| InstanceofUtil.isInstanceof(c, var.getDefinedType(), env)) {
+					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
+							var.getVariableName(), c, c.getTarget()));
 				} else {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
-							+ varIndex.get(i).getDefinedType().val() + " in argument " + (i + 1) + ", but"
+							+ var.getDefinedType().val() + " in argument " + (i + 1) + ", but"
 							+ " a value of type " + c.typeof() + " was found instead.", c.getTarget());
 				}
 			}
 		}
-		env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, Target.UNKNOWN,
-				env));
+		env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, t));
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
 		try {

@@ -465,8 +465,7 @@ public class Exceptions {
 							// This should eventually be changed to be of the appropriate type. Unfortunately, that will
 							// require reworking basically everything. We need all functions to accept Mixed, instead of Mixed.
 							// This will have to do in the meantime.
-							varList.set(new IVariable(CArray.TYPE, var.getVariableName(), e.getExceptionObject(), t,
-									env));
+							varList.set(new IVariable(CArray.TYPE, var.getVariableName(), e.getExceptionObject(), t));
 							parent.eval(nodes[i + 1], env);
 							varList.remove(var.getVariableName());
 						} catch (ConfigRuntimeException | FunctionReturnException newEx) {

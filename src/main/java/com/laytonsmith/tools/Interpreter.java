@@ -801,7 +801,7 @@ public final class Interpreter {
 			v.setDefault(finalArgument.toString());
 			vars.add(v);
 			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
-					Target.UNKNOWN, env));
+					Target.UNKNOWN));
 		}
 		try {
 			ProfilePoint p = this.env.getEnv(GlobalEnv.class).GetProfiler().start("Interpreter Script", LogLevel.ERROR);

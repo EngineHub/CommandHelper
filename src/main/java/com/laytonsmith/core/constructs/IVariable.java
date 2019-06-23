@@ -30,16 +30,24 @@ public class IVariable extends Construct implements Cloneable {
 		this.definedTarget = t;
 	}
 
+	public IVariable(CClassType checkedType, String name, Mixed checkedValue, Target t) {
+		super(name, ConstructType.IVARIABLE, t);
+		this.type = checkedType;
+		this.varValue = checkedValue;
+		this.name = name;
+		this.definedTarget = t;
+	}
+
 	public IVariable(CClassType type, String name, Mixed value, Target t, Environment env) {
 		super(name, ConstructType.IVARIABLE, t);
+		if(type.equals(CVoid.TYPE)) {
+			throw new CRECastException("Variables may not be of type void", t);
+		}
 		if(!type.equals(Auto.TYPE) && !(value instanceof CNull)) {
 			if(!InstanceofUtil.isInstanceof(value, type, env)) {
 				throw new CRECastException(name + " is of type " + type.val() + ", but a value of type "
 						+ value.typeof() + " was assigned to it.", t);
 			}
-		}
-		if(type.equals(CVoid.TYPE)) {
-			throw new CRECastException("Variables may not be of type void", t);
 		}
 		this.type = type;
 		if(value == null) {
@@ -84,7 +92,7 @@ public class IVariable extends Construct implements Cloneable {
 		if(this.varValue != null) {
 			clone.varValue = this.varValue.clone();
 		}
-		return (IVariable) clone;
+		return clone;
 	}
 
 	@Override

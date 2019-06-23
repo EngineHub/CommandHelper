@@ -248,8 +248,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 			for(Map.Entry<String, Mixed> entry : activeEvent.parsedEvent.entrySet()) {
 				ca.set(new CString(entry.getKey(), Target.UNKNOWN), entry.getValue(), Target.UNKNOWN);
 			}
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, ca, Target.UNKNOWN,
-					env));
+			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, ca, Target.UNKNOWN));
 			env.getEnv(GlobalEnv.class).SetEvent(activeEvent);
 			activeEvent.addHistory("Triggering bound event: " + this);
 			try {
