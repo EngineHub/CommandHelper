@@ -43,6 +43,9 @@ public class IVariable extends Construct implements Cloneable {
 		if(type.equals(CVoid.TYPE)) {
 			throw new CRECastException("Variables may not be of type void", t);
 		}
+		if(value == null) {
+			throw new NullPointerException();
+		}
 		if(value.typeof().equals(CVoid.TYPE)) {
 			throw new CRECastException("Void may not be assigned to a variable", t);
 		}
@@ -53,9 +56,6 @@ public class IVariable extends Construct implements Cloneable {
 			}
 		}
 		this.type = type;
-		if(value == null) {
-			throw new NullPointerException();
-		}
 		this.varValue = value;
 		this.name = name;
 		this.definedTarget = t;
