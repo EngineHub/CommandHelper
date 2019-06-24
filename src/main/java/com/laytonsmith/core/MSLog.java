@@ -5,7 +5,6 @@ import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
-import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.core.constructs.Target;
 import java.io.File;
 import java.io.IOException;
@@ -320,9 +319,8 @@ public class MSLog {
 		if(moduleLevel.level >= level.level || (moduleLevel == LogLevel.ERROR && Prefs.ScreamErrors())) {
 			//We want to do the log
 			try {
-				Static.LogDebug(root, "[" + Implementation.GetServerType().getBranding() + "][" + level.name()
-						+ "][" + modules.getName() + "] " + message + (t != Target.UNKNOWN ? " " + t.toString() : ""),
-						level, printScreen);
+				Static.LogDebug(root, "[" + level.name() + "][" + modules.getName() + "] " + message
+						+ (t != Target.UNKNOWN ? " " + t.toString() : ""), level, printScreen);
 			} catch (IOException e) {
 				//Well, shoot.
 				if(level.level <= 1) {

@@ -1103,7 +1103,8 @@ public final class Static {
 			}
 		}
 		String timestamp = DateUtils.ParseCalendarNotation("%Y-%M-%D %h:%m.%s - ");
-		QuickAppend(Static.debugLogFile(root), timestamp + message + Static.LF());
+		QuickAppend(Static.debugLogFile(root), timestamp + "[" + Implementation.GetServerType().getBranding() + "]"
+				+ message + Static.LF());
 	}
 
 	public static void QuickAppend(FileWriter f, String message) throws IOException {
