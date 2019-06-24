@@ -161,10 +161,12 @@ public final class ReflectionUtils {
 				Field f = clazz.getDeclaredField(variableName);
 				f.setAccessible(true);
 
-				//This is the really evil stuff here, this is what removes the final modifier.
-				Field modifiersField = Field.class.getDeclaredField("modifiers");
-				modifiersField.setAccessible(true);
-				modifiersField.setInt(f, f.getModifiers() & ~Modifier.FINAL);
+				if(Modifier.isFinal(f.getModifiers())) {
+					//This is the really evil stuff here, this is what removes the final modifier.
+					Field modifiersField = Field.class.getDeclaredField("modifiers");
+					modifiersField.setAccessible(true);
+					modifiersField.setInt(f, f.getModifiers() & ~Modifier.FINAL);
+				}
 
 				f.set(instance, value);
 

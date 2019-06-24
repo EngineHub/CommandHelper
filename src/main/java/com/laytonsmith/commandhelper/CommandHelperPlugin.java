@@ -292,8 +292,13 @@ public class CommandHelperPlugin extends JavaPlugin {
 		};
 		loadingThread.start();
 
-		if(new SimpleVersion(System.getProperty("java.version")).lt(new SimpleVersion("1.8"))) {
-			MSLog.GetLogger().e(MSLog.Tags.GENERAL, "CommandHelper does not support a Java version older than 8!", Target.UNKNOWN);
+		SimpleVersion javaVersion = new SimpleVersion(System.getProperty("java.version"));
+		if(javaVersion.lt(new SimpleVersion("1.8"))) {
+			MSLog.GetLogger().e(MSLog.Tags.GENERAL, "CommandHelper does not support Java versions older than 8!",
+					Target.UNKNOWN);
+		} else if(javaVersion.gt(new SimpleVersion("1.8"))) {
+			Static.getLogger().log(Level.WARNING, "CommandHelper only officially supports Java 8 at this time."
+					+ " Specific features may break. (eg. secure strings)");
 		}
 
 		myServer = BukkitMCServer.Get();
