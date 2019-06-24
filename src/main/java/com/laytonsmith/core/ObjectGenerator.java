@@ -53,6 +53,7 @@ import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -414,6 +415,14 @@ public class ObjectGenerator {
 			ma.set("enchants", enchants(meta.getEnchants(), t), t);
 			ma.set("repair", new CInt(meta.getRepairCost(), t), t);
 
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
+				if(meta.hasCustomModelData()) {
+					ma.set("model", new CInt(meta.getCustomModelData(), t), t);
+				} else {
+					ma.set("model", CNull.NULL, t);
+				}
+			}
+
 			Set<MCItemFlag> itemFlags = meta.getItemFlags();
 			CArray flagArray = new CArray(t);
 			if(itemFlags.size() > 0) {
@@ -423,6 +432,7 @@ public class ObjectGenerator {
 			}
 			ma.set("flags", flagArray, t);
 
+			// Damageable items only
 			if(is.getType().getMaxDurability() > 0) {
 				ma.set("damage", new CInt(meta.getDamage(), t), t);
 				ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t);
@@ -656,8 +666,17 @@ public class ObjectGenerator {
 						throw new CREFormatException("Enchants field was expected to be an array of Enchantment arrays", t);
 					}
 				}
-				if(ma.containsKey("repair") && !(ma.get("repair", t) instanceof CNull)) {
-					meta.setRepairCost(Static.getInt32(ma.get("repair", t), t));
+				if(ma.containsKey("repair")) {
+					Mixed r = ma.get("repair", t);
+					if(!(r instanceof CNull)) {
+						meta.setRepairCost(Static.getInt32(r, t));
+					}
+				}
+				if(ma.containsKey("model")) {
+					Mixed m = ma.get("model", t);
+					if(!(m instanceof CNull)) {
+						meta.setCustomModelData(Static.getInt32(m, t));
+					}
 				}
 				if(ma.containsKey("flags")) {
 					Mixed flags = ma.get("flags", t);
@@ -672,6 +691,7 @@ public class ObjectGenerator {
 					}
 				}
 
+				// Damageable items only
 				if(mat.getMaxDurability() > 0) {
 					if(ma.containsKey("damage")) {
 						meta.setDamage(Static.getInt32(ma.get("damage", t), t));

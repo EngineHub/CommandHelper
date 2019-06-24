@@ -178,6 +178,10 @@ public class BukkitMCItemMeta implements MCItemMeta {
 
 	@Override
 	public void setCustomModelData(int id) {
-		im.setCustomModelData(id);
+		try {
+			im.setCustomModelData(id);
+		} catch (NoSuchMethodError ex) {
+			// probably 1.13
+		}
 	}
 }
