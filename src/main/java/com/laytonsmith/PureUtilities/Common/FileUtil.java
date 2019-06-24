@@ -144,10 +144,25 @@ public final class FileUtil {
 	}
 
 	/**
-	 * Writes out byte data to the given file, either appending or overwriting, depending on the selected mode. If create
+	 * Writes out string data as UTF-8 to the given file, either appending or overwriting, depending on the selected
+	 * mode. If create
 	 * is true, will attempt to create the file and parent directories if need be.
 	 *
 	 * @param data The string to write to the file
+	 * @param file The File to write to
+	 * @param mode The mode in which to write the file
+	 * @param create If true, will create the parent directories
+	 * @throws IOException If the File cannot be written to
+	 */
+	public static void write(String data, File file, FileWriteMode mode, boolean create) throws IOException {
+		write(data.getBytes("UTF-8"), file, mode, create);
+	}
+
+	/**
+	 * Writes out byte data to the given file, either appending or overwriting, depending on the selected mode. If create
+	 * is true, will attempt to create the file and parent directories if need be.
+	 *
+	 * @param data The data to write to the file
 	 * @param file The File to write to
 	 * @param mode The mode in which to write the file
 	 * @param create If true, will create the parent directories

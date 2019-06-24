@@ -3,6 +3,7 @@ package com.laytonsmith.tools;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.FileWriteMode;
 import com.laytonsmith.PureUtilities.Common.HTMLUtils;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
@@ -97,7 +98,6 @@ import static com.laytonsmith.PureUtilities.TermColors.YELLOW;
 import static com.laytonsmith.PureUtilities.TermColors.p;
 import static com.laytonsmith.PureUtilities.TermColors.pl;
 import static com.laytonsmith.PureUtilities.TermColors.reset;
-import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Documentation;
@@ -113,9 +113,7 @@ import com.laytonsmith.core.functions.ExampleScript;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.tools.docgen.DocGen;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -135,7 +133,12 @@ public final class Interpreter {
 	 *
 	 * BAD THINGS WILL HAPPEN TO EVERYBODY YOU LOVE IF THIS IS CHANGED!
 	 */
-	private static final String INTERPRETER_INSTALLATION_LOCATION = "/usr/local/bin/";
+	private static final String UNIX_INTERPRETER_INSTALLATION_LOCATION = "/usr/local/bin/";
+
+	/**
+	 * Be sure to update this if the powershell.psm1 file changes.
+	 */
+	private static final String POWERSHELL_MODULE_VERSION = "1.0.0";
 
 	private boolean inTTYMode = false;
 	private boolean multilineMode = false;
@@ -961,7 +964,7 @@ public final class Interpreter {
 			case MAC:
 				try {
 					URL jar = Interpreter.class.getProtectionDomain().getCodeSource().getLocation();
-					File exe = new File(INTERPRETER_INSTALLATION_LOCATION + commandName);
+					File exe = new File(UNIX_INTERPRETER_INSTALLATION_LOCATION + commandName);
 					String bashScript = Static.GetStringResource("/interpreter-helpers/bash.sh");
 					try {
 						bashScript = bashScript.replaceAll("%%LOCATION%%", jar.toURI().getPath());
@@ -994,11 +997,13 @@ public final class Interpreter {
 			case WINDOWS:
 				Path tmp = null;
 				try {
-					// 1. Unpack the csharp installer program in a temporary directory
-					File root = new File(Interpreter.class.getResource("/interpreter-helpers/csharp").toExternalForm());
-					ZipReader zReader = new ZipReader(root);
-					tmp = Files.createTempDirectory("methodscript-installer", new FileAttribute[]{});
-					zReader.recursiveCopy(tmp.toFile(), false);
+					// C# installer, not really uninstallable, so temporarily removing this, so the other installer
+					// can be used with no risk.
+//					// 1. Unpack the csharp installer program in a temporary directory
+//					File root = new File(Interpreter.class.getResource("/interpreter-helpers/csharp").toExternalForm());
+//					ZipReader zReader = new ZipReader(root);
+//					tmp = Files.createTempDirectory("methodscript-installer", new FileAttribute[]{});
+//					zReader.recursiveCopy(tmp.toFile(), false);
 
 					// 2. Write the location of this jar to the registry
 					String me = ClassDiscovery.GetClassContainer(Interpreter.class).toExternalForm().substring(6);
@@ -1006,26 +1011,66 @@ public final class Interpreter {
 					WinRegistry.createKey(WinRegistry.HKEY_CURRENT_USER, keyName);
 					WinRegistry.writeStringValue(WinRegistry.HKEY_CURRENT_USER, keyName, "JarLocation", me);
 
-					// 3. Execute the setup.exe file
-					File setup = new File(tmp.toFile(), "setup.exe");
-					int setupResult = new CommandExecutor(new String[]{setup.getAbsolutePath()}).start().waitFor();
-					if(setupResult != 0) {
-						StreamUtils.GetSystemErr().println("Setup failed to complete successfully (exit code " + setupResult + ")");
-						System.exit(setupResult);
-					} else {
-						StreamUtils.GetSystemOut().println("Setup has begun. Finish the installation in the GUI.");
+//					// 3. Execute the setup.exe file
+//					File setup = new File(tmp.toFile(), "setup.exe");
+//					int setupResult = new CommandExecutor(new String[]{setup.getAbsolutePath()}).start().waitFor();
+//					if(setupResult != 0) {
+//						StreamUtils.GetSystemErr().println("Setup failed to complete successfully (exit code " + setupResult + ")");
+//						System.exit(setupResult);
+//					} else {
+//						StreamUtils.GetSystemOut().println("Setup has begun. Finish the installation in the GUI.");
+//					}
+
+					// 4. Write MethodScript.psm1 to the powershell module directory,
+					// C:\Program Files\WindowsPowerShell\Modules
+					// as well as MethodScript.psd1
+					String powershellModule = Static.GetStringResource("/interpreter-helpers/windows/MethodScript.psm1");
+					FileUtil.write(powershellModule, new File("C:/Program Files/WindowsPowerShell/Modules/"
+							+ "MethodScript/MethodScript.psm1"));
+					String powershellManifest = Static.GetStringResource("/interpreter-helpers/windows/MethodScript.psd1");
+					FileUtil.write(powershellManifest, new File("C:/Program Files/WindowsPowerShell/Modules/"
+							+ "MethodScript/MethodScript.psd1"));
+
+					// 5. Put the mscript.cmd file in C:\Program Files\MethodScript
+					String batchScript = Static.GetStringResource("/interpreter-helpers/windows/mscript.cmd");
+					FileUtil.write(batchScript, new File("C:/Program Files/MethodScript/mscript.cmd"),
+							FileWriteMode.OVERWRITE, true);
+
+					// 6. Add C:\Program Files\MethodScript\mscript.cmd to the PATH, checking first if it's already
+					// there.
+					if(!System.getenv("PATH").contains("MethodScript")) {
+						String pathKey = "System\\CurrentControlSet\\Control\\Session Manager\\Environment";
+						String path = System.getenv("Path");
+						if(path != null) {
+							WinRegistry.writeStringValue(WinRegistry.HKEY_LOCAL_MACHINE, pathKey, "Path", path + ";"
+								+ "C:\\Program Files\\MethodScript");
+						}
+						CommandExecutor.Execute("powershell -command \"& {$md=\\\"[DllImport(`\\\"user32.dll\\\"\\\",SetLastError=true,CharSet=CharSet.Auto)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd,uint Msg,UIntPtr wParam,string lParam,uint fuFlags,uint uTimeout,out UIntPtr lpdwResult);\\\"; $sm=Add-Type -MemberDefinition $md -Name NativeMethods -Namespace Win32 -PassThru;$result=[uintptr]::zero;$sm::SendMessageTimeout(0xffff,0x001A,[uintptr]::Zero,\\\"Environment\\\",2,5000,[ref]$result)}\"");
 					}
-				} catch (IOException | InterruptedException | IllegalAccessException | InvocationTargetException ex) {
-					ex.printStackTrace(StreamUtils.GetSystemErr());
+
+				} catch(IOException | IllegalAccessException | InterruptedException | InvocationTargetException ex) {
+					StreamUtils.GetSystemErr().println("Could not install: " + ex + ". You need to run this in Administrator Mode however, did you do that?");
 					System.exit(1);
 				}
 				break;
 		}
 		StreamUtils.GetSystemOut().println("MethodScript has successfully been installed on your system. Note that you may need to rerun the install command"
-				+ " if you change locations of the jar, or rename it. Be sure to put \"#!" + INTERPRETER_INSTALLATION_LOCATION + commandName + "\" at the top of all your scripts,"
+				+ " if you change locations of the jar, or rename it. Be sure to put \"#!" + UNIX_INTERPRETER_INSTALLATION_LOCATION + commandName + "\" at the top of all your scripts,"
 				+ " if you wish them to be executable on unix systems, and set the execution bit with chmod +x <script name> on unix systems. (Or use the '" + commandName + " -- new' cmdline utility.)");
 		StreamUtils.GetSystemOut().println("Try this script to test out the basic features of the scripting system:\n");
 		StreamUtils.GetSystemOut().println(Static.GetStringResource("/interpreter-helpers/sample.ms"));
+
+		if(OSUtils.GetOS() == OSUtils.OS.WINDOWS) {
+			StreamUtils.GetSystemOut().println("Additionally, MethodScript has been installed as a PowerShell module.\n"
+					+ "You may activate this module with `Import-Module -Name MethodScript` and then execute the\n"
+					+ "command `Invoke-MethodScript` for interpeter mode. To run a script, use\n"
+					+ "`Invoke-MethodScript script.ms args1 args2` and to use the command line tools,\n"
+					+ "use `Invoke-MethodScript -Tool tool args`"
+					+ "In cmd.exe, you can use the `mscript` command instead, but otherwise the arguments\n"
+					+ "are the same as to the PowerShell command.");
+			StreamUtils.GetSystemOut().println(TermColors.RED + "YOU MUST REBOOT YOUR COMPUTER TO USE THIS IN CMD.EXE"
+					+ TermColors.RESET);
+		}
 	}
 
 	public static void uninstall() {
@@ -1037,7 +1082,7 @@ public final class Interpreter {
 			case LINUX:
 			case MAC:
 				try {
-					File exe = new File(INTERPRETER_INSTALLATION_LOCATION);
+					File exe = new File(UNIX_INTERPRETER_INSTALLATION_LOCATION);
 					if(!exe.delete()) {
 						throw new IOException();
 					}
