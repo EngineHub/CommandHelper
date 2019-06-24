@@ -14,6 +14,7 @@ import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Common.UIUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
+import com.laytonsmith.PureUtilities.JavaVersion;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.abstraction.Implementation;
@@ -1159,6 +1160,38 @@ public class Main {
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
 			APIBuilder.main(null);
 			System.exit(0);
+		}
+
+	}
+
+	@tool("cmdline-args")
+	public static class CmdlineArgsTool extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+					.addDescription(Implementation.GetServerType().getBranding() + " requires certain arguments"
+							+ " to be passed to the java program to properly start up."
+							+ " This tool prints out the arguments that it needs,"
+							+ " in a version specific manner. Depending on your system, and the version of"
+							+ " the program, you may get different arguments, but these will always be up"
+							+ " to date. You can either integrate them into your startup flow manually,"
+							+ " or dynamically call this command to automatically update it. The command"
+							+ " may return an empty string. If so, this means that no commandline flags"
+							+ " are needed.");
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			String args = "";
+			if(JavaVersion.getMajorVersion() > 8) {
+				// Need to add the --add-opens values. The values live in interpreter-helper/modules
+				String modules = Static.GetStringResource("/interpreter-helpers/modules");
+				modules = modules.replaceAll("(.*)\n", "--add-opens $1=ALL_UNNAMED ");
+				args += " " + modules;
+			}
+			args += "-Xrs ";
+			StreamUtils.GetSystemOut().println(args.trim());
 		}
 
 	}
