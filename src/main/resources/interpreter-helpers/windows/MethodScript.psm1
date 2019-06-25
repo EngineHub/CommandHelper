@@ -41,7 +41,7 @@ function Invoke-MethodScript {
         $reader = New-Object IO.StreamReader($stream)
         $modules = $reader.ReadToEnd()
         $modules = $modules -replace '\r',''
-        $modules = $modules -replace '(.*)\n','--add-opens $1=ALL_UNNAMED '
+        $modules = $modules -replace '(.*)\n','--add-opens $1=ALL-UNNAMED '
     } else {
         $modules = ""
     }

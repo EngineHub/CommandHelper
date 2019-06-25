@@ -1187,7 +1187,7 @@ public class Main {
 			if(JavaVersion.getMajorVersion() > 8) {
 				// Need to add the --add-opens values. The values live in interpreter-helper/modules
 				String modules = Static.GetStringResource("/interpreter-helpers/modules");
-				modules = modules.replaceAll("(.*)\n", "--add-opens $1=ALL_UNNAMED ");
+				modules = modules.replaceAll("(.*)\n", "--add-opens $1=ALL-UNNAMED ");
 				args += " " + modules;
 			}
 			args += "-Xrs ";
