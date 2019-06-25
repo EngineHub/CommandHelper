@@ -54,3 +54,35 @@ contributors, please see the CONTRIBUTING.txt file.
 Portions of CommandHelper are copyright by various contributors.
 
 This project uses BrowserStack (https://www.browserstack.com) for testing the website.
+
+Installing
+----------
+
+There are two modes of installation, both first require obtaining the MethodScript jar.
+You can build it yourself, or download the official builds from
+[here](http://builds.enginehub.org/job/commandhelper?branch=master).
+
+Minecraft: Installation in Minecraft is simple. Simply drop the jar in the plugins
+folder.
+
+Standalone Programming: MethodScript is a fledgling general purpose programming language,
+and can be used from the command line, much like python, node, or other programming
+languages. To install, place the jar file in whatever location you like, (noting that
+it will create a folder at the same level which contains the configuration files, so
+it's probably easiest to put this in your user directory),
+then run `java -jar MethodScript.jar install-cmdline` as root/Administrator.
+This will install the `mscript` program and add it to your path, 
+which can be used to start a REPL shell for quick tasks, execute a script file, or
+easily run the commandline tools. On Windows, this also installs a PowerShell module,
+which can be used with `Import-Module -Name MethodScript` and `Invoke-MethodScript`. On Windows,
+you must reboot your system after installatation to use the `mscript` command in cmd.exe.
+You can install MethodScript using the same jar that is used in the Minecraft server,
+though two different environments are used, with separate folders for the CommandHelper
+installation, and the MethodScript installation. You can symlink these folders together if you
+wish your configuration to be the same for both environments.
+
+Commandline Tools: Various command line tools are available for use, and are useful
+both for those that use the jar as a plugin, or as a general purpose language. Run
+`java -jar MethodScript.jar help` for a list of these tools, or if you have installed
+the commandline version, you can use `mscript -- help` on unix, or `mscript -Tool help`
+on Windows.
