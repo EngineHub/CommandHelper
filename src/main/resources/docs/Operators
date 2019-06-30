@@ -46,6 +46,19 @@ get will specify function names.
 | {{function|postinc}}/{{function|postdec}}
 | This is only considered postfix when it comes after an identifier: @i++
 |-
+| ''Array Sub-indices''
+| %%NOWIKI|[ ]%%
+| {{function|array_get}}
+| Using square braces allows for array accesses, and in combination with the <code>=</code> sign, setting sub-indices.
+If the array set appears on the right hand side of an assignment, or in a general statement without an assign, it is an
+array_get operation. If it appears on the left hand side of an assignment, it is an array_set operation. The brackets
+apply to the element just preceeding, for instance with <code>@var['index']</code>, it is assumed that <code>@var</code>
+is an array or array like value. Empty braces, <code>[]</code>, when on the left hand side works as an array push, and
+when on the right hand side, or in a general statement without an assign, it is an array clone operation (which ultimately
+still uses array_get). Sub-strings within strings may be pulled out using the bracket notation as well, and slices are supported.
+<code>array(1, 2, 3)[1..2]</code> returns an array with 2 elements in it, namely 2 and 3. <code>'string'[0]</code> returns
+'s', and <code>'string'[0..1]</code> returns 'st'.
+|-
 | ''Unary''
 | ! ++ --
 | {{function|not}}/{{function|inc}}/{{function|dec}}
@@ -83,29 +96,18 @@ get will specify function names.
 |
 |-
 | ''Logical OR''
-| %%NOWIKI|||%%
+| &#124;&#124;
 | {{function|or}}
 |
 |-
 | ''Assignment''
-| = += -= *= /= .=
-| {{function|assign}}
+| = += -= *= /= .= []= []+= []-= []*= []/= [].=
+| {{function|assign}}/{{function|array_set}}/{{function|array_push}}
 | There is no single functional equivalent except for = per se, <code>@var += 1</code> is equivalent to 
 <code>assign(@var, add(@var, 1))</code>, etc. += uses {{function|add}}, 
--= uses {{function|subtract}}, *= uses {{function|multiply}}, /= uses {{function|divide}}, and .= uses {{function|concat}}. 
-|-
-| ''Array Sub-indices''
-| %%NOWIKI|[ ]%%
-| {{function|array_get}}/{{function|array_set}}/{{function|array_push}}
-| Using square braces allows for array accesses, and in combination with the <code>=</code> sign, setting sub-indices.
-If the array set appears on the right hand side of an assignment, or in a general statement without an assign, it is an
-array_get operation. If it appears on the left hand side of an assignment, it is an array_set operation. The brackets
-apply to the element just preceeding, for instance with <code>@var['index']</code>, it is assumed that <code>@var</code>
-is an array or array like value. Empty braces, <code>[]</code>, when on the left hand side works as an array push, and
-when on the right hand side, or in a general statement without an assign, it is an array clone operation (which ultimately
-still uses array_get). Sub-strings within strings may be pulled out using the bracket notation as well, and slices are supported.
-<code>array(1, 2, 3)[1..2]</code> returns an array with 2 elements in it, namely 2 and 3. <code>'string'[0]</code> returns
-'s', and <code>'string'[0..1]</code> returns 'st'.
+-= uses {{function|subtract}}, *= uses {{function|multiply}}, /= uses {{function|divide}}, and .= uses {{function|concat}}.
+Square brackets with an assign indicate that a value is being assigned to the array element at the index that is given between the square brackets.
+If no index is given, the value is appended to the end of the array.
 |}
 
 Note the lack of bitwise operators, which are usually standard in other languages. These are not provided, because the 
