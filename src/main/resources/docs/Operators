@@ -32,23 +32,26 @@ if((@var == 3) && (2 <= @var2)){
 
 The following operators are supported, and their order of operations is from top to bottom. Note that all 
 operators are simply converted to the functional notation, so if your code is incorrect, the errors you 
-get will specify function names.
+get will specify function names. Associativity tells in which order operators with equal priority are executed. This can be left (to right), right (to left) or non-assoc (not allowed to combine or nest).
 
 {| class="wikitable"
 |-
 ! Type
 ! Symbol
 ! Function Conversion
+! Associativity
 ! Notes
 |-
 | ''Postfix''
 | ++ --
 | {{function|postinc}}/{{function|postdec}}
+| Non-assoc
 | This is only considered postfix when it comes after an identifier: @i++
 |-
 | ''Array Sub-indices''
 | %%NOWIKI|[ ]%%
 | {{function|array_get}}
+| Left
 | Using square braces allows for array accesses, and in combination with the <code>=</code> sign, setting sub-indices.
 If the array set appears on the right hand side of an assignment, or in a general statement without an assign, it is an
 array_get operation. If it appears on the left hand side of an assignment, it is an array_set operation. The brackets
@@ -62,46 +65,55 @@ still uses array_get). Sub-strings within strings may be pulled out using the br
 | ''Unary''
 | ! ++ --
 | {{function|not}}/{{function|inc}}/{{function|dec}}
+| Non-assoc
 | These are ''unary'' operators, they only operate on one identifier
 |-
 | ''Exponential''
 | **
 | {{function|pow}}
+| Left
 | 
 |-
 | ''Multiplicative''
 | * / %
 | {{function|multiply}}/{{function|divide}}/{{function|mod}}
+| Left
 |
 |-
 | ''Additive''
 | + - .
 | {{function|add}}/{{function|subtract}}/{{function|concat}}
+| Left
 | If a minus or plus sign is used to denote the sign of a number, it is handled slightly differently, for instance, ''2 + -1'' does not use any subtraction
 |-
 | ''Relational''
 | &lt; &gt; &lt;= &gt;=
 | {{function|lt}}/{{function|gt}}/{{function|lte}}/{{function|gte}}
+| Left
 |
 |-
 | ''Equality''
 | == != === !==
 | {{function|equals}}/{{function|nequals}}/{{function|sequals}}/{{function|snequals}}
+| Left
 | There is no operational equivalent for equals_ic
 |-
 | ''Logical AND''
 | &&
 | {{function|and}}
+| Left
 |
 |-
 | ''Logical OR''
 | &#124;&#124;
 | {{function|or}}
+| Left
 |
 |-
 | ''Assignment''
 | = += -= *= /= .= []= []+= []-= []*= []/= [].=
 | {{function|assign}}/{{function|array_set}}/{{function|array_push}}
+| Right
 | There is no single functional equivalent except for = per se, <code>@var += 1</code> is equivalent to 
 <code>assign(@var, add(@var, 1))</code>, etc. += uses {{function|add}}, 
 -= uses {{function|subtract}}, *= uses {{function|multiply}}, /= uses {{function|divide}}, and .= uses {{function|concat}}.
