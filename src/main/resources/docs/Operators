@@ -64,7 +64,6 @@ still uses array_get). Sub-strings within strings may be pulled out using the br
 | {{function|not}}/{{function|inc}}/{{function|dec}}
 | These are ''unary'' operators, they only operate on one identifier
 |-
-|-
 | ''Exponential''
 | **
 | {{function|pow}}
