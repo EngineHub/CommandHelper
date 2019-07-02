@@ -2,10 +2,14 @@ package com.laytonsmith.testing;
 
 import com.laytonsmith.abstraction.MCPlayer;
 import static com.laytonsmith.testing.StaticTest.SRun;
+
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import org.bukkit.plugin.Plugin;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -47,6 +51,51 @@ public class ProcedureTest {
 	public void testProcWithArguments() throws Exception {
 		SRun("proc(_blah, msg(@arguments)) _blah(1, 2, 3, 4)", fakePlayer);
 		verify(fakePlayer).sendMessage("{1, 2, 3, 4}");
+	}
+
+	@Test
+	public void testProcReturnType1() throws Exception {
+		SRun("void proc _blah(){ return() } _blah()", null);
+	}
+
+	@Test
+	public void testProcReturnType2() throws Exception {
+		try {
+			SRun("void proc _blah(){ return(null) } _blah()", null);
+			fail("Expected a CastException because null return is not void");
+		} catch (CRECastException ex) {
+			// Test passed.
+		}
+	}
+
+	@Test
+	public void testProcReturnType3() throws Exception {
+		try {
+			SRun("string proc _blah(){ return() } _blah()", null);
+			fail("Expected a CastException because void return is not of type string");
+		} catch (CRECastException ex) {
+			// Test passed.
+		}
+	}
+
+	@Test
+	public void testProcReturnType4() throws Exception {
+		try {
+			SRun("string proc _blah(){ return(array()) } _blah()", null);
+			fail("Expected a CastException because array is not of type string");
+		} catch (CRECastException ex) {
+			// Test passed.
+		}
+	}
+
+	@Test
+	public void testProcReturnType5() throws Exception {
+		SRun("string proc _blah(){ return(null) } _blah()", null);
+	}
+
+	@Test
+	public void testProcReturnType6() throws Exception {
+		SRun("proc _blah(){ return() } _blah()", null);
 	}
 
 	@Test

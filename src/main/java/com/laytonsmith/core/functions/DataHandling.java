@@ -1167,8 +1167,12 @@ public class DataHandling {
 			List<String> varNames = new ArrayList<>();
 			boolean usesAssign = false;
 			CClassType returnType = Auto.TYPE;
-			if(nodes[0].getData().isInstanceOf(CClassType.class)) {
-				returnType = (CClassType) nodes[0].getData();
+			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData().isInstanceOf(CClassType.class)) {
+				if(nodes[0].getData().equals(CVoid.VOID)) {
+					returnType = CVoid.TYPE;
+				} else {
+					returnType = (CClassType) nodes[0].getData();
+				}
 				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
 				for(int i = 1; i < nodes.length; i++) {
 					newNodes[i - 1] = nodes[i];
@@ -1183,7 +1187,7 @@ public class DataHandling {
 				} else {
 					boolean thisNodeIsAssign = false;
 					if(nodes[i].getData() instanceof CFunction) {
-						if(((CFunction) nodes[i].getData()).val().equals("assign")) {
+						if((nodes[i].getData()).val().equals("assign")) {
 							thisNodeIsAssign = true;
 							if((nodes[i].getChildren().size() == 3 && Construct.IsDynamicHelper(nodes[i].getChildAt(0).getData()))
 									|| Construct.IsDynamicHelper(nodes[i].getChildAt(1).getData())) {
@@ -1194,23 +1198,23 @@ public class DataHandling {
 					env.getEnv(GlobalEnv.class).SetFlag("no-check-duplicate-assign", true);
 					Mixed cons = parent.eval(nodes[i], env);
 					env.getEnv(GlobalEnv.class).ClearFlag("no-check-duplicate-assign");
-					if(i == 0 && cons instanceof IVariable) {
-						throw new CREInvalidProcedureException("Anonymous Procedures are not allowed", t);
-					} else if(i == 0 && !(cons instanceof IVariable)) {
+					if(i == 0) {
+						if(cons instanceof IVariable) {
+							throw new CREInvalidProcedureException("Anonymous Procedures are not allowed", t);
+						}
 						name = cons.val();
-					} else if(!(cons instanceof IVariable)) {
-						throw new CREInvalidProcedureException("You must use IVariables as the arguments", t);
 					} else {
+						if(!(cons instanceof IVariable)) {
+							throw new CREInvalidProcedureException("You must use IVariables as the arguments", t);
+						}
 						IVariable ivar = null;
 						try {
 							Mixed c = cons;
-							if(c instanceof IVariable) {
-								String varName = ((IVariable) c).getVariableName();
-								if(varNames.contains(varName)) {
-									throw new CREInvalidProcedureException("Same variable name defined twice in " + name, t);
-								}
-								varNames.add(varName);
+							String varName = ((IVariable) c).getVariableName();
+							if(varNames.contains(varName)) {
+								throw new CREInvalidProcedureException("Same variable name defined twice in " + name, t);
 							}
+							varNames.add(varName);
 							while(c instanceof IVariable) {
 								c = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getVariableName(), t,
 										true, env).ival();
