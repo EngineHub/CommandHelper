@@ -235,9 +235,12 @@ public class Procedure implements Cloneable {
 		} catch (FunctionReturnException e) {
 			// Normal exit
 			Mixed ret = e.getReturn();
-			if(!InstanceofUtil.isInstanceof(ret, returnType, env)) {
-				throw new CRECastException("Expected procedure \"" + name + "\" to return a value of type " + returnType.val()
-						+ " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
+			if(returnType.equals(CVoid.TYPE) != ret.equals(CVoid.VOID)
+					|| !ret.equals(CNull.NULL) && !ret.equals(CVoid.VOID)
+					&& !InstanceofUtil.isInstanceof(ret, returnType, env)) {
+				throw new CRECastException("Expected procedure \"" + name + "\" to return a value of type "
+						+ returnType.val() + " but a value of type " + ret.typeof() + " was returned instead",
+						ret.getTarget());
 			}
 			return ret;
 		} catch (LoopManipulationException ex) {

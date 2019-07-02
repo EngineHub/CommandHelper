@@ -462,7 +462,7 @@ public class Compiler {
 
 			// Look for typed assignments
 			for(int k = 0; k < list.size(); k++) {
-				if(list.get(k).getData().isInstanceOf(CClassType.class)) {
+				if(list.get(k).getData().equals(CVoid.VOID) || list.get(k).getData().isInstanceOf(CClassType.class)) {
 					if(k == list.size() - 1) {
 						// This is not a typed assignment
 						break;
@@ -476,6 +476,11 @@ public class Compiler {
 							case "assign":
 							case "proc":
 								// Typed assign/closure
+								if(list.get(k + 1).getData().val().equals("assign")
+										&& list.get(k).getData().equals(CVoid.VOID)) {
+									throw new ConfigCompileException("Variables may not be of type void",
+											list.get(k).getTarget());
+								}
 								ParseTree type = list.remove(k);
 								List<ParseTree> children = list.get(k).getChildren();
 								children.add(0, type);

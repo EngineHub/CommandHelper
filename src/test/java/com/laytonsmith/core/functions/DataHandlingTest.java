@@ -6,6 +6,8 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.RunCommand;
 import static com.laytonsmith.testing.StaticTest.SRun;
@@ -17,6 +19,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -310,5 +314,30 @@ public class DataHandlingTest {
 	public void testEmptyClosureFunction() throws Exception {
 		// This should not throw an exception
 		SRun("closure()", null);
+	}
+
+	@Test
+	public void testAssignmentTypes1() throws Exception {
+		SRun("string @ivar = 'value'", null);
+	}
+
+	@Test
+	public void testAssignmentTypes2() throws Exception {
+		try {
+			SRun("array @ivar = 'value'", null);
+			fail("Excepted a CastException because string is not array");
+		} catch (CRECastException ex) {
+			// Test passed.
+		}
+	}
+
+	@Test
+	public void testAssignmentTypes3() throws Exception {
+		try {
+			SRun("void @ivar = 'value'", null);
+			fail("Expected a compile exception because IVariable cannot be assigned to void");
+		} catch (ConfigCompileException ex) {
+			// Test passed.
+		}
 	}
 }
