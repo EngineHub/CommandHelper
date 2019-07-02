@@ -235,6 +235,9 @@ public class Procedure implements Cloneable {
 		} catch (FunctionReturnException e) {
 			// Normal exit
 			Mixed ret = e.getReturn();
+			if(returnType.equals(Auto.TYPE)) {
+				return ret;
+			}
 			if(returnType.equals(CVoid.TYPE) != ret.equals(CVoid.VOID)
 					|| !ret.equals(CNull.NULL) && !ret.equals(CVoid.VOID)
 					&& !InstanceofUtil.isInstanceof(ret, returnType, env)) {

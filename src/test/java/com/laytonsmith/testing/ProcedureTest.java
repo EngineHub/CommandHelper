@@ -94,6 +94,11 @@ public class ProcedureTest {
 	}
 
 	@Test
+	public void testProcReturnType6() throws Exception {
+		SRun("proc _blah(){ return() } _blah()", null);
+	}
+
+	@Test
 	public void testProcCalledMultipleTimes() throws Exception {
 		SRun("proc(_blah, @blah, msg(@blah)) _blah('blah') _blah('blarg')", fakePlayer);
 		verify(fakePlayer).sendMessage("blah");
