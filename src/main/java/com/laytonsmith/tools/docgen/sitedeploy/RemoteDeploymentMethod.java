@@ -17,8 +17,8 @@ class RemoteDeploymentMethod implements DeploymentMethod {
 	}
 
 	@Override
-	public boolean deploy(InputStream data, String toLocation) throws IOException {
-		return SSHWrapper.SCPWrite(data, remote + toLocation);
+	public boolean deploy(InputStream data, String toLocation, String overrideIdRsa) throws IOException {
+		return SSHWrapper.SCPWrite(data, remote + toLocation, overrideIdRsa);
 	}
 
 	@Override

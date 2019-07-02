@@ -93,7 +93,6 @@ public class Main {
 	private static final ArgumentParser PM_VIEWER_MODE;
 	private static final ArgumentParser CORE_FUNCTIONS_MODE;
 	private static final ArgumentParser UI_MODE;
-	private static final ArgumentParser SITE_DEPLOY;
 	private static final ArgumentParser EXTENSION_BUILDER_MODE;
 	// DO NOT ADD MORE TO THIS LIST. These will eventually all be ported to the @tool/CommandLineTool mechanism, which
 	// allows far more flexibility, and provides better grouping anyways. Plus, it allows Main to be referenced
@@ -304,64 +303,6 @@ public class Main {
 								+ " process and causes the initial shell to return.")
 						.asFlag().setName("in-shell"));
 		suite.addMode("ui", UI_MODE);
-		SITE_DEPLOY = ArgumentParser.GetParser()
-				.addDescription("Deploys the documentation site, using the preferences specified in the configuration"
-						+ " file. This mechanism completely re-writes"
-						+ " the remote site, so that builds are totally reproduceable.")
-				.addArgument(new ArgumentBuilder()
-						.setDescription("The path to the config file for deployment")
-						.setUsageName("config file")
-						.setOptional()
-						.setName('c', "config")
-						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
-						.setDefaultVal(MethodScriptFileLocations.getDefault().getSiteDeployFile().getAbsolutePath()))
-				.addArgument(new ArgumentBuilder()
-						.setDescription("Generates the preferences file initially, which you can then fill in.")
-						.asFlag().setName("generate-prefs"))
-				.addArgument(new ArgumentBuilder()
-						.setDescription("Generally, when the uploader runs, it checks the remote server to see if"
-							+ " the file already exists there (and is unchanged compared to the local file). If it is"
-							+ " unchanged, the upload is skipped. However, even checking with the remote to see"
-							+ " what the status of the remote file is takes time. If you are the only one uploading"
-							+ " files, then we can simply use a local cache of what the remote system has, and we"
-							+ " can skip the step of checking with the remote server for any given file. The cache is"
-							+ " always populated, whether or not this flag is set, so if you aren't sure if you can"
-							+ " trust the cache, run once without this flag, then for future runs, you can be sure that"
-							+ " the local cache is up to date.")
-						.asFlag().setName("use-local-cache"))
-				.addArgument(new ArgumentBuilder()
-						.setDescription("Clears the local cache of all entries, then exits.")
-						.asFlag().setName("clear-local-cache"))
-				.addArgument(new ArgumentBuilder()
-						.setDescription("Validates all of the uploaded web pages, and prints out a summary of the"
-								+ " results. This uses the value defined in the config file for validation.")
-						.asFlag().setName('d', "do-validation"))
-				.addArgument(new ArgumentBuilder()
-						.setDescription("When set, does not clear the progress bar line. This is mostly useful"
-							+ " when debugging the site-deploy tool itself.")
-						.asFlag().setName("no-progress-clear"))
-				.addArgument(new ArgumentBuilder()
-						.setDescription("If set, overrides the post-script value in the config.")
-						.setUsageName("script-location")
-						.setOptional()
-						.setName("override-post-script")
-						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
-						.setDefaultVal(""));
-				/*.addFlag("install", "When installing a fresh server, it is useful to have the setup completely automated. If this flag"
-						+ " is set, then the server is assumed to be a fresh ubuntu server, with nothing else on it. In that case,"
-						+ " the server will be installed from scratch automatically. NOTE: This will not account for the fact that"
-						+ " the documentation website is generally configured to allow for multiple versions of documentation. Old"
-						+ " versions will not be accounted for or uploaded. This process, if desired, must be done manually. If this"
-						+ " option is configured, the installation will occur before the upload or processing of files. During installation,"
-						+ " a \"lock\" file will be created, and if that file is present, it is assumed that the installation"
-						+ " has already occured on the instance, and will not be repeated. This is a safety measure to ensure"
-						+ " that the instance will not attempt to be redeployed, making it safe to always add the install"
-						+ " flag. If this flag is set, additional options need to be added to the config file. The remote server"
-						+ " is assumed to be an already running AWS ubuntu instance, with security groups configured and a pem"
-						+ " file available, but no login is necessary.")*/
-
-		suite.addMode("site-deploy", SITE_DEPLOY);
-
 
 		EXTENSION_BUILDER_MODE = ArgumentParser.GetParser()
 				.addDescription("Given a path to the git source repo, pulls down the code, builds the extension with"
@@ -771,34 +712,6 @@ public class Main {
 					ce.start();
 					System.exit(0);
 				}
-			} else if(mode == SITE_DEPLOY) {
-				boolean clearLocalCache = parsedArgs.isFlagSet("clear-local-cache");
-				if(clearLocalCache) {
-					PersistenceNetwork p = SiteDeploy.getPersistenceNetwork();
-					if(p == null) {
-						System.out.println("Cannot get reference to persistence network");
-						System.exit(1);
-						return;
-					}
-					DaemonManager dm = new DaemonManager();
-					p.clearKey(dm, new String[]{"site_deploy", "local_cache"});
-					dm.waitForThreads();
-					System.out.println("Local cache cleared");
-					System.exit(0);
-				}
-				boolean generatePrefs = parsedArgs.isFlagSet("generate-prefs");
-				boolean useLocalCache = parsedArgs.isFlagSet("use-local-cache");
-				boolean doValidation = parsedArgs.isFlagSet("do-validation");
-				boolean noProgressClear = parsedArgs.isFlagSet("no-progress-clear");
-				String configString = parsedArgs.getStringArgument("config");
-				String overridePostScript = parsedArgs.getStringArgument("override-post-script");
-				if("".equals(configString)) {
-					System.err.println("Config file missing, check command and try again");
-					System.exit(1);
-				}
-				File config = new File(configString);
-				SiteDeploy.run(generatePrefs, useLocalCache, config, "", doValidation, !noProgressClear,
-						overridePostScript);
 			} else if(mode == EXTENSION_BUILDER_MODE) {
 
 				try {
@@ -1201,6 +1114,113 @@ public class Main {
 			}
 			args += "-Xrs ";
 			StreamUtils.GetSystemOut().println(args.trim());
+		}
+
+	}
+
+	@tool("site-deploy")
+	public static class SiteDeployTool extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Deploys the documentation site, using the preferences specified in the configuration"
+						+ " file. This mechanism completely re-writes"
+						+ " the remote site, so that builds are totally reproduceable.")
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The path to the config file for deployment")
+						.setUsageName("config file")
+						.setOptional()
+						.setName('c', "config")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
+						.setDefaultVal(MethodScriptFileLocations.getDefault().getSiteDeployFile().getAbsolutePath()))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Generates the preferences file initially, which you can then fill in.")
+						.asFlag().setName("generate-prefs"))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Generally, when the uploader runs, it checks the remote server to see if"
+							+ " the file already exists there (and is unchanged compared to the local file). If it is"
+							+ " unchanged, the upload is skipped. However, even checking with the remote to see"
+							+ " what the status of the remote file is takes time. If you are the only one uploading"
+							+ " files, then we can simply use a local cache of what the remote system has, and we"
+							+ " can skip the step of checking with the remote server for any given file. The cache is"
+							+ " always populated, whether or not this flag is set, so if you aren't sure if you can"
+							+ " trust the cache, run once without this flag, then for future runs, you can be sure that"
+							+ " the local cache is up to date.")
+						.asFlag().setName("use-local-cache"))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Clears the local cache of all entries, then exits.")
+						.asFlag().setName("clear-local-cache"))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Validates all of the uploaded web pages, and prints out a summary of the"
+								+ " results. This uses the value defined in the config file for validation.")
+						.asFlag().setName('d', "do-validation"))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("When set, does not clear the progress bar line. This is mostly useful"
+							+ " when debugging the site-deploy tool itself.")
+						.asFlag().setName("no-progress-clear"))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("If set, overrides the post-script value in the config.")
+						.setUsageName("script-location")
+						.setOptional()
+						.setName("override-post-script")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
+						.setDefaultVal(""))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("If the rsa key is in the non-default location, that location be specified"
+								+ " here")
+						.setUsageName("id-rsa-path")
+						.setOptional()
+						.setName("override-id-rsa")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
+						.setDefaultVal(""));
+				/*.addFlag("install", "When installing a fresh server, it is useful to have the setup completely automated. If this flag"
+						+ " is set, then the server is assumed to be a fresh ubuntu server, with nothing else on it. In that case,"
+						+ " the server will be installed from scratch automatically. NOTE: This will not account for the fact that"
+						+ " the documentation website is generally configured to allow for multiple versions of documentation. Old"
+						+ " versions will not be accounted for or uploaded. This process, if desired, must be done manually. If this"
+						+ " option is configured, the installation will occur before the upload or processing of files. During installation,"
+						+ " a \"lock\" file will be created, and if that file is present, it is assumed that the installation"
+						+ " has already occured on the instance, and will not be repeated. This is a safety measure to ensure"
+						+ " that the instance will not attempt to be redeployed, making it safe to always add the install"
+						+ " flag. If this flag is set, additional options need to be added to the config file. The remote server"
+						+ " is assumed to be an already running AWS ubuntu instance, with security groups configured and a pem"
+						+ " file available, but no login is necessary.")*/
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			boolean clearLocalCache = parsedArgs.isFlagSet("clear-local-cache");
+			if(clearLocalCache) {
+				PersistenceNetwork p = SiteDeploy.getPersistenceNetwork();
+				if(p == null) {
+					System.out.println("Cannot get reference to persistence network");
+					System.exit(1);
+					return;
+				}
+				DaemonManager dm = new DaemonManager();
+				p.clearKey(dm, new String[]{"site_deploy", "local_cache"});
+				dm.waitForThreads();
+				System.out.println("Local cache cleared");
+				System.exit(0);
+			}
+			boolean generatePrefs = parsedArgs.isFlagSet("generate-prefs");
+			boolean useLocalCache = parsedArgs.isFlagSet("use-local-cache");
+			boolean doValidation = parsedArgs.isFlagSet("do-validation");
+			boolean noProgressClear = parsedArgs.isFlagSet("no-progress-clear");
+			String configString = parsedArgs.getStringArgument("config");
+			String overridePostScript = parsedArgs.getStringArgument("override-post-script");
+			String overrideIdRsa = parsedArgs.getStringArgument("override-id-rsa");
+			if(overrideIdRsa.equals("")) {
+				overrideIdRsa = null;
+			}
+			if("".equals(configString)) {
+				System.err.println("Config file missing, check command and try again");
+				System.exit(1);
+			}
+			File config = new File(configString);
+			SiteDeploy.run(generatePrefs, useLocalCache, config, "", doValidation, !noProgressClear,
+					overridePostScript, overrideIdRsa);
 		}
 
 	}

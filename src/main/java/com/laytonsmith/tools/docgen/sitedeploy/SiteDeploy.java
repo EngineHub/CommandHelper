@@ -99,7 +99,8 @@ public final class SiteDeploy {
 	private static final String INSTALL_PUB_KEYS = "install-pub-keys";
 
 	public static void run(boolean generatePrefs, boolean useLocalCache, File sitedeploy, String password,
-			boolean doValidation, boolean clearProgressBar, String overridePostScript) throws Exception {
+			boolean doValidation, boolean clearProgressBar, String overridePostScript,
+			String overrideIdRsa) throws Exception {
 		List<Preferences.Preference> defaults = new ArrayList<>();
 		// SCP Options
 		defaults.add(new Preferences.Preference(USERNAME, "", Preferences.Type.STRING, "The username to scp with"));
@@ -225,6 +226,12 @@ public final class SiteDeploy {
 					configErrors.add("post-script does not end in .ms, and is not executable");
 				}
 			}
+			if(overrideIdRsa != null) {
+				if(!new File(overrideIdRsa).exists()) {
+					configErrors.add("override-id-rsa parameter points to a non-existent file.");
+				}
+			}
+
 			if(!configErrors.isEmpty()) {
 				System.err.println("Invalid input. Check preferences in " + sitedeploy.getAbsolutePath() + " and re-run");
 				System.err.println(StringUtils.PluralTemplateHelper(configErrors.size(),
@@ -284,15 +291,17 @@ public final class SiteDeploy {
 
 		// Ok, all the configuration details are input and correct, so lets deploy now.
 		deploy(useLocalCache, siteBase, docsBase, deploymentMethod, doValidation,
-				showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript, clearProgressBar);
+				showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript, clearProgressBar, overrideIdRsa);
 	}
 
 	private static void deploy(boolean useLocalCache, String siteBase, String docsBase,
 			DeploymentMethod deploymentMethod, boolean doValidation, boolean showTemplateCredit,
-			String githubBaseUrl, String validatorUrl, File finalizerScript, boolean clearProgressBar)
+			String githubBaseUrl, String validatorUrl, File finalizerScript, boolean clearProgressBar,
+			String overrideIdRsa)
 			throws IOException, InterruptedException {
 		new SiteDeploy(siteBase, docsBase, useLocalCache, deploymentMethod, doValidation,
-				showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript, clearProgressBar).deploy();
+				showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript, clearProgressBar,
+				overrideIdRsa).deploy();
 	}
 
 	String apiJson;
@@ -467,6 +476,7 @@ public final class SiteDeploy {
 	private final String validatorUrl;
 	private final File finalizerScript;
 	private final boolean clearProgressBar;
+	private final String overrideIdRsa;
 
 	private static final String EDIT_THIS_PAGE_PREAMBLE = "Find a bug in this page? <a rel=\"noopener noreferrer\" target=\"_blank\" href=\"";
 	private static final String EDIT_THIS_PAGE_POSTAMBLE = "\">Edit this page yourself, then submit a pull request.</a>";
@@ -475,7 +485,8 @@ public final class SiteDeploy {
 	@SuppressWarnings("unchecked")
 	private SiteDeploy(String siteBase, String docsBase, boolean useLocalCache,
 			DeploymentMethod deploymentMethod, boolean doValidation, boolean showTemplateCredit,
-			String githubBaseUrl, String validatorUrl, File finalizerScript, boolean clearProgressBar)
+			String githubBaseUrl, String validatorUrl, File finalizerScript, boolean clearProgressBar,
+			String overrideIdRsa)
 			throws IOException {
 		this.siteBase = siteBase;
 		this.docsBase = docsBase;
@@ -523,6 +534,7 @@ public final class SiteDeploy {
 				notificationAboutLocalCache = false;
 			}
 		}
+		this.overrideIdRsa = overrideIdRsa;
 	}
 
 	/**
@@ -780,7 +792,7 @@ public final class SiteDeploy {
 							}
 						}
 					}
-					if(!skipUpload && deploymentMethod.deploy(new ByteArrayInputStream(c), toLocation)) {
+					if(!skipUpload && deploymentMethod.deploy(new ByteArrayInputStream(c), toLocation, overrideIdRsa)) {
 						filesChanged.add(toLocation);
 					}
 					if(pn != null && notificationAboutLocalCache && hash != null) {

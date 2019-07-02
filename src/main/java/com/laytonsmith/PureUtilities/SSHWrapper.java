@@ -57,6 +57,22 @@ public final class SSHWrapper {
 	 * true otherwise
 	 */
 	public static boolean SCP(String from, String to) throws IOException {
+		return SCP(from, to, null);
+	}
+
+	/**
+	 * Copies a file from/to a remote host, via ssh. Currently, both paths being remote is not supported. A path can
+	 * look like the following: user@remote[:port[:password]]:path/to/remote/file If the password is not specified, then
+	 * public key authentication will be assumed. The port must be specified if the password is specified, but setting
+	 * it to 0 will use the default (22), allowing it to be bypassed.
+	 *
+	 * @param from
+	 * @param to
+	 * @param privateKeyLocation If the private key is not in the default location, it can be provided here
+	 * @return false, if the file is being pushed to the remote, yet it was already the same, thus no changes were made,
+	 * true otherwise
+	 */
+	public static boolean SCP(String from, String to, String privateKeyLocation) throws IOException {
 		if((from.contains("@") && to.contains("@")) || (!from.contains("@") && !to.contains("@"))) {
 			throw new IOException("Paths cannot be both remote, or both local.");
 		}
@@ -111,7 +127,11 @@ public final class SSHWrapper {
 				}
 				if(password == null) {
 					//We need to try public key authentication
-					File privKey = new File(System.getProperty("user.home") + "/.ssh/id_rsa");
+					String idRsa = System.getProperty("user.home") + "/.ssh/id_rsa";
+					if(privateKeyLocation != null) {
+						idRsa = privateKeyLocation;
+					}
+					File privKey = new File(idRsa);
 					if(privKey.exists()) {
 						jsch.addIdentity(privKey.getAbsolutePath());
 					} else {
@@ -460,12 +480,23 @@ public final class SSHWrapper {
 	 * were made
 	 */
 	public static boolean SCPWrite(InputStream is, String to) throws IOException {
+		return SCPWrite(is, to, null);
+	}
+
+	/**
+	 * Given an input stream, writes it out to a remote file system. The path given (to) must be a remote path.
+	 *
+	 * @param is
+	 * @return true, if the file on the remote was changed, false, if it was already at this version, thus no changes
+	 * were made
+	 */
+	public static boolean SCPWrite(InputStream is, String to, String idRsa) throws IOException {
 		File temp = File.createTempFile("methodscript-temp-file", ".tmp");
 		FileOutputStream fos = new FileOutputStream(temp);
 		StreamUtils.Copy(is, fos);
 		fos.close();
 		try {
-			return SCP(temp.getAbsolutePath(), to);
+			return SCP(temp.getAbsolutePath(), to, idRsa);
 		} finally {
 			temp.delete();
 			temp.deleteOnExit();
