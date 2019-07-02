@@ -24,4 +24,4 @@ steps:
 - task: PublishPipelineArtifact@0
   inputs:
     targetPath: 'target/commandhelper-$(version)-full.jar'
-    artifactName: 'MethodScript.jar'
+    artifactName: 'CommandHelper-$(version)-$(Build.BuildNumber).jar'
