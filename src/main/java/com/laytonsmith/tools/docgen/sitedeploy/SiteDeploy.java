@@ -99,7 +99,7 @@ public final class SiteDeploy {
 	private static final String INSTALL_PUB_KEYS = "install-pub-keys";
 
 	public static void run(boolean generatePrefs, boolean useLocalCache, File sitedeploy, String password,
-			boolean doValidation, boolean clearProgressBar) throws Exception {
+			boolean doValidation, boolean clearProgressBar, String overridePostScript) throws Exception {
 		List<Preferences.Preference> defaults = new ArrayList<>();
 		// SCP Options
 		defaults.add(new Preferences.Preference(USERNAME, "", Preferences.Type.STRING, "The username to scp with"));
@@ -182,6 +182,11 @@ public final class SiteDeploy {
 		String githubBaseUrl = prefs.getStringPreference(GITHUB_BASE_URL);
 		String validatorUrl = prefs.getStringPreference(VALIDATOR_URL);
 		File finalizerScript = prefs.getFilePreference(POST_SCRIPT);
+
+
+		if(!overridePostScript.equals("")) {
+			finalizerScript = new File(overridePostScript);
+		}
 
 		{
 			// Check for config errors

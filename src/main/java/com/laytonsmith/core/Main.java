@@ -339,7 +339,14 @@ public class Main {
 				.addArgument(new ArgumentBuilder()
 						.setDescription("When set, does not clear the progress bar line. This is mostly useful"
 							+ " when debugging the site-deploy tool itself.")
-						.asFlag().setName("no-progress-clear"));
+						.asFlag().setName("no-progress-clear"))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("If set, overrides the post-script value in the config.")
+						.setUsageName("script-location")
+						.setOptional()
+						.setName("override-post-script")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
+						.setDefaultVal(""));
 				/*.addFlag("install", "When installing a fresh server, it is useful to have the setup completely automated. If this flag"
 						+ " is set, then the server is assumed to be a fresh ubuntu server, with nothing else on it. In that case,"
 						+ " the server will be installed from scratch automatically. NOTE: This will not account for the fact that"
@@ -784,12 +791,14 @@ public class Main {
 				boolean doValidation = parsedArgs.isFlagSet("do-validation");
 				boolean noProgressClear = parsedArgs.isFlagSet("no-progress-clear");
 				String configString = parsedArgs.getStringArgument("config");
+				String overridePostScript = parsedArgs.getStringArgument("override-post-script");
 				if("".equals(configString)) {
 					System.err.println("Config file missing, check command and try again");
 					System.exit(1);
 				}
 				File config = new File(configString);
-				SiteDeploy.run(generatePrefs, useLocalCache, config, "", doValidation, !noProgressClear);
+				SiteDeploy.run(generatePrefs, useLocalCache, config, "", doValidation, !noProgressClear,
+						overridePostScript);
 			} else if(mode == EXTENSION_BUILDER_MODE) {
 
 				try {
