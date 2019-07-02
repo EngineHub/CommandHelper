@@ -20,4 +20,5 @@ steps:
 - task: PublishPipelineArtifact@0
   inputs:
     patterns: '**/*-full.jar'
+    targetPath: 'target'
     artifact: 'MethodScript.jar'
