@@ -20,5 +20,5 @@ steps:
 - task: PublishPipelineArtifact@0
   inputs:
     targetPath: $(Build.ArtifactStatingDirectory)
-    patterns: *-full.jar
-    artifact: MethodScript.jar
+    patterns: '*-full.jar'
+    artifact: 'MethodScript.jar'
