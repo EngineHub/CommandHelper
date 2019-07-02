@@ -19,6 +19,5 @@ steps:
     goals: 'package'
 - task: PublishPipelineArtifact@0
   inputs:
-    patterns: '*-full.jar'
-    targetPath: 'target'
-    artifact: 'MethodScript.jar'
+    targetPath: 'target/commandhelper-*-full.jar'
+    artifactName: 'MethodScript.jar'
