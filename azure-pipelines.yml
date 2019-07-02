@@ -20,8 +20,8 @@ steps:
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
-    script: '[xml]$pomXml = Get-Content $filePath; $version = $pomXml.project.version; Write-Host "##vso[task.setvariable variable=version]$version"'    
+    script: '[xml]$pomXml = Get-Content "pom.xml"; $version = $pomXml.project.version; Write-Host "##vso[task.setvariable variable=version]$version"'    
 - task: PublishPipelineArtifact@0
   inputs:
-    targetPath: 'target/commandhelper-$(version)-SNAPSHOT-full.jar'
+    targetPath: 'target/commandhelper-$(version)-full.jar'
     artifactName: 'MethodScript.jar'
