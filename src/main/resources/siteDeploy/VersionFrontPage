@@ -82,7 +82,7 @@ Tired of writing your scripts in a plain black and white text editor? Try a synt
 The Visual Studio Code 
 [https://marketplace.visualstudio.com/items?itemName=MethodScriptVSC.methodscriptvsc MethodScriptVSC]
 IDE is the only officially supported IDE/Syntax Highlighter, and is most likely the most feature rich and up-to-date 
-version, so it is highly recommeneded. To install, [https://code.visualstudio.com/Download download Visual Studio Code] 
+version, so it is highly recommended. To install, [https://code.visualstudio.com/Download download Visual Studio Code] 
 (free, on all platforms), and install the MethodScriptVSC extension from the extensions tab.
 
 If you prefer other text editors, there is community support for other text editors:
