@@ -80,6 +80,7 @@ import org.json.simple.JSONValue;
  *
  * @author cailin
  */
+@SuppressWarnings("UseSpecificCatch")
 public final class SiteDeploy {
 
 	private static final String USERNAME = "username";
@@ -308,10 +309,11 @@ public final class SiteDeploy {
 	String apiJson;
 	String apiJsonVersion;
 
-	@SuppressWarnings("StringEquality")
+	@SuppressWarnings({"StringEquality", "ImplicitArrayToString"})
 	private void deploy() throws InterruptedException, IOException {
 		apiJson = JSONValue.toJSONString(new APIBuilder().build());
 		apiJsonVersion = getLocalMD5(StreamUtils.GetInputStream(apiJson));
+		deployJar();
 		deployResources();
 		deployFrontPages();
 		deployLearningTrail();
@@ -1568,5 +1570,19 @@ public final class SiteDeploy {
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
+	}
+
+	private void deployJar() {
+		uploadQueue.submit(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					writeFromStream(ClassDiscovery.GetClassContainer(SiteDeploy.class).openStream(),
+							"MethodScript.jar");
+				} catch(Throwable e) {
+					e.printStackTrace(System.err);
+				}
+			}
+		});
 	}
 }
