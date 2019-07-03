@@ -55,8 +55,10 @@ for normal use at this time. The uninstallation is unstable, and may require man
 manual work to uninstall or update, so use it at your own risk.%>
 
 On Windows systems, you'll need to have launched your command prompt as Administrator. (To install on Windows
-Subsystem for Linux, follow the same instructions as for Unix.) On Windows, an additional installer will run, which will
-allow you to double click .ms files to run them.
+Subsystem for Linux, follow the same instructions as for Unix.) A program ''mscript'' will be installed on your
+path, and a PowerShell Module will also be installed. Running ''mscript'' will launch the interpreter, running
+it with a file will run that file, and using ''mscript -Tool'' followed by a verb (such as help) will run the
+cmdline utilities.
 
 == Usage ==
 
