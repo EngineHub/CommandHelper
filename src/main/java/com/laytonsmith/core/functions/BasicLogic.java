@@ -2403,6 +2403,17 @@ public class BasicLogic {
 			return MSVersion.V3_3_3;
 		}
 
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[] {
+				new ExampleScript("", "hash(1);"),
+				new ExampleScript("", "hash(2);"),
+				new ExampleScript("", "hash(3);"),
+				new ExampleScript("", "hash('Hello World!');"),
+				new ExampleScript("", "hash(array(1, 2, 3));")
+			};
+		}
+
 	}
 
 }
