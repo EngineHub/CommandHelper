@@ -1579,7 +1579,7 @@ public final class SiteDeploy {
 				try {
 					writeFromStream(ClassDiscovery.GetClassContainer(SiteDeploy.class).openStream(),
 							"MethodScript.jar");
-				} catch(Throwable e) {
+				} catch (Throwable e) {
 					e.printStackTrace(System.err);
 				}
 			}
