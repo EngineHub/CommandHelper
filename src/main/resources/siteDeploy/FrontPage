@@ -4,4 +4,5 @@ For the docs for the latest version, see <a href="%%siteRoot%%docs/3.3.4">here</
 
 <script type="text/javascript">
     showLearningTrail = false;
+	window.location.replace("%%siteRoot%%docs/3.3.4/index.html");
 </script>

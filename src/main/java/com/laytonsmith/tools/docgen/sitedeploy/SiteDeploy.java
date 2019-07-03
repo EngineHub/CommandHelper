@@ -117,7 +117,8 @@ public final class SiteDeploy {
 				+ " the *docs* folder. Files may be created one directory above this folder, in this folder, and in"
 				+ " lower folders that are created by the site deploy tool. So if /var/www is your web"
 				+ " root, then you should put /var/www/docs here. It will create an index file in /var/www, as"
-				+ " well as in /var/www/docs, but the majority of files will be put in /var/www/docs/"
+				+ " well as in /var/www/docs, but the majority of files will be put in /var/www/docs/. If you"
+				+ " are on Windows, use / as the directory separator, not \\."
 				+ MSVersion.LATEST.toString() + "."));
 		defaults.add(new Preferences.Preference(PASSWORD, "false", Preferences.Type.BOOLEAN, "Whether or not to use"
 				+ " password authentication. If false, public key authentication will be used instead, and your"
