@@ -108,8 +108,9 @@ public class ExampleScript {
 		String consoleErrorOutput = Static.MCToANSIColors(MCChatColor.RED.toString() + "Unintentional compile error in "
 				+ c.getEnclosingClass().getSimpleName() + ":" + functionName + "(): \"" + description + "\"\n" + MCChatColor.PLAIN_WHITE);
 		try {
+			Environment env = Static.GenerateStandaloneEnvironment();
 			this.script = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script,
-					new File((OSUtils.GetOS() == OSUtils.OS.WINDOWS ? "C:\\" : "/") + "Examples.ms"), true), null);
+					new File((OSUtils.GetOS() == OSUtils.OS.WINDOWS ? "C:\\" : "/") + "Examples.ms"), true), env);
 			this.output = output;
 		} catch (ConfigCompileException e) {
 			if(intentionalCompileError) {
@@ -134,6 +135,8 @@ public class ExampleScript {
 					System.out.println(e.getMessage());
 				}
 			}
+		} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
+			ex.printStackTrace(System.err);
 		}
 		playerOutput = new StringBuilder();
 

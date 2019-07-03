@@ -1259,7 +1259,7 @@ public final class SiteDeploy {
 							Arrays.asList(new String[]{"API", "functions"}),
 							"A list of all " + Implementation.GetServerType().getBranding() + " functions");
 					currentGenerateTask.addAndGet(1);
-				} catch (Error ex) {
+				} catch (Throwable ex) {
 					ex.printStackTrace(System.err);
 				}
 			}
