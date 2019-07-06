@@ -29,7 +29,8 @@ public enum MCGameRule {
 	SENDCOMMANDFEEDBACK("sendCommandFeedback"),
 	SHOWDEATHMESSAGES("showDeathMessages"),
 	SPAWNRADIUS("spawnRadius", CInt.class),
-	SPECTATORSGENERATECHUNKS("spectatorsGenerateChunks");
+	SPECTATORSGENERATECHUNKS("spectatorsGenerateChunks"),
+	DISABLERAIDS("disableRaids");
 
 	private final String gameRule;
 	private final Class<? extends Mixed> ruleType;

@@ -44,5 +44,6 @@ public enum MCSpawnReason {
 	TRAP,
 	ENDER_PEARL,
 	DROWNED,
-	SHEARED
+	SHEARED,
+	EXPLOSION
 }
