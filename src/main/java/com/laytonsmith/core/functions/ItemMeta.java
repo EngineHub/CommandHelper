@@ -66,6 +66,7 @@ public class ItemMeta {
 			+ " item exists in that slot: \"fuel\", \"ingredient\", \"leftbottle\", \"middlebottle\", and \"rightbottle\".</li>"
 			+ "<li>Tropical Fish Bucket - \"fishcolor\" (the base dye color of the fish), \"fishpatterncolor\" (the"
 			+ " color of the pattern on the fish), and \"fishpattern\" (the pattern type on the fish).</li>"
+			+ "<li>Crossbow - \"projectiles\" (an array of item arrays, only accepts arrows and fireworks).</li>"
 			+ "</ul>";
 
 	@api(environments = {CommandHelperEnvironment.class})

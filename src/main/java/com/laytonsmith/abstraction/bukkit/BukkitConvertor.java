@@ -127,6 +127,7 @@ import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.CrossbowMeta;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -518,6 +519,9 @@ public class BukkitConvertor extends AbstractConvertor {
 		}
 		if(im instanceof TropicalFishBucketMeta) {
 			return new BukkitMCTropicalFishBucketMeta((TropicalFishBucketMeta) im);
+		}
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14) && im instanceof CrossbowMeta) {
+			return new BukkitMCCrossbowMeta((CrossbowMeta) im);
 		}
 		return new BukkitMCItemMeta(im);
 	}
