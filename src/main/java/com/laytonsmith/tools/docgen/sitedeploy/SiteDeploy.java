@@ -80,6 +80,7 @@ import org.json.simple.JSONValue;
  *
  * @author cailin
  */
+@SuppressWarnings("UseSpecificCatch")
 public final class SiteDeploy {
 
 	private static final String USERNAME = "username";
@@ -308,10 +309,11 @@ public final class SiteDeploy {
 	String apiJson;
 	String apiJsonVersion;
 
-	@SuppressWarnings("StringEquality")
+	@SuppressWarnings({"StringEquality", "ImplicitArrayToString"})
 	private void deploy() throws InterruptedException, IOException {
 		apiJson = JSONValue.toJSONString(new APIBuilder().build());
 		apiJsonVersion = getLocalMD5(StreamUtils.GetInputStream(apiJson));
+		deployJar();
 		deployResources();
 		deployFrontPages();
 		deployLearningTrail();
@@ -496,7 +498,7 @@ public final class SiteDeploy {
 		this.reader = new jline.console.ConsoleReader();
 		this.generateQueue = new ThreadPoolExecutor(1, 1,
 				0L, TimeUnit.MILLISECONDS,
-				new LinkedBlockingQueue<Runnable>(),
+				new LinkedBlockingQueue<>(),
 				new ThreadFactory() {
 			@Override
 			public Thread newThread(Runnable r) {
@@ -505,7 +507,7 @@ public final class SiteDeploy {
 		});
 		this.uploadQueue = new ThreadPoolExecutor(1, 1,
 				0L, TimeUnit.MILLISECONDS,
-				new LinkedBlockingQueue<Runnable>(),
+				new LinkedBlockingQueue<>(),
 				new ThreadFactory() {
 			@Override
 			public Thread newThread(Runnable r) {
@@ -1144,7 +1146,7 @@ public final class SiteDeploy {
 					List<String> hiddenFunctions = new ArrayList<>();
 					for(Class<? extends Function> functionClass : functionClasses) {
 						if(!data.containsKey(functionClass.getEnclosingClass())) {
-							data.put(functionClass.getEnclosingClass(), new ArrayList<List<String>>());
+							data.put(functionClass.getEnclosingClass(), new ArrayList<>());
 						}
 						List<List<String>> d = data.get(functionClass.getEnclosingClass());
 						List<String> c = new ArrayList<>();
@@ -1161,7 +1163,11 @@ public final class SiteDeploy {
 						generateQueue.submit(new Runnable() {
 							@Override
 							public void run() {
-								generateFunctionDocs(f, di);
+								try {
+									generateFunctionDocs(f, di);
+								} catch (Throwable ex) {
+									ex.printStackTrace(System.err);
+								}
 							}
 						});
 						if(f.since().equals(MSVersion.V0_0_0)) {
@@ -1259,7 +1265,7 @@ public final class SiteDeploy {
 							Arrays.asList(new String[]{"API", "functions"}),
 							"A list of all " + Implementation.GetServerType().getBranding() + " functions");
 					currentGenerateTask.addAndGet(1);
-				} catch (Error ex) {
+				} catch (Throwable ex) {
 					ex.printStackTrace(System.err);
 				}
 			}
@@ -1290,9 +1296,11 @@ public final class SiteDeploy {
 				+ "! scope=\"row\" | Throws\n"
 				+ "| ");
 		List<String> exceptions = new ArrayList<>();
-		for(Class<? extends CREThrowable> c : f.thrown()) {
-			String t = c.getAnnotation(typeof.class).value();
-			exceptions.add("[[../objects/" + t + "|" + t + "]]");
+		if(f.thrown() != null) {
+			for(Class<? extends CREThrowable> c : f.thrown()) {
+				String t = c.getAnnotation(typeof.class).value();
+				exceptions.add("[[../objects/" + t + "|" + t + "]]");
+			}
 		}
 		page.append(StringUtils.Join(exceptions, "<br>"));
 		page.append("\n"
@@ -1562,5 +1570,19 @@ public final class SiteDeploy {
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
+	}
+
+	private void deployJar() {
+		uploadQueue.submit(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					writeFromStream(ClassDiscovery.GetClassContainer(SiteDeploy.class).openStream(),
+							"MethodScript.jar");
+				} catch (Throwable e) {
+					e.printStackTrace(System.err);
+				}
+			}
+		});
 	}
 }

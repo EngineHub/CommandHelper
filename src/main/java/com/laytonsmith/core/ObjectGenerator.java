@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCBrewerInventory;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCreatureSpawner;
+import com.laytonsmith.abstraction.MCCrossbowMeta;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEnchantmentStorageMeta;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
@@ -255,6 +256,9 @@ public class ObjectGenerator {
 			throw new CREFormatException("Expected an array!", t);
 		}
 		CArray item = (CArray) i;
+		if(!item.isAssociative()) {
+			throw new CREFormatException("Expected an associative array!", t);
+		}
 		String mat;
 		MCItemStack ret;
 		int data = 0;
@@ -612,6 +616,17 @@ public class ObjectGenerator {
 					ma.set("fishcolor", CNull.NULL, t);
 					ma.set("fishpatterncolor", CNull.NULL, t);
 					ma.set("fishpattern", CNull.NULL, t);
+				}
+			} else if(meta instanceof MCCrossbowMeta) {
+				MCCrossbowMeta cbm = (MCCrossbowMeta) meta;
+				if(cbm.hasChargedProjectiles()) {
+					CArray projectiles = new CArray(t);
+					for(MCItemStack projectile : cbm.getChargedProjectiles()) {
+						projectiles.push(item(projectile, t), t);
+					}
+					ma.set("projectiles", projectiles, t);
+				} else {
+					ma.set("projectiles", CNull.NULL, t);
 				}
 			}
 			return ma;
@@ -1015,6 +1030,17 @@ public class ObjectGenerator {
 						if(!(pa instanceof CNull)) {
 							MCTropicalFish.MCPattern pattern = MCTropicalFish.MCPattern.valueOf(pa.val().toUpperCase());
 							((MCTropicalFishBucketMeta) meta).setPattern(pattern);
+						}
+					}
+				} else if(meta instanceof MCCrossbowMeta) {
+					if(ma.containsKey("projectiles")) {
+						Mixed value = ma.get("projectiles", t);
+						if(!(value instanceof CNull)) {
+							List<MCItemStack> projectiles = new ArrayList<>();
+							for(Mixed m : Static.getArray(value, t).asList()) {
+								projectiles.add(item(m, t));
+							}
+							((MCCrossbowMeta) meta).setChargedProjectiles(projectiles);
 						}
 					}
 				}
