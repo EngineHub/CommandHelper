@@ -2122,8 +2122,8 @@ public class ArrayHandling {
 			if(number < 1) {
 				throw new CRERangeException("number may not be less than 1.", t);
 			}
-			if(number > Integer.MAX_VALUE) {
-				throw new CRERangeException("Overflow detected. Number cannot be larger than " + Integer.MAX_VALUE, t);
+			if(number > array.size()) {
+				throw new CRERangeException("Number cannot be larger than array size", t);
 			}
 			if(args.length > 2) {
 				getKeys = ArgumentValidation.getBoolean(args[2], t);
