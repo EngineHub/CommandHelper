@@ -1393,16 +1393,11 @@ public class StringHandling {
 
 			// Handle the formatting.
 			String formatString = args[1].val();
-			Object[] params = new Object[numArgs - 2];
 			List<FormatString> parsed;
 			try {
 				parsed = parse(formatString, t);
 			} catch (IllegalFormatException e) {
 				throw new CREFormatException(e.getMessage(), t);
-			}
-			if(requiredArgs(parsed) != numArgs - 2) {
-				throw new CREInsufficientArgumentsException("The specified format string: \"" + formatString + "\""
-						+ " expects " + requiredArgs(parsed) + " argument(s), but " + (numArgs - 2) + " were provided.", t);
 			}
 
 			List<Mixed> flattenedArgs = new ArrayList<>();
@@ -1419,7 +1414,15 @@ public class StringHandling {
 					flattenedArgs.add(args[i]);
 				}
 			}
+
+			if(requiredArgs(parsed) != flattenedArgs.size()) {
+				throw new CREInsufficientArgumentsException("The specified format string: \"" + formatString + "\""
+						+ " expects " + requiredArgs(parsed) + " argument(s),"
+						+ " but " + flattenedArgs.size() + " were provided.", t);
+			}
+
 			//Now figure out how to cast things, now that we know our argument numbers will match up
+			Object[] params = new Object[flattenedArgs.size()];
 			for(int i = 0; i < requiredArgs(parsed); i++) {
 				Mixed arg = flattenedArgs.get(i);
 				FormatString fs = parsed.get(i);
