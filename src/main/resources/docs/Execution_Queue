@@ -8,7 +8,11 @@ queue management functions are all provided to make doing complex operations pos
 The most basic operation is the {{function|queue_push}} function. This pushes a new routine at the end of the queue. 
 For instance:
 
-<%CODE|queue_push(closure(msg('Hello World!')))%>
+<%CODE|
+queue_push(closure() {
+    msg('Hello World!');
+});
+%>
 
 would be valid. This will run the code <code>msg('Hello World!')</code> at the next available opportunity, after other 
 queued operations occur. Each
@@ -24,7 +28,11 @@ There can be multiple queues. Each queue is simply named something, with the def
 across queues are not executed in any particular order with respect to each other, but within each queue, operations are 
 guaranteed to be sequential. Each queue function takes an optional parameter which specifies the queue name.
 
-<%CODE|queue_push(closure(msg('Hello World!')), 'default')%>
+<%CODE|
+queue_push(closure() {
+    msg('Hello World!');
+}, 'default');
+%>
 
 To make a new queue, just use a new name, it will be created automatically.
 
@@ -33,7 +41,7 @@ Delays can be inserted into a queue as well. This delay will suspend the queue's
 freeze the server, since the delay will be on the execution queue's thread, not the server thread. This is a seperate 
 operation, and uses the {{function|queue_delay}} function.
 
-<%CODE|queue_delay(1000, 'default') #Put a 1 second delay on the default queue. 'default' is optional.%>
+<%CODE|queue_delay(1000, 'default'); #Put a 1 second delay on the default queue. 'default' is optional.%>
 
 == Other Queue Operations ==
 The queue works like a doubly ended queue. There are other operations to control this queue, with a few caveats. Once an 
@@ -68,10 +76,16 @@ This example splits a loop up into many smaller chunks, which should cause the s
 
 <%CODE|
 for(int @i = -5000, @i < 5000, @i++) {
-    queue_push(closure(set_block_at(@i, 50, @i, 1, 'world')), 'block-set'); 
+    queue_push(closure() {
+        set_block_at(@i, 50, @i, 1, 'world');
+    }, 'block-set'); 
     // Sets a diagonal line of blocks to stone, 
     // from [-5000, 50, -5000] to [5000, 50, 5000]
 }
+
+queue_push(closure() {
+    msg('Block set queue is finished.');
+}, 'block-set');
 %>
 
 Queing up the operations should complete relatively fast, but the full task will take a while.
