@@ -91,7 +91,7 @@ public class DocGenTemplates {
 			}
 		});
 		g.putAll(DocGenTemplates.GetGenerators());
-		String t = "<%SYNTAX|html|\n<%MySQL_CREATE_TABLE_QUERY%>\n%>";
+		String t = "<%SYNTAX|html|\n<%MYSQL_CREATE_TABLE_QUERY%>\n%>";
 		StreamUtils.GetSystemOut().println(DoTemplateReplacement(t, g));
 	}
 

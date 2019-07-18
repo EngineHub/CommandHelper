@@ -23,7 +23,7 @@ There are several different connection types supported, and each has a slightly 
 ! scope="col" width="50%" | Description
 ! scope="col" width="30%" | Example
 ! scope="col" width="10%" | Since
-<%persistence_connections%>
+<%PERSISTENCE_CONNECTIONS%>
 |}
 
 In addition, several modifier types can be specified, which modify the connection type. 
@@ -38,7 +38,7 @@ applicable to all connection types.
 |-
 ! scope="col" width="20%" | Flag Name
 ! scope="col" width="80%" | Description
-%%data_source_modifiers%%
+%%DATA_SOURCE_MODIFIERS%%
 |}
 
 Invalid modifiers will cause a warning to be raised during startup, but will otherwise be ignored.
