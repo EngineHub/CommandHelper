@@ -159,9 +159,8 @@ public final class Prefs {
 		a.add(new Preference(PNames.SHOW_SPLASH_SCREEN.config(), "true", Preferences.Type.BOOLEAN, "Whether or not to"
 				+ " show the splash screen at server startup"));
 		a.add(new Preference(PNames.USE_COLORS.config(),
-				(TermColors.SYSTEM == TermColors.SYS.WINDOWS ? "false" : "true"), Preferences.Type.BOOLEAN, "Whether or"
-				+ " not to use console colors. If this is a Windows machine, defaults to false, however, it can"
-				+ " be toggled manually, and will then respect your setting."));
+				"true", Preferences.Type.BOOLEAN, "Whether or"
+				+ " not to use console colors."));
 		a.add(new Preference(PNames.HALT_ON_FAILURE.config(), "false", Preferences.Type.BOOLEAN, "Whether or not to"
 				+ " halt compilation of pure mscript files if a compilation failure occurs in any one of the files."));
 		a.add(new Preference(PNames.USE_SUDO_FALLBACK.config(), "false", Preferences.Type.BOOLEAN, "If true, sudo()"
