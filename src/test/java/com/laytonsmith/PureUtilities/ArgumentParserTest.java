@@ -337,4 +337,27 @@ public class ArgumentParserTest {
 		assertEquals("\"This is a quoted\" 'string'", r.getStringArgument('b'));
 	}
 
+	@Test(expected = ArgumentParser.ValidationException.class)
+	public void testFailOnUnknownLongArgument() throws Exception {
+		ArgumentParser p = ArgumentParser.GetParser()
+				.addArgument(new ArgumentBuilder()
+					.setDescription("description")
+					.setUsageName("asdf")
+					.setOptional()
+					.setName("asdf"))
+				.setErrorOnUnknownArgs(true);
+		p.match("--asdf --unknown");
+	}
+
+	@Test(expected = ArgumentParser.ValidationException.class)
+	public void testFailOnUnknownShortArgument() throws Exception {
+		ArgumentParser p = ArgumentParser.GetParser()
+				.addArgument(new ArgumentBuilder()
+					.setDescription("description")
+					.asFlag()
+					.setName('a'))
+				.setErrorOnUnknownArgs(true);
+		p.match("-a -u");
+	}
+
 }

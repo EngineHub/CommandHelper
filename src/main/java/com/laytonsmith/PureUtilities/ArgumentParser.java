@@ -1026,6 +1026,12 @@ public final class ArgumentParser {
 	 * the possibly valid arguments are known up front, then this should generally remain true, so
 	 * as to fail faster and give the user a better overall experience.
 	 *
+	 * Also note that it is possible to escape dashes, so the argument parser doesn't accept the argument
+	 * as a known flag, but instead a literal, which can then be further processed later by another
+	 * argument parser, for instance. It may be better to instead instruct users to pass the arguments
+	 * through escaped, so that arguments can still be validated. (This works for both short and
+	 * long arguments, i.e. {@code \-s} or {@code \--long}.)
+	 *
 	 * @param errorOnUnknown
 	 * @return {@code this} for easier chaining.
 	 */
@@ -1385,6 +1391,9 @@ public final class ArgumentParser {
 				results.updateArgument(validateArgument(lastArg, looseArgs));
 				//This is a long arg, and so it is the only one.
 				arg = arg.substring(2);
+				if(errorOnUnknown && getArgument(arg) == null) {
+					throw new ValidationException("Unrecognized argument: " + arg);
+				}
 				lastArg = getArgument(arg);
 				continue;
 			}
