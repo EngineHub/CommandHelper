@@ -2166,7 +2166,8 @@ public class DataHandling {
 		@Override
 		public String docs() {
 			return "mixed {player, label, [values...], closure} Executes the given closure in the context of a given"
-					+ " player. A closure that runs player(), for instance, would return the specified player's name."
+					+ " player or " + Static.getConsoleName() + ". A closure that runs player(), for instance,"
+					+ " would return the specified player's name."
 					+ " The label argument sets the permission label that this closure will use. If null is given,"
 					+ " the current label will be used, like with execute().";
 		}
@@ -2198,7 +2199,13 @@ public class DataHandling {
 			GlobalEnv gEnv = closure.getEnv().getEnv(GlobalEnv.class);
 
 			MCCommandSender originalSender = cEnv.GetCommandSender();
-			cEnv.SetCommandSender(Static.GetPlayer(args[0].val(), t));
+			MCCommandSender sender;
+			if(args[0].val().equals(Static.getConsoleName())) {
+				sender = Static.getServer().getConsole();
+			} else {
+				sender = Static.GetPlayer(args[0].val(), t);
+			}
+			cEnv.SetCommandSender(sender);
 
 			String originalLabel = gEnv.GetLabel();
 			if(!(args[1] instanceof CNull)) {
