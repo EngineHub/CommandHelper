@@ -68,9 +68,9 @@ How do you use CommandHelper? We have a set of easy to follow articles that you 
 * '''Want to script completely new features?''' Follow the ''Learning Trail'' at the bottom of the page.
 * '''Just want the API?''' See the [[API.html|API reference]].
 
-Need more help? Visit the [http://forum.enginehub.org/forums/commandhelper.20/ forums], or chat with us on IRC in
-[http://skq.me/irc/irc.esper.net/commandhelper/ #CommandHelper on irc.esper.net], or
-[https://discord.gg/Z7jpHed Discord].
+Need more help? Chat with us on IRC in
+[http://skq.me/irc/irc.esper.net/commandhelper/ #CommandHelper on irc.esper.net], on [https://discord.gg/Z7jpHed Discord],
+or go to the [https://dev.enginehub.org/youtrack/issues/CMDHELPER issue tracker].
 {{LearningTrail}}
 
 == Tools ==
@@ -87,10 +87,13 @@ version, so it is highly recommended. To install, [https://code.visualstudio.com
 
 If you prefer other text editors, there is community support for other text editors:
 
-* TextWrangler and BBEdit - Mac OS X [http://forum.enginehub.org/threads/textwrangler-bbedit-language-module.382/ Forum Link] - Created by Connor Griffin (Very Outdated)
-* Notepad++ (Default Theme) - Windows [http://forum.enginehub.org/threads/syntax-highlighting-for-notepad.399/ Forum Link] - Created by MrMagical
-* Notepad++ (Obsidian Theme) - Windows [http://forum.enginehub.org/threads/notepad-syntax-highlighter-obsidian-theme.1033/ Forum Link] - Created by TTSDA (based on MrMagical's Highlighter)
-* gedit - GNOME/Cross-platform [http://forum.enginehub.org/threads/gedit-syntax-highlighting.1102/ Forum Link] - Created by MrMagical
+* Atom - Cross-platform - Created by jacobwgillespie
+* gedit - GNOME/Cross-platform - Created by MrMagical
+* Notepad++ (Default Theme) - Windows - Created by MrMagical
+* Notepad++ (Obsidian Theme) - Windows - Created by TTSDA (based on MrMagical's Highlighter)
+* Sublime Text 3 - Cross-platform - Created by Ecconia
+* TextWrangler and BBEdit - Mac OS X - Created by Connor Griffin (Very Outdated)
+* and others
 
 If you create a syntax highlighter for your favorite text editor, contact us, and we can add it here!
 
@@ -106,7 +109,7 @@ For more detailed instructions, [[SyntaxHighlighting.html|see here]]}}
 
 Long-term planned features can be found on the [[Roadmap.html|roadmap]], and short term features can be found on the
 issue tracker. To request your own features or file a bug, use
-[http://youtrack.sk89q.com/issues/CMDHELPER our issue tracker]. Known bugs can be found on the issue tracker.
+[https://dev.enginehub.org/youtrack/issues/CMDHELPER our issue tracker]. Known bugs can be found on the issue tracker.
 
 If you would to request new functions, it is typically easy to add those, so please post your feature request in the
 issue tracker. If you happen to find a bug in the program, please let us know so we can fix it!

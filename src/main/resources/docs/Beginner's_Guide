@@ -100,7 +100,7 @@ just a few lines. See below for alternate syntax to do the same thing with a mor
 Macros allow you to run several commands with only having typed in one command. One common use may be to create "kits" 
 for players to use, which spawn several items at once. Here is an example for that:
 %%ALIAS|
-/kit gold = /give player() 284 64 \ /give player() 285 64 \ /give player() 286 64
+/kit gold = /give player() golden_shovel \ /give player() golden_pickaxe \ /give player() golden_axe
 %%
 
 Note that we are defining the literal "gold" here. The command will not be intercepted without the user running
@@ -108,16 +108,16 @@ Note that we are defining the literal "gold" here. The command will not be inter
 
 The <code>player()</code> is a function. Using all the functions is a more advanced feature, but the player() function 
 is fairly simple; all it does is give you the name of the player issuing the command. So, specifically, 
-"/give player() 284 64" would be turned into "/give playerName 284 64". 
+"/give player() golden_shovel" would be turned into "/give playerName golden_shovel". 
 
 In general, macros are not recommended for use. Instead, use the multiline construct and multiple <code>run()</code>
 calls. The same code from above can be written as such (using full strict syntax with operators):
 
 %%ALIAS|
 /kit gold = >>>
-	run('/give '.player().' 284 64');
-	run('/give '.player().' 285 64');
-	run('/give '.player().' 286 64');
+	run('/give '.player().' golden_shovel');
+	run('/give '.player().' golden_pickaxe');
+	run('/give '.player().' golden_axe');
 <<<
 %%
 
