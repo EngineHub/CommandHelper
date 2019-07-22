@@ -865,6 +865,26 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+			<plugin>
+                <groupId>io.github.phillipuniverse</groupId>
+                <artifactId>githook-maven-plugin</artifactId>
+                <version>1.0.4</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>install</goal>
+                        </goals>
+                        <configuration>
+                            <hooks>
+                                <pre-commit>
+                                    echo running validation build
+                                    exec mvn clean install -Pfail-on-test-failures
+                                </pre-commit>
+                            </hooks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 			
 		</plugins>
 	</build>
