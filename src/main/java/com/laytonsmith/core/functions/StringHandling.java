@@ -412,8 +412,8 @@ public class StringHandling {
 				new ExampleScript("Demonstrates basic usage", "parse_args('This turns into 5 arguments')"),
 				new ExampleScript("Demonstrates usage with extra spaces",
 						"parse_args('This   trims   extra   spaces')"),
-				new ExampleScript("With the advanced mode",
-						"parse_args('This supports \"quoted arguments\" and \\'even \\\\'escapes\\\\'\\'', true)")
+				new ExampleScript("With the advanced mode (escapes are also supported with \\, for instance \\'",
+						"parse_args('This supports \"quoted arguments\"', true)")
 			};
 		}
 

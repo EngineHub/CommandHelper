@@ -12,9 +12,9 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -26,19 +26,19 @@ import java.io.IOException;
  *
  * @author cailin
  */
+@SuppressWarnings("UseSpecificCatch")
 public class Clipboard {
 
 	public static String docs() {
 		return "Provides functions for managing the system clipboard";
 	}
 
-	@SuppressWarnings("FieldMayBeFinal") // No it can't, shut up ide
 	private static java.awt.datatransfer.Clipboard clipboard;
 
 	static {
 		try {
 			clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-		} catch (HeadlessException ex) {
+		} catch (Throwable ex) {
 			clipboard = null;
 		}
 	}
@@ -49,7 +49,8 @@ public class Clipboard {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class, CREInsufficientPermissionException.class};
+			return new Class[]{CREFormatException.class, CREInsufficientPermissionException.class,
+				CREUnsupportedOperationException.class};
 		}
 
 		@Override
@@ -65,6 +66,10 @@ public class Clipboard {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Cmdline.requireCmdlineMode(environment, this, t);
+			if(clipboard == null) {
+				throw new CREUnsupportedOperationException(
+						"Clipboard functions are not supported on this platform.", t);
+			}
 			Transferable tr = clipboard.getContents(null);
 			if(tr.isDataFlavorSupported(DataFlavor.stringFlavor)) {
 				try {
@@ -93,8 +98,11 @@ public class Clipboard {
 
 		@Override
 		public String docs() {
-			return "string {[flavor]} Returns the contents of the system clipboard. Can only be used in cmdline mode. Flavor defaults to null, and is currently unused. Only strings are currently supported."
-					+ " If a string version of the clipboard contents cannot be parsed, a FormatException is thrown.";
+			return "string {[flavor]} Returns the contents of the system clipboard. Can only be used in cmdline mode."
+					+ " Flavor defaults to null, and is currently unused. Only strings are currently supported."
+					+ " If a string version of the clipboard contents cannot be parsed, a FormatException is thrown."
+					+ " If the platform doesn't support clipboard operations, an UnsupportedOperationException is"
+					+ " thrown.";
 		}
 
 		@Override
@@ -110,7 +118,7 @@ public class Clipboard {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREInsufficientPermissionException.class};
+			return new Class[]{CREInsufficientPermissionException.class, CREUnsupportedOperationException.class};
 		}
 
 		@Override
@@ -126,6 +134,10 @@ public class Clipboard {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Cmdline.requireCmdlineMode(environment, this, t);
+			if(clipboard == null) {
+				throw new CREUnsupportedOperationException(
+						"Clipboard functions are not supported on this platform.", t);
+			}
 			String data = args[0].val();
 			StringSelection s = new StringSelection(data);
 			clipboard.setContents(s, s);
@@ -144,7 +156,10 @@ public class Clipboard {
 
 		@Override
 		public String docs() {
-			return "void {value, [flavor]} Sets the contents of the system clipboard, to the given value. Can only be used in cmdline mode. Flavor defaults to null, and is currently unused. Only strings are currently supported.";
+			return "void {value, [flavor]} Sets the contents of the system clipboard, to the given value. Can only be"
+					+ " used in cmdline mode. Flavor defaults to null, and is currently unused. Only strings are"
+					+ " currently supported. If the platform doesn't support clipboard operations, an"
+					+ " UnsupportedOperationException is thrown.";
 		}
 
 		@Override
