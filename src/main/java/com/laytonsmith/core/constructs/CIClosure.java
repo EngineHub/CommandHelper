@@ -93,8 +93,6 @@ public class CIClosure extends CClosure {
 				MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class)
 						.GetScript());
 			} catch (LoopManipulationException e) {
-				// Not normal, but pop anyways
-				stManager.popStackTraceElement();
 				//This shouldn't ever happen.
 				LoopManipulationException lme = ((LoopManipulationException) e);
 				Target t = lme.getTarget();
@@ -102,8 +100,6 @@ public class CIClosure extends CClosure {
 						+ lme.getName() + "() bubbled up to the top of"
 						+ " a closure, which is unexpected behavior.", t), environment);
 			} catch (FunctionReturnException ex) {
-				// Normal. Pop element
-				stManager.popStackTraceElement();
 				// Check the return type of the closure to see if it matches the defined type
 				Mixed ret = ex.getReturn();
 				if(!InstanceofUtil.isInstanceof(ret, returnType, environment)) {
@@ -113,16 +109,14 @@ public class CIClosure extends CClosure {
 				// Now rethrow it
 				throw ex;
 			} catch (CancelCommandException e) {
-				stManager.popStackTraceElement();
 				// die()
 			} catch (ConfigRuntimeException ex) {
 				if(ex instanceof AbstractCREException) {
 					((AbstractCREException) ex).freezeStackTraceElements(stManager);
 				}
 				throw ex;
-			} catch (Throwable t) {
+			} finally {
 				stManager.popStackTraceElement();
-				throw t;
 			}
 			// If we got here, then there was no return type. This is fine, but only for returnType void or auto.
 			if(!(returnType.equals(Auto.TYPE) || returnType.equals(CVoid.TYPE))) {
