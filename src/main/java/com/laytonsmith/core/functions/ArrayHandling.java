@@ -1357,7 +1357,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	@seealso({StringHandling.split.class, Regex.reg_split.class})
+	@seealso({StringHandling.split.class, Regex.reg_split.class, map_implode.class})
 	public static class array_implode extends AbstractFunction {
 
 		@Override
@@ -1427,6 +1427,84 @@ public class ArrayHandling {
 				new ExampleScript("Basic usage", "array_implode(array(1, 2, 3), '-')"),
 				new ExampleScript("With associative array", "array_implode(array(one: 'a', two: 'b', three: 'c'), '-')")};
 		}
+	}
+
+	@api
+	@seealso({array_implode.class})
+	public static class map_implode extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray array = ArgumentValidation.getArray(args[0], t);
+			String innerGlue = ArgumentValidation.getString(args[1], t);
+			String outerGlue = ArgumentValidation.getString(args[2], t);
+			if(!array.isAssociative()) {
+				throw new CRECastException("Expecting an associative array, but a normal array was provided.", t);
+			}
+
+			StringBuilder b = new StringBuilder();
+
+			boolean first = true;
+			for(Mixed key : array.keySet()) {
+				Mixed value = array.get(key, t);
+				if(!first) {
+					b.append(outerGlue);
+				}
+				first = false;
+				b.append(key.val()).append(innerGlue).append(value.val());
+			}
+
+			return new CString(b.toString(), t);
+		}
+
+		@Override
+		public String getName() {
+			return "map_implode";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{3};
+		}
+
+		@Override
+		public String docs() {
+			return "string {associativeArray, innerGlue, outerGlue} Implodes an associative array. The innerGlue is"
+					+ " used to glue the key to the value, and then the outerGlue is used to glue those elements"
+					+ " together. This only works with associative arrays, and will throw CastException if the array"
+					+ " passed in isa  normal array.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Single element", "map_implode(array('a': 'b'), '=', '&')"),
+				new ExampleScript("Multiple elements", "map_implode(array('a': '1', 'b': '2'), '=', '&')"),
+			};
+		}
+
+
+
 	}
 
 	@api

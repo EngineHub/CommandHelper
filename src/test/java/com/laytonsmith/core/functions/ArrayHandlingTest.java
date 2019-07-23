@@ -7,6 +7,7 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -529,6 +530,18 @@ public class ArrayHandlingTest {
 				+ " array(array(id: 1, qty: 19), array(id: 6, qty: 2)), closure(@a, @b){ return(@a[id] == @b[id]); })", fakePlayer),
 				is("{{id: 1, qty: 2}}"));
 
+	}
+
+	@Test
+	public void testMapImplode() throws Exception {
+		assertThat(SRun("map_implode(array('a': 'b'), '=', '&')", null), is("a=b"));
+		assertThat(SRun("map_implode(array('a': '1', 'b': '2'), '=', '&')", null), is("a=1&b=2"));
+		try {
+			SRun("map_implode(array(), '', '')", null);
+			fail();
+		} catch (CRECastException ex) {
+			// pass
+		}
 	}
 
 }
