@@ -281,25 +281,22 @@ public class Scheduling {
 			final CClosure c = (CClosure) args[1 + offset];
 			final AtomicInteger ret = new AtomicInteger(-1);
 
-			ret.set(StaticLayer.SetFutureRepeater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), time, delay, new Runnable() {
-				@Override
-				public void run() {
-					c.getEnv().getEnv(GlobalEnv.class).SetCustom("timeout-id", ret.get());
+			ret.set(StaticLayer.SetFutureRepeater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), time, delay, () -> {
+				c.getEnv().getEnv(GlobalEnv.class).SetCustom("timeout-id", ret.get());
+				try {
+					ProfilePoint p = environment.getEnv(GlobalEnv.class).GetProfiler().start("Executing timeout"
+							+ " with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
 					try {
-						ProfilePoint p = environment.getEnv(GlobalEnv.class).GetProfiler().start("Executing timeout"
-								+ " with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
-						try {
-							c.executeCallable();
-						} finally {
-							p.stop();
-						}
-					} catch (ConfigRuntimeException e) {
-						ConfigRuntimeException.HandleUncaughtException(e, environment);
-					} catch (CancelCommandException e) {
-						//Ok
-					} catch (ProgramFlowManipulationException e) {
-						ConfigRuntimeException.DoWarning("Using a program flow manipulation construct improperly! " + e.getClass().getSimpleName());
+						c.executeCallable();
+					} finally {
+						p.stop();
 					}
+				} catch (ConfigRuntimeException e) {
+					ConfigRuntimeException.HandleUncaughtException(e, environment);
+				} catch (CancelCommandException e) {
+					//Ok
+				} catch (ProgramFlowManipulationException e) {
+					ConfigRuntimeException.DoWarning("Using a program flow manipulation construct improperly! " + e.getClass().getSimpleName());
 				}
 			}));
 			return new CInt(ret.get(), t);
@@ -370,41 +367,34 @@ public class Scheduling {
 			final CClosure c = (CClosure) args[1];
 			final AtomicInteger ret = new AtomicInteger(-1);
 			final AtomicBoolean isRunning = new AtomicBoolean(false);
-			ret.set(StaticLayer.SetFutureRunnable(environment.getEnv(GlobalEnv.class).GetDaemonManager(), time, new Runnable() {
-				@Override
-				public void run() {
-					isRunning.set(true);
-					c.getEnv().getEnv(GlobalEnv.class).SetCustom("timeout-id", ret.get());
-					taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.RUNNING);
+			ret.set(StaticLayer.SetFutureRunnable(environment.getEnv(GlobalEnv.class).GetDaemonManager(), time, () -> {
+				isRunning.set(true);
+				c.getEnv().getEnv(GlobalEnv.class).SetCustom("timeout-id", ret.get());
+				taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.RUNNING);
+				try {
+					ProfilePoint p = environment.getEnv(GlobalEnv.class).GetProfiler().start("Executing timeout"
+							+ " with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
 					try {
-						ProfilePoint p = environment.getEnv(GlobalEnv.class).GetProfiler().start("Executing timeout"
-								+ " with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
-						try {
-							c.executeCallable();
-						} finally {
-							p.stop();
-						}
-					} catch (ConfigRuntimeException e) {
-						ConfigRuntimeException.HandleUncaughtException(e, environment);
-					} catch (CancelCommandException e) {
-						//Ok
-					} catch (ProgramFlowManipulationException e) {
-						ConfigRuntimeException.DoWarning("Using a program flow manipulation construct improperly! " + e.getClass().getSimpleName());
+						c.executeCallable();
 					} finally {
-						taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.FINISHED);
-						environment.getEnv(GlobalEnv.class).SetInterrupt(false);
+						p.stop();
 					}
+				} catch (ConfigRuntimeException e) {
+					ConfigRuntimeException.HandleUncaughtException(e, environment);
+				} catch (CancelCommandException e) {
+					//Ok
+				} catch (ProgramFlowManipulationException e) {
+					ConfigRuntimeException.DoWarning("Using a program flow manipulation construct improperly! " + e.getClass().getSimpleName());
+				} finally {
+					taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.FINISHED);
+					environment.getEnv(GlobalEnv.class).SetInterrupt(false);
 				}
 			}));
-			taskManager.addTask(new TimeoutTaskHandler(ret.get(), t, new Runnable() {
-
-				@Override
-				public void run() {
-					if(isRunning.get()) {
-						new clear_task().exec(t, environment, new CInt(ret.get(), t));
-						environment.getEnv(GlobalEnv.class).SetInterrupt(true);
-						taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.KILLED);
-					}
+			taskManager.addTask(new TimeoutTaskHandler(ret.get(), t, () -> {
+				if(isRunning.get()) {
+					new clear_task().exec(t, environment, new CInt(ret.get(), t));
+					environment.getEnv(GlobalEnv.class).SetInterrupt(true);
+					taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.KILLED);
 				}
 			}));
 			taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.IDLE);
@@ -516,28 +506,24 @@ public class Scheduling {
 
 		@Override
 		public String docs() {
-			Map<String, DocGenTemplates.Generator> map = new HashMap<String, DocGenTemplates.Generator>();
-			map.put("timezoneValues", new DocGenTemplates.Generator() {
-
-				@Override
-				public String generate(String... args) {
-					String[] timezones = ArrayUtils.EMPTY_STRING_ARRAY;
-					try {
-						timezones = TimeZone.getAvailableIDs();
-					} catch (NullPointerException e) {
-						//This is due to a JDK bug. As you can see, the code above
-						//should never NPE due to our mistake, so it would only occur
-						//during an internal error. The solution that worked for me is here:
-						//https://bugs.launchpad.net/ubuntu/+source/tzdata/+bug/1053160
-						//however, this appears to be an issue in Open JDK, so performance on
-						//other systems may vary. We will handle this error by reporting that
-						//list could not be retrieved, using the Join method's empty parameter.
-					}
-					//Let's sort the timezones
-					List<String> tz = new ArrayList<String>(Arrays.asList(timezones));
-					Collections.sort(tz);
-					return StringUtils.Join(tz, ", ", " or ", " or ", "Couldn't retrieve the list of timezones!");
+			Map<String, DocGenTemplates.Generator> map = new HashMap<>();
+			map.put("timezoneValues", (DocGenTemplates.Generator) (String... args) -> {
+				String[] timezones = ArrayUtils.EMPTY_STRING_ARRAY;
+				try {
+					timezones = TimeZone.getAvailableIDs();
+				} catch (NullPointerException e) {
+					//This is due to a JDK bug. As you can see, the code above
+					//should never NPE due to our mistake, so it would only occur
+					//during an internal error. The solution that worked for me is here:
+					//https://bugs.launchpad.net/ubuntu/+source/tzdata/+bug/1053160
+					//however, this appears to be an issue in Open JDK, so performance on
+					//other systems may vary. We will handle this error by reporting that
+					//list could not be retrieved, using the Join method's empty parameter.
 				}
+				//Let's sort the timezones
+				List<String> tz = new ArrayList<>(Arrays.asList(timezones));
+				Collections.sort(tz);
+				return StringUtils.Join(tz, ", ", " or ", " or ", "Couldn't retrieve the list of timezones!");
 			});
 			try {
 				return getBundledDocs(map);
@@ -641,8 +627,21 @@ public class Scheduling {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			SimpleDateFormat dateFormat;
+			Locale locale = Locale.getDefault();
+			if(args.length >= 3) {
+				String countryCode = Construct.nval(args[2]);
+				if(countryCode == null) {
+					locale = Locale.getDefault();
+				} else {
+					locale = Static.GetLocale(countryCode);
+				}
+				if(locale == null) {
+					throw new CREFormatException("The given locale was not found on your system: "
+							+ countryCode, t);
+				}
+			}
 			try {
-				dateFormat = new SimpleDateFormat(args[0].toString());
+				dateFormat = new SimpleDateFormat(args[0].toString(), locale);
 				Date d = dateFormat.parse(args[1].val());
 				return new CInt(d.getTime(), t);
 			} catch (IllegalArgumentException | ParseException ex) {
@@ -657,12 +656,12 @@ public class Scheduling {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{2, 3};
 		}
 
 		@Override
 		public String docs() {
-			return "int {dateFormat, dateString} Parses a date string, and returns an integer timestamp representing that time. This essentially"
+			return "int {dateFormat, dateString, [locale]} Parses a date string, and returns an integer timestamp representing that time. This essentially"
 					+ " works in reverse of {{function|simple_date}}. The dateFormat string is the same as simple_date, see the documentation for"
 					+ " that function to see full details on that. The dateString is the actual date to be parsed. The dateFormat should be the"
 					+ " equivalent format that was used to generate the dateString. In general, this function is fairly lenient, and will still"
@@ -810,68 +809,56 @@ public class Scheduling {
 				if(cronThread == null) {
 					final DaemonManager dm = environment.getEnv(GlobalEnv.class).GetDaemonManager();
 					final MutableObject<Boolean> stopCron = new MutableObject<>(false);
-					StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
-
-						@Override
-						public void run() {
-							cronThread = null;
-							stopCron.setObject(true);
-							synchronized(CRON_JOBS) {
-								CRON_JOBS.clear();
-							}
-							synchronized(CRON_THREAD_LOCK) {
-								CRON_THREAD_LOCK.notifyAll();
-							}
+					StaticLayer.GetConvertor().addShutdownHook(() -> {
+						cronThread = null;
+						stopCron.setObject(true);
+						synchronized(CRON_JOBS) {
+							CRON_JOBS.clear();
+						}
+						synchronized(CRON_THREAD_LOCK) {
+							CRON_THREAD_LOCK.notifyAll();
 						}
 					});
-					cronThread = new Thread(new Runnable() {
-
-						@Override
-						public void run() {
-							long lastMinute = 0;
-							while(!stopCron.getObject()) {
-								//We want to check to make sure that we only run once per minute, even though the
-								//checks happen every second. This ensures that we have a fast enough sampling
-								//period, while ensuring that we don't repeat tasks within the same minute.
-								if((System.currentTimeMillis() / 1000 / 60) > lastMinute) {
-									//Set the lastMinute value to now
-									lastMinute = System.currentTimeMillis() / 1000 / 60;
-									//Activate
-									synchronized(CRON_JOBS) {
-										Calendar c = Calendar.getInstance();
-										for(final CronFormat f : CRON_JOBS.values()) {
-											//Check to see if it is currently time to run each job
-											if(f.min.contains(c.get(Calendar.MINUTE))
-													&& f.hour.contains(c.get(Calendar.HOUR_OF_DAY))
-													&& f.day.contains(c.get(Calendar.DAY_OF_MONTH))
-													&& f.month.contains(c.get(Calendar.MONTH) + 1)
-													&& f.dayOfWeek.contains(c.get(Calendar.DAY_OF_WEEK) - 1)) {
-												//All the fields match, so let's trigger this job
-												StaticLayer.GetConvertor().runOnMainThreadLater(dm, new Runnable() {
-
-													@Override
-													public void run() {
-														try {
-															f.job.executeCallable();
-														} catch (ConfigRuntimeException ex) {
-															ConfigRuntimeException.HandleUncaughtException(ex, f.job.getEnv());
-														}
-													}
-												});
-											}
+					cronThread = new Thread(() -> {
+						long lastMinute = 0;
+						while(!stopCron.getObject()) {
+							//We want to check to make sure that we only run once per minute, even though the
+							//checks happen every second. This ensures that we have a fast enough sampling
+							//period, while ensuring that we don't repeat tasks within the same minute.
+							if((System.currentTimeMillis() / 1000 / 60) > lastMinute) {
+								//Set the lastMinute value to now
+								lastMinute = System.currentTimeMillis() / 1000 / 60;
+								//Activate
+								synchronized(CRON_JOBS) {
+									Calendar c = Calendar.getInstance();
+									for(final CronFormat f : CRON_JOBS.values()) {
+										//Check to see if it is currently time to run each job
+										if(f.min.contains(c.get(Calendar.MINUTE))
+												&& f.hour.contains(c.get(Calendar.HOUR_OF_DAY))
+												&& f.day.contains(c.get(Calendar.DAY_OF_MONTH))
+												&& f.month.contains(c.get(Calendar.MONTH) + 1)
+												&& f.dayOfWeek.contains(c.get(Calendar.DAY_OF_WEEK) - 1)) {
+											//All the fields match, so let's trigger this job
+											StaticLayer.GetConvertor().runOnMainThreadLater(dm, () -> {
+												try {
+													f.job.executeCallable();
+												} catch (ConfigRuntimeException ex) {
+													ConfigRuntimeException.HandleUncaughtException(ex, f.job.getEnv());
+												}
+											});
 										}
 									}
-								} //else continue, we'll wait another second.
-								synchronized(CRON_THREAD_LOCK) {
-									try {
-										CRON_THREAD_LOCK.wait(1000);
-									} catch (InterruptedException ex) {
-										//Continue
-									}
+								}
+							} //else continue, we'll wait another second.
+							synchronized(CRON_THREAD_LOCK) {
+								try {
+									CRON_THREAD_LOCK.wait(1000);
+								} catch (InterruptedException ex) {
+									//Continue
 								}
 							}
-							dm.deactivateThread(cronThread);
 						}
+						dm.deactivateThread(cronThread);
 					}, Implementation.GetServerType().getBranding() + "-CronDaemon");
 					dm.activateThread(cronThread);
 					cronThread.start();
@@ -989,11 +976,11 @@ public class Scheduling {
 				hour = hour.replace(key, Integer.toString(HOURS.get(key)));
 			}
 			//Split on commas
-			List<String> minList = new ArrayList<String>(Arrays.asList(min.split(",")));
-			List<String> hourList = new ArrayList<String>(Arrays.asList(hour.split(",")));
-			List<String> dayList = new ArrayList<String>(Arrays.asList(day.split(",")));
-			List<String> monthList = new ArrayList<String>(Arrays.asList(month.split(",")));
-			List<String> dayOfWeekList = new ArrayList<String>(Arrays.asList(dayOfWeek.split(",")));
+			List<String> minList = new ArrayList<>(Arrays.asList(min.split(",")));
+			List<String> hourList = new ArrayList<>(Arrays.asList(hour.split(",")));
+			List<String> dayList = new ArrayList<>(Arrays.asList(day.split(",")));
+			List<String> monthList = new ArrayList<>(Arrays.asList(month.split(",")));
+			List<String> dayOfWeekList = new ArrayList<>(Arrays.asList(dayOfWeek.split(",")));
 
 			List<List<String>> segments = Arrays.asList(minList, hourList, dayList, monthList, dayOfWeekList);
 			//Now go through each and pull out any ranges. At this point, everything
@@ -1001,7 +988,7 @@ public class Scheduling {
 			for(int i = 0; i < segments.size(); i++) {
 				List<String> segment = segments.get(i);
 				Iterator<String> it = segment.iterator();
-				List<String> addAll = new ArrayList<String>();
+				List<String> addAll = new ArrayList<>();
 				Range range = RANGES.get(i);
 				while(it.hasNext()) {
 					String part = it.next();
@@ -1041,7 +1028,7 @@ public class Scheduling {
 			//Everything is ints now, so parse it into a CronFormat object.
 			CronFormat f = new CronFormat();
 			for(int i = 0; i < 5; i++) {
-				List<Integer> list = new ArrayList<Integer>();
+				List<Integer> list = new ArrayList<>();
 				List<String> segment = segments.get(i);
 				Range range = RANGES.get(i);
 				for(String s : segment) {
@@ -1060,7 +1047,7 @@ public class Scheduling {
 				if(!range.contains(list.get(list.size() - 1))) {
 					throw new CREFormatException("Expecting value to be within the range " + range + " in format for " + getName() + ", but the value was " + list.get(list.size() - 1), t);
 				}
-				Set<Integer> set = new TreeSet<Integer>(list);
+				Set<Integer> set = new TreeSet<>(list);
 				switch(i) {
 					case 0:
 						f.min = set;
@@ -1084,11 +1071,11 @@ public class Scheduling {
 
 		private static class CronFormat {
 
-			public Set<Integer> min = new HashSet<Integer>();
-			public Set<Integer> hour = new HashSet<Integer>();
-			public Set<Integer> day = new HashSet<Integer>();
-			public Set<Integer> month = new HashSet<Integer>();
-			public Set<Integer> dayOfWeek = new HashSet<Integer>();
+			public Set<Integer> min = new HashSet<>();
+			public Set<Integer> hour = new HashSet<>();
+			public Set<Integer> day = new HashSet<>();
+			public Set<Integer> month = new HashSet<>();
+			public Set<Integer> dayOfWeek = new HashSet<>();
 
 			public CClosure job;
 

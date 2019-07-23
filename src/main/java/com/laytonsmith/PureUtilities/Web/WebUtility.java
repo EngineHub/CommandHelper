@@ -468,7 +468,14 @@ public final class WebUtility {
 			}
 		}
 		conn.setRequestMethod(method.name());
-		if((parameters != null && !parameters.isEmpty()) || settings.getRawParameter() != null) {
+		if((parameters != null && !parameters.isEmpty() && !method.equals(HTTPMethod.GET))
+				|| settings.getRawParameter() != null) {
+			if(logger != null) {
+				if(method.equals(HTTPMethod.GET)) {
+					logger.log(Level.WARNING, "Method was set to GET, but raw parameter data was provided, so method"
+							+ " is changing to POST.");
+				}
+			}
 			conn.setDoOutput(true);
 			byte[] params = ArrayUtils.EMPTY_BYTE_ARRAY;
 			if(parameters != null && !parameters.isEmpty()) {
