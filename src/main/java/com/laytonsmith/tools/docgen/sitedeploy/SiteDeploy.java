@@ -909,88 +909,92 @@ public final class SiteDeploy {
 		generateQueue.submit(new Runnable() {
 			@Override
 			public void run() {
-				String bW = body;
-				if(!bW.contains(EDIT_THIS_PAGE_PREAMBLE)) {
-					bW += "<p id=\"edit_this_page\">"
-							+ EDIT_THIS_PAGE_PREAMBLE
-							+ String.format(githubBaseUrl, "java/" + SiteDeploy.class.getName().replace(".", "/")) + ".java"
-							+ EDIT_THIS_PAGE_POSTAMBLE
-							+ "</p>";
-				}
 				try {
-					writeStatus("Currently generating " + toLocation);
-					// First, substitute the templates in the body
-					final String b;
-					try {
-						Map<String, Generator> standard = getStandardGenerators();
-						standard.putAll(DocGenTemplates.GetGenerators());
-						b = DocGenTemplates.DoTemplateReplacement(bW, standard);
-					} catch (Exception ex) {
-						if(ex instanceof GenerateException) {
-							writeLog("Failed to substitute template"
-									+ " while trying to upload resource to " + toLocation, ex);
-						} else {
-							writeLog(null, ex);
-						}
-						reader.flush();
-						generateQueue.shutdownNow();
-						uploadQueue.shutdownNow();
-						return;
+					String bW = body;
+					if(!bW.contains(EDIT_THIS_PAGE_PREAMBLE)) {
+						bW += "<p id=\"edit_this_page\">"
+								+ EDIT_THIS_PAGE_PREAMBLE
+								+ String.format(githubBaseUrl, "java/" + SiteDeploy.class.getName().replace(".", "/")) + ".java"
+								+ EDIT_THIS_PAGE_POSTAMBLE
+								+ "</p>";
 					}
-					// Second, add the template %%body%% and replace that in the frame
-					final Map<String, Generator> g = new HashMap<>();
-					g.put("body", new Generator() {
-						@Override
-						public String generate(String... args) {
-							return b;
+					try {
+						writeStatus("Currently generating " + toLocation);
+						// First, substitute the templates in the body
+						final String b;
+						try {
+							Map<String, Generator> standard = getStandardGenerators();
+							standard.putAll(DocGenTemplates.GetGenerators());
+							b = DocGenTemplates.DoTemplateReplacement(bW, standard);
+						} catch (Exception ex) {
+							if(ex instanceof GenerateException) {
+								writeLog("Failed to substitute template"
+										+ " while trying to upload resource to " + toLocation, ex);
+							} else {
+								writeLog(null, ex);
+							}
+							reader.flush();
+							generateQueue.shutdownNow();
+							uploadQueue.shutdownNow();
+							return;
 						}
-					});
-					g.put("bodyEscaped", new Generator() {
-						@Override
-						public String generate(String... args) {
-							String s = b.replaceAll("\\\\", "\\\\\\\\").replaceAll("'", "\\\\'")
-									.replaceAll("\r", "").replaceAll("\n", "\\\\n");
-							s = s.replaceAll("<script.*?</script>", "");
-							return s;
-						}
-					});
-					g.put("title", new Generator() {
-						@Override
-						public String generate(String... args) {
-							return title;
-						}
-					});
-					g.put("useHttps", new Generator() {
-						@Override
-						public String generate(String... args) {
-							return SiteDeploy.this.siteBase.startsWith("https") ? "true" : "false";
-						}
-					});
-					g.put("keywords", new Generator() {
-						@Override
-						public String generate(String... args) throws GenerateException {
-							List<String> k = new ArrayList<>(kw);
-							k.add(Implementation.GetServerType().getBranding());
-							return StringUtils.Join(k, ", ");
-						}
-					});
-					g.put("description", new Generator() {
-						@Override
-						public String generate(String... args) throws GenerateException {
-							return description;
-						}
-					});
-					g.putAll(getStandardGenerators());
-					g.putAll(DocGenTemplates.GetGenerators());
-					String frame = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/frame.html"));
-					final String bb = DocGenTemplates.DoTemplateReplacement(frame, g);
-					// Write out using writeFromString
-					uploadedPages.put(toLocation, bb);
-					writeFromString(bb, toLocation);
-					currentGenerateTask.addAndGet(1);
-					writeStatus("");
-				} catch (Exception ex) {
-					writeLog("While writing " + toLocation + " the following error occured:", ex);
+						// Second, add the template %%body%% and replace that in the frame
+						final Map<String, Generator> g = new HashMap<>();
+						g.put("body", new Generator() {
+							@Override
+							public String generate(String... args) {
+								return b;
+							}
+						});
+						g.put("bodyEscaped", new Generator() {
+							@Override
+							public String generate(String... args) {
+								String s = b.replaceAll("\\\\", "\\\\\\\\").replaceAll("'", "\\\\'")
+										.replaceAll("\r", "").replaceAll("\n", "\\\\n");
+								s = s.replaceAll("<script.*?</script>", "");
+								return s;
+							}
+						});
+						g.put("title", new Generator() {
+							@Override
+							public String generate(String... args) {
+								return title;
+							}
+						});
+						g.put("useHttps", new Generator() {
+							@Override
+							public String generate(String... args) {
+								return SiteDeploy.this.siteBase.startsWith("https") ? "true" : "false";
+							}
+						});
+						g.put("keywords", new Generator() {
+							@Override
+							public String generate(String... args) throws GenerateException {
+								List<String> k = new ArrayList<>(kw);
+								k.add(Implementation.GetServerType().getBranding());
+								return StringUtils.Join(k, ", ");
+							}
+						});
+						g.put("description", new Generator() {
+							@Override
+							public String generate(String... args) throws GenerateException {
+								return description;
+							}
+						});
+						g.putAll(getStandardGenerators());
+						g.putAll(DocGenTemplates.GetGenerators());
+						String frame = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/frame.html"));
+						final String bb = DocGenTemplates.DoTemplateReplacement(frame, g);
+						// Write out using writeFromString
+						uploadedPages.put(toLocation, bb);
+						writeFromString(bb, toLocation);
+						currentGenerateTask.addAndGet(1);
+						writeStatus("");
+					} catch (Exception ex) {
+						writeLog("While writing " + toLocation + " the following error occured:", ex);
+					}
+				} catch (Throwable t) {
+					writeLog("Failure!", t);
 				}
 			}
 		});
@@ -1007,6 +1011,7 @@ public final class SiteDeploy {
 			@Override
 			public void run() {
 				try {
+					writeStatus("Generating resources");
 					File root = new File(SiteDeploy.class.getResource("/siteDeploy/resources").toExternalForm());
 					ZipReader reader = new ZipReader(root);
 					Queue<File> q = new LinkedList<>();
@@ -1017,6 +1022,7 @@ public final class SiteDeploy {
 							q.addAll(Arrays.asList(r.listFiles()));
 						} else {
 							String fileName = r.getFile().getAbsolutePath().replaceFirst(Pattern.quote(reader.getFile().getAbsolutePath()), "");
+							writeStatus("Generating " + fileName);
 							writeFromStream(r.getInputStream(), "resources" + fileName);
 						}
 					}
@@ -1042,54 +1048,78 @@ public final class SiteDeploy {
 		generateQueue.submit(new Runnable() {
 			@Override
 			public void run() {
-				writePageFromResource(MSVersion.LATEST.toString() + " - Docs", "/siteDeploy/VersionFrontPage", "index.html",
-						Arrays.asList(new String[]{MSVersion.LATEST.toString()}), "Front page for " + MSVersion.LATEST.toString());
-				currentGenerateTask.addAndGet(1);
+				try {
+					writePageFromResource(MSVersion.LATEST.toString() + " - Docs", "/siteDeploy/VersionFrontPage", "index.html",
+							Arrays.asList(new String[]{MSVersion.LATEST.toString()}), "Front page for " + MSVersion.LATEST.toString());
+					currentGenerateTask.addAndGet(1);
+				} catch (Throwable t) {
+					writeLog("Failure!", t);
+				}
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
 		generateQueue.submit(new Runnable() {
 			@Override
 			public void run() {
-				writePageFromResource("Privacy Policy", "/siteDeploy/privacy_policy.html", "privacy_policy.html",
-						Arrays.asList(new String[]{"privacy policy"}), "Privacy policy for the site");
-				currentGenerateTask.addAndGet(1);
+				try {
+					writePageFromResource("Privacy Policy", "/siteDeploy/privacy_policy.html", "privacy_policy.html",
+							Arrays.asList(new String[]{"privacy policy"}), "Privacy policy for the site");
+					currentGenerateTask.addAndGet(1);
+				} catch (Throwable t) {
+					writeLog("Failure!", t);
+				}
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
 		generateQueue.submit(new Runnable() {
 			@Override
 			public void run() {
-				writePageFromResource(Implementation.GetServerType().getBranding(), "/siteDeploy/FrontPage", "../../index.html",
-						Arrays.asList(new String[]{"index", "front page"}), "The front page for " + Implementation.GetServerType().getBranding());
-				currentGenerateTask.addAndGet(1);
+				try {
+					writePageFromResource(Implementation.GetServerType().getBranding(), "/siteDeploy/FrontPage", "../../index.html",
+							Arrays.asList(new String[]{"index", "front page"}), "The front page for " + Implementation.GetServerType().getBranding());
+					currentGenerateTask.addAndGet(1);
+				} catch (Throwable t) {
+					writeLog("Failure!", t);
+				}
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
 		generateQueue.submit(new Runnable() {
 			@Override
 			public void run() {
-				writePageFromResource(Implementation.GetServerType().getBranding(), "/siteDeploy/Sponsors", "../../sponsors.html",
-						Arrays.asList(new String[]{"index", "front page"}), "Sponsors of MethodScript");
-				currentGenerateTask.addAndGet(1);
+				try {
+					writePageFromResource(Implementation.GetServerType().getBranding(), "/siteDeploy/Sponsors", "../../sponsors.html",
+							Arrays.asList(new String[]{"index", "front page"}), "Sponsors of MethodScript");
+					currentGenerateTask.addAndGet(1);
+				} catch (Throwable t) {
+					writeLog("Failure!", t);
+				}
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
 		generateQueue.submit(new Runnable() {
 			@Override
 			public void run() {
-				writePageFromResource("Doc Directory", "/siteDeploy/DocDirectory", "../index.html",
-						Arrays.asList(new String[]{"directory"}), "The directory for all documented versions");
-				currentGenerateTask.addAndGet(1);
+				try {
+					writePageFromResource("Doc Directory", "/siteDeploy/DocDirectory", "../index.html",
+							Arrays.asList(new String[]{"directory"}), "The directory for all documented versions");
+					currentGenerateTask.addAndGet(1);
+				} catch (Throwable t) {
+					writeLog("Failure!", t);
+				}
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
 		generateQueue.submit(new Runnable() {
 			@Override
 			public void run() {
-				writePageFromResource("404 Not Found", "/siteDeploy/404", "../../404.html",
-						Arrays.asList(new String[]{"404"}), "Page not found");
-				currentGenerateTask.addAndGet(1);
+				try {
+					writePageFromResource("404 Not Found", "/siteDeploy/404", "../../404.html",
+							Arrays.asList(new String[]{"404"}), "Page not found");
+					currentGenerateTask.addAndGet(1);
+				} catch (Throwable t) {
+					writeLog("Failure!", t);
+				}
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
@@ -1145,66 +1175,71 @@ public final class SiteDeploy {
 					});
 					List<String> hiddenFunctions = new ArrayList<>();
 					for(Class<? extends Function> functionClass : functionClasses) {
-						if(!data.containsKey(functionClass.getEnclosingClass())) {
-							data.put(functionClass.getEnclosingClass(), new ArrayList<>());
-						}
-						List<List<String>> d = data.get(functionClass.getEnclosingClass());
-						List<String> c = new ArrayList<>();
-						// function name, returns, arguments, throws, description, restricted
-						final Function f;
 						try {
-							f = ReflectionUtils.instantiateUnsafe(functionClass);
-						} catch (ReflectionUtils.ReflectionException ex) {
-							throw new RuntimeException("While trying to construct " + functionClass + ", got the following", ex);
-						}
-						final DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
-						// If the function is hidden, we don't want to put it on the main page by default. Regardless,
-						// we do want to generate the function page, it will just remain unlinked.
-						generateQueue.submit(new Runnable() {
-							@Override
-							public void run() {
-								try {
-									generateFunctionDocs(f, di);
-								} catch (Throwable ex) {
-									ex.printStackTrace(System.err);
+							if(!data.containsKey(functionClass.getEnclosingClass())) {
+								data.put(functionClass.getEnclosingClass(), new ArrayList<>());
+							}
+							List<List<String>> d = data.get(functionClass.getEnclosingClass());
+							List<String> c = new ArrayList<>();
+							// function name, returns, arguments, throws, description, restricted
+							final Function f;
+							try {
+								f = ReflectionUtils.instantiateUnsafe(functionClass);
+							} catch (ReflectionUtils.ReflectionException ex) {
+								throw new RuntimeException("While trying to construct " + functionClass + ", got the following", ex);
+							}
+							final DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
+							// If the function is hidden, we don't want to put it on the main page by default. Regardless,
+							// we do want to generate the function page, it will just remain unlinked.
+							generateQueue.submit(new Runnable() {
+								@Override
+								public void run() {
+									try {
+										generateFunctionDocs(f, di);
+									} catch (Throwable ex) {
+										ex.printStackTrace(System.err);
+									}
+								}
+							});
+							if(f.since().equals(MSVersion.V0_0_0)) {
+								// Don't add these
+								continue;
+							}
+							if(f.getClass().getAnnotation(hide.class) != null) {
+								hiddenFunctions.add(f.getName());
+							}
+							c.add("[[API/functions/" + f.getName() + "|" + f.getName() + "]]()");
+							c.add(di.ret);
+							c.add(di.args);
+							List<String> exc = new ArrayList<>();
+							if(f.thrown() != null) {
+								for(Class<? extends CREThrowable> e : f.thrown()) {
+									CREThrowable ct = ReflectionUtils.instantiateUnsafe(e);
+									exc.add("{{object|" + ct.getName() + "}}");
 								}
 							}
-						});
-						if(f.since().equals(MSVersion.V0_0_0)) {
-							// Don't add these
-							continue;
-						}
-						if(f.getClass().getAnnotation(hide.class) != null) {
-							hiddenFunctions.add(f.getName());
-						}
-						c.add("[[API/functions/" + f.getName() + "|" + f.getName() + "]]()");
-						c.add(di.ret);
-						c.add(di.args);
-						List<String> exc = new ArrayList<>();
-						if(f.thrown() != null) {
-							for(Class<? extends CREThrowable> e : f.thrown()) {
-								CREThrowable ct = ReflectionUtils.instantiateUnsafe(e);
-								exc.add("{{object|" + ct.getName() + "}}");
+							c.add(StringUtils.Join(exc, "<br>"));
+							StringBuilder desc = new StringBuilder();
+							desc.append(HTMLUtils.escapeHTML(di.desc));
+							if(di.extendedDesc != null) {
+								desc.append(" [[API/functions/").append(f.getName()).append("|See more...]]<br>\n");
 							}
-						}
-						c.add(StringUtils.Join(exc, "<br>"));
-						StringBuilder desc = new StringBuilder();
-						desc.append(HTMLUtils.escapeHTML(di.desc));
-						if(di.extendedDesc != null) {
-							desc.append(" [[API/functions/").append(f.getName()).append("|See more...]]<br>\n");
-						}
-						try {
-							if(f.examples() != null && f.examples().length > 0) {
-								desc.append("<br>([[API/functions/").append(f.getName()).append("#Examples|Examples...]])\n");
+							try {
+								if(f.examples() != null && f.examples().length > 0) {
+									desc.append("<br>([[API/functions/").append(f.getName()).append("#Examples|Examples...]])\n");
+								}
+							} catch (ConfigCompileException | NoClassDefFoundError ex) {
+								writeLog(null, ex);
 							}
-						} catch (ConfigCompileException | NoClassDefFoundError ex) {
-							writeLog(null, ex);
+							c.add(desc.toString());
+							c.add("<span class=\"api_" + (f.isRestricted() ? "yes" : "no") + "\">" + (f.isRestricted() ? "Yes" : "No")
+									+ "</span>");
+							d.add(c);
+						} catch (Throwable t) {
+							writeLog("Failure while generating " + functionClass, t);
 						}
-						c.add(desc.toString());
-						c.add("<span class=\"api_" + (f.isRestricted() ? "yes" : "no") + "\">" + (f.isRestricted() ? "Yes" : "No")
-								+ "</span>");
-						d.add(c);
 					}
+//					System.out.println("Functions to be deployed: " + data + "\n\n");
 					// data is now constructed.
 					StringBuilder b = new StringBuilder();
 					b.append("<ul id=\"TOC\">");
@@ -1565,8 +1600,12 @@ public final class SiteDeploy {
 		generateQueue.submit(new Runnable() {
 			@Override
 			public void run() {
-				writeFromString(apiJson, "api.json");
-				currentGenerateTask.addAndGet(1);
+				try {
+					writeFromString(apiJson, "api.json");
+					currentGenerateTask.addAndGet(1);
+				} catch (Throwable t) {
+					writeLog("Failure!", t);
+				}
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
