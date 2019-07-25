@@ -877,8 +877,8 @@
                         <configuration>
                             <hooks>
                                 <pre-push>
-                                    echo running validation build
-                                    exec mvn clean package -Pfail-on-test-failures
+                                    #echo running validation build
+                                    #exec mvn clean package -Pfail-on-test-failures
                                 </pre-push>
                             </hooks>
                         </configuration>
