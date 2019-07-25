@@ -1618,6 +1618,11 @@ public final class SiteDeploy {
 				try {
 					writeFromStream(ClassDiscovery.GetClassContainer(SiteDeploy.class).openStream(),
 							"MethodScript.jar");
+					// It goes in two places, so the latest release is always available no matter the last
+					// build this version was built with.
+					writeFromStream(ClassDiscovery.GetClassContainer(SiteDeploy.class).openStream(),
+							"../../MethodScript.jar");
+
 				} catch (Throwable e) {
 					e.printStackTrace(System.err);
 				}
