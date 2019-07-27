@@ -2136,7 +2136,7 @@ public class PlayerManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2, 3, 4, 5, 6};
+			return new Integer[]{2, 3, 4, 5, 6, 7};
 		}
 
 		@Override
