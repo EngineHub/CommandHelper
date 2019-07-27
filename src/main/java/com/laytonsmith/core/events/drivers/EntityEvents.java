@@ -389,8 +389,8 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{id: <macro> The entityID | type: <macro> the entity type of the projectile | hittype: <string>"
-					+ " the type of object hit, either ENTITY or BLOCK}"
+			return "{id: <macro> The entityID | type: <macro> the entity type of the projectile"
+					+ " | hittype: <string match> the type of object hit, either ENTITY or BLOCK}"
 					+ " Fires when a projectile collides with something."
 					+ " {type | id: the entityID of the projectile |"
 					+ " location: where it makes contact | shooter | hittype | hit: the entity id or block"
@@ -1660,7 +1660,7 @@ public class EntityEvents {
 					+ " | block: <string match> The block name the entity is interacting with.}"
 					+ " Fires when a non-player entity physically interacts with and triggers a block."
 					+ " (eg. pressure plates, redstone ore, farmland, tripwire, doors, and wooden button)"
-					+ " {entity: the ID of the entity that interacted with the block | block | block (deprecated)"
+					+ " {entity: the ID of the entity that interacted with the block | block"
 					+ " | location: the location of the interaction}"
 					+ " {}"
 					+ " {}";

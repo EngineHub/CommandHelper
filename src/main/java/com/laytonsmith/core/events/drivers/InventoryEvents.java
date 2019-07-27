@@ -62,7 +62,7 @@ public class InventoryEvents {
 
 		@Override
 		public String docs() {
-			return "{virtual: <boolean> Whether or not this inventory is virtually stored in CH"
+			return "{virtual: <boolean match> Whether or not this inventory is virtually stored in CH"
 					+ " | slottype: <macro> The type of slot being clicked, can be "
 					+ StringUtils.Join(MCSlotType.values(), ", ", ", or ")
 					+ " | clicktype: <macro> One of " + StringUtils.Join(MCClickType.values(), ", ", ", or ")
@@ -208,7 +208,7 @@ public class InventoryEvents {
 
 		@Override
 		public String docs() {
-			return "{virtual: <boolean> Whether or not this inventory is virtually stored in CH"
+			return "{virtual: <boolean match> Whether or not this inventory is virtually stored in CH"
 					+ " | world: <macro> World name"
 					+ " | type: <string match> Can be " + StringUtils.Join(MCDragType.values(), ", ", ", or ")
 					+ " | cursoritem: <string match> old item type held by the cursor before event starts}"
@@ -346,7 +346,7 @@ public class InventoryEvents {
 
 		@Override
 		public String docs() {
-			return "{virtual: <boolean> Whether or not this inventory is virtually stored in CH} "
+			return "{virtual: <boolean match> Whether or not this inventory is virtually stored in CH} "
 					+ "Fired when a player opens an inventory. "
 					+ "{player: The player | inventory: the inventory items in this inventory"
 					+ " | inventorytype: type of inventory | virtual"
@@ -428,7 +428,7 @@ public class InventoryEvents {
 
 		@Override
 		public String docs() {
-			return "{virtual: <boolean> Whether or not this inventory is virtually stored in CH} "
+			return "{virtual: <boolean match> Whether or not this inventory is virtually stored in CH} "
 					+ "Fired when a player closes an inventory. "
 					+ "{player: The player | inventory: the inventory items in this inventory"
 					+ " | inventorytype: type of inventory | virtual"
@@ -723,7 +723,7 @@ public class InventoryEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <string>}"
+			return "{player: <string match>}"
 					+ " Fires when a player changes which quickbar slot they have selected."
 					+ " {player | to | from: the slot the player is switching from}"
 					+ " {to: the slot that the player is switching to}"

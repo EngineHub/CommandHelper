@@ -211,7 +211,7 @@ public class VehicleEvents {
 			return "{type: <macro> The entitytype of the vehicle | collisiontype: <string match> One of "
 					+ StringUtils.Join(MCCollisionType.values(), ", ", ", or ", " or ")
 					+ " | hittype: <macro> Matches an entitytype in an enitity collision"
-					+ " | hittype: <item match> Matches a block in a block collision}"
+					+ " | hittype: <string match> Matches a block in a block collision}"
 					+ " Fires when a vehicle runs into something. If it ran into a block,"
 					+ " event data will contain block info. If it ran into an entity,"
 					+ " event data will contain info and options relevant to hitting an entity."
@@ -367,7 +367,7 @@ public class VehicleEvents {
 		@Override
 		public String docs() {
 			return "{vehicletype: <macro> the entitytype of the vehicle | passengertype: <macro>"
-					+ " the enitytype of the passenger | world: <string> the world the vehicle is in"
+					+ " the enitytype of the passenger | world: <string match> the world the vehicle is in"
 					+ "| from: <location match> This should be a location array (x, y, z, world)."
 					+ "| to: <location match> The location the vehicle is now in."
 					+ "| threshold: <custom> The minimum distance the vehicle must have travelled before the event"

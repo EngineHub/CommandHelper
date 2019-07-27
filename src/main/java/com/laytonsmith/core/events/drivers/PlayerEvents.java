@@ -956,11 +956,11 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{location: <location match> The location of the bed, result: <string match>} "
+			return "{location: <location match> The location of the bed | result: <string match>} "
 					+ "Fires when a player tries to enter a bed."
 					+ "{location: The location of the bed |"
 					+ " player: The player associated with this event |"
-					+ " result: The outcome of this attempt to enter bed. Can be one of"
+					+ " result: The outcome of this attempt to enter bed. Can be one of "
 					+ StringUtils.Join(MCEnterBedResult.values(), ", ", ", or ") + "}"
 					+ "{}"
 					+ "{location|player}";
