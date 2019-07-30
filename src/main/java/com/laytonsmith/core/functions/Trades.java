@@ -7,7 +7,7 @@ import com.laytonsmith.abstraction.MCMerchant;
 import com.laytonsmith.abstraction.MCMerchantRecipe;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.abstraction.entities.MCVillager;
+import com.laytonsmith.abstraction.entities.MCTrader;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ArgumentValidation;
@@ -44,7 +44,7 @@ public class Trades {
 	public static String docs() {
 		return "Functions related to the management of trades and merchants. A trade is a special kind of recipe"
 				+ " accessed through the merchant interface. A merchant is a provider of trades,"
-				+ " which may or may not be attached to a Villager.";
+				+ " which may or may not be attached to a Villager or Wandering Trader.";
 	}
 
 	@api
@@ -299,7 +299,7 @@ public class Trades {
 				player = Static.getPlayer(env, t);
 			}
 			if(args.length == 3) {
-				force = ArgumentValidation.getBoolean(args[2], t);
+				force = ArgumentValidation.getBooleanish(args[2], t);
 			}
 			MCMerchant merchant = GetMerchant(args[0], t);
 			if(!force && merchant.isTrading()) {
@@ -383,10 +383,10 @@ public class Trades {
 		if(specifier.val().length() == 36 || specifier.val().length() == 32) {
 			try {
 				MCEntity entity = Static.getEntity(specifier, t);
-				if(!(entity instanceof MCVillager)) {
+				if(!(entity instanceof MCTrader)) {
 					throw new CREIllegalArgumentException("The entity specified is not capable of being an merchant.", t);
 				}
-				return ((MCVillager) entity).asMerchant();
+				return ((MCTrader) entity).asMerchant();
 			} catch (CREFormatException iae) {
 				// not a UUID
 			}
