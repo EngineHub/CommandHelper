@@ -1,12 +1,9 @@
 package com.laytonsmith.abstraction.entities;
 
-import com.laytonsmith.abstraction.MCInventoryHolder;
-import com.laytonsmith.abstraction.MCMerchant;
 import com.laytonsmith.abstraction.enums.MCProfession;
 
-public interface MCVillager extends MCAgeable, MCInventoryHolder {
+public interface MCVillager extends MCTrader {
 
-	MCMerchant asMerchant();
 	MCProfession getProfession();
 	void setProfession(MCProfession profession);
 }
