@@ -2,7 +2,7 @@ CommandHelper
 =============
 | Service | Badge |
 |--------|---------:|
-| Travis | [![Travis Build Status](https://ci.enginehub.org/app/rest/builds/buildType:bt12,branch:master/statusIcon.svg)](http://ci.enginehub.org/viewType.html?buildTypeId=bt12&guest=1) |
+| TeamCity | [![TC Build Status](http://ci.enginehub.org/app/rest/builds/buildType:bt12,branch:master/statusIcon.svg)](http://ci.enginehub.org/viewType.html?buildTypeId=bt12&guest=1) |
 | Azure | [![Azure Build Status](https://dev.azure.com/MethodScript/CommandHelper/_apis/build/status/EngineHub.CommandHelper)](https://dev.azure.com/MethodScript/CommandHelper/_build/latest?definitionId=1) |
 | Snyk.io | [![Known Vulnerabilities](https://snyk.io/test/github/EngineHub/CommandHelper/badge.svg)](https://snyk.io/test/github/EngineHub/CommandHelper) |
 | Discord | [![Discord](https://img.shields.io/discord/446057847428481044.svg)](https://img.shields.io/discord/446057847428481044.svg) |
