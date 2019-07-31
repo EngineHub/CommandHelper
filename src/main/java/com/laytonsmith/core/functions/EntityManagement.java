@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFireworkEffect;
+import com.laytonsmith.abstraction.MCFireworkMeta;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
@@ -1842,6 +1843,16 @@ public class EntityManagement {
 					MCFireball ball = (MCFireball) entity;
 					specArray.set(entity_spec.KEY_FIREBALL_DIRECTION, ObjectGenerator.GetGenerator().vector(ball.getDirection(), t), t);
 					break;
+				case FIREWORK:
+					MCFirework firework = (MCFirework) entity;
+					MCFireworkMeta fmeta = firework.getFireWorkMeta();
+					specArray.set(entity_spec.KEY_FIREWORK_STRENGTH, new CInt(fmeta.getStrength(), t), t);
+					CArray fe = new CArray(t);
+					for(MCFireworkEffect effect : fmeta.getEffects()) {
+						fe.push(ObjectGenerator.GetGenerator().fireworkEffect(effect, t), t);
+					}
+					specArray.set(entity_spec.KEY_FIREWORK_EFFECTS, fe, t);
+					break;
 				case FOX:
 					MCFox fox = (MCFox) entity;
 					specArray.set(entity_spec.KEY_GENERIC_SITTING, CBoolean.get(fox.isSitting()), t);
@@ -2096,6 +2107,8 @@ public class EntityManagement {
 		private static final String KEY_FALLING_BLOCK_DROPITEM = "dropitem";
 		private static final String KEY_FALLING_BLOCK_DAMAGE = "damage";
 		private static final String KEY_FIREBALL_DIRECTION = "direction";
+		private static final String KEY_FIREWORK_STRENGTH = "strength";
+		private static final String KEY_FIREWORK_EFFECTS = "effects";
 		private static final String KEY_FOX_CROUCHING = "crouching";
 		private static final String KEY_FOX_TYPE = "type";
 		private static final String KEY_HORSE_COLOR = "color";
@@ -2614,6 +2627,31 @@ public class EntityManagement {
 								throwException(index, t);
 						}
 					}
+					break;
+				case FIREWORK:
+					MCFirework firework = (MCFirework) entity;
+					MCFireworkMeta fm = firework.getFireWorkMeta();
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_FIREWORK_STRENGTH:
+								fm.setStrength(Static.getInt32(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_FIREWORK_EFFECTS:
+								fm.clearEffects();
+								CArray effects = Static.getArray(specArray.get(index, t), t);
+								for(Mixed eff : effects.asList()) {
+									if(eff.isInstanceOf(CArray.class)) {
+										fm.addEffect(ObjectGenerator.GetGenerator().fireworkEffect((CArray) eff, t));
+									} else {
+										throw new CRECastException("Firework effect expected to be an array.", t);
+									}
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					firework.setFireWorkMeta(fm);
 					break;
 				case FOX:
 					MCFox fox = (MCFox) entity;

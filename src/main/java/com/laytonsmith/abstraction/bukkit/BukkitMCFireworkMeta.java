@@ -46,4 +46,9 @@ public class BukkitMCFireworkMeta extends BukkitMCItemMeta implements MCFirework
 		fm.addEffect((FireworkEffect) effect.getHandle());
 	}
 
+	@Override
+	public void clearEffects() {
+		fm.clearEffects();
+	}
+
 }

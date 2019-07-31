@@ -105,6 +105,11 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_FIREBALL_DIRECTION%: The direction the fireball is heading toward.
 |-
+| FIREWORK
+| 
+* %KEY_FIREWORK_STRENGTH%: The firework rocket's flight time.
+* %KEY_FIREWORK_EFFECTS%: An array of firework effect arrays. (see {{function|launch_firework}})
+|-
 | FOX
 | 
 * %KEY_GENERIC_SITTING%: Whether or not the fox is sitting.
