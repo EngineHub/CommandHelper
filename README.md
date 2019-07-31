@@ -2,7 +2,7 @@ CommandHelper
 =============
 | Service | Badge |
 |--------|---------:|
-| Travis | [![Travis Build Status](https://travis-ci.org/EngineHub/CommandHelper.svg?branch=master)](https://travis-ci.org/EngineHub/CommandHelper) |
+| Travis | [![Travis Build Status](https://ci.enginehub.org/app/rest/builds/buildType:bt12,branch:master/statusIcon.svg)](http://ci.enginehub.org/viewType.html?buildTypeId=bt12&guest=1) |
 | Azure | [![Azure Build Status](https://dev.azure.com/MethodScript/CommandHelper/_apis/build/status/EngineHub.CommandHelper)](https://dev.azure.com/MethodScript/CommandHelper/_build/latest?definitionId=1) |
 | Snyk.io | [![Known Vulnerabilities](https://snyk.io/test/github/EngineHub/CommandHelper/badge.svg)](https://snyk.io/test/github/EngineHub/CommandHelper) |
 | Discord | [![Discord](https://img.shields.io/discord/446057847428481044.svg)](https://img.shields.io/discord/446057847428481044.svg) |
@@ -22,7 +22,7 @@ Compiling
 You need to have Maven installed (http://maven.apache.org). Once installed,
 simply run:
 
-    mvn clean package install
+	mvn clean package install
 
 Maven will automatically download dependencies for you. Note: For that to work,
 be sure to add Maven to your "PATH". If you get a message about tests failing,
