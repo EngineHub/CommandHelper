@@ -19,6 +19,7 @@ import com.laytonsmith.abstraction.enums.MCEnterBedResult;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
+import com.laytonsmith.abstraction.enums.MCResourcePackStatus;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.events.MCExpChangeEvent;
@@ -39,6 +40,7 @@ import com.laytonsmith.abstraction.events.MCPlayerLoginEvent;
 import com.laytonsmith.abstraction.events.MCPlayerMoveEvent;
 import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
 import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
+import com.laytonsmith.abstraction.events.MCPlayerResourcePackEvent;
 import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
 import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
 import com.laytonsmith.abstraction.events.MCPlayerToggleFlightEvent;
@@ -2642,6 +2644,66 @@ public class PlayerEvents {
 		@Override
 		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
+		}
+	}
+
+	@api
+	public static class resource_pack_status extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "resource_pack_status";
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.RESOURCE_PACK_STATUS;
+		}
+
+		@Override
+		public String docs() {
+			return "{player: <string match> | status: <string match> }"
+					+ " Called when a player's client responds to a request to download and load a resource pack."
+					+ " Two of these events may be fired for each request: first when the client accepts the pack,"
+					+ " and later when the client successfully loads (or fails to download) the pack."
+					+ " {player | status: The resource pack status received from the client, one of: "
+					+ StringUtils.Join(MCResourcePackStatus.values(), ", ", ", or ") + "}"
+					+ " {}"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if(event instanceof MCPlayerResourcePackEvent) {
+				MCPlayerResourcePackEvent prpe = (MCPlayerResourcePackEvent) event;
+				Prefilters.match(prefilter, "player", prpe.getPlayer().getName(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "status", prpe.getStatus().name(), PrefilterType.STRING_MATCH);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+			Map<String, Mixed> map = evaluate_helper(event);
+			map.put("status", new CString(((MCPlayerResourcePackEvent) event).getStatus().name(), Target.UNKNOWN));
+			return map;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+			return false;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
 		}
 	}
 }

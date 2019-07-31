@@ -92,6 +92,7 @@ public enum Driver {
 	TAB_COMPLETE,
 	WORLD_CHANGED,
 	FOOD_LEVEL_CHANGED,
+	RESOURCE_PACK_STATUS,
 	/**
 	 * Plugin events
 	 */

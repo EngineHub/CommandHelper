@@ -19,6 +19,7 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlay
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerPortalEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerQuitEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerRespawnEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerResourcePackEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerTeleportEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerToggleFlightEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerToggleSneakEvent;
@@ -51,6 +52,7 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerResourcePackStatusEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
@@ -300,6 +302,12 @@ public class BukkitPlayerListener implements Listener {
 	public void onPlayerToggleSprint(PlayerToggleSprintEvent event) {
 		BukkitMCPlayerToggleSprintEvent ptse = new BukkitMCPlayerToggleSprintEvent(event);
 		EventUtils.TriggerListener(Driver.PLAYER_TOGGLE_SPRINT, "player_toggle_sprint", ptse);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPlayerResourcePackStatus(PlayerResourcePackStatusEvent event) {
+		BukkitMCPlayerResourcePackEvent prpse = new BukkitMCPlayerResourcePackEvent(event);
+		EventUtils.TriggerListener(Driver.RESOURCE_PACK_STATUS, "resource_pack_status", prpse);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
