@@ -374,7 +374,8 @@ public class Meta {
 
 		@Override
 		public String docs() {
-			return "void {var1} Runs a command as the current player. Useful for running commands in a loop. Note that this accepts commands like from the "
+			return "void {string command} Runs a command as the current player. Useful for running commands in a loop."
+					+ " Note that this accepts commands like from the "
 					+ "chat; with a forward slash in front.";
 		}
 

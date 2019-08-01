@@ -5712,4 +5712,74 @@ public class PlayerManagement {
 			return false;
 		}
 	}
+
+	@api
+	public static class ptellraw extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			String selector = ArgumentValidation.getString(args[0], t);
+			CArray raw = ArgumentValidation.getArray(args[1], t);
+			String json = new DataTransformations.json_encode().exec(t, environment, raw).val();
+			return new Meta.run().exec(t, environment, new CString("/tellraw " + selector + " " + json, t));
+		}
+
+		@Override
+		public String getName() {
+			return "ptellraw";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {string selector, array raw} A thin wrapper around the /tellraw command, this simply passes"
+					+  "the input ot the Minecraft tellraw command. The raw is passed in as a normal (possibly"
+					+ " associative) array, and json encoded. No validation is done on the input, so the command may"
+					+ " fail. The specification of the array may change from version to version of Minecraft,"
+					+ " but is documented here https://minecraft.gamepedia.com/Commands#Raw_JSON_text. ----"
+					+ " This function is simply written in terms of json_encode and run, and is otherwise equivalent"
+					+ " to run('/tellraw ' . @selector . ' ' . json_encode(@raw))";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[] {
+				new ExampleScript("Simple usage with a plain message",
+						"ptellraw('@a', array('text': 'Hello World!'));",
+						"<<Would output the plain message to the player.>>"),
+				new ExampleScript("Complex object",
+						"ptellraw('@s', array(\n"
+								+ "\tarray('text': 'Hello '),\n"
+								+ "\tarray('text': 'World', 'color': color(LIGHT_PURPLE)),\n"
+								+ "\tarray('text': '!')\n"
+								+ ");",
+						"<<Would output the colorful message to the player>>")
+			};
+		}
+
+	}
 }
