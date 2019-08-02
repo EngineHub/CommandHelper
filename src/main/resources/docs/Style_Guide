@@ -238,3 +238,4 @@ The descriptions in a smart comment should end with a punctuation mark, and shou
 int proc _p(string @a) throws IOException, IllegalArgumentException {
 	// ...
 }
+%>

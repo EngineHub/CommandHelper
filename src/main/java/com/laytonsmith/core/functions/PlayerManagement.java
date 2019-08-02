@@ -5776,7 +5776,7 @@ public class PlayerManagement {
 								+ "\tarray('text': 'Hello '),\n"
 								+ "\tarray('text': 'World', 'color': color(LIGHT_PURPLE)),\n"
 								+ "\tarray('text': '!')\n"
-								+ ");",
+								+ "));",
 						"<<Would output the colorful message to the player>>")
 			};
 		}

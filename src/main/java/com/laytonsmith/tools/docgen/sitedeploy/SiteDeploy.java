@@ -82,6 +82,16 @@ import org.json.simple.JSONValue;
 @SuppressWarnings("UseSpecificCatch")
 public final class SiteDeploy {
 
+	/**
+	 * Supported values are the language codes found under the translation section of this page:
+	 * https://api.cognitive.microsofttranslator.com/languages?api-version=3.0 along with the
+	 * special code "art" which is a programmatically generated test language, that is always
+	 * available.
+	 */
+	private static final String[] SUPPORTED_LOCALES = {
+		"art", // as in artificial, this is the official language code for made up languages
+	};
+
 	private static final String USERNAME = "username";
 	private static final String HOSTNAME = "hostname";
 	private static final String PORT = "port";
@@ -93,6 +103,8 @@ public final class SiteDeploy {
 	private static final String GITHUB_BASE_URL = "github-base-url";
 	private static final String VALIDATOR_URL = "validator-url";
 	private static final String POST_SCRIPT = "post-script";
+
+	private static final String TRANSLATION_MEMORY_DB = "translation-memory-db";
 
 	private static final String INSTALL_URL = "install-url";
 	private static final String INSTALL_PEM_FILE = "install-pem-file";
@@ -119,9 +131,7 @@ public final class SiteDeploy {
 				+ " the *docs* folder. Files may be created one directory above this folder, in this folder, and in"
 				+ " lower folders that are created by the site deploy tool. So if /var/www is your web"
 				+ " root, then you should put /var/www/docs here. It will create an index file in /var/www, as"
-				+ " well as in /var/www/docs, but the majority of files will be put in /var/www/docs/. If you"
-				+ " are on Windows, use / as the directory separator, not \\."
-				+ MSVersion.LATEST.toString() + "."));
+				+ " well as in /var/www/docs, but the majority of files will be put in /var/www/docs/."));
 		defaults.add(new Preferences.Preference(PASSWORD, "false", Preferences.Type.BOOLEAN, "Whether or not to use"
 				+ " password authentication. If false, public key authentication will be used instead, and your"
 				+ " system must be pre-configured for that. The password is interactively"
@@ -167,6 +177,9 @@ public final class SiteDeploy {
 				+ " to upload to, and add to the authorized_keys file on the server. These keys will not"
 				+ " be used by this script, but can allow easier login in the future. If blank, no additional keys"
 				+ " will be uploaded."));
+		defaults.add(new Preferences.Preference(TRANSLATION_MEMORY_DB, "", Preferences.Type.FILE, "The path to a"
+				+ " local checkout of a translation memory database. This may be empty, in which case"
+				+ " internationalization options will not be available on the deployed site."));
 
 		Preferences prefs = new Preferences("Site-Deploy", Logger.getLogger(SiteDeploy.class.getName()), defaults);
 		if(generatePrefs) {
@@ -189,6 +202,7 @@ public final class SiteDeploy {
 		String githubBaseUrl = prefs.getStringPreference(GITHUB_BASE_URL);
 		String validatorUrl = prefs.getStringPreference(VALIDATOR_URL);
 		File finalizerScript = prefs.getFilePreference(POST_SCRIPT);
+		File translationMemoryDb = prefs.getFilePreference(TRANSLATION_MEMORY_DB);
 
 
 		if(!overridePostScript.equals("")) {
@@ -238,6 +252,10 @@ public final class SiteDeploy {
 					configErrors.add("override-id-rsa parameter points to a non-existent file.");
 				}
 			}
+			if(translationMemoryDb != null && !translationMemoryDb.exists()) {
+				configErrors.add("Translation memory db must point to an existing database. (" + translationMemoryDb
+						+ ")");
+			}
 
 			if(!configErrors.isEmpty()) {
 				System.err.println("Invalid input. Check preferences in " + sitedeploy.getAbsolutePath()
@@ -265,6 +283,9 @@ public final class SiteDeploy {
 		System.out.println("docs-base: " + docsBase);
 		System.out.println("site-base: " + siteBase);
 		System.out.println("github-base-url: " + githubBaseUrl);
+		if(translationMemoryDb != null) {
+			System.out.println("Translation memory database: " + translationMemoryDb);
+		}
 		if(finalizerScript != null) {
 			System.out.println("post-script: " + finalizerScript.getCanonicalPath());
 		}
@@ -299,17 +320,18 @@ public final class SiteDeploy {
 
 		// Ok, all the configuration details are input and correct, so lets deploy now.
 		deploy(useLocalCache, siteBase, docsBase, deploymentMethod, doValidation,
-				showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript, clearProgressBar, overrideIdRsa);
+				showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript, clearProgressBar, overrideIdRsa,
+				translationMemoryDb);
 	}
 
 	private static void deploy(boolean useLocalCache, String siteBase, String docsBase,
 			DeploymentMethod deploymentMethod, boolean doValidation, boolean showTemplateCredit,
 			String githubBaseUrl, String validatorUrl, File finalizerScript, boolean clearProgressBar,
-			String overrideIdRsa)
+			String overrideIdRsa, File translationMemoryDb)
 			throws IOException, InterruptedException {
 		new SiteDeploy(siteBase, docsBase, useLocalCache, deploymentMethod, doValidation,
 				showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript, clearProgressBar,
-				overrideIdRsa).deploy();
+				overrideIdRsa, translationMemoryDb).deploy();
 	}
 
 	String apiJson;
@@ -319,15 +341,15 @@ public final class SiteDeploy {
 	private void deploy() throws InterruptedException, IOException {
 		apiJson = JSONValue.toJSONString(new APIBuilder().build());
 		apiJsonVersion = getLocalMD5(StreamUtils.GetInputStream(apiJson));
-		deployJar();
-		deployResources();
-		deployFrontPages();
-		deployLearningTrail();
 		deployAPI();
 		deployEventAPI();
+		deployAPIJSON();
+		deployFrontPages();
+		deployLearningTrail();
 		deployEvents();
 		deployObjects();
-		deployAPIJSON();
+		deployResources();
+		deployJar();
 		Runnable generateFinalizer = new Runnable() {
 			@Override
 			public void run() {
@@ -346,6 +368,11 @@ public final class SiteDeploy {
 			@Override
 			public void run() {
 				if(uploadQueue.getQueue().isEmpty()) {
+					try {
+						writeMasterTranslations();
+					} catch (Throwable ex) {
+						writeLog("Could not write out translations!", ex);
+					}
 					uploadQueue.shutdown();
 				} else {
 					uploadQueue.submit(this);
@@ -485,6 +512,16 @@ public final class SiteDeploy {
 	private final File finalizerScript;
 	private final boolean clearProgressBar;
 	private final String overrideIdRsa;
+	private final File translationMemoryDb;
+
+	/**
+	 * The master memories object exists purely to prevent duplicate translations being requested from the
+	 * translation server for new translations. However, identical keys may be translated differently
+	 * on different pages, and that's ok. The TM that gets set in here is non deterministic, but only the
+	 * firstt time, because after that, each page should have it's own TM, and if the one that was picked
+	 * was wrong, then once it's manually corrected, it will stay correct forever.
+	 */
+	private final TranslationMaster masterMemories;
 
 	private static final String EDIT_THIS_PAGE_PREAMBLE
 			= "Find a bug in this page? <a rel=\"noopener noreferrer\" target=\"_blank\" href=\"";
@@ -497,7 +534,7 @@ public final class SiteDeploy {
 	private SiteDeploy(String siteBase, String docsBase, boolean useLocalCache,
 			DeploymentMethod deploymentMethod, boolean doValidation, boolean showTemplateCredit,
 			String githubBaseUrl, String validatorUrl, File finalizerScript, boolean clearProgressBar,
-			String overrideIdRsa)
+			String overrideIdRsa, File translationMemoryDb)
 			throws IOException {
 		this.siteBase = siteBase;
 		this.docsBase = docsBase;
@@ -546,6 +583,14 @@ public final class SiteDeploy {
 			}
 		}
 		this.overrideIdRsa = overrideIdRsa;
+		this.translationMemoryDb = translationMemoryDb;
+		if(translationMemoryDb != null) {
+			writeStatus("Loading translation memories, this may take a while.");
+			this.masterMemories = new TranslationMaster(translationMemoryDb);
+			writeStatus("Done loading translation memories.");
+		} else {
+			this.masterMemories = null;
+		}
 	}
 
 	/**
@@ -885,6 +930,18 @@ public final class SiteDeploy {
 				}
 				try {
 					writeStatus("Currently generating " + toLocation);
+					if(translationMemoryDb != null) {
+						generateQueue.submit(() -> {
+							try {
+								createTranslationMemory(toLocation, body);
+							} catch (Throwable t) {
+								writeLog("While generating translation memory for " + toLocation + "an error occured: ",
+										t);
+							}
+							currentGenerateTask.addAndGet(1);
+						});
+						totalGenerateTasks.addAndGet(1);
+					}
 					// First, substitute the templates in the body
 					final String b;
 					try {
@@ -939,6 +996,39 @@ public final class SiteDeploy {
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
+	}
+
+	/**
+	 * Translation memories allow strings within the page to be localized in to different languages. The translations
+	 * themselves are by default created by machine translation, but it's important to be able to override these when
+	 * necessary, so the translation memories (tmem) files are created and committed to a repository, so PRs can
+	 * be created. This function is charged with orchestrating the process, which is comprised of several smaller tasks.
+	 * @param toLocation
+	 * @param inputString
+	 */
+	private void createTranslationMemory(String toLocation, String inputString) throws IOException {
+		toLocation = StringUtils.replaceLast(toLocation, "\\.html", ".tmem.xml");
+		for(String locale : SUPPORTED_LOCALES) {
+			File location = new File(new File(translationMemoryDb, locale + "/docs/"
+					+ MSVersion.V3_3_4), toLocation);
+			writeStatus("Creating memory file for " + locale + " at " + location);
+			Set<String> segments = TranslationMaster.findSegments(inputString);
+			for(String segment : segments) {
+				TranslationMemory tm;
+				if(masterMemories.hasMasterTranslation(locale, segment)) {
+					tm = masterMemories.getLocaleMaster(locale).get(segment);
+				} else {
+					tm = masterMemories.generateNewTranslation(locale, segment);
+				}
+				masterMemories.addTranslation(locale, location, tm);
+			}
+		}
+	}
+
+	private void writeMasterTranslations() throws IOException {
+		if(masterMemories != null) {
+			masterMemories.save();
+		}
 	}
 
 	/**
@@ -1077,6 +1167,7 @@ public final class SiteDeploy {
 	private void deployAPI() {
 		generateQueue.submit(() -> {
 			try {
+				writeStatus("Generating API");
 				Set<Class<? extends Function>> functionClasses = new TreeSet<>(
 						(Class<? extends Function> o1, Class<? extends Function> o2) -> {
 					Function f1 = ReflectionUtils.instantiateUnsafe(o1);
@@ -1223,6 +1314,7 @@ public final class SiteDeploy {
 	}
 
 	private void generateFunctionDocs(Function f, DocGen.DocInfo docs) {
+		writeStatus("Generating function docs for " + f.getName());
 		StringBuilder page = new StringBuilder();
 		page.append("== ").append(f.getName()).append(" ==\n");
 		page.append("<div>").append(docs.desc).append("</div>\n");
@@ -1499,6 +1591,7 @@ public final class SiteDeploy {
 	private void deployAPIJSON() {
 		generateQueue.submit(() -> {
 			try {
+				writeStatus("Generating api.json");
 				writeFromString(apiJson, "api.json");
 				currentGenerateTask.addAndGet(1);
 			} catch (Throwable t) {

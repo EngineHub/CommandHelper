@@ -321,7 +321,9 @@ public class Preferences {
 
 			b.append("# This file is generated automatically. Changes made to the values of this file")
 					.append(nl)
-					.append("# will persist, but changes to comments will not.")
+					.append("# will persist, but changes to comments will not. For windows file paths,")
+					.append(nl)
+					.append("# use either / or \\\\, but not a single \\.")
 					.append(nl).append(nl);
 			if(!header.trim().isEmpty()) {
 				b.append(header).append(nl).append(nl);
@@ -346,7 +348,13 @@ public class Preferences {
 						}
 					}
 				}
-				b.append(c).append(nl).append(p.name).append("=").append(p.value).append(nl).append(nl);
+				b.append(c).append(nl).append(p.name).append("=");
+				if(p.allowed == Type.FILE && p.value != null) {
+					b.append(p.value.replace("\\", "\\\\"));
+				} else {
+					b.append(p.value);
+				}
+				b.append(nl).append(nl);
 			}
 			if(prefFile != null && !prefFile.exists()) {
 				prefFile.getAbsoluteFile().getParentFile().mkdirs();
