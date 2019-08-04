@@ -7,11 +7,14 @@ import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREIncludeException;
 import com.laytonsmith.core.exceptions.CRE.CRESecurityException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
+import com.laytonsmith.core.profiler.ProfilePoint;
+import com.laytonsmith.core.profiler.Profiler;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -46,9 +49,16 @@ public class IncludeCache {
 					+ " due to restrictions imposed by the base-dir setting.", t);
 		}
 		MSLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Security check passed", t);
+		Profiler profiler = env.getEnv(GlobalEnv.class).GetProfiler();
 		try {
 			String s = new ZipReader(file).getFileContents();
-			ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, file, true), env);
+			ProfilePoint p = profiler.start("Compiling " + file, LogLevel.WARNING);
+			ParseTree tree;
+			try {
+				tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, file, true), env);
+			} finally {
+				p.stop();
+			}
 			MSLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Compilation succeeded, adding to cache.", t);
 			IncludeCache.add(file, tree);
 			return tree;

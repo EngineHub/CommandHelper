@@ -658,11 +658,16 @@ public class AliasCore {
 		}
 
 		public void compileMSA(List<Script> scripts, MCPlayer player) {
-
 			for(FileInfo fi : msa) {
 				List<Script> tempScripts;
 				try {
-					tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents, fi.file, false));
+					ProfilePoint p = parent.profiler.start("Compiling " + fi.file, LogLevel.WARNING);
+					try {
+						tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents,
+								fi.file, false));
+					} finally {
+						p.stop();
+					}
 					for(Script s : tempScripts) {
 						try {
 							try {
