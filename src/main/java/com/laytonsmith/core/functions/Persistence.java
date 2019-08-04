@@ -255,7 +255,9 @@ public class Persistence {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Getting values", "store_value('x.top.a',true)\nstore_value('x.top.b',false)\nmsg(get_values('x'))")};
+				new ExampleScript("Getting values", "store_value('x.top.a',true)\n"
+						+ "store_value('x.top.b',false)\n"
+						+ "msg(get_values('x'))", "{x.top.a: true, x.top.b: false}")};
 		}
 
 		@Override
