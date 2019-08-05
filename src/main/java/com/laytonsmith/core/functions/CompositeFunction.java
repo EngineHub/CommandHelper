@@ -32,6 +32,13 @@ public abstract class CompositeFunction extends AbstractFunction {
 
 	private static final Map<Class<? extends CompositeFunction>, ParseTree> CACHED_SCRIPTS = new HashMap<>();
 
+	private static void setTarget(ParseTree tree, Target t) {
+		tree.getData().setTarget(t);
+		for(ParseTree child : tree.getChildren()) {
+			setTarget(child, t);
+		}
+	}
+
 	@Override
 	public final Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 		ParseTree tree;
@@ -44,6 +51,7 @@ public abstract class CompositeFunction extends AbstractFunction {
 				tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), environment)
 						// the root of the tree is null, so go ahead and pull it up
 						.getChildAt(0);
+				setTarget(tree, t);
 			} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 				// This is really bad.
 				throw new Error(ex);
