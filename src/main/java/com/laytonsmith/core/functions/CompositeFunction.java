@@ -32,13 +32,6 @@ public abstract class CompositeFunction extends AbstractFunction {
 
 	private static final Map<Class<? extends CompositeFunction>, ParseTree> CACHED_SCRIPTS = new HashMap<>();
 
-	private static void setTarget(ParseTree tree, Target t) {
-		tree.getData().setTarget(t);
-		for(ParseTree child : tree.getChildren()) {
-			setTarget(child, t);
-		}
-	}
-
 	@Override
 	public final Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 		ParseTree tree;
@@ -61,7 +54,6 @@ public abstract class CompositeFunction extends AbstractFunction {
 		} else {
 			tree = CACHED_SCRIPTS.get(this.getClass());
 		}
-		setTarget(tree, t);
 
 		GlobalEnv env = environment.getEnv(GlobalEnv.class);
 		IVariableList oldVariables = env.GetVarList();
@@ -78,6 +70,10 @@ public abstract class CompositeFunction extends AbstractFunction {
 			}
 		} catch (FunctionReturnException ex) {
 			ret = ex.getReturn();
+		} catch (ConfigRuntimeException ex) {
+			ex.setTarget(t);
+			env.GetStackTraceManager().setCurrentTarget(t);
+			throw ex;
 		}
 		env.SetVarList(oldVariables);
 
