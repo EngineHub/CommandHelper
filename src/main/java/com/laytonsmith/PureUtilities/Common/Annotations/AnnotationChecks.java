@@ -44,7 +44,7 @@ public class AnnotationChecks {
 				}
 			} catch (ReflectionUtils.ReflectionException ex) {
 				errors.add(clazz.getClassName() + " needs to add the following:\n\t@SuppressWarnings(\"FieldNameHidesFieldInSuperclass\")\n"
-						+ "\tpublic static final CClassType TYPE = CClassType.get(\"" + clazz.getAnnotation(typeof.class).getValue("value") + "\");");
+						+ "\tpublic static final CClassType TYPE = CClassType.get(" + clazz.getSimpleName() + ".class);");
 			}
 		}
 		if(!errors.isEmpty()) {

@@ -16,10 +16,10 @@ import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.natives.interfaces.Commentable;
 import com.laytonsmith.core.natives.interfaces.MAnnotation;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -50,7 +50,7 @@ public class ObjectDefinition implements Commentable {
 	private final Set<UnqualifiedClassName> interfaces;
 	private final CClassType containingClass;
 	private final Target definitionTarget;
-	private final Map<String, List<ElementDefinition>> properties;
+	private final List<Element> properties;
 	private final SmartComment classComment;
 	private final List<Object> genericParameters;
 	private final Class<? extends Mixed> nativeClass;
@@ -62,7 +62,7 @@ public class ObjectDefinition implements Commentable {
 			CClassType type,
 			Set<UnqualifiedClassName> superclasses, Set<UnqualifiedClassName> interfaces,
 			CClassType containingClass, Target t,
-			Map<String, List<ElementDefinition>> properties, List<MAnnotation> annotations,
+			List<ElementDefinition> properties, List<MAnnotation> annotations,
 			SmartComment classComment, List<Object> genericParameters, Class<? extends Mixed> nativeClass) {
 		this.accessModifier = accessModifier;
 		this.objectModifiers = objectModifiers;
@@ -72,7 +72,10 @@ public class ObjectDefinition implements Commentable {
 		this.interfaces = interfaces;
 		this.containingClass = containingClass;
 		this.definitionTarget = t;
-		this.properties = properties;
+		this.properties = new ArrayList<>();
+		for(ElementDefinition d : properties) {
+			this.properties.add(d.createConcreteType(type));
+		}
 		this.annotations = annotations;
 		this.classComment = classComment;
 		this.genericParameters = genericParameters;
@@ -205,6 +208,14 @@ public class ObjectDefinition implements Commentable {
 							ucn.getTarget(), ex));
 				}
 			}
+			for(Element element : properties) {
+				try {
+					element.qualifyType(env);
+				} catch (ClassNotFoundException ex) {
+					uhohs.add(new ConfigCompileException("Could not find " + element.getUCN(),
+							element.getTarget(), ex));
+				}
+			}
 			if(!uhohs.isEmpty()) {
 				throw new ConfigCompileGroupException(uhohs);
 			}
@@ -254,7 +265,7 @@ public class ObjectDefinition implements Commentable {
 		return definitionTarget;
 	}
 
-	public Map<String, List<ElementDefinition>> getElements() {
+	public List<Element> getElements() {
 		return properties;
 	}
 

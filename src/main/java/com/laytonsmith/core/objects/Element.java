@@ -6,85 +6,64 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.UnqualifiedClassName;
 import com.laytonsmith.core.constructs.CClassType;
-import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import java.lang.reflect.Field;
 import java.util.Objects;
 import java.util.Set;
 
 /**
- * An ElementDefinition is the definition of elements within an object. These can be either properties or methods, as
- * they are handled the same in most ways, this superclass can safely represent both. For methods, the defaultValue
- * should always be provided, a Callable. There is special support for native types, in which a Method/Field is
- * provided.
  *
- * In general, an ElementDefinition is not useable, until it is converted into an Element, which is the same as the
- * definition, but includes a {@code definedIn} property. This is set and created when the field is actually associated
- * with a class definition, which happens later. A free floating element definition is otherwise useless, however.
  */
-@typeof("ms.lang.ElementDefinition")
-public abstract class ElementDefinition extends Construct {
+@typeof("ms.lang.Element")
+public abstract class Element extends Construct {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get(ElementDefinition.class);
+	public static final CClassType TYPE = CClassType.get(Element.class);
 
 	private final AccessModifier accessModifier;
 	private final Set<ElementModifier> elementModifiers;
+	private CClassType definedIn;
 	private CClassType type;
 	private final UnqualifiedClassName unqualifiedType;
 	private final String name;
 	private final Target t;
 
-	private final String signature;
-
 	private final ParseTree tree;
 	private java.lang.reflect.Method nativeMethod = null;
-	private Field nativeField = null;
+	private java.lang.reflect.Field nativeField = null;
 
 	/**
 	 * Constructs a new element definition. If this is a native method or field,
 	 * you must also call {@link #setNativeField(java.lang.reflect.Field)} or
 	 * {@link #setNativeMethod(java.lang.reflect.Method)} immediately after construction.
-	 * @param accessModifier The access modifier of the element
-	 * @param elementModifiers The modifiers of the element
-	 * @param type The type of the element (variable type for fields, return type
-	 * for methods, java null for constructors)
-	 * @param name The name of the element (should start with @ if this is a
-	 * variable declaration).
-	 * @param tree The default value, if this is a field, and null if this
-	 * is a method. If the default value is MethodScript null, or is not set, you MUST
-	 * send either {@link CNull#NULL} or {@link CNull#UNDEFINED}, rather than java
-	 * null.
-	 * @param signature The signature, which serves as the "toString" of this element.
-	 * @param constructType The ConstructType
-	 * @param t The code target where this element is defined in.
-	 * @throws NullPointerException If one of the required fields is null
+	 * @param definition The element definition this instance is based on.
+	 * @param definedIn The class that this element is defined in.
+	 * @throws NullPointerException If one of the required fields is null.
 	 * @throws IllegalArgumentException If both defaultValue and method are non-null.
 	 */
-	public ElementDefinition(
-			AccessModifier accessModifier,
-			Set<ElementModifier> elementModifiers,
-			UnqualifiedClassName type,
-			String name,
-			ParseTree tree,
-			String signature,
-			ConstructType constructType,
-			Target t
-	) {
-		super(signature, constructType, t);
-		Objects.requireNonNull(accessModifier);
-		Objects.requireNonNull(elementModifiers);
-		Objects.requireNonNull(name);
+	public Element(ElementDefinition definition, CClassType definedIn) {
+		super(definition.getSignature(), definition.getCType(), definition.getTarget());
+		Objects.requireNonNull(definition);
+		Objects.requireNonNull(definedIn);
 
-		this.signature = signature;
-		this.accessModifier = accessModifier;
-		this.elementModifiers = elementModifiers;
-		this.unqualifiedType = type;
-		this.name = name;
-		this.tree = tree;
-		this.t = t;
+		this.accessModifier = definition.getAccessModifier();
+		this.elementModifiers = definition.getElementModifiers();
+		this.unqualifiedType = definition.getUCN();
+		this.name = definition.getElementName();
+		this.tree = definition.getTree();
+		this.t = definition.getTarget();
+		this.definedIn = definedIn;
+	}
+
+	/**
+	 * Qualifies the type. Must be called before {@link #getType()} can be used.
+	 * @param env
+	 * @throws java.lang.ClassNotFoundException
+	 */
+	public void qualifyType(Environment env) throws ClassNotFoundException {
+		this.type = CClassType.get(unqualifiedType.getFQCN(env));
 	}
 
 	/**
@@ -102,7 +81,7 @@ public abstract class ElementDefinition extends Construct {
 	 * checks are done at this point, but it MUST be true that the field type is castable to {@link Mixed}.
 	 * @param f
 	 */
-	public void setNativeField(Field f) {
+	public void setNativeField(java.lang.reflect.Field f) {
 		this.nativeField = f;
 	}
 
@@ -156,6 +135,13 @@ public abstract class ElementDefinition extends Construct {
 			throw new Error("qualifyType must be called before getType can be used");
 		}
 		return type;
+	}
+
+	public CClassType getDefinedIn() {
+		if(definedIn == null) {
+			throw new Error("qualifyType must be called before getDefinedIn can be used");
+		}
+		return definedIn;
 	}
 
 	/**
@@ -213,7 +199,7 @@ public abstract class ElementDefinition extends Construct {
 	 * that fact should not be relied on, use {@link #isNative()} to determine that for sure.
 	 * @return
 	 */
-	public Field getNativeField() {
+	public java.lang.reflect.Field getNativeField() {
 		return nativeField;
 	}
 
@@ -234,7 +220,7 @@ public abstract class ElementDefinition extends Construct {
 
 	@Override
 	public String docs() {
-		return "An ElementDefinition is an intermediate step before creating an Element. This should not be used.";
+		return "An Element is a value that is at the top level of a class, for instance, a field, or a method.";
 	}
 
 	@Override
@@ -242,15 +228,5 @@ public abstract class ElementDefinition extends Construct {
 		return MSVersion.V3_3_4;
 	}
 
-	public String getSignature() {
-		return signature;
-	}
-
-	/**
-	 * Creates a concrete type, based on this defintion, which requires the CClassType.
-	 * @param definedIn
-	 * @return
-	 */
-	public abstract Element createConcreteType(CClassType definedIn);
 
 }

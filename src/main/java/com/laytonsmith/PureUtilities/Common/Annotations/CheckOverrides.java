@@ -64,6 +64,8 @@ public class CheckOverrides extends AbstractProcessor {
 				}
 				if(c != null) {
 					if(!c.isInterface()) {
+						StreamUtils.GetSystemErr().println("Only interfaces may be annotated with "
+								+ MustUseOverride.class.getName());
 						processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
 								"Only interfaces may be annotated with " + MustUseOverride.class.getName());
 					}
@@ -240,6 +242,7 @@ public class CheckOverrides extends AbstractProcessor {
 						.append(" with @Override to continue the build process.")
 						.append(StringUtils.NL)
 						.append(StringUtils.Join(stringMethodsInError, StringUtils.NL));
+				StreamUtils.GetSystemErr().println(b.toString());
 				processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, b.toString());
 			} else {
 				StreamUtils.GetSystemOut().println("No @Override annotations were found to be missing.");
