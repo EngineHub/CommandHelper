@@ -35,8 +35,10 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 	private final String translation;
 	private final String automaticTranslation;
 	private final int translationId;
+	private final Boolean isMachineTranslatable;
 
-	public TranslationMemory(String englishKey, String locale, String comment, String translation,
+	public TranslationMemory(TranslationSummary summary, String englishKey, String locale, String comment,
+			String translation,
 			String automaticTranslation, int id) {
 		this.englishKey = englishKey;
 		this.locale = locale;
@@ -44,6 +46,7 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 		this.translation = translation;
 		this.automaticTranslation = automaticTranslation;
 		this.translationId = id;
+		isMachineTranslatable = summary.isMachineTranslatable(englishKey);
 	}
 
 	public String getEnglishKey() {
@@ -80,6 +83,9 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 	}
 
 	private String escape(String input) {
+		if(input == null || "".equals(input)) {
+			return "";
+		}
 		input = input.replace("]]>", "]]]]><![CDATA[>");
 		return "<![CDATA[" + input + "]]>";
 	}
@@ -94,7 +100,8 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 		return BEGIN_BLOCK + b.toString() + END_BLOCK;
 	}
 
-	public static Map<String, TranslationMemory> fromTmemFile(String locale, String fileContents) throws IOException {
+	public static Map<String, TranslationMemory> fromTmemFile(TranslationSummary translationSummary,
+			String locale, String fileContents) throws IOException {
 		Map<String, TranslationMemory> memories = new HashMap<>();
 		if("".equals(fileContents)) {
 			return memories;
@@ -129,6 +136,7 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 		sax.addListener("/translations/translationBlock", (xpath, tag, attr, contents) -> {
 			int intId = Integer.parseInt(id.getObject().replaceAll(locale + "-(.*)", "$1"));
 			TranslationMemory tm = new TranslationMemory(
+					translationSummary,
 					key.getObject(),
 					locale,
 					comment.getObject(),

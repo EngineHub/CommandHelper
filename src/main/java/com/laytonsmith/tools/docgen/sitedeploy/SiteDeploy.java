@@ -82,16 +82,6 @@ import org.json.simple.JSONValue;
 @SuppressWarnings("UseSpecificCatch")
 public final class SiteDeploy {
 
-	/**
-	 * Supported values are the language codes found under the translation section of this page:
-	 * https://api.cognitive.microsofttranslator.com/languages?api-version=3.0 along with the
-	 * special code "art" which is a programmatically generated test language, that is always
-	 * available.
-	 */
-	private static final String[] SUPPORTED_LOCALES = {
-		"art", // as in artificial, this is the official language code for made up languages
-	};
-
 	private static final String USERNAME = "username";
 	private static final String HOSTNAME = "hostname";
 	private static final String PORT = "port";
@@ -1008,21 +998,9 @@ public final class SiteDeploy {
 	 */
 	private void createTranslationMemory(String toLocation, String inputString) throws IOException {
 		toLocation = StringUtils.replaceLast(toLocation, "\\.html", ".tmem.xml");
-		for(String locale : SUPPORTED_LOCALES) {
-			File location = new File(new File(translationMemoryDb, locale + "/docs/"
-					+ MSVersion.V3_3_4), toLocation);
-			writeStatus("Creating memory file for " + locale + " at " + location);
-			Set<String> segments = TranslationMaster.findSegments(inputString);
-			for(String segment : segments) {
-				TranslationMemory tm;
-				if(masterMemories.hasMasterTranslation(locale, segment)) {
-					tm = masterMemories.getLocaleMaster(locale).get(segment);
-				} else {
-					tm = masterMemories.generateNewTranslation(locale, segment);
-				}
-				masterMemories.addTranslation(locale, location, tm);
-			}
-		}
+		String location = "%s/docs/" + MSVersion.V3_3_4 + "/" + toLocation;
+		writeStatus("Creating memory file for " + location);
+		masterMemories.createTranslationMemory(location, inputString);
 	}
 
 	private void writeMasterTranslations() throws IOException {
