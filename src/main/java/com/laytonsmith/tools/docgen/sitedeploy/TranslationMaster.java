@@ -281,7 +281,10 @@ public class TranslationMaster {
 	 * segments, and being their own segment.
 	 */
 	private static final String[] UNIQUE_SEGMENTS = new String[] {
-			"%s([[%s|Examples...]])",
+		"%s([[%s|Examples...]])",
+		"%sFind a bug in this page? %sEdit this page yourself, then submit a pull request.%s%s",
+		"%sFind a bug in this page? %sEdit this page yourself, then submit a pull request.%s"
+			+ " (Note this page is automatically generated from the documentation in the source code.)%s",
 	};
 
 
@@ -340,7 +343,7 @@ public class TranslationMaster {
 			.filter((string) -> {
 				if(string.isEmpty()) {
 					return false;
-				} else if(string.matches("(?:%s)+")) {
+				} else if(string.matches("(?:\\s*%s\\s*)+")) {
 					return false;
 				} else if(string.matches("\\s*")) {
 					return false;
