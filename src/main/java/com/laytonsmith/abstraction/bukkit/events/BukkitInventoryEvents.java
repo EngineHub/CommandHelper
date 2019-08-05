@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.bukkit.events;
 
 import com.laytonsmith.abstraction.MCCraftingInventory;
 import com.laytonsmith.abstraction.MCEnchantment;
+import com.laytonsmith.abstraction.MCEnchantmentOffer;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryView;
@@ -12,6 +13,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCraftingInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEnchantment;
+import com.laytonsmith.abstraction.bukkit.BukkitMCEnchantmentOffer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventoryView;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
@@ -38,6 +40,7 @@ import com.laytonsmith.abstraction.events.MCItemSwapEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.events.MCPrepareItemEnchantEvent;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.enchantments.EnchantmentOffer;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Result;
@@ -419,8 +422,13 @@ public class BukkitInventoryEvents {
 		}
 
 		@Override
-		public int[] getExpLevelCostsOffered() {
-			return pie.getExpLevelCostsOffered();
+		public MCEnchantmentOffer[] getOffers() {
+			EnchantmentOffer[] offers = pie.getOffers();
+			MCEnchantmentOffer[] ret = new MCEnchantmentOffer[offers.length];
+			for(int i = 0; i < offers.length; i++) {
+				ret[i] = new BukkitMCEnchantmentOffer(offers[i]);
+			}
+			return ret;
 		}
 
 		@Override
