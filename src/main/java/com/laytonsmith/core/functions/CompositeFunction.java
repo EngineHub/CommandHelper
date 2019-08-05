@@ -51,7 +51,6 @@ public abstract class CompositeFunction extends AbstractFunction {
 				tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), environment)
 						// the root of the tree is null, so go ahead and pull it up
 						.getChildAt(0);
-				setTarget(tree, t);
 			} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 				// This is really bad.
 				throw new Error(ex);
@@ -62,6 +61,7 @@ public abstract class CompositeFunction extends AbstractFunction {
 		} else {
 			tree = CACHED_SCRIPTS.get(this.getClass());
 		}
+		setTarget(tree, t);
 
 		GlobalEnv env = environment.getEnv(GlobalEnv.class);
 		IVariableList oldVariables = env.GetVarList();
