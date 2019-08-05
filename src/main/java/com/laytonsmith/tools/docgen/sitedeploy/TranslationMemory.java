@@ -36,16 +36,18 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 	private final String automaticTranslation;
 	private final int translationId;
 	private final Boolean isMachineTranslatable;
+	private final boolean overrideMaster;
 
 	public TranslationMemory(TranslationSummary summary, String englishKey, String locale, String comment,
 			String translation,
-			String automaticTranslation, int id) {
+			String automaticTranslation, int id, boolean overrideMaster) {
 		this.englishKey = englishKey;
 		this.locale = locale;
 		this.comment = comment;
 		this.translation = translation;
 		this.automaticTranslation = automaticTranslation;
 		this.translationId = id;
+		this.overrideMaster = overrideMaster;
 		isMachineTranslatable = summary.isMachineTranslatable(englishKey);
 	}
 
@@ -65,6 +67,10 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 		return translationId;
 	}
 
+	public boolean isOverrideMaster() {
+		return overrideMaster;
+	}
+
 	@Override
 	public String toString() {
 		return "(" + locale + ") " + englishKey + " ------> " + translation;
@@ -78,6 +84,7 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 		b.append("\t<comment>").append(escape(comment)).append("</comment>\n");
 		b.append("\t<translation>").append(escape(translation)).append("</translation>\n");
 		b.append("\t<auto>").append(escape(automaticTranslation)).append("</auto>\n");
+		b.append("\t<overrideMaster>").append(overrideMaster).append("</overrideMaster>\n");
 		b.append("</translationBlock>\n");
 		return b.toString();
 	}
@@ -112,6 +119,7 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 		final MutableObject<String> comment = new MutableObject<>();
 		final MutableObject<String> translation = new MutableObject<>();
 		final MutableObject<String> automaticTranslation = new MutableObject<>();
+		final MutableObject<Boolean> overrideMaster = new MutableObject<>();
 
 		sax.addListener("/translations/translationBlock/id", (xpath, tag, attr, contents) -> {
 			id.setObject(contents);
@@ -133,6 +141,10 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 			automaticTranslation.setObject(contents);
 		});
 
+		sax.addListener("/translations/translationBlock/overrideMaster", (xpath, tag, attr, contents) -> {
+			overrideMaster.setObject(Boolean.valueOf(contents));
+		});
+
 		sax.addListener("/translations/translationBlock", (xpath, tag, attr, contents) -> {
 			int intId = Integer.parseInt(id.getObject().replaceAll(locale + "-(.*)", "$1"));
 			TranslationMemory tm = new TranslationMemory(
@@ -142,13 +154,15 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 					comment.getObject(),
 					translation.getObject(),
 					automaticTranslation.getObject(),
-					intId);
+					intId,
+					overrideMaster.getObject());
 			memories.put(key.getObject(), tm);
 			id.setObject(null);
 			key.setObject(null);
 			comment.setObject(null);
 			translation.setObject(null);
 			automaticTranslation.setObject(null);
+			overrideMaster.setObject(null);
 		});
 
 		try {

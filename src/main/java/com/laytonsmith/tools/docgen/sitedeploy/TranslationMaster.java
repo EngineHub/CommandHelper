@@ -4,11 +4,14 @@ import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.FileWriteMode;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * The TranslationMaster contains all translations, as well as the individual page translations.
@@ -59,6 +62,22 @@ public class TranslationMaster {
 		File file;
 		Map<String, TranslationMemory> blocks;
 		String locale;
+
+		/**
+		 * Given the master translation file, rewrites the local page blocks with the data in the master file, if they
+		 * aren't marked with override master.
+		 * @param master
+		 */
+		private void rewriteFromMaster(Map<String, TranslationMemory> master) {
+			for(TranslationMemory tm : blocks.values()) {
+				if(!tm.isOverrideMaster()) {
+					if(master.containsKey(tm.getEnglishKey())) {
+						TranslationMemory masterTm = master.get(tm.getEnglishKey());
+						blocks.put(tm.getEnglishKey(), masterTm);
+					}
+				}
+			}
+		}
 	}
 
 	private void initNewLocale(String localeName) {
@@ -197,6 +216,7 @@ public class TranslationMaster {
 			for(Map.Entry<File, PageTranslations> fpt : ltm.pages.entrySet()) {
 				File f = fpt.getKey();
 				PageTranslations pt = fpt.getValue();
+				pt.rewriteFromMaster(ltm.master);
 				String page = TranslationMemory.generateTranslationFile(pt.blocks);
 				FileUtil.write(page, f, FileWriteMode.OVERWRITE, true);
 			}
@@ -206,7 +226,6 @@ public class TranslationMaster {
 	/**
 	 * Generates a new, unique id for the given locale. This can be used to tie page specific translation memories
 	 * back to the master file.
-	 * @param locale
 	 * @return
 	 */
 	public int getNewId() {
@@ -227,13 +246,17 @@ public class TranslationMaster {
 		if("art".equals(locale)) {
 			// Eventually, once I get all the escapes done, this can be programmatically translated. For now,
 			// it's the same as other locales.
-			return new TranslationMemory(translationSummary, englishKey, locale, "", "", "", id);
+			return new TranslationMemory(translationSummary, englishKey, locale, "", "", "", id, false);
 		} else {
-			return new TranslationMemory(translationSummary, englishKey, locale, "", "", "", id);
+			return new TranslationMemory(translationSummary, englishKey, locale, "", "", "", id, false);
 		}
 	}
 
-	private static final String[] SEGMENT_SEP = new String[]{"==+", Pattern.quote("|-"), "\n\n"};
+	private static final String[] SEGMENT_SEP = new String[]{
+		"==+",
+		"\n\n",
+		"^\\*",
+	};
 	private static final Pattern SPLIT_PATTERN;
 	static {
 		StringBuilder b = new StringBuilder();
@@ -250,6 +273,17 @@ public class TranslationMaster {
 
 	private static final String URL_PATTERN
 			= "(?:https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+	private static final String TABLE_PATTERN_STRING = "(?s)(\\{\\|.*?\n\\|\\})";
+	private static final Pattern TABLE_PATTERN = Pattern.compile(TABLE_PATTERN_STRING);
+
+	/**
+	 * Unique segments are values that are very often repeated, and deserve being removed from other
+	 * segments, and being their own segment.
+	 */
+	private static final String[] UNIQUE_SEGMENTS = new String[] {
+			"%s([[%s|Examples...]])",
+	};
+
 
 	/**
 	 * Splits an input string intos segments, which can be used to create smaller individual memories, increasing
@@ -262,27 +296,58 @@ public class TranslationMaster {
 		Set<String> segments = new HashSet<>();
 		// First, remove all things that shouldn't be translated, code blocks, html, etc
 		inputString = inputString.replaceAll("\r", "");
+		inputString = inputString.replaceAll("(?s)<script.*?</script>", "");
 		inputString = inputString.replaceAll("(?s)<%CODE.*?%>", "");
 		inputString = inputString.replaceAll("(?s)%%CODE.*?%%", "");
+		inputString = inputString.replaceAll("(?s)<%ALIAS.*?%>", "");
+		inputString = inputString.replaceAll("(?s)%%ALIAS.*?%%", "");
 		inputString = inputString.replaceAll("\\{\\{.*?\\}\\}", "%s");
 		inputString = inputString.replaceAll("\\[\\[.*?\\|(.*?)\\]\\]", "[[%s|$1]]");
+		inputString = inputString.replaceAll("\\[\\[File:.*?\\]\\]", "");
 		inputString = inputString.replaceAll("\\[" + URL_PATTERN + "( .*?)\\]", "[%s$1]");
 		inputString = inputString.replaceAll(URL_PATTERN, "%s");
-		inputString = inputString.replaceAll("<.*?>", "%s");
-		// Process tables
+		inputString = inputString.replaceAll("(?s)<.*?>", "%s");
 
-		// TODO
-
-		for(String s : SPLIT_PATTERN.split(inputString)) {
-			if(s.matches("\\s*")) {
-				continue;
+		for(String uniqueSegment : UNIQUE_SEGMENTS) {
+			if(inputString.contains(uniqueSegment)) {
+				// We have to add it here so it ends up in the page file
+				segments.add(uniqueSegment);
+				inputString = inputString.replace(uniqueSegment, "");
 			}
-			if(s.matches("(?:%s)+")) {
-				continue;
-			}
-			segments.add(s.replace("\n", " ").trim());
 		}
-		return segments;
+
+		// Process tables
+		Matcher m = TABLE_PATTERN.matcher(inputString);
+		while(m.find()) {
+			String table = m.group(1);
+			table = table.replaceAll("\\{\\|.*\n", "");
+			table = table.replaceAll("\\|\\}", "");
+			table = table.replaceAll("\\|\\-\\s*\n", "");
+			table = table.replaceAll("!.*\n", "");
+			segments.addAll(Arrays.asList(table.split("\\|\\||(?:(?:^|\n)\\|)")));
+		}
+		inputString = inputString.replaceAll(TABLE_PATTERN_STRING, "");
+
+		segments.addAll(Arrays.asList(SPLIT_PATTERN.split(inputString)));
+
+		return segments.stream()
+			.filter(string -> string != null)
+			.map(string -> {
+				string = string.trim();
+				string = string.replace("\n", " ");
+				return string;
+			})
+			.filter((string) -> {
+				if(string.isEmpty()) {
+					return false;
+				} else if(string.matches("(?:%s)+")) {
+					return false;
+				} else if(string.matches("\\s*")) {
+					return false;
+				}
+				return true;
+			})
+			.collect(Collectors.toSet());
 	}
 
 	/**
@@ -348,6 +413,14 @@ public class TranslationMaster {
 			}
 		}
 		return errors;
+	}
+
+	/**
+	 * Returns the number of unique segments in the summary.
+	 * @return
+	 */
+	public int size() {
+		return translationSummary.size();
 	}
 
 }

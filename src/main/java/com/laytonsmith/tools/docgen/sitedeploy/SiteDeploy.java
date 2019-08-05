@@ -95,6 +95,7 @@ public final class SiteDeploy {
 	private static final String POST_SCRIPT = "post-script";
 
 	private static final String TRANSLATION_MEMORY_DB = "translation-memory-db";
+	private static final String PRODUCTION_TRANSLATIONS = "production-translations";
 
 	private static final String INSTALL_URL = "install-url";
 	private static final String INSTALL_PEM_FILE = "install-pem-file";
@@ -170,6 +171,10 @@ public final class SiteDeploy {
 		defaults.add(new Preferences.Preference(TRANSLATION_MEMORY_DB, "", Preferences.Type.FILE, "The path to a"
 				+ " local checkout of a translation memory database. This may be empty, in which case"
 				+ " internationalization options will not be available on the deployed site."));
+		defaults.add(new Preferences.Preference(PRODUCTION_TRANSLATIONS, "", Preferences.Type.STRING, "The base url"
+				+ " for the production version of the localization database. If blank, the official url is used, but"
+				+ " this should be set to your fork of the official repository, or a local server that serves the"
+				+ " translations if you are testing localizations."));
 
 		Preferences prefs = new Preferences("Site-Deploy", Logger.getLogger(SiteDeploy.class.getName()), defaults);
 		if(generatePrefs) {
@@ -476,6 +481,9 @@ public final class SiteDeploy {
 		System.out.println("Done!");
 		System.out.println("Summary of changed files (" + filesChanged.size() + ")");
 		System.out.println(StringUtils.Join(filesChanged, "\n"));
+		if(masterMemories != null) {
+			System.out.println(masterMemories.size() + " translation segments exist.");
+		}
 	}
 
 	private final String siteBase;
@@ -1005,6 +1013,7 @@ public final class SiteDeploy {
 
 	private void writeMasterTranslations() throws IOException {
 		if(masterMemories != null) {
+			writeStatus("Writing out translation database");
 			masterMemories.save();
 		}
 	}

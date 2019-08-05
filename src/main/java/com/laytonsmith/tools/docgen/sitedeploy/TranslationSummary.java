@@ -30,6 +30,7 @@ public class TranslationSummary {
 		private final String englishKey;
 		private final int id;
 		private Boolean eligibleForMachineTranslation = null;
+		private boolean untranslatable = false;
 		private String comment;
 
 		public TranslationSummaryEntry(String englishKey, int id) {
@@ -58,6 +59,10 @@ public class TranslationSummary {
 			return comment;
 		}
 
+		public boolean isUntranslatable() {
+			return untranslatable;
+		}
+
 	}
 
 	private final Map<String, TranslationSummaryEntry> entries = new HashMap<>();
@@ -81,6 +86,7 @@ public class TranslationSummary {
 			b.append("\t<eligibleForMachineTranslation>").append(tse.eligibleForMachineTranslation)
 					.append("</eligibleForMachineTranslation>\n");
 			b.append("\t<comment>").append(escape(tse.comment)).append("</comment>\n");
+			b.append("\t<untranslatable>").append(tse.untranslatable).append("</untranslatable>\n");
 			b.append("</translationEntry>\n");
 		}
 		b.append("</summary>\n");
@@ -159,6 +165,7 @@ public class TranslationSummary {
 		MutableObject<String> key = new MutableObject<>();
 		MutableObject<Boolean> eligibleForMachineTranslation = new MutableObject<>();
 		MutableObject<String> comment = new MutableObject<>();
+		MutableObject<Boolean> untranslatable = new MutableObject<>();
 
 		sd.addListener("/summary/translationEntry/id",
 				(String xpath, String tag, Map<String, String> attr, String contents) -> {
@@ -186,6 +193,11 @@ public class TranslationSummary {
 		sd.addListener("/summary/translationEntry/comment",
 				(String xpath, String tag, Map<String, String> attr, String contents) -> {
 			comment.setObject(contents);
+		});
+
+		sd.addListener("/summary/translationEntry/untranslatable",
+				(xpath, tag, attr, contents) -> {
+			untranslatable.setObject(Boolean.valueOf(contents));
 		});
 
 		sd.addListener("/summary/translationEntry",
@@ -228,5 +240,13 @@ public class TranslationSummary {
 			}
 		}
 		return errors;
+	}
+
+	/**
+	 * Returns the number of translation segments in total.
+	 * @return
+	 */
+	public int size() {
+		return entries.size();
 	}
 }

@@ -66,4 +66,29 @@ public class LocalizationTools {
 		}
 
 	}
+
+	@tool("l10n-ui")
+	public static class LocalizationUI extends AbstractCommandLineTool {
+
+		private static final String DATABASE = "database";
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+					.addDescription("Launches the Localization (L10n) UI, which simplifies translations.")
+					.addArgument(new ArgumentParser.ArgumentBuilder()
+						.setDescription("Sets the database from the command line. If this is absent, the UI will"
+								+ " prompt you for the location.")
+						.setUsageName("path to database")
+						.setOptional()
+						.setName(DATABASE)
+						.setArgType(ArgumentParser.ArgumentBuilder.BuilderTypeNonFlag.STRING));
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+	}
 }
