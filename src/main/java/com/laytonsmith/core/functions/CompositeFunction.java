@@ -70,6 +70,12 @@ public abstract class CompositeFunction extends AbstractFunction {
 			}
 		} catch (FunctionReturnException ex) {
 			ret = ex.getReturn();
+		} catch (ConfigRuntimeException ex) {
+			if(ex.getTarget().file() == null) {
+				ex.setTarget(t);
+				env.GetStackTraceManager().setCurrentTarget(t);
+			}
+			throw ex;
 		}
 		env.SetVarList(oldVariables);
 
