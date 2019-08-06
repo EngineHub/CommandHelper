@@ -90,7 +90,7 @@ public class Main {
 	private static final ArgumentParser DOC_EXPORT_MODE;
 	private static final ArgumentParser PROFILER_SUMMARY_MODE;
 	private static final ArgumentParser RSA_KEY_GEN_MODE;
-	private static final ArgumentParser PM_VIEWER_MODE;
+	private static final ArgumentParser PN_VIEWER_MODE;
 	private static final ArgumentParser CORE_FUNCTIONS_MODE;
 	private static final ArgumentParser UI_MODE;
 	private static final ArgumentParser EXTENSION_BUILDER_MODE;
@@ -268,7 +268,7 @@ public class Main {
 						.setName('l', "label")
 						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
 		suite.addMode("key-gen", RSA_KEY_GEN_MODE);
-		PM_VIEWER_MODE = ArgumentParser.GetParser()
+		PN_VIEWER_MODE = ArgumentParser.GetParser()
 				.addDescription("Launches the Persistence Network viewer. This is a GUI tool that can help you"
 						+ " visualize your databases.")
 				.addArgument(new ArgumentBuilder()
@@ -290,7 +290,7 @@ public class Main {
 						.setOptional()
 						.setName("password")
 						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
-		suite.addMode("pn-viewer", PM_VIEWER_MODE);
+		suite.addMode("pn-viewer", PN_VIEWER_MODE);
 		CORE_FUNCTIONS_MODE = ArgumentParser.GetParser()
 				.addDescription("Prints a list of functions tagged with the @core annotation, then exits.");
 		suite.addMode("core-functions", CORE_FUNCTIONS_MODE);
@@ -648,7 +648,7 @@ public class Main {
 				FileUtil.write(enc.getPrivateKey(), privOutputFile);
 				FileUtil.write(enc.getPublicKey(), pubOutputFile);
 				System.exit(0);
-			} else if(mode == PM_VIEWER_MODE) {
+			} else if(mode == PN_VIEWER_MODE) {
 				if(parsedArgs.isFlagSet("server")) {
 					if(parsedArgs.getNumberArgument("port") == null) {
 						StreamUtils.GetSystemErr().println("When running as a server, port is required.");

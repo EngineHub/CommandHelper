@@ -7,9 +7,12 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.functions.FunctionList;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -233,6 +236,28 @@ public class TranslationMaster {
 	 */
 	public int getNewId() {
 		return translationSummary.getNextId();
+	}
+
+	/**
+	 * Returns a list of supported locales, including the artificial locale.
+	 * @return
+	 */
+	public List<String> getLocales() {
+		return new ArrayList<>(allLocales.keySet());
+	}
+
+	/**
+	 * Returns a list of all the pages.
+	 * @return
+	 */
+	public List<String> getPages() {
+		List<String> pages = new ArrayList<>();
+		String toReplace = new File(translationDb.getAbsolutePath(), "art").getAbsolutePath();
+		for(File f : allLocales.get("art").pages.keySet()) {
+			pages.add(f.getAbsolutePath().replaceFirst(Pattern.quote(toReplace), ""));
+		}
+		Collections.sort(pages);
+		return pages;
 	}
 
 	/**

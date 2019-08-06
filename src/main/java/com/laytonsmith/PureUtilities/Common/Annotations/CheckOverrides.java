@@ -19,8 +19,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.processing.AbstractProcessor;
@@ -60,12 +58,13 @@ public class CheckOverrides extends AbstractProcessor {
 				try {
 					c = getClassFromName(className);
 				} catch (ClassNotFoundException ex) {
-					Logger.getLogger(CheckOverrides.class.getName()).log(Level.SEVERE, null, ex);
+					ex.printStackTrace(System.err);
 				}
 				if(c != null) {
 					if(!c.isInterface()) {
-						processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-								"Only interfaces may be annotated with " + MustUseOverride.class.getName());
+						String msg = "Only interfaces may be annotated with " + MustUseOverride.class.getName();
+						System.err.println(msg);
+						processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, msg);
 					}
 					INTERFACES_WITH_MUST_USE_OVERRIDE.add(c);
 				}
@@ -76,7 +75,7 @@ public class CheckOverrides extends AbstractProcessor {
 				try {
 					c = getClassFromName(className);
 				} catch (ClassNotFoundException ex) {
-					Logger.getLogger(CheckOverrides.class.getName()).log(Level.SEVERE, null, ex);
+					ex.printStackTrace(System.err);
 				}
 
 				if(c != null && !c.isInterface()) {
@@ -126,7 +125,7 @@ public class CheckOverrides extends AbstractProcessor {
 								}
 								if(!isTemplate || !found) {
 									//Oh, there aren't any. Well, I don't know why this would happen.
-									Logger.getLogger(CheckOverrides.class.getName()).log(Level.SEVERE, null, e);
+									e.printStackTrace(System.err);
 								}
 								try {
 									argTypes[i] = Class.forName(args[i]);
@@ -169,7 +168,7 @@ public class CheckOverrides extends AbstractProcessor {
 								}
 							}
 						} catch (NoSuchMethodException | SecurityException ex) {
-							Logger.getLogger(CheckOverrides.class.getName()).log(Level.SEVERE, null, ex);
+							ex.printStackTrace(System.err);
 						}
 					}
 					if(methods.get(c).isEmpty()) {
@@ -240,6 +239,7 @@ public class CheckOverrides extends AbstractProcessor {
 						.append(" with @Override to continue the build process.")
 						.append(StringUtils.NL)
 						.append(StringUtils.Join(stringMethodsInError, StringUtils.NL));
+				System.err.println(b.toString());
 				processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, b.toString());
 			} else {
 				StreamUtils.GetSystemOut().println("No @Override annotations were found to be missing.");

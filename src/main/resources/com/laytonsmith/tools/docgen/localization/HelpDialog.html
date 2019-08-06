@@ -1,6 +1,11 @@
 <div>
 	<h1>Localization (L10N) UI Help</h1>
-
+	<h3>Contents</h3>
+	<ul>
+		<li><a href="#general">General</a></li>
+		<li><a href="#forks">Fork Repository</a></li>
+		<li><a href="#azurekey">Allowing Machine Translations</a></li>
+	</ul>
 	<div id="general">
 		<h3>General</h3>
 		<p>
@@ -14,5 +19,25 @@
 			be found on the website <a href="%%wiki|Localization%%">here</a>, and you should be familiar with that
 			before using this tool, but this help file describes use of the tool itself.
 		</p>
-	</div>	
+	</div>
+	<div id="forks">
+		<h3>Fork Repository</h3>
+		<p>
+			Before the system can be used, you must fork the primary repository, and create a local copy. Go to
+			Tools->Fork Database... to launch the fork tool, which will help you get a repository initially set up.
+		</p>
+	</div>
+	<div id="azurekey">
+		<h3>Allowing Machine Translations</h3>
+		<p>
+			To use the machine translation features of the tool, a subscription to the Azure Cognitive Services
+			must be set up. More information about how to sign up for an account and subscription can be found
+			<a href="https://azure.microsoft.com/en-us/services/cognitive-services/">here</a>. While paid subscriptions
+			exist, there is a free tier, which can be used in limited amounts per month. Once a subscription to
+			Cognitive Services is set up, the key and endpoint can be found under Resource Management -> Quick Start. 
+			These values can be copied into the tool under Tools->Add Azure Key. You can choose to store the values
+			to your computer, so they don't need to be re-entered every time, but do keep in mind that they are stored
+			in plain text in your local persistence network, so it may be unwise to do so.
+		</p>
+	</div>
 </div>

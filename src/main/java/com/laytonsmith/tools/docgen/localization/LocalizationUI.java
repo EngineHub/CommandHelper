@@ -1,23 +1,40 @@
 package com.laytonsmith.tools.docgen.localization;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.TemplateBuilder;
 import com.laytonsmith.PureUtilities.Common.UIUtils;
+import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.UI.TextDialog;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.MethodScriptFileLocations;
+import com.laytonsmith.persistence.DataSourceException;
+import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.PersistenceNetworkImpl;
+import com.laytonsmith.persistence.ReadOnlyException;
+import com.laytonsmith.persistence.io.ConnectionMixinFactory;
+import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
+import java.awt.Insets;
+import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.ListModel;
+import javax.swing.event.ListDataListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 /**
  * UI supporting localization efforts.
@@ -26,6 +43,11 @@ public final class LocalizationUI extends javax.swing.JFrame {
 
 	private boolean unsavedChanges = false;
 	private TranslationMaster translations;
+	private PersistenceNetwork pn;
+	private String azureEndpoint = null;
+	private String azureKey = null;
+	private String storedLocation = null;
+	private final DaemonManager dm = new DaemonManager();
 
 	/**
 	 * Creates new form LocalizationUI
@@ -50,79 +72,365 @@ public final class LocalizationUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
+        statusPanel = new javax.swing.JPanel();
         statusLabel = new java.awt.Label();
-        jMenuBar1 = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        localeList = new javax.swing.JList<>();
+        localeLabel = new javax.swing.JLabel();
+        pagesLabel = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        pagesList = new javax.swing.JList<>();
+        segmentDetailsPanel = new javax.swing.JPanel();
+        segmentDetailsLabel = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        segmentsList = new javax.swing.JList<>();
+        segmentsLabel = new javax.swing.JLabel();
+        filtersLabel = new javax.swing.JLabel();
+        showMissingTranslationsCheckbox = new javax.swing.JCheckBox();
+        showUncategorizedCheckbox = new javax.swing.JCheckBox();
+        topMenu = new javax.swing.JMenuBar();
+        fileMenu = new javax.swing.JMenu();
         loadMenu = new javax.swing.JMenuItem();
         saveMenu = new javax.swing.JMenuItem();
         exitMenu = new javax.swing.JMenuItem();
-        jMenu2 = new javax.swing.JMenu();
+        toolsMenu = new javax.swing.JMenu();
+        azureKeyMenu = new javax.swing.JMenuItem();
+        forkDatabaseMenu = new javax.swing.JMenuItem();
+        findSegmentMenu = new javax.swing.JMenuItem();
+        jumpToPageMenu = new javax.swing.JMenuItem();
+        helpMenuTop = new javax.swing.JMenu();
         helpMenu = new javax.swing.JMenuItem();
         aboutMenu = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        statusPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         statusLabel.setText("label1");
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        javax.swing.GroupLayout statusPanelLayout = new javax.swing.GroupLayout(statusPanel);
+        statusPanel.setLayout(statusPanelLayout);
+        statusPanelLayout.setHorizontalGroup(
+            statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(statusPanelLayout.createSequentialGroup()
                 .addComponent(statusLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 1789, Short.MAX_VALUE))
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+        statusPanelLayout.setVerticalGroup(
+            statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, statusPanelLayout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(statusLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        jMenu1.setText("File");
+        jScrollPane1.setViewportView(localeList);
+
+        localeLabel.setText("Locale");
+
+        pagesLabel.setText("Pages");
+
+        jScrollPane2.setViewportView(pagesList);
+
+        segmentDetailsPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        javax.swing.GroupLayout segmentDetailsPanelLayout = new javax.swing.GroupLayout(segmentDetailsPanel);
+        segmentDetailsPanel.setLayout(segmentDetailsPanelLayout);
+        segmentDetailsPanelLayout.setHorizontalGroup(
+            segmentDetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        segmentDetailsPanelLayout.setVerticalGroup(
+            segmentDetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+
+        segmentDetailsLabel.setText("Segment Details");
+
+        jScrollPane3.setViewportView(segmentsList);
+
+        segmentsLabel.setText("Segments");
+
+        filtersLabel.setText("Filters");
+
+        showMissingTranslationsCheckbox.setText("Show Missing Translations");
+        showMissingTranslationsCheckbox.setToolTipText("Shows only segments that are missing either a machine translation or a manual translation, and therefore appear in English on the page");
+
+        showUncategorizedCheckbox.setText("Show Uncategorized");
+        showUncategorizedCheckbox.setToolTipText("Shows only segments that have not been marked as machine translatable or not");
+
+        fileMenu.setText("File");
 
         loadMenu.setText("Load...");
-        jMenu1.add(loadMenu);
+        loadMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loadMenuActionPerformed(evt);
+            }
+        });
+        fileMenu.add(loadMenu);
 
         saveMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
         saveMenu.setText("Save");
-        jMenu1.add(saveMenu);
+        saveMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveMenuActionPerformed(evt);
+            }
+        });
+        fileMenu.add(saveMenu);
 
         exitMenu.setText("Exit");
-        jMenu1.add(exitMenu);
+        exitMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exitMenuActionPerformed(evt);
+            }
+        });
+        fileMenu.add(exitMenu);
 
-        jMenuBar1.add(jMenu1);
+        topMenu.add(fileMenu);
 
-        jMenu2.setText("Help");
+        toolsMenu.setText("Tools");
+
+        azureKeyMenu.setText("Add Azure Key...");
+        azureKeyMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                azureKeyMenuActionPerformed(evt);
+            }
+        });
+        toolsMenu.add(azureKeyMenu);
+
+        forkDatabaseMenu.setText("Fork Database...");
+        forkDatabaseMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                forkDatabaseMenuActionPerformed(evt);
+            }
+        });
+        toolsMenu.add(forkDatabaseMenu);
+
+        findSegmentMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.event.InputEvent.CTRL_MASK));
+        findSegmentMenu.setText("Find Segment...");
+        findSegmentMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                findSegmentMenuActionPerformed(evt);
+            }
+        });
+        toolsMenu.add(findSegmentMenu);
+
+        jumpToPageMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_J, java.awt.event.InputEvent.CTRL_MASK));
+        jumpToPageMenu.setText("Jump to Page");
+        jumpToPageMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jumpToPageMenuActionPerformed(evt);
+            }
+        });
+        toolsMenu.add(jumpToPageMenu);
+
+        topMenu.add(toolsMenu);
+
+        helpMenuTop.setText("Help");
 
         helpMenu.setText("Help...");
-        jMenu2.add(helpMenu);
+        helpMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                helpMenuActionPerformed(evt);
+            }
+        });
+        helpMenuTop.add(helpMenu);
 
         aboutMenu.setText("About...");
-        jMenu2.add(aboutMenu);
+        aboutMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                aboutMenuActionPerformed(evt);
+            }
+        });
+        helpMenuTop.add(aboutMenu);
 
-        jMenuBar1.add(jMenu2);
+        topMenu.add(helpMenuTop);
 
-        setJMenuBar(jMenuBar1);
+        setJMenuBar(topMenu);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(statusPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(localeLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pagesLabel)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 267, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(segmentsLabel)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 174, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(filtersLabel)
+                    .addComponent(showMissingTranslationsCheckbox)
+                    .addComponent(showUncategorizedCheckbox))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(segmentDetailsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(segmentDetailsLabel)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 994, Short.MAX_VALUE)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(localeLabel)
+                    .addComponent(pagesLabel)
+                    .addComponent(segmentDetailsLabel)
+                    .addComponent(segmentsLabel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(segmentDetailsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1)
+                    .addComponent(jScrollPane2)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 886, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(filtersLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(showMissingTranslationsCheckbox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(showUncategorizedCheckbox)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(statusPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void loadMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadMenuActionPerformed
+        JFileChooser fc = new JFileChooser();
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		int returnVal = fc.showOpenDialog(LocalizationUI.this);
+		if(returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = fc.getSelectedFile();
+			initializeTranslationDb(file);
+		}
+    }//GEN-LAST:event_loadMenuActionPerformed
+
+    private void saveMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveMenuActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_saveMenuActionPerformed
+
+    private void exitMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuActionPerformed
+        if(!unsavedChanges) {
+			System.exit(0);
+		} else {
+			Object[] options = {"Quit anyways",
+				"Resume editing"};
+			int n = JOptionPane.showOptionDialog(this,
+					"You have unsaved changes, are you sure you want to quit?",
+					"Unsaved changes",
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE,
+					null, //do not use a custom Icon
+					options, //the titles of buttons
+					options[0]); //default button title
+			if(n == 0) {
+				System.exit(0);
+			}
+		}
+    }//GEN-LAST:event_exitMenuActionPerformed
+
+    private void azureKeyMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_azureKeyMenuActionPerformed
+        AzureKeyInputDialog d = new AzureKeyInputDialog(LocalizationUI.this, this.azureEndpoint,
+				(endpoint, key, save) -> {
+			LocalizationUI.this.azureKey = key;
+			LocalizationUI.this.azureEndpoint = endpoint;
+			if(save) {
+				if(pn != null) {
+					try {
+						pn.set(dm, new String[]{"l10n", "azureEndpoint"}, endpoint);
+						pn.set(dm, new String[]{"l10n", "azureKey"}, key);
+					} catch(DataSourceException | ReadOnlyException | IOException | IllegalArgumentException ex) {
+						showError("Could not save Azure Key! " + ex.getMessage());
+					}
+				}
+			}
+		});
+		UIUtils.centerWindowOnWindow(d, LocalizationUI.this);
+		d.setVisible(true);
+    }//GEN-LAST:event_azureKeyMenuActionPerformed
+
+    private void forkDatabaseMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_forkDatabaseMenuActionPerformed
+        if(unsavedChanges) {
+			showError("You have unsaved changes, cannot create a new fork now!");
+			return;
+		}
+		showError("Not yet implemented!");
+    }//GEN-LAST:event_forkDatabaseMenuActionPerformed
+
+    private void findSegmentMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_findSegmentMenuActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_findSegmentMenuActionPerformed
+
+    private void jumpToPageMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jumpToPageMenuActionPerformed
+        List<String> pages = translations.getPages();
+		new FindDialog(this, new FindDialog.SearchModel() {
+			@Override
+			public void selectedEntry(int index) {
+				pagesList.setSelectedIndex(index + 1);
+				pagesList.ensureIndexIsVisible(index + 1);
+			}
+
+			@Override
+			public List<String> getEntrySet() {
+				return pages;
+			}
+
+			@Override
+			public String getDialogTitle() {
+				return "Find Page";
+			}
+		}).setVisible(true);
+    }//GEN-LAST:event_jumpToPageMenuActionPerformed
+
+    private void helpMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_helpMenuActionPerformed
+        TemplateBuilder builder = new TemplateBuilder();
+		builder.addTemplate("wiki", new TemplateBuilder.Generator() {
+
+			@Override
+			public String generate(String... args) {
+				return "https://methodscript.com/docs/" + MSVersion.LATEST + "/" + args[0] + ".html";
+			}
+		});
+		String text = builder.build(StreamUtils.GetString(LocalizationUI.class
+				.getResourceAsStream("HelpDialog.html")));
+		TextDialog td = new TextDialog(LocalizationUI.this, false, text);
+		UIUtils.centerWindowOnWindow(td, LocalizationUI.this);
+		td.setVisible(true);
+    }//GEN-LAST:event_helpMenuActionPerformed
+
+    private void aboutMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutMenuActionPerformed
+        TemplateBuilder builder = new TemplateBuilder();
+		builder.addTemplate("version", new TemplateBuilder.Generator() {
+
+			@Override
+			public String generate(String... args) {
+				return MSVersion.LATEST.toString();
+			}
+		});
+		builder.addTemplate("implementation", new TemplateBuilder.Generator() {
+
+			@Override
+			public String generate(String... args) {
+				return getBranding();
+			}
+		});
+
+		String text = builder.build(StreamUtils.GetString(LocalizationUI.class
+				.getResourceAsStream("AboutDialog.html")));
+		TextDialog td = new TextDialog(LocalizationUI.this, true, text);
+		UIUtils.centerWindowOnWindow(td, LocalizationUI.this);
+		td.setVisible(true);
+    }//GEN-LAST:event_aboutMenuActionPerformed
 
 	/**
 	 * @param args the command line arguments
@@ -132,6 +440,9 @@ public final class LocalizationUI extends javax.swing.JFrame {
 	}
 
 	public static void launch(String database) {
+		Implementation.forceServerType(Implementation.Type.SHELL);
+		ClassDiscovery.getDefaultInstance()
+				.addDiscoveryLocation(ClassDiscovery.GetClassContainer(LocalizationUI.class));
 		File f;
 		if(database != null) {
 			f = new File(database);
@@ -158,33 +469,55 @@ public final class LocalizationUI extends javax.swing.JFrame {
 					break;
 				}
 			}
-		} catch(ClassNotFoundException ex) {
-			java.util.logging.Logger.getLogger(LocalizationUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch(InstantiationException ex) {
-			java.util.logging.Logger.getLogger(LocalizationUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch(IllegalAccessException ex) {
-			java.util.logging.Logger.getLogger(LocalizationUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		} catch(javax.swing.UnsupportedLookAndFeelException ex) {
-			java.util.logging.Logger.getLogger(LocalizationUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+		} catch(ClassNotFoundException | InstantiationException | IllegalAccessException
+				| javax.swing.UnsupportedLookAndFeelException ex) {
+			Logger.getLogger(LocalizationUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
 		}
 		//</editor-fold>
 
 		LocalizationUI ui = new LocalizationUI();
-		ui.initializeActions();
+		ui.initialize();
 
 		/* Create and display the form */
 		java.awt.EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				UIUtils.centerWindow(ui);
+				Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+				Insets scnMax = Toolkit.getDefaultToolkit().getScreenInsets(ui.getGraphicsConfiguration());
+				int taskBarSize = scnMax.bottom;
+				ui.setSize((int) Math.min(screenSize.getWidth(), ui.getWidth()),
+						(int) Math.min(screenSize.getHeight() - taskBarSize, ui.getHeight()));
 				ui.setVisible(true);
 				if(f != null) {
 					ui.initializeTranslationDb(f);
+				} else if(ui.storedLocation != null) {
+					ui.initializeTranslationDb(new File(ui.storedLocation));
 				}
 			}
 		});
 	}
 
-	private void initializeActions() {
+	private static PersistenceNetwork getPersistenceNetwork(File config) throws URISyntaxException, IOException,
+			DataSourceException {
+		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
+		options.setWorkingDirectory(config.getParentFile().getParentFile());
+		return new PersistenceNetworkImpl(config, new URI("sqlite://" + new File(config.getParentFile().getParentFile(),
+				"persistence.db").toString().replace('\\', '/')), options);
+	}
+
+	private void initialize() {
+
+		try {
+			pn = getPersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig());
+			if(pn != null) {
+				storedLocation = pn.get(new String[]{"l10n", "lastLoadedDb"});
+				azureEndpoint = pn.get(new String[]{"l10n", "azureEndpoint"});
+				azureKey = pn.get(new String[]{"l10n", "azureKey"});
+			}
+		} catch(URISyntaxException | IOException | DataSourceException ex) {
+			showError("Could not load Persistence Database! " + ex.getMessage());
+		}
 
 		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		this.addWindowListener(new WindowAdapter() {
@@ -204,77 +537,25 @@ public final class LocalizationUI extends javax.swing.JFrame {
 			}
 
 		});
-		exitMenu.addActionListener((ActionEvent ae) -> {
-			if(!unsavedChanges) {
-				System.exit(0);
-			} else {
-				Object[] options = {"Quit anyways",
-					"Resume editing"};
-				int n = JOptionPane.showOptionDialog(this,
-						"You have unsaved changes, are you sure you want to quit?",
-						"Unsaved changes",
-						JOptionPane.YES_NO_OPTION,
-						JOptionPane.QUESTION_MESSAGE,
-						null, //do not use a custom Icon
-						options, //the titles of buttons
-						options[0]); //default button title
-				if(n == 0) {
-					System.exit(0);
-				}
-			}
-		});
 
-		aboutMenu.addActionListener((ae) -> {
-			TemplateBuilder builder = new TemplateBuilder();
-			builder.addTemplate("version", new TemplateBuilder.Generator() {
+		setInvalidMenus(false);
+	}
 
-				@Override
-				public String generate(String... args) {
-					return MSVersion.LATEST.toString();
-				}
-			});
-			builder.addTemplate("implementation", new TemplateBuilder.Generator() {
+	/**
+	 * Sets menu options to the specified value. These are set to false initially, and then once a
+	 * translation model is loaded, set to true.
+	 * @param to
+	 */
+	private void setInvalidMenus(boolean to) {
+		findSegmentMenu.setEnabled(to);
+		jumpToPageMenu.setEnabled(to);
+	}
 
-				@Override
-				public String generate(String... args) {
-					return getBranding();
-				}
-			});
-
-			String text = builder.build(StreamUtils.GetString(LocalizationUI.class
-					.getResourceAsStream("AboutDialog.html")));
-			TextDialog td = new TextDialog(LocalizationUI.this, true, text);
-			UIUtils.centerWindowOnWindow(td, LocalizationUI.this);
-			td.setVisible(true);
-		});
-
-		helpMenu.addActionListener((ae) -> {
-			TemplateBuilder builder = new TemplateBuilder();
-			builder.addTemplate("wiki", new TemplateBuilder.Generator() {
-
-				@Override
-				public String generate(String... args) {
-					return "https://methodscript.com/docs/" + MSVersion.LATEST + "/" + args[0] + ".html";
-				}
-			});
-			String text = builder.build(StreamUtils.GetString(LocalizationUI.class
-					.getResourceAsStream("HelpDialog.html")));
-			TextDialog td = new TextDialog(LocalizationUI.this, false, text);
-			UIUtils.centerWindowOnWindow(td, LocalizationUI.this);
-			td.setVisible(true);
-		});
-
-		loadMenu.addActionListener((ae) -> {
-			JFileChooser fc = new JFileChooser();
-			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			int returnVal = fc.showOpenDialog(LocalizationUI.this);
-			if(returnVal == JFileChooser.APPROVE_OPTION) {
-				File file = fc.getSelectedFile();
-//				System.out.println(file.getAbsolutePath());
-				initializeTranslationDb(file);
-			}
-		});
-
+	private void showError(String text) {
+		JOptionPane.showMessageDialog(LocalizationUI.this,
+			text,
+			"Error",
+			JOptionPane.ERROR_MESSAGE);
 	}
 
 	private String getBranding() {
@@ -289,12 +570,16 @@ public final class LocalizationUI extends javax.swing.JFrame {
 		new Thread(() -> {
 			try {
 				translations = new TranslationMaster(path);
+				if(pn != null) {
+					try {
+						pn.set(dm, new String[]{"l10n", "lastLoadedDb"}, path.getAbsolutePath());
+					} catch(DataSourceException | ReadOnlyException | IllegalArgumentException ex) {
+						Logger.getLogger(LocalizationUI.class.getName()).log(Level.SEVERE, null, ex);
+					}
+				}
 			} catch(IOException ex) {
 				EventQueue.invokeLater(() -> {
-					JOptionPane.showMessageDialog(LocalizationUI.this,
-						"Could not load database: " + ex.getMessage(),
-						"Error",
-						JOptionPane.ERROR_MESSAGE);
+					showError("Could not load database: " + ex.getMessage());
 				});
 				return;
 			}
@@ -304,7 +589,61 @@ public final class LocalizationUI extends javax.swing.JFrame {
 	}
 
 	private void initializeUIFromDatabase() {
+		setStatus("Finished.");
+		localeList.setModel(new ListModel<String>(){
+			@Override
+			public int getSize() {
+				return translations.getLocales().size() + 1;
+			}
 
+			@Override
+			public String getElementAt(int index) {
+				if(index == 0) {
+					return "All Locales";
+				}
+				return translations.getLocales().get(index - 1);
+			}
+
+			@Override
+			public void addListDataListener(ListDataListener l) {}
+
+			@Override
+			public void removeListDataListener(ListDataListener l) {}
+
+		});
+		localeList.addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				// TODO
+			}
+
+		});
+
+		pagesList.setModel(new ListModel<String>(){
+			@Override
+			public int getSize() {
+				return translations.getPages().size() + 1;
+			}
+
+			@Override
+			public String getElementAt(int index) {
+				if(index == 0) {
+					return "All Pages";
+				}
+				return translations.getPages().get(index - 1);
+			}
+
+			@Override
+			public void addListDataListener(ListDataListener l) {}
+
+			@Override
+			public void removeListDataListener(ListDataListener l) {}
+
+		});
+
+		localeList.setSelectedIndex(0);
+		pagesList.setSelectedIndex(0);
+		setInvalidMenus(true);
 	}
 
 	private void setStatus(String status) {
@@ -316,14 +655,33 @@ public final class LocalizationUI extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMenu;
+    private javax.swing.JMenuItem azureKeyMenu;
     private javax.swing.JMenuItem exitMenu;
+    private javax.swing.JMenu fileMenu;
+    private javax.swing.JLabel filtersLabel;
+    private javax.swing.JMenuItem findSegmentMenu;
+    private javax.swing.JMenuItem forkDatabaseMenu;
     private javax.swing.JMenuItem helpMenu;
-    private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu2;
-    private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JPanel jPanel1;
+    private javax.swing.JMenu helpMenuTop;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JMenuItem jumpToPageMenu;
     private javax.swing.JMenuItem loadMenu;
+    private javax.swing.JLabel localeLabel;
+    private javax.swing.JList<String> localeList;
+    private javax.swing.JLabel pagesLabel;
+    private javax.swing.JList<String> pagesList;
     private javax.swing.JMenuItem saveMenu;
+    private javax.swing.JLabel segmentDetailsLabel;
+    private javax.swing.JPanel segmentDetailsPanel;
+    private javax.swing.JLabel segmentsLabel;
+    private javax.swing.JList<String> segmentsList;
+    private javax.swing.JCheckBox showMissingTranslationsCheckbox;
+    private javax.swing.JCheckBox showUncategorizedCheckbox;
     private java.awt.Label statusLabel;
+    private javax.swing.JPanel statusPanel;
+    private javax.swing.JMenu toolsMenu;
+    private javax.swing.JMenuBar topMenu;
     // End of variables declaration//GEN-END:variables
 }

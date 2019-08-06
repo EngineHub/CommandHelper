@@ -17,6 +17,8 @@
 	
 	<!-- It's too difficult to manage checkstyle for half generated files, so just exclude them. -->
 	<suppress checks=".*" files="com[\\/]laytonsmith[\\/]tools[\\/]docgen[\\/]localization[\\/]LocalizationUI.java$"/>
+	<suppress checks=".*" files="com[\\/]laytonsmith[\\/]tools[\\/]docgen[\\/]localization[\\/]FindDialog.java$"/>
+	<suppress checks=".*" files="com[\\/]laytonsmith[\\/]tools[\\/]docgen[\\/]localization[\\/]AzureKeyInputDialog.java$"/>
 	
 	
 </suppressions>

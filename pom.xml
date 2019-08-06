@@ -781,7 +781,7 @@
 						<processor>com.laytonsmith.core.extensions.ExtensionAnnotationProcessor</processor>
 						<processor>com.laytonsmith.core.MObjectAnnotationProcessor</processor>
 					</processors>
-					<outputDiagnostics>false</outputDiagnostics>
+					<outputDiagnostics>true</outputDiagnostics>
 				</configuration>
 			</plugin>
 
