@@ -6,13 +6,13 @@ import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class BukkitMCItemStack implements MCItemStack {
 
@@ -146,7 +146,7 @@ public class BukkitMCItemStack implements MCItemStack {
 
 	@Override
 	public boolean hasItemMeta() {
-		return is.hasItemMeta();
+		return is != null && is.hasItemMeta();
 	}
 
 	@Override
