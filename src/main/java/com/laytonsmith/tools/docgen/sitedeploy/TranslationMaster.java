@@ -2,6 +2,9 @@ package com.laytonsmith.tools.docgen.sitedeploy;
 
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.FileWriteMode;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.functions.FunctionList;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -258,6 +261,22 @@ public class TranslationMaster {
 		"^\\*",
 	};
 	private static final Pattern SPLIT_PATTERN;
+
+	/**
+	 * Function names frequently appear throughout the code as
+	 */
+	private static final Set<String> FUNCTION_IDENTIFIERS = FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)
+				.stream()
+				.map((function) -> {
+					return "\\[\\[%s\\|" + function.getName() + "\\]\\]\\(?\\)?";
+				})
+				.collect(Collectors.toSet());
+
+	private static final Set<String> FUNCTION_NAMES = FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)
+			.stream()
+			.map((f) -> f.getName())
+			.collect(Collectors.toSet());
+
 	static {
 		StringBuilder b = new StringBuilder();
 		boolean first = true;
@@ -269,6 +288,7 @@ public class TranslationMaster {
 			first = false;
 		}
 		SPLIT_PATTERN = Pattern.compile("(?:" + b.toString() + ")");
+
 	}
 
 	private static final String URL_PATTERN
@@ -278,14 +298,25 @@ public class TranslationMaster {
 
 	/**
 	 * Unique segments are values that are very often repeated, and deserve being removed from other
-	 * segments, and being their own segment.
+	 * segments, and being their own segment. This are literals, not regex.
 	 */
 	private static final String[] UNIQUE_SEGMENTS = new String[] {
 		"%s([[%s|Examples...]])",
 		"%sFind a bug in this page? %sEdit this page yourself, then submit a pull request.%s%s",
 		"%sFind a bug in this page? %sEdit this page yourself, then submit a pull request.%s"
 			+ " (Note this page is automatically generated from the documentation in the source code.)%s",
+		"The output would be:",
+		"The output might be:",
 	};
+
+	/**
+	 * Some segments, after all the processing is done, result in useless segments, that shouldn't be translated.
+	 * These are essentially a blacklist of segments. Comparison is done as is, if the final segment equals this,
+	 * it is filtered out.
+	 */
+	private static final Set<String> USELESS_SEGMENTS = new HashSet<>(Arrays.asList(new String[]{
+		",",
+	}));
 
 
 	/**
@@ -319,6 +350,10 @@ public class TranslationMaster {
 			}
 		}
 
+		for(String functionNames : FUNCTION_IDENTIFIERS) {
+			inputString = inputString.replaceAll(functionNames, "%s");
+		}
+
 		// Process tables
 		Matcher m = TABLE_PATTERN.matcher(inputString);
 		while(m.find()) {
@@ -338,6 +373,16 @@ public class TranslationMaster {
 			.map(string -> {
 				string = string.trim();
 				string = string.replace("\n", " ");
+				// Removing beginning and ending %s in the string has no impact on whether or not a string
+				// matches, but does increase the performance of the regex, and simplifies the segment for
+				// translators.
+				while(string.startsWith("%s")) {
+					string = string.replaceFirst("%s", "").trim();
+				}
+				while(string.endsWith("%s")) {
+					string = StringUtils.replaceLast(string, "%s", "").trim();
+				}
+
 				return string;
 			})
 			.filter((string) -> {
@@ -350,6 +395,9 @@ public class TranslationMaster {
 				}
 				return true;
 			})
+			// Segments that are entirely just a function name are removed.
+			.filter((string) -> !FUNCTION_NAMES.contains(string))
+			.filter((string) -> !USELESS_SEGMENTS.contains(string))
 			.collect(Collectors.toSet());
 	}
 

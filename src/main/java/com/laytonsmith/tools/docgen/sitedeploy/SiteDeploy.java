@@ -1376,7 +1376,8 @@ public final class SiteDeploy {
 					exampleBuilder.append("====Example ").append(count).append("====\n")
 							.append(HTMLUtils.escapeHTML(es.getDescription())).append("\n\n"
 							+ "Given the following code:\n");
-					exampleBuilder.append(SimpleSyntaxHighlighter.Highlight(es.getScript(), true)).append("\n");
+//					exampleBuilder.append(SimpleSyntaxHighlighter.Highlight(es.getScript(), true)).append("\n");
+					exampleBuilder.append("<%CODE|").append(es.getScript()).append("%>\n");
 					String style = "";
 					exampleBuilder.append("\n\nThe output ");
 					if(es.isAutomatic()) {
