@@ -1,5 +1,6 @@
 package com.laytonsmith.tools.docgen.sitedeploy;
 
+import com.laytonsmith.tools.docgen.localization.TranslationMaster;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.GNUErrorMessageFormat;
@@ -35,7 +36,6 @@ import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.ReadOnlyException;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import com.laytonsmith.tools.Interpreter;
-import com.laytonsmith.tools.SimpleSyntaxHighlighter;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import com.laytonsmith.tools.docgen.DocGenTemplates.Generator;

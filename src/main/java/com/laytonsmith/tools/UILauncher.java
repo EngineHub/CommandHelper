@@ -1,6 +1,7 @@
 package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.Common.UIUtils;
+import com.laytonsmith.tools.docgen.localization.LocalizationUI;
 import com.laytonsmith.tools.pnviewer.PNViewer;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -28,6 +29,10 @@ public class UILauncher extends javax.swing.JFrame {
 		final String[] args = {};
 		uis.add(new UI("Persistence Network Viewer", "Allows easier visualization of the Persistence Network", () -> {
 			PNViewer.main(args);
+		}));
+		uis.add(new UI("Localization (L10n) UI", "Provides an easy to use UI to correctly edit localization files",
+				() -> {
+			LocalizationUI.launch(null);
 		}));
 
 		initComponents();

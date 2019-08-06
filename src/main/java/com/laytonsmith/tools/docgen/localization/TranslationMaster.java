@@ -1,4 +1,4 @@
-package com.laytonsmith.tools.docgen.sitedeploy;
+package com.laytonsmith.tools.docgen.localization;
 
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.FileWriteMode;

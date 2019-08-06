@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.laytonsmith.tools.docgen.sitedeploy;
+package com.laytonsmith.tools.docgen.localization;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
@@ -68,7 +68,7 @@ public class LocalizationTools {
 	}
 
 	@tool("l10n-ui")
-	public static class LocalizationUI extends AbstractCommandLineTool {
+	public static class LocalizationUITool extends AbstractCommandLineTool {
 
 		private static final String DATABASE = "database";
 
@@ -87,8 +87,13 @@ public class LocalizationTools {
 
 		@Override
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
-			throw new UnsupportedOperationException("Not supported yet.");
+			String database = parsedArgs.getStringArgument(DATABASE);
+			LocalizationUI.launch(database);
 		}
 
+		@Override
+		public boolean noExitOnReturn() {
+			return true;
+		}
 	}
 }

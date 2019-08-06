@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.laytonsmith.tools.docgen.sitedeploy;
+package com.laytonsmith.tools.docgen.localization;
 
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.FileWriteMode;

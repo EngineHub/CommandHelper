@@ -799,8 +799,11 @@ public class Main {
 					e.printStackTrace(System.err);
 				}
 			} else if(dynamicTools.containsKey(mode)) {
-				dynamicTools.get(mode).execute(parsedArgs);
-				System.exit(0);
+				CommandLineTool tool = dynamicTools.get(mode);
+				tool.execute(parsedArgs);
+				if(!tool.noExitOnReturn()) {
+					System.exit(0);
+				}
 			} else {
 				throw new Error("Should not have gotten here");
 			}

@@ -1,4 +1,4 @@
-package com.laytonsmith.tools.docgen.sitedeploy;
+package com.laytonsmith.tools.docgen.localization;
 
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.SAXDocument;

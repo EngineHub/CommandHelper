@@ -25,4 +25,12 @@ public interface CommandLineTool {
 	 */
 	void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception;
 
+	/**
+	 * Whether or not to call System.exit(0) when the program completes. If this returns true, then the tool is
+	 * expected to clean up, System.exit will not be called. False (which is the default for
+	 * {@link AbstractCommandLineTool} causes it to exit on completion.
+	 * @return
+	 */
+	boolean noExitOnReturn();
+
 }

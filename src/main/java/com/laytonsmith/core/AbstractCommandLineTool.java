@@ -17,4 +17,11 @@ public abstract class AbstractCommandLineTool implements CommandLineTool {
 	public AbstractCommandLineTool() {
 	}
 
+	@Override
+	public boolean noExitOnReturn() {
+		return false;
+	}
+
+
+
 }
