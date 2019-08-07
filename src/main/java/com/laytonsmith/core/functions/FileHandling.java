@@ -201,27 +201,29 @@ public class FileHandling {
 	@noboilerplate
 	public static class async_read extends AbstractFunction {
 
-		RunnableQueue queue = new RunnableQueue("MethodScript-asyncRead");
-		boolean started = false;
+		private static RunnableQueue queue;
+		private static volatile boolean started = false;
+		private static final Object LOCK = new Object();
 
+		// It's not really nested, it's within the callback, but the IDE doesn't understand that.
+		@SuppressWarnings("NestedSynchronizedStatement")
 		private void startup() {
 			if(!started) {
-				queue.invokeLater(null, new Runnable() {
-
-					@Override
-					public void run() {
-						//This warms up the queue. Apparently.
+				synchronized(LOCK) {
+					if(!started) {
+						queue = new RunnableQueue("MethodScript-asyncRead");
+						queue.invokeLater(null, () -> {
+							//This warms up the queue.
+						});
+						StaticLayer.GetConvertor().addShutdownHook(() -> {
+							synchronized(LOCK) {
+								queue.shutdown();
+								started = false;
+							}
+						});
+						started = true;
 					}
-				});
-				StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
-
-					@Override
-					public void run() {
-						queue.shutdown();
-						started = false;
-					}
-				});
-				started = true;
+				}
 			}
 		}
 
@@ -325,7 +327,7 @@ public class FileHandling {
 					+ " If @contents is null, that indicates that an exception occured, and @exception will not be null, but instead have an"
 					+ " exeption array. Otherwise, @contents will contain the file's contents, and @exception will be null. This method is useful"
 					+ " to use in two cases, either you need a remote file via SCP, or a local file is big enough that you notice a delay when"
-					+ " simply using the read() function.";
+					+ " simply using the read() function. async_read is threadsafe.";
 		}
 
 		@Override
