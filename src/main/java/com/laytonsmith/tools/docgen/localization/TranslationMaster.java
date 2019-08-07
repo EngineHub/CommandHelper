@@ -31,7 +31,8 @@ public class TranslationMaster {
 	 * available.
 	 */
 	private static final String[] SUPPORTED_LOCALES = {
-		"art", // as in artificial, this is the official language code for made up languages
+		"art",	// as in artificial, this is the official language code for made up languages, and is
+				// always assumed to be present, so cannot be removed.
 		"ko",
 	};
 
@@ -261,6 +262,45 @@ public class TranslationMaster {
 	}
 
 	/**
+	 * Returns a list of all TranslationMemories that are on the given page. Note that this will return a different
+	 * segment than getting the master summary list.
+	 * @param locale
+	 * @param page
+	 * @return
+	 */
+	public List<TranslationMemory> getMemoriesForPage(String locale, String page) {
+		return new ArrayList<>(allLocales.get(locale)
+				.pages.get(new File(translationDb, locale + "/" + page))
+				.blocks.values());
+	}
+
+	/**
+	 * Returns the full list of memories for the given locale
+	 * @param locale
+	 * @return
+	 */
+	public List<TranslationMemory> getMemoriesForLocale(String locale) {
+		return new ArrayList<>(allLocales.get(locale).master.values());
+	}
+
+	/**
+	 * Returns just the summary translation entries for all memories.
+	 * @return
+	 */
+	public List<TranslationSummary.TranslationSummaryEntry> getMasterMemories() {
+		return translationSummary.getAllMemories();
+	}
+
+	/**
+	 * Returns the translation summary for the given key.
+	 * @param key
+	 * @return
+	 */
+	public TranslationSummary.TranslationSummaryEntry getSummaryForKey(String key) {
+		return translationSummary.getMemory(key);
+	}
+
+	/**
 	 * For brand new segments, some default translation must be used. By default, the English version is
 	 * used for the auto translation, but in the future, where possible, a machine translation may be used
 	 * instead. It will never fill the manual translation field however. The remaining fields are filled out
@@ -284,6 +324,7 @@ public class TranslationMaster {
 		"==+",
 		"\n\n",
 		"^\\*",
+		"^#"
 	};
 	private static final Pattern SPLIT_PATTERN;
 

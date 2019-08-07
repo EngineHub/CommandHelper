@@ -26,11 +26,12 @@ import org.xml.sax.SAXException;
  */
 public class TranslationSummary {
 
-	class TranslationSummaryEntry implements Comparable<TranslationSummaryEntry> {
+	public class TranslationSummaryEntry implements Comparable<TranslationSummaryEntry> {
 		private final String englishKey;
 		private final int id;
 		private Boolean eligibleForMachineTranslation = null;
 		private boolean untranslatable = false;
+		private boolean suspectSegment = false;
 		private String comment;
 
 		public TranslationSummaryEntry(String englishKey, int id) {
@@ -63,6 +64,25 @@ public class TranslationSummary {
 			return untranslatable;
 		}
 
+		public boolean isSuspectSegment() {
+			return suspectSegment;
+		}
+
+		public void setComment(String comment) {
+			this.comment = comment;
+		}
+
+		public void setEligibleForMachineTranslation(Boolean eligibleForMachineTranslation) {
+			this.eligibleForMachineTranslation = eligibleForMachineTranslation;
+		}
+
+		public void setSuspectSegment(boolean suspectSegment) {
+			this.suspectSegment = suspectSegment;
+		}
+
+		public void setUntranslatable(boolean untranslatable) {
+			this.untranslatable = untranslatable;
+		}
 	}
 
 	private final Map<String, TranslationSummaryEntry> entries = new HashMap<>();
@@ -87,6 +107,7 @@ public class TranslationSummary {
 					.append("</eligibleForMachineTranslation>\n");
 			b.append("\t<comment>").append(escape(tse.comment)).append("</comment>\n");
 			b.append("\t<untranslatable>").append(tse.untranslatable).append("</untranslatable>\n");
+			b.append("\t<suspectSegment>").append(tse.suspectSegment).append("</suspectSegment>\n");
 			b.append("</translationEntry>\n");
 		}
 		b.append("</summary>\n");
@@ -121,6 +142,23 @@ public class TranslationSummary {
 	 */
 	public int getTranslationId(String key) {
 		return entries.get(key).id;
+	}
+
+	/**
+	 * Returns a list of all the summary translation memories.
+	 * @return
+	 */
+	public List<TranslationSummaryEntry> getAllMemories() {
+		return new ArrayList<>(entries.values());
+	}
+
+	/**
+	 * Returns a translation memory summary based on the string key
+	 * @param key
+	 * @return
+	 */
+	public TranslationSummaryEntry getMemory(String key) {
+		return entries.get(key);
 	}
 
 	/**
@@ -166,6 +204,7 @@ public class TranslationSummary {
 		MutableObject<Boolean> eligibleForMachineTranslation = new MutableObject<>();
 		MutableObject<String> comment = new MutableObject<>();
 		MutableObject<Boolean> untranslatable = new MutableObject<>();
+		MutableObject<Boolean> suspectSegment = new MutableObject<>(false);
 
 		sd.addListener("/summary/translationEntry/id",
 				(String xpath, String tag, Map<String, String> attr, String contents) -> {
@@ -200,11 +239,16 @@ public class TranslationSummary {
 			untranslatable.setObject(Boolean.valueOf(contents));
 		});
 
+		sd.addListener("/summary/translationEntry/suspectSegment", (xpath, tag, attr, contents) -> {
+			suspectSegment.setObject(Boolean.valueOf(contents));
+		});
+
 		sd.addListener("/summary/translationEntry",
 				(String xpath, String tag, Map<String, String> attr, String contents) -> {
 			TranslationSummaryEntry tse = new TranslationSummaryEntry(key.getObject(), id.getObject());
 			tse.eligibleForMachineTranslation = eligibleForMachineTranslation.getObject();
 			tse.comment = comment.getObject();
+			tse.suspectSegment = suspectSegment.getObject();
 			TranslationSummary.this.entries.put(key.getObject(), tse);
 
 			nextId = java.lang.Math.max(nextId, tse.id);
@@ -213,6 +257,7 @@ public class TranslationSummary {
 			key.setObject(null);
 			eligibleForMachineTranslation.setObject(null);
 			comment.setObject(null);
+			suspectSegment.setObject(false);
 		});
 
 		try {
