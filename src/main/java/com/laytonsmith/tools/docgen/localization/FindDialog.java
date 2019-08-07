@@ -1,7 +1,7 @@
 package com.laytonsmith.tools.docgen.localization;
 
 import com.laytonsmith.PureUtilities.Common.UIUtils;
-import com.sun.glass.events.KeyEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
