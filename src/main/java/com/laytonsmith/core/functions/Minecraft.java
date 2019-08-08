@@ -1307,4 +1307,53 @@ public class Minecraft {
 		}
 
 	}
+
+	@api
+	public static class all_materials extends AbstractFunction {
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return Boolean.FALSE;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray mats = new CArray(t);
+			for(MCMaterial mat : StaticLayer.GetMaterialValues()) {
+				if(!mat.getName().startsWith("LEGACY_")) {
+					mats.push(new CString(mat.getName(), t), t);
+				}
+			}
+			return mats;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public String getName() {
+			return "all_materials";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "array {} Returns an array of all material names.";
+		}
+	}
 }

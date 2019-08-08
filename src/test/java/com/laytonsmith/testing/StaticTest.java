@@ -809,6 +809,11 @@ public class StaticTest {
 		}
 
 		@Override
+		public MCMaterial[] GetMaterialValues() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
 		public MCMaterial GetMaterialFromLegacy(String name, int data) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
