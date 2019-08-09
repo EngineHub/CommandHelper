@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import javax.swing.JOptionPane;
 
 /**
  * Provides common UI utilites
@@ -101,4 +102,84 @@ public class UIUtils {
 	public static boolean openWebpage(URL url) throws IOException, URISyntaxException {
 		return openWebpage(url.toURI());
 	}
+
+	/**
+	 * The various types of message boxes available. This primarily decides the icon to use, but generally determines
+	 * the way the dialog looks.
+	 */
+	public static enum MessageType {
+		ERROR(JOptionPane.ERROR_MESSAGE),
+		INFORMATION(JOptionPane.INFORMATION_MESSAGE),
+		WARNING(JOptionPane.WARNING_MESSAGE),
+		QUESTION(JOptionPane.QUESTION_MESSAGE),
+		PLAIN(JOptionPane.PLAIN_MESSAGE);
+
+		private final int joptionPaneType;
+		private MessageType(int joptionPaneType) {
+			this.joptionPaneType = joptionPaneType;
+		}
+
+		public int getJOptionPaneType() {
+			return joptionPaneType;
+		}
+	}
+
+	/**
+	 * Provides a simple Yes/No confirm dialog. If the user clicks Yes, then true is returned. The type defaults
+	 * to QUESTION.
+	 * @param parent
+	 * @param title
+	 * @param message
+	 * @return
+	 */
+	public static boolean confirm(Window parent, String title, String message) {
+		return confirm(parent, title, message, MessageType.QUESTION);
+	}
+
+	/**
+	 * Provides a simple Yes/No confirm dialog. If the user clicks Yes, then true is returned.
+	 * @param parent
+	 * @param title
+	 * @param message
+	 * @param type
+	 * @return
+	 */
+	public static boolean confirm(Window parent, String title, String message, MessageType type) {
+		Object[] options = {"Yes", "No"};
+		int n = JOptionPane.showOptionDialog(parent,
+					message,
+					title,
+					JOptionPane.YES_NO_OPTION,
+					type.getJOptionPaneType(),
+					null, //do not use a custom Icon
+					options, //the titles of buttons
+					options[0]); //default button title
+		return n == 0;
+	}
+
+	/**
+	 * Shows an alert message to the user, defaulting to the INFORMATION type.
+	 * @param parent
+	 * @param title
+	 * @param message
+	 */
+	public static void alert(Window parent, String title, String message) {
+		alert(parent, title, message, MessageType.INFORMATION);
+	}
+
+	/**
+	 * Shows an alert message to the user.
+	 * @param parent
+	 * @param title
+	 * @param message
+	 * @param type
+	 */
+	public static void alert(Window parent, String title, String message, MessageType type) {
+		JOptionPane.showMessageDialog(parent,
+			message,
+			title,
+			type.getJOptionPaneType());
+	}
+
+
 }

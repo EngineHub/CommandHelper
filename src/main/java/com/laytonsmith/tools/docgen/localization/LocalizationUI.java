@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,7 +34,6 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.ListModel;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
@@ -61,7 +61,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
 	 */
 	private LocalizationUI() {
 		initComponents();
-		setTitle("L10n Interface");
+		setUnsavedChanges(false);
 		setStatus("Welcome to the " + getBranding() + " Localization (L10N) UI!"
 				+ " To get started, use File->Load... and select your local database.");
 		try {
@@ -69,12 +69,30 @@ public final class LocalizationUI extends javax.swing.JFrame {
 		} catch(IOException ex) {
 			Logger.getLogger(LocalizationUI.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		setEntriesEnabled(false);
+		setSummarySettingsEnabled(false);
+		setLocaleSettingsEnabled(false);
+
+		localeList.addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				String selectedSegment = segmentsList.getSelectedValue();
+				setupSegmentsList();
+				if(selectedSegment != null) {
+					segmentsList.setSelectedValue(selectedSegment, true);
+				}
+			}
+
+		});
 
 		segmentsList.addListSelectionListener((ListSelectionEvent lse) -> {
 			if(segmentsList.getSelectedIndex() != -1) {
 				populateSegment(currentSegments.get(segmentsList.getSelectedIndex()));
 			}
+		});
+
+		pagesList.addListSelectionListener((ListSelectionEvent lse) -> {
+			setupSegmentsList();
+			viewPageInBrowserButton.setEnabled(pagesList.getSelectedIndex() > 0);
 		});
 	}
 
@@ -87,6 +105,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
     private void initComponents() {
 
         summaryEligibleForMachineTranslationButtonGroup = new javax.swing.ButtonGroup();
+        filtersButtonGroup = new javax.swing.ButtonGroup();
         statusPanel = new javax.swing.JPanel();
         statusLabel = new java.awt.Label();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -115,13 +134,33 @@ public final class LocalizationUI extends javax.swing.JFrame {
         jScrollPane5 = new javax.swing.JScrollPane();
         summaryAppearsOnPagesList = new javax.swing.JList<>();
         summaryWordWrapCheckbox = new javax.swing.JCheckBox();
+        localeSettingsLabel = new javax.swing.JLabel();
+        localeSettingsPanel = new javax.swing.JPanel();
+        localeSettingsLocaleIdLabel = new javax.swing.JLabel();
+        localeSettingsLocaleIdField = new javax.swing.JTextField();
+        localeSettingsLocaleCommentLabel = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        localeSettingsLocaleCommentField = new javax.swing.JTextField();
+        localeSettingsMachineTranslationLabel = new javax.swing.JLabel();
+        jScrollPane6 = new javax.swing.JScrollPane();
+        localeSettingsMachineTranslationField = new javax.swing.JTextArea();
+        localeSettingsManualTranslationLabel = new javax.swing.JLabel();
+        jScrollPane7 = new javax.swing.JScrollPane();
+        localeSettingsManualTranslationField = new javax.swing.JTextArea();
+        localeSettingsMachineTranslationWordWrapCheckbox = new javax.swing.JCheckBox();
+        localeSettingsManualTranslationWordWrapCheckbox = new javax.swing.JCheckBox();
+        localeSettingsMachineTranslationGenerateButton = new javax.swing.JButton();
         segmentDetailsLabel = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
         segmentsList = new javax.swing.JList<>();
         segmentsLabel = new javax.swing.JLabel();
         filtersLabel = new javax.swing.JLabel();
-        showMissingTranslationsCheckbox = new javax.swing.JCheckBox();
-        showUncategorizedCheckbox = new javax.swing.JCheckBox();
+        viewPageInBrowserButton = new javax.swing.JButton();
+        filterShowAllRadioButton = new javax.swing.JRadioButton();
+        filterShowUntranslatedRadioButton = new javax.swing.JRadioButton();
+        filterShowUncategorizedRadioButton = new javax.swing.JRadioButton();
+        filterShowSuspectRadioButton = new javax.swing.JRadioButton();
+        filterShowTranslatableRadioButton = new javax.swing.JRadioButton();
         topMenu = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         loadMenu = new javax.swing.JMenuItem();
@@ -271,10 +310,12 @@ public final class LocalizationUI extends javax.swing.JFrame {
                             .addComponent(idLabel)
                             .addComponent(summaryEnglishKeyLabel)
                             .addComponent(summaryGlobalCommentLabel)
-                            .addComponent(summaryWordWrapCheckbox))
+                            .addGroup(summaryPanelLayout.createSequentialGroup()
+                                .addGap(20, 20, 20)
+                                .addComponent(summaryWordWrapCheckbox)))
                         .addGap(57, 57, 57)
                         .addGroup(summaryPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane4)
+                            .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 1038, Short.MAX_VALUE)
                             .addComponent(summaryIdField)
                             .addComponent(summaryGlobalCommentField)))
                     .addGroup(summaryPanelLayout.createSequentialGroup()
@@ -293,8 +334,8 @@ public final class LocalizationUI extends javax.swing.JFrame {
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(summaryPanelLayout.createSequentialGroup()
                         .addComponent(summaryAppearsOnPagesLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 1060, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jScrollPane5)))
                 .addContainerGap())
         );
         summaryPanelLayout.setVerticalGroup(
@@ -309,7 +350,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
                     .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(summaryPanelLayout.createSequentialGroup()
                         .addComponent(summaryEnglishKeyLabel)
-                        .addGap(15, 15, 15)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(summaryWordWrapCheckbox)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(summaryPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -333,15 +374,150 @@ public final class LocalizationUI extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        localeSettingsLabel.setText("Locale Settings");
+
+        localeSettingsPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        localeSettingsLocaleIdLabel.setText("Locale ID");
+
+        localeSettingsLocaleIdField.setEditable(false);
+        localeSettingsLocaleIdField.setToolTipText("The locale id that uniquely identifies this translation within this locale");
+
+        localeSettingsLocaleCommentLabel.setText("Locale Comment");
+
+        jLabel4.setText("(English Preferred)");
+
+        localeSettingsLocaleCommentField.setToolTipText("Note about this segment to editors of this specific locale (English is preferred, but can be the locale language can be used as well)");
+        localeSettingsLocaleCommentField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                localeSettingsLocaleCommentFieldKeyReleased(evt);
+            }
+        });
+
+        localeSettingsMachineTranslationLabel.setText("Machine Translation");
+
+        localeSettingsMachineTranslationField.setEditable(false);
+        localeSettingsMachineTranslationField.setColumns(20);
+        localeSettingsMachineTranslationField.setLineWrap(true);
+        localeSettingsMachineTranslationField.setRows(5);
+        localeSettingsMachineTranslationField.setToolTipText("If generated (and allowed due to the settings), the machine generated translation.");
+        localeSettingsMachineTranslationField.setWrapStyleWord(true);
+        jScrollPane6.setViewportView(localeSettingsMachineTranslationField);
+
+        localeSettingsManualTranslationLabel.setText("Manual Translation");
+
+        localeSettingsManualTranslationField.setColumns(20);
+        localeSettingsManualTranslationField.setLineWrap(true);
+        localeSettingsManualTranslationField.setRows(5);
+        localeSettingsManualTranslationField.setToolTipText("The manual translation. This overrides the machine translation, if available.");
+        localeSettingsManualTranslationField.setWrapStyleWord(true);
+        localeSettingsManualTranslationField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                localeSettingsManualTranslationFieldKeyReleased(evt);
+            }
+        });
+        jScrollPane7.setViewportView(localeSettingsManualTranslationField);
+
+        localeSettingsMachineTranslationWordWrapCheckbox.setSelected(true);
+        localeSettingsMachineTranslationWordWrapCheckbox.setText("Word Wrap");
+        localeSettingsMachineTranslationWordWrapCheckbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                localeSettingsMachineTranslationWordWrapCheckboxActionPerformed(evt);
+            }
+        });
+
+        localeSettingsManualTranslationWordWrapCheckbox.setSelected(true);
+        localeSettingsManualTranslationWordWrapCheckbox.setText("Word Wrap");
+        localeSettingsManualTranslationWordWrapCheckbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                localeSettingsManualTranslationWordWrapCheckboxActionPerformed(evt);
+            }
+        });
+
+        localeSettingsMachineTranslationGenerateButton.setText("Generate");
+        localeSettingsMachineTranslationGenerateButton.setToolTipText("Generates a machine translation. Only available for the art locale, or if an Azure Key is stored.");
+        localeSettingsMachineTranslationGenerateButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                localeSettingsMachineTranslationGenerateButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout localeSettingsPanelLayout = new javax.swing.GroupLayout(localeSettingsPanel);
+        localeSettingsPanel.setLayout(localeSettingsPanelLayout);
+        localeSettingsPanelLayout.setHorizontalGroup(
+            localeSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(localeSettingsPanelLayout.createSequentialGroup()
+                .addGroup(localeSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(localeSettingsPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(localeSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(localeSettingsLocaleIdLabel)
+                            .addComponent(localeSettingsLocaleCommentLabel)))
+                    .addGroup(localeSettingsPanelLayout.createSequentialGroup()
+                        .addGap(48, 48, 48)
+                        .addComponent(jLabel4))
+                    .addGroup(localeSettingsPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(localeSettingsManualTranslationLabel))
+                    .addGroup(localeSettingsPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(localeSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(localeSettingsMachineTranslationWordWrapCheckbox)
+                            .addComponent(localeSettingsMachineTranslationLabel)
+                            .addComponent(localeSettingsManualTranslationWordWrapCheckbox)
+                            .addComponent(localeSettingsMachineTranslationGenerateButton))))
+                .addGap(31, 31, 31)
+                .addGroup(localeSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(localeSettingsLocaleIdField)
+                    .addComponent(localeSettingsLocaleCommentField)
+                    .addComponent(jScrollPane6)
+                    .addComponent(jScrollPane7))
+                .addContainerGap())
+        );
+        localeSettingsPanelLayout.setVerticalGroup(
+            localeSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(localeSettingsPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(localeSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(localeSettingsLocaleIdLabel)
+                    .addComponent(localeSettingsLocaleIdField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(localeSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(localeSettingsLocaleCommentLabel)
+                    .addComponent(localeSettingsLocaleCommentField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(localeSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(localeSettingsPanelLayout.createSequentialGroup()
+                        .addComponent(localeSettingsMachineTranslationLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(localeSettingsMachineTranslationWordWrapCheckbox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(localeSettingsMachineTranslationGenerateButton))
+                    .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(23, 23, 23)
+                .addGroup(localeSettingsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(localeSettingsPanelLayout.createSequentialGroup()
+                        .addComponent(localeSettingsManualTranslationLabel)
+                        .addGap(18, 18, 18)
+                        .addComponent(localeSettingsManualTranslationWordWrapCheckbox))
+                    .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout segmentDetailsPanelLayout = new javax.swing.GroupLayout(segmentDetailsPanel);
         segmentDetailsPanel.setLayout(segmentDetailsPanelLayout);
         segmentDetailsPanelLayout.setHorizontalGroup(
             segmentDetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(summaryPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(segmentDetailsPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(summaryDataLabel)
-                .addContainerGap(1161, Short.MAX_VALUE))
-            .addComponent(summaryPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(segmentDetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(summaryDataLabel)
+                    .addComponent(localeSettingsLabel))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(localeSettingsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         segmentDetailsPanelLayout.setVerticalGroup(
             segmentDetailsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -350,7 +526,11 @@ public final class LocalizationUI extends javax.swing.JFrame {
                 .addComponent(summaryDataLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(summaryPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(localeSettingsLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(localeSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(39, Short.MAX_VALUE))
         );
 
         segmentDetailsLabel.setText("Segment Details");
@@ -361,11 +541,34 @@ public final class LocalizationUI extends javax.swing.JFrame {
 
         filtersLabel.setText("Filters");
 
-        showMissingTranslationsCheckbox.setText("Show Missing Translations");
-        showMissingTranslationsCheckbox.setToolTipText("Shows only segments that are missing either a machine translation or a manual translation, and therefore appear in English on the page");
+        viewPageInBrowserButton.setText("View Page In Browser");
+        viewPageInBrowserButton.setEnabled(false);
+        viewPageInBrowserButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                viewPageInBrowserButtonActionPerformed(evt);
+            }
+        });
 
-        showUncategorizedCheckbox.setText("Show Uncategorized");
-        showUncategorizedCheckbox.setToolTipText("Shows only segments that have not been marked as machine translatable or not");
+        filtersButtonGroup.add(filterShowAllRadioButton);
+        filterShowAllRadioButton.setSelected(true);
+        filterShowAllRadioButton.setText("Show All");
+        filterShowAllRadioButton.setToolTipText("Shows all segments");
+
+        filtersButtonGroup.add(filterShowUntranslatedRadioButton);
+        filterShowUntranslatedRadioButton.setText("Show Untranslated");
+        filterShowUntranslatedRadioButton.setToolTipText("Shows only segments that are missing any translation at all");
+
+        filtersButtonGroup.add(filterShowUncategorizedRadioButton);
+        filterShowUncategorizedRadioButton.setText("Show Uncategorized");
+        filterShowUncategorizedRadioButton.setToolTipText("Shows only segments that are not categorized for machine translation yet");
+
+        filtersButtonGroup.add(filterShowSuspectRadioButton);
+        filterShowSuspectRadioButton.setText("Show Suspect");
+        filterShowSuspectRadioButton.setToolTipText("Shows only segments that have been marked as suspect");
+
+        filtersButtonGroup.add(filterShowTranslatableRadioButton);
+        filterShowTranslatableRadioButton.setText("Show Translatable");
+        filterShowTranslatableRadioButton.setToolTipText("Shows only segments that are marked as translatable");
 
         fileMenu.setText("File");
 
@@ -469,14 +672,18 @@ public final class LocalizationUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(pagesLabel)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 267, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 267, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(viewPageInBrowserButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(segmentsLabel)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 174, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(filtersLabel)
-                    .addComponent(showMissingTranslationsCheckbox)
-                    .addComponent(showUncategorizedCheckbox))
+                    .addComponent(filterShowAllRadioButton)
+                    .addComponent(filterShowUntranslatedRadioButton)
+                    .addComponent(filterShowUncategorizedRadioButton)
+                    .addComponent(filterShowSuspectRadioButton)
+                    .addComponent(filterShowTranslatableRadioButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(segmentDetailsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -498,15 +705,24 @@ public final class LocalizationUI extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(segmentDetailsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jScrollPane1)
-                    .addComponent(jScrollPane2)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 886, Short.MAX_VALUE)
+                        .addComponent(jScrollPane2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(viewPageInBrowserButton))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(filtersLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(showMissingTranslationsCheckbox)
+                        .addComponent(filterShowAllRadioButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(showUncategorizedCheckbox)))
+                        .addComponent(filterShowUntranslatedRadioButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(filterShowUncategorizedRadioButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(filterShowSuspectRadioButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(filterShowTranslatableRadioButton)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(statusPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -515,34 +731,41 @@ public final class LocalizationUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void loadMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadMenuActionPerformed
-        JFileChooser fc = new JFileChooser();
-		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		int returnVal = fc.showOpenDialog(LocalizationUI.this);
-		if(returnVal == JFileChooser.APPROVE_OPTION) {
-			File file = fc.getSelectedFile();
-			initializeTranslationDb(file);
+		if(!unsavedChanges || UIUtils.confirm(this, "Unsaved Changes",
+				"You have unsaved changes, loading will lose them, would you like to continue?")) {
+			JFileChooser fc = new JFileChooser();
+			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			int returnVal = fc.showOpenDialog(LocalizationUI.this);
+			if(returnVal == JFileChooser.APPROVE_OPTION) {
+				File file = fc.getSelectedFile();
+				initializeTranslationDb(file);
+			}
 		}
+
     }//GEN-LAST:event_loadMenuActionPerformed
 
     private void saveMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveMenuActionPerformed
-        // TODO add your handling code here:
+        if(unsavedChanges) {
+			new Thread(() -> {
+				try {
+					translations.save();
+					setUnsavedChanges(false);
+					setStatus("Finished.");
+				} catch(IOException ex) {
+					UIUtils.alert(this, "Error while saving!", "Could not save the database: " + ex.getMessage(),
+							UIUtils.MessageType.ERROR);
+					setStatus("Error saving...");
+				}
+			}).start();
+			setStatus("Saving...");
+		}
     }//GEN-LAST:event_saveMenuActionPerformed
 
     private void exitMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuActionPerformed
         if(!unsavedChanges) {
 			System.exit(0);
 		} else {
-			Object[] options = {"Quit anyways",
-				"Resume editing"};
-			int n = JOptionPane.showOptionDialog(this,
-					"You have unsaved changes, are you sure you want to quit?",
-					"Unsaved changes",
-					JOptionPane.YES_NO_OPTION,
-					JOptionPane.QUESTION_MESSAGE,
-					null, //do not use a custom Icon
-					options, //the titles of buttons
-					options[0]); //default button title
-			if(n == 0) {
+			if(UIUtils.confirm(this, "Unsaved Changes", "You have unsaved changes, are you sure you want to quit?")) {
 				System.exit(0);
 			}
 		}
@@ -669,8 +892,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
     }//GEN-LAST:event_summaryMachineTranslatableNoActionPerformed
 
     private void summaryWordWrapCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_summaryWordWrapCheckboxActionPerformed
-        boolean b = summaryWordWrapCheckbox.isSelected();
-		summaryEnglishKeyField.setLineWrap(b);
+		summaryEnglishKeyField.setLineWrap(summaryWordWrapCheckbox.isSelected());
     }//GEN-LAST:event_summaryWordWrapCheckboxActionPerformed
 
     private void summaryAppearsOnPagesListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_summaryAppearsOnPagesListMouseClicked
@@ -681,6 +903,54 @@ public final class LocalizationUI extends javax.swing.JFrame {
 			segmentsList.setSelectedValue(currentSegment, true);
 		}
     }//GEN-LAST:event_summaryAppearsOnPagesListMouseClicked
+
+    private void localeSettingsMachineTranslationWordWrapCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_localeSettingsMachineTranslationWordWrapCheckboxActionPerformed
+        localeSettingsMachineTranslationField.setLineWrap(localeSettingsMachineTranslationWordWrapCheckbox.isSelected());
+    }//GEN-LAST:event_localeSettingsMachineTranslationWordWrapCheckboxActionPerformed
+
+    private void localeSettingsManualTranslationWordWrapCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_localeSettingsManualTranslationWordWrapCheckboxActionPerformed
+        localeSettingsManualTranslationField.setLineWrap(localeSettingsManualTranslationWordWrapCheckbox.isSelected());
+    }//GEN-LAST:event_localeSettingsManualTranslationWordWrapCheckboxActionPerformed
+
+    private void localeSettingsLocaleCommentFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_localeSettingsLocaleCommentFieldKeyReleased
+        updateCurrent();
+    }//GEN-LAST:event_localeSettingsLocaleCommentFieldKeyReleased
+
+    private void localeSettingsManualTranslationFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_localeSettingsManualTranslationFieldKeyReleased
+        updateCurrent();
+    }//GEN-LAST:event_localeSettingsManualTranslationFieldKeyReleased
+
+    private void localeSettingsMachineTranslationGenerateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_localeSettingsMachineTranslationGenerateButtonActionPerformed
+        if(localeList.getSelectedIndex() == 0) {
+			return;
+		}
+		final String locale = localeList.getSelectedValue();
+		if(!locale.equals("art") && azureKey == null) {
+			return;
+		}
+		final TranslationMemory tm = currentMemory;
+		setStatus("Looking up translation...");
+
+		new Thread(() -> {
+			String t = translations.doMachineTranslation(azureEndpoint, azureKey,
+					locale, currentMemory.getEnglishKey());
+			tm.setAutomaticTranslation(t);
+			EventQueue.invokeLater(() -> {
+				setStatus("Finished.");
+				populateSegment(currentMemory);
+				updateCurrent();
+			});
+		}, "GenerateTranslationThread").start();
+    }//GEN-LAST:event_localeSettingsMachineTranslationGenerateButtonActionPerformed
+
+    private void viewPageInBrowserButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewPageInBrowserButtonActionPerformed
+		try {
+			UIUtils.openWebpage(new URL("https://methodscript.com"
+					+ pagesList.getSelectedValue().replace(".tmem.xml", ".html").replace("\\", "/")));
+		} catch(IOException | URISyntaxException ex) {
+			showError("Cannot open browser: " + ex.getMessage());
+		}
+    }//GEN-LAST:event_viewPageInBrowserButtonActionPerformed
 
 	/**
 	 * @param args the command line arguments
@@ -775,10 +1045,8 @@ public final class LocalizationUI extends javax.swing.JFrame {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				if(unsavedChanges) {
-					int sel = JOptionPane.showConfirmDialog(LocalizationUI.this,
-							"You have unsaved changes, are you sure you wish to quit?", "Confirm",
-							JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-					if(sel == JOptionPane.YES_OPTION) {
+					if(UIUtils.confirm(LocalizationUI.this, "Unsaved Changes",
+							"You have unsaved changes, are you sure you want to quit?")) {
 						System.exit(0);
 					}
 				} else {
@@ -801,17 +1069,19 @@ public final class LocalizationUI extends javax.swing.JFrame {
 		jumpToPageMenu.setEnabled(to);
 	}
 
-	private void setEntriesEnabled(boolean enabled) {
+	private void setSummarySettingsEnabled(boolean enabled) {
 		UIUtils.setEnabled(enabled, summaryGlobalCommentField,
 				summaryIsUntraslatable, summaryIsSuspectSegment, summaryMachineTranslatableUncategorizedRadioButton,
 				summaryMachineTranslatableYes, summaryMachineTranslatableNo, summaryAppearsOnPagesList);
 	}
 
+	private void setLocaleSettingsEnabled(boolean enabled) {
+		UIUtils.setEnabled(enabled, localeSettingsLocaleCommentField, localeSettingsMachineTranslationField,
+				localeSettingsMachineTranslationGenerateButton, localeSettingsManualTranslationField);
+	}
+
 	private void showError(String text) {
-		JOptionPane.showMessageDialog(LocalizationUI.this,
-			text,
-			"Error",
-			JOptionPane.ERROR_MESSAGE);
+		UIUtils.alert(this, "Error", text, UIUtils.MessageType.ERROR);
 	}
 
 	private String getBranding() {
@@ -846,6 +1116,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
 
 	private void initializeUIFromDatabase() {
 		setStatus("Finished.");
+
 		localeList.setModel(new ListModel<String>(){
 			@Override
 			public int getSize() {
@@ -865,13 +1136,6 @@ public final class LocalizationUI extends javax.swing.JFrame {
 
 			@Override
 			public void removeListDataListener(ListDataListener l) {}
-
-		});
-		localeList.addListSelectionListener(new ListSelectionListener() {
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
-				// TODO
-			}
 
 		});
 
@@ -897,10 +1161,6 @@ public final class LocalizationUI extends javax.swing.JFrame {
 
 		});
 
-		pagesList.addListSelectionListener((ListSelectionEvent lse) -> {
-			setupSegmentsList();
-		});
-
 		localeList.setSelectedIndex(0);
 		pagesList.setSelectedIndex(0);
 
@@ -910,6 +1170,9 @@ public final class LocalizationUI extends javax.swing.JFrame {
 	private void setupSegmentsList() {
 		int index = pagesList.getSelectedIndex();
 		String locale = localeList.getSelectedValue();
+		if(index == -1 || locale == null) {
+			return;
+		}
 		if(localeList.getSelectedIndex() == 0) {
 			locale = "art";
 		}
@@ -990,12 +1253,28 @@ public final class LocalizationUI extends javax.swing.JFrame {
 			});
 		}, "FindPagesThread").start();
 
-		setEntriesEnabled(true);
+		setSummarySettingsEnabled(true);
+
+		if(localeList.getSelectedIndex() != 0) {
+			if(localeList.getSelectedValue().equals("art") || azureKey != null) {
+				localeSettingsMachineTranslationGenerateButton.setEnabled(true);
+			}
+			localeSettingsLocaleIdField.setText(tm.getLocale() + "-" + tm.getId());
+			localeSettingsLocaleCommentField.setText(tm.getComment());
+			localeSettingsMachineTranslationField.setText(tm.getMachineTranslation());
+			localeSettingsManualTranslationField.setText(tm.getTranslation());
+			setLocaleSettingsEnabled(!summary.isSuspectSegment() && !summary.isUntranslatable());
+		} else {
+			setLocaleSettingsEnabled(false);
+			localeSettingsLocaleIdField.setText("");
+			localeSettingsLocaleCommentField.setText("");
+			localeSettingsMachineTranslationField.setText("");
+			localeSettingsManualTranslationField.setText("");
+		}
 	}
 
 	private void updateCurrent() {
-		unsavedChanges = true;
-		setTitle("* L10N Interface");
+		setUnsavedChanges(true);
 		{
 			// Summary
 			currentSummary.setComment(summaryGlobalCommentField.getText());
@@ -1010,6 +1289,14 @@ public final class LocalizationUI extends javax.swing.JFrame {
 				eFMT = null;
 			}
 			currentSummary.setEligibleForMachineTranslation(eFMT);
+		}
+		{
+			// Locale
+			if(localeList.getSelectedIndex() != 0) {
+				currentMemory.setComment(localeSettingsLocaleCommentField.getText());
+				currentMemory.setTranslation(localeSettingsManualTranslationField.getText());
+				setLocaleSettingsEnabled(!currentSummary.isSuspectSegment() && !currentSummary.isUntranslatable());
+			}
 		}
 	}
 
@@ -1040,11 +1327,31 @@ public final class LocalizationUI extends javax.swing.JFrame {
 		});
 	}
 
+	private void setUnsavedChanges(boolean to) {
+		unsavedChanges = to;
+		String p = "";
+		if(unsavedChanges) {
+			p = "* ";
+		}
+		String title = p + "L10N Interface";
+		EventQueue.invokeLater(() -> {
+			setTitle(title);
+			saveMenu.setEnabled(unsavedChanges);
+		});
+	}
+
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMenu;
     private javax.swing.JMenuItem azureKeyMenu;
     private javax.swing.JMenuItem exitMenu;
     private javax.swing.JMenu fileMenu;
+    private javax.swing.JRadioButton filterShowAllRadioButton;
+    private javax.swing.JRadioButton filterShowSuspectRadioButton;
+    private javax.swing.JRadioButton filterShowTranslatableRadioButton;
+    private javax.swing.JRadioButton filterShowUncategorizedRadioButton;
+    private javax.swing.JRadioButton filterShowUntranslatedRadioButton;
+    private javax.swing.ButtonGroup filtersButtonGroup;
     private javax.swing.JLabel filtersLabel;
     private javax.swing.JMenuItem findSegmentMenu;
     private javax.swing.JMenuItem forkDatabaseMenu;
@@ -1052,15 +1359,31 @@ public final class LocalizationUI extends javax.swing.JFrame {
     private javax.swing.JMenu helpMenuTop;
     private javax.swing.JLabel idLabel;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JScrollPane jScrollPane6;
+    private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JMenuItem jumpToPageMenu;
     private javax.swing.JMenuItem loadMenu;
     private javax.swing.JLabel localeLabel;
     private javax.swing.JList<String> localeList;
+    private javax.swing.JLabel localeSettingsLabel;
+    private javax.swing.JTextField localeSettingsLocaleCommentField;
+    private javax.swing.JLabel localeSettingsLocaleCommentLabel;
+    private javax.swing.JTextField localeSettingsLocaleIdField;
+    private javax.swing.JLabel localeSettingsLocaleIdLabel;
+    private javax.swing.JTextArea localeSettingsMachineTranslationField;
+    private javax.swing.JButton localeSettingsMachineTranslationGenerateButton;
+    private javax.swing.JLabel localeSettingsMachineTranslationLabel;
+    private javax.swing.JCheckBox localeSettingsMachineTranslationWordWrapCheckbox;
+    private javax.swing.JTextArea localeSettingsManualTranslationField;
+    private javax.swing.JLabel localeSettingsManualTranslationLabel;
+    private javax.swing.JCheckBox localeSettingsManualTranslationWordWrapCheckbox;
+    private javax.swing.JPanel localeSettingsPanel;
     private javax.swing.JLabel pagesLabel;
     private javax.swing.JList<String> pagesList;
     private javax.swing.JMenuItem saveMenu;
@@ -1068,8 +1391,6 @@ public final class LocalizationUI extends javax.swing.JFrame {
     private javax.swing.JPanel segmentDetailsPanel;
     private javax.swing.JLabel segmentsLabel;
     private javax.swing.JList<String> segmentsList;
-    private javax.swing.JCheckBox showMissingTranslationsCheckbox;
-    private javax.swing.JCheckBox showUncategorizedCheckbox;
     private java.awt.Label statusLabel;
     private javax.swing.JPanel statusPanel;
     private javax.swing.JLabel summaryAppearsOnPagesLabel;
@@ -1090,5 +1411,6 @@ public final class LocalizationUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox summaryWordWrapCheckbox;
     private javax.swing.JMenu toolsMenu;
     private javax.swing.JMenuBar topMenu;
+    private javax.swing.JButton viewPageInBrowserButton;
     // End of variables declaration//GEN-END:variables
 }

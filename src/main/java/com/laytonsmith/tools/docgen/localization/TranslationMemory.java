@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.xml.sax.SAXException;
 
 /**
@@ -29,26 +30,34 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 	private static final String BEGIN_BLOCK = "<translations>\n<comment></comment>\n";
 	private static final String END_BLOCK = "</translations>\n";
 
+	private final int translationId;
 	private final String englishKey;
 	private final String locale;
-	private final String comment;
-	private final String translation;
-	private final String automaticTranslation;
-	private final int translationId;
-	private final Boolean isMachineTranslatable;
-	private final boolean overrideMaster;
+	private String comment;
+	private String translation;
+	private String automaticTranslation;
 
-	public TranslationMemory(TranslationSummary summary, String englishKey, String locale, String comment,
+	public TranslationMemory(String englishKey, String locale, String comment,
 			String translation,
-			String automaticTranslation, int id, boolean overrideMaster) {
+			String automaticTranslation, int id) {
 		this.englishKey = englishKey;
 		this.locale = locale;
 		this.comment = comment;
 		this.translation = translation;
 		this.automaticTranslation = automaticTranslation;
 		this.translationId = id;
-		this.overrideMaster = overrideMaster;
-		isMachineTranslatable = summary.isMachineTranslatable(englishKey);
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public void setTranslation(String translation) {
+		this.translation = translation;
+	}
+
+	public void setAutomaticTranslation(String automaticTranslation) {
+		this.automaticTranslation = automaticTranslation;
 	}
 
 	public String getEnglishKey() {
@@ -67,8 +76,12 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 		return translationId;
 	}
 
-	public boolean isOverrideMaster() {
-		return overrideMaster;
+	public String getMachineTranslation() {
+		return this.automaticTranslation;
+	}
+
+	public String getTranslation() {
+		return this.translation;
 	}
 
 	@Override
@@ -84,7 +97,6 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 		b.append("\t<comment>").append(escape(comment)).append("</comment>\n");
 		b.append("\t<translation>").append(escape(translation)).append("</translation>\n");
 		b.append("\t<auto>").append(escape(automaticTranslation)).append("</auto>\n");
-		b.append("\t<overrideMaster>").append(overrideMaster).append("</overrideMaster>\n");
 		b.append("</translationBlock>\n");
 		return b.toString();
 	}
@@ -107,8 +119,7 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 		return BEGIN_BLOCK + b.toString() + END_BLOCK;
 	}
 
-	public static Map<String, TranslationMemory> fromTmemFile(TranslationSummary translationSummary,
-			String locale, String fileContents) throws IOException {
+	public static Map<String, TranslationMemory> fromTmemFile(String locale, String fileContents) throws IOException {
 		Map<String, TranslationMemory> memories = new HashMap<>();
 		if("".equals(fileContents)) {
 			return memories;
@@ -148,14 +159,12 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 		sax.addListener("/translations/translationBlock", (xpath, tag, attr, contents) -> {
 			int intId = Integer.parseInt(id.getObject().replaceAll(locale + "-(.*)", "$1"));
 			TranslationMemory tm = new TranslationMemory(
-					translationSummary,
 					key.getObject(),
 					locale,
 					comment.getObject(),
 					translation.getObject(),
 					automaticTranslation.getObject(),
-					intId,
-					overrideMaster.getObject());
+					intId);
 			memories.put(key.getObject(), tm);
 			id.setObject(null);
 			key.setObject(null);

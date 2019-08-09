@@ -61,7 +61,7 @@ public class FindDialog extends javax.swing.JDialog {
 		errorLabel.setVisible(false);
 		boolean matchCase = matchCaseCheckbox.isSelected();
 		boolean literalSearch = (searchTypeButtonGroup.getSelection() == literalSearchRadioButton.getModel());
-		String prefix = (matchCase ? "" : "(?s)");
+		String prefix = (matchCase ? "" : "(?i)");
 		String regex;
 		if(literalSearch) {
 			regex = Pattern.quote(searchField.getText());

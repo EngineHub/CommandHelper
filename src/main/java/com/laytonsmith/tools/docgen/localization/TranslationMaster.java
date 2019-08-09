@@ -54,8 +54,25 @@ public class TranslationMaster {
 	private void initialize() throws IOException {
 		File[] locales = translationDb.listFiles((File file) -> file.isDirectory());
 		for(File locale : locales) {
+			if(locale.getName().equals(".git")) {
+				continue;
+			}
 			String l = locale.getName();
 			initLocale(l, locale);
+		}
+	}
+
+	public String doMachineTranslation(String azureEndpoint, String azureKey, String locale, String english) {
+		if(locale.equals("art")) {
+			return english
+					.replace("a", "å")
+					.replace("e", "ə")
+					.replace("i", "î")
+					.replace("o", "ø")
+					.replace("u", "ü")
+					.replace("y", "ʎ");
+		} else {
+			return "TODO: NOT YET SUPPORTED";
 		}
 	}
 
@@ -67,24 +84,11 @@ public class TranslationMaster {
 	}
 	private class PageTranslations {
 		File file;
-		Map<String, TranslationMemory> blocks;
-		String locale;
-
 		/**
-		 * Given the master translation file, rewrites the local page blocks with the data in the master file, if they
-		 * aren't marked with override master.
-		 * @param master
+		 * Set of EnglishKeys on this page
 		 */
-		private void rewriteFromMaster(Map<String, TranslationMemory> master) {
-			for(TranslationMemory tm : blocks.values()) {
-				if(!tm.isOverrideMaster()) {
-					if(master.containsKey(tm.getEnglishKey())) {
-						TranslationMemory masterTm = master.get(tm.getEnglishKey());
-						blocks.put(tm.getEnglishKey(), masterTm);
-					}
-				}
-			}
-		}
+		Set<String> blocks;
+		String locale;
 	}
 
 	private void initNewLocale(String localeName) {
@@ -107,8 +111,7 @@ public class TranslationMaster {
 			if(f.isDirectory()) {
 				return;
 			}
-			Map<String, TranslationMemory> tmem = TranslationMemory.fromTmemFile(translationSummary, localeName,
-					FileUtil.read(f));
+			Map<String, TranslationMemory> tmem = TranslationMemory.fromTmemFile(localeName, FileUtil.read(f));
 			if(f.getCanonicalFile().equals(master)) {
 				ltm.master = tmem;
 				for(TranslationMemory t : ltm.master.values()) {
@@ -117,7 +120,7 @@ public class TranslationMaster {
 			} else if(f.getName().endsWith(".tmem.xml")) {
 				PageTranslations pt = new PageTranslations();
 				pt.file = f;
-				pt.blocks = tmem;
+				pt.blocks = tmem.keySet();
 				pt.locale = localeName;
 				ltm.pages.put(f, pt);
 			} else {
@@ -186,13 +189,13 @@ public class TranslationMaster {
 			pt = new PageTranslations();
 			pt.file = page;
 			pt.locale = locale;
-			pt.blocks = new HashMap<>();
+			pt.blocks = new HashSet<>();
 			ltm.pages.put(page, pt);
 		} else {
 			pt = ltm.pages.get(page);
 		}
 
-		pt.blocks.put(memory.getEnglishKey(), memory);
+		pt.blocks.add(memory.getEnglishKey());
 	}
 
 	/**
@@ -223,8 +226,11 @@ public class TranslationMaster {
 			for(Map.Entry<File, PageTranslations> fpt : ltm.pages.entrySet()) {
 				File f = fpt.getKey();
 				PageTranslations pt = fpt.getValue();
-				pt.rewriteFromMaster(ltm.master);
-				String page = TranslationMemory.generateTranslationFile(pt.blocks);
+				Map<String, TranslationMemory> blocks = new HashMap<>();
+				pt.blocks.forEach((key) -> {
+					blocks.put(key, ltm.master.get(key));
+				});
+				String page = TranslationMemory.generateTranslationFile(blocks);
 				FileUtil.write(page, f, FileWriteMode.OVERWRITE, true);
 			}
 		}
@@ -262,16 +268,17 @@ public class TranslationMaster {
 	}
 
 	/**
-	 * Returns a list of all TranslationMemories that are on the given page. Note that this will return a different
-	 * segment than getting the master summary list.
+	 * Returns a list of all TranslationMemories that are on the given page.
 	 * @param locale
 	 * @param page
 	 * @return
 	 */
 	public List<TranslationMemory> getMemoriesForPage(String locale, String page) {
-		return new ArrayList<>(allLocales.get(locale)
+		Map<String, TranslationMemory> master = allLocales.get(locale).master;
+		Set<String> keys = allLocales.get(locale)
 				.pages.get(new File(translationDb, locale + "/" + page))
-				.blocks.values());
+				.blocks;
+		return new ArrayList<>(keys.stream().map((key) -> master.get(key)).collect(Collectors.toList()));
 	}
 
 	/**
@@ -311,13 +318,7 @@ public class TranslationMaster {
 	 * @return
 	 */
 	public TranslationMemory generateNewTranslation(String locale, String englishKey, int id) {
-		if("art".equals(locale)) {
-			// Eventually, once I get all the escapes done, this can be programmatically translated. For now,
-			// it's the same as other locales.
-			return new TranslationMemory(translationSummary, englishKey, locale, "", "", "", id, false);
-		} else {
-			return new TranslationMemory(translationSummary, englishKey, locale, "", "", "", id, false);
-		}
+		return new TranslationMemory(englishKey, locale, "", "", "", id);
 	}
 
 	private static final String[] SEGMENT_SEP = new String[]{
@@ -401,6 +402,9 @@ public class TranslationMaster {
 		inputString = inputString.replaceAll("(?s)%%CODE.*?%%", "");
 		inputString = inputString.replaceAll("(?s)<%ALIAS.*?%>", "");
 		inputString = inputString.replaceAll("(?s)%%ALIAS.*?%%", "");
+		inputString = inputString.replaceAll("(?s)<%PRE.*?%>", "");
+		inputString = inputString.replaceAll("(?s)%%PRE.*?%%", "");
+		inputString = inputString.replaceAll("(?s)<pre.*?</pre>", "");
 		inputString = inputString.replaceAll("\\{\\{.*?\\}\\}", "%s");
 		inputString = inputString.replaceAll("\\[\\[.*?\\|(.*?)\\]\\]", "[[%s|$1]]");
 		inputString = inputString.replaceAll("\\[\\[File:.*?\\]\\]", "");
@@ -497,37 +501,37 @@ public class TranslationMaster {
 							+ tm.getId() + " does not exist in the summary file!");
 				}
 			}
-			for(PageTranslations pt : ltm.pages.values()) {
-				for(TranslationMemory tm : pt.blocks.values()) {
-					for(TranslationMemory tm2 : pt.blocks.values()) {
-						if(tm == tm2) {
-							continue;
-						}
-						if(tm.getId() == tm2.getId()) {
-							errors.add("Two entries in the " + pt.file + " file for the " + ltm.locale + " locale"
-									+ " have the same id: " + tm.getId());
-						}
-						if(tm.getEnglishKey().equals(tm2.getEnglishKey())) {
-							errors.add("Two entries in the " + pt.file + " file for the " + ltm.locale + " locale"
-									+ " have the same key: "
-									+ ltm.locale + "-" + tm.getId() + " and "
-									+ ltm.locale + "-" + tm2.getId());
-						}
-					}
-
-					int summaryId = this.translationSummary.getTranslationId(tm.getEnglishKey());
-					if(summaryId != tm.getId()) {
-						errors.add("The id defined in " + pt.file + " for the " + ltm.locale + " locale for "
-								+ tm.getId() + " does not exist in the summary file!");
-					}
-
-					int masterId = allLocales.get(pt.locale).master.get(tm.getEnglishKey()).getId();
-					if(masterId != tm.getId()) {
-						errors.add("The id defined in " + pt.file + " for the " + ltm.locale + " locale for "
-								+ tm.getId() + " does not exist in the master.tmem.xml file!");
-					}
-				}
-			}
+//			for(PageTranslations pt : ltm.pages.values()) {
+//				for(TranslationMemory tm : pt.blocks.values()) {
+//					for(TranslationMemory tm2 : pt.blocks.values()) {
+//						if(tm == tm2) {
+//							continue;
+//						}
+//						if(tm.getId() == tm2.getId()) {
+//							errors.add("Two entries in the " + pt.file + " file for the " + ltm.locale + " locale"
+//									+ " have the same id: " + tm.getId());
+//						}
+//						if(tm.getEnglishKey().equals(tm2.getEnglishKey())) {
+//							errors.add("Two entries in the " + pt.file + " file for the " + ltm.locale + " locale"
+//									+ " have the same key: "
+//									+ ltm.locale + "-" + tm.getId() + " and "
+//									+ ltm.locale + "-" + tm2.getId());
+//						}
+//					}
+//
+//					int summaryId = this.translationSummary.getTranslationId(tm.getEnglishKey());
+//					if(summaryId != tm.getId()) {
+//						errors.add("The id defined in " + pt.file + " for the " + ltm.locale + " locale for "
+//								+ tm.getId() + " does not exist in the summary file!");
+//					}
+//
+//					int masterId = allLocales.get(pt.locale).master.get(tm.getEnglishKey()).getId();
+//					if(masterId != tm.getId()) {
+//						errors.add("The id defined in " + pt.file + " for the " + ltm.locale + " locale for "
+//								+ tm.getId() + " does not exist in the master.tmem.xml file!");
+//					}
+//				}
+//			}
 		}
 		return errors;
 	}

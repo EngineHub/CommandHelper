@@ -17,6 +17,7 @@ here: http://en.wikipedia.org/wiki/Cron However, information for this function s
 Barring predefined special schedule definitions, a cronFormat is specified with 5 "sections", each separated by one
 or more space (or tabs).
 
+<pre>
  # *    *    *    *    *
  # ┬    ┬    ┬    ┬    ┬
  # │    │    │    │    │
@@ -26,6 +27,7 @@ or more space (or tabs).
  # │    │    └─────────────── day of month (1 - 31)
  # │    └──────────────────── hour (0 - 23) (The strings "noon" (12) and "midnight" (0) are also acceptable
  # └───────────────────────── min (0 - 59)
+</pre>
 
 If a star is present in each position, it means that it will trigger regardless of what the current date/time for
 that segment is. For instance:
@@ -71,15 +73,15 @@ There are a few special predefined schedules, for very common cases:
 |-
 !Entry                   !!Description                    !!Equivalent To
 |-
-|<code>@yearly (or @annually)</code>    ||Run once a year at midnight in the morning of January 1              ||<code>0 0 1 1  *</code>
+|<code>@yearly (or @annually)</code>    || Run once a year at midnight in the morning of January 1              || <code>0 0 1 1  *</code>
 |-
-|<code>@monthly</code>   ||Run once a month at midnight in the morning of the first of the month               ||<code>0 0 1 * * </code>
+|<code>@monthly</code>   || Run once a month at midnight in the morning of the first of the month               || <code>0 0 1 * * </code>
 |-
-|<code>@weekly</code>    ||Run once a week at midnight in the morning of Sunday             ||<code>0 0 * * 0 </code>
+|<code>@weekly</code>    || Run once a week at midnight in the morning of Sunday             || <code>0 0 * * 0 </code>
 |-
-|<code>@daily</code>     ||Run once a day at midnight                 ||<code>0 0 * * *</code>
+|<code>@daily</code>     || Run once a day at midnight                 || <code>0 0 * * *</code>
 |-
-|<code>@hourly</code>    ||Run once an hour at the beginning of the hour               ||<code>0 * * * *</code>
+|<code>@hourly</code>    || Run once an hour at the beginning of the hour               || <code>0 * * * *</code>
 |}
 
 Caveats:

@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<Form version="1.5" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
+<Form version="1.8" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
   <NonVisualComponents>
     <Component class="javax.swing.ButtonGroup" name="summaryEligibleForMachineTranslationButtonGroup">
+    </Component>
+    <Component class="javax.swing.ButtonGroup" name="filtersButtonGroup">
     </Component>
     <Menu class="javax.swing.JMenuBar" name="topMenu">
       <SubComponents>
@@ -145,14 +147,18 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="pagesLabel" min="-2" max="-2" attributes="0"/>
                   <Component id="jScrollPane2" min="-2" pref="267" max="-2" attributes="0"/>
+                  <Component id="viewPageInBrowserButton" alignment="0" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="segmentsLabel" min="-2" max="-2" attributes="0"/>
                   <Component id="jScrollPane3" alignment="0" min="-2" pref="174" max="-2" attributes="0"/>
                   <Component id="filtersLabel" min="-2" max="-2" attributes="0"/>
-                  <Component id="showMissingTranslationsCheckbox" min="-2" max="-2" attributes="0"/>
-                  <Component id="showUncategorizedCheckbox" min="-2" max="-2" attributes="0"/>
+                  <Component id="filterShowAllRadioButton" min="-2" max="-2" attributes="0"/>
+                  <Component id="filterShowUntranslatedRadioButton" min="-2" max="-2" attributes="0"/>
+                  <Component id="filterShowUncategorizedRadioButton" min="-2" max="-2" attributes="0"/>
+                  <Component id="filterShowSuspectRadioButton" min="-2" max="-2" attributes="0"/>
+                  <Component id="filterShowTranslatableRadioButton" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
@@ -180,15 +186,25 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="segmentDetailsPanel" max="32767" attributes="0"/>
                   <Component id="jScrollPane1" max="32767" attributes="0"/>
-                  <Component id="jScrollPane2" alignment="0" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
-                      <Component id="jScrollPane3" pref="886" max="32767" attributes="0"/>
+                      <Component id="jScrollPane2" max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="viewPageInBrowserButton" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="jScrollPane3" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="filtersLabel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="showMissingTranslationsCheckbox" min="-2" max="-2" attributes="0"/>
+                      <Component id="filterShowAllRadioButton" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="showUncategorizedCheckbox" min="-2" max="-2" attributes="0"/>
+                      <Component id="filterShowUntranslatedRadioButton" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="filterShowUncategorizedRadioButton" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="filterShowSuspectRadioButton" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="filterShowTranslatableRadioButton" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -283,12 +299,16 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="summaryDataLabel" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="1161" max="32767" attributes="0"/>
-              </Group>
               <Component id="summaryPanel" alignment="0" max="32767" attributes="0"/>
+              <Group type="102" attributes="0">
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="summaryDataLabel" min="-2" max="-2" attributes="0"/>
+                      <Component id="localeSettingsLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace max="32767" attributes="0"/>
+              </Group>
+              <Component id="localeSettingsPanel" alignment="0" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
@@ -298,7 +318,11 @@
                   <Component id="summaryDataLabel" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="summaryPanel" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="32767" attributes="0"/>
+                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                  <Component id="localeSettingsLabel" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="localeSettingsPanel" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace pref="39" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -329,11 +353,14 @@
                                   <Component id="idLabel" min="-2" max="-2" attributes="0"/>
                                   <Component id="summaryEnglishKeyLabel" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Component id="summaryGlobalCommentLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  <Component id="summaryWordWrapCheckbox" min="-2" max="-2" attributes="0"/>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
+                                      <Component id="summaryWordWrapCheckbox" min="-2" max="-2" attributes="0"/>
+                                  </Group>
                               </Group>
                               <EmptySpace min="-2" pref="57" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="jScrollPane4" max="32767" attributes="0"/>
+                                  <Component id="jScrollPane4" pref="1038" max="32767" attributes="0"/>
                                   <Component id="summaryIdField" max="32767" attributes="0"/>
                                   <Component id="summaryGlobalCommentField" alignment="0" max="32767" attributes="0"/>
                               </Group>
@@ -358,8 +385,8 @@
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
                               <Component id="summaryAppearsOnPagesLabel" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="32767" attributes="0"/>
-                              <Component id="jScrollPane5" min="-2" pref="1060" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="jScrollPane5" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
@@ -379,7 +406,7 @@
                           <Component id="jScrollPane4" min="-2" max="-2" attributes="0"/>
                           <Group type="102" attributes="0">
                               <Component id="summaryEnglishKeyLabel" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="summaryWordWrapCheckbox" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
@@ -556,6 +583,210 @@
             </Component>
           </SubComponents>
         </Container>
+        <Component class="javax.swing.JLabel" name="localeSettingsLabel">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Locale Settings"/>
+          </Properties>
+        </Component>
+        <Container class="javax.swing.JPanel" name="localeSettingsPanel">
+          <Properties>
+            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+              <Border info="org.netbeans.modules.form.compat2.border.LineBorderInfo">
+                <LineBorder/>
+              </Border>
+            </Property>
+          </Properties>
+
+          <Layout>
+            <DimensionLayout dim="0">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="localeSettingsLocaleIdLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="localeSettingsLocaleCommentLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace min="-2" pref="48" max="-2" attributes="0"/>
+                              <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="localeSettingsManualTranslationLabel" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="1" attributes="0">
+                                  <Component id="localeSettingsMachineTranslationWordWrapCheckbox" min="-2" max="-2" attributes="0"/>
+                                  <Component id="localeSettingsMachineTranslationLabel" min="-2" max="-2" attributes="0"/>
+                                  <Component id="localeSettingsManualTranslationWordWrapCheckbox" alignment="1" min="-2" max="-2" attributes="0"/>
+                                  <Component id="localeSettingsMachineTranslationGenerateButton" alignment="1" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                          </Group>
+                      </Group>
+                      <EmptySpace min="-2" pref="31" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="localeSettingsLocaleIdField" max="32767" attributes="0"/>
+                          <Component id="localeSettingsLocaleCommentField" max="32767" attributes="0"/>
+                          <Component id="jScrollPane6" alignment="0" max="32767" attributes="0"/>
+                          <Component id="jScrollPane7" alignment="0" max="32767" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                  </Group>
+              </Group>
+            </DimensionLayout>
+            <DimensionLayout dim="1">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="localeSettingsLocaleIdLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="localeSettingsLocaleIdField" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="localeSettingsLocaleCommentLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="localeSettingsLocaleCommentField" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" attributes="0">
+                              <Component id="localeSettingsMachineTranslationLabel" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="localeSettingsMachineTranslationWordWrapCheckbox" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="localeSettingsMachineTranslationGenerateButton" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Component id="jScrollPane6" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace min="-2" pref="23" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" attributes="0">
+                              <Component id="localeSettingsManualTranslationLabel" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Component id="localeSettingsManualTranslationWordWrapCheckbox" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Component id="jScrollPane7" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="32767" attributes="0"/>
+                  </Group>
+              </Group>
+            </DimensionLayout>
+          </Layout>
+          <SubComponents>
+            <Component class="javax.swing.JLabel" name="localeSettingsLocaleIdLabel">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Locale ID"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JTextField" name="localeSettingsLocaleIdField">
+              <Properties>
+                <Property name="editable" type="boolean" value="false"/>
+                <Property name="toolTipText" type="java.lang.String" value="The locale id that uniquely identifies this translation within this locale"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="localeSettingsLocaleCommentLabel">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Locale Comment"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel4">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="(English Preferred)"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JTextField" name="localeSettingsLocaleCommentField">
+              <Properties>
+                <Property name="toolTipText" type="java.lang.String" value="Note about this segment to editors of this specific locale (English is preferred, but can be the locale language can be used as well)"/>
+              </Properties>
+              <Events>
+                <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="localeSettingsLocaleCommentFieldKeyReleased"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JLabel" name="localeSettingsMachineTranslationLabel">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Machine Translation"/>
+              </Properties>
+            </Component>
+            <Container class="javax.swing.JScrollPane" name="jScrollPane6">
+              <AuxValues>
+                <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
+              </AuxValues>
+
+              <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+              <SubComponents>
+                <Component class="javax.swing.JTextArea" name="localeSettingsMachineTranslationField">
+                  <Properties>
+                    <Property name="editable" type="boolean" value="false"/>
+                    <Property name="columns" type="int" value="20"/>
+                    <Property name="lineWrap" type="boolean" value="true"/>
+                    <Property name="rows" type="int" value="5"/>
+                    <Property name="toolTipText" type="java.lang.String" value="If generated (and allowed due to the settings), the machine generated translation."/>
+                    <Property name="wrapStyleWord" type="boolean" value="true"/>
+                  </Properties>
+                </Component>
+              </SubComponents>
+            </Container>
+            <Component class="javax.swing.JLabel" name="localeSettingsManualTranslationLabel">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Manual Translation"/>
+              </Properties>
+            </Component>
+            <Container class="javax.swing.JScrollPane" name="jScrollPane7">
+              <AuxValues>
+                <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
+              </AuxValues>
+
+              <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+              <SubComponents>
+                <Component class="javax.swing.JTextArea" name="localeSettingsManualTranslationField">
+                  <Properties>
+                    <Property name="columns" type="int" value="20"/>
+                    <Property name="lineWrap" type="boolean" value="true"/>
+                    <Property name="rows" type="int" value="5"/>
+                    <Property name="toolTipText" type="java.lang.String" value="The manual translation. This overrides the machine translation, if available."/>
+                    <Property name="wrapStyleWord" type="boolean" value="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="localeSettingsManualTranslationFieldKeyReleased"/>
+                  </Events>
+                </Component>
+              </SubComponents>
+            </Container>
+            <Component class="javax.swing.JCheckBox" name="localeSettingsMachineTranslationWordWrapCheckbox">
+              <Properties>
+                <Property name="selected" type="boolean" value="true"/>
+                <Property name="text" type="java.lang.String" value="Word Wrap"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="localeSettingsMachineTranslationWordWrapCheckboxActionPerformed"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JCheckBox" name="localeSettingsManualTranslationWordWrapCheckbox">
+              <Properties>
+                <Property name="selected" type="boolean" value="true"/>
+                <Property name="text" type="java.lang.String" value="Word Wrap"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="localeSettingsManualTranslationWordWrapCheckboxActionPerformed"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JButton" name="localeSettingsMachineTranslationGenerateButton">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Generate"/>
+                <Property name="toolTipText" type="java.lang.String" value="Generates a machine translation. Only available for the art locale, or if an Azure Key is stored."/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="localeSettingsMachineTranslationGenerateButtonActionPerformed"/>
+              </Events>
+            </Component>
+          </SubComponents>
+        </Container>
       </SubComponents>
     </Container>
     <Component class="javax.swing.JLabel" name="segmentDetailsLabel">
@@ -587,16 +818,59 @@
         <Property name="text" type="java.lang.String" value="Filters"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JCheckBox" name="showMissingTranslationsCheckbox">
+    <Component class="javax.swing.JButton" name="viewPageInBrowserButton">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Show Missing Translations"/>
-        <Property name="toolTipText" type="java.lang.String" value="Shows only segments that are missing either a machine translation or a manual translation, and therefore appear in English on the page"/>
+        <Property name="text" type="java.lang.String" value="View Page In Browser"/>
+        <Property name="enabled" type="boolean" value="false"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="viewPageInBrowserButtonActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JRadioButton" name="filterShowAllRadioButton">
+      <Properties>
+        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+          <ComponentRef name="filtersButtonGroup"/>
+        </Property>
+        <Property name="selected" type="boolean" value="true"/>
+        <Property name="text" type="java.lang.String" value="Show All"/>
+        <Property name="toolTipText" type="java.lang.String" value="Shows all segments"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JCheckBox" name="showUncategorizedCheckbox">
+    <Component class="javax.swing.JRadioButton" name="filterShowUntranslatedRadioButton">
       <Properties>
+        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+          <ComponentRef name="filtersButtonGroup"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Show Untranslated"/>
+        <Property name="toolTipText" type="java.lang.String" value="Shows only segments that are missing any translation at all"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JRadioButton" name="filterShowUncategorizedRadioButton">
+      <Properties>
+        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+          <ComponentRef name="filtersButtonGroup"/>
+        </Property>
         <Property name="text" type="java.lang.String" value="Show Uncategorized"/>
-        <Property name="toolTipText" type="java.lang.String" value="Shows only segments that have not been marked as machine translatable or not"/>
+        <Property name="toolTipText" type="java.lang.String" value="Shows only segments that are not categorized for machine translation yet"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JRadioButton" name="filterShowSuspectRadioButton">
+      <Properties>
+        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+          <ComponentRef name="filtersButtonGroup"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Show Suspect"/>
+        <Property name="toolTipText" type="java.lang.String" value="Shows only segments that have been marked as suspect"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JRadioButton" name="filterShowTranslatableRadioButton">
+      <Properties>
+        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+          <ComponentRef name="filtersButtonGroup"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Show Translatable"/>
+        <Property name="toolTipText" type="java.lang.String" value="Shows only segments that are marked as translatable"/>
       </Properties>
     </Component>
   </SubComponents>

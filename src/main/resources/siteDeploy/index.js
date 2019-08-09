@@ -312,7 +312,9 @@
                     }
                     lastCellWasTH = false;
                     // don't split on || or it'll catch OR operators
-                    ret += "<td>" + line.substr(1); //join(line.substr(1).split(/\|\|/g), "</td><td>");
+					// however, <nowiki>||</nowiki> will fix that.
+                    ret += "<td>" + join(line.substr(1).split(/\|\|(?!<\/nowiki>)/g), "</td><td>")
+							.replace(/<nowiki>\|\|<\/nowiki>/g, '||');
                     finishLast = true;
                 } else {
                     // continuation of previous line, just output the line with \n
