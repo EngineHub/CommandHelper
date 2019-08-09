@@ -88,6 +88,11 @@ public class BukkitMCMaterial implements MCMaterial {
 	}
 
 	@Override
+	public boolean isLegacy() {
+		return m.isLegacy();
+	}
+
+	@Override
 	public float getHardness() {
 		return m.getHardness();
 	}

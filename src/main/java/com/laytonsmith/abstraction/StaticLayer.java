@@ -92,6 +92,10 @@ public final class StaticLayer {
 		return convertor.GetEnchantmentByName(name);
 	}
 
+	public static MCMaterial[] GetMaterialValues() {
+		return convertor.GetMaterialValues();
+	}
+
 	public static MCMaterial GetMaterial(String name) {
 		return convertor.GetMaterial(name);
 	}

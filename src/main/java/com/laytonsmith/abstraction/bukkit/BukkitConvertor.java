@@ -68,15 +68,15 @@ import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.abstraction.enums.MCVersion;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPatternShape;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionType;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -198,6 +198,16 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCServer GetServer() {
 		return BukkitMCServer.Get();
+	}
+
+	@Override
+	public MCMaterial[] GetMaterialValues() {
+		Material[] mats = Material.values();
+		MCMaterial[] ret = new MCMaterial[mats.length];
+		for(int i = 0; i < mats.length; i++) {
+			ret[i] = new BukkitMCMaterial(mats[i]);
+		}
+		return ret;
 	}
 
 	@Override

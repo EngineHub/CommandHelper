@@ -47,6 +47,8 @@ public interface Convertor {
 
 	void Startup(CommandHelperPlugin chp);
 
+	MCMaterial[] GetMaterialValues();
+
 	MCMaterial GetMaterialFromLegacy(String name, int data);
 
 	MCMaterial GetMaterialFromLegacy(int id, int data);
