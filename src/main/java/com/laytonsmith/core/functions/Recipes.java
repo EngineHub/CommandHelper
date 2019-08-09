@@ -177,9 +177,7 @@ public class Recipes {
 			CArray ret = new CArray(t);
 			List<MCRecipe> recipes = Static.getServer().allRecipes();
 			for(MCRecipe recipe : recipes) {
-				if(recipe != null) {
-					ret.push(ObjectGenerator.GetGenerator().recipe(recipe, t), t);
-				}
+				ret.push(ObjectGenerator.GetGenerator().recipe(recipe, t), t);
 			}
 
 			return ret;

@@ -567,7 +567,10 @@ public class BukkitMCServer implements MCServer {
 		List<MCRecipe> ret = new ArrayList<>();
 		for(Iterator<Recipe> recipes = s.recipeIterator(); recipes.hasNext();) {
 			Recipe recipe = recipes.next();
-			ret.add(BukkitConvertor.BukkitGetRecipe(recipe));
+			MCRecipe mcRecipe = BukkitConvertor.BukkitGetRecipe(recipe);
+			if(mcRecipe != null) {
+				ret.add(mcRecipe);
+			}
 		}
 		return ret;
 	}
