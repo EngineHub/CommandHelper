@@ -1329,7 +1329,7 @@ public class Minecraft {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray mats = new CArray(t);
 			for(MCMaterial mat : StaticLayer.GetMaterialValues()) {
-				if(!mat.getName().startsWith("LEGACY_")) {
+				if(!mat.isLegacy()) {
 					mats.push(new CString(mat.getName(), t), t);
 				}
 			}

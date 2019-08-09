@@ -34,6 +34,8 @@ public interface MCMaterial extends AbstractionObject {
 
 	boolean isInteractable();
 
+	boolean isLegacy();
+
 	float getHardness();
 
 	float getBlastResistance();
