@@ -1,16 +1,17 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.laytonsmith.tools.docgen.localization;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.CommandExecutor;
+import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.core.AbstractCommandLineTool;
 import com.laytonsmith.core.tool;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -82,13 +83,38 @@ public class LocalizationTools {
 						.setUsageName("path to database")
 						.setOptional()
 						.setName(DATABASE)
-						.setArgType(ArgumentParser.ArgumentBuilder.BuilderTypeNonFlag.STRING));
+						.setArgType(ArgumentParser.ArgumentBuilder.BuilderTypeNonFlag.STRING))
+					.addArgument(new ArgumentParser.ArgumentBuilder()
+						.setDescription("Runs the UI in the same shell process. By default, it creates a new"
+								+ " process and causes the initial shell to return.")
+						.asFlag()
+						.setName("in-shell"));
 		}
 
 		@Override
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
 			String database = parsedArgs.getStringArgument(DATABASE);
-			LocalizationUI.launch(database);
+			if(parsedArgs.isFlagSet("in-shell")) {
+				// Actually launch the GUI
+				LocalizationUI.launch(database);
+			} else {
+				// Relaunch the jar in a new process with the --run flag set,
+				// so that the process will be in its own subshell
+				List<String> largs = new ArrayList<>();
+				largs.add("java");
+				largs.add("-jar");
+				String jarPath = ClassDiscovery.GetClassContainer(LocalizationTools.class).getPath();
+				if(OSUtils.GetOS().isWindows() && jarPath.startsWith("/")) {
+					jarPath = jarPath.substring(1);
+				}
+				largs.add(jarPath);
+				largs.add("l10n-ui");
+				largs.addAll(parsedArgs.getRawArguments());
+				largs.add("--in-shell");
+				CommandExecutor ce = new CommandExecutor(largs.toArray(new String[largs.size()]));
+				ce.start();
+				System.exit(0);
+			}
 		}
 
 		@Override

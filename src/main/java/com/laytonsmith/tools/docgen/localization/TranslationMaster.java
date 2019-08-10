@@ -365,7 +365,7 @@ public class TranslationMaster {
 
 	/**
 	 * Unique segments are values that are very often repeated, and deserve being removed from other
-	 * segments, and being their own segment. This are literals, not regex.
+	 * segments, and being their own segment. These are literals, not regex.
 	 */
 	private static final String[] UNIQUE_SEGMENTS = new String[] {
 		"%s([[%s|Examples...]])",
@@ -382,7 +382,7 @@ public class TranslationMaster {
 	 * it is filtered out.
 	 */
 	private static final Set<String> USELESS_SEGMENTS = new HashSet<>(Arrays.asList(new String[]{
-		",",
+		",", "%%", "<%", "%>"
 	}));
 
 
@@ -404,6 +404,10 @@ public class TranslationMaster {
 		inputString = inputString.replaceAll("(?s)%%ALIAS.*?%%", "");
 		inputString = inputString.replaceAll("(?s)<%PRE.*?%>", "");
 		inputString = inputString.replaceAll("(?s)%%PRE.*?%%", "");
+		inputString = inputString.replaceAll("(?s)<%SYNTAX.*?%>", "");
+		inputString = inputString.replaceAll("(?s)%%SYNTAX.*?%%", "");
+		inputString = inputString.replaceAll("%%[a-zA-Z_]+%%", "");
+		inputString = inputString.replaceAll("<%[a-zA-Z_]+%>", "");
 		inputString = inputString.replaceAll("(?s)<pre.*?</pre>", "");
 		inputString = inputString.replaceAll("\\{\\{.*?\\}\\}", "%s");
 		inputString = inputString.replaceAll("\\[\\[.*?\\|(.*?)\\]\\]", "[[%s|$1]]");
@@ -465,8 +469,13 @@ public class TranslationMaster {
 				}
 				return true;
 			})
+			// Strings that are just numbers in their entirety can be removed. We may consider
+			// relocalizing them automatically later, but we do have to be careful about version
+			// numbers and such.
+			.filter((string) -> !string.matches("^[0-9\\.]+$"))
 			// Segments that are entirely just a function name are removed.
 			.filter((string) -> !FUNCTION_NAMES.contains(string))
+			// TODO Also add object names
 			.filter((string) -> !USELESS_SEGMENTS.contains(string))
 			.collect(Collectors.toSet());
 	}

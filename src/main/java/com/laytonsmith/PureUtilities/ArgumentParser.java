@@ -668,6 +668,11 @@ public final class ArgumentParser {
 
 		List<Argument> arguments = new ArrayList<>();
 		List<String> unclassified = new ArrayList<>();
+		List<String> rawArgs;
+
+		private ArgumentParserResults(List<String> rawArgs) {
+			this.rawArgs = new ArrayList<>(rawArgs);
+		}
 
 		private void updateArgument(Argument a) {
 			if(a == null) {
@@ -960,6 +965,14 @@ public final class ArgumentParser {
 				}
 			}
 			return b.toString();
+		}
+
+		/**
+		 * Returns a list of the raw, unprocessed arguments. This includes all arguments as is, with no processing.
+		 * @return
+		 */
+		public List<String> getRawArguments() {
+			return new ArrayList<>(rawArgs);
 		}
 	}
 
@@ -1361,7 +1374,7 @@ public final class ArgumentParser {
 	}
 
 	private ArgumentParserResults parse(List<String> args) throws ValidationException {
-		ArgumentParserResults results = new ArgumentParserResults();
+		ArgumentParserResults results = new ArgumentParserResults(args);
 		//Fill in results with all the defaults
 		for(Argument arg : argumentModel) {
 			if(arg.defaultVal != null) {
