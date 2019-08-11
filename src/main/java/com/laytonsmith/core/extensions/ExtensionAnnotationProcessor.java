@@ -25,7 +25,7 @@ import javax.tools.Diagnostic.Kind;
  * @author Jason Unger <entityreborn@gmail.com>
  */
 @SupportedAnnotationTypes({"com.laytonsmith.core.extensions.MSExtension"})
-@SupportedSourceVersion(SourceVersion.RELEASE_7)
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class ExtensionAnnotationProcessor extends AbstractProcessor {
 
 	int found = 0;
