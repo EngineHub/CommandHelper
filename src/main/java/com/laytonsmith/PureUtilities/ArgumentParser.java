@@ -664,7 +664,7 @@ public final class ArgumentParser {
 		}
 	}
 
-	public class ArgumentParserResults {
+	public final class ArgumentParserResults {
 
 		List<Argument> arguments = new ArrayList<>();
 		List<String> unclassified = new ArrayList<>();

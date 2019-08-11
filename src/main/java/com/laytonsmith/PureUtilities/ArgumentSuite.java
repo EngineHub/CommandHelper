@@ -194,9 +194,8 @@ public class ArgumentSuite {
 	/**
 	 * A convenience method to get the underlying ArgumentParser based on the mode name given. Aliases will not suffice,
 	 * but you may call getModeFromAlias to resolve the mode name first. Null is returned if no mode exists with that
-	 * name. Useful for perhaps a help mode, to generically display a mode's help. If {
-	 *
-	 * @see mode} is null, null is returned.
+	 * name. Useful for perhaps a help mode, to generically display a mode's help. If {@code mode} is null, null is returned.
+	 * 
 	 * @param mode
 	 * @return
 	 */
