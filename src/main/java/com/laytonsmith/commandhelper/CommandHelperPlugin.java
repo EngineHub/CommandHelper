@@ -270,27 +270,22 @@ public class CommandHelperPlugin extends JavaPlugin {
 		Prefs.SetColors();
 		Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
-		getLogger().log(Level.INFO, "Running initial class discovery...");
 		ClassDiscoveryCache cdc = new ClassDiscoveryCache(CommandHelperFileLocations.getDefault().getCacheDirectory());
 		cdc.setLogger(getLogger());
 		ClassDiscovery.getDefaultInstance().setClassDiscoveryCache(cdc);
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(CommandHelperPlugin.class));
+
 		MSLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
-		getLogger().log(Level.INFO, "Loading extensions in the background...");
 		loadingThread = new Thread("extensionloader") {
 			@Override
 			public void run() {
 				ExtensionManager.AddDiscoveryLocation(CommandHelperFileLocations.getDefault().getExtensionsDirectory());
-
 				if(OSUtils.GetOS() == OSUtils.OS.WINDOWS) {
-					getLogger().log(Level.INFO, "Caching extensions...");
+					getLogger().log(Level.INFO, "Caching extensions in the background...");
 					ExtensionManager.Cache(CommandHelperFileLocations.getDefault().getExtensionCacheDirectory());
 					getLogger().log(Level.INFO, "Extension caching complete.");
 				}
-
-				ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
-				getLogger().log(Level.INFO, "Extension loading complete.");
 			}
 		};
 		loadingThread.start();
@@ -320,13 +315,17 @@ public class CommandHelperPlugin extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		if(loadingThread.isAlive()) {
-			getLogger().log(Level.INFO, "Waiting for extension loading to complete...");
-
+			getLogger().log(Level.INFO, "Waiting for extension caching to complete...");
 			try {
 				loadingThread.join();
 			} catch (InterruptedException ex) {
 				getLogger().log(Level.SEVERE, null, ex);
 			}
+		}
+
+		if(firstLoad) {
+			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
+			getLogger().log(Level.INFO, "Extensions initialized.");
 		}
 
 		//Metrics
