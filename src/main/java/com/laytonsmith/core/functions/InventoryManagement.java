@@ -711,6 +711,18 @@ public class InventoryManagement {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates item name and meta matching.",
+					"phas_item(array('name': 'DIAMOND_SWORD', 'meta': array('display': 'The Slasher')))",
+					"Returns how many diamond swords with the name 'The Slasher' that are in the player's inventory."),
+				new ExampleScript("Demonstrates plain item matching.",
+					"phas_item(array('name': 'DIAMOND', 'meta': array('display': null, 'lore': null)))",
+					"Returns the number of diamonds the player has, provided that they have no display name or lore."),
+			};
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -820,6 +832,21 @@ public class InventoryManagement {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates item name and meta matching.",
+						"pitem_slot(array('name': 'DIAMOND_SWORD', 'meta': array('display': 'The Slasher')))",
+						"Returns an array of slot numbers of the player's inventory that contain a diamond sword"
+								+ " with the name 'The Slasher', regardless of the item's lore or enchantments."),
+				new ExampleScript("Demonstrates item quantity matching.",
+						"pitem_slot(player(), array('name': 'DIAMOND', 'qty': 8))",
+						"Returns an array of slot numbers that have one ore more diamonds. Ignores 'qty'."),
+				new ExampleScript("Demonstrates plain item matching.",
+						"pitem_slot(array('name': 'DIAMOND', 'meta': array('display': null, 'lore': null)))",
+						"Returns an array of slots that contain diamonds, if they have no lore or display name."),
+			};
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -1055,6 +1082,23 @@ public class InventoryManagement {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates item name and meta matching.",
+					"ptake_item(array('name': 'DIAMOND_SWORD', 'meta': array('display': 'The Slasher')))",
+					"Removes one diamond sword with the name 'The Slasher' from the player's inventory."
+							+ " This removes the item regardless of lore or enchantments."),
+				new ExampleScript("Demonstrates item quantity matching.",
+					"ptake_item(player(), array('name': 'DIAMOND', 'qty': 8))",
+					"Removes up to eight diamonds from a player's inventory and returns how many."
+							+ " This removes the item even if it has a different display name."),
+				new ExampleScript("Demonstrates plain item matching.",
+					"ptake_item(array('name': 'DIAMOND', 'meta': array('display': null, 'lore': null)))",
+					"This will remove one diamond, provided that the diamond has no display name or lore."),
+			};
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -1285,6 +1329,23 @@ public class InventoryManagement {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates item name and meta matching.",
+					"ptake_enderchest_item(array('name': 'DIAMOND_SWORD', 'meta': array('display': 'The Slasher')))",
+					"Removes one diamond sword with the name 'The Slasher' from the player's enderchest."
+							+ " This removes the item regardless of lore or enchantments."),
+				new ExampleScript("Demonstrates item quantity matching.",
+					"ptake_enderchest_item(player(), array('name': 'DIAMOND', 'qty': 8))",
+					"Removes up to eight diamonds from a player's enderchest and returns how many."
+							+ " This removes the item even if it has a different display name."),
+				new ExampleScript("Demonstrates plain item matching.",
+					"ptake_enderchest_item(array('name': 'DIAMOND', 'meta': array('display': null, 'lore': null)))",
+					"This will remove one diamond, provided that the diamond has no display name or lore."),
+			};
 		}
 	}
 
@@ -2170,6 +2231,23 @@ public class InventoryManagement {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates item name and meta matching.",
+					"take_from_inventory(puuid(), array('name': 'DIAMOND_SWORD', 'meta': array('display': 'Slasher')))",
+					"Removes one diamond sword with the name 'Slasher' from the player's inventory."
+							+ " This removes the item regardless of lore or enchantments."),
+				new ExampleScript("Demonstrates item quantity matching.",
+					"take_from_inventory(@location, array('name': 'DIAMOND', 'qty': 8))",
+					"Removes up to eight diamonds from an inventory at a storage block location and returns how many."
+							+ " This removes the item even if it has a different display name."),
+				new ExampleScript("Demonstrates plain item matching.",
+					"take_from_inventory(@uuid, array('name': 'DIAMOND', 'meta': array('display': null, 'lore': null)))",
+					"This will remove 1 diamond from an entity, provided that the diamond has no display name or lore"),
+			};
 		}
 	}
 
