@@ -1193,6 +1193,8 @@ public class DataHandling {
 									|| Construct.IsDynamicHelper(nodes[i].getChildAt(1).getData())) {
 								usesAssign = true;
 							}
+						} else if((nodes[i].getData()).val().equals("__autoconcat__")) {
+							throw new CREInvalidProcedureException("Invalid arguments defined for procedure", t);
 						}
 					}
 					env.getEnv(GlobalEnv.class).SetFlag("no-check-duplicate-assign", true);
