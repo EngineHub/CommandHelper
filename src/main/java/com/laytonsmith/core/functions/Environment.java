@@ -289,6 +289,133 @@ public class Environment {
 		}
 	}
 
+	@api
+	public static class get_blockdata extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_blockdata";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {locationArray} Gets the block data as an array at the location.";
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args)
+				throws CancelCommandException, ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+			if(b == null) {
+				throw new CRENotFoundException("Could not find the block in " + this.getName() + " (cmdline mode?)", t);
+			}
+			return ObjectGenerator.GetGenerator().blockData(b.getBlockData(), t);
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class, CREInvalidWorldException.class,
+					CRENotFoundException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
+	public static class set_blockdata extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_blockdata";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {locationArray, data, [physics]} Sets the block at the location from a blockdata object.";
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args)
+				throws CancelCommandException, ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+			if(b == null) {
+				throw new CRENotFoundException("Could not find the block in " + this.getName() + " (cmdline mode?)", t);
+			}
+			boolean physics = true;
+			if(args.length == 3) {
+				physics = ArgumentValidation.getBooleanish(args[2], t);
+			}
+			MCBlockData bd;
+			try {
+				if(args[1] instanceof CArray) {
+					CArray bda = (CArray) args[1];
+					if(bda.size() == 1) {
+						MCMaterial mat = StaticLayer.GetMaterial(bda.get("block", t).val().toUpperCase());
+						if(mat == null) {
+							throw new CREIllegalArgumentException("Cannot find material \""
+									+ bda.get("block", t).val() + "\".", t);
+						}
+						b.setType(mat);
+						return CVoid.VOID;
+					}
+					bd = ObjectGenerator.GetGenerator().blockData((CArray) args[1], t);
+				} else {
+					bd = Static.getServer().createBlockData(args[1].val());
+				}
+			} catch (IllegalArgumentException ex) {
+				throw new CREIllegalArgumentException("Cannot create block data from string: " + args[1].val(), t);
+			}
+			b.setBlockData(bd, physics);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class, CREInvalidWorldException.class,
+					CRENotFoundException.class, CREIllegalArgumentException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
 	@hide("Deprecated in favor of get_block()")
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_block_at extends AbstractFunction implements Optimizable {

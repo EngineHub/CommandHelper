@@ -37,6 +37,7 @@ import com.laytonsmith.abstraction.MCSkullMeta;
 import com.laytonsmith.abstraction.MCTropicalFishBucketMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCBanner;
@@ -1651,6 +1652,57 @@ public class ObjectGenerator {
 
 	public MCMaterial material(Mixed name, Target t) {
 		return material(name.val(), t);
+	}
+
+	public MCBlockData blockData(CArray ca, Target t) {
+		StringBuilder b = new StringBuilder().append("[");
+		boolean first = true;
+		for(String key : ca.stringKeySet()) {
+			if(key.equals("block")) {
+				b.insert(0, ca.get("block", t).val());
+			} else {
+				if(first) {
+					first = false;
+				} else {
+					b.append(',');
+				}
+				b.append(key).append('=').append(ca.get(key, t).val());
+			}
+		}
+		b.append("]");
+		return Static.getServer().createBlockData(b.toString());
+	}
+
+	public CArray blockData(MCBlockData blockdata, Target t) {
+		CArray ca = CArray.GetAssociativeArray(t);
+		String full = blockdata.getAsString().substring(10); // ignore "minecraft:"
+		int bracketPos = full.indexOf('[', 3);
+		if(bracketPos != -1) {
+			ca.set("block", new CString(full.substring(0, bracketPos), t), t);
+			String[] states = full.substring(bracketPos + 1, full.length() - 1).split(",");
+			for(String s : states) {
+				int equalsPos = s.indexOf('=');
+				ca.set(s.substring(0, equalsPos), blockState(s.substring(equalsPos + 1)), t);
+			}
+		} else {
+			ca.set("block", new CString(full, t), t);
+		}
+		return ca;
+	}
+
+	private Construct blockState(String value) {
+		if(value.length() < 3 && Character.isDigit(value.charAt(0))) {
+			// integer states range from 0-25
+			try {
+				return new CInt(Long.parseLong(value), Target.UNKNOWN);
+			} catch (NumberFormatException e) {
+			}
+		} else if(value.equals("true")) {
+			return CBoolean.TRUE;
+		} else if(value.equals("false")) {
+			return CBoolean.FALSE;
+		}
+		return new CString(value, Target.UNKNOWN);
 	}
 
 	/**
