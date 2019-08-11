@@ -256,6 +256,9 @@ public class CommandHelperPlugin extends JavaPlugin {
 			upgradeLog.runTasks();
 		} catch (IOException ex) {
 			getLogger().log(Level.SEVERE, null, ex);
+		} catch (NoClassDefFoundError ex) {
+			MSLog.GetLogger().e(MSLog.Tags.GENERAL, "Failed to load CommandHelper. Incorrect jar?", Target.UNKNOWN);
+			return;
 		}
 
 		try {
