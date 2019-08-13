@@ -51,7 +51,6 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCProjectile;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCTameable;
-import com.laytonsmith.abstraction.bukkit.entities.BukkitMCTrader;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCVehicle;
 import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitBlockListener;
@@ -104,7 +103,6 @@ import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.AbstractVillager;
 import org.bukkit.entity.Ageable;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.ComplexLivingEntity;
@@ -386,11 +384,6 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(be instanceof Projectile) {
 			type.setWrapperClass(BukkitMCProjectile.class);
 			return new BukkitMCProjectile(be);
-		}
-
-		if(be instanceof AbstractVillager) {
-			type.setWrapperClass(BukkitMCTrader.class);
-			return new BukkitMCTrader(be);
 		}
 
 		if(be instanceof Tameable) {

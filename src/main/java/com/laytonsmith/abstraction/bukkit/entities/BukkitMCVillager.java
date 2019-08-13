@@ -1,7 +1,9 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.AbstractionObject;
+import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCMerchant;
+import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCMerchant;
 import com.laytonsmith.abstraction.entities.MCVillager;
 import com.laytonsmith.abstraction.enums.MCProfession;
@@ -39,5 +41,10 @@ public class BukkitMCVillager extends BukkitMCTrader implements MCVillager {
 		Villager villager = getHandle();
 		String title = villager.getCustomName() == null ? getHandle().getProfession().name() : villager.getCustomName();
 		return new BukkitMCMerchant(villager, title);
+	}
+
+	@Override
+	public MCInventory getInventory() {
+		return new BukkitMCInventory(getHandle().getInventory());
 	}
 }
