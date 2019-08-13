@@ -116,6 +116,27 @@ public class Commands {
 		public Version since() {
 			return MSVersion.V3_3_1;
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates completion suggestions for multiple arguments.",
+					"set_tabcompleter('cmd', closure(@alias, @sender, @args, @info) {\n"
+							+ "\t@input = @args[-1];\n"
+							+ "\t@completions = array();\n"
+							+ "\tif(array_size(@args) == 1) {\n"
+							+ "\t\t@completions = array('one', 'two', 'three');\n"
+							+ "\t} else if(array_size(@args) == 2) {\n"
+							+ "\t\t@completions = array('apple', 'orange', 'banana');\n"
+							+ "\t}\n"
+							+ "\treturn(array_filter(@completions, closure(@index, @string) {\n"
+							+ "\t\treturn(length(@input) <= length(@string) \n"
+							+ "\t\t\t\t&& equals_ic(@input, substr(@string, 0, length(@input))));\n"
+							+ "\t}));\n"
+							+ "});",
+					"Will only suggest 'orange' if given 'o' for the second argument for /cmd.")
+			};
+		}
 	}
 
 	@api
@@ -283,26 +304,24 @@ public class Commands {
 				+ "\t'permission': 'perms.hugs',\n"
 				+ "\t'noPermMsg': 'You do not have permission to give hugs to players (Sorry :o).',\n"
 				+ "\t'tabcompleter': closure(@alias, @sender, @args) {\n"
-				+ "\t\t\tif(array_size(@args) == 0) {\n"
-				+ "\t\t\t\treturn(all_players());\n"
-				+ "\t\t\t}\n"
-				+ "\t\t\t@search = @args[array_size(@args) - 1];\n"
-				+ "\t\t\treturn(array_filter(all_players(), closure(@index, @player) {\n"
-				+ "\t\t\t\treturn(equals_ic(@search, substr(@player, 0, length(@search))));\n"
+				+ "\t\t@input = @args[-1];\n"
+				+ "\t\treturn(array_filter(all_players(), closure(@index, @player) {\n"
+				+ "\t\t\treturn(length(@input) <= length(@string)\n"
+				+ "\t\t\t\t\t&& equals_ic(@input, substr(@player, 0, length(@input))));\n"
 				+ "\t\t\t}));\n"
 				+ "\t\t},\n"
 				+ "\t'aliases':array('hugg', 'hugs'),\n"
 				+ "\t'executor': closure(@alias, @sender, @args) {\n"
-				+ "\t\t\tif(array_size(@args) == 1) {\n"
-				+ "\t\t\t\tif(ponline(@args[0])) {\n"
-				+ "\t\t\t\t\tbroadcast(colorize('&4'.@sender.' &6hugs &4'.@args[0]));\n"
-				+ "\t\t\t\t} else {\n"
-				+ "\t\t\t\t\ttmsg(@sender, colorize('&cThe given player is not online.'));\n"
-				+ "\t\t\t\t}\n"
-				+ "\t\t\t\treturn(true);\n"
+				+ "\t\tif(array_size(@args) == 1) {\n"
+				+ "\t\t\tif(ponline(@args[0])) {\n"
+				+ "\t\t\t\tbroadcast(colorize('&4'.@sender.' &6hugs &4'.@args[0]));\n"
+				+ "\t\t\t} else {\n"
+				+ "\t\t\t\ttmsg(@sender, colorize('&cThe given player is not online.'));\n"
 				+ "\t\t\t}\n"
-				+ "\t\t\treturn(false);\n"
+				+ "\t\t\treturn(true);\n"
 				+ "\t\t}\n"
+				+ "\t\treturn(false);\n"
+				+ "\t}\n"
 				+ "));",
 				"Registers the /hug command.")
 			};
