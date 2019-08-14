@@ -1,22 +1,22 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.MCCookingRecipe;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCStonecuttingRecipe;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import org.bukkit.Material;
-import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice;
+import org.bukkit.inventory.StonecuttingRecipe;
 
 import java.util.List;
 
-public class BukkitMCFurnaceRecipe extends BukkitMCRecipe implements MCCookingRecipe {
+public class BukkitMCStonecuttingRecipe extends BukkitMCRecipe implements MCStonecuttingRecipe {
 
-	private FurnaceRecipe recipe;
+	private StonecuttingRecipe recipe;
 
-	public BukkitMCFurnaceRecipe(FurnaceRecipe recipe) {
+	public BukkitMCStonecuttingRecipe(StonecuttingRecipe recipe) {
 		super(recipe);
 		this.recipe = recipe;
 	}
@@ -28,7 +28,7 @@ public class BukkitMCFurnaceRecipe extends BukkitMCRecipe implements MCCookingRe
 
 	@Override
 	public MCRecipeType getRecipeType() {
-		return MCRecipeType.FURNACE;
+		return MCRecipeType.STONECUTTING;
 	}
 
 	@Override
@@ -78,25 +78,5 @@ public class BukkitMCFurnaceRecipe extends BukkitMCRecipe implements MCCookingRe
 			concrete[i] = (Material) mats[i].getHandle();
 		}
 		recipe.setInputChoice(new RecipeChoice.MaterialChoice(concrete));
-	}
-
-	@Override
-	public int getCookingTime() {
-		return recipe.getCookingTime();
-	}
-
-	@Override
-	public void setCookingTime(int ticks) {
-		recipe.setCookingTime(ticks);
-	}
-
-	@Override
-	public float getExperience() {
-		return recipe.getExperience();
-	}
-
-	@Override
-	public void setExperience(float exp) {
-		recipe.setExperience(exp);
 	}
 }

@@ -100,4 +100,12 @@ public class BukkitMCMerchantRecipe extends BukkitMCRecipe implements MCMerchant
 	public MCRecipeType getRecipeType() {
 		return MCRecipeType.MERCHANT;
 	}
+
+	@Override
+	public String getGroup() {
+		return "";
+	}
+
+	@Override
+	public void setGroup(String group) {}
 }

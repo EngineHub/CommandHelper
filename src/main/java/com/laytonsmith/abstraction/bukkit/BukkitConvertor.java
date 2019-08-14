@@ -117,6 +117,8 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Tameable;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.minecart.CommandMinecart;
+import org.bukkit.inventory.BlastingRecipe;
+import org.bukkit.inventory.CampfireRecipe;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -124,6 +126,8 @@ import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.SmokingRecipe;
+import org.bukkit.inventory.StonecuttingRecipe;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.BookMeta;
@@ -641,24 +645,48 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCMerchantRecipe(new MerchantRecipe(is, Integer.MAX_VALUE));
 		}
 		NamespacedKey nskey = new NamespacedKey(CommandHelperPlugin.self, key);
-		switch(type) {
-			case FURNACE:
-				return new BukkitMCFurnaceRecipe(new FurnaceRecipe(nskey, is, Material.AIR, 0.0F, 200));
-			case SHAPED:
-				return new BukkitMCShapedRecipe(new ShapedRecipe(nskey, is));
-			case SHAPELESS:
-				return new BukkitMCShapelessRecipe(new ShapelessRecipe(nskey, is));
+		try {
+			switch(type) {
+				case BLASTING:
+					return new BukkitMCCookingRecipe(new BlastingRecipe(nskey, is, Material.AIR, 0.0F, 100), type);
+				case CAMPFIRE:
+					return new BukkitMCCookingRecipe(new CampfireRecipe(nskey, is, Material.AIR, 0.0F, 100), type);
+				case FURNACE:
+					return new BukkitMCFurnaceRecipe(new FurnaceRecipe(nskey, is, Material.AIR, 0.0F, 200));
+				case SHAPED:
+					return new BukkitMCShapedRecipe(new ShapedRecipe(nskey, is));
+				case SHAPELESS:
+					return new BukkitMCShapelessRecipe(new ShapelessRecipe(nskey, is));
+				case SMOKING:
+					return new BukkitMCCookingRecipe(new SmokingRecipe(nskey, is, Material.AIR, 0.0F, 200), type);
+				case STONECUTTING:
+					return new BukkitMCStonecuttingRecipe(new StonecuttingRecipe(nskey, is, Material.AIR));
+			}
+		} catch (NoClassDefFoundError ex) {
+			// doesn't exist on this version.
+			// eg. 1.14 recipe type on 1.13
 		}
-		return null;
+		throw new IllegalArgumentException("Server version does not support this recipe type: " + type.name());
 	}
 
 	@Override
 	public MCRecipe GetRecipe(MCRecipe unspecific) {
-		Recipe r = ((BukkitMCRecipe) unspecific).r;
+		Recipe r = (Recipe) unspecific.getHandle();
 		return BukkitGetRecipe(r);
 	}
 
 	public static MCRecipe BukkitGetRecipe(Recipe r) {
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
+			if(r instanceof BlastingRecipe) {
+				return new BukkitMCCookingRecipe(r, MCRecipeType.BLASTING);
+			} else if(r instanceof CampfireRecipe) {
+				return new BukkitMCCookingRecipe(r, MCRecipeType.CAMPFIRE);
+			} else if(r instanceof SmokingRecipe) {
+				return new BukkitMCCookingRecipe(r, MCRecipeType.SMOKING);
+			} else if(r instanceof StonecuttingRecipe) {
+				return new BukkitMCStonecuttingRecipe((StonecuttingRecipe) r);
+			}
+		}
 		if(r instanceof ShapelessRecipe) {
 			return new BukkitMCShapelessRecipe((ShapelessRecipe) r);
 		} else if(r instanceof ShapedRecipe) {

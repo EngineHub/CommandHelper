@@ -6,54 +6,55 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import org.bukkit.Material;
-import org.bukkit.inventory.FurnaceRecipe;
+import org.bukkit.inventory.CookingRecipe;
+import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice;
 
 import java.util.List;
 
-public class BukkitMCFurnaceRecipe extends BukkitMCRecipe implements MCCookingRecipe {
+public class BukkitMCCookingRecipe extends BukkitMCRecipe implements MCCookingRecipe {
 
-	private FurnaceRecipe recipe;
+	private MCRecipeType type;
 
-	public BukkitMCFurnaceRecipe(FurnaceRecipe recipe) {
+	public BukkitMCCookingRecipe(Recipe recipe, MCRecipeType type) {
 		super(recipe);
-		this.recipe = recipe;
+		this.type = type;
 	}
 
 	@Override
 	public String getKey() {
-		return recipe.getKey().getKey();
+		return getHandle().getKey().getKey();
 	}
 
 	@Override
 	public MCRecipeType getRecipeType() {
-		return MCRecipeType.FURNACE;
+		return type;
 	}
 
 	@Override
 	public String getGroup() {
-		return recipe.getGroup();
+		return getHandle().getGroup();
 	}
 
 	@Override
 	public void setGroup(String group) {
-		recipe.setGroup(group);
+		getHandle().setGroup(group);
 	}
 
 	@Override
 	public MCItemStack getResult() {
-		return new BukkitMCItemStack(recipe.getResult());
+		return new BukkitMCItemStack(getHandle().getResult());
 	}
 
 	@Override
-	public Object getHandle() {
-		return recipe;
+	public CookingRecipe getHandle() {
+		return (CookingRecipe) super.getHandle();
 	}
 
 	@Override
 	public MCMaterial[] getInput() {
-		List<Material> choices = ((RecipeChoice.MaterialChoice) recipe.getInputChoice()).getChoices();
+		List<Material> choices = ((RecipeChoice.MaterialChoice) getHandle().getInputChoice()).getChoices();
 		MCMaterial[] ret = new MCMaterial[choices.size()];
 		for(int i = 0; i < choices.size(); i++) {
 			ret[i] = new BukkitMCMaterial(choices.get(i));
@@ -63,12 +64,12 @@ public class BukkitMCFurnaceRecipe extends BukkitMCRecipe implements MCCookingRe
 
 	@Override
 	public void setInput(MCItemStack input) {
-		recipe.setInput(((ItemStack) input.getHandle()).getType());
+		getHandle().setInput(((ItemStack) input.getHandle()).getType());
 	}
 
 	@Override
 	public void setInput(MCMaterial mat) {
-		recipe.setInput((Material) mat.getHandle());
+		getHandle().setInput((Material) mat.getHandle());
 	}
 
 	@Override
@@ -77,26 +78,26 @@ public class BukkitMCFurnaceRecipe extends BukkitMCRecipe implements MCCookingRe
 		for(int i = 0; i < mats.length; i++) {
 			concrete[i] = (Material) mats[i].getHandle();
 		}
-		recipe.setInputChoice(new RecipeChoice.MaterialChoice(concrete));
+		getHandle().setInputChoice(new RecipeChoice.MaterialChoice(concrete));
 	}
 
 	@Override
 	public int getCookingTime() {
-		return recipe.getCookingTime();
+		return getHandle().getCookingTime();
 	}
 
 	@Override
 	public void setCookingTime(int ticks) {
-		recipe.setCookingTime(ticks);
+		getHandle().setCookingTime(ticks);
 	}
 
 	@Override
 	public float getExperience() {
-		return recipe.getExperience();
+		return getHandle().getExperience();
 	}
 
 	@Override
 	public void setExperience(float exp) {
-		recipe.setExperience(exp);
+		getHandle().setExperience(exp);
 	}
 }

@@ -5,10 +5,8 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import java.util.List;
 
 public interface MCShapelessRecipe extends MCRecipe {
-
-	MCShapelessRecipe addIngredient(MCItemStack ingredient);
-
-	MCShapelessRecipe addIngredient(MCMaterial ingredient);
-
-	List<MCItemStack> getIngredients();
+	void addIngredient(MCItemStack ingredient);
+	void addIngredient(MCMaterial ingredient);
+	void addIngredient(MCMaterial... ingredients);
+	List<MCMaterial[]> getIngredients();
 }

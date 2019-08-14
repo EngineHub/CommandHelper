@@ -15,7 +15,7 @@ import com.laytonsmith.abstraction.MCFireworkEffect;
 import com.laytonsmith.abstraction.MCFireworkEffectMeta;
 import com.laytonsmith.abstraction.MCFireworkMeta;
 import com.laytonsmith.abstraction.MCFurnaceInventory;
-import com.laytonsmith.abstraction.MCFurnaceRecipe;
+import com.laytonsmith.abstraction.MCCookingRecipe;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemFactory;
@@ -34,6 +34,7 @@ import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCShapedRecipe;
 import com.laytonsmith.abstraction.MCShapelessRecipe;
 import com.laytonsmith.abstraction.MCSkullMeta;
+import com.laytonsmith.abstraction.MCStonecuttingRecipe;
 import com.laytonsmith.abstraction.MCTropicalFishBucketMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -69,6 +70,7 @@ import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREEnchantmentException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
@@ -1489,14 +1491,34 @@ public class ObjectGenerator {
 		ret.set("type", new CString(r.getRecipeType().name(), t), t);
 		ret.set("result", item(r.getResult(), t), t);
 		ret.set("key", r.getKey(), t);
-		if(r instanceof MCFurnaceRecipe) {
-			MCFurnaceRecipe furnace = (MCFurnaceRecipe) r;
-			ret.set("input", item(furnace.getInput(), t), t);
+		ret.set("group", r.getGroup(), t);
+		if(r instanceof MCCookingRecipe) {
+			MCCookingRecipe recipe = (MCCookingRecipe) r;
+			MCMaterial[] list = recipe.getInput();
+			if(list.length == 1) {
+				ret.set("input", new CString(list[0].getName(), t), t);
+			} else {
+				CArray mats = new CArray(t);
+				for(MCMaterial mat : recipe.getInput()) {
+					mats.push(new CString(mat.getName(), t), t);
+				}
+				ret.set("input", mats, t);
+			}
+			ret.set("experience", new CDouble(recipe.getExperience(), t), t);
+			ret.set("cookingtime", new CInt(recipe.getCookingTime(), t), t);
 		} else if(r instanceof MCShapelessRecipe) {
 			MCShapelessRecipe shapeless = (MCShapelessRecipe) r;
 			CArray il = new CArray(t);
-			for(MCItemStack i : shapeless.getIngredients()) {
-				il.push(item(i, t), t);
+			for(MCMaterial[] list : shapeless.getIngredients()) {
+				if(list.length == 1) {
+					il.push(new CString(list[0].getName(), t), t);
+				} else {
+					CArray materials = new CArray(t);
+					for(MCMaterial mat : list) {
+						materials.push(new CString(mat.getName(), t), t);
+					}
+					il.push(materials, t);
+				}
 			}
 			ret.set("ingredients", il, t);
 		} else if(r instanceof MCShapedRecipe) {
@@ -1505,12 +1527,34 @@ public class ObjectGenerator {
 			for(String line : shaped.getShape()) {
 				shape.push(new CString(line, t), t);
 			}
-			CArray imap = CArray.GetAssociativeArray(t);
-			for(Map.Entry<Character, MCItemStack> entry : shaped.getIngredientMap().entrySet()) {
-				imap.set(entry.getKey().toString(), item(entry.getValue(), t), t);
-			}
 			ret.set("shape", shape, t);
+			CArray imap = CArray.GetAssociativeArray(t);
+			for(Map.Entry<Character, MCMaterial[]> entry : shaped.getIngredientMap().entrySet()) {
+				if(entry.getValue() == null) {
+					imap.set(entry.getKey().toString(), CNull.NULL, t);
+				} else if(entry.getValue().length == 1) {
+					imap.set(entry.getKey().toString(), entry.getValue()[0].getName(), t);
+				} else {
+					CArray materials = new CArray(t);
+					for(MCMaterial mat : entry.getValue()) {
+						materials.push(new CString(mat.getName(), t), t);
+					}
+					imap.set(entry.getKey().toString(), materials, t);
+				}
+			}
 			ret.set("ingredients", imap, t);
+		} else if(r instanceof MCStonecuttingRecipe) {
+			MCStonecuttingRecipe recipe = (MCStonecuttingRecipe) r;
+			MCMaterial[] list = recipe.getInput();
+			if(list.length == 1) {
+				ret.set("input", new CString(list[0].getName(), t), t);
+			} else {
+				CArray mats = new CArray(t);
+				for(MCMaterial mat : recipe.getInput()) {
+					mats.push(new CString(mat.getName(), t), t);
+				}
+				ret.set("input", mats, t);
+			}
 		}
 		return ret;
 	}
@@ -1527,7 +1571,7 @@ public class ObjectGenerator {
 		try {
 			recipeType = MCRecipeType.valueOf(recipe.get("type", t).val());
 		} catch (IllegalArgumentException e) {
-			throw new CREFormatException("Invalid recipe type.", t);
+			throw new CREIllegalArgumentException("Invalid recipe type.", t);
 		}
 
 		MCItemStack result = item(recipe.get("result", t), t);
@@ -1536,8 +1580,13 @@ public class ObjectGenerator {
 		try {
 			ret = StaticLayer.GetNewRecipe(recipeKey, recipeType, result);
 		} catch (IllegalArgumentException ex) {
-			throw new CREFormatException(ex.getMessage(), t);
+			throw new CREIllegalArgumentException(ex.getMessage(), t);
 		}
+
+		if(recipe.containsKey("group")) {
+			ret.setGroup(recipe.get("group", t).val());
+		}
+
 		switch(recipeType) {
 			case SHAPED:
 				CArray shaped = Static.getArray(recipe.get("shape", t), t);
@@ -1558,87 +1607,135 @@ public class ObjectGenerator {
 
 				CArray shapedIngredients = Static.getArray(recipe.get("ingredients", t), t);
 				if(!shapedIngredients.inAssociativeMode()) {
-					throw new CREFormatException("Ingredients array is invalid.", t);
+					throw new CREIllegalArgumentException("Ingredients array is invalid.", t);
 				}
 				for(String key : shapedIngredients.stringKeySet()) {
-					MCMaterial mat = null;
 					Mixed ingredient = shapedIngredients.get(key, t);
-					if(ingredient.isInstanceOf(CString.class)) {
-						mat = StaticLayer.GetMaterial(ingredient.val());
-						if(mat == null) {
-							// maybe legacy item format
-							try {
-								if(ingredient.val().contains(":")) {
-									String[] split = ingredient.val().split(":");
-									mat = StaticLayer.GetMaterialFromLegacy(Integer.valueOf(split[0]), Integer.valueOf(split[1]));
-								} else {
-									mat = StaticLayer.GetMaterialFromLegacy(Integer.valueOf(ingredient.val()), 0);
+					if(ingredient.isInstanceOf(CArray.class)) {
+						if(((CArray) ingredient).isAssociative()) {
+							((MCShapedRecipe) ret).setIngredient(key.charAt(0), item(ingredient, t).getType());
+						} else {
+							CArray list = (CArray) ingredient;
+							MCMaterial[] mats = new MCMaterial[(int) list.size()];
+							for(int index = 0; index < list.size(); index++) {
+								MCMaterial mat = StaticLayer.GetMaterial(list.get(index, t).val());
+								if(mat == null) {
+									throw new CREIllegalArgumentException("Recipe input is invalid: "
+											+ list.get(index, t).val(), t);
 								}
-								MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Numeric item formats (eg. \"0:0\" are deprecated.", t);
-							} catch (NumberFormatException ex) {}
+								mats[index] = mat;
+							}
+							((MCShapedRecipe) ret).setIngredient(key.charAt(0), mats);
 						}
-					} else if(ingredient.isInstanceOf(CInt.class)) {
-						mat = StaticLayer.GetMaterialFromLegacy(Static.getInt32(ingredient, t), 0);
-						MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Numeric item ingredients are deprecated.", t);
-					} else if(ingredient.isInstanceOf(CArray.class)) {
-						mat = item(ingredient, t).getType();
+					} else if(ingredient instanceof CNull) {
+						((MCShapedRecipe) ret).setIngredient(key.charAt(0), EmptyItem());
+					} else {
+						MCMaterial mat = StaticLayer.GetMaterial(ingredient.val());
+						if(mat == null) {
+							throw new CREIllegalArgumentException("Ingredient is invalid: " + ingredient.val(), t);
+						}
+						((MCShapedRecipe) ret).setIngredient(key.charAt(0), mat);
 					}
-					if(mat == null) {
-						throw new CREFormatException("Ingredient is invalid: " + ingredient.val(), t);
-					}
-					((MCShapedRecipe) ret).setIngredient(key.charAt(0), mat);
 				}
 				return ret;
 
 			case SHAPELESS:
 				CArray ingredients = Static.getArray(recipe.get("ingredients", t), t);
 				if(ingredients.inAssociativeMode()) {
-					throw new CREFormatException("Ingredients array is invalid.", t);
+					throw new CREIllegalArgumentException("Ingredients array is invalid.", t);
 				}
 				for(Mixed ingredient : ingredients.asList()) {
-					if(ingredient.isInstanceOf(CString.class)) {
+					if(ingredient.isInstanceOf(CArray.class)) {
+						if(((CArray) ingredient).isAssociative()) {
+							((MCShapelessRecipe) ret).addIngredient(item(ingredient, t));
+						} else {
+							CArray list = (CArray) ingredient;
+							MCMaterial[] mats = new MCMaterial[(int) list.size()];
+							for(int index = 0; index < list.size(); index++) {
+								MCMaterial mat = StaticLayer.GetMaterial(list.get(index, t).val());
+								if(mat == null) {
+									throw new CREIllegalArgumentException("Recipe input is invalid: "
+											+ list.get(index, t).val(), t);
+								}
+								mats[index] = mat;
+							}
+							((MCShapelessRecipe) ret).addIngredient(mats);
+						}
+					} else {
 						MCMaterial mat = StaticLayer.GetMaterial(ingredient.val());
 						if(mat == null) {
-							// maybe legacy item format
-							try {
-								if(ingredient.val().contains(":")) {
-									String[] split = ingredient.val().split(":");
-									mat = StaticLayer.GetMaterialFromLegacy(Integer.valueOf(split[0]), Integer.valueOf(split[1]));
-								} else {
-									mat = StaticLayer.GetMaterialFromLegacy(Integer.valueOf(ingredient.val()), 0);
-								}
-								MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Numeric item formats (eg. \"0:0\" are deprecated.", t);
-							} catch (NumberFormatException ex) {}
-							if(mat == null) {
-								throw new CREFormatException("Ingredient is invalid: " + ingredient.val(), t);
-							}
+							throw new CREIllegalArgumentException("Ingredient is invalid: " + ingredient.val(), t);
 						}
 						((MCShapelessRecipe) ret).addIngredient(mat);
-					} else if(ingredient.isInstanceOf(CArray.class)) {
-						((MCShapelessRecipe) ret).addIngredient(item(ingredient, t));
-					} else {
-						throw new CREFormatException("Item was not found", t);
 					}
 				}
 				return ret;
 
+			case BLASTING:
+			case CAMPFIRE:
 			case FURNACE:
+			case SMOKING:
 				Mixed input = recipe.get("input", t);
-				if(input.isInstanceOf(CString.class)) {
+				if(input.isInstanceOf(CArray.class)) {
+					if(((CArray) input).isAssociative()) {
+						((MCCookingRecipe) ret).setInput(item(input, t));
+					} else {
+						CArray list = (CArray) input;
+						MCMaterial[] mats = new MCMaterial[(int) list.size()];
+						for(int index = 0; index < list.size(); index++) {
+							MCMaterial mat = StaticLayer.GetMaterial(list.get(index, t).val());
+							if(mat == null) {
+								throw new CREIllegalArgumentException("Recipe input is invalid: "
+										+ list.get(index, t).val(), t);
+							}
+							mats[index] = mat;
+						}
+						((MCCookingRecipe) ret).setInput(mats);
+					}
+				} else {
 					MCMaterial mat = StaticLayer.GetMaterial(input.val());
 					if(mat == null) {
-						throw new CREFormatException("Furnace input is invalid: " + input.val(), t);
+						throw new CREIllegalArgumentException("Recipe input is invalid: " + input.val(), t);
 					}
-					((MCFurnaceRecipe) ret).setInput(mat);
-				} else if(input.isInstanceOf(CArray.class)) {
-					((MCFurnaceRecipe) ret).setInput(item(input, t));
+					((MCCookingRecipe) ret).setInput(mat);
+				}
+				if(recipe.containsKey("experience")) {
+					((MCCookingRecipe) ret).setExperience(Static.getDouble32(recipe.get("experience", t), t));
+				}
+				if(recipe.containsKey("cookingtime")) {
+					((MCCookingRecipe) ret).setCookingTime(Static.getInt32(recipe.get("cookingtime", t), t));
+				}
+				return ret;
+
+			case STONECUTTING:
+				Mixed stoneCutterInput = recipe.get("input", t);
+				if(stoneCutterInput.isInstanceOf(CArray.class)) {
+					if(((CArray) stoneCutterInput).isAssociative()) {
+						((MCStonecuttingRecipe) ret).setInput(item(stoneCutterInput, t));
+					} else {
+						CArray list = (CArray) stoneCutterInput;
+						MCMaterial[] mats = new MCMaterial[(int) list.size()];
+						for(int index = 0; index < list.size(); index++) {
+							MCMaterial mat = StaticLayer.GetMaterial(list.get(index, t).val());
+							if(mat == null) {
+								throw new CREIllegalArgumentException("Recipe input is invalid: "
+										+ list.get(index, t).val(), t);
+							}
+							mats[index] = mat;
+						}
+						((MCStonecuttingRecipe) ret).setInput(mats);
+					}
 				} else {
-					throw new CREFormatException("Item was not found", t);
+					MCMaterial mat = StaticLayer.GetMaterial(stoneCutterInput.val());
+					if(mat == null) {
+						throw new CREIllegalArgumentException("Recipe input is invalid: " + stoneCutterInput.val(), t);
+					}
+					((MCStonecuttingRecipe) ret).setInput(mat);
 				}
 				return ret;
 
 			default:
-				throw new CREFormatException("Could not find valid recipe type.", t);
+				throw new CREIllegalArgumentException("Could not find valid recipe type.", t);
 		}
 	}
 

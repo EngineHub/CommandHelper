@@ -2,12 +2,11 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCRecipe;
-import com.laytonsmith.abstraction.enums.MCRecipeType;
 import org.bukkit.inventory.Recipe;
 
 public abstract class BukkitMCRecipe implements MCRecipe {
 
-	Recipe r;
+	private Recipe r;
 
 	protected BukkitMCRecipe(Recipe rec) {
 		r = rec;
@@ -22,9 +21,6 @@ public abstract class BukkitMCRecipe implements MCRecipe {
 	public MCItemStack getResult() {
 		return new BukkitMCItemStack(r.getResult());
 	}
-
-	@Override
-	public abstract MCRecipeType getRecipeType();
 
 	@Override
 	public boolean equals(Object obj) {

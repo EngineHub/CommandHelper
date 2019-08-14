@@ -549,7 +549,7 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public boolean addRecipe(MCRecipe recipe) {
-		return s.addRecipe(((BukkitMCRecipe) recipe).r);
+		return s.addRecipe((Recipe) recipe.getHandle());
 	}
 
 	@Override
