@@ -543,7 +543,7 @@ public final class SiteDeploy {
 	private static final String DEFAULT_GITHUB_BASE_URL
 			= "https://github.com/EngineHub/CommandHelper/edit/master/src/main/%s";
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "checkstyle:regexpsingleline"})
 	private SiteDeploy(String siteBase, String docsBase, boolean useLocalCache,
 			DeploymentMethod deploymentMethod, boolean doValidation, boolean showTemplateCredit,
 			String githubBaseUrl, String validatorUrl, File finalizerScript, boolean clearProgressBar,

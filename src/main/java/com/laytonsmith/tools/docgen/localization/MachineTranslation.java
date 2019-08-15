@@ -44,7 +44,7 @@ public interface MachineTranslation {
 		for(String english : englishStrings) {
 			try {
 				ret.put(english, translate(locale, english));
-			} catch(TranslationException ex) {
+			} catch (TranslationException ex) {
 				callback.error(ex);
 			}
 		}

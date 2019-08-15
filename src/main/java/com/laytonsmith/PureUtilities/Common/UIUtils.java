@@ -14,8 +14,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
@@ -173,7 +171,7 @@ public class UIUtils {
 		} else {
 			try {
 				EventQueue.invokeAndWait(r);
-			} catch(InterruptedException | InvocationTargetException ex) {
+			} catch (InterruptedException | InvocationTargetException ex) {
 				throw new RuntimeException(ex);
 			}
 		}

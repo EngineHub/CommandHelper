@@ -20,5 +20,7 @@
 	<suppress checks=".*" files="com[\\/]laytonsmith[\\/]tools[\\/]docgen[\\/]localization[\\/]FindDialog.java$"/>
 	<suppress checks=".*" files="com[\\/]laytonsmith[\\/]tools[\\/]docgen[\\/]localization[\\/]AzureKeyInputDialog.java$"/>
 	
+	<suppress checks=".*" files="com[\\/]laytonsmith[\\/]core[\\/]MainSandbox.java$"/>
+	
 	
 </suppressions>

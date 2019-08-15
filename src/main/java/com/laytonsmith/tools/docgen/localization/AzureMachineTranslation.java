@@ -92,7 +92,7 @@ public class AzureMachineTranslation implements MachineTranslation {
 	public AzureMachineTranslation(String key) {
 		try {
 			this.endpoint = new URL(AZURE_TRANSLATE_ENDPOINT);
-		} catch(MalformedURLException ex) {
+		} catch (MalformedURLException ex) {
 			throw new Error(ex);
 		}
 		this.key = key;
@@ -102,7 +102,9 @@ public class AzureMachineTranslation implements MachineTranslation {
 	public String translate(String locale, String english) throws TranslationException {
 		MutableObject<TranslationException> ex = new MutableObject<>();
 		Map<String, String> ret = bulkTranslate(locale, new HashSet<>(Arrays.asList(english)),
-				(e) -> { ex.setObject(e); });
+				(e) -> {
+					ex.setObject(e);
+				});
 		if(ex.getObject() != null) {
 			throw ex.getObject();
 		}
@@ -131,7 +133,7 @@ public class AzureMachineTranslation implements MachineTranslation {
 				if(itemCount + 1 >= PAGE_SIZE || charCount + next.length() >= MAX_TEXT_SIZE) {
 					try {
 						ret.putAll(doRequest(locale, section));
-					} catch(TranslationException ex) {
+					} catch (TranslationException ex) {
 						callback.error(ex);
 						// Don't continue though.
 						break;
@@ -147,7 +149,7 @@ public class AzureMachineTranslation implements MachineTranslation {
 			if(!section.isEmpty()) {
 				try {
 					ret.putAll(doRequest(locale, section));
-				} catch(TranslationException ex) {
+				} catch (TranslationException ex) {
 					callback.error(ex);
 				}
 			}
@@ -226,7 +228,7 @@ public class AzureMachineTranslation implements MachineTranslation {
 			}
 
 			return ret;
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			throw new TranslationException(ex, true);
 		}
 	}
