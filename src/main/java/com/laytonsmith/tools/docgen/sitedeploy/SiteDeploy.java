@@ -1419,8 +1419,8 @@ public final class SiteDeploy {
 					exampleBuilder.append(" be:\n<pre class=\"pre\" style=\"border-top: 1px solid blue;"
 							+ " border-bottom: 1px solid blue;")
 							.append(style).append("\"");
-					exampleBuilder.append(">%%NOWIKI|").append(es.getOutput())
-							.append("%%").append("</pre>\n");
+					exampleBuilder.append("><%NOWIKI|").append(es.getOutput())
+							.append("%>").append("</pre>\n");
 					count++;
 				}
 			} else {

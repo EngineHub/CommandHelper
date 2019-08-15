@@ -8,6 +8,7 @@ import java.util.List;
  * https://api.cognitive.microsofttranslator.com/languages?api-version=3.0 along with the special code "art" which is a
  * programmatically generated test language, that is always available.
  */
+@SuppressWarnings({"checkstyle:nowhitespacebefore"})
 public enum Locale {
 
 	/**
@@ -17,10 +18,11 @@ public enum Locale {
 	ART("art", "Artificial", "Årtïfïcïål", TextDirection.LTR, java.util.Locale.forLanguageTag("art-x-dummy"),
 			Arrays.asList()),
 	KO("ko", "Korean", "한국어", TextDirection.LTR, java.util.Locale.KOREAN, Arrays.asList("Malgun Gothic")),
-	PT("pt", "Portuguese", "Português", TextDirection.LTR, java.util.Locale.forLanguageTag("pt"), Arrays.asList()),
-	HE("he", "Hebrew", "עברית", TextDirection.RTL, java.util.Locale.forLanguageTag("he"), Arrays.asList()),
-	NL("nl", "Dutch", "Nederlands", TextDirection.LTR, java.util.Locale.forLanguageTag("nl"), Arrays.asList()),
-	NB("nb", "Norwegian", "Norsk", TextDirection.LTR, java.util.Locale.forLanguageTag("nb"), Arrays.asList());
+	NB("nb", "Norwegian", "Norsk", TextDirection.LTR, java.util.Locale.forLanguageTag("nb"), Arrays.asList()),
+//	PT("pt", "Portuguese", "Português", TextDirection.LTR, java.util.Locale.forLanguageTag("pt"), Arrays.asList()),
+//	HE("he", "Hebrew", "עברית", TextDirection.RTL, java.util.Locale.forLanguageTag("he"), Arrays.asList()),
+//	NL("nl", "Dutch", "Nederlands", TextDirection.LTR, java.util.Locale.forLanguageTag("nl"), Arrays.asList()),
+	;
 	private final String locale;
 	private final String englishName;
 	private final String localName;

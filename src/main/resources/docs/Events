@@ -48,6 +48,7 @@ following information:
 * "type" - The event type. Normally you've already got this data, because you registered it, however, wildcard events \
 may be possible in the future.
 * "macrotype" - This determines what kind of data there will be in the rest of the event
+
 The rest of the data in the event is dependent on the event type, and this information can be looked up in the event 
 table.
 

@@ -248,6 +248,7 @@ public class TranslationSummary {
 			TranslationSummaryEntry tse = new TranslationSummaryEntry(key.getObject(), id.getObject());
 			tse.eligibleForMachineTranslation = eligibleForMachineTranslation.getObject();
 			tse.comment = comment.getObject();
+			tse.untranslatable = untranslatable.getObject();
 			tse.suspectSegment = suspectSegment.getObject();
 			TranslationSummary.this.entries.put(key.getObject(), tse);
 
@@ -257,6 +258,7 @@ public class TranslationSummary {
 			key.setObject(null);
 			eligibleForMachineTranslation.setObject(null);
 			comment.setObject(null);
+			untranslatable.setObject(false);
 			suspectSegment.setObject(false);
 		});
 

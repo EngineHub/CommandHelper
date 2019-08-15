@@ -3,9 +3,9 @@ package com.laytonsmith.tools.docgen.localization;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.FileWriteMode;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.ProgressIterator;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.functions.FunctionList;
 import java.io.File;
 import java.io.IOException;
@@ -179,7 +179,7 @@ public class TranslationMaster {
 				id = translationSummary.getMemory(segment).getId();
 			}
 			for(Locale locale : Locale.values()) {
-				File location = new File(translationDb, String.format(toLocation, locale.getLocalName()));
+				File location = new File(translationDb, String.format(toLocation, locale.getLocale()));
 				TranslationMemory tm;
 				if(this.hasMasterTranslation(locale, segment)) {
 					tm = this.getLocaleMaster(locale).get(segment);
@@ -255,7 +255,7 @@ public class TranslationMaster {
 		translationSummary.save();
 		pi.progressChanged(current, total);
 		for(LocaleTranslationMaster ltm : allLocales.values()) {
-			File masterFile = new File(translationDb, ltm.locale + "/master.tmem.xml");
+			File masterFile = new File(translationDb, ltm.locale.getLocale() + "/master.tmem.xml");
 			FileUtil.write(TranslationMemory.generateTranslationFile(ltm.master), masterFile,
 					FileWriteMode.OVERWRITE, true);
 
@@ -379,6 +379,11 @@ public class TranslationMaster {
 			.map((f) -> f.getName())
 			.collect(Collectors.toSet());
 
+	private static final Set<String> CLASS_NAMES = NativeTypeList.getNativeTypeList()
+			.stream()
+			.map((f) -> f.getFQCN())
+			.collect(Collectors.toSet());
+
 	static {
 		StringBuilder b = new StringBuilder();
 		boolean first = true;
@@ -416,9 +421,17 @@ public class TranslationMaster {
 	 * These are essentially a blacklist of segments. Comparison is done as is, if the final segment equals this,
 	 * it is filtered out.
 	 */
-	private static final Set<String> USELESS_SEGMENTS = new HashSet<>(Arrays.asList(new String[]{
+	private static final Set<String> USELESS_SEGMENTS = new HashSet<>(Arrays.asList(
 		",", "%%", "<%", "%>"
-	}));
+	));
+
+	/**
+	 * Most templates are purely functional, and so should always be removed. Only ones that are specifically
+	 * intended to be displayed as strings should be translated, and those can be whitelisted here.
+	 */
+	private static final Set<String> NO_REMOVE_TEMPLATES = new HashSet<>(Arrays.asList(
+			"NOTE"
+	));
 
 
 	/**
@@ -434,17 +447,37 @@ public class TranslationMaster {
 		inputString = inputString.replaceAll("\r", "");
 		inputString = inputString.replaceAll("\\\\\n", "");
 		inputString = inputString.replaceAll("(?s)<script.*?</script>", "");
-		inputString = inputString.replaceAll("(?s)<%CODE.*?%>", "");
-		inputString = inputString.replaceAll("(?s)%%CODE.*?%%", "");
-		inputString = inputString.replaceAll("(?s)<%ALIAS.*?%>", "");
-		inputString = inputString.replaceAll("(?s)%%ALIAS.*?%%", "");
-		inputString = inputString.replaceAll("(?s)<%PRE.*?%>", "");
-		inputString = inputString.replaceAll("(?s)%%PRE.*?%%", "");
-		inputString = inputString.replaceAll("(?s)<%SYNTAX.*?%>", "");
-		inputString = inputString.replaceAll("(?s)%%SYNTAX.*?%%", "");
-		// For now just need to go ahead and remove these
-		inputString = inputString.replaceAll("%%[a-zA-Z_]+%%", "");
-		inputString = inputString.replaceAll("<%[a-zA-Z_]+%>", "");
+		{
+			inputString = inputString.replaceAll("(?s)%%.*?%%", "");
+			// Template removal. We can't use regex here, because <% %> templates can be nested. Eventually, we want
+			// to use the whitelist, but for now, just remove all templates.
+			char c1;
+			char c2;
+			int count = 0;
+			StringBuilder b = new StringBuilder();
+			for(int i = 0; i < inputString.length(); i++) {
+				c1 = inputString.charAt(i);
+				c2 = '\0';
+				if(i + 1 < inputString.length()) {
+					c2 = inputString.charAt(i + 1);
+				}
+				if(c1 == '<' && c2 == '%') {
+					count++;
+					i++;
+					continue;
+				}
+				if(c1 == '%' && c2 == '>') {
+					count--;
+					i++;
+					continue;
+				}
+				if(count > 0) {
+					continue;
+				}
+				b.append(c1);
+			}
+			inputString = b.toString();
+		}
 		inputString = inputString.replaceAll("(?s)<pre.*?</pre>", "");
 		inputString = inputString.replaceAll("\\{\\{.*?\\}\\}", "%s");
 		inputString = inputString.replaceAll("\\[\\[.*?\\|(.*?)\\]\\]", "[[%s|$1]]");
@@ -486,16 +519,16 @@ public class TranslationMaster {
 			.map(string -> {
 				string = string.trim();
 				string = string.replace("\n", " ");
+				for(String className : CLASS_NAMES) {
+					// These are fully qualified, so they are certainly not meant to be translated.
+					string = string.replace(className, "%s");
+				}
 				// Removing beginning and ending %s in the string has no impact on whether or not a string
 				// matches, but does increase the performance of the regex, and simplifies the segment for
-				// translators.
-				while(string.startsWith("%s")) {
-					string = string.replaceFirst("%s", "").trim();
-				}
-				while(string.endsWith("%s")) {
-					string = StringUtils.replaceLast(string, "%s", "").trim();
-				}
-
+				// translators. We also want to remove symbols and whitespace where it's not necessary.
+				string = string.replaceAll("^(?:%s|\\s|[,#*])*(.*?)(?:%s|\\s)*$", "$1");
+				// Collapse multiple %s into one
+				string = string.replaceAll("%s(?:%s)+", "%s");
 				return string;
 			})
 			.filter((string) -> {
@@ -508,13 +541,10 @@ public class TranslationMaster {
 				}
 				return true;
 			})
-			// Strings that are just numbers in their entirety can be removed. We may consider
-			// relocalizing them automatically later, but we do have to be careful about version
-			// numbers and such.
-			.filter((string) -> !string.matches("^[0-9\\.]+$"))
+			// Strings that are just symbols (or %s) in their entirety can be removed.
+			.filter((string) -> !string.matches("^(?:[^a-zA-Z]|%s)+$"))
 			// Segments that are entirely just a function name are removed.
 			.filter((string) -> !FUNCTION_NAMES.contains(string))
-			// TODO Also add object names
 			.filter((string) -> !USELESS_SEGMENTS.contains(string))
 			.collect(Collectors.toSet());
 	}

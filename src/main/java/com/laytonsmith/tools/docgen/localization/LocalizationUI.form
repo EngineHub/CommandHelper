@@ -72,7 +72,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="menuMoveDownSegment">
               <Properties>
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
-                  <KeyStroke key="Ctrl+D"/>
+                  <KeyStroke key="Ctrl+DOWN"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Move Down Segment"/>
               </Properties>
@@ -83,7 +83,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="menuMoveUpSegment">
               <Properties>
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
-                  <KeyStroke key="Ctrl+U"/>
+                  <KeyStroke key="Ctrl+UP"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Move Up Segment"/>
               </Properties>
@@ -173,7 +173,8 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" attributes="0">
+          <Component id="statusPanel" alignment="1" max="32767" attributes="0"/>
+          <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="jScrollPane1" alignment="0" min="-2" pref="85" max="-2" attributes="0"/>
@@ -187,26 +188,33 @@
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="segmentsLabel" min="-2" max="-2" attributes="0"/>
-                  <Component id="jScrollPane3" alignment="0" min="-2" pref="174" max="-2" attributes="0"/>
-                  <Component id="filtersLabel" min="-2" max="-2" attributes="0"/>
-                  <Component id="filterShowAllRadioButton" min="-2" max="-2" attributes="0"/>
-                  <Component id="filterShowUntranslatedRadioButton" min="-2" max="-2" attributes="0"/>
-                  <Component id="filterShowUncategorizedRadioButton" min="-2" max="-2" attributes="0"/>
-                  <Component id="filterShowSuspectRadioButton" min="-2" max="-2" attributes="0"/>
-                  <Component id="filterShowTranslatableRadioButton" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="segmentDetailsPanel" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
-                      <Component id="segmentDetailsLabel" min="-2" max="-2" attributes="0"/>
+                      <Component id="segmentCountLabel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  </Group>
+                  <Group type="102" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="segmentsLabel" min="-2" max="-2" attributes="0"/>
+                          <Component id="jScrollPane3" alignment="0" min="-2" pref="174" max="-2" attributes="0"/>
+                          <Component id="filtersLabel" min="-2" max="-2" attributes="0"/>
+                          <Component id="filterShowAllRadioButton" min="-2" max="-2" attributes="0"/>
+                          <Component id="filterShowUntranslatedRadioButton" min="-2" max="-2" attributes="0"/>
+                          <Component id="filterShowUncategorizedRadioButton" min="-2" max="-2" attributes="0"/>
+                          <Component id="filterShowSuspectRadioButton" min="-2" max="-2" attributes="0"/>
+                          <Component id="filterShowTranslatableRadioButton" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="segmentDetailsPanel" max="32767" attributes="0"/>
+                          <Group type="102" attributes="0">
+                              <Component id="segmentDetailsLabel" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                          </Group>
+                      </Group>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
-          <Component id="statusPanel" alignment="1" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
@@ -244,7 +252,9 @@
                       <Component id="filterShowTranslatableRadioButton" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace min="-2" pref="34" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="segmentCountLabel" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="13" max="-2" attributes="0"/>
               <Component id="statusPanel" min="-2" max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -408,7 +418,7 @@
                           <Group type="102" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" attributes="0">
-                                      <Component id="summaryIsUntraslatable" min="-2" max="-2" attributes="0"/>
+                                      <Component id="summaryIsUntranslatable" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace type="separate" max="-2" attributes="0"/>
                                       <Component id="summaryIsSuspectSegment" min="-2" max="-2" attributes="0"/>
                                   </Group>
@@ -457,7 +467,7 @@
                       </Group>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="summaryIsUntraslatable" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="summaryIsUntranslatable" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="summaryIsSuspectSegment" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
@@ -530,13 +540,13 @@
                 <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="summaryGlobalCommentFieldKeyReleased"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JCheckBox" name="summaryIsUntraslatable">
+            <Component class="javax.swing.JCheckBox" name="summaryIsUntranslatable">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Is Untranslatable"/>
                 <Property name="toolTipText" type="java.lang.String" value="If selected, this entire segment is not eligible for translation to any locale, for instance due to it being a technical string"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="summaryIsUntraslatableActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="summaryIsUntranslatableActionPerformed"/>
               </Events>
             </Component>
             <Component class="javax.swing.JCheckBox" name="summaryIsSuspectSegment">
@@ -666,15 +676,20 @@
                                   <Component id="localeSettingsMachineTranslationWordWrapCheckbox" min="-2" max="-2" attributes="0"/>
                                   <Component id="localeSettingsMachineTranslationLabel" min="-2" max="-2" attributes="0"/>
                                   <Component id="localeSettingsManualTranslationWordWrapCheckbox" alignment="1" min="-2" max="-2" attributes="0"/>
-                                  <Component id="localeSettingsMachineTranslationGenerateButton" alignment="1" min="-2" max="-2" attributes="0"/>
                               </Group>
                           </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
+                              <Component id="localeSettingsMachineTranslationGenerateButton" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="localeSettingsMachineTranslationClearButton" min="-2" max="-2" attributes="0"/>
+                          </Group>
                       </Group>
-                      <EmptySpace min="-2" pref="31" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="7" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="localeSettingsLocaleIdField" max="32767" attributes="0"/>
                           <Component id="localeSettingsLocaleCommentField" max="32767" attributes="0"/>
-                          <Component id="jScrollPane6" alignment="0" max="32767" attributes="0"/>
+                          <Component id="jScrollPane6" alignment="0" pref="1073" max="32767" attributes="0"/>
                           <Component id="jScrollPane7" alignment="0" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
@@ -703,7 +718,10 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="localeSettingsMachineTranslationWordWrapCheckbox" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="localeSettingsMachineTranslationGenerateButton" min="-2" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="localeSettingsMachineTranslationGenerateButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="localeSettingsMachineTranslationClearButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                              </Group>
                           </Group>
                           <Component id="jScrollPane6" min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -831,6 +849,15 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="localeSettingsMachineTranslationGenerateButtonActionPerformed"/>
               </Events>
             </Component>
+            <Component class="javax.swing.JButton" name="localeSettingsMachineTranslationClearButton">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Clear"/>
+                <Property name="toolTipText" type="java.lang.String" value="Clears the automatic translation. Only do this if the translation is really so bad that English would be better. Instead, create a better manual translation, and leave this as is."/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="localeSettingsMachineTranslationClearButtonActionPerformed"/>
+              </Events>
+            </Component>
           </SubComponents>
         </Container>
       </SubComponents>
@@ -882,6 +909,9 @@
         <Property name="text" type="java.lang.String" value="Show All"/>
         <Property name="toolTipText" type="java.lang.String" value="Shows all segments"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="filterShowAllRadioButtonActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JRadioButton" name="filterShowUntranslatedRadioButton">
       <Properties>
@@ -891,6 +921,9 @@
         <Property name="text" type="java.lang.String" value="Show Untranslated"/>
         <Property name="toolTipText" type="java.lang.String" value="Shows only segments that are missing any translation at all"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="filterShowUntranslatedRadioButtonActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JRadioButton" name="filterShowUncategorizedRadioButton">
       <Properties>
@@ -900,6 +933,9 @@
         <Property name="text" type="java.lang.String" value="Show Uncategorized"/>
         <Property name="toolTipText" type="java.lang.String" value="Shows only segments that are not categorized for machine translation yet"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="filterShowUncategorizedRadioButtonActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JRadioButton" name="filterShowSuspectRadioButton">
       <Properties>
@@ -909,6 +945,9 @@
         <Property name="text" type="java.lang.String" value="Show Suspect"/>
         <Property name="toolTipText" type="java.lang.String" value="Shows only segments that have been marked as suspect"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="filterShowSuspectRadioButtonActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JRadioButton" name="filterShowTranslatableRadioButton">
       <Properties>
@@ -917,6 +956,14 @@
         </Property>
         <Property name="text" type="java.lang.String" value="Show Translatable"/>
         <Property name="toolTipText" type="java.lang.String" value="Shows only segments that are marked as translatable"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="filterShowTranslatableRadioButtonActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="segmentCountLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="                      "/>
       </Properties>
     </Component>
   </SubComponents>
