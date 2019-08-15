@@ -8,9 +8,9 @@ Currently, MethodScript does not have an interactive debugger (though this is pl
 in the future) however, this does not stop you from debugging scripts anyways.
 When debugging, there are several key concepts
 
-  * Understand code flow
-  * Understand variable's values
-  * Know the assumptions you are making, and test assumptions that matter
+* Understand code flow
+* Understand variable's values
+* Know the assumptions you are making, and test assumptions that matter
 
 == Understand code flow ==
 

@@ -1,6 +1,7 @@
 (function ($, skel, wiky, bodyEscaped, showLearningTrail, pageRender) {
     var resourceBase = "%%resourceBase%%";
     var docsBase = "%%docsBase%%";
+	var productionTranslations = "%%productionTranslations%%";
     var $body = $("#body");
     var $learningTrail = $("#learningTrail");
     var learningTrailJSON = JSON.parse("%%js_string_learning_trail%%");
@@ -353,8 +354,76 @@
         return newHtml;
     }
 
+    function localize(t) {
+        t.forEach(element => {
+            let key = element.key;
+            let translation = element.translation;
+            // First escape all special characters
+            key = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            // Then replace %s with .*
+            key = key.replace(/%s/g, "(.*?)");
+            key = key.replace(/ /g, "\\s+");
+            // We only want to replace strings where the whole thing is within a border. For instance, if one segment
+            // is A, and another is ABC, we don't want to replace the A in ABC, because then the match for ABC won't
+            // work. Instead, we need to ensure that we're only replacing entire segments, which means essentially 
+            // reversing the segmentation logic that was originally used.
+            let spacer = "(\\s*(?:==+|\n\n|\n\*|\n#)\\s*)";
+            key = spacer + key + spacer; 
+            let count = 2;
+            translation = "$1" + translation;
+            while(translation.includes("%s")) {
+                translation = translation.replace(/%s/, "$" + count);
+                count++;
+            }
+            translation = translation + "$" + count;
+            bodyEscaped = bodyEscaped.replace(new RegExp(key, 'g'), translation);
+        });
+    }
+
     $(function () {
-        render();
+        var url = new URL(window.location.href);
+        var lang = url.searchParams.get("lang");
+        if(productionTranslations !== "" && lang !== null) {
+            // We need to download and parse the locale data first
+            let pageTranslations = productionTranslations + "/" + lang + "/" + window.location.pathname.replace(/\.html$/, ".tmem.xml");
+            $.get(pageTranslations, function(data) {
+                $data = $(data);
+                $blocks = $data.find("translationBlock");
+                let t = [];
+                for(var i = 0; i < $blocks.length; ++i) {
+                    var $block = $($blocks.get(i));
+                    var key = $block.find("key").text();
+                    var auto = $block.find("auto").text();
+                    var translation = $block.find("translation").text();
+                    if(auto === "" && translation === "") {
+                        // No translation available for this one, move along
+                        continue;
+                    }
+                    if(translation === "") {
+                        // Use the auto translation
+                        t.push({key: key, translation: auto});
+                    } else {
+                        // Use the manual translation
+                        t.push({key: key, translation: translation});
+                    }
+                }
+                t.sort(function(a, b) {
+                    a = a.key.length;
+                    b = b.key.length;
+                    if(a == b) {
+                        return 0;
+                    } else if (a < b) {
+                        return 1;
+                    } else {
+                        return -1;
+                    }
+                });
+                localize(t);
+                render();
+            });
+        } else {
+            render();
+        }
     });
     skel.on("change", function () {
         console.log("Current state is: " + skel.vars.stateId);

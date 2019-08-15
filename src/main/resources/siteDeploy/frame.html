@@ -9,7 +9,7 @@
         <meta name="slurp" content="index, follow">
         <title>%%title%% - %%branding%%</title>
         <script type="text/javascript">
-            if (%%useHttps%% && window.location.protocol !== "https:") {
+            if ("%%useHttps%%" === "true" && window.location.protocol !== "https:") {
                 window.location.href = "https:" + window.location.href.substring(window.location.protocol.length);
             }
             var RESOURCE_BASE = "%%resourceBase%%";

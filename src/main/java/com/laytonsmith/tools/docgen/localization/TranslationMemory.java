@@ -31,12 +31,12 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 
 	private final int translationId;
 	private final String englishKey;
-	private final String locale;
+	private final Locale locale;
 	private String comment;
 	private String translation;
 	private String automaticTranslation;
 
-	public TranslationMemory(String englishKey, String locale, String comment,
+	public TranslationMemory(String englishKey, Locale locale, String comment,
 			String translation,
 			String automaticTranslation, int id) {
 		this.englishKey = englishKey;
@@ -44,6 +44,9 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 		this.comment = comment;
 		this.translation = translation;
 		this.automaticTranslation = automaticTranslation;
+		if(id <= 0) {
+			throw new IllegalArgumentException("id must be above 0!");
+		}
 		this.translationId = id;
 	}
 
@@ -63,7 +66,7 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 		return englishKey;
 	}
 
-	public String getLocale() {
+	public Locale getLocale() {
 		return locale;
 	}
 
@@ -91,7 +94,7 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 	public String toTmemString() {
 		StringBuilder b = new StringBuilder();
 		b.append("<translationBlock>\n");
-		b.append("\t<id>").append(locale).append("-").append(translationId).append("</id>\n");
+		b.append("\t<id>").append(locale.getLocale()).append("-").append(translationId).append("</id>\n");
 		b.append("\t<key>").append(escape(englishKey)).append("</key>\n");
 		b.append("\t<comment>").append(escape(comment)).append("</comment>\n");
 		b.append("\t<translation>").append(escape(translation)).append("</translation>\n");
@@ -118,7 +121,7 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 		return BEGIN_BLOCK + b.toString() + END_BLOCK;
 	}
 
-	public static Map<String, TranslationMemory> fromTmemFile(String locale, String fileContents) throws IOException {
+	public static Map<String, TranslationMemory> fromTmemFile(Locale locale, String fileContents) throws IOException {
 		Map<String, TranslationMemory> memories = new HashMap<>();
 		if("".equals(fileContents)) {
 			return memories;
@@ -156,7 +159,7 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 		});
 
 		sax.addListener("/translations/translationBlock", (xpath, tag, attr, contents) -> {
-			int intId = Integer.parseInt(id.getObject().replaceAll(locale + "-(.*)", "$1"));
+			int intId = Integer.parseInt(id.getObject().replaceAll(locale.getLocale() + "-(.*)", "$1"));
 			TranslationMemory tm = new TranslationMemory(
 					key.getObject(),
 					locale,

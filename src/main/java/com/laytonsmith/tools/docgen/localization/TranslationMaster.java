@@ -2,7 +2,9 @@ package com.laytonsmith.tools.docgen.localization;
 
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.FileWriteMode;
+import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.ProgressIterator;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.functions.FunctionList;
 import java.io.File;
@@ -24,21 +26,11 @@ import java.util.stream.Collectors;
  */
 public class TranslationMaster {
 
-	/**
-	 * Supported values are the language codes found under the translation section of this page:
-	 * https://api.cognitive.microsofttranslator.com/languages?api-version=3.0 along with the
-	 * special code "art" which is a programmatically generated test language, that is always
-	 * available.
-	 */
-	private static final String[] SUPPORTED_LOCALES = {
-		"art",	// as in artificial, this is the official language code for made up languages, and is
-				// always assumed to be present, so cannot be removed.
-		"ko",
-	};
-
-	private final Map<String, LocaleTranslationMaster> allLocales = new HashMap<>();
+	private static final ProgressIterator NULLPI = (current, total) -> {};
+	private final Map<Locale, LocaleTranslationMaster> allLocales = new HashMap<>();
 	private final File translationDb;
 	private final TranslationSummary translationSummary;
+	private final ProgressIterator progressCallback;
 
 	/**
 	 * Creates an object that represents a full translation database, located at the given local location.
@@ -46,39 +38,50 @@ public class TranslationMaster {
 	 * @throws IOException
 	 */
 	public TranslationMaster(File translationDb) throws IOException {
+		this(translationDb, NULLPI);
+	}
+
+	/**
+	 * Creates an object that represents a full translation database, located at the given local location.
+	 * @param translationDb
+	 * @param callback If desired, keeps a count of the loading progress. Useful for UI components. Null is supported,
+	 * and disables this checking.
+	 * @throws IOException
+	 */
+	public TranslationMaster(File translationDb, ProgressIterator callback) throws IOException {
 		this.translationDb = translationDb;
+		if(callback == null) {
+			this.progressCallback = NULLPI;
+		} else {
+			this.progressCallback = callback;
+		}
 		translationSummary = new TranslationSummary(translationDb);
 		initialize();
 	}
 
 	private void initialize() throws IOException {
 		File[] locales = translationDb.listFiles((File file) -> file.isDirectory());
+		int total = 0;
 		for(File locale : locales) {
 			if(locale.getName().equals(".git")) {
 				continue;
 			}
-			String l = locale.getName();
-			initLocale(l, locale);
+			total += prepLocale(locale);
 		}
-	}
 
-	public String doMachineTranslation(String azureEndpoint, String azureKey, String locale, String english) {
-		if(locale.equals("art")) {
-			return english
-					.replace("a", "å")
-					.replace("e", "ə")
-					.replace("i", "î")
-					.replace("o", "ø")
-					.replace("u", "ü")
-					.replace("y", "ʎ");
-		} else {
-			return "TODO: NOT YET SUPPORTED";
+		MutableObject<Integer> current = new MutableObject<>(0);
+		for(File locale : locales) {
+			if(locale.getName().equals(".git")) {
+				continue;
+			}
+			Locale l = Locale.fromLocale(locale.getName());
+			initLocale(l, locale, current, total);
 		}
 	}
 
 	private class LocaleTranslationMaster {
 		int maxId = 0;
-		String locale;
+		Locale locale;
 		Map<String, TranslationMemory> master;
 		Map<File, PageTranslations> pages;
 	}
@@ -88,30 +91,42 @@ public class TranslationMaster {
 		 * Set of EnglishKeys on this page
 		 */
 		Set<String> blocks;
-		String locale;
+		Locale locale;
 	}
 
-	private void initNewLocale(String localeName) {
-		if(!allLocales.containsKey(localeName)) {
+	private void initNewLocale(Locale locale) {
+		if(!allLocales.containsKey(locale)) {
 			LocaleTranslationMaster ltm;
 			ltm = new LocaleTranslationMaster();
-			ltm.locale = localeName;
+			ltm.locale = locale;
 			ltm.master = new HashMap<>();
 			ltm.pages = new HashMap<>();
-			allLocales.put(localeName, ltm);
+			allLocales.put(locale, ltm);
 		}
 	}
 
-	private void initLocale(String localeName, File locale) throws IOException {
-		initNewLocale(localeName);
-		LocaleTranslationMaster ltm = allLocales.get(localeName);
-		// Be sure to increment nextId to the max id in the locale
-		File master = new File(locale, "master.tmem.xml").getCanonicalFile();
+	private int prepLocale(File locale) throws IOException {
+		MutableObject<Integer> i = new MutableObject<>(0);
 		FileUtil.recursiveFind(locale, (File f) -> {
 			if(f.isDirectory()) {
 				return;
 			}
-			Map<String, TranslationMemory> tmem = TranslationMemory.fromTmemFile(localeName, FileUtil.read(f));
+			i.setObject(i.getObject() + 1);
+		});
+		return i.getObject();
+	}
+
+	private void initLocale(Locale locale, File localeFile, MutableObject<Integer> current, int total)
+			throws IOException {
+		initNewLocale(locale);
+		LocaleTranslationMaster ltm = allLocales.get(locale);
+		// Be sure to increment nextId to the max id in the locale
+		File master = new File(localeFile, "master.tmem.xml").getCanonicalFile();
+		FileUtil.recursiveFind(localeFile, (File f) -> {
+			if(f.isDirectory()) {
+				return;
+			}
+			Map<String, TranslationMemory> tmem = TranslationMemory.fromTmemFile(locale, FileUtil.read(f));
 			if(f.getCanonicalFile().equals(master)) {
 				ltm.master = tmem;
 				for(TranslationMemory t : ltm.master.values()) {
@@ -120,12 +135,14 @@ public class TranslationMaster {
 			} else if(f.getName().endsWith(".tmem.xml")) {
 				PageTranslations pt = new PageTranslations();
 				pt.file = f;
-				pt.blocks = tmem.keySet();
-				pt.locale = localeName;
+				pt.blocks = new HashSet<>(tmem.keySet());
+				pt.locale = locale;
 				ltm.pages.put(f, pt);
 			} else {
 				System.out.println("Skipping non tmem file " + f.getAbsolutePath());
 			}
+			current.setObject(current.getObject() + 1);
+			progressCallback.progressChanged(current.getObject(), total);
 		});
 		if(ltm.master == null) {
 			throw new IOException("Missing master translation file!");
@@ -146,7 +163,7 @@ public class TranslationMaster {
 	 * @param key
 	 * @return
 	 */
-	public boolean hasMasterTranslation(String locale, String key) {
+	public boolean hasMasterTranslation(Locale locale, String key) {
 		initNewLocale(locale);
 		return allLocales.get(locale).master.containsKey(key);
 	}
@@ -154,13 +171,15 @@ public class TranslationMaster {
 	public void createTranslationMemory(String toLocation, String inputString) {
 		Set<String> segments = TranslationMaster.findSegments(inputString);
 		for(String segment : segments) {
-			int id = -1;
+			int id;
 			if(!translationSummary.containsTranslation(segment)) {
 				id = getNewId();
 				translationSummary.addTranslation(segment, id);
+			} else {
+				id = translationSummary.getMemory(segment).getId();
 			}
-			for(String locale : SUPPORTED_LOCALES) {
-				File location = new File(translationDb, String.format(toLocation, locale));
+			for(Locale locale : Locale.values()) {
+				File location = new File(translationDb, String.format(toLocation, locale.getLocalName()));
 				TranslationMemory tm;
 				if(this.hasMasterTranslation(locale, segment)) {
 					tm = this.getLocaleMaster(locale).get(segment);
@@ -178,7 +197,7 @@ public class TranslationMaster {
 	 * @param page The file where the page lives.
 	 * @param memory The translation memory itself.
 	 */
-	private void addTranslation(String locale, File page, TranslationMemory memory) {
+	private void addTranslation(Locale locale, File page, TranslationMemory memory) {
 		initNewLocale(locale);
 		page = standardizeFile(page);
 		LocaleTranslationMaster ltm = allLocales.get(locale);
@@ -207,7 +226,7 @@ public class TranslationMaster {
 	 * @param locale
 	 * @return
 	 */
-	public Map<String, TranslationMemory> getLocaleMaster(String locale) {
+	public Map<String, TranslationMemory> getLocaleMaster(Locale locale) {
 		return allLocales.get(locale).master;
 	}
 
@@ -217,7 +236,24 @@ public class TranslationMaster {
 	 * @throws IOException
 	 */
 	public void save() throws IOException {
+		save(NULLPI);
+	}
+
+	public void save(ProgressIterator pi) throws IOException {
+		if(pi == null) {
+			pi = NULLPI;
+		}
+		int total = 1;
+		int current = 1;
+		if(pi != NULLPI) {
+			for(LocaleTranslationMaster ltm : allLocales.values()) {
+				for(Map.Entry<File, PageTranslations> fpt : ltm.pages.entrySet()) {
+					total++;
+				}
+			}
+		}
 		translationSummary.save();
+		pi.progressChanged(current, total);
 		for(LocaleTranslationMaster ltm : allLocales.values()) {
 			File masterFile = new File(translationDb, ltm.locale + "/master.tmem.xml");
 			FileUtil.write(TranslationMemory.generateTranslationFile(ltm.master), masterFile,
@@ -232,6 +268,8 @@ public class TranslationMaster {
 				});
 				String page = TranslationMemory.generateTranslationFile(blocks);
 				FileUtil.write(page, f, FileWriteMode.OVERWRITE, true);
+				current++;
+				pi.progressChanged(current, total);
 			}
 		}
 	}
@@ -249,7 +287,7 @@ public class TranslationMaster {
 	 * Returns a list of supported locales, including the artificial locale.
 	 * @return
 	 */
-	public List<String> getLocales() {
+	public List<Locale> getLocales() {
 		return new ArrayList<>(allLocales.keySet());
 	}
 
@@ -260,7 +298,7 @@ public class TranslationMaster {
 	public List<String> getPages() {
 		List<String> pages = new ArrayList<>();
 		String toReplace = new File(translationDb.getAbsolutePath(), "art").getAbsolutePath();
-		for(File f : allLocales.get("art").pages.keySet()) {
+		for(File f : allLocales.get(Locale.ART).pages.keySet()) {
 			pages.add(f.getAbsolutePath().replaceFirst(Pattern.quote(toReplace), ""));
 		}
 		Collections.sort(pages);
@@ -273,7 +311,7 @@ public class TranslationMaster {
 	 * @param page
 	 * @return
 	 */
-	public List<TranslationMemory> getMemoriesForPage(String locale, String page) {
+	public List<TranslationMemory> getMemoriesForPage(Locale locale, String page) {
 		Map<String, TranslationMemory> master = allLocales.get(locale).master;
 		Set<String> keys = allLocales.get(locale)
 				.pages.get(new File(translationDb, locale + "/" + page))
@@ -286,7 +324,7 @@ public class TranslationMaster {
 	 * @param locale
 	 * @return
 	 */
-	public List<TranslationMemory> getMemoriesForLocale(String locale) {
+	public List<TranslationMemory> getMemoriesForLocale(Locale locale) {
 		return new ArrayList<>(allLocales.get(locale).master.values());
 	}
 
@@ -308,24 +346,21 @@ public class TranslationMaster {
 	}
 
 	/**
-	 * For brand new segments, some default translation must be used. By default, the English version is
-	 * used for the auto translation, but in the future, where possible, a machine translation may be used
-	 * instead. It will never fill the manual translation field however. The remaining fields are filled out
-	 * with default values, such as the id.
+	 * Creates a new segment with default values.
 	 * @param locale
 	 * @param englishKey
 	 * @param id
 	 * @return
 	 */
-	public TranslationMemory generateNewTranslation(String locale, String englishKey, int id) {
+	public TranslationMemory generateNewTranslation(Locale locale, String englishKey, int id) {
 		return new TranslationMemory(englishKey, locale, "", "", "", id);
 	}
 
 	private static final String[] SEGMENT_SEP = new String[]{
 		"==+",
 		"\n\n",
-		"^\\*",
-		"^#"
+		"\n\\*",
+		"\n#"
 	};
 	private static final Pattern SPLIT_PATTERN;
 
@@ -397,6 +432,7 @@ public class TranslationMaster {
 		Set<String> segments = new HashSet<>();
 		// First, remove all things that shouldn't be translated, code blocks, html, etc
 		inputString = inputString.replaceAll("\r", "");
+		inputString = inputString.replaceAll("\\\\\n", "");
 		inputString = inputString.replaceAll("(?s)<script.*?</script>", "");
 		inputString = inputString.replaceAll("(?s)<%CODE.*?%>", "");
 		inputString = inputString.replaceAll("(?s)%%CODE.*?%%", "");
@@ -406,6 +442,7 @@ public class TranslationMaster {
 		inputString = inputString.replaceAll("(?s)%%PRE.*?%%", "");
 		inputString = inputString.replaceAll("(?s)<%SYNTAX.*?%>", "");
 		inputString = inputString.replaceAll("(?s)%%SYNTAX.*?%%", "");
+		// For now just need to go ahead and remove these
 		inputString = inputString.replaceAll("%%[a-zA-Z_]+%%", "");
 		inputString = inputString.replaceAll("<%[a-zA-Z_]+%>", "");
 		inputString = inputString.replaceAll("(?s)<pre.*?</pre>", "");
@@ -436,7 +473,9 @@ public class TranslationMaster {
 			table = table.replaceAll("\\|\\}", "");
 			table = table.replaceAll("\\|\\-\\s*\n", "");
 			table = table.replaceAll("!.*\n", "");
-			segments.addAll(Arrays.asList(table.split("\\|\\||(?:(?:^|\n)\\|)")));
+			for(String cell : Arrays.asList(table.split("\\|\\||(?:(?:^|\n)\\|)"))) {
+				segments.addAll(Arrays.asList(SPLIT_PATTERN.split(cell)));
+			}
 		}
 		inputString = inputString.replaceAll(TABLE_PATTERN_STRING, "");
 

@@ -47,6 +47,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -101,6 +102,7 @@ public final class SiteDeploy {
 	private static final String INSTALL_PEM_FILE = "install-pem-file";
 	private static final String INSTALL_PUB_KEYS = "install-pub-keys";
 
+	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public static void run(boolean generatePrefs, boolean useLocalCache, File sitedeploy, String password,
 			boolean doValidation, boolean clearProgressBar, String overridePostScript,
 			String overrideIdRsa) throws Exception {
@@ -198,6 +200,7 @@ public final class SiteDeploy {
 		String validatorUrl = prefs.getStringPreference(VALIDATOR_URL);
 		File finalizerScript = prefs.getFilePreference(POST_SCRIPT);
 		File translationMemoryDb = prefs.getFilePreference(TRANSLATION_MEMORY_DB);
+		String productionTranslations = prefs.getStringPreference(PRODUCTION_TRANSLATIONS);
 
 
 		if(!overridePostScript.equals("")) {
@@ -251,6 +254,14 @@ public final class SiteDeploy {
 				configErrors.add("Translation memory db must point to an existing database. (" + translationMemoryDb
 						+ ")");
 			}
+			if(!"".equals(productionTranslations)) {
+				try {
+					new URL(productionTranslations);
+				} catch (MalformedURLException e) {
+					configErrors.add("Invalid URL for " + PRODUCTION_TRANSLATIONS + " value: "
+							+ productionTranslations);
+				}
+			}
 
 			if(!configErrors.isEmpty()) {
 				System.err.println("Invalid input. Check preferences in " + sitedeploy.getAbsolutePath()
@@ -280,6 +291,9 @@ public final class SiteDeploy {
 		System.out.println("github-base-url: " + githubBaseUrl);
 		if(translationMemoryDb != null) {
 			System.out.println("Translation memory database: " + translationMemoryDb);
+		}
+		if(productionTranslations != null) {
+			System.out.println("Production translations url: " + productionTranslations);
 		}
 		if(finalizerScript != null) {
 			System.out.println("post-script: " + finalizerScript.getCanonicalPath());
@@ -316,17 +330,17 @@ public final class SiteDeploy {
 		// Ok, all the configuration details are input and correct, so lets deploy now.
 		deploy(useLocalCache, siteBase, docsBase, deploymentMethod, doValidation,
 				showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript, clearProgressBar, overrideIdRsa,
-				translationMemoryDb);
+				translationMemoryDb, productionTranslations);
 	}
 
 	private static void deploy(boolean useLocalCache, String siteBase, String docsBase,
 			DeploymentMethod deploymentMethod, boolean doValidation, boolean showTemplateCredit,
 			String githubBaseUrl, String validatorUrl, File finalizerScript, boolean clearProgressBar,
-			String overrideIdRsa, File translationMemoryDb)
+			String overrideIdRsa, File translationMemoryDb, String productionTranslations)
 			throws IOException, InterruptedException {
 		new SiteDeploy(siteBase, docsBase, useLocalCache, deploymentMethod, doValidation,
 				showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript, clearProgressBar,
-				overrideIdRsa, translationMemoryDb).deploy();
+				overrideIdRsa, translationMemoryDb, productionTranslations).deploy();
 	}
 
 	String apiJson;
@@ -489,6 +503,7 @@ public final class SiteDeploy {
 	private final String siteBase;
 	private final String docsBase;
 	private final String resourceBase;
+	private final String productionTranslations;
 	private final jline.console.ConsoleReader reader;
 	private final ThreadPoolExecutor generateQueue;
 	private final ThreadPoolExecutor uploadQueue;
@@ -532,7 +547,7 @@ public final class SiteDeploy {
 	private SiteDeploy(String siteBase, String docsBase, boolean useLocalCache,
 			DeploymentMethod deploymentMethod, boolean doValidation, boolean showTemplateCredit,
 			String githubBaseUrl, String validatorUrl, File finalizerScript, boolean clearProgressBar,
-			String overrideIdRsa, File translationMemoryDb)
+			String overrideIdRsa, File translationMemoryDb, String productionTranslations)
 			throws IOException {
 		this.siteBase = siteBase;
 		this.docsBase = docsBase;
@@ -582,9 +597,16 @@ public final class SiteDeploy {
 		}
 		this.overrideIdRsa = overrideIdRsa;
 		this.translationMemoryDb = translationMemoryDb;
+		this.productionTranslations = productionTranslations;
 		if(translationMemoryDb != null) {
 			writeStatus("Loading translation memories, this may take a while.");
-			this.masterMemories = new TranslationMaster(translationMemoryDb);
+			this.masterMemories = new TranslationMaster(translationMemoryDb, (current, total) -> {
+				if(!clearProgressBar) {
+					return;
+				}
+				writeStatus("Loading translation memories, this may take a while (" + ((int) current) + "/"
+						+ ((int) total) + ")");
+			});
 			writeStatus("Done loading translation memories.");
 		} else {
 			this.masterMemories = null;
@@ -662,6 +684,7 @@ public final class SiteDeploy {
 		g.put("resourceBase", (Generator) (String... args) -> SiteDeploy.this.resourceBase);
 		g.put("branding", (Generator) (String... args) -> Implementation.GetServerType().getBranding());
 		g.put("siteRoot", (Generator) (String... args) -> SiteDeploy.this.siteBase);
+		g.put("productionTranslations", (args) -> SiteDeploy.this.productionTranslations);
 		g.put("docsBase", (Generator) (String... args) -> SiteDeploy.this.docsBase);
 		g.put("apiJsonVersion", (Generator) (String... args) -> apiJsonVersion);
 		/**
@@ -1014,7 +1037,13 @@ public final class SiteDeploy {
 	private void writeMasterTranslations() throws IOException {
 		if(masterMemories != null) {
 			writeStatus("Writing out translation database");
-			masterMemories.save();
+			masterMemories.save((current, total) -> {
+				if(!clearProgressBar) {
+					return;
+				}
+				writeStatus("Writing out translation database (" + ((int) current) + "/"
+						+ ((int) total) + ")");
+			});
 		}
 	}
 
@@ -1065,7 +1094,8 @@ public final class SiteDeploy {
 			try {
 				writePageFromResource(MSVersion.LATEST.toString() + " - Docs", "/siteDeploy/VersionFrontPage",
 						"index.html",
-						Arrays.asList(new String[]{MSVersion.LATEST.toString()}), "Front page for "
+						Arrays.asList(new String[]{MSVersion.LATEST.toString(), "better than skript"}),
+						"Front page for "
 								+ MSVersion.LATEST.toString());
 				currentGenerateTask.addAndGet(1);
 			} catch (Throwable t) {

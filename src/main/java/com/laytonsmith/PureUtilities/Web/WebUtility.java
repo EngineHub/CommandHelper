@@ -272,13 +272,19 @@ public final class WebUtility {
 						followRedirects, timeout, username, password == null ? "null" : password.length()});
 		}
 		//First, let's check to see that the url is properly formatted. If there are parameters,
-		//and this is a GET request, we want to tack them on to the end.
-		if(parameters != null && !parameters.isEmpty() && method == HTTPMethod.GET) {
+		//and this is a GET request, we want to tack them on to the end. OR, if there is a raw parameter and parameters,
+		//and this is a post reqest, put the parameters on anyways.
+		if(parameters != null && !parameters.isEmpty()
+				&& (method == HTTPMethod.GET
+				|| (method != HTTPMethod.GET
+					&& settings.getRawParameter() != null && settings.getRawParameter().length != 0))) {
 			StringBuilder b = new StringBuilder(url.getQuery() == null ? "" : url.getQuery());
 			if(b.length() != 0) {
 				b.append("&");
 			}
 			b.append(encodeParameters(parameters));
+			// Setting this to null avoids further processing below
+			parameters = null;
 			String query = b.toString();
 			url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "?" + query);
 		}
@@ -301,10 +307,10 @@ public final class WebUtility {
 				throw new IOException("Could not resolve the proxy address: " + addr.toString());
 			}
 		}
-		//FIXME: When given a bad proxy, this causes it to stall forever
 		if(logger != null) {
 			logger.log(Level.INFO, "Opening connection...");
 		}
+		//FIXME: When given a bad proxy, this causes it to stall forever
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection(/*proxy*/);
 		if(conn instanceof HttpsURLConnection
 				&& (settings.getDisableCertChecking() || settings.getUseDefaultTrustStore() == false

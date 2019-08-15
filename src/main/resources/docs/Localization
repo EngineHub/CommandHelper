@@ -150,7 +150,7 @@ Follow the remaining directions to get a local site
 up and running, then:
 
 * Open a new terminal, in addition to the terminal running the server for the main site.
-* Run <%PRE|npx http-server -c-1 -p 7585%>
+* Run <%PRE|npx http-server -c-1 -p 7585 --cors%>
 
 Now, when you save the localizations in the UI, you simply need to refresh the page to see the new translations. 
 
@@ -166,4 +166,5 @@ appear on the website.
 == Errors in original documentation ==
 If you find errors or typos in the original English, do not translate them, because the segment will be invalidated and
 no longer translated. Submit a PR against the original English first, then allow the segment to update before
-translating it.
+translating it. You can also mark it as a suspect segment, and it will be flagged for review, and prevent others
+from translating it before it is replaced.

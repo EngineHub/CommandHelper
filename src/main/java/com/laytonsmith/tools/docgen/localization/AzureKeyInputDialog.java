@@ -10,22 +10,17 @@ public class AzureKeyInputDialog extends javax.swing.JDialog {
 
 
 	public static interface AzureKeyInputDialogCallback {
-		void getResults(String endpoint, String key, boolean storeValue);
+		void getResults(String key, boolean storeValue);
 	}
 
 	/**
 	 * Creates new form AzureKeyInputDialog
 	 * @param parent The parent frame
-	 * @param endpoint The existing endpoint, if any
 	 * @param callback The callback is called with the key and store value setting if the user clicks ok
 	 */
-	public AzureKeyInputDialog(java.awt.Frame parent, String endpoint, AzureKeyInputDialogCallback callback) {
+	public AzureKeyInputDialog(java.awt.Frame parent, AzureKeyInputDialogCallback callback) {
 		super(parent, true);
-		if(endpoint == null) {
-			endpoint = "";
-		}
 		initComponents();
-		endpointField.setText(endpoint);
 		keyField.setText("");
 		okButton.setEnabled(false);
 		storeKeyCheckbox.setSelected(false);
@@ -34,12 +29,11 @@ public class AzureKeyInputDialog extends javax.swing.JDialog {
 			this.dispose();
 		});
 		okButton.addActionListener((ae) -> {
-			callback.getResults(endpointField.getText(), new String(keyField.getPassword()),
+			callback.getResults(new String(keyField.getPassword()),
 					storeKeyCheckbox.isSelected());
 			setVisible(false);
 			this.dispose();
 		});
-		endpointField.addKeyListener(validationListener);
 		keyField.addKeyListener(validationListener);
 	}
 
@@ -61,7 +55,7 @@ public class AzureKeyInputDialog extends javax.swing.JDialog {
 	};
 
 	private void validateInput() {
-		if(endpointField.getText().trim().isEmpty() || keyField.getPassword().length == 0) {
+		if(keyField.getPassword().length == 0) {
 			okButton.setEnabled(false);
 		} else {
 			okButton.setEnabled(true);
@@ -82,8 +76,6 @@ public class AzureKeyInputDialog extends javax.swing.JDialog {
         storeKeyCheckbox = new javax.swing.JCheckBox();
         okButton = new javax.swing.JButton();
         cancelButton = new javax.swing.JButton();
-        jLabel2 = new javax.swing.JLabel();
-        endpointField = new javax.swing.JTextField();
         keyField = new javax.swing.JPasswordField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -96,8 +88,6 @@ public class AzureKeyInputDialog extends javax.swing.JDialog {
 
         cancelButton.setText("Cancel");
 
-        jLabel2.setText("Input Azure Cognitive Services Endpoint");
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -105,7 +95,6 @@ public class AzureKeyInputDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(endpointField)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(storeKeyCheckbox)
@@ -113,20 +102,15 @@ public class AzureKeyInputDialog extends javax.swing.JDialog {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(okButton)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(cancelButton))
-                            .addComponent(jLabel2))
+                                .addComponent(cancelButton)))
                         .addGap(0, 250, Short.MAX_VALUE))
                     .addComponent(keyField))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(endpointField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(keyField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -145,9 +129,7 @@ public class AzureKeyInputDialog extends javax.swing.JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelButton;
-    private javax.swing.JTextField endpointField;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JPasswordField keyField;
     private javax.swing.JButton okButton;
     private javax.swing.JCheckBox storeKeyCheckbox;

@@ -14,7 +14,7 @@ import java.util.Set;
 public final class HTTPResponse {
 
 	private String rawResponse = null;
-	private final List<HTTPHeader> headers = new LinkedList<>();
+	private final HTTPHeaders headers;
 	private final String responseText;
 	private final int responseCode;
 	private final byte[] content;
@@ -34,11 +34,13 @@ public final class HTTPResponse {
 			byte[] response, String httpVersion) {
 		this.responseText = responseText;
 		this.responseCode = responseCode;
+		List<HTTPHeader> h = new ArrayList<>();
 		for(String key : headers.keySet()) {
 			for(String value : headers.get(key)) {
-				this.headers.add(new HTTPHeader(key, value));
+				h.add(new HTTPHeader(key, value));
 			}
 		}
+		this.headers = new HTTPHeaders(h);
 		this.content = response;
 		this.httpVersion = httpVersion;
 	}
@@ -88,29 +90,22 @@ public final class HTTPResponse {
 	 *
 	 * @param key
 	 * @return
+	 * @deprecated Use {@link #getHeaderObject()} instead.
 	 */
+	@Deprecated
 	public String getFirstHeader(String key) {
-		for(HTTPHeader header : headers) {
-			if(header.getHeader().equalsIgnoreCase(key)) {
-				return header.getValue();
-			}
-		}
-		return null;
+		return headers.getFirstHeader(key);
 	}
 
 	/**
 	 * Returns a list of all the header names that are set in this request.
 	 *
 	 * @return
+	 * @deprecated Use {@link #getHeaderObject()} instead.
 	 */
+	@Deprecated
 	public Set<String> getHeaderNames() {
-		Set<String> set = new HashSet<>();
-		for(HTTPHeader h : headers) {
-			if(h.getHeader() != null) {
-				set.add(h.getHeader());
-			}
-		}
-		return set;
+		return headers.getHeaderNames();
 	}
 
 	/**
@@ -118,15 +113,15 @@ public final class HTTPResponse {
 	 *
 	 * @param key
 	 * @return
+	 * @deprecated Use {@link #getHeaderObject()} instead.
 	 */
+	@Deprecated
 	public List<String> getHeaders(String key) {
-		List<String> list = new ArrayList<>();
-		for(HTTPHeader header : headers) {
-			if((header.getHeader() == null && key == null) || (header.getHeader() != null && header.getHeader().equalsIgnoreCase(key))) {
-				list.add(header.getValue());
-			}
-		}
-		return list;
+		return headers.getHeaders(key);
+	}
+
+	public HTTPHeaders getHeaderObject() {
+		return headers;
 	}
 
 	/**

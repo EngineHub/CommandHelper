@@ -14,26 +14,33 @@ import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.ReadOnlyException;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
+import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.ListModel;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
@@ -44,10 +51,11 @@ import javax.swing.event.ListSelectionListener;
  */
 public final class LocalizationUI extends javax.swing.JFrame {
 
+	private static final String FINISHED = "Finished.";
+
 	private boolean unsavedChanges = false;
 	private TranslationMaster translations;
 	private PersistenceNetwork pn;
-	private String azureEndpoint = null;
 	private String azureKey = null;
 	private String storedLocation = null;
 	private final DaemonManager dm = new DaemonManager();
@@ -55,6 +63,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
 	private List<TranslationMemory> currentSegments;
 	private TranslationMemory currentMemory;
 	private TranslationSummary.TranslationSummaryEntry currentSummary;
+	private MachineTranslation machineTranslator;
 
 	/**
 	 * Creates new form LocalizationUI
@@ -108,6 +117,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
         filtersButtonGroup = new javax.swing.ButtonGroup();
         statusPanel = new javax.swing.JPanel();
         statusLabel = new java.awt.Label();
+        progressBar = new javax.swing.JProgressBar();
         jScrollPane1 = new javax.swing.JScrollPane();
         localeList = new javax.swing.JList<>();
         localeLabel = new javax.swing.JLabel();
@@ -166,11 +176,15 @@ public final class LocalizationUI extends javax.swing.JFrame {
         loadMenu = new javax.swing.JMenuItem();
         saveMenu = new javax.swing.JMenuItem();
         exitMenu = new javax.swing.JMenuItem();
+        navigationMenu = new javax.swing.JMenu();
+        findSegmentMenu = new javax.swing.JMenuItem();
+        jumpToPageMenu = new javax.swing.JMenuItem();
+        menuMoveDownSegment = new javax.swing.JMenuItem();
+        menuMoveUpSegment = new javax.swing.JMenuItem();
         toolsMenu = new javax.swing.JMenu();
         azureKeyMenu = new javax.swing.JMenuItem();
         forkDatabaseMenu = new javax.swing.JMenuItem();
-        findSegmentMenu = new javax.swing.JMenuItem();
-        jumpToPageMenu = new javax.swing.JMenuItem();
+        menuCountUntranslatedChars = new javax.swing.JMenuItem();
         helpMenuTop = new javax.swing.JMenu();
         helpMenu = new javax.swing.JMenuItem();
         aboutMenu = new javax.swing.JMenuItem();
@@ -186,14 +200,16 @@ public final class LocalizationUI extends javax.swing.JFrame {
         statusPanelLayout.setHorizontalGroup(
             statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(statusPanelLayout.createSequentialGroup()
+                .addContainerGap()
                 .addComponent(statusLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 1789, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         statusPanelLayout.setVerticalGroup(
             statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, statusPanelLayout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(statusLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(statusLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         jScrollPane1.setViewportView(localeList);
@@ -227,6 +243,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
 
         summaryGlobalCommentLabel.setText("Global Comment (English)");
 
+        summaryGlobalCommentField.setForeground(new java.awt.Color(255, 0, 0));
         summaryGlobalCommentField.setToolTipText("Note about this segment to editors of all locales (English only please)");
         summaryGlobalCommentField.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -387,6 +404,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
 
         jLabel4.setText("(English Preferred)");
 
+        localeSettingsLocaleCommentField.setForeground(new java.awt.Color(255, 0, 0));
         localeSettingsLocaleCommentField.setToolTipText("Note about this segment to editors of this specific locale (English is preferred, but can be the locale language can be used as well)");
         localeSettingsLocaleCommentField.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -530,7 +548,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
                 .addComponent(localeSettingsLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(localeSettingsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(39, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         segmentDetailsLabel.setText("Segment Details");
@@ -599,6 +617,46 @@ public final class LocalizationUI extends javax.swing.JFrame {
 
         topMenu.add(fileMenu);
 
+        navigationMenu.setText("Navigation");
+
+        findSegmentMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.event.InputEvent.CTRL_MASK));
+        findSegmentMenu.setText("Find Segment...");
+        findSegmentMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                findSegmentMenuActionPerformed(evt);
+            }
+        });
+        navigationMenu.add(findSegmentMenu);
+
+        jumpToPageMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_J, java.awt.event.InputEvent.CTRL_MASK));
+        jumpToPageMenu.setText("Jump to Page");
+        jumpToPageMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jumpToPageMenuActionPerformed(evt);
+            }
+        });
+        navigationMenu.add(jumpToPageMenu);
+
+        menuMoveDownSegment.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.event.InputEvent.CTRL_MASK));
+        menuMoveDownSegment.setText("Move Down Segment");
+        menuMoveDownSegment.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuMoveDownSegmentActionPerformed(evt);
+            }
+        });
+        navigationMenu.add(menuMoveDownSegment);
+
+        menuMoveUpSegment.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_U, java.awt.event.InputEvent.CTRL_MASK));
+        menuMoveUpSegment.setText("Move Up Segment");
+        menuMoveUpSegment.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuMoveUpSegmentActionPerformed(evt);
+            }
+        });
+        navigationMenu.add(menuMoveUpSegment);
+
+        topMenu.add(navigationMenu);
+
         toolsMenu.setText("Tools");
 
         azureKeyMenu.setText("Add Azure Key...");
@@ -617,23 +675,13 @@ public final class LocalizationUI extends javax.swing.JFrame {
         });
         toolsMenu.add(forkDatabaseMenu);
 
-        findSegmentMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.event.InputEvent.CTRL_MASK));
-        findSegmentMenu.setText("Find Segment...");
-        findSegmentMenu.addActionListener(new java.awt.event.ActionListener() {
+        menuCountUntranslatedChars.setText("Count Untranslated Chars...");
+        menuCountUntranslatedChars.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                findSegmentMenuActionPerformed(evt);
+                menuCountUntranslatedCharsActionPerformed(evt);
             }
         });
-        toolsMenu.add(findSegmentMenu);
-
-        jumpToPageMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_J, java.awt.event.InputEvent.CTRL_MASK));
-        jumpToPageMenu.setText("Jump to Page");
-        jumpToPageMenu.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jumpToPageMenuActionPerformed(evt);
-            }
-        });
-        toolsMenu.add(jumpToPageMenu);
+        toolsMenu.add(menuCountUntranslatedChars);
 
         topMenu.add(toolsMenu);
 
@@ -663,7 +711,6 @@ public final class LocalizationUI extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(statusPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -691,6 +738,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
                         .addComponent(segmentDetailsLabel)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
+            .addComponent(statusPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -723,7 +771,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
                         .addComponent(filterShowSuspectRadioButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(filterShowTranslatableRadioButton)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(34, 34, 34)
                 .addComponent(statusPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
@@ -748,16 +796,18 @@ public final class LocalizationUI extends javax.swing.JFrame {
         if(unsavedChanges) {
 			new Thread(() -> {
 				try {
-					translations.save();
+					translations.save((current, total) -> {
+						setProgressStatus("Saving...", current, total);
+					});
 					setUnsavedChanges(false);
-					setStatus("Finished.");
+					setStatus(FINISHED);
 				} catch(IOException ex) {
 					UIUtils.alert(this, "Error while saving!", "Could not save the database: " + ex.getMessage(),
 							UIUtils.MessageType.ERROR);
 					setStatus("Error saving...");
 				}
 			}).start();
-			setStatus("Saving...");
+			setProgressStatus("Saving...", 0, 0);
 		}
     }//GEN-LAST:event_saveMenuActionPerformed
 
@@ -772,14 +822,12 @@ public final class LocalizationUI extends javax.swing.JFrame {
     }//GEN-LAST:event_exitMenuActionPerformed
 
     private void azureKeyMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_azureKeyMenuActionPerformed
-        AzureKeyInputDialog d = new AzureKeyInputDialog(LocalizationUI.this, this.azureEndpoint,
-				(endpoint, key, save) -> {
+        AzureKeyInputDialog d = new AzureKeyInputDialog(LocalizationUI.this,
+				(key, save) -> {
 			LocalizationUI.this.azureKey = key;
-			LocalizationUI.this.azureEndpoint = endpoint;
 			if(save) {
 				if(pn != null) {
 					try {
-						pn.set(dm, new String[]{"l10n", "azureEndpoint"}, endpoint);
 						pn.set(dm, new String[]{"l10n", "azureKey"}, key);
 					} catch(DataSourceException | ReadOnlyException | IOException | IllegalArgumentException ex) {
 						showError("Could not save Azure Key! " + ex.getMessage());
@@ -932,11 +980,18 @@ public final class LocalizationUI extends javax.swing.JFrame {
 		setStatus("Looking up translation...");
 
 		new Thread(() -> {
-			String t = translations.doMachineTranslation(azureEndpoint, azureKey,
-					locale, currentMemory.getEnglishKey());
+			MachineTranslation mt = new AzureMachineTranslation(azureKey);
+			String t;
+			try {
+				t = mt.translate(locale, currentMemory.getEnglishKey());
+			} catch(MachineTranslation.TranslationException ex) {
+				UIUtils.alert(this, "Error", "<html><body>" + ex.getMessage().replace("\n", "<br>") + "</body></html>");
+				setStatus(FINISHED);
+				return;
+			}
 			tm.setAutomaticTranslation(t);
 			EventQueue.invokeLater(() -> {
-				setStatus("Finished.");
+				setStatus(FINISHED);
 				populateSegment(currentMemory);
 				updateCurrent();
 			});
@@ -951,6 +1006,57 @@ public final class LocalizationUI extends javax.swing.JFrame {
 			showError("Cannot open browser: " + ex.getMessage());
 		}
     }//GEN-LAST:event_viewPageInBrowserButtonActionPerformed
+
+    private void menuMoveDownSegmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuMoveDownSegmentActionPerformed
+		int current = segmentsList.getSelectedIndex();
+		if(current == segmentsList.getModel().getSize()) {
+			return;
+		}
+		current++;
+		segmentsList.setSelectedIndex(current);
+		segmentsList.ensureIndexIsVisible(current);
+    }//GEN-LAST:event_menuMoveDownSegmentActionPerformed
+
+    private void menuMoveUpSegmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuMoveUpSegmentActionPerformed
+		int current = segmentsList.getSelectedIndex();
+		if(current == 0) {
+			return;
+		}
+		current--;
+		segmentsList.setSelectedIndex(current);
+		segmentsList.ensureIndexIsVisible(current);
+    }//GEN-LAST:event_menuMoveUpSegmentActionPerformed
+
+    private void menuCountUntranslatedCharsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuCountUntranslatedCharsActionPerformed
+        new Thread(() -> {
+			Map<Locale, Integer> counts = new HashMap<>();
+			int total = 0;
+			for(Locale locale : translations.getLocales()) {
+				int count = 0;
+				List<TranslationMemory> memories = translations.getMemoriesForLocale(locale);
+				for(TranslationMemory tm : memories) {
+					if(tm.getMachineTranslation().isEmpty()) {
+						count += tm.getEnglishKey().length();
+					}
+				}
+				if(!Locale.getDummyLocale().equals(locale)) {
+					total += count;
+				}
+				counts.put(locale, count);
+			}
+			setStatus(FINISHED);
+			StringBuilder b = new StringBuilder();
+			b.append("<html><body>");
+			for(Map.Entry<Locale, Integer> e : counts.entrySet()) {
+				b.append("<p>Locale: ").append(e.getKey().getEnglishName())
+						.append("; Count: ").append(String.format("%,d", e.getValue())).append("</p>");
+			}
+			b.append("<p>Total (minus art): ").append(String.format("%,d", total)).append("</p>");
+			b.append("</body></html>");
+			UIUtils.alert(this, "Character Count", b.toString());
+		}, "count-chars").start();
+		setStatus("Counting characters...");
+    }//GEN-LAST:event_menuCountUntranslatedCharsActionPerformed
 
 	/**
 	 * @param args the command line arguments
@@ -1032,7 +1138,6 @@ public final class LocalizationUI extends javax.swing.JFrame {
 			pn = getPersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig());
 			if(pn != null) {
 				storedLocation = pn.get(new String[]{"l10n", "lastLoadedDb"});
-				azureEndpoint = pn.get(new String[]{"l10n", "azureEndpoint"});
 				azureKey = pn.get(new String[]{"l10n", "azureKey"});
 			}
 		} catch(URISyntaxException | IOException | DataSourceException ex) {
@@ -1067,6 +1172,9 @@ public final class LocalizationUI extends javax.swing.JFrame {
 	private void setInvalidMenus(boolean to) {
 		findSegmentMenu.setEnabled(to);
 		jumpToPageMenu.setEnabled(to);
+		menuMoveDownSegment.setEnabled(to);
+		menuMoveUpSegment.setEnabled(to);
+		menuCountUntranslatedChars.setEnabled(to);
 	}
 
 	private void setSummarySettingsEnabled(boolean enabled) {
@@ -1095,7 +1203,10 @@ public final class LocalizationUI extends javax.swing.JFrame {
 	private void initializeTranslationDb(File path) {
 		new Thread(() -> {
 			try {
-				translations = new TranslationMaster(path);
+				translations = new TranslationMaster(path, (current, total) -> {
+					setProgressStatus("Loading translations from " + path + ", please wait...",
+							current, total);
+				});
 				if(pn != null) {
 					try {
 						pn.set(dm, new String[]{"l10n", "lastLoadedDb"}, path.getAbsolutePath());
@@ -1111,11 +1222,11 @@ public final class LocalizationUI extends javax.swing.JFrame {
 			}
 			EventQueue.invokeLater(this::initializeUIFromDatabase);
 		}, "Initialize-Translations").start();
-		setStatus("Loading translations from " + path + ", please wait...");
+		setProgressStatus("Loading translations from " + path + ", please wait...", 0, 0);
 	}
 
 	private void initializeUIFromDatabase() {
-		setStatus("Finished.");
+		setStatus(FINISHED);
 
 		localeList.setModel(new ListModel<String>(){
 			@Override
@@ -1128,7 +1239,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
 				if(index == 0) {
 					return "All Locales";
 				}
-				return translations.getLocales().get(index - 1);
+				return translations.getLocales().get(index - 1).getLocale();
 			}
 
 			@Override
@@ -1169,12 +1280,14 @@ public final class LocalizationUI extends javax.swing.JFrame {
 
 	private void setupSegmentsList() {
 		int index = pagesList.getSelectedIndex();
-		String locale = localeList.getSelectedValue();
-		if(index == -1 || locale == null) {
+		if(index == -1) {
 			return;
 		}
+		Locale locale;
 		if(localeList.getSelectedIndex() == 0) {
-			locale = "art";
+			locale = Locale.getDummyLocale();
+		} else {
+			locale = Locale.fromLocale(localeList.getSelectedValue());
 		}
 		if(index == 0) {
 			// All segments
@@ -1214,7 +1327,30 @@ public final class LocalizationUI extends javax.swing.JFrame {
 		segmentsList.setSelectedIndex(0);
 	}
 
+	private Font getFontForLocale(Locale locale) {
+		List<String> fonts = locale.getUseFonts();
+		Font useFont = null;
+		if(fonts.isEmpty()) {
+			useFont = new JLabel().getFont();
+		}
+		if(useFont == null) {
+			GraphicsEnvironment ge =
+				GraphicsEnvironment.getLocalGraphicsEnvironment();
+			for(Font font : ge.getAllFonts()) {
+				if(fonts.contains(font.getFamily())) {
+					useFont = font;
+					break;
+				}
+			}
+		}
+		if(useFont == null) {
+			useFont = new JLabel().getFont();
+		}
+		return new Font(useFont.getName(), 0, 11);
+	}
+
 	private void populateSegment(TranslationMemory tm) {
+		Font localeFieldFont = getFontForLocale(tm.getLocale());
 		TranslationSummary.TranslationSummaryEntry summary = translations.getSummaryForKey(tm.getEnglishKey());
 		currentMemory = tm;
 		currentSummary = summary;
@@ -1239,7 +1375,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
 			TranslationMemory myTM = tm;
 			List<String> pages = new ArrayList<>();
 			for(String page : translations.getPages()) {
-				for(TranslationMemory tt : translations.getMemoriesForPage("art", page)) {
+				for(TranslationMemory tt : translations.getMemoriesForPage(Locale.getDummyLocale(), page)) {
 					if(tt.getId() == tm.getId()) {
 						pages.add(page);
 					}
@@ -1271,6 +1407,16 @@ public final class LocalizationUI extends javax.swing.JFrame {
 			localeSettingsMachineTranslationField.setText("");
 			localeSettingsManualTranslationField.setText("");
 		}
+
+		localeSettingsLocaleCommentField.setFont(localeFieldFont);
+		localeSettingsMachineTranslationField.setFont(localeFieldFont);
+		localeSettingsManualTranslationField.setFont(localeFieldFont);
+
+		ComponentOrientation co = tm.getLocale().getTextDirection() == TextDirection.LTR
+				? ComponentOrientation.LEFT_TO_RIGHT : ComponentOrientation.RIGHT_TO_LEFT;
+		localeSettingsLocaleCommentField.setComponentOrientation(co);
+		localeSettingsMachineTranslationField.setComponentOrientation(co);
+		localeSettingsManualTranslationField.setComponentOrientation(co);
 	}
 
 	private void updateCurrent() {
@@ -1320,9 +1466,23 @@ public final class LocalizationUI extends javax.swing.JFrame {
 		};
 	}
 
-	private void setStatus(String status) {
-		// TODO
+	private void setProgressStatus(String status, double current, double total) {
 		EventQueue.invokeLater(() -> {
+			statusLabel.setText(status);
+			progressBar.setVisible(true);
+			if((current == 0 && total == 0) || current == total) {
+				progressBar.setIndeterminate(true);
+			} else {
+				progressBar.setIndeterminate(false);
+				progressBar.setMaximum((int) total);
+				progressBar.setValue((int) current);
+			}
+		});
+	}
+
+	private void setStatus(String status) {
+		EventQueue.invokeLater(() -> {
+			progressBar.setVisible(false);
 			statusLabel.setText(status);
 		});
 	}
@@ -1384,8 +1544,13 @@ public final class LocalizationUI extends javax.swing.JFrame {
     private javax.swing.JLabel localeSettingsManualTranslationLabel;
     private javax.swing.JCheckBox localeSettingsManualTranslationWordWrapCheckbox;
     private javax.swing.JPanel localeSettingsPanel;
+    private javax.swing.JMenuItem menuCountUntranslatedChars;
+    private javax.swing.JMenuItem menuMoveDownSegment;
+    private javax.swing.JMenuItem menuMoveUpSegment;
+    private javax.swing.JMenu navigationMenu;
     private javax.swing.JLabel pagesLabel;
     private javax.swing.JList<String> pagesList;
+    private javax.swing.JProgressBar progressBar;
     private javax.swing.JMenuItem saveMenu;
     private javax.swing.JLabel segmentDetailsLabel;
     private javax.swing.JPanel segmentDetailsPanel;

@@ -2,6 +2,7 @@ package com.laytonsmith.PureUtilities.Common;
 
 import java.awt.Component;
 import java.awt.Desktop;
+import java.awt.EventQueue;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.MouseInfo;
@@ -9,9 +10,12 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
@@ -126,7 +130,10 @@ public class UIUtils {
 
 	/**
 	 * Provides a simple Yes/No confirm dialog. If the user clicks Yes, then true is returned. The type defaults
-	 * to QUESTION.
+	 * to QUESTION. The actual creation of
+	 * the dialog is done on the main UI thread using invokeAndWait (if necessary).
+	 * Normally this method throws an InterruptedException
+	 * or InvocationTargetException, but these are wrapped in a RuntimeException and rethrown.
 	 * @param parent
 	 * @param title
 	 * @param message
@@ -137,7 +144,10 @@ public class UIUtils {
 	}
 
 	/**
-	 * Provides a simple Yes/No confirm dialog. If the user clicks Yes, then true is returned.
+	 * Provides a simple Yes/No confirm dialog. If the user clicks Yes, then true is returned. The actual creation of
+	 * the dialog is done on the main UI thread using invokeAndWait (if necessary).
+	 * Normally this method throws an InterruptedException
+	 * or InvocationTargetException, but these are wrapped in a RuntimeException and rethrown.
 	 * @param parent
 	 * @param title
 	 * @param message
@@ -145,8 +155,10 @@ public class UIUtils {
 	 * @return
 	 */
 	public static boolean confirm(Window parent, String title, String message, MessageType type) {
-		Object[] options = {"Yes", "No"};
-		int n = JOptionPane.showOptionDialog(parent,
+		MutableObject<Boolean> ret = new MutableObject<>();
+		Runnable r = () -> {
+			Object[] options = {"Yes", "No"};
+			int n = JOptionPane.showOptionDialog(parent,
 					message,
 					title,
 					JOptionPane.YES_NO_OPTION,
@@ -154,11 +166,22 @@ public class UIUtils {
 					null, //do not use a custom Icon
 					options, //the titles of buttons
 					options[0]); //default button title
-		return n == 0;
+			ret.setObject(n == 0);
+		};
+		if(EventQueue.isDispatchThread()) {
+			r.run();
+		} else {
+			try {
+				EventQueue.invokeAndWait(r);
+			} catch(InterruptedException | InvocationTargetException ex) {
+				throw new RuntimeException(ex);
+			}
+		}
+		return ret.getObject();
 	}
 
 	/**
-	 * Shows an alert message to the user, defaulting to the INFORMATION type.
+	 * Shows an alert message to the user, defaulting to the INFORMATION type. The dialog is shown on the UI thread.
 	 * @param parent
 	 * @param title
 	 * @param message
@@ -168,17 +191,19 @@ public class UIUtils {
 	}
 
 	/**
-	 * Shows an alert message to the user.
+	 * Shows an alert message to the user. The dialog is shown on the UI thread.
 	 * @param parent
 	 * @param title
 	 * @param message
 	 * @param type
 	 */
 	public static void alert(Window parent, String title, String message, MessageType type) {
-		JOptionPane.showMessageDialog(parent,
-			message,
-			title,
-			type.getJOptionPaneType());
+		EventQueue.invokeLater(() -> {
+			JOptionPane.showMessageDialog(parent,
+				message,
+				title,
+				type.getJOptionPaneType());
+		});
 	}
 
 

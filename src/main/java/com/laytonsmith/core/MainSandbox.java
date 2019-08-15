@@ -1,6 +1,9 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.core.constructs.CClassType;
+import java.awt.*;
+import javax.swing.*;
+import java.net.URL;
+import java.util.Locale;
 
 
 /**
@@ -9,10 +12,19 @@ import com.laytonsmith.core.constructs.CClassType;
 public class MainSandbox {
 
 
-	public static void main(String[] args) throws Exception {
-		System.out.println(FullyQualifiedClassName.forFullyQualifiedClass("asdf.asdf.asdf"));
-		CClassType.defineClass(FullyQualifiedClassName.forFullyQualifiedClass("asdf.asdf"));
-		System.out.println(CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass("asdf.asdf")));
-	}
+    public static void main(String[] args) throws Exception {
+        // This font is < 35Kb.
+        URL fontUrl = new URL("http://webpagepublicity.com/" +
+            "free-fonts/a/Airacobra%20Condensed.ttf");
+        Font font = Font.createFont(Font.TRUETYPE_FONT, fontUrl.openStream());
+        GraphicsEnvironment ge =
+            GraphicsEnvironment.getLocalGraphicsEnvironment();
+        ge.registerFont(font);
+        for(Font f : ge.getAllFonts()) {
+			System.out.println(f.getFamily());
+			System.out.println(f.getName());
+			System.out.println();
+		}
+    }
 
 }
