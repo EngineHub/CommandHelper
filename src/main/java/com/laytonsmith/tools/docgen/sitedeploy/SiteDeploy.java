@@ -260,7 +260,7 @@ public final class SiteDeploy {
 			if("".equals(productionTranslations)) {
 				productionTranslations = PRODUCTION_TRANSLATIONS_URL;
 			}
-			
+
 			try {
 				new URL(productionTranslations);
 			} catch (MalformedURLException e) {
