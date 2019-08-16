@@ -420,7 +420,7 @@
                 });
                 localize(t);
                 render();
-            });
+            }).fail(render);
         } else {
             render();
         }

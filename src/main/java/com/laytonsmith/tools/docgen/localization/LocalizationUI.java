@@ -1372,38 +1372,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
 			currentSegments = translations.getMemoriesForPage(locale, page);
 		}
 
-		// Filter out values based on the checkbox filters
-		boolean showOnlyUntranslated = filterShowUntranslatedRadioButton.isSelected();
-		boolean showOnlyUncategorized = filterShowUncategorizedRadioButton.isSelected();
-		boolean showOnlySuspect = filterShowSuspectRadioButton.isSelected();
-		boolean showOnlyTranslatable = filterShowTranslatableRadioButton.isSelected();
-
-		currentSegments = currentSegments.stream()
-				.filter((s) -> {
-					TranslationSummary.TranslationSummaryEntry tse = translations.getSummaryForKey(s.getEnglishKey());
-					if(showOnlyUntranslated
-							&& (!s.getMachineTranslation().isEmpty() || !s.getTranslation().isEmpty()
-								|| tse.isUntranslatable()
-								|| tse.isSuspectSegment())) {
-						return false;
-					}
-					// Marking them as untranslatable or suspect segments also removes this from this filter,
-					// as that implies they are not machine translatable either.
-					if(showOnlyUncategorized
-							&& (tse.getEligibleForMachineTranslation() != null
-								|| tse.isUntranslatable()
-								|| tse.isSuspectSegment())) {
-						return false;
-					}
-					if(showOnlySuspect && !tse.isSuspectSegment()) {
-						return false;
-					}
-					if(showOnlyTranslatable && tse.isUntranslatable()) {
-						return false;
-					}
-					return true;
-				})
-				.collect(Collectors.toList());
+		currentSegments = filterSegmentList(currentSegments);
 
 		segmentCountLabel.setText("Segments: " + currentSegments.size());
 
@@ -1431,6 +1400,49 @@ public final class LocalizationUI extends javax.swing.JFrame {
 		});
 
 		segmentsList.setSelectedIndex(0);
+	}
+
+	/**
+	 * Given a list of segments, filters out the ones that don't match the filter criteria
+	 * set in the GUI.
+	 * @param list
+	 * @return
+	 */
+	private List<TranslationMemory> filterSegmentList(List<TranslationMemory> list) {
+		// Filter out values based on the checkbox filters
+		boolean showOnlyUntranslated = filterShowUntranslatedRadioButton.isSelected();
+		boolean showOnlyUncategorized = filterShowUncategorizedRadioButton.isSelected();
+		boolean showOnlySuspect = filterShowSuspectRadioButton.isSelected();
+		boolean showOnlyTranslatable = filterShowTranslatableRadioButton.isSelected();
+		return list.stream()
+			.filter((s) -> {
+				TranslationSummary.TranslationSummaryEntry tse = translations.getSummaryForKey(s.getEnglishKey());
+				if(showOnlyUntranslated
+						&& (!s.getMachineTranslation().isEmpty() || !s.getTranslation().isEmpty()
+							|| tse.isUntranslatable()
+							|| tse.isSuspectSegment()
+							|| tse.getEligibleForMachineTranslation() != null)) {
+					return false;
+				}
+				// Marking them as untranslatable or suspect segments also removes this from this filter,
+				// as that implies they are not machine translatable either.
+				if(showOnlyUncategorized
+						&& (tse.getEligibleForMachineTranslation() != null
+							|| tse.isUntranslatable()
+							|| tse.isSuspectSegment())) {
+					return false;
+				}
+				if(showOnlySuspect && !tse.isSuspectSegment()) {
+					return false;
+				}
+				if(showOnlyTranslatable && (tse.isUntranslatable()
+							|| tse.isSuspectSegment()
+							|| tse.getEligibleForMachineTranslation() != null)) {
+					return false;
+				}
+				return true;
+			})
+			.collect(Collectors.toList());
 	}
 
 	private Font getFontForLocale(Locale locale) {
@@ -1505,7 +1517,8 @@ public final class LocalizationUI extends javax.swing.JFrame {
 			localeSettingsLocaleCommentField.setText(tm.getComment());
 			localeSettingsMachineTranslationField.setText(tm.getMachineTranslation());
 			localeSettingsManualTranslationField.setText(tm.getTranslation());
-			setLocaleSettingsEnabled(!summary.isSuspectSegment() && !summary.isUntranslatable());
+			setLocaleSettingsEnabled(!summary.isSuspectSegment() && !summary.isUntranslatable()
+					&& summary.getEligibleForMachineTranslation() != null);
 		} else {
 			setLocaleSettingsEnabled(false);
 			localeSettingsLocaleIdField.setText("");
