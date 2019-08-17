@@ -649,6 +649,9 @@ public class Main {
 				FileUtil.write(enc.getPublicKey(), pubOutputFile);
 				System.exit(0);
 			} else if(mode == PN_VIEWER_MODE) {
+				Implementation.forceServerType(Implementation.Type.SHELL);
+				ClassDiscovery.getDefaultInstance()
+					.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
 				if(parsedArgs.isFlagSet("server")) {
 					if(parsedArgs.getNumberArgument("port") == null) {
 						StreamUtils.GetSystemErr().println("When running as a server, port is required.");
@@ -910,6 +913,9 @@ public class Main {
 
 		@Override
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			Implementation.forceServerType(Implementation.Type.SHELL);
+			ClassDiscovery.getDefaultInstance()
+					.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
 			Manager.start();
 		}
 

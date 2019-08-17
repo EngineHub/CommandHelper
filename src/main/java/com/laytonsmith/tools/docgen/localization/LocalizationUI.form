@@ -21,6 +21,14 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="loadMenuActionPerformed"/>
               </Events>
             </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="menuFileUpdateRepo">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Update Repo"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuFileUpdateRepoActionPerformed"/>
+              </Events>
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="saveMenu">
               <Properties>
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
@@ -106,6 +114,14 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="azureKeyMenuActionPerformed"/>
               </Events>
             </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="menuToolsAuthorizeOnGithub">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Authorize on Github"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuToolsAuthorizeOnGithubActionPerformed"/>
+              </Events>
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="forkDatabaseMenu">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Fork Database..."/>
@@ -116,7 +132,7 @@
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="menuCountUntranslatedChars">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Count Untranslated Chars..."/>
+                <Property name="text" type="java.lang.String" value="Count Untranslated Chars"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuCountUntranslatedCharsActionPerformed"/>

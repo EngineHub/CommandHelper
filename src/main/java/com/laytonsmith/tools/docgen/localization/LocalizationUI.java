@@ -1,14 +1,23 @@
 package com.laytonsmith.tools.docgen.localization;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.TemplateBuilder;
 import com.laytonsmith.PureUtilities.Common.UIUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.UI.TextDialog;
 import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.MethodScriptFileLocations;
+import com.laytonsmith.core.Profiles;
+import com.laytonsmith.core.ProfilesImpl;
+import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.functions.OAuth;
+import com.laytonsmith.core.profiler.Profiler;
+import com.laytonsmith.core.taskmanager.TaskManagerImpl;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.PersistenceNetworkImpl;
@@ -59,6 +68,8 @@ public final class LocalizationUI extends javax.swing.JFrame {
 	private String azureKey = null;
 	private String storedLocation = null;
 	private final DaemonManager dm = new DaemonManager();
+	private GlobalEnv gEnv;
+	private String githubOAuthToken;
 
 	private List<TranslationMemory> currentSegments;
 	private TranslationMemory currentMemory;
@@ -175,6 +186,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
         topMenu = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         loadMenu = new javax.swing.JMenuItem();
+        menuFileUpdateRepo = new javax.swing.JMenuItem();
         saveMenu = new javax.swing.JMenuItem();
         exitMenu = new javax.swing.JMenuItem();
         navigationMenu = new javax.swing.JMenu();
@@ -184,6 +196,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
         menuMoveUpSegment = new javax.swing.JMenuItem();
         toolsMenu = new javax.swing.JMenu();
         azureKeyMenu = new javax.swing.JMenuItem();
+        menuToolsAuthorizeOnGithub = new javax.swing.JMenuItem();
         forkDatabaseMenu = new javax.swing.JMenuItem();
         menuCountUntranslatedChars = new javax.swing.JMenuItem();
         helpMenuTop = new javax.swing.JMenu();
@@ -640,6 +653,14 @@ public final class LocalizationUI extends javax.swing.JFrame {
         });
         fileMenu.add(loadMenu);
 
+        menuFileUpdateRepo.setText("Update Repo");
+        menuFileUpdateRepo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuFileUpdateRepoActionPerformed(evt);
+            }
+        });
+        fileMenu.add(menuFileUpdateRepo);
+
         saveMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
         saveMenu.setText("Save");
         saveMenu.addActionListener(new java.awt.event.ActionListener() {
@@ -709,6 +730,14 @@ public final class LocalizationUI extends javax.swing.JFrame {
         });
         toolsMenu.add(azureKeyMenu);
 
+        menuToolsAuthorizeOnGithub.setText("Authorize on Github");
+        menuToolsAuthorizeOnGithub.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuToolsAuthorizeOnGithubActionPerformed(evt);
+            }
+        });
+        toolsMenu.add(menuToolsAuthorizeOnGithub);
+
         forkDatabaseMenu.setText("Fork Database...");
         forkDatabaseMenu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -717,7 +746,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
         });
         toolsMenu.add(forkDatabaseMenu);
 
-        menuCountUntranslatedChars.setText("Count Untranslated Chars...");
+        menuCountUntranslatedChars.setText("Count Untranslated Chars");
         menuCountUntranslatedChars.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 menuCountUntranslatedCharsActionPerformed(evt);
@@ -1130,6 +1159,29 @@ public final class LocalizationUI extends javax.swing.JFrame {
 		populateSegment(currentMemory);
     }//GEN-LAST:event_localeSettingsMachineTranslationClearButtonActionPerformed
 
+    private void menuToolsAuthorizeOnGithubActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuToolsAuthorizeOnGithubActionPerformed
+		authorizeGithub(true, () -> {
+			UIUtils.alert(this, "Success", "Github authorization obtained!");
+		});
+    }//GEN-LAST:event_menuToolsAuthorizeOnGithubActionPerformed
+
+    private void menuFileUpdateRepoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFileUpdateRepoActionPerformed
+		if(storedLocation == null) {
+			showError("You must first select a database to load or fork.");
+			return;
+		}
+		new Thread(() -> {
+			// TODO
+//			String repoStatus;
+//			try {
+//				repoStatus = new CommandExecutor(command)CommandExecutor.Execute("git", "status", "--porcelain");
+//				System.out.println(repoStatus);
+//			} catch(InterruptedException | IOException ex) {
+//				showError("Could not update repo: " + ex.getMessage());
+//			}
+		}, "UpdateRepo").start();
+    }//GEN-LAST:event_menuFileUpdateRepoActionPerformed
+
 	/**
 	 * @param args the command line arguments
 	 */
@@ -1212,7 +1264,13 @@ public final class LocalizationUI extends javax.swing.JFrame {
 				storedLocation = pn.get(new String[]{"l10n", "lastLoadedDb"});
 				azureKey = pn.get(new String[]{"l10n", "azureKey"});
 			}
-		} catch(URISyntaxException | IOException | DataSourceException ex) {
+			gEnv = new GlobalEnv(new MethodScriptExecutionQueue("L10N-UI", "default"),
+					new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile()),
+					pn,
+					MethodScriptFileLocations.getDefault().getTempDir(),
+					new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile()),
+					new TaskManagerImpl());
+		} catch(URISyntaxException | IOException | DataSourceException | Profiles.InvalidProfileException ex) {
 			showError("Could not load Persistence Database! " + ex.getMessage());
 		}
 
@@ -1625,6 +1683,34 @@ public final class LocalizationUI extends javax.swing.JFrame {
 		});
 	}
 
+	/**
+	 *
+	 * @param clearFirst If the settings should be cleared first. Only should be done on the explicit menu option.
+	 * @param success If successful, the callback to run afterwards. This is NOT run on the main thread.
+	 */
+	private void authorizeGithub(boolean clearFirst, Runnable success) {
+		String authorizationUrl = "https://github.com/login/oauth/authorize";
+		String clientId = "9574af3fc79384fa690a";
+		// Not actually a secret for "public apps"
+		String clientSecret = "e767193ef18fd213dcde506f8f465e873c1a5927";
+		String scope = "public_repo";
+		String tokenUrl = "https://github.com/login/oauth/access_token";
+		OAuth.x_get_oauth_token.OAuthOptions options
+				= new OAuth.x_get_oauth_token.OAuthOptions(authorizationUrl, clientId, clientSecret, scope, tokenUrl);
+		new Thread(() -> {
+			try {
+				if(clearFirst) {
+					OAuth.clear_oauth_tokens.execute(gEnv, clientId);
+				}
+				options.forcePort = 5346;
+				githubOAuthToken = OAuth.x_get_oauth_token.execute(gEnv, options);
+				success.run();
+			} catch (Exception ex) {
+				showError(ex.getMessage());
+			}
+		}, "GithubAuth").start();
+	}
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMenu;
@@ -1671,8 +1757,10 @@ public final class LocalizationUI extends javax.swing.JFrame {
     private javax.swing.JCheckBox localeSettingsManualTranslationWordWrapCheckbox;
     private javax.swing.JPanel localeSettingsPanel;
     private javax.swing.JMenuItem menuCountUntranslatedChars;
+    private javax.swing.JMenuItem menuFileUpdateRepo;
     private javax.swing.JMenuItem menuMoveDownSegment;
     private javax.swing.JMenuItem menuMoveUpSegment;
+    private javax.swing.JMenuItem menuToolsAuthorizeOnGithub;
     private javax.swing.JMenu navigationMenu;
     private javax.swing.JLabel pagesLabel;
     private javax.swing.JList<String> pagesList;

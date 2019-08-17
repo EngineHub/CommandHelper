@@ -46,7 +46,7 @@ public class CommandExecutor {
 	 * @throws java.lang.InterruptedException
 	 * @throws java.io.IOException
 	 */
-	public static String Execute(String[] args) throws InterruptedException, IOException {
+	public static String Execute(String... args) throws InterruptedException, IOException {
 		final List<Byte> output = new ArrayList<>();
 		CommandExecutor c = new CommandExecutor(args);
 		OutputStream os = new BufferedOutputStream(new OutputStream() {
@@ -88,7 +88,7 @@ public class CommandExecutor {
 	private Thread errThread;
 	private Thread inThread;
 
-	public CommandExecutor(String[] command) {
+	public CommandExecutor(String... command) {
 		args = command;
 	}
 

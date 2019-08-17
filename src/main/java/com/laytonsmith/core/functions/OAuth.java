@@ -11,9 +11,11 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -44,6 +46,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -67,6 +70,56 @@ public class OAuth {
 	@hide("experimental")
 	@noboilerplate
 	public static class x_get_oauth_token extends AbstractFunction {
+
+		public static class OAuthOptions {
+			public final String authorizationUrl;
+			public final String clientId;
+			public final String clientSecret;
+			public final String scope;
+			public final String tokenUrl;
+			public String successText;
+			public Map<String, String> extraHeaders;
+			public String refreshToken;
+			public Integer forcePort;
+
+			public OAuthOptions(String authorizationUrl, String clientId, String clientSecret, String scope, String tokenUrl) {
+				this.authorizationUrl = authorizationUrl;
+				this.clientId = clientId;
+				this.clientSecret = clientSecret;
+				this.scope = scope;
+				this.tokenUrl = tokenUrl;
+			}
+
+			CArray toOptionsArray() {
+				CArray ret = CArray.GetAssociativeArray(Target.UNKNOWN);
+				ret.set("authorizationUrl", authorizationUrl);
+				ret.set("clientId", clientId);
+				ret.set("scope", scope);
+				ret.set("tokenUrl", tokenUrl);
+				ret.set("clientSecret", clientSecret == null ? "" : clientSecret);
+				ret.set("successText", successText == null ? CNull.NULL : new CString(successText, Target.UNKNOWN),
+						Target.UNKNOWN);
+				if(extraHeaders != null) {
+					CArray eh = CArray.GetAssociativeArray(Target.UNKNOWN);
+					for(Map.Entry<String, String> e : extraHeaders.entrySet()) {
+						eh.set(e.getKey(), e.getValue());
+					}
+					ret.set("extraHeaders", eh, Target.UNKNOWN);
+				}
+				if(refreshToken != null) {
+					ret.set("refreshToken", refreshToken);
+				}
+				if(forcePort != null) {
+					ret.set("forcePort", new CInt(forcePort, Target.UNKNOWN), Target.UNKNOWN);
+				}
+				return ret;
+			}
+		}
+
+		public static String execute(GlobalEnv gEnv, OAuthOptions options) {
+			Environment env = Environment.createEnvironment(gEnv);
+			return new x_get_oauth_token().exec(Target.UNKNOWN, env, options.toOptionsArray()).val();
+		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -103,6 +156,10 @@ public class OAuth {
 					extraHeaders.put(key, extraHeaders1.get(key, t).val());
 				}
 			}
+			Integer forcePort = null;
+			if(options.containsKey("forcePort")) {
+				forcePort = ArgumentValidation.getInt32(options.get("forcePort", t), t);
+			}
 			try { // Persistence errors
 				String accessToken = getAccessToken(env, clientId);
 				if(accessToken == null) {
@@ -113,7 +170,7 @@ public class OAuth {
 						}
 						String refreshToken;
 						if(!hasRefreshToken(env, clientId)) {
-							MutableObject<String> lock = startServer(successText);
+							MutableObject<String> lock = startServer(successText, forcePort);
 							String redirectUrl;
 							synchronized(lock) {
 								if(lock.getObject() == null) {
@@ -141,12 +198,42 @@ public class OAuth {
 							tokenParameters.put("code", authorizationCode);
 							tokenParameters.put("grant_type", "authorization_code");
 							tokenParameters.put("redirect_uri", redirectUrl);
+							Map<String, List<String>> headers = new HashMap<>();
+							headers.put("Accept",
+									Arrays.asList("application/json", "application/x-www-form-urlencoded"));
+							settings.setHeaders(headers);
 							settings.setParameters(tokenParameters);
 							HTTPResponse tokenResponse = WebUtility.GetPage(new URL(tokenUrl), settings);
-							CArray tokenJson = (CArray) new DataTransformations.json_decode().exec(t, env, new CString(tokenResponse.getContentAsString(), t));
-							storeRefreshToken(env, clientId, tokenJson.get("refresh_token", t).val());
-							accessToken = tokenJson.get("access_token", t).val();
-							storeAccessToken(env, clientId, new AccessToken(accessToken, Static.getInt32(tokenJson.get("expires_in", t), t) * 1000));
+							String response = tokenResponse.getContentAsString();
+							String responseType = tokenResponse.getHeaderObject().getContentType().mimeType.mediaType;
+							switch(responseType) {
+								case "application/json": {
+									CArray tokenJson = (CArray) new DataTransformations.json_decode()
+											.exec(t, env, new CString(tokenResponse.getContentAsString(), t));
+									if(tokenJson.containsKey("refresh_token")) {
+										storeRefreshToken(env, clientId, tokenJson.get("refresh_token", t).val());
+									}
+									accessToken = tokenJson.get("access_token", t).val();
+									int expiresIn;
+									if(tokenJson.containsKey("expires_in")) {
+										expiresIn = Static.getInt32(tokenJson.get("expires_in", t), t) * 1000;
+									} else {
+										expiresIn = Integer.MAX_VALUE;
+									}
+									storeAccessToken(env, clientId, new AccessToken(accessToken, expiresIn));
+									break;
+								}
+								case "application/x-www-form-urlencoded": {
+									Map<String, String> resp = WebUtility.getQueryMap(response);
+									accessToken = resp.get("access_token");
+									int expiresIn = Integer.parseInt(resp.get("expires_in")) * 1000;
+									storeAccessToken(env, clientId, new AccessToken(accessToken, expiresIn));
+									break;
+								}
+								default:
+									throw new CREIOException("Received unsupported response from server of type "
+											+ responseType + ": " + response, t);
+							}
 						}
 						if(accessToken == null) {
 							refreshToken = getRefreshToken(env, clientId);
@@ -270,7 +357,7 @@ public class OAuth {
 		}
 
 		public static String getFormattedClientId(String clientId) {
-			return clientId.replaceAll("[^a-zA-Z_\\.]", "");
+			return clientId.replaceAll("[^a-zA-Z0-9_\\.]", "");
 		}
 
 		private static String formatValue(String value) {
@@ -289,7 +376,7 @@ public class OAuth {
 			}
 		}
 
-		private static MutableObject<String> startServer(String successText1) {
+		private static MutableObject<String> startServer(String successText1, Integer forcePort) {
 			final String successText;
 			if(successText1 == null) {
 				successText = "OAuth request successful. You may now close your browser window.";
@@ -301,60 +388,63 @@ public class OAuth {
 				@Override
 				public void run() {
 					try {
-						ServerSocket s = new ServerSocket(0);
-						ret.setObject("http://localhost:" + s.getLocalPort());
-						synchronized(ret) {
-							ret.notifyAll();
-						}
-						Socket ss = s.accept();
-						InputStream is = new BufferedInputStream(ss.getInputStream());
-						BufferedReader input = new BufferedReader(new InputStreamReader(is));
-						List<String> headers = new ArrayList<>();
-						while(input.ready()) {
-							String line = input.readLine();
-							if("".equals(line)) {
-								break;
+						Map<String, String> query;
+						try(ServerSocket s = new ServerSocket(forcePort == null ? 0 : forcePort)) {
+							ret.setObject("http://localhost:" + (forcePort == null ? s.getLocalPort() : forcePort));
+							synchronized(ret) {
+								ret.notifyAll();
 							}
-							headers.add(line);
-						}
-						int contentLength = 0;
-						for(String header : headers) {
-							if(header.matches("(?i)content-length.*")) {
-								contentLength = Integer.parseInt(header.split(":")[1].trim());
+							try(Socket ss = s.accept()) {
+								InputStream is = new BufferedInputStream(ss.getInputStream());
+								BufferedReader input = new BufferedReader(new InputStreamReader(is));
+								List<String> headers = new ArrayList<>();
+								{
+									String line;
+									while((line = input.readLine()) != null) {
+										if("".equals(line)) {
+											break;
+										}
+										headers.add(line);
+									}
+								}
+								int contentLength = 0;
+								for(String header : headers) {
+									if(header.matches("(?i)content-length.*")) {
+										contentLength = Integer.parseInt(header.split(":")[1].trim());
+									}
+								}
+								char[] cbuf = new char[contentLength];
+								input.read(cbuf);
+								ss.shutdownInput();
+								String body = new String(cbuf);
+								String queryS = headers.get(0).split(" ")[1];
+								queryS = queryS.split("\\?", 2)[1];
+								query = WebUtility.getQueryMap(queryS);
+								OutputStreamWriter os = new OutputStreamWriter(new BufferedOutputStream(ss.getOutputStream()));
+								String style = "p {font-family: Helvetica,sans-serif;text-align: center;margin: 10em;"
+										+ "background-color: rgb(103, 209, 232);padding: 2em;border-radius: 1em;"
+										+ "font-size: 14pt;}";
+								String script = "window.open('', '_self').close();";
+								String content = "<html><head><style type=\"text/css\">" + style
+										+ "</style><title>OAuth Successful</title><script type=\"text/javascript\">"
+										+ script + "</script></head><body><p>" + successText + "</p></body></html>";
+								os.append("HTTP/1.0 200 OK\r\n");
+								os.append("Content-Length: " + content.length() + "\r\n");
+								os.append("Connection: close\r\n");
+								os.append("Content-Type: text/html\r\n");
+								os.append("\r\n");
+								os.append(content);
+								os.flush();
+								ss.shutdownOutput();
 							}
 						}
-						char[] cbuf = new char[contentLength];
-						input.read(cbuf);
-						ss.shutdownInput();
-						String body = new String(cbuf);
-						String queryS = headers.get(0).split(" ")[1];
-						queryS = queryS.split("\\?", 2)[1];
-						Map<String, String> query = WebUtility.getQueryMap(queryS);
-						OutputStreamWriter os = new OutputStreamWriter(new BufferedOutputStream(ss.getOutputStream()));
-						String style = "p {font-family: Helvetica,sans-serif;text-align: center;margin: 10em;"
-								+ "background-color: rgb(103, 209, 232);padding: 2em;border-radius: 1em;"
-								+ "font-size: 14pt;}";
-						String script = "window.open('', '_self').close();";
-						String content = "<html><head><style type=\"text/css\">" + style
-								+ "</style><title>OAuth Successful</title><script type=\"text/javascript\">"
-								+ script + "</script></head><body><p>" + successText + "</p></body></html>";
-						os.append("HTTP/1.0 200 OK\r\n");
-						os.append("Content-Length: " + content.length() + "\r\n");
-						os.append("Connection: close\r\n");
-						os.append("Content-Type: text/html\r\n");
-						os.append("\r\n");
-						os.append(content);
-						os.flush();
-						ss.shutdownOutput();
-						ss.close();
-						s.close();
 
 						ret.setObject(query.get("code"));
 						synchronized(ret) {
 							ret.notifyAll();
 						}
 					} catch (IOException ex) {
-						ex.printStackTrace();
+						ex.printStackTrace(System.err);
 					}
 				}
 			}, "oauth-callback-" + UUID.randomUUID()).start();
@@ -402,6 +492,20 @@ public class OAuth {
 	@api
 	public static class clear_oauth_tokens extends AbstractFunction {
 
+		/**
+		 *
+		 * @param gEnv
+		 * @param clientId If set, clears just the one client id, if null, clears all tokens.
+		 */
+		public static void execute(GlobalEnv gEnv, String clientId) {
+			Mixed[] args = new Mixed[0];
+			if(clientId != null) {
+				args = new Mixed[]{new CString(clientId, Target.UNKNOWN)};
+			}
+			Environment env = Environment.createEnvironment(gEnv);
+			new clear_oauth_tokens().exec(Target.UNKNOWN, env, args);
+		}
+
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{};
@@ -422,7 +526,7 @@ public class OAuth {
 			PersistenceNetwork pn = environment.getEnv(GlobalEnv.class).GetPersistenceNetwork();
 			String namespace = "oauth";
 			if(args.length >= 1) {
-				namespace += x_get_oauth_token.getFormattedClientId(args[0].val());
+				namespace += "." + x_get_oauth_token.getFormattedClientId(args[0].val());
 			}
 			DaemonManager dm = environment.getEnv(GlobalEnv.class).GetDaemonManager();
 			try {
