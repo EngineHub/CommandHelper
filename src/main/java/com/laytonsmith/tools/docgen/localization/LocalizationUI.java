@@ -32,6 +32,7 @@ import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -69,7 +70,6 @@ public final class LocalizationUI extends javax.swing.JFrame {
 	private String storedLocation = null;
 	private final DaemonManager dm = new DaemonManager();
 	private GlobalEnv gEnv;
-	private String githubOAuthToken;
 
 	private List<TranslationMemory> currentSegments;
 	private TranslationMemory currentMemory;
@@ -82,7 +82,8 @@ public final class LocalizationUI extends javax.swing.JFrame {
 		initComponents();
 		setUnsavedChanges(false);
 		setStatus("Welcome to the " + getBranding() + " Localization (L10N) UI!"
-				+ " To get started, use File->Load... and select your local database.");
+				+ " To get started, use File->Load... and select your local database, or Tools->Fork Database... to"
+				+ " create or checkout an existing one.");
 		try {
 			setIconImage(ImageIO.read(LocalizationUI.class.getResourceAsStream("GearIcon.png")));
 		} catch(IOException ex) {
@@ -922,7 +923,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
 			showError("You have unsaved changes, cannot create a new fork now!");
 			return;
 		}
-		showError("Not yet implemented!");
+		new ForkDatabaseWizard(this).setVisible(true);
     }//GEN-LAST:event_forkDatabaseMenuActionPerformed
 
     private void findSegmentMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_findSegmentMenuActionPerformed
@@ -1160,7 +1161,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
     }//GEN-LAST:event_localeSettingsMachineTranslationClearButtonActionPerformed
 
     private void menuToolsAuthorizeOnGithubActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuToolsAuthorizeOnGithubActionPerformed
-		authorizeGithub(true, () -> {
+		authorizeGithub(true, (token) -> {
 			UIUtils.alert(this, "Success", "Github authorization obtained!");
 		});
     }//GEN-LAST:event_menuToolsAuthorizeOnGithubActionPerformed
@@ -1170,15 +1171,36 @@ public final class LocalizationUI extends javax.swing.JFrame {
 			showError("You must first select a database to load or fork.");
 			return;
 		}
+		if(unsavedChanges) {
+			showError("You cannot update while having unsaved changes, please save and try again.");
+		}
 		new Thread(() -> {
-			// TODO
-//			String repoStatus;
-//			try {
-//				repoStatus = new CommandExecutor(command)CommandExecutor.Execute("git", "status", "--porcelain");
-//				System.out.println(repoStatus);
-//			} catch(InterruptedException | IOException ex) {
-//				showError("Could not update repo: " + ex.getMessage());
-//			}
+			try {
+				File wd = new File(storedLocation);
+				String repoStatus = CommandExecutor.Execute(wd, "git", "status", "--porcelain");
+				if(!"".equals(repoStatus)) {
+					repoStatus = CommandExecutor.Execute(wd, "git", "status");
+					showError("<html><body>Cannot update repo, repository not clean!<br>"
+							+ repoStatus.replace("\n", "<br>")
+							+ "<br><br>Please manually clean up the repo, or commit, and try again.</body></html>");
+					return;
+				}
+				CommandExecutor pull = new CommandExecutor("git", "pull");
+				pull.setWorkingDir(wd);
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				pull.setSystemOut(out);
+				ByteArrayOutputStream err = new ByteArrayOutputStream();
+				pull.setSystemErr(err);
+				int exit = pull.start().waitFor();
+				if(err.size() > 0 || exit != 0) {
+					showError("<html><body>Encountered an error while trying to update:<br>"
+						+ err.toString("UTF-8").replace("\n", "<br>")
+						+ "</body></html>");
+				}
+				System.out.println(out.toString("UTF-8"));
+			} catch(InterruptedException | IOException ex) {
+				showError("Could not update repo: " + ex.getMessage());
+			}
 		}, "UpdateRepo").start();
     }//GEN-LAST:event_menuFileUpdateRepoActionPerformed
 
@@ -1331,7 +1353,12 @@ public final class LocalizationUI extends javax.swing.JFrame {
 		}
 	}
 
-	private void initializeTranslationDb(File path) {
+	void initializeTranslationDb(File path) {
+		if(!path.exists()) {
+			UIUtils.alert(this, "Error", "Tried to load database at " + path.getAbsolutePath()
+					+ " but it could not be found.", UIUtils.MessageType.ERROR);
+			return;
+		}
 		new Thread(() -> {
 			try {
 				translations = new TranslationMaster(path, (current, total) -> {
@@ -1683,12 +1710,20 @@ public final class LocalizationUI extends javax.swing.JFrame {
 		});
 	}
 
+	public static interface GithubAuthSuccess {
+		/**
+		 * Provides the oauth token that was obtained from either the cache or the server.
+		 * @param token
+		 */
+		void token(String token);
+	}
+
 	/**
 	 *
 	 * @param clearFirst If the settings should be cleared first. Only should be done on the explicit menu option.
 	 * @param success If successful, the callback to run afterwards. This is NOT run on the main thread.
 	 */
-	private void authorizeGithub(boolean clearFirst, Runnable success) {
+	public void authorizeGithub(boolean clearFirst, GithubAuthSuccess success) {
 		String authorizationUrl = "https://github.com/login/oauth/authorize";
 		String clientId = "9574af3fc79384fa690a";
 		// Not actually a secret for "public apps"
@@ -1703,8 +1738,8 @@ public final class LocalizationUI extends javax.swing.JFrame {
 					OAuth.clear_oauth_tokens.execute(gEnv, clientId);
 				}
 				options.forcePort = 5346;
-				githubOAuthToken = OAuth.x_get_oauth_token.execute(gEnv, options);
-				success.run();
+				String githubOAuthToken = OAuth.x_get_oauth_token.execute(gEnv, options);
+				success.token(githubOAuthToken);
 			} catch (Exception ex) {
 				showError(ex.getMessage());
 			}

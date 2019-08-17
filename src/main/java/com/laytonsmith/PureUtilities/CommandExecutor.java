@@ -34,6 +34,19 @@ public class CommandExecutor {
 	 * @throws java.io.IOException
 	 */
 	public static String Execute(String command) throws InterruptedException, IOException {
+		return Execute(new File("."), command);
+	}
+	/**
+	 * If you're in a hurry, and all you want is to get the output of System.out from a process started with a string,
+	 * this will do it for you.
+	 *
+	 * @param workingDir
+	 * @param command
+	 * @return
+	 * @throws java.lang.InterruptedException
+	 * @throws java.io.IOException
+	 */
+	public static String Execute(File workingDir, String command) throws InterruptedException, IOException {
 		return Execute(StringToArray(command));
 	}
 
@@ -47,8 +60,23 @@ public class CommandExecutor {
 	 * @throws java.io.IOException
 	 */
 	public static String Execute(String... args) throws InterruptedException, IOException {
+		return Execute(new File("."), args);
+	}
+
+	/**
+	 * If you're in a hurry, and all you want is to get the output of System.out from a process started with a list of
+	 * arguments, this will do it for you.
+	 *
+	 * @param workingDir
+	 * @param args
+	 * @return
+	 * @throws java.lang.InterruptedException
+	 * @throws java.io.IOException
+	 */
+	public static String Execute(File workingDir, String... args) throws InterruptedException, IOException {
 		final List<Byte> output = new ArrayList<>();
 		CommandExecutor c = new CommandExecutor(args);
+		c.setWorkingDir(workingDir);
 		OutputStream os = new BufferedOutputStream(new OutputStream() {
 
 			@Override

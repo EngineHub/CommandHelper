@@ -2,6 +2,7 @@ package com.laytonsmith.PureUtilities.Web;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -32,6 +33,17 @@ public class HTTPHeaders implements Iterable<HTTPHeader> {
 	public Iterator<HTTPHeader> iterator() {
 		return model.iterator();
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		for(HTTPHeader h : model) {
+			b.append(h.getHeader()).append(": ").append(h.getValue()).append("\n");
+		}
+		return b.toString();
+	}
+
+
 
 	/**
 	 * <strong>(Read the note below if you're using this for "Set-Cookie" headers!)</strong>
@@ -77,7 +89,7 @@ public class HTTPHeaders implements Iterable<HTTPHeader> {
 	 * @return
 	 */
 	public String getCombinedHeader(String key) {
-		return StringUtils.Join(getHeaders(key), ",");
+		return StringUtils.Join(getHeaders(key), ",").trim();
 	}
 
 	/**
@@ -214,6 +226,28 @@ public class HTTPHeaders implements Iterable<HTTPHeader> {
 				boundary = null;
 			}
 		}
+	}
+
+	/**
+	 * Reads the link headers (if present) and finds the link with the given relation. If there are no link headers,
+	 * or there are but none with the specified relation, null is returned. Note that the returned link may be
+	 * either relative or absolute, so if the value starts with /, one should use the existing domain as the url base.
+	 * @param rel
+	 * @return
+	 */
+	public String getLink(String rel) {
+		String links = getCombinedHeader("link");
+		if(links.isEmpty()) {
+			return null;
+		}
+		List<String> headers = Arrays.asList(links.split(","));
+		for(String link : headers) {
+			link = link.trim();
+			if(link.contains("rel=\"" + rel + "\"")) {
+				return link.replaceAll("<(.*)>.*", "$1");
+			}
+		}
+		return null;
 	}
 
 }

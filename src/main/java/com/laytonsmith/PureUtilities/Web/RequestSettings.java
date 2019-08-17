@@ -18,6 +18,7 @@ public class RequestSettings {
 	private HTTPMethod method = HTTPMethod.GET;
 	private Map<String, List<String>> headers = null;
 	private Map<String, List<String>> parameters = null;
+	private Map<String, List<String>> queryParameters = null;
 	private CookieJar cookieJar = null;
 	private boolean followRedirects = true;
 	private int timeout = 60000;
@@ -96,7 +97,7 @@ public class RequestSettings {
 			this.parameters = null;
 			return this;
 		} else {
-			Map<String, List<String>> p = new HashMap<String, List<String>>();
+			Map<String, List<String>> p = new HashMap<>();
 			for(String key : parameters.keySet()) {
 				p.put(key, Arrays.asList(new String[]{parameters.get(key)}));
 			}
@@ -122,6 +123,48 @@ public class RequestSettings {
 	 */
 	public Map<String, List<String>> getParameters() {
 		return parameters;
+	}
+
+	/**
+	 *
+	 * @param parameters The parameters to be sent. Parameters can be also specified directly in the URL, and they will
+	 * be merged. May be null. This is a convenience method for setComplexParameters, because that is technically the
+	 * only way to set the parameters, because array parameters are supported, but often times this isn't needed, so
+	 * this is a simpler setter.
+	 * @return
+	 */
+	public RequestSettings setQueryParameters(Map<String, String> parameters) {
+		if(parameters == null) {
+			this.queryParameters = null;
+			return this;
+		} else {
+			Map<String, List<String>> p = new HashMap<>();
+			for(String key : parameters.keySet()) {
+				p.put(key, Arrays.asList(new String[]{parameters.get(key)}));
+			}
+			return setComplexQueryParameters(p);
+		}
+	}
+
+	/**
+	 * Sets the query parameters. Unlike the normal parameters, these are ALWAYS put in the query, regardless
+	 * of whether or not the method is GET or POST, which can be useful when a protocol requires an empty post body
+	 * as well as query parameters. If you are explicitely setting a post body, you may use either this or
+	 * setParameters, as the effect will be the same.
+	 * @param parameters
+	 * @return
+	 */
+	public RequestSettings setComplexQueryParameters(Map<String, List<String>> parameters) {
+		this.queryParameters = parameters;
+		return this;
+	}
+
+	/**
+	 * Returns the query parameters.
+	 * @return
+	 */
+	public Map<String, List<String>> getQueryParameters() {
+		return this.queryParameters;
 	}
 
 	/**

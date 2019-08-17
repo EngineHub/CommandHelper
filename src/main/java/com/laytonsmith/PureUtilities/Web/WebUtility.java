@@ -251,6 +251,7 @@ public final class WebUtility {
 		HTTPMethod method = settings.getMethod();
 		Map<String, List<String>> headers = settings.getHeaders();
 		Map<String, List<String>> parameters = settings.getParameters();
+		Map<String, List<String>> queryParameters = settings.getQueryParameters();
 		CookieJar cookieStash = settings.getCookieJar();
 		boolean followRedirects = settings.getFollowRedirects();
 		final int timeout = settings.getTimeout();
@@ -287,6 +288,15 @@ public final class WebUtility {
 			parameters = null;
 			String query = b.toString();
 			url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "?" + query);
+		}
+
+		if(queryParameters != null && !queryParameters.isEmpty()) {
+			String query = url.getQuery();
+			if(query == null) {
+				query = "?";
+			}
+			query += encodeParameters(queryParameters);
+			url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + query);
 		}
 		if(logger != null) {
 			logger.log(Level.INFO, "Using url: {0}", url);
