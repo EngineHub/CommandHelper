@@ -11,6 +11,7 @@ import com.laytonsmith.abstraction.MCLeatherArmorMeta;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.entities.MCTropicalFish;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
+import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
@@ -34,6 +35,9 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -104,6 +108,13 @@ public class ItemMeta {
 			docs = docs.replace("%PATTERN_SHAPES%", StringUtils.Join(MCPatternShape.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%FISH_PATTERNS%", StringUtils.Join(MCTropicalFish.MCPattern.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%FIREWORK_TYPES%", StringUtils.Join(MCFireworkType.values(), ", ", ", or ", " or "));
+			List<String> spawnable = new ArrayList<>();
+			for(MCEntityType type : MCEntityType.values()) {
+				if(type.isSpawnable()) {
+					spawnable.add(type.name());
+				}
+			}
+			docs = docs.replace("%ENTITY_TYPES%", StringUtils.Join(spawnable, ", ", ", or ", " or "));
 			return docs;
 		}
 

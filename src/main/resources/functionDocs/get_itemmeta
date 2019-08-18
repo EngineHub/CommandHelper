@@ -33,7 +33,7 @@ Below are the available fields in the item meta array. Fields can be null when t
 |-
 | Leather Armor
 |
-* '''color''' : (array) A color array, with '''"r"''', '''"g"''', and '''"b"''' keys with values of 0 - 255.
+* '''color''' : (array) A color array, with '''"r"''', '''"g"''', and '''"b"''' keys that have values ranging from 0 to 255.
 |-
 | Player Heads
 |
@@ -42,7 +42,7 @@ Below are the available fields in the item meta array. Fields can be null when t
 | Potions
 |
 * '''base''' : (array) Defines the base potion effect. Has the keys '''"extended"''', '''"upgraded"''', and '''"type"''' which can be: ''%POTION_TYPES%''.
-* '''potions''' : (array) An array of custom potion effect arrays. Each can contain the keys: '''"id"''' (string), '''"strength"''' (int), '''"seconds"''' remaining (int), whether the effect is '''"ambient"''', whether '''"particles"''' are enabled, and whether the '''"icon"''' is shown to the player.
+* '''potions''' : (array) An associative array of custom potion effect arrays, where each key is the vanilla potion effect name. Each effect array can contain the keys: '''"id"''' (int), '''"strength"''' (int), '''"seconds"''' remaining (int), whether the effect is '''"ambient"''', whether '''"particles"''' are enabled, and whether the '''"icon"''' is shown to the player.
 |-
 | Banners
 |
@@ -86,4 +86,14 @@ Below are the available fields in the item meta array. Fields can be null when t
 | Crossbows
 |
 * '''projectiles''' : (array) An array of item arrays that are loaded in the crossbow. Items must be arrows or fireworks. When fired, the first item is the middle projectile. (maximum of three projectiles)
+|-
+| Spawners
+|
+* '''spawntype''' : (string) May be one of ''%ENTITY_TYPES%''. Not all entity types will spawn from spawners, and some require special conditions.
+* '''delay''' : (int) The time in ticks until the spawner will spawn the next entity.
+|-
+| Maps
+|
+* '''mapid''' : (int) The unique id for a map on the server.
+* '''color''' : (array) An array of the map item's color, with '''"r"''', '''"g"''', and '''"b"''' keys that have values ranging from 0 to 255.
 |}
