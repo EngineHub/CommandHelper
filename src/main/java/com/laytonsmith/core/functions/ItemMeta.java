@@ -9,7 +9,12 @@ import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLeatherArmorMeta;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCTropicalFish;
+import com.laytonsmith.abstraction.enums.MCDyeColor;
+import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
+import com.laytonsmith.abstraction.enums.MCPatternShape;
+import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -38,36 +43,6 @@ public class ItemMeta {
 	public static String docs() {
 		return "These functions manipulate an item's meta data. The items are modified in a player's inventory.";
 	}
-
-	private static final String APPLICABLE_ITEM_META = "<ul>"
-			+ "<li>All items - \"display\" (string), \"lore\" (array of strings), \"enchants\" (An associative array of"
-			+ " enchantments with the vanilla name of enchantment as the key, and value being an enchantment array with"
-			+ " the key \"elevel\" for the level of the enchantment), \"model\" (an int representing vanilla's"
-			+ " CustomModelData for use with resource packs),"
-			+ " \"flags\" (array). Possible flags: " + StringUtils.Join(MCItemFlag.values(), ", ", " or ") + "</li>"
-			+ "<li>Damageable: \"damage\" on the item (0 is undamaged; each item type has its own max durability),"
-			+ " \"unbreakable\" (boolean) and \"repair\" (int, repair cost)</li>"
-			+ "<li>Books - \"title\" (string), author (string), \"pages\" (array of strings)</li>"
-			+ "<li>EnchantedBooks - \"stored\" (associative array of enchantments (see Example))</li>"
-			+ "<li>Leather Armor - \"color\" (color array (see Example))</li>"
-			+ "<li>Player Skulls - \"owner\" (string)</li>"
-			+ "<li>Potions - \"potions\" (array of custom potion effects (see get_peffect()),"
-			+ " \"base\" (an array with the keys \"type\", \"extended\", and \"upgraded\")</li>"
-			+ "<li>Banners - \"patterns\" (an array of pattern arrays, each with the keys"
-			+ " \"shape\" and \"color\")</li>"
-			+ "<li>Shields - \"basecolor\" (string), and \"patterns\" like in Banners."
-			+ "<li>Fireworks - \"firework\" (array with strength (int), \"effects\" (array of effect arrays (see Example)))</li>"
-			+ "<li>Firework Charges - \"effect\" (single Firework effect array)</li>"
-			+ "<li>Storage Blocks - \"inventory\" (an array of item arrays)</li>"
-			+ "<li>Mob Spawners - \"spawntype\" (an entity type)</li>"
-			+ "<li>Furnace - \"burntime\" (int), \"cooktime\" (int), and in \"inventory\" these keys can exist if an"
-			+ " item exists in that slot: \"result\", \"fuel\", and \"smelting\".</li>"
-			+ "<li>Brewing Stand - \"brewtime\" (int), \"fuel\" (int), and in \"inventory\" these keys can exist if an"
-			+ " item exists in that slot: \"fuel\", \"ingredient\", \"leftbottle\", \"middlebottle\", and \"rightbottle\".</li>"
-			+ "<li>Tropical Fish Bucket - \"fishcolor\" (the base dye color of the fish), \"fishpatterncolor\" (the"
-			+ " color of the pattern on the fish), and \"fishpattern\" (the pattern type on the fish).</li>"
-			+ "<li>Crossbow - \"projectiles\" (an array of item arrays, only accepts arrows and fireworks).</li>"
-			+ "</ul>";
 
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_itemmeta extends AbstractFunction {
@@ -122,10 +97,14 @@ public class ItemMeta {
 
 		@Override
 		public String docs() {
-			return "array {[player,] inventorySlot} Returns an associative array of known ItemMeta for the slot given,"
-					+ " or null if there isn't any. All items can have a display(name), lore, and/or enchants, "
-					+ " and more info will be available for the items that have it. ---- Returned keys: "
-					+ APPLICABLE_ITEM_META;
+			String docs = getBundledDocs();
+			docs = docs.replace("%ITEM_FLAGS%", StringUtils.Join(MCItemFlag.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%POTION_TYPES%", StringUtils.Join(MCPotionType.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%DYE_COLORS%", StringUtils.Join(MCDyeColor.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%PATTERN_SHAPES%", StringUtils.Join(MCPatternShape.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%FISH_PATTERNS%", StringUtils.Join(MCTropicalFish.MCPattern.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%FIREWORK_TYPES%", StringUtils.Join(MCFireworkType.values(), ", ", ", or ", " or "));
+			return docs;
 		}
 
 		@Override
@@ -136,29 +115,22 @@ public class ItemMeta {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Demonstrates a generic item without meta", "msg(get_itemmeta(null))",
-				"null"),
-				new ExampleScript("Demonstrates a generic item with meta", "msg(get_itemmeta(null))",
-				"{display: AmazingSword, enchants: {}, lore: {Look at my sword, my sword is amazing}}"),
-				new ExampleScript("Demonstrates a written book", "msg(get_itemmeta(null))",
-				"{author: Notch, display: null, enchants: {}, lore: null,"
-				+ " pages: {This is page 1, This is page 2}, title: Example Book}"),
-				new ExampleScript("Demonstrates an EnchantedBook", "msg(get_itemmeta(null))",
-				"{display: null, enchants: {}, lore: null, stored: {flame: 1}}"),
-				new ExampleScript("Demonstrates a piece of leather armor", "msg(get_itemmeta(null))",
-				"{color: {b: 106, g: 160, r: 64}, display: null, enchants: {}, lore: null}"),
-				new ExampleScript("Demonstrates a skull", "msg(get_itemmeta(null))",
-				"{display: null, enchants: {}, lore: null, owner: Herobrine}"),
-				new ExampleScript("Demonstrates a custom potion", "msg(get_itemmeta(null))",
-				"{display: null, enchants: {}, lore: null, main: 8,"
-				+ " potions: {{ambient: true, id: 8, seconds: 180, strength: 5}}}"),
-				new ExampleScript("Demonstrates a custom banner", "msg(get_itemmeta(0))",
-				"{basecolor: WHITE, patterns: {{color: BLACK, shape: SKULL}, {color: RED, shape: CROSS}}}"),
-				new ExampleScript("Demonstrates a custom firework", "msg(get_itemmeta(null))",
-				"{firework: {effects: {{colors: {{b: 240, g: 240, r: 240}, {b: 44, g: 49, r: 179},"
-				+ " {b: 146, g: 49, r: 37}}, fade: {}, flicker: true, trail: false, type: STAR},"
-				+ " {colors: {{b: 255, g: 255, r: 255}}, fade: {{b: 0, g: 0, r: 255}}, flicker: false,"
-				+ " trail: true, type: BURST}}, strength: 2}}")
+				new ExampleScript("Demonstrates generic meta for an item in your main hand.",
+					"msg(get_itemmeta(null))",
+					"{display: AmazingSword, enchants: {}, lore: {Look at my sword, my sword is amazing}, repair: 0,"
+							+ " model: null, flags: {}}"),
+				new ExampleScript("Demonstrates a written book (excluding generic meta)",
+					"msg(get_itemmeta(null))",
+					"{author: Notch, pages: {This is page 1, This is page 2}, title: Example Book}"),
+				new ExampleScript("Demonstrates an EnchantedBook (excluding generic meta)",
+					"msg(get_itemmeta(null))",
+					"{stored: {flame: 1}}"),
+				new ExampleScript("Demonstrates a custom firework (excluding generic meta)",
+					"msg(get_itemmeta(null))",
+					"{firework: {effects: {{colors: {{b: 240, g: 240, r: 240}, {b: 44, g: 49, r: 179},"
+							+ " {b: 146, g: 49, r: 37}}, fade: {}, flicker: true, trail: false, type: STAR},"
+							+ " {colors: {{b: 255, g: 255, r: 255}}, fade: {{b: 0, g: 0, r: 255}}, flicker: false,"
+							+ " trail: true, type: BURST}}, strength: 2}}")
 			};
 		}
 
@@ -222,10 +194,10 @@ public class ItemMeta {
 
 		@Override
 		public String docs() {
-			return "void {[player,] inventorySlot, ItemMetaArray} Applies the data from the given array to the item at the"
-					+ " specified slot. Unused fields will be ignored. If null or an empty array is supplied, or if none of"
-					+ " the given fields are applicable, the item will become default, as this function overwrites any"
-					+ " existing data. ---- Available fields: " + APPLICABLE_ITEM_META;
+			return "void {[player,] slot, ItemMetaArray} Applies the data from the given array to the item at the"
+					+ " specified slot. Unused fields will be ignored. If null or an empty array is supplied, or if"
+					+ " none of the given fields are applicable, the item will become default, as this function"
+					+ " overwrites any existing data. See {{function|get_itemmeta}} for available fields.";
 		}
 
 		@Override
