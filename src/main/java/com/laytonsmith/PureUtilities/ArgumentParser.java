@@ -613,9 +613,9 @@ public final class ArgumentParser {
 				//If short code is false, we need to check to see if there is a short code, if so,
 				//this is an alias.
 				if(shortCode) {
-					b.append("-").append(shortArg);
+					b.append(TermColors.GREEN).append("-").append(shortArg).append(TermColors.RESET);
 				} else {
-					b.append("--").append(longArg);
+					b.append(TermColors.GREEN).append("--").append(longArg).append(TermColors.RESET);
 				}
 				b.append(": ");
 
@@ -1148,12 +1148,12 @@ public final class ArgumentParser {
 			}
 		}
 
-		b.append("Usage:\n\t");
+		b.append(TermColors.BOLD).append("Usage:\n\t").append(TermColors.RESET);
 		//Get the short flags first, then the long flags, then the short arguments, then the long arguments
 		List<String> parts = new ArrayList<>();
 		if(!shortFlags.isEmpty()) {
 			StringBuilder usage = new StringBuilder();
-			usage.append("[-");
+			usage.append("[").append("-");
 			for(Character c : shortFlags) {
 				usage.append(c);
 			}
@@ -1247,7 +1247,7 @@ public final class ArgumentParser {
 		}
 
 		if(flags.length() != 0) {
-			b.append("Flags");
+			b.append(TermColors.BOLD).append("Flags").append(TermColors.RESET);
 			if(hasShortCodeFlags) {
 				b.append(" (Short flags may be combined)");
 			}
@@ -1264,7 +1264,7 @@ public final class ArgumentParser {
 			} else if(flags.length() == 0) {
 				b.append("\tNo flags.\n");
 			} else {
-				b.append("Options:\n");
+				b.append(TermColors.BOLD).append("Options:\n").append(TermColors.RESET);
 			}
 		}
 

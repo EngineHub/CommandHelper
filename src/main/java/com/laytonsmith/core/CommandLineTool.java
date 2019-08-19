@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
+import com.laytonsmith.PureUtilities.ArgumentSuite;
 
 /**
  * Implementations of this that are tagged with {@link tool} will be entered into the cmdline tool system.
@@ -19,11 +20,26 @@ public interface CommandLineTool {
 	/**
 	 * If the tool is executed, this will be called, with the parsedArgs passed in. Within this method, it is
 	 * appropriate and expected that {@link System#exit} is called at the end. If the method returns, the framework
-	 * will {@code System.exit(0);}
+	 * will {@code System.exit(0);}. If there was an error in parsing the arguments, this will be null. However,
+	 * the framework can detect this scenario and display the help contents instead of passing the arguments on,
+	 * so most modules can assume this is not null.
 	 * @param parsedArgs The arguments entered by the user.
 	 * @throws java.lang.Exception Any exception may be thrown, and it will be printed to {@link System#err}.
 	 */
 	void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception;
+
+	/**
+	 * Called before execute, this should set the argument that this mode is apart of.
+	 * @param suite
+	 */
+	void setSuite(ArgumentSuite suite);
+
+	/**
+	 * If this returns true, the ExtensionManager will be started up at the default location before the command is
+	 * executed. If false, nothing is loaded, and it is up to the tool do do the loading if necessary.
+	 * @return
+	 */
+	boolean startupExtensionManager();
 
 	/**
 	 * Whether or not to call System.exit(0) when the program completes. If this returns true, then the tool is

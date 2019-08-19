@@ -13,6 +13,7 @@ import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.CommandLineTool;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Main;
 import com.laytonsmith.core.Optimizable;
@@ -26,6 +27,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.Scheduling;
+import com.laytonsmith.core.tool;
 import com.laytonsmith.persistence.DataSource;
 import com.laytonsmith.persistence.MySQLDataSource;
 import com.laytonsmith.persistence.SQLiteDataSource;
@@ -493,16 +495,17 @@ public class DocGenTemplates {
 			StringBuilder b = new StringBuilder();
 			boolean colorsDisabled = TermColors.ColorsDisabled();
 			TermColors.DisableColors();
-			b.append("<pre style=\"white-space: pre-wrap;\">\n").append(HTMLUtils.escapeHTML(Main.ARGUMENT_SUITE.getBuiltDescription())).append("\n</pre>\n");
+			Main.CmdlineToolCollection collection = Main.GetCommandLineTools();
+			b.append("<pre style=\"white-space: pre-wrap;\">\n")
+					.append(HTMLUtils.escapeHTML(collection.getSuite().getBuiltDescription())).append("\n</pre>\n");
 			if(!colorsDisabled) {
 				TermColors.EnableColors();
 			}
-			for(Field f : Main.class.getDeclaredFields()) {
-				if(f.getType() == ArgumentParser.class) {
-					b.append("==== ").append(StringUtils.replaceLast(f.getName(), "(?i)mode", "")).append(" ====\n<pre style=\"white-space: pre-wrap;\">");
-					ArgumentParser parser = (ArgumentParser) ReflectionUtils.get(Main.class, f.getName());
-					b.append(HTMLUtils.escapeHTML(parser.getBuiltDescription())).append("</pre>\n\n");
-				}
+			for(Map.Entry<ArgumentParser, CommandLineTool> e : collection.getDynamicTools().entrySet()) {
+				b.append("==== ")
+						.append(e.getValue().getClass().getAnnotation(tool.class).value())
+						.append(" ====\n<pre style=\"white-space: pre-wrap;\">");
+				b.append(HTMLUtils.escapeHTML(e.getKey().getBuiltDescription())).append("</pre>\n\n");
 			}
 			return b.toString();
 		}

@@ -67,6 +67,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import jline.console.ConsoleReader;
 import org.json.simple.JSONValue;
@@ -77,618 +79,136 @@ import org.json.simple.JSONValue;
  */
 public class Main {
 
-	public static final ArgumentSuite ARGUMENT_SUITE;
-	private static final ArgumentParser HELP_MODE;
+	public static class CmdlineToolCollection {
+		private final ArgumentSuite suite;
+		private final Map<ArgumentParser, CommandLineTool> dynamicTools;
 
-	private static final ArgumentParser PRINT_DB_MODE;
-	private static final ArgumentParser DOCS_MODE;
-	private static final ArgumentParser UNINSTALL_CMDLINE_MODE;
-	private static final ArgumentParser SYNTAX_MODE;
-	private static final ArgumentParser DOCGEN_MODE;
-	private static final ArgumentParser EXAMPLES_MODE;
-	private static final ArgumentParser CMDLINE_MODE;
-	private static final ArgumentParser EXTENSION_DOCS_MODE;
-	private static final ArgumentParser DOC_EXPORT_MODE;
-	private static final ArgumentParser PROFILER_SUMMARY_MODE;
-	private static final ArgumentParser RSA_KEY_GEN_MODE;
-	private static final ArgumentParser PN_VIEWER_MODE;
-	private static final ArgumentParser CORE_FUNCTIONS_MODE;
-	private static final ArgumentParser UI_MODE;
-	private static final ArgumentParser EXTENSION_BUILDER_MODE;
-	// DO NOT ADD MORE TO THIS LIST. These will eventually all be ported to the @tool/CommandLineTool mechanism, which
-	// allows far more flexibility, and provides better grouping anyways. Plus, it allows Main to be referenced
-	// statically, without causing exceptions.
+		public CmdlineToolCollection(ArgumentSuite suite, Map<ArgumentParser, CommandLineTool> dynamicTools) {
+			this.suite = suite;
+			this.dynamicTools = dynamicTools;
+		}
 
-	static {
-		// TODO: Remove these two lines, once all these are removed, and uncomment them within main()
-		Implementation.setServerType(Implementation.Type.SHELL);
-		MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
+		/**
+		 * Gets the argument suite for the command line tools
+		 * @return
+		 */
+		public ArgumentSuite getSuite() {
+			return suite;
+		}
 
+		/**
+		 * Gets the tools themselves, keyed on the ArgumentParser object associated with this tool
+		 * @return
+		 */
+		public Map<ArgumentParser, CommandLineTool> getDynamicTools() {
+			return dynamicTools;
+		}
+	}
+
+	public static CmdlineToolCollection GetCommandLineTools() {
 		ArgumentSuite suite = new ArgumentSuite()
-				.addDescription("These are the command line tools for CommandHelper. For more information about a"
-						+ " particular mode, run help <mode name>. To run a command, in general, use the command:\n\n"
-						+ "\tjava -jar " + MethodScriptFileLocations.getDefault().getJarFile().getName() + " <mode name> <[mode specific arguments]>\n");
-		HELP_MODE = ArgumentParser.GetParser()
-				.addDescription("Displays help for all modes, or the given mode if one is provided.")
-				.addArgument(new ArgumentBuilder().setDescription("Displays help for the given mode.")
-						.setUsageName("mode name")
-						.setOptionalAndDefault()
-						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
-				.setErrorOnUnknownArgs(false);
-		suite.addMode("help", HELP_MODE).addModeAlias("--help", "help").addModeAlias("-help", "help")
-				.addModeAlias("/?", "help");
-		PRINT_DB_MODE = ArgumentParser.GetParser()
-				.addDescription("Prints out the built in database in a human readable form, then exits.");
-		suite.addMode("print-db", PRINT_DB_MODE);
-		DOCS_MODE = ArgumentParser.GetParser()
-				.addDescription("Prints documentation for the functions that CommandHelper knows about, then exits.")
-				.addArgument(new ArgumentBuilder()
-						.setDescription("The type of the documentation, defaulting to html."
-							+ " It may be one of the following: "
-							+ StringUtils.Join(DocGen.MarkupType.values(), ", ", ", or "))
-						.setUsageName("type")
-						.setOptionalAndDefault()
-						.setDefaultVal("html"));
-		suite.addMode("docs", DOCS_MODE);
-		UNINSTALL_CMDLINE_MODE = ArgumentParser.GetParser()
-				.addDescription("Uninstalls the MethodScript interpreter from your system.");
-		suite.addMode("uninstall-cmdline", UNINSTALL_CMDLINE_MODE);
-		SYNTAX_MODE = ArgumentParser.GetParser()
-				.addDescription("Generates the syntax highlighter for the specified editor (if available).")
-				.addArgument(new ArgumentBuilder()
-						.setDescription("The type of the syntax file to generate. Don't specify a type to see the"
-								+ " available options.")
-						.setUsageName("type")
-						.setOptionalAndDefault()
-						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
-		suite.addMode("syntax", SYNTAX_MODE);
-		DOCGEN_MODE = ArgumentParser.GetParser()
-				.addDescription("Starts the automatic wiki uploader GUI.");
-		suite.addMode("docgen", DOCGEN_MODE);
-		EXAMPLES_MODE = ArgumentParser.GetParser()
-				.addDescription("Installs one of the built in LocalPackage examples, which may in and of itself be useful.")
-				.addArgument(new ArgumentBuilder()
-						.setDescription("The name of the package to install. Leave blank to see a list of examples to"
-								+ " choose from.")
-						.setUsageName("packageName")
-						.setOptionalAndDefault());
-		suite.addMode("examples", EXAMPLES_MODE);
-		CMDLINE_MODE = ArgumentParser.GetParser()
-				.addDescription("Given a source file, runs it in cmdline mode. This is similar to"
-						+ " the interpreter mode, but allows for tty input (which is required for some functions,"
-						+ " like the prompt_* functions) and provides better information for errors, as the"
-						+ " file is known.")
-				.addArgument(new ArgumentBuilder()
-						.setDescription("File path/arguments")
-						.setUsageName("file and args")
-						.setRequiredAndDefault());
-		suite.addMode("cmdline", CMDLINE_MODE);
-		EXTENSION_DOCS_MODE = ArgumentParser.GetParser()
-				.addDescription("Generates markdown documentation for the specified extension utilizing its code, to be"
-						+ " used most likely on the extensions github page.")
-				.addArgument(new ArgumentBuilder()
-						.setDescription("The extension jar to generate documentation for.")
-						.setUsageName("path to jar file")
-						.setRequired()
-						.setName('i', "input-jar")
-						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
-				.addArgument(new ArgumentBuilder()
-						.setDescription("The file to output the generated documentation to. (Should probably end in"
-								+ " .md, but is not required to.) This argument is optional, and if left off, the"
-								+ " output will instead print to stdout.")
-						.setUsageName("output file name")
-						.setOptional()
-						.setName('o', "output-file"));
-		suite.addMode("extension-docs", EXTENSION_DOCS_MODE);
-		DOC_EXPORT_MODE = ArgumentParser.GetParser()
-				.addDescription("Outputs all known function documentation as a json. This includes known extensions"
-						+ " as well as the built in functions.")
-				.addArgument(new ArgumentBuilder()
-						.setDescription("Provides the path to your extension directory.")
-						.setUsageName("extension folder")
-						.setOptional()
-						.setName("extension-dir")
-						.setDefaultVal("./CommandHelper/extensions")
-						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
-				.addArgument(new ArgumentBuilder()
-						.setDescription("The file to output the generated json to. If this parameter is missing, it is"
-								+ " simply printed to screen.")
-						.setUsageName("output file")
-						.setOptional()
-						.setName('o', "output-file")
-						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
-		suite.addMode("doc-export", DOC_EXPORT_MODE);
-		PROFILER_SUMMARY_MODE = ArgumentParser.GetParser()
-				.addDescription("Analyzes the output file for a profiler session, and generates a summary report of the results.")
-				.addArgument(new ArgumentBuilder()
-						.setDescription("This value dictates how much of the lower end data is ignored."
-							+ " If the function took less time than this percentage of the total time, it is omitted from the"
-							+ " results.")
-						.setUsageName("ignore-percentage")
-						.setOptional()
-						.setName('i', "ignore-percentage")
-						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.NUMBER)
-						.setDefaultVal("0"))
-				.addArgument(new ArgumentBuilder()
-						.setDescription("Path to the profiler file to use.")
-						.setUsageName("input-file")
-						.setRequiredAndDefault());
-		suite.addMode("profiler-summary", PROFILER_SUMMARY_MODE);
-		RSA_KEY_GEN_MODE = ArgumentParser.GetParser()
-				.addDescription("Creates an ssh compatible rsa key pair. This is used with the Federation system, but"
-						+ " is useful with other tools as well.")
-				.addArgument(new ArgumentBuilder()
-						.setDescription("Output file for the keys. For instance, \"/home/user/.ssh/id_rsa\"."
-							+ " The public key will have the same name, with \".pub\" appended.")
-						.setUsageName("file")
-						.setRequired()
-						.setName('o', "output-file")
-						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
-				.addArgument(new ArgumentBuilder()
-						.setDescription("Label for the public key. For instance, \"user@localhost\" or an email"
-								+ " address.")
-						.setUsageName("label")
-						.setRequired()
-						.setName('l', "label")
-						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
-		suite.addMode("key-gen", RSA_KEY_GEN_MODE);
-		PN_VIEWER_MODE = ArgumentParser.GetParser()
-				.addDescription("Launches the Persistence Network viewer. This is a GUI tool that can help you"
-						+ " visualize your databases.")
-				.addArgument(new ArgumentBuilder()
-						.setDescription("Sets up a server running on this machine, that can be accessed by remote"
-								+ " Persistence Network Viewers. If this is set, you must also provide the --port and"
-								+ " --password options.")
-						.asFlag()
-						.setName("server"))
-				.addArgument(new ArgumentBuilder()
-						.setDescription("The port for the server to listen on.")
-						.setUsageName("port")
-						.setOptional()
-						.setName("port")
-						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.NUMBER))
-				.addArgument(new ArgumentBuilder()
-						.setDescription("The password that remote clients will need to provide to connect. Leave the"
-								+ " field blank to be prompted for a password.")
-						.setUsageName("password")
-						.setOptional()
-						.setName("password")
-						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
-		suite.addMode("pn-viewer", PN_VIEWER_MODE);
-		CORE_FUNCTIONS_MODE = ArgumentParser.GetParser()
-				.addDescription("Prints a list of functions tagged with the @core annotation, then exits.");
-		suite.addMode("core-functions", CORE_FUNCTIONS_MODE);
-		UI_MODE = ArgumentParser.GetParser()
-				.addDescription("Launches a GUI that provides a list of all the sub GUI tools provided, and allows"
-						+ " selection of a module. This command creates a subshell to run the launcher in, so that the"
-						+ " original cmdline shell returns.")
-				.addArgument(new ArgumentBuilder()
-						.setDescription("Runs the launcher in the same shell process. By default, it creates a new"
-								+ " process and causes the initial shell to return.")
-						.asFlag().setName("in-shell"));
-		suite.addMode("ui", UI_MODE);
+			.addDescription("These are the command line tools for MethodScript. For more information about a"
+					+ " particular mode, run help <mode name>. To run a command, in general, use the command:\n\n"
+					+ "\tjava -jar " + MethodScriptFileLocations.getDefault().getJarFile().getName()
+					+ " <mode name> <[mode specific arguments]>\n");
 
-		EXTENSION_BUILDER_MODE = ArgumentParser.GetParser()
-				.addDescription("Given a path to the git source repo, pulls down the code, builds the extension with"
-						+ " maven, and places the artifact in the extension folder. Git, Maven, and the JDK must all"
-						+ " be pre-installed on your system for this to work, but once those are configued and working"
-						+ " so you can run git and mvn from the cmdline, the rest of the build system should work.")
-				.addArgument(new ArgumentBuilder()
-					.setDescription("The path to the git repo (ending in .git usually)."
-						+ " May be either http or ssh, this parameter is just passed through to git.")
-					.setUsageName("git repo path")
-					.setRequired()
-					.setName('s', "source")
-					.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
-				.addArgument(new ArgumentBuilder()
-					.setDescription("The branch to check out. Defaults to \"master\".")
-					.setUsageName("branch")
-					.setOptional()
-					.setName('b', "branch")
-					.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
-					.setDefaultVal("master"))
-				.addArgument(new ArgumentBuilder()
-					.setDescription("The extension directory you want to install the built artifact to, by default, this"
-						+ " installation's extension directory.")
-					.setUsageName("dir")
-					.setOptional()
-					.setName('e', "extension-dir")
-					.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
-					.setDefaultVal(MethodScriptFileLocations.getDefault().getExtensionsDirectory().getAbsolutePath()))
-				.addArgument(new ArgumentBuilder()
-					.setDescription("If the checkout folder already exists, it is first deleted, then cloned again.")
-					.asFlag()
-					.setName('f', "force"));
-		suite.addMode("build-extension", EXTENSION_BUILDER_MODE);
-
-
-		ARGUMENT_SUITE = suite;
+		Map<ArgumentParser, CommandLineTool> dynamicTools = new HashMap<>();
+		for(Class<? extends CommandLineTool> ctool : ClassDiscovery.getDefaultInstance()
+				.loadClassesWithAnnotationThatExtend(tool.class, CommandLineTool.class)) {
+			try {
+				CommandLineTool tool = ctool.newInstance();
+				ArgumentParser ap = tool.getArgumentParser();
+				String toolName = ctool.getAnnotation(tool.class).value();
+				suite.addMode(toolName, ap);
+				String[] aliases = ctool.getAnnotation(tool.class).aliases();
+				if(aliases != null) {
+					for(String alias : aliases) {
+						suite.addModeAlias(alias, toolName);
+					}
+				}
+				dynamicTools.put(ap, tool);
+			} catch (InstantiationException | IllegalAccessException ex) {
+				Logger.getLogger(Main.class.getName()).log(Level.SEVERE, "Could not load " + ctool.getName(), ex);
+			}
+		}
+		return new CmdlineToolCollection(suite, dynamicTools);
 	}
 
 	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public static void main(String[] args) throws Exception {
+		ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
+		cd.addThisJar();
+		Implementation.setServerType(Implementation.Type.SHELL);
+		MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
+		ClassDiscoveryCache cdcCache
+				= new ClassDiscoveryCache(MethodScriptFileLocations.getDefault().getCacheDirectory());
+		cd.setClassDiscoveryCache(cdcCache);
+
+		MSLog.initialize(MethodScriptFileLocations.getDefault().getJarDirectory());
+		Prefs.init(MethodScriptFileLocations.getDefault().getPreferencesFile());
+
+		Prefs.SetColors();
+		if(Prefs.UseColors()) {
+			//Use jansi to enable output to color properly, even on windows.
+			org.fusesource.jansi.AnsiConsole.systemInstall();
+		}
+
+		cd.addAllJarsInFolder(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
+
+
+		if(args.length == 0) {
+			args = new String[]{"help"};
+		}
+
+		ArgumentParser mode;
+		ArgumentParser.ArgumentParserResults parsedArgs;
+
+		CmdlineToolCollection collection = GetCommandLineTools();
+		ArgumentSuite suite = collection.getSuite();
+
+		String helpModeName = HelpMode.class.getAnnotation(tool.class).value();
+
+		boolean wasError = false;
+
 		try {
+			ArgumentSuite.ArgumentSuiteResults results = suite.match(args, helpModeName);
+			mode = results.getMode();
+			parsedArgs = results.getResults();
+		} catch (ArgumentParser.ResultUseException | ArgumentParser.ValidationException e) {
+			// The mode was found, but the arguments are wrong. Unlike the below catch,
+			// we want to print the help just for this mode.
+			System.out.println(TermColors.RED + e.getMessage() + "\nSee usage.\n" + TermColors.RESET);
+			String[] newArgs = new String[]{"help", args[0]};
+			ArgumentSuite.ArgumentSuiteResults results = suite.match(newArgs, helpModeName);
+			mode = results.getMode();
+			parsedArgs = results.getResults();
+			wasError = true;
+		} catch (ArgumentSuite.ModeNotFoundException e) {
+			StreamUtils.GetSystemOut().println(TermColors.RED + e.getMessage() + TermColors.RESET);
+			mode = suite.getMode(helpModeName);
+			parsedArgs = null;
+			wasError = true;
+		}
 
-			ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
-			cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
-			ClassDiscoveryCache cdcCache
-					= new ClassDiscoveryCache(MethodScriptFileLocations.getDefault().getCacheDirectory());
-			cd.setClassDiscoveryCache(cdcCache);
-			MSLog.initialize(MethodScriptFileLocations.getDefault().getJarDirectory());
-			Prefs.init(MethodScriptFileLocations.getDefault().getPreferencesFile());
-
-			Prefs.SetColors();
-			if(Prefs.UseColors()) {
-				//Use jansi to enable output to color properly, even on windows.
-				org.fusesource.jansi.AnsiConsole.systemInstall();
+		if(collection.getDynamicTools().containsKey(mode)) {
+			CommandLineTool tool = collection.getDynamicTools().get(mode);
+			tool.setSuite(suite);
+			if(tool.startupExtensionManager()) {
+				ExtensionManager.AddDiscoveryLocation(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
+				ExtensionManager.Cache(MethodScriptFileLocations.getDefault().getExtensionCacheDirectory());
+				ExtensionManager.Initialize(cd);
+				ExtensionManager.Startup();
 			}
-
-			cd.addAllJarsInFolder(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
-
-			ExtensionManager.AddDiscoveryLocation(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
-			ExtensionManager.Cache(MethodScriptFileLocations.getDefault().getExtensionCacheDirectory());
-			ExtensionManager.Initialize(cd);
-			ExtensionManager.Startup();
-
-//			Implementation.setServerType(Implementation.Type.SHELL);
-//			MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
-
-			if(args.length == 0) {
-				args = new String[]{"help"};
+			tool.execute(parsedArgs);
+			if(wasError) {
+				System.exit(1);
 			}
-
-			ArgumentParser mode;
-			ArgumentParser.ArgumentParserResults parsedArgs;
-
-			Map<ArgumentParser, CommandLineTool> dynamicTools = new HashMap<>();
-			for(Class<? extends CommandLineTool> ctool : ClassDiscovery.getDefaultInstance()
-					.loadClassesWithAnnotationThatExtend(tool.class, CommandLineTool.class)) {
-				CommandLineTool tool = ctool.newInstance();
-				ArgumentParser ap = tool.getArgumentParser();
-				String toolName = ctool.getAnnotation(tool.class).value();
-				ARGUMENT_SUITE.addMode(toolName, ap);
-				String[] aliases = ctool.getAnnotation(tool.class).aliases();
-				if(aliases != null) {
-					for(String alias : aliases) {
-						ARGUMENT_SUITE.addModeAlias(alias, toolName);
-					}
-				}
-				dynamicTools.put(ap, tool);
+			if(!tool.noExitOnReturn()) {
+				System.exit(0);
 			}
-
-			try {
-				ArgumentSuite.ArgumentSuiteResults results = ARGUMENT_SUITE.match(args, "help");
-				mode = results.getMode();
-				parsedArgs = results.getResults();
-			} catch (ArgumentParser.ResultUseException | ArgumentParser.ValidationException e) {
-				StreamUtils.GetSystemOut().println(TermColors.RED + e.getMessage() + TermColors.RESET);
-				mode = HELP_MODE;
-				parsedArgs = null;
-			}
-
-			if(mode == HELP_MODE) {
-				String modeForHelp = null;
-				if(parsedArgs != null) {
-					modeForHelp = parsedArgs.getStringArgument();
-				}
-				modeForHelp = ARGUMENT_SUITE.getModeFromAlias(modeForHelp);
-				if(modeForHelp == null) {
-					//Display the general help
-					StreamUtils.GetSystemOut().println(ARGUMENT_SUITE.getBuiltDescription());
-					System.exit(0);
-					return;
-				} else {
-					//Display the help for this mode
-					StreamUtils.GetSystemOut().println(ARGUMENT_SUITE.getModeFromName(modeForHelp).getBuiltDescription());
-					return;
-				}
-			}
-
-			//Gets rid of warnings below. We now know parsedArgs will never be null,
-			//if it were, the help command would have run.
-			assert parsedArgs != null;
-
-			if(mode == CORE_FUNCTIONS_MODE) {
-				List<String> core = new ArrayList<>();
-				for(api.Platforms platform : api.Platforms.values()) {
-					for(FunctionBase f : FunctionList.getFunctionList(platform, null)) {
-						if(f.isCore()) {
-							core.add(f.getName());
-						}
-					}
-				}
-				Collections.sort(core);
-				StreamUtils.GetSystemOut().println(StringUtils.Join(core, ", "));
-				System.exit(0);
-			} else if(mode == UNINSTALL_CMDLINE_MODE) {
-				Interpreter.uninstall();
-				System.exit(0);
-			} else if(mode == PRINT_DB_MODE) {
-				ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
-				options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
-				PersistenceNetwork pn = new PersistenceNetworkImpl(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
-						new URI("sqlite://" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile().getCanonicalPath()
-								//This replace is required on Windows.
-								.replace('\\', '/')), options);
-				Map<String[], String> values = pn.getNamespace(new String[]{});
-				for(String[] s : values.keySet()) {
-					StreamUtils.GetSystemOut().println(StringUtils.Join(s, ".") + "=" + values.get(s));
-				}
-				System.exit(0);
-			} else if(mode == DOCS_MODE) {
-				DocGen.MarkupType docs;
-				try {
-					docs = DocGen.MarkupType.valueOf(parsedArgs.getStringArgument().toUpperCase());
-				} catch (IllegalArgumentException e) {
-					StreamUtils.GetSystemOut().println("The type of documentation must be one of the following: " + StringUtils.Join(DocGen.MarkupType.values(), ", ", ", or "));
-					System.exit(1);
-					return;
-				}
-				//Documentation generator
-				StreamUtils.GetSystemErr().print("Creating " + docs + " documentation...");
-				StreamUtils.GetSystemOut().println(DocGen.functions(docs, api.Platforms.INTERPRETER_JAVA, true));
-				StreamUtils.GetSystemErr().println("Done.");
-				System.exit(0);
-			} else if(mode == EXAMPLES_MODE) {
-				ExampleLocalPackageInstaller.run(MethodScriptFileLocations.getDefault().getJarDirectory(),
-						parsedArgs.getStringArgument());
-			} else if(mode == SYNTAX_MODE) {
-				// TODO: Maybe load extensions here?
-				List<String> syntax = parsedArgs.getStringListArgument();
-				String type = (syntax.size() >= 1 ? syntax.get(0) : null);
-				String theme = (syntax.size() >= 2 ? syntax.get(1) : null);
-				StreamUtils.GetSystemOut().println(SyntaxHighlighters.generate(type, theme));
-				System.exit(0);
-			} else if(mode == CMDLINE_MODE) {
-				//We actually can't use the parsedArgs, because there may be cmdline switches in
-				//the arguments that we want to ignore here, but otherwise pass through. parsedArgs
-				//will prevent us from seeing those, however.
-				List<String> allArgs = new ArrayList<>(Arrays.asList(args));
-				//The 0th arg is the cmdline verb though, so remove that.
-				allArgs.remove(0);
-				if(allArgs.isEmpty()) {
-					StreamUtils.GetSystemErr().println("Usage: path/to/file.ms [arg1 arg2]");
-					System.exit(1);
-				}
-				String fileName = allArgs.get(0);
-				allArgs.remove(0);
-				try {
-					Interpreter.startWithTTY(fileName, allArgs);
-				} catch (Profiles.InvalidProfileException ex) {
-					StreamUtils.GetSystemErr().println("Invalid profile file at " + MethodScriptFileLocations.getDefault().getProfilesFile()
-							+ ": " + ex.getMessage());
-					System.exit(1);
-				}
-				StaticLayer.GetConvertor().runShutdownHooks();
-				System.exit(0);
-			} else if(mode == EXTENSION_DOCS_MODE) {
-				String inputJarS = parsedArgs.getStringArgument("input-jar");
-				String outputFileS = parsedArgs.getStringArgument("output-file");
-				if(inputJarS == null) {
-					StreamUtils.GetSystemOut().println("Usage: --input-jar extension-docs path/to/extension.jar [--output-file path/to/output.md]\n\tIf the output is blank, it is printed to stdout.");
-					System.exit(1);
-				}
-				File inputJar = new File(inputJarS);
-				OutputStream outputFile = StreamUtils.GetSystemOut();
-				if(outputFileS != null) {
-					outputFile = new FileOutputStream(new File(outputFileS));
-				}
-				ExtensionDocGen.generate(inputJar, outputFile);
-			} else if(mode == DOC_EXPORT_MODE) {
-				String extensionDirS = parsedArgs.getStringArgument("extension-dir");
-				String outputFileS = parsedArgs.getStringArgument("output-file");
-				OutputStream outputFile = StreamUtils.GetSystemOut();
-				if(outputFileS != null) {
-					outputFile = new FileOutputStream(new File(outputFileS));
-				}
-				Implementation.forceServerType(Implementation.Type.BUKKIT);
-				File extensionDir = new File(extensionDirS);
-				if(extensionDir.exists()) {
-					//Might not exist, but that's ok, however we will print a warning
-					//to stderr.
-					for(File f : extensionDir.listFiles()) {
-						if(f.getName().endsWith(".jar")) {
-							cd.addDiscoveryLocation(f.toURI().toURL());
-						}
-					}
-				} else {
-					StreamUtils.GetSystemErr().println("Extension directory specificed doesn't exist: "
-							+ extensionDirS + ". Continuing anyways.");
-				}
-				new DocGenExportTool(cd, outputFile).export();
-			} else if(mode == PROFILER_SUMMARY_MODE) {
-				String input = parsedArgs.getStringArgument();
-				if("".equals(input)) {
-					StreamUtils.GetSystemErr().println(TermColors.RED + "No input file specified! Run `help profiler-summary' for usage." + TermColors.RESET);
-					System.exit(1);
-				}
-				double ignorePercentage = parsedArgs.getNumberArgument("ignore-percentage");
-				ProfilerSummary summary = new ProfilerSummary(new FileInputStream(input));
-				try {
-					summary.setIgnorePercentage(ignorePercentage);
-				} catch (IllegalArgumentException ex) {
-					StreamUtils.GetSystemErr().println(TermColors.RED + ex.getMessage() + TermColors.RESET);
-					System.exit(1);
-				}
-				StreamUtils.GetSystemOut().println(summary.getAnalysis());
-				System.exit(0);
-			} else if(mode == RSA_KEY_GEN_MODE) {
-				String outputFileString = parsedArgs.getStringArgument('o');
-				File privOutputFile = new File(outputFileString);
-				File pubOutputFile = new File(outputFileString + ".pub");
-				String label = parsedArgs.getStringArgument('l');
-				if(privOutputFile.exists() || pubOutputFile.exists()) {
-					StreamUtils.GetSystemErr().println("Either the public key or private key file already exists. This utility will not overwrite any existing files.");
-					System.exit(1);
-				}
-				RSAEncrypt enc = RSAEncrypt.generateKey(label);
-				FileUtil.write(enc.getPrivateKey(), privOutputFile);
-				FileUtil.write(enc.getPublicKey(), pubOutputFile);
-				System.exit(0);
-			} else if(mode == PN_VIEWER_MODE) {
-				Implementation.forceServerType(Implementation.Type.SHELL);
-				ClassDiscovery.getDefaultInstance()
-					.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
-				if(parsedArgs.isFlagSet("server")) {
-					if(parsedArgs.getNumberArgument("port") == null) {
-						StreamUtils.GetSystemErr().println("When running as a server, port is required.");
-						System.exit(1);
-					}
-					int port = parsedArgs.getNumberArgument("port").intValue();
-					if(port > 65535 || port < 1) {
-						StreamUtils.GetSystemErr().println("Port must be between 1 and 65535.");
-						System.exit(1);
-					}
-					String password = parsedArgs.getStringArgument("password");
-					if("".equals(password)) {
-						ConsoleReader reader = null;
-						try {
-							reader = new ConsoleReader();
-							reader.setExpandEvents(false);
-							Character cha = new Character((char) 0);
-							password = reader.readLine("Enter password: ", cha);
-						} finally {
-							if(reader != null) {
-								reader.close();
-							}
-						}
-					}
-					if(password == null) {
-						StreamUtils.GetSystemErr().println("Warning! Running server with no password, anyone will be able to connect!");
-						password = "";
-					}
-					try {
-						PNViewer.startServer(port, password);
-					} catch (IOException ex) {
-						StreamUtils.GetSystemErr().println(ex.getMessage());
-						System.exit(1);
-					}
-				} else {
-					try {
-						PNViewer.main(parsedArgs.getStringListArgument().toArray(ArrayUtils.EMPTY_STRING_ARRAY));
-					} catch (HeadlessException ex) {
-						StreamUtils.GetSystemErr().println("The Persistence Network Viewer may not be run from a headless environment.");
-						System.exit(1);
-					}
-				}
-			} else if(mode == UI_MODE) {
-				if(parsedArgs.isFlagSet("in-shell")) {
-					// Actually launch the GUI
-					UILauncher.main(args);
-				} else {
-					// Relaunch the jar in a new process with the --run flag set,
-					// so that the process will be in its own subshell
-					List<String> largs = new ArrayList<>();
-					largs.add("java");
-					largs.add("-jar");
-					String jarPath = ClassDiscovery.GetClassContainer(Main.class).getPath();
-					if(OSUtils.GetOS().isWindows() && jarPath.startsWith("/")) {
-						jarPath = jarPath.substring(1);
-					}
-					largs.add(jarPath);
-					largs.addAll(Arrays.asList(args));
-					largs.add("--in-shell");
-					CommandExecutor ce = new CommandExecutor(largs.toArray(new String[largs.size()]));
-					ce.start();
-					System.exit(0);
-				}
-			} else if(mode == EXTENSION_BUILDER_MODE) {
-
-				try {
-					new CommandExecutor("git --version").start().waitFor();
-					new CommandExecutor("mvn --version").start().waitFor();
-				} catch (IOException e)  {
-					System.err.println("Git and Maven are required (and Maven requires the JDK). These three"
-							+ " components must be already installed to use this tool.");
-					System.exit(1);
-				}
-
-				String branch = parsedArgs.getStringArgument("branch");
-				String source = parsedArgs.getStringArgument("source");
-				boolean force = parsedArgs.isFlagSet("force");
-				File extensionDir = new File(parsedArgs.getStringArgument("extension-dir"));
-
-				File checkoutPath;
-				checkoutPath = new File(MethodScriptFileLocations.getDefault().getTempDir(),
-						source.replaceAll("^.*/(.*?)(?:.git)*?$", "$1"));
-
-				System.out.println("Cloning " + source);
-				System.out.println("Using branch " + branch);
-				System.out.println("Checkout path is " + checkoutPath);
-				System.out.println("Deploying to " + extensionDir);
-				System.out.println("------------------------------------------------");
-
-				if(!extensionDir.exists()) {
-					if(force) {
-						extensionDir.mkdirs();
-					} else {
-						System.err.println("Extension directory does not exist, refusing to continue."
-								+ " If " + extensionDir.getAbsolutePath() + " is the correct"
-								+ " directory, manually create it and try again, or use --force.");
-						System.exit(1);
-					}
-				}
-				try {
-					if(checkoutPath.exists()) {
-						if(!force) {
-							System.err.println("Checkout path already exists (" + checkoutPath.getAbsolutePath()
-									+ "), refusing to continue.");
-							System.exit(1);
-						} else {
-							System.out.println("Deleting " + checkoutPath + " directory...");
-							if(!FileUtil.recursiveDelete(checkoutPath)) {
-								System.err.println("Could not fully delete checkout path, refusing to continue. Please"
-										+ " manually delete " + checkoutPath + ", and try again.");
-								System.exit(1);
-							}
-						}
-					}
-
-					new CommandExecutor(new String[]{"git", "clone",
-						"--single-branch", "--branch", branch,
-						"--depth=1", source, checkoutPath.getAbsolutePath()})
-							.setSystemInputsAndOutputs()
-							.start().waitFor();
-					System.out.println("Building extension...");
-					int mvnBuild = new CommandExecutor(new String[]{"mvn", "package", "-DskipTests"})
-							.setSystemInputsAndOutputs()
-							.setWorkingDir(checkoutPath)
-							.start().waitFor();
-					if(mvnBuild != 0) {
-						System.err.println("Something went wrong in the maven build, unable to continue. Please correct"
-								+ " the listed error, and then try again.");
-						System.err.flush();
-						System.exit(1);
-					}
-					System.out.println("Extension built, moving artifact to extension directory...");
-					// Read the POM for information about what the jar is named
-					XMLDocument pom = new XMLDocument(new FileInputStream(new File(checkoutPath, "pom.xml")));
-					String artifactId = pom.getNode("/project/artifactId");
-					String version = pom.getNode("/project/version");
-					String artifactName = artifactId + "-" + version + ".jar";
-					System.out.println("Identified " + artifactName + " as the artifact to use");
-					FileUtil.copy(new File(checkoutPath, "target/" + artifactName),
-							new File(extensionDir, artifactName), null);
-					System.out.println("Build complete, cleaning up...");
-					if(!FileUtil.recursiveDelete(checkoutPath)) {
-						System.err.println("Could not delete " + checkoutPath + ", but build completed successfully.");
-						System.exit(1);
-					}
-					System.exit(0);
-				} catch (Exception e) {
-					e.printStackTrace(System.err);
-				}
-			} else if(dynamicTools.containsKey(mode)) {
-				CommandLineTool tool = dynamicTools.get(mode);
-				tool.execute(parsedArgs);
-				if(!tool.noExitOnReturn()) {
-					System.exit(0);
-				}
-			} else {
-				throw new Error("Should not have gotten here");
-			}
-		} catch (NoClassDefFoundError error) {
-			StreamUtils.GetSystemErr().println(Static.getNoClassDefFoundErrorMessage(error));
+		} else {
+			// This means the requested module could not be found, but our lookup for the help module also failed.
+			throw new Error("Should not have gotten here");
 		}
 	}
 
@@ -796,6 +316,22 @@ public class Main {
 			System.exit(0);
 		}
 
+	}
+
+	@tool("uninstall-cmdline")
+	public static class UninstallCmdlineMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Uninstalls the MethodScript interpreter from your system.");
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			Interpreter.uninstall();
+			System.exit(0);
+		}
 	}
 
 	@tool(value = "version", aliases = {"-v", "--v", "-version", "--version"})
@@ -1014,6 +550,57 @@ public class Main {
 			System.exit(0);
 		}
 
+	}
+
+	@tool("doc-export")
+	public static class DocExportMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Outputs all known function documentation as a json. This includes known extensions"
+						+ " as well as the built in functions.")
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Provides the path to your extension directory.")
+						.setUsageName("extension folder")
+						.setOptional()
+						.setName("extension-dir")
+						.setDefaultVal("./CommandHelper/extensions")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The file to output the generated json to. If this parameter is missing, it is"
+								+ " simply printed to screen.")
+						.setUsageName("output file")
+						.setOptional()
+						.setName('o', "output-file")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
+			String extensionDirS = parsedArgs.getStringArgument("extension-dir");
+			String outputFileS = parsedArgs.getStringArgument("output-file");
+			OutputStream outputFile = StreamUtils.GetSystemOut();
+			if(outputFileS != null) {
+				outputFile = new FileOutputStream(new File(outputFileS));
+			}
+			Implementation.forceServerType(Implementation.Type.BUKKIT);
+			File extensionDir = new File(extensionDirS);
+			if(extensionDir.exists()) {
+				//Might not exist, but that's ok, however we will print a warning
+				//to stderr.
+				for(File f : extensionDir.listFiles()) {
+					if(f.getName().endsWith(".jar")) {
+						cd.addDiscoveryLocation(f.toURI().toURL());
+					}
+				}
+			} else {
+				StreamUtils.GetSystemErr().println("Extension directory specificed doesn't exist: "
+						+ extensionDirS + ". Continuing anyways.");
+			}
+			new DocGenExportTool(cd, outputFile).export();
+		}
 	}
 
 	@tool("cmdline-args")
@@ -1244,7 +831,28 @@ public class Main {
 						.setDescription("The file to check")
 						.setUsageName("file")
 						.setRequiredAndDefault())
-				.addArgument(GetEnvironmentParameter());
+				.addArgument(GetEnvironmentParameter())
+				.addArgument(new ArgumentBuilder()
+					.setDescription("Adds the given folder(s) to the extension discovery location. By default,"
+							+ " no extensions are loaded, not even default MethodScript extensions, but you"
+							+ " can provide that location by using the string \"--load-default\" flag, or explicitely"
+							+ " provide the path with this argument.")
+					.setUsageName("directories")
+					.setOptional()
+					.setName("extension-dirs")
+					.setArgType(ArgumentBuilder.BuilderTypeNonFlag.ARRAY_OF_STRINGS))
+				.addArgument(new ArgumentBuilder()
+					.setDescription("Adds the default MethodScript extension directory to the extension discovery"
+							+ " mechanism. By default no extensions are loaded. This is equivalent to adding"
+							+ " " + MethodScriptFileLocations.getDefault().getExtensionsDirectory().getAbsolutePath()
+							+ " to the --extension-dirs argument list.")
+					.asFlag()
+					.setName('d', "default-extensions"));
+		}
+
+		@Override
+		public boolean startupExtensionManager() {
+			return false;
 		}
 
 		@Override
@@ -1254,6 +862,18 @@ public class Main {
 				StreamUtils.GetSystemErr().println("File parameter is required.");
 				System.exit(1);
 			}
+
+			for(String dir : parsedArgs.getStringListArgument("extension-dirs", new ArrayList<>())) {
+				ExtensionManager.AddDiscoveryLocation(new File(dir));
+			}
+
+			if(parsedArgs.isFlagSet("default-extensions")) {
+				ExtensionManager.AddDiscoveryLocation(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
+			}
+
+			ExtensionManager.Cache(MethodScriptFileLocations.getDefault().getExtensionCacheDirectory());
+			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
+			ExtensionManager.Startup();
 			Set<Class<? extends Environment.EnvironmentImpl>> envs = GetEnvironmentValue(parsedArgs);
 			File f = new File(file);
 			String script = FileUtil.read(f);
@@ -1355,8 +975,579 @@ public class Main {
 				System.out.println(s);
 			}, null, null);
 		}
-
-
 	}
 
+	@tool("print-db")
+	public static class PrintDBMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Prints out the built in database in a human readable form, then exits.");
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
+			options.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
+			PersistenceNetwork pn = new PersistenceNetworkImpl(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
+					new URI("sqlite://" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile().getCanonicalPath()
+							//This replace is required on Windows.
+							.replace('\\', '/')), options);
+			Map<String[], String> values = pn.getNamespace(new String[]{});
+			for(String[] s : values.keySet()) {
+				StreamUtils.GetSystemOut().println(StringUtils.Join(s, ".") + "=" + values.get(s));
+			}
+			System.exit(0);
+		}
+	}
+
+	@tool("docs")
+	public static class DocsMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Prints documentation for the functions that CommandHelper knows about, then exits.")
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The type of the documentation, defaulting to html."
+							+ " It may be one of the following: "
+							+ StringUtils.Join(DocGen.MarkupType.values(), ", ", ", or "))
+						.setUsageName("type")
+						.setOptionalAndDefault()
+						.setDefaultVal("html"));
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			DocGen.MarkupType docs;
+			try {
+				docs = DocGen.MarkupType.valueOf(parsedArgs.getStringArgument().toUpperCase());
+			} catch (IllegalArgumentException e) {
+				StreamUtils.GetSystemOut().println("The type of documentation must be one of the following: " + StringUtils.Join(DocGen.MarkupType.values(), ", ", ", or "));
+				System.exit(1);
+				return;
+			}
+			//Documentation generator
+			StreamUtils.GetSystemErr().print("Creating " + docs + " documentation...");
+			StreamUtils.GetSystemOut().println(DocGen.functions(docs, api.Platforms.INTERPRETER_JAVA, true));
+			StreamUtils.GetSystemErr().println("Done.");
+			System.exit(0);
+		}
+	}
+
+	@tool("syntax")
+	public static class SyntaxMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Generates the syntax highlighter for the specified editor (if available).")
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The type of the syntax file to generate. Don't specify a type to see the"
+								+ " available options.")
+						.setUsageName("type")
+						.setOptionalAndDefault()
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			// TODO: Maybe load extensions here?
+			List<String> syntax = parsedArgs.getStringListArgument();
+			String type = (syntax.size() >= 1 ? syntax.get(0) : null);
+			String theme = (syntax.size() >= 2 ? syntax.get(1) : null);
+			StreamUtils.GetSystemOut().println(SyntaxHighlighters.generate(type, theme));
+			System.exit(0);
+		}
+	}
+
+	@tool("examples")
+	public static class ExamplesMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Installs one of the built in LocalPackage examples, which may in and of itself be useful.")
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The name of the package to install. Leave blank to see a list of examples to"
+								+ " choose from.")
+						.setUsageName("packageName")
+						.setOptionalAndDefault());
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			ExampleLocalPackageInstaller.run(MethodScriptFileLocations.getDefault().getJarDirectory(),
+						parsedArgs.getStringArgument());
+		}
+	}
+
+	@tool("cmdline")
+	public static class CmdlineMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Given a source file, runs it in cmdline mode. This is similar to"
+						+ " the interpreter mode, but allows for tty input (which is required for some functions,"
+						+ " like the prompt_* functions) and provides better information for errors, as the"
+						+ " file is known.")
+				.addArgument(new ArgumentBuilder()
+						.setDescription("File path/arguments")
+						.setUsageName("file and args")
+						.setRequiredAndDefault());
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			//We actually can't use the parsedArgs, because there may be cmdline switches in
+			//the arguments that we want to ignore here, but otherwise pass through. parsedArgs
+			//will prevent us from seeing those, however.
+			List<String> allArgs = parsedArgs.getRawArguments();
+			//The 0th arg is the cmdline verb though, so remove that.
+			allArgs.remove(0);
+			if(allArgs.isEmpty()) {
+				StreamUtils.GetSystemErr().println("Usage: path/to/file.ms [arg1 arg2]");
+				System.exit(1);
+			}
+			String fileName = allArgs.get(0);
+			allArgs.remove(0);
+			try {
+				Interpreter.startWithTTY(fileName, allArgs);
+			} catch (Profiles.InvalidProfileException ex) {
+				StreamUtils.GetSystemErr().println("Invalid profile file at " + MethodScriptFileLocations.getDefault()
+						.getProfilesFile()
+						+ ": " + ex.getMessage());
+				System.exit(1);
+			}
+			StaticLayer.GetConvertor().runShutdownHooks();
+			System.exit(0);
+		}
+	}
+
+	@tool("extension-docs")
+	public static class ExtensionDocsMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Generates markdown documentation for the specified extension utilizing its code, to be"
+						+ " used most likely on the extensions github page.")
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The extension jar to generate documentation for.")
+						.setUsageName("path to jar file")
+						.setRequired()
+						.setName('i', "input-jar")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The file to output the generated documentation to. (Should probably end in"
+								+ " .md, but is not required to.) This argument is optional, and if left off, the"
+								+ " output will instead print to stdout.")
+						.setUsageName("output file name")
+						.setOptional()
+						.setName('o', "output-file")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			String inputJarS = parsedArgs.getStringArgument("input-jar");
+			String outputFileS = parsedArgs.getStringArgument("output-file");
+
+			File inputJar = new File(inputJarS);
+			OutputStream outputFile = StreamUtils.GetSystemOut();
+			if(outputFileS != null) {
+				outputFile = new FileOutputStream(new File(outputFileS));
+			}
+			ExtensionDocGen.generate(inputJar, outputFile);
+		}
+	}
+
+	@tool("profiler-summary")
+	public static class ProfilerSummaryMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Analyzes the output file for a profiler session, and generates a summary report of the results.")
+				.addArgument(new ArgumentBuilder()
+						.setDescription("This value dictates how much of the lower end data is ignored."
+							+ " If the function took less time than this percentage of the total time, it is omitted from the"
+							+ " results.")
+						.setUsageName("ignore-percentage")
+						.setOptional()
+						.setName('i', "ignore-percentage")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.NUMBER)
+						.setDefaultVal("0"))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Path to the profiler file to use.")
+						.setUsageName("input-file")
+						.setRequiredAndDefault());
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			String input = parsedArgs.getStringArgument();
+			if("".equals(input)) {
+				StreamUtils.GetSystemErr().println(TermColors.RED + "No input file specified! Run `help profiler-summary' for usage." + TermColors.RESET);
+				System.exit(1);
+			}
+			double ignorePercentage = parsedArgs.getNumberArgument("ignore-percentage");
+			ProfilerSummary summary = new ProfilerSummary(new FileInputStream(input));
+			try {
+				summary.setIgnorePercentage(ignorePercentage);
+			} catch (IllegalArgumentException ex) {
+				StreamUtils.GetSystemErr().println(TermColors.RED + ex.getMessage() + TermColors.RESET);
+				System.exit(1);
+			}
+			StreamUtils.GetSystemOut().println(summary.getAnalysis());
+			System.exit(0);
+		}
+	}
+
+	@tool("key-gen")
+	public static class RSAKeyGenMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Creates an ssh compatible rsa key pair. This is used with the Federation system, but"
+						+ " is useful with other tools as well.")
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Output file for the keys. For instance, \"/home/user/.ssh/id_rsa\"."
+							+ " The public key will have the same name, with \".pub\" appended.")
+						.setUsageName("file")
+						.setRequired()
+						.setName('o', "output-file")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Label for the public key. For instance, \"user@localhost\" or an email"
+								+ " address.")
+						.setUsageName("label")
+						.setRequired()
+						.setName('l', "label")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			String outputFileString = parsedArgs.getStringArgument('o');
+			File privOutputFile = new File(outputFileString);
+			File pubOutputFile = new File(outputFileString + ".pub");
+			String label = parsedArgs.getStringArgument('l');
+			if(privOutputFile.exists() || pubOutputFile.exists()) {
+				StreamUtils.GetSystemErr().println("Either the public key or private key file already exists. This utility will not overwrite any existing files.");
+				System.exit(1);
+			}
+			RSAEncrypt enc = RSAEncrypt.generateKey(label);
+			FileUtil.write(enc.getPrivateKey(), privOutputFile);
+			FileUtil.write(enc.getPublicKey(), pubOutputFile);
+			System.exit(0);
+		}
+	}
+
+	@tool("pn-viewer")
+	public static class PNViewerMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Launches the Persistence Network viewer. This is a GUI tool that can help you"
+						+ " visualize your databases.")
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Sets up a server running on this machine, that can be accessed by remote"
+								+ " Persistence Network Viewers. If this is set, you must also provide the --port and"
+								+ " --password options.")
+						.asFlag()
+						.setName("server"))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The port for the server to listen on.")
+						.setUsageName("port")
+						.setOptional()
+						.setName("port")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.NUMBER))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The password that remote clients will need to provide to connect. Leave the"
+								+ " field blank to be prompted for a password.")
+						.setUsageName("password")
+						.setOptional()
+						.setName("password")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			Implementation.forceServerType(Implementation.Type.SHELL);
+			ClassDiscovery.getDefaultInstance()
+				.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
+			if(parsedArgs.isFlagSet("server")) {
+				if(parsedArgs.getNumberArgument("port") == null) {
+					StreamUtils.GetSystemErr().println("When running as a server, port is required.");
+					System.exit(1);
+				}
+				int port = parsedArgs.getNumberArgument("port").intValue();
+				if(port > 65535 || port < 1) {
+					StreamUtils.GetSystemErr().println("Port must be between 1 and 65535.");
+					System.exit(1);
+				}
+				String password = parsedArgs.getStringArgument("password");
+				if("".equals(password)) {
+					ConsoleReader reader = null;
+					try {
+						reader = new ConsoleReader();
+						reader.setExpandEvents(false);
+						Character cha = new Character((char) 0);
+						password = reader.readLine("Enter password: ", cha);
+					} finally {
+						if(reader != null) {
+							reader.close();
+						}
+					}
+				}
+				if(password == null) {
+					StreamUtils.GetSystemErr().println("Warning! Running server with no password, anyone will be able to connect!");
+					password = "";
+				}
+				try {
+					PNViewer.startServer(port, password);
+				} catch (IOException ex) {
+					StreamUtils.GetSystemErr().println(ex.getMessage());
+					System.exit(1);
+				}
+			} else {
+				try {
+					PNViewer.main(parsedArgs.getStringListArgument().toArray(ArrayUtils.EMPTY_STRING_ARRAY));
+				} catch (HeadlessException ex) {
+					StreamUtils.GetSystemErr().println("The Persistence Network Viewer may not be run from a headless environment.");
+					System.exit(1);
+				}
+			}
+		}
+	}
+
+	@tool("core-functions")
+	public static class CoreFunctionsMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Prints a list of functions tagged with the @core annotation, then exits.");
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			List<String> core = new ArrayList<>();
+			for(api.Platforms platform : api.Platforms.values()) {
+				for(FunctionBase f : FunctionList.getFunctionList(platform, null)) {
+					if(f.isCore()) {
+						core.add(f.getName());
+					}
+				}
+			}
+			Collections.sort(core);
+			StreamUtils.GetSystemOut().println(StringUtils.Join(core, ", "));
+			System.exit(0);
+		}
+	}
+
+	@tool("ui")
+	public static class UIMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Launches a GUI that provides a list of all the sub GUI tools provided, and allows"
+						+ " selection of a module. This command creates a subshell to run the launcher in, so that the"
+						+ " original cmdline shell returns.")
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Runs the launcher in the same shell process. By default, it creates a new"
+								+ " process and causes the initial shell to return.")
+						.asFlag().setName("in-shell"));
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			if(parsedArgs.isFlagSet("in-shell")) {
+				// Actually launch the GUI
+				UILauncher.main(parsedArgs.getRawArguments().toArray(new String[0]));
+			} else {
+				// Relaunch the jar in a new process with the --run flag set,
+				// so that the process will be in its own subshell
+				List<String> largs = new ArrayList<>();
+				largs.add("java");
+				largs.add("-jar");
+				String jarPath = ClassDiscovery.GetClassContainer(Main.class).getPath();
+				if(OSUtils.GetOS().isWindows() && jarPath.startsWith("/")) {
+					jarPath = jarPath.substring(1);
+				}
+				largs.add(jarPath);
+				largs.addAll(parsedArgs.getRawArguments());
+				largs.add("--in-shell");
+				CommandExecutor ce = new CommandExecutor(largs.toArray(new String[largs.size()]));
+				ce.start();
+				System.exit(0);
+			}
+		}
+	}
+
+	@tool("build-extension")
+	public static class ExtensionBuilderMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Given a path to the git source repo, pulls down the code, builds the extension with"
+						+ " maven, and places the artifact in the extension folder. Git, Maven, and the JDK must all"
+						+ " be pre-installed on your system for this to work, but once those are configued and working"
+						+ " so you can run git and mvn from the cmdline, the rest of the build system should work.")
+				.addArgument(new ArgumentBuilder()
+					.setDescription("The path to the git repo (ending in .git usually)."
+						+ " May be either http or ssh, this parameter is just passed through to git.")
+					.setUsageName("git repo path")
+					.setRequired()
+					.setName('s', "source")
+					.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
+				.addArgument(new ArgumentBuilder()
+					.setDescription("The branch to check out. Defaults to \"master\".")
+					.setUsageName("branch")
+					.setOptional()
+					.setName('b', "branch")
+					.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
+					.setDefaultVal("master"))
+				.addArgument(new ArgumentBuilder()
+					.setDescription("The extension directory you want to install the built artifact to, by default, this"
+						+ " installation's extension directory.")
+					.setUsageName("dir")
+					.setOptional()
+					.setName('e', "extension-dir")
+					.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
+					.setDefaultVal(MethodScriptFileLocations.getDefault().getExtensionsDirectory().getAbsolutePath()))
+				.addArgument(new ArgumentBuilder()
+					.setDescription("If the checkout folder already exists, it is first deleted, then cloned again.")
+					.asFlag()
+					.setName('f', "force"));
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			try {
+				new CommandExecutor("git --version").start().waitFor();
+				new CommandExecutor("mvn --version").start().waitFor();
+			} catch (IOException e)  {
+				System.err.println("Git and Maven are required (and Maven requires the JDK). These three"
+						+ " components must be already installed to use this tool.");
+				System.exit(1);
+			}
+
+			String branch = parsedArgs.getStringArgument("branch");
+			String source = parsedArgs.getStringArgument("source");
+			boolean force = parsedArgs.isFlagSet("force");
+			File extensionDir = new File(parsedArgs.getStringArgument("extension-dir"));
+
+			File checkoutPath;
+			checkoutPath = new File(MethodScriptFileLocations.getDefault().getTempDir(),
+					source.replaceAll("^.*/(.*?)(?:.git)*?$", "$1"));
+
+			System.out.println("Cloning " + source);
+			System.out.println("Using branch " + branch);
+			System.out.println("Checkout path is " + checkoutPath);
+			System.out.println("Deploying to " + extensionDir);
+			System.out.println("------------------------------------------------");
+
+			if(!extensionDir.exists()) {
+				if(force) {
+					extensionDir.mkdirs();
+				} else {
+					System.err.println("Extension directory does not exist, refusing to continue."
+							+ " If " + extensionDir.getAbsolutePath() + " is the correct"
+							+ " directory, manually create it and try again, or use --force.");
+					System.exit(1);
+				}
+			}
+			try {
+				if(checkoutPath.exists()) {
+					if(!force) {
+						System.err.println("Checkout path already exists (" + checkoutPath.getAbsolutePath()
+								+ "), refusing to continue.");
+						System.exit(1);
+					} else {
+						System.out.println("Deleting " + checkoutPath + " directory...");
+						if(!FileUtil.recursiveDelete(checkoutPath)) {
+							System.err.println("Could not fully delete checkout path, refusing to continue. Please"
+									+ " manually delete " + checkoutPath + ", and try again.");
+							System.exit(1);
+						}
+					}
+				}
+
+				new CommandExecutor(new String[]{"git", "clone",
+					"--single-branch", "--branch", branch,
+					"--depth=1", source, checkoutPath.getAbsolutePath()})
+						.setSystemInputsAndOutputs()
+						.start().waitFor();
+				System.out.println("Building extension...");
+				int mvnBuild = new CommandExecutor(new String[]{"mvn", "package", "-DskipTests"})
+						.setSystemInputsAndOutputs()
+						.setWorkingDir(checkoutPath)
+						.start().waitFor();
+				if(mvnBuild != 0) {
+					System.err.println("Something went wrong in the maven build, unable to continue. Please correct"
+							+ " the listed error, and then try again.");
+					System.err.flush();
+					System.exit(1);
+				}
+				System.out.println("Extension built, moving artifact to extension directory...");
+				// Read the POM for information about what the jar is named
+				XMLDocument pom = new XMLDocument(new FileInputStream(new File(checkoutPath, "pom.xml")));
+				String artifactId = pom.getNode("/project/artifactId");
+				String version = pom.getNode("/project/version");
+				String artifactName = artifactId + "-" + version + ".jar";
+				System.out.println("Identified " + artifactName + " as the artifact to use");
+				FileUtil.copy(new File(checkoutPath, "target/" + artifactName),
+						new File(extensionDir, artifactName), null);
+				System.out.println("Build complete, cleaning up...");
+				if(!FileUtil.recursiveDelete(checkoutPath)) {
+					System.err.println("Could not delete " + checkoutPath + ", but build completed successfully.");
+					System.exit(1);
+				}
+				System.exit(0);
+			} catch (Exception e) {
+				e.printStackTrace(System.err);
+			}
+		}
+	}
+
+	@tool(value = "help", aliases = {"/?", "--help", "-help", "-h"})
+	public static class HelpMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Displays help for all modes, or the given mode if one is provided.")
+				.addArgument(new ArgumentBuilder().setDescription("Displays help for the given mode.")
+						.setUsageName("mode name")
+						.setOptionalAndDefault()
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
+				.setErrorOnUnknownArgs(false);
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			String modeForHelp = null;
+			if(parsedArgs != null) {
+				modeForHelp = parsedArgs.getStringArgument();
+			}
+			modeForHelp = getSuite().getModeFromAlias(modeForHelp);
+			if(modeForHelp == null) {
+				//Display the general help
+				StreamUtils.GetSystemOut().println(getSuite().getBuiltDescription());
+				System.exit(0);
+			} else {
+				//Display the help for this mode
+				StreamUtils.GetSystemOut().println(getSuite().getMode(modeForHelp).getBuiltDescription());
+			}
+		}
+
+	}
 }
