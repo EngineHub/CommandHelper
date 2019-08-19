@@ -1450,7 +1450,9 @@ public class Meta {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() != 1) {
 				throw new ConfigCompileException("Invalid number of arguments passed to " + getName(), t);
@@ -1497,6 +1499,51 @@ public class Meta {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+	}
+
+	@api
+	public static class engine_location extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			return new CString(ClassDiscovery.GetClassContainer(Meta.class).toString(), t);
+		}
+
+		@Override
+		public String getName() {
+			return "engine_location";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "string {} Returns the location of the currently running engine binary.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
 		}
 
 	}

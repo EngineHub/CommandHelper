@@ -204,5 +204,29 @@ public class UIUtils {
 		});
 	}
 
+	/**
+	 * Prompts the user for input. The call is blocking, and returns the entered input as a string.
+	 * @param parent
+	 * @param title
+	 * @param message
+	 * @param type
+	 * @return
+	 */
+	public static String prompt(Window parent, String title, String message, MessageType type) {
+		return JOptionPane.showInputDialog(parent, message, title, type.getJOptionPaneType());
+	}
+
+	/**
+	 * Prompts the user for input. The call is blocking, and returns the entered input as a string. The type
+	 * will be a QUESTION type.
+	 * @param parent
+	 * @param title
+	 * @param message
+	 * @return
+	 */
+	public static String prompt(Window parent, String title, String message) {
+		return JOptionPane.showInputDialog(parent, message, title, MessageType.QUESTION.getJOptionPaneType());
+	}
+
 
 }

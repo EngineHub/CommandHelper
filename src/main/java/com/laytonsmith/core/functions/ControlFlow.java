@@ -158,7 +158,9 @@ public class ControlFlow {
 		private static final String and = new BasicLogic.and().getName();
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> args, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> args, FileOptions fileOptions)
 				throws ConfigCompileException {
 			//Check for too many/few arguments
 			if(args.size() < 2) {
@@ -333,7 +335,9 @@ public class ControlFlow {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			// TODO: Redo this optimization.
 			return null;
@@ -555,7 +559,9 @@ public class ControlFlow {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 1 && children.get(1).getData() instanceof CFunction
 					&& new StringHandling.sconcat().getName().equals(children.get(1).getData().val())) {
@@ -907,7 +913,9 @@ public class ControlFlow {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			//In for(@i = 0, @i < @x, @i++, ...), the @i++ is more optimally written as ++@i, but
 			//it is commonplace to use postfix operations, so if the condition is in fact that simple,
@@ -1083,7 +1091,7 @@ public class ControlFlow {
 
 	}
 
-	@api(environments = CommandHelperEnvironment.class)
+	@api
 	@breakable
 	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class, ArrayIteration.class})
 	public static class foreach extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
@@ -1368,7 +1376,9 @@ public class ControlFlow {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 2) {
 				throw new ConfigCompileException("Invalid number of arguments passed to " + getName(), t);
@@ -1863,7 +1873,9 @@ public class ControlFlow {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 1) {
 				if(children.get(0).isDynamic()) {
@@ -2070,7 +2082,9 @@ public class ControlFlow {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 1) {
 				throw new CREInsufficientArgumentsException("Expecting at least one argument to " + getName(), t);
@@ -2130,7 +2144,9 @@ public class ControlFlow {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			//If they hardcode the name, that's fine, because the variables may just be the only thing that's variable.
 			return null;
@@ -2138,7 +2154,7 @@ public class ControlFlow {
 
 	}
 
-	@api(environments = {CommandHelperEnvironment.class})
+	@api
 	@noboilerplate
 	public static class die extends AbstractFunction implements Optimizable {
 
@@ -2157,6 +2173,7 @@ public class ControlFlow {
 				b.append(arg.val());
 			}
 			try {
+				// TODO: References to this environment should be removed, in favor of an exit/die handler interface
 				if(env.hasEnv(CommandHelperEnvironment.class)) {
 					Static.SendMessage(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), b.toString(), t);
 				} else {

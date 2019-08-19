@@ -31,6 +31,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -99,12 +100,14 @@ public abstract class AbstractFunction implements Function {
 	 *
 	 * @param t
 	 * @param env
+	 * @param envs
 	 * @param children
 	 * @param fileOptions
 	 * @return
 	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 */
-	public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+	public ParseTree optimizeDynamic(Target t, Environment env,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children, FileOptions fileOptions)
 			throws ConfigCompileException, ConfigRuntimeException {
 		return null;
 	}

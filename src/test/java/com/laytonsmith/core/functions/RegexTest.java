@@ -4,6 +4,7 @@ import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import static com.laytonsmith.testing.StaticTest.SRun;
+import java.util.Set;
 import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -18,6 +19,8 @@ import org.junit.Test;
  *
  */
 public class RegexTest {
+
+	static Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs = com.laytonsmith.core.environments.Environment.getDefaultEnvClasses();
 
 	public RegexTest() {
 	}
@@ -94,7 +97,8 @@ public class RegexTest {
 	//Here, it's a compile error, since we're using it statically
 	@Test(expected = ConfigCompileException.class)
 	public void testRegFailureStatic() throws Exception {
-		MethodScriptCompiler.compile(MethodScriptCompiler.lex("reg_match('(?i)asd(', 'irrelevant')", null, true), null);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex("reg_match('(?i)asd(', 'irrelevant')", null, true), null,
+				envs);
 	}
 
 	//Here, it's a runtime error, since we're using it dynamically

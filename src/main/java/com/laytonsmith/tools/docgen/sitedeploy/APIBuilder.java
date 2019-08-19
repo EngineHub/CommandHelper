@@ -70,7 +70,7 @@ public class APIBuilder {
 		{
 			// functions
 			Map<String, Map<String, Object>> api = new TreeMap<>();
-			for(FunctionBase f : FunctionList.getFunctionList(Platforms.INTERPRETER_JAVA)) {
+			for(FunctionBase f : FunctionList.getFunctionList(Platforms.INTERPRETER_JAVA, null)) {
 				if(f instanceof Function) {
 					Function ff = (Function) f;
 					Map<String, Object> function = new TreeMap<>();

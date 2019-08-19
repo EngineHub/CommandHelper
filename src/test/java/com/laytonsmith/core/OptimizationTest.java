@@ -1,9 +1,11 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.core.compiler.OptimizationUtilities;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
 import java.io.File;
+import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -15,13 +17,15 @@ import org.junit.Test;
  */
 public class OptimizationTest {
 
+	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
+
 	@BeforeClass
 	public static void setUpClass() {
 		StaticTest.InstallFakeServerFrontend();
 	}
 
 	public String optimize(String script) throws Exception {
-		return OptimizationUtilities.optimize(script, null);
+		return OptimizationUtilities.optimize(script, envs, null);
 	}
 
 	@Test
@@ -48,8 +52,8 @@ public class OptimizationTest {
 
 	@Test
 	public void testIfElseWithDie() throws Exception {
-		assertEquals("ifelse(is_null($pl),die(''),not(ponline(player($pl))),die(concat($pl,'')))",
-				optimize("if(is_null($pl)) {\ndie('') } else if(!ponline(player($pl))){ die($pl.'') }"));
+		assertEquals("ifelse(is_null($pl),die(''),not(dyn($pl)),die(concat($pl,'')))",
+				optimize("if(is_null($pl)) {\ndie('') } else if(!dyn($pl)){ die($pl.'') }"));
 	}
 
 	// Need to add this back too

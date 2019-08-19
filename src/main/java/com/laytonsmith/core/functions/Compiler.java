@@ -141,8 +141,9 @@ public class Compiler {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> list, FileOptions fileOptions) throws ConfigCompileException {
-			return optimizeSpecial(list, true);
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> list, FileOptions fileOptions) throws ConfigCompileException {
+			return optimizeSpecial(list, true, envs);
 		}
 
 		private static final String ASSIGN = new DataHandling.assign().getName();
@@ -157,7 +158,8 @@ public class Compiler {
 		 * @param returnSConcat
 		 * @return
 		 */
-		public ParseTree optimizeSpecial(List<ParseTree> list, boolean returnSConcat) throws ConfigCompileException {
+		public ParseTree optimizeSpecial(List<ParseTree> list, boolean returnSConcat,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs) throws ConfigCompileException {
 			//If any of our nodes are CSymbols, we have different behavior
 			boolean inSymbolMode = false; //caching this can save Xn
 
@@ -320,7 +322,7 @@ public class Compiler {
 								list.remove(k);
 								break;
 							}
-							conversion.addChild(optimizeSpecial(ac, returnSConcat));
+							conversion.addChild(optimizeSpecial(ac, returnSConcat, envs));
 						}
 					}
 
@@ -545,7 +547,7 @@ public class Compiler {
 								child.setChildren(list);
 							}
 							try {
-								Function f = (Function) FunctionList.getFunction(identifier);
+								Function f = (Function) FunctionList.getFunction(identifier, envs);
 								ParseTree node = new ParseTree(f.execs(identifier.getTarget(), null, null, child), child.getFileOptions());
 								return node;
 							} catch (Exception e) {
@@ -642,7 +644,10 @@ public class Compiler {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree node;
 			if(children.isEmpty()) {
 				node = new ParseTree(CVoid.VOID, fileOptions);
@@ -673,7 +678,10 @@ public class Compiler {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			throw new ConfigCompileException("Unexpected use of braces", t);
 		}
 	}
@@ -730,7 +738,10 @@ public class Compiler {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() != 1) {
 				throw new ConfigCompileException(getName() + " can only take one parameter", t);
 			}

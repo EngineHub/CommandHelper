@@ -473,7 +473,7 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String... args) {
 			try {
-				FunctionBase b = FunctionList.getFunction(args[0], Target.UNKNOWN);
+				FunctionBase b = FunctionList.getFunction(args[0], null, Target.UNKNOWN);
 				Class c = b.getClass();
 				while(c.getEnclosingClass() != null) {
 					c = c.getEnclosingClass();

@@ -45,7 +45,7 @@ public class CFunction extends Construct {
 	 */
 	public Function getFunction() throws ConfigCompileException {
 		if(function == null) {
-			function = (Function) FunctionList.getFunction(val(), this.getTarget());
+			function = (Function) FunctionList.getFunction(val(), null, this.getTarget());
 		}
 		return function;
 	}

@@ -19,6 +19,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -700,17 +701,28 @@ public class ExtensionManager {
 		}
 	}
 
-	public static FunctionBase GetFunction(Construct c, api.Platforms platform) throws ConfigCompileException {
+	public static FunctionBase GetFunction(Construct c, api.Platforms platform,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs)
+			throws ConfigCompileException {
 		if(platform == null) {
 			//Default to the Java interpreter
 			platform = api.Platforms.INTERPRETER_JAVA;
 		}
 
 		if(c instanceof CFunction) {
-			for(ExtensionTracker trk : EXTENSIONS.values()) {
+			functionLoop: for(ExtensionTracker trk : EXTENSIONS.values()) {
 				if(trk.functions.get(platform).containsKey(c.val())
 						&& trk.supportedPlatforms.get(c.val()).contains(platform)) {
-					return trk.functions.get(platform).get(c.val());
+					FunctionBase func = trk.functions.get(platform).get(c.val());
+					if(envs != null) {
+						api api = func.getClass().getAnnotation(api.class);
+						for(Class<? extends Environment.EnvironmentImpl> epl : api.environments()) {
+							if(!envs.contains(epl)) {
+								continue functionLoop;
+							}
+						}
+					}
+					return func;
 				}
 			}
 
@@ -722,12 +734,13 @@ public class ExtensionManager {
 		}
 	}
 
-	public static Set<FunctionBase> GetFunctions(api.Platforms platform) {
+	public static Set<FunctionBase> GetFunctions(api.Platforms platform,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs) {
 		if(platform == null) {
 			Set<FunctionBase> retn = new HashSet<>();
 
 			for(api.Platforms p : api.Platforms.values()) {
-				retn.addAll(GetFunctions(p));
+				retn.addAll(GetFunctions(p, envs));
 			}
 
 			return retn;
@@ -736,7 +749,17 @@ public class ExtensionManager {
 		Set<FunctionBase> retn = new HashSet<>();
 
 		for(ExtensionTracker trk : EXTENSIONS.values()) {
-			for(FunctionBase func : trk.functions.get(platform).values()) {
+			addList: for(FunctionBase func : trk.functions.get(platform).values()) {
+				// Functions which use a given environment are not valid if the current runtime does not contain
+				// that environment.
+				if(envs != null) {
+					api api = func.getClass().getAnnotation(api.class);
+					for(Class<? extends Environment.EnvironmentImpl> epl : api.environments()) {
+						if(!envs.contains(epl)) {
+							continue addList;
+						}
+					}
+				}
 				retn.add(func);
 			}
 		}

@@ -186,7 +186,10 @@ public class FileHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.get(0).isDynamic()) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded paths.", t);
 			}

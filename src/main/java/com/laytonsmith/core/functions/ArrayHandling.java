@@ -879,7 +879,9 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children,
+				FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 2) {
 				throw new ConfigCompileException(getName() + " must have 2 or more arguments", t);
 			}
@@ -1735,7 +1737,9 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children,
+				FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 2) {
 				if(!Construct.IsDynamicHelper(children.get(1).getData())) {
 					try {

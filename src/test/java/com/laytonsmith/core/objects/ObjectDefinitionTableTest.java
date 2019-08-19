@@ -12,6 +12,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.testing.StaticTest;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Set;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -23,9 +24,10 @@ import org.junit.Ignore;
 public class ObjectDefinitionTableTest {
 
 	Environment env;
+	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
 
 	private void doCompile(String script) throws Exception {
-		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("Test.ms"), true), env);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("Test.ms"), true), env, null);
 	}
 
 	private ObjectDefinition getObjectDefinition(String fqcn) throws Exception {
@@ -34,7 +36,7 @@ public class ObjectDefinitionTableTest {
 	}
 
 	private void addNatives() {
-		env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable().addNativeTypes(env);
+		env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable().addNativeTypes(env, envs);
 	}
 
 	@Before
@@ -48,7 +50,7 @@ public class ObjectDefinitionTableTest {
 	@Test
 	@Ignore("Ignored for now, while the features are being slowly rolled out")
 	public void testNativeTypeListIsProperlyAdded() {
-		ObjectDefinitionTable table = ObjectDefinitionTable.GetNewInstance(env);
+		ObjectDefinitionTable table = ObjectDefinitionTable.GetNewInstance(env, envs);
 		try {
 			ObjectDefinition d = table.get(CString.class);
 			table.add(d, Target.UNKNOWN);
@@ -65,9 +67,9 @@ public class ObjectDefinitionTableTest {
 	@Test
 	@Ignore("Ignored for now, while the features are being slowly rolled out")
 	public void testStringIsProperlyDefined() {
-		ObjectDefinitionTable table1 = ObjectDefinitionTable.GetNewInstance(env);
+		ObjectDefinitionTable table1 = ObjectDefinitionTable.GetNewInstance(env, envs);
 		ObjectDefinition string1 = table1.get(CString.class);
-		ObjectDefinitionTable table2 = ObjectDefinitionTable.GetNewInstance(env);
+		ObjectDefinitionTable table2 = ObjectDefinitionTable.GetNewInstance(env, envs);
 		ObjectDefinition string2 = table2.get(CString.class);
 		assertTrue(string1.equals(string2));
 		assertTrue(string2.exactlyEquals(string2));

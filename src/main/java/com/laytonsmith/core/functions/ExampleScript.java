@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
@@ -7,7 +8,6 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.MethodScriptCompiler;
-import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Script;
@@ -28,6 +28,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -110,7 +111,13 @@ public class ExampleScript {
 		try {
 			Environment env = Static.GenerateStandaloneEnvironment();
 			this.script = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script,
-					new File((OSUtils.GetOS() == OSUtils.OS.WINDOWS ? "C:\\" : "/") + "Examples.ms"), true), env);
+					new File((OSUtils.GetOS() == OSUtils.OS.WINDOWS ? "C:\\" : "/") + "Examples.ms"), true), env,
+					// We can't send null here, or it errors out, but we really do want to bypass the linking in
+					// this instance. Therefore, we just return a list of all environments. We can't run the examples
+					// that require non-default environments, but we can at least ensure that the script will generally
+					// compile in *some* environment.
+					new HashSet<>(ClassDiscovery.getDefaultInstance()
+									.loadClassesThatExtend(Environment.EnvironmentImpl.class)));
 			this.output = output;
 		} catch (ConfigCompileException e) {
 			if(intentionalCompileError) {
@@ -226,15 +233,13 @@ public class ExampleScript {
 		try {
 			List<Variable> vars = new ArrayList<>();
 			try {
-				MethodScriptCompiler.execute(originalScript, new File("/" + functionName + ".ms"), true, env, new MethodScriptComplete() {
-
-					@Override
-					public void done(String output) {
-						if(output != null) {
-							finalOutput.append(output);
-						}
-					}
-				}, null, vars);
+				MethodScriptCompiler.execute(originalScript, new File("/" + functionName + ".ms"), true, env,
+						env.getEnvClasses(), (String output1) -> {
+							if(output1 != null) {
+								finalOutput.append(output1);
+							}
+						},
+						null, vars);
 			} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 				// We already checked for compile errors, so this won't happen
 			}

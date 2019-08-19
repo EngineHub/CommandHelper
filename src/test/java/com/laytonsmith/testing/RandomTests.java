@@ -79,6 +79,8 @@ public class RandomTests {
 
 	MCPlayer fakePlayer;
 
+	Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
+
 	@Before
 	public void setUp() throws Exception {
 		fakePlayer = StaticTest.GetOnlinePlayer();
@@ -124,7 +126,7 @@ public class RandomTests {
 		}
 		Set<String> classDocs = new TreeSet<>();
 
-		for(FunctionBase f : FunctionList.getFunctionList(null)) {
+		for(FunctionBase f : FunctionList.getFunctionList(null, envs)) {
 			try {
 				if(TESTED_FUNCTIONS.contains(f.getName())) {
 					continue;

@@ -20,9 +20,12 @@ import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -64,6 +67,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import jline.console.ConsoleReader;
 import org.json.simple.JSONValue;
 
@@ -78,13 +82,10 @@ public class Main {
 
 	private static final ArgumentParser PRINT_DB_MODE;
 	private static final ArgumentParser DOCS_MODE;
-	private static final ArgumentParser VERIFY_MODE;
 	private static final ArgumentParser UNINSTALL_CMDLINE_MODE;
 	private static final ArgumentParser SYNTAX_MODE;
 	private static final ArgumentParser DOCGEN_MODE;
-	private static final ArgumentParser API_MODE;
 	private static final ArgumentParser EXAMPLES_MODE;
-	private static final ArgumentParser OPTIMIZER_TEST_MODE;
 	private static final ArgumentParser CMDLINE_MODE;
 	private static final ArgumentParser EXTENSION_DOCS_MODE;
 	private static final ArgumentParser DOC_EXPORT_MODE;
@@ -129,14 +130,6 @@ public class Main {
 						.setOptionalAndDefault()
 						.setDefaultVal("html"));
 		suite.addMode("docs", DOCS_MODE);
-		VERIFY_MODE = ArgumentParser.GetParser()
-				.addDescription("Compiles the given file, returning a json describing the errors in the file, or returning"
-						+ " nothing if the file compiles cleanly.")
-				.addArgument(new ArgumentBuilder()
-						.setDescription("The file to check")
-						.setUsageName("file")
-						.setRequiredAndDefault());
-		suite.addMode("verify", VERIFY_MODE);
 		UNINSTALL_CMDLINE_MODE = ArgumentParser.GetParser()
 				.addDescription("Uninstalls the MethodScript interpreter from your system.");
 		suite.addMode("uninstall-cmdline", UNINSTALL_CMDLINE_MODE);
@@ -152,27 +145,6 @@ public class Main {
 		DOCGEN_MODE = ArgumentParser.GetParser()
 				.addDescription("Starts the automatic wiki uploader GUI.");
 		suite.addMode("docgen", DOCGEN_MODE);
-		API_MODE = ArgumentParser.GetParser()
-				.addDescription("Prints documentation for the function specified, then exits. The argument is actually"
-						+ " a regex, with ^ and $ added to it, so if you would like to search the function list,"
-						+ " you can instead provide the rest of the regex. If multiple matches are found, the full"
-						+ " list of matches is printed out. For instance \"array.*\" will return all the functions"
-						+ " that start with the word \"array\".")
-				.addArgument(new ArgumentBuilder()
-						.setDescription("The name of the function to print the information for")
-						.setUsageName("functionRegex")
-						.setRequiredAndDefault()
-						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
-				.addArgument(new ArgumentBuilder()
-						.setDescription("Instead of displaying the results in the console, launches the website with"
-								+ " this function highlighted. The local documentation is guaranteed to be consistent"
-								+ " with your local version of MethodScript, while the online results may be slightly"
-								+ " stale, or may be from a different build, but the results are generally richer.")
-						.asFlag().setName('o', "online"))
-				.addArgument(new ArgumentBuilder()
-						.setDescription("Also prints out the examples for the function (if any).")
-						.asFlag().setName('e', "examples"));
-		suite.addMode("api", API_MODE);
 		EXAMPLES_MODE = ArgumentParser.GetParser()
 				.addDescription("Installs one of the built in LocalPackage examples, which may in and of itself be useful.")
 				.addArgument(new ArgumentBuilder()
@@ -181,14 +153,6 @@ public class Main {
 						.setUsageName("packageName")
 						.setOptionalAndDefault());
 		suite.addMode("examples", EXAMPLES_MODE);
-		OPTIMIZER_TEST_MODE = ArgumentParser.GetParser()
-				.addDescription("Given a source file, reads it in and outputs the \"optimized\" version. This is meant as a debug"
-						+ " tool, but could be used as an obfuscation tool as well.")
-				.addArgument(new ArgumentBuilder()
-						.setDescription("File path")
-						.setUsageName("file")
-						.setRequiredAndDefault());
-		suite.addMode("optimizer-test", OPTIMIZER_TEST_MODE);
 		CMDLINE_MODE = ArgumentParser.GetParser()
 				.addDescription("Given a source file, runs it in cmdline mode. This is similar to"
 						+ " the interpreter mode, but allows for tty input (which is required for some functions,"
@@ -427,7 +391,7 @@ public class Main {
 			if(mode == CORE_FUNCTIONS_MODE) {
 				List<String> core = new ArrayList<>();
 				for(api.Platforms platform : api.Platforms.values()) {
-					for(FunctionBase f : FunctionList.getFunctionList(platform)) {
+					for(FunctionBase f : FunctionList.getFunctionList(platform, null)) {
 						if(f.isCore()) {
 							core.add(f.getName());
 						}
@@ -468,99 +432,12 @@ public class Main {
 			} else if(mode == EXAMPLES_MODE) {
 				ExampleLocalPackageInstaller.run(MethodScriptFileLocations.getDefault().getJarDirectory(),
 						parsedArgs.getStringArgument());
-			} else if(mode == VERIFY_MODE) {
-				String file = parsedArgs.getStringArgument();
-				if("".equals(file)) {
-					StreamUtils.GetSystemErr().println("File parameter is required.");
-					System.exit(1);
-				}
-				File f = new File(file);
-				String script = FileUtil.read(f);
-				try {
-					try {
-						MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, f, file.endsWith("ms")), null);
-					} catch (ConfigCompileException ex) {
-						Set<ConfigCompileException> s = new HashSet<>(1);
-						s.add(ex);
-						throw new ConfigCompileGroupException(s);
-					}
-				} catch (ConfigCompileGroupException ex) {
-					List<Map<String, Object>> err = new ArrayList<>();
-					for(ConfigCompileException e : ex.getList()) {
-						Map<String, Object> error = new HashMap<>();
-						error.put("msg", e.getMessage());
-						error.put("file", e.getFile().getAbsolutePath());
-						error.put("line", e.getLineNum());
-						error.put("col", e.getColumn());
-						// TODO: Need to track target length for this
-						error.put("len", 0);
-						err.add(error);
-					}
-					String serr = JSONValue.toJSONString(err);
-					StreamUtils.GetSystemOut().println(serr);
-				}
-			} else if(mode == API_MODE) {
-				String function = parsedArgs.getStringArgument();
-				boolean examples = parsedArgs.isFlagSet('e');
-				if("".equals(function)) {
-					StreamUtils.GetSystemErr().println("Usage: java -jar CommandHelper.jar api <function name>");
-					System.exit(1);
-				}
-				List<FunctionBase> fl = new ArrayList<>();
-				for(FunctionBase fb : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
-					if(fb.getName().matches("^" + function + "$")) {
-						fl.add(fb);
-					}
-				}
-				if(fl.isEmpty()) {
-					StreamUtils.GetSystemErr().println("The function '" + function + "' was not found.");
-					System.exit(1);
-				} else if(fl.size() == 1) {
-					FunctionBase f = fl.get(0);
-					if(parsedArgs.isFlagSet("online")) {
-						String url = String.format("https://methodscript.com/docs/%s/API/functions/%s",
-								MSVersion.LATEST.toString(), f.getName());
-						System.out.println("Launching browser to " + url);
-						if(!UIUtils.openWebpage(new URL(url))) {
-							System.err.println("Could not launch browser");
-						}
-					} else {
-						StreamUtils.GetSystemOut().println(Interpreter.formatDocsForCmdline(f.getName(), examples));
-					}
-				} else {
-					StreamUtils.GetSystemOut().println("Multiple function matches found:");
-					for(FunctionBase fb : fl) {
-						StreamUtils.GetSystemOut().println(fb.getName());
-					}
-				}
-				System.exit(0);
 			} else if(mode == SYNTAX_MODE) {
 				// TODO: Maybe load extensions here?
 				List<String> syntax = parsedArgs.getStringListArgument();
 				String type = (syntax.size() >= 1 ? syntax.get(0) : null);
 				String theme = (syntax.size() >= 2 ? syntax.get(1) : null);
 				StreamUtils.GetSystemOut().println(SyntaxHighlighters.generate(type, theme));
-				System.exit(0);
-			} else if(mode == OPTIMIZER_TEST_MODE) {
-				String path = parsedArgs.getStringArgument();
-				File source = new File(path);
-				String plain = FileUtil.read(source);
-				Security.setSecurityEnabled(false);
-				String optimized;
-				try {
-					try {
-						optimized = OptimizationUtilities.optimize(plain, source);
-					} catch (ConfigCompileException ex) {
-						Set<ConfigCompileException> group = new HashSet<>();
-						group.add(ex);
-						throw new ConfigCompileGroupException(group);
-					}
-				} catch (ConfigCompileGroupException ex) {
-					ConfigRuntimeException.HandleUncaughtException(ex, null);
-					System.exit(1);
-					return;
-				}
-				StreamUtils.GetSystemOut().println(optimized);
 				System.exit(0);
 			} else if(mode == CMDLINE_MODE) {
 				//We actually can't use the parsedArgs, because there may be cmdline switches in
@@ -854,6 +731,48 @@ public class Main {
 
 	}
 
+	public static ArgumentBuilder.ArgumentBuilderFinal GetEnvironmentParameter() {
+		// This needs to be changed once CH code is moved out, as extensions will be able to add new environment
+		// types. Or perhaps not, if the solution is an embedded approach.
+		ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
+		cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(Main.class));
+		String envs = StringUtils.Join(cd.getClassesThatExtend(Environment.EnvironmentImpl.class)
+				.stream()
+				.map((c) -> c.getClassName())
+				.collect(Collectors.toSet()), ", ", ", or ");
+		return new ArgumentBuilder()
+						.setDescription("The environments to target during compilation. May be one or more of "
+							+ envs + ", but note that " + GlobalEnv.class.getName() + " and "
+							+ CompilerEnvironment.class.getName()
+							+ " are provided for you.")
+						.setUsageName("environments")
+						.setOptional()
+						.setName("environments")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.ARRAY_OF_STRINGS);
+	}
+
+	public static Set<Class<? extends Environment.EnvironmentImpl>> GetEnvironmentValue(
+			ArgumentParser.ArgumentParserResults parsedArgs) {
+		List<String> environments = parsedArgs.getStringListArgument("environments", new ArrayList<>());
+		Set<Class<? extends Environment.EnvironmentImpl>> envs = new HashSet<>();
+		envs.add(GlobalEnv.class);
+		envs.add(CompilerEnvironment.class);
+		for(String e : environments) {
+			try {
+				Class c = ClassDiscovery.getDefaultInstance().forName(e).loadClass();
+				if(!c.isAssignableFrom(Environment.EnvironmentImpl.class)) {
+					System.out.println("The class " + e + " is not a valid option!");
+					System.exit(1);
+				}
+				envs.add((Class<? extends Environment.EnvironmentImpl>) c);
+			} catch (ClassNotFoundException ex) {
+				System.out.println("The class " + e + " could not be found!");
+				System.exit(1);
+			}
+		}
+		return envs;
+	}
+
 	@tool("install-cmdline")
 	public static class InstallCmdlineMode extends AbstractCommandLineTool {
 
@@ -930,17 +849,19 @@ public class Main {
 				.addDescription("Creates an MSLP file based on the directory specified.")
 				.addArgument(new ArgumentBuilder().setDescription("The path to the folder")
 						.setUsageName("path/to/folder")
-						.setRequiredAndDefault());
+						.setRequiredAndDefault())
+				.addArgument(GetEnvironmentParameter());
 		}
 
 		@Override
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
 			String mslp = parsedArgs.getStringArgument();
+			Set<Class<? extends Environment.EnvironmentImpl>> envs = GetEnvironmentValue(parsedArgs);
 			if(mslp.isEmpty()) {
 				StreamUtils.GetSystemOut().println("Usage: --mslp path/to/folder");
 				System.exit(1);
 			}
-			MSLPMaker.start(mslp);
+			MSLPMaker.start(mslp, envs);
 		}
 
 	}
@@ -1231,6 +1152,210 @@ public class Main {
 			SiteDeploy.run(generatePrefs, useLocalCache, config, "", doValidation, !noProgressClear,
 					overridePostScript, overrideIdRsa);
 		}
+
+	}
+
+	@tool("api")
+	public static class APIMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Prints documentation for the function specified, then exits. The argument is actually"
+						+ " a regex, with ^ and $ added to it, so if you would like to search the function list,"
+						+ " you can instead provide the rest of the regex. If multiple matches are found, the full"
+						+ " list of matches is printed out. For instance \"array.*\" will return all the functions"
+						+ " that start with the word \"array\".")
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The name of the function to print the information for")
+						.setUsageName("functionRegex")
+						.setRequiredAndDefault()
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Instead of displaying the results in the console, launches the website with"
+								+ " this function highlighted. The local documentation is guaranteed to be consistent"
+								+ " with your local version of MethodScript, while the online results may be slightly"
+								+ " stale, or may be from a different build, but the results are generally richer.")
+						.asFlag().setName('o', "online"))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("Also prints out the examples for the function (if any).")
+						.asFlag().setName('e', "examples"))
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The API platform to use. By default, INTERPRETER_JAVA, but may be one of "
+							+ StringUtils.Join(api.Platforms.values(), ", ", ", or "))
+						.setUsageName("platform")
+						.setOptional()
+						.setName("platform")
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
+						.setDefaultVal("INTERPRETER_JAVA"));
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			String function = parsedArgs.getStringArgument();
+			boolean examples = parsedArgs.isFlagSet('e');
+			api.Platforms platform = api.Platforms.valueOf(parsedArgs.getStringArgument("platform"));
+			if("".equals(function)) {
+				StreamUtils.GetSystemErr().println("Usage: java -jar CommandHelper.jar api <function name>");
+				System.exit(1);
+			}
+			List<FunctionBase> fl = new ArrayList<>();
+			for(FunctionBase fb : FunctionList.getFunctionList(platform, null)) {
+				if(fb.getName().matches("^" + function + "$")) {
+					fl.add(fb);
+				}
+			}
+			if(fl.isEmpty()) {
+				StreamUtils.GetSystemErr().println("The function '" + function + "' was not found.");
+				System.exit(1);
+			} else if(fl.size() == 1) {
+				FunctionBase f = fl.get(0);
+				if(parsedArgs.isFlagSet("online")) {
+					String url = String.format("https://methodscript.com/docs/%s/API/functions/%s",
+							MSVersion.LATEST.toString(), f.getName());
+					System.out.println("Launching browser to " + url);
+					if(!UIUtils.openWebpage(new URL(url))) {
+						System.err.println("Could not launch browser");
+					}
+				} else {
+					StreamUtils.GetSystemOut().println(Interpreter.formatDocsForCmdline(f.getName(), examples));
+				}
+			} else {
+				StreamUtils.GetSystemOut().println("Multiple function matches found:");
+				for(FunctionBase fb : fl) {
+					StreamUtils.GetSystemOut().println(fb.getName());
+				}
+			}
+			System.exit(0);
+		}
+
+	}
+
+	@tool("verify")
+	public static class VerifyMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Compiles the given file, returning a json describing the errors in the file, or"
+						+ " returning nothing if the file compiles cleanly. The target environment(s)"
+						+ " must be specified if not targetting command line.")
+				.addArgument(new ArgumentBuilder()
+						.setDescription("The file to check")
+						.setUsageName("file")
+						.setRequiredAndDefault())
+				.addArgument(GetEnvironmentParameter());
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			String file = parsedArgs.getStringArgument();
+			if("".equals(file)) {
+				StreamUtils.GetSystemErr().println("File parameter is required.");
+				System.exit(1);
+			}
+			Set<Class<? extends Environment.EnvironmentImpl>> envs = GetEnvironmentValue(parsedArgs);
+			File f = new File(file);
+			String script = FileUtil.read(f);
+			try {
+				try {
+					MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, f, file.endsWith("ms")), null,
+							envs);
+				} catch (ConfigCompileException ex) {
+					Set<ConfigCompileException> s = new HashSet<>(1);
+					s.add(ex);
+					throw new ConfigCompileGroupException(s);
+				}
+			} catch (ConfigCompileGroupException ex) {
+				List<Map<String, Object>> err = new ArrayList<>();
+				for(ConfigCompileException e : ex.getList()) {
+					Map<String, Object> error = new HashMap<>();
+					error.put("msg", e.getMessage());
+					error.put("file", e.getFile().getAbsolutePath());
+					error.put("line", e.getLineNum());
+					error.put("col", e.getColumn());
+					// TODO: Need to track target length for this
+					error.put("len", 0);
+					err.add(error);
+				}
+				String serr = JSONValue.toJSONString(err);
+				StreamUtils.GetSystemOut().println(serr);
+			}
+		}
+
+	}
+
+	@tool("optimizer-test")
+	public static class OptimizerTestMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+				.addDescription("Given a source file, reads it in and outputs the \"optimized\" version."
+						+ " This is meant as a debug"
+						+ " tool, but could be used as an obfuscation tool as well. The target environment(s)"
+						+ " must be specified if not targetting command line.")
+				.addArgument(new ArgumentBuilder()
+						.setDescription("File path")
+						.setUsageName("file")
+						.setRequiredAndDefault())
+				.addArgument(GetEnvironmentParameter());
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			String path = parsedArgs.getStringArgument();
+			Set<Class<? extends Environment.EnvironmentImpl>> envs = GetEnvironmentValue(parsedArgs);
+			File source = new File(path);
+			String plain = FileUtil.read(source);
+			Security.setSecurityEnabled(false);
+			String optimized;
+			try {
+				try {
+					optimized = OptimizationUtilities.optimize(plain, envs, source);
+				} catch (ConfigCompileException ex) {
+					Set<ConfigCompileException> group = new HashSet<>();
+					group.add(ex);
+					throw new ConfigCompileGroupException(group);
+				}
+			} catch (ConfigCompileGroupException ex) {
+				ConfigRuntimeException.HandleUncaughtException(ex, null);
+				System.exit(1);
+				return;
+			}
+			StreamUtils.GetSystemOut().println(optimized);
+			System.exit(0);
+		}
+
+	}
+
+
+	@tool("eval")
+	public static class EvalMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+					.addDescription("Runs the given MethodScript code, then exits.")
+					.addArgument(new ArgumentBuilder()
+						.setDescription("The code to run")
+						.setUsageName("methodscript code")
+						.setRequiredAndDefault());
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			ClassDiscovery.getDefaultInstance().addThisJar();
+
+			String script = parsedArgs.getStringArgument();
+			File file = new File("Interpreter");
+			Environment env = Static.GenerateStandaloneEnvironment(true);
+			Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
+			MethodScriptCompiler.execute(script, file, true, env, envs, (s) -> {
+				System.out.println(s);
+			}, null, null);
+		}
+
 
 	}
 

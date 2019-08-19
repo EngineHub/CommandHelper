@@ -97,7 +97,7 @@ public class Procedure implements Cloneable {
 		} else if(tree.getData() instanceof CFunction) {
 			//If the function itself is not optimizable, we needn't recurse.
 			try {
-				FunctionBase fb = FunctionList.getFunction((CFunction) tree.getData());
+				FunctionBase fb = FunctionList.getFunction((CFunction) tree.getData(), null);
 				if(fb instanceof Function) {
 					Function f = (Function) fb;
 					if(f instanceof ControlFlow._return) {

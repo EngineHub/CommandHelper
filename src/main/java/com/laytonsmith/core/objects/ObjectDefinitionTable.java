@@ -53,11 +53,13 @@ public final class ObjectDefinitionTable implements Iterable<ObjectDefinition> {
 	 * Returns a new instance of the ObjectDefinitionTable with the native classes pre-populated. This is the usual
 	 * use case for creating a new instance.
 	 * @param env The environment. It MUST include a CompilerEnvironment. The GlobalEnv may be a mock environment.
+	 * @param envs The target runtime environments
 	 * @return
 	 */
-	public static ObjectDefinitionTable GetNewInstance(Environment env) {
+	public static ObjectDefinitionTable GetNewInstance(Environment env,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs) {
 		ObjectDefinitionTable table = new ObjectDefinitionTable();
-		table.addNativeTypes(env);
+		table.addNativeTypes(env, envs);
 		return table;
 	}
 
@@ -76,8 +78,9 @@ public final class ObjectDefinitionTable implements Iterable<ObjectDefinition> {
 	 * Adds the native types to the instance. If this has already been called, it is not an error to call it again,
 	 * but no changes will be made.
 	 * @param env The environment. It MUST include a CompilerEnvironment. The GlobalEnv may be a mock environment.
+	 * @param envs The target runtime environments
 	 */
-	public void addNativeTypes(Environment env) {
+	public void addNativeTypes(Environment env, Set<Class<? extends Environment.EnvironmentImpl>> envs) {
 		if(nativeTypesAdded.compareAndSet(false, true)) {
 			// We have two types of onboarding, normal onboarding, and fallback onboarding.
 			// Normal onboarding is when the native code was properly compiled in, and we
@@ -117,7 +120,7 @@ public final class ObjectDefinitionTable implements Iterable<ObjectDefinition> {
 						try {
 							String script = FileUtil.read(file);
 							TokenStream ts = MethodScriptCompiler.lex(script, file, true);
-							MethodScriptCompiler.compile(ts, env);
+							MethodScriptCompiler.compile(ts, env, envs);
 						} catch (ConfigCompileGroupException g) {
 							oops.addAll(g.getList());
 						} catch (IOException | ConfigCompileException ex) {

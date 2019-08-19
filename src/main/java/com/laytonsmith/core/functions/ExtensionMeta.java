@@ -59,7 +59,7 @@ public class ExtensionMeta {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
-				FunctionList.getFunction(args[0].val().toLowerCase(), t);
+				FunctionList.getFunction(args[0].val().toLowerCase(), environment.getEnvClasses(), t);
 			} catch (ConfigCompileException ex) {
 				return CBoolean.FALSE;
 			}
@@ -104,7 +104,10 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() != 1) {
 				throw new ConfigCompileException(getName() + " can only accept one argument", t);
 			}
@@ -181,7 +184,10 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() != 1) {
 				throw new ConfigCompileException(getName() + " can only accept one argument", t);
 			}
@@ -253,7 +259,10 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() != 1) {
 				throw new ConfigCompileException(getName() + " can only accept one argument", t);
 			} else if(!(children.get(0).getData().isInstanceOf(CString.class))) {

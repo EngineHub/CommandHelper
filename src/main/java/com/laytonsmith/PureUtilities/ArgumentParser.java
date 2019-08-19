@@ -851,6 +851,23 @@ public final class ArgumentParser {
 		}
 
 		/**
+		 * Returns the list of values associated with the switch represented by this short code. If the switch
+		 * wasn't set, the default return value is returned instead.
+		 * @param flag
+		 * @param defaultReturn
+		 * @return
+		 * @throws com.laytonsmith.PureUtilities.ArgumentParser.ResultUseException
+		 */
+		public List<String> getStringListArgument(Character flag, List<String> defaultReturn)
+				throws ResultUseException {
+			List<String> d = getStringListArgument(flag);
+			if(d == null) {
+				return defaultReturn;
+			}
+			return d;
+		}
+
+		/**
 		 * Returns the list of values associated with the switch represented by
 		 * this long code. If the switch wasn't set, null is returned.
 		 *
@@ -860,6 +877,22 @@ public final class ArgumentParser {
 		 */
 		public List<String> getStringListArgument(String flag) throws ResultUseException {
 			return getStringListArgument(getArg(flag));
+		}
+
+		/**
+		 * Returns the list of values associated with the switch represented by this long code. If the switch
+		 * wasn't set, the default return value is returned instead.
+		 * @param flag
+		 * @param defaultReturn
+		 * @return
+		 * @throws com.laytonsmith.PureUtilities.ArgumentParser.ResultUseException
+		 */
+		public List<String> getStringListArgument(String flag, List<String> defaultReturn) throws ResultUseException {
+			List<String> d = getStringListArgument(flag);
+			if(d == null) {
+				return defaultReturn;
+			}
+			return d;
 		}
 
 		private List<String> getStringListArgument(Argument arg) {

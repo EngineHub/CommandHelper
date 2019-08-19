@@ -268,7 +268,8 @@ public final class Interpreter {
 			final ConsoleReader reader = new ConsoleReader();
 			reader.setExpandEvents(false);
 			//Get a list of all the function names. This will be provided to the auto completer.
-			Set<FunctionBase> functions = FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA);
+			Set<FunctionBase> functions = FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA,
+					env.getEnvClasses());
 			List<String> names = new ArrayList<>();
 			for(FunctionBase f : functions) {
 				if(f.appearInDocumentation()) {
@@ -343,7 +344,8 @@ public final class Interpreter {
 
 		String autoInclude = FileUtil.read(MethodScriptFileLocations.getDefault().getCmdlineInterpreterAutoIncludeFile());
 		try {
-			MethodScriptCompiler.execute(autoInclude, MethodScriptFileLocations.getDefault().getCmdlineInterpreterAutoIncludeFile(), true, env, null, null, null);
+			MethodScriptCompiler.execute(autoInclude, MethodScriptFileLocations.getDefault()
+					.getCmdlineInterpreterAutoIncludeFile(), true, env, env.getEnvClasses(), null, null, null);
 		} catch (ConfigCompileException ex) {
 			ConfigRuntimeException.HandleUncaughtException(ex, "Interpreter will continue to run, however.", null);
 		} catch (ConfigCompileGroupException ex) {
@@ -438,7 +440,8 @@ public final class Interpreter {
 						String helpCommand = m.group(2);
 						try {
 							List<FunctionBase> fl = new ArrayList<>();
-							for(FunctionBase fb : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
+							for(FunctionBase fb : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA,
+									env.getEnvClasses())) {
 								if(fb.getName().matches("^" + helpCommand + "$")) {
 									fl.add(fb);
 								}
@@ -495,7 +498,7 @@ public final class Interpreter {
 	public static String formatDocsForCmdline(String function, boolean showExamples) throws ConfigCompileException,
 			IOException, DataSourceException, URISyntaxException, DocGenTemplates.Generator.GenerateException {
 		StringBuilder b = new StringBuilder();
-		FunctionBase f = FunctionList.getFunction(function, Target.UNKNOWN);
+		FunctionBase f = FunctionList.getFunction(function, null, Target.UNKNOWN);
 		DocGen.DocInfo d = new DocGen.DocInfo(f.docs());
 		b.append(TermColors.CYAN).append(d.ret).append(" ");
 		b.append(TermColors.RESET).append(f.getName()).append("(")
@@ -590,7 +593,7 @@ public final class Interpreter {
 				String function = functionMatcher.group(1);
 				String color;
 				try {
-					FunctionBase f = FunctionList.getFunction(function, Target.UNKNOWN);
+					FunctionBase f = FunctionList.getFunction(function, null, Target.UNKNOWN);
 					if(f instanceof Function) {
 						if(((Function) f).isRestricted()) {
 							color = TermColors.CYAN;
@@ -767,7 +770,7 @@ public final class Interpreter {
 		final ParseTree tree;
 		try {
 			TokenStream stream = MethodScriptCompiler.lex(script, fromFile, true);
-			tree = MethodScriptCompiler.compile(stream, env);
+			tree = MethodScriptCompiler.compile(stream, env, env.getEnvClasses());
 		} finally {
 			compile.stop();
 		}

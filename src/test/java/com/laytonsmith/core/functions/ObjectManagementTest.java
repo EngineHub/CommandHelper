@@ -17,6 +17,7 @@ import com.laytonsmith.core.objects.ObjectType;
 import com.laytonsmith.testing.StaticTest;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Set;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -24,6 +25,8 @@ import static org.junit.Assert.*;
  *
  */
 public class ObjectManagementTest {
+
+	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
 
 	public static void Run(String code, CompilerEnvironment env) throws Exception {
 		GlobalEnv gEnv = Static.GenerateStandaloneEnvironment(false).getEnv(GlobalEnv.class);
@@ -33,7 +36,7 @@ public class ObjectManagementTest {
 	}
 
 	public static void Run(String code, Environment env) throws Exception {
-		MethodScriptCompiler.compile(MethodScriptCompiler.lex(code, new File("test.ms"), true), env);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex(code, new File("test.ms"), true), env, envs);
 	}
 
 	public ObjectManagementTest() {

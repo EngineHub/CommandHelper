@@ -55,8 +55,14 @@ public @interface api {
 	Platforms[] platform() default {api.Platforms.INTERPRETER_JAVA};
 
 	/**
-	 * Returns the environments this api element uses. The default is an empty array, but note that GlobalEnv.class is
-	 * implied for all elements, and it is not required to add that to this list.
+	 * Returns the environments this api element relies on. The default is an empty array,
+	 * but note that GlobalEnv.class is
+	 * implied for all elements, and it is not required to add that to this list. This list
+	 * is what determines if a compile error should be displayed or not, if this function is
+	 * used in an unsupported environment. There is no other functionality implied by this,
+	 * so it is not going to cause an error if missing, but it will cause errors that could
+	 * have been caught at compile time, to be runtime errors instead. Therefore, it is
+	 * still important to get this correct.
 	 *
 	 * @return
 	 */

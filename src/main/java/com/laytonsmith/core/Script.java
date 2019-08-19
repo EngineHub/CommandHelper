@@ -52,6 +52,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A script is a section of code that has been preprocessed and split into separate commands/actions. For instance, the
@@ -83,6 +84,7 @@ public class Script {
 	private final long compileTime;
 	private String label;
 	private Environment currentEnv;
+	private Set<Class<? extends Environment.EnvironmentImpl>> envs;
 	private FileOptions fileOptions;
 
 	private static final SimpleVersion GARBAGE_VERSION = new SimpleVersion(0, 0, 0, "version-error");
@@ -123,11 +125,13 @@ public class Script {
 		return b.toString();
 	}
 
-	public Script(List<Token> left, List<Token> right, String label, FileOptions fileOptions) {
+	public Script(List<Token> left, List<Token> right, String label,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, FileOptions fileOptions) {
 		this.left = left;
 		this.fullRight = right;
 		this.leftVars = new HashMap<>();
 		this.label = label;
+		this.envs = envs;
 		compileTime = System.currentTimeMillis();
 		this.fileOptions = fileOptions;
 	}
@@ -307,7 +311,7 @@ public class Script {
 			}
 			final Function f;
 			try {
-				f = (Function) FunctionList.getFunction((CFunction) m);
+				f = (Function) FunctionList.getFunction((CFunction) m, env.getEnvClasses());
 			} catch (ConfigCompileException | ClassCastException e) {
 				//Turn it into a config runtime exception. This shouldn't ever happen though.
 				throw ConfigRuntimeException.CreateUncatchableException("Unable to find function " + m.val(), m.getTarget());
@@ -872,7 +876,7 @@ public class Script {
 		right.add(temp);
 		cright = new ArrayList<>();
 		for(List<Token> l : right) {
-			cright.add(MethodScriptCompiler.compile(new TokenStream(l, fileOptions), null));
+			cright.add(MethodScriptCompiler.compile(new TokenStream(l, fileOptions), null, envs));
 		}
 	}
 

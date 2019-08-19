@@ -168,12 +168,15 @@ public interface Optimizable extends Function {
 	 *
 	 * @param t
 	 * @param env The environment. The only guaranteed useable environment is the {@link CompilerEnvironment}.
+	 * @param envs The target environments. Unfortunately, we cannot use the environment list in {@code env}, as that
+	 * does not represent the runtime environment.
 	 * @param children The children that are being passed to this function
 	 * @param fileOptions The file options for the top level function
 	 * @return
 	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 */
-	public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+	public ParseTree optimizeDynamic(Target t, Environment env, Set<Class<? extends Environment.EnvironmentImpl>> envs,
+			List<ParseTree> children, FileOptions fileOptions)
 			throws ConfigCompileException, ConfigRuntimeException;
 
 	/**

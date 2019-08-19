@@ -4,6 +4,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.functions.CompiledFunction;
@@ -12,6 +13,7 @@ import com.laytonsmith.core.functions.FunctionList;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The static compiler uses the dynamic compiler, but using a platform specific framework, ends up with output that can
@@ -29,22 +31,27 @@ public final class MethodScriptStaticCompiler {
 	 *
 	 * @param script
 	 * @param platform
+	 * @param envs
+	 * @param file
 	 * @return
 	 */
-	public static String compile(String script, api.Platforms platform, File file) throws ConfigCompileException, ConfigCompileGroupException {
+	public static String compile(String script, api.Platforms platform,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, File file)
+			throws ConfigCompileException, ConfigCompileGroupException {
 		//First, we optimize. The "core" functions are always run through
 		//the native interpreter's compiler for optimization.
-		ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, file, true), null);
+		ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, file, true), null, envs);
 		StringBuilder b = new StringBuilder();
 		for(ParseTree node : tree.getChildren()) {
-			go(node, b, platform);
+			go(node, b, platform, envs);
 		}
 		return b.toString();
 	}
 
-	private static void go(ParseTree node, StringBuilder b, api.Platforms platform) throws ConfigCompileException {
+	private static void go(ParseTree node, StringBuilder b, api.Platforms platform,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs) throws ConfigCompileException {
 		if(node.hasChildren()) {
-			FunctionBase f = FunctionList.getFunction((CFunction) node.getData(), platform);
+			FunctionBase f = FunctionList.getFunction((CFunction) node.getData(), platform, envs);
 			if(!(f instanceof CompiledFunction)) {
 				throw new ConfigCompileException("The function " + f.getName() + " is unknown in this platform.", node.getData().getTarget());
 			}
@@ -52,7 +59,7 @@ public final class MethodScriptStaticCompiler {
 			List<String> children = new ArrayList<String>();
 			for(ParseTree baby : node.getChildren()) {
 				StringBuilder bb = new StringBuilder();
-				go(baby, bb, platform);
+				go(baby, bb, platform, envs);
 				children.add(bb.toString());
 			}
 			b.append(cf.compile(node.getData().getTarget(), children.toArray(new String[children.size()])));

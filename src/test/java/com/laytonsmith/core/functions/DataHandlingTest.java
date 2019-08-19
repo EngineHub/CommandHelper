@@ -13,6 +13,7 @@ import static com.laytonsmith.testing.StaticTest.RunCommand;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -34,6 +35,7 @@ public class DataHandlingTest {
 	MCServer fakeServer;
 	MCPlayer fakePlayer;
 	com.laytonsmith.core.environments.Environment env;
+	static Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs = com.laytonsmith.core.environments.Environment.getDefaultEnvClasses();
 
 	public DataHandlingTest() throws Exception {
 		StaticTest.InstallFakeServerFrontend();
@@ -83,7 +85,7 @@ public class DataHandlingTest {
 		//Create the test file
 		File test = new File("unit_test_inc.ms");
 		FileUtil.write("msg('hello')", test);
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("./script.txt"), true), null), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("./script.txt"), true), null, envs), env, null, null, null);
 		verify(fakePlayer).sendMessage("hello");
 		//delete the test file
 		test.delete();

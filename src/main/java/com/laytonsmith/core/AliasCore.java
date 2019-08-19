@@ -372,7 +372,7 @@ public class AliasCore {
 				}
 				ProfilePoint compilerMSA = parent.profiler.start("Compilation of MSA files in Local Packages", LogLevel.VERBOSE);
 				try {
-					localPackages.compileMSA(scripts, player);
+					localPackages.compileMSA(scripts, player, env.getEnvClasses());
 				} finally {
 					compilerMSA.stop();
 				}
@@ -657,14 +657,15 @@ public class AliasCore {
 			ms.add(new FileInfo(s, path));
 		}
 
-		public void compileMSA(List<Script> scripts, MCPlayer player) {
+		public void compileMSA(List<Script> scripts, MCPlayer player,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs) {
 			for(FileInfo fi : msa) {
 				List<Script> tempScripts;
 				try {
 					ProfilePoint p = parent.profiler.start("Compiling " + fi.file, LogLevel.WARNING);
 					try {
 						tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents,
-								fi.file, false));
+								fi.file, false), envs);
 					} finally {
 						p.stop();
 					}
@@ -724,7 +725,8 @@ public class AliasCore {
 				boolean exception = false;
 				try {
 					MethodScriptCompiler.execute(MethodScriptCompiler.compile(
-							MethodScriptCompiler.lex(fi.contents, fi.file, true), env), env, null, null);
+							MethodScriptCompiler.lex(fi.contents, fi.file, true), env, env.getEnvClasses()),
+							env, null, null);
 				} catch (ConfigCompileGroupException e) {
 					exception = true;
 					ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath()

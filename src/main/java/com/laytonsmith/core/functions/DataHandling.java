@@ -155,7 +155,9 @@ public class DataHandling {
 		FileOptions lastFileOptions = null;
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children,
+				FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			//We need to check here to ensure that
 			//we aren't getting a slice in a label, which is used in switch
 			//statements, but doesn't make sense here.
@@ -363,7 +365,10 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			//Check for too few arguments
 			if(children.size() < 2) {
 				return null;
@@ -1759,7 +1764,7 @@ public class DataHandling {
 		}
 	}
 
-	@api(environments = CommandHelperEnvironment.class)
+	@api
 	@unbreakable
 	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class})
 	public static class closure extends AbstractFunction implements BranchStatement, VariableScope {
@@ -2763,7 +2768,7 @@ public class DataHandling {
 					throw new CRECastException("Closures cannot be eval'd directly. Use execute() instead.", t);
 				}
 				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file(), true),
-						env);
+						env, env.getEnvClasses());
 				StringBuilder b = new StringBuilder();
 				int count = 0;
 				for(ParseTree child : root.getChildren()) {
@@ -2813,7 +2818,9 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children,
+				FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() != 1) {
 				throw new ConfigCompileException(getName() + " expects only one argument", t);
 			}
@@ -3046,7 +3053,9 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children,
+				FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			// There are two specific cases here where we will give more precise error messages.
 			// If it's a string, yell at them
 			if(children.get(1).getData().isInstanceOf(CString.class)) {

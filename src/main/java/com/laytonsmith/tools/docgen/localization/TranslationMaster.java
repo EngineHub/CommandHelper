@@ -42,6 +42,14 @@ public class TranslationMaster {
 	}
 
 	/**
+	 * Gets the location of the translation database.
+	 * @return
+	 */
+	public File getTranslationDb() {
+		return translationDb;
+	}
+
+	/**
 	 * Creates an object that represents a full translation database, located at the given local location.
 	 * @param translationDb
 	 * @param callback If desired, keeps a count of the loading progress. Useful for UI components. Null is supported,
@@ -314,7 +322,7 @@ public class TranslationMaster {
 	public List<TranslationMemory> getMemoriesForPage(Locale locale, String page) {
 		Map<String, TranslationMemory> master = allLocales.get(locale).master;
 		Set<String> keys = allLocales.get(locale)
-				.pages.get(new File(translationDb, locale + "/" + page))
+				.pages.get(new File(translationDb, locale.getLocale() + "/" + page))
 				.blocks;
 		return new ArrayList<>(keys.stream().map((key) -> master.get(key)).collect(Collectors.toList()));
 	}
@@ -367,14 +375,16 @@ public class TranslationMaster {
 	/**
 	 * Function names frequently appear throughout the code as
 	 */
-	private static final Set<String> FUNCTION_IDENTIFIERS = FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)
-				.stream()
-				.map((function) -> {
-					return "\\[\\[%s\\|" + function.getName() + "\\]\\]\\(?\\)?";
-				})
-				.collect(Collectors.toSet());
+	private static final Set<String> FUNCTION_IDENTIFIERS
+			= FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA, null)
+			.stream()
+			.map((function) -> {
+				return "\\[\\[%s\\|" + function.getName() + "\\]\\]\\(?\\)?";
+			})
+			.collect(Collectors.toSet());
 
-	private static final Set<String> FUNCTION_NAMES = FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)
+	private static final Set<String> FUNCTION_NAMES
+			= FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA, null)
 			.stream()
 			.map((f) -> f.getName())
 			.collect(Collectors.toSet());

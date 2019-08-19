@@ -55,7 +55,7 @@ public class IncludeCache {
 			ProfilePoint p = profiler.start("Compiling " + file, LogLevel.WARNING);
 			ParseTree tree;
 			try {
-				tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, file, true), env);
+				tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, file, true), env, env.getEnvClasses());
 			} finally {
 				p.stop();
 			}

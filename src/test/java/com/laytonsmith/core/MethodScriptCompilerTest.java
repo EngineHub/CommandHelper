@@ -6,6 +6,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
@@ -17,6 +18,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.After;
@@ -48,6 +50,7 @@ public class MethodScriptCompilerTest {
 	MCServer fakeServer;
 	MCPlayer fakePlayer;
 	com.laytonsmith.core.environments.Environment env;
+	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
 
 	public MethodScriptCompilerTest() {
 		//StaticTest.InstallFakeServerFrontend();
@@ -112,31 +115,32 @@ public class MethodScriptCompilerTest {
 
 	@Test
 	public void testCompile() throws Exception {
-		MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another') 'function')", null, false)).get(0).compileRight();
+		MethodScriptCompiler.preprocess(
+				MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another') 'function')", null, false), envs).get(0).compileRight();
 		try {
 			//extra parameter
-			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another', 'oops') 'function')", null, false)).get(0).compileRight();
+			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another', 'oops') 'function')", null, false), envs).get(0).compileRight();
 			fail("Did not expect test to pass");
 		} catch (ConfigCompileException e) {
 			//passed
 		}
 		try {
 			//missing parenthesis
-			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another') 'function'", null, false)).get(0).compileRight();
+			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another') 'function'", null, false), envs).get(0).compileRight();
 			fail("Did not expect test to pass");
 		} catch (ConfigCompileException e) {
 			//passed
 		}
 		try {
 			//extra parenthesis
-			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another') 'function')))))", null, false)).get(0).compileRight();
+			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another') 'function')))))", null, false), envs).get(0).compileRight();
 			fail("Did not expect test to pass");
 		} catch (ConfigCompileException e) {
 			//passed
 		}
 		try {
 			//extra multiline end construct
-			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another') 'function') <<<", null, false)).get(0).compileRight();
+			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg('this is a string', if(true, 'and', 'another') 'function') <<<", null, false), envs).get(0).compileRight();
 			fail("Did not expect test to pass");
 		} catch (ConfigCompileException e) {
 			//passed
@@ -144,31 +148,31 @@ public class MethodScriptCompilerTest {
 
 		try {
 			//no multiline end construct
-			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = >>>\nmsg('hi')\n", null, false)).get(0).compileRight();
+			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = >>>\nmsg('hi')\n", null, false), envs).get(0).compileRight();
 			fail("Did not expect no multiline end construct to pass");
 		} catch (ConfigCompileException e) {
 			//passed
 		}
 
-		MethodScriptCompiler.compile(MethodScriptCompiler.lex("if(1, msg('') msg(''))", null, true), null);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex("if(1, msg('') msg(''))", null, true), null, envs);
 
 	}
 
 	@Test
 	public void testLabel() throws Exception {
-		assertEquals(Static.GLOBAL_PERMISSION, MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("*:/cmd = die()", null, false)).get(0).compile().getLabel());
-		assertEquals(Static.GLOBAL_PERMISSION, MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("* : /cmd = die()", null, false)).get(0).compile().getLabel());
-		assertEquals("~lol/fun", MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("~lol/fun: /cmd = die()", null, false)).get(0).compile().getLabel());
+		assertEquals(Static.GLOBAL_PERMISSION, MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("*:/cmd = die()", null, false), envs).get(0).compile().getLabel());
+		assertEquals(Static.GLOBAL_PERMISSION, MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("* : /cmd = die()", null, false), envs).get(0).compile().getLabel());
+		assertEquals("~lol/fun", MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("~lol/fun: /cmd = die()", null, false), envs).get(0).compile().getLabel());
 	}
 
 	@Test
 	public void testCompile13() throws Exception {
-		MethodScriptCompiler.compile(MethodScriptCompiler.lex("msg ('hi')", null, true), null);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex("msg ('hi')", null, true), null, envs);
 	}
 
 	@Test
 	public void testCompile14() throws Exception {
-		MethodScriptCompiler.compile(MethodScriptCompiler.lex("msg(('hi'))", null, true), null);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex("msg(('hi'))", null, true), null, envs);
 	}
 
 	@Test
@@ -188,7 +192,7 @@ public class MethodScriptCompilerTest {
 				+ "      assign(@hello1, 'hello')"
 				+ "      _hello(@hello1)";
 
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 		verify(fakePlayer).sendMessage("hello");
 	}
 
@@ -203,7 +207,7 @@ public class MethodScriptCompilerTest {
 				+ "assign(@blah, _hello())\n"
 				+ "msg(@blah)\n";
 
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 		verify(fakePlayer).sendMessage("hello");
 	}
 
@@ -215,7 +219,7 @@ public class MethodScriptCompilerTest {
 		try {
 			String script
 					= "[";
-			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
+			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 			fail("Test passed, but wasn't supposed to");
 		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 			//Passed
@@ -223,7 +227,7 @@ public class MethodScriptCompilerTest {
 		try {
 			String script
 					= "]";
-			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
+			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 			fail("Test passed, but wasn't supposed to");
 		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 			//Passed
@@ -237,7 +241,7 @@ public class MethodScriptCompilerTest {
 				+ "     return('hello')"
 				+ ")"
 				+ "msg(_hello())";
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 		verify(fakePlayer).sendMessage("hello");
 	}
 
@@ -246,7 +250,7 @@ public class MethodScriptCompilerTest {
 		String script
 				= "#This is a comment invalid()'\"'' function\n"
 				+ "msg('hello')";
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 		verify(fakePlayer).sendMessage("hello");
 	}
 
@@ -254,7 +258,7 @@ public class MethodScriptCompilerTest {
 	public void testExecute7() throws Exception {
 		String script
 				= "msg('hello') #This is a comment too invalid()'\"'' function\n";
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 		verify(fakePlayer).sendMessage("hello");
 	}
 
@@ -263,7 +267,7 @@ public class MethodScriptCompilerTest {
 		String script
 				= "msg('hello') /* This is a comment too invalid()'\"'' function\n"
 				+ "yup, still a comment. yay() */";
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 		verify(fakePlayer).sendMessage("hello");
 	}
 
@@ -272,14 +276,14 @@ public class MethodScriptCompilerTest {
 		String script
 				= "msg('hello') /* This is a comment too invalid()'\"'' function\n"
 				+ "yup, still a comment. yay() This will fail though, because the comment is unended.";
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 	}
 
 	@Test(expected = ConfigCompileException.class)
 	public void testExecute11() throws Exception {
 		String script
 				= "msg('hello') 'unended string";
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 	}
 
 	@Test
@@ -287,7 +291,7 @@ public class MethodScriptCompilerTest {
 		String script
 				= "msg('hello') /* This is a comment too invalid()'\"'' function\n"
 				+ "yup, still a comment. yay() */";
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 		verify(fakePlayer).sendMessage("hello");
 	}
 
@@ -296,7 +300,7 @@ public class MethodScriptCompilerTest {
 		String script
 				= "assign(@a, array(0, 1, 2))"
 				+ "msg(@a[0])";
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 		verify(fakePlayer).sendMessage("0");
 	}
 
@@ -308,7 +312,7 @@ public class MethodScriptCompilerTest {
 				+ ")"
 				+ "msg(_hello('hello'))"
 				+ "msg(_hello())";
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 		verify(fakePlayer).sendMessage("hello");
 		verify(fakePlayer).sendMessage("world");
 	}
@@ -324,7 +328,7 @@ public class MethodScriptCompilerTest {
 				+ "_out('hello')\n"
 				+ "assign(@j, 'goodbye')\n"
 				+ "_out('world')\n";
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 		verify(fakePlayer).sendMessage("@i is currently 0");
 		verify(fakePlayer).sendMessage("@i is currently hello and @j is null");
 		verify(fakePlayer).sendMessage("@i is currently world and @j is null");
@@ -339,7 +343,7 @@ public class MethodScriptCompilerTest {
 				+ "_myProc(1, 2)\n"
 				+ "_myProc(1, 2, 3)\n"
 				+ "_myProc(1, 2, 3, 4)\n";
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 		verify(fakePlayer).sendMessage("1");
 		verify(fakePlayer).sendMessage("1 2");
 		verify(fakePlayer, times(2)).sendMessage("1 2 3");
@@ -351,7 +355,7 @@ public class MethodScriptCompilerTest {
 				= "proc(_addition, @i, @j, msg(add(@i, @j)))\n"
 				+ "_addition(1, 1)\n"
 				+ "_addition(2, 2)";
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 		//verify(fakePlayer).sendMessage("null null null");
 		verify(fakePlayer).sendMessage("2");
 		verify(fakePlayer).sendMessage("4");
@@ -364,7 +368,7 @@ public class MethodScriptCompilerTest {
 				+ "_myProc()\n"
 				+ "_myProc(1)\n"
 				+ "_myProc(1, 2)";
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 		//verify(fakePlayer).sendMessage("null null null");
 		verify(fakePlayer).sendMessage("{}");
 		verify(fakePlayer).sendMessage("{1}");
@@ -386,7 +390,7 @@ public class MethodScriptCompilerTest {
 				+ "assign(@j, 'goodbye')\n"
 				+ "msg(_hello('hello'))"
 				+ "msg(_hello())";
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 		verify(fakePlayer).sendMessage("hello");
 		verify(fakePlayer).sendMessage("world");
 	}
@@ -396,7 +400,7 @@ public class MethodScriptCompilerTest {
 		final AtomicBoolean bool = new AtomicBoolean(false);
 		String script
 				= "msg('hello') world";
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null), env, new MethodScriptComplete() {
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, new MethodScriptComplete() {
 
 			@Override
 			public void done(String output) {
@@ -427,7 +431,7 @@ public class MethodScriptCompilerTest {
 	public void testCompile1() {
 		try {
 			String config = "/cmd [$p] $q = msg('')";
-			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0).compile();
+			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false), envs).get(0).compile();
 			fail("Test passed, but wasn't supposed to");
 		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 			//Passed
@@ -472,7 +476,7 @@ public class MethodScriptCompilerTest {
 	public void testCompile2() {
 		try {
 			String config = "/cmd [$p=player()] = msg('')";
-			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0).compile();
+			MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false), envs).get(0).compile();
 			fail("Test passed, but wasn't supposed to");
 		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 			//Passed
@@ -484,7 +488,7 @@ public class MethodScriptCompilerTest {
 		String config = "/cmd = >>>\n"
 				+ "msg('hello') #This is a comment too invalid()'\"'' function\n"
 				+ "<<<";
-		MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false));
+		MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false), envs);
 	}
 
 	@Test
@@ -492,7 +496,7 @@ public class MethodScriptCompilerTest {
 		String config = "label:/cmd = >>>\n"
 				+ "msg('hello') #This is a comment too invalid()'\"'' function\n"
 				+ "<<<";
-		Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0);
+		Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false), envs).get(0);
 		s.compile();
 		assertEquals("label", s.getLabel());
 	}
@@ -552,7 +556,7 @@ public class MethodScriptCompilerTest {
 		String config = "/test $var = >>>\n"
 				+ "msg($var)"
 				+ "<<<";
-		Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0);
+		Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false), envs).get(0);
 		s.compile();
 		assertTrue(s.match("/test 2"));
 		assertFalse(s.match("/test"));
@@ -582,7 +586,7 @@ public class MethodScriptCompilerTest {
 	public void testCompile12() throws Exception {
 		String config = "/*/one = bad()*/\n"
 				+ "/two = msg('Good')\n";
-		Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0);
+		Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false), envs).get(0);
 		s.compile();
 		assertFalse(s.match("/one"));
 		assertTrue(s.match("/two"));
@@ -591,7 +595,7 @@ public class MethodScriptCompilerTest {
 	@Test
 	public void testSmartCommentBeforeCommand() throws Exception {
 		String config = "/** sc */\n/cmd = msg('');";
-		Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false)).get(0);
+		Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, false), envs).get(0);
 		s.compile();
 		assertTrue(s.match("/cmd"));
 	}
@@ -711,7 +715,7 @@ public class MethodScriptCompilerTest {
 
 	@Test(expected = ConfigCompileException.class)
 	public void testCompileErrorOfStaticConstructOptimization() throws Exception {
-		MethodScriptCompiler.compile(MethodScriptCompiler.lex("2 / 0", null, true), null);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex("2 / 0", null, true), null, envs);
 	}
 
 	// If people complain that the old format is broken, I can see about re-adding this. For now,
@@ -1066,7 +1070,7 @@ public class MethodScriptCompilerTest {
 		Script s2;
 		try {
 			List<Script> scripts = MethodScriptCompiler.preprocess(
-					MethodScriptCompiler.lex(cmd1 + "\n" + cmd2, null, false));
+					MethodScriptCompiler.lex(cmd1 + "\n" + cmd2, null, false), envs);
 			s1 = scripts.get(0);
 			s2 = scripts.get(1);
 			s1.compile();
@@ -1227,7 +1231,7 @@ public class MethodScriptCompilerTest {
 		MCPlayer player = StaticTest.GetOnlinePlayer();
 		this.env.getEnv(CommandHelperEnvironment.class).SetPlayer(player);
 		MethodScriptCompiler.execute(MethodScriptCompiler.compile(
-				MethodScriptCompiler.lex(script, null, true), null), this.env, null, null);
+				MethodScriptCompiler.lex(script, null, true), null, envs), this.env, null, null);
 		verify(player).sendMessage(expectedResponse);
 		this.env.getEnv(CommandHelperEnvironment.class).SetPlayer(temp);
 	}

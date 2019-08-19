@@ -107,6 +107,10 @@ import static org.mockito.Mockito.when;
 public class StaticTest {
 
 	static com.laytonsmith.core.environments.Environment env;
+	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
+	static {
+		envs.add(CommandHelperEnvironment.class);
+	}
 
 	static {
 		try {
@@ -524,7 +528,7 @@ public class StaticTest {
 			env = StaticTest.env;
 		}
 		env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), env), env, done, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), env, envs), env, done, null);
 	}
 
 	public static void RunCommand(String combinedScript, MCCommandSender player, String command) throws Exception {
@@ -537,7 +541,7 @@ public class StaticTest {
 			env = StaticTest.env;
 		}
 		env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
-		List<Script> scripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(combinedScript, null, false));
+		List<Script> scripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(combinedScript, null, false), env.getEnvClasses());
 		for(Script s : scripts) {
 			s.compile();
 			if(s.match(command)) {

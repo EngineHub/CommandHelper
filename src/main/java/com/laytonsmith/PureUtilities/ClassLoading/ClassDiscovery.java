@@ -9,6 +9,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.FieldMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.MethodMirror;
 import com.laytonsmith.PureUtilities.Common.ClassUtils;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Pair;
@@ -387,6 +388,14 @@ public class ClassDiscovery {
 		} else {
 			return defaultClassLoader;
 		}
+	}
+
+	/**
+	 * Adds the jar that the calling class is in to the discovery location. This is equivalent to running
+	 * {@code addDiscoveryLocation(ClassDiscovery.GetClassContainer(this.getClass()));}
+	 */
+	public void addThisJar() {
+		this.addDiscoveryLocation(GetClassContainer(StackTraceUtils.getCallingClass()));
 	}
 
 	/**

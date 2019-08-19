@@ -507,7 +507,10 @@ public class Environment {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The function get_block_at() is deprecated. Use get_block().", t);
 			return null;
 		}
@@ -627,7 +630,10 @@ public class Environment {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The function set_block_at() is deprecated. Use set_block().", t);
 			return null;
 		}
@@ -973,7 +979,9 @@ public class Environment {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 
 			if(children.size() < 1) {
@@ -1623,7 +1631,9 @@ public class Environment {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 
 			if(children.size() < 2) {

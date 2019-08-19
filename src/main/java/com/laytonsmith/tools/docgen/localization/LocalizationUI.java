@@ -2,6 +2,7 @@ package com.laytonsmith.tools.docgen.localization;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.CommandExecutor;
+import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.TemplateBuilder;
 import com.laytonsmith.PureUtilities.Common.UIUtils;
@@ -75,10 +76,20 @@ public final class LocalizationUI extends javax.swing.JFrame {
 	private TranslationMemory currentMemory;
 	private TranslationSummary.TranslationSummaryEntry currentSummary;
 
+	private LogViewer logViewer = new LogViewer(this);
+
 	/**
 	 * Creates new form LocalizationUI
 	 */
 	private LocalizationUI() {
+		Thread.setDefaultUncaughtExceptionHandler((t, ex) -> {
+			String msg = "Exception in thread " + t.getName() + ":\n" + ex.getMessage() + "\n"
+				 + StackTraceUtils.GetStacktrace(ex);
+			System.err.println(msg);
+			if(logViewer != null) {
+				logViewer.pushLog(msg);
+			}
+		});
 		initComponents();
 		setUnsavedChanges(false);
 		setStatus("Welcome to the " + getBranding() + " Localization (L10N) UI!"
@@ -186,20 +197,24 @@ public final class LocalizationUI extends javax.swing.JFrame {
         segmentCountLabel = new javax.swing.JLabel();
         topMenu = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
-        loadMenu = new javax.swing.JMenuItem();
-        menuFileUpdateRepo = new javax.swing.JMenuItem();
-        saveMenu = new javax.swing.JMenuItem();
-        exitMenu = new javax.swing.JMenuItem();
+        menuLoad = new javax.swing.JMenuItem();
+        menuUpdateRepo = new javax.swing.JMenuItem();
+        menuSave = new javax.swing.JMenuItem();
+        menuSaveAndCommit = new javax.swing.JMenuItem();
+        menuSaveCommitAndPush = new javax.swing.JMenuItem();
+        menuPullRequest = new javax.swing.JMenuItem();
+        menuExit = new javax.swing.JMenuItem();
         navigationMenu = new javax.swing.JMenu();
-        findSegmentMenu = new javax.swing.JMenuItem();
-        jumpToPageMenu = new javax.swing.JMenuItem();
+        menuFindSegment = new javax.swing.JMenuItem();
+        menuJumpToPage = new javax.swing.JMenuItem();
         menuMoveDownSegment = new javax.swing.JMenuItem();
         menuMoveUpSegment = new javax.swing.JMenuItem();
         toolsMenu = new javax.swing.JMenu();
-        azureKeyMenu = new javax.swing.JMenuItem();
-        menuToolsAuthorizeOnGithub = new javax.swing.JMenuItem();
-        forkDatabaseMenu = new javax.swing.JMenuItem();
+        menuAzureKey = new javax.swing.JMenuItem();
+        menuAuthorizeOnGithub = new javax.swing.JMenuItem();
+        menuForkDatabase = new javax.swing.JMenuItem();
         menuCountUntranslatedChars = new javax.swing.JMenuItem();
+        menuShowLogs = new javax.swing.JMenuItem();
         helpMenuTop = new javax.swing.JMenu();
         helpMenu = new javax.swing.JMenuItem();
         aboutMenu = new javax.swing.JMenuItem();
@@ -646,60 +661,87 @@ public final class LocalizationUI extends javax.swing.JFrame {
 
         fileMenu.setText("File");
 
-        loadMenu.setText("Load...");
-        loadMenu.addActionListener(new java.awt.event.ActionListener() {
+        menuLoad.setText("Load...");
+        menuLoad.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                loadMenuActionPerformed(evt);
+                menuLoadActionPerformed(evt);
             }
         });
-        fileMenu.add(loadMenu);
+        fileMenu.add(menuLoad);
 
-        menuFileUpdateRepo.setText("Update Repo");
-        menuFileUpdateRepo.addActionListener(new java.awt.event.ActionListener() {
+        menuUpdateRepo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/laytonsmith/tools/docgen/localization/git_icon16x16.png"))); // NOI18N
+        menuUpdateRepo.setText("Update Repo");
+        menuUpdateRepo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuFileUpdateRepoActionPerformed(evt);
+                menuUpdateRepoActionPerformed(evt);
             }
         });
-        fileMenu.add(menuFileUpdateRepo);
+        fileMenu.add(menuUpdateRepo);
 
-        saveMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
-        saveMenu.setText("Save");
-        saveMenu.addActionListener(new java.awt.event.ActionListener() {
+        menuSave.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
+        menuSave.setText("Save");
+        menuSave.setToolTipText("Saves locally, but does not make a commit");
+        menuSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                saveMenuActionPerformed(evt);
+                menuSaveActionPerformed(evt);
             }
         });
-        fileMenu.add(saveMenu);
+        fileMenu.add(menuSave);
 
-        exitMenu.setText("Exit");
-        exitMenu.addActionListener(new java.awt.event.ActionListener() {
+        menuSaveAndCommit.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
+        menuSaveAndCommit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/laytonsmith/tools/docgen/localization/git_icon16x16.png"))); // NOI18N
+        menuSaveAndCommit.setText("Save and Commit");
+        menuSaveAndCommit.setToolTipText("Saves and makes a commit to the local repo");
+        menuSaveAndCommit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exitMenuActionPerformed(evt);
+                menuSaveAndCommitActionPerformed(evt);
             }
         });
-        fileMenu.add(exitMenu);
+        fileMenu.add(menuSaveAndCommit);
+
+        menuSaveCommitAndPush.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.ALT_MASK | java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
+        menuSaveCommitAndPush.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/laytonsmith/tools/docgen/localization/git_icon16x16.png"))); // NOI18N
+        menuSaveCommitAndPush.setText("Save, Commit, and Push");
+        menuSaveCommitAndPush.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuSaveCommitAndPushActionPerformed(evt);
+            }
+        });
+        fileMenu.add(menuSaveCommitAndPush);
+
+        menuPullRequest.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/laytonsmith/tools/docgen/localization/github_icon16x16.png"))); // NOI18N
+        menuPullRequest.setText("Pull Request");
+        fileMenu.add(menuPullRequest);
+
+        menuExit.setText("Exit");
+        menuExit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuExitActionPerformed(evt);
+            }
+        });
+        fileMenu.add(menuExit);
 
         topMenu.add(fileMenu);
 
         navigationMenu.setText("Navigation");
 
-        findSegmentMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.event.InputEvent.CTRL_MASK));
-        findSegmentMenu.setText("Find Segment...");
-        findSegmentMenu.addActionListener(new java.awt.event.ActionListener() {
+        menuFindSegment.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F, java.awt.event.InputEvent.CTRL_MASK));
+        menuFindSegment.setText("Find Segment...");
+        menuFindSegment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                findSegmentMenuActionPerformed(evt);
+                menuFindSegmentActionPerformed(evt);
             }
         });
-        navigationMenu.add(findSegmentMenu);
+        navigationMenu.add(menuFindSegment);
 
-        jumpToPageMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_J, java.awt.event.InputEvent.CTRL_MASK));
-        jumpToPageMenu.setText("Jump to Page");
-        jumpToPageMenu.addActionListener(new java.awt.event.ActionListener() {
+        menuJumpToPage.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_J, java.awt.event.InputEvent.CTRL_MASK));
+        menuJumpToPage.setText("Jump to Page");
+        menuJumpToPage.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jumpToPageMenuActionPerformed(evt);
+                menuJumpToPageActionPerformed(evt);
             }
         });
-        navigationMenu.add(jumpToPageMenu);
+        navigationMenu.add(menuJumpToPage);
 
         menuMoveDownSegment.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_DOWN, java.awt.event.InputEvent.CTRL_MASK));
         menuMoveDownSegment.setText("Move Down Segment");
@@ -723,29 +765,32 @@ public final class LocalizationUI extends javax.swing.JFrame {
 
         toolsMenu.setText("Tools");
 
-        azureKeyMenu.setText("Add Azure Key...");
-        azureKeyMenu.addActionListener(new java.awt.event.ActionListener() {
+        menuAzureKey.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/laytonsmith/tools/docgen/localization/cognitive_services_logo16x16.png"))); // NOI18N
+        menuAzureKey.setText("Add Azure Key...");
+        menuAzureKey.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                azureKeyMenuActionPerformed(evt);
+                menuAzureKeyActionPerformed(evt);
             }
         });
-        toolsMenu.add(azureKeyMenu);
+        toolsMenu.add(menuAzureKey);
 
-        menuToolsAuthorizeOnGithub.setText("Authorize on Github");
-        menuToolsAuthorizeOnGithub.addActionListener(new java.awt.event.ActionListener() {
+        menuAuthorizeOnGithub.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/laytonsmith/tools/docgen/localization/github_icon16x16.png"))); // NOI18N
+        menuAuthorizeOnGithub.setText("Authorize on Github");
+        menuAuthorizeOnGithub.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuToolsAuthorizeOnGithubActionPerformed(evt);
+                menuAuthorizeOnGithubActionPerformed(evt);
             }
         });
-        toolsMenu.add(menuToolsAuthorizeOnGithub);
+        toolsMenu.add(menuAuthorizeOnGithub);
 
-        forkDatabaseMenu.setText("Fork Database...");
-        forkDatabaseMenu.addActionListener(new java.awt.event.ActionListener() {
+        menuForkDatabase.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/laytonsmith/tools/docgen/localization/github_icon16x16.png"))); // NOI18N
+        menuForkDatabase.setText("Fork Database...");
+        menuForkDatabase.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                forkDatabaseMenuActionPerformed(evt);
+                menuForkDatabaseActionPerformed(evt);
             }
         });
-        toolsMenu.add(forkDatabaseMenu);
+        toolsMenu.add(menuForkDatabase);
 
         menuCountUntranslatedChars.setText("Count Untranslated Chars");
         menuCountUntranslatedChars.addActionListener(new java.awt.event.ActionListener() {
@@ -755,10 +800,19 @@ public final class LocalizationUI extends javax.swing.JFrame {
         });
         toolsMenu.add(menuCountUntranslatedChars);
 
+        menuShowLogs.setText("Show Logs");
+        menuShowLogs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuShowLogsActionPerformed(evt);
+            }
+        });
+        toolsMenu.add(menuShowLogs);
+
         topMenu.add(toolsMenu);
 
         helpMenuTop.setText("Help");
 
+        helpMenu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/laytonsmith/tools/docgen/localization/help_icon16x16.png"))); // NOI18N
         helpMenu.setText("Help...");
         helpMenu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -857,7 +911,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void loadMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadMenuActionPerformed
+    private void menuLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuLoadActionPerformed
 		if(!unsavedChanges || UIUtils.confirm(this, "Unsaved Changes",
 				"You have unsaved changes, loading will lose them, would you like to continue?")) {
 			JFileChooser fc = new JFileChooser();
@@ -869,28 +923,13 @@ public final class LocalizationUI extends javax.swing.JFrame {
 			}
 		}
 
-    }//GEN-LAST:event_loadMenuActionPerformed
+    }//GEN-LAST:event_menuLoadActionPerformed
 
-    private void saveMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveMenuActionPerformed
-        if(unsavedChanges) {
-			new Thread(() -> {
-				try {
-					translations.save((current, total) -> {
-						setProgressStatus("Saving...", current, total);
-					});
-					setUnsavedChanges(false);
-					setStatus(FINISHED);
-				} catch(IOException ex) {
-					UIUtils.alert(this, "Error while saving!", "Could not save the database: " + ex.getMessage(),
-							UIUtils.MessageType.ERROR);
-					setStatus("Error saving...");
-				}
-			}).start();
-			setProgressStatus("Saving...", 0, 0);
-		}
-    }//GEN-LAST:event_saveMenuActionPerformed
+    private void menuSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuSaveActionPerformed
+        doSave(() -> {});
+    }//GEN-LAST:event_menuSaveActionPerformed
 
-    private void exitMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuActionPerformed
+    private void menuExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuExitActionPerformed
         if(!unsavedChanges) {
 			System.exit(0);
 		} else {
@@ -898,9 +937,9 @@ public final class LocalizationUI extends javax.swing.JFrame {
 				System.exit(0);
 			}
 		}
-    }//GEN-LAST:event_exitMenuActionPerformed
+    }//GEN-LAST:event_menuExitActionPerformed
 
-    private void azureKeyMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_azureKeyMenuActionPerformed
+    private void menuAzureKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuAzureKeyActionPerformed
         AzureKeyInputDialog d = new AzureKeyInputDialog(LocalizationUI.this,
 				(key, save) -> {
 			LocalizationUI.this.azureKey = key;
@@ -916,21 +955,21 @@ public final class LocalizationUI extends javax.swing.JFrame {
 		});
 		UIUtils.centerWindowOnWindow(d, LocalizationUI.this);
 		d.setVisible(true);
-    }//GEN-LAST:event_azureKeyMenuActionPerformed
+    }//GEN-LAST:event_menuAzureKeyActionPerformed
 
-    private void forkDatabaseMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_forkDatabaseMenuActionPerformed
+    private void menuForkDatabaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuForkDatabaseActionPerformed
         if(unsavedChanges) {
 			showError("You have unsaved changes, cannot create a new fork now!");
 			return;
 		}
-		new ForkDatabaseWizard(this).setVisible(true);
-    }//GEN-LAST:event_forkDatabaseMenuActionPerformed
+		new ForkDatabaseWizard(this, logViewer).setVisible(true);
+    }//GEN-LAST:event_menuForkDatabaseActionPerformed
 
-    private void findSegmentMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_findSegmentMenuActionPerformed
+    private void menuFindSegmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFindSegmentActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_findSegmentMenuActionPerformed
+    }//GEN-LAST:event_menuFindSegmentActionPerformed
 
-    private void jumpToPageMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jumpToPageMenuActionPerformed
+    private void menuJumpToPageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuJumpToPageActionPerformed
         List<String> pages = translations.getPages();
 		new FindDialog(this, new FindDialog.SearchModel() {
 			@Override
@@ -949,7 +988,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
 				return "Find Page";
 			}
 		}).setVisible(true);
-    }//GEN-LAST:event_jumpToPageMenuActionPerformed
+    }//GEN-LAST:event_menuJumpToPageActionPerformed
 
     private void helpMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_helpMenuActionPerformed
         TemplateBuilder builder = new TemplateBuilder();
@@ -1160,13 +1199,13 @@ public final class LocalizationUI extends javax.swing.JFrame {
 		populateSegment(currentMemory);
     }//GEN-LAST:event_localeSettingsMachineTranslationClearButtonActionPerformed
 
-    private void menuToolsAuthorizeOnGithubActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuToolsAuthorizeOnGithubActionPerformed
+    private void menuAuthorizeOnGithubActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuAuthorizeOnGithubActionPerformed
 		authorizeGithub(true, (token) -> {
 			UIUtils.alert(this, "Success", "Github authorization obtained!");
 		});
-    }//GEN-LAST:event_menuToolsAuthorizeOnGithubActionPerformed
+    }//GEN-LAST:event_menuAuthorizeOnGithubActionPerformed
 
-    private void menuFileUpdateRepoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFileUpdateRepoActionPerformed
+    private void menuUpdateRepoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuUpdateRepoActionPerformed
 		if(storedLocation == null) {
 			showError("You must first select a database to load or fork.");
 			return;
@@ -1176,6 +1215,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
 		}
 		new Thread(() -> {
 			try {
+				setStatus("Updating repo");
 				File wd = new File(storedLocation);
 				String repoStatus = CommandExecutor.Execute(wd, "git", "status", "--porcelain");
 				if(!"".equals(repoStatus)) {
@@ -1185,6 +1225,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
 							+ "<br><br>Please manually clean up the repo, or commit, and try again.</body></html>");
 					return;
 				}
+				// TODO This doesn't appear to work yet
 				CommandExecutor pull = new CommandExecutor("git", "pull");
 				pull.setWorkingDir(wd);
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -1202,7 +1243,25 @@ public final class LocalizationUI extends javax.swing.JFrame {
 				showError("Could not update repo: " + ex.getMessage());
 			}
 		}, "UpdateRepo").start();
-    }//GEN-LAST:event_menuFileUpdateRepoActionPerformed
+    }//GEN-LAST:event_menuUpdateRepoActionPerformed
+
+    private void menuSaveAndCommitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuSaveAndCommitActionPerformed
+		doSave(() -> {
+			doCommit(() -> {});
+		});
+    }//GEN-LAST:event_menuSaveAndCommitActionPerformed
+
+    private void menuSaveCommitAndPushActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuSaveCommitAndPushActionPerformed
+        doSave(() -> {
+			doCommit(() -> {
+				doPush(() -> {});
+			});
+		});
+    }//GEN-LAST:event_menuSaveCommitAndPushActionPerformed
+
+    private void menuShowLogsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuShowLogsActionPerformed
+        logViewer.setVisible(true);
+    }//GEN-LAST:event_menuShowLogsActionPerformed
 
 	/**
 	 * @param args the command line arguments
@@ -1322,8 +1381,8 @@ public final class LocalizationUI extends javax.swing.JFrame {
 	 * @param to
 	 */
 	private void setInvalidMenus(boolean to) {
-		findSegmentMenu.setEnabled(to);
-		jumpToPageMenu.setEnabled(to);
+		menuFindSegment.setEnabled(to);
+		menuJumpToPage.setEnabled(to);
 		menuMoveDownSegment.setEnabled(to);
 		menuMoveUpSegment.setEnabled(to);
 		menuCountUntranslatedChars.setEnabled(to);
@@ -1342,6 +1401,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
 	}
 
 	private void showError(String text) {
+		logViewer.pushLog(text);
 		UIUtils.alert(this, "Error", text, UIUtils.MessageType.ERROR);
 	}
 
@@ -1677,6 +1737,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
 	}
 
 	private void setProgressStatus(String status, double current, double total) {
+		logViewer.pushLog(status);
 		EventQueue.invokeLater(() -> {
 			statusLabel.setText(status);
 			progressBar.setVisible(true);
@@ -1691,10 +1752,19 @@ public final class LocalizationUI extends javax.swing.JFrame {
 	}
 
 	private void setStatus(String status) {
+		logViewer.pushLog(status);
 		EventQueue.invokeLater(() -> {
 			progressBar.setVisible(false);
 			statusLabel.setText(status);
 		});
+	}
+
+	/**
+	 * Logs the message to the log viewer, but not the UI
+	 * @param status
+	 */
+	private void setSilentStatus(String status) {
+		logViewer.pushLog(status);
 	}
 
 	private void setUnsavedChanges(boolean to) {
@@ -1706,7 +1776,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
 		String title = p + "L10N Interface";
 		EventQueue.invokeLater(() -> {
 			setTitle(title);
-			saveMenu.setEnabled(unsavedChanges);
+			menuSave.setEnabled(unsavedChanges);
 		});
 	}
 
@@ -1746,11 +1816,81 @@ public final class LocalizationUI extends javax.swing.JFrame {
 		}, "GithubAuth").start();
 	}
 
+	/**
+	 *
+	 * @param onSuccess Called if the operation is successful, or if no changes were needed to be saved.
+	 */
+	private void doSave(Runnable onSuccess) {
+		if(unsavedChanges) {
+			new Thread(() -> {
+				try {
+					translations.save((current, total) -> {
+						setProgressStatus("Saving...", current, total);
+					});
+					setUnsavedChanges(false);
+					setStatus(FINISHED);
+					onSuccess.run();
+				} catch (IOException ex) {
+					UIUtils.alert(this, "Error while saving!", "Could not save the database: " + ex.getMessage(),
+							UIUtils.MessageType.ERROR);
+					setStatus("Error saving...");
+				}
+			}).start();
+			setProgressStatus("Saving...", 0, 0);
+		} else {
+			onSuccess.run();
+		}
+	}
+
+	private void doCommit(Runnable success) {
+		new Thread(() -> {
+			try {
+				String gitStatus = CommandExecutor.Execute(translations.getTranslationDb(),
+						"git", "status", "--porcelain");
+				if("".equals(gitStatus)) {
+					UIUtils.alert(this, "No changes", "No changes to commit!");
+					success.run();
+					return;
+				}
+				String commitMessage = UIUtils.prompt(this, "Commit Message", "Enter a descriptive commit message,"
+						+ " summarizing your changes.");
+				CommandExecutor.Execute(translations.getTranslationDb(), "git", "add", ".");
+				CommandExecutor.Execute(translations.getTranslationDb(), "git", "commit", "-m", commitMessage);
+				success.run();
+			} catch (InterruptedException | IOException ex) {
+				UIUtils.alert(this, "Error", ex.getMessage());
+			} finally {
+				setStatus(FINISHED);
+			}
+		}, "CommitChanges").start();
+		setStatus("Committing...");
+	}
+
+	private void doPush(Runnable success) {
+		new Thread(() -> {
+			try {
+				String diff = CommandExecutor
+						.Execute(translations.getTranslationDb(), "git", "log", "origin/master..master");
+				// If diff is empty, there are no local changes that need pushing
+				if("".equals(diff)) {
+					UIUtils.alert(this, "No changes", "No commits need to be pushed.");
+					success.run();
+					return;
+				}
+				CommandExecutor.Execute(translations.getTranslationDb(), "git", "push");
+			} catch (InterruptedException | IOException ex) {
+				UIUtils.alert(this, "Error", ex.getMessage());
+			} finally {
+				setStatus(FINISHED);
+			}
+		}, "PushChanges").start();
+		setStatus("Pushing...");
+	}
+
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMenu;
-    private javax.swing.JMenuItem azureKeyMenu;
-    private javax.swing.JMenuItem exitMenu;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JRadioButton filterShowAllRadioButton;
     private javax.swing.JRadioButton filterShowSuspectRadioButton;
@@ -1759,8 +1899,6 @@ public final class LocalizationUI extends javax.swing.JFrame {
     private javax.swing.JRadioButton filterShowUntranslatedRadioButton;
     private javax.swing.ButtonGroup filtersButtonGroup;
     private javax.swing.JLabel filtersLabel;
-    private javax.swing.JMenuItem findSegmentMenu;
-    private javax.swing.JMenuItem forkDatabaseMenu;
     private javax.swing.JMenuItem helpMenu;
     private javax.swing.JMenu helpMenuTop;
     private javax.swing.JLabel idLabel;
@@ -1773,8 +1911,6 @@ public final class LocalizationUI extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
-    private javax.swing.JMenuItem jumpToPageMenu;
-    private javax.swing.JMenuItem loadMenu;
     private javax.swing.JLabel localeLabel;
     private javax.swing.JList<String> localeList;
     private javax.swing.JLabel localeSettingsLabel;
@@ -1791,16 +1927,26 @@ public final class LocalizationUI extends javax.swing.JFrame {
     private javax.swing.JLabel localeSettingsManualTranslationLabel;
     private javax.swing.JCheckBox localeSettingsManualTranslationWordWrapCheckbox;
     private javax.swing.JPanel localeSettingsPanel;
+    private javax.swing.JMenuItem menuAuthorizeOnGithub;
+    private javax.swing.JMenuItem menuAzureKey;
     private javax.swing.JMenuItem menuCountUntranslatedChars;
-    private javax.swing.JMenuItem menuFileUpdateRepo;
+    private javax.swing.JMenuItem menuExit;
+    private javax.swing.JMenuItem menuFindSegment;
+    private javax.swing.JMenuItem menuForkDatabase;
+    private javax.swing.JMenuItem menuJumpToPage;
+    private javax.swing.JMenuItem menuLoad;
     private javax.swing.JMenuItem menuMoveDownSegment;
     private javax.swing.JMenuItem menuMoveUpSegment;
-    private javax.swing.JMenuItem menuToolsAuthorizeOnGithub;
+    private javax.swing.JMenuItem menuPullRequest;
+    private javax.swing.JMenuItem menuSave;
+    private javax.swing.JMenuItem menuSaveAndCommit;
+    private javax.swing.JMenuItem menuSaveCommitAndPush;
+    private javax.swing.JMenuItem menuShowLogs;
+    private javax.swing.JMenuItem menuUpdateRepo;
     private javax.swing.JMenu navigationMenu;
     private javax.swing.JLabel pagesLabel;
     private javax.swing.JList<String> pagesList;
     private javax.swing.JProgressBar progressBar;
-    private javax.swing.JMenuItem saveMenu;
     private javax.swing.JLabel segmentCountLabel;
     private javax.swing.JLabel segmentDetailsLabel;
     private javax.swing.JPanel segmentDetailsPanel;

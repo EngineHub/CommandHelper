@@ -21,7 +21,7 @@ public class ForkDatabaseWizard extends javax.swing.JDialog {
 	private static interface IntCallable extends Callable<Integer> {}
 	private static interface BooleanCallable extends Callable<Boolean> {}
 
-	private static final String REPO = "https://github.com/LadyCailin/MethodScriptTranslationDB";
+	private static final String REPO = "git@github.com:LadyCailin/MethodScriptTranslationDB.git";
 	private static final String MASTER_REPO_OWNER = "LadyCailin";
 	private static final String MASTER_REPO_NAME = "MethodScriptTranslationDB";
 
@@ -33,15 +33,17 @@ public class ForkDatabaseWizard extends javax.swing.JDialog {
 
 	private final LocalizationUI parent;
 	private final StateOptions stateOptions = new StateOptions();
+	private final LogViewer logViewer;
 	/**
 	 * Creates new form ForkDatabaseWizard
 	 * @param parent
 	 */
 	@SuppressWarnings("LeakingThisInConstructor")
-	public ForkDatabaseWizard(LocalizationUI parent) {
+	public ForkDatabaseWizard(LocalizationUI parent, LogViewer logViewer) {
 		super(parent, true);
 		this.parent = parent;
 		initComponents();
+		this.logViewer = logViewer;
 		step3ErrorLabel.setText("");
 		UIUtils.centerWindowOnWindow(this, parent);
 		for(int i = 0; i < tabbedPanel.getTabCount(); i++) {
@@ -130,6 +132,7 @@ public class ForkDatabaseWizard extends javax.swing.JDialog {
 
 	private void writeStatus(String status) {
 		outputWindow.append(status + "\n");
+		logViewer.pushLog("ForkDatabase: " + status);
 		JScrollBar vertical = outputWindowScrollPanel.getVerticalScrollBar();
 		vertical.setValue( vertical.getMaximum() );
 	}
@@ -158,9 +161,8 @@ public class ForkDatabaseWizard extends javax.swing.JDialog {
 						Thread.sleep(30000);
 					} else {
 						writeStatus("Fork already exists! Will reuse existing fork at " + fork.cloneUrl);
-						cloneUrl = fork.cloneUrl;
 					}
-					cloneUrl = fork.cloneUrl;
+					cloneUrl = fork.sshUrl;
 				}
 				writeStatus("Cloning...");
 				writeStatus(CommandExecutor.Execute(saveTo, "git", "clone", cloneUrl));
@@ -236,7 +238,6 @@ public class ForkDatabaseWizard extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Fork Database Wizard");
-        setAlwaysOnTop(true);
 
         jLabel1.setText("<html><body>Would you like to create a fork first? You must<br>create a fork before you will be able to make contributions.<br>If you create a fork, you must have a github account. You can create one in the next step.<br>If you already have a fork, but just want to check it, select \"Create Fork\" anyways.");
 

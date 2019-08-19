@@ -699,7 +699,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 0 && children.get(children.size() - 1).getData().isInstanceOf(CString.class)) {
 				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
@@ -819,7 +821,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 0 && children.get(children.size() - 1).getData().isInstanceOf(CString.class)) {
 				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
@@ -950,7 +954,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
 					&& (children.get(1).getData().isInstanceOf(CString.class) || children.get(1).getData().isInstanceOf(CInt.class))) {
@@ -1069,7 +1075,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
 					&& (children.get(1).getData().isInstanceOf(CString.class) || children.get(1).getData().isInstanceOf(CInt.class))) {
@@ -1200,7 +1208,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
 					&& (children.get(1).getData().isInstanceOf(CString.class) || children.get(1).getData().isInstanceOf(CInt.class))) {
@@ -1317,7 +1327,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
 					&& (children.get(1).getData().isInstanceOf(CString.class) || children.get(1).getData().isInstanceOf(CInt.class))) {
@@ -2126,7 +2138,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2) {
 				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
@@ -2220,7 +2234,9 @@ public class InventoryManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions)
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 3) {
 				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);

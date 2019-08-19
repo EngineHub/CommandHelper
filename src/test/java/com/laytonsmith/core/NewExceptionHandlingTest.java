@@ -3,6 +3,7 @@ package com.laytonsmith.core;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Exceptions;
@@ -13,6 +14,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import static com.laytonsmith.testing.StaticTest.SRun;
+import java.util.Set;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
@@ -24,13 +26,15 @@ import static org.mockito.Mockito.eq;
  */
 public class NewExceptionHandlingTest {
 
+	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
+
 	@BeforeClass
 	public static void setUpClass() {
 		StaticTest.InstallFakeServerFrontend();
 	}
 
 	public String optimize(String script) throws Exception {
-		return OptimizationUtilities.optimize(script, null);
+		return OptimizationUtilities.optimize(script, envs, null);
 	}
 
 	MCPlayer fakePlayer;

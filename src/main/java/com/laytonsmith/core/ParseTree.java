@@ -312,7 +312,7 @@ public class ParseTree implements Cloneable {
 			for(Mixed c : allChildren) {
 				if(c instanceof CFunction) {
 					try {
-						FunctionBase f = FunctionList.getFunction((CFunction) c);
+						FunctionBase f = FunctionList.getFunction((CFunction) c, null);
 						if(f instanceof Function) {
 							Function ff = (Function) f;
 							functions.add(ff);

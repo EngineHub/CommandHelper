@@ -77,7 +77,7 @@ public class Reflection {
 				+ " if you are not familiar with the language.";
 	}
 
-	@api(environments = {CommandHelperEnvironment.class})
+	@api
 	public static class reflect_pull extends AbstractFunction {
 
 		private static Set<Mixed> protocols;
@@ -320,7 +320,7 @@ public class Reflection {
 				}
 			} else {
 				try {
-					Function f = (Function) FunctionList.getFunction(new CFunction(element, t));
+					Function f = (Function) FunctionList.getFunction(new CFunction(element, t), env.getEnvClasses());
 					return new CString(formatFunctionDoc(f.docs(), docField), t);
 				} catch (ConfigCompileException ex) {
 					throw new CREFormatException("Unknown function: " + element, t);
@@ -347,7 +347,10 @@ public class Reflection {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.isEmpty()) {
 				//They are requesting this function's documentation. We can just return a string,
 				//and then it will never actually get called, so we handle it entirely in here.
@@ -362,7 +365,7 @@ public class Reflection {
 				String value = children.get(0).getData().val();
 				if(!value.startsWith("_") && !value.startsWith("@")) {
 					//It's a function
-					FunctionList.getFunction(new CFunction(value, t));
+					FunctionList.getFunction(new CFunction(value, t), env.getEnvClasses());
 				}
 			}
 			if(children.get(1).isConst()) {
@@ -438,8 +441,8 @@ public class Reflection {
 
 		private static final Map<String, List<String>> FUNCS = new HashMap<String, List<String>>();
 
-		private void initf() {
-			for(FunctionBase f : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)) {
+		private void initf(Environment env) {
+			for(FunctionBase f : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA, env.getEnvClasses())) {
 				String[] pack = f.getClass().getEnclosingClass().getName().split("\\.");
 				String clazz = pack[pack.length - 1];
 				if(!FUNCS.containsKey(clazz)) {
@@ -453,7 +456,7 @@ public class Reflection {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray ret = CArray.GetAssociativeArray(t);
 			if(FUNCS.keySet().size() < 10) {
-				initf();
+				initf(environment);
 			}
 			for(String cname : FUNCS.keySet()) {
 				CArray fnames = new CArray(t);
