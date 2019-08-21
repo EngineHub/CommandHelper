@@ -138,7 +138,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 			}
 
 			@Override
-			public boolean isInstanceOf(CClassType type) throws ClassNotFoundException {
+			public boolean isInstanceOf(CClassType type) {
 				return Mixed.TYPE.equals(type) || MEnumType.TYPE.equals(type) || this.typeof().equals(type);
 			}
 
@@ -256,7 +256,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 							}
 
 							@Override
-							public boolean isInstanceOf(CClassType type) throws ClassNotFoundException {
+							public boolean isInstanceOf(CClassType type) {
 								return Construct.isInstanceof(this, type);
 							}
 
@@ -425,7 +425,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	}
 
 	@Override
-	public boolean isInstanceOf(CClassType type) throws ClassNotFoundException {
+	public boolean isInstanceOf(CClassType type) {
 		return TYPE.equals(type);
 	}
 

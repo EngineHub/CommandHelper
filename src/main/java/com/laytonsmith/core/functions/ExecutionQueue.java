@@ -57,7 +57,7 @@ public class ExecutionQueue {
 		public Mixed exec(Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
-			if(!(args[0].isInstanceOf(CClosure.class))) {
+			if(!(args[0].isInstanceOf(CClosure.TYPE))) {
 				throw new CRECastException("Parameter 1 to " + getName() + " must be a closure.", t);
 			}
 			c = ((CClosure) args[0]);
@@ -139,7 +139,7 @@ public class ExecutionQueue {
 		public Mixed exec(Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
-			if(!(args[0].isInstanceOf(CClosure.class))) {
+			if(!(args[0].isInstanceOf(CClosure.TYPE))) {
 				throw new CRECastException("Parameter 1 to " + getName() + " must be a closure.", t);
 			}
 			c = ((CClosure) args[0]);

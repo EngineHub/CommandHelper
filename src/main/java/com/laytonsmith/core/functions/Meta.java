@@ -129,7 +129,7 @@ public class Meta {
 				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
 			}
 			String cmd = args[1].val().substring(1);
-			if(args[0].isInstanceOf(CArray.class)) {
+			if(args[0].isInstanceOf(CArray.TYPE)) {
 				CArray u = (CArray) args[0];
 				for(int i = 0; i < u.size(); i++) {
 					exec(t, env, new Mixed[]{new CString(u.get(i, t).val(), t), args[1]});
@@ -873,7 +873,7 @@ public class Meta {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CString s;
-			if(args[0].isInstanceOf(CString.class)) {
+			if(args[0].isInstanceOf(CString.TYPE)) {
 				s = (CString) args[0];
 			} else {
 				s = new CString(args[0].val(), t);

@@ -69,7 +69,7 @@ public class Statistics {
 		@Override
 		public CNumber exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			long count;
-			if(args.length == 1 && args[0].isInstanceOf(CArray.class)) {
+			if(args.length == 1 && args[0].isInstanceOf(CArray.TYPE)) {
 				CArray c = ArgumentValidation.getArray(args[0], t);
 				count = c.size();
 			} else {
@@ -119,7 +119,7 @@ public class Statistics {
 		@Override
 		public CNumber exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			List<Double> values = new ArrayList<>();
-			if(args.length == 1 && args[0].isInstanceOf(CArray.class)) {
+			if(args.length == 1 && args[0].isInstanceOf(CArray.TYPE)) {
 				CArray c = ArgumentValidation.getArray(args[0], t);
 				for(Mixed m : c.asList()) {
 					values.add(ArgumentValidation.getDouble(m, t));
@@ -175,7 +175,7 @@ public class Statistics {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			List<Double> values = new ArrayList<>();
-			if(args.length == 1 && args[0].isInstanceOf(CArray.class)) {
+			if(args.length == 1 && args[0].isInstanceOf(CArray.TYPE)) {
 				CArray c = ArgumentValidation.getArray(args[0], t);
 				for(Mixed m : c.asList()) {
 					values.add(ArgumentValidation.getDouble(m, t));
@@ -239,7 +239,7 @@ public class Statistics {
 		@Override
 		public CArray exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			List<Double> values = new ArrayList<>();
-			if(args.length == 1 && args[0].isInstanceOf(CArray.class)) {
+			if(args.length == 1 && args[0].isInstanceOf(CArray.TYPE)) {
 				CArray c = ArgumentValidation.getArray(args[0], t);
 				for(Mixed m : c.asList()) {
 					values.add(ArgumentValidation.getDouble(m, t));
@@ -339,7 +339,7 @@ public class Statistics {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			double percentile = ArgumentValidation.getDouble(args[0], t);
 			List<Double> values = new ArrayList<>();
-			if(args.length == 2 && args[1].isInstanceOf(CArray.class)) {
+			if(args.length == 2 && args[1].isInstanceOf(CArray.TYPE)) {
 				CArray c = ArgumentValidation.getArray(args[1], t);
 				for(Mixed m : c.asList()) {
 					values.add(ArgumentValidation.getNumber(m, t));

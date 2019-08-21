@@ -190,7 +190,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	private static Object json_encode0(Mixed c, Target t) throws MarshalException {
-		if(c.isInstanceOf(CString.class) || c instanceof Command) {
+		if(c.isInstanceOf(CString.TYPE) || c instanceof Command) {
 			return c.val();
 		} else if(c instanceof CVoid) {
 			return "";
@@ -202,7 +202,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return ((CBoolean) c).getBoolean();
 		} else if(c instanceof CNull) {
 			return null;
-		} else if(c.isInstanceOf(CArray.class)) {
+		} else if(c.isInstanceOf(CArray.TYPE)) {
 			CArray ca = (CArray) c;
 			if(!ca.inAssociativeMode()) {
 				List<Object> list = new ArrayList<Object>();
@@ -412,7 +412,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return Long.valueOf(((CInt) c).getInt());
 		} else if(c instanceof CDouble) {
 			return Double.valueOf(((CDouble) c).getDouble());
-		} else if(c.isInstanceOf(CArray.class)) {
+		} else if(c.isInstanceOf(CArray.TYPE)) {
 			CArray ca = (CArray) c;
 			if(ca.inAssociativeMode()) {
 				//SortedMap
@@ -576,7 +576,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	public static boolean isInstanceof(Mixed that, CClassType type) {
-		return that.typeof().doesExtend(type);
+		return that.getClass().isAnnotationPresent(typeof.class) && that.typeof().doesExtend(type);
 	}
 
 	public static boolean isInstanceof(Mixed that, Class<? extends Mixed> type) {

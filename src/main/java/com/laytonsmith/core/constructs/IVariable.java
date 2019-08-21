@@ -46,7 +46,7 @@ public class IVariable extends Construct implements Cloneable {
 		if(value == null) {
 			throw new NullPointerException();
 		}
-		if(value.typeof().equals(CVoid.TYPE)) {
+		if(value instanceof CVoid) {
 			throw new CRECastException("Void may not be assigned to a variable", t);
 		}
 		if(!type.equals(Auto.TYPE) && !(value instanceof CNull)) {

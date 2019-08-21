@@ -133,7 +133,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 				.forName(exception.get("classType", t).val(), t, env);
 		Class<? extends Mixed> clzz = NativeTypeList.getNativeClass(classType);
 		Throwable cause = null;
-		if(exception.get("causedBy", t).isInstanceOf(CArray.class)) {
+		if(exception.get("causedBy", t).isInstanceOf(CArray.TYPE)) {
 			// It has a cause
 			cause = new CRECausedByWrapper((CArray) exception.get("causedBy", t));
 		}
@@ -295,7 +295,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	}
 
 	@Override
-	public boolean isInstanceOf(CClassType type) throws ClassNotFoundException {
+	public boolean isInstanceOf(CClassType type) {
 		return Construct.isInstanceof(this, type);
 	}
 

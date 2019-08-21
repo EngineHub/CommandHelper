@@ -613,7 +613,7 @@ public class Regex {
 		String regex = "";
 		int flags = 0;
 		String sflags = "";
-		if(c.isInstanceOf(CArray.class)) {
+		if(c.isInstanceOf(CArray.TYPE)) {
 			CArray ca = (CArray) c;
 			regex = ca.get(0, t).val();
 			sflags = ca.get(1, t).val();

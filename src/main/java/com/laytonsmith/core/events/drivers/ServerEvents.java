@@ -333,7 +333,7 @@ public class ServerEvents {
 			if(event instanceof MCCommandTabCompleteEvent) {
 				MCCommandTabCompleteEvent e = (MCCommandTabCompleteEvent) event;
 				if("completions".equals(key)) {
-					if(value.isInstanceOf(CArray.class)) {
+					if(value.isInstanceOf(CArray.TYPE)) {
 						List<String> comp = new ArrayList<>();
 						if(((CArray) value).inAssociativeMode()) {
 							for(Mixed k : ((CArray) value).keySet()) {

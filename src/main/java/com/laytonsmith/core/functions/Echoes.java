@@ -590,7 +590,7 @@ public class Echoes {
 			}
 
 			// Handle "broadcast(message, recipientsArray)".
-			if(args[1].isInstanceOf(CArray.class)) {
+			if(args[1].isInstanceOf(CArray.TYPE)) {
 
 				// Get the CArray and validate that it is non-associative.
 				CArray array = (CArray) args[1];
@@ -722,7 +722,7 @@ public class Echoes {
 			if(args.length == 2) {
 				symbol = args[1].val();
 			}
-			if(text.isInstanceOf(CString.class)) {
+			if(text.isInstanceOf(CString.TYPE)) {
 				String stext = text.val();
 				StringBuilder b = new StringBuilder();
 				int sl = symbol.length();

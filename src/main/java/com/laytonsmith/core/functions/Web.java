@@ -231,7 +231,7 @@ public class Web {
 			final boolean binary;
 			final String textEncoding;
 			boolean useDefaultHeaders = true;
-			if(args[1].isInstanceOf(CClosure.class)) {
+			if(args[1].isInstanceOf(CClosure.TYPE)) {
 				success = (CClosure) args[1];
 				error = null;
 				arrayJar = null;
@@ -260,7 +260,7 @@ public class Web {
 					for(String key : headers.stringKeySet()) {
 						List<String> h = new ArrayList<String>();
 						Mixed c = headers.get(key, t);
-						if(c.isInstanceOf(CArray.class)) {
+						if(c.isInstanceOf(CArray.TYPE)) {
 							for(String kkey : ((CArray) c).stringKeySet()) {
 								h.add(((CArray) c).get(kkey, t).val());
 							}
@@ -287,13 +287,13 @@ public class Web {
 					}
 				}
 				if(csettings.containsKey("params") && !(csettings.get("params", t) instanceof CNull)) {
-					if(csettings.get("params", t).isInstanceOf(CArray.class)) {
+					if(csettings.get("params", t).isInstanceOf(CArray.TYPE)) {
 						CArray params = Static.getArray(csettings.get("params", t), t);
 						Map<String, List<String>> mparams = new HashMap<>();
 						for(String key : params.stringKeySet()) {
 							Mixed c = params.get(key, t);
 							List<String> l = new ArrayList<>();
-							if(c.isInstanceOf(CArray.class)) {
+							if(c.isInstanceOf(CArray.TYPE)) {
 								for(String kkey : ((CArray) c).stringKeySet()) {
 									l.add(((ArrayAccess) c).get(kkey, t).val());
 								}
@@ -304,7 +304,7 @@ public class Web {
 						}
 						settings.setComplexParameters(mparams);
 					} else {
-						if(csettings.get("params", t).isInstanceOf(CByteArray.class)) {
+						if(csettings.get("params", t).isInstanceOf(CByteArray.TYPE)) {
 							CByteArray b = (CByteArray) csettings.get("params", t);
 							settings.setRawParameter(b.asByteArrayCopy());
 						} else {
@@ -327,7 +327,7 @@ public class Web {
 				}
 				//Only required parameter
 				if(csettings.containsKey("success")) {
-					if(csettings.get("success", t).isInstanceOf(CClosure.class)) {
+					if(csettings.get("success", t).isInstanceOf(CClosure.TYPE)) {
 						success = (CClosure) csettings.get("success", t);
 					} else {
 						throw new CRECastException("Expecting the success parameter to be a closure.", t);
@@ -336,7 +336,7 @@ public class Web {
 					throw new CRECastException("Missing the success parameter, which is required.", t);
 				}
 				if(csettings.containsKey("error")) {
-					if(csettings.get("error", t).isInstanceOf(CClosure.class)) {
+					if(csettings.get("error", t).isInstanceOf(CClosure.TYPE)) {
 						error = (CClosure) csettings.get("error", t);
 					} else {
 						throw new CRECastException("Expecting the error parameter to be a closure.", t);
@@ -373,9 +373,9 @@ public class Web {
 				}
 				if(csettings.containsKey("trustStore")) {
 					Mixed trustStore = csettings.get("trustStore", t);
-					if(trustStore.isInstanceOf(CBoolean.class) && ArgumentValidation.getBoolean(trustStore, t) == false) {
+					if(trustStore.isInstanceOf(CBoolean.TYPE) && ArgumentValidation.getBoolean(trustStore, t) == false) {
 						settings.setDisableCertChecking(true);
-					} else if(trustStore.isInstanceOf(CArray.class)) {
+					} else if(trustStore.isInstanceOf(CArray.TYPE)) {
 						CArray trustStoreA = ((CArray) trustStore);
 						LinkedHashMap<String, String> trustStoreJ = new LinkedHashMap<>((int) trustStoreA.size());
 						final String noDefault = "no default";
@@ -843,7 +843,7 @@ public class Web {
 			String body = ArgumentValidation.getItemFromArray(options, "body", t, new CString("", t)).val();
 			Mixed cto = ArgumentValidation.getItemFromArray(options, "to", t, null);
 			CArray to;
-			if(cto.isInstanceOf(CString.class)) {
+			if(cto.isInstanceOf(CString.TYPE)) {
 				to = new CArray(t);
 				to.push(cto, t);
 			} else {
@@ -899,7 +899,7 @@ public class Web {
 				for(Mixed c : to.asList()) {
 					Message.RecipientType type = Message.RecipientType.TO;
 					String address;
-					if(c.isInstanceOf(CArray.class)) {
+					if(c.isInstanceOf(CArray.TYPE)) {
 						CArray ca = (CArray) c;
 						String stype = ArgumentValidation.getItemFromArray(ca, "type", t, new CString("TO", t)).val();
 						switch(stype) {
@@ -1029,9 +1029,9 @@ public class Web {
 		 * @return
 		 */
 		private Object getContent(Mixed c, Target t) {
-			if(c.isInstanceOf(CString.class)) {
+			if(c.isInstanceOf(CString.TYPE)) {
 				return c.val();
-			} else if(c.isInstanceOf(CByteArray.class)) {
+			} else if(c.isInstanceOf(CByteArray.TYPE)) {
 				CByteArray cb = (CByteArray) c;
 				return cb.asByteArrayCopy();
 			} else {

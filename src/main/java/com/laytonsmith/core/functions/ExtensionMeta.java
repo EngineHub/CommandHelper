@@ -112,7 +112,7 @@ public class ExtensionMeta {
 				throw new ConfigCompileException(getName() + " can only accept one argument", t);
 			}
 
-			if(!(children.get(0).getData().isInstanceOf(CString.class))) {
+			if(!(children.get(0).getData().isInstanceOf(CString.TYPE))) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
 			}
 
@@ -192,7 +192,7 @@ public class ExtensionMeta {
 				throw new ConfigCompileException(getName() + " can only accept one argument", t);
 			}
 
-			if(!(children.get(0).getData().isInstanceOf(CString.class))) {
+			if(!(children.get(0).getData().isInstanceOf(CString.TYPE))) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
 			}
 
@@ -265,7 +265,7 @@ public class ExtensionMeta {
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() != 1) {
 				throw new ConfigCompileException(getName() + " can only accept one argument", t);
-			} else if(!(children.get(0).getData().isInstanceOf(CString.class))) {
+			} else if(!(children.get(0).getData().isInstanceOf(CString.TYPE))) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
 			} else {
 				return new ParseTree(this.exec(t, null, children.get(0).getData()), children.get(0).getFileOptions());

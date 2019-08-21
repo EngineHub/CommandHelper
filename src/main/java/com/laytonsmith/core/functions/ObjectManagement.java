@@ -172,7 +172,7 @@ public class ObjectManagement {
 			if(data.getData() instanceof CNull) {
 				return CNull.NULL;
 			}
-			if(!(data.getData().isInstanceOf(CString.class))) {
+			if(!(data.getData().isInstanceOf(CString.TYPE))) {
 				throw new CREClassDefinitionError("Expected a string, but found " + data.getData() + " instead", t);
 			}
 			return data.getData();

@@ -713,7 +713,7 @@ public class MobManagement {
 			MCLivingEntity mob = Static.getLivingEntity(args[0], t);
 
 			MCPotionEffectType type = null;
-			if(args[1].isInstanceOf(CString.class)) {
+			if(args[1].isInstanceOf(CString.TYPE)) {
 				try {
 					type = MCPotionEffectType.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException ex) {
@@ -897,7 +897,7 @@ public class MobManagement {
 			if(args[1] instanceof CNull) {
 				ee.clearEquipment();
 				return CVoid.VOID;
-			} else if(args[1].isInstanceOf(CArray.class)) {
+			} else if(args[1].isInstanceOf(CArray.TYPE)) {
 				CArray ea = (CArray) args[1];
 				for(String key : ea.stringKeySet()) {
 					try {
@@ -1048,7 +1048,7 @@ public class MobManagement {
 				for(Map.Entry<MCEquipmentSlot, Float> ent : eq.entrySet()) {
 					eq.put(ent.getKey(), 0F);
 				}
-			} else if(args[1].isInstanceOf(CArray.class)) {
+			} else if(args[1].isInstanceOf(CArray.TYPE)) {
 				CArray ea = (CArray) args[1];
 				for(String key : ea.stringKeySet()) {
 					try {

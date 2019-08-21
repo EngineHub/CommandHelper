@@ -152,7 +152,7 @@ public class ObjectGenerator {
 	 * world. <em>More conveniently: ([world], x, y, z, [yaw, pitch])</em>
 	 */
 	public MCLocation location(Mixed c, MCWorld w, Target t) {
-		if(!(c.isInstanceOf(CArray.class))) {
+		if(!(c.isInstanceOf(CArray.TYPE))) {
 			throw new CREFormatException("Expecting an array, received " + c.typeof().getSimpleName(), t);
 		}
 		CArray array = (CArray) c;
@@ -255,7 +255,7 @@ public class ObjectGenerator {
 		if(i instanceof CNull) {
 			return EmptyItem();
 		}
-		if(!(i.isInstanceOf(CArray.class))) {
+		if(!(i.isInstanceOf(CArray.TYPE))) {
 			throw new CREFormatException("Expected an array!", t);
 		}
 		CArray item = (CArray) i;
@@ -292,7 +292,7 @@ public class ObjectGenerator {
 				}
 			} else {
 				Mixed type = item.get("type", t);
-				if(type.isInstanceOf(CString.class)) {
+				if(type.isInstanceOf(CString.TYPE)) {
 					int seperatorIndex = type.val().indexOf(':');
 					if(seperatorIndex != -1) {
 						try {
@@ -324,7 +324,7 @@ public class ObjectGenerator {
 			// convert legacy meta to material
 			if(material.getName().equals("PIG_SPAWN_EGG") && item.containsKey("meta")) {
 				Mixed meta = item.get("meta", t);
-				if(meta.isInstanceOf(CArray.class) && ((CArray) meta).containsKey("spawntype")) {
+				if(meta.isInstanceOf(CArray.TYPE) && ((CArray) meta).containsKey("spawntype")) {
 					Mixed spawntype = ((CArray) meta).get("spawntype", t);
 					if(!(spawntype instanceof CNull)) {
 						MCMaterial newmaterial;
@@ -646,7 +646,7 @@ public class ObjectGenerator {
 			return meta;
 		}
 		CArray ma;
-		if(c.isInstanceOf(CArray.class)) {
+		if(c.isInstanceOf(CArray.TYPE)) {
 			ma = (CArray) c;
 			try {
 				if(ma.containsKey("display")) {
@@ -659,11 +659,11 @@ public class ObjectGenerator {
 					Mixed li = ma.get("lore", t);
 					if(li instanceof CNull) {
 						//do nothing
-					} else if(li.isInstanceOf(CString.class)) {
+					} else if(li.isInstanceOf(CString.TYPE)) {
 						List<String> ll = new ArrayList<>();
 						ll.add(li.val());
 						meta.setLore(ll);
-					} else if(li.isInstanceOf(CArray.class)) {
+					} else if(li.isInstanceOf(CArray.TYPE)) {
 						CArray la = (CArray) li;
 						List<String> ll = new ArrayList<>();
 						for(int j = 0; j < la.size(); j++) {
@@ -676,7 +676,7 @@ public class ObjectGenerator {
 				}
 				if(ma.containsKey("enchants")) {
 					Mixed enchants = ma.get("enchants", t);
-					if(enchants.isInstanceOf(CArray.class)) {
+					if(enchants.isInstanceOf(CArray.TYPE)) {
 						for(Map.Entry<MCEnchantment, Integer> ench : enchants((CArray) enchants, t).entrySet()) {
 							meta.addEnchant(ench.getKey(), ench.getValue(), true);
 						}
@@ -698,7 +698,7 @@ public class ObjectGenerator {
 				}
 				if(ma.containsKey("flags")) {
 					Mixed flags = ma.get("flags", t);
-					if(flags.isInstanceOf(CArray.class)) {
+					if(flags.isInstanceOf(CArray.TYPE)) {
 						CArray flagArray = (CArray) flags;
 						for(int i = 0; i < flagArray.size(); i++) {
 							Mixed flag = flagArray.get(i, t);
@@ -727,7 +727,7 @@ public class ObjectGenerator {
 						if(ma.containsKey("inventory")) {
 							MCInventory inv = ((MCInventoryHolder) bs).getInventory();
 							Mixed cInvRaw = ma.get("inventory", t);
-							if(cInvRaw.isInstanceOf(CArray.class)) {
+							if(cInvRaw.isInstanceOf(CArray.TYPE)) {
 								CArray cinv = (CArray) cInvRaw;
 								for(String key : cinv.stringKeySet()) {
 									try {
@@ -855,7 +855,7 @@ public class ObjectGenerator {
 					MCFireworkEffectMeta femeta = (MCFireworkEffectMeta) meta;
 					if(ma.containsKey("effect")) {
 						Mixed cfem = ma.get("effect", t);
-						if(cfem.isInstanceOf(CArray.class)) {
+						if(cfem.isInstanceOf(CArray.TYPE)) {
 							femeta.setEffect(fireworkEffect((CArray) cfem, t));
 						} else if(!(cfem instanceof CNull)) {
 							throw new CREFormatException("FireworkCharge effect was expected to be an array or null.", t);
@@ -865,7 +865,7 @@ public class ObjectGenerator {
 					MCFireworkMeta fmeta = (MCFireworkMeta) meta;
 					if(ma.containsKey("firework")) {
 						Mixed construct = ma.get("firework", t);
-						if(construct.isInstanceOf(CArray.class)) {
+						if(construct.isInstanceOf(CArray.TYPE)) {
 							CArray firework = (CArray) construct;
 							if(firework.containsKey("strength")) {
 								fmeta.setStrength(Static.getInt32(firework.get("strength", t), t));
@@ -873,9 +873,9 @@ public class ObjectGenerator {
 							if(firework.containsKey("effects")) {
 								// New style (supports multiple effects)
 								Mixed effects = firework.get("effects", t);
-								if(effects.isInstanceOf(CArray.class)) {
+								if(effects.isInstanceOf(CArray.TYPE)) {
 									for(Mixed effect : ((CArray) effects).asList()) {
-										if(effect.isInstanceOf(CArray.class)) {
+										if(effect.isInstanceOf(CArray.TYPE)) {
 											fmeta.addEffect(fireworkEffect((CArray) effect, t));
 										} else {
 											throw new CREFormatException("Firework effect was expected to be an array.", t);
@@ -897,7 +897,7 @@ public class ObjectGenerator {
 						Mixed ci = ma.get("color", t);
 						if(ci instanceof CNull) {
 							//nothing
-						} else if(ci.isInstanceOf(CArray.class)) {
+						} else if(ci.isInstanceOf(CArray.TYPE)) {
 							((MCLeatherArmorMeta) meta).setColor(color((CArray) ci, t));
 						} else {
 							throw new CREFormatException("Color was expected to be an array.", t);
@@ -920,7 +920,7 @@ public class ObjectGenerator {
 						Mixed pages = ma.get("pages", t);
 						if(pages instanceof CNull) {
 							//nothing
-						} else if(pages.isInstanceOf(CArray.class)) {
+						} else if(pages.isInstanceOf(CArray.TYPE)) {
 							CArray pa = (CArray) pages;
 							List<String> pl = new ArrayList<>();
 							for(int j = 0; j < pa.size(); j++) {
@@ -943,7 +943,7 @@ public class ObjectGenerator {
 						Mixed stored = ma.get("stored", t);
 						if(stored instanceof CNull) {
 							//Still doing nothing
-						} else if(stored.isInstanceOf(CArray.class)) {
+						} else if(stored.isInstanceOf(CArray.TYPE)) {
 							for(Map.Entry<MCEnchantment, Integer> ench : enchants((CArray) stored, t).entrySet()) {
 								((MCEnchantmentStorageMeta) meta).addStoredEnchant(ench.getKey(), ench.getValue(), true);
 							}
@@ -954,7 +954,7 @@ public class ObjectGenerator {
 				} else if(meta instanceof MCPotionMeta) {
 					if(ma.containsKey("potions")) {
 						Mixed effects = ma.get("potions", t);
-						if(effects.isInstanceOf(CArray.class)) {
+						if(effects.isInstanceOf(CArray.TYPE)) {
 							for(MCLivingEntity.MCEffect e : potions((CArray) effects, t)) {
 								((MCPotionMeta) meta).addCustomEffect(e.getPotionEffectType(), e.getStrength(),
 										e.getTicksRemaining(), e.isAmbient(), e.hasParticles(), e.showIcon(), true, t);
@@ -965,16 +965,16 @@ public class ObjectGenerator {
 					}
 					if(ma.containsKey("base")) {
 						Mixed potiondata = ma.get("base", t);
-						if(potiondata.isInstanceOf(CArray.class)) {
+						if(potiondata.isInstanceOf(CArray.TYPE)) {
 							CArray pd = (CArray) potiondata;
 							((MCPotionMeta) meta).setBasePotionData(potionData((CArray) potiondata, t));
 						}
 					}
 					if(ma.containsKey("color")) {
 						Mixed color = ma.get("color", t);
-						if(color.isInstanceOf(CArray.class)) {
+						if(color.isInstanceOf(CArray.TYPE)) {
 							((MCPotionMeta) meta).setColor(color((CArray) color, t));
-						} else if(color.isInstanceOf(CString.class)) {
+						} else if(color.isInstanceOf(CString.TYPE)) {
 							((MCPotionMeta) meta).setColor(StaticLayer.GetConvertor().GetColor(color.val(), t));
 						}
 					}
@@ -1001,7 +1001,7 @@ public class ObjectGenerator {
 				} else if(meta instanceof MCMapMeta) {
 					if(ma.containsKey("color")) {
 						Mixed ci = ma.get("color", t);
-						if(ci.isInstanceOf(CArray.class)) {
+						if(ci.isInstanceOf(CArray.TYPE)) {
 							((MCMapMeta) meta).setColor(color((CArray) ci, t));
 						} else if(!(ci instanceof CNull)) {
 							throw new CREFormatException("Color was expected to be an array.", t);
@@ -1180,7 +1180,7 @@ public class ObjectGenerator {
 	 * @return the Vector
 	 */
 	public Vector3D vector(Vector3D v, Mixed c, Target t) {
-		if(c.isInstanceOf(CArray.class)) {
+		if(c.isInstanceOf(CArray.TYPE)) {
 			CArray va = (CArray) c;
 			double x = v.X();
 			double y = v.Y();
@@ -1238,7 +1238,7 @@ public class ObjectGenerator {
 			Mixed value = enchantArray.get(key, t);
 			if(enchantArray.isAssociative()) {
 				etype = StaticLayer.GetEnchantmentByName(key);
-				if(etype != null && value.isInstanceOf(CInt.class)) {
+				if(etype != null && value.isInstanceOf(CInt.TYPE)) {
 					ret.put(etype, Static.getInt32(value, t));
 					continue;
 				}
@@ -1281,7 +1281,7 @@ public class ObjectGenerator {
 	public List<MCLivingEntity.MCEffect> potions(CArray ea, Target t) {
 		List<MCLivingEntity.MCEffect> ret = new ArrayList<>();
 		for(String key : ea.stringKeySet()) {
-			if(ea.get(key, t).isInstanceOf(CArray.class)) {
+			if(ea.get(key, t).isInstanceOf(CArray.TYPE)) {
 				CArray effect = (CArray) ea.get(key, t);
 				MCPotionEffectType type;
 				int strength = 0;
@@ -1349,7 +1349,7 @@ public class ObjectGenerator {
 		boolean upgraded = false;
 		if(pd.containsKey("extended")) {
 			Mixed cext = pd.get("extended", t);
-			if(cext.isInstanceOf(CBoolean.class)) {
+			if(cext.isInstanceOf(CBoolean.TYPE)) {
 				extended = ((CBoolean) cext).getBoolean();
 			} else {
 				throw new CREFormatException(
@@ -1358,7 +1358,7 @@ public class ObjectGenerator {
 		}
 		if(pd.containsKey("upgraded")) {
 			Mixed cupg = pd.get("upgraded", t);
-			if(cupg.isInstanceOf(CBoolean.class)) {
+			if(cupg.isInstanceOf(CBoolean.TYPE)) {
 				upgraded = ((CBoolean) cupg).getBoolean();
 			} else {
 				throw new CREFormatException(
@@ -1405,18 +1405,18 @@ public class ObjectGenerator {
 		}
 		if(fe.containsKey("colors")) {
 			Mixed colors = fe.get("colors", t);
-			if(colors.isInstanceOf(CArray.class)) {
+			if(colors.isInstanceOf(CArray.TYPE)) {
 				CArray ccolors = (CArray) colors;
 				if(ccolors.size() == 0) {
 					builder.addColor(MCColor.WHITE);
 				} else {
 					for(Mixed color : ccolors.asList()) {
 						MCColor mccolor;
-						if(color.isInstanceOf(CString.class)) {
+						if(color.isInstanceOf(CString.TYPE)) {
 							mccolor = StaticLayer.GetConvertor().GetColor(color.val(), t);
-						} else if(color.isInstanceOf(CArray.class)) {
+						} else if(color.isInstanceOf(CArray.TYPE)) {
 							mccolor = color((CArray) color, t);
-						} else if(color.isInstanceOf(CInt.class) && ccolors.size() == 3) {
+						} else if(color.isInstanceOf(CInt.TYPE) && ccolors.size() == 3) {
 							// Appears to be a single color
 							builder.addColor(color(ccolors, t));
 							break;
@@ -1427,7 +1427,7 @@ public class ObjectGenerator {
 						builder.addColor(mccolor);
 					}
 				}
-			} else if(colors.isInstanceOf(CString.class)) {
+			} else if(colors.isInstanceOf(CString.TYPE)) {
 				String split[] = colors.val().split("\\|");
 				if(split.length == 0) {
 					builder.addColor(MCColor.WHITE);
@@ -1445,15 +1445,15 @@ public class ObjectGenerator {
 		}
 		if(fe.containsKey("fade")) {
 			Mixed colors = fe.get("fade", t);
-			if(colors.isInstanceOf(CArray.class)) {
+			if(colors.isInstanceOf(CArray.TYPE)) {
 				CArray ccolors = (CArray) colors;
 				for(Mixed color : ccolors.asList()) {
 					MCColor mccolor;
-					if(color.isInstanceOf(CArray.class)) {
+					if(color.isInstanceOf(CArray.TYPE)) {
 						mccolor = color((CArray) color, t);
-					} else if(color.isInstanceOf(CString.class)) {
+					} else if(color.isInstanceOf(CString.TYPE)) {
 						mccolor = StaticLayer.GetConvertor().GetColor(color.val(), t);
-					} else if(color.isInstanceOf(CInt.class) && ccolors.size() == 3) {
+					} else if(color.isInstanceOf(CInt.TYPE) && ccolors.size() == 3) {
 						// Appears to be a single color
 						builder.addFadeColor(color(ccolors, t));
 						break;
@@ -1463,7 +1463,7 @@ public class ObjectGenerator {
 					}
 					builder.addFadeColor(mccolor);
 				}
-			} else if(colors.isInstanceOf(CString.class)) {
+			} else if(colors.isInstanceOf(CString.TYPE)) {
 				String split[] = colors.val().split("\\|");
 				for(String s : split) {
 					builder.addFadeColor(StaticLayer.GetConvertor().GetColor(s, t));
@@ -1560,7 +1560,7 @@ public class ObjectGenerator {
 	}
 
 	public MCRecipe recipe(Mixed c, Target t) {
-		if(!(c.isInstanceOf(CArray.class))) {
+		if(!(c.isInstanceOf(CArray.TYPE))) {
 			throw new CRECastException("Expected array but received " + c.typeof().getSimpleName(), t);
 		}
 		CArray recipe = (CArray) c;
@@ -1596,7 +1596,7 @@ public class ObjectGenerator {
 				}
 				int i = 0;
 				for(Mixed row : shaped.asList()) {
-					if(row.isInstanceOf(CString.class) && row.val().length() >= 1 && row.val().length() <= 3) {
+					if(row.isInstanceOf(CString.TYPE) && row.val().length() >= 1 && row.val().length() <= 3) {
 						shape[i] = row.val();
 						i++;
 					} else {
@@ -1611,7 +1611,7 @@ public class ObjectGenerator {
 				}
 				for(String key : shapedIngredients.stringKeySet()) {
 					Mixed ingredient = shapedIngredients.get(key, t);
-					if(ingredient.isInstanceOf(CArray.class)) {
+					if(ingredient.isInstanceOf(CArray.TYPE)) {
 						if(((CArray) ingredient).isAssociative()) {
 							((MCShapedRecipe) ret).setIngredient(key.charAt(0), item(ingredient, t).getType());
 						} else {
@@ -1645,7 +1645,7 @@ public class ObjectGenerator {
 					throw new CREIllegalArgumentException("Ingredients array is invalid.", t);
 				}
 				for(Mixed ingredient : ingredients.asList()) {
-					if(ingredient.isInstanceOf(CArray.class)) {
+					if(ingredient.isInstanceOf(CArray.TYPE)) {
 						if(((CArray) ingredient).isAssociative()) {
 							((MCShapelessRecipe) ret).addIngredient(item(ingredient, t));
 						} else {
@@ -1676,7 +1676,7 @@ public class ObjectGenerator {
 			case FURNACE:
 			case SMOKING:
 				Mixed input = recipe.get("input", t);
-				if(input.isInstanceOf(CArray.class)) {
+				if(input.isInstanceOf(CArray.TYPE)) {
 					if(((CArray) input).isAssociative()) {
 						((MCCookingRecipe) ret).setInput(item(input, t));
 					} else {
@@ -1709,7 +1709,7 @@ public class ObjectGenerator {
 
 			case STONECUTTING:
 				Mixed stoneCutterInput = recipe.get("input", t);
-				if(stoneCutterInput.isInstanceOf(CArray.class)) {
+				if(stoneCutterInput.isInstanceOf(CArray.TYPE)) {
 					if(((CArray) stoneCutterInput).isAssociative()) {
 						((MCStonecuttingRecipe) ret).setInput(item(stoneCutterInput, t));
 					} else {

@@ -150,7 +150,7 @@ public class UserObject implements Mixed {
 	}
 
 	@Override
-	public boolean isInstanceOf(CClassType type) throws ClassNotFoundException {
+	public boolean isInstanceOf(CClassType type) {
 		return Construct.isInstanceof(this, type);
 	}
 

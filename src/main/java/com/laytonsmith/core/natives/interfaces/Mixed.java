@@ -116,9 +116,8 @@ public interface Mixed extends Cloneable, Documentation {
 	 *
 	 * @param type
 	 * @return
-	 * @throws ClassNotFoundException If the CClassType does not reflect a known type
 	 */
-	public boolean isInstanceOf(CClassType type) throws ClassNotFoundException;
+	public boolean isInstanceOf(CClassType type);
 
 	/**
 	 * Generally speaking, we cannot use Java's instanceof keyword to determine if something is an instanceof, because

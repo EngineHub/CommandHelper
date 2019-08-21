@@ -629,7 +629,7 @@ public class Scoreboards {
 				throw new CREScoreboardException("No objective by that name exists.", t);
 			}
 			CArray dis = CArray.GetAssociativeArray(t);
-			if(args[1].isInstanceOf(CArray.class)) {
+			if(args[1].isInstanceOf(CArray.TYPE)) {
 				dis = (CArray) args[1];
 			} else {
 				dis.set("displayname", args[1], t);
@@ -709,7 +709,7 @@ public class Scoreboards {
 				throw new CREScoreboardException("No team by that name exists.", t);
 			}
 			CArray dis = CArray.GetAssociativeArray(t);
-			if(args[1].isInstanceOf(CArray.class)) {
+			if(args[1].isInstanceOf(CArray.TYPE)) {
 				dis = (CArray) args[1];
 			} else {
 				dis.set("displayname", args[1], t);
@@ -1184,7 +1184,7 @@ public class Scoreboards {
 			if(team == null) {
 				throw new CREScoreboardException("No team by that name exists.", t);
 			}
-			if(args[1].isInstanceOf(CArray.class)) {
+			if(args[1].isInstanceOf(CArray.TYPE)) {
 				CArray options = (CArray) args[1];
 				if(options.containsKey("friendlyfire")) {
 					team.setAllowFriendlyFire(ArgumentValidation.getBoolean(options.get("friendlyfire", t), t));

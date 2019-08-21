@@ -529,12 +529,12 @@ public class Math {
 				}
 				long delta = Static.getInt(cdelta, t);
 				//First, error check, then get the old value, and store it in temp.
-				if(!(array.isInstanceOf(CArray.class)) && !(array.isInstanceOf(ArrayAccess.class))) {
+				if(!(array.isInstanceOf(CArray.TYPE)) && !(array.isInstanceOf(ArrayAccess.TYPE))) {
 					//Let's just evaluate this like normal with array_get, so it will
 					//throw the appropriate exception.
 					new ArrayHandling.array_get().exec(t, env, array, index);
 					throw ConfigRuntimeException.CreateUncatchableException("Shouldn't have gotten here. Please report this error, and how you got here.", t);
-				} else if(!(array.isInstanceOf(CArray.class))) {
+				} else if(!(array.isInstanceOf(CArray.TYPE))) {
 					//It's an ArrayAccess type, but we can't use that here, so, throw our
 					//own exception.
 					throw new CRECastException("Cannot increment/decrement a non-array array"
@@ -545,7 +545,7 @@ public class Math {
 				Mixed value = myArray.get(index, t);
 
 				//Alright, now let's actually perform the increment, and store that in the array.
-				if(value.isInstanceOf(CInt.class)) {
+				if(value.isInstanceOf(CInt.TYPE)) {
 					CInt newVal;
 					if(inc) {
 						newVal = new CInt(Static.getInt(value, t) + delta, t);
@@ -558,7 +558,7 @@ public class Math {
 					} else {
 						return value;
 					}
-				} else if(value.isInstanceOf(CDouble.class)) {
+				} else if(value.isInstanceOf(CDouble.TYPE)) {
 					CDouble newVal;
 					if(inc) {
 						newVal = new CDouble(Static.getDouble(value, t) + delta, t);
@@ -1192,7 +1192,7 @@ public class Math {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CInt.class)) {
+			if(args[0].isInstanceOf(CInt.TYPE)) {
 				return new CInt(java.lang.Math.abs(Static.getInt(args[0], t)), t);
 			} else {
 				return new CDouble(java.lang.Math.abs(Static.getDouble(args[0], t)), t);
@@ -1444,7 +1444,7 @@ public class Math {
 
 		public List<Mixed> recList(List<Mixed> list, Mixed... args) {
 			for(Mixed c : args) {
-				if(c.isInstanceOf(CArray.class)) {
+				if(c.isInstanceOf(CArray.TYPE)) {
 					for(int i = 0; i < ((CArray) c).size(); i++) {
 						recList(list, ((CArray) c).get(i, Target.UNKNOWN));
 					}
@@ -1526,7 +1526,7 @@ public class Math {
 
 		public List<Mixed> recList(List<Mixed> list, Mixed... args) {
 			for(Mixed c : args) {
-				if(c.isInstanceOf(CArray.class)) {
+				if(c.isInstanceOf(CArray.TYPE)) {
 					for(int i = 0; i < ((CArray) c).size(); i++) {
 						recList(list, ((CArray) c).get(i, Target.UNKNOWN));
 					}
@@ -2370,9 +2370,9 @@ public class Math {
 				throw new CREFormatException("Expression may not be empty", t);
 			}
 			CArray vars = null;
-			if(args.length == 2 && args[1].isInstanceOf(CArray.class)) {
+			if(args.length == 2 && args[1].isInstanceOf(CArray.TYPE)) {
 				vars = (CArray) args[1];
-			} else if(args.length == 2 && !(args[1].isInstanceOf(CArray.class))) {
+			} else if(args.length == 2 && !(args[1].isInstanceOf(CArray.TYPE))) {
 				throw new CRECastException("The second argument of expr() should be an array", t);
 			}
 			if(vars != null && !vars.inAssociativeMode()) {
@@ -2469,7 +2469,7 @@ public class Math {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CInt.class)) {
+			if(args[0].isInstanceOf(CInt.TYPE)) {
 				return new CInt(-(Static.getInt(args[0], t)), t);
 			} else {
 				return new CDouble(-(Static.getDouble(args[0], t)), t);

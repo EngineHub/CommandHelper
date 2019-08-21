@@ -257,7 +257,7 @@ public class World {
 				z = l.getBlockZ();
 			} else if(args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 2
-				if(args[1].isInstanceOf(CArray.class)) {
+				if(args[1].isInstanceOf(CArray.TYPE)) {
 					world = Static.getServer().getWorld(args[0].val());
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[1], null, t);
 					x = l.getBlockX();
@@ -316,7 +316,7 @@ public class World {
 				z = l.getBlockZ();
 			} else if(args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 2
-				if(args[1].isInstanceOf(CArray.class)) {
+				if(args[1].isInstanceOf(CArray.TYPE)) {
 					world = Static.getServer().getWorld(args[0].val());
 					if(world == null) {
 						throw new CREInvalidWorldException("The given world (" + args[0].val() + ") does not exist.", t);
@@ -399,7 +399,7 @@ public class World {
 				z = l.getBlockZ();
 			} else if(args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 2
-				if(args[1].isInstanceOf(CArray.class)) {
+				if(args[1].isInstanceOf(CArray.TYPE)) {
 					world = Static.getServer().getWorld(args[0].val());
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[1], null, t);
 					x = l.getBlockX();
@@ -579,7 +579,7 @@ public class World {
 				z = l.getBlockZ() >> 4;
 			} else if(args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 1
-				if(args[0].isInstanceOf(CArray.class)) {
+				if(args[0].isInstanceOf(CArray.TYPE)) {
 					world = Static.getServer().getWorld(args[1].val());
 					if(world == null) {
 						throw new CREInvalidWorldException("World " + args[1].val() + " does not exist.", t);
@@ -670,7 +670,7 @@ public class World {
 				z = l.getBlockZ() >> 4;
 			} else if(args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 1
-				if(args[0].isInstanceOf(CArray.class)) {
+				if(args[0].isInstanceOf(CArray.TYPE)) {
 					world = Static.getServer().getWorld(args[1].val());
 					if(world == null) {
 						throw new CREInvalidWorldException("The given world (" + args[1].val() + ") does not exist.", t);
@@ -918,7 +918,7 @@ public class World {
 				creator.type(type).environment(environment);
 			}
 			if((args.length >= 4) && !(args[3] instanceof CNull)) {
-				if(args[3].isInstanceOf(CInt.class)) {
+				if(args[3].isInstanceOf(CInt.TYPE)) {
 					creator.seed(Static.getInt(args[3], t));
 				} else {
 					creator.seed(args[3].val().hashCode());
@@ -1038,7 +1038,7 @@ public class World {
 			}
 
 			if(args.length == 1) {
-				if(args[0].isInstanceOf(CArray.class)) {
+				if(args[0].isInstanceOf(CArray.TYPE)) {
 					l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				} else {
 					throw new CREFormatException("Expecting argument 1 of get_chunk_loc to be a location array", t);
@@ -1732,7 +1732,7 @@ public class World {
 				distance = Static.getNumber(args[2], t);
 			}
 			Vector3D vector;
-			if(args[1].isInstanceOf(CArray.class)) {
+			if(args[1].isInstanceOf(CArray.TYPE)) {
 				MCLocation to = ObjectGenerator.GetGenerator().location(args[1], loc.getWorld(), t);
 				vector = to.toVector().subtract(loc.toVector()).normalize();
 			} else {
@@ -2170,7 +2170,7 @@ public class World {
 			}
 			MCWorldBorder wb = w.getWorldBorder();
 			Mixed c = args[1];
-			if(!(c.isInstanceOf(CArray.class))) {
+			if(!(c.isInstanceOf(CArray.TYPE))) {
 				throw new CREFormatException("Expected array but given \"" + args[1].val() + "\"", t);
 			}
 			CArray params = (CArray) c;

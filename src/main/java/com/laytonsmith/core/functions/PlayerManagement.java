@@ -339,7 +339,7 @@ public class PlayerManagement {
 				Static.AssertPlayerNonNull(p, t);
 				loc = p.getLocation();
 			} else {
-				if(!(args[0].isInstanceOf(CArray.class))) {
+				if(!(args[0].isInstanceOf(CArray.TYPE))) {
 					throw new CRECastException("Expecting an array at parameter 1 of players_in_radius", t);
 				}
 
@@ -492,7 +492,7 @@ public class PlayerManagement {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l;
 			if(args.length <= 2) {
-				if(!(args[args.length - 1].isInstanceOf(CArray.class))) {
+				if(!(args[args.length - 1].isInstanceOf(CArray.TYPE))) {
 					throw new CRECastException("Expecting an array at parameter " + args.length + " of set_ploc", t);
 				}
 				CArray ca = (CArray) args[args.length - 1];
@@ -588,14 +588,14 @@ public class PlayerManagement {
 			HashSet<MCMaterial> trans = null;
 			int transparentIndex = -1;
 			if(args.length == 1) {
-				if(args[0].isInstanceOf(CArray.class)) {
+				if(args[0].isInstanceOf(CArray.TYPE)) {
 					transparentIndex = 0;
 				} else {
 					p = Static.GetPlayer(args[0], t);
 				}
 			} else if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
-				if(args[1].isInstanceOf(CArray.class)) {
+				if(args[1].isInstanceOf(CArray.TYPE)) {
 					transparentIndex = 1;
 				} else {
 					throw new CREFormatException("An array was expected for argument 2 but received " + args[1], t);
@@ -1395,7 +1395,7 @@ public class PlayerManagement {
 					}
 				} else {
 					//if it's a number, we are setting F. Otherwise, it's a getter for the MCPlayer specified.
-					if(!(args[0].isInstanceOf(CInt.class))) {
+					if(!(args[0].isInstanceOf(CInt.TYPE))) {
 						MCPlayer p2 = Static.GetPlayer(args[0], t);
 						l = p2.getLocation();
 					}
@@ -2180,7 +2180,7 @@ public class PlayerManagement {
 			MCPlayer m = Static.GetPlayer(args[0].val(), t);
 
 			MCPotionEffectType type = null;
-			if(args[1].isInstanceOf(CString.class)) {
+			if(args[1].isInstanceOf(CString.TYPE)) {
 				try {
 					type = MCPotionEffectType.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException ex) {
@@ -3314,7 +3314,7 @@ public class PlayerManagement {
 				ticks = args[0];
 			}
 			int tick = 0;
-			if(ticks.isInstanceOf(CBoolean.class)) {
+			if(ticks.isInstanceOf(CBoolean.TYPE)) {
 				boolean value = ((CBoolean) ticks).getBoolean();
 				if(value) {
 					tick = 20;
@@ -4513,7 +4513,7 @@ public class PlayerManagement {
 			boolean forced = true;
 
 			if(args.length == 1) {
-				if(args[0].isInstanceOf(CArray.class)) {
+				if(args[0].isInstanceOf(CArray.TYPE)) {
 					if(p instanceof MCPlayer) {
 						m = ((MCPlayer) p);
 					}
@@ -4522,10 +4522,10 @@ public class PlayerManagement {
 					throw new CRECastException("Expecting an array in set_pbed_location", t);
 				}
 			} else if(args.length == 2) {
-				if(args[1].isInstanceOf(CArray.class)) {
+				if(args[1].isInstanceOf(CArray.TYPE)) {
 					pname = args[0].val();
 					locationIndex = 1;
-				} else if(args[0].isInstanceOf(CArray.class)) {
+				} else if(args[0].isInstanceOf(CArray.TYPE)) {
 					if(p instanceof MCPlayer) {
 						m = ((MCPlayer) p);
 					}
@@ -4535,7 +4535,7 @@ public class PlayerManagement {
 					throw new CRECastException("Expecting an array in set_pbed_location", t);
 				}
 			} else if(args.length == 3) {
-				if(args[1].isInstanceOf(CArray.class)) {
+				if(args[1].isInstanceOf(CArray.TYPE)) {
 					pname = args[0].val();
 					locationIndex = 1;
 					forced = ArgumentValidation.getBoolean(args[2], t);
@@ -4567,7 +4567,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(m, t);
 
-			if(args[locationIndex].isInstanceOf(CArray.class)) {
+			if(args[locationIndex].isInstanceOf(CArray.TYPE)) {
 				CArray ca = (CArray) args[locationIndex];
 				l = ObjectGenerator.GetGenerator().location(ca, m.getWorld(), t);
 				l.add(0, 1, 0); // someone decided to match ploc() here

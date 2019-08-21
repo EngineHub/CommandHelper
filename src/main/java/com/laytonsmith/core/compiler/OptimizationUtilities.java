@@ -87,7 +87,7 @@ public class OptimizationUtilities {
 			return ((Variable) node.getData()).getVariableName();
 		} else if(node.getData() instanceof CSlice) {
 			return node.getData().val();
-		} else if(node.getData().isInstanceOf(CArray.class)) {
+		} else if(node.getData().isInstanceOf(CArray.TYPE)) {
 			//It's a hardcoded array. This only happens in the course of optimization, if
 			//the optimizer adds a new array. We still need to handle it appropriately though.
 			//The values in the array will be constant, guaranteed.

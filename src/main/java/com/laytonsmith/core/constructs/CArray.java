@@ -107,7 +107,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 							max = -1; //Special case, there are no integer indexes in here yet.
 						}
 						associativeArray.put(Integer.toString(max + 1), item);
-						if(item.isInstanceOf(CArray.class)) {
+						if(item.isInstanceOf(CArray.TYPE)) {
 							((CArray) item).parent = this;
 						}
 					}
@@ -117,7 +117,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			if(items != null) {
 				for(Mixed item : items) {
 					array.add(item);
-					if(item.isInstanceOf(CArray.class)) {
+					if(item.isInstanceOf(CArray.TYPE)) {
 						((CArray) item).parent = this;
 					}
 				}
@@ -280,7 +280,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				associativeArray.put(Integer.toString(max + 1), c);
 			}
 		}
-		if(c.isInstanceOf(CArray.class)) {
+		if(c.isInstanceOf(CArray.TYPE)) {
 			((CArray) c).parent = this;
 		}
 		setDirty();
@@ -366,7 +366,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		if(associativeMode) {
 			associativeArray.put(normalizeConstruct(index), c);
 		}
-		if(c.isInstanceOf(CArray.class)) {
+		if(c.isInstanceOf(CArray.TYPE)) {
 			((CArray) c).parent = this;
 		}
 		setDirty();
@@ -514,7 +514,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			for(int i = 0; i < this.size(); i++) {
 				Mixed value = this.get(i, t);
 				String v;
-				if(value.isInstanceOf(CArray.class)) {
+				if(value.isInstanceOf(CArray.TYPE)) {
 					if(arrays.contains(value)) {
 						//Check for recursion
 						v = "*recursion*";
@@ -543,7 +543,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 					v = "null";
 				} else {
 					Mixed value = this.get(key, t);
-					if(value.isInstanceOf(CArray.class)) {
+					if(value.isInstanceOf(CArray.TYPE)) {
 						if(arrays.contains(value)) {
 							v = "*recursion*";
 						} else {
@@ -613,7 +613,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		// Iterate over the array, recursively calling this method to perform a deep clone.
 		for(Mixed key : array.keySet()) {
 			Mixed value = array.get(key, t);
-			if(value.isInstanceOf(CArray.class)) {
+			if(value.isInstanceOf(CArray.TYPE)) {
 				value = deepClone((CArray) value, t, cloneRefs);
 			}
 			clone.set(key, value, t);
@@ -622,13 +622,13 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	private String normalizeConstruct(Mixed c) {
-		if(c.isInstanceOf(CArray.class)) {
+		if(c.isInstanceOf(CArray.TYPE)) {
 			throw new CRECastException("Arrays cannot be used as the key in an associative array", c.getTarget());
-		} else if(c.isInstanceOf(CString.class) || c.isInstanceOf(CInt.class)) {
+		} else if(c.isInstanceOf(CString.TYPE) || c.isInstanceOf(CInt.TYPE)) {
 			return c.val();
 		} else if(c instanceof CNull) {
 			return "";
-		} else if(c.isInstanceOf(CBoolean.class)) {
+		} else if(c.isInstanceOf(CBoolean.TYPE)) {
 			if(((CBoolean) c).getBoolean()) {
 				return "1";
 			} else {
@@ -876,11 +876,11 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 					} else {
 						c = o2;
 					}
-					if(c.isInstanceOf(CArray.class)) {
+					if(c.isInstanceOf(CArray.TYPE)) {
 						throw new CRECastException("Cannot sort an array of arrays.", CArray.this.getTarget());
 					}
-					if(!(c.isInstanceOf(CBoolean.class) || c.isInstanceOf(CString.class) || c.isInstanceOf(CInt.class)
-							|| c.isInstanceOf(CDouble.class) || c instanceof CNull || c.isInstanceOf(CClassType.class))) {
+					if(!(c.isInstanceOf(CBoolean.TYPE) || c.isInstanceOf(CString.TYPE) || c.isInstanceOf(CInt.TYPE)
+							|| c.isInstanceOf(CDouble.TYPE) || c instanceof CNull || c.isInstanceOf(CClassType.TYPE))) {
 						throw new CREFormatException("Unsupported type being sorted: " + c.typeof(), CArray.this.getTarget());
 					}
 				}
@@ -893,7 +893,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 						return o1.val().compareTo("");
 					}
 				}
-				if(o1.isInstanceOf(CBoolean.class) || o2.isInstanceOf(CBoolean.class)) {
+				if(o1.isInstanceOf(CBoolean.TYPE) || o2.isInstanceOf(CBoolean.TYPE)) {
 					if(ArgumentValidation.getBoolean(o1, Target.UNKNOWN) == ArgumentValidation.getBoolean(o2, Target.UNKNOWN)) {
 						return 0;
 					} else {

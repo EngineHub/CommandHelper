@@ -212,7 +212,7 @@ public class BukkitMCCommand implements MCCommand {
 				Mixed fret = closure.executeCallable(null, t, new CString(alias, t), new CString(sender.getName(), t), cargs,
 						new CArray(t) // reserved for an obgen style command array
 				);
-				if(fret.isInstanceOf(CArray.class)) {
+				if(fret.isInstanceOf(CArray.TYPE)) {
 					List<String> ret = new ArrayList<>();
 					if(((CArray) fret).inAssociativeMode()) {
 						for(Mixed key : ((CArray) fret).keySet()) {
@@ -253,7 +253,7 @@ public class BukkitMCCommand implements MCCommand {
 				Mixed fret = closure.executeCallable(null, t, new CString(label, t), new CString(sender.getName(), t), cargs,
 						new CArray(t) // reserved for an obgen style command array
 				);
-				if(fret.isInstanceOf(CBoolean.class)) {
+				if(fret.isInstanceOf(CBoolean.TYPE)) {
 					return ((CBoolean) fret).getBoolean();
 				}
 			} catch (ConfigRuntimeException cre) {

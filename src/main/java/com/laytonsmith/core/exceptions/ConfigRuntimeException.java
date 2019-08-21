@@ -118,7 +118,7 @@ public class ConfigRuntimeException extends RuntimeException {
 			}
 			try {
 				Mixed ret = c.executeCallable(env, Target.UNKNOWN, new Mixed[]{ex});
-				if(ret.isInstanceOf(CNull.class) || ret.isInstanceOf(CVoid.class) || Prefs.ScreamErrors()) {
+				if(ret instanceof CNull || ret instanceof CVoid || Prefs.ScreamErrors()) {
 					return Reaction.REPORT; // Closure returned null or scream-errors was set in the config.
 				}
 				// Closure returned a boolean. TRUE -> IGNORE and FALSE -> FATAL.
