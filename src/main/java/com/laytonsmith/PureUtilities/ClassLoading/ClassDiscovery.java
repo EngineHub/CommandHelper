@@ -1155,7 +1155,7 @@ public class ClassDiscovery {
 	}
 
 	private static final Map<Pair<Class<?>, Class<? extends Annotation>>, Annotation> ANNOTATION_CACHE =
-			Collections.synchronizedMap(new HashMap<>());
+			new HashMap<>();
 
 	/**
 	 * {@code Class.getAnnotation} is relatively slow, so this provides a utility cache in front of it, so that
