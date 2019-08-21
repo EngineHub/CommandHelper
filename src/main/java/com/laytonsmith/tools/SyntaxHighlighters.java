@@ -160,7 +160,7 @@ public class SyntaxHighlighters {
 			}
 		} else if(datalist.equalsIgnoreCase("exceptions")) {
 			for(Class<? extends CREThrowable> c : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, CREThrowable.class)) {
-				base.add(c.getAnnotation(typeof.class).value());
+				base.add(ClassDiscovery.GetClassAnnotation(c, typeof.class).value());
 			}
 		} else if(datalist.equalsIgnoreCase("types")) {
 			base.addAll(NativeTypeList.getNativeTypeList().stream().map(e -> e.getFQCN()).collect(Collectors.toList()));

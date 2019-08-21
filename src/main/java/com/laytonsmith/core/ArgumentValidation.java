@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.typeof;
@@ -97,8 +98,8 @@ public final class ArgumentValidation {
 		if(clazz.isAssignableFrom(construct.getClass())) {
 			return (T) construct;
 		} else {
-			String expectedClassName = clazz.getAnnotation(typeof.class).value();
-			String actualClassName = construct.getClass().getAnnotation(typeof.class).value();
+			String expectedClassName = ClassDiscovery.GetClassAnnotation(clazz, typeof.class).value();
+			String actualClassName = ClassDiscovery.GetClassAnnotation(construct.getClass(), typeof.class).value();
 			throw new CRECastException("Expecting " + expectedClassName + " but receieved " + construct.val()
 					+ " (" + actualClassName + ") instead.", t);
 		}

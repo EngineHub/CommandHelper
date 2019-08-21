@@ -1361,7 +1361,7 @@ public final class SiteDeploy {
 		List<String> exceptions = new ArrayList<>();
 		if(f.thrown() != null) {
 			for(Class<? extends CREThrowable> c : f.thrown()) {
-				String t = c.getAnnotation(typeof.class).value();
+				String t = ClassDiscovery.GetClassAnnotation(c, typeof.class).value();
 				exceptions.add("[[../objects/" + t + "|" + t + "]]");
 			}
 		}

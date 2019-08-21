@@ -5,6 +5,7 @@
  */
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.typeof;
@@ -103,7 +104,7 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	 * @return
 	 */
 	public static FullyQualifiedClassName forNativeClass(Class<? extends Mixed> clazz) {
-		typeof t = clazz.getAnnotation(typeof.class);
+		typeof t = ClassDiscovery.GetClassAnnotation(clazz, typeof.class);
 		if(t == null) {
 			throw new Error("Native class " + clazz + " does not provide a typeof annotation");
 		}

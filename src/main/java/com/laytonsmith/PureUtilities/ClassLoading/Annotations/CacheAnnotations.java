@@ -64,7 +64,7 @@ public class CacheAnnotations {
 				for(Class r : ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(InterfaceRunnerFor.class)) {
 					InterfaceRunnerFor f = (InterfaceRunnerFor) r.getAnnotation(InterfaceRunnerFor.class);
 					if(f.value() == c) {
-						isGetNameExempt = c.getAnnotation(typeof.class) != null;
+						isGetNameExempt = ClassDiscovery.GetClassAnnotation(c, typeof.class) != null;
 						c = r;
 						break;
 					}
@@ -87,7 +87,7 @@ public class CacheAnnotations {
 					// typeof is exempt from having getName in each individual class, because the
 					// typeof value is that information.
 					if(!m.getName().equals("getName")) {
-						if(c.getAnnotation(typeof.class) != null && !isGetNameExempt) {
+						if(ClassDiscovery.GetClassAnnotation(c, typeof.class) != null && !isGetNameExempt) {
 							uhohs.add(c.getName() + " must implement " + m.getName() + "().");
 						}
 					}

@@ -505,7 +505,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 */
 	@Override
 	public final String getName() {
-		typeof t = this.getClass().getAnnotation(typeof.class);
+		typeof t = ClassDiscovery.GetClassAnnotation(this.getClass(), typeof.class);
 		return t.value();
 	}
 
@@ -580,7 +580,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	public static boolean isInstanceof(Mixed that, Class<? extends Mixed> type) {
-		if(that.getClass().getAnnotation(typeof.class) == null) {
+		if(ClassDiscovery.GetClassAnnotation(that.getClass(), typeof.class) == null) {
 			// This can happen in cases where we are in the middle of optimization.
 			// This can perhaps be improved in the future, when we store the return
 			// type with the CFunction, and we can at least handle those cases,
@@ -608,7 +608,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.getClass().getAnnotation(typeof.class), val());
+		return Objects.hash(ClassDiscovery.GetClassAnnotation(this.getClass(), typeof.class), val());
 	}
 
 

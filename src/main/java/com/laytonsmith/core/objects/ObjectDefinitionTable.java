@@ -1,5 +1,6 @@
 package com.laytonsmith.core.objects;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
@@ -188,7 +189,7 @@ public final class ObjectDefinitionTable implements Iterable<ObjectDefinition> {
 	 */
 	public ObjectDefinition get(Class<? extends Mixed> clazz) {
 		try {
-			return get(clazz.getAnnotation(typeof.class).value());
+			return get(ClassDiscovery.GetClassAnnotation(clazz, typeof.class).value());
 		} catch (ObjectDefinitionNotFoundException ex) {
 			throw new Error("Missing ObjectDefinition for native class: " + clazz.getName(), ex);
 		}

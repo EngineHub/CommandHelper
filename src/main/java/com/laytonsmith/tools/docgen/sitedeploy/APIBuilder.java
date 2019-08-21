@@ -82,7 +82,7 @@ public class APIBuilder {
 					try {
 						if(ff.thrown() != null) {
 							for(Class<? extends CREThrowable> c : ff.thrown()) {
-								thrown.add(c.getAnnotation(typeof.class).value());
+								thrown.add(ClassDiscovery.GetClassAnnotation(c, typeof.class).value());
 							}
 						}
 					} catch (Throwable t) {

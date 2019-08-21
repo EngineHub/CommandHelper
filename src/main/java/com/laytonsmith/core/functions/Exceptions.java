@@ -251,7 +251,7 @@ public class Exceptions {
 			String exceptions = "\n";
 			List<String> ee = new ArrayList<>();
 			for(Class<? extends CREThrowable> c : e) {
-				String exceptionType = c.getAnnotation(typeof.class).value();
+				String exceptionType = ClassDiscovery.GetClassAnnotation(c, typeof.class).value();
 				ee.add(exceptionType);
 			}
 			Collections.sort(ee);

@@ -330,7 +330,7 @@ public class NativeTypeList {
 	 * @return
 	 */
 	public static Mixed getNativeInvalidInstanceForUse(Class<? extends Mixed> clazz) {
-		if(clazz.getAnnotation(typeof.class) == null) {
+		if(ClassDiscovery.GetClassAnnotation(clazz, typeof.class) == null) {
 			throw new RuntimeException(clazz + " is missing typeof annotation!");
 		}
 		try {

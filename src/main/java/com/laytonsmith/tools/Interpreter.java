@@ -509,8 +509,8 @@ public final class Interpreter {
 				b.append("Throws: ");
 				Set<String> th = new HashSet<>();
 				for(Class<? extends CREThrowable> c : thrown) {
-					if(c.getAnnotation(typeof.class) != null) {
-						typeof t = c.getAnnotation(typeof.class);
+					if(ClassDiscovery.GetClassAnnotation(c, typeof.class) != null) {
+						typeof t = ClassDiscovery.GetClassAnnotation(c, typeof.class);
 						th.add(t.value());
 					}
 				}

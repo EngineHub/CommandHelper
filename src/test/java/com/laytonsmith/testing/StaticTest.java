@@ -285,7 +285,7 @@ public class StaticTest {
 						thrown = new Class[0];
 					}
 					for(Class<? extends CREThrowable> tt : thrown) {
-						expectedNames.add(tt.getAnnotation(typeof.class).value());
+						expectedNames.add(ClassDiscovery.GetClassAnnotation(tt, typeof.class).value());
 					}
 					if(f.thrown() == null || !expectedNames.contains(name)) {
 						fail("The documentation for " + f.getName() + " doesn't state that it can throw a "

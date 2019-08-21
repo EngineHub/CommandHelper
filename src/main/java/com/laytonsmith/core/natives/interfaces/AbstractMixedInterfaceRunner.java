@@ -38,7 +38,7 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 
 	@Override
 	public String getName() {
-		return getSponsorClass().getAnnotation(typeof.class).value();
+		return ClassDiscovery.GetClassAnnotation(getSponsorClass(), typeof.class).value();
 	}
 
 	@Override

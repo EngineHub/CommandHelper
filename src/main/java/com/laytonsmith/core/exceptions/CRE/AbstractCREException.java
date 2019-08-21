@@ -62,7 +62,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 	@Override
 	public String getName() {
-		typeof to = this.getClass().getAnnotation(typeof.class);
+		typeof to = ClassDiscovery.GetClassAnnotation(this.getClass(), typeof.class);
 		if(to == null) {
 			throw new Error("ConfigRuntimeException subtypes must annotate themselves with @typeof, if they are"
 					+ " instantiateable.");

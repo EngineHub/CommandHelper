@@ -1,5 +1,6 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.Static;
@@ -47,7 +48,7 @@ public class InstanceofUtil {
 				blacklist.addAll(getAllCastableClassesWithBlacklist(iface, blacklist, env));
 			}
 		} catch (UnsupportedOperationException ex) {
-			if(c.getClass().getAnnotation(typeof.class) != null) {
+			if(ClassDiscovery.GetClassAnnotation(c.getClass(), typeof.class) != null) {
 				throw new RuntimeException("Unexpected UnsupportedOperationException from " + c.getName());
 			}
 		}
@@ -105,7 +106,7 @@ public class InstanceofUtil {
 	}
 
 	private static FullyQualifiedClassName typeof(Class<? extends Mixed> c) {
-		typeof type = c.getAnnotation(typeof.class);
+		typeof type = ClassDiscovery.GetClassAnnotation(c, typeof.class);
 		if(type == null) {
 			return null;
 		} else {

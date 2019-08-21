@@ -1153,4 +1153,30 @@ public class ClassDiscovery {
 			throw new RuntimeException("While interrogating " + c.getName() + ", an unexpected exception was thrown for potential URL: \"" + packageRoot + "\"", e);
 		}
 	}
+
+	private static final Map<Pair<Class<?>, Class<? extends Annotation>>, Annotation> ANNOTATION_CACHE =
+			Collections.synchronizedMap(new HashMap<>());
+
+	/**
+	 * {@code Class.getAnnotation} is relatively slow, so this provides a utility cache in front of it, so that
+	 * multiple calls will not incur the penalty hit. Only the first call does the lookup.
+	 *
+	 * Unlike the other methods in this class, there is no way to clear the cache, because this only works with
+	 * concrete Java classes, and classes can't change annotations at runtime.
+	 * @param <T> The annotation type
+	 * @param clazz The class to find the annotation on
+	 * @param annotation The annotation class
+	 * @return The annotation, or null if the specified class does not have that annotation.
+	 */
+	public static <T extends Annotation> T GetClassAnnotation(Class<?> clazz, Class<T> annotation) {
+		Pair<Class<?>, Class<? extends Annotation>> pair = new Pair(clazz, annotation);
+		Annotation t = ANNOTATION_CACHE.get(pair);
+		if(t == null) {
+			t = clazz.getAnnotation(annotation);
+			ANNOTATION_CACHE.put(pair, t);
+		}
+		// This cast should always work, but since we're shoving all the annotations into the cache, the compiler
+		// can't know that the returned type will be T.
+		return (T) t;
+	}
 }

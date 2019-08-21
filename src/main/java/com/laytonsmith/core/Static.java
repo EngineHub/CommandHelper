@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.DateUtils;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
@@ -1383,7 +1384,7 @@ public final class Static {
 	public static <T extends Mixed> T AssertType(Class<T> type, Mixed[] args, int argNumber, Function func, Target t) {
 		Mixed value = args[argNumber];
 		if(!type.isAssignableFrom(value.getClass())) {
-			typeof todesired = type.getAnnotation(typeof.class);
+			typeof todesired = ClassDiscovery.GetClassAnnotation(type, typeof.class);
 			CClassType toactual = value.typeof();
 			if(todesired != null) {
 				throw new CRECastException("Argument " + (argNumber + 1) + " of " + func.getName() + " was expected to be a "
