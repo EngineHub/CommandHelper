@@ -46,7 +46,7 @@ import java.util.logging.Logger;
 
 public class ExtensionManager {
 
-	private static final Map<URL, ExtensionTracker> EXTENSIONS = new ConcurrentHashMap<>();
+	private static final Map<URL, ExtensionTracker> EXTENSIONS = new HashMap<>();
 	private static final List<File> LOCATIONS = new ArrayList<>();
 
 	/**
