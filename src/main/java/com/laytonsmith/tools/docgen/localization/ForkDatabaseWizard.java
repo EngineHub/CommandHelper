@@ -1,6 +1,7 @@
 package com.laytonsmith.tools.docgen.localization;
 
 import com.laytonsmith.PureUtilities.CommandExecutor;
+import com.laytonsmith.PureUtilities.Common.Annotations.CheckOverrides;
 import com.laytonsmith.PureUtilities.Common.UIUtils;
 import com.laytonsmith.PureUtilities.GithubUtil;
 import java.io.File;
@@ -13,6 +14,7 @@ import javax.swing.JScrollBar;
  *
  * @author Cailin
  */
+@CheckOverrides.SuppressCheckOverrides
 public class ForkDatabaseWizard extends javax.swing.JDialog {
 
 	private static interface Callable<T> {

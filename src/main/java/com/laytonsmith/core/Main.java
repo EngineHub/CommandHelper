@@ -280,7 +280,7 @@ public class Main {
 		for(String e : environments) {
 			try {
 				Class c = ClassDiscovery.getDefaultInstance().forName(e).loadClass();
-				if(!c.isAssignableFrom(Environment.EnvironmentImpl.class)) {
+				if(!Environment.EnvironmentImpl.class.isAssignableFrom(c)) {
 					System.out.println("The class " + e + " is not a valid option!");
 					System.exit(1);
 				}
@@ -871,6 +871,7 @@ public class Main {
 				ExtensionManager.AddDiscoveryLocation(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
 			}
 
+			ClassDiscovery.getDefaultInstance().addThisJar();
 			ExtensionManager.Cache(MethodScriptFileLocations.getDefault().getExtensionCacheDirectory());
 			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
 			ExtensionManager.Startup();
@@ -1105,8 +1106,6 @@ public class Main {
 			//the arguments that we want to ignore here, but otherwise pass through. parsedArgs
 			//will prevent us from seeing those, however.
 			List<String> allArgs = parsedArgs.getRawArguments();
-			//The 0th arg is the cmdline verb though, so remove that.
-			allArgs.remove(0);
 			if(allArgs.isEmpty()) {
 				StreamUtils.GetSystemErr().println("Usage: path/to/file.ms [arg1 arg2]");
 				System.exit(1);

@@ -2,6 +2,7 @@ package com.laytonsmith.tools.docgen.localization;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.CommandExecutor;
+import com.laytonsmith.PureUtilities.Common.Annotations.CheckOverrides;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.TemplateBuilder;
@@ -61,6 +62,7 @@ import javax.swing.event.ListSelectionListener;
 /**
  * UI supporting localization efforts.
  */
+@CheckOverrides.SuppressCheckOverrides
 public final class LocalizationUI extends javax.swing.JFrame {
 
 	private static final String FINISHED = "Finished.";

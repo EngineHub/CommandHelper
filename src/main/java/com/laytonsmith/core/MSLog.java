@@ -64,8 +64,24 @@ public class MSLog {
 	 * may be normal class members as well.
 	 */
 	public static interface Tag {
+		/**
+		 * This is the name of the tag in the preferences file. For standardization purposes, this should be
+		 * a lowercase word.
+		 * @return
+		 */
 		String getName();
+		
+		/**
+		 * The comment description that will be provided in the preferences file. This should describe what events
+		 * in general are logged under this tag.
+		 * @return
+		 */
 		String getDescription();
+
+		/**
+		 * The default log level that the preference should be initially configured at in new installations.
+		 * @return
+		 */
 		LogLevel getLevel();
 	}
 

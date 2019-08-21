@@ -7,6 +7,10 @@ import com.laytonsmith.PureUtilities.Common.ClassUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.MustUseOverride;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -36,6 +40,10 @@ import javax.tools.Diagnostic;
 @SupportedAnnotationTypes({"java.lang.Override", "com.laytonsmith.annotations.MustUseOverride"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class CheckOverrides extends AbstractProcessor {
+
+	@Target({ElementType.METHOD, ElementType.TYPE})
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface SuppressCheckOverrides {}
 
 	private static final boolean ENABLED = true;
 
@@ -193,10 +201,20 @@ public class CheckOverrides extends AbstractProcessor {
 					for(Class s : supers) {
 						compare.addAll(getOverridableMethods(s));
 					}
-					for(Method superM : compare) {
+					methodLoop: for(Method superM : compare) {
 						if(m.getName().equals(superM.getName())) {
 							if(checkSignatureForCompatibility(superM.getParameterTypes(), m.getParameterTypes())) {
 								//Oops, found a bad method.
+								if(m.isAnnotationPresent(SuppressCheckOverrides.class)) {
+									continue;
+								}
+								Class<?> container = m.getDeclaringClass();
+								do {
+									if(container.isAnnotationPresent(SuppressCheckOverrides.class)) {
+										continue methodLoop;
+									}
+									container = container.getEnclosingClass();
+								} while(container != null);
 								methodsInError.add(m);
 							}
 						} //else different method altogether
