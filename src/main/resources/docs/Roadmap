@@ -8,12 +8,12 @@ completed before they could be done. Adding more raw functions to allow more hoo
 simplify common programming tasks are continually being added. Also note that these tasks are not in any particular 
 order, though the main bullet points are roughly in order.
 
-* [[CommandHelper/IRC|IRC functionality]]
+* [[IRC|IRC functionality]]
 * File system functionality (This will only happen after completion of a "virtual filesystem", to allow for strict \
 sandboxing of scripts)
-* '''Low Level Packet Handling''' (See [[CommandHelper/PacketInterface|the initial design documentation]] for more info)
+* '''Low Level Packet Handling'''
 * '''External Task Manager''' (This will likely go along with the Netbeans plugin)
-* [[CommandHelper/Staged/NewObjects|'''Object Oriented Design''']]
+* [[NewObjects|'''Object Oriented Design''']]
 ** '''MethodScript STL''' (Also depends on the debugger and multithreading. I'm not gonna start writing complex \
 MScript code without a good way to find errors in it.)
 * '''Serialization of compiled scripts''' (That is, the ability to write out the compiled scripts to file system, \

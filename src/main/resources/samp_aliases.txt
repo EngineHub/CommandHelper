@@ -12,9 +12,9 @@
 # The special variable "$" must be the last variable, and it matches all the arguments from that point on.
 /msg $player $ = /tell $player $
 
-# Simple alias for /save-all
+# Simple alias for /toggledownfall
 # Super simple aliases can be error proofed by optionally matching all arguments, then not using them.
-/save [$] = /save-all
+/rain [$] = /toggledownfall
 
 # Echoes information back to the user
 # This demonstrates how to do string dot concatenation.
@@ -39,17 +39,20 @@
 	/give player() diamond_axe
 
 /*
-	Give command with material name lookup
-	Note that the second variable $qty is optional, and if no value is given, 1 is the default. The function
-	data_values() turns "stone" into "1:0". The pgive_item() function accepts two arguments separated by a comma.
+	Give item command with optional item quantity.
+	Note that the second variable $amount is optional, and if no value is given, 1 is the default.
+	The pgive_item() function accepts two arguments separated by a comma, the second argument is an array function
+	which holds values defining an item. The key "name" represents the material of the item. The value in an
+	associative array follows after the key, separated by a colon -- eg. array('key': 'value').
+	The key "qty" defines how many of the item to give. (see inventory functions for all available item array keys)
 	Also note that the command is labelled with "creative". If you are running a creative server, and the users should
 	be able to give themselves items, then you can give them the "ch.alias.creative" permission to run this alias.
 */
-creative:/i $data [$qty=1] = pgive_item(player(), data_values($data), $qty)
+creative:/i $itemname [$amount=1] = pgive_item(player(), array('name': $itemname, 'qty': $amount))
 
 # Creates a simple way to control the weather
 # The equals comparison here evaluates to true if the $value argument is "true". All other words would be false.
-rain:/rain [$value] = storm($value == 'true')
+/storm [$value] = storm($value == 'true')
 
 # Sets the time on the server with a function that accepts english words like "sunrise"
 /time $time = set_world_time($time)

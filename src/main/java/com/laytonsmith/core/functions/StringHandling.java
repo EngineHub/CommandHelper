@@ -4,12 +4,14 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils.ReflectionException;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
@@ -40,6 +42,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
@@ -53,6 +56,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import com.laytonsmith.core.natives.interfaces.Sizeable;
+import java.util.UUID;
 
 /**
  *
@@ -83,7 +87,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			StringBuilder b = new StringBuilder();
 			for(int i = 0; i < args.length; i++) {
 				b.append(args[i].val());
@@ -102,8 +106,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -112,7 +116,10 @@ public class StringHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			for(ParseTree child : children) {
 				if(child.getData() instanceof CLabel) {
@@ -161,7 +168,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			StringBuilder b = new StringBuilder();
 			for(int i = 0; i < args.length; i++) {
 				if(i > 0) {
@@ -188,8 +195,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -200,7 +207,10 @@ public class StringHandling {
 		public static final String STRING = new DataHandling._string().getName();
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			for(ParseTree child : children) {
 				if(child.getData() instanceof CLabel) {
@@ -244,7 +254,7 @@ public class StringHandling {
 					// sconcat only returns a string (except in the special case above) so we need to
 					// return the string value if it's not already a string
 					try {
-						if(InstanceofUtil.isInstanceof(child.getData(), "string")) {
+						if(InstanceofUtil.isInstanceof(child.getData(), CString.TYPE, env)) {
 							return child;
 						}
 					} catch (IllegalArgumentException ex) {
@@ -287,7 +297,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			String thing = args[0].val();
 			String what = args[1].val();
 			String that = args[2].val();
@@ -310,8 +320,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -348,13 +358,13 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			String string = args[0].val();
 			boolean useAdvanced = false;
 			if(args.length >= 2) {
-				useAdvanced = Static.getBoolean(args[1], t);
+				useAdvanced = ArgumentValidation.getBoolean(args[1], t);
 			}
-			List<Construct> a = new ArrayList<>();
+			List<Mixed> a = new ArrayList<>();
 			if(!useAdvanced) {
 				String[] sa = string.split(" ");
 				for(String s : sa) {
@@ -367,7 +377,7 @@ public class StringHandling {
 					a.add(new CString(s.trim(), t));
 				}
 			}
-			Construct[] csa = new Construct[a.size()];
+			Mixed[] csa = new Mixed[a.size()];
 			for(int i = 0; i < a.size(); i++) {
 				csa[i] = a.get(i);
 			}
@@ -393,8 +403,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -406,7 +416,10 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Demonstrates basic usage", "parse_args('This turns into 5 arguments')"),
-				new ExampleScript("Demonstrates usage with extra spaces", "parse_args('This   trims   extra   spaces')")
+				new ExampleScript("Demonstrates usage with extra spaces",
+						"parse_args('This   trims   extra   spaces')"),
+				new ExampleScript("With the advanced mode (escapes are also supported with \\, for instance \\'",
+						"parse_args('This supports \"quoted arguments\"', true)")
 			};
 		}
 
@@ -447,12 +460,12 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CString(args[0].val().trim(), args[0].getTarget());
 		}
 
@@ -504,12 +517,12 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CString(StringUtils.trimRight(args[0].val()), args[0].getTarget());
 		}
 
@@ -561,12 +574,12 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CString(StringUtils.trimLeft(args[0].val()), t);
 		}
 
@@ -604,7 +617,8 @@ public class StringHandling {
 
 		@Override
 		public String docs() {
-			return "int {str | array} Returns the character length of str, if the value is castable to a string, or the length of the array, if an array is given";
+			return "int {str | Sizeable} Returns the character length of str, if the value is castable to a string, or"
+					+ " the length of the ms.lang.Sizeable object, if an array or other Sizeable object is given.";
 		}
 
 		@Override
@@ -618,8 +632,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -628,8 +642,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if(args[0] instanceof Sizeable) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			if(args[0].isInstanceOf(Sizeable.class)) {
 				return new CInt(((Sizeable) args[0]).size(), t);
 			} else {
 				return new CInt(args[0].val().length(), t);
@@ -680,8 +694,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -690,8 +704,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if(!(args[0] instanceof CString)) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			if(!(args[0].isInstanceOf(CString.class))) {
 				throw new CREFormatException(this.getName() + " expects a string as first argument, but type "
 						+ args[0].typeof() + " was found.", t);
 			}
@@ -743,8 +757,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -753,8 +767,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if(!(args[0] instanceof CString)) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			if(!(args[0].isInstanceOf(CString.class))) {
 				throw new CREFormatException(this.getName() + " expects a string as first argument, but type "
 						+ args[0].typeof() + " was found.", t);
 			}
@@ -809,8 +823,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -819,7 +833,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			try {
 				String s = args[0].val();
 				int begin = Static.getInt32(args[1], t);
@@ -875,11 +889,11 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			Static.AssertNonCNull(t, args);
 
-			String teststring = args[0].nval();
-			String keyword = args[1].nval();
+			String teststring = Construct.nval(args[0]);
+			String keyword = Construct.nval(args[1]);
 			boolean ret = teststring.startsWith(keyword);
 
 			return CBoolean.get(ret);
@@ -898,8 +912,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -943,11 +957,11 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			Static.AssertNonCNull(t, args);
 
-			String teststring = args[0].nval();
-			String keyword = args[1].nval();
+			String teststring = Construct.nval(args[0]);
+			String keyword = Construct.nval(args[1]);
 			boolean ret = teststring.endsWith(keyword);
 
 			return CBoolean.get(ret);
@@ -966,8 +980,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -1003,12 +1017,12 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if(!(args[0].nval() instanceof String)) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			if(!(Construct.nval(args[0]) instanceof String)) {
 				throw new CRECastException(this.getName() + " expects a string as first argument, but type "
 						+ args[0].typeof() + " was found.", t);
 			}
-			String text = args[0].nval();
+			String text = Construct.nval(args[0]);
 			// Enforce the fact we are only taking the first character here
 			// Do not let the user pass an entire string (or an empty string, d'oh). Only a single character.
 			if(text.length() != 1) {
@@ -1054,8 +1068,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -1098,8 +1112,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1108,9 +1122,9 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			String haystack = args[0].nval();
-			String needle = args[1].nval();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			String haystack = Construct.nval(args[0]);
+			String needle = Construct.nval(args[1]);
 			Static.AssertNonCNull(t, args);
 			return new CInt(haystack.indexOf(needle), t);
 		}
@@ -1131,8 +1145,8 @@ public class StringHandling {
 	}
 
 	@api
-	@seealso({string_position.class})
-	public static class string_contains extends AbstractFunction implements Optimizable {
+	@seealso({string_position.class, string_contains_ic.class})
+	public static class string_contains extends CompositeFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -1147,14 +1161,6 @@ public class StringHandling {
 		@Override
 		public Boolean runAsync() {
 			return null;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			String haystack = args[0].nval();
-			String needle = args[1].nval();
-			Static.AssertNonCNull(t, args);
-			return CBoolean.get(haystack.contains(needle));
 		}
 
 		@Override
@@ -1175,7 +1181,7 @@ public class StringHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -1191,6 +1197,65 @@ public class StringHandling {
 				new ExampleScript("Basic usage", "string_contains('haystack', 'hay');"),
 				new ExampleScript("Not found", "string_contains('abcd', 'wxyz');")
 			};
+		}
+
+		@Override
+		protected String script() {
+			return getBundledCode();
+		}
+
+	}
+
+	@api
+	@seealso({string_contains.class})
+	public static class string_contains_ic extends CompositeFunction implements Optimizable {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRENullPointerException.class, CREFormatException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public String getName() {
+			return "string_contains_ic";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {haystack, needle} Returns true if the string needle is found anywhere within the string haystack (while ignoring case)."
+					+ " This is functionally equivalent to string_postion(to_lower(@haystack), to_lower(@needle)) != -1, but is generally clearer.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE,
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.NO_SIDE_EFFECTS);
+		}
+
+		@Override
+		protected String script() {
+			return getBundledCode();
 		}
 
 	}
@@ -1229,8 +1294,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1239,7 +1304,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			//http://stackoverflow.com/questions/2667015/is-regex-too-slow-real-life-examples-where-simple-non-regex-alternative-is-bett
 			//According to this, regex isn't necessarily slower, but we do want to escape the pattern either way, since the main advantage
 			//of this function is convenience (not speed) however, if we can eek out a little extra speed too, excellent.
@@ -1316,7 +1381,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREInsufficientArgumentsException(getName() + " expects 2 or more arguments", t);
 			}
@@ -1324,7 +1389,7 @@ public class StringHandling {
 
 			// Get the Locale.
 			Locale locale = null;
-			String countryCode = args[0].nval();
+			String countryCode = Construct.nval(args[0]);
 			if(countryCode == null) {
 				locale = Locale.getDefault();
 			} else {
@@ -1337,20 +1402,15 @@ public class StringHandling {
 
 			// Handle the formatting.
 			String formatString = args[1].val();
-			Object[] params = new Object[numArgs - 2];
 			List<FormatString> parsed;
 			try {
 				parsed = parse(formatString, t);
 			} catch (IllegalFormatException e) {
 				throw new CREFormatException(e.getMessage(), t);
 			}
-			if(requiredArgs(parsed) != numArgs - 2) {
-				throw new CREInsufficientArgumentsException("The specified format string: \"" + formatString + "\""
-						+ " expects " + requiredArgs(parsed) + " argument(s), but " + (numArgs - 2) + " were provided.", t);
-			}
 
-			List<Construct> flattenedArgs = new ArrayList<Construct>();
-			if(numArgs == 3 && args[2] instanceof CArray) {
+			List<Mixed> flattenedArgs = new ArrayList<>();
+			if(numArgs == 3 && args[2].isInstanceOf(CArray.class)) {
 				if(((CArray) args[2]).inAssociativeMode()) {
 					throw new CRECastException("If the second argument to " + getName() + " is an array, it may not be associative.", t);
 				} else {
@@ -1363,9 +1423,17 @@ public class StringHandling {
 					flattenedArgs.add(args[i]);
 				}
 			}
+
+			if(requiredArgs(parsed) != flattenedArgs.size()) {
+				throw new CREInsufficientArgumentsException("The specified format string: \"" + formatString + "\""
+						+ " expects " + requiredArgs(parsed) + " argument(s),"
+						+ " but " + flattenedArgs.size() + " were provided.", t);
+			}
+
 			//Now figure out how to cast things, now that we know our argument numbers will match up
+			Object[] params = new Object[flattenedArgs.size()];
 			for(int i = 0; i < requiredArgs(parsed); i++) {
-				Construct arg = flattenedArgs.get(i);
+				Mixed arg = flattenedArgs.get(i);
 				FormatString fs = parsed.get(i);
 				Character c = fs.getExpectedType();
 				params[i] = convertArgument(arg, c, i, t);
@@ -1374,7 +1442,7 @@ public class StringHandling {
 			return new CString(String.format(locale, formatString, params), t);
 		}
 
-		private Object convertArgument(Construct arg, Character c, int i, Target t) {
+		private Object convertArgument(Mixed arg, Character c, int i, Target t) {
 			Object o;
 			if(Conversion.isValid(c)) {
 				if(c == 't' || c == 'T') {
@@ -1398,7 +1466,7 @@ public class StringHandling {
 					//Further processing is needed
 					if(c == Conversion.BOOLEAN || c == Conversion.BOOLEAN_UPPER) {
 						//Boolean, parse as such
-						o = Static.getBoolean(arg, t);
+						o = ArgumentValidation.getBoolean(arg, t);
 					} else {
 						//Else it's either a string or a hash code, in which case
 						//we will treat it as a string anyways
@@ -1523,12 +1591,15 @@ public class StringHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 2) {
 				throw new ConfigCompileException(getName() + " expects 2 or more argument", t);
 			}
 			if(children.get(0).isConst()) {
-				String locale = children.get(0).getData().nval();
+				String locale = Construct.nval(children.get(0).getData());
 				if(locale != null && Static.GetLocale(locale) == null) {
 					throw new ConfigCompileException("The locale " + locale + " could not be found on this system", t);
 				}
@@ -1654,14 +1725,40 @@ public class StringHandling {
 					throw ConfigRuntimeException.CreateUncatchableException(e.getMessage(), t);
 				}
 			}
-			int length = Array.getLength(parse);
+			Arrayable a = new Arrayable(parse);
+			int length = a.length();
 			for(int i = 0; i < length; i++) {
-				FormatString s = new FormatString(Array.get(parse, i));
+				FormatString s = new FormatString(a.get(i));
 				if(s.getExpectedType() != null) {
 					list.add(s);
 				}
 			}
 			return list;
+		}
+
+		// In java 8, it's an array, in java 9+, it's an ArrayList. This class
+		// abstracts away the differences
+		private static class Arrayable {
+			private final Object t;
+			public Arrayable(Object o) {
+				this.t = o;
+			}
+
+			public int length() {
+				if(t instanceof List) {
+					return ((List) t).size();
+				} else {
+					return Array.getLength(t);
+				}
+			}
+
+			public Object get(int i) {
+				if(t instanceof List) {
+					return ((List) t).get(i);
+				} else {
+					return Array.get(t, i);
+				}
+			}
 		}
 
 		private int requiredArgs(List<FormatString> list) {
@@ -1706,8 +1803,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1749,8 +1846,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1765,12 +1862,15 @@ public class StringHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 1) {
 				throw new ConfigCompileException(getName() + " expects at least 1 argument", t);
 			}
 			children.add(0, new ParseTree(CNull.NULL, fileOptions)); // Add a default locale to the arguments.
-			return super.optimizeDynamic(t, children, fileOptions);
+			return super.optimizeDynamic(t, env, envs, children, fileOptions);
 		}
 
 		@Override
@@ -1815,7 +1915,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String val = args[0].val();
 			String encoding = "UTF-8";
 			if(args.length == 2) {
@@ -1846,8 +1946,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -1871,7 +1971,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CByteArray ba = Static.getByteArray(args[0], t);
 			String encoding = "UTF-8";
 			if(args.length == 2) {
@@ -1901,8 +2001,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -1926,7 +2026,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREInsufficientArgumentsException(getName() + " must have 2 arguments at minimum", t);
 			}
@@ -1958,7 +2058,7 @@ public class StringHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2015,7 +2115,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
 				return new CString(new String(Character.toChars(Static.getInt32(args[0], t))), t);
 			} catch (IllegalArgumentException ex) {
@@ -2038,14 +2138,16 @@ public class StringHandling {
 			return "string {unicode} Returns the unicode character for a given unicode value. This is meant"
 					+ " for dynamic input that needs converting to a unicode character, if you're hardcoding"
 					+ " it, you should just use '\\u1234' syntax instead, however, this is the dynamic equivalent"
-					+ " of the \\u string escape, so '\\u1234' == char_from_unicode(parse_int('1234', 16)). Despite the name,"
+					+ " of the \\u string escape, so"
+					+ " '\\u1234' == char_from_unicode(parse_int('1234', 16)) == char_from_unicode(0x1234)."
+					+ " Despite the name,"
 					+ " certain unicode escapes may return multiple characters, so there is no guarantee that"
 					+ " length(char_from_unicode(@val)) will equal 1.";
 		}
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2081,7 +2183,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0].val().toCharArray().length == 0) {
 				throw new CRERangeException("Empty string cannot be converted to unicode.", t);
 			}
@@ -2107,7 +2209,7 @@ public class StringHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2139,7 +2241,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(StringUtils.LevenshteinDistance(args[0].val(), args[1].val()), t);
 		}
 
@@ -2162,7 +2264,7 @@ public class StringHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2196,7 +2298,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CNull) {
 				return CNull.NULL;
 			}
@@ -2281,7 +2383,7 @@ public class StringHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -2295,6 +2397,7 @@ public class StringHandling {
 
 	@api
 	@seealso(decrypt_secure_string.class)
+	@noboilerplate // A boilerplate test on this function is very hard on Travis CI, sometimes resulting in a timeout.
 	public static class secure_string extends AbstractFunction {
 
 		@Override
@@ -2313,8 +2416,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CArray) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CArray.class)) {
 				CArray array = Static.getArray(args[0], t);
 				return new CSecureString(array, t);
 			} else {
@@ -2349,7 +2452,7 @@ public class StringHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -2391,11 +2494,11 @@ public class StringHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CSecureString) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CSecureString.class)) {
 				CSecureString secure = ArgumentValidation.getObject(args[0], t, CSecureString.class);
 				return secure.getDecryptedCharCArray();
-			} else if(args[0] instanceof CString) {
+			} else if(args[0].isInstanceOf(CString.class)) {
 				CArray array = new CArray(Target.UNKNOWN, args[0].val().length());
 				for(char c : args[0].val().toCharArray()) {
 					array.push(new CString(c, t), t);
@@ -2426,7 +2529,7 @@ public class StringHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -2442,6 +2545,114 @@ public class StringHandling {
 				+ "msg(typeof(@insecure));\n")
 			};
 		}
+	}
 
+	@api
+	public static class uuid extends AbstractFunction {
+
+		@MEnum("ms.lang.UUIDType")
+		public static enum UUIDType {
+			// TODO: May wish to instead look into https://github.com/cowtowncoder/java-uuid-generator instead
+			// of rolling our own here. Most people probably only will use RANDOM anyways
+//			MAC("Returns UUID representing the datetime and MAC address of this device. The system's current time"
+//					+ " is used if the argument is null, but you may instead send your own value to use"
+//					+ " instead", 1,
+//				(input) -> {
+//
+//				}),
+//			MAC_DCE("Returns the UUID representing the datetime and MAC address of this device, but is modified with"
+//					+ " the local domain parameter passed in", 1),
+//			NAMESPACE_MD5("", 1),
+			RANDOM("Returns a random UUID", 0,
+				(input) -> UUID.randomUUID()),
+//			NAMESPACE_SHA1("", 1),
+			NIL("Returns the nil UUID, that is 00000000-0000-0000-0000-000000000000", 0, (input) -> new UUID(0, 0));
+
+			private static interface Generate {
+				UUID g(String input);
+			}
+
+			private final String description;
+			private final int parameters;
+			private final Generate generator;
+
+			UUIDType(String description, int parameters, Generate g) {
+				this.description = description;
+				this.parameters = parameters;
+				this.generator = g;
+			}
+
+			public UUID generate(String input) {
+				return generator.g(input);
+			}
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			UUIDType type = UUIDType.RANDOM;
+			String input = null;
+			if(args.length > 0) {
+				type = ArgumentValidation.getEnum(args[0], UUIDType.class, t);
+			}
+			if(args.length > 1) {
+				input = Construct.nval(args[1]);
+			}
+			return new CString(type.generate(input).toString(), t);
+		}
+
+		@Override
+		public String getName() {
+			return "uuid";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "string {type, arg} Returns a UUID (also known as a GUID). Different types of UUIDs can be"
+					+ " generated, by default, if no parameters are provided, a random uuid is returned (version 4)."
+					+ " For full details on what exactly a uuid is, and what the different versions are, see"
+					+ " https://en.wikipedia.org/wiki/Universally_unique_identifier. The arg varies depending on the"
+					+ " type, some types do not require an argument, in which case, this parameter will be ignored."
+					+ " <code>type</code> may be one of:\n- " + StringUtils.Join(UUIDType.values(), "\n- ", "\n- ",
+							"\n- ", "",
+							(UUIDType type) -> {
+								return type.name() + " - " + type.description + ". This type takes "
+										+ StringUtils.PluralTemplateHelper(type.parameters, "%d argument.",
+												"%d arguments.");
+							});
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_3;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Typical usage", "uuid()", "46fa3d0e-0178-4384-8a9c-2f0df1cada2b"),
+				new ExampleScript("Explicit RANDOM uuid", "uuid(RANDOM)", "fb9f9a7b-76c2-40e3-ba20-8ab23553b9d6"),
+				new ExampleScript("NIL uuid", "uuid(NIL)")
+			};
+		}
 	}
 }

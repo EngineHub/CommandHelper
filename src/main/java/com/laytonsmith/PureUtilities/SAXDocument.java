@@ -44,6 +44,7 @@ public class SAXDocument {
 	 *
 	 * @param document The XML document in a string
 	 * @param encoding The encoding of the stream. If null, UTF-8 is used.
+	 * @throws java.io.UnsupportedEncodingException
 	 */
 	public SAXDocument(String document, String encoding) throws UnsupportedEncodingException {
 		this(new ByteArrayInputStream(document.getBytes(encoding == null ? "UTF-8" : encoding)));
@@ -73,7 +74,7 @@ public class SAXDocument {
 
 			@Override
 			public void startDocument() throws SAXException {
-				nodeCount.push(new HashMap<String, AtomicInteger>());
+				nodeCount.push(new HashMap<>());
 			}
 
 			@Override
@@ -211,6 +212,14 @@ public class SAXDocument {
 			throw new IllegalArgumentException("The xpath must be absolute, meaning it must start with exactly 1 forward slash");
 		}
 		//Standardize our xpath
+		xpath = standardizeXpath(xpath);
+		if(!callbacks.containsKey(xpath)) {
+			callbacks.put(xpath, new ArrayList<>());
+		}
+		callbacks.get(xpath).add(callback);
+	}
+
+	private String standardizeXpath(String xpath) {
 		String[] parts = xpath.substring(1).split("/");
 		StringBuilder b = new StringBuilder();
 		for(String part : parts) {
@@ -221,10 +230,7 @@ public class SAXDocument {
 			b.append("/").append(part);
 		}
 		xpath = "^" + b.toString().replace("[*]", "[\\d+]").replace("[", "\\[").replace("]", "\\]") + "$";
-		if(!callbacks.containsKey(xpath)) {
-			callbacks.put(xpath, new ArrayList<ElementCallback>());
-		}
-		callbacks.get(xpath).add(callback);
+		return xpath;
 	}
 
 	public static interface ElementCallback {
@@ -232,7 +238,7 @@ public class SAXDocument {
 		/**
 		 * Called when a matched element is fully read in.
 		 *
-		 * @param path The XPath of this element. This will be a canonical reference to the element, so will not
+		 * @param xpath The XPath of this element. This will be a canonical reference to the element, so will not
 		 * necessarily match the XPath you passed in to tag this element with.
 		 * @param tag The element name
 		 * @param attr The attributes on the element

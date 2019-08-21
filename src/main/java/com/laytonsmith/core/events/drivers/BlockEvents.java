@@ -5,11 +5,9 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCIgniteCause;
 import com.laytonsmith.abstraction.enums.MCInstrument;
-import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
 import com.laytonsmith.abstraction.events.MCBlockBurnEvent;
 import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
@@ -24,7 +22,8 @@ import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
 import com.laytonsmith.abstraction.events.MCNotePlayEvent;
 import com.laytonsmith.abstraction.events.MCSignChangeEvent;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -33,18 +32,19 @@ import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
+import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
-import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,7 +62,7 @@ public class BlockEvents {
 	public abstract static class piston_event extends AbstractEvent {
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			return true;
 		}
 
@@ -72,27 +72,16 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
 			return false;
 		}
 
-		public Map<String, Construct> evaluate_stub(BindableEvent e) throws EventException {
+		Map<String, Mixed> evaluate_stub(BindableEvent e) throws EventException {
 			MCBlockPistonEvent event = (MCBlockPistonEvent) e;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> map = evaluate_helper(event);
+			Map<String, Mixed> map = evaluate_helper(event);
 
 			MCBlock block = event.getBlock();
-			MCMaterial mat = block.getType();
-
-			CArray blk = CArray.GetAssociativeArray(t);
-			blk.set("name", mat.getName());
-			blk.set("type", new CInt(mat.getType(), t), t);
-			blk.set("data", new CInt(block.getData(), t), t);
-			blk.set("X", new CInt(block.getX(), t), t);
-			blk.set("Y", new CInt(block.getY(), t), t);
-			blk.set("Z", new CInt(block.getZ(), t), t);
-			blk.set("world", new CString(block.getWorld().getName(), t), t);
-			map.put("block", blk);
 
 			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
 			map.put("isSticky", CBoolean.get(event.isSticky()));
@@ -114,9 +103,7 @@ public class BlockEvents {
 		public String docs() {
 			return "{} "
 					+ "This event is called when a piston is extended. Cancelling the event cancels the move."
-					+ "{block: An array with keys 'type' (int; deprecated), 'name' (string), 'data' (int), 'X' (int),"
-					+ " 'Y' (int), 'Z' (int) and 'world' (string) for the physical location of the block"
-					+ " | location: the locationArray of this block | direction: direction of travel"
+					+ "{location: the locationArray of this piston | direction: direction of travel"
 					+ " | sticky: true if the piston is sticky | affectedBlocks: blocks pushed}"
 					+ "{} "
 					+ "{} "
@@ -129,21 +116,19 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCBlockPistonExtendEvent event = (MCBlockPistonExtendEvent) e;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> map = evaluate_stub(e);
+			Map<String, Mixed> map = evaluate_stub(e);
 
 			CArray affected = new CArray(t);
 			for(MCBlock block : event.getPushedBlocks()) {
 				MCMaterial mat = block.getType();
 				CArray blk = CArray.GetAssociativeArray(t);
 				blk.set("name", mat.getName(), t);
-				blk.set("type", new CInt(mat.getType(), t), t);
-				blk.set("data", new CInt(block.getData(), t), t);
-				blk.set("X", new CInt(block.getX(), t), t);
-				blk.set("Y", new CInt(block.getY(), t), t);
-				blk.set("Z", new CInt(block.getZ(), t), t);
+				blk.set("x", new CInt(block.getX(), t), t);
+				blk.set("y", new CInt(block.getY(), t), t);
+				blk.set("z", new CInt(block.getZ(), t), t);
 				blk.set("world", new CString(block.getWorld().getName(), t), t);
 				affected.push(blk, t);
 			}
@@ -153,7 +138,7 @@ public class BlockEvents {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -169,9 +154,7 @@ public class BlockEvents {
 		public String docs() {
 			return "{} "
 					+ "This event is called when a piston is retracted. Cancelling the event cancels the move."
-					+ "{block: An array with keys 'type' (int; deprecated), 'name' (string), 'data' (int), 'X' (int),"
-					+ " 'Y' (int), 'Z' (int) and 'world' (string) for the physical location of the block"
-					+ " | location: the locationArray of this block | direction: direction of travel"
+					+ "{location: the locationArray of this piston | direction: direction of travel"
 					+ " | sticky: true if the piston is sticky | retractedLocation: if the piston"
 					+ " is sticky and attached to a block, where the attached block would end up }"
 					+ "{} "
@@ -185,16 +168,16 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCBlockPistonRetractEvent event = (MCBlockPistonRetractEvent) e;
-			Map<String, Construct> map = evaluate_stub(e);
+			Map<String, Mixed> map = evaluate_stub(e);
 			map.put("retractedLocation", ObjectGenerator.GetGenerator().location(event.getRetractedLocation(), false));
 			return map;
 		}
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -208,22 +191,19 @@ public class BlockEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <string match> | name: <string match> | type: <math match> | data: <string match>}"
+			return "{player: <string match> | block: <string match>}"
 					+ "This event is called when a block is broken. Cancelling the event cancels the breakage."
-					+ "{player: The player's name | block: An array with"
-					+ " keys 'type' (int; deprecated), 'name' (string), 'data' (int), 'X' (int), 'Y' (int), 'Z' (int)"
-					+ " and 'world' (string) for the physical location of the block"
+					+ "{player: The player's name | block: the block type that was broken"
 					+ " | location: the locationArray of this block | drops | xp}"
-					+ "{drops: an array of arrays (with keys 'type' (string),"
-					+ " 'qty' (int), 'data' (int), 'enchants' (array)) of items the block will drop"
+					+ "{drops: an array of arrays of items the block will drop"
 					+ " | xp: the xp that this block will drop, if any}"
 					+ "{drops|xp} "
 					+ "{}";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -232,7 +212,38 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilter
+			Map<String, Mixed> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("name")) {
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("name").val(), 0);
+				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
+						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
+			} else if(prefilter.containsKey("type")) {
+				Mixed cid = prefilter.get("type");
+				if(cid.isInstanceOf(CInt.class)) {
+					int id = (int) ((CInt) cid).getInt();
+					int data = 0;
+					if(prefilter.containsKey("data")) {
+						Mixed cdata = prefilter.get("data");
+						if(cdata.isInstanceOf(CInt.class)) {
+							data = (int) ((CInt) cdata).getInt();
+						}
+					}
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(id, data);
+					if(mat == null) {
+						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
+					}
+					prefilter.put("block", new CString(mat.getName(), event.getTarget()));
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"type\" and \"data\" prefilters in " + getName()
+							+ " are deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
+				}
+			}
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(!(e instanceof MCBlockBreakEvent)) {
 				return false;
 			}
@@ -244,29 +255,8 @@ public class BlockEvents {
 				}
 			}
 
-			if(prefilter.containsKey("name")) {
-				if(!prefilter.get("name").val().equals(event.getBlock().getType().getName())) {
-					return false;
-				}
-			} else if(prefilter.containsKey("type")) {
-				Construct v = prefilter.get("type");
-				if(v instanceof CInt) {
-					if(event.getBlock().getTypeId() != ((CInt) v).getInt()) {
-						return false;
-					}
-				} else {
-					return false;
-				}
-			}
-
-			if(prefilter.containsKey("data")) {
-				Construct v = prefilter.get("data");
-
-				if(v instanceof CInt) {
-					if((int) event.getBlock().getData() != ((CInt) v).getInt()) {
-						return false;
-					}
-				} else {
+			if(prefilter.containsKey("block")) {
+				if(!event.getBlock().getType().getName().equals(prefilter.get("block").val())) {
 					return false;
 				}
 			}
@@ -279,34 +269,23 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCBlockBreakEvent event = (MCBlockBreakEvent) e;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> map = evaluate_helper(event);
+			Map<String, Mixed> map = evaluate_helper(event);
 
 			MCBlock block = event.getBlock();
-			MCMaterial mat = block.getType();
 
 			map.put("player", new CString(event.getPlayer().getName(), t));
-
-			CArray blk = CArray.GetAssociativeArray(t);
-			blk.set("name", mat.getName(), t);
-			blk.set("type", new CInt(mat.getType(), t), t);
-			blk.set("data", new CInt(block.getData(), t), t);
-			blk.set("X", new CInt(block.getX(), t), t);
-			blk.set("Y", new CInt(block.getY(), t), t);
-			blk.set("Z", new CInt(block.getZ(), t), t);
-			blk.set("world", new CString(block.getWorld().getName(), t), t);
-			map.put("block", blk);
+			map.put("block", new CString(block.getType().getName(), t));
 
 			CArray drops = new CArray(t);
 			Collection<MCItemStack> items = event.getDrops();
 			if(items == null) {
-				items = event.getBlock().getDrops(event.getPlayer().getItemInHand());
+				items = block.getDrops(event.getPlayer().getInventory().getItemInMainHand());
 			}
 			for(MCItemStack stack : items) {
-				CArray item = (CArray) ObjectGenerator.GetGenerator().item(stack, t);
-				drops.push(item, t);
+				drops.push(ObjectGenerator.GetGenerator().item(stack, t), t);
 			}
 			map.put("drops", drops);
 
@@ -317,16 +296,19 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
 			MCBlockBreakEvent event = (MCBlockBreakEvent) e;
 
 			if(key.equals("drops")) {
 				List<MCItemStack> drops = new ArrayList<>();
-				if(value instanceof CArray) {
+				if(value.isInstanceOf(CArray.class)) {
 					CArray arr = (CArray) value;
 					for(int i = 0; i < arr.size(); i++) {
-						CArray item = (CArray) arr.get(i, value.getTarget());
-						drops.add(ObjectGenerator.GetGenerator().item(item, value.getTarget()));
+						CArray item = Static.getArray(arr.get(i, value.getTarget()), value.getTarget());
+						MCItemStack stack = ObjectGenerator.GetGenerator().item(item, value.getTarget());
+						if(!stack.isEmpty()) {
+							drops.add(stack);
+						}
 					}
 				}
 				event.setDrops(drops);
@@ -334,7 +316,7 @@ public class BlockEvents {
 			}
 
 			if(key.equals("xp")) {
-				if(value instanceof CInt) {
+				if(value.isInstanceOf(CInt.class)) {
 					int xp = Integer.parseInt(value.val());
 					event.setExpToDrop(xp);
 					return true;
@@ -355,22 +337,19 @@ public class BlockEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <string match> | name: <string match> | type: <math match> | data: <string match>} "
+			return "{player: <string match> | block: <string match>} "
 					+ "This event is called when a player places a block. Cancelling the event cancels placing the block."
-					+ "{player: The player's name | type: (deprecated) numerical type id of the block being placed"
-					+ " | name: the material name for the block being placed"
-					+ " | X: the X coordinate of the block | Y: the Y coordinate of the block"
-					+ " | Z: the Z coordinate of the block | world: the world of the block"
-					+ " | data: the data value for the block being placed | against: the block"
-					+ " being placed against | oldblock: the blocktype and blockdata being replaced"
+					+ "{player: The player's name | block: the block type that was placed"
+					+ " | against: a block array of the block being placed against"
+					+ " | oldblock: the old block type that was replaced"
 					+ " | location: A locationArray for this block} "
-					+ "{name|type|data} "
+					+ "{block} "
 					+ "{}";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -379,7 +358,38 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilter
+			Map<String, Mixed> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("name")) {
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("name").val(), 0);
+				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
+						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
+			} else if(prefilter.containsKey("type")) {
+				Mixed cid = prefilter.get("type");
+				if(cid.isInstanceOf(CInt.class)) {
+					int id = (int) ((CInt) cid).getInt();
+					int data = 0;
+					if(prefilter.containsKey("data")) {
+						Mixed cdata = prefilter.get("data");
+						if(cdata.isInstanceOf(CInt.class)) {
+							data = (int) ((CInt) cdata).getInt();
+						}
+					}
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(id, data);
+					if(mat == null) {
+						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
+					}
+					prefilter.put("block", new CString(mat.getName(), event.getTarget()));
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"type\" and \"data\" prefilters in " + getName()
+							+ " are deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
+				}
+			}
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(!(e instanceof MCBlockPlaceEvent)) {
 				return false;
 			}
@@ -391,30 +401,8 @@ public class BlockEvents {
 				}
 			}
 
-			if(prefilter.containsKey("name")) {
-				if(!prefilter.get("name").val().equals(event.getBlock().getType().getName())) {
-					return false;
-				}
-			} else if(prefilter.containsKey("type")) {
-				Construct v = prefilter.get("type");
-
-				if(v instanceof CInt) {
-					if(event.getBlock().getTypeId() != ((CInt) v).getInt()) {
-						return false;
-					}
-				} else {
-					return false;
-				}
-			}
-
-			if(prefilter.containsKey("data")) {
-				Construct v = prefilter.get("data");
-
-				if(v instanceof CInt) {
-					if((int) event.getBlock().getData() != ((CInt) v).getInt()) {
-						return false;
-					}
-				} else {
+			if(prefilter.containsKey("block")) {
+				if(!event.getBlock().getType().getName().equals(prefilter.get("block").val())) {
 					return false;
 				}
 			}
@@ -428,79 +416,63 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> map = evaluate_helper(e);
+			Map<String, Mixed> map = evaluate_helper(e);
 
 			MCBlock block = event.getBlock();
 			MCMaterial mat = block.getType();
 
 			map.put("player", new CString(event.getPlayer().getName(), t));
-
-			map.put("name", new CString(mat.getName(), t));
-			map.put("type", new CInt(mat.getType(), t));
-			map.put("data", new CInt(block.getData(), t));
-			map.put("X", new CInt(block.getX(), t));
-			map.put("Y", new CInt(block.getY(), t));
-			map.put("Z", new CInt(block.getZ(), t));
-			map.put("world", new CString(block.getWorld().getName(), t));
+			map.put("block", new CString(mat.getName(), t));
 			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
 
 			MCBlock agstblock = event.getBlockAgainst();
 			MCMaterial agstmat = agstblock.getType();
 			CArray agst = CArray.GetAssociativeArray(t);
 			agst.set("name", agstmat.getName(), t);
-			agst.set("type", new CInt(agstmat.getType(), t), t);
-			agst.set("data", new CInt(agstblock.getData(), t), t);
-			agst.set("X", new CInt(agstblock.getX(), t), t);
-			agst.set("Y", new CInt(agstblock.getY(), t), t);
-			agst.set("Z", new CInt(agstblock.getZ(), t), t);
+			agst.set("x", new CInt(agstblock.getX(), t), t);
+			agst.set("y", new CInt(agstblock.getY(), t), t);
+			agst.set("z", new CInt(agstblock.getZ(), t), t);
 			map.put("against", agst);
 
-			MCBlockState old = event.getBlockReplacedState();
-			MCMaterial oldmat = old.getType();
-			CArray oldarr = CArray.GetAssociativeArray(t);
-			oldarr.set("name", oldmat.getName(), t);
-			oldarr.set("type", new CInt(oldmat.getType(), t), t);
-			oldarr.set("data", new CInt(old.getData().getData(), t), t);
-			map.put("oldblock", oldarr);
+			map.put("oldblock", new CString(event.getBlockReplacedState().getType().getName(), t));
 
 			return map;
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
 			MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
 
-			if(key.equals("name")) {
+			if(key.equals("block")) {
 				MCMaterial mat = StaticLayer.GetMaterial(value.val());
 				if(mat == null) {
 					throw new CREFormatException("Material name \"" + value.val() + "\" not found.", value.getTarget());
 				}
 				event.getBlock().setType(mat);
 				return true;
+			} else if(key.equals("name")) {
+				MCMaterial mat = StaticLayer.GetMaterial(value.val());
+				if(mat == null) {
+					throw new CREFormatException("Material name \"" + value.val() + "\" not found.", value.getTarget());
+				}
+				event.getBlock().setType(mat);
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Mutable data key \"name\" in " + getName()
+						+ " is deprecated for \"block\". Converted to " + mat.getName(), value.getTarget());
+				return true;
 			} else if(key.equals("type")) {
-				if(value instanceof CInt) {
-					int i = Integer.parseInt(value.val());
-					event.getBlock().setTypeId(i);
+				if(value.isInstanceOf(CInt.class)) {
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy((int) ((CInt) value).getInt(), 0);
+					event.getBlock().setType(mat);
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Mutable data key \"type\" in " + getName()
+							+ " is deprecated for \"block\". Converted to " + mat.getName(), value.getTarget());
 					return true;
 				}
 			} else if(key.equals("data")) {
-				if(value instanceof CInt) {
-					byte b;
-					try {
-						b = Byte.parseByte(value.val());
-					} catch (NumberFormatException exc) {
-						if(Integer.parseInt(value.val()) < 0) {
-							b = 0;
-						} else {
-							b = Byte.MAX_VALUE;
-						}
-					}
-					event.getBlock().setData(b);
-					return true;
-				}
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Mutable data key \"data\" in " + getName()
+						+ " is deprecated for \"block\".", value.getTarget());
 			}
 			return false;
 		}
@@ -516,18 +488,17 @@ public class BlockEvents {
 
 		@Override
 		public String docs() {
-			return "{name: <string match> | type: <math match> | data: <string match>}"
+			return "{block: <string match>}"
 					+ "This event is called when a block is burned. Cancelling the event cancels the burn. "
-					+ "{block: An array with keys 'type' (int; deprecated), 'name' (string), 'data' (int), 'X' (int),"
-					+ " 'Y' (int), 'Z' (int) and 'world' (string) for the physical location of the block"
+					+ "{block: the block type that was burned"
 					+ " | location: the locationArray of this block}"
 					+ "{block}"
 					+ "{}";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -536,34 +507,45 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilter
+			Map<String, Mixed> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("name")) {
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("name").val(), 0);
+				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
+						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
+			} else if(prefilter.containsKey("type")) {
+				Mixed cid = prefilter.get("type");
+				if(cid.isInstanceOf(CInt.class)) {
+					int id = (int) ((CInt) cid).getInt();
+					int data = 0;
+					if(prefilter.containsKey("data")) {
+						Mixed cdata = prefilter.get("data");
+						if(cdata.isInstanceOf(CInt.class)) {
+							data = (int) ((CInt) cdata).getInt();
+						}
+					}
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(id, data);
+					if(mat == null) {
+						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
+					}
+					prefilter.put("block", new CString(mat.getName(), event.getTarget()));
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"type\" and \"data\" prefilters in " + getName()
+							+ " are deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
+				}
+			}
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(!(e instanceof MCBlockBurnEvent)) {
 				return false;
 			}
 			MCBlockBurnEvent event = (MCBlockBurnEvent) e;
 
-			if(prefilter.containsKey("name")) {
-				if(!prefilter.get("name").val().equals(event.getBlock().getType().getName())) {
-					return false;
-				}
-			} else if(prefilter.containsKey("type")) {
-				Construct v = prefilter.get("type");
-				if(v instanceof CInt) {
-					if(event.getBlock().getTypeId() != ((CInt) v).getInt()) {
-						return false;
-					}
-				} else {
-					return false;
-				}
-			}
-
-			if(prefilter.containsKey("data")) {
-				Construct v = prefilter.get("data");
-				if(v instanceof CInt) {
-					if((int) event.getBlock().getData() != ((CInt) v).getInt()) {
-						return false;
-					}
-				} else {
+			if(prefilter.containsKey("block")) {
+				if(!event.getBlock().getType().getName().equals(prefilter.get("block").val())) {
 					return false;
 				}
 			}
@@ -577,31 +559,21 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCBlockBurnEvent event = (MCBlockBurnEvent) e;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> map = evaluate_helper(event);
+			Map<String, Mixed> map = evaluate_helper(event);
 
 			MCBlock block = event.getBlock();
-			MCMaterial mat = block.getType();
 
-			CArray blk = CArray.GetAssociativeArray(t);
-			blk.set("name", mat.getName(), t);
-			blk.set("type", new CInt(mat.getType(), t), t);
-			blk.set("data", new CInt(block.getData(), t), t);
-			blk.set("X", new CInt(block.getX(), t), t);
-			blk.set("Y", new CInt(block.getY(), t), t);
-			blk.set("Z", new CInt(block.getZ(), t), t);
-			blk.set("world", new CString(block.getWorld().getName(), t), t);
-			map.put("block", blk);
-
+			map.put("block", new CString(block.getType().getName(), t));
 			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
 
 			return map;
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
 			return false;
 		}
 	}
@@ -617,19 +589,19 @@ public class BlockEvents {
 		@Override
 		public String docs() {
 			return "{player: <macro> | cause: <macro> | world: <string match>}"
-					+ "This event is called when a block or entity is ignited."
-					+ "{player: The player's name | ignitingentity: entity ID, if entity is ignited"
-					+ " | ignitingblock: (deprecated) block ID, if block is ignited"
-					+ " | ignitingblockname: block material name, if block is ignited"
-					+ " | location: the locationArray of block or entity"
-					+ " | cause: the cause of ignition, one of: " + StringUtils.Join(MCIgniteCause.values(), ", ") + "}"
+					+ "This event is called when a block ignited by a block or entity."
+					+ "{player: The player's name | ignitingentity: entity ID, if caused by entity"
+					+ " | ignitingblock: the block's type, if caused by block"
+					+ " | ignitingblocklocation: the block's location that ignited"
+					+ " | location: the locationArray that got ignited"
+					+ " | cause: the cause of ignition, one of " + StringUtils.Join(MCIgniteCause.values(), ", ") + "}"
 					+ "{}"
 					+ "{}";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -638,7 +610,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(!(e instanceof MCBlockIgniteEvent)) {
 				return false;
 			}
@@ -659,13 +631,13 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(!(e instanceof MCBlockIgniteEvent)) {
 				throw new EventException("Cannot convert e to MCBlockIgniteEvent");
 			}
 			MCBlockIgniteEvent event = (MCBlockIgniteEvent) e;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> map = evaluate_helper(e);
+			Map<String, Mixed> map = evaluate_helper(e);
 
 			if(event.getPlayer() != null) {
 				map.put("player", new CString(event.getPlayer().getName(), t));
@@ -675,10 +647,10 @@ public class BlockEvents {
 				map.put("ignitingentity", new CString(event.getIgnitingEntity().getUniqueId().toString(), t));
 			}
 
-			if(event.getIgnitingBlock() != null) {
-				MCMaterial ignitingmat = event.getIgnitingBlock().getType();
-				map.put("ignitingblock", new CInt(ignitingmat.getType(), t));
-				map.put("ignitingblockname", new CString(ignitingmat.getName(), t));
+			MCBlock b = event.getIgnitingBlock();
+			if(b != null) {
+				map.put("ignitingblock", new CString(b.getType().getName(), t));
+				map.put("ignitingblocklocation",  ObjectGenerator.GetGenerator().location(b.getLocation(), false));
 			}
 
 			map.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
@@ -688,7 +660,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 	}
@@ -703,62 +675,96 @@ public class BlockEvents {
 
 		@Override
 		public String docs() {
-			return "{name: <string match> | type: <math match> | data: <string match> | world: <string match>"
-					+ " | toname: <string match> | totype: <math match> | todata: <string match>"
-					+ " | toworld: <string match> | face: <string match>}"
+			return "{block: <string match> | world: <string match>"
+					+ " | toblock: <string match> | toworld: <string match> | face: <string match>}"
 					+ "This event is called when a water or lava is flowed and ender dragon egg is teleported."
 					+ " Cancelling the event cancels the flow or teleport."
-					+ "{block: An array with keys 'type' (int; deprecated), 'name' (string), 'data' (int), 'X' (int),"
-					+ " 'Y' (int), 'Z' (int) and 'world' (string) for the physical location of the block"
-					+ " | location: the locationArray of this block"
-					+ " | toblock: target block"
-					+ " | tolocation: target block's locationArray}"
+					+ "{block: the source block type"
+					+ " | location: the locationArray of the source block"
+					+ " | toblock: the target block type"
+					+ " | tolocation: the target block's locationArray}"
 					+ "{block|toblock}"
 					+ "{}";
 		}
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilter
+			Map<String, Mixed> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("name")) {
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("name").val(), 0);
+				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"name\" prefilter in " + getName()
+						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
+			} else if(prefilter.containsKey("type")) {
+				Mixed cid = prefilter.get("type");
+				if(cid.isInstanceOf(CInt.class)) {
+					int id = (int) ((CInt) cid).getInt();
+					int data = 0;
+					if(prefilter.containsKey("data")) {
+						Mixed cdata = prefilter.get("data");
+						if(cdata.isInstanceOf(CInt.class)) {
+							data = (int) ((CInt) cdata).getInt();
+						}
+					}
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(id, data);
+					if(mat == null) {
+						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
+					}
+					prefilter.put("block", new CString(mat.getName(), event.getTarget()));
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"type\" and \"data\" prefilters in " + getName()
+							+ " are deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
+				}
+			}
+			if(prefilter.containsKey("toname")) {
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("toname").val(), 0);
+				prefilter.put("toblock", new CString(mat.getName(), event.getTarget()));
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"toname\" prefilter in " + getName()
+						+ " is deprecated for \"toblock\". Converted to " + mat.getName(), event.getTarget());
+			} else if(prefilter.containsKey("totype")) {
+				Mixed cid = prefilter.get("totype");
+				if(cid.isInstanceOf(CInt.class)) {
+					int id = (int) ((CInt) cid).getInt();
+					int data = 0;
+					if(prefilter.containsKey("todata")) {
+						Mixed cdata = prefilter.get("todata");
+						if(cdata.isInstanceOf(CInt.class)) {
+							data = (int) ((CInt) cdata).getInt();
+						}
+					}
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(id, data);
+					if(mat == null) {
+						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
+					}
+					prefilter.put("toblock", new CString(mat.getName(), event.getTarget()));
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"totype\" and \"todata\" prefilters in " + getName()
+							+ " are deprecated for \"toblock\". Converted to " + mat.getName(), event.getTarget());
+				}
+			}
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(!(e instanceof MCBlockFromToEvent)) {
 				return false;
 			}
 			MCBlockFromToEvent event = (MCBlockFromToEvent) e;
 			Prefilters.match(prefilter, "world", event.getBlock().getWorld().getName(), PrefilterType.STRING_MATCH);
-			if(prefilter.containsKey("name")) {
-				if(!prefilter.get("name").val().equals(event.getBlock().getType().getName())) {
-					return false;
-				}
-			} else if(prefilter.containsKey("type")) {
-				Construct v = prefilter.get("type");
-				if(v instanceof CInt) {
-					if(event.getBlock().getTypeId() != ((CInt) v).getInt()) {
-						return false;
-					}
-				} else {
+			if(prefilter.containsKey("block")) {
+				if(!event.getBlock().getType().getName().equals(prefilter.get("block").val())) {
 					return false;
 				}
 			}
-			Prefilters.match(prefilter, "data", (int) event.getBlock().getData(), PrefilterType.STRING_MATCH);
-			if(prefilter.containsKey("toname")) {
-				if(!prefilter.get("toname").val().equals(event.getToBlock().getType().getName())) {
-					return false;
-				}
-			} else if(prefilter.containsKey("totype")) {
-				Construct v = prefilter.get("totype");
-				if(v instanceof CInt) {
-					if(event.getToBlock().getTypeId() != ((CInt) v).getInt()) {
-						return false;
-					}
-				} else {
+			if(prefilter.containsKey("toblock")) {
+				if(!event.getToBlock().getType().getName().equals(prefilter.get("toblock").val())) {
 					return false;
 				}
 			}
-			Prefilters.match(prefilter, "todata", (int) event.getToBlock().getData(), PrefilterType.STRING_MATCH);
 			Prefilters.match(prefilter, "toworld", event.getToBlock().getWorld().getName(), PrefilterType.STRING_MATCH);
 			Prefilters.match(prefilter, "face", event.getBlockFace().toString(), PrefilterType.STRING_MATCH);
 			return true;
@@ -770,31 +776,22 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(!(e instanceof MCBlockFromToEvent)) {
 				throw new EventException("Cannot convert e to MCBlockFromToEvent");
 			}
 			MCBlockFromToEvent event = (MCBlockFromToEvent) e;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> map = evaluate_helper(e);
+			Map<String, Mixed> map = evaluate_helper(e);
 
 			MCBlock block = event.getBlock();
-			MCMaterial mat = block.getType();
 
-			CArray blk = CArray.GetAssociativeArray(t);
-			blk.set("name", mat.getName());
-			blk.set("type", new CInt(mat.getType(), t), t);
-			blk.set("data", new CInt(block.getData(), t), t);
-			map.put("block", blk);
+			map.put("block", new CString(block.getType().getName(), t));
 			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
 
 			MCBlock toblock = event.getToBlock();
-			MCMaterial tomat = toblock.getType();
-			CArray toblk = CArray.GetAssociativeArray(t);
-			toblk.set("name", tomat.getName(), t);
-			toblk.set("type", new CInt(tomat.getType(), t), t);
-			toblk.set("data", new CInt(toblock.getData(), t), t);
-			map.put("toblock", toblk);
+
+			map.put("toblock", new CString(toblock.getType().getName(), t));
 			map.put("tolocation", ObjectGenerator.GetGenerator().location(toblock.getLocation(), false));
 
 			map.put("face", new CString(event.getBlockFace().toString(), t));
@@ -807,62 +804,122 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(!(event instanceof MCBlockFromToEvent)) {
 				return false;
 			}
 			MCBlockFromToEvent e = (MCBlockFromToEvent) event;
-			if(key.equals("block") && value instanceof CArray) {
-				CArray blockArray = (CArray) value;
+			if(key.equals("block")) {
 				MCBlock block = e.getBlock();
-				Construct name = blockArray.get("name", value.getTarget());
-				if(name != null) {
-					MCMaterial mat = StaticLayer.GetMaterial(name.val());
+				if(value.isInstanceOf(CArray.class)) {
+					CArray blockArray = (CArray) value;
+					if(blockArray.containsKey("name")) {
+						Mixed name = blockArray.get("name", value.getTarget());
+						int data = 0;
+						if(blockArray.containsKey("data")) {
+							try {
+								data = Integer.parseInt(blockArray.get("data", value.getTarget()).val());
+							} catch (Exception ex) {
+								throw new CREFormatException("blockArray is invalid", value.getTarget());
+							}
+						}
+						MCMaterial mat = StaticLayer.GetMaterialFromLegacy(name.val(), data);
+						if(mat == null) {
+							throw new CREFormatException("Material name \"" + name.val() + "\" not found.", value.getTarget());
+						}
+						block.setType(mat);
+						MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Mutable data key \"block\" in " + getName()
+								+ " is deprecated when using an array. Converted to " + mat.getName(), value.getTarget());
+						return true;
+					}
+					if(blockArray.containsKey("type")) {
+						int type;
+						int data = 0;
+						try {
+							type = Integer.parseInt(blockArray.get("type", value.getTarget()).val());
+						} catch (Exception ex) {
+							throw new CREFormatException("blockArray is invalid", value.getTarget());
+						}
+						if(blockArray.containsKey("data")) {
+							try {
+								data = Integer.parseInt(blockArray.get("data", value.getTarget()).val());
+							} catch (Exception ex) {
+								throw new CREFormatException("blockArray is invalid", value.getTarget());
+							}
+						}
+						MCMaterial mat = StaticLayer.GetMaterialFromLegacy(type, data);
+						if(mat == null) {
+							throw new CREFormatException("Material type \"" + type + "\" not found.", value.getTarget());
+						}
+						block.setType(mat);
+						MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Mutable data key \"block\" in " + getName()
+								+ " is deprecated when using an array. Converted to " + mat.getName(), value.getTarget());
+						return true;
+					}
+				} else {
+					MCMaterial mat = StaticLayer.GetMaterial(value.val());
 					if(mat == null) {
-						throw new CREFormatException("Material name \"" + name.val() + "\" not found.", value.getTarget());
+						throw new CREFormatException("Material type \"" + value.val() + "\" not found.", value.getTarget());
 					}
 					block.setType(mat);
-				} else {
-					try {
-						block.setTypeId(Integer.parseInt(blockArray.get("type", value.getTarget()).val()));
-					} catch (Exception ex) {
-						throw new CREFormatException("blockArray is invalid", value.getTarget());
-					}
+					return true;
 				}
-				if(blockArray.containsKey("data")) {
-					try {
-						block.setData((byte) Integer.parseInt(blockArray.get("data", value.getTarget()).val()));
-					} catch (Exception ex) {
-						throw new CREFormatException("blockArray is invalid", value.getTarget());
-					}
-				}
-				return true;
 			}
-			if(key.equals("toblock") && value instanceof CArray) {
-				CArray blockArray = (CArray) value;
+			if(key.equals("toblock")) {
 				MCBlock block = e.getToBlock();
-				Construct name = blockArray.get("name", value.getTarget());
-				if(name != null) {
-					MCMaterial mat = StaticLayer.GetMaterial(name.val());
+				if(value.isInstanceOf(CArray.class)) {
+					CArray blockArray = (CArray) value;
+					if(blockArray.containsKey("name")) {
+						Mixed name = blockArray.get("name", value.getTarget());
+						int data = 0;
+						if(blockArray.containsKey("data")) {
+							try {
+								data = Integer.parseInt(blockArray.get("data", value.getTarget()).val());
+							} catch (Exception ex) {
+								throw new CREFormatException("blockArray is invalid", value.getTarget());
+							}
+						}
+						MCMaterial mat = StaticLayer.GetMaterialFromLegacy(name.val(), data);
+						if(mat == null) {
+							throw new CREFormatException("Material name \"" + name.val() + "\" not found.", value.getTarget());
+						}
+						block.setType(mat);
+						MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Mutable data key \"toblock\" in " + getName()
+								+ " is deprecated when using an array. Converted to " + mat.getName(), value.getTarget());
+						return true;
+					}
+					if(blockArray.containsKey("type")) {
+						int type;
+						int data = 0;
+						try {
+							type = Integer.parseInt(blockArray.get("type", value.getTarget()).val());
+						} catch (Exception ex) {
+							throw new CREFormatException("blockArray is invalid", value.getTarget());
+						}
+						if(blockArray.containsKey("data")) {
+							try {
+								data = Integer.parseInt(blockArray.get("data", value.getTarget()).val());
+							} catch (Exception ex) {
+								throw new CREFormatException("blockArray is invalid", value.getTarget());
+							}
+						}
+						MCMaterial mat = StaticLayer.GetMaterialFromLegacy(type, data);
+						if(mat == null) {
+							throw new CREFormatException("Material type \"" + type + "\" not found.", value.getTarget());
+						}
+						block.setType(mat);
+						MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Mutable data key \"toblock\" in " + getName()
+								+ " is deprecated when using an array. Converted to " + mat.getName(), value.getTarget());
+						return true;
+					}
+				} else {
+					MCMaterial mat = StaticLayer.GetMaterial(value.val());
 					if(mat == null) {
-						throw new CREFormatException("Material name \"" + name.val() + "\" not found.", value.getTarget());
+						throw new CREFormatException("Material type \"" + value.val() + "\" not found.", value.getTarget());
 					}
 					block.setType(mat);
-				} else {
-					try {
-						block.setTypeId(Integer.parseInt(blockArray.get("type", value.getTarget()).val()));
-					} catch (Exception ex) {
-						throw new CREFormatException("blockArray is invalid", value.getTarget());
-					}
+					return true;
 				}
-				if(blockArray.containsKey("data")) {
-					try {
-						block.setData((byte) Integer.parseInt(blockArray.get("data", value.getTarget()).val()));
-					} catch (Exception ex) {
-						throw new CREFormatException("blockArray is invalid", value.getTarget());
-					}
-				}
-				return true;
 			}
 			return false;
 		}
@@ -878,7 +935,7 @@ public class BlockEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <string match> | 1: <regex> | 2: regex> | 3: <regex> | 4: <regex> }"
+			return "{player: <string match> | 1: <regex> | 2: <regex> | 3: <regex> | 4: <regex> }"
 					+ "This event is called when a player changes a sign. Cancelling the event cancels any edits completely."
 					+ "{player: The player's name | location: an array usable as a locationArray while also compatible"
 					+ " with X,Y,Z,world indices | text: An array with keys 0 thru 3 defining every line on the sign}"
@@ -887,8 +944,8 @@ public class BlockEvents {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -897,7 +954,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(!(e instanceof MCSignChangeEvent)) {
 				return false;
 			}
@@ -918,12 +975,12 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(!(e instanceof MCSignChangeEvent)) {
 				throw new EventException("Cannot convert e to MCSignChangeEvent");
 			}
 			MCSignChangeEvent event = (MCSignChangeEvent) e;
-			Map<String, Construct> map = evaluate_helper(e);
+			Map<String, Mixed> map = evaluate_helper(e);
 
 			map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 			map.put("text", event.getLines());
@@ -933,7 +990,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(!(event instanceof MCSignChangeEvent)) {
 				return false;
 			}
@@ -941,7 +998,7 @@ public class BlockEvents {
 
 			// Allow changing everything at once.
 			if(key.equals("text")) {
-				if(!(value instanceof CArray)) {
+				if(!(value.isInstanceOf(CArray.class))) {
 					return false;
 				}
 
@@ -1005,7 +1062,7 @@ public class BlockEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <string match> Type of dispenser | item: <item match> Item which is dispensed}"
+			return "{type: <string match> Type of dispenser | itemname: <string match> Item type which is dispensed}"
 					+ "This event is called when a dispenser dispense an item. Cancelling the event cancels dispensing."
 					+ "{type: Type of dispenser | item: Item which is dispensed | velocity: Returns an associative array"
 					+ " indicating the x/y/z components of item velocity. As a convenience, the magnitude is also included."
@@ -1015,8 +1072,8 @@ public class BlockEvents {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1025,11 +1082,24 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		@SuppressWarnings("deprecation")
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilter
+			Map<String, Mixed> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("item")) {
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"item\" prefilter in " + getName()
+						+ " is deprecated for \"itemname\".", event.getTarget());
+				MCItemStack is = Static.ParseItemNotation(null, prefilter.get("item").val(), 1, event.getTarget());
+				prefilter.put("itemname", new CString(is.getType().getName(), event.getTarget()));
+			}
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCBlockDispenseEvent) {
 				MCBlockDispenseEvent event = (MCBlockDispenseEvent) e;
 				Prefilters.match(prefilter, "type", event.getBlock().getType().getName(), PrefilterType.STRING_MATCH);
-				Prefilters.match(prefilter, "item", Static.ParseItemNotation(event.getItem()), PrefilterType.ITEM_MATCH);
+				Prefilters.match(prefilter, "itemname", event.getItem().getType().getName(), PrefilterType.STRING_MATCH);
 				return true;
 			}
 			return false;
@@ -1041,10 +1111,10 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCBlockDispenseEvent event = (MCBlockDispenseEvent) e;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> map = evaluate_helper(e);
+			Map<String, Mixed> map = evaluate_helper(e);
 
 			MCBlock block = event.getBlock();
 
@@ -1060,7 +1130,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCBlockDispenseEvent) {
 				if("item".equals(key)) {
 					((MCBlockDispenseEvent) event).setItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
@@ -1089,66 +1159,96 @@ public class BlockEvents {
 		}
 
 		@Override
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilter
+			Map<String, Mixed> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("oldname")) {
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("oldname").val(), 0);
+				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"oldname\" prefilter in " + getName()
+						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
+			} else if(prefilter.containsKey("oldtype")) {
+				Mixed cid = prefilter.get("oldtype");
+				if(cid.isInstanceOf(CInt.class)) {
+					int id = (int) ((CInt) cid).getInt();
+					int data = 0;
+					if(prefilter.containsKey("olddata")) {
+						Mixed cdata = prefilter.get("olddata");
+						if(cdata.isInstanceOf(CInt.class)) {
+							data = (int) ((CInt) cdata).getInt();
+						}
+					}
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(id, data);
+					if(mat == null) {
+						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
+					}
+					prefilter.put("block", new CString(mat.getName(), event.getTarget()));
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"oldtype\" and \"olddata\" prefilters in " + getName()
+							+ " are deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
+				}
+			}
+			if(prefilter.containsKey("newname")) {
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("newname").val(), 0);
+				prefilter.put("newblock", new CString(mat.getName(), event.getTarget()));
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"newname\" prefilter in " + getName()
+						+ " is deprecated for \"newblock\". Converted to " + mat.getName(), event.getTarget());
+			} else if(prefilter.containsKey("newtype")) {
+				Mixed cid = prefilter.get("newtype");
+				if(cid.isInstanceOf(CInt.class)) {
+					int id = (int) ((CInt) cid).getInt();
+					int data = 0;
+					if(prefilter.containsKey("newdata")) {
+						Mixed cdata = prefilter.get("newdata");
+						if(cdata.isInstanceOf(CInt.class)) {
+							data = (int) ((CInt) cdata).getInt();
+						}
+					}
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(id, data);
+					if(mat == null) {
+						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
+					}
+					prefilter.put("newname", new CString(mat.getName(), event.getTarget()));
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"newtype\" and \"newdata\" prefilters in " + getName()
+							+ " are deprecated for \"newname\". Converted to " + mat.getName(), event.getTarget());
+				}
+			}
+		}
+
+		@Override
 		public String docs() {
-			return "{oldname: <string match> The block name before the growth"
-					+ " | oldtype: <math match> (deprecated) The block numeric id before the growth"
-					+ " | olddata: <string match> The block data before the growth"
-					+ " | newname: <string match> The block name after the growth"
-					+ " | newtype: <math match> (deprecated) The block numeric id after the growth"
-					+ " | newdata: <string match> The block data after the growth"
+			return "{block: <string match> The block name before the growth"
+					+ " | newblock: <string match> The block name after the growth"
 					+ " | world: <macro>}"
 					+ " This event is called when a block grows naturally. If the event is cancelled, the block will not grow."
-					+ " {oldblock: The block before the growth (an array with keys 'type' (deprecated), 'name', and 'data')"
-					+ " | newblock: The block after the growth (an array with keys 'type' (deprecated), 'name', and 'data')"
+					+ " {block: The block type before the growth"
+					+ " | newblock: The block type after the growth"
 					+ " | location: the location of the block that will grow}"
 					+ " {}"
 					+ " {}";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
 			if(!(event instanceof MCBlockGrowEvent)) {
 				return false;
 			}
-			MCBlockGrowEvent blockGrowEvent = (MCBlockGrowEvent) event;
-			MCBlock oldBlock = blockGrowEvent.getBlock();
-			if(prefilter.containsKey("oldname")) {
-				if(!prefilter.get("oldname").val().equals(oldBlock.getType().getName())) {
-					return false;
-				}
-			} else if(prefilter.containsKey("oldtype")) {
-				Construct v = prefilter.get("oldtype");
-				if(v instanceof CInt) {
-					if(oldBlock.getTypeId() != ((CInt) v).getInt()) {
-						return false;
-					}
-				} else {
+			MCBlockGrowEvent e = (MCBlockGrowEvent) event;
+			if(prefilter.containsKey("block")) {
+				if(!e.getBlock().getType().getName().equals(prefilter.get("block").val())) {
 					return false;
 				}
 			}
-			Prefilters.match(prefilter, "olddata", oldBlock.getData(), PrefilterType.STRING_MATCH);
-			MCBlockState newBlock = blockGrowEvent.getNewState();
-			if(prefilter.containsKey("newname")) {
-				if(!prefilter.get("newname").val().equals(newBlock.getType().getName())) {
-					return false;
-				}
-			} else if(prefilter.containsKey("newtype")) {
-				Construct v = prefilter.get("newtype");
-				if(v instanceof CInt) {
-					if(newBlock.getType().getType() != ((CInt) v).getInt()) {
-						return false;
-					}
-				} else {
+			if(prefilter.containsKey("newblock")) {
+				if(!e.getNewState().getType().getName().equals(prefilter.get("newblock").val())) {
 					return false;
 				}
 			}
-			Prefilters.match(prefilter, "newdata", newBlock.getData().getData(), PrefilterType.STRING_MATCH);
-			Prefilters.match(prefilter, "world", oldBlock.getWorld().getName(), PrefilterType.MACRO);
+			Prefilters.match(prefilter, "world", e.getBlock().getWorld().getName(), PrefilterType.MACRO);
 			return true;
 		}
 
@@ -1158,37 +1258,22 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(!(event instanceof MCBlockGrowEvent)) {
 				throw new EventException("Cannot convert event to BlockGrowEvent");
 			}
-			MCBlockGrowEvent blockGrowEvent = (MCBlockGrowEvent) event;
+			MCBlockGrowEvent e = (MCBlockGrowEvent) event;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> mapEvent = evaluate_helper(event);
+			Map<String, Mixed> mapEvent = evaluate_helper(e);
 
-			MCBlock oldBlock = blockGrowEvent.getBlock();
-			MCMaterial oldMat = oldBlock.getType();
-
-			CArray oldBlockArray = CArray.GetAssociativeArray(t);
-			oldBlockArray.set("name", oldMat.getName());
-			oldBlockArray.set("type", new CInt(oldMat.getType(), t), t);
-			oldBlockArray.set("data", new CInt(oldBlock.getData(), t), t);
-			mapEvent.put("oldblock", oldBlockArray);
-
-			MCBlockState newBlock = blockGrowEvent.getNewState();
-			MCMaterial newMat = newBlock.getType();
-			CArray newBlockArray = CArray.GetAssociativeArray(t);
-			newBlockArray.set("name", newMat.getName());
-			newBlockArray.set("type", new CInt(newMat.getType(), t), t);
-			newBlockArray.set("data", new CInt(newBlock.getData().getData(), t), t);
-			mapEvent.put("newblock", newBlockArray);
-
-			mapEvent.put("location", ObjectGenerator.GetGenerator().location(oldBlock.getLocation(), false));
+			mapEvent.put("block", new CString(e.getBlock().getType().getName(), t));
+			mapEvent.put("newblock", new CString(e.getNewState().getType().getName(), t));
+			mapEvent.put("location", ObjectGenerator.GetGenerator().location(e.getBlock().getLocation(), false));
 			return mapEvent;
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
 			return false;
 		}
 	}
@@ -1210,20 +1295,20 @@ public class BlockEvents {
 		public String docs() {
 			return "{}"
 					+ " This event is called when a noteblock is activated via player interaction or redstone."
-					+ " The instrument may be one of: " + StringUtils.Join(MCInstrument.values(), ", ", ", or ") + "."
+					+ " The instrument may be one of " + StringUtils.Join(MCInstrument.values(), ", ", ", or ") + "."
 					+ " {location: The location of the noteblock | instrument: The name of the sound"
 					+ " | tone: The note played (eg. F#) | octave: The octave the tone was played (0 - 2)}"
-					+ " {instrument|tone|octave}"
+					+ " {}"
 					+ " {}";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
 			return event instanceof MCNotePlayEvent;
 		}
 
@@ -1233,13 +1318,13 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(!(event instanceof MCNotePlayEvent)) {
 				throw new EventException("Cannot convert event to NotePlayEvent");
 			}
 			MCNotePlayEvent e = (MCNotePlayEvent) event;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> map = new HashMap<>();
+			Map<String, Mixed> map = new HashMap<>();
 
 			map.put("location", ObjectGenerator.GetGenerator().location(e.getBlock().getLocation(), false));
 			map.put("instrument", new CString(e.getInstrument().name(), t));
@@ -1250,35 +1335,9 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
-			if(e instanceof MCNotePlayEvent) {
-				MCNotePlayEvent event = (MCNotePlayEvent) e;
-				try {
-					if("instrument".equals(key)) {
-						event.setInstrument(MCInstrument.valueOf(value.val()));
-						return true;
-					}
-					if("tone".equals(key)) {
-						if(value.val().length() == 0) {
-							return false;
-						}
-						int octave = event.getNote().getOctave();
-						MCTone tone = MCTone.valueOf(value.val().substring(0, 1));
-						boolean sharp = value.val().endsWith("#");
-						event.setNote(StaticLayer.GetConvertor().GetNote(octave, tone, sharp));
-						return true;
-					}
-					if("octave".equals(key)) {
-						int octave = Static.getInt32(value, value.getTarget());
-						MCTone tone = event.getNote().getTone();
-						boolean sharp = event.getNote().isSharped();
-						event.setNote(StaticLayer.GetConvertor().GetNote(octave, tone, sharp));
-						return true;
-					}
-				} catch (IllegalArgumentException ex) {
-					throw new CREIllegalArgumentException("No " + key + " with the value " + value + " exists", value.getTarget(), ex);
-				}
-			}
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
+			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Modifying the instrument or note for note_play"
+					+ " events is no longer supported.", value.getTarget());
 			return false;
 		}
 	}
@@ -1298,12 +1357,11 @@ public class BlockEvents {
 
 		@Override
 		public String docs() {
-			return "{oldname: <string match> Block name before it fades"
-					+ " | oldtype: <math match> (deprecated) The block numerical id before it fades"
+			return "{block: <string match> Block type that is fading"
 					+ " | world: <string match>}"
 					+ "Called when a block fades, melts or disappears based on world conditions."
-					+ "{oldblock: The block before the fades (an array with keys 'type' (deprecated), 'name', and 'data')"
-					+ " | newblock: The block after the fades (an array with keys 'type' (deprecated), 'name', and 'data')"
+					+ "{block: The block type that is fading"
+					+ " | newblock: The block type after the fades"
 					+ " | location: the location of the block that will fade}"
 					+ "{}"
 					+ "{}";
@@ -1311,31 +1369,46 @@ public class BlockEvents {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public void bind(BoundEvent event) {
+			// handle deprecated prefilter
+			Map<String, Mixed> prefilter = event.getPrefilter();
+			if(prefilter.containsKey("oldname")) {
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(prefilter.get("oldname").val(), 0);
+				prefilter.put("block", new CString(mat.getName(), event.getTarget()));
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"oldname\" prefilter in " + getName()
+						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
+			} else if(prefilter.containsKey("oldtype")) {
+				Mixed cid = prefilter.get("oldtype");
+				if(cid.isInstanceOf(CInt.class)) {
+					int id = (int) ((CInt) cid).getInt();
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(id, 0);
+					if(mat == null) {
+						throw new CREBindException("Invalid material id '" + id + "'", event.getTarget());
+					}
+					prefilter.put("block", new CString(mat.getName(), event.getTarget()));
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The \"oldtype\" prefilter in " + getName()
+							+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
+				}
+			}
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(!(e instanceof MCBlockFadeEvent)) {
 				return false;
 			}
 			MCBlockFadeEvent event = (MCBlockFadeEvent) e;
 			MCBlock oldBlock = event.getBlock();
-			if(prefilter.containsKey("oldname")) {
-				if(!prefilter.get("oldname").val().equals(oldBlock.getType().getName())) {
-					return false;
-				}
-			} else if(prefilter.containsKey("oldtype")) {
-				Construct v = prefilter.get("oldtype");
-				if(v instanceof CInt) {
-					if(oldBlock.getTypeId() != ((CInt) v).getInt()) {
-						return false;
-					}
-				} else {
+			if(prefilter.containsKey("block")) {
+				if(!oldBlock.getType().getName().equals(prefilter.get("block").val())) {
 					return false;
 				}
 			}
-			Construct world = prefilter.get("world");
+			Mixed world = prefilter.get("world");
 			if(world != null && !world.val().equals(oldBlock.getWorld().getName())) {
 				return false;
 			}
@@ -1348,37 +1421,23 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(!(e instanceof MCBlockFadeEvent)) {
 				throw new EventException("Cannot convert event to BlockFadeEvent");
 			}
 			MCBlockFadeEvent event = (MCBlockFadeEvent) e;
 			Target t = Target.UNKNOWN;
-			Map<String, Construct> mapEvent = evaluate_helper(event);
+			Map<String, Mixed> mapEvent = evaluate_helper(event);
 
-			MCBlock oldBlock = event.getBlock();
-			MCMaterial oldMat = oldBlock.getType();
+			mapEvent.put("block", new CString(event.getBlock().getType().getName(), t));
+			mapEvent.put("newblock", new CString(event.getNewState().getType().getName(), t));
 
-			CArray oldBlockArray = CArray.GetAssociativeArray(t);
-			oldBlockArray.set("name", oldMat.getName());
-			oldBlockArray.set("type", new CInt(oldMat.getType(), t), t);
-			oldBlockArray.set("data", new CInt(oldBlock.getData(), t), t);
-			mapEvent.put("oldblock", oldBlockArray);
-
-			MCBlockState newBlock = event.getNewState();
-			MCMaterial newMat = newBlock.getType();
-			CArray newBlockArray = CArray.GetAssociativeArray(t);
-			newBlockArray.set("name", newMat.getName());
-			newBlockArray.set("type", new CInt(newMat.getType(), t), t);
-			newBlockArray.set("data", new CInt(newBlock.getData().getData(), t), t);
-			mapEvent.put("newblock", newBlockArray);
-
-			mapEvent.put("location", ObjectGenerator.GetGenerator().location(oldBlock.getLocation(), false));
+			mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 			return mapEvent;
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 	}

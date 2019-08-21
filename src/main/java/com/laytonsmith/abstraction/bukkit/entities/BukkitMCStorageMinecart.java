@@ -2,11 +2,11 @@ package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
-import com.laytonsmith.abstraction.entities.MCHopperMinecart;
+import com.laytonsmith.abstraction.entities.MCStorageMinecart;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.minecart.StorageMinecart;
 
-public class BukkitMCStorageMinecart extends BukkitMCMinecart implements MCHopperMinecart {
+public class BukkitMCStorageMinecart extends BukkitMCMinecart implements MCStorageMinecart {
 
 	StorageMinecart sm;
 

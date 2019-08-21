@@ -2,8 +2,9 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.natives.interfaces.AbstractMixedInterfaceRunner;
+import com.laytonsmith.core.objects.ObjectType;
 
 /**
  *
@@ -19,7 +20,7 @@ public class CNumberRunner extends AbstractMixedInterfaceRunner {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_0_1;
+		return MSVersion.V3_0_1;
 	}
 
 	@Override
@@ -29,7 +30,14 @@ public class CNumberRunner extends AbstractMixedInterfaceRunner {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{};
+		return CClassType.EMPTY_CLASS_ARRAY;
 	}
+
+	@Override
+	public ObjectType getObjectType() {
+		return ObjectType.ABSTRACT;
+	}
+
+
 
 }

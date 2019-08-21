@@ -11,15 +11,20 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.AliasCore;
-import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
@@ -28,10 +33,13 @@ import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
@@ -40,12 +48,17 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.jar.JarFile;
 import java.util.Locale;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 
@@ -55,7 +68,8 @@ import java.util.zip.ZipEntry;
 public class Meta {
 
 	public static String docs() {
-		return "These functions provide a way to run other commands";
+		return "These functions provide a way to run other commands, and otherwise interact with the system in a meta"
+				+ " way.";
 	}
 
 	/*
@@ -74,7 +88,7 @@ public class Meta {
 			return false;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(CommandHelperPlugin.isFirstLoad());
 		}
 
@@ -92,7 +106,7 @@ public class Meta {
 		}
 
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 	 */
@@ -110,27 +124,22 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, final Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if(args[1].nval() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
+		public Mixed exec(Target t, final Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			if(Construct.nval(args[1]) == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
 				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
 			}
 			String cmd = args[1].val().substring(1);
-			if(args[0] instanceof CArray) {
+			if(args[0].isInstanceOf(CArray.class)) {
 				CArray u = (CArray) args[0];
 				for(int i = 0; i < u.size(); i++) {
-					exec(t, env, new Construct[]{new CString(u.get(i, t).val(), t), args[1]});
+					exec(t, env, new Mixed[]{new CString(u.get(i, t).val(), t), args[1]});
 				}
 				return CVoid.VOID;
 			}
-			if(args[0].val().equals("~op")) {
-				//TODO: Remove this after next release (3.3.1)
-				CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING, "Using runas(~op, " + args[1].asString().getQuote()
-						+ ") is deprecated. Use sudo(" + args[1].asString().getQuote() + ") instead.", t);
-				new sudo().exec(t, env, args[1]);
-			} else if(args[0].val().equals(Static.getConsoleName())) {
-				CHLog.GetLogger().Log(CHLog.Tags.META, LogLevel.INFO, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as console): " + args[1].val().trim(), t);
+			if(args[0].val().equals(Static.getConsoleName())) {
+				MSLog.GetLogger().Log(MSLog.Tags.META, LogLevel.INFO, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as console): " + args[1].val().trim(), t);
 				if(Prefs.DebugMode()) {
-					Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as : " + args[1].val().trim());
+					Static.getLogger().log(Level.INFO, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as : " + args[1].val().trim());
 				}
 				if(cmd.equalsIgnoreCase("interpreter-on")) {
 					//This isn't allowed for security reasons.
@@ -149,9 +158,9 @@ public class Meta {
 						name = "Unknown player";
 					}
 
-					CHLog.GetLogger().Log(CHLog.Tags.META, LogLevel.INFO, "Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim(), t);
+					MSLog.GetLogger().Log(MSLog.Tags.META, LogLevel.INFO, "Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim(), t);
 					if(Prefs.DebugMode()) {
-						Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim());
+						Static.getLogger().log(Level.INFO, "Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim());
 					}
 					//m.chat(cmd);
 					Static.getServer().dispatchCommand(m, cmd);
@@ -181,8 +190,8 @@ public class Meta {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -210,8 +219,8 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if(args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			if(Construct.nval(args[0]) == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
 				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
 			}
 			String cmd = args[0].val().substring(1);
@@ -224,9 +233,9 @@ public class Meta {
 			//Store their current op status
 			Boolean isOp = env.getEnv(CommandHelperEnvironment.class).GetCommandSender().isOp();
 
-			CHLog.GetLogger().Log(CHLog.Tags.META, LogLevel.INFO, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as op): " + args[0].val().trim(), t);
+			MSLog.GetLogger().Log(MSLog.Tags.META, LogLevel.INFO, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as op): " + args[0].val().trim(), t);
 			if(Prefs.DebugMode()) {
-				Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as op): " + args[0].val().trim());
+				Static.getLogger().log(Level.INFO, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as op): " + args[0].val().trim());
 			}
 
 			//If they aren't op, op them now
@@ -273,8 +282,8 @@ public class Meta {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		/**
@@ -294,7 +303,7 @@ public class Meta {
 				if(Prefs.UseSudoFallback()) {
 					p.setOp(value);
 				} else {
-					Static.getLogger().log(Level.WARNING, "[CommandHelper]: Failed to OP player " + player.getName() + "."
+					Static.getLogger().log(Level.WARNING, "Failed to OP player " + player.getName() + "."
 							+ " Check that your server jar ends with \".jar\" or enable \"use-sudo-fallback\" in preferences.ini.");
 					StreamUtils.GetSystemErr().println("Extra information about the error: ");
 					e.printStackTrace();
@@ -337,16 +346,16 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if(args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			if(Construct.nval(args[0]) == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
 				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
 			}
 			String cmd = args[0].val().substring(1);
 			if(Prefs.DebugMode()) {
 				if(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
-					Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() + ": " + args[0].val().trim());
+					Static.getLogger().log(Level.INFO, "Executing command on " + env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() + ": " + args[0].val().trim());
 				} else {
-					Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + args[0].val().trim());
+					Static.getLogger().log(Level.INFO, "Executing command from console equivalent: " + args[0].val().trim());
 				}
 			}
 			if(cmd.equalsIgnoreCase("interpreter-on")) {
@@ -365,7 +374,8 @@ public class Meta {
 
 		@Override
 		public String docs() {
-			return "void {var1} Runs a command as the current player. Useful for running commands in a loop. Note that this accepts commands like from the "
+			return "void {string command} Runs a command as the current player. Useful for running commands in a loop."
+					+ " Note that this accepts commands like from the "
 					+ "chat; with a forward slash in front.";
 		}
 
@@ -380,8 +390,8 @@ public class Meta {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -409,7 +419,7 @@ public class Meta {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, Construct... args)
+		public CBoolean exec(Target t, Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
 			AliasCore ac = Static.getAliasCore();
 
@@ -437,8 +447,8 @@ public class Meta {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -477,8 +487,8 @@ public class Meta {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -487,7 +497,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			boolean doRemoval = true;
 			if(!Static.getAliasCore().hasPlayerReference(env.getEnv(CommandHelperEnvironment.class).GetCommandSender())) {
 				doRemoval = false;
@@ -504,7 +514,7 @@ public class Meta {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
-	public static class scriptas extends AbstractFunction {
+	public static class scriptas extends AbstractFunction implements VariableScope {
 
 		@Override
 		public String getName() {
@@ -518,9 +528,10 @@ public class Meta {
 
 		@Override
 		public String docs() {
-			return "void {player, [label], script} Runs the specified script in the context of a given player."
-					+ " A script that runs player() for instance, would return the specified player's name,"
-					+ " not the player running the command. Setting the label allows you to dynamically set the label"
+			return "void {player, [label], script} Runs the specified script in the context of a given player or "
+					+ Static.getConsoleName() + ". A script that runs player(), for instance,"
+					+ " would return the specified player's name, not the player running the command."
+					+ " Setting the label allows you to dynamically set the label"
 					+ " this script is run under as well (in regards to permission checking)";
 		}
 
@@ -540,8 +551,8 @@ public class Meta {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -550,14 +561,20 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) {
 			return null;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment environment, Script parent, ParseTree... nodes) throws ConfigRuntimeException {
-			MCPlayer p = Static.GetPlayer(parent.seval(nodes[0], environment).val(), t);
-			MCCommandSender originalPlayer = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+		public Mixed execs(Target t, Environment environment, Script parent, ParseTree... nodes) throws ConfigRuntimeException {
+			String senderName = parent.seval(nodes[0], environment).val();
+			MCCommandSender sender;
+			if(senderName.equals(Static.getConsoleName())) {
+				sender = Static.getServer().getConsole();
+			} else {
+				sender = Static.GetPlayer(senderName, t);
+			}
+			MCCommandSender originalSender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			int offset = 0;
 			String originalLabel = environment.getEnv(GlobalEnv.class).GetLabel();
 			if(nodes.length == 3) {
@@ -567,11 +584,11 @@ public class Meta {
 			} else {
 				environment.getEnv(GlobalEnv.class).SetLabel(parent.getLabel());
 			}
-			environment.getEnv(CommandHelperEnvironment.class).SetPlayer(p);
+			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
 			parent.enforceLabelPermissions();
 			ParseTree tree = nodes[1 + offset];
 			parent.eval(tree, environment);
-			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(originalPlayer);
+			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(originalSender);
 			environment.getEnv(GlobalEnv.class).SetLabel(originalLabel);
 			return CVoid.VOID;
 		}
@@ -579,6 +596,17 @@ public class Meta {
 		@Override
 		public boolean useSpecialExec() {
 			return true;
+		}
+
+		@Override
+		public List<Boolean> isScope(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>(children.size());
+			ret.add(false);
+			if(children.size() == 3) {
+				ret.add(false);
+			}
+			ret.add(true);
+			return ret;
 		}
 	}
 
@@ -618,7 +646,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(environment.getEnv(CommandHelperEnvironment.class).GetCommand() == null) {
 				return CNull.NULL;
 			} else {
@@ -627,8 +655,8 @@ public class Meta {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 	}
 
@@ -652,7 +680,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String player = args[0].val();
 			String cmd = args[1].val();
 			if(!cmd.startsWith("/")) {
@@ -693,8 +721,8 @@ public class Meta {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -717,7 +745,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCLocation loc;
 			CArray ret;
@@ -752,8 +780,8 @@ public class Meta {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -776,16 +804,16 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			boolean state;
 			if(args.length == 1) {
 				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(player, t);
-				state = Static.getBoolean(args[0], t);
+				state = ArgumentValidation.getBoolean(args[0], t);
 			} else {
 				player = Static.GetPlayer(args[0].val(), t);
-				state = Static.getBoolean(args[1], t);
+				state = ArgumentValidation.getBoolean(args[1], t);
 			}
 			player.setOp(state);
 			return CVoid.VOID;
@@ -807,8 +835,8 @@ public class Meta {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -843,9 +871,9 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CString s;
-			if(args[0] instanceof CString) {
+			if(args[0].isInstanceOf(CString.class)) {
 				s = (CString) args[0];
 			} else {
 				s = new CString(args[0].val(), t);
@@ -878,7 +906,7 @@ public class Meta {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -902,7 +930,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -918,17 +946,19 @@ public class Meta {
 
 		@Override
 		public String docs() {
-			return "void {[...]} An operation that does nothing. Any arguments passed in are ignored entirely.";
+			return "void {[...]} An operation that does nothing. Any arguments passed in are ignored entirely, though"
+					+ " they will be evaluated first.";
 		}
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
 
 	@api
+	@noboilerplate // A boilerplate test on this function is relatively expensive and not necessary.
 	public static class get_locales extends AbstractFunction {
 
 		@Override
@@ -947,7 +977,7 @@ public class Meta {
 		}
 
 		@Override
-		public CArray exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CArray exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray c = new CArray(t);
 			for(Locale l : Locale.getAvailableLocales()) {
 				if(!l.getCountry().isEmpty()) {
@@ -978,7 +1008,7 @@ public class Meta {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1009,7 +1039,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			JarFile jf;
 			try {
 				String jar = ClassDiscovery.GetClassContainer(Meta.class).toString();
@@ -1041,7 +1071,7 @@ public class Meta {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1065,7 +1095,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(environment.getEnv(GlobalEnv.class).GetScript().getCompileTime(), t);
 		}
 
@@ -1086,7 +1116,7 @@ public class Meta {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -1110,7 +1140,7 @@ public class Meta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CResource<>(environment, t);
 		}
 
@@ -1133,7 +1163,387 @@ public class Meta {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
+		}
+
+	}
+
+	@api
+	public static class get_compiler_options extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray ret = new CArray(t);
+			for(FileOptions.CompilerOption s : FileOptions.CompilerOption.values()) {
+				ret.push(new CString(s.getName(), t), t);
+			}
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "get_compiler_options";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "array {} Returns a list of all defined compiler options, which can be set using the"
+					+ " compilerOptions file option";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api
+	public static class get_compiler_warnings extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray ret = new CArray(t);
+			for(FileOptions.SuppressWarning s : FileOptions.SuppressWarning.values()) {
+				ret.push(new CString(s.getName(), t), t);
+			}
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "get_compiler_warnings";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "array {} Returns a list of all defined compiler warnings, which can be suppressed using the"
+					+ " suppressWarnings file option";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api
+	@seealso({has_runtime_setting.class, remove_runtime_setting.class, DataHandling._import.class,
+		DataHandling._export.class})
+	public static class set_runtime_setting extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			String name = ArgumentValidation.getString(args[0], t);
+			Mixed setting = args[1];
+			environment.getEnv(GlobalEnv.class).SetRuntimeSetting(name, setting);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "set_runtime_setting";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {name, setting} Sets the value of a particular runtime setting. Various system components can"
+					+ " define these differently, so see the documentation for a particular component to see if it has"
+					+ " a runtime setting that can be changed, and what the name and setting should be. Note that there"
+					+ " is intentionally no mechanism provided to get the value of a setting, as this is not meant to"
+					+ " be used for user settings, just system level settings. To set your own user based settings,"
+					+ " use {{function|import}}/{{function|export}}.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api
+	@seealso({set_runtime_setting.class, has_runtime_setting.class})
+	public static class remove_runtime_setting extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			String name = ArgumentValidation.getString(args[0], t);
+			GlobalEnv env = environment.getEnv(GlobalEnv.class);
+			if(env.GetRuntimeSetting(name) != null) {
+				env.SetRuntimeSetting(name, null);
+			} else {
+				if(!ArgumentValidation.getBooleanish(
+						env.GetRuntimeSetting("function.remove_runtime_setting.no_warn_on_removing_blank",
+								CBoolean.FALSE), t)) {
+					MSLog.GetLogger().e(MSLog.Tags.META, "Attempting to remove a runtime setting that doesn't exist,"
+							+ " '" + name + "'", t);
+				}
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "remove_runtime_setting";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {name} Removes the previously set runtime setting. If the setting wasn't already set, then"
+					+ " a warning is issued, unless"
+					+ " 'function.remove_runtime_setting.no_warn_on_removing_blank' is set to true.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api
+	@seealso({set_runtime_setting.class, remove_runtime_setting.class})
+	public static class has_runtime_setting extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			String name = ArgumentValidation.getString(args[0], t);
+			return CBoolean.get(environment.getEnv(GlobalEnv.class).GetRuntimeSetting(name) != null);
+		}
+
+		@Override
+		public String getName() {
+			return "has_runtime_setting";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {name} Returns true if the runtime setting is set. This will also return true if the value"
+					+ " of the setting is null.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api
+	public static class nameof extends AbstractFunction implements Optimizable {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			throw new Error();
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() != 1) {
+				throw new ConfigCompileException("Invalid number of arguments passed to " + getName(), t);
+			}
+			ParseTree d = children.get(0);
+			Mixed m = d.getData();
+			String ret = null;
+			if(m instanceof IVariable) {
+				ret = ((IVariable) m).getVariableName();
+			} else if(m instanceof Variable) {
+				ret = ((Variable) m).getVariableName();
+			}
+			if(ret == null) {
+				throw new ConfigCompileException("Invalid type passed to " + getName(), t);
+			}
+			return new ParseTree(new CString(ret, t), fileOptions);
+		}
+
+		@Override
+		public String getName() {
+			return "nameof";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {component} Returns the name of the item. For now, only works with variables."
+					+ " For instance, nameof(@var)"
+					+ " returns the string \"@var\". This is useful for avoiding hardcoding of strings of items"
+					+ " that are refactorable. This allows tools to properly refactor, without needing to manually"
+					+ " update strings that contain the names of variables or other refactorable items. This is"
+					+ " a meta function, and is fully resolved at compile time.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+	}
+
+	@api
+	public static class engine_location extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			return new CString(ClassDiscovery.GetClassContainer(Meta.class).toString(), t);
+		}
+
+		@Override
+		public String getName() {
+			return "engine_location";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "string {} Returns the location of the currently running engine binary.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
 		}
 
 	}

@@ -1,0 +1,85 @@
+<div>
+	<h1>Localization (L10N) UI Help</h1>
+	<h3>Contents</h3>
+	<ul>
+		<li><a href="#general">General</a></li>
+		<li><a href="#forks">Fork Repository</a></li>
+		<li><a href="#azurekey">Allowing Machine Translations</a></li>
+	</ul>
+	<div id="general">
+		<h3>General</h3>
+		<p>
+			The MethodScript website supports localization efforts, to better serve communities that are primarily non-English
+			speaking. While much of the application itself is necessarily written in English (function names, etc would be a
+			disaster to try to localize), the documentation for the application does not necessarily need to be in English.
+		</p><p>
+			To this end, a Localization (or L10n) framework has been put in place to facilitate bilingual localizers to help
+			translate the documentation into languages other than English! Much care has been put into ensuring the accuracy of
+			the documentation, and the language of it is no exception. General help for the localization framework can
+			be found on the website <a href="%%wiki|Localization%%">here</a>, and you should be familiar with that
+			before using this tool, but this help file describes use of the tool itself.
+		</p><p>
+			In order to use this program, you must have git installed and available on your path. For instructions on
+			how to install this, see <a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git">the git
+			installation guide</a>.
+		</p><p>
+			There are two main workflows when doing localization, the categorization workflow, and the translation
+			workflow. Before a segment may be translated, it must first be categorized. Categorization is simply the
+			act of ensuring whether or not the segment itself is appropriate, that is, ensuring that the original
+			English is correct, and that the segementation logic behaved correctly. It is also about categorizing it
+			as machine translatable or not. To complete categorization, review the original English, and ensure it is
+			correct. If it is untranslatable, because it is for instance, completely a technical string, mark it as
+			untranslatable, and the categorization is done. This prevents translation of the segment in any locale.
+			Similarly, if the English is incorrect, or the segmentation logic was wrong, and this segment has something
+			wrong with the original English in such a way that it should be fixed, mark the segment as "suspect", which
+			prevents the segment from being translated in any locale, and flags the segment to be reviewed by
+			developers. Due to the way the segmentation logic works, this should not be translated, as segments can't be
+			changed. Changing the text of a segment creates a brand new segment, but the old segment remains in the
+			database until manually removed later. Finally, the segment should be reviewed for suitability for machine
+			translation. If the segment partially contains technical strings that are plain words, but shouldn't be
+			translated for technical reasons, then the segment should be marked as not eligible for machine translation.
+		</p><p>
+			Once the segment is fully categorized, this unlocks the translation panel for all locales. Each segment must
+			be reviewed before it can be localized, but this review only needs to happen once to unlock it in all
+			locales. There are filters available to help guide these workflows, depending on what you've set out to do.			
+		</p><p>
+			There are 4 filters, in addition to the one that shows all segments, and are intended to support the
+			following workflows:
+		</p><ul>
+			<li>Show Untranslated - Shows the segments that do not have either a machine translation or manual
+			translation. This also shows uncategorized segments, so in order to do the translation, you will
+			have to categorize the segment first. Segments that have been categorized, but have been determined
+			to not need a translation due to the fact that they are untranslatable or a suspect segment are removed
+			from this view.</li>
+			<li>Show Uncategorized - Shows the segments that have not yet been categorized. This is all segments that
+			have not been marked as untranslatable, not been marked as suspect, and are still marked as uncategorized
+			in the eligible for machine translation category.</li>
+			<li>Show Suspect - This is mostly meant for the developer view, to quickly see all the suspect segments, so
+			that the original English can be easily identified to be fixed.</li>
+			<li>Show Translatable - Shows all segments that can be translated, whether they have a translation or not
+			already (including a machine translation.) This workflow is useful for reviewing existing translations for
+			correctness, but also being able to provide new ones where missing. This is the usual workflow when editing
+			individual pages.</li>
+		</ul>
+	</div>
+	<div id="forks">
+		<h3>Fork Repository</h3>
+		<p>
+			Before the system can be used, you must fork the primary repository, and create a local copy. Go to
+			Tools->Fork Database... to launch the fork tool, which will help you get a repository initially set up.
+		</p>
+	</div>
+	<div id="azurekey">
+		<h3>Allowing Machine Translations</h3>
+		<p>
+			To use the machine translation features of the tool, a subscription to the Azure Cognitive Services
+			must be set up. More information about how to sign up for an account and subscription can be found
+			<a href="https://azure.microsoft.com/en-us/services/cognitive-services/">here</a>. While paid subscriptions
+			exist, there is a free tier, which can be used in limited amounts per month. Once a subscription to
+			Cognitive Services is set up, the key and endpoint can be found under Resource Management -> Quick Start. 
+			These values can be copied into the tool under Tools->Add Azure Key. You can choose to store the values
+			to your computer, so they don't need to be re-entered every time, but do keep in mind that they are stored
+			in plain text in your local persistence network, so it may be unwise to do so.
+		</p>
+	</div>
+</div>

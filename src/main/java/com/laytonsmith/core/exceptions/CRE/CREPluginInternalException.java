@@ -2,18 +2,18 @@ package com.laytonsmith.core.exceptions.CRE;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 
 /**
  *
  */
-@typeof("PluginInternalException")
+@typeof("ms.lang.PluginInternalException")
 public class CREPluginInternalException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("PluginInternalException");
+	public static final CClassType TYPE = CClassType.get(CREPluginInternalException.class);
 
 	public CREPluginInternalException(String msg, Target t) {
 		super(msg, t);
@@ -32,7 +32,7 @@ public class CREPluginInternalException extends CREException {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_1;
+		return MSVersion.V3_3_1;
 	}
 
 	@Override

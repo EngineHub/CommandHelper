@@ -1,5 +1,6 @@
 package com.laytonsmith.tools.docgen.sitedeploy;
 
+import com.laytonsmith.tools.docgen.localization.TranslationMaster;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.GNUErrorMessageFormat;
@@ -19,7 +20,7 @@ import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Profiles;
@@ -31,10 +32,10 @@ import com.laytonsmith.core.functions.ExampleScript;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.ReadOnlyException;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import com.laytonsmith.tools.Interpreter;
-import com.laytonsmith.tools.SimpleSyntaxHighlighter;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import com.laytonsmith.tools.docgen.DocGenTemplates.Generator;
@@ -45,6 +46,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -52,7 +55,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -67,7 +69,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
@@ -79,6 +80,7 @@ import org.json.simple.JSONValue;
  *
  * @author cailin
  */
+@SuppressWarnings("UseSpecificCatch")
 public final class SiteDeploy {
 
 	private static final String USERNAME = "username";
@@ -93,12 +95,20 @@ public final class SiteDeploy {
 	private static final String VALIDATOR_URL = "validator-url";
 	private static final String POST_SCRIPT = "post-script";
 
+	private static final String TRANSLATION_MEMORY_DB = "translation-memory-db";
+	private static final String PRODUCTION_TRANSLATIONS = "production-translations";
+
 	private static final String INSTALL_URL = "install-url";
 	private static final String INSTALL_PEM_FILE = "install-pem-file";
 	private static final String INSTALL_PUB_KEYS = "install-pub-keys";
 
+	private static final String PRODUCTION_TRANSLATIONS_URL
+			= "https://github.com/LadyCailin/MethodScriptTranslationDB/blob/master/";
+
+	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public static void run(boolean generatePrefs, boolean useLocalCache, File sitedeploy, String password,
-			boolean doValidation) throws Exception {
+			boolean doValidation, boolean clearProgressBar, String overridePostScript,
+			String overrideIdRsa) throws Exception {
 		List<Preferences.Preference> defaults = new ArrayList<>();
 		// SCP Options
 		defaults.add(new Preferences.Preference(USERNAME, "", Preferences.Type.STRING, "The username to scp with"));
@@ -106,17 +116,18 @@ public final class SiteDeploy {
 				+ " hostname of the site). If"
 				+ " the hostname is \"localhost\", this triggers special handling, which skips the upload, and simply"
 				+ " saves to the specified location on local disk. This should work with all OSes, otherwise the host"
-				+ " that this connects to must support ssh, though it does not necessarily have to be a unix based system."
+				+ " that this connects to must support ssh, though it does not necessarily have to be a unix"
+				+ " based system."
 				+ " If the value is localhost, the values " + USERNAME + ", " + PORT + ", and " + PASSWORD + " are"
 				+ " irrelevant, and not used. This should NOT begin with a protocol, i.e. http://"));
 		defaults.add(new Preferences.Preference(PORT, "22", Preferences.Type.INT, "The port to use for SCP"));
-		defaults.add(new Preferences.Preference(DIRECTORY, "/var/www/docs", Preferences.Type.STRING, "The root location of"
+		defaults.add(new Preferences.Preference(DIRECTORY, "/var/www/docs", Preferences.Type.STRING,
+				"The root location of"
 				+ " the remote web server. This must be an absolute path. Note that this is the location of"
 				+ " the *docs* folder. Files may be created one directory above this folder, in this folder, and in"
 				+ " lower folders that are created by the site deploy tool. So if /var/www is your web"
 				+ " root, then you should put /var/www/docs here. It will create an index file in /var/www, as"
-				+ " well as in /var/www/docs, but the majority of files will be put in /var/www/docs/"
-				+ CHVersion.LATEST.toString() + "."));
+				+ " well as in /var/www/docs, but the majority of files will be put in /var/www/docs/."));
 		defaults.add(new Preferences.Preference(PASSWORD, "false", Preferences.Type.BOOLEAN, "Whether or not to use"
 				+ " password authentication. If false, public key authentication will be used instead, and your"
 				+ " system must be pre-configured for that. The password is interactively"
@@ -152,35 +163,52 @@ public final class SiteDeploy {
 				+ " step. If the file is specified, it must exist, and if it does not end"
 				+ " in .ms, it must be executable."));
 		defaults.add(new Preferences.Preference(INSTALL_URL, "", Preferences.Type.STRING, "The ec2 instance public url."
-				+ " NOTE: The security group of the instance must be configured to allow access to port 22. Ports 80 and"
+				+ " NOTE: The security group of the instance must be configured to allow access to port 22."
+				+ " Ports 80 and"
 				+ " 443 are also used, and should be opened, but that will not affect the installation process."));
-		defaults.add(new Preferences.Preference(INSTALL_PEM_FILE, "", Preferences.Type.STRING, "The path to the PEM file"
+		defaults.add(new Preferences.Preference(INSTALL_PEM_FILE, "", Preferences.Type.STRING,
+				"The path to the PEM file"
 				+ " used for initial login."));
 		defaults.add(new Preferences.Preference(INSTALL_PUB_KEYS, "", Preferences.Type.STRING, "A list of public keys"
 				+ " to upload to, and add to the authorized_keys file on the server. These keys will not"
 				+ " be used by this script, but can allow easier login in the future. If blank, no additional keys"
 				+ " will be uploaded."));
+		defaults.add(new Preferences.Preference(TRANSLATION_MEMORY_DB, "", Preferences.Type.FILE, "The path to a"
+				+ " local checkout of a translation memory database. This may be empty, in which case"
+				+ " internationalization options will not be available on the deployed site."));
+		defaults.add(new Preferences.Preference(PRODUCTION_TRANSLATIONS, "", Preferences.Type.STRING, "The base url"
+				+ " for the production version of the localization database. If blank, the official url is used, but"
+				+ " this should be set to your fork of the official repository, or a local server that serves the"
+				+ " translations if you are testing localizations."));
 
 		Preferences prefs = new Preferences("Site-Deploy", Logger.getLogger(SiteDeploy.class.getName()), defaults);
 		if(generatePrefs) {
 			prefs.init(sitedeploy);
-			System.out.println("Preferences file is now located at " + sitedeploy.getAbsolutePath() + ". Please fill in the"
+			System.out.println("Preferences file is now located at " + sitedeploy.getAbsolutePath()
+					+ ". Please fill in the"
 					+ " values, then re-run this command without the --generate-prefs option.");
 			System.exit(0);
 		}
 		prefs.init(sitedeploy);
 
-		String username = (String) prefs.getPreference(USERNAME);
-		String hostname = (String) prefs.getPreference(HOSTNAME);
-		Integer port = (Integer) prefs.getPreference(PORT);
-		String directory = (String) prefs.getPreference(DIRECTORY);
-		Boolean usePassword = (Boolean) prefs.getPreference(PASSWORD);
-		String docsBase = (String) prefs.getPreference(DOCSBASE);
-		String siteBase = (String) prefs.getPreference(SITEBASE);
-		Boolean showTemplateCredit = (Boolean) prefs.getPreference(SHOW_TEMPLATE_CREDIT);
-		String githubBaseUrl = (String) prefs.getPreference(GITHUB_BASE_URL);
-		String validatorUrl = (String) prefs.getPreference(VALIDATOR_URL);
-		File finalizerScript = (File) prefs.getPreference(POST_SCRIPT);
+		String username = prefs.getStringPreference(USERNAME);
+		String hostname = prefs.getStringPreference(HOSTNAME);
+		Integer port = prefs.getIntegerPreference(PORT);
+		String directory = prefs.getStringPreference(DIRECTORY);
+		Boolean usePassword = prefs.getBooleanPreference(PASSWORD);
+		String docsBase = prefs.getStringPreference(DOCSBASE);
+		String siteBase = prefs.getStringPreference(SITEBASE);
+		Boolean showTemplateCredit = prefs.getBooleanPreference(SHOW_TEMPLATE_CREDIT);
+		String githubBaseUrl = prefs.getStringPreference(GITHUB_BASE_URL);
+		String validatorUrl = prefs.getStringPreference(VALIDATOR_URL);
+		File finalizerScript = prefs.getFilePreference(POST_SCRIPT);
+		File translationMemoryDb = prefs.getFilePreference(TRANSLATION_MEMORY_DB);
+		String productionTranslations = prefs.getStringPreference(PRODUCTION_TRANSLATIONS);
+
+
+		if(!overridePostScript.equals("")) {
+			finalizerScript = new File(overridePostScript);
+		}
 
 		{
 			// Check for config errors
@@ -214,13 +242,35 @@ public final class SiteDeploy {
 			}
 			if(finalizerScript != null) {
 				if(!finalizerScript.exists()) {
-					configErrors.add("post-script file specified does not exist (" + finalizerScript.getCanonicalPath() + ")");
+					configErrors.add("post-script file specified does not exist (" + finalizerScript.getCanonicalPath()
+							+ ")");
 				} else if(!finalizerScript.getPath().endsWith(".ms") && !finalizerScript.canExecute()) {
 					configErrors.add("post-script does not end in .ms, and is not executable");
 				}
 			}
+			if(overrideIdRsa != null) {
+				if(!new File(overrideIdRsa).exists()) {
+					configErrors.add("override-id-rsa parameter points to a non-existent file.");
+				}
+			}
+			if(translationMemoryDb != null && !translationMemoryDb.exists()) {
+				configErrors.add("Translation memory db must point to an existing database. (" + translationMemoryDb
+						+ ")");
+			}
+			if("".equals(productionTranslations)) {
+				productionTranslations = PRODUCTION_TRANSLATIONS_URL;
+			}
+
+			try {
+				new URL(productionTranslations);
+			} catch (MalformedURLException e) {
+				configErrors.add("Invalid URL for " + PRODUCTION_TRANSLATIONS + " value: "
+						+ productionTranslations);
+			}
+
 			if(!configErrors.isEmpty()) {
-				System.err.println("Invalid input. Check preferences in " + sitedeploy.getAbsolutePath() + " and re-run");
+				System.err.println("Invalid input. Check preferences in " + sitedeploy.getAbsolutePath()
+						+ " and re-run");
 				System.err.println(StringUtils.PluralTemplateHelper(configErrors.size(),
 						"Here is the %d error:", "Here are the %d errors:"));
 				System.err.println(" - " + StringUtils.Join(configErrors, "\n - "));
@@ -234,8 +284,8 @@ public final class SiteDeploy {
 		if(!docsBase.endsWith("/")) {
 			docsBase += "/";
 		}
-		directory += CHVersion.LATEST;
-		docsBase += CHVersion.LATEST + "/";
+		directory += MSVersion.LATEST;
+		docsBase += MSVersion.LATEST + "/";
 		System.out.println("Using the following settings, loaded from " + sitedeploy.getCanonicalPath());
 		System.out.println("username: " + username);
 		System.out.println("hostname: " + hostname);
@@ -244,6 +294,12 @@ public final class SiteDeploy {
 		System.out.println("docs-base: " + docsBase);
 		System.out.println("site-base: " + siteBase);
 		System.out.println("github-base-url: " + githubBaseUrl);
+		if(translationMemoryDb != null) {
+			System.out.println("Translation memory database: " + translationMemoryDb);
+		}
+		if(productionTranslations != null) {
+			System.out.println("Production translations url: " + productionTranslations);
+		}
 		if(finalizerScript != null) {
 			System.out.println("post-script: " + finalizerScript.getCanonicalPath());
 		}
@@ -260,7 +316,7 @@ public final class SiteDeploy {
 				password = reader.readLine("Please enter your password: ", cha);
 			} finally {
 				if(reader != null) {
-					reader.shutdown();
+					reader.close();
 				}
 			}
 		}
@@ -278,32 +334,36 @@ public final class SiteDeploy {
 
 		// Ok, all the configuration details are input and correct, so lets deploy now.
 		deploy(useLocalCache, siteBase, docsBase, deploymentMethod, doValidation,
-				showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript);
+				showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript, clearProgressBar, overrideIdRsa,
+				translationMemoryDb, productionTranslations);
 	}
 
 	private static void deploy(boolean useLocalCache, String siteBase, String docsBase,
 			DeploymentMethod deploymentMethod, boolean doValidation, boolean showTemplateCredit,
-			String githubBaseUrl, String validatorUrl, File finalizerScript) throws IOException, InterruptedException {
+			String githubBaseUrl, String validatorUrl, File finalizerScript, boolean clearProgressBar,
+			String overrideIdRsa, File translationMemoryDb, String productionTranslations)
+			throws IOException, InterruptedException {
 		new SiteDeploy(siteBase, docsBase, useLocalCache, deploymentMethod, doValidation,
-				showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript).deploy();
+				showTemplateCredit, githubBaseUrl, validatorUrl, finalizerScript, clearProgressBar,
+				overrideIdRsa, translationMemoryDb, productionTranslations).deploy();
 	}
 
 	String apiJson;
 	String apiJsonVersion;
 
-	@SuppressWarnings("StringEquality")
+	@SuppressWarnings({"StringEquality", "ImplicitArrayToString"})
 	private void deploy() throws InterruptedException, IOException {
 		apiJson = JSONValue.toJSONString(new APIBuilder().build());
 		apiJsonVersion = getLocalMD5(StreamUtils.GetInputStream(apiJson));
-		deployResources();
-		deployFrontPages();
-		deployLearningTrail();
 		deployAPI();
 		deployEventAPI();
-		deployFunctions();
+		deployAPIJSON();
+		deployFrontPages();
+		deployLearningTrail();
 		deployEvents();
 		deployObjects();
-		deployAPIJSON();
+		deployResources();
+		deployJar();
 		Runnable generateFinalizer = new Runnable() {
 			@Override
 			public void run() {
@@ -322,6 +382,11 @@ public final class SiteDeploy {
 			@Override
 			public void run() {
 				if(uploadQueue.getQueue().isEmpty()) {
+					try {
+						writeMasterTranslations();
+					} catch (Throwable ex) {
+						writeLog("Could not write out translations!", ex);
+					}
 					uploadQueue.shutdown();
 				} else {
 					uploadQueue.submit(this);
@@ -367,7 +432,7 @@ public final class SiteDeploy {
 						throw new IOException("Response was non-200, refusing to continue with validation");
 					}
 
-					String[] errors = response.getContent().split("\n");
+					String[] errors = response.getContentAsString().split("\n");
 					int errorsDisplayed = 0;
 					for(String error : errors) {
 						GNUErrorMessageFormat gnuError = new GNUErrorMessageFormat(error);
@@ -435,11 +500,15 @@ public final class SiteDeploy {
 		System.out.println("Done!");
 		System.out.println("Summary of changed files (" + filesChanged.size() + ")");
 		System.out.println(StringUtils.Join(filesChanged, "\n"));
+		if(masterMemories != null) {
+			System.out.println(masterMemories.size() + " translation segments exist.");
+		}
 	}
 
 	private final String siteBase;
 	private final String docsBase;
 	private final String resourceBase;
+	private final String productionTranslations;
 	private final jline.console.ConsoleReader reader;
 	private final ThreadPoolExecutor generateQueue;
 	private final ThreadPoolExecutor uploadQueue;
@@ -459,15 +528,32 @@ public final class SiteDeploy {
 	private final String githubBaseUrl;
 	private final String validatorUrl;
 	private final File finalizerScript;
+	private final boolean clearProgressBar;
+	private final String overrideIdRsa;
+	private final File translationMemoryDb;
 
-	private static final String EDIT_THIS_PAGE_PREAMBLE = "Find a bug in this page? <a rel=\"noopener noreferrer\" target=\"_blank\" href=\"";
-	private static final String EDIT_THIS_PAGE_POSTAMBLE = "\">Edit this page yourself, then submit a pull request.</a>";
-	private static final String DEFAULT_GITHUB_BASE_URL = "https://github.com/EngineHub/CommandHelper/edit/master/src/main/%s";
+	/**
+	 * The master memories object exists purely to prevent duplicate translations being requested from the
+	 * translation server for new translations. However, identical keys may be translated differently
+	 * on different pages, and that's ok. The TM that gets set in here is non deterministic, but only the
+	 * firstt time, because after that, each page should have it's own TM, and if the one that was picked
+	 * was wrong, then once it's manually corrected, it will stay correct forever.
+	 */
+	private final TranslationMaster masterMemories;
 
-	@SuppressWarnings("unchecked")
+	private static final String EDIT_THIS_PAGE_PREAMBLE
+			= "Find a bug in this page? <a rel=\"noopener noreferrer\" target=\"_blank\" href=\"";
+	private static final String EDIT_THIS_PAGE_POSTAMBLE
+			= "\">Edit this page yourself, then submit a pull request.</a>";
+	private static final String DEFAULT_GITHUB_BASE_URL
+			= "https://github.com/EngineHub/CommandHelper/edit/master/src/main/%s";
+
+	@SuppressWarnings({"unchecked", "checkstyle:regexpsingleline"})
 	private SiteDeploy(String siteBase, String docsBase, boolean useLocalCache,
 			DeploymentMethod deploymentMethod, boolean doValidation, boolean showTemplateCredit,
-			String githubBaseUrl, String validatorUrl, File finalizerScript) throws IOException {
+			String githubBaseUrl, String validatorUrl, File finalizerScript, boolean clearProgressBar,
+			String overrideIdRsa, File translationMemoryDb, String productionTranslations)
+			throws IOException {
 		this.siteBase = siteBase;
 		this.docsBase = docsBase;
 		this.resourceBase = docsBase + "resources/";
@@ -475,7 +561,7 @@ public final class SiteDeploy {
 		this.reader = new jline.console.ConsoleReader();
 		this.generateQueue = new ThreadPoolExecutor(1, 1,
 				0L, TimeUnit.MILLISECONDS,
-				new LinkedBlockingQueue<Runnable>(),
+				new LinkedBlockingQueue<>(),
 				new ThreadFactory() {
 			@Override
 			public Thread newThread(Runnable r) {
@@ -484,7 +570,7 @@ public final class SiteDeploy {
 		});
 		this.uploadQueue = new ThreadPoolExecutor(1, 1,
 				0L, TimeUnit.MILLISECONDS,
-				new LinkedBlockingQueue<Runnable>(),
+				new LinkedBlockingQueue<>(),
 				new ThreadFactory() {
 			@Override
 			public Thread newThread(Runnable r) {
@@ -500,6 +586,7 @@ public final class SiteDeploy {
 			githubBaseUrl = DEFAULT_GITHUB_BASE_URL;
 		}
 		this.githubBaseUrl = githubBaseUrl;
+		this.clearProgressBar = clearProgressBar;
 		pn = getPersistenceNetwork();
 		if(pn != null) {
 			try {
@@ -509,9 +596,25 @@ public final class SiteDeploy {
 				}
 				lc = (Map<String, String>) JSONValue.parse(localCache);
 			} catch (DataSourceException | IllegalArgumentException ex) {
-				Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Could not read in local cache", ex);
+				writeLog("Could not read in local cache", ex);
 				notificationAboutLocalCache = false;
 			}
+		}
+		this.overrideIdRsa = overrideIdRsa;
+		this.translationMemoryDb = translationMemoryDb;
+		this.productionTranslations = productionTranslations;
+		if(translationMemoryDb != null) {
+			writeStatus("Loading translation memories, this may take a while.");
+			this.masterMemories = new TranslationMaster(translationMemoryDb, (current, total) -> {
+				if(!clearProgressBar) {
+					return;
+				}
+				writeStatus("Loading translation memories, this may take a while (" + ((int) current) + "/"
+						+ ((int) total) + ")");
+			});
+			writeStatus("Done loading translation memories.");
+		} else {
+			this.masterMemories = null;
 		}
 	}
 
@@ -523,7 +626,7 @@ public final class SiteDeploy {
 	public static PersistenceNetwork getPersistenceNetwork() {
 		PersistenceNetwork p;
 		try {
-			p = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
+			p = new PersistenceNetworkImpl(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 					new URI("sqlite://" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile()
 							.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace('\\', '/')),
 					new ConnectionMixinFactory.ConnectionMixinOptions());
@@ -534,8 +637,28 @@ public final class SiteDeploy {
 	}
 
 	private void resetLine() throws IOException {
-		reader.getOutput().write("\u001b[1G\u001b[K");
-		reader.flush();
+		if(clearProgressBar) {
+			reader.getOutput().write("\u001b[1G\u001b[K");
+			reader.flush();
+		} else {
+			reader.getOutput().write("\n");
+			reader.flush();
+		}
+	}
+
+	private synchronized void writeLog(String log, Throwable e) {
+		try {
+			reader.getOutput().write("\n" + log + "\n");
+			e.printStackTrace(new PrintWriter(reader.getOutput()));
+			reader.getOutput().write("\n");
+			reader.flush();
+		} catch (IOException ex) {
+			System.err.println("Failure while logging exception!");
+			System.err.println("Original exception:");
+			e.printStackTrace(System.err);
+			System.err.println("Logging exception:");
+			ex.printStackTrace(System.err);
+		}
 	}
 
 	private synchronized void writeStatus(String additionalInfo) {
@@ -563,36 +686,12 @@ public final class SiteDeploy {
 
 	private Map<String, Generator> getStandardGenerators() {
 		Map<String, Generator> g = new HashMap<>();
-		g.put("resourceBase", new Generator() {
-			@Override
-			public String generate(String... args) {
-				return SiteDeploy.this.resourceBase;
-			}
-		});
-		g.put("branding", new Generator() {
-			@Override
-			public String generate(String... args) {
-				return Implementation.GetServerType().getBranding();
-			}
-		});
-		g.put("siteRoot", new Generator() {
-			@Override
-			public String generate(String... args) {
-				return SiteDeploy.this.siteBase;
-			}
-		});
-		g.put("docsBase", new Generator() {
-			@Override
-			public String generate(String... args) {
-				return SiteDeploy.this.docsBase;
-			}
-		});
-		g.put("apiJsonVersion", new Generator() {
-			@Override
-			public String generate(String... args) throws GenerateException {
-				return apiJsonVersion;
-			}
-		});
+		g.put("resourceBase", (Generator) (String... args) -> SiteDeploy.this.resourceBase);
+		g.put("branding", (Generator) (String... args) -> Implementation.GetServerType().getBranding());
+		g.put("siteRoot", (Generator) (String... args) -> SiteDeploy.this.siteBase);
+		g.put("productionTranslations", (args) -> SiteDeploy.this.productionTranslations);
+		g.put("docsBase", (Generator) (String... args) -> SiteDeploy.this.docsBase);
+		g.put("apiJsonVersion", (Generator) (String... args) -> apiJsonVersion);
 		/**
 		 * The cacheBuster template is meant to make it easier to deal with caching of resources. The template allows
 		 * you to specify the resource, and it creates a path to the resource using resourceBase, but it also appends a
@@ -602,104 +701,90 @@ public final class SiteDeploy {
 		 * the place. In that case, you should use the following format:
 		 * %%cacheBuster|/absolute/path/to/resource.css|path/to/resource/in/html.css%%
 		 */
-		g.put("cacheBuster", new Generator() {
-			@Override
-			public String generate(String... args) {
-				String resourceLoc = SiteDeploy.this.resourceBase + args[0];
-				String loc = args[0];
-				if(!loc.startsWith("/")) {
-					loc = "/siteDeploy/resources/" + loc;
-				} else {
-					resourceLoc = SiteDeploy.this.resourceBase + args[1];
-				}
-				String hash = "0";
-				try {
-					InputStream in = SiteDeploy.class.getResourceAsStream(loc);
-					if(in == null) {
-						throw new RuntimeException("Could not find " + loc + " in resources folder for cacheBuster template");
-					}
-					hash = getLocalMD5(in);
-				} catch (IOException ex) {
-					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
-				}
-				return resourceLoc + "?v=" + hash;
+		g.put("cacheBuster", (Generator) (String... args) -> {
+			String resourceLoc = SiteDeploy.this.resourceBase + args[0];
+			String loc = args[0];
+			if(!loc.startsWith("/")) {
+				loc = "/siteDeploy/resources/" + loc;
+			} else {
+				resourceLoc = SiteDeploy.this.resourceBase + args[1];
 			}
-
+			String hash = "0";
+			try {
+				InputStream in = SiteDeploy.class.getResourceAsStream(loc);
+				if(in == null) {
+					throw new RuntimeException("Could not find " + loc
+							+ " in resources folder for cacheBuster template");
+				}
+				hash = getLocalMD5(in);
+			} catch (IOException ex) {
+				writeLog(null, ex);
+			}
+			return resourceLoc + "?v=" + hash;
 		});
-		final Generator learningTrailGen = new Generator() {
-			@Override
-			public String generate(String... args) {
-				String learningTrail =
-						StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/LearningTrail.json"));
-				List<Map<String, List<Map<String, String>>>> ret = new ArrayList<>();
-				@SuppressWarnings("unchecked")
-				List<Map<String, List<Object>>> lt = (List<Map<String, List<Object>>>) JSONValue.parse(learningTrail);
-				for(Map<String, List<Object>> l : lt) {
-					for(Map.Entry<String, List<Object>> e : l.entrySet()) {
-						String category = e.getKey();
-						List<Map<String, String>> catInfo = new ArrayList<>();
-						for(Object ll : e.getValue()) {
-							Map<String, String> pageInfo = new LinkedHashMap<>();
-							String page = null;
-							String name = null;
-							if(ll instanceof String) {
-								name = page = (String) ll;
-							} else if(ll instanceof Map) {
-								@SuppressWarnings("unchecked")
-								Map<String, String> p = (Map<String, String>) ll;
-								if(p.entrySet().size() != 1) {
-									throw new RuntimeException("Invalid JSON for learning trail");
-								}
-								for(Map.Entry<String, String> ee : p.entrySet()) {
-									page = ee.getKey();
-									name = ee.getValue();
-								}
-							} else {
+		final Generator learningTrailGen = (String... args) -> {
+			String learningTrail =
+					StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/LearningTrail.json"));
+			List<Map<String, List<Map<String, String>>>> ret = new ArrayList<>();
+			@SuppressWarnings("unchecked")
+			List<Map<String, List<Object>>> lt = (List<Map<String, List<Object>>>) JSONValue.parse(learningTrail);
+			for(Map<String, List<Object>> l : lt) {
+				for(Map.Entry<String, List<Object>> e : l.entrySet()) {
+					String category = e.getKey();
+					List<Map<String, String>> catInfo = new ArrayList<>();
+					for(Object ll : e.getValue()) {
+						Map<String, String> pageInfo = new LinkedHashMap<>();
+						String page = null;
+						String name = null;
+						if(ll instanceof String) {
+							name = page = (String) ll;
+						} else if(ll instanceof Map) {
+							@SuppressWarnings("unchecked")
+									Map<String, String> p = (Map<String, String>) ll;
+							if(p.entrySet().size() != 1) {
 								throw new RuntimeException("Invalid JSON for learning trail");
 							}
-							assert page != null && name != null;
-							boolean exists;
-							if(page.contains(".")) {
-								// We can't really check this, because it might be a synthetic page, like
-								// api.json. So we just have to set it to true.
-								exists = true;
-							} else {
-								exists = SiteDeploy.class.getResourceAsStream("/docs/" + page) != null;
+							for(Map.Entry<String, String> ee : p.entrySet()) {
+								page = ee.getKey();
+								name = ee.getValue();
 							}
-							pageInfo.put("name", name);
-							pageInfo.put("page", page);
-							pageInfo.put("category", category);
-							pageInfo.put("exists", Boolean.toString(exists));
-							catInfo.add(pageInfo);
+						} else {
+							throw new RuntimeException("Invalid JSON for learning trail");
 						}
-						Map<String, List<Map<String, String>>> m = new HashMap<>();
-						m.put(category, catInfo);
-						ret.add(m);
+						assert page != null && name != null;
+						boolean exists;
+						if(page.contains(".")) {
+							// We can't really check this, because it might be a synthetic page, like
+							// api.json. So we just have to set it to true.
+							exists = true;
+						} else {
+							exists = SiteDeploy.class.getResourceAsStream("/docs/" + page) != null;
+						}
+						pageInfo.put("name", name);
+						pageInfo.put("page", page);
+						pageInfo.put("category", category);
+						pageInfo.put("exists", Boolean.toString(exists));
+						catInfo.add(pageInfo);
 					}
+					Map<String, List<Map<String, String>>> m = new HashMap<>();
+					m.put(category, catInfo);
+					ret.add(m);
 				}
-				return JSONValue.toJSONString(ret);
 			}
+			return JSONValue.toJSONString(ret);
 		};
-		g.put("js_string_learning_trail", new Generator() {
-			@Override
-			public String generate(String... args) throws GenerateException {
-				String g = learningTrailGen.generate(args);
-				g = g.replaceAll("\\\\", "\\\\");
-				g = g.replaceAll("\"", "\\\\\"");
-				return g;
-			}
+		g.put("js_string_learning_trail", (Generator) (String... args) -> {
+			String g1 = learningTrailGen.generate(args);
+			g1 = g1.replaceAll("\\\\", "\\\\");
+			g1 = g1.replaceAll("\"", "\\\\\"");
+			return g1;
 		});
 		g.put("learning_trail", learningTrailGen);
 		/**
 		 * If showTemplateCredit is false, then this will return "display: none;" otherwise, it will return an empty
 		 * string.
 		 */
-		g.put("showTemplateCredit", new Generator() {
-			@Override
-			public String generate(String... args) throws GenerateException {
-				return showTemplateCredit ? "" : "display: none;";
-			}
-		});
+		g.put("showTemplateCredit", (Generator) (String... args) -> showTemplateCredit ? "" : "display: none;");
 		return g;
 	}
 
@@ -722,53 +807,50 @@ public final class SiteDeploy {
 	 * @param toLocation The location to write to
 	 */
 	private void writeFromStream(final InputStream contents, final String toLocation) {
-		uploadQueue.submit(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					writeStatus("Currently uploading " + toLocation);
-					// Read the contents only once
-					byte[] c = StreamUtils.GetBytes(contents);
-					contents.close();
-					boolean skipUpload = false;
-					String hash = null;
-					if(pn != null) {
-						if(notificationAboutLocalCache) {
-							hash = getLocalMD5(new ByteArrayInputStream(c));
-							try {
-								if(lc.containsKey(deploymentMethod.getID() + toLocation)) {
-									if(useLocalCache) {
-										String cacheHash = lc.get(deploymentMethod.getID() + toLocation);
-										if(cacheHash.equals(hash)) {
-											skipUpload = true;
-										}
+		uploadQueue.submit(() -> {
+			try {
+				writeStatus("Currently uploading " + toLocation);
+				// Read the contents only once
+				byte[] c = StreamUtils.GetBytes(contents);
+				contents.close();
+				boolean skipUpload = false;
+				String hash = null;
+				if(pn != null) {
+					if(notificationAboutLocalCache) {
+						hash = getLocalMD5(new ByteArrayInputStream(c));
+						try {
+							if(lc.containsKey(deploymentMethod.getID() + toLocation)) {
+								if(useLocalCache) {
+									String cacheHash = lc.get(deploymentMethod.getID() + toLocation);
+									if(cacheHash.equals(hash)) {
+										skipUpload = true;
 									}
 								}
-							} catch (IllegalArgumentException ex) {
-								Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Could not use local cache", ex);
-								notificationAboutLocalCache = false;
 							}
-						}
-					}
-					if(!skipUpload && deploymentMethod.deploy(new ByteArrayInputStream(c), toLocation)) {
-						filesChanged.add(toLocation);
-					}
-					if(pn != null && notificationAboutLocalCache && hash != null) {
-						try {
-							lc.put(deploymentMethod.getID() + toLocation, hash);
-							pn.set(dm, new String[]{"site_deploy", "local_cache"}, JSONValue.toJSONString(lc));
-						} catch (DataSourceException | ReadOnlyException | IllegalArgumentException ex) {
-							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
+						} catch (IllegalArgumentException ex) {
+							writeLog("Could not use local cache", ex);
 							notificationAboutLocalCache = false;
 						}
 					}
-					currentUploadTask.addAndGet(1);
-					writeStatus("");
-				} catch (Throwable ex) {
-					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Failed while uploading " + toLocation, ex);
-					generateQueue.shutdownNow();
-					uploadQueue.shutdownNow();
 				}
+				if(!skipUpload && deploymentMethod.deploy(new ByteArrayInputStream(c), toLocation, overrideIdRsa)) {
+					filesChanged.add(toLocation);
+				}
+				if(pn != null && notificationAboutLocalCache && hash != null) {
+					try {
+						lc.put(deploymentMethod.getID() + toLocation, hash);
+						pn.set(dm, new String[]{"site_deploy", "local_cache"}, JSONValue.toJSONString(lc));
+					} catch (DataSourceException | ReadOnlyException | IllegalArgumentException ex) {
+						writeLog(null, ex);
+						notificationAboutLocalCache = false;
+					}
+				}
+				currentUploadTask.addAndGet(1);
+				writeStatus("");
+			} catch (Throwable ex) {
+				writeLog("Failed while uploading " + toLocation, ex);
+				generateQueue.shutdownNow();
+				uploadQueue.shutdownNow();
 			}
 		});
 		totalUploadTasks.addAndGet(1);
@@ -811,7 +893,7 @@ public final class SiteDeploy {
 	 */
 	private void writePageFromResource(String title, String resource, String toLocation, List<String> keywords,
 			String description) {
-		String s = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream(resource));
+		String s = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream(resource.replace('\\', '/')));
 		s += "<p id=\"edit_this_page\">"
 				+ EDIT_THIS_PAGE_PREAMBLE
 				+ String.format(githubBaseUrl, "resources" + resource)
@@ -861,19 +943,31 @@ public final class SiteDeploy {
 			keywords = new ArrayList<>();
 		}
 		final List<String> kw = keywords;
-		generateQueue.submit(new Runnable() {
-			@Override
-			public void run() {
+		generateQueue.submit(() -> {
+			try {
 				String bW = body;
 				if(!bW.contains(EDIT_THIS_PAGE_PREAMBLE)) {
 					bW += "<p id=\"edit_this_page\">"
 							+ EDIT_THIS_PAGE_PREAMBLE
-							+ String.format(githubBaseUrl, "java/" + SiteDeploy.class.getName().replace(".", "/")) + ".java"
+							+ String.format(githubBaseUrl, "java/" + SiteDeploy.class.getName().replace(".", "/"))
+							+ ".java"
 							+ EDIT_THIS_PAGE_POSTAMBLE
 							+ "</p>";
 				}
 				try {
 					writeStatus("Currently generating " + toLocation);
+					if(translationMemoryDb != null) {
+						generateQueue.submit(() -> {
+							try {
+								createTranslationMemory(toLocation, body);
+							} catch (Throwable t) {
+								writeLog("While generating translation memory for " + toLocation + "an error occured: ",
+										t);
+							}
+							currentGenerateTask.addAndGet(1);
+						});
+						totalGenerateTasks.addAndGet(1);
+					}
 					// First, substitute the templates in the body
 					final String b;
 					try {
@@ -882,60 +976,38 @@ public final class SiteDeploy {
 						b = DocGenTemplates.DoTemplateReplacement(bW, standard);
 					} catch (Exception ex) {
 						if(ex instanceof GenerateException) {
-							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "Failed to substitute template"
+							writeLog("Failed to substitute template"
 									+ " while trying to upload resource to " + toLocation, ex);
 						} else {
-							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
+							writeLog(null, ex);
 						}
+						reader.flush();
 						generateQueue.shutdownNow();
 						uploadQueue.shutdownNow();
 						return;
 					}
 					// Second, add the template %%body%% and replace that in the frame
 					final Map<String, Generator> g = new HashMap<>();
-					g.put("body", new Generator() {
-						@Override
-						public String generate(String... args) {
-							return b;
-						}
+					g.put("body", (Generator) (String... args) -> b);
+					g.put("bodyEscaped", (Generator) (String... args) -> {
+						String s = b.replaceAll("\\\\", "\\\\\\\\").replaceAll("'", "\\\\'")
+								.replaceAll("\r", "").replaceAll("\n", "\\\\n");
+						s = s.replaceAll("<script.*?</script>", "");
+						return s;
 					});
-					g.put("bodyEscaped", new Generator() {
-						@Override
-						public String generate(String... args) {
-							String s = b.replaceAll("\\\\", "\\\\\\\\").replaceAll("'", "\\\\'").replaceAll("\r?\n", "\\\\n");
-							s = s.replaceAll("<script.*?</script>", "");
-							return s;
-						}
+					g.put("title", (Generator) (String... args) -> title);
+					g.put("useHttps", (Generator) (String... args)
+							-> SiteDeploy.this.siteBase.startsWith("https") ? "true" : "false");
+					g.put("keywords", (Generator) (String... args) -> {
+						List<String> k = new ArrayList<>(kw);
+						k.add(Implementation.GetServerType().getBranding());
+						return StringUtils.Join(k, ", ");
 					});
-					g.put("title", new Generator() {
-						@Override
-						public String generate(String... args) {
-							return title;
-						}
-					});
-					g.put("useHttps", new Generator() {
-						@Override
-						public String generate(String... args) {
-							return SiteDeploy.this.siteBase.startsWith("https") ? "true" : "false";
-						}
-					});
-					g.put("keywords", new Generator() {
-						@Override
-						public String generate(String... args) throws GenerateException {
-							List<String> k = new ArrayList<>(kw);
-							k.add(Implementation.GetServerType().getBranding());
-							return StringUtils.Join(k, ", ");
-						}
-					});
-					g.put("description", new Generator() {
-						@Override
-						public String generate(String... args) throws GenerateException {
-							return description;
-						}
-					});
+					g.put("description", (Generator) (String... args) -> description);
 					g.putAll(getStandardGenerators());
 					g.putAll(DocGenTemplates.GetGenerators());
-					String frame = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/frame.html"));
+					String frame = StreamUtils.GetString(SiteDeploy.class
+							.getResourceAsStream("/siteDeploy/frame.html"));
 					final String bb = DocGenTemplates.DoTemplateReplacement(frame, g);
 					// Write out using writeFromString
 					uploadedPages.put(toLocation, bb);
@@ -943,11 +1015,41 @@ public final class SiteDeploy {
 					currentGenerateTask.addAndGet(1);
 					writeStatus("");
 				} catch (Exception ex) {
-					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While writing " + toLocation + " the following error occured:", ex);
+					writeLog("While writing " + toLocation + " the following error occured:", ex);
 				}
+			} catch (Throwable t) {
+				writeLog("Failure!", t);
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
+	}
+
+	/**
+	 * Translation memories allow strings within the page to be localized in to different languages. The translations
+	 * themselves are by default created by machine translation, but it's important to be able to override these when
+	 * necessary, so the translation memories (tmem) files are created and committed to a repository, so PRs can
+	 * be created. This function is charged with orchestrating the process, which is comprised of several smaller tasks.
+	 * @param toLocation
+	 * @param inputString
+	 */
+	private void createTranslationMemory(String toLocation, String inputString) throws IOException {
+		toLocation = StringUtils.replaceLast(toLocation, "\\.html", ".tmem.xml");
+		String location = "%s/docs/" + MSVersion.V3_3_4 + "/" + toLocation;
+		writeStatus("Creating memory file for " + location);
+		masterMemories.createTranslationMemory(location, inputString);
+	}
+
+	private void writeMasterTranslations() throws IOException {
+		if(masterMemories != null) {
+			writeStatus("Writing out translation database");
+			masterMemories.save((current, total) -> {
+				if(!clearProgressBar) {
+					return;
+				}
+				writeStatus("Writing out translation database (" + ((int) current) + "/"
+						+ ((int) total) + ")");
+			});
+		}
 	}
 
 	/**
@@ -956,34 +1058,35 @@ public final class SiteDeploy {
 	 * replacement)
 	 */
 	private void deployResources() {
-		generateQueue.submit(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					File root = new File(SiteDeploy.class.getResource("/siteDeploy/resources").toExternalForm());
-					ZipReader reader = new ZipReader(root);
-					Queue<File> q = new LinkedList<>();
-					q.addAll(Arrays.asList(reader.listFiles()));
-					while(q.peek() != null) {
-						ZipReader r = new ZipReader(q.poll());
-						if(r.isDirectory()) {
-							q.addAll(Arrays.asList(r.listFiles()));
-						} else {
-							String fileName = r.getFile().getAbsolutePath().replaceFirst(Pattern.quote(reader.getFile().getAbsolutePath()), "");
-							writeFromStream(r.getInputStream(), "resources" + fileName);
-						}
+		generateQueue.submit(() -> {
+			try {
+				writeStatus("Generating resources");
+				File root = new File(SiteDeploy.class.getResource("/siteDeploy/resources").toExternalForm());
+				ZipReader reader1 = new ZipReader(root);
+				Queue<File> q = new LinkedList<>();
+				q.addAll(Arrays.asList(reader1.listFiles()));
+				while(q.peek() != null) {
+					ZipReader r = new ZipReader(q.poll());
+					if(r.isDirectory()) {
+						q.addAll(Arrays.asList(r.listFiles()));
+					} else {
+						String fileName = r.getFile().getAbsolutePath().replaceFirst(Pattern.quote(reader1.getFile()
+								.getAbsolutePath()), "");
+						writeStatus("Generating " + fileName);
+						writeFromStream(r.getInputStream(), "resources" + fileName);
 					}
-				} catch (IOException ex) {
-					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				String indexJs = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/index.js"));
-				try {
-					writeFromString(DocGenTemplates.DoTemplateReplacement(indexJs, getStandardGenerators()), "resources/js/index.js");
-				} catch (Generator.GenerateException ex) {
-					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "GenerateException in /siteDeploy/index.js", ex);
-				}
-				currentGenerateTask.addAndGet(1);
+			} catch (IOException ex) {
+				writeLog(null, ex);
 			}
+			String indexJs = StreamUtils.GetString(SiteDeploy.class.getResourceAsStream("/siteDeploy/index.js"));
+			try {
+				writeFromString(DocGenTemplates.DoTemplateReplacement(indexJs, getStandardGenerators()),
+						"resources/js/index.js");
+			} catch (Generator.GenerateException ex) {
+				writeLog("GenerateException in /siteDeploy/index.js", ex);
+			}
+			currentGenerateTask.addAndGet(1);
 		});
 		totalGenerateTasks.addAndGet(1);
 	}
@@ -992,57 +1095,69 @@ public final class SiteDeploy {
 	 * Pages deployed: index.html privacy_policy.html sponsors.html
 	 */
 	private void deployFrontPages() {
-		generateQueue.submit(new Runnable() {
-			@Override
-			public void run() {
-				writePageFromResource(CHVersion.LATEST.toString() + " - Docs", "/siteDeploy/VersionFrontPage", "index.html",
-						Arrays.asList(new String[]{CHVersion.LATEST.toString()}), "Front page for " + CHVersion.LATEST.toString());
+		generateQueue.submit(() -> {
+			try {
+				writePageFromResource(MSVersion.LATEST.toString() + " - Docs", "/siteDeploy/VersionFrontPage",
+						"index.html",
+						Arrays.asList(new String[]{MSVersion.LATEST.toString(), "better than skript"}),
+						"Front page for "
+								+ MSVersion.LATEST.toString());
 				currentGenerateTask.addAndGet(1);
+			} catch (Throwable t) {
+				writeLog("Failure!", t);
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
-		generateQueue.submit(new Runnable() {
-			@Override
-			public void run() {
+		generateQueue.submit(() -> {
+			try {
 				writePageFromResource("Privacy Policy", "/siteDeploy/privacy_policy.html", "privacy_policy.html",
 						Arrays.asList(new String[]{"privacy policy"}), "Privacy policy for the site");
 				currentGenerateTask.addAndGet(1);
+			} catch (Throwable t) {
+				writeLog("Failure!", t);
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
-		generateQueue.submit(new Runnable() {
-			@Override
-			public void run() {
-				writePageFromResource(Implementation.GetServerType().getBranding(), "/siteDeploy/FrontPage", "../../index.html",
-						Arrays.asList(new String[]{"index", "front page"}), "The front page for " + Implementation.GetServerType().getBranding());
+		generateQueue.submit(() -> {
+			try {
+				writePageFromResource(Implementation.GetServerType().getBranding(), "/siteDeploy/FrontPage",
+						"../../index.html",
+						Arrays.asList(new String[]{"index", "front page"}), "The front page for "
+								+ Implementation.GetServerType().getBranding());
 				currentGenerateTask.addAndGet(1);
+			} catch (Throwable t) {
+				writeLog("Failure!", t);
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
-		generateQueue.submit(new Runnable() {
-			@Override
-			public void run() {
-				writePageFromResource(Implementation.GetServerType().getBranding(), "/siteDeploy/Sponsors", "../../sponsors.html",
+		generateQueue.submit(() -> {
+			try {
+				writePageFromResource(Implementation.GetServerType().getBranding(), "/siteDeploy/Sponsors",
+						"../../sponsors.html",
 						Arrays.asList(new String[]{"index", "front page"}), "Sponsors of MethodScript");
 				currentGenerateTask.addAndGet(1);
+			} catch (Throwable t) {
+				writeLog("Failure!", t);
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
-		generateQueue.submit(new Runnable() {
-			@Override
-			public void run() {
+		generateQueue.submit(() -> {
+			try {
 				writePageFromResource("Doc Directory", "/siteDeploy/DocDirectory", "../index.html",
 						Arrays.asList(new String[]{"directory"}), "The directory for all documented versions");
 				currentGenerateTask.addAndGet(1);
+			} catch (Throwable t) {
+				writeLog("Failure!", t);
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
-		generateQueue.submit(new Runnable() {
-			@Override
-			public void run() {
+		generateQueue.submit(() -> {
+			try {
 				writePageFromResource("404 Not Found", "/siteDeploy/404", "../../404.html",
 						Arrays.asList(new String[]{"404"}), "Page not found");
 				currentGenerateTask.addAndGet(1);
+			} catch (Throwable t) {
+				writeLog("Failure!", t);
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
@@ -1052,53 +1167,46 @@ public final class SiteDeploy {
 	 * Pages deployed: All files from /docs/*
 	 */
 	private void deployLearningTrail() {
-		generateQueue.submit(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					File root = new File(SiteDeploy.class.getResource("/docs").toExternalForm());
-					ZipReader zReader = new ZipReader(root);
-					for(File r : zReader.listFiles()) {
-						String filename = r.getAbsolutePath().replaceFirst(Pattern.quote(zReader.getFile().getAbsolutePath()), "");
-						writePageFromResource(r.getName(), "/docs" + filename, r.getName() + ".html",
-								Arrays.asList(new String[]{r.getName().replace("_", " ")}), "Learning trail page for " + r.getName().replace("_", " "));
-					}
-				} catch (IOException ex) {
-					Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
+		generateQueue.submit(() -> {
+			try {
+				File root = new File(SiteDeploy.class.getResource("/docs").toExternalForm());
+				ZipReader zReader = new ZipReader(root);
+				String path = Pattern.quote(zReader.getFile().getAbsolutePath());
+				for(File r : zReader.listFiles()) {
+					String filename = r.getAbsolutePath().replaceFirst(path, "");
+					writePageFromResource(r.getName(), "/docs" + filename, r.getName() + ".html",
+							Arrays.asList(new String[]{r.getName().replace("_", " ")}), "Learning trail page for "
+									+ r.getName().replace("_", " "));
 				}
-				currentGenerateTask.addAndGet(1);
+			} catch (IOException ex) {
+				writeLog(null, ex);
 			}
+			currentGenerateTask.addAndGet(1);
 		});
 		totalGenerateTasks.addAndGet(1);
 	}
 
 	private void deployAPI() {
-		generateQueue.submit(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					Set<Class<? extends Function>> functionClasses
-							= new TreeSet<>(new Comparator<Class<? extends Function>>() {
-								@Override
-								public int compare(Class<? extends Function> o1, Class<? extends Function> o2) {
-									Function f1 = ReflectionUtils.instantiateUnsafe(o1);
-									Function f2 = ReflectionUtils.instantiateUnsafe(o2);
-									return f1.getName().compareTo(f2.getName());
-								}
-							});
-					functionClasses.addAll(ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(api.class, Function.class));
-					// A map of where it maps the enclosing class to the list of function rows, which contains a list of
-					// table cells.
-					Map<Class<?>, List<List<String>>> data = new TreeMap<>(new Comparator<Class<?>>() {
-						@Override
-						public int compare(Class<?> o1, Class<?> o2) {
-							return o1.getCanonicalName().compareTo(o2.getCanonicalName());
-						}
-					});
-					List<String> hiddenFunctions = new ArrayList<>();
-					for(Class<? extends Function> functionClass : functionClasses) {
+		generateQueue.submit(() -> {
+			try {
+				writeStatus("Generating API");
+				Set<Class<? extends Function>> functionClasses = new TreeSet<>(
+						(Class<? extends Function> o1, Class<? extends Function> o2) -> {
+					Function f1 = ReflectionUtils.instantiateUnsafe(o1);
+					Function f2 = ReflectionUtils.instantiateUnsafe(o2);
+					return f1.getName().compareTo(f2.getName());
+				});
+				functionClasses.addAll(ClassDiscovery.getDefaultInstance()
+						.loadClassesWithAnnotationThatExtend(api.class, Function.class));
+				// A map of where it maps the enclosing class to the list of function rows, which contains a list of
+				// table cells.
+				Map<Class<?>, List<List<String>>> data = new TreeMap<>((Class<?> o1, Class<?> o2)
+						-> o1.getCanonicalName().compareTo(o2.getCanonicalName()));
+				List<String> hiddenFunctions = new ArrayList<>();
+				for(Class<? extends Function> functionClass : functionClasses) {
+					try {
 						if(!data.containsKey(functionClass.getEnclosingClass())) {
-							data.put(functionClass.getEnclosingClass(), new ArrayList<List<String>>());
+							data.put(functionClass.getEnclosingClass(), new ArrayList<>());
 						}
 						List<List<String>> d = data.get(functionClass.getEnclosingClass());
 						List<String> c = new ArrayList<>();
@@ -1107,18 +1215,20 @@ public final class SiteDeploy {
 						try {
 							f = ReflectionUtils.instantiateUnsafe(functionClass);
 						} catch (ReflectionUtils.ReflectionException ex) {
-							throw new RuntimeException("While trying to construct " + functionClass + ", got the following", ex);
+							throw new RuntimeException("While trying to construct " + functionClass
+									+ ", got the following", ex);
 						}
 						final DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
 						// If the function is hidden, we don't want to put it on the main page by default. Regardless,
 						// we do want to generate the function page, it will just remain unlinked.
-						generateQueue.submit(new Runnable() {
-							@Override
-							public void run() {
+						generateQueue.submit(() -> {
+							try {
 								generateFunctionDocs(f, di);
+							} catch (Throwable ex) {
+								ex.printStackTrace(System.err);
 							}
 						});
-						if(f.since().equals(CHVersion.V0_0_0)) {
+						if(f.since().equals(MSVersion.V0_0_0)) {
 							// Don't add these
 							continue;
 						}
@@ -1143,85 +1253,90 @@ public final class SiteDeploy {
 						}
 						try {
 							if(f.examples() != null && f.examples().length > 0) {
-								desc.append("<br>([[API/functions/").append(f.getName()).append("#Examples|Examples...]])\n");
+								desc.append("<br>([[API/functions/").append(f.getName())
+										.append("#Examples|Examples...]])\n");
 							}
 						} catch (ConfigCompileException | NoClassDefFoundError ex) {
-							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, null, ex);
+							writeLog(null, ex);
 						}
 						c.add(desc.toString());
-						c.add("<span class=\"api_" + (f.isRestricted() ? "yes" : "no") + "\">" + (f.isRestricted() ? "Yes" : "No")
+						c.add("<span class=\"api_" + (f.isRestricted() ? "yes" : "no") + "\">"
+								+ (f.isRestricted() ? "Yes" : "No")
 								+ "</span>");
 						d.add(c);
+					} catch (Throwable t) {
+						writeLog("Failure while generating " + functionClass, t);
 					}
-					// data is now constructed.
-					StringBuilder b = new StringBuilder();
-					b.append("<ul id=\"TOC\">");
-					for(Class<?> clazz : data.keySet()) {
-						b.append("<li><a href=\"#").append(clazz.getSimpleName())
-								.append("\">").append(clazz.getSimpleName()).append("</a></li>");
-					}
-					b.append("</ul>\n");
-					for(Map.Entry<Class<?>, List<List<String>>> e : data.entrySet()) {
-						Class<?> clazz = e.getKey();
-						List<List<String>> clazzData = e.getValue();
-						if(clazzData.isEmpty()) {
-							// If there are no functions in the class, don't display it. This is most likely to happen
-							// if all the class's functions are hidden with @hide.
-							continue;
-						}
-						try {
-							b.append("== ").append(clazz.getSimpleName()).append(" ==\n");
-							String docs = (String) ReflectionUtils.invokeMethod(clazz, null, "docs");
-							b.append("<div>").append(docs).append("</div>\n\n");
-							b.append("{|\n|-\n");
-							b.append("! scope=\"col\" width=\"6%\" | Function Name\n"
-									+ "! scope=\"col\" width=\"5%\" | Returns\n"
-									+ "! scope=\"col\" width=\"10%\" | Arguments\n"
-									+ "! scope=\"col\" width=\"10%\" | Throws\n"
-									+ "! scope=\"col\" width=\"64%\" | Description\n"
-									+ "! scope=\"col\" width=\"5%\" | <span class=\"abbr\" title=\"Restricted\">Res</span>\n");
-							for(List<String> row : clazzData) {
-								b.append("|-");
-								if(hiddenFunctions.contains(row.get(0))) {
-									b.append(" class=\"hiddenFunction\"");
-								}
-								b.append("\n");
-								for(String cell : row) {
-									b.append("| ").append(cell).append("\n");
-								}
-
-							}
-							b.append("|}\n");
-							b.append("<p><a href=\"#TOC\">Back to top</a></p>\n");
-						} catch (Error ex) {
-							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While processing " + clazz + " got:", ex);
-						}
-					}
-
-					b.append("<div><a href=\"#\" id=\"showHidden\">Show hidden</a></div>");
-					b.append("<script type=\"text/javascript\">\n"
-							+ "pageRender.then(function() {\n"
-							+ "$('#showHidden').click(function(event){\n"
-							+ "$('.hiddenFunction').removeClass('hiddenFunction');\n"
-							+ "$('#showHidden').remove();\n"
-							+ "event.preventDefault();\nreturn false;\n"
-							+ "});\n"
-							+ "});\n"
-							+ "</script>");
-
-					writePage("API", b.toString(), "API.html",
-							Arrays.asList(new String[]{"API", "functions"}),
-							"A list of all " + Implementation.GetServerType().getBranding() + " functions");
-					currentGenerateTask.addAndGet(1);
-				} catch (Error ex) {
-					ex.printStackTrace(System.err);
 				}
+				//					System.out.println("Functions to be deployed: " + data + "\n\n");
+				// data is now constructed.
+				StringBuilder b = new StringBuilder();
+				b.append("<ul id=\"TOC\">");
+				for(Class<?> clazz : data.keySet()) {
+					b.append("<li><a href=\"#").append(clazz.getSimpleName())
+							.append("\">").append(clazz.getSimpleName()).append("</a></li>");
+				}
+				b.append("</ul>\n");
+				for(Map.Entry<Class<?>, List<List<String>>> e : data.entrySet()) {
+					Class<?> clazz = e.getKey();
+					List<List<String>> clazzData = e.getValue();
+					if(clazzData.isEmpty()) {
+						// If there are no functions in the class, don't display it. This is most likely to happen
+						// if all the class's functions are hidden with @hide.
+						continue;
+					}
+					try {
+						b.append("== ").append(clazz.getSimpleName()).append(" ==\n");
+						String docs = (String) ReflectionUtils.invokeMethod(clazz, null, "docs");
+						b.append("<div>").append(docs).append("</div>\n\n");
+						b.append("{|\n|-\n");
+						b.append("! scope=\"col\" width=\"6%\" | Function Name\n"
+								+ "! scope=\"col\" width=\"5%\" | Returns\n"
+								+ "! scope=\"col\" width=\"10%\" | Arguments\n"
+								+ "! scope=\"col\" width=\"10%\" | Throws\n"
+								+ "! scope=\"col\" width=\"64%\" | Description\n"
+								+ "! scope=\"col\" width=\"5%\" |"
+								+ " <span class=\"abbr\" title=\"Restricted\">Res</span>\n");
+						for(List<String> row : clazzData) {
+							b.append("|-");
+							if(hiddenFunctions.contains(row.get(0))) {
+								b.append(" class=\"hiddenFunction\"");
+							}
+							b.append("\n");
+							for(String cell : row) {
+								b.append("| ").append(cell).append("\n");
+							}
+
+						}
+						b.append("|}\n");
+						b.append("<p><a href=\"#TOC\">Back to top</a></p>\n");
+					} catch (Error ex) {
+						writeLog("While processing " + clazz + " got:", ex);
+					}
+				}
+				b.append("<div><a href=\"#\" id=\"showHidden\">Show hidden</a></div>");
+				b.append("<script type=\"text/javascript\">\n"
+						+ "pageRender.then(function() {\n"
+						+ "$('#showHidden').click(function(event){\n"
+						+ "$('.hiddenFunction').removeClass('hiddenFunction');\n"
+						+ "$('#showHidden').remove();\n"
+						+ "event.preventDefault();\nreturn false;\n"
+						+ "});\n"
+						+ "});\n"
+						+ "</script>");
+				writePage("API", b.toString(), "API.html",
+						Arrays.asList(new String[]{"API", "functions"}),
+						"A list of all " + Implementation.GetServerType().getBranding() + " functions");
+				currentGenerateTask.addAndGet(1);
+			} catch (Throwable ex) {
+				ex.printStackTrace(System.err);
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
 	}
 
 	private void generateFunctionDocs(Function f, DocGen.DocInfo docs) {
+		writeStatus("Generating function docs for " + f.getName());
 		StringBuilder page = new StringBuilder();
 		page.append("== ").append(f.getName()).append(" ==\n");
 		page.append("<div>").append(docs.desc).append("</div>\n");
@@ -1244,9 +1359,11 @@ public final class SiteDeploy {
 				+ "! scope=\"row\" | Throws\n"
 				+ "| ");
 		List<String> exceptions = new ArrayList<>();
-		for(Class<? extends CREThrowable> c : f.thrown()) {
-			String t = c.getAnnotation(typeof.class).value();
-			exceptions.add("[[../objects/" + t + "|" + t + "]]");
+		if(f.thrown() != null) {
+			for(Class<? extends CREThrowable> c : f.thrown()) {
+				String t = c.getAnnotation(typeof.class).value();
+				exceptions.add("[[../objects/" + t + "|" + t + "]]");
+			}
 		}
 		page.append(StringUtils.Join(exceptions, "<br>"));
 		page.append("\n"
@@ -1294,7 +1411,8 @@ public final class SiteDeploy {
 					exampleBuilder.append("====Example ").append(count).append("====\n")
 							.append(HTMLUtils.escapeHTML(es.getDescription())).append("\n\n"
 							+ "Given the following code:\n");
-					exampleBuilder.append(SimpleSyntaxHighlighter.Highlight(es.getScript(), true)).append("\n");
+//					exampleBuilder.append(SimpleSyntaxHighlighter.Highlight(es.getScript(), true)).append("\n");
+					exampleBuilder.append("<%CODE|").append(es.getScript()).append("%>\n");
 					String style = "";
 					exampleBuilder.append("\n\nThe output ");
 					if(es.isAutomatic()) {
@@ -1303,16 +1421,17 @@ public final class SiteDeploy {
 					} else {
 						exampleBuilder.append("might");
 					}
-					exampleBuilder.append(" be:\n<pre class=\"pre\" style=\"border-top: 1px solid blue; border-bottom: 1px solid blue;")
+					exampleBuilder.append(" be:\n<pre class=\"pre\" style=\"border-top: 1px solid blue;"
+							+ " border-bottom: 1px solid blue;")
 							.append(style).append("\"");
-					exampleBuilder.append(">%%NOWIKI|").append(es.getOutput())
-							.append("%%").append("</pre>\n");
+					exampleBuilder.append("><%NOWIKI|").append(es.getOutput())
+							.append("%>").append("</pre>\n");
 					count++;
 				}
 			} else {
 				exampleBuilder.append("Sorry, there are no examples for this function! :(\n");
 			}
-		} catch (ConfigCompileException | IOException | DataSourceException | URISyntaxException ex) {
+		} catch (Exception ex) {
 			exampleBuilder.append("Error while compiling the examples for ").append(f.getName());
 		}
 
@@ -1331,10 +1450,10 @@ public final class SiteDeploy {
 				first = false;
 				if(Function.class.isAssignableFrom(c)) {
 					Function f2 = (Function) ReflectionUtils.newInstance(c);
-					seeAlsoText += "<code>[[" + f2.getName() + "|" + f2.getName() + "]]</code>";
+					seeAlsoText += "<code>[[API/functions/" + f2.getName() + ".html|" + f2.getName() + "]]</code>";
 				} else if(Template.class.isAssignableFrom(c)) {
 					Template t = (Template) ReflectionUtils.newInstance(c);
-					seeAlsoText += "[[" + t.getName() + "|Learning Trail: " + t.getDisplayName() + "]]";
+					seeAlsoText += "[[" + t.getPath() + t.getName() + "|Learning Trail: " + t.getDisplayName() + "]]";
 				} else {
 					throw new Error("Unsupported class found in @seealso annotation: " + c.getName());
 				}
@@ -1352,136 +1471,121 @@ public final class SiteDeploy {
 				+ EDIT_THIS_PAGE_POSTAMBLE
 				+ " (Note this page is automatically generated from the documentation in the source code.)</p>";
 		page.append(bW);
-		String description = "";
-		writePage(f.getName(), page.toString(), "API/functions/" + f.getName(), Arrays.asList(new String[]{f.getName(),
-			f.getName() + " api", f.getName() + " example", f.getName() + " description"}), description);
+		String description = f.getName() + "() api page";
+		writePage(f.getName(), page.toString(), "API/functions/" + f.getName() + ".html", Arrays.asList(
+				new String[]{f.getName(), f.getName() + " api", f.getName() + " example", f.getName()
+						+ " description"}), description);
 	}
 
 	private void deployEventAPI() {
-		generateQueue.submit(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					Set<Class<? extends Event>> eventClasses
-							= new TreeSet<>(new Comparator<Class<? extends Event>>() {
-								@Override
-								public int compare(Class<? extends Event> o1, Class<? extends Event> o2) {
-									Event f1 = ReflectionUtils.instantiateUnsafe(o1);
-									Event f2 = ReflectionUtils.instantiateUnsafe(o2);
-									return f1.getName().compareTo(f2.getName());
-								}
-							});
-					eventClasses.addAll(ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(api.class, Event.class));
-					// A map of where it maps the enclosing class to the list of event rows, which contains a list of table cells.
-					Map<Class<?>, List<List<String>>> data = new TreeMap<>(new Comparator<Class<?>>() {
-						@Override
-						public int compare(Class<?> o1, Class<?> o2) {
-							return o1.getCanonicalName().compareTo(o2.getCanonicalName());
-						}
-					});
-					for(Class<? extends Event> eventClass : eventClasses) {
-						if(!data.containsKey(eventClass.getEnclosingClass())) {
-							data.put(eventClass.getEnclosingClass(), new ArrayList<>());
-						}
-						List<List<String>> d = data.get(eventClass.getEnclosingClass());
-						List<String> c = new ArrayList<>();
-						// event name, description, prefilters, data, mutable
-						final Event e;
-						try {
-							e = ReflectionUtils.instantiateUnsafe(eventClass);
-						} catch (ReflectionUtils.ReflectionException ex) {
-							throw new RuntimeException("While trying to construct " + eventClass + ", got the following", ex);
-						}
-						final DocGen.EventDocInfo edi = new DocGen.EventDocInfo(e.docs(), e.getName());
-						if(e.since().equals(CHVersion.V0_0_0)) {
-							// Don't add these
-							continue;
-						}
-						c.add(e.getName());
-						c.add(edi.description);
-						List<String> pre = new ArrayList<>();
-						if(!edi.prefilter.isEmpty()) {
-							for(DocGen.EventDocInfo.PrefilterData pdata : edi.prefilter) {
-								pre.add("<p><strong>" + pdata.name + "</strong>: " + pdata.formatDescription(DocGen.MarkupType.HTML) + "</p>");
-							}
-						}
-						c.add(StringUtils.Join(pre, ""));
-						List<String> ed = new ArrayList<>();
-						if(!edi.eventData.isEmpty()) {
-							for(DocGen.EventDocInfo.EventData edata : edi.eventData) {
-								ed.add("<p><strong>" + edata.name + "</strong>"
-										+ (!edata.description.isEmpty() ? ": " + edata.description : "") + "</p>");
-							}
-						}
-						c.add(StringUtils.Join(ed, ""));
-						List<String> mut = new ArrayList<>();
-						if(!edi.mutability.isEmpty()) {
-							for(DocGen.EventDocInfo.MutabilityData mdata : edi.mutability) {
-								mut.add("<p><strong>" + mdata.name + "</strong>"
-										+ (!mdata.description.isEmpty() ? ": " + mdata.description : "") + "</p>");
-							}
-						}
-						c.add(StringUtils.Join(mut, ""));
-						d.add(c);
+		generateQueue.submit(() -> {
+			try {
+				Set<Class<? extends Event>> eventClasses = new TreeSet<>(
+						(Class<? extends Event> o1, Class<? extends Event> o2) -> {
+					Event f1 = ReflectionUtils.instantiateUnsafe(o1);
+					Event f2 = ReflectionUtils.instantiateUnsafe(o2);
+					return f1.getName().compareTo(f2.getName());
+				});
+				eventClasses.addAll(ClassDiscovery.getDefaultInstance()
+						.loadClassesWithAnnotationThatExtend(api.class, Event.class));
+				// A map of where it maps the enclosing class to the list of event rows,
+				// which contains a list of table cells.
+				Map<Class<?>, List<List<String>>> data = new TreeMap<>((Class<?> o1, Class<?> o2)
+						-> o1.getCanonicalName().compareTo(o2.getCanonicalName()));
+				for(Class<? extends Event> eventClass : eventClasses) {
+					if(!data.containsKey(eventClass.getEnclosingClass())) {
+						data.put(eventClass.getEnclosingClass(), new ArrayList<>());
 					}
-					// data is now constructed.
-					StringBuilder b = new StringBuilder();
-					b.append("<ul id=\"TOC\">");
-					for(Class<?> clazz : data.keySet()) {
-						b.append("<li><a href=\"#").append(clazz.getSimpleName())
-								.append("\">").append(clazz.getSimpleName()).append("</a></li>");
+					List<List<String>> d = data.get(eventClass.getEnclosingClass());
+					List<String> c = new ArrayList<>();
+					// event name, description, prefilters, data, mutable
+					final Event e;
+					try {
+						e = ReflectionUtils.instantiateUnsafe(eventClass);
+					} catch (ReflectionUtils.ReflectionException ex) {
+						throw new RuntimeException("While trying to construct " + eventClass
+								+ ", got the following", ex);
 					}
-					b.append("</ul>\n");
-					for(Map.Entry<Class<?>, List<List<String>>> e : data.entrySet()) {
-						Class<?> clazz = e.getKey();
-						List<List<String>> clazzData = e.getValue();
-						if(clazzData.isEmpty()) {
-							// If there are no events in the class, don't display it.
-							continue;
-						}
-						try {
-							b.append("== ").append(clazz.getSimpleName()).append(" ==\n");
-							String docs = (String) ReflectionUtils.invokeMethod(clazz, null, "docs");
-							b.append("<div>").append(docs).append("</div>\n\n");
-							b.append("{|\n|-\n");
-							b.append("! scope=\"col\" width=\"7%\" | Event Name\n"
-									+ "! scope=\"col\" width=\"30%\" | Description\n"
-									+ "! scope=\"col\" width=\"20%\" | Prefilters\n"
-									+ "! scope=\"col\" width=\"25%\" | Event Data\n"
-									+ "! scope=\"col\" width=\"18%\" | Mutable Fields\n");
-							for(List<String> row : clazzData) {
-								b.append("|-");
-								b.append("\n");
-								for(String cell : row) {
-									b.append("| ").append(cell).append("\n");
-								}
-							}
-							b.append("|}\n");
-							b.append("<p><a href=\"#TOC\">Back to top</a></p>\n");
-						} catch (Error ex) {
-							Logger.getLogger(SiteDeploy.class.getName()).log(Level.SEVERE, "While processing " + clazz + " got:", ex);
+					final DocGen.EventDocInfo edi = new DocGen.EventDocInfo(e.docs(), e.getName());
+					if(e.since().equals(MSVersion.V0_0_0)) {
+						// Don't add these
+						continue;
+					}
+					c.add(e.getName());
+					c.add(edi.description);
+					List<String> pre = new ArrayList<>();
+					if(!edi.prefilter.isEmpty()) {
+						for(DocGen.EventDocInfo.PrefilterData pdata : edi.prefilter) {
+							pre.add("<p><strong>" + pdata.name + "</strong>: "
+									+ pdata.formatDescription(DocGen.MarkupType.HTML) + "</p>");
 						}
 					}
-					writePage("Event API", b.toString(), "Event_API.html",
-							Arrays.asList(new String[]{"API", "events"}),
-							"A list of all " + Implementation.GetServerType().getBranding() + " events");
-					currentGenerateTask.addAndGet(1);
-				} catch (Error ex) {
-					ex.printStackTrace(System.err);
+					c.add(StringUtils.Join(pre, ""));
+					List<String> ed = new ArrayList<>();
+					if(!edi.eventData.isEmpty()) {
+						for(DocGen.EventDocInfo.EventData edata : edi.eventData) {
+							ed.add("<p><strong>" + edata.name + "</strong>"
+									+ (!edata.description.isEmpty() ? ": " + edata.description : "") + "</p>");
+						}
+					}
+					c.add(StringUtils.Join(ed, ""));
+					List<String> mut = new ArrayList<>();
+					if(!edi.mutability.isEmpty()) {
+						for(DocGen.EventDocInfo.MutabilityData mdata : edi.mutability) {
+							mut.add("<p><strong>" + mdata.name + "</strong>"
+									+ (!mdata.description.isEmpty() ? ": " + mdata.description : "") + "</p>");
+						}
+					}
+					c.add(StringUtils.Join(mut, ""));
+					d.add(c);
 				}
+				// data is now constructed.
+				StringBuilder b = new StringBuilder();
+				b.append("<ul id=\"TOC\">");
+				for(Class<?> clazz : data.keySet()) {
+					b.append("<li><a href=\"#").append(clazz.getSimpleName())
+							.append("\">").append(clazz.getSimpleName()).append("</a></li>");
+				}
+				b.append("</ul>\n");
+				for(Map.Entry<Class<?>, List<List<String>>> e : data.entrySet()) {
+					Class<?> clazz = e.getKey();
+					List<List<String>> clazzData = e.getValue();
+					if(clazzData.isEmpty()) {
+						// If there are no events in the class, don't display it.
+						continue;
+					}
+					try {
+						b.append("== ").append(clazz.getSimpleName()).append(" ==\n");
+						String docs = (String) ReflectionUtils.invokeMethod(clazz, null, "docs");
+						b.append("<div>").append(docs).append("</div>\n\n");
+						b.append("{|\n|-\n");
+						b.append("! scope=\"col\" width=\"7%\" | Event Name\n"
+								+ "! scope=\"col\" width=\"30%\" | Description\n"
+								+ "! scope=\"col\" width=\"20%\" | Prefilters\n"
+								+ "! scope=\"col\" width=\"25%\" | Event Data\n"
+								+ "! scope=\"col\" width=\"18%\" | Mutable Fields\n");
+						for(List<String> row : clazzData) {
+							b.append("|-");
+							b.append("\n");
+							for(String cell : row) {
+								b.append("| ").append(cell).append("\n");
+							}
+						}
+						b.append("|}\n");
+						b.append("<p><a href=\"#TOC\">Back to top</a></p>\n");
+					} catch (Error ex) {
+						writeLog("While processing " + clazz + " got:", ex);
+					}
+				}
+				writePage("Event API", b.toString(), "Event_API.html",
+						Arrays.asList(new String[]{"API", "events"}),
+						"A list of all " + Implementation.GetServerType().getBranding() + " events");
+				currentGenerateTask.addAndGet(1);
+			} catch (Error ex) {
+				ex.printStackTrace(System.err);
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
-	}
-
-	private void deployFunctions() {
-//	generateQueue.submit(new Runnable() {
-//		@Override
-//		public void run() {
-//		currentGenerateTask.addAndGet(1);
-//		}
-//	});
-//	totalGenerateTasks.addAndGet(1);
 	}
 
 	private void deployEvents() {
@@ -1508,13 +1612,31 @@ public final class SiteDeploy {
 	 * Pages deployed: api.json - This page is the json version of the api
 	 */
 	private void deployAPIJSON() {
-		generateQueue.submit(new Runnable() {
-			@Override
-			public void run() {
+		generateQueue.submit(() -> {
+			try {
+				writeStatus("Generating api.json");
 				writeFromString(apiJson, "api.json");
 				currentGenerateTask.addAndGet(1);
+			} catch (Throwable t) {
+				writeLog("Failure!", t);
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
+	}
+
+	private void deployJar() {
+		uploadQueue.submit(() -> {
+			try {
+				writeFromStream(ClassDiscovery.GetClassContainer(SiteDeploy.class).openStream(),
+						"MethodScript.jar");
+				// It goes in two places, so the latest release is always available no matter the last
+				// build this version was built with.
+				writeFromStream(ClassDiscovery.GetClassContainer(SiteDeploy.class).openStream(),
+						"../../MethodScript.jar");
+
+			} catch (Throwable e) {
+				e.printStackTrace(System.err);
+			}
+		});
 	}
 }

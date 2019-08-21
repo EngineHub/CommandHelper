@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<asmv1:assembly xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" manifestVersion="1.0" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns="urn:schemas-microsoft-com:asm.v2" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2">
+  <asmv1:assemblyIdentity name="mscript.exe" version="0.0.0.1" publicKeyToken="ac31606174ac0e1e" language="en" processorArchitecture="msil" type="win32" />
+  <description asmv2:iconFile="commandhelper_icon.ico" xmlns="urn:schemas-microsoft-com:asm.v1" />
+  <application />
+  <entryPoint>
+    <assemblyIdentity name="mscript" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+    <commandLine file="mscript.exe" parameters="" />
+  </entryPoint>
+  <trustInfo>
+    <security>
+      <applicationRequestMinimum>
+        <PermissionSet Unrestricted="true" ID="Custom" SameSite="site" />
+        <defaultAssemblyRequest permissionSetReference="Custom" />
+      </applicationRequestMinimum>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <!--
+          UAC Manifest Options
+          If you want to change the Windows User Account Control level replace the 
+          requestedExecutionLevel node with one of the following.
+
+        <requestedExecutionLevel  level="asInvoker" uiAccess="false" />
+        <requestedExecutionLevel  level="requireAdministrator" uiAccess="false" />
+        <requestedExecutionLevel  level="highestAvailable" uiAccess="false" />
+
+         If you want to utilize File and Registry Virtualization for backward 
+         compatibility then delete the requestedExecutionLevel node.
+    -->
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+  <dependency>
+    <dependentOS>
+      <osVersionInfo>
+        <os majorVersion="5" minorVersion="1" buildNumber="2600" servicePackMajor="0" />
+      </osVersionInfo>
+    </dependentOS>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="preRequisite" allowDelayedBinding="true">
+      <assemblyIdentity name="Microsoft.Windows.CommonLanguageRuntime" version="4.0.30319.0" />
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="mscript.exe" size="118208">
+      <assemblyIdentity name="mscript" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>UvFC5/W2ZtcX8SRxV7x685ZpRdeluzbnwFxxmr9+hrY=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <file name="commandhelper_icon.ico" size="109645">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>JhRJO10luEOMFXK1XKw09Rsuv1ORneZi1JI6rBdOQzM=</dsig:DigestValue>
+    </hash>
+  </file>
+  <file name="mscript.exe.config" size="189">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>rl5/qDc7Jz+tB+BIbOv9iMGPlRe6YJwrjmU09dnlPcs=</dsig:DigestValue>
+    </hash>
+  </file>
+  <fileAssociation extension=".ms" description="MethodScript main file" progid="mscript" defaultIcon="commandhelper_icon.ico" xmlns="urn:schemas-microsoft-com:clickonce.v1" />
+<publisherIdentity name="CN=CAILIN-PC\Cailin" issuerKeyHash="ee309971cd8d9d5fa4c5a32f80a8ee537449f8c4" /><Signature Id="StrongNameSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>L0N/87k8t0+zkdEHpusr4XCfnFqlKG+IKvQSBcVjazA=</DigestValue></Reference></SignedInfo><SignatureValue>lORkT6r/NZajlq91B2es8OB3XFXzpVw1UQCTRZSsfUnAU0g+Y0Vtud5HeOiFHlW5lkn7KQ4HTEIwEA+TKvvHShsNmtWekV+pQE1wyBq8qDgfwOMv3/WruEGoS+rUGjP/qNaO0bf3gdj0g/ntO5ucQ779UewsA7PIZxl8KkoBa1o=</SignatureValue><KeyInfo Id="StrongNameKeyInfo"><KeyValue><RSAKeyValue><Modulus>28k7+oIrAEAn+arwPOLs8b4cB212D5q/dO9LXKAEeay2TjiBOXcFpn9k030GAAJ7EO/gadjWuOos/jy2n+quoEEIFPYeg7dt0BRVSXN+N+r3QCJKMWnLH07Abl+69kXP+jK+82aeNEOcGsXDOt7VKsIMoTY5CvelrdUg5lBXTEk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><msrel:RelData xmlns:msrel="http://schemas.microsoft.com/windows/rel/2005/reldata"><r:license xmlns:r="urn:mpeg:mpeg21:2003:01-REL-R-NS" xmlns:as="http://schemas.microsoft.com/windows/pki/2005/Authenticode"><r:grant><as:ManifestInformation Hash="306b63c50512f42a886f28a55a9c9f70e12beba607d191b34fb73cb9f37f432f" Description="" Url=""><as:assemblyIdentity name="mscript.exe" version="0.0.0.1" publicKeyToken="ac31606174ac0e1e" language="en" processorArchitecture="msil" type="win32" /></as:ManifestInformation><as:SignedBy /><as:AuthenticodePublisher><as:X509SubjectName>CN=CAILIN-PC\Cailin</as:X509SubjectName></as:AuthenticodePublisher></r:grant><r:issuer><Signature Id="AuthenticodeSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>1Q4yzuzEBWDBqJCO8UQI9WgoSlghJwPAXzpthIeA0Y8=</DigestValue></Reference></SignedInfo><SignatureValue>Fe31v9UuaJ3mQwVY1nHUj7zfj3aRgWa7oVRp6l2sbrwoe2vKAh5YjXJFM1emKelDFqF3WvPrJNiFx20cJJgC/BdgCGosEhLdzJcLN+d1R0Gu1pGXLpuI+YdgX8rdkf0Gwldwf7WweSTFa0x/SrWwg2yueCvpz18DiEk1Mtb+7Ac=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>28k7+oIrAEAn+arwPOLs8b4cB212D5q/dO9LXKAEeay2TjiBOXcFpn9k030GAAJ7EO/gadjWuOos/jy2n+quoEEIFPYeg7dt0BRVSXN+N+r3QCJKMWnLH07Abl+69kXP+jK+82aeNEOcGsXDOt7VKsIMoTY5CvelrdUg5lBXTEk=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIB2TCCAUKgAwIBAgIQe1N0R43MqaZGIyrAXlUNgDANBgkqhkiG9w0BAQsFADArMSkwJwYDVQQDHiAAQwBBAEkATABJAE4ALQBQAEMAXABDAGEAaQBsAGkAbjAeFw0xODA0MDEyMTU4MTlaFw0xOTA0MDIwMzU4MTlaMCsxKTAnBgNVBAMeIABDAEEASQBMAEkATgAtAFAAQwBcAEMAYQBpAGwAaQBuMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDbyTv6gisAQCf5qvA84uzxvhwHbXYPmr9070tcoAR5rLZOOIE5dwWmf2TTfQYAAnsQ7+Bp2Na46iz+PLaf6q6gQQgU9h6Dt23QFFVJc3436vdAIkoxacsfTsBuX7r2Rc/6Mr7zZp40Q5waxcM63tUqwgyhNjkK96Wt1SDmUFdMSQIDAQABMA0GCSqGSIb3DQEBCwUAA4GBACrDvynO4cZFkjCIpFZSHSeBBPPrPs2+XhDFcDxDPKI8jIbYZAsN4C/oSTHx3Kx1U/nSw5DtsGzLX2iq4fa+SbuW8BVFAv4a9e2Y63vpYRRmPfJnmP4LRsM9VraBTv9O/xY5Uc9w7nxXhLBOBKMU52lv5euXAJ7Ok1IUjOzBHdPl</X509Certificate></X509Data></KeyInfo></Signature></r:issuer></r:license></msrel:RelData></KeyInfo></Signature></asmv1:assembly>

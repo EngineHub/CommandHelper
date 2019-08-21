@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -91,12 +92,12 @@ public final class ThreadsafeDataSource implements DataSource {
 	}
 
 	@Override
-	public synchronized DataSourceModifier[] implicitModifiers() {
+	public synchronized EnumSet<DataSourceModifier> implicitModifiers() {
 		return source.implicitModifiers();
 	}
 
 	@Override
-	public synchronized DataSourceModifier[] invalidModifiers() {
+	public synchronized EnumSet<DataSourceModifier> invalidModifiers() {
 		return source.invalidModifiers();
 	}
 

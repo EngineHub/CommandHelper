@@ -249,9 +249,9 @@ the Turing completeness of the plugin, it is possible to do far more advanced th
  * principal in the first two runs, but not the third.
  */
 /kit gold = >>>
-	run('/give' player() data_values('gold_pickaxe') 64);
-	run('/give' player() data_values('gold_spade') 64);
-	run('/give ' . player() . ' ' . data_values('gold_axe') . ' 64');
+	run('/give' player() golden_pickaxe 64);
+	run('/give' player() golden_shovel 64);
+	run('/give ' . player() . ' golden_axe 64');
 <<<
 
 /**
@@ -334,7 +334,7 @@ if used on the right.
 |-
 | @...
 | ivariable
-| This is a variable that can be defined and then used on the right side
+| This is a variable that can be defined and used on the right side of an alias
 |-
 | ...:
 | label

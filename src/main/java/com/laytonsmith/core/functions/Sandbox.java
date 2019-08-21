@@ -1,33 +1,28 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.core.FileWriteMode;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.PureUtilities.ZipReader;
-import com.laytonsmith.abstraction.MCEnchantment;
-import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MCPlayerInventory;
-import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.commandhelper.BukkitDirtyRegisteredListener;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -35,22 +30,23 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
-import com.laytonsmith.core.exceptions.CRE.CREEnchantmentException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREIncludeException;
-import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRESecurityException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import org.bukkit.event.Cancellable;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Random;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -97,8 +93,8 @@ public class Sandbox {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -107,7 +103,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
 			if(original == null) {
 				throw new CREBindException("is_cancelled cannot be called outside an event handler", t);
@@ -118,95 +114,6 @@ public class Sandbox {
 				BukkitDirtyRegisteredListener.setCancelled((org.bukkit.event.Event) original.getUnderlyingEvent());
 			}
 			environment.getEnv(GlobalEnv.class).GetEvent().setCancelled(true);
-			return CVoid.VOID;
-		}
-	}
-
-	@api(environments = {CommandHelperEnvironment.class})
-	public static class enchant_inv_unsafe extends AbstractFunction {
-
-		@Override
-		public String getName() {
-			return "enchant_inv_unsafe";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{3, 4};
-		}
-
-		@Override
-		public String docs() {
-			return "void {[player], slot, type, level} Works the same as enchant_inv, except anything goes. "
-					+ " You can enchant a fish with a level 5000 enchantment if you wish. Side effects"
-					+ " may include nausia, dry mouth, insomnia, or server crashes. (Seriously, this might"
-					+ " crash your server, be careful with it.)";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREEnchantmentException.class,
-				CREPlayerOfflineException.class, CRENotFoundException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V0_0_0;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			int offset = 1;
-			if(args.length == 4) {
-				m = Static.GetPlayer(args[0].val(), t);
-				offset = 0;
-			}
-			Static.AssertPlayerNonNull(m, t);
-			MCItemStack is;
-			if(args[1 - offset] instanceof CNull) {
-				is = m.getItemInHand();
-			} else {
-				int slot = Static.getInt32(args[1 - offset], t);
-				MCPlayerInventory pinv = m.getInventory();
-				if(pinv == null) {
-					throw new CRENotFoundException(
-							"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
-				}
-				is = pinv.getItem(slot);
-			}
-			CArray enchantArray = new CArray(t);
-			if(!(args[2 - offset] instanceof CArray)) {
-				enchantArray.push(args[2 - offset], t);
-			} else {
-				enchantArray = (CArray) args[2 - offset];
-			}
-
-			CArray levelArray = new CArray(t);
-			if(!(args[3 - offset] instanceof CArray)) {
-				levelArray.push(args[3 - offset], t);
-			} else {
-				levelArray = (CArray) args[3 - offset];
-			}
-			for(String key : enchantArray.stringKeySet()) {
-				MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()));
-				if(e == null) {
-					throw new CREEnchantmentException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", t);
-				}
-				int level = Static.getInt32(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
-
-				is.addUnsafeEnchantment(e, level);
-			}
 			return CVoid.VOID;
 		}
 	}
@@ -249,17 +156,17 @@ public class Sandbox {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer me;
 			boolean isVanished;
 			MCPlayer other;
 			if(args.length == 2) {
 				me = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				isVanished = Static.getBoolean(args[0], t);
+				isVanished = ArgumentValidation.getBoolean(args[0], t);
 				other = Static.GetPlayer(args[1], t);
 			} else {
 				me = Static.GetPlayer(args[0], t);
-				isVanished = Static.getBoolean(args[1], t);
+				isVanished = ArgumentValidation.getBoolean(args[1], t);
 				other = Static.GetPlayer(args[2], t);
 			}
 
@@ -269,8 +176,8 @@ public class Sandbox {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 	}
 
@@ -310,7 +217,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer me;
 			MCPlayer other;
 			if(args.length == 1) {
@@ -324,8 +231,8 @@ public class Sandbox {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 	}
 
@@ -363,7 +270,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CString(GenerateMooSaying(args[0].val())
 					+ " \\   ^__^\n"
 					+ "  \\  (oo)\\_______\n"
@@ -384,7 +291,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CString(
 					GenerateMooSaying(args[0].val())
 					+ "              ^__^   /\n"
@@ -406,7 +313,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CString("  .-*)) `*-.\n"
 					+ " /*  ((*   *'.\n"
 					+ "|   *))  *   *\\\n"
@@ -423,7 +330,7 @@ public class Sandbox {
 	public static class norway extends DummyFunction {
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Function color = new Echoes.color();
 			String red = color.exec(t, environment, args.length == 3 ? args[0] : new CString("RED", t)).val();
 			String white = color.exec(t, environment, args.length == 3 ? args[1] : new CString("WHITE", t)).val();
@@ -486,7 +393,7 @@ public class Sandbox {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Random r;
 			try {
 				r = (Random) ArgumentValidation.getObject(args[0], t, CResource.class).getResource();
@@ -515,7 +422,7 @@ public class Sandbox {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 	}
@@ -563,7 +470,7 @@ public class Sandbox {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 	}
@@ -602,8 +509,8 @@ public class Sandbox {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -612,16 +519,16 @@ public class Sandbox {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			File file = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			int num = 0;
 			if(Security.CheckSecurity(file)) {
 				if(file.isDirectory()) {
-					HashMap<File, ParseTree> files = compileDirectory(file, t);
+					HashMap<File, ParseTree> files = compileDirectory(file, env, t);
 					IncludeCache.addAll(files);
 					num = files.size();
 				} else if(IncludeCache.has(file)) {
-					IncludeCache.add(file, compileFile(file, t));
+					IncludeCache.add(file, compileFile(file, env, t));
 					num = 1;
 				}
 			} else {
@@ -631,25 +538,25 @@ public class Sandbox {
 			return new CInt(num, t);
 		}
 
-		private HashMap<File, ParseTree> compileDirectory(File file, Target t) {
+		private HashMap<File, ParseTree> compileDirectory(File file, Environment env, Target t) {
 			HashMap<File, ParseTree> newFiles = new HashMap<>();
 			File[] files = file.listFiles();
 			if(files != null) {
 				for(File f : files) {
 					if(f.isDirectory()) {
-						newFiles.putAll(compileDirectory(f, t));
+						newFiles.putAll(compileDirectory(f, env, t));
 					} else if(IncludeCache.has(f)) {
-						newFiles.put(f, compileFile(f, t));
+						newFiles.put(f, compileFile(f, env, t));
 					}
 				}
 			}
 			return newFiles;
 		}
 
-		private ParseTree compileFile(File file, Target t) {
+		private ParseTree compileFile(File file, Environment env, Target t) {
 			try {
 				String s = new ZipReader(file).getFileContents();
-				return MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, file, true));
+				return MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, file, true), env, env.getEnvClasses());
 			} catch (ConfigCompileException ex) {
 				throw new CREIncludeException("There was a compile error when trying to recompile the script at "
 						+ file + "\n" + ex.getMessage() + " :: " + file.getName() + ":" + ex.getLineNum(), t);
@@ -666,4 +573,85 @@ public class Sandbox {
 			}
 		}
 	}
+
+	@api
+	@noboilerplate
+	public static class x_write extends AbstractFunction {
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRESecurityException.class, CREIOException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(!Static.InCmdLine(environment, true)) {
+				throw new CRESecurityException(getName() + " is only available in cmdline mode.", t);
+			}
+			File location = Static.GetFileFromArgument(args[0].val(), environment, t, null);
+			if(location.isDirectory()) {
+				throw new CREIOException("Path already exists, and is a directory", t);
+			}
+
+			byte[] content;
+			if(!(args[1].isInstanceOf(CByteArray.class))) {
+				content = args[1].val().getBytes(Charset.forName("UTF-8"));
+			} else {
+				content = ArgumentValidation.getByteArray(args[1], t).asByteArrayCopy();
+			}
+			FileWriteMode mode = FileWriteMode.SAFE_WRITE;
+			if(args.length > 2) {
+				mode = ArgumentValidation.getEnum(args[2], FileWriteMode.class, t);
+			}
+			if(mode == FileWriteMode.SAFE_WRITE && location.exists()) {
+				throw new CREIOException("File already exists, refusing to overwrite.", t);
+			}
+
+			try {
+				FileUtils.writeByteArrayToFile(location, content, mode == FileWriteMode.APPEND);
+			} catch (IOException e) {
+				throw new CREIOException(e.getMessage(), t, e);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "x_write";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {path, content, [mode]} Writes a file to the file system. This method only works from the"
+					+ " cmdline,"
+					+ " if not in cmdline, a SecurityExcpetion is thrown. Because of this, there is no check against"
+					+ " the base-dir path. ---- The path, if relative, is relative to this script"
+					+ " file. If the path already exists, and is a directory, an IOException is thrown."
+					+ " The content may be a string, in which case it is written out as UTF-8 text. It could also"
+					+ " be a byte_array, in which cases it is written as is. Mode can be one of the following, but"
+					+ " defaults to SAFE_WRITE:\n"
+					+ createEnumTable(FileWriteMode.class);
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+	}
+
 }

@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction.events;
 
-import com.laytonsmith.abstraction.MCItem;
+import com.laytonsmith.abstraction.entities.MCItem;
 import com.laytonsmith.abstraction.MCItemStack;
 
 public interface MCPlayerPickupItemEvent extends MCPlayerEvent {

@@ -1,7 +1,11 @@
 package com.laytonsmith.core.environments;
 
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This is a generic environment storage class. Environments cannot be removed from the environment, but the environment
@@ -101,9 +105,26 @@ public final class Environment implements Cloneable {
 	public Environment clone() throws CloneNotSupportedException {
 		Environment clone = (Environment) super.clone();
 		clone.environments = new HashMap<>();
-		for(Class c : environments.keySet()) {
-			clone.environments.put(c, environments.get(c).clone());
+		for(Map.Entry<Class<? extends EnvironmentImpl>, EnvironmentImpl> entry : environments.entrySet()) {
+			clone.environments.put(entry.getKey(), entry.getValue().clone());
 		}
 		return clone;
+	}
+
+	/**
+	 * Returns the set of Class objects for the contained classes.
+	 * @return
+	 */
+	public Set<Class<? extends EnvironmentImpl>> getEnvClasses() {
+		return environments.keySet();
+	}
+
+	/**
+	 * Environments that are used by the core compiler/runtime will always be present. This function returns a
+	 * set of those classes.
+	 * @return
+	 */
+	public static Set<Class<? extends EnvironmentImpl>> getDefaultEnvClasses() {
+		return new HashSet<>(Arrays.asList(GlobalEnv.class, CompilerEnvironment.class));
 	}
 }

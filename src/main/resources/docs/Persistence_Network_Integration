@@ -90,7 +90,7 @@ There are three columns in the table, and the table name is determined by the us
 The columns are defined by the query:
 
 <%SYNTAX|sql|
-<%MySQL_CREATE_TABLE_QUERY%>
+<%MYSQL_CREATE_TABLE_QUERY%>
 %>
 
 Selections, inserts, etc, must take the key and binary hash it with the UNHEX and MD5 functions: 
@@ -114,7 +114,7 @@ the key column is the primary key. The database may contain multiple tables, but
 with the query:
 
 <%SYNTAX|sql|
-<%SQLite_CREATE_TABLE_QUERY%>
+<%SQLITE_CREATE_TABLE_QUERY%>
 %>
 
 will be used.

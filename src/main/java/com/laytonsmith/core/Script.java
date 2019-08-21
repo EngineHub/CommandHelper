@@ -10,15 +10,9 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.TokenStream;
-import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CDouble;
-import com.laytonsmith.core.constructs.CEntry;
-import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CLabel;
-import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Command;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Construct.ConstructType;
@@ -32,9 +26,9 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.InvalidEnvironmentException;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
-import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
+import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
@@ -50,6 +44,7 @@ import com.laytonsmith.core.extensions.ExtensionTracker;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
 
 import java.util.ArrayList;
@@ -57,7 +52,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
+import java.util.Set;
 
 /**
  * A script is a section of code that has been preprocessed and split into separate commands/actions. For instance, the
@@ -73,6 +68,9 @@ import java.util.logging.Level;
  */
 public class Script {
 
+	// See set_debug_output()
+	public static boolean debugOutput = false;
+
 	private List<Token> left;
 	private List<List<Token>> right;
 	private List<Token> fullRight;
@@ -86,7 +84,10 @@ public class Script {
 	private final long compileTime;
 	private String label;
 	private Environment currentEnv;
+	private Set<Class<? extends Environment.EnvironmentImpl>> envs;
 	private FileOptions fileOptions;
+
+	private static final SimpleVersion GARBAGE_VERSION = new SimpleVersion(0, 0, 0, "version-error");
 
 	@Override
 	public String toString() {
@@ -124,11 +125,13 @@ public class Script {
 		return b.toString();
 	}
 
-	public Script(List<Token> left, List<Token> right, String label, FileOptions fileOptions) {
+	public Script(List<Token> left, List<Token> right, String label,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, FileOptions fileOptions) {
 		this.left = left;
 		this.fullRight = right;
 		this.leftVars = new HashMap<>();
 		this.label = label;
+		this.envs = envs;
 		compileTime = System.currentTimeMillis();
 		this.fileOptions = fileOptions;
 	}
@@ -181,7 +184,7 @@ public class Script {
 				if(rootNode == null) {
 					continue;
 				}
-				for(Construct tempNode : rootNode.getAllData()) {
+				for(Mixed tempNode : rootNode.getAllData()) {
 					if(tempNode instanceof Variable) {
 						if(leftVars == null) {
 							throw ConfigRuntimeException.CreateUncatchableException("$variables may not be used in this context."
@@ -240,11 +243,11 @@ public class Script {
 	 * @param env
 	 * @return
 	 */
-	public Construct seval(ParseTree c, final Environment env) {
-		Construct ret = eval(c, env);
+	public Mixed seval(ParseTree c, final Environment env) {
+		Mixed ret = eval(c, env);
 		while(ret instanceof IVariable) {
 			IVariable cur = (IVariable) ret;
-			ret = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget()).ival();
+			ret = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget(), env).ival();
 		}
 		return ret;
 	}
@@ -257,20 +260,24 @@ public class Script {
 	 * @return
 	 * @throws CancelCommandException
 	 */
-	public Construct eval(ParseTree c, final Environment env) throws CancelCommandException {
+	@SuppressWarnings("UseSpecificCatch")
+	public Mixed eval(ParseTree c, final Environment env) throws CancelCommandException {
 		if(env.getEnv(GlobalEnv.class).IsInterrupted()) {
 			//First things first, if we're interrupted, kill the script
 			//unconditionally.
 			throw new CancelCommandException("", Target.UNKNOWN);
 		}
 
-		final Construct m = c.getData();
+		final Mixed m = c.getData();
 		currentEnv = env;
-		if(m.getCType() != ConstructType.FUNCTION) {
-			if(m.getCType() == ConstructType.VARIABLE) {
-				return new CString(m.val(), m.getTarget());
-			} else {
-				return m;
+		if(m instanceof Construct) {
+			Construct co = (Construct) m;
+			if(co.getCType() != ConstructType.FUNCTION) {
+				if(co.getCType() == ConstructType.VARIABLE) {
+					return new CString(m.val(), m.getTarget());
+				} else {
+					return m;
+				}
 			}
 		}
 
@@ -290,15 +297,13 @@ public class Script {
 				if(p == null) {
 					throw new CREInvalidProcedureException("Unknown procedure \"" + m.val() + "\"", m.getTarget());
 				}
-				Environment newEnv = env;
-				try {
-					newEnv = env.clone();
-				} catch (CloneNotSupportedException e) {
-				}
 				ProfilePoint pp = env.getEnv(GlobalEnv.class).GetProfiler().start(m.val() + " execution", LogLevel.INFO);
-				Construct ret;
+				Mixed ret;
 				try {
-					ret = p.cexecute(c.getChildren(), newEnv, m.getTarget());
+					if(debugOutput) {
+						doDebugOutput(p.getName(), c.getChildren());
+					}
+					ret = p.cexecute(c.getChildren(), env, m.getTarget());
 				} finally {
 					pp.stop();
 				}
@@ -306,26 +311,29 @@ public class Script {
 			}
 			final Function f;
 			try {
-				f = (Function) FunctionList.getFunction(m);
-			} catch (ConfigCompileException e) {
+				f = (Function) FunctionList.getFunction((CFunction) m, env.getEnvClasses());
+			} catch (ConfigCompileException | ClassCastException e) {
 				//Turn it into a config runtime exception. This shouldn't ever happen though.
 				throw ConfigRuntimeException.CreateUncatchableException("Unable to find function " + m.val(), m.getTarget());
 			}
 
-			ArrayList<Construct> args = new ArrayList<>();
+			ArrayList<Mixed> args = new ArrayList<>();
 			try {
 				if(f.isRestricted() && !Static.hasCHPermission(f.getName(), env)) {
 					throw new CREInsufficientPermissionException("You do not have permission to use the "
 							+ f.getName() + " function.", m.getTarget());
 				}
 
+				if(debugOutput) {
+					doDebugOutput(f.getName(), c.getChildren());
+				}
 				if(f.useSpecialExec()) {
 					ProfilePoint p = null;
 					if(f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null
 							&& env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())) {
 						p = env.getEnv(GlobalEnv.class).GetProfiler().start(f.profileMessageS(c.getChildren()), f.profileAt());
 					}
-					Construct ret;
+					Mixed ret;
 					try {
 						ret = f.execs(m.getTarget(), env, this, c.getChildren().toArray(new ParseTree[]{}));
 					} finally {
@@ -340,22 +348,24 @@ public class Script {
 					args.add(eval(c2, env));
 				}
 				Object[] a = args.toArray();
-				Construct[] ca = new Construct[a.length];
+				Mixed[] ca = new Mixed[a.length];
 				for(int i = 0; i < a.length; i++) {
-					ca[i] = (Construct) a[i];
+					ca[i] = (Mixed) a[i];
+					// TODO: This code is outdated and needs to be rethought.
 					//CArray, CBoolean, CDouble, CInt, CNull, CString, CVoid, CEntry, CLabel (only to sconcat).
-					if(!(ca[i] instanceof CArray || ca[i] instanceof CBoolean || ca[i] instanceof CDouble
-							|| ca[i] instanceof CInt || ca[i] instanceof CNull
-							|| ca[i] instanceof CString || ca[i] instanceof CVoid
-							|| ca[i] instanceof IVariable || ca[i] instanceof CEntry || ca[i] instanceof CLabel)
-							&& (!f.getName().equals("__autoconcat__") && (ca[i] instanceof CLabel))) {
-						throw new CRECastException("Invalid Construct ("
-								+ ca[i].getClass() + ") being passed as an argument to a function ("
-								+ f.getName() + ")", m.getTarget());
-					}
+//					if(!(ca[i].isInstanceOf(CArray.class) || ca[i] instanceof CBoolean || ca[i] instanceof CDouble
+//							|| ca[i] instanceof CInt || ca[i] instanceof CNull
+//							|| ca[i] instanceof CString || ca[i] instanceof CVoid
+//							|| ca[i] instanceof IVariable || ca[i] instanceof CEntry || ca[i] instanceof CLabel)
+//							&& (!f.getName().equals("__autoconcat__") && (ca[i] instanceof CLabel))) {
+//						throw new CRECastException("Invalid Mixed ("
+//								+ ca[i].getClass() + ") being passed as an argument to a function ("
+//								+ f.getName() + ")", m.getTarget());
+//					}
 					while(f.preResolveVariables() && ca[i] instanceof IVariable) {
 						IVariable cur = (IVariable) ca[i];
-						ca[i] = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget()).ival();
+						ca[i] = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget(),
+								env).ival();
 					}
 				}
 
@@ -367,7 +377,7 @@ public class Script {
 							&& env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())) {
 						p = env.getEnv(GlobalEnv.class).GetProfiler().start(f.profileMessage(ca), f.profileAt());
 					}
-					Construct ret;
+					Mixed ret;
 					try {
 						ret = f.exec(m.getTarget(), env, ca);
 					} finally {
@@ -389,9 +399,24 @@ public class Script {
 					e.setData(f.getName());
 				}
 				throw e;
-			} catch (Exception e) {
+			} catch (StackOverflowError e) {
+				// This handles this in all cases that weren't previously considered. But it still should
+				// be individually handled by other cases to ensure that the stack trace is more correct
+				throw new CREStackOverflowError(null, c.getTarget(), e);
+			} catch (Throwable e) {
+				if(e instanceof ThreadDeath) {
+					// Bail quickly in this case
+					throw e;
+				}
 				String brand = Implementation.GetServerType().getBranding();
-				SimpleVersion version = Static.getVersion();
+				SimpleVersion version;
+
+				try {
+					version = Static.getVersion();
+				} catch (Throwable ex) {
+					// This failing should not be a dealbreaker, so fill it with default data
+					version = GARBAGE_VERSION;
+				}
 
 				String culprit = brand;
 				outer:
@@ -410,26 +435,30 @@ public class Script {
 
 				String emsg = TermColors.RED + "Uh oh! You've found an error in " + TermColors.CYAN + culprit + TermColors.RED + ".\n"
 						+ "This happened while running your code, so you may be able to find a workaround,"
+						+ (!(e instanceof Exception) ? " (though since this is an Error, maybe not)" : "")
 						+ " but is ultimately an issue in " + culprit + ".\n"
 						+ "The following code caused the error:\n" + TermColors.WHITE;
 
 				List<String> args2 = new ArrayList<>();
 				Map<String, String> vars = new HashMap<>();
-				for(Construct cc : args) {
+				for(Mixed cc : args) {
 					if(cc instanceof IVariable) {
-						Construct ccc = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) cc).getVariableName(), cc.getTarget()).ival();
+						Mixed ccc = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) cc).getVariableName(),
+								cc.getTarget(), env).ival();
 						String vval = ccc.val();
 						if(ccc instanceof CString) {
-							vval = ccc.asString().getQuote();
+							vval = new CString(ccc.val(), Target.UNKNOWN).getQuote();
 						}
 						vars.put(((IVariable) cc).getVariableName(), vval);
 					}
 					if(cc == null) {
 						args2.add("java-null");
 					} else if(cc instanceof CString) {
-						args2.add(cc.asString().getQuote());
+						args2.add(new CString(cc.val(), Target.UNKNOWN).getQuote());
 					} else if(cc instanceof IVariable) {
 						args2.add(((IVariable) cc).getVariableName());
+					} else if(cc instanceof CClosure) {
+						args2.add("<closure>");
 					} else {
 						args2.add(cc.val());
 					}
@@ -474,7 +503,7 @@ public class Script {
 						+ TermColors.CYAN + brand + TermColors.RED + " version: " + TermColors.RESET + version + TermColors.RED + ";\n"
 						+ "Loaded extensions and versions:\n" + extensionData
 						+ "Here's the stacktrace:\n" + TermColors.RESET + Static.GetStacktraceString(e);
-				Static.getLogger().log(Level.SEVERE, emsg);
+				System.err.println(emsg);
 				throw new CancelCommandException(null, Target.UNKNOWN);
 			}
 		} finally {
@@ -482,6 +511,27 @@ public class Script {
 				stManager.popStackTraceElement();
 			}
 		}
+	}
+
+	private void doDebugOutput(String nodeName, List<ParseTree> children) {
+		List<String> args = new ArrayList<>();
+		for(ParseTree t : children) {
+			if(t.isConst()) {
+				if(t.getData() instanceof CString) {
+					args.add(new CString(t.getData().val(), Target.UNKNOWN).getQuote());
+				} else {
+					args.add(t.getData().val());
+				}
+			} else if(t.getData() instanceof IVariable) {
+				args.add(((IVariable) t.getData()).getVariableName());
+			} else if(t.getData() instanceof Variable) {
+				args.add(((Variable) t.getData()).getVariableName());
+			} else {
+				args.add("[[Dynamic Element]]");
+			}
+		}
+		StreamUtils.GetSystemOut().println(TermColors.BG_RED + "[[DEBUG]] " + nodeName + "("
+				+ StringUtils.Join(args, ", ") + ")" + TermColors.RESET);
 	}
 
 	public boolean match(String command) {
@@ -501,15 +551,15 @@ public class Script {
 				break;
 			}
 			lastJ = j;
-			Construct c = cleft.get(j);
+			Mixed c = cleft.get(j);
 			if(args.size() <= j) {
-				if(c.getCType() != ConstructType.VARIABLE || !((Variable) c).isOptional()) {
+				if(!Construct.IsCType(c, ConstructType.VARIABLE) || !((Variable) c).isOptional()) {
 					isAMatch = false;
 				}
 				break;
 			}
 			String arg = args.get(j);
-			if(c.getCType() != ConstructType.VARIABLE) {
+			if(!Construct.IsCType(c, ConstructType.VARIABLE)) {
 				if(caseSensitive && !c.val().equals(arg) || !caseSensitive && !c.val().equalsIgnoreCase(arg)) {
 					isAMatch = false;
 					continue;
@@ -521,7 +571,7 @@ public class Script {
 					if(args.size() <= cleft.size()) {
 						return true;
 					} else {
-						Construct fin = cleft.get(cleft.size() - 1);
+						Mixed fin = cleft.get(cleft.size() - 1);
 						if(fin instanceof Variable) {
 							if(((Variable) fin).isFinal()) {
 								return true;
@@ -532,7 +582,7 @@ public class Script {
 				}
 			}
 			if(j == cleft.size() - 1) {
-				if(cleft.get(j).getCType() == ConstructType.VARIABLE) {
+				if(Construct.IsCType(cleft.get(j), ConstructType.VARIABLE)) {
 					Variable lv = (Variable) cleft.get(j);
 					if(lv.isFinal()) {
 						for(int a = j; a < args.size(); a++) {
@@ -573,7 +623,7 @@ public class Script {
 		Variable v = null;
 		for(int j = 0; j < cleft.size(); j++) {
 			try {
-				if(cleft.get(j).getCType() == ConstructType.VARIABLE) {
+				if(Construct.IsCType(cleft.get(j), ConstructType.VARIABLE)) {
 					if(((Variable) cleft.get(j)).getVariableName().equals("$")) {
 						for(int k = j; k < args.size(); k++) {
 							lastVar.append(args.get(k).trim()).append(" ");
@@ -826,13 +876,16 @@ public class Script {
 		right.add(temp);
 		cright = new ArrayList<>();
 		for(List<Token> l : right) {
-			cright.add(MethodScriptCompiler.compile(new TokenStream(l, fileOptions)));
+			cright.add(MethodScriptCompiler.compile(new TokenStream(l, fileOptions), null, envs));
 		}
 	}
 
 	public void checkAmbiguous(List<Script> scripts) throws ConfigCompileException {
 		List<Construct> thisCommand = this.cleft;
 		for(Script script : scripts) {
+			if(script.fileOptions.hasCompilerOption(FileOptions.CompilerOption.AllowAmbiguousCommands)) {
+				continue;
+			}
 			List<Construct> thatCommand = script.cleft;
 			if(thatCommand == null) {
 				// It hasn't been compiled yet.
@@ -854,7 +907,8 @@ public class Script {
 						// the same argument position.
 						if(c1.getCType() == c2.getCType()
 								&& (c1.getCType() == ConstructType.STRING || c1.getCType() == ConstructType.COMMAND)) {
-							if(c1.nval() != c2.nval() && (c1.nval() == null || !c1.nval().equals(c2.nval()))) {
+							if(Construct.nval(c1) != Construct.nval(c2) && (Construct.nval(c1) == null
+									|| !Construct.nval(c1).equals(Construct.nval(c2)))) {
 								break matchScope;
 							}
 						}

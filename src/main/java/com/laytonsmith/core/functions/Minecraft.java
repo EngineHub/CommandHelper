@@ -16,17 +16,21 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -34,12 +38,15 @@ import com.laytonsmith.core.events.drivers.ServerEvents;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -60,8 +67,8 @@ public class Minecraft {
 	public static String docs() {
 		return "These functions provide a hook into game functionality.";
 	}
-	private static final SortedMap<String, Construct> DATA_VALUE_LOOKUP = new TreeMap<>();
-	private static final SortedMap<String, Construct> DATA_NAME_LOOKUP = new TreeMap<>();
+
+	private static final SortedMap<String, Mixed> DATA_VALUE_LOOKUP = new TreeMap<>();
 
 	static {
 		Properties p1 = new Properties();
@@ -75,22 +82,10 @@ public class Minecraft {
 		} catch (IOException ex) {
 			Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
 		}
-
-		Properties p2 = new Properties();
-		try {
-			p2.load(Minecraft.class.getResourceAsStream("/data_names.txt"));
-			Enumeration e = p2.propertyNames();
-			while(e.hasMoreElements()) {
-				String name = e.nextElement().toString();
-				DATA_NAME_LOOKUP.put(name, new CString(p2.getProperty(name), Target.UNKNOWN));
-			}
-		} catch (IOException ex) {
-			Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
-		}
 	}
 
 	@api
-	public static class data_values extends AbstractFunction {
+	public static class data_values extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -103,14 +98,14 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if(args[0] instanceof CInt) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			if(args[0].isInstanceOf(CInt.class)) {
 				return new CInt(Static.getInt(args[0], t), t);
 			}
 			String c = args[0].val();
-			int number = StaticLayer.LookupItemId(c);
-			if(number != -1) {
-				return new CInt(number, t);
+			MCMaterial mat = StaticLayer.GetMaterial("LEGACY_" + c.toUpperCase());
+			if(mat != null) {
+				return new CInt(mat.getType(), t);
 			}
 			String changed = c;
 			if(changed.contains(":")) {
@@ -135,8 +130,8 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "int {var1} Does a lookup to return the data value of a name. For instance, returns 1 for 'stone'. If an integer is given,"
-					+ " simply returns that number. If the data value cannot be found, null is returned.";
+			return "int {var1} Does a lookup to return the data value of a name. For instance, returns 1 for 'stone'."
+					+ " If the data value cannot be found, null is returned.";
 		}
 
 		@Override
@@ -150,13 +145,27 @@ public class Minecraft {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
 		public Boolean runAsync() {
 			return false;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "data_values() is deprecated.", t);
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -175,10 +184,10 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "string {int | itemArray} Performs the reverse functionality as data_values. Given 1, returns 'Stone'. Note that the enum value"
-					+ " given in bukkit's Material class is what is returned as a fallback, if the id doesn't match a value in the internally maintained list."
-					+ " If a completely invalid argument is passed"
-					+ " in, null is returned.";
+			return "string {item} Returns a modern material for the a legacy item id, name, notation, or array."
+					+ " If an invalid argument is passed in, null is returned."
+					+ " Given 1 or '1:0', returns 'STONE'."
+					+ " Given an item array with {name: STONE, data: 1}, returns 'GRANITE'.";
 		}
 
 		@Override
@@ -192,8 +201,8 @@ public class Minecraft {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -202,10 +211,10 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			int i = -1;
 			int i2 = -1;
-			if(args[0] instanceof CString) {
+			if(args[0].isInstanceOf(CString.class)) {
 				//We also accept item notation
 				if(args[0].val().contains(":")) {
 					String[] split = args[0].val().split(":");
@@ -217,24 +226,27 @@ public class Minecraft {
 						throw new CREFormatException("Incorrect format for the item notation: " + args[0].val(), t);
 					}
 				}
-			} else if(args[0] instanceof CArray) {
-				MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], t);
-				i = is.getTypeId();
-				i2 = is.getData().getData();
+			} else if(args[0].isInstanceOf(CArray.class)) {
+				MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], t, true);
+				return new CString(is.getType().getName(), t);
 			}
 			if(i == -1) {
-				i = Static.getInt32(args[0], t);
+				try {
+					i = Static.getInt32(args[0], t);
+				} catch (CRECastException ex) {
+					// possibly a material name
+					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(args[0].val(), 0);
+					if(mat == null) {
+						return CNull.NULL;
+					}
+					return new CString(mat.getName(), t);
+				}
 			}
 			if(i2 == -1) {
 				i2 = 0;
 			}
-			if(DATA_NAME_LOOKUP.containsKey(i + "_" + i2)) {
-				return DATA_NAME_LOOKUP.get(i + "_" + i2);
-			} else if(DATA_NAME_LOOKUP.containsKey(i + "_0")) {
-				return DATA_NAME_LOOKUP.get(i + "_0");
-			}
 			try {
-				return new CString(StaticLayer.LookupMaterialName(i), t);
+				return new CString(StaticLayer.GetMaterialFromLegacy(i, i2).getName(), t);
 			} catch (NullPointerException e) {
 				return CNull.NULL;
 			}
@@ -242,7 +254,61 @@ public class Minecraft {
 	}
 
 	@api
-	public static class max_stack_size extends AbstractFunction {
+	public static class convert_legacy_item extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "convert_legacy_item";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {itemArray} Converts old pre-1.13 item arrays to new item arrays."
+					+ " Almost all item arrays will be converted successfully when passing them to a function that"
+					+ " accepts item arrays. However, if the array is missing the 'type' key, several item types"
+					+ " might not convert accurately due to name conflicts."
+					+ " This function offers convenience and ensures better conversion accuracy."
+					+ " Use this if you have item arrays stored in a database and want to convert them all at once."
+					+ " Passing new item arrays to this function is not supported."
+					+ " Conversions may not be supported in far future versions of Minecraft.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CRERangeException.class,
+					CRENotFoundException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray item = Static.getArray(args[0], t);
+			MCItemStack is = ObjectGenerator.GetGenerator().item(item, t, true);
+			return ObjectGenerator.GetGenerator().item(is, t);
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_3;
+		}
+	}
+
+	@api
+	public static class max_stack_size extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -256,12 +322,8 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "integer {itemType | itemArray} Given an item type, returns"
-					+ " the maximum allowed stack size. This method will accept either"
-					+ " a single data value (i.e. 278) or an item array like is returned"
-					+ " from pinv(). Additionally, if a single value, it can also be in"
-					+ " the old item notation (i.e. '35:11'), though for the purposes of this"
-					+ " function, the data is unnecessary.";
+			return "integer {itemArray} Given an item array, returns the maximum allowed stack size."
+					+ " This method will accept an item array like is returned from pinv().";
 		}
 
 		@Override
@@ -281,22 +343,27 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Construct id = args[0];
-			if(id instanceof CArray) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			Mixed id = args[0];
+			if(id.isInstanceOf(CArray.class)) {
 				MCItemStack is = ObjectGenerator.GetGenerator().item(id, t);
 				return new CInt(is.getType().getMaxStackSize(), t);
-			} else if(id instanceof CString) {
-				int seperatorIndex = id.val().indexOf(':');
-				if(seperatorIndex != -1) {
-					id = new CString(id.val().substring(0, seperatorIndex), t);
+			}
+			// legacy
+			int type;
+			int data = 0;
+			try {
+				int separatorIndex = id.val().indexOf(':');
+				if(separatorIndex != -1) {
+					type = Integer.parseInt(id.val().substring(0, separatorIndex));
+					data = Integer.parseInt(id.val().substring(separatorIndex + 1));
+				} else {
+					type = Integer.parseInt(id.val());
 				}
+			} catch (NumberFormatException e) {
+				throw new CREFormatException("Invalid item notation: " + id.val(), t);
 			}
-			int seperatorIndex = id.val().indexOf(':');
-			if(seperatorIndex != -1) {
-				id = new CString(id.val().substring(0, seperatorIndex), t);
-			}
-			MCMaterial mat = StaticLayer.GetConvertor().getMaterial(Static.getInt32(id, t));
+			MCMaterial mat = StaticLayer.GetMaterialFromLegacy(type, data);
 			if(mat == null) {
 				throw new CRENotFoundException("A material type could not be found based on the given id.", t);
 			}
@@ -304,13 +371,33 @@ public class Minecraft {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() < 1) {
+				return null;
+			}
+			if(children.get(0).getData().isInstanceOf(CString.class) && children.get(0).getData().val().contains(":")
+					|| ArgumentValidation.isNumber(children.get(0).getData())) {
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Numeric ids are deprecated in max_stack_size()", t);
+			}
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class make_effect extends AbstractFunction {
+	public static class make_effect extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -324,11 +411,12 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "void {locationArray, effect, [radius]} Plays the specified effect (sound effect) at the given location, for all players within"
-					+ " the radius (or 64 by default). The effect can be one of the following: "
+			return "void {locationArray, effect, [radius]} Plays the specified effect at the given location"
+					+ " for all players within the radius (or 64 by default). The effect can be one of the following: "
 					+ StringUtils.Join(MCEffect.values(), ", ", ", or ", " or ")
-					+ ". Additional data can be supplied with the syntax EFFECT:DATA. The RECORD_PLAY effect takes the item"
-					+ " id of a disc as data, STEP_SOUND takes a blockID and SMOKE takes a direction bit (4 is upwards).";
+					+ ". Additional data can be supplied with the syntax EFFECT:DATA. The STEP_SOUND effect takes an"
+					+ " int of a legacy block id, SMOKE takes an int as a direction (4 is upwards), and POTION_BREAK"
+					+ " takes an int as a color.";
 		}
 
 		@Override
@@ -342,8 +430,8 @@ public class Minecraft {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -352,7 +440,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t);
 			MCEffect e;
@@ -371,10 +459,11 @@ public class Minecraft {
 			try {
 				e = MCEffect.valueOf(preEff.toUpperCase());
 			} catch (IllegalArgumentException ex) {
-				throw new CREFormatException("The effect type " + args[1].val() + " is not valid", t);
+				MSLog.GetLogger().e(MSLog.Tags.GENERAL, "The effect type " + args[1].val() + " is not valid", t);
+				return CVoid.VOID;
 			}
 			if(e.equals(MCEffect.STEP_SOUND)) {
-				MCMaterial mat = StaticLayer.GetConvertor().getMaterial(data);
+				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(data, 0);
 				if(mat == null || !mat.isBlock()) {
 					throw new CREFormatException("This effect requires a valid BlockID", t);
 				}
@@ -384,6 +473,32 @@ public class Minecraft {
 			}
 			l.getWorld().playEffect(l, e, data, radius);
 			return CVoid.VOID;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 2) {
+				return null;
+			}
+			Mixed effect = children.get(1).getData();
+			if(effect.isInstanceOf(CString.class)) {
+				String effectName = effect.val().split(":")[0].toUpperCase();
+				try {
+					MCEffect.valueOf(effectName);
+				} catch (IllegalArgumentException ex) {
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The effect type " + effectName + " is not valid", t);
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -403,13 +518,14 @@ public class Minecraft {
 		@Override
 		public String docs() {
 			return "mixed {[value]} Returns various information about server."
-					+ "If value is set, it should be an integer of one of the following indexes, and only that information for that index"
-					+ " will be returned. ---- Otherwise if value is not specified (or is -1), it returns an array of"
+					+ "If value is set, it should be an integer of one of the following indexes,"
+					+ " and only that information for that index will be returned."
+					+ " ---- Otherwise if value is not specified (or is -1), it returns an array of"
 					+ " information with the following pieces of information in the specified index: "
 					+ "<ul><li>0 - Server name; the name of the server in server.properties.</li>"
 					+ "<li>1 - API version; The version of the plugin API this server is implementing.</li>"
 					+ "<li>2 - Server version; The bare version string of the server implementation.</li>"
-					+ "<li>3 - Allow flight; If true, Minecraft's inbuilt anti fly check is enabled.</li>"
+					+ "<li>3 - Allow flight; If true, Minecraft's inbuilt anti fly check is disabled.</li>"
 					+ "<li>4 - Allow nether; is true, the Nether dimension is enabled</li>"
 					+ "<li>5 - Allow end; if true, the End is enabled</li>"
 					+ "<li>6 - World container; The path to the world container.</li>"
@@ -437,8 +553,8 @@ public class Minecraft {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -447,7 +563,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCServer server = StaticLayer.GetServer();
 			int index = -1;
 			if(args.length == 0) {
@@ -460,7 +576,7 @@ public class Minecraft {
 				throw new CRERangeException(this.getName() + " expects the index to be between -1 and 16 (inclusive)", t);
 			}
 
-			ArrayList<Construct> retVals = new ArrayList<Construct>();
+			ArrayList<Mixed> retVals = new ArrayList<>();
 
 			if(index == 0 || index == -1) {
 				//Server name
@@ -566,7 +682,7 @@ public class Minecraft {
 			}
 
 			CArray ca = new CArray(t);
-			for(Construct c : retVals) {
+			for(Mixed c : retVals) {
 				ca.push(c, t);
 			}
 			return ca;
@@ -588,7 +704,7 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "Array {} An array of players banned on the server.";
+			return "array {} An array of players banned on the server.";
 		}
 
 		@Override
@@ -602,8 +718,8 @@ public class Minecraft {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -612,7 +728,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCServer server = StaticLayer.GetServer();
 			CArray co = new CArray(t);
 			List<MCOfflinePlayer> so = server.getBannedPlayers();
@@ -642,7 +758,7 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "Array {} An array of players whitelisted on the server.";
+			return "array {} An array of players whitelisted on the server.";
 		}
 
 		@Override
@@ -656,8 +772,8 @@ public class Minecraft {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -666,7 +782,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			MCServer server = StaticLayer.GetServer();
 			CArray co = new CArray(t);
 			List<MCOfflinePlayer> so = server.getWhitelistedPlayers();
@@ -700,7 +816,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
@@ -727,13 +843,12 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "string {locationArray} Gets the spawner type of the specified mob spawner. ----"
-					+ " Valid types will be one of the mob types.";
+			return "string {locationArray} Gets the entity type that will spawn from the specified mob spawner.";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -757,7 +872,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
@@ -790,14 +905,15 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "void {locationArray, type} Sets the mob spawner type at the location specified. If the location is not a mob spawner,"
-					+ " or if the type is invalid, a FormatException is thrown. The type may be one of either "
+			return "void {locationArray, type} Sets the mob spawner's entity type at the location specified."
+					+ " If the location is not a mob spawner, or if the type is invalid, a FormatException is thrown."
+					+ " ---- The type may be one of either "
 					+ StringUtils.Join(MCEntityType.MCVanillaEntityType.values(), ", ", ", or ");
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -821,7 +937,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = Static.GetPlayer(args[0], t);
 			p.sendResourcePack(args[1].val());
 			return CVoid.VOID;
@@ -841,14 +957,14 @@ public class Minecraft {
 		public String docs() {
 			return "void {player, url} Sends a resourcepack URL to the player's client."
 					+ " If the client has not been requested to change resources in the"
-					+ " past, they will recieve a confirmation dialog before downloading"
+					+ " past, they will receive a confirmation dialog before downloading"
 					+ " and switching to the new pack. Clients that ignore server resources"
-					+ " will not recieve the request, so this function will not affect them.";
+					+ " will not receive the request, so this function will not affect them.";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -871,7 +987,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			CArray ret = new CArray(t);
 			for(String ip : s.getIPBans()) {
@@ -896,8 +1012,8 @@ public class Minecraft {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -920,10 +1036,10 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			String ip = args[0].val();
-			if(Static.getBoolean(args[1], t)) {
+			if(ArgumentValidation.getBoolean(args[1], t)) {
 				s.banIP(ip);
 			} else {
 				s.unbanIP(ip);
@@ -948,62 +1064,88 @@ public class Minecraft {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
 	@api
-	public static class material_info extends AbstractFunction {
+	public static class material_info extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREFormatException.class};
+			return new Class[]{CRECastException.class, CREFormatException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCMaterial i = StaticLayer.GetConvertor().getMaterial(Static.getInt32(args[0], t));
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCMaterial mat = StaticLayer.GetMaterial(args[0].val());
+			if(mat == null) {
+				try {
+					mat = StaticLayer.GetMaterialFromLegacy(Static.getInt32(args[0], t), 0);
+				} catch (CRECastException ex) {
+					throw new CREIllegalArgumentException("Unable to get the material from: " + args[0].val(), t);
+				}
+			}
 			if(args.length == 2) {
 				switch(args[1].val()) {
 					case "maxStacksize":
-						return new CInt(i.getMaxStackSize(), t);
+						return new CInt(mat.getMaxStackSize(), t);
 					case "maxDurability":
-						return new CInt(i.getMaxDurability(), t);
+						return new CInt(mat.getMaxDurability(), t);
 					case "hasGravity":
-						return CBoolean.get(i.hasGravity());
+						return CBoolean.get(mat.hasGravity());
 					case "isBlock":
-						return CBoolean.get(i.isBlock());
+						return CBoolean.get(mat.isBlock());
 					case "isBurnable":
-						return CBoolean.get(i.isBurnable());
+						return CBoolean.get(mat.isBurnable());
 					case "isEdible":
-						return CBoolean.get(i.isEdible());
+						return CBoolean.get(mat.isEdible());
 					case "isFlammable":
-						return CBoolean.get(i.isFlammable());
+						return CBoolean.get(mat.isFlammable());
 					case "isOccluding":
-						return CBoolean.get(i.isOccluding());
+						return CBoolean.get(mat.isOccluding());
 					case "isRecord":
-						return CBoolean.get(i.isRecord());
+						return CBoolean.get(mat.isRecord());
 					case "isSolid":
-						return CBoolean.get(i.isSolid());
+						return CBoolean.get(mat.isSolid());
 					case "isTransparent":
-						return CBoolean.get(i.isTransparent());
+						return CBoolean.get(mat.isTransparent());
+					case "isInteractable":
+						return CBoolean.get(mat.isInteractable());
+					case "hardness":
+						if(!mat.isBlock()) {
+							throw new CREIllegalArgumentException(
+									"Invalid trait \"hardness\" for non-block material " + mat.getName(), t);
+						}
+						return new CDouble(mat.getHardness(), t);
+					case "blastResistance":
+						if(!mat.isBlock()) {
+							throw new CREIllegalArgumentException(
+									"Invalid trait \"blastResistance\" for non-block material " + mat.getName(), t);
+						}
+						return new CDouble(mat.getBlastResistance(), t);
 					default:
-						throw new CREFormatException("Invalid argument for material_info", t);
+						throw new CREFormatException("Invalid argument for material_info: " + args[1].val(), t);
 				}
 			}
 			CArray ret = CArray.GetAssociativeArray(t);
-			ret.set("maxStacksize", new CInt(i.getMaxStackSize(), t), t);
-			ret.set("maxDurability", new CInt(i.getMaxDurability(), t), t);
-			ret.set("hasGravity", CBoolean.get(i.hasGravity()), t);
-			ret.set("isBlock", CBoolean.get(i.isBlock()), t);
-			ret.set("isBurnable", CBoolean.get(i.isBurnable()), t);
-			ret.set("isEdible", CBoolean.get(i.isEdible()), t);
-			ret.set("isFlammable", CBoolean.get(i.isFlammable()), t);
-			ret.set("isOccluding", CBoolean.get(i.isOccluding()), t);
-			ret.set("isRecord", CBoolean.get(i.isRecord()), t);
-			ret.set("isSolid", CBoolean.get(i.isSolid()), t);
-			ret.set("isTransparent", CBoolean.get(i.isTransparent()), t);
+			ret.set("maxStacksize", new CInt(mat.getMaxStackSize(), t), t);
+			ret.set("maxDurability", new CInt(mat.getMaxDurability(), t), t);
+			ret.set("hasGravity", CBoolean.get(mat.hasGravity()), t);
+			ret.set("isBlock", CBoolean.get(mat.isBlock()), t);
+			ret.set("isBurnable", CBoolean.get(mat.isBurnable()), t);
+			ret.set("isEdible", CBoolean.get(mat.isEdible()), t);
+			ret.set("isFlammable", CBoolean.get(mat.isFlammable()), t);
+			ret.set("isOccluding", CBoolean.get(mat.isOccluding()), t);
+			ret.set("isRecord", CBoolean.get(mat.isRecord()), t);
+			ret.set("isSolid", CBoolean.get(mat.isSolid()), t);
+			ret.set("isTransparent", CBoolean.get(mat.isTransparent()), t);
+			ret.set("isInteractable", CBoolean.get(mat.isInteractable()), t);
+			if(mat.isBlock()) {
+				ret.set("hardness", new CDouble(mat.getHardness(), t), t);
+				ret.set("blastResistance", new CDouble(mat.getBlastResistance(), t), t);
+			}
 			return ret;
 		}
 
@@ -1019,9 +1161,11 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "mixed {int, [trait]} Returns an array of info about the material. If a trait is specified, it"
-					+ " returns only that trait. Available traits: hasGravity, isBlock, isBurnable, isEdible,"
-					+ " isFlammable, isOccluding, isRecord, isSolid, isTransparent, maxDurability, maxStacksize.";
+			return "mixed {material, [trait]} Returns an array of info about the material. If a trait is specified,"
+					+ " it returns only that trait. Available traits: hasGravity, isBlock, isBurnable, isEdible,"
+					+ " isFlammable, isOccluding, isRecord, isSolid, isTransparent, isInteractable, maxDurability,"
+					+ " hardness (for block materials only), blastResistance (for block materials only),"
+					+ " and maxStacksize. The accuracy of these values depend on the server implementation.";
 		}
 
 		@Override
@@ -1036,7 +1180,26 @@ public class Minecraft {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() < 1) {
+				return null;
+			}
+			if(ArgumentValidation.isNumber(children.get(0).getData())) {
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Numeric ids are deprecated in material_info()", t);
+			}
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -1075,11 +1238,11 @@ public class Minecraft {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws CancelCommandException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws CancelCommandException {
 			Static.getServer().shutdown();
 			throw new CancelCommandException("", t);
 		}
@@ -1111,7 +1274,7 @@ public class Minecraft {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld world = null;
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
@@ -1120,7 +1283,7 @@ public class Minecraft {
 			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], world, t);
 			boolean add = true;
 			if(args.length > 1) {
-				add = Static.getBoolean(args[1], t);
+				add = ArgumentValidation.getBoolean(args[1], t);
 			}
 			Map<MCLocation, Boolean> redstoneMonitors = ServerEvents.getRedstoneMonitors();
 			if(add) {
@@ -1143,15 +1306,65 @@ public class Minecraft {
 
 		@Override
 		public String docs() {
-			return "void {location, [isMonitored]} Sets up a location to be monitored for redstone changes. If a location is monitored,"
-					+ " it will cause redstone_changed events to be trigged. By default, isMonitored is true, however, setting it to false"
-					+ " will remove the previously monitored location from the list of monitors.";
+			return "void {location, [isMonitored]} Sets up a location to be monitored for redstone changes."
+					+ " If a location is monitored, it will cause redstone_changed events to be triggered. By default,"
+					+ " isMonitored is true, however, setting it to false will remove the previously monitored location"
+					+ " from the list of monitors.";
 		}
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
+	}
+
+	@api
+	public static class all_materials extends AbstractFunction {
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return Boolean.FALSE;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray mats = new CArray(t);
+			for(MCMaterial mat : StaticLayer.GetMaterialValues()) {
+				if(!mat.isLegacy()) {
+					mats.push(new CString(mat.getName(), t), t);
+				}
+			}
+			return mats;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public String getName() {
+			return "all_materials";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "array {} Returns an array of all material names.";
+		}
 	}
 }

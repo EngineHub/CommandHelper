@@ -3,12 +3,13 @@ package com.laytonsmith.persistence;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.annotations.datasource;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Properties;
 
@@ -52,13 +53,13 @@ public class INIDataSource extends StringSerializableDataSource {
 	}
 
 	@Override
-	public DataSourceModifier[] implicitModifiers() {
+	public EnumSet<DataSourceModifier> implicitModifiers() {
 		return null;
 	}
 
 	@Override
-	public DataSourceModifier[] invalidModifiers() {
-		return new DataSourceModifier[]{DataSourceModifier.PRETTYPRINT};
+	public EnumSet<DataSourceModifier> invalidModifiers() {
+		return EnumSet.of(DataSourceModifier.PRETTYPRINT);
 	}
 
 	@Override
@@ -71,8 +72,8 @@ public class INIDataSource extends StringSerializableDataSource {
 	}
 
 	@Override
-	public CHVersion since() {
-		return CHVersion.V3_3_1;
+	public MSVersion since() {
+		return MSVersion.V3_3_1;
 	}
 
 }

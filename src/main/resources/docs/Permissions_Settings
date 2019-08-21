@@ -19,12 +19,13 @@ These commands are provided by the plugin itself and are not aliases:
 ! Command
 ! Description
 |-
-| rowspan=2 | ''No permission required''
+| ''No permission required''
 | '''/commandhelper ''&lt;arguments&gt;'''''
 | Gain meta information about CommandHelper.
 |-
+| ''No permission required''
 | '''/runalias ''&lt;alias&gt;'''''
-| Run an alias. Can be used by other plugins to call aliases. '''''&lt;alias&gt;''''' includes the forward slash. 
+| Run an alias. Can be used by other plugins to call aliases. '''''&lt;alias&gt;''''' includes the forward slash. \
 ''Example:'' '''/runalias /eat cake''' would always fire off the alias '''/eat cake'''
 |-
 | '''commandhelper.reloadaliases'''
@@ -59,7 +60,7 @@ There are two ways to handle the permissions for restricted functions:
 === Function Based Permissions ===
 These permissions apply no matter where or how a function is used.
 
-{{warning|text=These apply to ALL scripts everywhere, and so are usually not recommended for use except by advanced 
+{{TakeNote|text=These apply to ALL scripts everywhere, and so are usually not recommended for use except by advanced 
 users. See alias based permissions below for more granular control}}
 
 {| class="wiki-table" width="100%"

@@ -6,7 +6,8 @@ import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.MemoryMapFileUtil;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.annotations.datasource;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URI;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -195,7 +197,7 @@ public class SerializedPersistence extends AbstractDataSource {
 			try {
 				load();
 			} catch (Exception ex) {
-				Logger.getLogger("Minecraft").log(Level.SEVERE, null, ex);
+				Static.getLogger().log(Level.SEVERE, null, ex);
 			}
 		}
 		String oldVal = data.get(key);
@@ -304,13 +306,13 @@ public class SerializedPersistence extends AbstractDataSource {
 	}
 
 	@Override
-	public DataSourceModifier[] implicitModifiers() {
+	public EnumSet<DataSourceModifier> implicitModifiers() {
 		return null;
 	}
 
 	@Override
-	public DataSourceModifier[] invalidModifiers() {
-		return new DataSourceModifier[]{DataSourceModifier.HTTP, DataSourceModifier.HTTPS, DataSourceModifier.PRETTYPRINT};
+	public EnumSet<DataSourceModifier> invalidModifiers() {
+		return EnumSet.of(DataSourceModifier.HTTP, DataSourceModifier.HTTPS, DataSourceModifier.PRETTYPRINT);
 	}
 
 	@Override
@@ -323,8 +325,8 @@ public class SerializedPersistence extends AbstractDataSource {
 	}
 
 	@Override
-	public CHVersion since() {
-		return CHVersion.V3_0_2;
+	public MSVersion since() {
+		return MSVersion.V3_0_2;
 	}
 
 	@Override

@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("OptionStatus")
+@MEnum("com.commandhelper.OptionStatus")
 public enum MCOptionStatus {
 	ALWAYS,
 	FOR_OTHER_TEAMS,

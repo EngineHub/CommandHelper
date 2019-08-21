@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noprofile;
@@ -10,18 +11,19 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.snapins.PackagePermission;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import com.laytonsmith.tools.docgen.DocGenTemplates.Generator.GenerateException;
@@ -29,6 +31,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -47,11 +50,12 @@ public abstract class AbstractFunction implements Function {
 	 *
 	 * @param t
 	 * @param env
+	 * @param parent
 	 * @param nodes
 	 * @return
 	 */
 	@Override
-	public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+	public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 		return CVoid.VOID;
 	}
 
@@ -80,10 +84,12 @@ public abstract class AbstractFunction implements Function {
 	 * Just return null by default. Most functions won't get to this anyways, since canOptimize is returning false.
 	 *
 	 * @param t
+	 * @param env
 	 * @param args
 	 * @return
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 */
-	public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+	public Mixed optimize(Target t, Environment env, Mixed... args) throws ConfigCompileException {
 		return null;
 	}
 
@@ -93,10 +99,16 @@ public abstract class AbstractFunction implements Function {
 	 * case where it can optimize anyways, even if some values are undetermined at the moment.
 	 *
 	 * @param t
+	 * @param env
+	 * @param envs
 	 * @param children
+	 * @param fileOptions
 	 * @return
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 */
-	public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+	public ParseTree optimizeDynamic(Target t, Environment env,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children, FileOptions fileOptions)
+			throws ConfigCompileException, ConfigRuntimeException {
 		return null;
 	}
 
@@ -134,22 +146,22 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	@Override
-	public String profileMessage(Construct... args) {
+	public String profileMessage(Mixed... args) {
 		StringBuilder b = new StringBuilder();
 		boolean first = true;
-		for(Construct ccc : args) {
+		for(Mixed ccc : args) {
 			if(!first) {
 				b.append(", ");
 			}
 			first = false;
-			if(ccc instanceof CArray) {
+			if(ccc.isInstanceOf(CArray.class)) {
 				//Arrays take too long to toString, so we don't want to actually toString them here if
 				//we don't need to.
-				b.append("<arrayNotShown size:" + ((CArray) ccc).size() + ">");
-			} else if(ccc instanceof CClosure) {
+				b.append("<arrayNotShown size:").append(((CArray) ccc).size()).append(">");
+			} else if(ccc.isInstanceOf(CClosure.class)) {
 				//The toString of a closure is too long, so let's not output them either.
 				b.append("<closureNotShown>");
-			} else if(ccc instanceof CString) {
+			} else if(ccc.isInstanceOf(CString.class)) {
 				String val = ccc.val().replace("\\", "\\\\").replace("'", "\\'");
 				int max = 1000;
 				if(val.length() > max) {
@@ -191,11 +203,36 @@ public abstract class AbstractFunction implements Function {
 	 * @return
 	 */
 	protected String getBundledDocs(Map<String, DocGenTemplates.Generator> map) throws GenerateException {
-		String template = StreamUtils.GetString(AbstractFunction.class.getResourceAsStream("/functionDocs/" + getName()));
+		String template = StreamUtils.GetString(AbstractFunction.class.getResourceAsStream("/functionDocs/"
+				+ getName()));
 		if(map == null) {
 			map = new HashMap<>();
 		}
 		return DocGenTemplates.DoTemplateReplacement(template, map);
+	}
+
+	protected <T extends Enum<?> & SimpleDocumentation> String createEnumTable(Class<T> c) {
+		StringBuilder b = new StringBuilder();
+		MEnum me = c.getAnnotation(MEnum.class);
+		String title;
+		if(me == null) {
+			title = c.getSimpleName();
+		} else {
+			title = me.value();
+		}
+		b.append("<br>'''").append(title).append("'''<br>\n");
+		b.append("{|\n");
+		b.append("|-\n! Name\n! Docs\n! Since\n");
+		Enum[] elist = c.getEnumConstants();
+		for(Enum e : elist) {
+			SimpleDocumentation d = (SimpleDocumentation) e;
+			b.append("|-\n")
+					.append("| ").append(d.getName()).append("\n")
+					.append("| ").append(d.docs()).append("\n")
+					.append("| ").append(d.since()).append("\n");
+		}
+		b.append("|}\n");
+		return b.toString();
 	}
 
 	@Override

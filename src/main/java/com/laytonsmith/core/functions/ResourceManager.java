@@ -6,11 +6,10 @@ import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -19,6 +18,7 @@ import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -110,9 +110,9 @@ public class ResourceManager {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			ResourceTypes type;
-			Construct data = null;
+			Mixed data = null;
 			try {
 				type = ResourceTypes.valueOf(args[0].val());
 			} catch (IllegalArgumentException e) {
@@ -180,7 +180,7 @@ public class ResourceManager {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -204,8 +204,8 @@ public class ResourceManager {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CResource) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CResource.class)) {
 				CResource<?> resource = (CResource<?>) args[0];
 				if(RESOURCES.containsKey(resource.getId())) {
 					RESOURCES.remove(resource.getId());
@@ -236,7 +236,7 @@ public class ResourceManager {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 }

@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCEntity;
@@ -9,7 +10,6 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCTravelAgent;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
@@ -19,26 +19,29 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCTravelAgent;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
-import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFishHook;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityDeathEvent;
 import com.laytonsmith.abstraction.entities.MCFishHook;
 import com.laytonsmith.abstraction.enums.MCAction;
+import com.laytonsmith.abstraction.enums.MCEnterBedResult;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
+import com.laytonsmith.abstraction.enums.MCResourcePackStatus;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAction;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEnterBedResult;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCFishingState;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCGameMode;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCResourcePackStatus;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCTeleportCause;
-import com.laytonsmith.abstraction.events.MCChatTabCompleteEvent;
 import com.laytonsmith.abstraction.events.MCExpChangeEvent;
 import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
-import com.laytonsmith.abstraction.events.MCPlayerBedEvent;
+import com.laytonsmith.abstraction.events.MCPlayerEnterBedEvent;
+import com.laytonsmith.abstraction.events.MCPlayerLeaveBedEvent;
 import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
 import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
 import com.laytonsmith.abstraction.events.MCPlayerDeathEvent;
@@ -52,8 +55,8 @@ import com.laytonsmith.abstraction.events.MCPlayerKickEvent;
 import com.laytonsmith.abstraction.events.MCPlayerLoginEvent;
 import com.laytonsmith.abstraction.events.MCPlayerMoveEvent;
 import com.laytonsmith.abstraction.events.MCPlayerPortalEvent;
-import com.laytonsmith.abstraction.events.MCPlayerPreLoginEvent;
 import com.laytonsmith.abstraction.events.MCPlayerQuitEvent;
+import com.laytonsmith.abstraction.events.MCPlayerResourcePackEvent;
 import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
 import com.laytonsmith.abstraction.events.MCPlayerTeleportEvent;
 import com.laytonsmith.abstraction.events.MCPlayerToggleFlightEvent;
@@ -63,7 +66,6 @@ import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
 import com.laytonsmith.annotations.abstraction;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.TravelAgent;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -74,7 +76,6 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerChatTabCompleteEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerEditBookEvent;
 import org.bukkit.event.player.PlayerEvent;
@@ -88,8 +89,8 @@ import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
-import org.bukkit.event.player.PlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerResourcePackStatusEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
@@ -99,7 +100,6 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -195,26 +195,38 @@ public class BukkitPlayerEvents {
 		}
 	}
 
-	public static class BukkitMCPlayerBedEvent extends BukkitMCPlayerEvent implements MCPlayerBedEvent {
+	public static class BukkitMCPlayerEnterBedEvent extends BukkitMCPlayerEvent implements MCPlayerEnterBedEvent {
 
-		MCBlock block;
-		PlayerEvent event;
+		PlayerBedEnterEvent event;
 
-		public BukkitMCPlayerBedEvent(PlayerBedEnterEvent event) {
+		public BukkitMCPlayerEnterBedEvent(PlayerBedEnterEvent event) {
 			super(event);
 			this.event = event;
-			this.block = new BukkitMCBlock(event.getBed());
-		}
-
-		public BukkitMCPlayerBedEvent(PlayerBedLeaveEvent event) {
-			super(event);
-			this.event = event;
-			this.block = new BukkitMCBlock(event.getBed());
 		}
 
 		@Override
 		public MCBlock getBed() {
-			return block;
+			return new BukkitMCBlock(event.getBed());
+		}
+
+		@Override
+		public MCEnterBedResult getResult() {
+			return BukkitMCEnterBedResult.getConvertor().getAbstractedEnum(event.getBedEnterResult());
+		}
+	}
+
+	public static class BukkitMCPlayerLeaveBedEvent extends BukkitMCPlayerEvent implements MCPlayerLeaveBedEvent {
+
+		PlayerBedLeaveEvent event;
+
+		public BukkitMCPlayerLeaveBedEvent(PlayerBedLeaveEvent event) {
+			super(event);
+			this.event = event;
+		}
+
+		@Override
+		public MCBlock getBed() {
+			return new BukkitMCBlock(event.getBed());
 		}
 	}
 
@@ -325,22 +337,24 @@ public class BukkitPlayerEvents {
 
 		@Override
 		public void useTravelAgent(boolean useTravelAgent) {
-			p.useTravelAgent(useTravelAgent);
+			ReflectionUtils.invokeMethod(PlayerPortalEvent.class, p, "useTravelAgent",
+					new Class[]{boolean.class}, new Object[]{useTravelAgent});
 		}
 
 		@Override
 		public boolean useTravelAgent() {
-			return p.useTravelAgent();
+			return (boolean) ReflectionUtils.invokeMethod(PlayerPortalEvent.class, p, "useTravelAgent");
 		}
 
 		@Override
 		public MCTravelAgent getPortalTravelAgent() {
-			return new BukkitMCTravelAgent(p.getPortalTravelAgent());
+			return new BukkitMCTravelAgent(ReflectionUtils.invokeMethod(PlayerPortalEvent.class, p,
+					"getPortalTravelAgent"));
 		}
 
 		@Override
 		public void setPortalTravelAgent(MCTravelAgent travelAgent) {
-			p.setPortalTravelAgent((TravelAgent) travelAgent.getHandle());
+			ReflectionUtils.invokeMethod(p, "setPortalTravelAgent", travelAgent);
 		}
 
 		@Override
@@ -400,51 +414,6 @@ public class BukkitPlayerEvents {
 		public String getHostname() {
 			return event.getHostname();
 		}
-	}
-
-	public static class BukkitMCPlayerPreLoginEvent implements MCPlayerPreLoginEvent {
-
-		PlayerPreLoginEvent event;
-
-		public BukkitMCPlayerPreLoginEvent(PlayerPreLoginEvent e) {
-			event = e;
-		}
-
-		@Override
-		public Object _GetObject() {
-			return event;
-		}
-
-		@Override
-		public String getName() {
-			return event.getName();
-		}
-
-		@Override
-		public String getKickMessage() {
-			return event.getKickMessage();
-		}
-
-		@Override
-		public void setKickMessage(String msg) {
-			event.setKickMessage(msg);
-		}
-
-		@Override
-		public String getResult() {
-			return event.getResult().toString();
-		}
-
-		@Override
-		public void setResult(String rst) {
-			event.setResult(PlayerPreLoginEvent.Result.valueOf(rst.toUpperCase()));
-		}
-
-		@Override
-		public String getIP() {
-			return event.getAddress().toString();
-		}
-
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
@@ -596,15 +565,10 @@ public class BukkitPlayerEvents {
 
 		@Override
 		public MCEquipmentSlot getHand() {
-			try {
-				if(pie.getHand() == EquipmentSlot.HAND) {
-					return MCEquipmentSlot.WEAPON;
-				}
-				return MCEquipmentSlot.OFF_HAND;
-			} catch (NoSuchMethodError e) {
-				// before Bukkit 1.9
+			if(pie.getHand() == EquipmentSlot.HAND) {
 				return MCEquipmentSlot.WEAPON;
 			}
+			return MCEquipmentSlot.OFF_HAND;
 		}
 	}
 
@@ -663,7 +627,7 @@ public class BukkitPlayerEvents {
 
 		@Override
 		public MCEntity getKiller() {
-			return StaticLayer.GetCorrectEntity(new BukkitMCEntity(pde.getEntity().getKiller()));
+			return BukkitConvertor.BukkitGetCorrectEntity(pde.getEntity().getKiller());
 		}
 
 		@Override
@@ -843,31 +807,6 @@ public class BukkitPlayerEvents {
 		}
 	}
 
-	public static class BukkitMCChatTabCompleteEvent extends BukkitMCPlayerEvent implements MCChatTabCompleteEvent {
-
-		PlayerChatTabCompleteEvent tc;
-
-		public BukkitMCChatTabCompleteEvent(PlayerChatTabCompleteEvent event) {
-			super(event);
-			this.tc = event;
-		}
-
-		@Override
-		public String getChatMessage() {
-			return tc.getChatMessage();
-		}
-
-		@Override
-		public String getLastToken() {
-			return tc.getLastToken();
-		}
-
-		@Override
-		public Collection<String> getTabCompletions() {
-			return tc.getTabCompletions();
-		}
-	}
-
 	public static class BukkitMCExpChangeEvent extends BukkitMCPlayerEvent implements MCExpChangeEvent {
 
 		PlayerExpChangeEvent ec;
@@ -913,9 +852,14 @@ public class BukkitPlayerEvents {
 			pebe.setNewBookMeta(((BukkitMCBookMeta) bookMeta).getBookMeta());
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public int getSlot() {
-			return pebe.getSlot();
+			int slot = pebe.getSlot();
+			if(slot == -1) { // bukkit offhand slot
+				return -106; // vanilla offhand slot
+			}
+			return slot;
 		}
 
 		@Override
@@ -1004,6 +948,22 @@ public class BukkitPlayerEvents {
 		@Override
 		public void setCancelled(boolean bln) {
 			ptse.setCancelled(bln);
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerResourcePackEvent extends BukkitMCPlayerEvent implements MCPlayerResourcePackEvent {
+
+		PlayerResourcePackStatusEvent e;
+
+		public BukkitMCPlayerResourcePackEvent(PlayerResourcePackStatusEvent event) {
+			super(event);
+			this.e = event;
+		}
+
+		@Override
+		public MCResourcePackStatus getStatus() {
+			return BukkitMCResourcePackStatus.getConvertor().getAbstractedEnum(this.e.getStatus());
 		}
 	}
 

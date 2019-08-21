@@ -12,14 +12,13 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.functions.Commands;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.command.Command;
@@ -210,19 +209,17 @@ public class BukkitMCCommand implements MCCommand {
 			}
 			CClosure closure = Commands.onTabComplete.get(cmd.getName().toLowerCase());
 			try {
-				closure.execute(new CString(alias, t), new CString(sender.getName(), t), cargs,
+				Mixed fret = closure.executeCallable(null, t, new CString(alias, t), new CString(sender.getName(), t), cargs,
 						new CArray(t) // reserved for an obgen style command array
 				);
-			} catch (FunctionReturnException e) {
-				Construct fret = e.getReturn();
-				if(fret instanceof CArray) {
+				if(fret.isInstanceOf(CArray.class)) {
 					List<String> ret = new ArrayList<>();
 					if(((CArray) fret).inAssociativeMode()) {
-						for(Construct key : ((CArray) fret).keySet()) {
+						for(Mixed key : ((CArray) fret).keySet()) {
 							ret.add(((CArray) fret).get(key, Target.UNKNOWN).val());
 						}
 					} else {
-						for(Construct value : ((CArray) fret).asList()) {
+						for(Mixed value : ((CArray) fret).asList()) {
 							ret.add(value.val());
 						}
 					}
@@ -253,12 +250,10 @@ public class BukkitMCCommand implements MCCommand {
 			cEnv.SetCommand("/" + label + StringUtils.Join(args, " "));
 
 			try {
-				closure.execute(new CString(label, t), new CString(sender.getName(), t), cargs,
+				Mixed fret = closure.executeCallable(null, t, new CString(label, t), new CString(sender.getName(), t), cargs,
 						new CArray(t) // reserved for an obgen style command array
 				);
-			} catch (FunctionReturnException e) {
-				Construct fret = e.getReturn();
-				if(fret instanceof CBoolean) {
+				if(fret.isInstanceOf(CBoolean.class)) {
 					return ((CBoolean) fret).getBoolean();
 				}
 			} catch (ConfigRuntimeException cre) {

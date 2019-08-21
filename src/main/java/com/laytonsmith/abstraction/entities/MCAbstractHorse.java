@@ -2,8 +2,6 @@ package com.laytonsmith.abstraction.entities;
 
 import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.abstraction.MCTameable;
-import com.laytonsmith.abstraction.MCVehicle;
 
 public interface MCAbstractHorse extends MCTameable, MCVehicle, MCInventoryHolder {
 

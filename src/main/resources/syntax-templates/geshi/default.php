@@ -11,103 +11,103 @@
  *  - First Release
  ****************************************************/
 $language_data = array(
-    'LANG_NAME' => 'CommandHelper',
-    'COMMENT_SINGLE' => array(1 => '#', 2 => '//'),
-    'HARD_QUOTE' => array("'", "'"),
-    'HARDESCAPE' => array('\\\''),
-    'HARDCHAR' => array("\\"),
-    'CASE_KEYWORDS' => GESHI_CAPS_NO_CHANGE,
-    'QUOTEMARKS' => array('"', "'"),
-    'ESCAPE_CHAR' => '\\',
-    'ESCAPE_REGEXP' => array(
-            //Simple Single Char Escapes
-            1 => "#\\\\[nfrtv\$\"\n\\\\]#i",
-            2 => "#[\\$\\@][a-zA-Z0-9]+"
-    ),
-    'NUMBERS' => GESHI_NUMBER_INT_BASIC,
-    'KEYWORDS' => array(
-        // Non-Restricted
-        1 => array(
+	'LANG_NAME' => 'CommandHelper',
+	'COMMENT_SINGLE' => array(1 => '#', 2 => '//'),
+	'HARD_QUOTE' => array("'", "'"),
+	'HARDESCAPE' => array('\\\''),
+	'HARDCHAR' => array("\\"),
+	'CASE_KEYWORDS' => GESHI_CAPS_NO_CHANGE,
+	'QUOTEMARKS' => array('"', "'"),
+	'ESCAPE_CHAR' => '\\',
+	'ESCAPE_REGEXP' => array(
+			//Simple Single Char Escapes
+			1 => "#\\\\[nfrtv\$\"\n\\\\]#i",
+			2 => "#[\\$\\@][a-zA-Z0-9]+"
+	),
+	'NUMBERS' => GESHI_NUMBER_INT_BASIC,
+	'KEYWORDS' => array(
+		// Non-Restricted
+		1 => array(
 ///!            %%comma:functions:quoted:unrestricted%%
-        ),
-        // Restricted
-        2 => array(
+		),
+		// Restricted
+		2 => array(
 ///!             %%comma:functions:quoted:restricted%%
-        ),
-        3 => array(
+		),
+		3 => array(
 ///!             %%comma:events:quoted%%
-        ),
-        4 => array(
+		),
+		4 => array(
 ///!            %%comma:colors:quoted%%
-        ),
+		),
 		5 => array(
 ///!				%%comma:keywords:quoted%%
 		)
-    ),
-    'SYMBOLS' => array (
-        0 => array(
-            '(', ')', '[', ']', '{', '}',
-            '$', '@', '<', '>',
-            '=', ':', ',', '>>>', '<<<'
-        )
-    ),
-    'CASE_SENSITIVE' => array(
-        GESHI_COMMENTS => false,
-        1 => false,
-        2 => false
-    ),
-    'STYLES' => array(
-        'KEYWORDS' => array(
-            1 => 'color: #1265A9;',
-            2 => 'color: #B35900;',
-            3 => 'color: #B30059;',
-            4 => 'color: #5900B3;',
+	),
+	'SYMBOLS' => array (
+		0 => array(
+			'(', ')', '[', ']', '{', '}',
+			'$', '@', '<', '>',
+			'=', ':', ',', '>>>', '<<<'
+		)
+	),
+	'CASE_SENSITIVE' => array(
+		GESHI_COMMENTS => false,
+		1 => false,
+		2 => false
+	),
+	'STYLES' => array(
+		'KEYWORDS' => array(
+			1 => 'color: #1265A9;',
+			2 => 'color: #B35900;',
+			3 => 'color: #B30059;',
+			4 => 'color: #5900B3;',
 			5 => 'color: #0000FF;'
-        ),
-        'COMMENTS' => array(
-            1 => 'color: #666666; font-weight: bold;'
-        ),
-        'ESCAPE_CHAR' => array(
-            1 => 'color: #000099; font-weight: bold;'
-        ),
-        'BRACKETS' => array(
-            0 => 'color: #009900;'
-        ),
-        'STRINGS' => array(
-            0 => 'color: #0000ff;',
-            'HARD' => 'color: #0000ff;'
-        ),
-        'NUMBERS' => array(
-            0 => 'color: #cc66cc;'
-        ),
-        'METHODS' => array(
-            1 => 'color: #004000;',
-            2 => 'color: #004000;'
-        ),
-        'SYMBOLS' => array(
-            1 => 'color: #339933;',
-            2 => 'color: #339933;'
-        ),
-        'REGEXPS' => array(
-            0 => 'color: #000088;'
-        )
-    ),
-    'URLS' => array(
-        1 => 'https://methodscript.com/docs/3.3.2/API/functions{FNAMEL}',
-        2 => 'https://methodscript.com/docs/3.3.2/API/functions{FNAMEL}'
-    ),
-    'OOLANG' => false,
-    'REGEXPS' => array(
-        //Variables
-        0 => "[\\$\\@][a-zA-Z00-9_]+"
-    ),
-    'STRICT_MODE_APPLIES' => GESHI_MAYBE,
-    'TAB_WIDTH' => 4,
-    'PARSER_CONTROL' => array(
-        'KEYWORDS' => array(
-            'DISALLOWED_AFTER' =>  "(?![\.\-a-zA-Z0-9_%=\\/\&])",
-            'DISALLOWED_BEFORE' => "(?<![\.\-a-zA-Z0-9_\$\@\#\&])"
-        )
-    ),
+		),
+		'COMMENTS' => array(
+			1 => 'color: #666666; font-weight: bold;'
+		),
+		'ESCAPE_CHAR' => array(
+			1 => 'color: #000099; font-weight: bold;'
+		),
+		'BRACKETS' => array(
+			0 => 'color: #009900;'
+		),
+		'STRINGS' => array(
+			0 => 'color: #0000ff;',
+			'HARD' => 'color: #0000ff;'
+		),
+		'NUMBERS' => array(
+			0 => 'color: #cc66cc;'
+		),
+		'METHODS' => array(
+			1 => 'color: #004000;',
+			2 => 'color: #004000;'
+		),
+		'SYMBOLS' => array(
+			1 => 'color: #339933;',
+			2 => 'color: #339933;'
+		),
+		'REGEXPS' => array(
+			0 => 'color: #000088;'
+		)
+	),
+	'URLS' => array(
+		1 => 'https://methodscript.com/docs/3.3.2/API/functions/{FNAMEL}',
+		2 => 'https://methodscript.com/docs/3.3.2/API/functions/{FNAMEL}'
+	),
+	'OOLANG' => false,
+	'REGEXPS' => array(
+		//Variables
+		0 => "[\\$\\@][a-zA-Z0-9_]+"
+	),
+	'STRICT_MODE_APPLIES' => GESHI_MAYBE,
+	'TAB_WIDTH' => 4,
+	'PARSER_CONTROL' => array(
+		'KEYWORDS' => array(
+			'DISALLOWED_AFTER' =>  "(?![\.\-a-zA-Z0-9_%=\\/\&])",
+			'DISALLOWED_BEFORE' => "(?<![\.\-a-zA-Z0-9_\$\@\#\&])"
+		)
+	),
 	'SCRIPT_DELIMITERS' => array()
 );

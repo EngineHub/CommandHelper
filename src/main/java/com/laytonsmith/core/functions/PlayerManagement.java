@@ -15,18 +15,20 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.enums.MCGameMode;
+import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCWeather;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -58,9 +60,9 @@ import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
-import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -103,7 +105,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 
 			if(args.length == 1) {
@@ -129,15 +131,16 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "string {[playerName]} Returns a player's name. If a string is specified, it will attempt to find"
-					+ " a complete match for a partial name. If no string is specified, the current player is returned."
-					+ " UUIDs are also accepted for this and other online player functions."
+			return "string {[playerName] | [uuid]} Returns a player's name. If a string is specified, it will attempt"
+					+ " to find a complete match for a partial name. If no string is specified, the current player is"
+					+ " returned. UUIDs are also accepted for this and other functions that apply to online players."
 					+ " If the command is being run from the console, then the string '" + Static.getConsoleName()
 					+ "' is returned. If the command came from a CommandBlock, the block's name prefixed with "
 					+ Static.getBlockPrefix() + " is returned. If the command is coming from elsewhere,"
 					+ " returns a string chosen by the sender of this command (or null)."
-					+ " Note that most functions won't support console or block names (they'll throw a PlayerOfflineException),"
-					+ " but you can use this to determine where a command is being run from.";
+					+ " Note that most functions won't support console or block names"
+					+ " (they'll throw a PlayerOfflineException), but you can use this to determine where a command is"
+					+ " being run from.";
 		}
 
 		@Override
@@ -151,8 +154,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -180,7 +183,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			boolean dashless = false;
 			if(args.length >= 1) {
@@ -191,7 +194,7 @@ public class PlayerManagement {
 				}
 			}
 			if(args.length == 2) {
-				dashless = Static.getBoolean(args[1], t);
+				dashless = ArgumentValidation.getBoolean(args[1], t);
 			}
 			if(pl == null) {
 				throw new CREPlayerOfflineException("No matching player could be found.", t);
@@ -217,14 +220,14 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "string {[player], [dashless]} Returns the uuid of the current player or the specified player."
+			return "string {[player], [dashless]} Returns the UUID of the current player or the specified player."
 					+ " This will attempt to find an offline player, but if that also fails,"
 					+ " a PlayerOfflineException will be thrown.";
 		}
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -242,7 +245,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			CArray players = new CArray(t);
 			if(args.length == 0) {
 				for(MCPlayer player : Static.getServer().getOnlinePlayers()) {
@@ -264,7 +267,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[world]} Returns an array of all the player names of all the online players on the server, if world is given only the name of the players in this world will be returned.";
+			return "array {[world]} Returns an array of all the player names of all the online players on the server."
+					+ " If world is given only the name of the players in this world will be returned.";
 		}
 
 		@Override
@@ -278,8 +282,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -319,15 +323,11 @@ public class PlayerManagement {
 					+ (y1 - y2) * (y1 - y2)
 					+ (z1 - z2) * (z1 - z2));
 
-			if(distance <= dist) {
-				return true;
-			}
-
-			return false;
+			return distance <= dist;
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			Collection<MCPlayer> pa = Static.getServer().getOnlinePlayers();
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 
@@ -339,7 +339,7 @@ public class PlayerManagement {
 				Static.AssertPlayerNonNull(p, t);
 				loc = p.getLocation();
 			} else {
-				if(!(args[0] instanceof CArray)) {
+				if(!(args[0].isInstanceOf(CArray.class))) {
 					throw new CRECastException("Expecting an array at parameter 1 of players_in_radius", t);
 				}
 
@@ -360,7 +360,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[location array], distance} Returns an array of all the player names of all the online players within the given radius";
+			return "array {[locationArray], distance} Returns an array of all the players within the given radius.";
 		}
 
 		@Override
@@ -375,8 +375,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -399,7 +399,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 0) {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -418,8 +418,10 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[playerName]} Returns an array of x, y, z coords of the player specified, or the player running the command otherwise. Note that the y coordinate is"
-					+ " in relation to the block the player is standing on. The array returned will also include the player's world.";
+			return "array {[playerName]} Returns a location array of the coordinates of the player specified,"
+					+ " or the player running the command if no player is specified."
+					+ " Note that unlike entity_loc() the y coordinate will be for the block the player is standing on,"
+					+ " which is one meter lower. The array returned also includes the player's world, yaw and pitch.";
 		}
 
 		@Override
@@ -433,8 +435,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -476,8 +478,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
@@ -486,11 +488,11 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l;
 			if(args.length <= 2) {
-				if(!(args[args.length - 1] instanceof CArray)) {
+				if(!(args[args.length - 1].isInstanceOf(CArray.class))) {
 					throw new CRECastException("Expecting an array at parameter " + args.length + " of set_ploc", t);
 				}
 				CArray ca = (CArray) args[args.length - 1];
@@ -556,11 +558,12 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[player], [array]} Returns an array with the (x, y, z, world) coordinates of the block the player has highlighted"
-					+ " in their crosshairs. If player is omitted, the current player is used. If the block is too far, a"
-					+ " RangeException is thrown. An array of ids to be considered transparent can be supplied, otherwise"
-					+ " only air will be considered transparent. Providing an empty array will cause air to be considered"
-					+ " a potential target, allowing a way to get the block containing the player's head.";
+			return "array {[player], [array]} Returns a location array with the coordinates of the block the player has"
+					+ " highlighted in their crosshairs. If player is omitted, the current player is used."
+					+ " If the block is too far, a RangeException is thrown. An array of block types to be considered"
+					+ " transparent can be supplied, otherwise only air will be considered transparent."
+					+ " Providing an empty array will cause air to be considered a potential target, allowing a way to"
+					+ " get the block containing the player's head.";
 		}
 
 		@Override
@@ -575,34 +578,50 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_2;
+		public MSVersion since() {
+			return MSVersion.V3_0_2;
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			HashSet<Short> trans = null;
+			HashSet<MCMaterial> trans = null;
+			int transparentIndex = -1;
 			if(args.length == 1) {
-				if(args[0] instanceof CArray) {
-					CArray ta = (CArray) args[0];
-					trans = new HashSet<Short>();
-					for(int i = 0; i < ta.size(); i++) {
-						trans.add(Static.getInt16(ta.get(i, t), t));
-					}
+				if(args[0].isInstanceOf(CArray.class)) {
+					transparentIndex = 0;
 				} else {
 					p = Static.GetPlayer(args[0], t);
 				}
 			} else if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
-				if(args[1] instanceof CArray) {
-					CArray ta = (CArray) args[1];
-					trans = new HashSet<Short>();
-					for(int i = 0; i < ta.size(); i++) {
-						trans.add(Static.getInt16(ta.get(i, t), t));
-					}
+				if(args[1].isInstanceOf(CArray.class)) {
+					transparentIndex = 1;
 				} else {
 					throw new CREFormatException("An array was expected for argument 2 but received " + args[1], t);
+				}
+			}
+			if(transparentIndex >= 0) {
+				CArray ta = (CArray) args[transparentIndex];
+				trans = new HashSet<>();
+				for(Mixed mat : ta.asList()) {
+					MCMaterial material = StaticLayer.GetMaterial(mat.val());
+					if(material != null) {
+						trans.add(StaticLayer.GetMaterial(mat.val()));
+						continue;
+					}
+					try {
+						material = StaticLayer.GetMaterialFromLegacy(Static.getInt16(mat, t), 0);
+						if(material != null) {
+							MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The id \"" + mat.val() + "\" is deprecated."
+									+ " Converted to \"" + material.getName() + "\"", t);
+							trans.add(material);
+							continue;
+						}
+					} catch (CRECastException ex) {
+						// ignore and throw a more specific message
+					}
+					throw new CREFormatException("Could not find a material by the name \"" + mat.val() + "\"", t);
 				}
 			}
 			Static.AssertPlayerNonNull(p, t);
@@ -663,7 +682,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length > 0) {
 				p = Static.GetPlayer(args[0], t);
@@ -688,13 +707,13 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[player]} Returns the \"target space\" that the player is currently targetting. This is the"
-					+ " \"space\" where if they placed a block (and were close enough), it would end up going.";
+			return "array {[player]} Returns a location array of the space that the player is currently looking at."
+					+ " This is the space where if they placed a block (and were close enough), it would end up going.";
 		}
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -713,7 +732,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if(args.length == 1) {
@@ -730,7 +749,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[playerName]} Kills the specified player, or the current player if it is omitted";
+			return "void {[playerName]} Kills the specified player, or the current player if a name is omitted.";
 		}
 
 		@Override
@@ -744,8 +763,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -768,7 +787,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender sender;
 			if(args.length == 0) {
 				sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
@@ -787,7 +806,9 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[playerName]} Returns an array of the groups a player is in. If playerName is omitted, the current player is used.";
+			return "array {[playerName]} Returns an array of the groups a player is in. If playerName is omitted,"
+					+ " the current player is used. This relies on \"group.groupname\" permission nodes in your"
+					+ " permissions plugin. Otherwise an extension is required to get the groups from the plugin.";
 		}
 
 		@Override
@@ -801,8 +822,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -830,23 +851,23 @@ public class PlayerManagement {
 					+ " player if no argument was given. ----"
 					+ " If value is set, it should be an integer of one of the following indexes, and only that"
 					+ " information for that index will be returned. Otherwise if value is not specified (or is -1), it"
-					+ " returns an array of information with the following pieces of information in the specified index:"
+					+ " returns an array of values with the following pieces of information in the specified index:"
 					+ "<ul>"
-					+ "<li>0 - player's name; This will return the player's exact name,"
+					+ "<li>0 - Player's name; This will return the player's exact name,"
 					+ " even if called with a partial match.</li>"
-					+ "<li>1 - player's location; a location array of the player's coordinates</li>"
-					+ "<li>2 - player's cursor; an array of the location of the player's cursor,"
-					+ " or null if the block is out of sight.</li>"
-					+ "<li>3 - player's IP; Returns the IP address of this player.</li>"
+					+ "<li>1 - Player's location; a location array of the player's coordinates</li>"
+					+ "<li>2 - Player's cursor; a location array of the block the player is looking at,"
+					+ " or null if no block is in sight.</li>"
+					+ "<li>3 - Player's IP; Returns the IP address of this player.</li>"
 					+ "<li>4 - Display name; The name that is typically used when displayed on screen.</li>"
-					+ "<li>5 - player's health; The current health of the player, which will be an int from 0-20.</li>"
-					+ "<li>6 - Item in hand; The type and data for the item in the 0:0 format. (deprecated)</li>"
+					+ "<li>5 - Player's health; The current health of the player, which will be an int from 0-20.</li>"
+					+ "<li>6 - Item in hand; The type of item in their main hand.</li>"
 					+ "<li>7 - World name; Gets the name of the world this player is in.</li>"
 					+ "<li>8 - Is Op; true or false if this player is an op.</li>"
-					+ "<li>9 - player groups; An array of the groups the player is in, by permission nodes.</li>"
+					+ "<li>9 - Player groups; An array of the groups the player is in, by permission nodes.</li>"
 					+ "<li>10 - The player's hostname (or IP if a hostname can't be found)</li>"
 					+ "<li>11 - Is sneaking?</li><li>12 - Host; The host the player connected to.</li>"
-					+ "<li>13 - Player UUID; (This is the same as 20, but exists for backwards compatibility.)</li>"
+					+ "<li>13 - Player UUID; (deprecated for index 20, but exists for backwards compatibility.)</li>"
 					+ "<li>14 - Is player in a vehicle? Returns true or false.</li>"
 					+ "<li>15 - Held Slot; The slot number of the player's current hand.</li>"
 					+ "<li>16 - Is sleeping?</li>"
@@ -869,8 +890,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
@@ -879,12 +900,12 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender m = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			String player = "";
-			int index = -1;
+			String player;
+			int index;
 			if(args.length == 0) {
-				player = (m instanceof MCPlayer ? ((MCPlayer) m).getName() : null);
+				player = m instanceof MCPlayer ? m.getName() : null;
 				index = -1;
 			} else if(args.length == 1) {
 				player = args[0].val();
@@ -900,7 +921,7 @@ public class PlayerManagement {
 			if(index < -1 || index > maxIndex) {
 				throw new CRERangeException(this.getName() + " expects the index to be between -1 and " + maxIndex, t);
 			}
-			ArrayList<Construct> retVals = new ArrayList<Construct>();
+			ArrayList<Mixed> retVals = new ArrayList<>();
 			if(index == 0 || index == -1) {
 				//MCPlayer name
 				retVals.add(new CString(p.getName(), t));
@@ -952,8 +973,8 @@ public class PlayerManagement {
 			}
 			if(index == 6 || index == -1) {
 				//Item in hand
-				MCItemStack is = p.getItemInHand();
-				retVals.add(new CString(is.getTypeId() + ":" + is.getDurability(), t));
+				MCItemStack is = p.getInventory().getItemInMainHand();
+				retVals.add(new CString(is.getType().getName(), t));
 			}
 			if(index == 7 || index == -1) {
 				//World name
@@ -1019,7 +1040,7 @@ public class PlayerManagement {
 				return retVals.get(0);
 			} else {
 				CArray ca = new CArray(t);
-				for(Construct c : retVals) {
+				for(Mixed c : retVals) {
 					ca.push(c, t);
 				}
 				return ca;
@@ -1042,7 +1063,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "string {[playerName]} Gets the world of the player specified, or the current player, if playerName isn't specified.";
+			return "string {[playerName]} Gets the world of the player specified,"
+					+ " or the current player if playerName isn't specified.";
 		}
 
 		@Override
@@ -1056,8 +1078,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
@@ -1066,7 +1088,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if(args.length == 0) {
@@ -1096,8 +1118,9 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[playerName], [message]} Kicks the specified player, with an optional message. If no message is specified, "
-					+ "\"You have been kicked\" is used. If no player is specified, the current player is used, with the default message.";
+			return "void {[playerName], [message]} Kicks the specified player with an optional message."
+					+ " If no message is specified, \"You have been kicked\" is used."
+					+ " If no player is specified, the current player is used with the default message.";
 		}
 
 		@Override
@@ -1111,8 +1134,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
@@ -1121,7 +1144,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			String message = "You have been kicked";
 			MCPlayer m = null;
@@ -1172,8 +1195,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -1182,7 +1205,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m;
 			if(args.length == 0) {
 				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -1209,9 +1232,9 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {playerName, newDisplayName | newDisplayName} Sets a player's display name. If the second usage is used,"
-					+ " it sets the display name of the player running the command. See reset_display_name also. playerName, as well"
-					+ " as all CommandHelper commands expect the player's real name, not their display name.";
+			return "void {[playerName], newDisplayName} Sets a player's display name. If the first name isn't provided,"
+					+ " it sets the display name of the player running the command. See reset_display_name() also."
+					+ " All player functions expect the player's real name, not their display name.";
 		}
 
 		@Override
@@ -1225,8 +1248,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -1235,21 +1258,18 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCPlayer MCPlayer = null;
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer player;
 			String name;
 			if(args.length == 1) {
-				if(p instanceof MCPlayer) {
-					MCPlayer = (MCPlayer) p;
-				}
+				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(player, t);
 				name = args[0].val();
 			} else {
-				MCPlayer = Static.GetPlayer(args[0], t);
+				player = Static.GetPlayer(args[0], t);
 				name = args[1].val();
 			}
-			Static.AssertPlayerNonNull(MCPlayer, t);
-			MCPlayer.setDisplayName(name);
+			player.setDisplayName(name);
 			return CVoid.VOID;
 		}
 	}
@@ -1269,8 +1289,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[playerName]} Resets a player's display name to their real name. If playerName isn't specified, defaults to the"
-					+ " player running the command.";
+			return "void {[playerName]} Resets a player's display name to their real name."
+					+ " If playerName isn't specified, defaults to the player running the command.";
 		}
 
 		@Override
@@ -1284,8 +1304,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -1294,18 +1314,15 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCPlayer MCPlayer = null;
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer player;
 			if(args.length == 0) {
-				if(p instanceof MCPlayer) {
-					MCPlayer = (MCPlayer) p;
-				}
+				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(player, t);
 			} else {
-				MCPlayer = Static.GetPlayer(args[0], t);
+				player = Static.GetPlayer(args[0], t);
 			}
-			Static.AssertPlayerNonNull(MCPlayer, t);
-			MCPlayer.setDisplayName(MCPlayer.getName());
+			player.setDisplayName(player.getName());
 			return CVoid.VOID;
 		}
 	}
@@ -1325,16 +1342,24 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "mixed {F | yaw, pitch | player, F | player, yaw, pitch | player | &lt;none&gt;} Sets the direction the player is facing. ---- When using the first variation, expects an integer 0-3, which will"
-					+ " set the direction the player faces using their existing pitch (up and down) but sets their yaw (left and right) to one of the"
-					+ " cardinal directions, as follows: 0 - West, 1 - South, 2 - East, 3 - North, which corresponds to the directions given by F when"
-					+ " viewed with F3. In the second variation, specific yaw and pitches can be provided. If the player is not specified, the current player"
-					+ " is used. If just the player is specified, that player's yaw and pitch are returned as an array, or if no arguments are given, the"
-					+ " player running the command's yaw and pitch are returned as an array. The function returns void when setting the values. (Note that while this"
-					+ " function looks like it has ambiguous arguments, players cannot be named numbers.) A note on numbers: The values returned by the getter will always be"
-					+ " as such: pitch will always be a number between 90 and -90, with -90 being the player looking up, and 90 being the player looking down. Yaw will"
-					+ " always be a number between 0 and 359.9~. When using it as a setter, pitch must be a number between -90 and 90, and yaw may be any number."
-					+ " If the number given is not between 0 and 359.9~, it will be normalized first. 0 is dead west, 90 is north, etc.";
+			return "mixed {F | yaw, pitch | player, F | player, yaw, pitch | player | &lt;none&gt;}"
+					+ " Gets or sets the direction the player is facing."
+					+ " ---- When using the first variation, expects an integer 0-3, which will set the direction the"
+					+ " player faces using their existing pitch (up and down) but sets their yaw (left and right) to"
+					+ " one of the cardinal directions, as follows: 0 - West, 1 - South, 2 - East, 3 - North, which"
+					+ " corresponds to the directions given by F when viewed with F3."
+					+ " In the second variation, specific yaw and pitches can be provided."
+					+ " If the player is not specified, the current player is used."
+					+ " If just the player is specified, that player's yaw and pitch are returned as an array,"
+					+ " or if no arguments are given, the current player's yaw and pitch are returned as an array."
+					+ " The function returns void when setting the values. (Note that while this"
+					+ " function looks like it has ambiguous arguments, players cannot be named numbers.)"
+					+ " A note on numbers: The values returned by the getter will always be as such:"
+					+ " pitch will always be a number between 90 and -90, with -90 being the player looking up,"
+					+ " and 90 being the player looking down. Yaw will always be a number between 0 and 359.9~."
+					+ " When setting the facing, pitch must be a number between -90 and 90, and yaw may be any number."
+					+ " If the number given is not between 0 and 359.9~, it will be normalized first."
+					+ " 0 is dead west, 90 is north, etc.";
 		}
 
 		@Override
@@ -1349,8 +1374,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -1359,7 +1384,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			//Getter
 			if(args.length == 0 || args.length == 1) {
@@ -1370,7 +1395,7 @@ public class PlayerManagement {
 					}
 				} else {
 					//if it's a number, we are setting F. Otherwise, it's a getter for the MCPlayer specified.
-					if(!(args[0] instanceof CInt)) {
+					if(!(args[0].isInstanceOf(CInt.class))) {
 						MCPlayer p2 = Static.GetPlayer(args[0], t);
 						l = p2.getLocation();
 					}
@@ -1409,14 +1434,13 @@ public class PlayerManagement {
 				//Either we are setting this MCPlayer's pitch and yaw, or we are setting the specified MCPlayer's F.
 				//Check to see if args[0] is a number
 				try {
-					Float.parseFloat(args[0].val());
+					yaw = (float) Static.getNumber(args[0], t);
+					pitch = (float) Static.getNumber(args[1], t);
 					//It's the yaw, pitch variation
 					if(p instanceof MCPlayer) {
 						toSet = (MCPlayer) p;
 					}
-					yaw = (float) Static.getNumber(args[0], t);
-					pitch = (float) Static.getNumber(args[1], t);
-				} catch (NumberFormatException e) {
+				} catch (CRECastException e) {
 					//It's the MCPlayer, F variation
 					toSet = Static.GetPlayer(args[0], t);
 					pitch = toSet.getLocation().getPitch();
@@ -1473,7 +1497,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "string {[player]} Returns the player's game mode. It will be one of " + StringUtils.Join(MCGameMode.values(), ", ", ", or ") + ".";
+			return "string {[player]} Returns the player's game mode."
+					+ " It will be one of " + StringUtils.Join(MCGameMode.values(), ", ", ", or ") + ".";
 		}
 
 		@Override
@@ -1488,8 +1513,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -1498,7 +1523,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if(p instanceof MCPlayer) {
@@ -1534,7 +1559,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], mode} Sets the player's game mode. mode must be one of: " + StringUtils.Join(MCGameMode.values(), ", ", ", or ");
+			return "void {[player], mode} Sets the player's game mode."
+					+ " Mode must be one of: " + StringUtils.Join(MCGameMode.values(), ", ", ", or ");
 		}
 
 		@Override
@@ -1548,8 +1574,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -1558,10 +1584,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			String mode = "";
+			String mode;
 			MCGameMode gm;
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
@@ -1599,8 +1625,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player]} Gets the experience of a player within this level, as a percentage, from 0 to 99. (100 would be next level,"
-					+ " therefore, 0.)";
+			return "int {[player]} Gets the experience of a player within this level, as a percentage, from 0 to 99."
+					+ " (100 would be next level, therefore, 0.)";
 		}
 
 		@Override
@@ -1614,8 +1640,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -1624,7 +1650,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if(p instanceof MCPlayer) {
@@ -1653,7 +1679,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], xp} Sets the experience of a player within the current level, as a percentage, from 0 to 100.";
+			return "void {[player], xp} Sets the experience of a player within the current level, as a percentage,"
+					+ " from 0 to 99. 100 resets the experience to zero and adds a level to the player.";
 		}
 
 		@Override
@@ -1667,8 +1694,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -1677,10 +1704,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			int xp = 0;
+			int xp;
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
@@ -1714,7 +1741,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], exp} Gives the player the specified amount of xp.";
+			return "void {[player], exp} Gives the player the specified amount of experience.";
 		}
 
 		@Override
@@ -1728,8 +1755,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -1738,10 +1765,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			int xp = 0;
+			int xp;
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
@@ -1787,8 +1814,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -1797,7 +1824,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if(p instanceof MCPlayer) {
@@ -1840,8 +1867,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -1850,10 +1877,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			int level = 0;
+			int level;
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
@@ -1898,8 +1925,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -1908,7 +1935,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if(p instanceof MCPlayer) {
@@ -1938,13 +1965,12 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], xp} Sets the total experience of a player.";
+			return "void {[player], exp} Sets the total experience of a player.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREPlayerOfflineException.class,
-				CRERangeException.class};
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class, CRERangeException.class};
 		}
 
 		@Override
@@ -1953,8 +1979,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -1963,10 +1989,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			int xp = 0;
+			int xp;
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
@@ -2018,8 +2044,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -2028,7 +2054,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if(p instanceof MCPlayer) {
@@ -2071,8 +2097,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -2081,10 +2107,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			int level = 0;
+			int level;
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
@@ -2110,21 +2136,22 @@ public class PlayerManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{3, 4, 5, 6};
+			return new Integer[]{2, 3, 4, 5, 6, 7};
 		}
 
 		@Override
 		public String docs() {
-			return "boolean {player, potionID, strength, [seconds], [ambient], [particles]} Effect is 1-23."
-					+ " Seconds defaults to 30.0. If the potionID is out of range, a RangeException is thrown, because"
-					+ " out of range potion effects cause the client to crash, fairly hardcore. See"
-					+ " http://www.minecraftwiki.net/wiki/Potion_effects for a complete list of potions that can be"
-					+ " added. To remove an effect, set the seconds to 0. Strength is the number of levels to add to the"
-					+ " base power (effect level 1). Ambient takes a boolean of whether the particles should be less"
-					+ " noticeable. Particles takes a boolean of whether the particles should be visible at all. The"
-					+ " function returns true if the effect was added or removed as desired, and false if it wasn't"
-					+ " (however, this currently only will happen if an effect is attempted to be removed, yet isn't"
-					+ " already on the player).";
+			return "boolean {player, potionEffect, [strength], [seconds], [ambient], [particles], [icon]}"
+					+ " Adds one, or modifies an existing, potion effect on a mob."
+					+ " The potionEffect can be " + StringUtils.Join(MCPotionEffectType.types(), ", ", ", or ", " or ")
+					+ ". It also accepts an integer corresponding to the effect id listed on the Minecraft wiki."
+					+ " Strength is an integer representing the power level of the effect, starting at 0."
+					+ " Seconds defaults to 30.0. To remove an effect, set the seconds to 0."
+					+ " If seconds is less than 0 or greater than 107374182 a RangeException is thrown."
+					+ " Ambient takes a boolean of whether the particles should be more transparent."
+					+ " Particles takes a boolean of whether the particles should be visible at all."
+					+ " Icon takes a boolean for whether or not to show the icon to the player."
+					+ " The function returns whether or not the effect was modified.";
 		}
 
 		@Override
@@ -2139,8 +2166,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2149,41 +2176,59 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = Static.GetPlayer(args[0].val(), t);
 
-			int effect = Static.getInt32(args[1], t);
-			//To work around a bug in bukkit/vanilla, if the effect is invalid, throw an exception
-			//otherwise the client crashes, and requires deletion of
-			//player data to fix.
-			if(effect < 1 || effect > m.getMaxEffect()) {
-				throw new CRERangeException("Invalid effect ID recieved, must be from 1-" + m.getMaxEffect(), t);
+			MCPotionEffectType type = null;
+			if(args[1].isInstanceOf(CString.class)) {
+				try {
+					type = MCPotionEffectType.valueOf(args[1].val().toUpperCase());
+				} catch (IllegalArgumentException ex) {
+					// maybe it's a number id
+				}
+			}
+			if(type == null) {
+				try {
+					type = MCPotionEffectType.getById(Static.getInt32(args[1], t));
+				} catch (CRECastException | IllegalArgumentException ex) {
+					throw new CREFormatException("Invalid potion effect type: " + args[1].val(), t);
+				}
 			}
 
-			int strength = Static.getInt32(args[2], t);
+			int strength = 0;
 			double seconds = 30.0;
 			boolean ambient = false;
 			boolean particles = true;
-			if(args.length >= 4) {
-				seconds = Static.getDouble(args[3], t);
-				if(seconds < 0.0) {
-					throw new CRERangeException("Seconds cannot be less than 0.0", t);
-				} else if(seconds * 20 > Integer.MAX_VALUE) {
-					throw new CRERangeException("Seconds cannot be greater than 107374182.0", t);
+			boolean icon = true;
+			if(args.length >= 3) {
+				strength = Static.getInt32(args[2], t);
+
+				if(args.length >= 4) {
+					seconds = Static.getDouble(args[3], t);
+					if(seconds < 0.0) {
+						throw new CRERangeException("Seconds cannot be less than 0.0", t);
+					} else if(seconds * 20 > Integer.MAX_VALUE) {
+						throw new CRERangeException("Seconds cannot be greater than 107374182.0", t);
+					}
+
+					if(args.length >= 5) {
+						ambient = ArgumentValidation.getBoolean(args[4], t);
+
+						if(args.length >= 6) {
+							particles = ArgumentValidation.getBoolean(args[5], t);
+
+							if(args.length == 7) {
+								icon = ArgumentValidation.getBoolean(args[6], t);
+							}
+						}
+					}
 				}
 			}
-			if(args.length >= 5) {
-				ambient = Static.getBoolean(args[4], t);
-			}
-			if(args.length == 6) {
-				particles = Static.getBoolean(args[5], t);
-			}
-			Static.AssertPlayerNonNull(m, t);
+
 			if(seconds == 0.0) {
-				return CBoolean.get(m.removeEffect(effect));
+				return CBoolean.get(m.removeEffect(type));
 			} else {
-				m.addEffect(effect, strength, (int) (seconds * 20), ambient, particles, t);
-				return CBoolean.TRUE;
+				return CBoolean.get(m.addEffect(type, strength, (int) (seconds * 20), ambient, particles, icon));
 			}
 		}
 
@@ -2191,13 +2236,13 @@ public class PlayerManagement {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Give player Notch nausea for 30 seconds",
-				"set_peffect('Notch', 9, 30)",
+				"set_peffect('Notch', 'NAUSEA')",
 				"The player will experience a wobbly screen."),
 				new ExampleScript("Make player ArenaPlayer unable to jump for 10 minutes",
-				"set_peffect('ArenaPlayer', 8, -16, 600)",
+				"set_peffect('ArenaPlayer', 'JUMP_BOOST', -16, 600)",
 				"From the player's perspective, they will not even leave the ground."),
 				new ExampleScript("Remove poison from yourself",
-				"set_peffect(player(), 19, 1, 0)",
+				"set_peffect(player(), 'POISON', 1, 0)",
 				"You are now unpoisoned. Note, it does not matter what you set strength to here.")
 			};
 		}
@@ -2222,7 +2267,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length > 0) {
 				p = Static.GetPlayer(args[0], t);
@@ -2243,15 +2288,16 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[player]} Returns an array of effects that are currently active on a given player."
-					+ " The array will be full of playerEffect objects, which contain three fields, \"id\","
-					+ " \"strength\", \"seconds\" remaining, whether the effect is \"ambient\", and whether"
-					+ " \"particles\" are enabled.";
+			return "array {[player]} Returns an array of potion effects that are currently active on a given player."
+					+ " The array can contain potion effect objects, with the key defining the type of potion effect."
+					+ " The arrays contain the following fields: \"id\","
+					+ " \"strength\", \"seconds\" remaining, whether the effect is \"ambient\", whether"
+					+ " \"particles\" are enabled, and whether the \"icon\" is shown to the player.";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -2274,7 +2320,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 0) {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -2302,8 +2348,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 	}
 
@@ -2336,8 +2382,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -2346,7 +2392,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m;
 			if(args.length == 0) {
 				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -2387,8 +2433,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -2397,7 +2443,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m;
 			if(args.length == 0) {
 				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -2424,7 +2470,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], health} Sets the player's health. Health should be a double between 0 and their max health.";
+			return "void {[player], health} Sets the player's health."
+					+ " Health should be a double between 0 and their max health, which is 20.0 by default.";
 		}
 
 		@Override
@@ -2438,8 +2485,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -2448,7 +2495,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if(p instanceof MCPlayer) {
@@ -2486,8 +2533,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {player} Returns whether or not the specified player is online. Note"
-					+ " that the name must match exactly, but it will not throw a PlayerOfflineException"
+			return "boolean {player} Returns whether or not the specified player is online."
+					+ " Note that the name must match exactly, but it will not throw a PlayerOfflineException"
 					+ " if the player is not online, or if the player doesn't even exist.";
 		}
 
@@ -2502,8 +2549,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2512,26 +2559,18 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			//We have to use this method here, because we might be in the midst
-			//of an event, in which the player is offline, but not really. It will
-			//throw an exception if the player doesn't exist
-			MCPlayer p = null;
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			try {
-				p = Static.GetPlayer(args[0], t);
+				//Static.GetPlayer() autocompletes names, which we don't want in this function,
+				//however we have to check if this is an injected player first.
+				MCPlayer p = Static.GetPlayer(args[0], t);
+				//Now we must check if the name was exact. Skip this if the argument is a UUID.
+				if(args[0].val().length() <= 16 && !p.getName().equalsIgnoreCase(args[0].val())) {
+					p = Static.getServer().getPlayerExact(args[0].val());
+				}
+				return CBoolean.get(p != null);
 			} catch (ConfigRuntimeException e) {
 				//They aren't in the player list
-			}
-			//If the player we grabbed doesn't match exactly, we're referring to another player
-			//However, we had to check with Static.GetPlayer first, in case this is an injected player.
-			//Otherwise, we need to use the player returned from Static.GetPlayer, not the one returned
-			//from the server directly
-			if(p != null && !p.getName().equals(args[0].val())) {
-				MCOfflinePlayer player = Static.getServer().getOfflinePlayer(args[0].val());
-				return CBoolean.get(player.isOnline());
-			} else if(p != null) {
-				return CBoolean.get(p.isOnline());
-			} else {
 				return CBoolean.FALSE;
 			}
 		}
@@ -2552,8 +2591,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {player} Returns whether or not this player is whitelisted. Note that"
-					+ " this will work with offline players, but the name must be exact." + UUID_WARNING;
+			return "boolean {player} Returns whether or not this player is whitelisted."
+					+ " This will work with offline players, but the name must be exact. ---- " + UUID_WARNING;
 		}
 
 		@Override
@@ -2567,8 +2606,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2577,15 +2616,9 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
-			boolean ret;
-			if(pl == null) {
-				ret = false;
-			} else {
-				ret = pl.isWhitelisted();
-			}
-			return CBoolean.get(ret);
+			return CBoolean.get(pl != null && pl.isWhitelisted());
 		}
 	}
 
@@ -2604,8 +2637,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {player, isWhitelisted} Sets the whitelist flag of the specified player. Note that"
-					+ " this will work with offline players, but the name must be exact." + UUID_WARNING;
+			return "void {player, isWhitelisted} Sets the whitelist flag of the specified player."
+					+ " This will work with offline players, but the name must be exact. ---- " + UUID_WARNING;
 		}
 
 		@Override
@@ -2619,8 +2652,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2629,9 +2662,9 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
-			boolean whitelist = Static.getBoolean(args[1], t);
+			boolean whitelist = ArgumentValidation.getBoolean(args[1], t);
 			if(pl == null) {
 				throw new CRENotFoundException(
 						this.getName() + " could not get the offline player (are you running in cmdline mode?)", t);
@@ -2643,7 +2676,7 @@ public class PlayerManagement {
 
 	private static final String UUID_WARNING = " NOTICE: This function accepts UUIDs in place of player names,"
 			+ " however due to lack of API from Mojang, some server software is not able to"
-			+ " correctly associate a uuid with a player if the player has not recently been online."
+			+ " correctly associate a UUID with a player if the player has not recently been online."
 			+ " As such, it may not always be possible to ban or whitelist a player by UUID."
 			+ " Servers known to have this problem are Bukkit and Spigot. Furthermore,"
 			+ " although this API functions, due to the limitations of the vanilla ban/whitelist"
@@ -2664,11 +2697,11 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {player} Returns whether or not this player is banned. Note that"
-					+ " this will work with offline players, but the name must be exact. At this"
-					+ " time, this function only works with the vanilla ban system. If you use"
-					+ " a third party ban system, you should instead run the command for that"
-					+ " plugin instead." + UUID_WARNING;
+			return "boolean {player} Returns whether or not this player is banned."
+					+ " This will work with offline players, but the name must be exact."
+					+ " At this time, this function only works with the vanilla ban system."
+					+ " If you use a third party ban system, you should instead run the command for that"
+					+ " plugin instead. ---- " + UUID_WARNING;
 		}
 
 		@Override
@@ -2682,8 +2715,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2692,7 +2725,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
 			if(pl == null) {
 				throw new CRENotFoundException(
@@ -2712,16 +2745,18 @@ public class PlayerManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{2, 3, 4};
 		}
 
 		@Override
 		public String docs() {
-			return "void {player, isBanned} Sets the ban flag of the specified player. Note that"
-					+ " this will work with offline players, but the name must be exact. At this"
-					+ " time, this function only works with the vanilla ban system. If you use"
-					+ " a third party ban system, you should instead run the command for that"
-					+ " plugin instead." + UUID_WARNING;
+			return "void {player, isBanned, [reason], [source]} Sets the ban flag for the specified player."
+					+ " This will work with offline players, but the name must be exact. When banning,"
+					+ " a reason message may be provided that the player will see when attempting to login."
+					+ " An optional source may also be provided that indicates who or what banned the player."
+					+ " At this time, this function only works with the vanilla ban system."
+					+ " If you use a third party ban system, you should instead run the command for that"
+					+ " plugin instead. ---- " + UUID_WARNING;
 		}
 
 		@Override
@@ -2735,8 +2770,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2745,9 +2780,12 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String target = args[0].val();
-			boolean ban = Static.getBoolean(args[1], t);
+			boolean ban = ArgumentValidation.getBoolean(args[1], t);
+			String reason = "";
+			String source = "";
+
 			if(target.length() > 16) {
 				MCOfflinePlayer pl = Static.GetUser(target, t);
 				if(pl == null) {
@@ -2759,8 +2797,15 @@ public class PlayerManagement {
 					throw new CRENotFoundException(this.getName() + " could not get offline player's name", t);
 				}
 			}
+
 			if(ban) {
-				Static.getServer().banName(target);
+				if(args.length > 2) {
+					reason = Construct.nval(args[2]);
+					if(args.length == 4) {
+						source = Construct.nval(args[3]);
+					}
+				}
+				Static.getServer().banName(target, reason, source);
 			} else {
 				Static.getServer().unbanName(target);
 			}
@@ -2783,7 +2828,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], speed} Sets players speed. The speed must be between -1 or 1";
+			return "void {[player], speed} Sets a player's walk speed. The speed must be between -1.0 and 1.0."
+					+ " The default player walk speed is 0.2.";
 		}
 
 		@Override
@@ -2797,8 +2843,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2807,10 +2853,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			double speed = 0;
+			double speed;
 
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
@@ -2847,7 +2893,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "double {[player]} Gets the players speed. The speed must be between -1 or 1";
+			return "double {[player]} Gets a player's walk speed. The speed will be between -1.0 and 1.0.";
 		}
 
 		@Override
@@ -2861,8 +2907,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2871,7 +2917,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 
@@ -2904,7 +2950,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], speed} Sets players fly speed. The speed must be between -1 or 1";
+			return "void {[player], speed} Sets a player's fly speed. The speed must be between -1.0 and 1.0."
+					+ " The default player fly speed is 0.1.";
 		}
 
 		@Override
@@ -2918,8 +2965,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2928,10 +2975,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
-			double speed = 0;
+			double speed;
 
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
@@ -2968,7 +3015,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "double {[player]} Gets the players speed. The speed must be between -1 or 1";
+			return "double {[player]} Gets a player's fly speed. The speed will be between -1.0 and 1.0.";
 		}
 
 		@Override
@@ -2982,8 +3029,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2992,7 +3039,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 
@@ -3025,8 +3072,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {[player]} Returns whether or not the specified player (or the current"
-					+ " player if not specified) is op";
+			return "boolean {[player]} Returns whether or not the player is op.";
 		}
 
 		@Override
@@ -3040,8 +3086,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3050,7 +3096,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				m = Static.GetPlayer(args[0].val(), t);
@@ -3089,8 +3135,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3099,7 +3145,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l;
 			if(args.length == 1) {
@@ -3133,7 +3179,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[player]} Gets the compass target of the specified player";
+			return "array {[player]} Gets the compass target location for the specified player.";
 		}
 
 		@Override
@@ -3147,8 +3193,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3157,7 +3203,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				m = Static.GetPlayer(args[0].val(), t);
@@ -3182,9 +3228,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player]} Returns the number of ticks remaining that this player will"
-					+ " be on fire for. If the player is not on fire, 0 is returned, which incidentally"
-					+ " is false.";
+			return "int {[player]} Returns the number of ticks remaining that this player will be on fire for."
+					+ " If the player is not on fire, 0 is returned, which evaluates as false.";
 		}
 
 		@Override
@@ -3198,8 +3243,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3208,7 +3253,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
@@ -3234,8 +3279,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], ticks} Sets the player on fire for the specified number of"
-					+ " ticks. If a boolean is given for ticks, false is 0, and true is 20.";
+			return "void {[player], ticks} Sets the player on fire for the specified number of ticks."
+					+ " If a boolean is given for ticks, false is 0, and true is 20.";
 		}
 
 		@Override
@@ -3249,8 +3294,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3259,9 +3304,9 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			Construct ticks;
+			Mixed ticks;
 			if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
 				ticks = args[1];
@@ -3269,7 +3314,7 @@ public class PlayerManagement {
 				ticks = args[0];
 			}
 			int tick = 0;
-			if(ticks instanceof CBoolean) {
+			if(ticks.isInstanceOf(CBoolean.class)) {
 				boolean value = ((CBoolean) ticks).getBoolean();
 				if(value) {
 					tick = 20;
@@ -3298,7 +3343,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {[player]} Returns whether or not the player has the ability to fly";
+			return "boolean {[player]} Returns whether or not the player has the ability to fly.";
 		}
 
 		@Override
@@ -3317,7 +3362,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
@@ -3327,8 +3372,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -3348,7 +3393,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], flight} Sets whether or not this player is allowed to fly";
+			return "void {[player], flight} Sets whether or not this player is allowed to fly.";
 		}
 
 		@Override
@@ -3367,14 +3412,14 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			boolean flight;
 			if(args.length == 1) {
-				flight = Static.getBoolean(args[0], t);
+				flight = ArgumentValidation.getBoolean(args[0], t);
 			} else {
 				p = Static.GetPlayer(args[0], t);
-				flight = Static.getBoolean(args[1], t);
+				flight = ArgumentValidation.getBoolean(args[1], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			p.setAllowFlight(flight);
@@ -3382,11 +3427,11 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
-	private static final SortedMap<String, Construct> TIME_LOOKUP = new TreeMap<String, Construct>();
+	private static final SortedMap<String, CString> TIME_LOOKUP = new TreeMap<>();
 
 	static {
 		Properties p = new Properties();
@@ -3419,7 +3464,7 @@ public class PlayerManagement {
 		public String docs() {
 			StringBuilder doc = new StringBuilder();
 			doc.append("void {[player], time, [relative]} Sets the time of a given player. Relative defaults to false,"
-					+ " but if true, the time will be an offset and the player's time will still progress with the world."
+					+ " but if true, the time will be an offset and the player's time will still progress."
 					+ " Otherwise it will be locked and should be a number from 0 to 24000, else it is modulo scaled."
 					+ " Alternatively, common time notation (9:30pm, 4:00 am) is acceptable,"
 					+ " and convenient english mappings also exist:");
@@ -3442,8 +3487,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3452,7 +3497,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = null;
 			boolean relative = false;
 			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
@@ -3462,7 +3507,7 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 			if(args.length == 3) {
-				relative = Static.getBoolean(args[2], t);
+				relative = ArgumentValidation.getBoolean(args[2], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			long time = 0;
@@ -3524,8 +3569,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player]} Returns the time of the specified player, as an integer from"
-					+ " 0 to 24000-1";
+			return "int {[player]} Returns the time of the specified player, as an integer from 0 to 24000-1";
 		}
 
 		@Override
@@ -3539,8 +3583,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3549,7 +3593,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = null;
 			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -3577,7 +3621,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player]} Resets the time of the player to the time of the world.";
+			return "void {[player]} Resets the visible time for the player to the time of the world.";
 		}
 
 		@Override
@@ -3591,8 +3635,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3601,7 +3645,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = null;
 			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -3634,7 +3678,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				m = Static.GetPlayer(args[0], t);
@@ -3661,7 +3705,7 @@ public class PlayerManagement {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -3684,7 +3728,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
 			if(args.length == 2) {
@@ -3694,7 +3738,7 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(m, t);
 			if(args[offset] instanceof CNull) {
 				m.resetPlayerWeather();
-			} else if(Static.getBoolean(args[offset], t)) {
+			} else if(ArgumentValidation.getBoolean(args[offset], t)) {
 				m.setPlayerWeather(MCWeather.DOWNFALL);
 			} else {
 				m.setPlayerWeather(MCWeather.CLEAR);
@@ -3715,13 +3759,13 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "void {[player], downFall} Sets the weather for the given player only. If downFall is true, the"
-					+ " player will experience a storm. If downFall is null, it will reset the player's weather to that"
-					+ " of the world.";
+					+ " player will experience a storm. If downFall is null, it will reset the player's visible weather"
+					+ " to that which the player's world is experiencing.";
 		}
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -3730,8 +3774,7 @@ public class PlayerManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREPlayerOfflineException.class,
-				CRELengthException.class, CREIllegalArgumentException.class};
+			return new Class[]{CREPlayerOfflineException.class, CRELengthException.class};
 		}
 
 		@Override
@@ -3745,29 +3788,18 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m;
 			String listName;
 			if(args.length == 2) {
 				m = Static.GetPlayer(args[0], t);
-				listName = args[1].nval();
+				listName = Construct.nval(args[1]);
 			} else {
 				m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				listName = args[0].nval();
+				Static.AssertPlayerNonNull(m, t);
+				listName = Construct.nval(args[0]);
 			}
-			Static.AssertPlayerNonNull(m, t);
-			try {
-				m.setPlayerListName(listName);
-			} catch (IllegalArgumentException e) {
-				if(listName.length() > 16) {
-					throw new CRELengthException("set_list_name([player,] name)"
-							+ " expects name to be 16 characters or less for MineCraft versions prior to 1.8.", t);
-				} else {
-					throw new CREIllegalArgumentException("set_list_name([player,] name)"
-							+ " was called with a name that is already in use."
-							+ " (This will no longer cause an Exception for MineCraft versions 1.8 and higher).", t);
-				}
-			}
+			m.setPlayerListName(listName);
 			return CVoid.VOID;
 		}
 
@@ -3783,17 +3815,13 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], [listName]} Sets the player's list name. Colors are supported"
-					+ " and setting the name to null resets it."
-					+ " MineCraft versions prior to 1.8 have a limit of 16 characters for the name."
-					+ " In these versions, an IllegalArgumentException is thrown if the name specified is already"
-					+ " taken and a LengthException is thrown when the name is greater than 16 characters."
-					+ " In versions 1.8 and higher, specifying an already taken name will be silently ignored.";
+			return "void {[player], [listName]} Sets the player's list name."
+					+ " Colors are supported and setting the name to null resets it.";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -3816,7 +3844,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
@@ -3837,12 +3865,12 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "string {[player]} Returns the list name of the specified player, or the current player if none specified.";
+			return "string {[player]} Returns the name of the player that's display on the player list.";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -3883,7 +3911,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
@@ -3902,8 +3930,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 	}
 
@@ -3912,7 +3940,8 @@ public class PlayerManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREPlayerOfflineException.class, CREFormatException.class};
+			return new Class[]{CRECastException.class, CREPlayerOfflineException.class, CREFormatException.class,
+					CREIllegalArgumentException.class};
 		}
 
 		@Override
@@ -3926,55 +3955,47 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			double x;
-			double y;
-			double z;
+			Vector3D v;
+			int offset = 0;
 			switch(args.length) {
 				case 1:
 				case 2: {
-					int offset = 0;
 					if(args.length == 2) {
 						offset = 1;
 						p = Static.GetPlayer(args[0], t);
 					}
-					if(args[offset] instanceof CArray) {
-						Static.AssertPlayerNonNull(p, t);
-						MCLocation l = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
-						x = l.getX();
-						y = l.getY();
-						z = l.getZ();
-					} else {
-						throw new CRECastException("Expecting an array, but \"" + args[offset].val() + "\" was given.", t);
-					}
+					v = ObjectGenerator.GetGenerator().vector(args[offset], t);
 					break;
 				}
 				case 3:
 				case 4: {
-					int offset = 0;
 					if(args.length == 4) {
 						offset = 1;
 						p = Static.GetPlayer(args[0], t);
 					}
-					x = Static.getDouble(args[offset], t);
-					y = Static.getDouble(args[offset + 1], t);
-					z = Static.getDouble(args[offset + 2], t);
+					double x = Static.getDouble(args[offset], t);
+					double y = Static.getDouble(args[offset + 1], t);
+					double z = Static.getDouble(args[offset + 2], t);
+					v = new Vector3D(x, y, z);
 					break;
 				}
 				default:
 					throw new RuntimeException();
 			}
-			Vector3D v = new Vector3D(x, y, z);
-			// TODO: consider removing this and updating the switch above
 			if(v.length() > 10) {
-				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING,
+				MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.WARNING,
 						"The call to " + getName() + " has been cancelled, because the magnitude was greater than 10."
 						+ " (It was " + v.length() + ")", t);
 				return CBoolean.FALSE;
 			}
 			Static.AssertPlayerNonNull(p, t);
-			p.setVelocity(v);
+			try {
+				p.setVelocity(v);
+			} catch (IllegalArgumentException ex) {
+				throw new CREIllegalArgumentException(ex.getMessage(), t);
+			}
 			return CBoolean.TRUE;
 		}
 
@@ -3994,13 +4015,12 @@ public class PlayerManagement {
 					+ " associative array with x, y, and z keys defined (if magnitude is set, it is ignored)."
 					+ " If the vector's magnitude is greater than 10, the command is cancelled, because the"
 					+ " server won't allow the player to move faster than that. A warning is issued, and false"
-					+ " is returned if this"
-					+ " happens, otherwise, true is returned.";
+					+ " is returned if this happens, otherwise, true is returned.";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -4023,7 +4043,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
 			if(args.length == 3 || args.length == 6) {
@@ -4069,18 +4089,19 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], locationArray, 1, 2, 3, 4 | [player], locationArray, lineArray} Changes a signs' text, but only temporarily, and only for the specified player."
+			return "void {[player], locationArray, 1, 2, 3, 4 | [player], locationArray, lineArray}"
+					+ " Changes a sign's text only for the specified player. This change does not persist."
 					+ " This can be used to \"fake\" sign text for a player. LineArray, if used, must have 4 elements.";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class psend_block_change extends AbstractFunction {
+	public static class psend_block_change extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -4098,7 +4119,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
 			if(args.length == 3) {
@@ -4106,9 +4127,23 @@ public class PlayerManagement {
 				offset = 1;
 			}
 			Static.AssertPlayerNonNull(p, t);
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0 + offset], p.getWorld(), t);
-			MCItemStack item = Static.ParseItemNotation(getName(), args[1 + offset].val(), 1, t);
-			p.sendBlockChange(loc, item.getType().getType(), (byte) item.getData().getData());
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
+			MCBlockData data;
+			try {
+				data = StaticLayer.GetServer().createBlockData(args[1 + offset].val().toLowerCase());
+			} catch (IllegalArgumentException ex) {
+				String value = args[1 + offset].val();
+				if(value.contains(":") && value.length() <= 6) {
+					data = Static.ParseItemNotation(getName(), args[1 + offset].val(), 1, t).getType().createBlockData();
+				} else {
+					throw new CREFormatException("Invalid block format: " + value, t);
+				}
+			}
+			if(!data.getMaterial().isBlock()) {
+				throw new CREIllegalArgumentException("The value \"" + args[1 + offset].val()
+						+ "\" is not a valid block material.", t);
+			}
+			p.sendBlockChange(loc, data);
 			return CVoid.VOID;
 		}
 
@@ -4124,13 +4159,35 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], locationArray, itemID} Changes a block, but only temporarily, and only for the specified player."
-					+ " This can be used to \"fake\" blocks for a player. ItemID is in the 1[:1] data format.";
+			return "void {[player], locationArray, block} Changes a block temporarily for the specified player."
+					+ " This can be used to \"fake\" blocks for a player. These illusory blocks will disappear when"
+					+ " the client updates them, most often by clicking on them or reloading the chunks."
+					+ " A block type or blockdata format is supported. (see set_blockdata_string())";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() < 2) {
+				return null;
+			}
+			String value = children.get(children.size() - 1).getData().val();
+			if(value.contains(":") && value.length() <= 6) { // longest valid item format without being blockdata string
+				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The 1:1 format is deprecated in psend_block_change()", t);
+			}
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -4153,7 +4210,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
@@ -4174,12 +4231,12 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player]} Returns the player's hunger level";
+			return "int {[player]} Returns the player's hunger level.";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -4202,7 +4259,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int hungerIndex = 0;
 			if(args.length == 2) {
@@ -4227,12 +4284,12 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], hunger} Sets a player's hunger level";
+			return "void {[player], hunger} Sets a player's hunger level, where 0 is empty and 20 is full.";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -4255,7 +4312,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
@@ -4276,12 +4333,12 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "double {[player]} Returns the player's saturation level";
+			return "double {[player]} Returns the player's food saturation level.";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -4304,7 +4361,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			float saturation;
 			int saturationIndex = 0;
@@ -4330,12 +4387,14 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], saturation} ";
+			return "void {[player], saturation} Set's the player's food saturation level."
+					+ " If this is above 0.0 and the player's health is below max, the player will experience fast"
+					+ " health regeneration.";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -4354,7 +4413,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				player = Static.GetUser(args[0].val(), t);
@@ -4375,8 +4434,10 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {[playerName]} Returns an array of x, y, z, coords of the bed of the player specified, or the player running the command otherwise."
-					+ "The array returned will also include the bed's world in index 3 of the array. This is set when a player sleeps or by set_pbed_location.";
+			return "array {[playerName]} Returns a location array of the bed block the player last slept in."
+					+ " The player will normally respawn next to this bed if they die."
+					+ " However, this respawn location can be forcibly be set by plugins or commands to any location,"
+					+ " like when using set_pbed_location().";
 		}
 
 		@Override
@@ -4390,8 +4451,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4423,9 +4484,8 @@ public class PlayerManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CRELengthException.class,
-				CREPlayerOfflineException.class, CREFormatException.class,
-				CRENullPointerException.class};
+			return new Class[]{CRECastException.class, CRELengthException.class, CREPlayerOfflineException.class,
+				CREFormatException.class, CRENullPointerException.class};
 		}
 
 		@Override
@@ -4434,8 +4494,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4444,9 +4504,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args)
-				throws CancelCommandException, ConfigRuntimeException {
-
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			String pname = null;
 			MCPlayer m = null;
@@ -4455,7 +4513,7 @@ public class PlayerManagement {
 			boolean forced = true;
 
 			if(args.length == 1) {
-				if(args[0] instanceof CArray) {
+				if(args[0].isInstanceOf(CArray.class)) {
 					if(p instanceof MCPlayer) {
 						m = ((MCPlayer) p);
 					}
@@ -4464,23 +4522,23 @@ public class PlayerManagement {
 					throw new CRECastException("Expecting an array in set_pbed_location", t);
 				}
 			} else if(args.length == 2) {
-				if(args[1] instanceof CArray) {
+				if(args[1].isInstanceOf(CArray.class)) {
 					pname = args[0].val();
 					locationIndex = 1;
-				} else if(args[0] instanceof CArray) {
+				} else if(args[0].isInstanceOf(CArray.class)) {
 					if(p instanceof MCPlayer) {
 						m = ((MCPlayer) p);
 					}
 					locationIndex = 0;
-					forced = Static.getBoolean(args[1], t);
+					forced = ArgumentValidation.getBoolean(args[1], t);
 				} else {
 					throw new CRECastException("Expecting an array in set_pbed_location", t);
 				}
 			} else if(args.length == 3) {
-				if(args[1] instanceof CArray) {
+				if(args[1].isInstanceOf(CArray.class)) {
 					pname = args[0].val();
 					locationIndex = 1;
-					forced = Static.getBoolean(args[2], t);
+					forced = ArgumentValidation.getBoolean(args[2], t);
 				} else {
 					if(p instanceof MCPlayer) {
 						m = (MCPlayer) p;
@@ -4496,12 +4554,12 @@ public class PlayerManagement {
 						m = (MCPlayer) p;
 					}
 					locationIndex = 0;
-					forced = Static.getBoolean(args[3], t);
+					forced = ArgumentValidation.getBoolean(args[3], t);
 				}
 			} else {
 				m = Static.GetPlayer(args[0], t);
 				locationIndex = 1;
-				forced = Static.getBoolean(args[4], t);
+				forced = ArgumentValidation.getBoolean(args[4], t);
 			}
 
 			if(m == null && pname != null) {
@@ -4509,7 +4567,7 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(m, t);
 
-			if(args[locationIndex] instanceof CArray) {
+			if(args[locationIndex].isInstanceOf(CArray.class)) {
 				CArray ca = (CArray) args[locationIndex];
 				l = ObjectGenerator.GetGenerator().location(ca, m.getWorld(), t);
 				l.add(0, 1, 0); // someone decided to match ploc() here
@@ -4544,7 +4602,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "string {[player]} Returns ID of vehicle which player is in or null if player is outside the vehicle";
+			return "string {[player]} Returns the UUID of the vehicle which the player is riding,"
+					+ " or null if player is not riding a vehicle.";
 		}
 
 		@Override
@@ -4558,8 +4617,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4568,7 +4627,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0].val(), t);
@@ -4598,7 +4657,8 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {[player]} Leave vehicle by player or return false if player is outside the vehicle";
+			return "boolean {[player]} Forces a player to leave their vehicile."
+					+ " This returns false if the player is not riding a vehicle.";
 		}
 
 		@Override
@@ -4612,8 +4672,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4622,7 +4682,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
 				p = Static.GetPlayer(args[0].val(), t);
@@ -4652,10 +4712,11 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			CArray ret = new CArray(t);
-			if(s != null && s.getOfflinePlayers() != null) { // This causes the function to return an empty array for a fake/null server.
+			// This causes the function to return an empty array for a fake/null server.
+			if(s != null && s.getOfflinePlayers() != null) {
 				for(MCOfflinePlayer offp : s.getOfflinePlayers()) {
 					ret.push(new CString(offp.getName(), t), t);
 				}
@@ -4679,8 +4740,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4711,7 +4772,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer offp = Static.GetUser(args[0].val(), t);
 			return CBoolean.get(offp != null && offp.hasPlayedBefore());
 		}
@@ -4729,19 +4790,21 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "boolean {player} Returns whether the given player has ever been on this server."
-					+ " This will not throw a PlayerOfflineException, so the name must be exact.";
+					+ " The player argument can be a UUID or a name. But if given a name, it must be exact.";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Demonstrates a player that has played", "phas_played('Notch')", ":true"),
-				new ExampleScript("Demonstrates a player that has not played", "phas_played('Herobrine')", ":false")
+				new ExampleScript("Demonstrates a player that has played",
+						"phas_played('Notch')", ":true"),
+				new ExampleScript("Demonstrates a player that has not played",
+						"phas_played('Herobrine')", ":false")
 			};
 		}
 
@@ -4766,8 +4829,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCOfflinePlayer op = null;
 			if(args.length == 1) {
@@ -4791,13 +4853,13 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "int {[player]} Returns the unix time stamp, in milliseconds, that this player first logged onto"
-					+ " this server, or 0 if they never have. This will not throw a PlayerOfflineException, so the"
-					+ " name or UUID must be exact.";
+					+ " this server, or 0 if they never have."
+					+ " The player argument can be a UUID or a name. But if given a name, it must be exact.";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4831,7 +4893,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCOfflinePlayer op = null;
 			if(args.length == 1) {
@@ -4855,13 +4917,13 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "int {[player]} Returns the unix time stamp, in milliseconds, that this player was last seen on this"
-					+ " server, or 0 if they never were. This will not throw a PlayerOfflineException, so the name or "
-					+ " UUID must be exact.";
+					+ " server, or 0 if they never were."
+					+ " The player argument can be a UUID or a name. But if given a name, it must be exact.";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4894,7 +4956,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer p = Static.GetUser(args[0].val(), t);
 			if(p == null) {
 				return CNull.NULL;
@@ -4924,69 +4986,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
-		}
-	}
-
-	@api
-	@hide("Deprecated.")
-	public static class get_player_from_entity_id extends AbstractFunction implements Optimizable {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			try {
-				return new CString(((MCPlayer) Static.getLivingEntity(args[0], t)).getName(), t);
-			} catch (Exception exception) {
-				return CNull.NULL;
-			}
-		}
-
-		@Override
-		public String getName() {
-			return "get_player_from_entity_id";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
-		@Override
-		public String docs() {
-			return "string {entityID} Given an entity ID that represents a player, returns that player's name, or"
-					+ " null if the entity ID isn't a player's entity ID.";
-		}
-
-		@Override
-		public Version since() {
-			return CHVersion.V3_3_1;
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			CHLog.GetLogger().w(CHLog.Tags.DEPRECATION, "The function get_player_from_entity_id() is deprecated. Use player().", t);
-			return null;
-		}
-
-		@Override
-		public Set<Optimizable.OptimizationOption> optimizationOptions() {
-			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 	}
 
@@ -5009,7 +5010,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Static.getServer().savePlayers();
 			return CVoid.VOID;
 		}
@@ -5031,7 +5032,7 @@ public class PlayerManagement {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -5051,7 +5052,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], flight} Sets whether or not this player is flying."
+			return "void {[player], flying} Sets the flying state for the player."
 					+ "Requires player to have the ability to fly, which is set with set_pflight().";
 		}
 
@@ -5071,14 +5072,14 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			boolean flight;
 			if(args.length == 1) {
-				flight = Static.getBoolean(args[0], t);
+				flight = ArgumentValidation.getBoolean(args[0], t);
 			} else {
 				p = Static.GetPlayer(args[0], t);
-				flight = Static.getBoolean(args[1], t);
+				flight = ArgumentValidation.getBoolean(args[1], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			if(!p.getAllowFlight()) {
@@ -5099,8 +5100,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -5119,7 +5120,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "string {[player]} Gets the entity that a spectator is viewing. If the player isn't spectating"
+			return "string {[player]} Gets the entity UUID that a spectator is viewing. If the player isn't spectating"
 					+ " from an entity, null is returned. If the player isn't in spectator mode, an"
 					+ " IllegalArgumentException is thrown.";
 		}
@@ -5140,7 +5141,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 0) {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -5159,8 +5160,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -5201,7 +5202,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			int offset = 0;
 			if(args.length == 1) {
@@ -5223,8 +5224,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -5249,7 +5250,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
 
 			MCPlayer p = Static.GetPlayer(args[0], t);
@@ -5292,8 +5293,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 	}
@@ -5319,7 +5320,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
 
 			MCPlayer p = Static.GetPlayer(args[0], t);
@@ -5355,8 +5356,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 	}
@@ -5380,7 +5381,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			String materialName;
 			if(args.length == 2) {
@@ -5412,14 +5413,14 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player], material} Gets the time left on the player's cooldown for the specified material."
-					+ " The material is the name found in item arrays. This returns an integer representing the"
-					+ " time in game ticks until items of this material can be used again by this player. (MC 1.11.2)";
+			return "int {[player], material} Gets the time left on the player's cooldown for the specified item type."
+					+ " This returns an integer representing the time in server ticks until any items of this material"
+					+ " can be used again by this player.";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 	}
@@ -5444,7 +5445,7 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			String materialName;
 			int cooldown;
@@ -5484,14 +5485,303 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "int {[player], material, cooldown} Sets the player's cooldown time for the specified material."
-					+ " The material is the name found in item arrays. The cooldown must be a positive integer"
-					+ " representing game ticks. (MC 1.11.2)";
+			return "int {[player], material, cooldown} Sets the player's cooldown time for the specified item type."
+					+ " The cooldown must be a positive integer representing server ticks.";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
+		}
+
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_plist_header extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_plist_header";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {[player]} Gets the player list header for a player."
+					+ " This is the text that appears above the player list that appears when hitting the tab key.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			if(args.length == 2) {
+				p = Static.GetPlayer(args[0], t);
+			} else {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+			}
+			return new CString(p.getPlayerListHeader(), t);
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_plist_header extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_plist_header";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], header} Sets the player list header for a player."
+					+ " This is the text that appears above the player list that appears when hitting the tab key."
+					+ " Colors and new lines are accepted. Only the given player (or current player if none is given)"
+					+ " will see these changes.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			String header;
+			if(args.length == 2) {
+				p = Static.GetPlayer(args[0], t);
+				header = args[1].val();
+			} else {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				header = args[0].val();
+			}
+			p.setPlayerListHeader(header);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_plist_footer extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_plist_footer";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {[player]} Gets the player list footer for a player."
+					+ " This is the text that appears below the player list that appears when hitting the tab key.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			if(args.length == 2) {
+				p = Static.GetPlayer(args[0], t);
+			} else {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+			}
+			return new CString(p.getPlayerListFooter(), t);
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_plist_footer extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_plist_footer";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], footer} Sets the player list footer for a player."
+					+ " This is the text that appears below the player list that appears when hitting the tab key."
+					+ " Colors and new lines are accepted. Only the given player (or current player if none is given)"
+					+ " will see these changes.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			String footer;
+			if(args.length == 2) {
+				p = Static.GetPlayer(args[0], t);
+				footer = args[1].val();
+			} else {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+				footer = args[0].val();
+			}
+			p.setPlayerListFooter(footer);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRELengthException.class, CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
+	public static class ptellraw extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			String selector = ArgumentValidation.getString(args[0], t);
+			CArray raw = ArgumentValidation.getArray(args[1], t);
+			String json = new DataTransformations.json_encode().exec(t, environment, raw).val();
+			return new Meta.run().exec(t, environment, new CString("/tellraw " + selector + " " + json, t));
+		}
+
+		@Override
+		public String getName() {
+			return "ptellraw";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {string selector, array raw} A thin wrapper around the /tellraw command, this simply passes"
+					+  "the input ot the Minecraft tellraw command. The raw is passed in as a normal (possibly"
+					+ " associative) array, and json encoded. No validation is done on the input, so the command may"
+					+ " fail. The specification of the array may change from version to version of Minecraft,"
+					+ " but is documented here https://minecraft.gamepedia.com/Commands#Raw_JSON_text. ----"
+					+ " This function is simply written in terms of json_encode and run, and is otherwise equivalent"
+					+ " to run('/tellraw ' . @selector . ' ' . json_encode(@raw))";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[] {
+				new ExampleScript("Simple usage with a plain message",
+						"ptellraw('@a', array('text': 'Hello World!'));",
+						"<<Would output the plain message to the player.>>"),
+				new ExampleScript("Complex object",
+						"ptellraw('@s', array(\n"
+								+ "\tarray('text': 'Hello '),\n"
+								+ "\tarray('text': 'World', 'color': color(LIGHT_PURPLE)),\n"
+								+ "\tarray('text': '!')\n"
+								+ "));",
+						"<<Would output the colorful message to the player>>")
+			};
 		}
 
 	}

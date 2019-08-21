@@ -7,18 +7,23 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFishHook;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHopperMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCItem;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLightningStrike;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLlama;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCStorageMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCTNT;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCThrownPotion;
 import com.laytonsmith.abstraction.enums.MCEntityType;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Projectile;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class BukkitMCEntityType extends MCEntityType<EntityType> {
+
+	protected static final Map<EntityType, MCEntityType> BUKKIT_MAP = new HashMap<>();
 
 	public BukkitMCEntityType(EntityType concreteType, MCVanillaEntityType abstractedType) {
 		super(abstractedType, concreteType);
@@ -26,28 +31,27 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 
 	// This way we don't take up extra memory on non-bukkit implementations
 	public static void build() {
-		vanilla = new HashMap<>();
-		mappings = new HashMap<>();
 		NULL = new BukkitMCEntityType(EntityType.UNKNOWN, MCVanillaEntityType.UNKNOWN);
-		ArrayList<EntityType> counted = new ArrayList<>();
 		for(MCVanillaEntityType v : MCVanillaEntityType.values()) {
-			if(v.existsInCurrent()) {
-				EntityType type = getBukkitType(v);
-				if(type == null) {
-					CHLog.GetLogger().e(CHLog.Tags.RUNTIME, "Could not find a matching entity type for " + v.name()
-							+ ". This is an error, please report this to the bug tracker.", Target.UNKNOWN);
+			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
+				EntityType type;
+				try {
+					type = getBukkitType(v);
+				} catch (IllegalArgumentException | NoSuchFieldError ex) {
+					MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Could not find a Bukkit EntityType for " + v.name(), Target.UNKNOWN);
 					continue;
 				}
 				BukkitMCEntityType wrapper = new BukkitMCEntityType(type, v);
 				wrapper.setWrapperClass();
-				vanilla.put(v, wrapper);
-				mappings.put(v.name(), wrapper);
-				counted.add(type);
+				VANILLA_MAP.put(v, wrapper);
+				MAP.put(v.name(), wrapper);
+				BUKKIT_MAP.put(type, wrapper);
 			}
 		}
 		for(EntityType b : EntityType.values()) {
-			if(!counted.contains(b)) {
-				mappings.put(b.name(), new BukkitMCEntityType(b, MCVanillaEntityType.UNKNOWN));
+			if(!BUKKIT_MAP.containsKey(b)) {
+				MAP.put(b.name(), new BukkitMCEntityType(b, MCVanillaEntityType.UNKNOWN));
+				BUKKIT_MAP.put(b, new BukkitMCEntityType(b, MCVanillaEntityType.UNKNOWN));
 			}
 		}
 	}
@@ -65,17 +69,22 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 	@Override
 	public boolean isSpawnable() {
 		if(getAbstracted() == MCVanillaEntityType.UNKNOWN) {
-			return getConcrete() != EntityType.UNKNOWN;
+			return getConcrete() != EntityType.UNKNOWN && getConcrete().isSpawnable();
 		} else {
-			return getAbstracted().isSpawnable();
+			return getAbstracted().isSpawnable() || getConcrete().isSpawnable();
 		}
 	}
 
+	@Override
+	public boolean isProjectile() {
+		return getConcrete().getEntityClass() != null
+				&& Projectile.class.isAssignableFrom(getConcrete().getEntityClass());
+	}
+
 	public static BukkitMCEntityType valueOfConcrete(EntityType test) {
-		for(MCEntityType t : mappings.values()) {
-			if(((BukkitMCEntityType) t).getConcrete().equals(test)) {
-				return (BukkitMCEntityType) t;
-			}
+		MCEntityType type = BUKKIT_MAP.get(test);
+		if(type != null) {
+			return (BukkitMCEntityType) type;
 		}
 		return (BukkitMCEntityType) NULL;
 	}
@@ -89,16 +98,12 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 	}
 
 	// Add exceptions here
-	public static EntityType getBukkitType(MCVanillaEntityType v) {
+	private static EntityType getBukkitType(MCVanillaEntityType v) {
 		switch(v) {
 			case ENDER_EYE:
 				return EntityType.ENDER_SIGNAL;
 		}
-		try {
-			return EntityType.valueOf(v.name());
-		} catch (IllegalArgumentException iae) {
-			return null;
-		}
+		return EntityType.valueOf(v.name());
 	}
 
 	// This is here because it shouldn't be getting changed from API
@@ -122,6 +127,7 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 				wrapperClass = BukkitMCLightningStrike.class;
 				break;
 			case LINGERING_POTION:
+			case SPLASH_POTION:
 				wrapperClass = BukkitMCThrownPotion.class;
 				break;
 			case MINECART_CHEST:
@@ -136,8 +142,8 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 			case PRIMED_TNT:
 				wrapperClass = BukkitMCTNT.class;
 				break;
-			case SPLASH_POTION:
-				wrapperClass = BukkitMCThrownPotion.class;
+			case TRADER_LLAMA:
+				wrapperClass = BukkitMCLlama.class;
 				break;
 			case UNKNOWN:
 				wrapperClass = null;
@@ -156,7 +162,7 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 				} catch (ClassNotFoundException e) {
 					String url = "https://github.com/sk89q/CommandHelper/tree/master/src/main/java/"
 							+ "com/laytonsmith/abstraction/bukkit/entities";
-					CHLog.GetLogger().d(CHLog.Tags.RUNTIME, "While trying to find the correct entity class for "
+					MSLog.GetLogger().d(MSLog.Tags.RUNTIME, "While trying to find the correct entity class for "
 							+ getAbstracted().name() + "(attempted " + name + "), we could not find a wrapper class."
 							+ " This is not necessarily an error, we just don't have any special handling for"
 							+ " this entity yet, and will treat it generically. If there is a matching file at"

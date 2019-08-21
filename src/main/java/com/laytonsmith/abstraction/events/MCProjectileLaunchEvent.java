@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction.events;
 
-import com.laytonsmith.abstraction.MCProjectile;
+import com.laytonsmith.abstraction.entities.MCProjectile;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.core.events.BindableEvent;
 

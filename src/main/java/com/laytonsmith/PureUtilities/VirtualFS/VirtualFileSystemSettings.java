@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -188,11 +186,11 @@ public class VirtualFileSystemSettings {
 	}
 
 	public VirtualFileSystemSettings(String unparsedSettings) {
-		settings = (HashMap<VirtualGlob, SettingGroup>) deserialize(unparsedSettings);
+		this((HashMap<VirtualGlob, SettingGroup>) deserialize(unparsedSettings));
 	}
 
 	public VirtualFileSystemSettings(Map<VirtualGlob, SettingGroup> settings) {
-		this.settings = new HashMap<VirtualGlob, VirtualFileSystemSettings.SettingGroup>(settings);
+		this.settings = new HashMap<>(settings);
 		this.settings.put(new VirtualGlob(VirtualFileSystem.META_DIRECTORY), new SettingGroup(META_DIRECTORY_SETTINGS));
 		for(VirtualGlob g : settings.keySet()) {
 			SettingGroup s = settings.get(g);
@@ -201,8 +199,8 @@ public class VirtualFileSystemSettings {
 					if(g.matches(new VirtualFile("/"))) {
 						hasQuota = true;
 					} else {
-						Logger.getLogger(VirtualFileSystemSettings.class.getName()).log(Level.WARNING, "The \"quota\" setting can only be applied to the root of the "
-								+ "file system at this time. The quota setting for " + g.toString() + " is being ignored.");
+						throw new IllegalArgumentException("The \"quota\" setting can only be applied to the root of the "
+								+ "file system at this time but it was set on " + g.toString() + ".");
 					}
 				}
 			}
@@ -212,8 +210,8 @@ public class VirtualFileSystemSettings {
 					if(g.matches(new VirtualFile("/"))) {
 						cordonedOff = true;
 					} else {
-						Logger.getLogger(VirtualFileSystemSettings.class.getName()).log(Level.WARNING, "The \"cordoned-off\" setting can only be applied to the root"
-								+ " of the file system at this time. The setting for " + g.toString() + " is being ignored.");
+						throw new IllegalArgumentException("The \"cordoned-off\" setting can only be applied to the root"
+								+ " of the file system but it was set on " + g.toString() + ".");
 					}
 				}
 			}

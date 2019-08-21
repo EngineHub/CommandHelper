@@ -8,13 +8,13 @@ import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import java.io.File;
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 	private final String eventName;
 	private final String id;
 	private final Priority priority;
-	private final Map<String, Construct> prefilter;
+	private final Map<String, Mixed> prefilter;
 	private final String eventObjName;
 	private final Environment originalEnv;
 	private final ParseTree tree; //The code closure for this event
@@ -155,7 +155,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 			this.priority = Priority.NORMAL;
 		}
 
-		this.prefilter = new HashMap<String, Construct>();
+		this.prefilter = new HashMap<String, Mixed>();
 		if(prefilter != null) {
 			for(String key : prefilter.stringKeySet()) {
 				this.prefilter.put(key, prefilter.get(key, Target.UNKNOWN));
@@ -207,7 +207,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 		return id;
 	}
 
-	public Map<String, Construct> getPrefilter() {
+	public Map<String, Mixed> getPrefilter() {
 		return prefilter;
 	}
 
@@ -245,14 +245,15 @@ public class BoundEvent implements Comparable<BoundEvent> {
 			//        root.setRoot(tree);
 			Environment env = originalEnv.clone();
 			CArray ca = CArray.GetAssociativeArray(Target.UNKNOWN);
-			for(Map.Entry<String, Construct> entry : activeEvent.parsedEvent.entrySet()) {
+			for(Map.Entry<String, Mixed> entry : activeEvent.parsedEvent.entrySet()) {
 				ca.set(new CString(entry.getKey(), Target.UNKNOWN), entry.getValue(), Target.UNKNOWN);
 			}
 			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, ca, Target.UNKNOWN));
 			env.getEnv(GlobalEnv.class).SetEvent(activeEvent);
 			activeEvent.addHistory("Triggering bound event: " + this);
 			try {
-				ProfilePoint p = env.getEnv(GlobalEnv.class).GetProfiler().start("Executing event handler for " + this.getEventName() + " defined at " + this.getTarget(), LogLevel.ERROR);
+				ProfilePoint p = env.getEnv(GlobalEnv.class).GetProfiler().start("Executing event handler for "
+						+ this.getEventName() + " defined at " + this.getTarget(), LogLevel.ERROR);
 				try {
 					this.execute(env, activeEvent);
 				} finally {
@@ -278,8 +279,9 @@ public class BoundEvent implements Comparable<BoundEvent> {
 	public void manual_trigger(CArray event) throws EventException {
 		try {
 			Environment env = originalEnv.clone();
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, event, Target.UNKNOWN));
-			Map<String, Construct> map = new HashMap<>();
+			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, event, Target.UNKNOWN,
+					env));
+			Map<String, Mixed> map = new HashMap<>();
 			for(String key : event.stringKeySet()) {
 				map.put(key, event.get(key, Target.UNKNOWN));
 			}
@@ -340,7 +342,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 	public static class ActiveEvent {
 
 		private final BindableEvent underlyingEvent;
-		private Map<String, Construct> parsedEvent;
+		private Map<String, Mixed> parsedEvent;
 		private BoundEvent boundEvent;
 		private Boolean cancelled;
 		private BoundEvent consumedAt;
@@ -353,10 +355,10 @@ public class BoundEvent implements Comparable<BoundEvent> {
 		public ActiveEvent(BindableEvent underlyingEvent) {
 			this.underlyingEvent = underlyingEvent;
 			this.cancelled = null;
-			whenCancelled = new ArrayList<Pair<CClosure, Environment>>();
-			whenTriggered = new ArrayList<Pair<CClosure, Environment>>();
-			lockedAt = new HashMap<String, BoundEvent>();
-			history = new ArrayList<String>();
+			whenCancelled = new ArrayList<>();
+			whenTriggered = new ArrayList<>();
+			lockedAt = new HashMap<>();
+			history = new ArrayList<>();
 		}
 
 		public void addHistory(String history) {
@@ -369,7 +371,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 			return history;
 		}
 
-		public Map<String, Construct> getParsedEvent() {
+		public Map<String, Mixed> getParsedEvent() {
 			return parsedEvent;
 		}
 
@@ -385,7 +387,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 			this.boundEvent = boundEvent;
 		}
 
-		public void setParsedEvent(Map<String, Construct> parsedEvent) {
+		public void setParsedEvent(Map<String, Mixed> parsedEvent) {
 			this.parsedEvent = parsedEvent;
 		}
 

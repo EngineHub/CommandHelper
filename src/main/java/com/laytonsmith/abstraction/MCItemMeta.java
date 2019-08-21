@@ -106,4 +106,14 @@ public interface MCItemMeta extends AbstractionObject {
 	boolean isUnbreakable();
 
 	void setUnbreakable(boolean unbreakable);
+
+	int getDamage();
+
+	void setDamage(int damage);
+
+	boolean hasCustomModelData();
+
+	int getCustomModelData();
+
+	void setCustomModelData(int id);
 }

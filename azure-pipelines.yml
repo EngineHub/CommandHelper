@@ -1,0 +1,27 @@
+# Maven
+# Build your Java project and run tests with Apache Maven.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+
+pool:
+  vmImage: 'vs2017-win2016'
+
+steps:
+- task: Maven@3
+  inputs:
+    mavenPomFile: 'pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeOption: 'JDKVersion'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    publishJUnitResults: true
+    testResultsFiles: '**/TEST-*.xml'
+    goals: 'package'
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: '[xml]$pomXml = Get-Content "pom.xml"; $version = $pomXml.project.version; Write-Host "##vso[task.setvariable variable=version]$version"'    
+- task: PublishPipelineArtifact@0
+  inputs:
+    targetPath: 'target/commandhelper-$(version)-full.jar'
+    artifactName: 'CommandHelper-$(version)-$(Build.BuildNumber).jar'

@@ -12,5 +12,6 @@ This will print out the syntax file to the console. You can pipe the output to a
 
 <code>java -jar CommandHelper.jar syntax npp obsidian > syntaxFile.xml</code>
 
-This will save the file in the current directory. Follow the procedure for your specific text editor to update the syntax files using the freshly generated syntax file. (This varies depending on your text editor.)
+This will save the file in the current directory. Follow the procedure for your specific text editor to update the
+syntax files using the freshly generated syntax file. (This varies depending on your text editor.)
 

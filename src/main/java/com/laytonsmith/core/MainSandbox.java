@@ -1,36 +1,30 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.annotations.NonInheritImplements;
+import java.awt.*;
+import javax.swing.*;
+import java.net.URL;
+import java.util.Locale;
+
 
 /**
  * This class is for testing concepts
  */
 public class MainSandbox {
 
-	public static interface Interface {
-		void method(int i, String b, int j);
-	}
-	@NonInheritImplements(Interface.class)
-	public static class A1 {
-		public void method(int i, String b, int j) {
-			System.out.println("i: " + i + "; b: " + b);
+
+    public static void main(String[] args) throws Exception {
+        // This font is < 35Kb.
+        URL fontUrl = new URL("http://webpagepublicity.com/" +
+            "free-fonts/a/Airacobra%20Condensed.ttf");
+        Font font = Font.createFont(Font.TRUETYPE_FONT, fontUrl.openStream());
+        GraphicsEnvironment ge =
+            GraphicsEnvironment.getLocalGraphicsEnvironment();
+        ge.registerFont(font);
+        for(Font f : ge.getAllFonts()) {
+			System.out.println(f.getFamily());
+			System.out.println(f.getName());
+			System.out.println();
 		}
-	}
-
-	public static class A2 extends A1 {
-		void moreMethods() {
-
-		}
-	}
-
-	public static void main(String[] argv) throws Exception {
-		Interface interf = NonInheritImplements.Helper.Cast(Interface.class, new A1());
-		System.out.println(NonInheritImplements.Helper.Instanceof(new A2(), Interface.class));
-		myMethod(interf);
-	}
-
-	public static void myMethod(Interface iface) {
-		iface.method(12, "string", 123);
-	}
+    }
 
 }

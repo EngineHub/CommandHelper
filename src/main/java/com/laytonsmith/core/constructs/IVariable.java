@@ -1,6 +1,7 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -12,7 +13,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 public class IVariable extends Construct implements Cloneable {
 
 	public static final long serialVersionUID = 1L;
-	private Construct varValue;
+	private Mixed varValue;
 	private final String name;
 	private final CClassType type;
 	private final Target definedTarget;
@@ -29,21 +30,32 @@ public class IVariable extends Construct implements Cloneable {
 		this.definedTarget = t;
 	}
 
-	public IVariable(CClassType type, String name, Construct value, Target t) {
+	public IVariable(CClassType checkedType, String name, Mixed checkedValue, Target t) {
 		super(name, ConstructType.IVARIABLE, t);
+		this.type = checkedType;
+		this.varValue = checkedValue;
+		this.name = name;
+		this.definedTarget = t;
+	}
+
+	public IVariable(CClassType type, String name, Mixed value, Target t, Environment env) {
+		super(name, ConstructType.IVARIABLE, t);
+		if(type.equals(CVoid.TYPE)) {
+			throw new CRECastException("Variables may not be of type void", t);
+		}
+		if(value == null) {
+			throw new NullPointerException();
+		}
+		if(value.typeof().equals(CVoid.TYPE)) {
+			throw new CRECastException("Void may not be assigned to a variable", t);
+		}
 		if(!type.equals(Auto.TYPE) && !(value instanceof CNull)) {
-			if(!InstanceofUtil.isInstanceof(value, type.val())) {
+			if(!InstanceofUtil.isInstanceof(value, type, env)) {
 				throw new CRECastException(name + " is of type " + type.val() + ", but a value of type "
 						+ value.typeof() + " was assigned to it.", t);
 			}
 		}
-		if(type.equals(CVoid.TYPE)) {
-			throw new CRECastException("Variables may not be of type void", t);
-		}
 		this.type = type;
-		if(value == null) {
-			throw new NullPointerException();
-		}
 		this.varValue = value;
 		this.name = name;
 		this.definedTarget = t;
@@ -54,7 +66,7 @@ public class IVariable extends Construct implements Cloneable {
 		return varValue.val();
 	}
 
-	public Construct ival() {
+	public Mixed ival() {
 		varValue.setTarget(getTarget());
 		return varValue;
 	}
@@ -68,7 +80,7 @@ public class IVariable extends Construct implements Cloneable {
 		return name;
 	}
 
-	public void setIval(Construct c) {
+	public void setIval(Mixed c) {
 		varValue = c;
 	}
 
@@ -83,7 +95,7 @@ public class IVariable extends Construct implements Cloneable {
 		if(this.varValue != null) {
 			clone.varValue = this.varValue.clone();
 		}
-		return (IVariable) clone;
+		return clone;
 	}
 
 	@Override

@@ -43,12 +43,15 @@ mode actually does.
 Suppresses the given compiler warnings for this file. The list should be comma separated, but can contain multiple 
 types.
 
-<%SupressWarningsList%>
+<%SUPPRESS_WARNINGS_LIST%>
 
 == name ==
 
-This should be the name of the file. If it exists, and the file name does not match this value, the compilation will 
-fail.
+This should be the name of the file. If it exists, and the file name does not match this value, the a compiler warning
+will be issued. The name must simply match the end of the actual file path, so providing a partial path, just the file
+name, the path within the project, or the absolute path are all acceptable. It is recommended that you do not provide
+the absolute path however, or the files cannot be easily moved. Both forward and backward slashes are accepted, and
+spaces in file paths are allowed.
 
 == author ==
 
@@ -64,3 +67,15 @@ readers of the script. This will eventually be available in the reflection infor
 
 A description of this file. This value is not used by the compiler, but is perhaps useful information for future 
 readers of the script. This will eventually be available in the reflection information.
+
+== requiredExtensions ==
+
+A comma separated list of extensions that must be loaded in order to compile this file. While it is possible to be
+more granular by using {{function|function_exists}} and {{function|event_exists}}, if the file cannot be useful without
+a given extension, this directive is preferred.
+
+== compilerOptions ==
+
+A comma separated list of compiler options. These options are considered to be unset if not present, and set if present.
+
+<%COMPILER_OPTIONS_LIST%>

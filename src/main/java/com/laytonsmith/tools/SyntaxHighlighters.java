@@ -25,9 +25,37 @@ import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.functions.Function;
-import java.lang.reflect.Field;
+import java.util.stream.Collectors;
 
 public class SyntaxHighlighters {
+
+	public static final String HELP_TEXT = "File for the following syntax highlighters are currently available:\n"
+				+ "\tNotepad++ - Use type \"npp\". You may also select a theme, either \"default\" or \"obsidian\"\n"
+				+ "\tTextWrangler - Use type \"textwrangler\". Only the default theme is available.\n"
+				+ "\t\tTo install: put the generated file in ~/Library/Application Support/TextWrangler/Language Modules/\n"
+				+ "\t\tNote that this output file can also be used for BBEdit.\n"
+				+ "\tGeSHi - Use type \"geshi\". Only the default theme is available.\n"
+				+ "\tViM - Use type \"vim\". Only the default theme is available.\n"
+				+ "\t\tTo install: put in ~/.vim/syntax/commandhelper.vim then edit\n"
+				+ "\t\t~/.vim/ftdetect/commandhelper.vim and add the line \n"
+				+ "\t\tau BufRead,BufNewFile *.ms set filetype=commandhelper\n"
+				+ "\t\tThen, if you're on linux and use cmdline mode, in ~/.vim/scripts.vim, add the following lines:\n"
+				+ "\t\t\tif did_filetype()\n"
+				+ "\t\t\t\tfinish\n"
+				+ "\t\t\tendif\n"
+				+ "\t\t\tif getline(1) =~# '^#!.*\\(/bin/env\\s\\+mscript\\|/bin/mscript\\)\\>'\n"
+				+ "\t\t\t\tsetfiletype commandhelper\n"
+				+ "\t\t\tendif"
+				+ "\t\t(Create directories and files as needed)\n"
+				+ "\tnano - Use type \"nano\". Only the default theme is available.\n"
+				+ "\tSublime Text - Use type \"sublime\". Only the default theme is available.\n"
+				+ "\t\tTo install: Place in Sublime Text's ./SublimeText/data/Packages/User folder.\n"
+				+ "\tSublime Text 3 - Use type \"sublime3\".\n"
+				+ "\tAtom - Use type \"atom\". Only the default theme is available.\n"
+				+ "\t\tTo install: Install package language-mscript from the Atom package manager."
+				+ "\n\n"
+				+ "Know how to write a syntax highlighter file for your favorite text editor? Let me know, and we\n"
+				+ "can work to get it included in CommandHelper!";
 
 	public static String generate(String type, String theme) {
 		Implementation.forceServerType(Implementation.Type.BUKKIT);
@@ -69,33 +97,7 @@ public class SyntaxHighlighters {
 			return template("/syntax-templates/sublime3/default.sublime-syntax");
 		}
 
-		return "File for the following syntax highlighters are currently available:\n"
-				+ "\tNotepad++ - Use type \"npp\". You may also select a theme, either \"default\" or \"obsidian\"\n"
-				+ "\tTextWrangler - Use type \"textwrangler\". Only the default theme is available.\n"
-				+ "\t\tTo install: put the generated file in ~/Library/Application Support/TextWrangler/Language Modules/\n"
-				+ "\t\tNote that this output file can also be used for BBEdit.\n"
-				+ "\tGeSHi - Use type \"geshi\". Only the default theme is available.\n"
-				+ "\tViM - Use type \"vim\". Only the default theme is available.\n"
-				+ "\t\tTo install: put in ~/.vim/syntax/commandhelper.vim then edit\n"
-				+ "\t\t~/.vim/ftdetect/commandhelper.vim and add the line \n"
-				+ "\t\tau BufRead,BufNewFile *.ms set filetype=commandhelper\n"
-				+ "\t\tThen, if you're on linux and use cmdline mode, in ~/.vim/scripts.vim, add the following lines:\n"
-				+ "\t\t\tif did_filetype()\n"
-				+ "\t\t\t\tfinish\n"
-				+ "\t\t\tendif\n"
-				+ "\t\t\tif getline(1) =~# '^#!.*\\(/bin/env\\s\\+mscript\\|/bin/mscript\\)\\>'\n"
-				+ "\t\t\t\tsetfiletype commandhelper\n"
-				+ "\t\t\tendif"
-				+ "\t\t(Create directories and files as needed)\n"
-				+ "\tnano - Use type \"nano\". Only the default theme is available.\n"
-				+ "\tSublime Text - Use type \"sublime\". Only the default theme is available.\n"
-				+ "\t\tTo install: Place in Sublime Text's ./SublimeText/data/Packages/User folder.\n"
-				+ "\tSublime Text 3 - Use type \"sublime3\".\n"
-				+ "\tAtom - Use type \"atom\". Only the default theme is available.\n"
-				+ "\t\tTo install: Install package language-mscript from the Atom package manager."
-				+ "\n\n"
-				+ "Know how to write a syntax highlighter file for your favorite text editor? Let me know, and we\n"
-				+ "can work to get it included in CommandHelper!";
+		return HELP_TEXT;
 	}
 
 	/**
@@ -161,7 +163,9 @@ public class SyntaxHighlighters {
 				base.add(c.getAnnotation(typeof.class).value());
 			}
 		} else if(datalist.equalsIgnoreCase("types")) {
-			base.addAll(NativeTypeList.getNativeTypeList());
+			base.addAll(NativeTypeList.getNativeTypeList().stream().map(e -> e.getFQCN()).collect(Collectors.toList()));
+			base.addAll(NativeTypeList.getNativeTypeList().stream()
+					.map(e -> e.getSimpleName()).collect(Collectors.toList()));
 			base.remove("null"); // Null is technically in the list, but it shouldn't be added.
 		} else if(datalist.equalsIgnoreCase("enums")) {
 			Set<String> set = new HashSet<>();
@@ -174,9 +178,7 @@ public class SyntaxHighlighters {
 			}
 			base.addAll(set);
 		} else if(datalist.equalsIgnoreCase("fileOptions")) {
-			for(Field f : FileOptions.class.getDeclaredFields()) {
-				base.add(f.getName());
-			}
+			base.addAll(FileOptions.getKnownOptions());
 		}
 		String header = "";
 		String spliter = "IMPROPER FORMATTING";

@@ -13,6 +13,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
+import com.laytonsmith.core.environments.Environment;
 
 /**
  * This class provides methods for more easily creating different Constructs for testing purposes.
@@ -20,6 +21,15 @@ import com.laytonsmith.core.constructs.Variable;
  */
 public class C {
 
+	private static final Environment ENV;
+
+	static {
+		try {
+			ENV = Static.GenerateStandaloneEnvironment(false);
+		} catch (Exception ex) {
+			throw new Error(ex);
+		}
+	}
 	//Shortcut to Construct.class
 	public static final Class<CArray> ARRAY = CArray.class;
 	public static final Class<CBoolean> BOOLEAN = CBoolean.class;
@@ -60,7 +70,7 @@ public class C {
 	}
 
 	public static IVariable IVariable(String name, Construct val) {
-		return new IVariable(Auto.TYPE, name, val, Target.UNKNOWN);
+		return new IVariable(Auto.TYPE, name, val, Target.UNKNOWN, ENV);
 	}
 
 	public static Variable Variable(String name, String val) {

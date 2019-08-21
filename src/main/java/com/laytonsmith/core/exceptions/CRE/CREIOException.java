@@ -2,18 +2,18 @@ package com.laytonsmith.core.exceptions.CRE;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 
 /**
  *
  */
-@typeof("IOException")
+@typeof("ms.lang.IOException")
 public class CREIOException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("IOException");
+	public static final CClassType TYPE = CClassType.get(CREIOException.class);
 
 	public CREIOException(String msg, Target t) {
 		super(msg, t);
@@ -30,7 +30,7 @@ public class CREIOException extends CREException {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_1;
+		return MSVersion.V3_3_1;
 	}
 
 	@Override

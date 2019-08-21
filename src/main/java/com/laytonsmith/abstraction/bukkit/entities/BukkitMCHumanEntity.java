@@ -5,6 +5,7 @@ import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryView;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCMerchant;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCInventoryView;
@@ -16,6 +17,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Merchant;
 
 public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHumanEntity {
 
@@ -47,8 +49,7 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 
 	@Override
 	public MCItemStack getItemInHand() {
-		// deprecated in 1.9
-		ItemStack is = he.getItemInHand();
+		ItemStack is = he.getInventory().getItemInMainHand();
 		return is == null ? null : new BukkitMCItemStack(is);
 	}
 
@@ -79,8 +80,7 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 
 	@Override
 	public void setItemInHand(MCItemStack item) {
-		// deprecated in 1.9
-		he.setItemInHand(((BukkitMCItemStack) item).asItemStack());
+		he.getInventory().setItemInMainHand(((BukkitMCItemStack) item).asItemStack());
 	}
 
 	@Override
@@ -90,21 +90,12 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 
 	@Override
 	public int getCooldown(MCMaterial material) {
-		try {
-			return he.getCooldown((Material) material.getHandle());
-		} catch (NoSuchMethodError ex) {
-			// Probably prior to 1.11.2
-			return 0;
-		}
+		return he.getCooldown((Material) material.getHandle());
 	}
 
 	@Override
 	public void setCooldown(MCMaterial material, int ticks) {
-		try {
-			he.setCooldown((Material) material.getHandle(), ticks);
-		} catch (NoSuchMethodError ex) {
-			// Probably prior to 1.11.2
-		}
+		he.setCooldown((Material) material.getHandle(), ticks);
 	}
 
 	@Override
@@ -130,6 +121,11 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 	@Override
 	public MCInventoryView openWorkbench(MCLocation loc, boolean force) {
 		return new BukkitMCInventoryView(he.openWorkbench((Location) loc.getHandle(), force));
+	}
+
+	@Override
+	public MCInventoryView openMerchant(MCMerchant merchant, boolean force) {
+		return new BukkitMCInventoryView(he.openMerchant((Merchant) merchant.getHandle(), force));
 	}
 
 	@Override

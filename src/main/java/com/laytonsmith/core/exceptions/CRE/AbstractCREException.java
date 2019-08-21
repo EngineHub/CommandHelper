@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Documentation;
+import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
@@ -13,13 +14,17 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.objects.AccessModifier;
+import com.laytonsmith.core.objects.ObjectModifier;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
@@ -59,10 +64,21 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	public String getName() {
 		typeof to = this.getClass().getAnnotation(typeof.class);
 		if(to == null) {
-			throw new Error("ConfigRuntimeException subtypes must annotate themselves with @typeof, if they are instantiateable.");
+			throw new Error("ConfigRuntimeException subtypes must annotate themselves with @typeof, if they are"
+					+ " instantiateable.");
 		} else {
 			return to.value();
 		}
+	}
+
+	@Override
+	public AccessModifier getAccessModifier() {
+		return AccessModifier.PUBLIC;
+	}
+
+	@Override
+	public Set<ObjectModifier> getObjectModifiers() {
+		return EnumSet.noneOf(ObjectModifier.class);
 	}
 
 	/**
@@ -71,7 +87,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 * @return
 	 */
 	public CClassType getExceptionType() {
-		return CClassType.get(getName());
+		return Construct.typeof(this);
 	}
 
 	/**
@@ -111,21 +127,23 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	}
 
 	@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
-	public static AbstractCREException getFromCArray(CArray exception, Target t) throws ClassNotFoundException {
-		String classType = exception.get("classType", t).val();
+	public static AbstractCREException getFromCArray(CArray exception, Target t, Environment env)
+			throws ClassNotFoundException {
+		FullyQualifiedClassName classType = FullyQualifiedClassName
+				.forName(exception.get("classType", t).val(), t, env);
 		Class<? extends Mixed> clzz = NativeTypeList.getNativeClass(classType);
 		Throwable cause = null;
-		if(exception.get("causedBy", t) instanceof CArray) {
+		if(exception.get("causedBy", t).isInstanceOf(CArray.class)) {
 			// It has a cause
 			cause = new CRECausedByWrapper((CArray) exception.get("causedBy", t));
 		}
 		String message = exception.get("message", t).val();
 		List<StackTraceElement> st = new ArrayList<>();
-		for(Construct consStElement : Static.getArray(exception.get("stackTrace", t), t).asList()) {
+		for(Mixed consStElement : Static.getArray(exception.get("stackTrace", t), t).asList()) {
 			CArray stElement = Static.getArray(consStElement, t);
 			int line = Static.getInt32(stElement.get("line", t), t);
 			File f = new File(stElement.get("file", t).val());
-			int col = 0; //
+			int col = Static.getInt32(stElement.get("col", t), t);
 			st.add(new StackTraceElement(stElement.get("id", t).val(), new Target(line, f, col)));
 		}
 		// Now we have parsed everything into POJOs
@@ -136,7 +154,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		return ex;
 	}
 
-	private static Construct getCausedBy(Throwable causedBy) {
+	private static Mixed getCausedBy(Throwable causedBy) {
 		if(causedBy == null || !(causedBy instanceof CRECausedByWrapper)) {
 			return CNull.NULL;
 		}
@@ -173,28 +191,23 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 * @throws ConfigRuntimeException
 	 */
 	@Override
-	public Construct get(String index, Target t) throws ConfigRuntimeException {
+	public Mixed get(String index, Target t) throws ConfigRuntimeException {
 		return exceptionObject.get(index, t);
 	}
 
 	@Override
-	public Construct get(int index, Target t) throws ConfigRuntimeException {
+	public Mixed get(int index, Target t) throws ConfigRuntimeException {
 		return exceptionObject.get(index, t);
 	}
 
 	@Override
-	public Construct get(Construct index, Target t) throws ConfigRuntimeException {
+	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
 		return exceptionObject.get(index, t);
 	}
 
 	@Override
-	public Set<Construct> keySet() {
+	public Set<Mixed> keySet() {
 		return exceptionObject.keySet();
-	}
-
-	@Override
-	public long size() {
-		return exceptionObject.size();
 	}
 
 	@Override
@@ -208,7 +221,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	}
 
 	@Override
-	public Construct slice(int begin, int end, Target t) {
+	public Mixed slice(int begin, int end, Target t) {
 		return exceptionObject.slice(begin, end, t);
 	}
 
@@ -219,10 +232,39 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		return obj;
 	}
 
+	/**
+	 * Freezes the stack trace. This should be called when an element that has added a frame to the stack
+	 * trace gets an AbstractCREException thrown. This will record the current stack trace, which is then
+	 * returned by {@link #getCREStackTrace()}. If this isn't called, then the stack trace will continue
+	 * to change as the elements are popped, leading to an invalid stacktrace.
+	 *
+	 * Exception handlers up the stack should always call this method anyways, only the first call will
+	 * cause the stacktrace to be recorded, and there's no way for up stack code to know if it had already
+	 * been called.
+	 * @param manager
+	 */
 	public void freezeStackTraceElements(StackTraceManager manager) {
 		if(this.stackTrace == null) {
 			this.stackTrace = manager.getCurrentStackTrace();
 		}
+	}
+
+	/**
+	 * NOTE!!! This is probably not what you're looking for, you're probably looking for
+	 * {@link #freezeStackTraceElements(com.laytonsmith.core.exceptions.StackTraceManager)}.
+	 * <p>
+	 * Sets the stacktrace if it is not already frozen. For asynchronous processing, it may sometimes be needed
+	 * to get the stacktrace before going asynchronous, for if an exception is thrown in the asynchronous code,
+	 * at which point, this can be set in the newly generated exception.
+	 * <p>
+	 * If the stacktrace was already set, this is an Error, because this should never happen in the usual case.
+	 * @param st
+	 */
+	public void setStackTraceElements(List<StackTraceElement> st) {
+		if(this.stackTrace != null) {
+			throw new RuntimeException("The stacktrace was already set, and it cannot be set again");
+		}
+		this.stackTrace = st;
 	}
 
 	public List<StackTraceElement> getCREStackTrace() {

@@ -1,0 +1,99 @@
+array {[player,] slot} Returns an associative array of known item meta for the slot given, or null if there isn't any. ----
+
+Below are the available fields in the item meta array. Fields can be null when the item meta doesn't have that value (except in some cases where the type is an array).
+
+{| width="80%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
+|-
+! scope="col" width="15%" | Item Type
+! scope="col" width="85%" | Meta
+|-
+| All Items
+|
+* '''display''' : (string) The display name seen when the item is selected.
+* '''lore''' : (array) An array of strings that is displayed when hovering the item.
+* '''enchants''' : (array) An associative array of enchantments with the vanilla name of enchantment as the key, and value being an enchantment array with the key '''"elevel"''' for the level of the enchantment.
+* '''model''' : (int) Represents vanilla's CustomModelData tag for use with resource packs.
+* '''flags''' : (array) Possible flags: ''%ITEM_FLAGS%''.
+* '''repair''' : (int) The cost to repair or combine this item in an anvil.
+|-
+| Damageable Items
+|
+* '''damage''' : (int) The amount of damage on the item. 0 is undamaged. Maximum is determined by each item type's max durability.
+* '''unbreakable''' : (boolean) Whether or not the item can be damaged.
+|-
+| Books
+|
+* '''title''' : (string) The title of the book.
+* '''author''' : (string) The author of the book.
+* '''pages''' : (array) An array of pages as strings. New lines supported. 256 character limit per page. 50 page limit.
+|-
+| Enchanted Books
+|
+* '''stored''' : (array) An associative array of enchantments, just like "enchants".
+|-
+| Leather Armor
+|
+* '''color''' : (array) A color array, with '''"r"''', '''"g"''', and '''"b"''' keys that have values ranging from 0 to 255.
+|-
+| Player Heads
+|
+* '''owner''' : (string) The player name.
+|-
+| Potions
+|
+* '''base''' : (array) Defines the base potion effect. Has the keys '''"extended"''', '''"upgraded"''', and '''"type"''' which can be: ''%POTION_TYPES%''.
+* '''potions''' : (array) An associative array of custom potion effect arrays, where each key is the vanilla potion effect name. Each effect array can contain the keys: '''"id"''' (int), '''"strength"''' (int), '''"seconds"''' remaining (int), whether the effect is '''"ambient"''', whether '''"particles"''' are enabled, and whether the '''"icon"''' is shown to the player.
+|-
+| Banners
+|
+* '''patterns''' : (array) An array of pattern arrays. Each can contain the keys '''"color"''' (one of ''%DYE_COLORS%'') and '''"shape"''' (one of ''%PATTERN_SHAPES%'').
+|-
+| Shields
+|
+* '''basecolor''' : (string) A color name, one of ''%DYE_COLORS%''.
+* '''patterns''' : (array) See Banner "patterns" above.
+|-
+| Firework Charges
+|
+* '''effect''' : (array) A firework effect array, can have the keys '''"flicker"''' (boolean), '''"trail"''' (boolean), '''"type"''' (one of ''%FIREWORK_TYPES%''), '''"colors"''' (array of color names or color arrays), and '''"fade"''' (array of color names or color arrays).
+|-
+| Fireworks
+|
+* '''firework''' : (array) An array with the keys '''"strength"''' (int), how long in seconds the rocket will last, and '''"effects"''', an array of effect arrays (see Firework Charges above).
+|-
+| Storage Blocks
+|
+* '''inventory''' : (array) An array of item arrays, where each index is an inventory slot. (exceptions exist for furnaces and brewing stands; see below)
+|-
+| Furnaces
+|
+* '''burntime''' : (int) The amount of time left in ticks before the furnace extinguishes.
+* '''cooktime''' : (int) The amount of time in ticks the item has been cooking for.
+* '''inventory''' : (array) An associative array with the slots for '''"result"''', '''"fuel"''', and '''"smelting"'''.
+|-
+| Brewing Stands
+|
+* '''brewtime''' : (int) The amount of time left in ticks before brewing completes.
+* '''fuel''' : (int) The amount of fuel left.
+* '''inventory''' : (array) An associative array with the slots for '''"fuel"''', '''"ingredient"''', '''"leftbottle"''', '''"middlebottle"''', and '''"rightbottle"'''.
+|-
+| Tropical Fish Buckets
+|
+* '''fishcolor''' : (string) The color of the fish, can be one of ''%DYE_COLORS%''.
+* '''fishpatterncolor''' : (string) The color of the pattern on the fish.
+* '''fishpattern''' : (string) The pattern type on the fish, can be one of ''%FISH_PATTERNS%''.
+|-
+| Crossbows
+|
+* '''projectiles''' : (array) An array of item arrays that are loaded in the crossbow. Items must be arrows or fireworks. When fired, the first item is the middle projectile. (maximum of three projectiles)
+|-
+| Spawners
+|
+* '''spawntype''' : (string) May be one of ''%ENTITY_TYPES%''. Not all entity types will spawn from spawners, and some require special conditions.
+* '''delay''' : (int) The time in ticks until the spawner will spawn the next entity.
+|-
+| Maps
+|
+* '''mapid''' : (int) The unique id for a map on the server.
+* '''color''' : (array) An array of the map item's color, with '''"r"''', '''"g"''', and '''"b"''' keys that have values ranging from 0 to 255.
+|}

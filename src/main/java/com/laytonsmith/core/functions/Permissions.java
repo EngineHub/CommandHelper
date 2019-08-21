@@ -3,10 +3,9 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -15,6 +14,7 @@ import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
@@ -44,8 +44,7 @@ public class Permissions {
 			return "boolean {[player], permissionName} Using the built in permissions system,"
 					+ " checks to see if the player has a particular permission."
 					+ " This is simply passed through to the permissions system."
-					+ " If you notice, this function isn't restricted. A player can check their own permissions,"
-					+ " however it IS restricted if the player attempts to check another player's permissions."
+					+ " This function is only restricted if the player attempts to check another player's permissions."
 					+ " If run from the console or a CommandBlock, will always return true unless a value has been"
 					+ " explicitly set for them.";
 		}
@@ -61,8 +60,8 @@ public class Permissions {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -71,7 +70,7 @@ public class Permissions {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 
 			MCCommandSender sender;
 			String permission;

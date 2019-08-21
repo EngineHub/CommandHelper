@@ -14,7 +14,7 @@ connection to the smtp server, and email settings affect the email itself.
 
 If the profile is specified, then the transport settings are pulled from the profile specified in profiles.xml instead, 
 with any other options specified
-overridding the values specified in the profile. See [[CommandHelper/Staged/Profiles]] for more
+overridding the values specified in the profile. See [[Profiles]] for more
 information about setting up profiles in general. The type of the profile is "email".
 All transport settings may be specified in the profile. This is
 useful so that sensitive information isn't hardcoded. Here is an example profile:

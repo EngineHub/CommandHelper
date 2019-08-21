@@ -6,17 +6,19 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
-import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.Target;
@@ -36,6 +38,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -55,7 +58,7 @@ public class EventBinding {
 	private static final AtomicInteger BIND_COUNTER = new AtomicInteger(0);
 
 	@api(environments = CommandHelperEnvironment.class)
-	public static class bind extends AbstractFunction implements Optimizable {
+	public static class bind extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
 
 		@Override
 		public String getName() {
@@ -90,8 +93,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -100,27 +103,28 @@ public class EventBinding {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			if(nodes.length < 5) {
 				throw new CREInsufficientArgumentsException("bind accepts 5 or more parameters", t);
 			}
-			Construct name = parent.seval(nodes[0], env);
-			Construct options = parent.seval(nodes[1], env);
-			Construct prefilter = parent.seval(nodes[2], env);
-			Construct event_obj = parent.eval(nodes[3], env);
+			Mixed name = parent.seval(nodes[0], env);
+			Mixed options = parent.seval(nodes[1], env);
+			Mixed prefilter = parent.seval(nodes[2], env);
+			Mixed event_obj = parent.eval(nodes[3], env);
 			IVariableList custom_params = new IVariableList();
 			for(int a = 0; a < nodes.length - 5; a++) {
-				Construct var = parent.eval(nodes[4 + a], env);
+				Mixed var = parent.eval(nodes[4 + a], env);
 				if(!(var instanceof IVariable)) {
 					throw new CRECastException("The custom parameters must be ivariables", t);
 				}
 				IVariable cur = (IVariable) var;
-				custom_params.set(env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(), cur.getTarget()));
+				custom_params.set(env.getEnv(GlobalEnv.class).GetVarList().get(cur.getVariableName(),
+						cur.getTarget(), env));
 			}
 			Environment newEnv = env;
 			try {
@@ -131,10 +135,10 @@ public class EventBinding {
 			ParseTree tree = nodes[nodes.length - 1];
 
 			//Check to see if our arguments are correct
-			if(!(options instanceof CNull || options instanceof CArray)) {
+			if(!(options instanceof CNull || options.isInstanceOf(CArray.class))) {
 				throw new CRECastException("The options must be an array or null", t);
 			}
-			if(!(prefilter instanceof CNull || prefilter instanceof CArray)) {
+			if(!(prefilter instanceof CNull || prefilter.isInstanceOf(CArray.class))) {
 				throw new CRECastException("The prefilters must be an array or null", t);
 			}
 			if(!(event_obj instanceof IVariable)) {
@@ -190,7 +194,10 @@ public class EventBinding {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 5) {
 				throw new CREInsufficientArgumentsException("bind accepts 5 or more parameters", t);
 			}
@@ -210,6 +217,21 @@ public class EventBinding {
 			} catch (IllegalArgumentException ex) {
 				throw new ConfigCompileException(ex.getMessage(), t);
 			}
+		}
+
+		@Override
+		public List<Boolean> isBranch(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>(children.size());
+			for(int i = 0; i < children.size() - 1; i++) {
+				ret.add(false);
+			}
+			ret.add(true);
+			return ret;
+		}
+
+		@Override
+		public List<Boolean> isScope(List<ParseTree> children) {
+			return isBranch(children);
 		}
 
 	}
@@ -244,8 +266,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -254,7 +276,7 @@ public class EventBinding {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return EventUtils.DumpEvents();
 		}
 	}
@@ -289,8 +311,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -299,7 +321,7 @@ public class EventBinding {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String id = null;
 			if(args.length == 1) {
 				//We are cancelling an arbitrary event
@@ -362,8 +384,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -372,10 +394,10 @@ public class EventBinding {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			boolean cancelled = true;
 			if(args.length == 1) {
-				cancelled = Static.getBoolean(args[0], t);
+				cancelled = ArgumentValidation.getBoolean(args[0], t);
 			}
 
 			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
@@ -419,8 +441,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -429,7 +451,7 @@ public class EventBinding {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			BoundEvent.ActiveEvent original = environment.getEnv(GlobalEnv.class).GetEvent();
 			if(original == null) {
 				throw new CREBindException("is_cancelled cannot be called outside an event handler", t);
@@ -482,8 +504,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -492,18 +514,18 @@ public class EventBinding {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray obj = null;
 			if(args[1] instanceof CNull) {
 				obj = new CArray(t);
-			} else if(args[1] instanceof CArray) {
+			} else if(args[1].isInstanceOf(CArray.class)) {
 				obj = (CArray) args[1];
 			} else {
 				throw new CRECastException("The eventObject must be null, or an array", t);
 			}
 			boolean serverWide = false;
 			if(args.length == 3) {
-				serverWide = Static.getBoolean(args[2], t);
+				serverWide = ArgumentValidation.getBoolean(args[2], t);
 			}
 			EventUtils.ManualTrigger(args[0].val(), obj, t, serverWide);
 			return CVoid.VOID;
@@ -549,8 +571,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -559,12 +581,12 @@ public class EventBinding {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String parameter = args[0].val();
-			Construct value = args[1];
+			Mixed value = args[1];
 			boolean throwOnFailure = false;
 			if(args.length == 3) {
-				throwOnFailure = Static.getBoolean(args[3], t);
+				throwOnFailure = ArgumentValidation.getBoolean(args[3], t);
 			}
 			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException(this.getName() + " must be called from within an event handler", t);
@@ -627,7 +649,7 @@ public class EventBinding {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException("lock must be called from within an event handler", t);
 			}
@@ -638,7 +660,7 @@ public class EventBinding {
 			if(args.length == 0) {
 				e.lock(null);
 			} else {
-				if(args[0] instanceof CArray) {
+				if(args[0].isInstanceOf(CArray.class)) {
 					CArray ca = (CArray) args[1];
 					for(int i = 0; i < ca.size(); i++) {
 						params.add(ca.get(i, t).val());
@@ -656,8 +678,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 	}
 
@@ -698,7 +720,7 @@ public class EventBinding {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException("is_locked may only be called from inside an event handler", t);
 			}
@@ -706,8 +728,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 	}
 
@@ -747,7 +769,7 @@ public class EventBinding {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException("consume may only be called from an event handler!", t);
 			}
@@ -756,8 +778,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 	}
 
@@ -798,7 +820,7 @@ public class EventBinding {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException("is_consumed must be called from within an event handler", t);
 			}
@@ -806,8 +828,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 	}
 
@@ -852,7 +874,7 @@ public class EventBinding {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException("event_meta must be called from within an event handler!", t);
 			}
@@ -864,8 +886,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 	}
 
@@ -888,7 +910,7 @@ public class EventBinding {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(EventUtils.GetEventById(args[0].val()) != null);
 		}
 
@@ -911,7 +933,7 @@ public class EventBinding {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}

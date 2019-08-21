@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction;
 
-import com.laytonsmith.abstraction.enums.MCNameTagVisibility;
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.enums.MCOption;
 import com.laytonsmith.abstraction.enums.MCOptionStatus;
 
@@ -18,8 +18,6 @@ public interface MCTeam {
 
 	String getName();
 
-	MCNameTagVisibility getNameTagVisibility();
-
 	MCOptionStatus getOption(MCOption option);
 
 	Set<String> getEntries();
@@ -32,6 +30,8 @@ public interface MCTeam {
 
 	String getSuffix();
 
+	MCChatColor getColor();
+
 	boolean hasEntry(String entry);
 
 	boolean removeEntry(String entry);
@@ -42,13 +42,13 @@ public interface MCTeam {
 
 	void setDisplayName(String displayName);
 
-	void setNameTagVisibility(MCNameTagVisibility visibility);
-
 	void setOption(MCOption option, MCOptionStatus status);
 
 	void setPrefix(String prefix);
 
 	void setSuffix(String suffix);
+
+	void setColor(MCChatColor color);
 
 	void unregister();
 }

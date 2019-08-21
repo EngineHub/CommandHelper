@@ -7,14 +7,20 @@ import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
-import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHLog.Tags;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSLog.Tags;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.functions.InventoryManagement;
+import org.bukkit.Nameable;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.DoubleChest;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -46,7 +52,7 @@ public class BukkitMCInventory implements MCInventory {
 			return new BukkitMCItemStack(i.getItem(slot));
 		} catch (ArrayIndexOutOfBoundsException aioobe) {
 			if(slot > 0 && slot < getSize()) {
-				CHLog.GetLogger().Log(Tags.RUNTIME, LogLevel.WARNING, "The API claims that a particular slot is"
+				MSLog.GetLogger().Log(Tags.RUNTIME, LogLevel.WARNING, "The API claims that a particular slot is"
 						+ " accessible, however the server implementation does not give access."
 						+ " This is the fault of the server and can't be helped by "
 						+ Implementation.GetServerType().getBranding() + ".", Target.UNKNOWN);
@@ -63,7 +69,7 @@ public class BukkitMCInventory implements MCInventory {
 			this.i.setItem(slot, stack == null ? null : ((BukkitMCItemStack) stack).is);
 		} catch (ArrayIndexOutOfBoundsException aioobe) {
 			if(slot > 0 && slot < getSize()) {
-				CHLog.GetLogger().Log(Tags.RUNTIME, LogLevel.WARNING, "The API claims that a particular slot is"
+				MSLog.GetLogger().Log(Tags.RUNTIME, LogLevel.WARNING, "The API claims that a particular slot is"
 						+ " accessible, however the server implementation does not give access."
 						+ " This is the fault of the server and can't be helped by "
 						+ Implementation.GetServerType().getBranding() + ".", Target.UNKNOWN);
@@ -135,11 +141,27 @@ public class BukkitMCInventory implements MCInventory {
 
 	@Override
 	public MCInventoryHolder getHolder() {
-		return new BukkitMCInventoryHolder(i.getHolder());
+		InventoryHolder ih = i.getHolder();
+		if(ih instanceof BlockState) {
+			return (MCInventoryHolder) BukkitConvertor.BukkitGetCorrectBlockState((BlockState) ih);
+		} else if(ih instanceof Entity) {
+			return (MCInventoryHolder) BukkitConvertor.BukkitGetCorrectEntity((Entity) ih);
+		} else if(ih instanceof BukkitMCVirtualInventoryHolder.VirtualHolder) {
+			return new BukkitMCVirtualInventoryHolder(ih);
+		} else if(ih instanceof DoubleChest) {
+			return new BukkitMCDoubleChest((DoubleChest) ih);
+		} else if(ih == null) {
+			for(Map.Entry<String, MCInventory> entry : InventoryManagement.VIRTUAL_INVENTORIES.entrySet()) {
+				if(entry.getValue().equals(this)) {
+					return new BukkitMCVirtualInventoryHolder(entry.getKey());
+				}
+			}
+		}
+		return new BukkitMCInventoryHolder(ih);
 	}
 
 	@Override
 	public String getTitle() {
-		return i.getTitle();
+		return ((Nameable) i.getHolder()).getCustomName();
 	}
 }

@@ -2,9 +2,12 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.natives.interfaces.AbstractMixedInterfaceRunner;
+import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.objects.ObjectType;
+import com.laytonsmith.core.natives.interfaces.ValueType;
 
 /**
  *
@@ -15,12 +18,13 @@ public class CPrimitiveRunner extends AbstractMixedInterfaceRunner {
 
 	@Override
 	public String docs() {
-		return "A primitive is any non-object and non-array data type. All primitives are pass by value.";
+		return "A primitive is any non-object and non-array data type. All primitives are pass by value and"
+				+ " Booleanish.";
 	}
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_0_1;
+		return MSVersion.V3_0_1;
 	}
 
 	@Override
@@ -30,6 +34,13 @@ public class CPrimitiveRunner extends AbstractMixedInterfaceRunner {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{};
+		return new CClassType[]{ValueType.TYPE, Booleanish.TYPE};
 	}
+
+	@Override
+	public ObjectType getObjectType() {
+		return ObjectType.ABSTRACT;
+	}
+
+
 }

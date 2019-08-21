@@ -21,7 +21,7 @@ If you note, this looks very similar to the {{function|proc}} function. In essen
 CommandHelper is responsible for calling the function, when the specified event occurs, not you. The options object 
 allows you to set certain options for this event, including setting a custom event id, and event priority. The prefilter 
 allows you to tell the event handler to pre-filter which events are intercepted (Prefilters are a more complicated 
-subject, and have their own [[CommandHelper/Events/Prefilters|wiki page]]). Both the options parameter and the prefilter 
+subject, and have their own [[Prefilters|page]]). Both the options parameter and the prefilter 
 parameter may be null. The information in the @event_object depends on the event. Each event sends different parameters. 
 Finally, the custom params are discussed below in the scope section. So, let's look at the <code>player_interact</code> 
 event, which occurs whenever the player left or right clicks a block or the air, and show a few use cases. First, we 
@@ -48,6 +48,7 @@ following information:
 * "type" - The event type. Normally you've already got this data, because you registered it, however, wildcard events \
 may be possible in the future.
 * "macrotype" - This determines what kind of data there will be in the rest of the event
+
 The rest of the data in the event is dependent on the event type, and this information can be looked up in the event 
 table.
 

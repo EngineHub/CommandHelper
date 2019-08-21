@@ -1,7 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,7 +13,7 @@ public final class Globals {
 	private Globals() {
 	}
 
-	private static final Map<String, Construct> GLOBAL_CONSTRUCT = new HashMap<>();
+	private static final Map<String, Mixed> GLOBAL_CONSTRUCT = new HashMap<>();
 
 	/**
 	 * Sets a variable in the global registry.
@@ -21,8 +21,8 @@ public final class Globals {
 	 * @param name The value name
 	 * @param value The value itself
 	 */
-	public static synchronized void SetGlobal(String name, Construct value) {
-		Map<String, Construct> vars = GLOBAL_CONSTRUCT; // (HashMap<String, Construct>)env.get("global_construct");
+	public static synchronized void SetGlobal(String name, Mixed value) {
+		Map<String, Mixed> vars = GLOBAL_CONSTRUCT; // (HashMap<String, Construct>)env.get("global_construct");
 		if(value instanceof CNull) {
 			vars.remove(name);
 		} else {
@@ -37,8 +37,8 @@ public final class Globals {
 	 * @param name The name of the value to return.
 	 * @return the construct stored at this name, or CNull if none exists
 	 */
-	public static synchronized Construct GetGlobalConstruct(String name) {
-		Map<String, Construct> vars = GLOBAL_CONSTRUCT; // (HashMap<String, Construct>)env.get("global_construct");
+	public static synchronized Mixed GetGlobalConstruct(String name) {
+		Map<String, Mixed> vars = GLOBAL_CONSTRUCT; // (HashMap<String, Construct>)env.get("global_construct");
 		return vars.getOrDefault(name, CNull.NULL);
 	}
 

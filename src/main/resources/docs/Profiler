@@ -29,10 +29,10 @@ information shown. As you go to more verbose, more information is shown, as well
 {|
 |-
 | 1 - Only high level information is shown about how long aliases, events, execution queue, and \
-set_timeout/set_interval tasks took.
+set_timeout/set_interval tasks took. Compilation of all MethodScript files is logged.
 |-
 | 2 - Loop times are shown; for, foreach, while, and dowhile. The parameters passed to the loops will be displayed as \
-well, so you can differentiate between various loop sizes.
+well, so you can differentiate between various loop sizes. Compilation of MethodScript files are individually logged.
 |-
 | 3 - Procedure execution times are shown. The parameters passed to the procedure will be displayed as well, so you \
 can differentiate between various procedure executions.

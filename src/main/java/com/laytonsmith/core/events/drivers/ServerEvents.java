@@ -2,8 +2,11 @@ package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCBlockCommandSender;
+import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.entities.MCCommandMinecart;
 import com.laytonsmith.abstraction.events.MCBroadcastMessageEvent;
 import com.laytonsmith.abstraction.events.MCCommandTabCompleteEvent;
 import com.laytonsmith.abstraction.events.MCServerCommandEvent;
@@ -11,7 +14,7 @@ import com.laytonsmith.abstraction.events.MCRedstoneChangedEvent;
 import com.laytonsmith.abstraction.events.MCServerPingEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -34,6 +37,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,11 +63,14 @@ public class ServerEvents {
 
 		@Override
 		public String docs() {
-			return "{prefix: <string match> The first part of the command, i.e. 'cmd' in '/cmd blah blah'}"
+			return "{prefix: <string match> The first part of the command, i.e. 'cmd' in '/cmd blah blah'"
+					+ " | type: <string match> The command sender type}"
 					+ "This event is fired off when any command is run from the console or commandblock. This fires"
 					+ " before CommandHelper aliases, allowing you to insert control beforehand. Be careful with this"
 					+ " event, because it can override ALL server commands, potentially creating all sorts of havoc."
-					+ "{command: The entire command | prefix: Just the prefix of the command}"
+					+ "{command: The entire command | prefix: The prefix of the command"
+					+ " | sendertype: The command sender type. This is one of console, command_block,"
+					+ " command_minecart or null if the sender is unknown to CommandHelper.}"
 					+ "{command}"
 					+ "{}";
 		}
@@ -74,22 +81,20 @@ public class ServerEvents {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(!(e instanceof MCServerCommandEvent)) {
 				return false;
 			}
 			MCServerCommandEvent event = (MCServerCommandEvent) e;
-			if(prefilter.containsKey("prefix")) {
-				String prefix = event.getCommand().split(" ", 2)[0];
-				if(!prefix.equals(prefilter.get("prefix").val())) {
-					return false;
-				}
-			}
+			String prefix = event.getCommand().split(" ", 2)[0];
+			Prefilters.match(prefilter, "prefix", prefix, PrefilterType.STRING_MATCH);
+			Prefilters.match(prefilter, "sendertype",
+					getCommandsenderString(event.getCommandSender()), PrefilterType.STRING_MATCH);
 			return true;
 		}
 
@@ -99,20 +104,37 @@ public class ServerEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(!(e instanceof MCServerCommandEvent)) {
 				throw new EventException("Cannot convert e to MCServerCommandEvent");
 			}
 			MCServerCommandEvent event = (MCServerCommandEvent) e;
-			Map<String, Construct> map = new HashMap<>();
+			Map<String, Mixed> map = new HashMap<>();
 			map.put("command", new CString(event.getCommand(), Target.UNKNOWN));
 			String prefix = event.getCommand().split(" ", 2)[0];
 			map.put("prefix", new CString(prefix, Target.UNKNOWN));
+
+			// Set the command sender type.
+			String type = getCommandsenderString(event.getCommandSender());
+			map.put("sendertype", (type == null ? CNull.NULL : new CString(type, Target.UNKNOWN)));
+
 			return map;
 		}
 
+		private static String getCommandsenderString(MCCommandSender sender) {
+			if(sender instanceof MCConsoleCommandSender) {
+				return "console";
+			} else if(sender instanceof MCBlockCommandSender) {
+				return "command_block";
+			} else if(sender instanceof MCCommandMinecart) {
+				return "command_minecart";
+			} else {
+				return null; // Unknown sender implementation.
+			}
+		}
+
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCServerCommandEvent) {
 				MCServerCommandEvent e = (MCServerCommandEvent) event;
 				if(key.equals("command")) {
@@ -153,7 +175,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCServerPingEvent) {
 				MCServerPingEvent event = (MCServerPingEvent) e;
 				Prefilters.match(prefilter, "players", event.getNumPlayers(), PrefilterType.MATH_MATCH);
@@ -169,11 +191,11 @@ public class ServerEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCServerPingEvent) {
 				MCServerPingEvent event = (MCServerPingEvent) e;
 				Target t = Target.UNKNOWN;
-				Map<String, Construct> ret = evaluate_helper(event);
+				Map<String, Mixed> ret = evaluate_helper(event);
 				String ip;
 				try {
 					ip = event.getAddress().getHostAddress();
@@ -196,7 +218,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCServerPingEvent) {
 				MCServerPingEvent e = (MCServerPingEvent) event;
 				switch(key.toLowerCase()) {
@@ -210,9 +232,9 @@ public class ServerEvents {
 						// Modifies the player list. The new list will be the intersection of the original
 						// and the given list. Names and UUID's outside this intersection will simply be ignored.
 						Set<MCPlayer> modifiedPlayers = new HashSet<>();
-						List<Construct> passedList = ArgumentValidation.getArray(value, value.getTarget()).asList();
+						List<Mixed> passedList = ArgumentValidation.getArray(value, value.getTarget()).asList();
 						for(MCPlayer player : e.getPlayers()) {
-							for(Construct construct : passedList) {
+							for(Mixed construct : passedList) {
 								String playerStr = construct.val();
 								if(playerStr.length() > 0 && playerStr.length() <= 16) { // "player" is a name.
 									if(playerStr.equalsIgnoreCase(player.getName())) {
@@ -241,7 +263,7 @@ public class ServerEvents {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -267,7 +289,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
 			return event instanceof MCCommandTabCompleteEvent;
 		}
 
@@ -277,11 +299,11 @@ public class ServerEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
 			if(event instanceof MCCommandTabCompleteEvent) {
 				MCCommandTabCompleteEvent e = (MCCommandTabCompleteEvent) event;
 				Target t = Target.UNKNOWN;
-				Map<String, Construct> ret = evaluate_helper(event);
+				Map<String, Mixed> ret = evaluate_helper(event);
 				ret.put("sender", new CString(e.getCommandSender().getName(), t));
 				CArray comp = new CArray(t);
 				if(e.getCompletions() != null) {
@@ -309,18 +331,18 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			if(event instanceof MCCommandTabCompleteEvent) {
 				MCCommandTabCompleteEvent e = (MCCommandTabCompleteEvent) event;
 				if("completions".equals(key)) {
-					if(value instanceof CArray) {
+					if(value.isInstanceOf(CArray.class)) {
 						List<String> comp = new ArrayList<>();
 						if(((CArray) value).inAssociativeMode()) {
-							for(Construct k : ((CArray) value).keySet()) {
+							for(Mixed k : ((CArray) value).keySet()) {
 								comp.add(((CArray) value).get(k, value.getTarget()).val());
 							}
 						} else {
-							for(Construct v : ((CArray) value).asList()) {
+							for(Mixed v : ((CArray) value).asList()) {
 								comp.add(v.val());
 							}
 						}
@@ -334,7 +356,7 @@ public class ServerEvents {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -374,7 +396,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, com.laytonsmith.core.natives.interfaces.Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCRedstoneChangedEvent) {
 				MCRedstoneChangedEvent event = (MCRedstoneChangedEvent) e;
 				Prefilters.match(prefilter, "location", event.getLocation(), PrefilterType.LOCATION_MATCH);
@@ -389,9 +411,9 @@ public class ServerEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCRedstoneChangedEvent event = (MCRedstoneChangedEvent) e;
-			Map<String, Construct> map = evaluate_helper(e);
+			Map<String, Mixed> map = evaluate_helper(e);
 			map.put("location", ObjectGenerator.GetGenerator().location(event.getLocation()));
 			map.put("active", CBoolean.get(event.isActive()));
 			return map;
@@ -403,13 +425,13 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -433,7 +455,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCBroadcastMessageEvent) {
 				MCBroadcastMessageEvent event = (MCBroadcastMessageEvent) e;
 				Prefilters.match(prefilter, "message", event.getMessage(), PrefilterType.STRING_MATCH);
@@ -471,9 +493,9 @@ public class ServerEvents {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCBroadcastMessageEvent event = (MCBroadcastMessageEvent) e;
-			Map<String, Construct> map = evaluate_helper(e);
+			Map<String, Mixed> map = evaluate_helper(e);
 			map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
 			CArray cRecipients = new CArray(Target.UNKNOWN);
 			for(MCPlayer player : event.getPlayerRecipients()) {
@@ -489,10 +511,10 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Construct value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
 			if(key.equals("message")) {
 				MCBroadcastMessageEvent event = (MCBroadcastMessageEvent) e;
-				event.setMessage(value.nval());
+				event.setMessage(Construct.nval(value));
 				return true;
 			}
 			return false;
@@ -500,7 +522,7 @@ public class ServerEvents {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 	}
 }

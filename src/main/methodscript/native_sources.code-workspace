@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../ms-resources"
+		}
+	],
+	"settings": {
+		"editor.rulers": [120],
+		"editor.insertSpaces": false,
+		"editor.detectIndentation": false,
+		"files.trimTrailingWhitespace": true
+	}
+}

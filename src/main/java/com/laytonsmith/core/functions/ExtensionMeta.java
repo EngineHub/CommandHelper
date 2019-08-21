@@ -4,14 +4,13 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.Event;
@@ -21,6 +20,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.extensions.ExtensionTracker;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.net.URL;
 import java.util.EnumSet;
 import java.util.List;
@@ -57,9 +57,9 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
-				FunctionList.getFunction(args[0].val().toLowerCase(), t);
+				FunctionList.getFunction(args[0].val().toLowerCase(), environment.getEnvClasses(), t);
 			} catch (ConfigCompileException ex) {
 				return CBoolean.FALSE;
 			}
@@ -95,7 +95,7 @@ public class ExtensionMeta {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -104,12 +104,15 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() != 1) {
 				throw new ConfigCompileException(getName() + " can only accept one argument", t);
 			}
 
-			if(!(children.get(0).getData() instanceof CString)) {
+			if(!(children.get(0).getData().isInstanceOf(CString.class))) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
 			}
 
@@ -148,7 +151,7 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(EventList.getEvent(args[0].val().toLowerCase()) != null);
 		}
 
@@ -172,7 +175,7 @@ public class ExtensionMeta {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -181,12 +184,15 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() != 1) {
 				throw new ConfigCompileException(getName() + " can only accept one argument", t);
 			}
 
-			if(!(children.get(0).getData() instanceof CString)) {
+			if(!(children.get(0).getData().isInstanceOf(CString.class))) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
 			}
 
@@ -214,7 +220,7 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Map<URL, ExtensionTracker> trackers = ExtensionManager.getTrackers();
 			for(ExtensionTracker tracker : trackers.values()) {
 				String identifier = tracker.getIdentifier();
@@ -244,7 +250,7 @@ public class ExtensionMeta {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -253,10 +259,13 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() != 1) {
 				throw new ConfigCompileException(getName() + " can only accept one argument", t);
-			} else if(!(children.get(0).getData() instanceof CString)) {
+			} else if(!(children.get(0).getData().isInstanceOf(CString.class))) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
 			} else {
 				return new ParseTree(this.exec(t, null, children.get(0).getData()), children.get(0).getFileOptions());
@@ -283,7 +292,7 @@ public class ExtensionMeta {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Map<URL, ExtensionTracker> trackers = ExtensionManager.getTrackers();
 
 			CArray retn = CArray.GetAssociativeArray(t);
@@ -314,7 +323,7 @@ public class ExtensionMeta {
 							funcs.push(new CString(func.getName(), t), t);
 						}
 					}
-					funcs.sort(CArray.SortType.STRING_IC);
+					funcs.sort(CArray.ArraySortType.STRING_IC);
 					trkdata.set("functions", funcs, t);
 
 					CArray events;
@@ -326,7 +335,7 @@ public class ExtensionMeta {
 					for(Event event : trk.getEvents()) {
 						events.push(new CString(event.getName(), t), t);
 					}
-					events.sort(CArray.SortType.STRING_IC);
+					events.sort(CArray.ArraySortType.STRING_IC);
 					trkdata.set("events", events, t);
 
 					trkdata.set("version", trk.getVersion().toString());
@@ -350,7 +359,7 @@ public class ExtensionMeta {
 								functions.push(new CString(function.getName(), t), t);
 							}
 						}
-						functions.sort(CArray.SortType.STRING_IC);
+						functions.sort(CArray.ArraySortType.STRING_IC);
 						retn.set("functions", functions, t);
 						CArray events = (retn.containsKey("events")) ? (CArray) retn.get("events", t) : new CArray(t);
 						for(Event event : tracker.getEvents()) {
@@ -358,7 +367,7 @@ public class ExtensionMeta {
 								events.push(new CString(event.getName(), t), t);
 							}
 						}
-						events.sort(CArray.SortType.STRING_IC);
+						events.sort(CArray.ArraySortType.STRING_IC);
 						retn.set("events", events, t);
 						retn.set("version", tracker.getVersion().toString(), t);
 					}
@@ -388,7 +397,7 @@ public class ExtensionMeta {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 }

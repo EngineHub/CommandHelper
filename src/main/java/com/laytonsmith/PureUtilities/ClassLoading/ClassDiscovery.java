@@ -9,8 +9,10 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.FieldMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.MethodMirror;
 import com.laytonsmith.PureUtilities.Common.ClassUtils;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.ProgressIterator;
 import com.laytonsmith.PureUtilities.ZipIterator;
 import java.io.File;
@@ -20,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -48,6 +51,9 @@ import org.objectweb.asm.ClassReader;
  * take up more PermGen space to the calling code, instead of this class.
  */
 public class ClassDiscovery {
+
+	private static final boolean IS_DEBUG = java.lang.management.ManagementFactory.getRuntimeMXBean()
+			.getInputArguments().toString().contains("jdwp");
 
 	/**
 	 * The default instance.
@@ -135,6 +141,8 @@ public class ClassDiscovery {
 	 * Cache for constructor annotations. Whenever a new URL is added to the URL cache, this is cleared.
 	 */
 	private final Map<Class<? extends Annotation>, Set<ConstructorMirror<?>>> constructorAnnotationCache = new HashMap<>();
+	private final Map<Pair<Class<? extends Annotation>, Class<?>>, Set<ClassMirror<?>>>
+			classesWithAnnotationThatExtendCache = new HashMap<>();
 	/**
 	 * By default null, but this can be set per instance.
 	 */
@@ -383,6 +391,14 @@ public class ClassDiscovery {
 	}
 
 	/**
+	 * Adds the jar that the calling class is in to the discovery location. This is equivalent to running
+	 * {@code addDiscoveryLocation(ClassDiscovery.GetClassContainer(this.getClass()));}
+	 */
+	public void addThisJar() {
+		this.addDiscoveryLocation(GetClassContainer(StackTraceUtils.getCallingClass()));
+	}
+
+	/**
 	 * Adds a new discovery URL. This makes the URL eligible to be included when finding classes/methods/fields with the
 	 * various other methods. If the URL already has been added, this has no effect.
 	 *
@@ -458,6 +474,7 @@ public class ClassDiscovery {
 		fieldAnnotationCache.clear();
 		methodAnnotationCache.clear();
 		constructorAnnotationCache.clear();
+		classesWithAnnotationThatExtendCache.clear();
 		dirtyURLs.addAll(urlCache);
 	}
 
@@ -713,6 +730,15 @@ public class ClassDiscovery {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> Set<ClassMirror<? extends T>> getClassesWithAnnotationThatExtend(Class<? extends Annotation> annotation, Class<T> superClass) {
+		Pair<Class<? extends Annotation>, Class<?>> id = new Pair<>(annotation, superClass);
+		if(classesWithAnnotationThatExtendCache.containsKey(id)) {
+			// This (insane) double cast is necessary, because the cache will certainly contain the value of the
+			// correct type,
+			// but there's no way for us to encode T into the generic type of the definition, so we just do this,
+			// lie to the compiler, and go about our merry way. We do the same below.
+			// I'm totally open to a better approach though.
+			return (Set<ClassMirror<? extends T>>) (Object) classesWithAnnotationThatExtendCache.get(id);
+		}
 		Set<ClassMirror<? extends T>> mirrors = new HashSet<>();
 		for(ClassMirror<?> c : getClassesWithAnnotation(annotation)) {
 			if(doesClassExtend(c, superClass)) {
@@ -724,6 +750,7 @@ public class ClassDiscovery {
 			// ourselves here.
 			mirrors.add(new ClassMirror<>(superClass));
 		}
+		classesWithAnnotationThatExtendCache.put(id, (Set<ClassMirror<?>>) (Object) mirrors);
 		return mirrors;
 	}
 
@@ -794,8 +821,15 @@ public class ClassDiscovery {
 			try {
 				set.add(cm.loadClass(loader, initialize));
 			} catch (NoClassDefFoundError e) {
-				//Ignore this for now?
-				//throw new Error("While trying to process " + cm.toString() + ", an error occurred.", e);
+				if(IS_DEBUG) {
+					// This is tough. Normally, we really want to ignore this error, but during development, it can be
+					// a critical error to see to diagnose a very hard to find error. So we compromize here, and only
+					// print error details out while in debug mode.
+					System.err.println("While trying to process " + cm.toString() + ", an error occurred. It it"
+							+ " probably safe to ignore this error, but if you're debugging to figure out why an"
+							+ " expected class is not showing up, then this is probably why.");
+					e.printStackTrace(System.err);
+				}
 			}
 		}
 		return set;
@@ -823,6 +857,41 @@ public class ClassDiscovery {
 		}
 		fieldAnnotationCache.put(annotation, mirrors);
 		return mirrors;
+	}
+
+	/**
+	 * Unlike {@link #getFieldsWithAnnotation(java.lang.Class)}, this actually loads the matching field's containing
+	 * classes into PermGen, and returns a Set of Field objects. This is useful if you are for sure going to use these
+	 * fields immediately, and don't want to have to lazy load them individually.
+	 *
+	 * @param annotation
+	 * @return
+	 */
+	public Set<Field> loadFieldsWithAnnotation(Class<? extends Annotation> annotation) {
+		return loadFieldsWithAnnotation(annotation, ClassDiscovery.class.getClassLoader(), true);
+	}
+
+	/**
+	 * Unlike {@link #getFieldsWithAnnotation(java.lang.Class)}, this actually loads the matching field's containing
+	 * classes into PermGen, and returns a Set of Field objects. This is useful if you are for sure going to use these
+	 * fields immediately, and don't want to have to lazy load them individually.
+	 *
+	 * @param annotation
+	 * @param loader
+	 * @param initialize
+	 * @return
+	 */
+	public Set<Field> loadFieldsWithAnnotation(Class<? extends Annotation> annotation, ClassLoader loader, boolean initialize) {
+		Set<Field> ret = new HashSet<>();
+		for(FieldMirror fm : getFieldsWithAnnotation(annotation)) {
+			try {
+				Field f = fm.loadField(loader, initialize);
+				ret.add(f);
+			} catch (ClassNotFoundException ex) {
+				throw new NoClassDefFoundError(ex.getMessage());
+			}
+		}
+		return ret;
 	}
 
 	/**
@@ -878,7 +947,7 @@ public class ClassDiscovery {
 			}
 			return set;
 		} catch (ClassNotFoundException ex) {
-			throw new NoClassDefFoundError();
+			throw new NoClassDefFoundError(ex.getMessage());
 		}
 	}
 

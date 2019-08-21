@@ -6,7 +6,7 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.noprofile;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
@@ -28,6 +28,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -67,7 +68,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			switch(nodes.length) {
 				case 0:
 					return CVoid.VOID;
@@ -79,7 +80,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 	}
@@ -96,7 +97,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CEntry(args[0], args[1], t);
 		}
 	}
@@ -123,7 +124,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			throw new Error("Should not have gotten here, __autoconcat__ was not removed before runtime.");
 		}
 
@@ -140,8 +141,9 @@ public class Compiler {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> list, FileOptions fileOptions) throws ConfigCompileException {
-			return optimizeSpecial(list, true);
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> list, FileOptions fileOptions) throws ConfigCompileException {
+			return optimizeSpecial(list, true, envs);
 		}
 
 		private static final String ASSIGN = new DataHandling.assign().getName();
@@ -156,7 +158,8 @@ public class Compiler {
 		 * @param returnSConcat
 		 * @return
 		 */
-		public ParseTree optimizeSpecial(List<ParseTree> list, boolean returnSConcat) throws ConfigCompileException {
+		public ParseTree optimizeSpecial(List<ParseTree> list, boolean returnSConcat,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs) throws ConfigCompileException {
 			//If any of our nodes are CSymbols, we have different behavior
 			boolean inSymbolMode = false; //caching this can save Xn
 
@@ -231,6 +234,9 @@ public class Compiler {
 								//Add the next two children, (the symbol then the item)
 								//and continue.
 								ac.addChild(list.get(index));
+								if(list.size() <= index + 1) {
+									throw new ConfigCompileException("Unexpected end of statement", list.get(index).getTarget());
+								}
 								ac.addChild(list.get(index + 1));
 								list.remove(index);
 								list.remove(index);
@@ -242,6 +248,9 @@ public class Compiler {
 						//Set this subset into the correct slot, the rest of the
 						//code will grab it correctly that way.
 						list.add(i + 2, ac);
+					}
+					if(list.size() <= i + 2) {
+						throw new ConfigCompileException("Unexpected end of statement", list.get(i).getTarget());
 					}
 					rhs = list.get(i + 2);
 					assign.addChild(lhs);
@@ -313,7 +322,7 @@ public class Compiler {
 								list.remove(k);
 								break;
 							}
-							conversion.addChild(optimizeSpecial(ac, returnSConcat));
+							conversion.addChild(optimizeSpecial(ac, returnSConcat, envs));
 						}
 					}
 
@@ -455,9 +464,11 @@ public class Compiler {
 
 			// Look for typed assignments
 			for(int k = 0; k < list.size(); k++) {
-				if(list.get(k).getData() instanceof CClassType) {
+				if(list.get(k).getData().equals(CVoid.VOID) || list.get(k).getData().isInstanceOf(CClassType.class)) {
 					if(k == list.size() - 1) {
-						throw new ConfigCompileException("Unexpected ClassType", list.get(k).getTarget());
+						// This is not a typed assignment
+						break;
+						//throw new ConfigCompileException("Unexpected ClassType", list.get(k).getTarget());
 					}
 					if(list.get(k + 1).getData() instanceof CFunction) {
 						switch(list.get(k + 1).getData().val()) {
@@ -467,6 +478,11 @@ public class Compiler {
 							case "assign":
 							case "proc":
 								// Typed assign/closure
+								if(list.get(k + 1).getData().val().equals("assign")
+										&& list.get(k).getData().equals(CVoid.VOID)) {
+									throw new ConfigCompileException("Variables may not be of type void",
+											list.get(k).getTarget());
+								}
 								ParseTree type = list.remove(k);
 								List<ParseTree> children = list.get(k).getChildren();
 								children.add(0, type);
@@ -520,7 +536,7 @@ public class Compiler {
 				return list.get(0);
 			} else {
 				for(int i = 0; i < list.size(); i++) {
-					if(list.get(i).getData().getCType() == Construct.ConstructType.IDENTIFIER) {
+					if(Construct.IsCType(list.get(i).getData(), Construct.ConstructType.IDENTIFIER)) {
 						if(i == 0) {
 							//Yup, it's an identifier
 							CFunction identifier = new CFunction(list.get(i).getData().val(), list.get(i).getTarget());
@@ -531,7 +547,7 @@ public class Compiler {
 								child.setChildren(list);
 							}
 							try {
-								Function f = (Function) FunctionList.getFunction(identifier);
+								Function f = (Function) FunctionList.getFunction(identifier, envs);
 								ParseTree node = new ParseTree(f.execs(identifier.getTarget(), null, null, child), child.getFileOptions());
 								return node;
 							} catch (Exception e) {
@@ -578,7 +594,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String s = null;
 			if(args.length == 1) {
 				s = args[0].val();
@@ -604,7 +620,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 0) {
 				return CVoid.VOID;
 			}
@@ -617,7 +633,7 @@ public class Compiler {
 	public static class __cbracket__ extends DummyFunction implements Optimizable {
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
@@ -628,7 +644,10 @@ public class Compiler {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree node;
 			if(children.isEmpty()) {
 				node = new ParseTree(CVoid.VOID, fileOptions);
@@ -648,7 +667,7 @@ public class Compiler {
 	public static class __cbrace__ extends DummyFunction implements Optimizable {
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
@@ -659,7 +678,10 @@ public class Compiler {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			throw new ConfigCompileException("Unexpected use of braces", t);
 		}
 	}
@@ -685,7 +707,7 @@ public class Compiler {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException(getName() + " should have been compiled out. If you are reaching this, an error has occured in the parser."
 					+ " Please report this error to the developers.");
 		}
@@ -707,7 +729,7 @@ public class Compiler {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -716,11 +738,14 @@ public class Compiler {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() != 1) {
 				throw new ConfigCompileException(getName() + " can only take one parameter", t);
 			}
-			if(!(children.get(0).getData() instanceof CString)) {
+			if(!(children.get(0).getData().isInstanceOf(CString.class))) {
 				throw new ConfigCompileException("Only hardcoded strings may be passed into " + getName(), t);
 			}
 			String value = children.get(0).getData().val();

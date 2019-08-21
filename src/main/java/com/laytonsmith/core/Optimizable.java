@@ -1,11 +1,13 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.FileOptions;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.List;
 import java.util.Set;
 
@@ -39,21 +41,21 @@ public interface Optimizable extends Function {
 		CONSTANT_OFFLINE("If all the parameters of a function are constant, a function with this optimization"
 				+ " will be run at compile time, and that value stored, instead of it being run each time. For"
 				+ " instance, the add function is like this, which means that if you were to do add(2, 2), it would"
-				+ " simply replace that call with 4, at compile time, which makes it more efficient during runtime.", CHVersion.V3_3_1),
+				+ " simply replace that call with 4, at compile time, which makes it more efficient during runtime.", MSVersion.V3_3_1),
 		/**
 		 * If the function will return void, and the effects of the function do not need to be ordered, this can be
 		 * selected, and the function will be run on another thread. Note that this will only be valid if a function
 		 * also can be run async. This is a runtime optimization.
 		 */
 		INSTANT_RETURN("Some functions can be run async, and there is no benefit for it to wait around for the operation to finish."
-				+ " For instance, using sys_out() does not need to wait for the IO to flush before returning control to the script.", CHVersion.V3_3_1),
+				+ " For instance, using sys_out() does not need to wait for the IO to flush before returning control to the script.", MSVersion.V3_3_1),
 		/**
 		 * If a function can do some amount of optimization at compile time, but can't simply run the exec() function
 		 * directly, this can be selected, which will cause the function's optimize() method to be called. This is a
 		 * compile time optimization.
 		 */
 		OPTIMIZE_CONSTANT("A function may be able to do some optimization if the parameters are constant, but it may be"
-				+ " a bit more complicated than simply running the function. Otherwise, this is exactly like " + CONSTANT_OFFLINE.getName(), CHVersion.V3_3_1),
+				+ " a bit more complicated than simply running the function. Otherwise, this is exactly like " + CONSTANT_OFFLINE.getName(), MSVersion.V3_3_1),
 		/**
 		 * If a function can do some amount of optimization at compile time, even if some of the parameters are dynamic,
 		 * this can be selected, which will cause the function's optimizeDynamic() method to be called. This is a
@@ -61,7 +63,7 @@ public interface Optimizable extends Function {
 		 */
 		OPTIMIZE_DYNAMIC("Some functions can do some amount of optimization or compilation checks, even if the function is sent dynamic"
 				+ " parameters. For instance, if(true, rand(), '1') can be changed simply to rand(), because the condition is hard coded"
-				+ " to be true. In this case, the compile tree is smaller, which makes it more efficient.", CHVersion.V3_3_1),
+				+ " to be true. In this case, the compile tree is smaller, which makes it more efficient.", MSVersion.V3_3_1),
 		/**
 		 * If, given the same parameters, the return of this function could be cached (that is, it is a const function)
 		 * this can be selected. This does not guarantee that the results will be cached, since there is a memory trade
@@ -73,7 +75,7 @@ public interface Optimizable extends Function {
 				+ " If the engine determines that it is faster to cache the returned values vs re-running the function,"
 				+ " it may choose to do so. This is a runtime optimization, and is calculated by the engine itself to determine"
 				+ " which method is faster, so there is no guarantee that any optimization will occur, however, unless this"
-				+ " option is specified, it will certainly not.", CHVersion.V3_3_1),
+				+ " option is specified, it will certainly not.", MSVersion.V3_3_1),
 		/**
 		 * If this function is terminal, that is, it will ALWAYS interrupt program flow, this can be selected. For
 		 * instance, return() is an example. This is used during optimization, and to give compiler warnings.
@@ -81,7 +83,7 @@ public interface Optimizable extends Function {
 		TERMINAL("If a function is \"terminal\", that is, it is guaranteed to have abnormal code flow (for instance,"
 				+ " return() or throw()) it is marked terminal, which is used by the compiler to issue warnings, in the"
 				+ " event you make some code unreachable by putting it under a terminal statement, and to optimize"
-				+ " by removing the unreachable code from the code tree.", CHVersion.V3_3_1),
+				+ " by removing the unreachable code from the code tree.", MSVersion.V3_3_1),
 		/**
 		 * If a function is "side effect free", that is, if the return value is unused, the function itself does
 		 * nothing, then this optimization can be specified. This is mostly useful for cases where the value returns a
@@ -91,7 +93,7 @@ public interface Optimizable extends Function {
 		NO_SIDE_EFFECTS("If a function is \"side effect free\", that is, if the return value is unused, the function"
 				+ " itself does nothing, then this optimization can be specified. This is mostly useful for cases"
 				+ " where the value returns a check, but the check has been determined by the compiler to be unused,"
-				+ " making the entire call itself unneeded, allowing the call itself to be removed from the tree.", CHVersion.V3_3_1),
+				+ " making the entire call itself unneeded, allowing the call itself to be removed from the tree.", MSVersion.V3_3_1),
 		/**
 		 * Some functions do want to do linking, but in a special, custom way. If this is specified, then the function
 		 * will have the link() method called on it, in place of the default linking mechanism that the compiler
@@ -99,7 +101,7 @@ public interface Optimizable extends Function {
 		 */
 		CUSTOM_LINK("Some functions do want to do linking, but in a special, custom way. If this is specified, then"
 				+ " the function will have the link() method called on it, in place of the default linking mechanism that"
-				+ " the compiler provides.", CHVersion.V3_3_1),
+				+ " the compiler provides.", MSVersion.V3_3_1),
 		/**
 		 * This is a priority optimization function, meaning it needs to be optimized before its children are. This is
 		 * required when optimization of the children could cause different internal behavior, for instance if this
@@ -109,12 +111,12 @@ public interface Optimizable extends Function {
 		PRIORITY_OPTIMIZATION("This is a priority optimization function, meaning it needs to be optimized before its children are."
 				+ " This is required when optimization of the children could cause different internal behavior, for instance"
 				+ " if this function is expecting the presence of some code element, but the child gets optimized out, this"
-				+ " would cause an error, even though the user did in fact provide code in that section.", CHVersion.V3_3_1);
+				+ " would cause an error, even though the user did in fact provide code in that section.", MSVersion.V3_3_1);
 
-		private final CHVersion since;
+		private final MSVersion since;
 		private final String docs;
 
-		private OptimizationOption(String docs, CHVersion since) {
+		private OptimizationOption(String docs, MSVersion since) {
 			this.docs = docs;
 			this.since = since;
 		}
@@ -130,7 +132,7 @@ public interface Optimizable extends Function {
 		}
 
 		@Override
-		public CHVersion since() {
+		public MSVersion since() {
 			return since;
 		}
 
@@ -151,10 +153,13 @@ public interface Optimizable extends Function {
 	 * ConfigCompileException.
 	 *
 	 * @param t
+	 * @param env The environment. The only guaranteed useable environment is the {@link CompilerEnvironment}.
 	 * @param args
 	 * @return
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 */
-	public Construct optimize(Target t, Construct... args) throws ConfigRuntimeException, ConfigCompileException;
+	public Mixed optimize(Target t, Environment env, Mixed... args)
+			throws ConfigRuntimeException, ConfigCompileException;
 
 	/**
 	 * If the function indicates it can optimize dynamic values, this method is called. It may also throw a compile
@@ -162,11 +167,17 @@ public interface Optimizable extends Function {
 	 * the default).
 	 *
 	 * @param t
+	 * @param env The environment. The only guaranteed useable environment is the {@link CompilerEnvironment}.
+	 * @param envs The target environments. Unfortunately, we cannot use the environment list in {@code env}, as that
+	 * does not represent the runtime environment.
 	 * @param children The children that are being passed to this function
 	 * @param fileOptions The file options for the top level function
 	 * @return
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 */
-	public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException;
+	public ParseTree optimizeDynamic(Target t, Environment env, Set<Class<? extends Environment.EnvironmentImpl>> envs,
+			List<ParseTree> children, FileOptions fileOptions)
+			throws ConfigCompileException, ConfigRuntimeException;
 
 	/**
 	 * Does custom linking in a given function. This is called if the {@link OptimizationOption#CUSTOM_LINK} option is
@@ -176,6 +187,7 @@ public interface Optimizable extends Function {
 	 *
 	 * @param t
 	 * @param children
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 */
 	public void link(Target t, List<ParseTree> children) throws ConfigCompileException;
 

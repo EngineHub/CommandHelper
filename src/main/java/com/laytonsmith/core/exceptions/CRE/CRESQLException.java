@@ -2,18 +2,18 @@ package com.laytonsmith.core.exceptions.CRE;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 
 /**
  *
  */
-@typeof("SQLException")
+@typeof("ms.lang.SQLException")
 public class CRESQLException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("SQLException");
+	public static final CClassType TYPE = CClassType.get(CRESQLException.class);
 
 	public CRESQLException(String msg, Target t) {
 		super(msg, t);
@@ -30,7 +30,7 @@ public class CRESQLException extends CREException {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_1;
+		return MSVersion.V3_3_1;
 	}
 
 	@Override

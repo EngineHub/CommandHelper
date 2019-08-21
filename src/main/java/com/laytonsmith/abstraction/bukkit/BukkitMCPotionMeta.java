@@ -1,10 +1,12 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCLivingEntity.MCEffect;
 import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.MCPotionMeta;
+import com.laytonsmith.abstraction.enums.MCPotionEffectType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
@@ -33,13 +35,9 @@ public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta
 	}
 
 	@Override
-	public boolean addCustomEffect(int potionID, int strength, int ticks, boolean ambient, boolean overwrite, Target t) {
-		int maxID = PotionEffectType.values().length;
-		if(potionID < 1 || potionID > maxID) {
-			throw new CRERangeException("Invalid effect ID, must be from 1-" + maxID, t);
-		}
-		PotionEffect pe = new PotionEffect(PotionEffectType.getById(potionID), ticks, strength, ambient);
-		return pm.addCustomEffect(pe, overwrite);
+	public boolean addCustomEffect(MCPotionEffectType type, int strength, int ticks, boolean ambient, boolean particles, boolean icon, boolean force, Target t) {
+		PotionEffect pe = new PotionEffect((PotionEffectType) type.getConcrete(), ticks, strength, ambient, particles, icon);
+		return pm.addCustomEffect(pe, force);
 	}
 
 	@Override
@@ -51,14 +49,15 @@ public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta
 	public List<MCEffect> getCustomEffects() {
 		List<MCEffect> list = new ArrayList<>();
 		for(PotionEffect pe : pm.getCustomEffects()) {
-			list.add(new MCEffect(pe.getType().getId(), pe.getAmplifier(), pe.getDuration(), pe.isAmbient()));
+			list.add(new MCEffect(BukkitMCPotionEffectType.valueOfConcrete(pe.getType()), pe.getAmplifier(),
+					pe.getDuration(), pe.isAmbient(), pe.hasParticles(), pe.hasIcon()));
 		}
 		return list;
 	}
 
 	@Override
-	public boolean hasCustomEffect(int id) {
-		return pm.hasCustomEffect(PotionEffectType.getById(id));
+	public boolean hasCustomEffect(MCPotionEffectType type) {
+		return pm.hasCustomEffect((PotionEffectType) type.getConcrete());
 	}
 
 	@Override
@@ -67,13 +66,20 @@ public class BukkitMCPotionMeta extends BukkitMCItemMeta implements MCPotionMeta
 	}
 
 	@Override
-	public boolean removeCustomEffect(int id) {
-		return pm.removeCustomEffect(PotionEffectType.getById(id));
+	public boolean removeCustomEffect(MCPotionEffectType type) {
+		return pm.removeCustomEffect((PotionEffectType) type.getConcrete());
+	}
+
+	public boolean hasColor() {
+		return pm.hasColor();
+	}
+
+	public MCColor getColor() {
+		return BukkitMCColor.GetMCColor(pm.getColor());
 	}
 
 	@Override
-	public boolean setMainEffect(int id) {
-		return pm.setMainEffect(PotionEffectType.getById(id));
+	public void setColor(MCColor color) {
+		pm.setColor(BukkitMCColor.GetColor(color));
 	}
-
 }

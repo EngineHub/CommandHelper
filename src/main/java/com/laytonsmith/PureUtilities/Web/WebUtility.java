@@ -1,16 +1,15 @@
 package com.laytonsmith.PureUtilities.Web;
 
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.FileWriteMode;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import java.io.BufferedInputStream;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -30,10 +29,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -41,15 +44,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import org.apache.commons.codec.binary.Base64;
+import org.brotli.dec.BrotliInputStream;
 
 /**
  * Contains methods to simplify web connections.
@@ -63,6 +70,15 @@ public final class WebUtility {
 		HTTPResponse resp = GetPage(new URL("http://www.google.com/"), HTTPMethod.GET, null, null, stash, true, 60000);
 		StreamUtils.GetSystemOut().println(stash.getCookies(new URL("http://www.google.com")));
 	}
+
+	/**
+	 * This is the list of encodings that this class supports. Generally speaking, this is the list that you should
+	 * provide in the Accept-Encoding list. If you wish to support something other than this list, you should
+	 * disable encoding support, and manage the decompression entirely yourself.
+	 */
+	public static final Set<String> SUPPORTED_ENCODINGS
+			= Collections.unmodifiableSet(new HashSet<>(
+					Arrays.asList(new String[]{"gzip", "deflate", "br", "identity"})));
 
 	private WebUtility() {
 	}
@@ -101,59 +117,67 @@ public final class WebUtility {
 	/**
 	 * Gets a web page based on the parameters specified. This is a blocking call, if you wish for it to be event
 	 * driven, consider using the GetPage that requires a HTTPResponseCallback.
-	 *
+	 * <p>
+	 * The settings may have the following parameters:
+	 * <ul>
+	 * <li>method - The HTTP method to use</li>
+	 * <li>parameters - The parameters to be sent. Parameters can be also specified directly in the URL, and they will
+	 * be merged. May be null.</li>
+	 * <li>cookieStash - An instance of a cookie stash to use, or null if none is needed. Cookies will automatically be
+	 * added and used from this instance.</li>
+	 * <li>followRedirects - If 300 code responses should automatically be followed.</li>
+	 * <li>timeout - Sets the timeout in ms for this connection. 0 means no timeout. If the timeout is reached, a
+	 * SocketTimeoutException will be thrown.</li>
+	 * <li>username - The username to use in response to HTTP Basic authentication. Null ignores this parameter.</li>
+	 * <li>password - The password to use in response to HTTP Basic authentication. Null ignores this parameter.</li>
+	 * </ul>
 	 * @param url The url to navigate to
-	 * @param method The HTTP method to use
-	 * @param parameters The parameters to be sent. Parameters can be also specified directly in the URL, and they will
-	 * be merged. May be null.
-	 * @param cookieStash An instance of a cookie stash to use, or null if none is needed. Cookies will automatically be
-	 * added and used from this instance.
-	 * @param followRedirects If 300 code responses should automatically be followed.
-	 * @param timeout Sets the timeout in ms for this connection. 0 means no timeout. If the timeout is reached, a
-	 * SocketTimeoutException will be thrown.
-	 * @param username The username to use in response to HTTP Basic authentication. Null ignores this parameter.
-	 * @param password The password to use in response to HTTP Basic authentication. Null ignores this parameter.
+	 * @param settings The settings to use for this request
 	 * @return
-	 * @throws IOException
+	 * @throws SocketTimeoutException If the request took longer than the configured timeout
+	 * @throws IOException If the connection could not be made properly
 	 */
 	public static HTTPResponse GetPage(URL url, RequestSettings settings) throws SocketTimeoutException, IOException {
+		// If SAFE_WRITE is set, there's no reason to do the download given we know it will fail later, so let's fail
+		// fast, and do the check here
+		if(settings.getDownloadTo() != null && settings.getDownloadStrategy() == FileWriteMode.SAFE_WRITE) {
+			if(settings.getDownloadTo().exists()) {
+				throw new IOException("Refusing to download file, destination path already exists ["
+						+ settings.getDownloadTo() + "]");
+			}
+		}
 		CookieJar cookieStash = settings.getCookieJar();
 		RawHTTPResponse response = getWebStream(url, settings);
-		StringBuilder b = null;
-		BufferedReader in = new BufferedReader(new InputStreamReader(response.getStream()));
+		byte[] b = null;
+		InputStream in = new BufferedInputStream(response.getStream());
 		if(settings.getDownloadTo() == null) {
 			if(settings.getLogger() != null) {
 				settings.getLogger().log(Level.INFO, "Reading in response body");
 			}
-			b = new StringBuilder();
-			String line;
-			while((line = in.readLine()) != null) {
-				b.append(line).append("\n");
+			try {
+				b = StreamUtils.GetBytes(in);
+			} finally {
+				in.close();
 			}
-			in.close();
 		} else {
 			if(settings.getLogger() != null) {
-				settings.getLogger().log(Level.INFO, "Saving file to {0}", settings.getDownloadTo());
-			}
-			int r;
-			OutputStream out = new BufferedOutputStream(new FileOutputStream(settings.getDownloadTo()));
-			while((r = in.read()) != -1) {
-				out.write(r);
+				settings.getLogger().log(Level.INFO, "Saving file to [{0}] using {1} strategy",
+						new Object[]{settings.getDownloadTo(), settings.getDownloadStrategy()});
 			}
 			try {
-				out.close();
+				FileUtil.write(StreamUtils.GetBytes(in), settings.getDownloadTo(), settings.getDownloadStrategy(), true);
 			} finally {
 				in.close();
 			}
 		}
 		//Assume 1.0 if something breaks
 		String httpVersion = "1.0";
-		Matcher m = Pattern.compile("HTTP/(\\d\\+.\\d+).*").matcher(response.getConnection().getHeaderField(0));
+		Matcher m = Pattern.compile("HTTP/(\\d+.\\d+).*").matcher(response.getConnection().getHeaderField(0));
 		if(m.find()) {
 			httpVersion = m.group(1);
 		}
 		HTTPResponse resp = new HTTPResponse(response.getConnection().getResponseMessage(),
-				response.getConnection().getResponseCode(), response.getConnection().getHeaderFields(), b == null ? null : b.toString(), httpVersion);
+				response.getConnection().getResponseCode(), response.getConnection().getHeaderFields(), b, httpVersion);
 		if(cookieStash != null && resp.getHeaderNames().contains("Set-Cookie")) {
 			//We need to add the cookie to the stash
 			for(String h : resp.getHeaders("Set-Cookie")) {
@@ -227,6 +251,7 @@ public final class WebUtility {
 		HTTPMethod method = settings.getMethod();
 		Map<String, List<String>> headers = settings.getHeaders();
 		Map<String, List<String>> parameters = settings.getParameters();
+		Map<String, List<String>> queryParameters = settings.getQueryParameters();
 		CookieJar cookieStash = settings.getCookieJar();
 		boolean followRedirects = settings.getFollowRedirects();
 		final int timeout = settings.getTimeout();
@@ -248,15 +273,30 @@ public final class WebUtility {
 						followRedirects, timeout, username, password == null ? "null" : password.length()});
 		}
 		//First, let's check to see that the url is properly formatted. If there are parameters,
-		//and this is a GET request, we want to tack them on to the end.
-		if(parameters != null && !parameters.isEmpty() && method == HTTPMethod.GET) {
+		//and this is a GET request, we want to tack them on to the end. OR, if there is a raw parameter and parameters,
+		//and this is a post reqest, put the parameters on anyways.
+		if(parameters != null && !parameters.isEmpty()
+				&& (method == HTTPMethod.GET
+				|| (method != HTTPMethod.GET
+					&& settings.getRawParameter() != null && settings.getRawParameter().length != 0))) {
 			StringBuilder b = new StringBuilder(url.getQuery() == null ? "" : url.getQuery());
 			if(b.length() != 0) {
 				b.append("&");
 			}
 			b.append(encodeParameters(parameters));
+			// Setting this to null avoids further processing below
+			parameters = null;
 			String query = b.toString();
 			url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + "?" + query);
+		}
+
+		if(queryParameters != null && !queryParameters.isEmpty()) {
+			String query = url.getQuery();
+			if(query == null) {
+				query = "?";
+			}
+			query += encodeParameters(queryParameters);
+			url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + query);
 		}
 		if(logger != null) {
 			logger.log(Level.INFO, "Using url: {0}", url);
@@ -277,10 +317,10 @@ public final class WebUtility {
 				throw new IOException("Could not resolve the proxy address: " + addr.toString());
 			}
 		}
-		//FIXME: When given a bad proxy, this causes it to stall forever
 		if(logger != null) {
 			logger.log(Level.INFO, "Opening connection...");
 		}
+		//FIXME: When given a bad proxy, this causes it to stall forever
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection(/*proxy*/);
 		if(conn instanceof HttpsURLConnection
 				&& (settings.getDisableCertChecking() || settings.getUseDefaultTrustStore() == false
@@ -444,7 +484,14 @@ public final class WebUtility {
 			}
 		}
 		conn.setRequestMethod(method.name());
-		if((parameters != null && !parameters.isEmpty()) || settings.getRawParameter() != null) {
+		if((parameters != null && !parameters.isEmpty() && !method.equals(HTTPMethod.GET))
+				|| settings.getRawParameter() != null) {
+			if(logger != null) {
+				if(method.equals(HTTPMethod.GET)) {
+					logger.log(Level.WARNING, "Method was set to GET, but raw parameter data was provided, so method"
+							+ " is changing to POST.");
+				}
+			}
 			conn.setDoOutput(true);
 			byte[] params = ArrayUtils.EMPTY_BYTE_ARRAY;
 			if(parameters != null && !parameters.isEmpty()) {
@@ -480,26 +527,49 @@ public final class WebUtility {
 			if(logger != null) {
 				logger.log(Level.SEVERE, "Exception occurred, {0} response from server", conn.getResponseCode());
 			}
+			if(e instanceof SSLHandshakeException) {
+				// The certificate was not valid, and the input stream will be null anyways, so just throw at this
+				// point.
+				throw new IOException("Invalid SSL certificate for " + url.getHost() + ". Refusing to connect.");
+			}
 			is = conn.getErrorStream();
 		}
-		if("x-gzip".equals(conn.getContentEncoding()) || "gzip".equals(conn.getContentEncoding())) {
-			if(logger != null) {
-				logger.log(Level.INFO, "Response is gzipped, using a GZIPInputStream");
-			}
-			is = new GZIPInputStream(is);
-		} else if("deflate".equals(conn.getContentEncoding())) {
-			if(logger != null) {
-				logger.log(Level.INFO, "Response is zipped, using a InflaterInputStream");
-			}
-			is = new InflaterInputStream(is);
-		} else if("identity".equals(conn.getContentEncoding())) {
-			//This is the default, meaning no transformation is needed.
-			if(logger != null) {
-				logger.log(Level.INFO, "Response is not compressed");
+
+		if(!settings.getDisableCompressionHandling() && conn.getContentEncoding() != null) {
+			/*
+			The HTTP spec for Content-Encoding specifies that multiple comma separated values can be provided. Where
+			more than one is provided, this means that the content was compressed multiple times, in the specified order.
+			Given that, we must loop through the list, wrapping the input stream in the given decompression handlers.
+			In practice, this will only loop once though.
+			*/
+			List<String> compression
+					= Stream.of(conn.getContentEncoding().split(",")).map((e) -> e.trim()).collect(Collectors.toList());
+			for(String scheme : compression) {
+				if("x-gzip".equals(scheme) || "gzip".equals(scheme)) {
+					if(logger != null) {
+						logger.log(Level.INFO, "Response is gzipped, using a GZIPInputStream");
+					}
+					is = new GZIPInputStream(is);
+				} else if("deflate".equals(scheme)) {
+					if(logger != null) {
+						logger.log(Level.INFO, "Response is zipped, using an InflaterInputStream");
+					}
+					is = new InflaterInputStream(is);
+				} else if("br".equals(scheme)) {
+					if(logger != null) {
+						logger.log(Level.INFO, "Response is Brotli compressed, using a BrotliInputStream");
+					}
+					is = new BrotliInputStream(is);
+				} else if("identity".equals(scheme)) {
+					//This is the default, meaning no transformation is needed.
+					if(logger != null) {
+						logger.log(Level.INFO, "Response is not compressed");
+					}
+				}
 			}
 		}
 		if(is == null) {
-			throw new IOException("Could not connnect to " + url);
+			throw new IOException("Could not connect to " + url);
 		}
 		return new RawHTTPResponse(conn, is);
 	}
@@ -543,31 +613,51 @@ public final class WebUtility {
 		return b.toString();
 	}
 
-	private static void WriteStringToOutputStream(String data, BufferedWriter bw) throws IOException {
-		for(Character c : data.toCharArray()) {
-			bw.write((int) c.charValue());
-		}
-	}
-
 	/**
 	 * A very simple convenience method to get a page. Only the contents are returned by this method.
+	 * It is assumed that the content is a UTF-8 formatted string, and is not binary content.
 	 *
 	 * @param url
 	 * @return
 	 * @throws IOException
 	 */
 	public static String GetPageContents(URL url) throws IOException {
-		return GetPage(url).getContent();
+		return new String(GetPage(url).getContent(), "UTF-8");
 	}
 
 	/**
 	 * A very simple convenience method to get a page. Only the contents are returned by this method.
+	 * It is assumed that the content is a UTF-8 formatted string, and is not binary content.
 	 *
 	 * @param url
 	 * @return
 	 * @throws IOException
 	 */
 	public static String GetPageContents(String url) throws IOException {
+		return new String(GetPage(url).getContent(), "UTF-8");
+	}
+
+	/**
+	 * A very simple convenience method to get a page. Only the contents are returned by this method.
+	 * This supports returning binary content.
+	 *
+	 * @param url
+	 * @return
+	 * @throws IOException
+	 */
+	public static byte[] GetPageContentsBinary(URL url) throws IOException {
+		return GetPage(url).getContent();
+	}
+
+	/**
+	 * A very simple convenience method to get a page. Only the contents are returned by this method.
+	 * This supports returning binary content.
+	 *
+	 * @param url
+	 * @return
+	 * @throws IOException
+	 */
+	public static byte[] GetPageContentsBinary(String url) throws IOException {
 		return GetPage(url).getContent();
 	}
 

@@ -3,21 +3,22 @@ package com.laytonsmith.abstraction.enums;
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.annotations.MDynamicEnum;
-import com.laytonsmith.annotations.MEnum;
-import com.laytonsmith.core.Static;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.constructs.Target;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@MDynamicEnum("EntityType")
+@MDynamicEnum("com.commandhelper.EntityType")
 public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MCVanillaEntityType, Concrete> {
 
 	// To be filled by the implementer
-	protected static Map<String, MCEntityType> mappings;
-	protected static Map<MCVanillaEntityType, MCEntityType> vanilla;
+	protected static final Map<String, MCEntityType> MAP = new HashMap<>();
+	protected static final Map<MCVanillaEntityType, MCEntityType> VANILLA_MAP = new HashMap<>();
 
 	@SuppressWarnings("checkstyle:staticvariablename") // Fixing this violation might break dependents.
 	public static MCEntityType NULL = null;
@@ -35,6 +36,8 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	 */
 	public abstract boolean isSpawnable();
 
+	public abstract boolean isProjectile();
+
 	@Override
 	public MCVanillaEntityType getAbstracted() {
 		return super.getAbstracted();
@@ -45,21 +48,27 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 	}
 
 	public static MCEntityType valueOf(String test) throws IllegalArgumentException {
-		if(mappings == null) {
-			return null;
-		}
-		MCEntityType ret = mappings.get(test);
+		MCEntityType ret = MAP.get(test);
 		if(ret == null) {
+			switch(test) {
+				case "TIPPED_ARROW":
+					MSLog.GetLogger().e(MSLog.Tags.GENERAL,
+							"TIPPED_ARROW entity type was removed in 1.14. Converted to ARROW.",
+							Target.UNKNOWN);
+					return MAP.get("ARROW");
+				case "LINGERING_POTION":
+					MSLog.GetLogger().e(MSLog.Tags.GENERAL,
+							"LINGERING_POTION entity type was removed in 1.14. Converted to SPLASH_POTION.",
+							Target.UNKNOWN);
+					return MAP.get("SPLASH_POTION");
+			}
 			throw new IllegalArgumentException("Unknown entity type: " + test);
 		}
 		return ret;
 	}
 
 	public static MCEntityType valueOfVanillaType(MCVanillaEntityType type) {
-		if(vanilla == null) {
-			return null;
-		}
-		return vanilla.get(type);
+		return VANILLA_MAP.get(type);
 	}
 
 	/**
@@ -69,20 +78,25 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		if(NULL == null) { // docs mode
 			Set<String> dummy = new HashSet<>();
 			for(final MCVanillaEntityType t : MCVanillaEntityType.values()) {
-				dummy.add(t.name());
+				if(t.existsIn(MCVersion.CURRENT)) {
+					dummy.add(t.name());
+				}
 			}
 			return dummy;
 		}
-		return mappings.keySet();
+		return MAP.keySet();
 	}
 
 	/**
 	 * @return Our own EntityType list
 	 */
-	public static Collection<MCEntityType> values() {
+	public static List<MCEntityType> values() {
 		if(NULL == null) { // docs mode
 			ArrayList<MCEntityType> dummy = new ArrayList<>();
 			for(final MCVanillaEntityType t : MCVanillaEntityType.values()) {
+				if(!t.existsIn(MCVersion.CURRENT)) {
+					continue;
+				}
 				dummy.add(new MCEntityType<Object>(t, null) {
 					@Override
 					public String name() {
@@ -98,147 +112,197 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 					public boolean isSpawnable() {
 						return t.isSpawnable();
 					}
+
+					@Override
+					public boolean isProjectile() {
+						return t.isProjectile();
+					}
 				});
 			}
 			return dummy;
 		}
-		return mappings.values();
+		return new ArrayList<>(MAP.values());
 	}
 
-	@MEnum("VanillaEntityType")
 	public enum MCVanillaEntityType {
-		AREA_EFFECT_CLOUD(true, MCVersion.MC1_9),
-		ARMOR_STAND(true, MCVersion.MC1_8),
-		ARROW(true),
-		BAT(true, MCVersion.MC1_4),
-		BLAZE(true),
-		BOAT(true),
-		CAVE_SPIDER(true),
-		CHICKEN(true),
-		COMPLEX_PART(false),
-		COW(true),
-		CREEPER(true),
-		DRAGON_FIREBALL(true, MCVersion.MC1_9),
-		/**
-		 * Spawn with world.dropItem()
-		 */
-		DROPPED_ITEM(true),
-		DONKEY(true, MCVersion.MC1_11),
-		EGG(true),
-		ELDER_GUARDIAN(true, MCVersion.MC1_11),
-		ENDERMAN(true),
-		ENDERMITE(true, MCVersion.MC1_8),
-		ENDER_CRYSTAL(true),
-		ENDER_DRAGON(true),
-		ENDER_EYE(true),
-		ENDER_PEARL(true),
-		EVOKER(true, MCVersion.MC1_11),
-		EVOKER_FANGS(true, MCVersion.MC1_11),
-		EXPERIENCE_ORB(true),
-		/**
-		 * Spawn with world.spawnFallingBlock() I'm not sure what version we switched to FALLING_BLOCK from
-		 * FALLING_SAND, but it was after 1.0
-		 */
-		FALLING_BLOCK(true),
-		FIREBALL(true),
-		FIREWORK(true, MCVersion.MC1_4_7),
+		AREA_EFFECT_CLOUD,
+		ARMOR_STAND,
+		ARROW,
+		BAT,
+		BLAZE,
+		BOAT,
+		CAT(true, false, MCVersion.MC1_14),
+		CAVE_SPIDER,
+		CHICKEN,
+		COD,
+		COW,
+		CREEPER,
+		DOLPHIN,
+		DRAGON_FIREBALL,
+		DROPPED_ITEM,
+		DROWNED,
+		DONKEY,
+		EGG,
+		ELDER_GUARDIAN,
+		ENDERMAN,
+		ENDERMITE,
+		ENDER_CRYSTAL,
+		ENDER_DRAGON,
+		ENDER_EYE,
+		ENDER_PEARL,
+		EVOKER,
+		EVOKER_FANGS,
+		EXPERIENCE_ORB,
+		FALLING_BLOCK,
+		FIREBALL,
+		FIREWORK,
 		FISHING_HOOK(false),
-		GHAST(true),
-		GIANT(true),
-		GUARDIAN(true, MCVersion.MC1_8),
-		HORSE(true, MCVersion.MC1_6),
-		HUSK(true, MCVersion.MC1_11),
-		ILLUSIONER(true, MCVersion.MC1_12),
-		IRON_GOLEM(true, MCVersion.MC1_2),
-		ITEM_FRAME(true, MCVersion.MC1_4_5),
-		LLAMA(true, MCVersion.MC1_11),
-		LLAMA_SPIT(false, MCVersion.MC1_11),
-		LEASH_HITCH(true, MCVersion.MC1_6),
-		/**
-		 * Spawn with world.strikeLightning()
-		 */
-		LIGHTNING(true),
-		LINGERING_POTION(true, MCVersion.MC1_9),
-		MAGMA_CUBE(true),
-		MINECART(true),
-		MINECART_CHEST(true),
-		MINECART_COMMAND(true, MCVersion.MC1_7),
-		MINECART_FURNACE(true),
-		MINECART_HOPPER(true, MCVersion.MC1_5),
-		MINECART_MOB_SPAWNER(true, MCVersion.MC1_5),
-		MINECART_TNT(true, MCVersion.MC1_5),
-		MULE(true, MCVersion.MC1_11),
-		MUSHROOM_COW(true),
-		OCELOT(true, MCVersion.MC1_2),
-		PAINTING(true),
-		PARROT(true, MCVersion.MC1_12),
-		PIG(true),
-		PIG_ZOMBIE(true),
+		FOX(true, false, MCVersion.MC1_14),
+		GHAST,
+		GIANT,
+		GUARDIAN,
+		HORSE,
+		HUSK,
+		ILLUSIONER,
+		IRON_GOLEM,
+		ITEM_FRAME,
+		LLAMA,
+		LLAMA_SPIT(true, true),
+		LEASH_HITCH,
+		LIGHTNING,
+		LINGERING_POTION(true, true, MCVersion.MC1_9, MCVersion.MC1_13_X),
+		MAGMA_CUBE,
+		MINECART,
+		MINECART_CHEST,
+		MINECART_COMMAND,
+		MINECART_FURNACE,
+		MINECART_HOPPER,
+		MINECART_MOB_SPAWNER,
+		MINECART_TNT,
+		MULE,
+		MUSHROOM_COW,
+		OCELOT,
+		PAINTING,
+		PANDA(true, false, MCVersion.MC1_14),
+		PARROT,
+		PHANTOM,
+		PIG,
+		PIG_ZOMBIE,
+		PILLAGER(true, false, MCVersion.MC1_14),
 		PLAYER(false),
-		POLAR_BEAR(true, MCVersion.MC1_10),
-		PRIMED_TNT(true),
-		RABBIT(true, MCVersion.MC1_8),
-		SHEEP(true),
-		SILVERFISH(true),
-		SKELETON(true),
-		SHULKER(true, MCVersion.MC1_9),
-		SHULKER_BULLET(true, MCVersion.MC1_9),
-		SKELETON_HORSE(true, MCVersion.MC1_11),
-		SLIME(true),
-		SMALL_FIREBALL(true),
-		SNOWBALL(true),
-		SNOWMAN(true),
-		SQUID(true),
-		SPECTRAL_ARROW(true, MCVersion.MC1_9),
-		SPIDER(true),
-		SPLASH_POTION(true),
-		STRAY(true, MCVersion.MC1_11),
-		THROWN_EXP_BOTTLE(true),
-		TIPPED_ARROW(true, MCVersion.MC1_9),
-		VEX(true, MCVersion.MC1_11),
-		VINDICATOR(true, MCVersion.MC1_11),
-		WEATHER(false),
-		WITCH(true, MCVersion.MC1_4_5),
-		WITHER(true, MCVersion.MC1_4),
-		WITHER_SKELETON(true, MCVersion.MC1_11),
-		WITHER_SKULL(true, MCVersion.MC1_4),
-		WOLF(true),
-		VILLAGER(true),
-		ZOMBIE(true),
-		ZOMBIE_HORSE(true, MCVersion.MC1_11),
-		ZOMBIE_VILLAGER(true, MCVersion.MC1_11),
+		POLAR_BEAR,
+		PRIMED_TNT,
+		PUFFERFISH,
+		RABBIT,
+		RAVAGER(true, false, MCVersion.MC1_14),
+		SALMON,
+		SHEEP,
+		SILVERFISH,
+		SKELETON,
+		SHULKER,
+		SHULKER_BULLET,
+		SKELETON_HORSE,
+		SLIME,
+		SMALL_FIREBALL,
+		SNOWBALL,
+		SNOWMAN,
+		SQUID,
+		SPECTRAL_ARROW,
+		SPIDER,
+		SPLASH_POTION,
+		STRAY,
+		THROWN_EXP_BOTTLE,
+		TIPPED_ARROW(true, true, MCVersion.MC1_9, MCVersion.MC1_13_X),
+		TRADER_LLAMA(true, false, MCVersion.MC1_14),
+		TRIDENT,
+		TROPICAL_FISH,
+		TURTLE,
+		VEX,
+		VILLAGER,
+		VINDICATOR,
+		WANDERING_TRADER(true, false, MCVersion.MC1_14),
+		WITCH,
+		WITHER,
+		WITHER_SKELETON,
+		WITHER_SKULL,
+		WOLF,
+		ZOMBIE,
+		ZOMBIE_HORSE,
+		ZOMBIE_VILLAGER,
 		/**
 		 * An unknown entity without an Entity Class
 		 */
 		UNKNOWN(false);
 
-		private final boolean apiCanSpawn;
-		private final MCVersion version;
+		private final boolean canSpawn;
+		private final boolean canShoot;
+		private final MCVersion from;
+		private final MCVersion to;
+
+		MCVanillaEntityType() {
+			this.canSpawn = true;
+			this.canShoot = false;
+			this.from = MCVersion.MC1_0;
+			this.to = MCVersion.FUTURE;
+		}
 
 		/**
 		 * @param spawnable true if the entity is spawnable
 		 */
 		MCVanillaEntityType(boolean spawnable) {
-			this.apiCanSpawn = spawnable;
-			this.version = MCVersion.MC1_0;
+			this.canSpawn = spawnable;
+			this.canShoot = false;
+			this.from = MCVersion.MC1_0;
+			this.to = MCVersion.FUTURE;
 		}
 
 		/**
 		 * @param spawnable true if the entity is spawnable
+		 * @param projectile true if the entity is a projectile
+		 */
+		MCVanillaEntityType(boolean spawnable, boolean projectile) {
+			this.canSpawn = spawnable;
+			this.canShoot = projectile;
+			this.from = MCVersion.MC1_0;
+			this.to = MCVersion.FUTURE;
+		}
+
+		/**
+		 * @param spawnable true if the entity is spawnable
+		 * @param projectile true if the entity is a projectile
 		 * @param added the version this entity was added
 		 */
-		MCVanillaEntityType(boolean spawnable, MCVersion added) {
-			this.apiCanSpawn = spawnable;
-			this.version = added;
+		MCVanillaEntityType(boolean spawnable, boolean projectile, MCVersion added) {
+			this.canSpawn = spawnable;
+			this.canShoot = projectile;
+			this.from = added;
+			this.to = MCVersion.FUTURE;
+		}
+
+		/**
+		 * @param spawnable true if the entity is spawnable
+		 * @param projectile true if the entity is a projectile
+		 * @param added the version this entity was added
+		 * @param removed the version this entity was removed
+		 */
+		MCVanillaEntityType(boolean spawnable, boolean projectile, MCVersion added, MCVersion removed) {
+			this.canSpawn = spawnable;
+			this.canShoot = projectile;
+			this.from = added;
+			this.to = removed;
 		}
 
 		// This is here only for site-based documentation of some functions
 		public boolean isSpawnable() {
-			return this.apiCanSpawn;
+			return this.canSpawn;
 		}
 
-		public boolean existsInCurrent() {
-			return Static.getServer().getMinecraftVersion().ordinal() >= version.ordinal();
+		public boolean isProjectile() {
+			return this.canShoot;
+		}
+
+		public boolean existsIn(MCVersion version) {
+			return version.gte(from) && version.lte(to);
 		}
 	}
 }

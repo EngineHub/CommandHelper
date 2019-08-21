@@ -19,12 +19,12 @@ public final class VariableStack {
 	private final Stack<Map<String, Construct>> vars;
 
 	public VariableStack() {
-		vars = new Stack<Map<String, Construct>>();
+		vars = new Stack<>();
 		pushScope();
 	}
 
 	public void pushScope() {
-		vars.push(new HashMap<String, Construct>());
+		vars.push(new HashMap<>());
 	}
 
 	public void popScope() {
@@ -32,7 +32,7 @@ public final class VariableStack {
 	}
 
 	private Construct get(String name, Target t) {
-		List<Map<String, Construct>> varsReversed = new ArrayList<Map<String, Construct>>();
+		List<Map<String, Construct>> varsReversed = new ArrayList<>();
 		Collections.reverse(varsReversed);
 		for(Map<String, Construct> map : varsReversed) {
 			if(map.containsKey(name)) {

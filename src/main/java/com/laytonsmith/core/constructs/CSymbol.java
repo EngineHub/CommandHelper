@@ -91,6 +91,10 @@ public class CSymbol extends Construct {
 			case EXPONENTIAL:
 				conversion = "pow";
 				break;
+			case COMMA:
+				// Only happens in object definition, which has special awareness in the compiler
+				conversion = ",";
+				break;
 			default:
 				conversion = "";
 				break;
@@ -99,6 +103,10 @@ public class CSymbol extends Construct {
 
 	public String convert() {
 		return conversion;
+	}
+
+	public boolean isConcatenation() {
+		return symbolType.equals(Token.TType.CONCAT);
 	}
 
 	public boolean isPostfix() {

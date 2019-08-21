@@ -1,9 +1,11 @@
 package com.laytonsmith.PureUtilities;
 
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An ArgumentParser allows for programmatic registration of arguments, which
@@ -15,10 +17,446 @@ import java.util.List;
 public final class ArgumentParser {
 
 	/**
+	 * Eases the operation of building a single argument. A new instance of this should be constructed, and the IDE
+	 * will guide you through selecting the rest of the elements. Using this builder, it is not possible to create
+	 * an inconsistent Argument.
+	 */
+	public static class ArgumentBuilder {
+
+		enum Mode { SHORT, LONG, BOTH, DEFAULT }
+		Mode mode;
+
+		char shortArg;
+		String longArg;
+
+		String description;
+		String usageName;
+		boolean required;
+
+		Type argType = Type.ARRAY_OF_STRINGS;
+		String defaultValue;
+
+		/**
+		 * Sets the description for this argument. For consistency, it is arbitrarily decided that these descriptions
+		 * should end in a period.
+		 * @param description The description
+		 * @return The next step in the build process
+		 */
+		public ArgumentBuilderRequired2 setDescription(String description) {
+			Objects.requireNonNull(description, "description may not be null");
+			ArgumentBuilder.this.description = description;
+			return new ArgumentBuilderRequired2();
+		}
+
+		public class ArgumentBuilderRequired2 {
+			ArgumentBuilderRequired2(){}
+
+			/**
+			 * Sets the usage name for this argument. Typically, this is just the name
+			 * of the long argument, or a very short phrase describing the value,
+			 * but is only used for informational purposes, so
+			 * is ok to be repeated across arguments.
+			 * <p>
+			 * During help generation, this argument is surrounded by &lt;&gt; to indicate that it
+			 * is an argument, so there is no need to wrap the value in symbols.
+			 * <p>
+			 * The documentation will look something like this, assuming the argument is named "path"
+			 * and the usageName is "path to file":
+			 * <pre>
+			 *	--path &lt;path to file&gt;
+			 * </pre>
+			 *
+			 * If the type of the argument is an array, {@code , ...} is appended, and if it is numeric, {@code #}
+			 * is prepended.
+			 * <p>
+			 * Flags do not have a parameter, so no usage name is needed.
+			 *
+			 * @param usageName The display name in the help docs.
+			 * @return The next step in the build process.
+			 */
+			public ArgumentBuilderRequired3 setUsageName(String usageName) {
+				Objects.requireNonNull(usageName, "usageName may not be null");
+				ArgumentBuilder.this.usageName = usageName;
+				return new ArgumentBuilderRequired3();
+			}
+
+			/**
+			 * Treat this argument as a flag. A flag is a value, which is true if present, and false if not present.
+			 * It takes no arguments, and cannot be the default argument.
+			 * @return The next step in the build process.
+			 */
+			public FlagBuilderMode asFlag() {
+				return new FlagBuilderMode();
+			}
+		}
+
+		public class ArgumentBuilderRequired3 {
+			ArgumentBuilderRequired3(){}
+
+			/**
+			 * Configures this as a required argument. If the argument is missing, then a {@link ValidationException}
+			 * will be thrown during parsing.
+			 * @return The next step in the build process.
+			 */
+			public RequiredArgumentBuilderMode setRequired() {
+				ArgumentBuilder.this.required = true;
+				return new RequiredArgumentBuilderMode();
+			}
+
+			/**
+			 * Shortcut to setting this argument as required and as the default argument.
+			 * @return The final step in the build process.
+			 */
+			public RequiredArgumentBuilderOptional setRequiredAndDefault() {
+				return setRequired().asDefault();
+			}
+
+			/**
+			 * Configures this as an optional argument. The build
+			 * process will allow you to set a default value if
+			 * desired.
+			 * @return The next step in the build process.
+			 */
+			public OptionalArgumentBuilderMode setOptional() {
+				ArgumentBuilder.this.required = false;
+				return new OptionalArgumentBuilderMode();
+			}
+
+			/**
+			 * Shortcut to setting this argument as optional and as the default argument.
+			 * @return The final step in the build process.
+			 */
+			public OptionalArgumentBuilderOptional setOptionalAndDefault() {
+				return setOptional().asDefault();
+			}
+
+		}
+
+		public class FlagBuilderMode {
+			/**
+			 * Creates an argument that is a flag. That is, this is a boolean true if present,
+			 * boolean false if not. There are no arguments attached to this value.
+			 * @param shortArg The short code for the argument
+			 * @return The next step in the build process.
+			 */
+			public ArgumentBuilderFlag setName(char shortArg) {
+				new OptionalArgumentBuilderMode().setName(shortArg);
+				argType = Type.BOOLEAN;
+				return new ArgumentBuilderFlag();
+			}
+
+			/**
+			 * Creates an argument that is a flag. That is, this is a boolean true if present,
+			 * boolean false if not. There are no arguments attached to this value.
+			 * @param longArg The long code for the argument
+			 * @return The next step in the build process.
+			 */
+			public ArgumentBuilderFlag setName(String longArg) {
+				new OptionalArgumentBuilderMode().setName(longArg);
+				argType = Type.BOOLEAN;
+				return new ArgumentBuilderFlag();
+			}
+
+			/**
+			 * Creates an argument that is a flag. That is, this is a boolean true if present,
+			 * boolean false if not. There are no arguments attached to this value.
+			 * @param shortArg The short code for the argument
+			 * @param longArg The long code for the argument
+			 * @return The next step in the build process.
+			 */
+			public ArgumentBuilderFlag setName(char shortArg, String longArg) {
+				new OptionalArgumentBuilderMode().setName(shortArg, longArg);
+				argType = Type.BOOLEAN;
+				return new ArgumentBuilderFlag();
+			}
+		}
+
+		public class OptionalArgumentBuilderMode {
+			/**
+			 * Sets the name of this argument, using a short code. The value passed in must
+			 * be a printable character (as defined by {@link Character#isAlphabetic(int)})
+			 * and cannot be \0.
+			 *
+			 * In this mode, the argument may only be addressed via the short arg.
+			 *
+			 * This does not set a flag, this sets an argument with input.
+			 * @param shortArg The short arg
+			 * @return The next step in the build process
+			 */
+			public OptionalArgumentBuilderOptional setName(char shortArg) {
+				if(shortArg == '\0') {
+					throw new NullPointerException("shortArg may not be the null character");
+				}
+
+				if(!Character.isAlphabetic(shortArg)) {
+					throw new IllegalArgumentException("shortArg must be a alphabetical character");
+				}
+
+				mode = Mode.SHORT;
+				ArgumentBuilder.this.shortArg = shortArg;
+				return new OptionalArgumentBuilderOptional();
+			}
+
+			/**
+			 * Sets the name of this argument, using a long code. The value passed in may not
+			 * be null.
+			 *
+			 * In this mode, the argument may only be addressed via the long arg.
+			 *
+			 * This does not set a flag, this sets an argument with input.
+			 *
+			 * @param longArg The long arg
+			 * @return The next step in the build process
+			 */
+			public OptionalArgumentBuilderOptional setName(String longArg) {
+				Objects.requireNonNull(longArg, "longArg must not be null");
+
+				mode = Mode.LONG;
+				ArgumentBuilder.this.longArg = longArg;
+				return new OptionalArgumentBuilderOptional();
+			}
+
+			/**
+			 * Sets the name of this argument, using a short code and a long code.
+			 * The short arg passed in must
+			 * be a printable character (as defined by {@link Character#isAlphabetic(int)})
+			 * and cannot be \0.
+			 *
+			 * The long arg passed in may not be null.
+			 *
+			 * @param shortArg The single character address for this argument
+			 * @param longArg The long name of this argument
+			 * @return The next step in the build process.
+			 */
+			public OptionalArgumentBuilderOptional setName(char shortArg, String longArg) {
+				setName(shortArg);
+				setName(longArg);
+
+				// reset mode
+				mode = Mode.BOTH;
+				return new OptionalArgumentBuilderOptional();
+			}
+
+			/**
+			 * Considers this argument to be a default argument, that is, this contains
+			 * the parameters passed in without parameter names. There may only be one of
+			 * these arguments in the list. If a second one is attempted to be added, an
+			 * exception is thrown.
+			 * @return The next step in the build process.
+			 */
+			public OptionalArgumentBuilderOptional asDefault() {
+				mode = Mode.DEFAULT;
+				return new OptionalArgumentBuilderOptional();
+			}
+		}
+
+		public class RequiredArgumentBuilderMode {
+			/**
+			 * Sets the name of this argument, using a short code. The value passed in must
+			 * be a printable character (as defined by {@link Character#isAlphabetic(int)})
+			 * and cannot be \0.
+			 *
+			 * In this mode, the argument may only be addressed via the short arg.
+			 *
+			 * This does not set a flag, this sets an argument with input.
+			 * @param shortArg The short arg
+			 * @return The next step in the build process
+			 */
+			public RequiredArgumentBuilderOptional setName(char shortArg) {
+				if(shortArg == '\0') {
+					throw new NullPointerException("shortArg may not be the null character");
+				}
+
+				if(!Character.isAlphabetic(shortArg)) {
+					throw new IllegalArgumentException("shortArg must be a alphabetical character");
+				}
+
+				mode = Mode.SHORT;
+				ArgumentBuilder.this.shortArg = shortArg;
+				return new RequiredArgumentBuilderOptional();
+			}
+
+			/**
+			 * Sets the name of this argument, using a long code. The value passed in may not
+			 * be null.
+			 *
+			 * In this mode, the argument may only be addressed via the long arg.
+			 *
+			 * This does not set a flag, this sets an argument with input.
+			 *
+			 * @param longArg The long arg
+			 * @return The next step in the build process
+			 */
+			public RequiredArgumentBuilderOptional setName(String longArg) {
+				Objects.requireNonNull(longArg, "longArg must not be null");
+
+				mode = Mode.LONG;
+				ArgumentBuilder.this.longArg = longArg;
+				return new RequiredArgumentBuilderOptional();
+			}
+
+			/**
+			 * Sets the name of this argument, using a short code and a long code.
+			 * The short arg passed in must
+			 * be a printable character (as defined by {@link Character#isAlphabetic(int)})
+			 * and cannot be \0.
+			 *
+			 * The long arg passed in may not be null.
+			 *
+			 * @param shortArg The single character address for this argument
+			 * @param longArg The long name of this argument
+			 * @return The next step in the build process.
+			 */
+			public RequiredArgumentBuilderOptional setName(char shortArg, String longArg) {
+				setName(shortArg);
+				setName(longArg);
+
+				// reset mode
+				mode = Mode.BOTH;
+				return new RequiredArgumentBuilderOptional();
+			}
+
+			/**
+			 * Considers this argument to be a default argument, that is, this contains
+			 * the parameters passed in without parameter names. There may only be one of
+			 * these arguments in the list. If a second one is attempted to be added, an
+			 * exception is thrown.
+			 * @return The next step in the build process.
+			 */
+			public RequiredArgumentBuilderOptional asDefault() {
+				mode = Mode.DEFAULT;
+				return new RequiredArgumentBuilderOptional();
+			}
+		}
+
+		/**
+		 * A subset of types that are only valid for non-flag types.
+		 */
+		public static enum BuilderTypeNonFlag {
+			/**
+			 * A single string value
+			 */
+			STRING(Type.STRING),
+			/**
+			 * An array of strings
+			 */
+			ARRAY_OF_STRINGS(Type.ARRAY_OF_STRINGS),
+			/**
+			 * A numeric value
+			 */
+			NUMBER(Type.NUMBER),
+			/**
+			 * An array of numeric values
+			 */
+			ARRAY_OF_NUMBERS(Type.ARRAY_OF_NUMBERS);
+
+			Type type;
+			private BuilderTypeNonFlag(Type type) {
+				this.type = type;
+			}
+
+			Type getType() {
+				return this.type;
+			}
+		}
+
+		/**
+		 * Represents an object that is ready to be built. While user code cannot
+		 * build the Argument directly, this is used internally.
+		 */
+		public abstract class ArgumentBuilderFinal {
+			private ArgumentBuilderFinal(){}
+
+			/**
+			 * After building, this Argument should be in a consistent state.
+			 * @return
+			 */
+			abstract Argument build();
+		}
+
+		public final class ArgumentBuilderFlag extends ArgumentBuilderFinal {
+			private ArgumentBuilderFlag(){}
+
+			@Override
+			Argument build() {
+				return new OptionalArgumentBuilderOptional().build();
+			}
+		}
+
+		public final class OptionalArgumentBuilderOptional extends ArgumentBuilderFinal {
+			OptionalArgumentBuilderOptional(){}
+
+			/**
+			 * Sets the argument type. By default, ARRAY_OF_STRINGS is assumed.
+			 * @param argType The type of this argument
+			 * @return {@code this}, which can be called repeatedly to set the
+			 * optional arguments, or used as is.
+			 */
+			public OptionalArgumentBuilderOptional setArgType(BuilderTypeNonFlag argType) {
+				Objects.requireNonNull(argType, "argType cannot be null");
+				ArgumentBuilder.this.argType = argType.getType();
+				return this;
+			}
+
+			/**
+			 * For arguments that are not required, the default value may be set.
+			 * If this argument is required, calling this method is an error.
+			 * @param defaultVal
+			 * @return {@code this}, which can be called repeatedly to set the
+			 * optional arguments, or used as is.
+			 */
+			public OptionalArgumentBuilderOptional setDefaultVal(String defaultVal) {
+				if(required) {
+					throw new IllegalArgumentException("Required arguments cannot have a default value provided");
+				}
+				ArgumentBuilder.this.defaultValue = defaultVal;
+				return this;
+			}
+
+			@Override
+			Argument build() {
+				return new Argument(shortArg == '\0' ? null : shortArg, longArg, argType, defaultValue, description,
+						usageName, required);
+			}
+
+		}
+
+		public final class RequiredArgumentBuilderOptional extends ArgumentBuilderFinal {
+			RequiredArgumentBuilderOptional(){}
+
+			/**
+			 * Sets the argument type. By default, ARRAY_OF_STRINGS is assumed.
+			 * @param argType The type of this argument
+			 * @return {@code this}, which can be called repeatedly to set the
+			 * optional arguments, or used as is.
+			 */
+			public RequiredArgumentBuilderOptional setArgType(BuilderTypeNonFlag argType) {
+				Objects.requireNonNull(argType, "argType cannot be null");
+				ArgumentBuilder.this.argType = argType.getType();
+				return this;
+			}
+
+			@Override
+			Argument build() {
+				return new OptionalArgumentBuilderOptional().build();
+			}
+
+		}
+
+	}
+
+	/**
 	 * A description of the command itself.
 	 */
 	String description = "";
-	List<Argument> argumentModel = new ArrayList<Argument>();
+	/**
+	 * The model for the arguments
+	 */
+	List<Argument> argumentModel = new ArrayList<>();
+	/**
+	 * Whether to throw an error if unrecognized arguments were provided
+	 */
+	boolean errorOnUnknown = true;
 
 	/**
 	 * Returns the default argument, if it exists.
@@ -58,7 +496,7 @@ public final class ArgumentParser {
 		return null;
 	}
 
-	private final class Argument {
+	private static final class Argument {
 
 		Character shortArg;
 		String longArg;
@@ -92,7 +530,7 @@ public final class ArgumentParser {
 
 			this.defaultVal = defaultVal;
 			if(isArray() && defaultVal != null) {
-				defaultList = ArgumentParser.this.lex(defaultVal);
+				defaultList = ArgumentParser.lex(defaultVal);
 			}
 			this.usageName = usageName;
 			this.required = required;
@@ -116,7 +554,7 @@ public final class ArgumentParser {
 
 		private void setValue(String val) {
 			if(isArray()) {
-				arrayVal = ArgumentParser.this.lex(val);
+				arrayVal = ArgumentParser.lex(val);
 			} else {
 				singleVal = val;
 			}
@@ -175,9 +613,9 @@ public final class ArgumentParser {
 				//If short code is false, we need to check to see if there is a short code, if so,
 				//this is an alias.
 				if(shortCode) {
-					b.append("-").append(shortArg);
+					b.append(TermColors.GREEN).append("-").append(shortArg).append(TermColors.RESET);
 				} else {
-					b.append("--").append(longArg);
+					b.append(TermColors.GREEN).append("--").append(longArg).append(TermColors.RESET);
 				}
 				b.append(": ");
 
@@ -226,15 +664,21 @@ public final class ArgumentParser {
 		}
 	}
 
-	public class ArgumentParserResults {
+	public final class ArgumentParserResults {
 
-		List<Argument> arguments = new ArrayList<Argument>();
+		List<Argument> arguments = new ArrayList<>();
+		List<String> unclassified = new ArrayList<>();
+		List<String> rawArgs;
+
+		private ArgumentParserResults(List<String> rawArgs) {
+			this.rawArgs = new ArrayList<>(rawArgs);
+		}
 
 		private void updateArgument(Argument a) {
 			if(a == null) {
 				return;
 			}
-			List<Argument> toRemove = new ArrayList<Argument>();
+			List<Argument> toRemove = new ArrayList<>();
 			for(Argument arg : arguments) {
 				if(arg.modelEquals(a)) {
 					toRemove.add(arg);
@@ -244,6 +688,10 @@ public final class ArgumentParser {
 				arguments.remove(arg);
 			}
 			arguments.add(a);
+		}
+
+		private void updateUnclassifiedArgument(String a) {
+			unclassified.add(a);
 		}
 
 		/**
@@ -382,11 +830,11 @@ public final class ArgumentParser {
 			try {
 				Argument a = getArg();
 				if(a.arrayVal == null) {
-					return new ArrayList<String>();
+					return new ArrayList<>();
 				}
-				return new ArrayList<String>(a.arrayVal);
+				return new ArrayList<>(a.arrayVal);
 			} catch (ResultUseException e) {
-				return new ArrayList<String>();
+				return new ArrayList<>();
 			}
 		}
 
@@ -403,6 +851,23 @@ public final class ArgumentParser {
 		}
 
 		/**
+		 * Returns the list of values associated with the switch represented by this short code. If the switch
+		 * wasn't set, the default return value is returned instead.
+		 * @param flag
+		 * @param defaultReturn
+		 * @return
+		 * @throws com.laytonsmith.PureUtilities.ArgumentParser.ResultUseException
+		 */
+		public List<String> getStringListArgument(Character flag, List<String> defaultReturn)
+				throws ResultUseException {
+			List<String> d = getStringListArgument(flag);
+			if(d == null) {
+				return defaultReturn;
+			}
+			return d;
+		}
+
+		/**
 		 * Returns the list of values associated with the switch represented by
 		 * this long code. If the switch wasn't set, null is returned.
 		 *
@@ -414,6 +879,22 @@ public final class ArgumentParser {
 			return getStringListArgument(getArg(flag));
 		}
 
+		/**
+		 * Returns the list of values associated with the switch represented by this long code. If the switch
+		 * wasn't set, the default return value is returned instead.
+		 * @param flag
+		 * @param defaultReturn
+		 * @return
+		 * @throws com.laytonsmith.PureUtilities.ArgumentParser.ResultUseException
+		 */
+		public List<String> getStringListArgument(String flag, List<String> defaultReturn) throws ResultUseException {
+			List<String> d = getStringListArgument(flag);
+			if(d == null) {
+				return defaultReturn;
+			}
+			return d;
+		}
+
 		private List<String> getStringListArgument(Argument arg) {
 			if(arg == null) {
 				return null;
@@ -421,7 +902,7 @@ public final class ArgumentParser {
 			if(arg.argType != Type.ARRAY_OF_STRINGS) {
 				throw new ClassCastException("Argument type not set to " + Type.ARRAY_OF_STRINGS.name() + ". Cannot return a " + "string list" + ".");
 			}
-			return new ArrayList<String>(arg.arrayVal);
+			return new ArrayList<>(arg.arrayVal);
 		}
 
 		/**
@@ -458,7 +939,7 @@ public final class ArgumentParser {
 				throw new ClassCastException("Argument type not set to " + Type.ARRAY_OF_NUMBERS.name() + ". Cannot return a " + "number list" + ".");
 			}
 
-			List<Double> list = new ArrayList<Double>();
+			List<Double> list = new ArrayList<>();
 			for(String s : arg.arrayVal) {
 				list.add(Double.parseDouble(s));
 			}
@@ -518,14 +999,21 @@ public final class ArgumentParser {
 			}
 			return b.toString();
 		}
+
+		/**
+		 * Returns a list of the raw, unprocessed arguments. This includes all arguments as is, with no processing.
+		 * @return
+		 */
+		public List<String> getRawArguments() {
+			return new ArrayList<>(rawArgs);
+		}
 	}
 
 	public static ArgumentParser GetParser() {
 		return new ArgumentParser();
 	}
 
-	public static enum Type {
-
+	static enum Type {
 		STRING,
 		NUMBER,
 		ARRAY_OF_STRINGS,
@@ -533,179 +1021,68 @@ public final class ArgumentParser {
 		BOOLEAN
 	}
 
-	private ArgumentParser addArgument0(Character shortArg, String longArg, Type argType, String defaultVal, String description, String usageName, boolean required) {
-		//TODO: Make sure this switch doesn't already exist
-		argumentModel.add(new Argument(shortArg, longArg, argType, defaultVal, description, usageName, required));
+	/**
+	 * Adds the configured argument to the ArgumentParser.
+	 * <p>
+	 * To build an Argument, create a new instance of {@link ArgumentBuilder}.
+	 * @param arg The argument to add to the list
+	 * @return {@code this}, for continued chaining
+	 */
+	public ArgumentParser addArgument(ArgumentBuilder.ArgumentBuilderFinal arg) {
+		Argument arg0 = arg.build();
+		// Check to make sure this isn't a duplicate value
+		for(Argument a : argumentModel) {
+			// default arg
+			if(a.shortArg == null && a.longArg == null) {
+				// This is the default arg, ensure that arg is not the default
+				if(arg0.shortArg == null && arg0.longArg == null) {
+					throw new IllegalArgumentException("Only 1 default argument may be provided.");
+				}
+			}
+			if(a.shortArg != null && arg0.shortArg != null && a.shortArg.equals(arg0.shortArg)) {
+				throw new IllegalArgumentException("A new argument with short arg '" + arg0.shortArg + "' was provided,"
+						+ " but a previous argument with the same short arg was already provided.");
+			}
+			if(a.longArg != null && arg0.longArg != null && a.longArg.equals(arg0.longArg)) {
+				throw new IllegalArgumentException("A new argument with long arg \"" + arg0.longArg + "\" was provided,"
+						+ " but a previous argument with the same long arg was already provided.");
+			}
+		}
+		argumentModel.add(arg0);
 		return this;
 	}
 
 	/**
-	 * Adds an argument to this argument parser. This is the most complex method
-	 * of adding an argument, all other methods are wrappers around this.
-	 *
-	 * The short code and long code for a switch both represent the underlying
-	 * switch, that is, they both "addresses" of a single underlying switch.
-	 * When accessing the argument later, you may use either the short code or
-	 * the long code to retrieve the value of the switch, but it is important to
-	 * understand that they are both pointing to the same item.
-	 *
-	 * @param shortArg The short code for this switch.
-	 * @param longArg The long code for this switch.
-	 * @param argType The expected type of this switch.
-	 * @param defaultVal The default value of this switch. If defaultVal is not
-	 * null, the switch will always exist when calling get*Argument from the
-	 * results. If argType is BOOLEAN, setting this will cause the switch to
-	 * @param description The description of this argument, which is used when
-	 * building the help text created by getBuiltDescription.
-	 * @return
-	 */
-	public ArgumentParser addArgument(Character shortArg, String longArg, Type argType, String defaultVal, String description, String usageName, boolean required) {
-		if(argType == Type.BOOLEAN) {
-			throw new IllegalArgumentException("Cannot use addArgument to add a flag. Use addFlag instead.");
-		}
-		if(shortArg == null && longArg == null) {
-			if(argType != Type.STRING && argType != Type.ARRAY_OF_STRINGS) {
-				throw new IllegalArgumentException("Cannot set the type of the default switch to anything but " + Type.STRING.name() + " or "
-						+ Type.ARRAY_OF_STRINGS.name());
-			}
-		}
-		return addArgument0(shortArg, longArg, argType, defaultVal, description, usageName, required);
-	}
-
-	/**
-	 * Sets the default switch's arg type, default value, and description. The
-	 * default switch is the switch that is associated with "loose" arguments,
-	 * for instance, <code>these are args</code> would all be loose arguments,
-	 * because they aren't associated with any explicit switches. Note that
-	 * there is no Type specified here, that's because the arguments can be
-	 * grabbed as either an array of strings or a string.
-	 *
-	 * @param argType
-	 * @param defaultVal
-	 * @param description
-	 * @return
-	 */
-	public ArgumentParser addArgument(String defaultVal, String description, String usageName, boolean required) {
-		return addArgument(null, null, Type.ARRAY_OF_STRINGS, defaultVal, description, usageName, required);
-	}
-
-	/**
-	 * Sets the default switch with no default value.
-	 *
-	 * @param argType
-	 * @param description
-	 * @return
-	 */
-	public ArgumentParser addArgument(String description, String usageName, boolean required) {
-		return addArgument(null, null, Type.ARRAY_OF_STRINGS, null, description, usageName, required);
-	}
-
-	/**
-	 * Adds a new argument with no default value.
-	 *
-	 * @param shortArg
-	 * @param longArg
-	 * @param argType
-	 * @param description
-	 * @return
-	 */
-	public ArgumentParser addArgument(Character shortArg, String longArg, Type argType, String description, String usageName, boolean required) {
-		return addArgument(shortArg, longArg, argType, null, description, usageName, required);
-	}
-
-	/**
-	 * Adds a new argument with no long code.
-	 *
-	 * @param shortArg
-	 * @param argType
-	 * @param defaultVal
-	 * @param description
-	 * @return
-	 */
-	public ArgumentParser addArgument(Character shortArg, Type argType, String defaultVal, String description, String usageName, boolean required) {
-		return addArgument(shortArg, null, argType, defaultVal, description, usageName, required);
-	}
-
-	/**
-	 * Adds a new argument with no short code.
-	 *
-	 * @param longArg
-	 * @param argType
-	 * @param defaultVal
-	 * @param description
-	 * @return
-	 */
-	public ArgumentParser addArgument(String longArg, Type argType, String defaultVal, String description, String usageName, boolean required) {
-		return addArgument(null, longArg, argType, defaultVal, description, usageName, required);
-	}
-
-	/**
-	 * Adds a new argument with no long code, and no default value.
-	 *
-	 * @param shortArg
-	 * @param argType
-	 * @param description
-	 * @return
-	 */
-	public ArgumentParser addArgument(Character shortArg, Type argType, String description, String usageName, boolean required) {
-		return addArgument(shortArg, null, argType, null, description, usageName, required);
-	}
-
-	/**
-	 * Adds a new argument with no short code, and no default value.
-	 *
-	 * @param longArg
-	 * @param argType
-	 * @param description
-	 * @return
-	 */
-	public ArgumentParser addArgument(String longArg, Type argType, String description, String usageName, boolean required) {
-		return addArgument(null, longArg, argType, null, description, usageName, required);
-	}
-
-	/**
-	 * Adds a new flag.
-	 *
-	 * @param shortArg
-	 * @param longArg
-	 * @param description
-	 * @return
-	 */
-	public ArgumentParser addFlag(Character shortArg, String longArg, String description) {
-		return addArgument0(shortArg, longArg, Type.BOOLEAN, null, description, null, false);
-	}
-
-	/**
-	 * Adds a new flag with no short code.
-	 *
-	 * @param longArg
-	 * @param description
-	 * @return
-	 */
-	public ArgumentParser addFlag(String longArg, String description) {
-		return addArgument0(null, longArg, Type.BOOLEAN, null, description, null, false);
-	}
-
-	/**
-	 * Adds a new flag with no long code.
-	 *
-	 * @param shortArg
-	 * @param description
-	 * @return
-	 */
-	public ArgumentParser addFlag(Character shortArg, String description) {
-		return addArgument0(shortArg, null, Type.BOOLEAN, null, description, null, false);
-	}
-
-	/**
 	 * Adds a description to the ArgumentParser object, which is used when
-	 * building the description returned by getBuiltDescription.
+	 * building the description returned by getBuiltDescription. For consistency,
+	 * it is arbitrarily decided that these descriptions should end with a period.
 	 *
 	 * @param description
 	 * @return
 	 */
 	public ArgumentParser addDescription(String description) {
 		this.description = description;
+		return this;
+	}
+
+	/**
+	 * If set to true (which is the default), then unknown options will cause an error. If false,
+	 * they will not cause an error, and can even still be accessed in the results. However, this is
+	 * only recommended for situations where arguments are processed in a later step as well, if all
+	 * the possibly valid arguments are known up front, then this should generally remain true, so
+	 * as to fail faster and give the user a better overall experience.
+	 *
+	 * Also note that it is possible to escape dashes, so the argument parser doesn't accept the argument
+	 * as a known flag, but instead a literal, which can then be further processed later by another
+	 * argument parser, for instance. It may be better to instead instruct users to pass the arguments
+	 * through escaped, so that arguments can still be validated. (This works for both short and
+	 * long arguments, i.e. {@code \-s} or {@code \--long}.)
+	 *
+	 * @param errorOnUnknown
+	 * @return {@code this} for easier chaining.
+	 */
+	public ArgumentParser setErrorOnUnknownArgs(boolean errorOnUnknown) {
+		this.errorOnUnknown = errorOnUnknown;
 		return this;
 	}
 
@@ -721,11 +1098,11 @@ public final class ArgumentParser {
 		//Now, we need to go through and get all the switch names in alphabetical
 		//order.
 		b.append("\t").append(this.description).append("\n\n");
-		List<Character> shortCodes = new ArrayList<Character>();
-		List<String> longCodes = new ArrayList<String>();
-		List<Character> shortCodesDone = new ArrayList<Character>();
-		List<String> longCodesDone = new ArrayList<String>();
-		List<String> aliases = new ArrayList<String>();
+		List<Character> shortCodes = new ArrayList<>();
+		List<String> longCodes = new ArrayList<>();
+		List<Character> shortCodesDone = new ArrayList<>();
+		List<String> longCodesDone = new ArrayList<>();
+		List<String> aliases = new ArrayList<>();
 		for(Argument arg : argumentModel) {
 			if(arg.shortArg != null) {
 				shortCodes.add(arg.shortArg);
@@ -742,10 +1119,10 @@ public final class ArgumentParser {
 		//Go through the flags first
 		boolean hasShortCodeFlags = false;
 		StringBuilder flags = new StringBuilder();
-		List<Character> shortFlags = new ArrayList<Character>();
-		List<String> longFlags = new ArrayList<String>();
-		List<Character> shortArguments = new ArrayList<Character>();
-		List<String> longArguments = new ArrayList<String>();
+		List<Character> shortFlags = new ArrayList<>();
+		List<String> longFlags = new ArrayList<>();
+		List<Character> shortArguments = new ArrayList<>();
+		List<String> longArguments = new ArrayList<>();
 		for(Character c : shortCodes) {
 			Argument a = getArgument(c);
 			if(a.isFlag()) {
@@ -771,12 +1148,12 @@ public final class ArgumentParser {
 			}
 		}
 
-		b.append("Usage:\n\t");
+		b.append(TermColors.BOLD).append("Usage:\n\t").append(TermColors.RESET);
 		//Get the short flags first, then the long flags, then the short arguments, then the long arguments
-		List<String> parts = new ArrayList<String>();
+		List<String> parts = new ArrayList<>();
 		if(!shortFlags.isEmpty()) {
 			StringBuilder usage = new StringBuilder();
-			usage.append("[-");
+			usage.append("[").append("-");
 			for(Character c : shortFlags) {
 				usage.append(c);
 			}
@@ -788,7 +1165,7 @@ public final class ArgumentParser {
 			parts.add("[--" + s + "]");
 		}
 
-		List<Argument> usageList = new ArrayList<Argument>();
+		List<Argument> usageList = new ArrayList<>();
 		for(Character c : shortArguments) {
 			usageList.add(getArgument(c));
 		}
@@ -835,7 +1212,16 @@ public final class ArgumentParser {
 
 		//Now, if the default switch exists, put it here too
 		if(getArgument() != null) {
-			parts.add("<" + getArgument().usageName + ", ...>");
+			String s = "<";
+			if(getArgument().isNumeric()) {
+				s += "#";
+			}
+			s += getArgument().usageName;
+			if(getArgument().isArray()) {
+				s += ", ...";
+			}
+			s += ">";
+			parts.add(s);
 		}
 
 		{
@@ -853,14 +1239,15 @@ public final class ArgumentParser {
 			}
 			b.append(usage.toString());
 		}
-		b.append("\n\nOptions:\n\n");
+
+		b.append("\n\n");
 		Argument def = getArgument();
 		if(def != null && def.description != null) {
 			b.append(def.generateDescription(false));
 		}
 
 		if(flags.length() != 0) {
-			b.append("Flags");
+			b.append(TermColors.BOLD).append("Flags").append(TermColors.RESET);
 			if(hasShortCodeFlags) {
 				b.append(" (Short flags may be combined)");
 			}
@@ -876,6 +1263,8 @@ public final class ArgumentParser {
 				b.append("\tNo options.\n");
 			} else if(flags.length() == 0) {
 				b.append("\tNo flags.\n");
+			} else {
+				b.append(TermColors.BOLD).append("Options:\n").append(TermColors.RESET);
 			}
 		}
 
@@ -917,6 +1306,7 @@ public final class ArgumentParser {
 	 *
 	 * @param args
 	 * @return
+	 * @throws com.laytonsmith.PureUtilities.ArgumentParser.ValidationException
 	 */
 	public ArgumentParserResults match(String args) throws ValidationException {
 		return parse(lex(args));
@@ -932,6 +1322,7 @@ public final class ArgumentParser {
 	 *
 	 * @param args
 	 * @return
+	 * @throws com.laytonsmith.PureUtilities.ArgumentParser.ValidationException
 	 */
 	public ArgumentParserResults match(String[] args) throws ValidationException {
 		return parse(Arrays.asList(args));
@@ -947,7 +1338,7 @@ public final class ArgumentParser {
 	 */
 	static List<String> lex(String args) {
 		//First, we have to tokenize the strings. Since we can have quoted arguments, we can't simply split on spaces.
-		List<String> arguments = new ArrayList<String>();
+		List<String> arguments = new ArrayList<>();
 		StringBuilder buf = new StringBuilder();
 		boolean stateInSingleQuote = false;
 		boolean stateInDoubleQuote = false;
@@ -1016,7 +1407,7 @@ public final class ArgumentParser {
 	}
 
 	private ArgumentParserResults parse(List<String> args) throws ValidationException {
-		ArgumentParserResults results = new ArgumentParserResults();
+		ArgumentParserResults results = new ArgumentParserResults(args);
 		//Fill in results with all the defaults
 		for(Argument arg : argumentModel) {
 			if(arg.defaultVal != null) {
@@ -1046,6 +1437,9 @@ public final class ArgumentParser {
 				results.updateArgument(validateArgument(lastArg, looseArgs));
 				//This is a long arg, and so it is the only one.
 				arg = arg.substring(2);
+				if(errorOnUnknown && getArgument(arg) == null) {
+					throw new ValidationException("Unrecognized argument: " + arg);
+				}
 				lastArg = getArgument(arg);
 				continue;
 			}
@@ -1061,7 +1455,12 @@ public final class ArgumentParser {
 					Character c = arg.charAt(i);
 					Argument vArg = getArgument(c);
 					if(vArg == null) {
-						throw new ValidationException("Unrecognized flag: " + c);
+						if(errorOnUnknown) {
+							throw new ValidationException("Unrecognized flag: " + c);
+						} else {
+							results.updateUnclassifiedArgument("-" + c.toString());
+							continue;
+						}
 					}
 					if(!vArg.isFlag() && hasNonFlagArg) {
 						//We have already come across a non-flag argument, and since this one isn't
@@ -1095,7 +1494,29 @@ public final class ArgumentParser {
 			//There are loose arguments left, so add them to the loose argument list.
 			results.updateArgument(validateArgument(null, looseArgs));
 		}
-		//TODO: Check to see if all the required values are here
+		//Check to see if all the required values are here
+		List<String> missing = new ArrayList<>();
+		model: for(Argument model : argumentModel) {
+			if(model.required) {
+				for(Argument r : results.arguments) {
+					if(r.modelEquals(model)) {
+						continue model;
+					}
+				}
+				if(model.shortArg != null && model.longArg == null) {
+					missing.add(model.shortArg.toString());
+				} else if(model.shortArg == null && model.longArg != null) {
+					missing.add(model.longArg);
+				} else if(model.shortArg != null && model.longArg != null) {
+					missing.add(model.shortArg + "/" + model.longArg);
+				} else {
+					missing.add("<default argument>");
+				}
+			}
+		}
+		if(!missing.isEmpty()) {
+			throw new ValidationException("Missing required argument(s): " + StringUtils.Join(missing, ", "));
+		}
 
 		return results;
 	}

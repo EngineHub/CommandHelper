@@ -5,7 +5,7 @@ import com.laytonsmith.annotations.MEnum;
 /**
  * An estimation of what the result will be
  */
-@MEnum("InventoryAction")
+@MEnum("com.commandhelper.InventoryAction")
 public enum MCInventoryAction {
 	/**
 	 * Nothing will happen from the click. There may be cases where nothing will happen and this is value is not

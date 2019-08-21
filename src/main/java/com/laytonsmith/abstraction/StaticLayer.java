@@ -64,28 +64,20 @@ public final class StaticLayer {
 		return convertor.GetServerEventMixin();
 	}
 
-	public static MCItemStack GetItemStack(int type, int qty) {
-		return convertor.GetItemStack(type, qty);
+	public static MCMaterial GetMaterialFromLegacy(int type, int data) {
+		return convertor.GetMaterialFromLegacy(type, data);
 	}
 
-	public static MCItemStack GetItemStack(int type, int data, int qty) {
-		return convertor.GetItemStack(type, data, qty);
+	public static MCMaterial GetMaterialFromLegacy(String name, int data) {
+		return convertor.GetMaterialFromLegacy(name, data);
 	}
 
 	public static MCItemStack GetItemStack(String type, int qty) {
 		return convertor.GetItemStack(type, qty);
 	}
 
-	public static MCItemStack GetItemStack(String type, int data, int qty) {
-		return convertor.GetItemStack(type, data, qty);
-	}
-
 	public static MCItemStack GetItemStack(MCMaterial type, int qty) {
 		return convertor.GetItemStack(type, qty);
-	}
-
-	public static MCItemStack GetItemStack(MCMaterial type, int data, int qty) {
-		return convertor.GetItemStack(type, data, qty);
 	}
 
 	public static MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded) {
@@ -98,6 +90,10 @@ public final class StaticLayer {
 
 	public static MCEnchantment GetEnchantmentByName(String name) {
 		return convertor.GetEnchantmentByName(name);
+	}
+
+	public static MCMaterial[] GetMaterialValues() {
+		return convertor.GetMaterialValues();
 	}
 
 	public static MCMaterial GetMaterial(String name) {
@@ -114,26 +110,6 @@ public final class StaticLayer {
 
 	public static MCMetadataValue GetMetadataValue(Object value, MCPlugin plugin) {
 		return convertor.GetMetadataValue(value, plugin);
-	}
-
-	/**
-	 * Returns the data value of the specified material name, or -1 if none was found.
-	 *
-	 * @param materialName
-	 * @return
-	 */
-	public static int LookupItemId(String materialName) {
-		return convertor.LookupItemId(materialName);
-	}
-
-	/**
-	 * Returns the name of the material, given the material's ID.
-	 *
-	 * @param id
-	 * @return
-	 */
-	public static String LookupMaterialName(int id) {
-		return convertor.LookupMaterialName(id);
 	}
 
 	/**

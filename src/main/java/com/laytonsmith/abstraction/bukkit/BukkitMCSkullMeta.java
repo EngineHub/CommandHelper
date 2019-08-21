@@ -42,11 +42,6 @@ public class BukkitMCSkullMeta extends BukkitMCItemMeta implements MCSkullMeta {
 
 	@Override
 	public void setOwningPlayer(MCOfflinePlayer player) {
-		try {
-			sm.setOwningPlayer((OfflinePlayer) player.getHandle());
-		} catch (NoSuchMethodError ex) {
-			// probably prior to 1.12.2
-			sm.setOwner(player.getName());
-		}
+		sm.setOwningPlayer((OfflinePlayer) player.getHandle());
 	}
 }

@@ -9,32 +9,41 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCCommandBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
+import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.abstraction.enums.MCTreeType;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
@@ -42,7 +51,13 @@ import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
+
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 
 public class Environment {
 
@@ -50,8 +65,360 @@ public class Environment {
 		return "Allows you to manipulate the environment around the player";
 	}
 
+	@api
+	public static class get_block extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_block";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {locationArray} Gets the type the block at the location.";
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args)
+				throws CancelCommandException, ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+			if(b == null) {
+				throw new CRENotFoundException(
+						"Could not find the block in " + this.getName() + " (are you running in cmdline mode?)", t);
+			}
+			return new CString(b.getType().getName(), t);
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class, CREInvalidWorldException.class,
+					CRENotFoundException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_3;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
+	public static class set_block extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_block";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {locationArray, blockName, [physics]} Sets the block at the location."
+					+ " The physics boolean determines whether or not this causes a block update. Defaults to true.";
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args)
+				throws CancelCommandException, ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			boolean physics = true;
+			if(args.length == 3) {
+				physics = ArgumentValidation.getBoolean(args[2], t);
+			}
+			MCMaterial mat = StaticLayer.GetMaterial(args[1].val());
+			if(mat == null) {
+				throw new CREIllegalArgumentException("Cannot find the material \"" + args[1].val() + "\".", t);
+			}
+			loc.getBlock().setType(mat, physics);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class, CREInvalidWorldException.class,
+					CREIllegalArgumentException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_3;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
+	public static class get_blockdata_string extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_blockdata_string";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "string {locationArray} Gets the block data at the location in a string format."
+					+ " Forward compatibility is not ensured.";
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args)
+				throws CancelCommandException, ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+			if(b == null) {
+				throw new CRENotFoundException("Could not find the block in " + this.getName() + " (cmdline mode?)", t);
+			}
+			return new CString(b.getBlockData().getAsString(), t);
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class, CREInvalidWorldException.class,
+					CRENotFoundException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_3;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
+	public static class set_blockdata_string extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_blockdata_string";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {locationArray, data, [physics]} Sets the block at the location from a blockdata string."
+					+ " Forward compatibility is not ensured.";
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args)
+				throws CancelCommandException, ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+			if(b == null) {
+				throw new CRENotFoundException("Could not find the block in " + this.getName() + " (cmdline mode?)", t);
+			}
+			MCBlockData bd;
+			try {
+				bd = Static.getServer().createBlockData(args[1].val());
+			} catch (IllegalArgumentException ex) {
+				throw new CREIllegalArgumentException("Cannot create block data from string: " + args[1].val(), t);
+			}
+			boolean physics = true;
+			if(args.length == 3) {
+				physics = ArgumentValidation.getBoolean(args[2], t);
+			}
+			b.setBlockData(bd, physics);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class, CREInvalidWorldException.class,
+					CRENotFoundException.class, CREIllegalArgumentException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_3;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
+	public static class get_blockdata extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_blockdata";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {locationArray} Gets the block data as an array at the location.";
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args)
+				throws CancelCommandException, ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+			if(b == null) {
+				throw new CRENotFoundException("Could not find the block in " + this.getName() + " (cmdline mode?)", t);
+			}
+			return ObjectGenerator.GetGenerator().blockData(b.getBlockData(), t);
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class, CREInvalidWorldException.class,
+					CRENotFoundException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api
+	public static class set_blockdata extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_blockdata";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {locationArray, data, [physics]} Sets the block at the location from a blockdata object.";
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args)
+				throws CancelCommandException, ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCBlock b = loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+			if(b == null) {
+				throw new CRENotFoundException("Could not find the block in " + this.getName() + " (cmdline mode?)", t);
+			}
+			boolean physics = true;
+			if(args.length == 3) {
+				physics = ArgumentValidation.getBooleanish(args[2], t);
+			}
+			MCBlockData bd;
+			try {
+				if(args[1] instanceof CArray) {
+					CArray bda = (CArray) args[1];
+					if(bda.size() == 1) {
+						MCMaterial mat = StaticLayer.GetMaterial(bda.get("block", t).val().toUpperCase());
+						if(mat == null) {
+							throw new CREIllegalArgumentException("Cannot find material \""
+									+ bda.get("block", t).val() + "\".", t);
+						}
+						b.setType(mat);
+						return CVoid.VOID;
+					}
+					bd = ObjectGenerator.GetGenerator().blockData((CArray) args[1], t);
+				} else {
+					bd = Static.getServer().createBlockData(args[1].val());
+				}
+			} catch (IllegalArgumentException ex) {
+				throw new CREIllegalArgumentException("Cannot create block data from string: " + args[1].val(), t);
+			}
+			b.setBlockData(bd, physics);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRECastException.class, CREInvalidWorldException.class,
+					CRENotFoundException.class, CREIllegalArgumentException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@hide("Deprecated in favor of get_block()")
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class get_block_at extends AbstractFunction {
+	public static class get_block_at extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -65,11 +432,12 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "string {x, y, z, [world] | locationArray, [world]} Gets the id of the block at the coordinates. The format"
-					+ " of the return will be x:y where x is the id of the block, and y is the meta data for the block."
-					+ " All blocks will return in this format, but blocks that don't have meta data will return 0 in y"
-					+ " (eg. air is \"0:0\"). If a world isn't provided in the location array or as an argument, the"
-					+ " current player's world is used.";
+			return "string {x, y, z, [world] | locationArray, [world]} Gets the id of the block at the coordinates."
+					+ " The format of the return will be x:y where x is the id of the block,"
+					+ " and y is the meta data for the block. All blocks will return in this format,"
+					+ " but blocks that don't have meta data will return 0 in y (eg. air is \"0:0\")."
+					+ " If a world isn't provided in the location array or as an argument,"
+					+ " the current player's world is used. (deprecated for get_block())";
 		}
 
 		@Override
@@ -84,12 +452,12 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_2;
+		public MSVersion since() {
+			return MSVersion.V3_0_2;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
 			int x;
 			int y;
@@ -137,10 +505,25 @@ public class Environment {
 		public Boolean runAsync() {
 			return false;
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The function get_block_at() is deprecated. Use get_block().", t);
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
+	@hide("Deprecated in favor of set_block()")
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class set_block_at extends AbstractFunction {
+	public static class set_block_at extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -156,9 +539,10 @@ public class Environment {
 		public String docs() {
 			return "void {x, y, z, id, [world] [physics] | locationArray, id, [physics]} Sets the id of the block at"
 					+ " the x y z coordinates specified. The id must be an integer or a blocktype identifier similar to"
-					+ " the type returned from get_block_at (eg. \"0:0\"). If the meta value is not specified, 0 is used."
-					+ " If world isn't specified, the current player's world is used. Physics (which defaults to true)"
-					+ " specifies whether or not to update the surrounding blocks when this block is set.";
+					+ " the type returned from get_block_at (eg. \"0:0\"). If the meta value is not specified,"
+					+ " 0 is used. If world isn't specified, the current player's world is used."
+					+ " Physics (which defaults to true) specifies whether or not to update the surrounding blocks when"
+					+ " this block is set. (deprecated for set_block())";
 		}
 
 		@Override
@@ -172,12 +556,12 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_2;
+		public MSVersion since() {
+			return MSVersion.V3_0_2;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
 			int x;
 			int y;
@@ -197,7 +581,7 @@ public class Environment {
 				w = l.getWorld();
 				id = args[1].val();
 				if(args.length == 3) {
-					physics = Static.getBoolean(args[2], t);
+					physics = ArgumentValidation.getBoolean(args[2], t);
 				}
 
 			} else {
@@ -211,7 +595,7 @@ public class Environment {
 						throw new CREInvalidWorldException("The specified world " + args[4].val() + " doesn't exist", t);
 					}
 					if(args.length == 6) {
-						physics = Static.getBoolean(args[5], t);
+						physics = ArgumentValidation.getBoolean(args[5], t);
 					}
 				} else if(w == null) {
 					throw new CREInvalidWorldException("No world was provided", t);
@@ -229,15 +613,12 @@ public class Environment {
 			} catch (NumberFormatException e) {
 				throw new CREFormatException("id must be formatted as such: 'x:y' where x and y are integers", t);
 			}
-			MCMaterial mat = StaticLayer.GetConvertor().getMaterial(data);
-			if(mat == null || !mat.isBlock()) {
-				throw new CRECastException("Not a block ID: " + data
-						+ ". Attempting to set an invalid id can corrupt chunks!", t);
-			}
-			try {
-				b.setTypeAndData(data, meta, physics);
-			} catch (IllegalArgumentException ex) {
-				throw new CREFormatException("Invalid block meta data: \"" + id + "\"", t);
+			if(b != null) {
+				try {
+					b.setTypeAndData(data, meta, physics);
+				} catch (IllegalArgumentException ex) {
+					throw new CREFormatException("Invalid block meta data: \"" + id + "\"", t);
+				}
 			}
 
 			return CVoid.VOID;
@@ -246,6 +627,20 @@ public class Environment {
 		@Override
 		public Boolean runAsync() {
 			return false;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The function set_block_at() is deprecated. Use set_block().", t);
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -267,8 +662,7 @@ public class Environment {
 		public String docs() {
 			return "void {locationArray, lineArray | locationArray, line1, [line2, [line3, [line4]]]}"
 					+ " Sets the text of the sign at the given location. If the block at x,y,z isn't a sign,"
-					+ " a RangeException is thrown. If the text on a line overflows 15 characters, it is simply"
-					+ " truncated.";
+					+ " a RangeException is thrown. If a text line cannot fit on the sign, it'll be cut off.";
 		}
 
 		@Override
@@ -282,8 +676,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -292,7 +686,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			if(sender instanceof MCPlayer) {
@@ -304,7 +698,7 @@ public class Environment {
 				String line2 = "";
 				String line3 = "";
 				String line4 = "";
-				if(args.length == 2 && args[1] instanceof CArray) {
+				if(args.length == 2 && args[1].isInstanceOf(CArray.class)) {
 					CArray ca = (CArray) args[1];
 					if(ca.size() >= 1) {
 						line1 = ca.get(0, t).val();
@@ -375,8 +769,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -385,7 +779,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCWorld w = null;
 			if(sender instanceof MCPlayer) {
@@ -434,8 +828,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -444,7 +838,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCWorld w = null;
 			if(sender instanceof MCPlayer) {
@@ -484,8 +878,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -494,7 +888,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCLocation l;
 			MCPlayer p;
 			p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -506,7 +900,7 @@ public class Environment {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class set_biome extends AbstractFunction {
+	public static class set_biome extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -542,7 +936,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
 			int x;
 			int z;
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
@@ -580,8 +974,33 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 1) {
+				return null;
+			}
+			Mixed c = children.get(children.size() - 1).getData();
+			if(c.isInstanceOf(CString.class)) {
+				try {
+					MCBiomeType.valueOf(c.val());
+				} catch (IllegalArgumentException ex) {
+					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, ex.getMessage(), t);
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -622,7 +1041,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
 			int x;
 			int z;
 			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
@@ -653,8 +1072,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -673,9 +1092,8 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "array {x, z, [world] | locationArray, [world]} Gets the xyz of the highest block at a x and a z."
-					+ "It works the same as get_block_at, except that it doesn't matter now what the Y is."
-					+ "You can set it to -1000 or to 92374 it will just be ignored.";
+			return "array {x, z, [world] | locationArray, [world]} Gets a location array for the highest block at a"
+					+ " specific x and z column. If a location array is specified, the y coordinate is ignored.";
 		}
 
 		@Override
@@ -691,12 +1109,12 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			double x = 0;
 			double z = 0;
 			MCWorld w = null;
@@ -706,7 +1124,7 @@ public class Environment {
 				w = ((MCPlayer) sender).getWorld();
 			}
 
-			if(args[0] instanceof CArray && !(args.length == 3)) {
+			if(args[0].isInstanceOf(CArray.class) && !(args.length == 3)) {
 				MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				x = loc.getX();
 				z = loc.getZ();
@@ -774,12 +1192,12 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			double x = 0;
 			double y = 0;
 			double z = 0;
@@ -789,7 +1207,7 @@ public class Environment {
 			boolean safe = false;
 
 			if(args.length >= 3) {
-				safe = Static.getBoolean(args[2], t);
+				safe = ArgumentValidation.getBoolean(args[2], t);
 			}
 			if(args.length >= 2) {
 				if(!(args[1] instanceof CNull)) {
@@ -801,7 +1219,7 @@ public class Environment {
 				throw new CRERangeException("A bit excessive, don't you think? Let's scale that back some, huh?", t);
 			}
 
-			if(!(args[0] instanceof CArray)) {
+			if(!(args[0].isInstanceOf(CArray.class))) {
 				throw new CRECastException("Expecting an array at parameter 1 of explosion", t);
 			}
 
@@ -813,7 +1231,8 @@ public class Environment {
 
 			if(w == null) {
 				if(!(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer)) {
-					throw new CREPlayerOfflineException(this.getName() + " needs a world in the location array, or a player so it can take the current world of that player.", t);
+					throw new CREPlayerOfflineException(this.getName() + " needs a world in the location array,"
+							+ " or a player so it can take the current world of that player.", t);
 				}
 
 				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -850,7 +1269,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCInstrument i = null;
 			MCNote n = null;
@@ -868,7 +1287,7 @@ public class Environment {
 				noteOffset = 2;
 				l = ObjectGenerator.GetGenerator().location(args[3], p.getWorld(), t);
 			} else {
-				if(!(args[1] instanceof CArray) && args[2] instanceof CArray) {
+				if(!(args[1].isInstanceOf(CArray.class)) && args[2].isInstanceOf(CArray.class)) {
 					//Player provided, location not
 					instrumentOffset = 1;
 					noteOffset = 2;
@@ -885,10 +1304,11 @@ public class Environment {
 			try {
 				i = MCInstrument.valueOf(args[instrumentOffset].val().toUpperCase().trim());
 			} catch (IllegalArgumentException e) {
-				throw new CREFormatException("Instrument provided is not a valid type, required one of: " + StringUtils.Join(MCInstrument.values(), ", ", ", or "), t);
+				throw new CREFormatException("Instrument provided is not a valid type, required one of: "
+						+ StringUtils.Join(MCInstrument.values(), ", ", ", or "), t);
 			}
 			MCTone tone = null;
-			if(args[noteOffset] instanceof CArray) {
+			if(args[noteOffset].isInstanceOf(CArray.class)) {
 				int octave = Static.getInt32(((CArray) args[noteOffset]).get("octave", t), t);
 				if(octave < 0 || octave > 2) {
 					throw new CRERangeException("The octave must be 0, 1, or 2, but was " + octave, t);
@@ -929,22 +1349,172 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {[player], instrument, note, [locationArray]} Plays a note for the given player, at the given location."
-					+ " Player defaults to the current player, and location defaults to the player's location. Instrument may be one of:"
-					+ " " + StringUtils.Join(MCInstrument.values(), ", ", ", or ") + ", and note is an associative array with 2 values,"
-					+ " array(octave: 0, tone: 'F#') where octave is either 0, 1, or 2, and tone is one of the notes "
-					+ StringUtils.Join(MCTone.values(), ", ", ", or ") + ", optionally suffixed with a pound symbol, which denotes a sharp."
+			return "void {[player], instrument, note, [locationArray]} Plays a note for the given player, at the given"
+					+ " note block location. Player defaults to the current player, and location defaults to the"
+					+ " player's location. Instrument may be one of: "
+					+ StringUtils.Join(MCInstrument.values(), ", ", ", or ")
+					+ ", and note is an associative array with 2 values, array(octave: 0, tone: 'F#') where octave is"
+					+ " either 0, 1, or 2, and tone is one of the notes "
+					+ StringUtils.Join(MCTone.values(), ", ", ", or ")
+					+ ", optionally suffixed with a pound symbol, which denotes a sharp."
 					+ " (Not all notes can be sharped.)";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
+		}
+	}
+
+
+	@api
+	public static class spawn_particle extends AbstractFunction {
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_3;
+		}
+
+		@Override
+		public String getName() {
+			return "spawn_particle";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {location, particle[, players]} Spawns particles at the specified location. The players"
+					+ " parameter can be one player or an array of players. If none is given, all players within 32"
+					+ " meters will see the particle. The particle parameter can be a particle name or an associative"
+					+ " array defining the characteristics of the particle to be spawned. The array requires the"
+					+ " particle name under the key \"particle\"."
+					+ " ---- Possible particles: " + StringUtils.Join(MCParticle.types(), ", ", ", or ", " or ")
+					+ " \n\nSome particles have more specific keys and/or special behavior, but the common keys for the"
+					+ " particle array are \"count\" (usually the number of particles to be spawned), \"speed\""
+					+ " (usually the velocity of the particle), \"xoffset\", \"yoffset\", and \"zoffset\""
+					+ " (usually the ranges from center within which the particle may be offset on that axis)."
+					+ " The BLOCK_DUST, BLOCK_CRACK and FALLING_DUST particles can take a block type name parameter"
+					+ " under the key \"block\".\n\n"
+					+ " The ITEM_CRACK particle can take an item array under the key \"item\".\n\n"
+					+ " The REDSTONE particle can take a color array (or name)"
+					+ " under the key \"color\"."
+					+ " If a block, item or color is provided for a particle type that doesn't support it,"
+					+ " an IllegalArgumentException will be thrown.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CRECastException.class, CREFormatException.class,
+					CREPlayerOfflineException.class, CRELengthException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCParticle p;
+			int count = 0;
+			double offsetX = 0.0;
+			double offsetY = 0.0;
+			double offsetZ = 0.0;
+			double speed = 0.0;
+			Object data = null;
+
+			if(args[1].isInstanceOf(CArray.class)) {
+				CArray pa = (CArray) args[1];
+				try {
+					p = MCParticle.valueOf(pa.get("particle", t).val().toUpperCase());
+				} catch (IllegalArgumentException ex) {
+					throw new CREIllegalArgumentException("Particle name '" + pa.get("particle", t).val()
+							+ "' is invalid.", t);
+				}
+
+				if(pa.containsKey("count")) {
+					count = Static.getInt32(pa.get("count", t), t);
+				}
+				if(pa.containsKey("xoffset")) {
+					offsetX = Static.getDouble(pa.get("xoffset", t), t) / 4.0D; // radius in approx. meters
+				}
+				if(pa.containsKey("yoffset")) {
+					offsetY = Static.getDouble(pa.get("yoffset", t), t) / 4.0D;
+				}
+				if(pa.containsKey("zoffset")) {
+					offsetZ = Static.getDouble(pa.get("zoffset", t), t) / 4.0D;
+				}
+				if(pa.containsKey("speed")) {
+					speed = Static.getDouble(pa.get("speed", t), t);
+				}
+
+				if(pa.containsKey("block")) {
+					String value = pa.get("block", t).val();
+					MCMaterial mat = StaticLayer.GetMaterial(value);
+					if(mat != null) {
+						try {
+							data = mat.createBlockData();
+						} catch (IllegalArgumentException ex) {
+							throw new CREIllegalArgumentException(value + " is not a block.", t);
+						}
+					} else {
+						throw new CREIllegalArgumentException("Could not find material from " + value, t);
+					}
+
+				} else if(pa.containsKey("item")) {
+					data = ObjectGenerator.GetGenerator().item(pa.get("item", t), t);
+
+				} else if(pa.containsKey("color")) {
+					Mixed c = pa.get("color", t);
+					if(c.isInstanceOf(CArray.class)) {
+						data = ObjectGenerator.GetGenerator().color((CArray) c, t);
+					} else {
+						data = StaticLayer.GetConvertor().GetColor(c.val(), t);
+					}
+				}
+
+			} else {
+				try {
+					p = MCParticle.valueOf(args[1].val().toUpperCase());
+				} catch (IllegalArgumentException ex) {
+					throw new CREIllegalArgumentException("Particle name '" + args[1].val() + "' is invalid.", t);
+				}
+			}
+
+			try {
+				if(args.length == 3) {
+					MCPlayer player;
+					if(args[2].isInstanceOf(CArray.class)) {
+						for(Mixed playerName : ((CArray) args[2]).asList()) {
+							player = Static.GetPlayer(playerName, t);
+							player.spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, data);
+						}
+					} else {
+						player = Static.GetPlayer(args[2], t);
+						player.spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, data);
+					}
+				} else {
+					l.getWorld().spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, data);
+				}
+			} catch (IllegalArgumentException ex) {
+				throw new CREIllegalArgumentException("Given unsupported data for particle type " + p.name(), t);
+			}
+			return CVoid.VOID;
 		}
 	}
 
 	@api
-	public static class play_sound extends AbstractFunction {
+	public static class play_sound extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -964,9 +1534,9 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t,
+		public Mixed exec(Target t,
 				com.laytonsmith.core.environments.Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			MCSound sound;
@@ -974,8 +1544,8 @@ public class Environment {
 			float volume = 1;
 			float pitch = 1;
 
-			if(!(args[1] instanceof CArray)) {
-				throw new CREFormatException("An array was expected but recieved " + args[1], t);
+			if(!(args[1].isInstanceOf(CArray.class))) {
+				throw new CREFormatException("An array was expected but received " + args[1], t);
 			}
 
 			CArray sa = (CArray) args[1];
@@ -983,7 +1553,9 @@ public class Environment {
 			try {
 				sound = MCSound.valueOf(sa.get("sound", t).val().toUpperCase());
 			} catch (IllegalArgumentException iae) {
-				throw new CREFormatException("Sound name '" + sa.get("sound", t).val() + "' is invalid.", t);
+				MSLog.GetLogger().e(MSLog.Tags.GENERAL, "Sound name '" + sa.get("sound", t).val()
+						+ "' is invalid.", t);
+				return CVoid.VOID;
 			}
 
 			if(sa.containsKey("category")) {
@@ -1004,7 +1576,7 @@ public class Environment {
 
 			if(args.length == 3) {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
-				if(args[2] instanceof CArray) {
+				if(args[2].isInstanceOf(CArray.class)) {
 					for(String key : ((CArray) args[2]).stringKeySet()) {
 						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t), t));
 					}
@@ -1050,15 +1622,46 @@ public class Environment {
 					+ " be a single player or an array of players to play the sound to, if"
 					+ " not given, all players can potentially hear it. ---- Possible categories: "
 					+ StringUtils.Join(MCSoundCategory.values(), ", ", ", or ", " or ") + "."
-					+ " ---- Possible sounds: "
-					+ StringUtils.Join(MCSound.types(), ", ", ", or ", " or ");
+					+ " \n\nPossible sounds: " + StringUtils.Join(MCSound.types(), "<br>");
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
+		@Override
+		public ParseTree optimizeDynamic(Target t, com.laytonsmith.core.environments.Environment env,
+				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+
+			if(children.size() < 2) {
+				return null;
+			}
+			ParseTree child = children.get(1);
+			if(child.getData() instanceof CFunction && child.getData().val().equals("array")) {
+				for(ParseTree node : child.getChildren()) {
+					if(node.getData() instanceof CFunction && node.getData().val().equals("centry")) {
+						children = node.getChildren();
+						if(children.get(0).getData().val().equals("sound")
+								&& children.get(1).getData().isInstanceOf(CString.class)) {
+							try {
+								MCSound.MCVanillaSound.valueOf(children.get(1).getData().val().toUpperCase());
+							} catch (IllegalArgumentException ex) {
+								MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, ex.getMessage(), t);
+							}
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 	@api
@@ -1082,9 +1685,9 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t,
+		public Mixed exec(Target t,
 				com.laytonsmith.core.environments.Environment environment,
-				Construct... args) throws ConfigRuntimeException {
+				Mixed... args) throws ConfigRuntimeException {
 
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			String path;
@@ -1092,8 +1695,8 @@ public class Environment {
 			float volume = 1;
 			float pitch = 1;
 
-			if(!(args[1] instanceof CArray)) {
-				throw new CREFormatException("An array was expected but recieved " + args[1], t);
+			if(!(args[1].isInstanceOf(CArray.class))) {
+				throw new CREFormatException("An array was expected but received " + args[1], t);
 			}
 
 			CArray sa = (CArray) args[1];
@@ -1118,7 +1721,7 @@ public class Environment {
 
 			if(args.length == 3) {
 				java.util.List<MCPlayer> players = new java.util.ArrayList<MCPlayer>();
-				if(args[2] instanceof CArray) {
+				if(args[2].isInstanceOf(CArray.class)) {
 					for(String key : ((CArray) args[2]).stringKeySet()) {
 						players.add(Static.GetPlayer(((CArray) args[2]).get(key, t), t));
 					}
@@ -1167,8 +1770,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -1192,7 +1795,7 @@ public class Environment {
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t);
 			MCBlock b = l.getBlock();
@@ -1234,7 +1837,9 @@ public class Environment {
 		@Override
 		public String docs() {
 			return "mixed {locationArray, [index]} Returns an associative array with various information about a block."
-					+ " If an index is specified, it will return a boolean. ---- <ul>"
+					+ " If an index is specified, it will return a boolean. ---- The accuracy of these values will"
+					+ " depend on the server implementation."
+					+ "<ul>"
 					+ " <li>solid: If a block is solid (i.e. dirt or stone, as opposed to a torch or water)</li>"
 					+ " <li>flammable: Indicates if a block can catch fire</li>"
 					+ " <li>transparent: Indicates if light can pass through</li>"
@@ -1244,8 +1849,8 @@ public class Environment {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -1285,15 +1890,15 @@ public class Environment {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(pl instanceof MCPlayer) {
+			if(pl != null) {
 				w = pl.getWorld();
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
@@ -1333,21 +1938,22 @@ public class Environment {
 		@Override
 		public String docs() {
 			return "boolean {locationArray, [checkMode]} Returns whether or not a block is being supplied with power."
-					+ "checkMode can be: \"BOTH\" (Check both direct and indirect power), \"DIRECT_ONLY\" (Check direct power only)"
-					+ " or \"INDIRECT_ONLY\" (Check indirect power only). CheckMode defaults to \"BOTH\".";
+					+ "checkMode can be: \"BOTH\" (Check both direct and indirect power),"
+					+ " \"DIRECT_ONLY\" (Check direct power only) or \"INDIRECT_ONLY\" (Check indirect power only)."
+					+ " CheckMode defaults to \"BOTH\".";
 		}
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(pl instanceof MCPlayer) {
+			if(pl != null) {
 				w = pl.getWorld();
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
@@ -1421,21 +2027,21 @@ public class Environment {
 		@Override
 		public String docs() {
 			return "int {locationArray} Returns the redstone power level that is supplied to this block [0-15]."
-					+ " If is_block_powered(locationArray, 'DIRECT_ONLY') returns true, a redstone ore placed at the"
+					+ " If is_block_powered(locationArray, 'DIRECT_ONLY') returns true, a redstone dust placed at the"
 					+ " given location would be powered the return value - 1.";
 		}
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
 			MCWorld w = null;
 			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(pl instanceof MCPlayer) {
+			if(pl != null) {
 				w = pl.getWorld();
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
@@ -1473,17 +2079,19 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "boolean {locationArray, [treeType]} Generates a tree at the given location and returns if the generation succeeded or not."
-					+ " treeType can be " + StringUtils.Join(MCTreeType.values(), ", ", ", or ", " or ") + ", defaulting to TREE.";
+			return "boolean {locationArray, [treeType]} Generates a tree at the given location and returns if the"
+					+ " generation succeeded or not. The treeType can be "
+					+ StringUtils.Join(MCTreeType.values(), ", ", ", or ", " or ")
+					+ ", defaulting to TREE.";
 		}
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCTreeType treeType;
 			if(args.length == 1) {
 				treeType = MCTreeType.TREE;
@@ -1535,11 +2143,11 @@ public class Environment {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			if(loc.getBlock().isCommandBlock()) {
@@ -1587,15 +2195,15 @@ public class Environment {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
 			String cmd = null;
 			if(args.length == 2 && !(args[1] instanceof CNull)) {
-				if(!(args[1] instanceof CString)) {
+				if(!(args[1].isInstanceOf(CString.class))) {
 					throw new CRECastException("Parameter 2 of " + getName() + " must be a string or null", t);
 				}
 				cmd = args[1].val();
@@ -1647,11 +2255,11 @@ public class Environment {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
 				throws ConfigRuntimeException {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
 			if(loc.getBlock().isCommandBlock()) {
@@ -1699,15 +2307,15 @@ public class Environment {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args
 		) throws ConfigRuntimeException {
 			String name = null;
 			if(args.length == 2 && !(args[1] instanceof CNull)) {
-				if(!(args[1] instanceof CString)) {
+				if(!(args[1].isInstanceOf(CString.class))) {
 					throw new CRECastException("Parameter 2 of " + getName() + " must be a string or null", t);
 				}
 				name = args[1].val();

@@ -3,28 +3,39 @@ package com.laytonsmith.core.environments;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.IVariableList;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import com.laytonsmith.core.events.BoundEvent;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.Iterator;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.core.taskmanager.TaskManager;
 import com.laytonsmith.persistence.PersistenceNetwork;
 
 import java.io.File;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A global environment is always available at runtime, and contains the objects that the core functionality uses.
@@ -56,9 +67,11 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private final Profiles profiles;
 	private BoundEvent.ActiveEvent event = null;
 	private boolean interrupt = false;
-	private final List<ArrayAccess.ArrayAccessIterator> arrayAccessList = Collections.synchronizedList(new ArrayList<ArrayAccess.ArrayAccessIterator>());
+	private final List<Iterator> arrayAccessList = Collections.synchronizedList(new ArrayList<>());
 	private final MutableObject<TaskManager> taskManager = new MutableObject<>();
 	private final WeakHashMap<Thread, StackTraceManager> stackTraceManagers = new WeakHashMap<>();
+	private final MutableObject<Map<String, Mixed>> runtimeSettings
+			= new MutableObject<>(new ConcurrentHashMap<>());
 
 	/**
 	 * Creates a new GlobalEnvironment. All fields in the constructor are required, and cannot be null.
@@ -67,7 +80,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * @param profiler The Profiler to use
 	 * @param network The pre-configured PersistenecNetwork object to use
 	 * @param root The root working directory to use
-	 * @param profiles The SQL SQLProfiles object to use
+	 * @param profiles The Profiles object to use
 	 * @param taskManager The TaskManager object to use
 	 */
 	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistenceNetwork network,
@@ -86,6 +99,71 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		}
 		this.profiles = profiles;
 		this.taskManager.setObject(taskManager);
+	}
+
+	/**
+	 * Thrown if one of the no-op classes is used.
+	 */
+	public static class GlobalEnvNoOpException extends RuntimeException {
+		public GlobalEnvNoOpException(String message) {
+			super(message);
+		}
+	}
+
+	/**
+	 * When constructing a GlobalEnv in meta circumstances, it may be helpful to provide
+	 * a no-op execution queue. This value is set up for that purpose. However, it's
+	 * not truly no-op, as an exception is thrown if any method in the interface are
+	 * used, as this points to a situation where something is being called that isn't
+	 * compatible with a no op execution.
+	 */
+	public static final ExecutionQueue NO_OP_EXECUTION_QUEUE
+			= GetErrorNoOp(ExecutionQueue.class, "NO_OP_EXECUTION_QUEUE");
+
+	/**
+	 * When constructing a GlobalEnv in meta circumstances, it may be helpful to provide
+	 * a no-op profiler. This value is set up for that purpose. It is
+	 * truly no-op, and no exception is thrown if a method in the interface is
+	 * used.
+	 */
+	public static final Profiler NO_OP_PROFILER = Profiler.FakeProfiler();
+
+	/**
+	 * When constructing a GlobalEnv in meta circumstances, it may be helpful to provide
+	 * a no-op persistence network. This value is set up for that purpose. However, it's
+	 * not truly no-op, as an exception is thrown if any method in the interface are
+	 * used, as this points to a situation where something is being called that isn't
+	 * compatible with a no op execution.
+	 */
+	public static final PersistenceNetwork NO_OP_PN = GetErrorNoOp(PersistenceNetwork.class, "NO_OP_PN");
+
+	/**
+	 * When constructing a GlobalEnv in meta circumstances, it may be helpful to provide
+	 * a no-op Profiles object. This value is set up for that purpose. However, it's
+	 * not truly no-op, as an exception is thrown if any method in the interface are
+	 * used, as this points to a situation where something is being called that isn't
+	 * compatible with a no op execution.
+	 */
+	public static final Profiles NO_OP_PROFILES = GetErrorNoOp(Profiles.class, "NO_OP_PROFILES");
+
+	/**
+	 * When constructing a GlobalEnv in meta circumstances, it may be helpful to provide
+	 * a no-op profiler. This value is set up for that purpose. It is
+	 * truly no-op, and no exception is thrown if a method in the interface is
+	 * used.
+	 */
+	public static final TaskManager NO_OP_TASK_MANAGER = GetNoOp(TaskManager.class);
+
+	private static <T> T GetErrorNoOp(Class<T> iface, String identifier) {
+		return (T) Proxy.newProxyInstance(GlobalEnv.class.getClassLoader(),
+				new Class[]{iface}, (Object proxy, Method method, Object[] args) -> {
+					throw new GlobalEnvNoOpException(identifier);
+				});
+	}
+
+	private static <T> T GetNoOp(Class<T> iface) {
+		return (T) Proxy.newProxyInstance(GlobalEnv.class.getClassLoader(),
+				new Class[]{iface}, (Object proxy, Method method, Object[] args) -> null);
 	}
 
 	public ExecutionQueue GetExecutionQueue() {
@@ -182,7 +260,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 			clone.procs = new HashMap<>();
 		}
 		if(cloneVars && iVariableList != null) {
-			clone.iVariableList = (IVariableList) iVariableList.clone();
+			clone.iVariableList = iVariableList.clone();
 		} else if(!cloneVars) {
 			clone.iVariableList = new IVariableList();
 		}
@@ -330,7 +408,9 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	}
 
 	/**
-	 * Returns true if this script has been interrupted, and should immediately halt execution.
+	 * Returns true if this script has been interrupted, and should immediately halt execution. This is monitored
+	 * in the core execution engine, however, if a function could be particularly long running, this value should
+	 * be manually checked, since the engine is not pre-emptive.
 	 *
 	 * @return
 	 */
@@ -344,7 +424,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 *
 	 * @return
 	 */
-	public List<ArrayAccess.ArrayAccessIterator> GetArrayAccessIterators() {
+	public List<Iterator> GetArrayAccessIterators() {
 		return arrayAccessList;
 	}
 
@@ -354,10 +434,10 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * @param array
 	 * @return
 	 */
-	public List<ArrayAccess.ArrayAccessIterator> GetArrayAccessIteratorsFor(ArrayAccess array) {
-		List<ArrayAccess.ArrayAccessIterator> list = new ArrayList<>();
+	public List<Iterator> GetArrayAccessIteratorsFor(ArrayAccess array) {
+		List<Iterator> list = new ArrayList<>();
 		synchronized(arrayAccessList) {
-			for(ArrayAccess.ArrayAccessIterator value : arrayAccessList) {
+			for(Iterator value : arrayAccessList) {
 				if(value.underlyingArray() == array) {
 					list.add(value);
 				}
@@ -374,12 +454,116 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	public StackTraceManager GetStackTraceManager() {
 		Thread currentThread = Thread.currentThread();
 		synchronized(stackTraceManagers) {
-			if(!stackTraceManagers.containsKey(currentThread)) {
-				StackTraceManager manager = new StackTraceManager();
+			StackTraceManager manager = stackTraceManagers.get(currentThread);
+			if(manager == null) {
+				manager = new StackTraceManager();
 				stackTraceManagers.put(currentThread, manager);
-				return manager;
 			}
-			return stackTraceManagers.get(currentThread);
+			return manager;
+		}
+	}
+
+	/**
+	 * Returns the runtime setting for a particular value. Runtime settings are a collection of free settings, which
+	 * individual functions can define setting
+	 * names and values, though in general, to prevent stepping over each other, the following guidelines should be
+	 * used for the names:
+	 * <p>
+	 * The general format of the setting should be hierarchical, with dots separating the setting name categories, i.e.
+	 * {@code function.function_name.setting_name} where the following top level hierarchies are defined:
+	 * <ul>
+	 *	<li>function - settings relating to functions. The second category should be the function name.</li>
+	 *  <li>event - settings relating to events. The second category should be the event name.</li>
+	 *  <li>extension - settings relating to extensions, that don't fit in the previous two categories.</li>
+	 *  <li>system - settings related to the system that aren't based on functions or events</li>
+	 * </ul>
+	 * <p>
+	 * Given that these settings can change at any time, it is important that these values be re-read each time. Due to
+	 * this, the underlying Map is threadsafe. If a setting is missing, then code must define what should happen, as
+	 * that may be different behavior. The documentation defining the behavior of the component in question must specify
+	 * the behavior, there is no generic mechanism defined for documenting these.
+	 * <p>
+	 * The map maps CString values to Mixed values, so the value may be anything, and as such, much be typechecked by
+	 * code first.
+	 * <p>
+	 * The values are defined globally, and cannot be scoped down to other scopes, so these should be used only in cases
+	 * where such global settings make sense, usually in regards to setting the default value for a particular parameter
+	 * or option.
+	 * @param name The setting name
+	 * @return The Mixed value, or null, if it is not contained in the set.
+	 */
+	public Mixed GetRuntimeSetting(String name) {
+		return runtimeSettings.getObject().get(name);
+	}
+
+	/**
+	 * Works like {@link #GetRuntimeSetting(java.lang.String)} but if the value is not set, or is set to CNull, the
+	 * default value is returned. If a totally missing value has a different meaning than a CNull value, you should use
+	 * {@link #GetRuntimeSettingOrCNull(java.lang.String, com.laytonsmith.core.natives.interfaces.Mixed)}.
+	 * @param name The setting name. See the stipulations for naming conventions in
+	 * {@link #GetRuntimeSetting(java.lang.String)}
+	 * @param defaultValue The value to return if the value was totally missing from the map or was set to CNull.
+	 * @return Either the user specified value, if present, or the defaultValue.
+	 */
+	public Mixed GetRuntimeSetting(String name, Mixed defaultValue) {
+		Mixed value = GetRuntimeSettingOrCNull(name, defaultValue);
+		if(CNull.NULL.equals(value)) {
+			return defaultValue;
+		} else {
+			return value;
+		}
+	}
+
+	/**
+	 * As many runtime settings are just booleans, this convenience method can be used to deal directly with java
+	 * booleans. If the value supplied is not a Booleanish though, the default value is returned, with a warning
+	 * issued. See {@link #GetRuntimeSetting(java.lang.String)} for details on the parameters.
+	 * @param name
+	 * @param defaultValue
+	 * @param t
+	 * @return
+	 */
+	public boolean GetRuntimeSetting(String name, boolean defaultValue, Target t) {
+		Mixed b = GetRuntimeSetting(name, CBoolean.get(defaultValue));
+		try {
+			return ArgumentValidation.getBooleanish(b, t);
+		} catch (CRECastException ex) {
+			MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Runtime setting \"" + name + "\" is not a boolean value, but was"
+					+ " expected to be. The default value is being used instead.", t);
+			return defaultValue;
+		}
+	}
+
+	/**
+	 * Works like {@link #GetRuntimeSetting(java.lang.String)} but if the value is not set in the map, the defaultValue
+	 * is returned. Note that if the value is set to CNull by the user, this will return CNull, not your default value.
+	 * If you want CNull to be considered the same as totally missing, use
+	 * {@link #GetRuntimeSetting(java.lang.String, com.laytonsmith.core.natives.interfaces.Mixed)}.
+	 * @param name The setting name. See the stipulations for naming conventions in
+	 * {@link #GetRuntimeSetting(java.lang.String)}
+	 * @param defaultValue The value to return if the value was totally missing from the map.
+	 * @return Either the user specified value, if present, or the defaultValue.
+	 */
+	public Mixed GetRuntimeSettingOrCNull(String name, Mixed defaultValue) {
+		if(runtimeSettings.getObject().containsKey(name)) {
+			return runtimeSettings.getObject().get(name);
+		} else {
+			return defaultValue;
+		}
+	}
+
+	/**
+	 * Sets the value of a runtime setting. If value is java null (CNull.NULL is different), then the value is simply
+	 * removed from the settings list. In general, this method should only be called by set/remove_runtime_setting, and
+	 * should never be modified by java code otherwise.
+	 * @param name The setting name.
+	 * @param value The value to set in the map
+	 */
+	public void SetRuntimeSetting(String name, Mixed value) {
+		if(value == null) {
+			runtimeSettings.getObject().remove(name);
+		} else {
+			runtimeSettings.getObject().put(name, value);
 		}
 	}
 }

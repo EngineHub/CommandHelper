@@ -23,12 +23,13 @@ import static com.laytonsmith.PureUtilities.TermColors.prompt;
 import static com.laytonsmith.PureUtilities.TermColors.reset;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Profiles;
+import com.laytonsmith.core.ProfilesImpl;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -37,13 +38,15 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.core.taskmanager.TaskManager;
+import com.laytonsmith.core.taskmanager.TaskManagerImpl;
 import com.laytonsmith.persistence.DataSource;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.DataSourceFilter;
 import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.ReadOnlyException;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.File;
@@ -80,21 +83,22 @@ public class Manager {
 		Implementation.forceServerType(Implementation.Type.BUKKIT);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(CH_DIRECTORY);
-		persistenceNetwork = new PersistenceNetwork(CommandHelperFileLocations.getDefault().getPersistenceConfig(),
+		persistenceNetwork = new PersistenceNetworkImpl(CommandHelperFileLocations.getDefault().getPersistenceConfig(),
 				CommandHelperFileLocations.getDefault().getDefaultPersistenceDBFile().toURI(), options);
 		Installer.Install(CH_DIRECTORY);
-		CHLog.initialize(CH_DIRECTORY);
+		MSLog.initialize(CH_DIRECTORY);
 		profiler = new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile());
 		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistenceNetwork,
-				CH_DIRECTORY, new Profiles(MethodScriptFileLocations.getDefault().getProfilesFile()),
-				new TaskManager());
+				CH_DIRECTORY, new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile()),
+				new TaskManagerImpl());
 		cls();
 		pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
 
 		pl("Starting the Data Manager...");
 		try {
 			Environment env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
-			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null, true)), env, null, null);
+			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("msg()", null, true),
+					env, null), env, null, null);
 		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 		}
 		pl(GREEN + "Welcome to the CommandHelper " + CYAN + "Data Manager!");
@@ -449,7 +453,8 @@ public class Manager {
 	public static boolean doAddEdit(String key, String valueScript) {
 		try {
 			Environment env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
-			Construct c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(valueScript, null, true)), env, null, null);
+			Mixed c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(
+					MethodScriptCompiler.lex(valueScript, null, true), env, null), env, null, null);
 			String value = Construct.json_encode(c, Target.UNKNOWN);
 			pl(CYAN + "Adding: " + WHITE + value);
 			String[] k = key.split("\\.");
@@ -584,8 +589,8 @@ public class Manager {
 			try {
 				DaemonManager dm = new DaemonManager();
 				mixinOptions.setWorkingDirectory(CH_DIRECTORY);
-				PersistenceNetwork pninput = new PersistenceNetwork(input, defaultURI, mixinOptions);
-				PersistenceNetwork pnoutput = new PersistenceNetwork(output, defaultURI, mixinOptions);
+				PersistenceNetwork pninput = new PersistenceNetworkImpl(input, defaultURI, mixinOptions);
+				PersistenceNetwork pnoutput = new PersistenceNetworkImpl(output, defaultURI, mixinOptions);
 				Pattern p = Pattern.compile(DataSourceFilter.toRegex(filter));
 				Map<String[], String> inputData = pninput.getNamespace(new String[]{});
 				boolean errors = false;

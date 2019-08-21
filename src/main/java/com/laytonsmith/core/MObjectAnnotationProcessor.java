@@ -25,7 +25,7 @@ import javax.tools.Diagnostic;
  *
  */
 @SupportedAnnotationTypes({"com.laytonsmith.annotations.mobject"})
-@SupportedSourceVersion(SourceVersion.RELEASE_7)
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class MObjectAnnotationProcessor extends AbstractProcessor {
 
 	@Override

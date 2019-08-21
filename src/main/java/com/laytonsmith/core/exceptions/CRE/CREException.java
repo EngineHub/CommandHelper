@@ -2,18 +2,18 @@ package com.laytonsmith.core.exceptions.CRE;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 
 /**
  *
  */
-@typeof("Exception")
+@typeof("ms.lang.Exception")
 public class CREException extends CREThrowable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("Exception");
+	public static final CClassType TYPE = CClassType.get(CREException.class);
 
 	public CREException(String msg, Target t) {
 		super(msg, t);
@@ -30,7 +30,7 @@ public class CREException extends CREThrowable {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_1;
+		return MSVersion.V3_3_1;
 	}
 
 	@Override

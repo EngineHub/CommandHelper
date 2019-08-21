@@ -3,6 +3,7 @@ package com.laytonsmith.core;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Exceptions;
@@ -13,6 +14,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import static com.laytonsmith.testing.StaticTest.SRun;
+import java.util.Set;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
@@ -24,13 +26,15 @@ import static org.mockito.Mockito.eq;
  */
 public class NewExceptionHandlingTest {
 
+	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
+
 	@BeforeClass
 	public static void setUpClass() {
 		StaticTest.InstallFakeServerFrontend();
 	}
 
 	public String optimize(String script) throws Exception {
-		return OptimizationUtilities.optimize(script, null);
+		return OptimizationUtilities.optimize(script, envs, null);
 	}
 
 	MCPlayer fakePlayer;
@@ -42,7 +46,8 @@ public class NewExceptionHandlingTest {
 
 	@Test
 	public void testBasicKeywordUsage() throws Exception {
-		assertEquals("complex_try(null,assign(IOException,@e,null),null,assign(Exception,@e,null),null,null)", optimize("try { } catch (IOException @e){ } catch (Exception @e){ } finally { }"));
+		assertEquals("complex_try(null,assign(ms.lang.IOException,@e,null),null,assign(ms.lang.Exception,@e,null),null,null)",
+				optimize("try { } catch (IOException @e){ } catch (Exception @e){ } finally { }"));
 	}
 
 	@Test
@@ -76,7 +81,7 @@ public class NewExceptionHandlingTest {
 				/* 3 */ + "} catch (IOException @e){ \n"
 				/* 4 */ + "msg(@e); \n"
 				/* 5 */ + "}", fakePlayer);
-		verify(fakePlayer).sendMessage("{causedBy: null, classType: IOException, message: message, stackTrace: {{file: Unknown file, id: <<main code>>, line: 2}}}");
+		verify(fakePlayer).sendMessage("{causedBy: null, classType: ms.lang.IOException, message: message, stackTrace: {{col: 2, file: Unknown file, id: <<main code>>, line: 2}}}");
 	}
 
 	@Test
@@ -97,12 +102,12 @@ public class NewExceptionHandlingTest {
 				/* 12 */ + "} catch (IOException @e){\n"
 				/* 13 */ + "msg(@e);\n"
 				/* 14 */ + "}", fakePlayer);
-		verify(fakePlayer).sendMessage("{causedBy: null, classType: IOException, message: message, stackTrace:"
+		verify(fakePlayer).sendMessage("{causedBy: null, classType: ms.lang.IOException, message: message, stackTrace:"
 				+ " {"
-				+ "{file: Unknown file, id: proc _c, line: 8}, "
-				+ "{file: Unknown file, id: proc _b, line: 5}, "
-				+ "{file: Unknown file, id: proc _a, line: 2}, "
-				+ "{file: Unknown file, id: <<main code>>, line: 11}}"
+				+ "{col: 2, file: Unknown file, id: proc _c, line: 8}, "
+				+ "{col: 2, file: Unknown file, id: proc _b, line: 5}, "
+				+ "{col: 2, file: Unknown file, id: proc _a, line: 2}, "
+				+ "{col: 2, file: Unknown file, id: <<main code>>, line: 11}}"
 				+ "}");
 	}
 
@@ -124,12 +129,12 @@ public class NewExceptionHandlingTest {
 				/* 12 */ + "} catch (RangeException @e){\n"
 				/* 13 */ + "msg(@e);\n"
 				/* 14 */ + "}", fakePlayer);
-		verify(fakePlayer).sendMessage("{causedBy: null, classType: RangeException, message: Division by 0!, stackTrace:"
+		verify(fakePlayer).sendMessage("{causedBy: null, classType: ms.lang.RangeException, message: Division by 0!, stackTrace:"
 				+ " {"
-				+ "{file: Unknown file, id: proc _c, line: 8}, "
-				+ "{file: Unknown file, id: proc _b, line: 5}, "
-				+ "{file: Unknown file, id: proc _a, line: 2}, "
-				+ "{file: Unknown file, id: <<main code>>, line: 11}}"
+				+ "{col: 12, file: Unknown file, id: proc _c, line: 8}, "
+				+ "{col: 2, file: Unknown file, id: proc _b, line: 5}, "
+				+ "{col: 2, file: Unknown file, id: proc _a, line: 2}, "
+				+ "{col: 2, file: Unknown file, id: <<main code>>, line: 11}}"
 				+ "}");
 	}
 
@@ -156,7 +161,7 @@ public class NewExceptionHandlingTest {
 
 	@Test
 	public void testHiddenThrowSetsOffLog() throws Exception {
-		CHLog log = StaticTest.InstallFakeLogger();
+		MSLog log = StaticTest.InstallFakeLogger();
 		StaticTest.SetPrivate(Exceptions.complex_try.class, "doScreamError", true, boolean.class);
 		try {
 			SRun("try { throw(IOException, 'hidden'); } finally { throw(CastException, 'shown'); }", fakePlayer);
@@ -165,7 +170,7 @@ public class NewExceptionHandlingTest {
 		} catch (Exception ex) {
 			fail("Expected an exception, but of type CRECastException");
 		}
-		verify(log).Log(eq(CHLog.Tags.RUNTIME), eq(LogLevel.WARNING), anyString(), any(Target.class));
+		verify(log).Log(eq(MSLog.Tags.RUNTIME), eq(LogLevel.WARNING), anyString(), any(Target.class));
 	}
 
 	@Test(expected = ConfigCompileException.class)
@@ -252,28 +257,32 @@ public class NewExceptionHandlingTest {
 				"{"
 				+ "causedBy: {"
 				+ "causedBy: null, "
-				+ "classType: IOException, "
+				+ "classType: ms.lang.IOException, "
 				+ "message: original, "
 				+ "stackTrace: {"
 				+ "{"
+				+ "col: 4, "
 				+ "file: Unknown file, "
 				+ "id: proc _a, "
 				+ "line: 2"
 				+ "}, {"
+				+ "col: 4, "
 				+ "file: Unknown file, "
 				+ "id: proc _b, "
 				+ "line: 5"
 				+ "}, {"
+				+ "col: 5, "
 				+ "file: Unknown file, "
 				+ "id: <<main code>>, "
 				+ "line: 9"
 				+ "}"
 				+ "}"
 				+ "}, "
-				+ "classType: CastException, "
+				+ "classType: ms.lang.CastException, "
 				+ "message: new, "
 				+ "stackTrace: {"
 				+ "{"
+				+ "col: 5, "
 				+ "file: Unknown file, "
 				+ "id: <<main code>>, "
 				+ "line: 11"

@@ -1,26 +1,32 @@
 package com.laytonsmith.core.natives.interfaces;
 
+import com.laytonsmith.core.objects.ObjectType;
+import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.objects.AccessModifier;
 import java.util.Set;
 
 /**
  * Mixed is the root type of all MethodScript objects and primitives.
  */
-@typeof("mixed")
+@typeof("ms.lang.mixed")
 public interface Mixed extends Cloneable, Documentation {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("mixed");
+	public static final CClassType TYPE = CClassType.get(Mixed.class);
 
 	public String val();
 
 	public void setTarget(Target target);
+
+	public Target getTarget();
 
 	public Mixed clone() throws CloneNotSupportedException;
 
@@ -63,6 +69,9 @@ public interface Mixed extends Cloneable, Documentation {
 	 *
 	 * If this is an interface, this should return an empty array always.
 	 *
+	 * It's also important to note that for performance reasons, if an empty array is returned, the code should prefer
+	 * to use {@link CClassType#EMPTY_CLASS_ARRAY}, and for core code, this is required by a unit test.
+	 *
 	 * @return
 	 */
 	@ForceImplementation
@@ -81,6 +90,12 @@ public interface Mixed extends Cloneable, Documentation {
 	public Set<ObjectModifier> getObjectModifiers();
 
 	/**
+	 * Gets the access level for this object, i.e. public, private...
+	 * @return
+	 */
+	public AccessModifier getAccessModifier();
+
+	/**
 	 * Returns the containing class for this object. If null is returned, that means this is a top level class.
 	 *
 	 * @return
@@ -94,6 +109,10 @@ public interface Mixed extends Cloneable, Documentation {
 	 * Java's keyword.
 	 *
 	 * This method works with CClassTypes.
+	 *
+	 * Implementation note: The implementation of this should just be
+	 * {@link Construct#isInstanceof(com.laytonsmith.core.natives.interfaces.Mixed,
+	 * com.laytonsmith.core.constructs.CClassType)} which supports Mixed values.
 	 *
 	 * @param type
 	 * @return
@@ -109,6 +128,10 @@ public interface Mixed extends Cloneable, Documentation {
 	 *
 	 * This method works with class type directly.
 	 *
+	 * Implementation note: The implementation of this should just be
+	 * {@link Construct#isInstanceof(com.laytonsmith.core.natives.interfaces.Mixed, java.lang.Class)} which supports
+	 * Mixed values.
+	 *
 	 * @param type
 	 * @return
 	 */
@@ -123,5 +146,25 @@ public interface Mixed extends Cloneable, Documentation {
 	 * @throws IllegalArgumentException If the class isn't public facing.
 	 */
 	public CClassType typeof();
+
+	/**
+	 * Casts the class to the specified type. This only works with Java types, and so for dynamic elements, this
+	 * may throw a RuntimeException. For dynamic types, use the other castTo.
+	 *
+	 * <p>For classes that are instanceof this class, (or vice versa) no logic is done, it is just cast, though if
+	 * it can't be cast, it will throw a ClassCastException. For classes that are cross castable, they will be first
+	 * cross casted.
+	 *
+	 * An important note, while it seems like you can just cast from the value using standard java cast notation,
+	 * the object model is not 1:1, and so dynamic classes may logically extend the java class, but due to restrictions
+	 * in java, that can't actually happen in java's object model, so we cannot rely on java's casting functionality
+	 * either. Add to that that user types don't exist in the java anyways.
+	 * @param <T>
+	 * @param clazz
+	 * @return
+	 * @throws ClassCastException if the class can't be cast
+	 */
+	// The whole argument validation/Static.get* methods needs to be moved to this mechanism.
+	//public <T extends Mixed> T castTo(Class<T> clazz) throws ClassCastException;
 
 }

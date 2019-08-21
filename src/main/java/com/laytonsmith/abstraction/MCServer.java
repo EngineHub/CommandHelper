@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.enums.MCBarColor;
 import com.laytonsmith.abstraction.enums.MCBarStyle;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
@@ -21,17 +22,38 @@ public interface MCServer extends AbstractionObject {
 
 	MCPluginManager getPluginManager();
 
+	MCPlayer getPlayerExact(String name);
+
 	MCPlayer getPlayer(String name);
 
 	MCPlayer getPlayer(UUID uuid);
+
+	MCEntity getEntity(UUID uuid);
 
 	MCWorld getWorld(String name);
 
 	List<MCWorld> getWorlds();
 
+	/**
+	 * Broadcasts a message to all online players and console.
+	 * @param message - The message to broadcast.
+	 */
 	void broadcastMessage(String message);
 
+	/**
+	 * Broadcasts a message to all online players with a given permission and console.
+	 * @param message - The message to broadcast.
+	 * @param permission - The required permission to receive the message.
+	 */
 	void broadcastMessage(String message, String permission);
+
+	/**
+	 * Broadcasts a message to a list of recipients.
+	 * {@link MCConsoleCommandSender Console} has to be included in this list to receive the broadcast.
+	 * @param message - The message to broadcast.
+	 * @param recipients - A list of {@link MCCommandSender command senders} to send the message to.
+	 */
+	void broadcastMessage(String message, Set<MCCommandSender> recipients);
 
 	MCConsoleCommandSender getConsole();
 
@@ -39,11 +61,9 @@ public interface MCServer extends AbstractionObject {
 
 	MCCommandMap getCommandMap();
 
-	MCInventory createInventory(MCInventoryHolder owner, MCInventoryType type);
+	MCInventory createInventory(MCInventoryHolder owner, MCInventoryType type, String title);
 
 	MCInventory createInventory(MCInventoryHolder owner, int size, String title);
-
-	MCInventory createInventory(MCInventoryHolder owner, int size);
 
 	/**
 	 * Provides access to local user data associated with a name. Depending on the implementation, a web lookup with the
@@ -100,7 +120,7 @@ public interface MCServer extends AbstractionObject {
 
 	List<MCOfflinePlayer> getOperators();
 
-	void banName(String name);
+	void banName(String name, String reason, String source);
 
 	void unbanName(String name);
 
@@ -145,4 +165,8 @@ public interface MCServer extends AbstractionObject {
 	String dispatchAndCaptureCommand(MCCommandSender commandSender, String cmd);
 
 	MCBossBar createBossBar(String title, MCBarColor color, MCBarStyle style);
+
+	MCBlockData createBlockData(String data);
+
+	MCMerchant createMerchant(String title);
 }

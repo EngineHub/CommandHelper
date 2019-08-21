@@ -5,8 +5,8 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -25,6 +25,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.ReadOnlyException;
@@ -43,7 +44,7 @@ import java.util.logging.Logger;
 public class Persistence {
 
 	public static String docs() {
-		return "Allows scripts to store data from execution to execution. See the guide on [[CommandHelper/Persistence|persistence]] for more information."
+		return "Allows scripts to store data from execution to execution. See the guide on [[Persistence|persistence]] for more information."
 				+ " In all the functions, you may send multiple arguments for the key, which will automatically"
 				+ " be concatenated with a period (the namespace separator). No magic happens here, you can"
 				+ " put periods yourself, or combine manually namespaced values or automatically namespaced values"
@@ -84,12 +85,12 @@ public class Persistence {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_2;
+		public MSVersion since() {
+			return MSVersion.V3_0_2;
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			String key = GetNamespace(args, args.length - 1, getName(), t);
 			String value = null;
 			try {
@@ -110,7 +111,7 @@ public class Persistence {
 					throw new CREFormatException("Param 1 in store_value must only contain letters, digits, underscores, or dots, (which denote namespaces).", t);
 				}
 			}
-			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Storing: " + key + " -> " + value, t);
+			MSLog.GetLogger().Log(MSLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Storing: " + key + " -> " + value, t);
 			try {
 				env.getEnv(GlobalEnv.class).GetPersistenceNetwork().set(env.getEnv(GlobalEnv.class).GetDaemonManager(), ("storage." + key).split("\\."), value);
 			} catch (IllegalArgumentException e) {
@@ -166,15 +167,15 @@ public class Persistence {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_2;
+		public MSVersion since() {
+			return MSVersion.V3_0_2;
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			Object o;
 			String namespace = GetNamespace(args, null, getName(), t);
-			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Getting value: " + namespace, t);
+			MSLog.GetLogger().Log(MSLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Getting value: " + namespace, t);
 			try {
 				Object obj;
 				try {
@@ -192,7 +193,7 @@ public class Persistence {
 				throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
 			}
 			try {
-				return (Construct) o;
+				return (Mixed) o;
 			} catch (ClassCastException e) {
 				return CNull.NULL;
 			}
@@ -254,16 +255,18 @@ public class Persistence {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Getting values", "store_value('x.top.a',true)\nstore_value('x.top.b',false)\nmsg(get_values('x'))")};
+				new ExampleScript("Getting values", "store_value('x.top.a',true)\n"
+						+ "store_value('x.top.b',false)\n"
+						+ "msg(get_values('x'))", "{x.top.a: true, x.top.b: false}")};
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			PersistenceNetwork p = environment.getEnv(GlobalEnv.class).GetPersistenceNetwork();
 			List<String> keyChain = new ArrayList<String>();
 			keyChain.add("storage");
 			String namespace = GetNamespace(args, null, getName(), t);
-			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Getting all values from " + namespace, t);
+			MSLog.GetLogger().Log(MSLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Getting all values from " + namespace, t);
 			keyChain.addAll(Arrays.asList(namespace.split("\\.")));
 			Map<String[], String> list;
 			try {
@@ -274,7 +277,7 @@ public class Persistence {
 				throw new CREFormatException(e.getMessage(), t, e);
 			}
 			CArray ca = CArray.GetAssociativeArray(t);
-			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, list.size() + " value(s) are being returned", t);
+			MSLog.GetLogger().Log(MSLog.Tags.PERSISTENCE, LogLevel.DEBUG, list.size() + " value(s) are being returned", t);
 			for(String[] e : list.keySet()) {
 				try {
 					String key = StringUtils.Join(e, ".").replaceFirst("storage\\.", ""); //Get that junk out of here
@@ -288,8 +291,8 @@ public class Persistence {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -329,8 +332,8 @@ public class Persistence {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -339,7 +342,7 @@ public class Persistence {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			try {
 				return CBoolean.get(env.getEnv(GlobalEnv.class).GetPersistenceNetwork().hasKey(("storage." + GetNamespace(args, null, getName(), t)).split("\\.")));
 			} catch (DataSourceException ex) {
@@ -386,8 +389,8 @@ public class Persistence {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -396,9 +399,9 @@ public class Persistence {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String namespace = GetNamespace(args, null, getName(), t);
-			CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Clearing value: " + namespace, t);
+			MSLog.GetLogger().Log(MSLog.Tags.PERSISTENCE, LogLevel.DEBUG, "Clearing value: " + namespace, t);
 			try {
 				environment.getEnv(GlobalEnv.class).GetPersistenceNetwork().clearKey(environment.getEnv(GlobalEnv.class).GetDaemonManager(), ("storage." + namespace).split("\\."));
 			} catch (DataSourceException | ReadOnlyException | IOException ex) {
@@ -423,7 +426,7 @@ public class Persistence {
 	 * @param exclude
 	 * @return
 	 */
-	private static String GetNamespace(Construct[] args, Integer exclude, String name, Target t) {
+	private static String GetNamespace(Mixed[] args, Integer exclude, String name, Target t) {
 		if(exclude != null && args.length < 2 || exclude == null && args.length < 1) {
 			throw new CREInsufficientArgumentsException(name + " was not provided with enough arguments. Check the documentation, and try again.", t);
 		}

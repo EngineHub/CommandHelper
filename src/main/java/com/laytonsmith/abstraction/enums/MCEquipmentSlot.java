@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("EquipmentSlot")
+@MEnum("com.commandhelper.EquipmentSlot")
 public enum MCEquipmentSlot {
 	WEAPON,
 	OFF_HAND,

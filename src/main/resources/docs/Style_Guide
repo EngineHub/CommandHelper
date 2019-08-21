@@ -60,7 +60,7 @@ In cases where you are using multiple blocks, at some point, all the blocks must
 ending parenthesis on the same line, but instead, match the end parenthesis with the start of the block
 
 %%CODE|
-# BAD:
+// BAD:
 @a = array(
 	array(1, 2, 3),
 	array(4, 5, 6));
@@ -71,7 +71,7 @@ if(@condition){
 msg(@a[
 	someValue()]);
 
-# Good:
+// Good:
 @a = array(
 	array(1, 2, 3),
 	array(4, 5, 6)
@@ -100,7 +100,7 @@ should be on a line of its own, and aligned with the parent if. Additionally, a 
 %%CODE|
 if(@condition,
     trueCode()
-, #else
+, // else
     falseCode()
 )
 %%
@@ -112,7 +112,7 @@ ifelse(@condition1,
     condition1Code()
 , @condition2,
     condition2Code()
-, #else
+, // else
     falseCode()
 )
 %%
@@ -152,14 +152,14 @@ Global procedures should be named using snake case, however.
 
 %%CODE|
 /**
- * Good
+ * Good.
  */
 proc _this_is_a_proc(){
 	return(0);
 }
 
 /**
- * Bad
+ * Bad.
  */
 proc _thisIsAProc(){
 	return(1);
@@ -175,3 +175,67 @@ for instance methods.
 For a full discussion on brace syntax, please see this article: [[Brace_Syntax|Brace Syntax]]. Brace
 syntax is preferred in all cases over functional syntax where possible, unless otherwise noted. (Most notably tertiary if
 statements.)
+
+== Comments ==
+Generally, the double slash (//) is preferred to the number sign (#) for line comments, with the notable exception of
+the hashbang at the top of the file, if present. A space should be added after the line comment operator, and before the
+first line of the comment text (//Bad) (// Good), the exception being IDE hint comments (i.e. #region)
+
+Block comments that are informational (rather than commenting out code) should follow these conventions: use /* for non
+documentation purposes, or for general comment blocks where the comment does not directly correspond with the next
+element, for instance, if the comment applies to the whole block of code, or more generally within blocks of code,
+rather than in element definitions. Comments that correspond with definitions of elements (classes, variables, procs,
+etc) should start with /**, which indicates and enables documentation help for that element in IDEs and reflection.
+These types of comments are known as "smart comments" and are treated specially by the compiler, and are not removed at
+compile time (though the compiler does otherwise ignore them). In any case, when using either /* or /**, comment blocks
+should line up the first star in a column. For blocks of code where the comment is not flush with the left side of the
+document, tabs should be used to push the comment block out, and except in the case of the first line, should add a
+single space before and after the star. A newline should be added after the begin comment operator, and before the end
+comment. The smart comment parser will ignore the first star in a line, and all the beginning whitespace.
+
+<%CODE|
+/** Bad comment */
+proc _badProcComment(){}
+
+/**
+* Bad comment 2, the stars don't line up.
+*/
+proc _badProcComment2(){}
+
+/**
+ * Good comment.
+ */
+proc _goodProcComment(){}
+%>
+
+Divider line comments are generally undesirable (i.e. //----------------------------------------), instead use region
+comments, which are hints to IDEs that support the feature, to provide a visual section for you.
+
+<%CODE|
+// In IDEs that support this notation, this will create a section for you, and in the editor, should surround the region
+// with divider lines.
+#region procDefinitions
+proc _a(){}
+proc _b(){}
+#endregion
+
+#region code
+_a();
+_b();
+#endregion 
+%>
+
+The descriptions in a smart comment should end with a punctuation mark, and should be complete sentences.
+
+<%CODE|
+/**
+ * This is a complete sentence, and is good practice for smart comments.
+ * @param a This describes what valid and invalid inputs are for this parameter.
+ * @return This describes what the return value of the procedure is.
+ * @throws IOException This describes in what cases the IOException will be thrown in.
+ * @throws IllegalArgumentException This describes in what cases the IllegalArgumentException is thrown in.
+ */
+int proc _p(string @a) throws IOException, IllegalArgumentException {
+	// ...
+}
+%>

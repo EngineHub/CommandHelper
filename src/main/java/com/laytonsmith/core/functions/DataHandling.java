@@ -3,17 +3,15 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.annotations.breakable;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
-import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.nolinking;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Globals;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptCompiler;
@@ -22,8 +20,9 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
-import com.laytonsmith.core.compiler.keywords.InKeyword;
+import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -34,7 +33,6 @@ import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CIClosure;
 import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CMutablePrimitive;
 import com.laytonsmith.core.constructs.CNull;
@@ -49,32 +47,28 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREIncludeException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
-import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
-import com.laytonsmith.core.exceptions.LoopBreakException;
-import com.laytonsmith.core.exceptions.LoopContinueException;
-import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.exceptions.StackTraceManager;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.tools.docgen.templates.ArrayIteration;
-import com.laytonsmith.tools.docgen.templates.Loops;
-
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -117,7 +111,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CArray(t, args);
 		}
 
@@ -137,8 +131,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -161,7 +155,9 @@ public class DataHandling {
 		FileOptions lastFileOptions = null;
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children,
+				FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			//We need to check here to ensure that
 			//we aren't getting a slice in a label, which is used in switch
 			//statements, but doesn't make sense here.
@@ -174,11 +170,11 @@ public class DataHandling {
 					if(((CLabel) child.getChildAt(0).getData()).cVal() instanceof IVariable) {
 						String array = "@a";
 						String valueName = ((IVariable) ((CLabel) child.getChildAt(0).getData()).cVal()).getVariableName();
-						Construct value = child.getChildAt(1).getData();
+						Mixed value = child.getChildAt(1).getData();
 						String v;
 						if(value instanceof IVariable) {
 							v = ((IVariable) value).getVariableName();
-						} else if(value instanceof CString) {
+						} else if(value.isInstanceOf(CString.class)) {
 							v = ((CString) value).getQuote();
 						} else {
 							v = "@value";
@@ -217,7 +213,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray array = CArray.GetAssociativeArray(t, args);
 			return array;
 		}
@@ -241,8 +237,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -270,7 +266,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			IVariableList list = env.getEnv(GlobalEnv.class).GetVarList();
 			int offset;
 			CClassType type;
@@ -283,29 +279,29 @@ public class DataHandling {
 				name = ((IVariable) args[offset]).getVariableName();
 				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag("no-check-duplicate-assign") == null) {
 					if(env.getEnv(GlobalEnv.class).GetFlag("closure-warn-overwrite") != null) {
-						CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR,
+						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR,
 								"The variable " + name + " is hiding another value of the"
 								+ " same name in the main scope.", t);
 					} else {
-						CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, name + " was already defined at "
-								+ list.get(name, t, true).getDefinedTarget() + " but is being redefined.", t);
+						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, name + " was already defined at "
+								+ list.get(name, t, true, env).getDefinedTarget() + " but is being redefined.", t);
 					}
 				}
 				type = ArgumentValidation.getClassType(args[0], t);
 			} else {
 				offset = 0;
 				if(!(args[offset] instanceof IVariable)) {
-					throw new CRECastException(getName() + " with 2 arguments only accepts an ivariable as the second argument.", t);
+					throw new CRECastException(getName() + " with 2 arguments only accepts an ivariable as the first argument.", t);
 				}
 				name = ((IVariable) args[offset]).getVariableName();
-				type = list.get(name, t, true).getDefinedType();
+				type = list.get(name, t, true, env).getDefinedType();
 			}
-			Construct c = args[offset + 1];
+			Mixed c = args[offset + 1];
 			while(c instanceof IVariable) {
 				IVariable cur = (IVariable) c;
-				c = list.get(cur.getVariableName(), cur.getTarget()).ival();
+				c = list.get(cur.getVariableName(), cur.getTarget(), env).ival();
 			}
-			IVariable v = new IVariable(type, name, c, t);
+			IVariable v = new IVariable(type, name, c, t, env);
 			list.set(v);
 			return v;
 		}
@@ -334,8 +330,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -352,13 +348,13 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+		public Mixed optimize(Target t, Environment env, Mixed... args) throws ConfigCompileException {
 			//We can't really optimize, but we can check that we are
 			//getting an ivariable.
 			int offset = 0;
 			if(args.length == 3) {
 				offset = 1;
-				if(!(args[0] instanceof CClassType)) {
+				if(!(args[0].isInstanceOf(CClassType.class))) {
 					throw new ConfigCompileException("Expecting a ClassType for parameter 1 to assign", t);
 				}
 			}
@@ -369,7 +365,10 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			//Check for too few arguments
 			if(children.size() < 2) {
 				return null;
@@ -378,7 +377,7 @@ public class DataHandling {
 					&& children.get(1).getData() instanceof IVariable) {
 				if(((IVariable) children.get(0).getData()).getVariableName().equals(
 						((IVariable) children.get(1).getData()).getVariableName())) {
-					CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Assigning a variable to itself", t);
+					MSLog.GetLogger().Log(MSLog.Tags.COMPILER, LogLevel.WARNING, "Assigning a variable to itself", t);
 				}
 			}
 			if(children.get(0).getData() instanceof CFunction && array_get.equals(children.get(0).getData().val())) {
@@ -410,1022 +409,15 @@ public class DataHandling {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "assign(@variable, 5);\nmsg(@variable);"),
 				new ExampleScript("Array assignment", "assign(@variable, associative_array());\nassign(@variable['associative'], 5);\nmsg(@variable);"),
+				new ExampleScript("String assignment with type", "assign(string, @s, 'string');"),
+				new ExampleScript("String assignment with invalid type", "assign(int, @i, 'string');", true),
 				new ExampleScript("Operator syntax", "@variable = 5;\nmsg(@variable);"),
+				new ExampleScript("Operator syntax with type", "string @s = 'string';"),
 				new ExampleScript("Operator syntax using combined operators", "@variable = 'string';\n@variable .= ' more string';\nmsg(@variable);"),
 				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable += 10;\nmsg(@variable);"),
 				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable -= 10;\nmsg(@variable);"),
 				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable *= 10;\nmsg(@variable);"),
 				new ExampleScript("Operator syntax using combined operators", "@variable = 5;\n@variable /= 10;\nmsg(@variable);")};
-		}
-	}
-
-	@api
-	@noboilerplate
-	@breakable
-	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class, com.laytonsmith.tools.docgen.templates.ArrayIteration.class})
-	public static class _for extends AbstractFunction implements Optimizable {
-
-		@Override
-		public String getName() {
-			return "for";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{4};
-		}
-
-		@Override
-		public Construct exec(Target t, Environment env, Construct... args) {
-			return CVoid.VOID;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			return new forelse(true).execs(t, env, parent, nodes);
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
-		}
-
-		@Override
-		public String docs() {
-			return "void {assign, condition, expression1, expression2} Acts as a typical for loop. The assignment is first run. Then, a"
-					+ " condition is checked. If that condition is checked and returns true, expression2 is run. After that, expression1 is run. In java"
-					+ " syntax, this would be: for(assign; condition; expression1){expression2}. assign must be an ivariable, either a "
-					+ "pre defined one, or the results of the assign() function. condition must be a boolean.";
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
-		}
-		//Doesn't matter, run out of state
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
-
-		@Override
-		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "for(assign(@i, 0), @i < 5, @i++,\n\tmsg(@i)\n)"),
-				new ExampleScript("With braces", "for(assign(@i, 0), @i < 2, @i++){\n\tmsg(@i)\n}"),
-				new ExampleScript("With continue. (See continue() for more examples)", "for(assign(@i, 0), @i < 2, @i++){\n"
-				+ "\tif(@i == 1, continue())\n"
-				+ "\tmsg(@i)\n"
-				+ "}")};
-		}
-
-		@Override
-		public LogLevel profileAt() {
-			return LogLevel.WARNING;
-		}
-
-		@Override
-		public String profileMessageS(List<ParseTree> args) {
-			return "Executing function: " + this.getName() + "("
-					+ args.get(0).toStringVerbose() + ", " + args.get(1).toStringVerbose()
-					+ ", " + args.get(2).toStringVerbose() + ", <code>)";
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			//In for(@i = 0, @i < @x, @i++, ...), the @i++ is more optimally written as ++@i, but
-			//it is commonplace to use postfix operations, so if the condition is in fact that simple,
-			//let's reverse it.
-			boolean isInc;
-			try {
-				if(children.get(2).getData() instanceof CFunction
-						&& ((isInc = children.get(2).getData().val().equals("postinc"))
-						|| children.get(2).getData().val().equals("postdec"))
-						&& children.get(2).getChildAt(0).getData() instanceof IVariable) {
-					ParseTree pre = new ParseTree(new CFunction(isInc ? "inc" : "dec", t), children.get(2).getFileOptions());
-					pre.addChild(children.get(2).getChildAt(0));
-					children.set(2, pre);
-				}
-			} catch (IndexOutOfBoundsException e) {
-				//Just ignore it. It's a compile error, but we'll let the rest of the
-				//existing system sort that out.
-			}
-
-			return null;
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
-	}
-
-	@api
-	@noboilerplate
-	@breakable
-	public static class forelse extends AbstractFunction {
-
-		public forelse() {
-		}
-
-		boolean runAsFor = false;
-
-		forelse(boolean runAsFor) {
-			this.runAsFor = runAsFor;
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return null;
-		}
-
-		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) throws ConfigRuntimeException {
-			ParseTree assign = nodes[0];
-			ParseTree condition = nodes[1];
-			ParseTree expression = nodes[2];
-			ParseTree runnable = nodes[3];
-			ParseTree elseCode = null;
-			if(!runAsFor) {
-				elseCode = nodes[4];
-			}
-			boolean hasRunOnce = false;
-
-			Construct counter = parent.eval(assign, env);
-			if(!(counter instanceof IVariable)) {
-				throw new CRECastException("First parameter of for must be an ivariable", t);
-			}
-			int _continue = 0;
-			while(true) {
-				boolean cond = Static.getBoolean(parent.seval(condition, env), t);
-				if(cond == false) {
-					break;
-				}
-				hasRunOnce = true;
-				if(_continue >= 1) {
-					--_continue;
-					parent.eval(expression, env);
-					continue;
-				}
-				try {
-					parent.eval(runnable, env);
-				} catch (LoopBreakException e) {
-					int num = e.getTimes();
-					if(num > 1) {
-						e.setTimes(--num);
-						throw e;
-					}
-					return CVoid.VOID;
-				} catch (LoopContinueException e) {
-					_continue = e.getTimes() - 1;
-					parent.eval(expression, env);
-					continue;
-				}
-				parent.eval(expression, env);
-			}
-			if(!hasRunOnce && !runAsFor && elseCode != null) {
-				parent.eval(elseCode, env);
-			}
-			return CVoid.VOID;
-		}
-
-		@Override
-		public String getName() {
-			return "forelse";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{5};
-		}
-
-		@Override
-		public String docs() {
-			return "void {assign, condition, expression1, expression2, else} Works like a normal for loop, but if upon checking the condition the first time,"
-					+ " it is determined that it is false (that is, NO code loops are going to be run) the else code is run instead. If the loop runs,"
-					+ " even once, it will NOT run the else branch. In general, brace syntax and use of for(){ } else { } syntax is preferred, instead"
-					+ " of using forelse directly.";
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
-	}
-
-	@api(environments = CommandHelperEnvironment.class)
-	@breakable
-	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class, ArrayIteration.class})
-	public static class foreach extends AbstractFunction implements Optimizable {
-
-		@Override
-		public String getName() {
-			return "foreach";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{2, 3, 4};
-		}
-
-		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			return CVoid.VOID;
-		}
-
-		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			if(nodes.length < 3) {
-				throw new CREInsufficientArgumentsException("Insufficient arguments passed to " + getName(), t);
-			}
-			ParseTree array = nodes[0];
-			ParseTree key = null;
-			int offset = 0;
-			if(nodes.length == 4) {
-				//Key and value provided
-				key = nodes[1];
-				offset = 1;
-			}
-			ParseTree value = nodes[1 + offset];
-			ParseTree code = nodes[2 + offset];
-			Construct arr = parent.seval(array, env);
-			Construct ik = null;
-			if(key != null) {
-				ik = parent.eval(key, env);
-				if(!(ik instanceof IVariable)) {
-					throw new CRECastException("Parameter 2 of " + getName() + " must be an ivariable", t);
-				}
-			}
-			Construct iv = parent.eval(value, env);
-			if(arr instanceof CSlice) {
-				long start = ((CSlice) arr).getStart();
-				long finish = ((CSlice) arr).getFinish();
-				if(finish < start) {
-					arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish - 1, t), new CInt(-1, t));
-				} else {
-					arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish + 1, t));
-				}
-			}
-			if(!(arr instanceof ArrayAccess)) {
-				throw new CRECastException("Parameter 1 of " + getName() + " must be an array or array like data structure", t);
-			}
-			if(!(iv instanceof IVariable)) {
-				throw new CRECastException("Parameter " + (2 + offset) + " of " + getName() + " must be an ivariable", t);
-			}
-			ArrayAccess one = (ArrayAccess) arr;
-			IVariable kkey = (IVariable) ik;
-			IVariable two = (IVariable) iv;
-			if(one.isAssociative()) {
-				//Iteration of an associative array is much easier, and we have
-				//special logic here to decrease the complexity.
-
-				//Clone the set, so changes in the array won't cause changes in
-				//the iteration order.
-				Set<Construct> keySet = new LinkedHashSet<>(one.keySet());
-				//Continues in an associative array are slightly different, so
-				//we have to track this differently. Basically, we skip the
-				//next element in the array key set.
-				int continues = 0;
-				for(Construct c : keySet) {
-					if(continues > 0) {
-						//If continues is greater than 0, continue in the loop,
-						//however many times necessary to make it 0.
-						continues--;
-						continue;
-					}
-					//If the key isn't null, set that in the variable table.
-					if(kkey != null) {
-						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(), kkey.getVariableName(), c, t));
-					}
-					//Set the value in the variable table
-					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(), two.getVariableName(), one.get(c.val(), t), t));
-					try {
-						//Execute the code
-						parent.eval(code, env);
-						//And handle any break/continues.
-					} catch (LoopBreakException e) {
-						int num = e.getTimes();
-						if(num > 1) {
-							e.setTimes(--num);
-							throw e;
-						}
-						return CVoid.VOID;
-					} catch (LoopContinueException e) {
-						// In associative arrays, (unlike with normal arrays) we need to decrement it by one, because the nature of
-						// the normal array is such that the counter is handled manually by our code. Because we are letting java
-						// handle our code though, this run actually counts as one run.
-						continues += e.getTimes() - 1;
-					}
-				}
-				return CVoid.VOID;
-			} else {
-				//It's not associative, so we have more complex handling. We will create an ArrayAccessIterator,
-				//and store that in the environment. As the array is iterated, underlying changes in the array
-				//will be reflected in the object, and we will adjust as necessary. The reason we use this mechanism
-				//is to avoid cloning the array, and iterating that. Arrays may be extremely large, and cloning the
-				//entire array is wasteful in that case. We are essentially tracking deltas this way, which prevents
-				//memory usage from getting out of hand.
-				ArrayAccess.ArrayAccessIterator iterator = new ArrayAccess.ArrayAccessIterator(one);
-				List<ArrayAccess.ArrayAccessIterator> arrayAccessList = env.getEnv(GlobalEnv.class).GetArrayAccessIterators();
-				try {
-					arrayAccessList.add(iterator);
-					int continues = 0;
-					while(true) {
-						int current = iterator.getCurrent();
-						if(continues > 0) {
-							//We have some continues to handle. Blacklisted
-							//values don't count for the continuing count, so
-							//we have to consider that when counting.
-							iterator.incrementCurrent();
-							if(iterator.isBlacklisted(current)) {
-								continue;
-							} else {
-								--continues;
-								continue;
-							}
-						}
-						if(current >= one.size()) {
-							//Done with the iterations.
-							break;
-						}
-						//If the item is blacklisted, we skip it.
-						if(!iterator.isBlacklisted(current)) {
-							if(kkey != null) {
-								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(), kkey.getVariableName(), new CInt(current, t), t));
-							}
-							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(), two.getVariableName(), one.get(current, t), t));
-							try {
-								parent.eval(code, env);
-							} catch (LoopBreakException e) {
-								int num = e.getTimes();
-								if(num > 1) {
-									e.setTimes(--num);
-									throw e;
-								}
-								return CVoid.VOID;
-							} catch (LoopContinueException e) {
-								continues += e.getTimes();
-								continue;
-							}
-						}
-						iterator.incrementCurrent();
-					}
-				} finally {
-					arrayAccessList.remove(iterator);
-				}
-			}
-			return CVoid.VOID;
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CRERangeException.class};
-		}
-
-		@Override
-		public String docs() {
-			return "void {array, [key], ivar, code} Walks through array, setting ivar equal to each element in the array, then running code."
-					+ " In addition, foreach(1..4, @i, code()) is also valid, setting @i to 1, 2, 3, 4 each time. The same syntax is valid as"
-					+ " in an array slice. If key is set (it must be an ivariable) then the index of each iteration will be set to that."
-					+ " See the examples for a demonstration. ---- "
-					+ " Enhanced syntax may also be used in foreach, using the \"in\", \"as\" and \"else\" keywords. See the examples for"
-					+ " examples of each structure. Using these keywords makes the structure of the foreach read much better. For instance,"
-					+ " with foreach(@value in @array){ } the code very literally reads \"for each value in array\", making ascertaining"
-					+ " the behavior of the loop easier. The \"as\" keyword reads less plainly, and so is not recommended for use, but is"
-					+ " allowed. Note that the array and value are reversed with the \"as\" keyword. An \"else\" block may be used after"
-					+ " the foreach, which will only run if the array provided is empty, that is, the loop code would never run. This provides"
-					+ " a good way to provide \"default\" handling. Array modifications while iterating are supported, and are well defined."
-					+ " See [[CommandHelper/Staged/Array_iteration|the page documenting array iterations]] for full details.";
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
-		}
-		//Doesn't matter, runs out of state anyways
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
-		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{
-				new ExampleScript("Using \"in\" keyword", "@array = array(1, 2, 3);\n"
-				+ "foreach(@value in @array){\n"
-				+ "\tmsg(@value);\n"
-				+ "}"),
-				new ExampleScript("Using \"in\" keyword, with a key", "@array = array(1, 2, 3);\n"
-				+ "foreach(@key: @value in @array){\n"
-				+ "\tmsg(@key . ': ' . @value);\n"
-				+ "}"),
-				new ExampleScript("Using \"as\" keyword", "@array = array(1, 2, 3);\n"
-				+ "foreach(@array as @value){\n"
-				+ "\tmsg(@value);\n"
-				+ "}"),
-				/*
-		// This is actually borked in real code, so it needs to be fixed. In the meantime, whatever, just remove the example.
-		new ExampleScript("Using \"as\" keyword, with a key", "@array = array(1, 2, 3);\n"
-		+ "foreach(@array as @key: @value){\n"
-		+ "\tmsg(@key . ': ' . @value);\n"
-		+ "}"),*/
-				new ExampleScript("With else clause", "@array = array() # Note empty array\n"
-				+ "foreach(@value in @array){\n"
-				+ "\tmsg(@value);\n"
-				+ "} else {\n"
-				+ "\tmsg('No values were in the array');\n"
-				+ "}"),
-				new ExampleScript("Basic functional usage", "assign(@array, array(1, 2, 3))\nforeach(@array, @i,\n\tmsg(@i)\n)"),
-				new ExampleScript("With braces", "assign(@array, array(1, 2, 3))\nforeach(@array, @i){\n\tmsg(@i)\n}"),
-				new ExampleScript("With a slice", "foreach(1..3, @i){\n\tmsg(@i)\n}"),
-				new ExampleScript("With a slice, counting down", "foreach(3..1, @i){\n\tmsg(@i)\n}"),
-				new ExampleScript("With array keys", "@array = array('one': 1, 'two': 2)\nforeach(@array, @key, @value){\n\tmsg(@key.':'.@value)\n}")};
-		}
-
-		@Override
-		public LogLevel profileAt() {
-			return LogLevel.WARNING;
-		}
-
-		@Override
-		public String profileMessageS(List<ParseTree> args) {
-			return "Executing function: " + this.getName() + "("
-					+ args.get(0).toStringVerbose() + ", " + args.get(1).toStringVerbose()
-					+ ", <code>)";
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
-		private static final String CENTRY = new Compiler.centry().getName();
-		private static final String ASSIGN = new assign().getName();
-		private static final String SCONCAT = new StringHandling.sconcat().getName();
-		private static final String IN = new InKeyword().getKeywordName();
-
-		private boolean isFunction(ParseTree node, String function) {
-			return node.getData() instanceof CFunction && node.getData().val().equals(function);
-		}
-
-		private boolean isKeyword(ParseTree node, String keyword) {
-			return node.getData() instanceof CKeyword && node.getData().val().equals(keyword);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() < 2) {
-				throw new ConfigCompileException("Invalid number of arguments passed to " + getName(), t);
-			}
-			if(isFunction(children.get(0), CENTRY)) {
-				// This is what "@key: @value in @array" looks like initially. We'll refactor this so the next segment can take over properly.
-				ParseTree sconcat = new ParseTree(new CFunction(new StringHandling.sconcat().getName(), t), fileOptions);
-				sconcat.addChild(children.get(0).getChildAt(0));
-				for(int i = 0; i < children.get(0).getChildAt(1).numberOfChildren(); i++) {
-					sconcat.addChild(children.get(0).getChildAt(1).getChildAt(i));
-				}
-				children.set(0, sconcat);
-			}
-			if(children.get(0).getData() instanceof CFunction && children.get(0).getData().val().equals(new StringHandling.sconcat().getName())) {
-				// We may be looking at a "@value in @array" or "@array as @value" type
-				// structure, so we need to re-arrange this into the standard format.
-				ParseTree array = null;
-				ParseTree key = null;
-				ParseTree value = null;
-				List<ParseTree> c = children.get(0).getChildren();
-				if(c.size() == 3) {
-					// No key specified
-					switch(c.get(1).getData().val()) {
-						case "in":
-							// @value in @array
-							value = c.get(0);
-							array = c.get(2);
-							break;
-						case "as":
-							// @array as @value
-							value = c.get(2);
-							array = c.get(0);
-							break;
-					}
-				} else if(c.size() == 4) {
-					if("in".equals(c.get(2).getData().val())) {
-						// @key: @value in @array
-						key = c.get(0);
-						value = c.get(1);
-						array = c.get(3);
-					} else if("as".equals(c.get(1).getData().val())) {
-						// @array as @key: @value
-						array = c.get(0);
-						key = c.get(2);
-						value = c.get(3);
-					}
-				}
-				if(key != null && key.getData() instanceof CLabel) {
-					if(!(((CLabel) key.getData()).cVal() instanceof IVariable)
-							&& !(((CLabel) key.getData()).cVal() instanceof CFunction
-							&& ((CLabel) key.getData()).cVal().val().equals(ASSIGN))) {
-						throw new ConfigCompileException("Expected a variable for key, but \"" + key.getData().val() + "\" was found", t);
-					}
-					key.setData(((CLabel) key.getData()).cVal());
-				}
-				// Now set up the new tree, and return that. Since foreachelse overrides us, we
-				// need to accept all the arguments after the first, and put those in.
-				List<ParseTree> newChildren = new ArrayList<>();
-				newChildren.add(array);
-				if(key != null) {
-					newChildren.add(key);
-				}
-				newChildren.add(value);
-				for(int i = 1; i < children.size(); i++) {
-					newChildren.add(children.get(i));
-				}
-				children.clear();
-				children.addAll(newChildren);
-				// Change foreach(){ ... } else { ... } to a foreachelse.
-				if(children.get(children.size() - 1).getData() instanceof CFunction
-						&& children.get(children.size() - 1).getData().val().equals("else")) {
-					ParseTree foreachelse = new ParseTree(new CFunction(new foreachelse().getName(), t), fileOptions);
-					children.set(children.size() - 1, children.get(children.size() - 1).getChildAt(0));
-					foreachelse.setChildren(children);
-					return foreachelse;
-				}
-			}
-			return null;
-		}
-
-	}
-
-	@api
-	@noboilerplate
-	@breakable
-	@seealso({foreach.class, Loops.class, ArrayIteration.class})
-	public static class foreachelse extends foreach {
-
-		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			ParseTree array = nodes[0];
-			//The last one
-			ParseTree elseCode = nodes[nodes.length - 1];
-
-			Construct data = parent.seval(array, env);
-
-			if(!(data instanceof CArray) && !(data instanceof CSlice)) {
-				throw new CRECastException(getName() + " expects an array for parameter 1", t);
-			}
-
-			if(((CArray) data).isEmpty()) {
-				parent.eval(elseCode, env);
-			} else {
-				ParseTree pass[] = new ParseTree[nodes.length - 1];
-				System.arraycopy(nodes, 0, pass, 0, nodes.length - 1);
-				nodes[0] = new ParseTree(data, null);
-				return super.execs(t, env, parent, pass);
-			}
-
-			return CVoid.VOID;
-		}
-
-		@Override
-		public String getName() {
-			return "foreachelse";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{4, 5};
-		}
-
-		@Override
-		public String docs() {
-			return "void {array, ivar, code, else} Works like a foreach, except if the array is empty, the else code runs instead. That is, if the code"
-					+ " would not run at all, the else condition would. In general, brace syntax and use of foreach(){ } else { } syntax is preferred, instead"
-					+ " of using foreachelse directly.";
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
-		@Override
-		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{
-				new ExampleScript("Basic usage, with the else code not running",
-				"@array = array(1, 2, 3)\n"
-				+ "foreachelse(@array, @val,\n"
-				+ "    msg(@val)\n"
-				+ ", #else \n"
-				+ "    msg('No values in the array')\n"
-				+ ")"),
-				new ExampleScript("Empty array, so else block running",
-				"@array = array()\n"
-				+ "foreachelse(@array, @val,\n"
-				+ "    msg(@val)\n"
-				+ ", #else \n"
-				+ "    msg('No values in the array')\n"
-				+ ")")};
-		}
-
-	}
-
-	@api
-	@noboilerplate
-	@breakable
-	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class})
-	public static class _while extends AbstractFunction {
-
-		@Override
-		public String getName() {
-			return "while";
-		}
-
-		@Override
-		public String docs() {
-			return "void {condition, [code]} While the condition is true, the code is executed. break and continue work"
-					+ " inside a dowhile, but continuing more than once is pointless, since the loop isn't inherently"
-					+ " keeping track of any counters anyways. Breaking multiple times still works however.";
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1, 2};
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return null;
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
-
-		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			try {
-				while(Static.getBoolean(parent.seval(nodes[0], env), t)) {
-					//We allow while(thing()); to be done. This makes certain
-					//types of coding styles possible.
-					if(nodes.length > 1) {
-						try {
-							parent.seval(nodes[1], env);
-						} catch (LoopContinueException e) {
-							//ok.
-						}
-					}
-				}
-			} catch (LoopBreakException e) {
-				if(e.getTimes() > 1) {
-					throw new LoopBreakException(e.getTimes() - 1, t);
-				}
-			}
-			return CVoid.VOID;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CNull.NULL;
-		}
-
-		@Override
-		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "assign(@i, 5)\nwhile(@i > 0,\n"
-				+ "\tmsg(@i)\n"
-				+ "\t@i--\n"
-				+ ")"),
-				new ExampleScript("With a break", "assign(@i, 0)\nwhile(true,\n"
-				+ "\tmsg(@i)\n"
-				+ "\t@i++\n"
-				+ "\tif(@i > 5, break())\n"
-				+ ")")};
-		}
-
-		@Override
-		public LogLevel profileAt() {
-			return LogLevel.WARNING;
-		}
-
-		@Override
-		public String profileMessageS(List<ParseTree> args) {
-			return "Executing function: " + this.getName() + "("
-					+ args.get(0).toStringVerbose() + ", <code>)";
-		}
-
-	}
-
-	@api
-	@noboilerplate
-	@breakable
-	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class})
-	public static class _dowhile extends AbstractFunction {
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return null;
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CNull.NULL;
-		}
-
-		@Override
-		public String getName() {
-			return "dowhile";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{2};
-		}
-
-		@Override
-		public String docs() {
-			return "void {code, condition} Like while, but always runs the code at least once. The condition is checked"
-					+ " after each run of the code, and if it is true, the code is run again. break and continue work"
-					+ " inside a dowhile, but continuing more than once is pointless, since the loop isn't inherently"
-					+ " keeping track of any counters anyways. Breaking multiple times still works however. In general, using brace"
-					+ " syntax is preferred: do { code(); } while(@condition); instead of using dowhile() directly.";
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			try {
-				do {
-					try {
-						parent.seval(nodes[0], env);
-					} catch (LoopContinueException e) {
-						//ok. No matter how many times it tells us to continue, we're only going to continue once.
-					}
-				} while(Static.getBoolean(parent.seval(nodes[1], env), t));
-			} catch (LoopBreakException e) {
-				if(e.getTimes() > 1) {
-					throw new LoopBreakException(e.getTimes() - 1, t);
-				}
-			}
-			return CVoid.VOID;
-		}
-
-		@Override
-		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "do {\n"
-				+ "\tmsg('This will only run once');\n"
-				+ "} while(false);"),
-				new ExampleScript("Pure functional usage", "dowhile(\n"
-				+ "\tmsg('This will only run once')\n"
-				+ ", #while\n"
-				+ "false)")
-			};
-		}
-
-		@Override
-		public LogLevel profileAt() {
-			return LogLevel.WARNING;
-		}
-
-		@Override
-		public String profileMessageS(List<ParseTree> args) {
-			return "Executing function: " + this.getName() + "(<code>, "
-					+ args.get(1).toStringVerbose() + ")";
-		}
-	}
-
-	@api
-	public static class _break extends AbstractFunction implements Optimizable {
-
-		@Override
-		public String getName() {
-			return "break";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{0, 1};
-		}
-
-		@Override
-		public String docs() {
-			return "nothing {[int]} Stops the current loop. If int is specified, and is greater than 1, the break travels that many loops up. So, if you had"
-					+ " a loop embedded in a loop, and you wanted to break in both loops, you would call break(2). If this function is called outside a loop"
-					+ " (or the number specified would cause the break to travel up further than any loops are defined), the function will fail. If no"
-					+ " argument is specified, it is the same as calling break(1). This function has special compilation rules. The break number"
-					+ " must not be dynamic, or a compile error will occur. An integer must be hard coded into the function.";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			int num = 1;
-			if(args.length == 1) {
-				num = Static.getInt32(args[0], t);
-			}
-			throw new LoopBreakException(num, t);
-		}
-
-		@Override
-		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "for(assign(@i, 0), @i < 1000, @i++,\n"
-				+ "\tfor(assign(@j, 0), @j < 1000, @j++,\n"
-				+ "\t\tmsg('This will only display once')\n"
-				+ "\t\tbreak(2)\n"
-				+ "\t)"
-				+ ")"),
-				new ExampleScript("Invalid number", "for(assign(@i, 0), @i < 1000, @i++,\n"
-				+ "\tfor(assign(@j, 0), @j < 1000, @j++,\n"
-				+ "\t\tbreak(3) #There are only 2 loops to break out of\n"
-				+ "\t)"
-				+ ")", true)};
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() == 1) {
-				if(children.get(0).isDynamic()) {
-					//This is absolutely a bad design, if there is a variable here
-					//in the break. Due to optimization, this is a compile error.
-					throw new ConfigCompileException("The parameter sent to break() should"
-							+ " be hard coded, and should not be dynamically determinable, since this is always a sign"
-							+ " of loose code flow, which should be avoided.", t);
-				}
-				if(!(children.get(0).getData() instanceof CInt)) {
-					throw new ConfigCompileException("break() only accepts integer values.", t);
-				}
-			}
-			return null;
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC
-			//, OptimizationOption.TERMINAL This can't be added yet, because of things like switch, where code
-			//branches aren't considered correctly.
-			);
-		}
-
-	}
-
-	@api
-	public static class _continue extends AbstractFunction {
-
-		@Override
-		public String getName() {
-			return "continue";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{0, 1};
-		}
-
-		@Override
-		public String docs() {
-			return "void {[int]} Skips the rest of the code in this loop, and starts the loop over, with it continuing at the next index. If this function"
-					+ " is called outside of a loop, the command will fail. If int is set, it will skip 'int' repetitions. If no argument is specified,"
-					+ " 1 is used.";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			int num = 1;
-			if(args.length == 1) {
-				num = Static.getInt32(args[0], t);
-			}
-			throw new LoopContinueException(num, t);
-		}
-
-		@Override
-		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "for(assign(@i, 0), @i < 5, @i++){\n"
-				+ "\tif(@i == 2, continue())\n"
-				+ "\tmsg(@i)\n"
-				+ "}"),
-				new ExampleScript("Argument specified", "for(assign(@i, 0), @i < 5, @i++){\n"
-				+ "\tif(@i == 2, continue(2))\n"
-				+ "\tmsg(@i)\n"
-				+ "}")};
 		}
 	}
 
@@ -1458,8 +450,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1468,8 +460,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(!(args[0] instanceof CArray));
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(!(args[0].isInstanceOf(CArray.class)));
 		}
 
 		@Override
@@ -1519,8 +511,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1529,8 +521,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0] instanceof CString);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(args[0].isInstanceOf(CString.class));
 		}
 
 		@Override
@@ -1578,8 +570,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1588,8 +580,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0] instanceof CByteArray);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(args[0].isInstanceOf(CByteArray.class));
 		}
 
 		@Override
@@ -1638,8 +630,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -1648,8 +640,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0] instanceof CArray);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(args[0].isInstanceOf(CArray.class));
 		}
 
 		@Override
@@ -1700,8 +692,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1710,8 +702,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0] instanceof CInt || args[0] instanceof CDouble);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(args[0].isInstanceOf(CInt.class) || args[0].isInstanceOf(CDouble.class));
 		}
 
 		@Override
@@ -1763,8 +755,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -1773,8 +765,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0] instanceof CDouble);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(args[0].isInstanceOf(CDouble.class));
 		}
 
 		@Override
@@ -1824,8 +816,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -1834,8 +826,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0] instanceof CInt);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(args[0].isInstanceOf(CInt.class));
 		}
 
 		@Override
@@ -1884,8 +876,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -1894,8 +886,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0] instanceof CBoolean);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(args[0].isInstanceOf(CBoolean.class));
 		}
 
 		@Override
@@ -1943,8 +935,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -1953,7 +945,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CBoolean.get(args[0] instanceof CNull);
 		}
 
@@ -2008,7 +1000,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			boolean b = true;
 			try {
 				Static.getNumber(args[0], t);
@@ -2019,8 +1011,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2082,7 +1074,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			double d;
 			try {
 				d = Static.getDouble(args[0], t);
@@ -2093,8 +1085,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2119,7 +1111,7 @@ public class DataHandling {
 
 	@api
 	@unbreakable
-	public static class proc extends AbstractFunction {
+	public static class proc extends AbstractFunction implements BranchStatement, VariableScope {
 
 		@Override
 		public String getName() {
@@ -2133,8 +1125,11 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "void {[name], [ivar...], procCode} Creates a new user defined procedure (also known as \"function\") that can be called later in code. Please see the more detailed"
-					+ " documentation on procedures for more information. In general, brace syntax and keyword usage is preferred:"
+			return "void {procName, [params...], procCode} Creates a new user defined procedure (also known as"
+					+ " \"function\"), with the given name and parameters, that can be called later in code."
+					+ " The name of the procedure must be a constant and its parameters must be variables."
+					+ " Please see the more detailed documentation on procedures for more information."
+					+ " In general, brace syntax and keyword usage is preferred:"
 					+ " proc _myProc(@a, @b){ procCode(@a, @b); }";
 		}
 
@@ -2154,8 +1149,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_3;
+		public MSVersion since() {
+			return MSVersion.V3_1_3;
 		}
 
 		@Override
@@ -2164,7 +1159,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			Procedure myProc = getProcedure(t, env, parent, nodes);
 			env.getEnv(GlobalEnv.class).GetProcs().put(myProc.getName(), myProc);
 			return CVoid.VOID;
@@ -2177,8 +1172,12 @@ public class DataHandling {
 			List<String> varNames = new ArrayList<>();
 			boolean usesAssign = false;
 			CClassType returnType = Auto.TYPE;
-			if(nodes[0].getData() instanceof CClassType) {
-				returnType = (CClassType) nodes[0].getData();
+			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData().isInstanceOf(CClassType.class)) {
+				if(nodes[0].getData().equals(CVoid.VOID)) {
+					returnType = CVoid.TYPE;
+				} else {
+					returnType = (CClassType) nodes[0].getData();
+				}
 				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
 				for(int i = 1; i < nodes.length; i++) {
 					newNodes[i - 1] = nodes[i];
@@ -2193,36 +1192,39 @@ public class DataHandling {
 				} else {
 					boolean thisNodeIsAssign = false;
 					if(nodes[i].getData() instanceof CFunction) {
-						if(((CFunction) nodes[i].getData()).getValue().equals("assign")) {
+						if((nodes[i].getData()).val().equals("assign")) {
 							thisNodeIsAssign = true;
-							if((nodes[i].getChildren().size() == 3 && nodes[i].getChildAt(0).getData().isDynamic())
-									|| nodes[i].getChildAt(1).getData().isDynamic()) {
+							if((nodes[i].getChildren().size() == 3 && Construct.IsDynamicHelper(nodes[i].getChildAt(0).getData()))
+									|| Construct.IsDynamicHelper(nodes[i].getChildAt(1).getData())) {
 								usesAssign = true;
 							}
+						} else if((nodes[i].getData()).val().equals("__autoconcat__")) {
+							throw new CREInvalidProcedureException("Invalid arguments defined for procedure", t);
 						}
 					}
 					env.getEnv(GlobalEnv.class).SetFlag("no-check-duplicate-assign", true);
-					Construct cons = parent.eval(nodes[i], env);
+					Mixed cons = parent.eval(nodes[i], env);
 					env.getEnv(GlobalEnv.class).ClearFlag("no-check-duplicate-assign");
-					if(i == 0 && cons instanceof IVariable) {
-						throw new CREInvalidProcedureException("Anonymous Procedures are not allowed", t);
-					} else if(i == 0 && !(cons instanceof IVariable)) {
+					if(i == 0) {
+						if(cons instanceof IVariable) {
+							throw new CREInvalidProcedureException("Anonymous Procedures are not allowed", t);
+						}
 						name = cons.val();
-					} else if(!(cons instanceof IVariable)) {
-						throw new CREInvalidProcedureException("You must use IVariables as the arguments", t);
 					} else {
+						if(!(cons instanceof IVariable)) {
+							throw new CREInvalidProcedureException("You must use IVariables as the arguments", t);
+						}
 						IVariable ivar = null;
 						try {
-							Construct c = cons;
-							if(c instanceof IVariable) {
-								String varName = ((IVariable) c).getVariableName();
-								if(varNames.contains(varName)) {
-									throw new CREInvalidProcedureException("Same variable name defined twice in " + name, t);
-								}
-								varNames.add(varName);
+							Mixed c = cons;
+							String varName = ((IVariable) c).getVariableName();
+							if(varNames.contains(varName)) {
+								throw new CREInvalidProcedureException("Same variable name defined twice in " + name, t);
 							}
+							varNames.add(varName);
 							while(c instanceof IVariable) {
-								c = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getVariableName(), t, true).ival();
+								c = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getVariableName(), t,
+										true, env).ival();
 							}
 							if(!thisNodeIsAssign) {
 								//This is required because otherwise a default value that's already in the environment
@@ -2230,7 +1232,8 @@ public class DataHandling {
 								//into this proc, if the call to the proc didn't have a value in this slot.
 								c = new CString("", t);
 							}
-							ivar = new IVariable(((IVariable) cons).getDefinedType(), ((IVariable) cons).getVariableName(), c.clone(), t);
+							ivar = new IVariable(((IVariable) cons).getDefinedType(),
+									((IVariable) cons).getVariableName(), c.clone(), t, env);
 						} catch (CloneNotSupportedException ex) {
 							//
 						}
@@ -2247,7 +1250,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -2257,7 +1260,7 @@ public class DataHandling {
 		}
 
 		/**
-		 * Returns either null to indicate that the procedure is not const, or returns a single Construct, which should
+		 * Returns either null to indicate that the procedure is not const, or returns a single Mixed, which should
 		 * replace the call to the procedure.
 		 *
 		 * @param t
@@ -2266,11 +1269,11 @@ public class DataHandling {
 		 * @return
 		 * @throws ConfigRuntimeException
 		 */
-		public static Construct optimizeProcedure(Target t, Procedure myProc, List<ParseTree> children) throws ConfigRuntimeException {
+		public static Mixed optimizeProcedure(Target t, Procedure myProc, List<ParseTree> children) throws ConfigRuntimeException {
 			if(myProc.isPossiblyConstant()) {
 				//Oooh, it's possibly constant. So, let's run it with our children.
 				try {
-					FileOptions options = new FileOptions(new HashMap<String, String>());
+					FileOptions options = new FileOptions(new HashMap<>());
 					if(!children.isEmpty()) {
 						options = children.get(0).getFileOptions();
 					}
@@ -2278,11 +1281,12 @@ public class DataHandling {
 					Script fakeScript = Script.GenerateScript(root, Static.GLOBAL_PERMISSION);
 					Environment env = Static.GenerateStandaloneEnvironment();
 					env.getEnv(GlobalEnv.class).SetScript(fakeScript);
-					Construct c = myProc.cexecute(children, env, t);
+					Mixed c = myProc.cexecute(children, env, t);
 					//Yup! It worked. It's a const proc.
 					return c;
 				} catch (ConfigRuntimeException e) {
-					if(e instanceof CREInvalidProcedureException) {
+					if(e instanceof CREThrowable
+							&& ((CREThrowable) e).isInstanceOf(CREInvalidProcedureException.class)) {
 						//This is the only valid exception that doesn't strictly mean it's a bad
 						//call.
 						return null;
@@ -2313,57 +1317,24 @@ public class DataHandling {
 //			//that here. If we don't, we lose the information
 //			return ;
 //		}
-	}
-
-	@api
-	public static class _return extends AbstractFunction implements Optimizable {
 
 		@Override
-		public String getName() {
-			return "return";
+		public List<Boolean> isBranch(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>(children.size());
+			for(int i = 0; i < children.size() - 1; i++) {
+				ret.add(false);
+			}
+			ret.add(true);
+			return ret;
 		}
 
 		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{0, 1};
-		}
-
-		@Override
-		public String docs() {
-			return "nothing {mixed} Returns the specified value from this procedure. It cannot be called outside a procedure.";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return null;
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(
-					OptimizationOption.TERMINAL
-			);
-		}
-
-		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			Construct ret = (args.length == 1 ? args[0] : CVoid.VOID);
-			throw new FunctionReturnException(ret, t);
+		public List<Boolean> isScope(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>(children.size());
+			for(ParseTree child : children) {
+				ret.add(true);
+			}
+			return ret;
 		}
 	}
 
@@ -2399,8 +1370,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -2409,20 +1380,31 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public CVoid exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public CVoid execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			ParseTree tree = nodes[0];
-			Construct arg = parent.seval(tree, env);
+			Mixed arg = parent.seval(tree, env);
 			String location = arg.val();
 			File file = Static.GetFileFromArgument(location, env, t, null);
-			ParseTree include = IncludeCache.get(file, t);
+			ParseTree include = IncludeCache.get(file, env, t);
 			if(include != null) {
 				// It could be an empty file
-				parent.eval(include.getChildAt(0), env);
+				StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
+				stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<include " + arg.val() + ">>", t));
+				try {
+					parent.eval(include.getChildAt(0), env);
+				} catch (AbstractCREException e) {
+					e.freezeStackTraceElements(stManager);
+					throw e;
+				} catch (StackOverflowError e) {
+					throw new CREStackOverflowError(null, t, e);
+				} finally {
+					stManager.popStackTraceElement();
+				}
 			}
 			return CVoid.VOID;
 		}
@@ -2440,7 +1422,7 @@ public class DataHandling {
 //		}
 //
 //		@Override
-//		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+//		public Mixed optimize(Target t, Mixed... args) throws ConfigCompileException {
 //			//We can't optimize per se, but if the path is constant, and the code is uncompilable, we
 //			//can give a warning, and go ahead and cache the tree.
 //			String path = args[0].val();
@@ -2448,137 +1430,21 @@ public class DataHandling {
 //			IncludeCache.get(file, t);
 //			return null;
 //		}
-	}
-
-	@api
-	public static class call_proc extends AbstractFunction implements Optimizable {
 
 		@Override
-		public String getName() {
-			return "call_proc";
+		public LogLevel profileAt() {
+			return LogLevel.ERROR;
 		}
 
 		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{Integer.MAX_VALUE};
-		}
-
-		@Override
-		public String docs() {
-			return "mixed {proc_name, [var1...]} Dynamically calls a user defined procedure. call_proc(_myProc, 'var1') is the equivalent of"
-					+ " _myProc('var1'), except you could dynamically build the procedure name if need be. This is useful for dynamic coding,"
-					+ " however, closures work best for callbacks. Throws an InvalidProcedureException if the procedure isn't defined. If you are"
-					+ " hardcoding the first parameter, a warning will be issued, because it is much more efficient and safe to directly use"
-					+ " a procedure if you know what its name is beforehand.";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREInvalidProcedureException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if(args.length < 1) {
-				throw new CREInsufficientArgumentsException("Expecting at least one argument to " + getName(), t);
+		public String profileMessageS(List<ParseTree> args) {
+			String m = "Executing function: include(";
+			if(args.get(0).isConst()) {
+				m += args.get(0).getData().val();
+			} else {
+				m += "<dynamic input>";
 			}
-			Procedure proc = env.getEnv(GlobalEnv.class).GetProcs().get(args[0].val());
-			if(proc != null) {
-				List<Construct> vars = new ArrayList<Construct>(Arrays.asList(args));
-				vars.remove(0);
-				Environment newEnv = null;
-				try {
-					newEnv = env.clone();
-				} catch (CloneNotSupportedException ex) {
-					throw new RuntimeException(ex);
-				}
-				return proc.execute(vars, newEnv, t);
-			}
-			throw new CREInvalidProcedureException("Unknown procedure \"" + args[0].val() + "\"", t);
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() < 1) {
-				throw new CREInsufficientArgumentsException("Expecting at least one argument to " + getName(), t);
-			}
-			if(children.get(0).isConst()) {
-				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Hardcoding procedure name in " + getName() + ", which is inefficient."
-						+ " Consider calling the procedure directly if the procedure name is known at compile time.", t);
-			}
-			return null;
-		}
-
-	}
-
-	@api
-	public static class call_proc_array extends call_proc {
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CArray ca = Static.getArray(args[1], t);
-			if(ca.inAssociativeMode()) {
-				throw new CRECastException("Expected the array passed to " + getName() + " to be non-associative.", t);
-			}
-			Construct[] args2 = new Construct[(int) ca.size() + 1];
-			args2[0] = args[0];
-			for(int i = 1; i < args2.length; i++) {
-				args2[i] = ca.get(i - 1, t);
-			}
-			return super.exec(t, environment, args2);
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREInvalidProcedureException.class, CRECastException.class};
-		}
-
-		@Override
-		public String getName() {
-			return "call_proc_array";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{2};
-		}
-
-		@Override
-		public String docs() {
-			return "mixed {proc_name, array} Works like call_proc, but allows for variable or unknown number of arguments to be passed to"
-					+ " a proc. The array parameter is \"flattened\", and call_proc is essentially called. If the array is associative, an"
-					+ " exception is thrown.";
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			//If they hardcode the name, that's fine, because the variables may just be the only thing that's variable.
-			return null;
+			return m + ")";
 		}
 
 	}
@@ -2613,8 +1479,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -2623,7 +1489,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) {
+		public Mixed exec(Target t, Environment env, Mixed... args) {
 			return CBoolean.get(env.getEnv(GlobalEnv.class).GetProcs().get(args[0].val()) != null);
 		}
 	}
@@ -2657,8 +1523,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2667,8 +1533,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CArray) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CArray.class)) {
 				return CBoolean.get(((CArray) args[0]).inAssociativeMode());
 			} else {
 				throw new CRECastException(this.getName() + " expects argument 1 to be an array", t);
@@ -2726,13 +1592,13 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0] instanceof CClosure);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(args[0].isInstanceOf(CClosure.class));
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2777,8 +1643,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2787,11 +1653,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String key;
-			if(args[0] instanceof CString) {
+			if(args[0].isInstanceOf(CString.class)) {
 				key = args[0].val();
-			} else if(args[0] instanceof CArray) {
+			} else if(args[0].isInstanceOf(CArray.class)) {
 				if(((CArray) args[0]).isAssociative()) {
 					throw new CREIllegalArgumentException("Associative arrays may not be used as keys in " + getName(), t);
 				}
@@ -2799,7 +1665,7 @@ public class DataHandling {
 			} else {
 				throw new CREIllegalArgumentException("Argument 1 in " + this.getName() + " must be a string or array.", t);
 			}
-			Construct c = Globals.GetGlobalConstruct(key);
+			Mixed c = Globals.GetGlobalConstruct(key);
 			if(args.length == 2 && c instanceof CNull) {
 				c = args[1];
 			}
@@ -2848,8 +1714,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2858,11 +1724,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String key;
-			if(args[0] instanceof CString) {
+			if(args[0].isInstanceOf(CString.class)) {
 				key = args[0].val();
-			} else if(args[0] instanceof CArray) {
+			} else if(args[0].isInstanceOf(CArray.class)) {
 				if(((CArray) args[0]).isAssociative()) {
 					throw new CREIllegalArgumentException("Associative arrays may not be used as keys in " + getName(), t);
 				}
@@ -2870,7 +1736,7 @@ public class DataHandling {
 			} else {
 				throw new CREIllegalArgumentException("Argument 1 in " + this.getName() + " must be a string or array.", t);
 			}
-			Construct c = args[1];
+			Mixed c = args[1];
 			Globals.SetGlobal(key, c);
 			return CVoid.VOID;
 		}
@@ -2898,10 +1764,10 @@ public class DataHandling {
 		}
 	}
 
-	@api(environments = CommandHelperEnvironment.class)
+	@api
 	@unbreakable
 	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class})
-	public static class closure extends AbstractFunction {
+	public static class closure extends AbstractFunction implements BranchStatement, VariableScope {
 
 		@Override
 		public String getName() {
@@ -2915,17 +1781,17 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "closure {[varNames...,] code} Returns a closure on the provided code. A closure is"
+			return "closure {[params...], code} Returns a closure on the provided code. A closure is"
 					+ " a datatype that represents some code as code, not the results of some"
 					+ " code after it is run. Code placed in a closure can be used as"
-					+ " a string, or executed by other functions using the eval() function."
+					+ " a string, or executed by other functions using the execute() function."
 					+ " If a closure is \"to string'd\" it will not necessarily look like"
 					+ " the original code, but will be functionally equivalent. The current environment"
 					+ " is \"snapshotted\" and stored with the closure, however, this information is"
 					+ " only stored in memory, it isn't retained during a serialization operation."
 					+ " Also, the special variable @arguments is automatically created for you, and contains"
 					+ " an array of all the arguments passed to the closure, much like procedures."
-					+ " See the wiki article on [[CommandHelper/Staged/Closures|closures]] for more details"
+					+ " See the wiki article on [[Closures|closures]] for more details"
 					+ " and examples.";
 		}
 
@@ -2950,19 +1816,19 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			if(nodes.length == 0) {
 				//Empty closure, do nothing.
-				return new CClosure(null, env, Auto.TYPE, new String[]{}, new Construct[]{}, new CClassType[]{}, t);
+				return new CClosure(null, env, Auto.TYPE, new String[]{}, new Mixed[]{}, new CClassType[]{}, t);
 			}
 			// Handle the closure type first thing
 			CClassType returnType = Auto.TYPE;
-			if(nodes[0].getData() instanceof CClassType) {
+			if(nodes[0].getData().isInstanceOf(CClassType.class)) {
 				returnType = (CClassType) nodes[0].getData();
 				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
 				for(int i = 1; i < nodes.length; i++) {
@@ -2971,7 +1837,7 @@ public class DataHandling {
 				nodes = newNodes;
 			}
 			String[] names = new String[nodes.length - 1];
-			Construct[] defaults = new Construct[nodes.length - 1];
+			Mixed[] defaults = new Mixed[nodes.length - 1];
 			CClassType[] types = new CClassType[nodes.length - 1];
 			// We clone the enviornment at this point, because we don't want the values
 			// that are assigned here to overwrite values in the main scope.
@@ -2989,7 +1855,7 @@ public class DataHandling {
 				newNode.setChildren(children);
 				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel());
 				myEnv.getEnv(GlobalEnv.class).SetFlag("closure-warn-overwrite", true);
-				Construct ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
+				Mixed ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
 				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
 				if(!(ret instanceof IVariable)) {
 					throw new CRECastException("Arguments sent to " + getName() + " barring the last) must be ivariables", t);
@@ -3008,7 +1874,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_0;
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3028,6 +1894,25 @@ public class DataHandling {
 			};
 		}
 
+		@Override
+		public List<Boolean> isBranch(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>(children.size());
+			if(children.isEmpty()) {
+				// This is the "closure()" usage, and does not have any branches.
+				return ret;
+			}
+			for(int i = 0; i < children.size() - 1; i++) {
+				ret.add(false);
+			}
+			ret.add(true);
+			return ret;
+		}
+
+		@Override
+		public List<Boolean> isScope(List<ParseTree> children) {
+			return isBranch(children);
+		}
+
 	}
 
 	@api
@@ -3042,7 +1927,7 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "iclosure {[varNames...,] code} Returns a scope isolated closure on the provided code. An iclosure is"
+			return "iclosure {[params...], code} Returns a scope isolated closure on the provided code. An iclosure is"
 					+ " a datatype that represents some code as code, not the results of some"
 					+ " code after it is run. Code placed in an iclosure can be used as"
 					+ " a string, or executed by other functions using the execute() function."
@@ -3054,19 +1939,19 @@ public class DataHandling {
 					+ " from the parent code."
 					+ " The special variable @arguments is automatically created for you, and contains"
 					+ " an array of all the arguments passed to the closure, much like procedures."
-					+ " See the wiki article on [[CommandHelper/Staged/Closures|closures]] for more details"
+					+ " See the wiki article on [[Closures|closures]] for more details"
 					+ " and examples.";
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			if(nodes.length == 0) {
 				//Empty closure, do nothing.
-				return new CClosure(null, env, Auto.TYPE, new String[]{}, new Construct[]{}, new CClassType[]{}, t);
+				return new CIClosure(null, env, Auto.TYPE, new String[]{}, new Mixed[]{}, new CClassType[]{}, t);
 			}
 			// Handle the closure type first thing
 			CClassType returnType = Auto.TYPE;
-			if(nodes[0].getData() instanceof CClassType) {
+			if(nodes[0].getData().isInstanceOf(CClassType.class)) {
 				returnType = (CClassType) nodes[0].getData();
 				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
 				for(int i = 1; i < nodes.length; i++) {
@@ -3075,7 +1960,7 @@ public class DataHandling {
 				nodes = newNodes;
 			}
 			String[] names = new String[nodes.length - 1];
-			Construct[] defaults = new Construct[nodes.length - 1];
+			Mixed[] defaults = new Mixed[nodes.length - 1];
 			CClassType[] types = new CClassType[nodes.length - 1];
 			// We clone the enviornment at this point, because we don't want the values
 			// that are assigned here to overwrite values in the main scope.
@@ -3093,7 +1978,7 @@ public class DataHandling {
 				newNode.setChildren(children);
 				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel());
 				myEnv.getEnv(GlobalEnv.class).SetFlag("closure-warn-overwrite", true);
-				Construct ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
+				Mixed ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
 				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
 				if(!(ret instanceof IVariable)) {
 					throw new CRECastException("Arguments sent to " + getName() + " barring the last) must be ivariables", t);
@@ -3112,7 +1997,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3152,7 +2037,7 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "closure {[varNames...], code} Returns a non-linking closure on the provided code. The same rules apply"
+			return "closure {[params...], code} Returns a non-linking closure on the provided code. The same rules apply"
 					+ " for closures, except the top level internal code does not check for proper linking at compile time,"
 					+ " and instead links at runtime. Lexer errors and some other compile time checks ARE done however, but"
 					+ " functions are not optimized or linked. This is used for remote code execution, since the remote platform"
@@ -3160,14 +2045,14 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
 
 	@api
-	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class})
+	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class, execute_array.class, executeas.class})
 	public static class execute extends AbstractFunction {
 
 		@Override
@@ -3182,7 +2067,7 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "mixed {[values...,] closure} Executes the given closure. You can also send arguments"
+			return "mixed {[values...], closure} Executes the given closure. You can also send arguments"
 					+ " to the closure, which it may or may not use, depending on the particular closure's"
 					+ " definition. If the closure returns a value with return(), then that value will"
 					+ " be returned with execute. Otherwise, void is returned.";
@@ -3204,25 +2089,70 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(args[args.length - 1] instanceof CClosure) {
-				Construct[] vals = new Construct[args.length - 1];
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(args[args.length - 1].isInstanceOf(CClosure.class)) {
+				Mixed[] vals = new Mixed[args.length - 1];
 				System.arraycopy(args, 0, vals, 0, args.length - 1);
 				CClosure closure = (CClosure) args[args.length - 1];
-				try {
-					closure.execute(vals);
-				} catch (FunctionReturnException e) {
-					return e.getReturn();
-				}
+				return closure.executeCallable(vals);
 			} else {
 				throw new CRECastException("Only a closure (created from the closure function) can be sent to execute()", t);
 			}
-			return CVoid.VOID;
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
+		}
+	}
+
+	@api
+	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class, execute.class})
+	public static class execute_array extends AbstractFunction {
+		@Override
+		public String getName() {
+			return "execute_array";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "mixed {valueArray, closure} Executes the given closure, expanding the value"
+					+ " array as individual arguments to the closure. If there are no arguments to be"
+					+ " sent to the closure, an empty array can be sent."
+					+ " If the closure returns a value with return(), then that value will"
+					+ " be returned with execute. Otherwise, void is returned.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			Mixed[] vals = ArgumentValidation.getArray(args[0], t).asList().toArray(new Mixed[0]);
+			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
+			return closure.executeCallable(vals);
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
 		}
 	}
 
@@ -3242,8 +2172,9 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "mixed {player, label, [values...,] closure} Executes the given closure in the context of a given"
-					+ " player. A closure that runs player(), for instance, would return the specified player's name."
+			return "mixed {player, label, [values...], closure} Executes the given closure in the context of a given"
+					+ " player or " + Static.getConsoleName() + ". A closure that runs player(), for instance,"
+					+ " would return the specified player's name."
 					+ " The label argument sets the permission label that this closure will use. If null is given,"
 					+ " the current label will be used, like with execute().";
 		}
@@ -3264,18 +2195,24 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(!(args[args.length - 1] instanceof CClosure)) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(!(args[args.length - 1].isInstanceOf(CClosure.class))) {
 				throw new CRECastException("Only a closure (created from the closure function) can be sent to executeas()", t);
 			}
-			Construct[] vals = new Construct[args.length - 3];
+			Mixed[] vals = new Mixed[args.length - 3];
 			System.arraycopy(args, 2, vals, 0, args.length - 3);
 			CClosure closure = (CClosure) args[args.length - 1];
 			CommandHelperEnvironment cEnv = closure.getEnv().getEnv(CommandHelperEnvironment.class);
 			GlobalEnv gEnv = closure.getEnv().getEnv(GlobalEnv.class);
 
 			MCCommandSender originalSender = cEnv.GetCommandSender();
-			cEnv.SetCommandSender(Static.GetPlayer(args[0].val(), t));
+			MCCommandSender sender;
+			if(args[0].val().equals(Static.getConsoleName())) {
+				sender = Static.getServer().getConsole();
+			} else {
+				sender = Static.GetPlayer(args[0].val(), t);
+			}
+			cEnv.SetCommandSender(sender);
 
 			String originalLabel = gEnv.GetLabel();
 			if(!(args[1] instanceof CNull)) {
@@ -3283,19 +2220,16 @@ public class DataHandling {
 			}
 
 			try {
-				closure.execute(vals);
-			} catch (FunctionReturnException e) {
-				return e.getReturn();
+				return closure.executeCallable(vals);
 			} finally {
 				cEnv.SetCommandSender(originalSender);
 				gEnv.SetLabel(originalLabel);
 			}
-			return CVoid.VOID;
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 	}
 
@@ -3335,13 +2269,13 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.get(Static.getBoolean(args[0], t));
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(ArgumentValidation.getBoolean(args[0], t));
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3404,13 +2338,13 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CInt((long) Static.getDouble(args[0], t), t);
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3466,13 +2400,13 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CDouble(Static.getDouble(args[0], t), t);
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3529,16 +2463,16 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CString) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CString.class)) {
 				return args[0];
 			}
 			return new CString(args[0].val(), t);
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -3581,7 +2515,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			int radix = Static.getInt32(args[1], t);
 			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
 				throw new CRERangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
@@ -3618,7 +2552,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3653,7 +2587,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String value = args[0].val();
 			int radix = Static.getInt32(args[1], t);
 			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
@@ -3688,7 +2622,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3738,7 +2672,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
 				return args[0].typeof();
 			} catch (IllegalArgumentException ex) {
@@ -3765,7 +2699,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3800,12 +2734,13 @@ public class DataHandling {
 		@Override
 		public String docs() {
 			return "string {script_string} Executes arbitrary MethodScript. Note that this function is very experimental, and is subject to changing or "
-					+ "removal.";
+					+ "removal. To globally disable use of eval, set the runtime setting \"function.eval.disable\" to"
+					+ " true, which will cause use of the function to throw an exception.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CREInsufficientPermissionException.class};
 		}
 
 		@Override
@@ -3814,25 +2749,30 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
+		public MSVersion since() {
+			return MSVersion.V3_1_0;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			if(ArgumentValidation.getBooleanish(env.getEnv(GlobalEnv.class).GetRuntimeSetting("function.eval.disable",
+					CBoolean.FALSE), t)) {
+				throw new CREInsufficientPermissionException("eval is disabled", t);
+			}
 			boolean oldDynamicScriptMode = env.getEnv(GlobalEnv.class).GetDynamicScriptingMode();
 			ParseTree node = nodes[0];
 			try {
 				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(true);
-				Construct script = parent.seval(node, env);
-				if(script instanceof CClosure) {
+				Mixed script = parent.seval(node, env);
+				if(script.isInstanceOf(CClosure.class)) {
 					throw new CRECastException("Closures cannot be eval'd directly. Use execute() instead.", t);
 				}
-				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file(), true));
+				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file(), true),
+						env, env.getEnvClasses());
 				StringBuilder b = new StringBuilder();
 				int count = 0;
 				for(ParseTree child : root.getChildren()) {
-					Construct s = parent.seval(child, env);
+					Mixed s = parent.seval(child, env);
 					if(!s.val().trim().isEmpty()) {
 						if(count > 0) {
 							b.append(" ");
@@ -3857,7 +2797,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 		//Doesn't matter, run out of state anyways
@@ -3878,12 +2818,14 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children,
+				FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() != 1) {
 				throw new ConfigCompileException(getName() + " expects only one argument", t);
 			}
 			if(children.get(0).isConst()) {
-				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Eval'd code is hardcoded, consider simply using the code directly, as wrapping"
+				MSLog.GetLogger().Log(MSLog.Tags.COMPILER, LogLevel.WARNING, "Eval'd code is hardcoded, consider simply using the code directly, as wrapping"
 						+ " hardcoded code in " + getName() + " is much less efficient.", t);
 			}
 			return null;
@@ -3907,7 +2849,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			for(int i = 0; i < args.length; i++) {
 				args[i].val();
 			}
@@ -3930,8 +2872,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -3971,8 +2913,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Construct val = CNull.NULL;
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			Mixed val = CNull.NULL;
 			if(args.length > 0) {
 				val = args[0];
 			}
@@ -4006,7 +2948,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4031,7 +2973,7 @@ public class DataHandling {
 				+ "_testWithMutable(@a); // This will actually change the value\n"
 				+ "msg(@a); // Here, the value is 5\n"
 				+ "_testWithoutMutable(@a); // This will not change the value\n"
-				+ "msg(@a); // Still teh value is 5\n"),
+				+ "msg(@a); // Still the value is 5\n"),
 				new ExampleScript("Basic usage with closure", "@a = mutable_primitive(0);\n"
 				+ "execute(closure(){\n"
 				+ "\t@a++;\n"
@@ -4066,11 +3008,18 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CNull) {
 				return CBoolean.FALSE;
 			}
-			boolean b = InstanceofUtil.isInstanceof(args[0], args[1].val());
+			CClassType type;
+			if(args[1].isInstanceOf(CClassType.class)) {
+				type = (CClassType) args[1];
+			} else {
+				throw new RuntimeException("This should have been optimized out, this is a bug in instanceof,"
+						+ " please report it");
+			}
+			boolean b = InstanceofUtil.isInstanceof(args[0], type, environment);
 			return CBoolean.get(b);
 		}
 
@@ -4095,7 +3044,7 @@ public class DataHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -4104,10 +3053,12 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children,
+				FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			// There are two specific cases here where we will give more precise error messages.
 			// If it's a string, yell at them
-			if(children.get(1).getData() instanceof CString) {
+			if(children.get(1).getData().isInstanceOf(CString.class)) {
 				throw new ConfigCompileException("Unexpected string type passed to \"instanceof\"", t);
 			}
 			// If it's a variable, also yell at them
@@ -4115,7 +3066,7 @@ public class DataHandling {
 				throw new ConfigCompileException("Variable types are not allowed in \"instanceof\"", t);
 			}
 			// Unknown error, but this is still never valid.
-			if(!(children.get(1).getData() instanceof CClassType)) {
+			if(!(children.get(1).getData().isInstanceOf(CClassType.class))) {
 				throw new ConfigCompileException("Unexpected type for \"instanceof\": " + children.get(1).getData(), t);
 			}
 			// null is technically a type, but instanceof shouldn't work with that

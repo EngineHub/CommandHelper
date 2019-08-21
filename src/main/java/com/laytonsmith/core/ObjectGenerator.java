@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCBrewerInventory;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCreatureSpawner;
+import com.laytonsmith.abstraction.MCCrossbowMeta;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEnchantmentStorageMeta;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
@@ -14,7 +15,7 @@ import com.laytonsmith.abstraction.MCFireworkEffect;
 import com.laytonsmith.abstraction.MCFireworkEffectMeta;
 import com.laytonsmith.abstraction.MCFireworkMeta;
 import com.laytonsmith.abstraction.MCFurnaceInventory;
-import com.laytonsmith.abstraction.MCFurnaceRecipe;
+import com.laytonsmith.abstraction.MCCookingRecipe;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemFactory;
@@ -25,7 +26,6 @@ import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMapMeta;
 import com.laytonsmith.abstraction.MCMetadataValue;
-import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPattern;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPotionData;
@@ -34,24 +34,26 @@ import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCShapedRecipe;
 import com.laytonsmith.abstraction.MCShapelessRecipe;
 import com.laytonsmith.abstraction.MCSkullMeta;
-import com.laytonsmith.abstraction.MCSpawnEggMeta;
+import com.laytonsmith.abstraction.MCStonecuttingRecipe;
+import com.laytonsmith.abstraction.MCTropicalFishBucketMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.abstraction.blocks.MCBanner;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.blocks.MCBanner;
 import com.laytonsmith.abstraction.blocks.MCBrewingStand;
-import com.laytonsmith.abstraction.blocks.MCChest;
+import com.laytonsmith.abstraction.blocks.MCContainer;
 import com.laytonsmith.abstraction.blocks.MCDispenser;
 import com.laytonsmith.abstraction.blocks.MCDropper;
 import com.laytonsmith.abstraction.blocks.MCFurnace;
-import com.laytonsmith.abstraction.blocks.MCHopper;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
-import com.laytonsmith.abstraction.blocks.MCShulkerBox;
+import com.laytonsmith.abstraction.entities.MCTropicalFish;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
+import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCVersion;
@@ -68,10 +70,12 @@ import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREEnchantmentException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -147,9 +151,9 @@ public class ObjectGenerator {
 	 * yaw, pitch)</li> </ul> In all cases, the pitch and yaw default to 0, and the world defaults to the specified
 	 * world. <em>More conveniently: ([world], x, y, z, [yaw, pitch])</em>
 	 */
-	public MCLocation location(Construct c, MCWorld w, Target t) {
-		if(!(c instanceof CArray)) {
-			throw new CREFormatException("Expecting an array, received " + c.getCType(), t);
+	public MCLocation location(Mixed c, MCWorld w, Target t) {
+		if(!(c.isInstanceOf(CArray.class))) {
+			throw new CREFormatException("Expecting an array, received " + c.typeof().getSimpleName(), t);
 		}
 		CArray array = (CArray) c;
 		MCWorld world = w;
@@ -225,17 +229,13 @@ public class ObjectGenerator {
 	 * @return An item array or CNull
 	 */
 	public Construct item(MCItemStack is, Target t) {
-		if(is == null || is.getAmount() == 0 || is.getTypeId() == 0) {
+		if(is == null || is.isEmpty()) {
 			return CNull.NULL;
 		}
 
-		MCMaterial mat = is.getType();
 		CArray ret = CArray.GetAssociativeArray(t);
-		ret.set("name", new CString(mat.getName(), t), t);
-		ret.set("type", new CInt(mat.getType(), t), t);
-		ret.set("data", new CInt(is.getDurability(), t), t);
+		ret.set("name", new CString(is.getType().getName(), t), t);
 		ret.set("qty", new CInt(is.getAmount(), t), t);
-		ret.set("enchants", enchants(is.getEnchantments(), t), t);
 		ret.set("meta", itemMeta(is, t), t);
 		return ret;
 	}
@@ -247,15 +247,23 @@ public class ObjectGenerator {
 	 * @param t
 	 * @return An abstract item stack
 	 */
-	public MCItemStack item(Construct i, Target t) {
+	public MCItemStack item(Mixed i, Target t) {
+		return item(i, t, false);
+	}
+
+	public MCItemStack item(Mixed i, Target t, boolean legacy) {
 		if(i instanceof CNull) {
 			return EmptyItem();
 		}
-		if(!(i instanceof CArray)) {
+		if(!(i.isInstanceOf(CArray.class))) {
 			throw new CREFormatException("Expected an array!", t);
 		}
 		CArray item = (CArray) i;
-		MCMaterial mat;
+		if(!item.isAssociative()) {
+			throw new CREFormatException("Expected an associative array!", t);
+		}
+		String mat;
+		MCItemStack ret;
 		int data = 0;
 		int qty = 1;
 
@@ -266,49 +274,110 @@ public class ObjectGenerator {
 			}
 		}
 
-		if(item.containsKey("name")) {
-			mat = StaticLayer.GetConvertor().GetMaterial(item.get("name", t).val());
-		} else if(item.containsKey("type")) {
-			Construct type = item.get("type", t);
-			if(type instanceof CString) {
-				int seperatorIndex = type.val().indexOf(':');
-				if(seperatorIndex != -1) {
-					try {
-						data = Integer.parseInt(type.val().substring(seperatorIndex + 1));
-					} catch (NumberFormatException e) {
-						throw new CRERangeException("The item data \"" + type.val().substring(seperatorIndex + 1)
-								+ "\" is not a valid integer.", t);
+		legacy = legacy || item.containsKey("type") || item.containsKey("data");
+
+		if(legacy) {
+			// Do legacy item conversion
+			if(item.containsKey("data")) {
+				data = Static.getInt32(item.get("data", t), t);
+			}
+			MCMaterial material;
+			if(item.containsKey("name")) {
+				mat = item.get("name", t).val();
+				if(mat.equals("MAP") || mat.equals("POTION")) {
+					// special handling, ignore data here
+					material = StaticLayer.GetMaterialFromLegacy(mat, 0);
+				} else {
+					material = StaticLayer.GetMaterialFromLegacy(mat, data);
+				}
+			} else {
+				Mixed type = item.get("type", t);
+				if(type.isInstanceOf(CString.class)) {
+					int seperatorIndex = type.val().indexOf(':');
+					if(seperatorIndex != -1) {
+						try {
+							data = Integer.parseInt(type.val().substring(seperatorIndex + 1));
+						} catch (NumberFormatException e) {
+							throw new CRERangeException("The item data \"" + type.val().substring(seperatorIndex + 1)
+									+ "\" is not a valid integer.", t);
+						}
+						type = new CString(type.val().substring(0, seperatorIndex), t);
 					}
-					type = new CString(type.val().substring(0, seperatorIndex), t);
+				}
+				mat = type.val();
+				int id = Static.getInt32(type, t);
+				if(id == 358 || id == 373) {
+					// special map handling, ignore data here
+					material = StaticLayer.GetMaterialFromLegacy(id, 0);
+				} else {
+					material = StaticLayer.GetMaterialFromLegacy(id, data);
 				}
 			}
-			mat = StaticLayer.GetConvertor().getMaterial(Static.getInt32(type, t));
+			if(material == null || material.getName().equals("AIR")) {
+				material = StaticLayer.GetMaterial(mat); // try modern material just in case
+				if(material == null) {
+					throw new CREFormatException("Could not find legacy item material from \"" + mat + "\""
+							+ " with data \"" + data + "\"", t);
+				}
+			}
+
+			// convert legacy meta to material
+			if(material.getName().equals("PIG_SPAWN_EGG") && item.containsKey("meta")) {
+				Mixed meta = item.get("meta", t);
+				if(meta.isInstanceOf(CArray.class) && ((CArray) meta).containsKey("spawntype")) {
+					Mixed spawntype = ((CArray) meta).get("spawntype", t);
+					if(!(spawntype instanceof CNull)) {
+						MCMaterial newmaterial;
+						String entityName = spawntype.val().toUpperCase();
+						if(entityName.equals("MUSHROOM_COW")) {
+							newmaterial = StaticLayer.GetMaterial("MOOSHROOM_SPAWN_EGG");
+						} else if(entityName.equals("PIG_ZOMBIE")) {
+							newmaterial = StaticLayer.GetMaterial("ZOMBIE_PIGMAN_SPAWN_EGG");
+						} else {
+							newmaterial = StaticLayer.GetMaterial(entityName + "_SPAWN_EGG");
+						}
+						if(newmaterial != null) {
+							material = newmaterial;
+						}
+					}
+				}
+			}
+
+			ret = StaticLayer.GetItemStack(material, qty);
+			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Converted \"" + mat + "\" with data \""
+					+ data + "\" to " + material.getName(), t);
+
 		} else {
-			throw new CREFormatException("Could not find item name!", t);
-		}
-		if(mat == null) {
-			throw new CRENotFoundException("A material could not be found based on the given name.", t);
-		}
-		if(mat.getType() == 0) {
-			return EmptyItem();
+			mat = item.get("name", t).val();
+			ret = StaticLayer.GetItemStack(mat, qty);
 		}
 
-		if(item.containsKey("data")) {
-			data = Static.getInt32(item.get("data", t), t);
+		if(ret == null) {
+			throw new CREFormatException("Could not find item material from \"" + mat + "\"", t);
 		}
 
-		MCItemMeta meta = null;
+		if(ret.isEmpty()) {
+			return ret;
+		}
+
 		if(item.containsKey("meta")) {
-			meta = itemMeta(item.get("meta", t), mat, t);
+			ret.setItemMeta(itemMeta(item.get("meta", t), ret.getType(), t));
 		}
 
-		// Create itemstack
-		MCItemStack ret = StaticLayer.GetItemStack(mat, data, qty);
-		if(meta != null) {
-			ret.setItemMeta(meta);
+		if(legacy) {
+			// convert legacy data to meta
+			if(ret.getType().getName().equals("FILLED_MAP")) {
+				MCMapMeta meta = (MCMapMeta) ret.getItemMeta();
+				meta.setMapId(data);
+				ret.setItemMeta(meta);
+			} else if(data > 0 && ret.getType().getMaxDurability() > 0) {
+				MCItemMeta meta = ret.getItemMeta();
+				meta.setDamage(data);
+				ret.setItemMeta(meta);
+			}
 		}
 
-		// Fallback to enchants in item array if not in meta
+		// Deprecated fallback to enchants in item array if not in meta
 		if(item.containsKey("enchants")) {
 			try {
 				Map<MCEnchantment, Integer> enchants = enchants((CArray) item.get("enchants", t), t);
@@ -324,7 +393,7 @@ public class ObjectGenerator {
 	}
 
 	private static MCItemStack EmptyItem() {
-		return StaticLayer.GetItemStack(0, 1);
+		return StaticLayer.GetItemStack("AIR", 1);
 	}
 
 	public Construct itemMeta(MCItemStack is, Target t) {
@@ -353,27 +422,33 @@ public class ObjectGenerator {
 			ma.set("enchants", enchants(meta.getEnchants(), t), t);
 			ma.set("repair", new CInt(meta.getRepairCost(), t), t);
 
-			// Version specific ItemMeta
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
-				Set<MCItemFlag> itemFlags = meta.getItemFlags();
-				CArray flagArray = new CArray(t);
-				if(itemFlags.size() > 0) {
-					for(MCItemFlag flag : itemFlags) {
-						flagArray.push(new CString(flag.name(), t), t);
-					}
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
+				if(meta.hasCustomModelData()) {
+					ma.set("model", new CInt(meta.getCustomModelData(), t), t);
+				} else {
+					ma.set("model", CNull.NULL, t);
 				}
-				ma.set("flags", flagArray, t);
+			}
 
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
-					ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t);
+			Set<MCItemFlag> itemFlags = meta.getItemFlags();
+			CArray flagArray = new CArray(t);
+			if(itemFlags.size() > 0) {
+				for(MCItemFlag flag : itemFlags) {
+					flagArray.push(new CString(flag.name(), t), t);
 				}
+			}
+			ma.set("flags", flagArray, t);
+
+			// Damageable items only
+			if(is.getType().getMaxDurability() > 0) {
+				ma.set("damage", new CInt(meta.getDamage(), t), t);
+				ma.set("unbreakable", CBoolean.get(meta.isUnbreakable()), t);
 			}
 
 			// Specific ItemMeta
 			if(meta instanceof MCBlockStateMeta) {
 				MCBlockState bs = ((MCBlockStateMeta) meta).getBlockState();
-				if(bs instanceof MCShulkerBox || bs instanceof MCChest
-						|| bs instanceof MCDispenser || bs instanceof MCDropper || bs instanceof MCHopper) {
+				if(bs instanceof MCContainer || bs instanceof MCDispenser || bs instanceof MCDropper) {
 					// Handle InventoryHolders with inventory slots that do not have a special meaning.
 					MCInventory inv = ((MCInventoryHolder) bs).getInventory();
 					CArray box = CArray.GetAssociativeArray(t);
@@ -386,6 +461,7 @@ public class ObjectGenerator {
 					ma.set("inventory", box, t);
 				} else if(bs instanceof MCBanner) {
 					MCBanner banner = (MCBanner) bs;
+					ma.set("basecolor", banner.getBaseColor().name(), t);
 					CArray patterns = new CArray(t, banner.numberOfPatterns());
 					for(MCPattern p : banner.getPatterns()) {
 						CArray pattern = CArray.GetAssociativeArray(t);
@@ -394,10 +470,6 @@ public class ObjectGenerator {
 						patterns.push(pattern, t);
 					}
 					ma.set("patterns", patterns, t);
-					MCDyeColor dyeColor = banner.getBaseColor();
-					if(dyeColor != null) {
-						ma.set("basecolor", new CString(dyeColor.toString(), t), t);
-					}
 				} else if(bs instanceof MCCreatureSpawner) {
 					MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
 					ma.set("spawntype", mccs.getSpawnedType().name());
@@ -488,21 +560,10 @@ public class ObjectGenerator {
 				ma.set("author", author, t);
 				ma.set("pages", pages, t);
 			} else if(meta instanceof MCSkullMeta) {
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_12_X)) {
-					if(((MCSkullMeta) meta).hasOwner()) {
-						MCOfflinePlayer player = ((MCSkullMeta) meta).getOwningPlayer();
-						ma.set("owner", new CString(player.getName(), t), t);
-						ma.set("owneruuid", new CString(player.getUniqueID().toString(), t), t);
-					} else {
-						ma.set("owner", CNull.NULL, t);
-						ma.set("owneruuid", CNull.NULL, t);
-					}
+				if(((MCSkullMeta) meta).hasOwner()) {
+					ma.set("owner", new CString(((MCSkullMeta) meta).getOwner(), t), t);
 				} else {
-					if(((MCSkullMeta) meta).hasOwner()) {
-						ma.set("owner", new CString(((MCSkullMeta) meta).getOwner(), t), t);
-					} else {
-						ma.set("owner", CNull.NULL, t);
-					}
+					ma.set("owner", CNull.NULL, t);
 				}
 			} else if(meta instanceof MCEnchantmentStorageMeta) {
 				Construct stored;
@@ -516,13 +577,14 @@ public class ObjectGenerator {
 				MCPotionMeta potionmeta = (MCPotionMeta) meta;
 				CArray effects = potions(potionmeta.getCustomEffects(), t);
 				ma.set("potions", effects, t);
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-					MCPotionData potiondata = potionmeta.getBasePotionData();
-					if(potiondata != null) {
-						ma.set("base", potionData(potiondata, t), t);
-					}
-				} else if(effects.size() > 0) {
-					ma.set("main", ((CArray) effects.get(0, t)).get("id", t), t);
+				MCPotionData potiondata = potionmeta.getBasePotionData();
+				if(potiondata != null) {
+					ma.set("base", potionData(potiondata, t), t);
+				}
+				if(potionmeta.hasColor()) {
+					ma.set("color", color(potionmeta.getColor(), t), t);
+				} else {
+					ma.set("color", CNull.NULL, t);
 				}
 			} else if(meta instanceof MCBannerMeta) {
 				MCBannerMeta bannermeta = (MCBannerMeta) meta;
@@ -534,32 +596,47 @@ public class ObjectGenerator {
 					patterns.push(pattern, t);
 				}
 				ma.set("patterns", patterns, t);
-				MCDyeColor dyeColor = bannermeta.getBaseColor();
-				if(dyeColor != null) {
-					ma.set("basecolor", new CString(dyeColor.toString(), t), t);
-				}
-			} else if(meta instanceof MCSpawnEggMeta) {
-				MCEntityType spawntype = ((MCSpawnEggMeta) meta).getSpawnedType();
-				if(spawntype == null) {
-					ma.set("spawntype", CNull.NULL, t);
-				} else {
-					ma.set("spawntype", new CString(spawntype.name(), t), t);
-				}
-			} else if(meta instanceof MCMapMeta && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
-				MCColor mapcolor = ((MCMapMeta) meta).getColor();
-				Construct color;
+			} else if(meta instanceof MCMapMeta) {
+				MCMapMeta mm = ((MCMapMeta) meta);
+				MCColor mapcolor = mm.getColor();
 				if(mapcolor == null) {
-					color = CNull.NULL;
+					ma.set("color", CNull.NULL, t);
 				} else {
-					color = color(mapcolor, t);
+					ma.set("color", color(mapcolor, t), t);
 				}
-				ma.set("color", color, t);
+				if(mm.hasMapId()) {
+					ma.set("mapid", new CInt(mm.getMapId(), t), t);
+				} else {
+					ma.set("mapid", CNull.NULL, t);
+				}
+			} else if(meta instanceof MCTropicalFishBucketMeta) {
+				MCTropicalFishBucketMeta fm = (MCTropicalFishBucketMeta) meta;
+				if(fm.hasVariant()) {
+					ma.set("fishcolor", new CString(fm.getBodyColor().name(), t), t);
+					ma.set("fishpatterncolor", new CString(fm.getPatternColor().name(), t), t);
+					ma.set("fishpattern", new CString(fm.getPattern().name(), t), t);
+				} else {
+					ma.set("fishcolor", CNull.NULL, t);
+					ma.set("fishpatterncolor", CNull.NULL, t);
+					ma.set("fishpattern", CNull.NULL, t);
+				}
+			} else if(meta instanceof MCCrossbowMeta) {
+				MCCrossbowMeta cbm = (MCCrossbowMeta) meta;
+				if(cbm.hasChargedProjectiles()) {
+					CArray projectiles = new CArray(t);
+					for(MCItemStack projectile : cbm.getChargedProjectiles()) {
+						projectiles.push(item(projectile, t), t);
+					}
+					ma.set("projectiles", projectiles, t);
+				} else {
+					ma.set("projectiles", CNull.NULL, t);
+				}
 			}
 			return ma;
 		}
 	}
 
-	public MCItemMeta itemMeta(Construct c, MCMaterial mat, Target t) throws ConfigRuntimeException {
+	public MCItemMeta itemMeta(Mixed c, MCMaterial mat, Target t) throws ConfigRuntimeException {
 		MCItemFactory itemFactory = Static.getServer().getItemFactory();
 		if(itemFactory == null) {
 			throw new CRENotFoundException("Could not find the internal MCItemFactory object (are you running in cmdline mode?)", t);
@@ -569,24 +646,24 @@ public class ObjectGenerator {
 			return meta;
 		}
 		CArray ma;
-		if(c instanceof CArray) {
+		if(c.isInstanceOf(CArray.class)) {
 			ma = (CArray) c;
 			try {
 				if(ma.containsKey("display")) {
-					Construct dni = ma.get("display", t);
+					Mixed dni = ma.get("display", t);
 					if(!(dni instanceof CNull)) {
 						meta.setDisplayName(dni.val());
 					}
 				}
 				if(ma.containsKey("lore")) {
-					Construct li = ma.get("lore", t);
+					Mixed li = ma.get("lore", t);
 					if(li instanceof CNull) {
 						//do nothing
-					} else if(li instanceof CString) {
+					} else if(li.isInstanceOf(CString.class)) {
 						List<String> ll = new ArrayList<>();
 						ll.add(li.val());
 						meta.setLore(ll);
-					} else if(li instanceof CArray) {
+					} else if(li.isInstanceOf(CArray.class)) {
 						CArray la = (CArray) li;
 						List<String> ll = new ArrayList<>();
 						for(int j = 0; j < la.size(); j++) {
@@ -598,8 +675,8 @@ public class ObjectGenerator {
 					}
 				}
 				if(ma.containsKey("enchants")) {
-					Construct enchants = ma.get("enchants", t);
-					if(enchants instanceof CArray) {
+					Mixed enchants = ma.get("enchants", t);
+					if(enchants.isInstanceOf(CArray.class)) {
 						for(Map.Entry<MCEnchantment, Integer> ench : enchants((CArray) enchants, t).entrySet()) {
 							meta.addEnchant(ench.getKey(), ench.getValue(), true);
 						}
@@ -607,29 +684,38 @@ public class ObjectGenerator {
 						throw new CREFormatException("Enchants field was expected to be an array of Enchantment arrays", t);
 					}
 				}
-				if(ma.containsKey("repair") && !(ma.get("repair", t) instanceof CNull)) {
-					meta.setRepairCost(Static.getInt32(ma.get("repair", t), t));
+				if(ma.containsKey("repair")) {
+					Mixed r = ma.get("repair", t);
+					if(!(r instanceof CNull)) {
+						meta.setRepairCost(Static.getInt32(r, t));
+					}
+				}
+				if(ma.containsKey("model")) {
+					Mixed m = ma.get("model", t);
+					if(!(m instanceof CNull)) {
+						meta.setCustomModelData(Static.getInt32(m, t));
+					}
+				}
+				if(ma.containsKey("flags")) {
+					Mixed flags = ma.get("flags", t);
+					if(flags.isInstanceOf(CArray.class)) {
+						CArray flagArray = (CArray) flags;
+						for(int i = 0; i < flagArray.size(); i++) {
+							Mixed flag = flagArray.get(i, t);
+							meta.addItemFlags(MCItemFlag.valueOf(flag.val().toUpperCase()));
+						}
+					} else {
+						throw new CREFormatException("Itemflags was expected to be an array of flags.", t);
+					}
 				}
 
-				// Version specific ItemMeta
-				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_8)) {
-					if(ma.containsKey("flags")) {
-						Construct flags = ma.get("flags", t);
-						if(flags instanceof CArray) {
-							CArray flagArray = (CArray) flags;
-							for(int i = 0; i < flagArray.size(); i++) {
-								Construct flag = flagArray.get(i, t);
-								meta.addItemFlags(MCItemFlag.valueOf(flag.getValue().toUpperCase()));
-							}
-						} else {
-							throw new CREFormatException("Itemflags was expected to be an array of flags.", t);
-						}
+				// Damageable items only
+				if(mat.getMaxDurability() > 0) {
+					if(ma.containsKey("damage")) {
+						meta.setDamage(Static.getInt32(ma.get("damage", t), t));
 					}
-
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
-						if(ma.containsKey("unbreakable")) {
-							meta.setUnbreakable(Static.getBoolean(ma.get("unbreakable", t), t));
-						}
+					if(ma.containsKey("unbreakable")) {
+						meta.setUnbreakable(ArgumentValidation.getBoolean(ma.get("unbreakable", t), t));
 					}
 				}
 
@@ -637,12 +723,11 @@ public class ObjectGenerator {
 				if(meta instanceof MCBlockStateMeta) {
 					MCBlockStateMeta bsm = (MCBlockStateMeta) meta;
 					MCBlockState bs = bsm.getBlockState();
-					if(bs instanceof MCShulkerBox || bs instanceof MCChest
-							|| bs instanceof MCDispenser || bs instanceof MCDropper || bs instanceof MCHopper) {
+					if(bs instanceof MCContainer || bs instanceof MCDispenser || bs instanceof MCDropper) {
 						if(ma.containsKey("inventory")) {
 							MCInventory inv = ((MCInventoryHolder) bs).getInventory();
-							Construct cInvRaw = ma.get("inventory", t);
-							if(cInvRaw instanceof CArray) {
+							Mixed cInvRaw = ma.get("inventory", t);
+							if(cInvRaw.isInstanceOf(CArray.class)) {
 								CArray cinv = (CArray) cInvRaw;
 								for(String key : cinv.stringKeySet()) {
 									try {
@@ -669,18 +754,40 @@ public class ObjectGenerator {
 					} else if(bs instanceof MCBanner) {
 						MCBanner banner = (MCBanner) bs;
 						if(ma.containsKey("basecolor")) {
-							banner.setBaseColor(MCDyeColor.valueOf(ma.get("basecolor", t).val().toUpperCase()));
+							String baseString = ma.get("basecolor", t).val().toUpperCase();
+							try {
+								MCDyeColor base = MCDyeColor.valueOf(baseString);
+								banner.setBaseColor(base);
+							} catch (IllegalArgumentException ex) {
+								if(baseString.equals("SILVER")) {
+									// convert old DyeColor
+									banner.setBaseColor(MCDyeColor.LIGHT_GRAY);
+								} else {
+									throw ex;
+								}
+							}
+						} else {
+							banner.setBaseColor(MCDyeColor.WHITE);
 						}
 						if(ma.containsKey("patterns")) {
 							CArray array = ArgumentValidation.getArray(ma.get("patterns", t), t);
 							for(String key : array.stringKeySet()) {
 								CArray pattern = ArgumentValidation.getArray(array.get(key, t), t);
 								MCPatternShape shape = MCPatternShape.valueOf(pattern.get("shape", t).val().toUpperCase());
-								MCDyeColor color = MCDyeColor.valueOf(pattern.get("color", t).val().toUpperCase());
-								banner.addPattern(StaticLayer.GetConvertor().GetPattern(color, shape));
+								String color = pattern.get("color", t).val().toUpperCase();
+								try {
+									MCDyeColor dyecolor = MCDyeColor.valueOf(color);
+									banner.addPattern(StaticLayer.GetConvertor().GetPattern(dyecolor, shape));
+								} catch (IllegalArgumentException ex) {
+									if(color.equals("SILVER")) {
+										// convert old DyeColor
+										banner.addPattern(StaticLayer.GetConvertor().GetPattern(MCDyeColor.LIGHT_GRAY, shape));
+									} else {
+										throw ex;
+									}
+								}
 							}
 						}
-						banner.update();
 						bsm.setBlockState(banner);
 					} else if(bs instanceof MCCreatureSpawner) {
 						MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
@@ -747,8 +854,8 @@ public class ObjectGenerator {
 				} else if(meta instanceof MCFireworkEffectMeta) {
 					MCFireworkEffectMeta femeta = (MCFireworkEffectMeta) meta;
 					if(ma.containsKey("effect")) {
-						Construct cfem = ma.get("effect", t);
-						if(cfem instanceof CArray) {
+						Mixed cfem = ma.get("effect", t);
+						if(cfem.isInstanceOf(CArray.class)) {
 							femeta.setEffect(fireworkEffect((CArray) cfem, t));
 						} else if(!(cfem instanceof CNull)) {
 							throw new CREFormatException("FireworkCharge effect was expected to be an array or null.", t);
@@ -757,18 +864,18 @@ public class ObjectGenerator {
 				} else if(meta instanceof MCFireworkMeta) {
 					MCFireworkMeta fmeta = (MCFireworkMeta) meta;
 					if(ma.containsKey("firework")) {
-						Construct construct = ma.get("firework", t);
-						if(construct instanceof CArray) {
+						Mixed construct = ma.get("firework", t);
+						if(construct.isInstanceOf(CArray.class)) {
 							CArray firework = (CArray) construct;
 							if(firework.containsKey("strength")) {
 								fmeta.setStrength(Static.getInt32(firework.get("strength", t), t));
 							}
 							if(firework.containsKey("effects")) {
 								// New style (supports multiple effects)
-								Construct effects = firework.get("effects", t);
-								if(effects instanceof CArray) {
-									for(Construct effect : ((CArray) effects).asList()) {
-										if(effect instanceof CArray) {
+								Mixed effects = firework.get("effects", t);
+								if(effects.isInstanceOf(CArray.class)) {
+									for(Mixed effect : ((CArray) effects).asList()) {
+										if(effect.isInstanceOf(CArray.class)) {
 											fmeta.addEffect(fireworkEffect((CArray) effect, t));
 										} else {
 											throw new CREFormatException("Firework effect was expected to be an array.", t);
@@ -787,10 +894,10 @@ public class ObjectGenerator {
 					}
 				} else if(meta instanceof MCLeatherArmorMeta) {
 					if(ma.containsKey("color")) {
-						Construct ci = ma.get("color", t);
+						Mixed ci = ma.get("color", t);
 						if(ci instanceof CNull) {
 							//nothing
-						} else if(ci instanceof CArray) {
+						} else if(ci.isInstanceOf(CArray.class)) {
 							((MCLeatherArmorMeta) meta).setColor(color((CArray) ci, t));
 						} else {
 							throw new CREFormatException("Color was expected to be an array.", t);
@@ -798,22 +905,22 @@ public class ObjectGenerator {
 					}
 				} else if(meta instanceof MCBookMeta) {
 					if(ma.containsKey("title")) {
-						Construct title = ma.get("title", t);
+						Mixed title = ma.get("title", t);
 						if(!(title instanceof CNull)) {
 							((MCBookMeta) meta).setTitle(title.val());
 						}
 					}
 					if(ma.containsKey("author")) {
-						Construct author = ma.get("author", t);
+						Mixed author = ma.get("author", t);
 						if(!(author instanceof CNull)) {
 							((MCBookMeta) meta).setAuthor(author.val());
 						}
 					}
 					if(ma.containsKey("pages")) {
-						Construct pages = ma.get("pages", t);
+						Mixed pages = ma.get("pages", t);
 						if(pages instanceof CNull) {
 							//nothing
-						} else if(pages instanceof CArray) {
+						} else if(pages.isInstanceOf(CArray.class)) {
 							CArray pa = (CArray) pages;
 							List<String> pl = new ArrayList<>();
 							for(int j = 0; j < pa.size(); j++) {
@@ -825,23 +932,18 @@ public class ObjectGenerator {
 						}
 					}
 				} else if(meta instanceof MCSkullMeta) {
-					if(ma.containsKey("owneruuid")) {
-						Construct id = ma.get("owneruuid", t);
-						if(!(id instanceof CNull)) {
-							((MCSkullMeta) meta).setOwningPlayer(Static.getServer().getOfflinePlayer(Static.GetUUID(id, t)));
-						}
-					} else if(ma.containsKey("owner")) {
-						Construct owner = ma.get("owner", t);
-						if(!(owner instanceof CNull)) {
+					if(ma.containsKey("owner")) {
+						Mixed owner = ma.get("owner", t);
+						if(!(owner instanceof CNull) && !owner.val().isEmpty()) {
 							((MCSkullMeta) meta).setOwner(owner.val());
 						}
 					}
 				} else if(meta instanceof MCEnchantmentStorageMeta) {
 					if(ma.containsKey("stored")) {
-						Construct stored = ma.get("stored", t);
+						Mixed stored = ma.get("stored", t);
 						if(stored instanceof CNull) {
 							//Still doing nothing
-						} else if(stored instanceof CArray) {
+						} else if(stored.isInstanceOf(CArray.class)) {
 							for(Map.Entry<MCEnchantment, Integer> ench : enchants((CArray) stored, t).entrySet()) {
 								((MCEnchantmentStorageMeta) meta).addStoredEnchant(ench.getKey(), ench.getValue(), true);
 							}
@@ -851,54 +953,97 @@ public class ObjectGenerator {
 					}
 				} else if(meta instanceof MCPotionMeta) {
 					if(ma.containsKey("potions")) {
-						Construct effects = ma.get("potions", t);
-						if(effects instanceof CArray) {
+						Mixed effects = ma.get("potions", t);
+						if(effects.isInstanceOf(CArray.class)) {
 							for(MCLivingEntity.MCEffect e : potions((CArray) effects, t)) {
-								((MCPotionMeta) meta).addCustomEffect(e.getPotionID(), e.getStrength(),
-										e.getTicksRemaining(), e.isAmbient(), true, t);
+								((MCPotionMeta) meta).addCustomEffect(e.getPotionEffectType(), e.getStrength(),
+										e.getTicksRemaining(), e.isAmbient(), e.hasParticles(), e.showIcon(), true, t);
 							}
 						} else {
 							throw new CREFormatException("Effects was expected to be an array of potion arrays.", t);
 						}
 					}
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-						if(ma.containsKey("base")) {
-							Construct potiondata = ma.get("base", t);
-							if(potiondata instanceof CArray) {
-								CArray pd = (CArray) potiondata;
-								((MCPotionMeta) meta).setBasePotionData(potionData((CArray) potiondata, t));
-							}
+					if(ma.containsKey("base")) {
+						Mixed potiondata = ma.get("base", t);
+						if(potiondata.isInstanceOf(CArray.class)) {
+							CArray pd = (CArray) potiondata;
+							((MCPotionMeta) meta).setBasePotionData(potionData((CArray) potiondata, t));
 						}
-					} else if(ma.containsKey("main")) {
-						((MCPotionMeta) meta).setMainEffect(Static.getInt32(ma.get("main", t), t));
+					}
+					if(ma.containsKey("color")) {
+						Mixed color = ma.get("color", t);
+						if(color.isInstanceOf(CArray.class)) {
+							((MCPotionMeta) meta).setColor(color((CArray) color, t));
+						} else if(color.isInstanceOf(CString.class)) {
+							((MCPotionMeta) meta).setColor(StaticLayer.GetConvertor().GetColor(color.val(), t));
+						}
 					}
 				} else if(meta instanceof MCBannerMeta) {
-					if(ma.containsKey("basecolor")) {
-						((MCBannerMeta) meta).setBaseColor(MCDyeColor.valueOf(ma.get("basecolor", t).val().toUpperCase()));
-					}
 					if(ma.containsKey("patterns")) {
 						CArray array = ArgumentValidation.getArray(ma.get("patterns", t), t);
 						for(String key : array.stringKeySet()) {
 							CArray pattern = ArgumentValidation.getArray(array.get(key, t), t);
 							MCPatternShape shape = MCPatternShape.valueOf(pattern.get("shape", t).val().toUpperCase());
-							MCDyeColor color = MCDyeColor.valueOf(pattern.get("color", t).val().toUpperCase());
-							((MCBannerMeta) meta).addPattern(StaticLayer.GetConvertor().GetPattern(color, shape));
+							String color = pattern.get("color", t).val().toUpperCase();
+							try {
+								MCDyeColor dyecolor = MCDyeColor.valueOf(color);
+								((MCBannerMeta) meta).addPattern(StaticLayer.GetConvertor().GetPattern(dyecolor, shape));
+							} catch (IllegalArgumentException ex) {
+								if(color.equals("SILVER")) {
+									// convert old DyeColor
+									((MCBannerMeta) meta).addPattern(StaticLayer.GetConvertor().GetPattern(MCDyeColor.LIGHT_GRAY, shape));
+								} else {
+									throw ex;
+								}
+							}
 						}
 					}
-				} else if(meta instanceof MCSpawnEggMeta) {
-					if(ma.containsKey("spawntype")) {
-						Construct spawntype = ma.get("spawntype", t);
-						if(spawntype instanceof CString) {
-							((MCSpawnEggMeta) meta).setSpawnedType(MCEntityType.valueOf(spawntype.val().toUpperCase()));
-						}
-					}
-				} else if(meta instanceof MCMapMeta && Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_11)) {
+				} else if(meta instanceof MCMapMeta) {
 					if(ma.containsKey("color")) {
-						Construct ci = ma.get("color", t);
-						if(ci instanceof CArray) {
+						Mixed ci = ma.get("color", t);
+						if(ci.isInstanceOf(CArray.class)) {
 							((MCMapMeta) meta).setColor(color((CArray) ci, t));
 						} else if(!(ci instanceof CNull)) {
 							throw new CREFormatException("Color was expected to be an array.", t);
+						}
+					}
+					if(ma.containsKey("mapid")) {
+						Mixed cid = ma.get("mapid", t);
+						if(!(cid instanceof CNull)) {
+							((MCMapMeta) meta).setMapId(Static.getInt32(cid, t));
+						}
+					}
+				} else if(meta instanceof MCTropicalFishBucketMeta) {
+					if(ma.containsKey("fishpatterncolor")) {
+						Mixed patterncolor = ma.get("fishpatterncolor", t);
+						if(!(patterncolor instanceof CNull)) {
+							MCDyeColor color = MCDyeColor.valueOf(patterncolor.val().toUpperCase());
+							((MCTropicalFishBucketMeta) meta).setPatternColor(color);
+						}
+					}
+					if(ma.containsKey("fishcolor")) {
+						Mixed fishcolor = ma.get("fishcolor", t);
+						if(!(fishcolor instanceof CNull)) {
+							MCDyeColor color = MCDyeColor.valueOf(fishcolor.val().toUpperCase());
+							((MCTropicalFishBucketMeta) meta).setBodyColor(color);
+						}
+					}
+					if(ma.containsKey("fishpattern")) {
+						Mixed pa = ma.get("fishpattern", t);
+						if(!(pa instanceof CNull)) {
+							MCTropicalFish.MCPattern pattern = MCTropicalFish.MCPattern.valueOf(pa.val().toUpperCase());
+							((MCTropicalFishBucketMeta) meta).setPattern(pattern);
+						}
+					}
+				} else if(meta instanceof MCCrossbowMeta) {
+					if(ma.containsKey("projectiles")) {
+						Mixed value = ma.get("projectiles", t);
+						if(!(value instanceof CNull)) {
+							List<MCItemStack> projectiles = new ArrayList<>();
+							for(Mixed m : Static.getArray(value, t).asList()) {
+								projectiles.add(item(m, t));
+							}
+							((MCCrossbowMeta) meta).setChargedProjectiles(projectiles);
 						}
 					}
 				}
@@ -906,7 +1051,7 @@ public class ObjectGenerator {
 				throw new CREFormatException(ex.getMessage(), t, ex);
 			}
 		} else {
-			throw new CREFormatException("An array was expected but recieved " + c + " instead.", t);
+			throw new CREFormatException("An array was expected but received " + c + " instead.", t);
 		}
 		return meta;
 	}
@@ -916,8 +1061,8 @@ public class ObjectGenerator {
 		return ex.getExceptionObject();
 	}
 
-	public AbstractCREException exception(CArray exception, Target t) throws ClassNotFoundException {
-		return AbstractCREException.getFromCArray(exception, t);
+	public AbstractCREException exception(CArray exception, Target t, Environment env) throws ClassNotFoundException {
+		return AbstractCREException.getFromCArray(exception, t, env);
 	}
 
 	/**
@@ -1021,7 +1166,7 @@ public class ObjectGenerator {
 	 * @param t the target
 	 * @return the Vector
 	 */
-	public Vector3D vector(Construct c, Target t) {
+	public Vector3D vector(Mixed c, Target t) {
 		return vector(Vector3D.ZERO, c, t);
 	}
 
@@ -1034,8 +1179,8 @@ public class ObjectGenerator {
 	 * @param t the target
 	 * @return the Vector
 	 */
-	public Vector3D vector(Vector3D v, Construct c, Target t) {
-		if(c instanceof CArray) {
+	public Vector3D vector(Vector3D v, Mixed c, Target t) {
+		if(c.isInstanceOf(CArray.class)) {
 			CArray va = (CArray) c;
 			double x = v.X();
 			double y = v.Y();
@@ -1069,17 +1214,17 @@ public class ObjectGenerator {
 			// fulfilling the todo?
 			return v;
 		} else {
-			throw new CREFormatException("Expecting an array, received " + c.getCType(), t);
+			throw new CREFormatException("Expecting an array, received " + c.typeof().getSimpleName(), t);
 		}
 	}
 
 	public CArray enchants(Map<MCEnchantment, Integer> map, Target t) {
-		CArray ret = new CArray(t);
+		CArray ret = CArray.GetAssociativeArray(t);
 		for(Map.Entry<MCEnchantment, Integer> entry : map.entrySet()) {
-			CArray eObj = CArray.GetAssociativeArray(t);
-			eObj.set("etype", new CString(entry.getKey().getName(), t), t);
-			eObj.set("elevel", new CInt(entry.getValue(), t), t);
-			ret.push(eObj, t);
+			CArray enchant = CArray.GetAssociativeArray(t);
+			enchant.set("etype", new CString(entry.getKey().getName(), t), t);
+			enchant.set("elevel", new CInt(entry.getValue(), t), t);
+			ret.set(entry.getKey().getKey(), enchant, t);
 		}
 		return ret;
 	}
@@ -1087,38 +1232,48 @@ public class ObjectGenerator {
 	public Map<MCEnchantment, Integer> enchants(CArray enchantArray, Target t) {
 		Map<MCEnchantment, Integer> ret = new HashMap<>();
 		for(String key : enchantArray.stringKeySet()) {
-			try {
-				CArray ea = (CArray) enchantArray.get(key, t);
+			MCEnchantment etype = null;
+			int elevel;
+
+			Mixed value = enchantArray.get(key, t);
+			if(enchantArray.isAssociative()) {
+				etype = StaticLayer.GetEnchantmentByName(key);
+				if(etype != null && value.isInstanceOf(CInt.class)) {
+					ret.put(etype, Static.getInt32(value, t));
+					continue;
+				}
+			}
+
+			CArray ea = Static.getArray(value, t);
+			if(etype == null) {
 				String setype = ea.get("etype", t).val();
-				MCEnchantment etype = StaticLayer.GetConvertor().GetEnchantmentByName(setype);
-				int elevel = Static.getInt32(ea.get("elevel", t), t);
+				etype = StaticLayer.GetEnchantmentByName(setype);
 				if(etype == null) {
 					if(setype.equals("SWEEPING")) {
 						// data from 1.11.2, changed in 1.12
 						etype = StaticLayer.GetEnchantmentByName("SWEEPING_EDGE");
-					}
-					if(etype == null) {
-						throw new CREEnchantmentException("Unknown enchantment type at " + key, t);
+					} else {
+						throw new CREEnchantmentException("Unknown enchantment type: " + setype, t);
 					}
 				}
-				ret.put(etype, elevel);
-			} catch (ClassCastException cce) {
-				throw new CREFormatException("Expected an array at index " + key, t);
 			}
+			elevel = Static.getInt32(ea.get("elevel", t), t);
+			ret.put(etype, elevel);
 		}
 		return ret;
 	}
 
 	public CArray potions(List<MCLivingEntity.MCEffect> effectList, Target t) {
-		CArray ea = new CArray(t);
+		CArray ea = CArray.GetAssociativeArray(t);
 		for(MCLivingEntity.MCEffect eff : effectList) {
 			CArray effect = CArray.GetAssociativeArray(t);
-			effect.set("id", new CInt(eff.getPotionID(), t), t);
+			effect.set("id", new CInt(eff.getPotionEffectType().getId(), t), t);
 			effect.set("strength", new CInt(eff.getStrength(), t), t);
 			effect.set("seconds", new CDouble(eff.getTicksRemaining() / 20.0, t), t);
 			effect.set("ambient", CBoolean.get(eff.isAmbient()), t);
 			effect.set("particles", CBoolean.get(eff.hasParticles()), t);
-			ea.push(effect, t);
+			effect.set("icon", CBoolean.get(eff.showIcon()), t);
+			ea.set(eff.getPotionEffectType().name().toLowerCase(), effect, t);
 		}
 		return ea;
 	}
@@ -1126,18 +1281,27 @@ public class ObjectGenerator {
 	public List<MCLivingEntity.MCEffect> potions(CArray ea, Target t) {
 		List<MCLivingEntity.MCEffect> ret = new ArrayList<>();
 		for(String key : ea.stringKeySet()) {
-			if(ea.get(key, t) instanceof CArray) {
+			if(ea.get(key, t).isInstanceOf(CArray.class)) {
 				CArray effect = (CArray) ea.get(key, t);
-				int potionID = 0;
+				MCPotionEffectType type;
 				int strength = 0;
 				double seconds = 30.0;
 				boolean ambient = false;
 				boolean particles = true;
-				if(effect.containsKey("id")) {
-					potionID = Static.getInt32(effect.get("id", t), t);
-				} else {
-					throw new CREFormatException("No potion ID was given at index " + key, t);
+				boolean icon = true;
+
+				try {
+					if(ea.isAssociative()) {
+						type = MCPotionEffectType.valueOf(key.toUpperCase());
+					} else if(effect.containsKey("id")) {
+						type = MCPotionEffectType.getById(Static.getInt32(effect.get("id", t), t));
+					} else {
+						throw new CREFormatException("No potion type was given.", t);
+					}
+				} catch (IllegalArgumentException ex) {
+					throw new CREFormatException(ex.getMessage(), t);
 				}
+
 				if(effect.containsKey("strength")) {
 					strength = Static.getInt32(effect.get("strength", t), t);
 				}
@@ -1150,12 +1314,15 @@ public class ObjectGenerator {
 					}
 				}
 				if(effect.containsKey("ambient")) {
-					ambient = Static.getBoolean(effect.get("ambient", t), t);
+					ambient = ArgumentValidation.getBoolean(effect.get("ambient", t), t);
 				}
 				if(effect.containsKey("particles")) {
-					particles = Static.getBoolean(effect.get("particles", t), t);
+					particles = ArgumentValidation.getBoolean(effect.get("particles", t), t);
 				}
-				ret.add(new MCLivingEntity.MCEffect(potionID, strength, (int) (seconds * 20), ambient, particles));
+				if(effect.containsKey("icon")) {
+					icon = ArgumentValidation.getBoolean(effect.get("icon", t), t);
+				}
+				ret.add(new MCLivingEntity.MCEffect(type, strength, (int) (seconds * 20), ambient, particles, icon));
 			} else {
 				throw new CREFormatException("Expected a potion array at index" + key, t);
 			}
@@ -1181,8 +1348,8 @@ public class ObjectGenerator {
 		boolean extended = false;
 		boolean upgraded = false;
 		if(pd.containsKey("extended")) {
-			Construct cext = pd.get("extended", t);
-			if(cext instanceof CBoolean) {
+			Mixed cext = pd.get("extended", t);
+			if(cext.isInstanceOf(CBoolean.class)) {
 				extended = ((CBoolean) cext).getBoolean();
 			} else {
 				throw new CREFormatException(
@@ -1190,8 +1357,8 @@ public class ObjectGenerator {
 			}
 		}
 		if(pd.containsKey("upgraded")) {
-			Construct cupg = pd.get("upgraded", t);
-			if(cupg instanceof CBoolean) {
+			Mixed cupg = pd.get("upgraded", t);
+			if(cupg.isInstanceOf(CBoolean.class)) {
 				upgraded = ((CBoolean) cupg).getBoolean();
 			} else {
 				throw new CREFormatException(
@@ -1231,25 +1398,25 @@ public class ObjectGenerator {
 	public MCFireworkEffect fireworkEffect(CArray fe, Target t) {
 		MCFireworkBuilder builder = StaticLayer.GetConvertor().GetFireworkBuilder();
 		if(fe.containsKey("flicker")) {
-			builder.setFlicker(Static.getBoolean(fe.get("flicker", t), t));
+			builder.setFlicker(ArgumentValidation.getBoolean(fe.get("flicker", t), t));
 		}
 		if(fe.containsKey("trail")) {
-			builder.setTrail(Static.getBoolean(fe.get("trail", t), t));
+			builder.setTrail(ArgumentValidation.getBoolean(fe.get("trail", t), t));
 		}
 		if(fe.containsKey("colors")) {
-			Construct colors = fe.get("colors", t);
-			if(colors instanceof CArray) {
+			Mixed colors = fe.get("colors", t);
+			if(colors.isInstanceOf(CArray.class)) {
 				CArray ccolors = (CArray) colors;
 				if(ccolors.size() == 0) {
 					builder.addColor(MCColor.WHITE);
 				} else {
-					for(Construct color : ccolors.asList()) {
+					for(Mixed color : ccolors.asList()) {
 						MCColor mccolor;
-						if(color instanceof CString) {
+						if(color.isInstanceOf(CString.class)) {
 							mccolor = StaticLayer.GetConvertor().GetColor(color.val(), t);
-						} else if(color instanceof CArray) {
+						} else if(color.isInstanceOf(CArray.class)) {
 							mccolor = color((CArray) color, t);
-						} else if(color instanceof CInt && ccolors.size() == 3) {
+						} else if(color.isInstanceOf(CInt.class) && ccolors.size() == 3) {
 							// Appears to be a single color
 							builder.addColor(color(ccolors, t));
 							break;
@@ -1260,7 +1427,7 @@ public class ObjectGenerator {
 						builder.addColor(mccolor);
 					}
 				}
-			} else if(colors instanceof CString) {
+			} else if(colors.isInstanceOf(CString.class)) {
 				String split[] = colors.val().split("\\|");
 				if(split.length == 0) {
 					builder.addColor(MCColor.WHITE);
@@ -1277,16 +1444,16 @@ public class ObjectGenerator {
 			builder.addColor(MCColor.WHITE);
 		}
 		if(fe.containsKey("fade")) {
-			Construct colors = fe.get("fade", t);
-			if(colors instanceof CArray) {
+			Mixed colors = fe.get("fade", t);
+			if(colors.isInstanceOf(CArray.class)) {
 				CArray ccolors = (CArray) colors;
-				for(Construct color : ccolors.asList()) {
+				for(Mixed color : ccolors.asList()) {
 					MCColor mccolor;
-					if(color instanceof CArray) {
+					if(color.isInstanceOf(CArray.class)) {
 						mccolor = color((CArray) color, t);
-					} else if(color instanceof CString) {
+					} else if(color.isInstanceOf(CString.class)) {
 						mccolor = StaticLayer.GetConvertor().GetColor(color.val(), t);
-					} else if(color instanceof CInt && ccolors.size() == 3) {
+					} else if(color.isInstanceOf(CInt.class) && ccolors.size() == 3) {
 						// Appears to be a single color
 						builder.addFadeColor(color(ccolors, t));
 						break;
@@ -1296,7 +1463,7 @@ public class ObjectGenerator {
 					}
 					builder.addFadeColor(mccolor);
 				}
-			} else if(colors instanceof CString) {
+			} else if(colors.isInstanceOf(CString.class)) {
 				String split[] = colors.val().split("\\|");
 				for(String s : split) {
 					builder.addFadeColor(StaticLayer.GetConvertor().GetColor(s, t));
@@ -1323,53 +1490,88 @@ public class ObjectGenerator {
 		CArray ret = CArray.GetAssociativeArray(t);
 		ret.set("type", new CString(r.getRecipeType().name(), t), t);
 		ret.set("result", item(r.getResult(), t), t);
-		if(r instanceof MCFurnaceRecipe) {
-			ret.set("input", item(((MCFurnaceRecipe) r).getInput(), t), t);
+		ret.set("key", r.getKey(), t);
+		ret.set("group", r.getGroup(), t);
+		if(r instanceof MCCookingRecipe) {
+			MCCookingRecipe recipe = (MCCookingRecipe) r;
+			MCMaterial[] list = recipe.getInput();
+			if(list.length == 1) {
+				ret.set("input", new CString(list[0].getName(), t), t);
+			} else {
+				CArray mats = new CArray(t);
+				for(MCMaterial mat : recipe.getInput()) {
+					mats.push(new CString(mat.getName(), t), t);
+				}
+				ret.set("input", mats, t);
+			}
+			ret.set("experience", new CDouble(recipe.getExperience(), t), t);
+			ret.set("cookingtime", new CInt(recipe.getCookingTime(), t), t);
 		} else if(r instanceof MCShapelessRecipe) {
 			MCShapelessRecipe shapeless = (MCShapelessRecipe) r;
 			CArray il = new CArray(t);
-			for(MCItemStack i : shapeless.getIngredients()) {
-				il.push(item(i, t), t);
+			for(MCMaterial[] list : shapeless.getIngredients()) {
+				if(list.length == 1) {
+					il.push(new CString(list[0].getName(), t), t);
+				} else {
+					CArray materials = new CArray(t);
+					for(MCMaterial mat : list) {
+						materials.push(new CString(mat.getName(), t), t);
+					}
+					il.push(materials, t);
+				}
 			}
 			ret.set("ingredients", il, t);
-			if(shapeless.getKey() != null) {
-				ret.set("key", shapeless.getKey(), t);
-			}
 		} else if(r instanceof MCShapedRecipe) {
 			MCShapedRecipe shaped = (MCShapedRecipe) r;
 			CArray shape = new CArray(t);
 			for(String line : shaped.getShape()) {
 				shape.push(new CString(line, t), t);
 			}
-			CArray imap = CArray.GetAssociativeArray(t);
-			for(Map.Entry<Character, MCItemStack> entry : shaped.getIngredientMap().entrySet()) {
-				imap.set(entry.getKey().toString(), item(entry.getValue(), t), t);
-			}
 			ret.set("shape", shape, t);
+			CArray imap = CArray.GetAssociativeArray(t);
+			for(Map.Entry<Character, MCMaterial[]> entry : shaped.getIngredientMap().entrySet()) {
+				if(entry.getValue() == null) {
+					imap.set(entry.getKey().toString(), CNull.NULL, t);
+				} else if(entry.getValue().length == 1) {
+					imap.set(entry.getKey().toString(), entry.getValue()[0].getName(), t);
+				} else {
+					CArray materials = new CArray(t);
+					for(MCMaterial mat : entry.getValue()) {
+						materials.push(new CString(mat.getName(), t), t);
+					}
+					imap.set(entry.getKey().toString(), materials, t);
+				}
+			}
 			ret.set("ingredients", imap, t);
-			if(shaped.getKey() != null) {
-				ret.set("key", shaped.getKey(), t);
+		} else if(r instanceof MCStonecuttingRecipe) {
+			MCStonecuttingRecipe recipe = (MCStonecuttingRecipe) r;
+			MCMaterial[] list = recipe.getInput();
+			if(list.length == 1) {
+				ret.set("input", new CString(list[0].getName(), t), t);
+			} else {
+				CArray mats = new CArray(t);
+				for(MCMaterial mat : recipe.getInput()) {
+					mats.push(new CString(mat.getName(), t), t);
+				}
+				ret.set("input", mats, t);
 			}
 		}
 		return ret;
 	}
 
-	public MCRecipe recipe(Construct c, Target t) {
-		if(!(c instanceof CArray)) {
-			throw new CRECastException("Expected array but recieved " + c.getCType().name(), t);
+	public MCRecipe recipe(Mixed c, Target t) {
+		if(!(c.isInstanceOf(CArray.class))) {
+			throw new CRECastException("Expected array but received " + c.typeof().getSimpleName(), t);
 		}
 		CArray recipe = (CArray) c;
 
-		String recipeKey = null;
-		if(recipe.containsKey("key")) {
-			recipeKey = recipe.get("key", t).val();
-		}
+		String recipeKey = recipe.get("key", t).val();
 
 		MCRecipeType recipeType;
 		try {
 			recipeType = MCRecipeType.valueOf(recipe.get("type", t).val());
 		} catch (IllegalArgumentException e) {
-			throw new CREFormatException("Invalid recipe type.", t);
+			throw new CREIllegalArgumentException("Invalid recipe type.", t);
 		}
 
 		MCItemStack result = item(recipe.get("result", t), t);
@@ -1378,8 +1580,13 @@ public class ObjectGenerator {
 		try {
 			ret = StaticLayer.GetNewRecipe(recipeKey, recipeType, result);
 		} catch (IllegalArgumentException ex) {
-			throw new CREFormatException(ex.getMessage(), t);
+			throw new CREIllegalArgumentException(ex.getMessage(), t);
 		}
+
+		if(recipe.containsKey("group")) {
+			ret.setGroup(recipe.get("group", t).val());
+		}
+
 		switch(recipeType) {
 			case SHAPED:
 				CArray shaped = Static.getArray(recipe.get("shape", t), t);
@@ -1388,8 +1595,8 @@ public class ObjectGenerator {
 					throw new CREFormatException("Shape array is invalid.", t);
 				}
 				int i = 0;
-				for(Construct row : shaped.asList()) {
-					if(row instanceof CString && row.val().length() >= 1 && row.val().length() <= 3) {
+				for(Mixed row : shaped.asList()) {
+					if(row.isInstanceOf(CString.class) && row.val().length() >= 1 && row.val().length() <= 3) {
 						shape[i] = row.val();
 						i++;
 					} else {
@@ -1400,75 +1607,199 @@ public class ObjectGenerator {
 
 				CArray shapedIngredients = Static.getArray(recipe.get("ingredients", t), t);
 				if(!shapedIngredients.inAssociativeMode()) {
-					throw new CREFormatException("Ingredients array is invalid.", t);
+					throw new CREIllegalArgumentException("Ingredients array is invalid.", t);
 				}
 				for(String key : shapedIngredients.stringKeySet()) {
-					MCItemStack is;
-					Construct ingredient = shapedIngredients.get(key, t);
-					if(ingredient instanceof CString) {
-						CString item = (CString) ingredient;
-						if(item.val().contains(":")) {
-							String[] split = item.val().split(":");
-							is = StaticLayer.GetItemStack(Integer.valueOf(split[0]), Integer.valueOf(split[1]), 1);
+					Mixed ingredient = shapedIngredients.get(key, t);
+					if(ingredient.isInstanceOf(CArray.class)) {
+						if(((CArray) ingredient).isAssociative()) {
+							((MCShapedRecipe) ret).setIngredient(key.charAt(0), item(ingredient, t).getType());
 						} else {
-							is = StaticLayer.GetItemStack(Integer.valueOf(item.val()), 1);
+							CArray list = (CArray) ingredient;
+							MCMaterial[] mats = new MCMaterial[(int) list.size()];
+							for(int index = 0; index < list.size(); index++) {
+								MCMaterial mat = StaticLayer.GetMaterial(list.get(index, t).val());
+								if(mat == null) {
+									throw new CREIllegalArgumentException("Recipe input is invalid: "
+											+ list.get(index, t).val(), t);
+								}
+								mats[index] = mat;
+							}
+							((MCShapedRecipe) ret).setIngredient(key.charAt(0), mats);
 						}
-					} else if(ingredient instanceof CInt) {
-						is = StaticLayer.GetItemStack(Static.getInt32(ingredient, t), 1);
-					} else if(ingredient instanceof CArray) {
-						is = item(ingredient, t);
 					} else if(ingredient instanceof CNull) {
-						is = StaticLayer.GetItemStack(0, 0);
+						((MCShapedRecipe) ret).setIngredient(key.charAt(0), EmptyItem());
 					} else {
-						throw new CREFormatException("Item was not found", t);
+						MCMaterial mat = StaticLayer.GetMaterial(ingredient.val());
+						if(mat == null) {
+							throw new CREIllegalArgumentException("Ingredient is invalid: " + ingredient.val(), t);
+						}
+						((MCShapedRecipe) ret).setIngredient(key.charAt(0), mat);
 					}
-					((MCShapedRecipe) ret).setIngredient(key.charAt(0), is);
 				}
 				return ret;
 
 			case SHAPELESS:
 				CArray ingredients = Static.getArray(recipe.get("ingredients", t), t);
 				if(ingredients.inAssociativeMode()) {
-					throw new CREFormatException("Ingredients array is invalid.", t);
+					throw new CREIllegalArgumentException("Ingredients array is invalid.", t);
 				}
-				for(Construct ingredient : ingredients.asList()) {
-					MCItemStack is;
-					if(ingredient instanceof CString) {
-						if(ingredient.val().contains(":")) {
-							String[] split = ingredient.val().split(":");
-							is = StaticLayer.GetItemStack(Integer.valueOf(split[0]), Integer.valueOf(split[1]), 1);
+				for(Mixed ingredient : ingredients.asList()) {
+					if(ingredient.isInstanceOf(CArray.class)) {
+						if(((CArray) ingredient).isAssociative()) {
+							((MCShapelessRecipe) ret).addIngredient(item(ingredient, t));
 						} else {
-							is = StaticLayer.GetItemStack(Integer.valueOf(ingredient.val()), 1);
+							CArray list = (CArray) ingredient;
+							MCMaterial[] mats = new MCMaterial[(int) list.size()];
+							for(int index = 0; index < list.size(); index++) {
+								MCMaterial mat = StaticLayer.GetMaterial(list.get(index, t).val());
+								if(mat == null) {
+									throw new CREIllegalArgumentException("Recipe input is invalid: "
+											+ list.get(index, t).val(), t);
+								}
+								mats[index] = mat;
+							}
+							((MCShapelessRecipe) ret).addIngredient(mats);
 						}
-					} else if(ingredient instanceof CArray) {
-						is = item(ingredient, t);
 					} else {
-						throw new CREFormatException("Item was not found", t);
+						MCMaterial mat = StaticLayer.GetMaterial(ingredient.val());
+						if(mat == null) {
+							throw new CREIllegalArgumentException("Ingredient is invalid: " + ingredient.val(), t);
+						}
+						((MCShapelessRecipe) ret).addIngredient(mat);
 					}
-					((MCShapelessRecipe) ret).addIngredient(is);
 				}
 				return ret;
 
+			case BLASTING:
+			case CAMPFIRE:
 			case FURNACE:
-				CArray is = Static.getArray(recipe.get("input", t), t);
-				((MCFurnaceRecipe) ret).setInput(item(is, t));
+			case SMOKING:
+				Mixed input = recipe.get("input", t);
+				if(input.isInstanceOf(CArray.class)) {
+					if(((CArray) input).isAssociative()) {
+						((MCCookingRecipe) ret).setInput(item(input, t));
+					} else {
+						CArray list = (CArray) input;
+						MCMaterial[] mats = new MCMaterial[(int) list.size()];
+						for(int index = 0; index < list.size(); index++) {
+							MCMaterial mat = StaticLayer.GetMaterial(list.get(index, t).val());
+							if(mat == null) {
+								throw new CREIllegalArgumentException("Recipe input is invalid: "
+										+ list.get(index, t).val(), t);
+							}
+							mats[index] = mat;
+						}
+						((MCCookingRecipe) ret).setInput(mats);
+					}
+				} else {
+					MCMaterial mat = StaticLayer.GetMaterial(input.val());
+					if(mat == null) {
+						throw new CREIllegalArgumentException("Recipe input is invalid: " + input.val(), t);
+					}
+					((MCCookingRecipe) ret).setInput(mat);
+				}
+				if(recipe.containsKey("experience")) {
+					((MCCookingRecipe) ret).setExperience(Static.getDouble32(recipe.get("experience", t), t));
+				}
+				if(recipe.containsKey("cookingtime")) {
+					((MCCookingRecipe) ret).setCookingTime(Static.getInt32(recipe.get("cookingtime", t), t));
+				}
+				return ret;
+
+			case STONECUTTING:
+				Mixed stoneCutterInput = recipe.get("input", t);
+				if(stoneCutterInput.isInstanceOf(CArray.class)) {
+					if(((CArray) stoneCutterInput).isAssociative()) {
+						((MCStonecuttingRecipe) ret).setInput(item(stoneCutterInput, t));
+					} else {
+						CArray list = (CArray) stoneCutterInput;
+						MCMaterial[] mats = new MCMaterial[(int) list.size()];
+						for(int index = 0; index < list.size(); index++) {
+							MCMaterial mat = StaticLayer.GetMaterial(list.get(index, t).val());
+							if(mat == null) {
+								throw new CREIllegalArgumentException("Recipe input is invalid: "
+										+ list.get(index, t).val(), t);
+							}
+							mats[index] = mat;
+						}
+						((MCStonecuttingRecipe) ret).setInput(mats);
+					}
+				} else {
+					MCMaterial mat = StaticLayer.GetMaterial(stoneCutterInput.val());
+					if(mat == null) {
+						throw new CREIllegalArgumentException("Recipe input is invalid: " + stoneCutterInput.val(), t);
+					}
+					((MCStonecuttingRecipe) ret).setInput(mat);
+				}
 				return ret;
 
 			default:
-				throw new CREFormatException("Could not find valid recipe type.", t);
+				throw new CREIllegalArgumentException("Could not find valid recipe type.", t);
 		}
 	}
 
 	public MCMaterial material(String name, Target t) {
-		try {
-			return StaticLayer.GetMaterial(name.toUpperCase());
-		} catch (IllegalArgumentException exception) {
+		MCMaterial mat = StaticLayer.GetMaterial(name.toUpperCase());
+		if(mat == null) {
 			throw new CREFormatException("Unknown material type: " + name, t);
 		}
+		return mat;
 	}
 
-	public MCMaterial material(Construct name, Target t) {
+	public MCMaterial material(Mixed name, Target t) {
 		return material(name.val(), t);
+	}
+
+	public MCBlockData blockData(CArray ca, Target t) {
+		StringBuilder b = new StringBuilder().append("[");
+		boolean first = true;
+		for(String key : ca.stringKeySet()) {
+			if(key.equals("block")) {
+				b.insert(0, ca.get("block", t).val());
+			} else {
+				if(first) {
+					first = false;
+				} else {
+					b.append(',');
+				}
+				b.append(key).append('=').append(ca.get(key, t).val());
+			}
+		}
+		b.append("]");
+		return Static.getServer().createBlockData(b.toString());
+	}
+
+	public CArray blockData(MCBlockData blockdata, Target t) {
+		CArray ca = CArray.GetAssociativeArray(t);
+		String full = blockdata.getAsString().substring(10); // ignore "minecraft:"
+		int bracketPos = full.indexOf('[', 3);
+		if(bracketPos != -1) {
+			ca.set("block", new CString(full.substring(0, bracketPos), t), t);
+			String[] states = full.substring(bracketPos + 1, full.length() - 1).split(",");
+			for(String s : states) {
+				int equalsPos = s.indexOf('=');
+				ca.set(s.substring(0, equalsPos), blockState(s.substring(equalsPos + 1)), t);
+			}
+		} else {
+			ca.set("block", new CString(full, t), t);
+		}
+		return ca;
+	}
+
+	private Construct blockState(String value) {
+		if(value.length() < 3 && Character.isDigit(value.charAt(0))) {
+			// integer states range from 0-25
+			try {
+				return new CInt(Long.parseLong(value), Target.UNKNOWN);
+			} catch (NumberFormatException e) {
+			}
+		} else if(value.equals("true")) {
+			return CBoolean.TRUE;
+		} else if(value.equals("false")) {
+			return CBoolean.FALSE;
+		}
+		return new CString(value, Target.UNKNOWN);
 	}
 
 	/**
@@ -1478,7 +1809,7 @@ public class ObjectGenerator {
 	 * @param plugin
 	 * @return
 	 */
-	public MCMetadataValue metadataValue(Construct value, MCPlugin plugin) {
+	public MCMetadataValue metadataValue(Mixed value, MCPlugin plugin) {
 		return metadataValue(Static.getJavaObject(value), plugin);
 	}
 

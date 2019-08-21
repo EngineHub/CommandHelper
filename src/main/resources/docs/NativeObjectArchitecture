@@ -1,0 +1,101 @@
+<%UNIMPLEMENTED%>
+
+To increase portability and flexibility, much of the functionality of native objects are defined directly in
+MethodScript, using most of the same compiler features available to user defined classes. Of course, some of the
+functionality is required to be different, as native code must be run in some cases, but the goal is to reduce this as
+much as possible. Doing so allows the compiler to be re-implemented in other languages more easily, and causes the code
+itself to "eat its own dogfood".
+
+To facilitate this, there are a few architectural features, and a few language features.
+
+== native class ==
+
+A native class, defined with the ''native class'' keyword, implies that this class is mirroring a class defined in the
+java, with a @typeof annotation of the same name. This causes the system to merge the two classes' functionality.
+
+All classes in the java marked with the @typeof annotation will be available in the code, regardless of whether or not
+there is a corresponding ''native class'', and can be used as normal in the java functions, but there will be no fields
+or methods available in user code. A java class with the typeof annotation and no corresponding MethodScript class will
+thus be synthesized as such:
+
+<%CODE|
+public native class ClassName extends ParentClasses implements ParentInterfaces {}
+%>
+
+The ParentClasses and ParentInterfaces are calculated based on the return value of the corresponding methods in the
+java. Any documentation for the class itself will come from the MethodScript definition, if present, and the java class
+otherwise.
+
+It is not strictly required that the java class implement mixed, but then the class would be unusable by most native
+code, so it generally should.
+
+== native methods ==
+
+The native keyword can also be applied to methods within a native class. Native methods outside of a native class are
+not valid. These methods are defined in MethodScript per normal, but with no method body. The documentation and other
+method information comes from the MethodScript, but the code itself is defined in the java.
+
+<%CODE|
+public native class ClassName {
+	/**
+	 * This is the method documentation
+	 */
+	public native int myMethod(int @a);
+
+	public native static void myStaticMethod();
+}
+%>
+
+Then within the java, you must use the @NativeElement annotation on the method with the same name and signature.
+
+<%SYNTAX|java|
+@typeof("ClassName")
+public class ClassName implements Mixed {
+	
+	@NativeElement
+	public CInt myMethod(CInt a) {
+		return ...;
+	}
+
+	@NativeElement
+	public static CVoid myStaticMethod() {
+		return CVoid.VOID;
+	}
+}
+%>
+
+It is worth noting that native methods can only work with other native classes, due to the tight coupling between the
+need for the return value and parameter types to be addressable in the java. No such requirement is placed on non-native
+methods however, and they may address objects fully defined elsewhere in MethodScript.
+
+In addition, non-native methods may be defined within the MethodScript, along side native methods.
+
+<%CODE|
+public native class ClassName {
+	public native void myMethod();
+
+	public void myMSMethod() {
+		return();
+	}
+}
+%>
+
+Such methods are not callable by java code, so if this is something that native code requires access to, it should be
+defined as a native method instead.
+
+Fields may be native as well. In these cases, it is as if they are defined with auto getters and setters that simply
+set and return the value.
+
+<%CODE|
+public native class ClassName {
+	public native int MAX;
+}
+%>
+
+== Precompilation ==
+
+Classes defined directly in MethodScript are pre-compiled at build time. The classes are defined in a certain folder,
+with files ending in .msc and at build time, these are scanned, compiled into ClassInfo objects, serialized, and stored
+in the resulting jar. At startup, these files are quickly loaded, pre-compiled, and added to the native class list.
+
+This step is important to reduce startup time, and extensions should follow the same logic when adding native classes.

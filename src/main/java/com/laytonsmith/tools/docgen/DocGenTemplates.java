@@ -2,6 +2,7 @@ package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.HTMLUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
@@ -12,6 +13,8 @@ import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.CommandLineTool;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Main;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
@@ -24,6 +27,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.Scheduling;
+import com.laytonsmith.core.tool;
 import com.laytonsmith.persistence.DataSource;
 import com.laytonsmith.persistence.MySQLDataSource;
 import com.laytonsmith.persistence.SQLiteDataSource;
@@ -89,7 +93,7 @@ public class DocGenTemplates {
 			}
 		});
 		g.putAll(DocGenTemplates.GetGenerators());
-		String t = "<%SYNTAX|html|\n<%MySQL_CREATE_TABLE_QUERY%>\n%>";
+		String t = "<%SYNTAX|html|\n<%MYSQL_CREATE_TABLE_QUERY%>\n%>";
 		StreamUtils.GetSystemOut().println(DoTemplateReplacement(t, g));
 	}
 
@@ -453,7 +457,11 @@ public class DocGenTemplates {
 
 		@Override
 		public String generate(String... args) {
-			Class c = ClassDiscovery.getDefaultInstance().forFuzzyName(args[0], args[1]).loadClass();
+			ClassMirror m = ClassDiscovery.getDefaultInstance().forFuzzyName(args[0], args[1]);
+			if(m == null) {
+				throw new NullPointerException("Could not find class " + args[0] + " " + args[1]);
+			}
+			Class c = m.loadClass();
 			return "[" + GITHUB_BASE_URL + "/" + c.getName().replace('.', '/') + ".java " + c.getSimpleName() + "]";
 		}
 	};
@@ -467,7 +475,7 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String... args) {
 			try {
-				FunctionBase b = FunctionList.getFunction(args[0], Target.UNKNOWN);
+				FunctionBase b = FunctionList.getFunction(args[0], null, Target.UNKNOWN);
 				Class c = b.getClass();
 				while(c.getEnclosingClass() != null) {
 					c = c.getEnclosingClass();
@@ -487,16 +495,17 @@ public class DocGenTemplates {
 			StringBuilder b = new StringBuilder();
 			boolean colorsDisabled = TermColors.ColorsDisabled();
 			TermColors.DisableColors();
-			b.append("<pre style=\"white-space: pre-wrap;\">\n").append(HTMLUtils.escapeHTML(Main.ARGUMENT_SUITE.getBuiltDescription())).append("\n</pre>\n");
+			Main.CmdlineToolCollection collection = Main.GetCommandLineTools();
+			b.append("<pre style=\"white-space: pre-wrap;\">\n")
+					.append(HTMLUtils.escapeHTML(collection.getSuite().getBuiltDescription())).append("\n</pre>\n");
 			if(!colorsDisabled) {
 				TermColors.EnableColors();
 			}
-			for(Field f : Main.class.getDeclaredFields()) {
-				if(f.getType() == ArgumentParser.class) {
-					b.append("==== ").append(StringUtils.replaceLast(f.getName(), "(?i)mode", "")).append(" ====\n<pre style=\"white-space: pre-wrap;\">");
-					ArgumentParser parser = (ArgumentParser) ReflectionUtils.get(Main.class, f.getName());
-					b.append(HTMLUtils.escapeHTML(parser.getBuiltDescription())).append("</pre>\n\n");
-				}
+			for(Map.Entry<ArgumentParser, CommandLineTool> e : collection.getDynamicTools().entrySet()) {
+				b.append("==== ")
+						.append(e.getValue().getClass().getAnnotation(tool.class).value())
+						.append(" ====\n<pre style=\"white-space: pre-wrap;\">");
+				b.append(HTMLUtils.escapeHTML(e.getKey().getBuiltDescription())).append("</pre>\n\n");
 			}
 			return b.toString();
 		}
@@ -544,6 +553,8 @@ public class DocGenTemplates {
 				out = SimpleSyntaxHighlighter.Highlight(code, false);
 			} catch (ConfigCompileException ex) {
 				throw new GenerateException(ex.getMessage() + "\nFor code: " + code, ex);
+			} catch (Exception ex) {
+				throw new RuntimeException(ex);
 			}
 			return out;
 		}
@@ -558,6 +569,7 @@ public class DocGenTemplates {
 		@Override
 		public String generate(String... args) throws GenerateException {
 			String code = StringUtils.Join(args, "|");
+			code = code.replace("\r\n", "\n");
 			if(code.endsWith("\n")) {
 				code = code.replaceAll("\n$", "");
 			}
@@ -566,6 +578,8 @@ public class DocGenTemplates {
 				out = SimpleSyntaxHighlighter.Highlight(code, true);
 			} catch (ConfigCompileException ex) {
 				throw new GenerateException(ex.getMessage() + "\nFor code: " + code, ex);
+			} catch (Exception ex) {
+				throw new RuntimeException(ex);
 			}
 			return out;
 		}
@@ -769,6 +783,8 @@ public class DocGenTemplates {
 		}
 	};
 
+	public static final Generator CURRENT_VERSION = (String... args) -> MSVersion.LATEST.toString();
+
 	/**
 	 * Returns the standard {{unimplemented}} template
 	 */
@@ -796,14 +812,28 @@ public class DocGenTemplates {
 
 	public static final Generator SUPPRESS_WARNINGS_LIST = (args) -> {
 		StringBuilder b = new StringBuilder();
-		for(FileOptions.SuppressWarnings s : FileOptions.SuppressWarnings.values()) {
+		for(FileOptions.SuppressWarning s : FileOptions.SuppressWarning.values()) {
 			b.append("* ")
 					.append(s.getName())
 					.append(" - ")
 					.append(s.docs())
 					.append(" (added ")
 					.append(s.since())
-					.append(")");
+					.append(")\n");
+		}
+		return b.toString();
+	};
+
+	public static final Generator COMPILER_OPTIONS_LIST = (args) -> {
+		StringBuilder b = new StringBuilder();
+		for(FileOptions.CompilerOption s : FileOptions.CompilerOption.values()) {
+			b.append("* ")
+					.append(s.getName())
+					.append(" - ")
+					.append(s.docs())
+					.append(" (added ")
+					.append(s.since())
+					.append(")\n");
 		}
 		return b.toString();
 	};

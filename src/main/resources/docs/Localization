@@ -1,0 +1,170 @@
+{{unimplemented}}
+
+The MethodScript website supports localization efforts, to better serve communities that are primarily non-English
+speaking. While much of the application itself is necessarily written in English (function names, etc would be a
+disaster to try to localize), the documentation for the application does not necessarily need to be in English.
+
+To this end, a Localization (or L10n) framework has been put in place to facilitate bilingual localizers to help
+translate the documentation into languages other than English! Much care has been put into ensuring the accuracy of
+the documentation, and the language of it is no exception. This document describes the l10n framework, 
+which is important to understand if you wish to contribute l10ns.
+
+== General Overview ==
+
+There are a few steps in the l10n process, and some complication is introduced to the system to reduce the amount of
+work that is needed to be done by l10n experts. The general process is this:
+
+First, when the website is generated, the deployment tooling automatically runs to create the translation database.
+The first step is to take each and every page that is eligible for l10n, and split it into '''segments'''. The logic is
+a bit complex, but the idea here is to split each page into many small, logical segments, rather than keeping it as one
+giant page. What defines a segment varies, but for instance, in a page with lots of paragraphs (such as this one), each
+paragraph becomes one segment. Tables are another good example, each cell in the table becomes a segment as well. Bullet
+points in a list each become their own segment, and so forth, and so on. Many of these segments are repeated across the
+site, and doing this segmentation in a very specific way can help identify segments of a page that are repeated across
+more than one page. In this way, we can ensure that when this segment is translated, every page across the site can
+inherit this translation, without the l10n expert having to translate the same segment multiple times. This also makes
+it easier for new information to be added, without requiring full re-localization of the page. It's better to have new
+information be available in English than not at all, and so untranslated segments are always shown as is, alongside any
+already translated segments.
+
+There are also lots of segments of text that are perfectly translatable by machine. That is, there isn't any text in the
+segment that needs to remain English for compatibility purposes, such as names of functions or enums, etc. In that case,
+all locales can use machine translation on that segment, which can save lots of time for many segments. There are
+however, many places where these machine translations might be wrong, or where the translation for the general text
+may not be appropriate in the context of an individual page. Therefore, mechanisms are in place to allow for l10n
+experts to override these where necessary.
+
+== Technical Discussion ==
+
+Due to the complexity of the system, various tooling is in place to assist in keeping things correct, but it is
+important to have an overview of the core of the system. The primary database is hosted on
+[http://github.com github.]
+
+There are three layers to the database. The summary file,
+the locale master file, and individual page files. Each translation file is an xml file. For each segment, there are
+at least 2 pieces of information that all segments have, the translation id, and the original English. 
+
+In the summary file, (summary.xml) we find information that relates to the segment across all locales, for instance,
+whether or not this segment should be eligible for machine translation. If the value is null, then this segment hasn't
+been judged yet, as this requires human review. There is also a comment field, which can be used to leave a note for
+l10n experts about this particular field as a whole, without regard to the particular locale. There is also a flag
+that marks this segment as '''untranslatable''', which means that the whole segment is something like a function name,
+or some other string that would be incorrect to localize. This effectively means that the English is the "translation"
+for this segment, and it is removed from the "missing translation" lists.
+
+At the root of the database, we find a folder for each supported locale. Within the folder, there exists a master
+locale file (master.tmem.xml), along with many other files which are page specific files. For the purposes of the
+l10n expert, the master file is the most important, though individual page files are sometimes useful to use. The
+master locale file is the file that the bulk of translations should go in. This file is somewhat a duplicate of the
+summary file,
+in that all segments in the system should be in this file, but it contains locale specific information. The id and
+English key are present, but there are also locale specific fields. The comment field allows a l10n expert to leave a
+locale specific note about this particular segment. The translation field is where the non-English translation should
+go. For segments that have been marked as eligible for machine translation, a separate "auto" field is added for that
+translation. In all cases, if both a manual translation and a machine translated version are available, the manual
+translation is used instead.
+
+Finally, we have individual pages of translations. These contain the same information as the master locale file, but
+only contain the translations that are used on that particular page on the site. Normally, these values are inherited
+from the master file, but if the overrideMaster flag is set to true, then this translation will not inherit the
+translation from the master file, and will use the translation specified for that particular page. In general, if this
+occurs, this probably points to a larger problem with the segment, and instead of doing that, we should consider how
+the pages are segmented instead.
+
+New translation blocks are not allowed to be created by hand. New segments are created automatically during website
+generation, and the blank templates are automatically committed to the central github repository. This prevents
+very messy merge conflicts if multiple l10n experts are working on the same pages, as well as prevents any conflicts
+that the automated systems can't recover from.
+
+On individual page loads, we don't want to load the entire translation memory, as this is quite large, which is why
+each page gets it own translation memory file, with just the segments that are on that page. When deciding how to
+translate each page, a page prefers to use the manual translation, followed by the machine translation, followed by the
+original English.
+
+There is an artificial language tag, which is always available for testing, the "art" locale. Since machine translations
+cost real money to generate, and it can be useful to do testing locally, the art locale is a programmatically
+modified English language, which can help detect issues in the machine localization, as well as testing other locale
+changes without breaking real languages.
+
+== Using the Localization Tool ==
+
+Because keeping all of these files in sync manually would be extremely difficult, in general, the rule is that only
+the tooling should directly modify the database. Editing the xml files by hand would likely cause issues, and so using
+the GUI is the only supported, and easiest way to modify the files. Use the '''l10n-ui''' tool to launch the
+Localization UI.
+
+The l10n database is just a git repo, so to contribute to localizations, you need a git client installed. On first run,
+you can tell the tool to help you check out the official repository, or you can specify your own, if you are just
+testing things.
+
+The localization tool allows you to operate in two main modes, General Mode, and Locale Specific Mode. In general mode,
+you can go through and mark segments as machine translatable or not, and this will apply to all supported locales. You
+can also add comments to the segments, which will be seen in all locales. You can also run machine translation for
+segments that were marked as machine translation supported. (This requires a subscription to Azure Translator Text API,
+which has a limited, free tier, but may cost money.)
+
+In locale specific mode, you can view translations for that particular locale. From this, you can view the entire master
+translation file, or you can view the segments for individual pages. From within a selected page, you can add a manual
+translation or a locale or page specific comment.
+
+Saving writes the database out to file, and you can also create a pull request to the main repository.
+
+== Special symbols and untranslatable strings within segments ==
+
+To facilitate easier parsing of the text, some segments have been modified to remove information that should definitely
+not be localized. For instance, urls, code, template markers, and other strings of that nature.
+In place of those symbols, '''%s''' has
+been added instead. THESE MUST BE LEFT IN PLACE. It should generally be obvious where it should go, often times these
+are within brackets, or surrounding a single word, etc. There are often time other symbols, such as html escapes,
+brackets, and other symbols that should be left intact in the translation, unless it's obviously supposed to be changed.
+There are also other cases where it's impossible to automatically determine whether or not to exclude a particular word
+from a translation, depending on the context. For instance, function names an other references to code should never be
+localized, as function names may only be in English. You must use common sense when doing the localization, and ensure
+that you don't change things that must be there for site functionality or may confuse the reader. In some cases, the
+entire segment is correct without any translation, for instance segments that are just the name of a function. In this
+case, do not copy the english over, instead, switch to general mode and mark it as untranslatable. This will cause it
+to use the English in all locales, but also remove it from the list of "missing translations". Unfortunately, 
+segments that contain strings that shouldn't be translated are not going to be eligible for automatic translation, and
+must be manually translated, ensuring that the untranslatable parts are left intact.
+
+Code blocks are currently wholly excluded from the l10n framework, though it should be possible in the future to
+allow comments and strings within the code to be localized.
+
+== Testing locally ==
+
+Before creating a Pull Request, you should make a deployment locally, and verify that your changes look alright. To
+create a local deployment, follow the directions [[SiteDeployTool|here]], but you'll additionally need to start up
+a server that serves your local copy of the database. These directions can be modified if you wish, but the easiest
+method to do so is to do the following.
+
+Before running the site-deploy tool, in your site-deploy.ini file, set production-translations to 
+"http://localhost:7585". Run the site-deploy tool like normal, with the latest version of the codebase. You can
+either download the latest release, or build it yourself, but to avoid missing segments, it must be based on the latest
+release build.
+
+<%TAKENOTE|Adding new segments in pull requests is not allowed! Only the automated pipeline may add new segements,
+so you must wait until the segment templates are in place before you can localize them. Likewise, removing
+segments is not allowed either. Segments that are unused will occasionally be culled manually.%>
+
+Follow the remaining directions to get a local site
+up and running, then:
+
+* Open a new terminal, in addition to the terminal running the server for the main site.
+* Run <%PRE|npx http-server -c-1 -p 7585 --cors%>
+
+Now, when you save the localizations in the UI, you simply need to refresh the page to see the new translations. 
+
+<%TAKENOTE|Please proofread all your translations, to ensure they are correct, and have appeared on the local site
+correctly.%>
+
+== Pull Request Acceptance ==
+
+Once the pull request is made, your changes will be validated, to ensure that they won't break anything. Once accepted,
+the PR will filter down into the website, though due to a delay in cache updates, some translations may take a bit to
+appear on the website.
+
+== Errors in original documentation ==
+If you find errors or typos in the original English, do not translate them, because the segment will be invalidated and
+no longer translated. Submit a PR against the original English first, then allow the segment to update before
+translating it. You can also mark it as a suspect segment, and it will be flagged for review, and prevent others
+from translating it before it is replaced.

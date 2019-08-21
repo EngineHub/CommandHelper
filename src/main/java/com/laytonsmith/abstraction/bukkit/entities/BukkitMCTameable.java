@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCAnimalTamer;
-import com.laytonsmith.abstraction.MCTameable;
+import com.laytonsmith.abstraction.entities.MCTameable;
 import com.laytonsmith.abstraction.bukkit.BukkitMCAnimalTamer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -14,12 +14,20 @@ public class BukkitMCTameable extends BukkitMCAgeable implements MCTameable {
 
 	public BukkitMCTameable(Entity t) {
 		super(t);
-		this.t = (Tameable) t;
+		// sometimes an entity was previously tameable in older versions
+		if(t instanceof Tameable) {
+			this.t = (Tameable) t;
+		}
 	}
 
 	public BukkitMCTameable(AbstractionObject a) {
 		super((LivingEntity) a.getHandle());
 		this.t = ((Tameable) a.getHandle());
+	}
+
+	@Override
+	public boolean isTameable() {
+		return t != null;
 	}
 
 	@Override

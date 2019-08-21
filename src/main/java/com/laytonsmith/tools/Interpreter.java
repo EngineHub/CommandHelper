@@ -1,9 +1,16 @@
 package com.laytonsmith.tools;
 
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.FileWriteMode;
+import com.laytonsmith.PureUtilities.Common.HTMLUtils;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
+import com.laytonsmith.PureUtilities.Common.OSUtils;
+import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Common.WinRegistry;
 import com.laytonsmith.PureUtilities.LimitedQueue;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.SignalHandler;
@@ -17,6 +24,7 @@ import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCInventory;
+import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
@@ -37,10 +45,12 @@ import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.convert;
+import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.LogLevel;
-import com.laytonsmith.core.Main;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.MethodScriptFileLocations;
@@ -48,9 +58,13 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
@@ -61,15 +75,21 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.drivers.CmdlineEvents;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
+import com.laytonsmith.core.functions.Cmdline;
+import com.laytonsmith.core.functions.Echoes;
+import com.laytonsmith.core.functions.ExampleScript;
+import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.persistence.DataSourceException;
+import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import jline.console.ConsoleReader;
 import jline.console.completer.ArgumentCompleter;
@@ -77,14 +97,22 @@ import jline.console.completer.StringsCompleter;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.laytonsmith.PureUtilities.TermColors.BLUE;
 import static com.laytonsmith.PureUtilities.TermColors.RED;
@@ -92,16 +120,6 @@ import static com.laytonsmith.PureUtilities.TermColors.YELLOW;
 import static com.laytonsmith.PureUtilities.TermColors.p;
 import static com.laytonsmith.PureUtilities.TermColors.pl;
 import static com.laytonsmith.PureUtilities.TermColors.reset;
-import com.laytonsmith.core.compiler.TokenStream;
-import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.exceptions.CRE.CREIOException;
-import com.laytonsmith.core.functions.Cmdline;
-import com.laytonsmith.core.functions.Echoes;
-import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This is a command line implementation of the in game interpreter mode. This should only be run while the server is
@@ -115,7 +133,12 @@ public final class Interpreter {
 	 *
 	 * BAD THINGS WILL HAPPEN TO EVERYBODY YOU LOVE IF THIS IS CHANGED!
 	 */
-	private static final String INTERPRETER_INSTALLATION_LOCATION = "/usr/local/bin/mscript";
+	private static final String UNIX_INTERPRETER_INSTALLATION_LOCATION = "/usr/local/bin/";
+
+	/**
+	 * Be sure to update this if the powershell.psm1 file changes.
+	 */
+	private static final String POWERSHELL_MODULE_VERSION = "1.0.0";
 
 	private boolean inTTYMode = false;
 	private boolean multilineMode = false;
@@ -181,7 +204,10 @@ public final class Interpreter {
 				+ "If the line starts with $$, then the rest of the line is taken to be a shell command. The command is taken as a string, wrapped\n"
 				+ "in shell_adv(), (where system out and system err are piped to the corresponding outputs).\n"
 				+ "If $$ is on a line by itself, it puts the shell in shell_adv mode, and each line is taken as if it started\n"
-				+ "with $$. Use - on a line by itself to exit this mode as well.";
+				+ "with $$. Use - on a line by itself to exit this mode as well.\n\n"
+				+ "For more information about a specific function, type \"help function\"\n"
+				+ "and for documentation plus examples, type \"examples function\". See the api tool\n"
+				+ "for more information about this feature.";
 		try {
 			msg += "\nYour current working directory is: " + env.getEnv(GlobalEnv.class).GetRootFolder().getCanonicalPath();
 		} catch (IOException ex) {
@@ -242,7 +268,8 @@ public final class Interpreter {
 			final ConsoleReader reader = new ConsoleReader();
 			reader.setExpandEvents(false);
 			//Get a list of all the function names. This will be provided to the auto completer.
-			Set<FunctionBase> functions = FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA);
+			Set<FunctionBase> functions = FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA,
+					env.getEnvClasses());
 			List<String> names = new ArrayList<>();
 			for(FunctionBase f : functions) {
 				if(f.appearInDocumentation()) {
@@ -283,163 +310,9 @@ public final class Interpreter {
 					break;
 				}
 			}
-
-			//Perhaps this code will be revisited in the future, so that more things
-			//can be done, like syntax highlighting, function keys, etc, but in order
+			//TODO: Add syntax highlighting, function keys, etc, but in order
 			//to do that, history, command completion, etc, will all have to be re-implemented,
 			//and implemented around readCharacter, which is a lot of work.
-//			p(getPrompt());
-//			boolean exit = false;
-//			while(true){
-//				jline.console.ConsoleReader reader = new jline.console.ConsoleReader();
-//				StringBuilder line = new StringBuilder();
-//				while(true){
-//					int c = reader.readCharacter();
-//					if(c == 27){
-//						//Escape sequence
-//						int c2 = reader.readCharacter();
-//						if(c2 == 79){
-//							//F1-F4
-//							int c3 = reader.readCharacter();
-//							if(c3 == 80){
-//								//F1
-//								StreamUtils.GetSystemOut().println("F1");
-//								continue;
-//							} else if(c3 == 81){
-//								//F2
-//								StreamUtils.GetSystemOut().println("F2");
-//								continue;
-//							} else if(c3 == 82){
-//								//F3
-//								StreamUtils.GetSystemOut().println("F3");
-//								continue;
-//							} else if(c3 == 83){
-//								//F4
-//								StreamUtils.GetSystemOut().println("F4");
-//								continue;
-//							}
-//						} else if(c2 == 91){
-//							//At least 3 characters
-//							int c3 = reader.readCharacter();
-//							if(c3 == 68){
-//								//Left arrow
-//								StreamUtils.GetSystemOut().println("Left Arrow");
-//								continue;
-//							} else if(c3 == 65){
-//								//Up Arrow
-//								StreamUtils.GetSystemOut().println("Up Arrow");
-//								continue;
-//							} else if(c3 == 66){
-//								//Down Arrow
-//								StreamUtils.GetSystemOut().println("Down Arrow");
-//								continue;
-//							} else if(c3 == 67){
-//								//Right Arrow
-//								StreamUtils.GetSystemOut().println("Right Arrow");
-//								continue;
-//							} else if(c3 == 72){
-//								//Home
-//								StreamUtils.GetSystemOut().println("Home");
-//								continue;
-//							} else if(c3 == 70){
-//								//End
-//								StreamUtils.GetSystemOut().println("End");
-//								continue;
-//							} else {
-//								//At least 4 characters
-//								int c4 = reader.readCharacter();
-//								if(c4 == 126){
-//									if(c3 == 50){
-//										//Insert
-//										StreamUtils.GetSystemOut().println("Insert");
-//										continue;
-//									} else if(c3 == 51){
-//										//Delete
-//										StreamUtils.GetSystemOut().println("Delete");
-//										continue;
-//									} else if(c3 == 53){
-//										//Page Up
-//										StreamUtils.GetSystemOut().println("Page Up");
-//										continue;
-//									} else if(c3 == 54){
-//										//Page Down
-//										StreamUtils.GetSystemOut().println("Page Down");
-//										continue;
-//									}
-//								} else {
-//									//At least 5 characters
-//									int c5 = reader.readCharacter();
-//									if(c5 == 126){
-//										if(c3 == 49){
-//											if(c4 == 53){
-//												//F5
-//												StreamUtils.GetSystemOut().println("F5");
-//												continue;
-//											} else if(c4 == 55){
-//												//F6
-//												StreamUtils.GetSystemOut().println("F6");
-//												continue;
-//											} else if(c4 == 56){
-//												//F7
-//												StreamUtils.GetSystemOut().println("F7");
-//												continue;
-//											} else if(c4 == 57){
-//												//F8
-//												StreamUtils.GetSystemOut().println("F8");
-//												continue;
-//											}
-//										} else if(c3 == 50){
-//											if(c4 == 48){
-//												//F9
-//												StreamUtils.GetSystemOut().println("F9");
-//												continue;
-//											} else if(c4 == 49){
-//												//F10
-//												StreamUtils.GetSystemOut().println("F10");
-//												continue;
-//											} else if(c4 == 51){
-//												//F11
-//												StreamUtils.GetSystemOut().println("F11");
-//												continue;
-//											} else if(c4 == 52){
-//												//F12
-//												StreamUtils.GetSystemOut().println("F12");
-//												continue;
-//											}
-//										} else {
-//											//Unknown
-//											continue;
-//										}
-//									} else {
-//										//Unknown. This hopefully won't ever happen.
-//										continue;
-//									}
-//								}
-//							}
-//						} else {
-//							continue; //Unrecognized. Hopefully this will be fine?
-//						}
-//					}
-//					if(c == 13){ //"Enter" character
-//						//done, send the line in for processing
-//						StreamUtils.GetSystemOut().println();
-//						break;
-//					}
-//					if(c == 127){
-//						reader.moveCursor(-1);
-//					}
-//					line.append((char)c);
-//					reader.putString(Character.toString((char)c));
-//				}
-//				if(!textLine(line.toString())){
-//					exit = true;
-//				}
-//				if(multilineMode){
-//					p(">");
-//				} else {
-//					p(getPrompt());
-//				}
-//			}
 		}
 	}
 
@@ -447,9 +320,7 @@ public final class Interpreter {
 		CClosure c = (CClosure) env.getEnv(GlobalEnv.class).GetCustom("cmdline_prompt");
 		if(c != null) {
 			try {
-				c.execute(CBoolean.get(inShellMode));
-			} catch (FunctionReturnException ex) {
-				String val = ex.getReturn().val();
+				String val = c.executeCallable(CBoolean.get(inShellMode)).val();
 				return Static.MCToANSIColors(val) + TermColors.RESET;
 			} catch (ConfigRuntimeException ex) {
 				ConfigRuntimeException.HandleUncaughtException(ex, env);
@@ -473,7 +344,8 @@ public final class Interpreter {
 
 		String autoInclude = FileUtil.read(MethodScriptFileLocations.getDefault().getCmdlineInterpreterAutoIncludeFile());
 		try {
-			MethodScriptCompiler.execute(autoInclude, MethodScriptFileLocations.getDefault().getCmdlineInterpreterAutoIncludeFile(), true, env, null, null, null);
+			MethodScriptCompiler.execute(autoInclude, MethodScriptFileLocations.getDefault()
+					.getCmdlineInterpreterAutoIncludeFile(), true, env, env.getEnvClasses(), null, null, null);
 		} catch (ConfigCompileException ex) {
 			ConfigRuntimeException.HandleUncaughtException(ex, "Interpreter will continue to run, however.", null);
 		} catch (ConfigCompileGroupException ex) {
@@ -561,23 +433,267 @@ public final class Interpreter {
 			case "$$":
 				inShellMode = true;
 				break;
-			default:
-				if(multilineMode) {
-					//Queue multiline
-					script = script + line + "\n";
-				} else {
-					try {
-						//Execute single line
-						execute(line, null);
-					} catch (ConfigCompileException ex) {
-						ConfigRuntimeException.HandleUncaughtException(ex, null, null);
-					} catch (ConfigCompileGroupException ex) {
-						ConfigRuntimeException.HandleUncaughtException(ex, null);
+			default: {
+					Pattern p = Pattern.compile("(help|examples) (.*)");
+					Matcher m;
+					if((m = p.matcher(line)).find()) {
+						String helpCommand = m.group(2);
+						try {
+							List<FunctionBase> fl = new ArrayList<>();
+							for(FunctionBase fb : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA,
+									env.getEnvClasses())) {
+								if(fb.getName().matches("^" + helpCommand + "$")) {
+									fl.add(fb);
+								}
+							}
+							if(fl.isEmpty()) {
+								StreamUtils.GetSystemErr().println("Could not find function of name " + helpCommand);
+							} else if(fl.size() == 1) {
+								StreamUtils.GetSystemOut().println(formatDocsForCmdline(helpCommand,
+										m.group(1).equals("examples")));
+							} else {
+								StreamUtils.GetSystemOut().println("Multiple function matches found:");
+								for(FunctionBase fb : fl) {
+									StreamUtils.GetSystemOut().println(fb.getName());
+								}
+							}
+						} catch (IOException | DataSourceException | URISyntaxException
+								| DocGenTemplates.Generator.GenerateException | ConfigCompileException e) {
+							e.printStackTrace(StreamUtils.GetSystemErr());
+						}
+						break;
 					}
+					if(multilineMode) {
+						//Queue multiline
+						script = script + line + "\n";
+					} else {
+						try {
+							//Execute single line
+							execute(line, null);
+						} catch (ConfigCompileException ex) {
+							ConfigRuntimeException.HandleUncaughtException(ex, null, null);
+						} catch (ConfigCompileGroupException ex) {
+							ConfigRuntimeException.HandleUncaughtException(ex, null);
+						}
+					}
+					break;
 				}
-				break;
 		}
 		return true;
+	}
+
+	/**
+	 * Given a function name, returns a string that is suitable for printing to the command line. This mechanism
+	 * is standardized, so that the display of this information is standardized across different methods. The returned
+	 * string will contain usages of {@link TermColors}.
+	 * @param function
+	 * @param showExamples
+	 * @return
+	 * @throws ConfigCompileException
+	 * @throws IOException
+	 * @throws DataSourceException
+	 * @throws URISyntaxException
+	 * @throws com.laytonsmith.tools.docgen.DocGenTemplates.Generator.GenerateException
+	 */
+	public static String formatDocsForCmdline(String function, boolean showExamples) throws ConfigCompileException,
+			IOException, DataSourceException, URISyntaxException, DocGenTemplates.Generator.GenerateException {
+		StringBuilder b = new StringBuilder();
+		FunctionBase f = FunctionList.getFunction(function, null, Target.UNKNOWN);
+		DocGen.DocInfo d = new DocGen.DocInfo(f.docs());
+		b.append(TermColors.CYAN).append(d.ret).append(" ");
+		b.append(TermColors.RESET).append(f.getName()).append("(")
+				.append(TermColors.MAGENTA).append(d.originalArgs).append(TermColors.RESET).append(")\n");
+		if(f instanceof Function) {
+			Class<? extends CREThrowable>[] thrown = ((Function) f).thrown();
+			if(thrown != null && thrown.length > 0) {
+				b.append("Throws: ");
+				Set<String> th = new HashSet<>();
+				for(Class<? extends CREThrowable> c : thrown) {
+					if(c.getAnnotation(typeof.class) != null) {
+						typeof t = c.getAnnotation(typeof.class);
+						th.add(t.value());
+					}
+				}
+				b.append(TermColors.RED).append(StringUtils.Join(th, ", ")).append(TermColors.RESET).append("\n");
+			}
+		}
+		b.append("\n");
+		{
+			String desc = reverseHTML(d.desc);
+			b.append(TermColors.WHITE).append(desc).append("\n");
+		}
+		if(d.extendedDesc != null) {
+			String desc = reverseHTML(d.extendedDesc);
+			b.append(TermColors.WHITE).append(desc).append("\n");
+		}
+		if(f instanceof Function) {
+			if(f.getClass().getAnnotation(seealso.class) != null) {
+				List<String> seeAlso = new ArrayList<>();
+				for(Class c : ((Function) f).seeAlso()) {
+					Object i = ReflectionUtils.newInstance(c);
+					if(i instanceof Documentation) {
+						Documentation seeAlsoDocumentation = (Documentation) i;
+						String color = TermColors.YELLOW;
+						if(i instanceof Function) {
+							if(((Function) f).isRestricted()) {
+								color = TermColors.CYAN;
+							} else {
+								color = TermColors.GREEN;
+							}
+						}
+						seeAlso.add(color + seeAlsoDocumentation.getName() + TermColors.RESET);
+					}
+					// TODO: also support Templates at some point, though this method will have to also be able
+					// to support the display of them, which it currently is unable to do.
+				}
+				if(!seeAlso.isEmpty()) {
+					b.append("See also: ");
+					b.append(StringUtils.Join(seeAlso, ", ")).append("\n");
+				}
+			}
+		}
+		if(f instanceof Function && showExamples) {
+			ExampleScript[] examples = ((Function) f).examples();
+			if(examples != null && examples.length > 0) {
+				b.append(TermColors.BOLD).append("\nExamples").append(TermColors.RESET).append("\n");
+				b.append("----------------------------------------------\n\n");
+				for(int i = 0; i < examples.length; i++) {
+					b.append(TermColors.BRIGHT_WHITE).append(TermColors.BOLD).append(TermColors.UNDERLINE)
+							.append("Example ").append(i + 1).append(TermColors.RESET).append("\n");
+					if(i > 0) {
+						b.append("\n\n");
+					}
+					ExampleScript e = examples[i];
+					b.append(e.getDescription()).append("\n\n");
+					b.append(TermColors.UNDERLINE).append("Code").append(TermColors.RESET).append("\n")
+							.append(reverseHTML(DocGenTemplates.CODE.generate(e.getScript()))).append("\n\n");
+					b.append(TermColors.UNDERLINE).append("Output").append(TermColors.RESET).append("\n")
+							.append(e.getOutput()).append("\n\n");
+				}
+			}
+		}
+		b.append(TermColors.RESET).append("\n");
+		return b.toString();
+	}
+
+	private static String reverseHTML(String input) {
+		input = input
+				.replaceAll("\\<br(.*?)>", "\n")
+				.replaceAll("</div>", "\n")
+				.replaceAll("\\<.*?>", "")
+				.replaceAll("(?s)\\<!--.*?-->", "");
+		input = HTMLUtils.unescapeHTML(input);
+		input = input.replaceAll("\\{\\{keyword\\|(.*?)\\}\\}", TermColors.BLUE + "$1" + TermColors.RESET);
+		input = input.replaceAll("\\{\\{object\\|(.*?)\\}\\}", TermColors.BRIGHT_BLUE + "$1" + TermColors.RESET);
+		input = input.replaceAll("\\\\\n", "\n");
+		input = input.replaceAll("(?s)\\{\\{Warning\\|text=(.*?)\\}\\}", TermColors.RED + "$1" + TermColors.RESET);
+		while(true) {
+			Matcher functionMatcher = Pattern.compile("\\{\\{function\\|(.*?)\\}\\}").matcher(input);
+			if(functionMatcher.find()) {
+				String function = functionMatcher.group(1);
+				String color;
+				try {
+					FunctionBase f = FunctionList.getFunction(function, null, Target.UNKNOWN);
+					if(f instanceof Function) {
+						if(((Function) f).isRestricted()) {
+							color = TermColors.CYAN;
+						} else {
+							color = TermColors.GREEN;
+						}
+					} else {
+						color = TermColors.YELLOW;
+					}
+				} catch (ConfigCompileException ex) {
+					color = TermColors.YELLOW;
+				}
+				input = input.replaceAll("\\{\\{function\\|" + function + "\\}\\}", color + function
+						+ TermColors.RESET);
+			} else {
+				break;
+			}
+		}
+		{
+			StringBuilder b = new StringBuilder();
+			StringBuilder headerLine = new StringBuilder();
+			boolean inTable = false;
+			boolean inTableHeader = false;
+			boolean inTableHeaderField = false;
+			for(int i = 0; i < input.length(); i++) {
+				char c = input.charAt(i);
+				char c2 = '\0';
+				char c3 = '\0';
+				if(i < input.length() - 1) {
+					c2 = input.charAt(i + 1);
+				}
+				if(i < input.length() - 2) {
+					c3 = input.charAt(i + 2);
+				}
+				if(c == '{' && c2 == '|') {
+					inTable = true;
+					inTableHeader = true;
+					b.append("\n");
+					i++;
+					continue;
+				}
+				if(c == '|' && c2 == '}') {
+					inTable = false;
+					i++;
+					b.append('\n');
+					continue;
+				}
+				if(inTable) {
+					if(inTableHeader) {
+						if(c == '|' && c2 == '-') {
+							b.append("\n");
+							i++;
+							continue;
+						}
+						if(c == '\n') {
+							inTableHeader = false;
+						}
+						continue;
+					}
+					if(inTableHeaderField) {
+						if(c == '|') {
+							inTableHeaderField = false;
+							b.append(TermColors.RESET).append("\n|").append(TermColors.MAGENTA);
+						} else if(c == '\n') {
+							b.append(TermColors.RESET).append("| ").append(TermColors.MAGENTA)
+									.append(headerLine.toString()).append(TermColors.RESET)
+									.append("\n");
+							if(c2 != '!') {
+								inTableHeaderField = false;
+							} else {
+								headerLine = new StringBuilder();
+								i++;
+							}
+							continue;
+						}
+						headerLine.append(c);
+						continue;
+					}
+					if(c == '\n' && c2 == '!') {
+						headerLine = new StringBuilder();
+						inTableHeaderField = true;
+						i++;
+						continue;
+					}
+					if((c == '\n' && c2 == '|' && c3 == '-') || (c == '|' && c2 == '-')) {
+						b.append(TermColors.RESET).append("\n").append(StringUtils.stringMultiply(80, "-"));
+						if(c == '\n') {
+							i += 2;
+						} else {
+							i++;
+							b.append("\n");
+						}
+						continue;
+					}
+				}
+				b.append(c);
+			}
+			input = b.toString() + "\n";
+		}
+		return input;
 	}
 
 	/**
@@ -654,7 +770,7 @@ public final class Interpreter {
 		final ParseTree tree;
 		try {
 			TokenStream stream = MethodScriptCompiler.lex(script, fromFile, true);
-			tree = MethodScriptCompiler.compile(stream);
+			tree = MethodScriptCompiler.compile(stream, env, env.getEnvClasses());
 		} finally {
 			compile.stop();
 		}
@@ -690,7 +806,8 @@ public final class Interpreter {
 			v.setVal(new CString(finalArgument.toString(), Target.UNKNOWN));
 			v.setDefault(finalArgument.toString());
 			vars.add(v);
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, Target.UNKNOWN));
+			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
+					Target.UNKNOWN));
 		}
 		try {
 			ProfilePoint p = this.env.getEnv(GlobalEnv.class).GetProfiler().start("Interpreter Script", LogLevel.ERROR);
@@ -709,10 +826,15 @@ public final class Interpreter {
 									}
 								}
 							}, null, vars);
-						} catch (CancelCommandException e) {
-							//Nothing, though we could have been Ctrl+C cancelled, so we need to reset
-							//the interrupt flag. But we do that unconditionally below, in the finally,
-							//in the other thread.
+							env.getEnv(GlobalEnv.class).GetDaemonManager().waitForThreads();
+						} catch (CancelCommandException | InterruptedException e) {
+							// Nothing, though we could have been Ctrl+C cancelled, so we need to reset
+							// the interrupt flag. But we do that unconditionally below, in the finally,
+							// in the other thread.
+							// However, interrupt all the underlying threads
+							for(Thread t : env.getEnv(GlobalEnv.class).GetDaemonManager().getActiveThreads()) {
+								t.interrupt();
+							}
 						} catch (ConfigRuntimeException e) {
 							ConfigRuntimeException.HandleUncaughtException(e, env);
 							//No need for the full stack trace
@@ -720,7 +842,7 @@ public final class Interpreter {
 								System.exit(1);
 							}
 						} catch (NoClassDefFoundError e) {
-							StreamUtils.GetSystemErr().println(RED + Main.getNoClassDefFoundErrorMessage(e) + reset());
+							StreamUtils.GetSystemErr().println(RED + Static.getNoClassDefFoundErrorMessage(e) + reset());
 							StreamUtils.GetSystemErr().println("Since you're running from standalone interpreter mode, this is not a fatal error, but one of the functions you just used required"
 									+ " an actual backing engine that isn't currently loaded. (It still might fail even if you load the engine though.) You simply won't be"
 									+ " able to use that function here.");
@@ -747,7 +869,6 @@ public final class Interpreter {
 				} catch (InterruptedException ex) {
 					//
 				}
-
 			} finally {
 				p.stop();
 			}
@@ -836,64 +957,149 @@ public final class Interpreter {
 		return false;
 	}
 
-	public static void install() {
-		if(TermColors.SYSTEM == TermColors.SYS.UNIX) {
-			try {
-				URL jar = Interpreter.class.getProtectionDomain().getCodeSource().getLocation();
-				File exe = new File(INTERPRETER_INSTALLATION_LOCATION);
-				String bashScript = Static.GetStringResource("/interpreter-helpers/bash.sh");
-				try {
-					bashScript = bashScript.replaceAll("%%LOCATION%%", jar.toURI().getPath());
-				} catch (URISyntaxException ex) {
-					ex.printStackTrace();
-				}
-				exe.createNewFile();
-				if(!exe.canWrite()) {
-					throw new IOException();
-				}
-				FileUtil.write(bashScript, exe);
-				exe.setExecutable(true, false);
-				File manDir = new File("/usr/local/man/man1");
-				if(manDir.exists()) {
-					//Don't do this installation if the man pages aren't already there.
-					String manPage = Static.GetStringResource("/interpreter-helpers/manpage");
-					try {
-						manPage = DocGenTemplates.DoTemplateReplacement(manPage, DocGenTemplates.GetGenerators());
-						File manPageFile = new File(manDir, "mscript.1");
-						FileUtil.write(manPage, manPageFile);
-					} catch (DocGenTemplates.Generator.GenerateException ex) {
-						Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
-					}
-				}
-			} catch (IOException e) {
-				StreamUtils.GetSystemErr().println("Cannot install. You must run the command with sudo for it to succeed, however, did you do that?");
-				return;
-			}
-		} else {
-			StreamUtils.GetSystemErr().println("Sorry, cmdline functionality is currently only supported on unix systems! Check back soon though!");
+	public static void install(String commandName) {
+		if(null == OSUtils.GetOS()) {
+			StreamUtils.GetSystemErr().println("Cmdline MethodScript is only supported on Unix and Windows");
 			return;
 		}
+		switch(OSUtils.GetOS()) {
+			case LINUX:
+			case MAC:
+				try {
+					URL jar = Interpreter.class.getProtectionDomain().getCodeSource().getLocation();
+					File exe = new File(UNIX_INTERPRETER_INSTALLATION_LOCATION + commandName);
+					String bashScript = Static.GetStringResource("/interpreter-helpers/bash.sh");
+					try {
+						bashScript = bashScript.replaceAll("%%LOCATION%%", jar.toURI().getPath());
+					} catch (URISyntaxException ex) {
+						ex.printStackTrace();
+					}
+					exe.createNewFile();
+					if(!exe.canWrite()) {
+						throw new IOException();
+					}
+					FileUtil.write(bashScript, exe);
+					exe.setExecutable(true, false);
+					File manDir = new File("/usr/local/man/man1");
+					if(manDir.exists()) {
+						//Don't do this installation if the man pages aren't already there.
+						String manPage = Static.GetStringResource("/interpreter-helpers/manpage");
+						try {
+							manPage = DocGenTemplates.DoTemplateReplacement(manPage, DocGenTemplates.GetGenerators());
+							File manPageFile = new File(manDir, commandName + ".1");
+							FileUtil.write(manPage, manPageFile);
+						} catch (DocGenTemplates.Generator.GenerateException ex) {
+							Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
+						}
+					}
+				} catch (IOException e) {
+					StreamUtils.GetSystemErr().println("Cannot install. You must run the command with sudo for it to succeed, however, did you do that?");
+					return;
+				}
+				break;
+			case WINDOWS:
+				Path tmp = null;
+				try {
+					// C# installer, not really uninstallable, so temporarily removing this, so the other installer
+					// can be used with no risk.
+//					// 1. Unpack the csharp installer program in a temporary directory
+//					File root = new File(Interpreter.class.getResource("/interpreter-helpers/csharp").toExternalForm());
+//					ZipReader zReader = new ZipReader(root);
+//					tmp = Files.createTempDirectory("methodscript-installer", new FileAttribute[]{});
+//					zReader.recursiveCopy(tmp.toFile(), false);
+
+					// 2. Write the location of this jar to the registry
+					String me = ClassDiscovery.GetClassContainer(Interpreter.class).toExternalForm().substring(6);
+					String keyName = "Software\\MethodScript";
+					WinRegistry.createKey(WinRegistry.HKEY_CURRENT_USER, keyName);
+					WinRegistry.writeStringValue(WinRegistry.HKEY_CURRENT_USER, keyName, "JarLocation", me);
+
+//					// 3. Execute the setup.exe file
+//					File setup = new File(tmp.toFile(), "setup.exe");
+//					int setupResult = new CommandExecutor(new String[]{setup.getAbsolutePath()}).start().waitFor();
+//					if(setupResult != 0) {
+//						StreamUtils.GetSystemErr().println("Setup failed to complete successfully (exit code " + setupResult + ")");
+//						System.exit(setupResult);
+//					} else {
+//						StreamUtils.GetSystemOut().println("Setup has begun. Finish the installation in the GUI.");
+//					}
+
+					// 4. Write MethodScript.psm1 to the powershell module directory,
+					// C:\Program Files\WindowsPowerShell\Modules
+					// as well as MethodScript.psd1
+					String powershellModule = Static.GetStringResource("/interpreter-helpers/windows/MethodScript.psm1");
+					FileUtil.write(powershellModule, new File("C:/Program Files/WindowsPowerShell/Modules/"
+							+ "MethodScript/MethodScript.psm1"));
+					String powershellManifest = Static.GetStringResource("/interpreter-helpers/windows/MethodScript.psd1");
+					FileUtil.write(powershellManifest, new File("C:/Program Files/WindowsPowerShell/Modules/"
+							+ "MethodScript/MethodScript.psd1"));
+
+					// 5. Put the mscript.cmd file in C:\Program Files\MethodScript
+					String batchScript = Static.GetStringResource("/interpreter-helpers/windows/mscript.cmd");
+					FileUtil.write(batchScript, new File("C:/Program Files/MethodScript/mscript.cmd"),
+							FileWriteMode.OVERWRITE, true);
+
+					// 6. Add C:\Program Files\MethodScript\mscript.cmd to the PATH, checking first if it's already
+					// there.
+					if(!System.getenv("PATH").contains("MethodScript")) {
+						String pathKey = "System\\CurrentControlSet\\Control\\Session Manager\\Environment";
+						String path = System.getenv("Path");
+						if(path != null) {
+							WinRegistry.writeStringValue(WinRegistry.HKEY_LOCAL_MACHINE, pathKey, "Path", path + ";"
+								+ "C:\\Program Files\\MethodScript");
+						}
+						CommandExecutor.Execute("powershell -command \"& {$md=\\\"[DllImport(`\\\"user32.dll\\\"\\\",SetLastError=true,CharSet=CharSet.Auto)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd,uint Msg,UIntPtr wParam,string lParam,uint fuFlags,uint uTimeout,out UIntPtr lpdwResult);\\\"; $sm=Add-Type -MemberDefinition $md -Name NativeMethods -Namespace Win32 -PassThru;$result=[uintptr]::zero;$sm::SendMessageTimeout(0xffff,0x001A,[uintptr]::Zero,\\\"Environment\\\",2,5000,[ref]$result)}\"");
+					}
+
+				} catch (IOException | IllegalAccessException | InterruptedException | InvocationTargetException ex) {
+					StreamUtils.GetSystemErr().println("Could not install: " + ex + ". You need to run this in Administrator Mode however, did you do that?");
+					System.exit(1);
+				}
+				break;
+		}
 		StreamUtils.GetSystemOut().println("MethodScript has successfully been installed on your system. Note that you may need to rerun the install command"
-				+ " if you change locations of the jar, or rename it. Be sure to put \"#!" + INTERPRETER_INSTALLATION_LOCATION + "\" at the top of all your scripts,"
-				+ " if you wish them to be executable on unix systems, and set the execution bit with chmod +x <script name> on unix systems.");
+				+ " if you change locations of the jar, or rename it. Be sure to put \"#!" + UNIX_INTERPRETER_INSTALLATION_LOCATION + commandName + "\" at the top of all your scripts,"
+				+ " if you wish them to be executable on unix systems, and set the execution bit with chmod +x <script name> on unix systems. (Or use the '" + commandName + " -- new' cmdline utility.)");
 		StreamUtils.GetSystemOut().println("Try this script to test out the basic features of the scripting system:\n");
 		StreamUtils.GetSystemOut().println(Static.GetStringResource("/interpreter-helpers/sample.ms"));
+
+		if(OSUtils.GetOS() == OSUtils.OS.WINDOWS) {
+			StreamUtils.GetSystemOut().println("Additionally, MethodScript has been installed as a PowerShell module.\n"
+					+ "You may activate this module with `Import-Module -Name MethodScript` and then execute the\n"
+					+ "command `Invoke-MethodScript` for interpeter mode. To run a script, use\n"
+					+ "`Invoke-MethodScript script.ms args1 args2` and to use the command line tools,\n"
+					+ "use `Invoke-MethodScript -Tool tool args`"
+					+ "In cmd.exe, you can use the `mscript` command instead, but otherwise the arguments\n"
+					+ "are the same as to the PowerShell command.");
+			StreamUtils.GetSystemOut().println(TermColors.RED + "YOU MUST REBOOT YOUR COMPUTER TO USE THIS IN CMD.EXE"
+					+ TermColors.RESET);
+		}
 	}
 
 	public static void uninstall() {
-		if(TermColors.SYSTEM == TermColors.SYS.UNIX) {
-			try {
-				File exe = new File(INTERPRETER_INSTALLATION_LOCATION);
-				if(!exe.delete()) {
-					throw new IOException();
-				}
-			} catch (IOException e) {
-				StreamUtils.GetSystemErr().println("Cannot uninstall. You must run the command with sudo for it to succeed, however, did you do that?");
-				return;
-			}
-		} else {
+		if(null == OSUtils.GetOS()) {
 			StreamUtils.GetSystemErr().println("Sorry, cmdline functionality is currently only supported on unix systems! Check back soon though!");
 			return;
+		}
+		switch(OSUtils.GetOS()) {
+			case LINUX:
+			case MAC:
+				try {
+					File exe = new File(UNIX_INTERPRETER_INSTALLATION_LOCATION);
+					if(!exe.delete()) {
+						throw new IOException();
+					}
+				} catch (IOException e) {
+					StreamUtils.GetSystemErr().println("Cannot uninstall. You must run the command with sudo for it to succeed, however, did you do that?");
+					return;
+				}
+				break;
+			case WINDOWS:
+				StreamUtils.GetSystemOut().println("To uninstall on windows, please uninstall from the Add or Remove Programs application.");
+				return;
+			default:
+				StreamUtils.GetSystemErr().println("Sorry, cmdline functionality is currently only supported on unix systems! Check back soon though!");
+				return;
 		}
 		StreamUtils.GetSystemOut().println("MethodScript has been uninstalled from this system.");
 	}
@@ -929,32 +1135,12 @@ public final class Interpreter {
 		}
 
 		@Override
-		public MCItemStack GetItemStack(int type, int qty) {
-			throw new UnsupportedOperationException("This method is not supported from a shell.");
-		}
-
-		@Override
-		public MCItemStack GetItemStack(int type, int data, int qty) {
-			throw new UnsupportedOperationException("This method is not supported from a shell.");
-		}
-
-		@Override
 		public MCItemStack GetItemStack(MCMaterial type, int qty) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
 		@Override
-		public MCItemStack GetItemStack(MCMaterial type, int data, int qty) {
-			throw new UnsupportedOperationException("This method is not supported from a shell.");
-		}
-
-		@Override
 		public MCItemStack GetItemStack(String type, int qty) {
-			throw new UnsupportedOperationException("This method is not supported from a shell.");
-		}
-
-		@Override
-		public MCItemStack GetItemStack(String type, int data, int qty) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
@@ -969,16 +1155,6 @@ public final class Interpreter {
 		}
 
 		@Override
-		public int LookupItemId(String materialName) {
-			throw new UnsupportedOperationException("This method is not supported from a shell.");
-		}
-
-		@Override
-		public String LookupMaterialName(int id) {
-			throw new UnsupportedOperationException("This method is not supported from a shell.");
-		}
-
-		@Override
 		public MCEntity GetCorrectEntity(MCEntity e) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
@@ -990,6 +1166,11 @@ public final class Interpreter {
 
 		@Override
 		public MCInventory GetLocationInventory(MCLocation location) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCInventoryHolder CreateInventoryHolder(String id) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
@@ -1024,7 +1205,17 @@ public final class Interpreter {
 		}
 
 		@Override
-		public MCMaterial getMaterial(int id) {
+		public MCMaterial[] GetMaterialValues() {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCMaterial GetMaterialFromLegacy(String name, int data) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		@Override
+		public MCMaterial GetMaterialFromLegacy(int id, int data) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 

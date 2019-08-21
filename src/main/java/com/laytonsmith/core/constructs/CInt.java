@@ -2,18 +2,18 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 
 /**
  *
  *
  */
-@typeof("int")
+@typeof("ms.lang.int")
 public class CInt extends CNumber implements Cloneable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("int");
+	public static final CClassType TYPE = CClassType.get(CInt.class);
 
 	public static final long serialVersionUID = 1L;
 	final long val;
@@ -53,7 +53,7 @@ public class CInt extends CNumber implements Cloneable {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_0_1;
+		return MSVersion.V3_0_1;
 	}
 
 	@Override
@@ -63,7 +63,17 @@ public class CInt extends CNumber implements Cloneable {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{};
+		return CClassType.EMPTY_CLASS_ARRAY;
+	}
+
+	@Override
+	public CInt duplicate() {
+		return new CInt(val, getTarget());
+	}
+
+	@Override
+	public double getNumber() {
+		return (double) val;
 	}
 
 }

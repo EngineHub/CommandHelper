@@ -1,7 +1,7 @@
 This page lists compatibility of various milestone versions of CommandHelper. Note that this chart was created starting with build 1498, so earlier builds may not be accurate. In general, the compatibility requirements, if not listed, are the same as the previous milestone build. The minimum requirements for the current builds are:
 
 * Java 8
-* Bukkit version as specified below (when used as a Bukkit plugin)
+* Bukkit/Spigot version as specified below (when used as a plugin)
 
 Also note that CommandHelper may still be backwards and forward compatible to a large degree, many of the advanced features that normally have hard dependencies on certain versions of external dependencies have been configured to "soft" fail, that is, individual components may not work, but in general the plugin should continue to function. Regardless, only the most current dev builds are officially supported.
 
@@ -12,6 +12,26 @@ Also note that CommandHelper may still be backwards and forward compatible to a 
 ! scope="col" width="5%" | Source
 ! scope="col" width="40%" | Milestone
 ! scope="col" width="50%" | Compatibility
+|-
+| [http://builds.enginehub.org/job/commandhelper/11523 #3653-]
+| [https://github.com/EngineHub/CommandHelper/commit/7cbdf86fff691c45746641543edd530cc3b517cd 7cbdf86f]
+| Updated for Spigot 1.14
+| Spigot 1.13.2 - 1.14.1
+|-
+| [http://builds.enginehub.org/job/commandhelper/10653 #3500-]
+| [https://github.com/EngineHub/CommandHelper/commit/676db513a5fbf489688d81ac5e62caf0053c5eb6 676db513]
+| CommandHelper 3.3.3 Final
+| Bukkit 1.13.1
+|-
+| [http://builds.enginehub.org/job/commandhelper/10371 #3427-]
+| [https://github.com/EngineHub/CommandHelper/commit/7277e87c4bb988b0244e258f4e478b01a4f29a01 7277e87c]
+| Updated for Bukkit 1.13
+| Bukkit 1.13.1
+|-
+| [http://builds.enginehub.org/job/commandhelper/10370 #3426-]
+| [https://github.com/EngineHub/CommandHelper/commit/90d3bc1b979bb5b2f2a3d8a32dec8cccd7502e75 90d3bc1b]
+| CommandHelper 3.3.2 Release
+| Bukkit 1.7.10 - 1.12.2
 |-
 | [http://builds.enginehub.org/job/commandhelper/10106 #3345-]
 | [https://github.com/EngineHub/CommandHelper/commit/40dc779ee121f771b1ac643e5d180365bec2ac80 40dc779e]
@@ -38,36 +58,36 @@ Also note that CommandHelper may still be backwards and forward compatible to a 
 | Bukkit 1.7.8 - 1.12.1
 |-
 | [http://builds.enginehub.org/job/commandhelper/8735 #3091-]
-| [https://github.com/sk89q/commandhelper/commit/8086fe6a80b7ee2b2250d775a7f0c4a711127aa2 8086fe]
+| [https://github.com/EngineHub/CommandHelper/commit/8086fe6a80b7ee2b2250d775a7f0c4a711127aa2 8086fe]
 | Finished updating for Bukkit 1.9
 | Bukkit 1.7.8 - 1.9.0
 |-
 | [http://builds.enginehub.org/job/commandhelper/8450 #3040-]
-| [https://github.com/sk89q/commandhelper/commit/8b08d139216fd13519ceb5d85ca195c77e41aca1 8b08d139]
+| [https://github.com/EngineHub/CommandHelper/commit/8b08d139216fd13519ceb5d85ca195c77e41aca1 8b08d139]
 | 3.3.2 snapshots start. All extensions need to be updated.
 | Bukkit 1.7.8 - 1.8.8
 |-
 | [http://builds.enginehub.org/job/commandhelper/7014 #2895-]
-| [https://github.com/sk89q/commandhelper/commit/6304f912f0be41e3522e0ae4191b1319ef8a8b89 6304f91]
+| [https://github.com/EngineHub/CommandHelper/commit/6304f912f0be41e3522e0ae4191b1319ef8a8b89 6304f91]
 | Updated for Bukkit 1.8.6
 | Bukkit 1.7.6 - 1.8.6
 |-
 | [http://builds.enginehub.org/job/commandhelper/6821 #2857-]
-| [https://github.com/sk89q/commandhelper/commit/f8953eb485a6689299381c8f644ea16fb92e9853 f8953eb]
+| [https://github.com/EngineHub/CommandHelper/commit/f8953eb485a6689299381c8f644ea16fb92e9853 f8953eb]
 | Removed WorldEdit dependency (See https://letsbuild.net/jenkins/job/SKCompat/ SKCompat] extension)
 |-
 | [http://builds.enginehub.org/job/commandhelper/6776 #2842-]
-| [https://github.com/sk89q/commandhelper/commit/4b485fd208f2b43d0e5bae71c74b48b212dc0140 4b485fd]
+| [https://github.com/EngineHub/CommandHelper/commit/4b485fd208f2b43d0e5bae71c74b48b212dc0140 4b485fd]
 | Removed vault dependency (See [https://letsbuild.net/jenkins/job/CHVault/ CHVault] extension)
 |-
 | [http://builds.enginehub.org/job/commandhelper/6492 #2802-]
-| [https://github.com/sk89q/CommandHelper/commit/cc0f80e9983b13c2ff6f643fbbc441f8f86268e8 cc0f80e]
+| [https://github.com/EngineHub/CommandHelper/commit/cc0f80e9983b13c2ff6f643fbbc441f8f86268e8 cc0f80e]
 | Updated for Bukkit 1.8
 * Vault 1.4
 | Bukkit 1.7.2 - 1.8.0
 |-
-| [http://builds.enginehub.org/job/commandhelper/5115/ #2717-aca997c]
-| [https://github.com/sk89q/commandhelper/commit/aca997cf7a09f00a92cd46aefc3a8f44f478a3d5 aca997c]
+| [http://builds.enginehub.org/job/commandhelper/5115/ #2717-]
+| [https://github.com/EngineHub/CommandHelper/commit/aca997cf7a09f00a92cd46aefc3a8f44f478a3d5 aca997c]
 | Updated several dependencies:
 * jsch: 0.1.51
 * WorldEdit: 5.6.2
@@ -79,27 +99,27 @@ Also note that CommandHelper may still be backwards and forward compatible to a 
 * jedis: 2.5.1
 |-
 | [http://builds.enginehub.org/job/commandhelper/5114/ #2716-]
-| [https://github.com/sk89q/commandhelper/commit/484c0645d302e22b8eec815acb54b91ea31c3b10 484c064]
+| [https://github.com/EngineHub/CommandHelper/commit/484c0645d302e22b8eec815acb54b91ea31c3b10 484c064]
 | Updated for Minecraft 1.7.9 (should still be compatible with 1.7.2 builds, excepting that Sound.BREATH and Sound.HURT have been removed).
 | Bukkit 1.7.2 - 1.7.9
 |-
 | [http://builds.enginehub.org/job/commandhelper/4876/ #2681-]
-| [https://github.com/sk89q/commandhelper/commit/773d877048514bb422b1e8755c9520ac99d9852a 773d877]
+| [https://github.com/EngineHub/CommandHelper/commit/773d877048514bb422b1e8755c9520ac99d9852a 773d877]
 | Updated to Minecraft 1.7.8 (should still be compatible with 1.7.2 builds, however)
 | Bukkit 1.7.2 - 1.7.8
 |-
 | [http://builds.enginehub.org/job/commandhelper/3463/ #2445-]
-| [https://github.com/sk89q/commandhelper/commit/8c4b1652ed5c43dddb95c7e6612aea072716aea5 8c4b165]
+| [https://github.com/EngineHub/CommandHelper/commit/8c4b1652ed5c43dddb95c7e6612aea072716aea5 8c4b165]
 | Updated to Minecraft 1.7.2
 | Bukkit 1.7.2
 |-
-| [http://build.sk89q.com/job/CommandHelper/1561/ 1561]
-| [https://github.com/sk89q/commandhelper/commit/896165ce2e003557441510667a76527977af536d 896165c]
+| #1561-
+| [https://github.com/EngineHub/CommandHelper/commit/896165ce2e003557441510667a76527977af536d 896165c]
 | Updated to Minecraft 1.6
 | Bukkit 1.6.1
 |-
-| [http://build.sk89q.com/job/CommandHelper/1556/ 1556]
-| [https://github.com/sk89q/commandhelper/commit/c14f67adf5d9d95ebf7840502bdc8ec110681adc c14f67a]
+| #1556-
+| [https://github.com/EngineHub/CommandHelper/commit/c14f67adf5d9d95ebf7840502bdc8ec110681adc c14f67a]
 | Updated third party dependencies
 |
 * commons-codec: 1.8
@@ -109,8 +129,8 @@ Also note that CommandHelper may still be backwards and forward compatible to a 
 Testing only:
 * powermock: 1.5.1
 |-
-| [http://build.sk89q.com/job/CommandHelper/1502/ 1502]
-| [https://github.com/sk89q/commandhelper/commit/cda686f377a38e9bbfd1d525783f8b9fca1b766a cda686f]
+| #1502-
+| [https://github.com/EngineHub/CommandHelper/commit/cda686f377a38e9bbfd1d525783f8b9fca1b766a cda686f]
 | Updated bukkit (Many other deps were updated at this time as well)
 |
 * Bukkit: 1.5.2
@@ -125,28 +145,28 @@ Testing only:
 * powermock-module-junit4: 1.5
 * powermock-api-mockito: 1.5
 |-
-| [http://build.sk89q.com/job/CommandHelper/1498/ 1498]
-| [https://github.com/sk89q/commandhelper/commit/765e75fd6243755fc1094d31cb9279e7093f130a 765e75f]
+| #1498-
+| [https://github.com/EngineHub/CommandHelper/commit/765e75fd6243755fc1094d31cb9279e7093f130a 765e75f]
 | First tracked compatibility
 | Bukkit: 1.5.1
 |-
-| [http://build.sk89q.com/job/CommandHelper/1425/ 1425]
-| [https://github.com/sk89q/commandhelper/commit/279381fe46793cbf206396a0133262a64258b55b 279381f]
+| #1425-
+| [https://github.com/EngineHub/CommandHelper/commit/279381fe46793cbf206396a0133262a64258b55b 279381f]
 | Added optional redis dependency
 | [http://redis.io/ Redis 2.6.13]
 |-
-| [http://build.zeoldcraft.com/ ???]
+|
 | [https://github.com/EntityReborn/commandhelper/tree/backport-1.4.7 1.4.7 Backport]
 | Backport of the latest build of CH, backported to be compatible with 1.4.7. Not officially supported, community maintained.
 | Bukkit: 1.4.7
 |-
-| [http://build.sk89q.com/job/CommandHelper/1337/ 1337]
-| [https://github.com/sk89q/commandhelper/commit/fd35d2e2d942e8edc20c2610df5ecc8d1506d7c9 fd35d2e]
+| #1337-
+| [https://github.com/EngineHub/CommandHelper/commit/fd35d2e2d942e8edc20c2610df5ecc8d1506d7c9 fd35d2e]
 | Updated to bukkit 1.4.7
 | Bukkit: 1.4.7
 |-
 |
-| [https://github.com/sk89q/commandhelper/commit/01237564243b0f73a5526ed7433a46e55a400d46 0123756]
+| [https://github.com/EngineHub/CommandHelper/commit/01237564243b0f73a5526ed7433a46e55a400d46 0123756]
 | Updated to bukkit 1.4.6
 | Bukkit: 1.4.6
 |}

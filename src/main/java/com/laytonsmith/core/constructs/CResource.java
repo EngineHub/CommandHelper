@@ -2,7 +2,7 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -12,11 +12,11 @@ import java.util.concurrent.atomic.AtomicLong;
  * slightly more complicated. Therefore, this is a stopgap measure that WILL be removed at some point, once Objects are
  * created.
  */
-@typeof("resource")
+@typeof("ms.lang.resource")
 public class CResource<T> extends Construct {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("resource");
+	public static final CClassType TYPE = CClassType.get(CResource.class);
 
 	private static final AtomicLong RESOURCE_POOL = new AtomicLong(0);
 
@@ -97,7 +97,7 @@ public class CResource<T> extends Construct {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_1;
+		return MSVersion.V3_3_1;
 	}
 
 	public static interface ResourceToString {
@@ -118,7 +118,7 @@ public class CResource<T> extends Construct {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{};
+		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 
 }

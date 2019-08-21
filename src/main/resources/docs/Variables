@@ -13,7 +13,7 @@ command definition. This is why it is referred to as the final var. It is treate
 array (for example, to parse the arguments individually), use parse_args($) to return an array of individual items. Here is a more complex, 
 but valid scenario:
 
-/cmd one $var1 const $var2 const $var3 $ = ...
+/cmd one $var1 $var2 $var3 $ = ...
 
 In this case, if the user types "/cmd one two three four five six", it would match, and the defined variables would be as follows:
 {|

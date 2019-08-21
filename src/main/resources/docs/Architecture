@@ -234,7 +234,7 @@ many of the possible elements in a pom, which can at first be confusing.
 
 ===Dependencies===
 
-The main dependencies of CH are (of course) Bukkit and WorldEdit, but if you look 
+The main dependency of CommandHelper is (of course) Spigot, but if you look 
 at it's dependency tree, you see almost 20 different dependencies! Not to worry, 
 most of those are not actually included by CH, they are transitive dependencies, 
 but anyways, with a few exceptions, they are not strictly required at runtime, 
@@ -252,9 +252,8 @@ de-complicate the distribution process.
 
 ===Common Failure Reasons===
 
-Sometimes a development version of WorldEdit may be linked. Dependencies are 
-downloaded from a variety of locations, but if none of them have the specified 
-dependency, it may be that it is only installed locally on developer machines. 
+Dependencies are downloaded from a variety of locations, but if none of them have the
+specified dependency, it may be that it is only installed locally on developer machines. 
 If this is the case, you'll have to find the source for the dependency, then 
 compile and install it manually, but usually I try to stay away from doing this, 
 as it also makes my life harder. Also, before you build a project for the first 

@@ -2,17 +2,24 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.HeapDumper;
+import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptFileLocations;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -21,9 +28,14 @@ import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.natives.interfaces.Sizeable;
 import java.io.File;
 import java.io.IOException;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -89,7 +101,7 @@ public class Debug {
 //			return true;
 //		}
 //
-//		public CHVersion since() {
+//		public MSVersion since() {
 //			return "0.0.0";
 //		}
 //
@@ -97,7 +109,7 @@ public class Debug {
 //			return false;
 //		}
 //
-//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 //			if(!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //				throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //			}
@@ -220,8 +232,8 @@ public class Debug {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -230,7 +242,7 @@ public class Debug {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(Prefs.DebugMode()) {
 				try {
 					Static.LogDebug(MethodScriptFileLocations.getDefault().getConfigDirectory(), args[0].val(), LogLevel.DEBUG);
@@ -243,7 +255,40 @@ public class Debug {
 	}
 
 	@api
-	public static class trace extends AbstractFunction {
+	@seealso(always_trace.class)
+	public static class trace extends always_trace {
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			//TODO: Once Prefs are no longer static, check to see if debug mode is on during compilation, and
+			//if so, remove this function entirely
+			if(Prefs.DebugMode()) {
+				return always_trace.doTrace(t, environment, args);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "trace";
+		}
+
+		@Override
+		public String docs() {
+			return "void {ivar} Works like {{function|always_trace}}, but only if debug-mode is enabled in the"
+					+ " preferences. See {{function|always_trace}} for details of the output.";
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
+		}
+
+	}
+
+	@api
+	@seealso(trace.class)
+	public static class always_trace extends AbstractFunction implements Optimizable {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -261,19 +306,8 @@ public class Debug {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(args[0] instanceof IVariable) {
-				if(Prefs.DebugMode()) {
-					IVariable ivar = (IVariable) args[0];
-					Construct val = environment.getEnv(GlobalEnv.class).GetVarList().get(ivar.getVariableName(), t);
-					StreamUtils.GetSystemOut().println(ivar.getVariableName() + ": " + val.val());
-				}
-				return CVoid.VOID;
-			} else {
-				throw new CRECastException("Expecting an ivar, but recieved " + args[0].getCType() + " instead", t);
-			}
-			//TODO: Once Prefs are no longer static, check to see if debug mode is on during compilation, and
-			//if so, remove this function entirely
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			return doTrace(t, environment, args);
 		}
 
 		@Override
@@ -283,7 +317,7 @@ public class Debug {
 
 		@Override
 		public String getName() {
-			return "trace";
+			return "always_trace";
 		}
 
 		@Override
@@ -293,14 +327,77 @@ public class Debug {
 
 		@Override
 		public String docs() {
-			return "void {ivar} If debug mode is on, outputs debug information about a variable. Unlike debug, this only accepts an ivar; it is a meta function."
-					+ " The runtime will then take the variable, and output information about it, in a human readable format, including"
-					+ " the variable's name and value. If debug mode is off, the function is ignored.";
+			return "void {ivar} Outputs debug information about a variable to standard out. Unlike {{function|debug}},"
+					+ " this only accepts an ivar; it is a meta function. The runtime will then take the variable,"
+					+ " and output information about it, in a human readable format, including the variable's"
+					+ " defined type, actual type, name and value.";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			// We have to hardcode the output here, because otherwise it just prints to stdout, and we don't curently
+			// capture that.
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage with auto type", "@m = 2;\n"
+						+ "always_trace(@m);", "auto (actual type ms.lang.int) @m: 2"),
+				new ExampleScript("With defined type", "int @i = 1;\n"
+						+ "always_trace(@i);", "ms.lang.int (actual type ms.lang.int) @i: 1"),
+				new ExampleScript("With subtype", "number @n = 2.0;\n"
+						+ "always_trace(@n);", "ms.lang.number (actual type ms.lang.double) @n: 2.0")
+			};
+		}
+
+		public static CVoid doTrace(Target t, Environment environment, Mixed... args) {
+			if(args[0] instanceof IVariable) {
+				IVariable ivar = environment.getEnv(GlobalEnv.class).GetVarList()
+						.get(((IVariable) args[0]).getVariableName(), t, environment);
+				Mixed val = ivar.ival();
+				StreamUtils.GetSystemOut().println(
+						TermColors.GREEN + environment.getEnv(GlobalEnv.class).GetStackTraceManager()
+								.getCurrentStackTrace().get(0).getProcedureName()
+						+ TermColors.RESET + ":"
+						+ TermColors.YELLOW + t.file().getName()
+						+ TermColors.RESET + ":"
+						+ TermColors.CYAN + t.line() + "." + t.col()
+						+ TermColors.RESET + ": "
+						+ TermColors.BRIGHT_WHITE + ivar.getDefinedType()
+						+ TermColors.RESET + " (actual type "
+						+ TermColors.BRIGHT_WHITE + val.typeof()
+						+ (val.isInstanceOf(Sizeable.class) ? ", length: " + ((Sizeable) val).size() : "")
+						+ TermColors.RESET + ") "
+						+ TermColors.CYAN + ivar.getVariableName()
+						+ TermColors.RESET + ": " + val.val());
+				return CVoid.VOID;
+			} else {
+				throw new CRECastException("Expecting an ivar, but recieved " + args[0].typeof().getSimpleName()
+						+ " instead", t);
+			}
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children,
+				FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() != 1) {
+				throw new ConfigCompileException(getName() + " expects 1 parameter, but " + children.size()
+						+ " were provided.", t);
+			}
+			ParseTree child = children.get(0);
+			if(!(child.getData() instanceof IVariable)) {
+				throw new ConfigCompileException(getName() + " can only accept an ivar as the argument.", t);
+			}
+			return null;
 		}
 
 	}
@@ -336,19 +433,19 @@ public class Debug {
 //			return true;
 //		}
 //
-//		public CHVersion since() {
-//			return CHVersion.V3_3_0;
+//		public MSVersion since() {
+//			return MSVersion.V3_3_0;
 //		}
 //
 //		public Boolean runAsync() {
 //			return false;
 //		}
 //
-//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 //			if(!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //				throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //			}
-//			boolean on = Static.getBoolean(args[0]);
+//			boolean on = ArgumentValidation.getBoolean(args[0]);
 //			int level = 1;
 //			if(args.length >= 2){
 //				level = Static.Normalize(Static.getInt32(args[1]), 1, 5);
@@ -356,7 +453,7 @@ public class Debug {
 //			Debug.EVENT_LOGGING = on;
 //			Debug.EVENT_LOGGING_LEVEL = level;
 //			if(args.length >= 3){
-//				Debug.LOG_TO_SCREEN = Static.getBoolean(args[2]);
+//				Debug.LOG_TO_SCREEN = ArgumentValidation.getBoolean(args[2]);
 //			}
 //			return CVoid.VOID;
 //		}
@@ -389,20 +486,20 @@ public class Debug {
 //			return true;
 //		}
 //
-//		public CHVersion since() {
-//			return CHVersion.V3_3_0;
+//		public MSVersion since() {
+//			return MSVersion.V3_3_0;
 //		}
 //
 //		public Boolean runAsync() {
 //			return true;
 //		}
 //
-//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 //			if(!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //				throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //			}
 //			Set<Event.Type> set = new HashSet<Event.Type>();
-//			if(args[0] instanceof CString) {
+//			if(args[0].isInstanceOf(CString.class)) {
 //				if(args[0].val().equals("*")) {
 //					for(Event.Type t : Event.Type.values()) {
 //						set.add(t);
@@ -415,7 +512,7 @@ public class Debug {
 //						throw new ConfigRuntimeException(args[0].val() + " is not a valid filter type. The filter log has not been changed.", CREFormatException.class, t);
 //					}
 //				}
-//			} else if(args[0] instanceof CArray) {
+//			} else if(args[0].isInstanceOf(CArray.class)) {
 //				for(String c : ((CArray) args[0]).keySet()) {
 //					try {
 //						set.add(Event.Type.valueOf(((CArray) args[0]).get(c, t).val().toUpperCase()));
@@ -465,22 +562,22 @@ public class Debug {
 //			return true;
 //		}
 //
-//		public CHVersion since() {
-//			return CHVersion.V3_3_0;
+//		public MSVersion since() {
+//			return MSVersion.V3_3_0;
 //		}
 //
 //		public Boolean runAsync() {
 //			return false;
 //		}
 //
-//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 //			if(!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
 //				throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getVariableName() + ", enable it in your preferences.", CRESecurityException.class, t);
 //			}
-//			if(args[0] instanceof CString) {
+//			if(args[0].isInstanceOf(CString.class)) {
 //				EVENT_PLUGIN_FILTER.clear();
 //				EVENT_PLUGIN_FILTER.add(args[0].val().toUpperCase());
-//			} else if(args[0] instanceof CArray) {
+//			} else if(args[0].isInstanceOf(CArray.class)) {
 //				for(String c : ((CArray) args[0]).keySet()) {
 //					EVENT_PLUGIN_FILTER.add(((CArray) args[0]).get(c, t).val().toUpperCase());
 //				}
@@ -509,7 +606,7 @@ public class Debug {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
 			CArray carray = new CArray(t);
 			for(Thread thread : threadSet) {
@@ -535,8 +632,8 @@ public class Debug {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -561,8 +658,8 @@ public class Debug {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			File file = new File("dump.bin");
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			File file = new File("dump.hprof");
 			try {
 				HeapDumper.dumpHeap(file.getAbsolutePath(), true);
 			} catch (Throwable tt) {
@@ -583,15 +680,70 @@ public class Debug {
 
 		@Override
 		public String docs() {
-			return "void {} Creates a heap dump file, and places it in the working directory, as \"dump.bin\". This might"
+			return "void {} Creates a heap dump file, and places it in the working directory, as \"dump.hprof\". This might"
 					+ " throw a PluginInternalException if the heap dump tools aren't available in your JVM. Once dumped,"
 					+ " the heap dump can be analyzed using tools such as jhat. More information about jhat can be found"
 					+ " [http://docs.oracle.com/javase/6/docs/technotes/tools/share/jhat.html here].";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
+		}
+
+	}
+
+	@api
+	@noboilerplate
+	public static class set_debug_output extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			Script.debugOutput = ArgumentValidation.getBoolean(args[0], t);
+			if(Script.debugOutput) {
+				StreamUtils.GetSystemOut().println(TermColors.BG_RED + "[[DEBUG]] set_debug_output(true)"
+						+ TermColors.RESET);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "set_debug_output";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {booleanValue} Turns verbose debug output on or off. This should generally never be on in"
+					+ " a production server, but can be useful to quickly trace what a script is doing when it runs in a"
+					+ " test environment. When on, every single function call will be printed out, along with the"
+					+ " parameters passed in to it. To reduce impact on scripts when this is disabled, this has been"
+					+ " implemented as a system wide setting, and applies to all scripts running in the same system.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_3;
 		}
 
 	}

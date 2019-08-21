@@ -1,5 +1,7 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -15,12 +17,14 @@ import com.laytonsmith.core.constructs.CMutablePrimitive;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CNumber;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.Booleanish;
+import com.laytonsmith.core.natives.interfaces.Mixed;
+import java.util.EnumSet;
 
 import java.util.regex.Pattern;
+import java.util.Set;
 
 /**
  * This class provides a way to validate, parse, and manipulate arguments passed to functions in a standard, minimalist
@@ -47,7 +51,7 @@ public final class ArgumentValidation {
 	 * @throws ConfigRuntimeException A FormatException is thrown if it doesn't contain the appropriate value and the
 	 * defaultItem is null.
 	 */
-	public static Construct getItemFromArray(CArray object, String key, Target t, Construct defaultItem) throws ConfigRuntimeException {
+	public static Mixed getItemFromArray(CArray object, String key, Target t, Mixed defaultItem) throws ConfigRuntimeException {
 		if(object.containsKey(key)) {
 			return object.get(key, t);
 		} else if(defaultItem == null) {
@@ -64,8 +68,8 @@ public final class ArgumentValidation {
 	 * @param t
 	 * @return
 	 */
-	public static CArray getArray(Construct construct, Target t) {
-		if(construct instanceof CArray) {
+	public static CArray getArray(Mixed construct, Target t) {
+		if(construct.isInstanceOf(CArray.class)) {
 			return ((CArray) construct);
 		} else {
 			throw new CRECastException("Expecting array, but received " + construct.val(), t);
@@ -73,42 +77,23 @@ public final class ArgumentValidation {
 	}
 
 	/**
-	 * Works like the other get* methods, but works in a more generic way for other types of Constructs.
-	 *
-	 * @param <T> The type expected.
-	 * @param construct The generic object
-	 * @param t Code target
-	 * @param expectedClassName The expected class type, for use in the error message if the construct is the wrong
-	 * type.
-	 * @param clazz The type expected.
-	 * @return The properly cast object.
-	 * @deprecated Use
-	 * {@link #getObject(com.laytonsmith.core.constructs.Construct, com.laytonsmith.core.constructs.Target, java.lang.Class)}
-	 * instead, as that gets the expected class name automatically.
-	 */
-	@Deprecated
-	public static <T extends Construct> T getObject(Construct construct, Target t, String expectedClassName, Class<T> clazz) {
-		if(clazz.isAssignableFrom(construct.getClass())) {
-			return (T) construct;
-		} else {
-			throw new CRECastException("Expecting " + expectedClassName + " but receieved " + construct.val() + " instead.", t);
-		}
-	}
-
-	/**
-	 * Works like the other get* methods, but works in a more generic way for other types of Constructs. It also assumes
+	 * Works like the other get* methods, but works in a more generic way for other types of Mixeds. It also assumes
 	 * that the class specified is tagged with a typeof annotation, thereby preventing the need for the
 	 * expectedClassName like the deprecated version uses.
 	 *
 	 * This will work if the value is a subtype of the expected value.
 	 *
+	 * User classes are not supported here, because user classes cannot be managed directly in the java,
+	 * it must be castable to an actual Java class to work, though it can work
+	 * with classes that are defined in extensions.
+	 *
 	 * @param <T> The type expected.
 	 * @param construct The generic object
 	 * @param t Code target
 	 * @param clazz The type expected.
 	 * @return The properly cast object.
 	 */
-	public static <T extends Construct> T getObject(Construct construct, Target t, Class<T> clazz) {
+	public static <T extends Mixed> T getObject(Mixed construct, Target t, Class<T> clazz) {
 		if(clazz.isAssignableFrom(construct.getClass())) {
 			return (T) construct;
 		} else {
@@ -128,7 +113,8 @@ public final class ArgumentValidation {
 	 * @param t
 	 * @return
 	 */
-	public static double getNumber(Construct c, Target t) {
+	public static double getNumber(Mixed c, Target t) {
+		// TODO: Formalize this in the same way that Booleanish is formalized.
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
@@ -136,10 +122,8 @@ public final class ArgumentValidation {
 		if(c == null || c instanceof CNull) {
 			return 0.0;
 		}
-		if(c instanceof CInt) {
-			d = ((CInt) c).getInt();
-		} else if(c instanceof CDouble) {
-			d = ((CDouble) c).getDouble();
+		if(c instanceof CNumber) {
+			d = ((CNumber) c).getNumber();
 		} else if(c instanceof CString) {
 			try {
 				d = Double.parseDouble(c.val());
@@ -185,10 +169,10 @@ public final class ArgumentValidation {
 	/**
 	 * Validates that a construct's value is a number or string that can be returned by GetNumber()
 	 *
-	 * @param c Construct
+	 * @param c Mixed
 	 * @return boolean
 	 */
-	public static boolean isNumber(Construct c) {
+	public static boolean isNumber(Mixed c) {
 		return c instanceof CNumber || VALID_DOUBLE.matcher(c.val()).matches();
 	}
 
@@ -199,7 +183,7 @@ public final class ArgumentValidation {
 	 * @param t
 	 * @return
 	 */
-	public static double getDouble(Construct c, Target t) {
+	public static double getDouble(Mixed c, Target t) {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
@@ -219,7 +203,7 @@ public final class ArgumentValidation {
 	 * @param t
 	 * @return
 	 */
-	public static float getDouble32(Construct c, Target t) {
+	public static float getDouble32(Mixed c, Target t) {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
@@ -238,9 +222,10 @@ public final class ArgumentValidation {
 	 *
 	 * @param c
 	 * @param t
+	 * @throws CRECastException If the value cannot be converted to a long
 	 * @return
 	 */
-	public static long getInt(Construct c, Target t) {
+	public static long getInt(Mixed c, Target t) {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
@@ -248,10 +233,10 @@ public final class ArgumentValidation {
 		if(c == null || c instanceof CNull) {
 			return 0;
 		}
-		if(c instanceof CInt) {
-			i = ((CInt) c).getInt();
-		} else if(c instanceof CBoolean) {
-			if(((CBoolean) c).getBoolean()) {
+		if(c.isInstanceOf(CInt.class)) {
+			i = getObject(c, t, CInt.class).getInt();
+		} else if(c.isInstanceOf(CBoolean.class)) {
+			if(getObject(c, t, CBoolean.class).getBoolean()) {
 				i = 1;
 			} else {
 				i = 0;
@@ -273,9 +258,11 @@ public final class ArgumentValidation {
 	 *
 	 * @param c
 	 * @param t
+	 * @throws CRERangeException If the value would be truncated
+	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
-	public static int getInt32(Construct c, Target t) {
+	public static int getInt32(Mixed c, Target t) {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
@@ -294,9 +281,11 @@ public final class ArgumentValidation {
 	 *
 	 * @param c
 	 * @param t
+	 * @throws CRERangeException If the value would be truncated
+	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
-	public static short getInt16(Construct c, Target t) {
+	public static short getInt16(Mixed c, Target t) {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
@@ -315,9 +304,11 @@ public final class ArgumentValidation {
 	 *
 	 * @param c
 	 * @param t
+	 * @throws CRERangeException If the value would be truncated
+	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
-	public static byte getInt8(Construct c, Target t) {
+	public static byte getInt8(Mixed c, Target t) {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
@@ -330,37 +321,57 @@ public final class ArgumentValidation {
 	}
 
 	/**
-	 * Returns a boolean from any given construct. Depending on the type of the construct being converted, it follows
-	 * the following rules: If it is an integer or a double, it is false if 0, true otherwise. If it is a string, array,
-	 * or other ArrayAccess value, if it is empty, it is false, otherwise it is true.
-	 *
+	 * <s>Returns a the boolean value from the underlying CBoolean, or throws a CastException if the underlying type is
+	 * not a CBoolean.</s>
+	 * <p>
+	 * Until auto cross casting is implemented, this has the same behavior as {@link #getBooleanish}, however, once
+	 * strong typing is implemented, this will have the behavior described above. In the meantime, if you truly wish
+	 * to validate the type, use {@link #getObject(Mixed, Target, Class)}
 	 * @param c
 	 * @param t
 	 * @return
 	 */
-	public static boolean getBoolean(Construct c, Target t) {
+	public static boolean getBooleanObject(Mixed c, Target t) {
+		return getBooleanish(c, t);
+	}
+
+	/**
+	 * Currently forwards the call to
+	 * {@link #getBooleanish},
+	 * to keep backwards compatible behavior, but will be removed in a future release. Explicitely use either
+	 * {@link #getBooleanish} or {@link #getBooleanObject}.
+	 * @param c
+	 * @param t
+	 * @return
+	 * @deprecated Use {@link #getBooleanish} for current behavior, or {@link #getBooleanObject} for strict behavior.
+	 * Generally speaking, if it seems reasonable for the user to send a non-boolean data type in this parameter, then
+	 * getBooleanish should be used. If it indicates a probable error, getBooleanObject should be used.
+	 */
+	@Deprecated
+	public static boolean getBoolean(Mixed c, Target t) {
+		return getBooleanish(c, t);
+	}
+
+	/**
+	 * Returns a boolean from any given construct. Depending on the type of the construct being converted, it will
+	 * return true or false. For actual booleans, the value is returned, but for Booleanish values, the value itself
+	 * determines the rules for if it is determined to be trueish or falseish.
+	 *
+	 * @param c The value to convert
+	 * @param t The code target
+	 * @return
+	 */
+	public static boolean getBooleanish(Mixed c, Target t) {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
-		boolean b = false;
 		if(c == null) {
 			return false;
 		}
-		if(c instanceof CBoolean) {
-			b = ((CBoolean) c).getBoolean();
-		} else if(c instanceof CString) {
-			if(((CString) c).val().equals("false")) {
-				CHLog.GetLogger().e(CHLog.Tags.FALSESTRING, "String \"false\" evaluates as true (non-empty strings are"
-						+ " true). This is most likely not what you meant to do. This warning can globally be disabled"
-						+ " with the logger-preferences.ini file.", t);
-			}
-			b = (c.val().length() > 0);
-		} else if(c instanceof CInt || c instanceof CDouble) {
-			b = !(getNumber(c, t) == 0);
-		} else if(c instanceof ArrayAccess) {
-			b = !(((ArrayAccess) c).size() == 0);
+		if(c instanceof Booleanish) {
+			return ((Booleanish) c).getBooleanValue(t);
 		}
-		return b;
+		throw new CRECastException("Could not convert value of type " + c.typeof() + " to a " + Booleanish.TYPE, t);
 	}
 
 	/**
@@ -370,7 +381,7 @@ public final class ArgumentValidation {
 	 * @param t
 	 * @return
 	 */
-	public static CByteArray getByteArray(Construct c, Target t) {
+	public static CByteArray getByteArray(Mixed c, Target t) {
 		if(c instanceof CByteArray) {
 			return (CByteArray) c;
 		} else if(c instanceof CNull) {
@@ -380,7 +391,7 @@ public final class ArgumentValidation {
 		}
 	}
 
-	public static CClassType getClassType(Construct c, Target t) {
+	public static CClassType getClassType(Mixed c, Target t) {
 		if(c instanceof CClassType) {
 			return (CClassType) c;
 		} else {
@@ -389,14 +400,14 @@ public final class ArgumentValidation {
 	}
 
 	/**
-	 * Returns a String object from the given construct. Note that no validation is done, because all Constructs can be
+	 * Returns a String object from the given construct. Note that no validation is done, because all Mixeds can be
 	 * toString'd, but this method is provided for consistency sake.
 	 *
 	 * @param c
 	 * @param t
 	 * @return
 	 */
-	public static String getString(Construct c, Target t) {
+	public static String getString(Mixed c, Target t) {
 		return c.val();
 	}
 
@@ -406,9 +417,9 @@ public final class ArgumentValidation {
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyDoubles(Construct... c) {
-		for(Construct c1 : c) {
-			if(c1 instanceof CDouble) {
+	public static boolean anyDoubles(Mixed... c) {
+		for(Mixed c1 : c) {
+			if(c1 instanceof CDouble || c1 instanceof CString && c1.val().indexOf(".", 1) > -1) {
 				return true;
 			}
 		}
@@ -421,8 +432,8 @@ public final class ArgumentValidation {
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyStrings(Construct... c) {
-		for(Construct c1 : c) {
+	public static boolean anyStrings(Mixed... c) {
+		for(Mixed c1 : c) {
 			if(c1 instanceof CString) {
 				return true;
 			}
@@ -436,8 +447,8 @@ public final class ArgumentValidation {
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyNulls(Construct... c) {
-		for(Construct c1 : c) {
+	public static boolean anyNulls(Mixed... c) {
+		for(Mixed c1 : c) {
 			if(c1 instanceof CNull) {
 				return true;
 			}
@@ -451,12 +462,67 @@ public final class ArgumentValidation {
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyBooleans(Construct... c) {
-		for(Construct c1 : c) {
+	public static boolean anyBooleans(Mixed... c) {
+		for(Mixed c1 : c) {
 			if(c1 instanceof CBoolean) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Returns the Enum value for the specified Enum value. While it doesn't technically have to be an MEnum,
+	 * non MEnum values should generally not be exposed to users, as they are not visible to the rest of
+	 * the ecosystem.
+	 * @param <T> The Enum type
+	 * @param c The construct passed in by the user
+	 * @param enumClass The desired enum class
+	 * @param t The code target
+	 * @return The Java enum value
+	 * @throws CRECastException If the user input is not a valid value, this is thrown, with a proper error message that
+	 * describes the valid options. If the value is an MEnum, then the name defined there will be used, otherwise the
+	 * class name will be used.
+	 */
+	public static <T extends Enum<T>> T getEnum(Mixed c, Class<T> enumClass, Target t) {
+		String val = c.val();
+		try {
+			return Enum.valueOf(enumClass, val);
+		} catch (IllegalArgumentException e) {
+			String name = "java:" + enumClass.getName();
+			MEnum menum = enumClass.getAnnotation(MEnum.class);
+			if(menum != null) {
+				name = menum.value();
+			}
+			throw new CRECastException("Cannot find enum of type " + name + " with value \"" + val + "\"."
+					+ " Valid options are: " + StringUtils.Join(enumClass.getEnumConstants(), ", ", ", or "), t);
+		}
+	}
+
+	/**
+	 * Returns a set of the given enum value. The input value may be either a single value or an array. If
+	 * it is a single value, the set will be of size 1. Null is also supported, and will return a set of size
+	 * 0. Internally, uses {@link #getEnum}, so the behavior will generally be consistent with that.
+	 * @param <T>
+	 * @param c
+	 * @param enumClass
+	 * @param t
+	 * @return
+	 */
+	public static <T extends Enum<T>> Set<T> getEnumSet(Mixed c, Class<T> enumClass, Target t) {
+		if(c instanceof CNull) {
+			return EnumSet.noneOf(enumClass);
+		}
+		if(!c.isInstanceOf(CArray.class)) {
+			Mixed val = c;
+			c = new CArray(t);
+			((CArray) c).push(val, t);
+		}
+		CArray ca = (CArray) c;
+		Set<T> set = EnumSet.noneOf(enumClass);
+		for(Mixed v : ca.asList()) {
+			set.add(getEnum(v, enumClass, t));
+		}
+		return set;
 	}
 }

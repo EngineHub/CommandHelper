@@ -1,11 +1,11 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
-import com.laytonsmith.abstraction.MCMaterialData;
-import com.laytonsmith.abstraction.bukkit.BukkitMCMaterialData;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockData;
 import com.laytonsmith.abstraction.entities.MCEnderman;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
-import org.bukkit.material.MaterialData;
 
 public class BukkitMCEnderman extends BukkitMCLivingEntity implements MCEnderman {
 
@@ -17,12 +17,12 @@ public class BukkitMCEnderman extends BukkitMCLivingEntity implements MCEnderman
 	}
 
 	@Override
-	public MCMaterialData getCarriedMaterial() {
-		return new BukkitMCMaterialData(e.getCarriedMaterial());
+	public MCBlockData getCarriedMaterial() {
+		return new BukkitMCBlockData(e.getCarriedBlock());
 	}
 
 	@Override
-	public void setCarriedMaterial(MCMaterialData held) {
-		e.setCarriedMaterial((MaterialData) held.getHandle());
+	public void setCarriedMaterial(MCBlockData held) {
+		e.setCarriedBlock((BlockData) held.getHandle());
 	}
 }

@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.core.FileWriteMode;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
@@ -16,8 +17,8 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.EmailProfile;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptFileLocations;
@@ -44,9 +45,9 @@ import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -107,7 +108,7 @@ public class Web {
 		for(Cookie cookie : cookieJar.getAllCookies()) {
 			boolean update = false;
 			CArray aCookie = null;
-			for(Construct ac : arrayJar.asList()) {
+			for(Mixed ac : arrayJar.asList()) {
 				aCookie = Static.getArray(ac, t);
 				if(cookie.getName().equals(aCookie.get("name", t).val())
 						&& cookie.getDomain().equals(aCookie.get("domain", t).val())
@@ -161,10 +162,10 @@ public class Web {
 				expiration = Static.getInt(cookie.get("expiration", t), t);
 			}
 			if(cookie.containsKey("httpOnly")) {
-				httpOnly = Static.getBoolean(cookie.get("httpOnly", t), t);
+				httpOnly = ArgumentValidation.getBoolean(cookie.get("httpOnly", t), t);
 			}
 			if(cookie.containsKey("secureOnly")) {
-				secureOnly = Static.getBoolean(cookie.get("secureOnly", t), t);
+				secureOnly = ArgumentValidation.getBoolean(cookie.get("secureOnly", t), t);
 			}
 			Cookie c = new Cookie(name, value, domain, path, expiration, httpOnly, secureOnly);
 			ret.addCookie(c);
@@ -194,7 +195,7 @@ public class Web {
 
 		static {
 			DEFAULT_HEADERS.put("Accept", "text/*, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8");
-			DEFAULT_HEADERS.put("Accept-Encoding", "gzip, deflate, identity");
+			DEFAULT_HEADERS.put("Accept-Encoding", StringUtils.Join(WebUtility.SUPPORTED_ENCODINGS, ", "));
 			DEFAULT_HEADERS.put("User-Agent", "Java/" + System.getProperty("java.version") + "/" + Implementation.GetServerType().getBranding());
 			DEFAULT_HEADERS.put("DNT", "1");
 			DEFAULT_HEADERS.put("Connection", "close");
@@ -216,7 +217,7 @@ public class Web {
 		}
 
 		@Override
-		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			final URL url;
 			try {
 				url = new URL(args[0].val());
@@ -227,10 +228,20 @@ public class Web {
 			final CClosure success;
 			final CClosure error;
 			final CArray arrayJar;
-			if(args[1] instanceof CClosure) {
+			final boolean binary;
+			final String textEncoding;
+			boolean useDefaultHeaders = true;
+			if(args[1].isInstanceOf(CClosure.class)) {
 				success = (CClosure) args[1];
 				error = null;
 				arrayJar = null;
+				binary = false;
+				textEncoding = "UTF-8";
+				Map<String, List<String>> headers = new HashMap<>();
+				for(String key : DEFAULT_HEADERS.keySet()) {
+					headers.put(key, Arrays.asList(DEFAULT_HEADERS.get(key)));
+				}
+				settings.setHeaders(headers);
 			} else {
 				CArray csettings = Static.getArray(args[1], t);
 				if(csettings.containsKey("method")) {
@@ -240,17 +251,16 @@ public class Web {
 						throw new CREFormatException(e.getMessage(), t);
 					}
 				}
-				boolean useDefaultHeaders = true;
 				if(csettings.containsKey("useDefaultHeaders")) {
-					useDefaultHeaders = Static.getBoolean(csettings.get("useDefaultHeaders", t), t);
+					useDefaultHeaders = ArgumentValidation.getBoolean(csettings.get("useDefaultHeaders", t), t);
 				}
 				if(csettings.containsKey("headers") && !(csettings.get("headers", t) instanceof CNull)) {
 					CArray headers = Static.getArray(csettings.get("headers", t), t);
 					Map<String, List<String>> mheaders = new HashMap<String, List<String>>();
 					for(String key : headers.stringKeySet()) {
 						List<String> h = new ArrayList<String>();
-						Construct c = headers.get(key, t);
-						if(c instanceof CArray) {
+						Mixed c = headers.get(key, t);
+						if(c.isInstanceOf(CArray.class)) {
 							for(String kkey : ((CArray) c).stringKeySet()) {
 								h.add(((CArray) c).get(kkey, t).val());
 							}
@@ -261,7 +271,7 @@ public class Web {
 					}
 					settings.setHeaders(mheaders);
 				} else {
-					settings.setHeaders(new HashMap<String, List<String>>());
+					settings.setHeaders(new HashMap<>());
 				}
 				if(useDefaultHeaders) {
 					outer:
@@ -277,13 +287,13 @@ public class Web {
 					}
 				}
 				if(csettings.containsKey("params") && !(csettings.get("params", t) instanceof CNull)) {
-					if(csettings.get("params", t) instanceof CArray) {
+					if(csettings.get("params", t).isInstanceOf(CArray.class)) {
 						CArray params = Static.getArray(csettings.get("params", t), t);
 						Map<String, List<String>> mparams = new HashMap<>();
 						for(String key : params.stringKeySet()) {
-							Construct c = params.get(key, t);
+							Mixed c = params.get(key, t);
 							List<String> l = new ArrayList<>();
-							if(c instanceof CArray) {
+							if(c.isInstanceOf(CArray.class)) {
 								for(String kkey : ((CArray) c).stringKeySet()) {
 									l.add(((ArrayAccess) c).get(kkey, t).val());
 								}
@@ -294,7 +304,7 @@ public class Web {
 						}
 						settings.setComplexParameters(mparams);
 					} else {
-						if(csettings.get("params", t) instanceof CByteArray) {
+						if(csettings.get("params", t).isInstanceOf(CByteArray.class)) {
 							CByteArray b = (CByteArray) csettings.get("params", t);
 							settings.setRawParameter(b.asByteArrayCopy());
 						} else {
@@ -313,11 +323,11 @@ public class Web {
 					arrayJar = null;
 				}
 				if(csettings.containsKey("followRedirects")) {
-					settings.setFollowRedirects(Static.getBoolean(csettings.get("followRedirects", t), t));
+					settings.setFollowRedirects(ArgumentValidation.getBoolean(csettings.get("followRedirects", t), t));
 				}
 				//Only required parameter
 				if(csettings.containsKey("success")) {
-					if(csettings.get("success", t) instanceof CClosure) {
+					if(csettings.get("success", t).isInstanceOf(CClosure.class)) {
 						success = (CClosure) csettings.get("success", t);
 					} else {
 						throw new CRECastException("Expecting the success parameter to be a closure.", t);
@@ -326,7 +336,7 @@ public class Web {
 					throw new CRECastException("Missing the success parameter, which is required.", t);
 				}
 				if(csettings.containsKey("error")) {
-					if(csettings.get("error", t) instanceof CClosure) {
+					if(csettings.get("error", t).isInstanceOf(CClosure.class)) {
 						error = (CClosure) csettings.get("error", t);
 					} else {
 						throw new CRECastException("Expecting the error parameter to be a closure.", t);
@@ -362,10 +372,10 @@ public class Web {
 					settings.setProxy(proxy);
 				}
 				if(csettings.containsKey("trustStore")) {
-					Construct trustStore = csettings.get("trustStore", t);
-					if(trustStore instanceof CBoolean && Static.getBoolean(trustStore, t) == false) {
+					Mixed trustStore = csettings.get("trustStore", t);
+					if(trustStore.isInstanceOf(CBoolean.class) && ArgumentValidation.getBoolean(trustStore, t) == false) {
 						settings.setDisableCertChecking(true);
-					} else if(trustStore instanceof CArray) {
+					} else if(trustStore.isInstanceOf(CArray.class)) {
 						CArray trustStoreA = ((CArray) trustStore);
 						LinkedHashMap<String, String> trustStoreJ = new LinkedHashMap<>((int) trustStoreA.size());
 						final String noDefault = "no default";
@@ -385,12 +395,12 @@ public class Web {
 					}
 				}
 				if(csettings.containsKey("download")) {
-					Construct download = csettings.get("download", t);
+					Mixed download = csettings.get("download", t);
 					if(download instanceof CNull) {
 						settings.setDownloadTo(null);
 					} else { // TODO: Remove this check and tie into the VFS once that is complete.
-						if(Static.InCmdLine(environment)) {
-							File file = new File(download.val());
+						if(Static.InCmdLine(environment, true)) {
+							File file = Static.GetFileFromArgument(Construct.nval(download), environment, t, null);
 							if(!file.isAbsolute()) {
 								file = new File(t.file(), file.getPath());
 							}
@@ -398,15 +408,45 @@ public class Web {
 						}
 					}
 				}
+				if(csettings.containsKey("downloadStrategy")) {
+					com.laytonsmith.core.FileWriteMode mode
+							= ArgumentValidation.getEnum(csettings.get("downloadStrategy", t), FileWriteMode.class, t);
+					com.laytonsmith.PureUtilities.Common.FileWriteMode puMode;
+					if(mode == com.laytonsmith.core.FileWriteMode.APPEND) {
+						puMode = com.laytonsmith.PureUtilities.Common.FileWriteMode.APPEND;
+					} else if(mode == com.laytonsmith.core.FileWriteMode.OVERWRITE) {
+						puMode = com.laytonsmith.PureUtilities.Common.FileWriteMode.OVERWRITE;
+					} else if(mode == com.laytonsmith.core.FileWriteMode.SAFE_WRITE) {
+						puMode = com.laytonsmith.PureUtilities.Common.FileWriteMode.SAFE_WRITE;
+					} else {
+						throw new Error("Unhandled case");
+					}
+					settings.setDownloadStrategy(puMode);
+				}
+				if(csettings.containsKey("binary")) {
+					binary = ArgumentValidation.getBoolean(csettings.get("binary", t), t);
+				} else {
+					binary = false;
+				}
+
+				if(csettings.containsKey("textEncoding")) {
+					textEncoding = csettings.get("textEncoding", t).val();
+				} else {
+					textEncoding = "UTF-8";
+				}
+
 				if(csettings.containsKey("blocking")) {
-					boolean blocking = Static.getBoolean(csettings.get("blocking", t), t);
+					boolean blocking = ArgumentValidation.getBoolean(csettings.get("blocking", t), t);
 					settings.setBlocking(blocking);
 				}
-				if(csettings.containsKey("log") && Static.getBoolean(csettings.get("log", t), t)) {
+				if(csettings.containsKey("log") && ArgumentValidation.getBoolean(csettings.get("log", t), t)) {
 					settings.setLogger(Logger.getLogger(Web.class.getName()));
 				}
 				settings.setAuthenticationDetails(username, password);
 			}
+
+			List<ConfigRuntimeException.StackTraceElement> st
+					= environment.getEnv(GlobalEnv.class).GetStackTraceManager().getCurrentStackTrace();
 			environment.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
 			Runnable task = new Runnable() {
 
@@ -415,7 +455,17 @@ public class Web {
 					try {
 						HTTPResponse resp = WebUtility.GetPage(url, settings);
 						final CArray array = CArray.GetAssociativeArray(t);
-						array.set("body", new CString(resp.getContent(), t), t);
+						if(settings.getDownloadTo() == null) {
+							if(binary) {
+								array.set("data", CByteArray.wrap(resp.getContent(), t), t);
+							} else {
+								try {
+									array.set("body", new CString(new String(resp.getContent(), textEncoding), t), t);
+								} catch (UnsupportedEncodingException ex) {
+									throw new CREFormatException("Unsupported encoding [" + textEncoding + "]", t, ex);
+								}
+							}
+						}
 						CArray headers = CArray.GetAssociativeArray(t);
 						for(String key : resp.getHeaderNames()) {
 							CArray h = new CArray(t);
@@ -440,11 +490,11 @@ public class Web {
 							}
 						});
 					} catch (IOException e) {
-						final ConfigRuntimeException ex = new CREIOException((e instanceof UnknownHostException ? "Unknown host: " : "")
-								+ e.getMessage(), t);
+						final CREIOException ex = new CREIOException((e instanceof UnknownHostException ? "Unknown host: " : "")
+							+ e.getMessage(), t);
+						ex.setStackTraceElements(st);
 						if(error != null) {
 							StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
-
 								@Override
 								public void run() {
 									executeFinish(error, ObjectGenerator.GetGenerator().exception(ex, environment, t), t, environment);
@@ -468,24 +518,23 @@ public class Web {
 			return CVoid.VOID;
 		}
 
-		private void executeFinish(CClosure closure, Construct arg, Target t, Environment environment) {
+		private void executeFinish(CClosure closure, Mixed arg, Target t, Environment environment) {
 			try {
-				closure.execute(new Construct[]{arg});
-			} catch (FunctionReturnException e) {
+				Mixed ret = closure.executeCallable(new Mixed[]{arg});
 				//Just ignore this if it's returning void. Otherwise, warn.
 				//TODO: Eventually, this should be taggable as a compile error
-				if(!(e.getReturn() instanceof CVoid)) {
-					CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.WARNING, "Returning a value from the closure. The value is"
+				if(!(ret instanceof CVoid)) {
+					MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.WARNING, "Returning a value from the closure. The value is"
 							+ " being ignored.", t);
 				}
 			} catch (ProgramFlowManipulationException e) {
 				//This is an error
-				CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.WARNING, "Only return may be used inside the closure.", t);
+				MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.WARNING, "Only return may be used inside the closure.", t);
 			} catch (ConfigRuntimeException e) {
 				ConfigRuntimeException.HandleUncaughtException(e, environment);
 			} catch (Throwable e) {
 				//Other throwables we just need to report
-				CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, "An unexpected exception has occurred. No extra"
+				MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, "An unexpected exception has occurred. No extra"
 						+ " information is available, but please report this error:\n" + StackTraceUtils.GetStacktrace(e), t);
 			}
 		}
@@ -515,6 +564,7 @@ public class Web {
 				}
 			});
 			templates.put("CODE", DocGenTemplates.CODE);
+			templates.put("DEFAULT_HEADERS", (e) -> DEFAULT_HEADERS.toString());
 			try {
 				return super.getBundledDocs(templates);
 			} catch (DocGenTemplates.Generator.GenerateException ex) {
@@ -526,7 +576,7 @@ public class Web {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -534,14 +584,14 @@ public class Web {
 			return new ExampleScript[]{
 				new ExampleScript("Getting headers from a website", "http_request('http://www.google.com', array(\n"
 				+ "\tsuccess: closure(@response,\n"
-				+ "\t\tmsg(@response['headers']['Server'][0])\n"
+				+ "\t\tmsg(@response['headers']['Server'][0]);\n"
 				+ "\t)\n"
 				+ "));\n", "gws"),
 				new ExampleScript("Using a cookie jar", "@cookiejar = array()\n"
 				+ "http_request('http://www.google.com', array(\n"
-				+ "\tcookiejar: @cookiejar, success: closure(@resp,\n"
-				+ "\t\tmsg(@cookiejar)\n"
-				+ "\t)\n"
+				+ "\tcookiejar: @cookiejar, success: closure(@resp) {\n"
+				+ "\t\tmsg(@cookiejar);\n"
+				+ "\t}\n"
 				+ "));\n", "<cookie jar would now have cookies in it>"),
 				new ExampleScript("Sending some json to the server",
 				"http_request('http://example.com', array(\n"
@@ -584,7 +634,7 @@ public class Web {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray array = Static.getArray(args[0], t);
 			CookieJar jar = getCookieJar(array, t);
 			jar.clearSessionCookies();
@@ -609,7 +659,7 @@ public class Web {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -633,7 +683,7 @@ public class Web {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
 				return new CString(URLEncoder.encode(args[0].val(), "UTF-8"), t);
 			} catch (UnsupportedEncodingException ex) {
@@ -659,7 +709,7 @@ public class Web {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -690,7 +740,7 @@ public class Web {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
 				return new CString(URLDecoder.decode(args[0].val(), "UTF-8"), t);
 			} catch (UnsupportedEncodingException ex) {
@@ -715,7 +765,7 @@ public class Web {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -748,7 +798,7 @@ public class Web {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			// Argument processing
 			CArray options;
 			if(args.length == 1) {
@@ -783,17 +833,17 @@ public class Web {
 			final String mailUser = ArgumentValidation.getItemFromArray(options, "user", t, new CString("", t)).val();
 			final String mailPassword = ArgumentValidation.getItemFromArray(options, "password", t, new CString("", t)).val();
 			int mailPort = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "port", t, new CInt(587, t)), t);
-			boolean useSSL = ArgumentValidation.getBoolean(ArgumentValidation.getItemFromArray(options, "use_ssl", t, CBoolean.FALSE), t);
-			boolean useStartTLS = ArgumentValidation.getBoolean(ArgumentValidation.getItemFromArray(options, "use_start_tls", t, CBoolean.FALSE), t);
+			boolean useSSL = ArgumentValidation.getBooleanObject(ArgumentValidation.getItemFromArray(options, "use_ssl", t, CBoolean.FALSE), t);
+			boolean useStartTLS = ArgumentValidation.getBooleanObject(ArgumentValidation.getItemFromArray(options, "use_start_tls", t, CBoolean.FALSE), t);
 			int timeout = ArgumentValidation.getInt32(ArgumentValidation.getItemFromArray(options, "timeout", t, new CInt(10000, t)), t);
 
 			//Standard email options
 			String from = ArgumentValidation.getItemFromArray(options, "from", t, null).val();
 			String subject = ArgumentValidation.getItemFromArray(options, "subject", t, new CString("<No Subject>", t)).val();
 			String body = ArgumentValidation.getItemFromArray(options, "body", t, new CString("", t)).val();
-			Construct cto = ArgumentValidation.getItemFromArray(options, "to", t, null);
+			Mixed cto = ArgumentValidation.getItemFromArray(options, "to", t, null);
 			CArray to;
-			if(cto instanceof CString) {
+			if(cto.isInstanceOf(CString.class)) {
 				to = new CArray(t);
 				to.push(cto, t);
 			} else {
@@ -846,10 +896,10 @@ public class Web {
 					attachments.push(bodyAttachment, 0, t);
 				}
 
-				for(Construct c : to.asList()) {
+				for(Mixed c : to.asList()) {
 					Message.RecipientType type = Message.RecipientType.TO;
 					String address;
-					if(c instanceof CArray) {
+					if(c.isInstanceOf(CArray.class)) {
 						CArray ca = (CArray) c;
 						String stype = ArgumentValidation.getItemFromArray(ca, "type", t, new CString("TO", t)).val();
 						switch(stype) {
@@ -878,7 +928,7 @@ public class Web {
 					String fileName = ArgumentValidation.getItemFromArray(pattachment, "filename", t, new CString("", t)).val().trim();
 					String description = ArgumentValidation.getItemFromArray(pattachment, "description", t, new CString("", t)).val().trim();
 					String disposition = ArgumentValidation.getItemFromArray(pattachment, "disposition", t, new CString("", t)).val().trim();
-					Construct content = ArgumentValidation.getItemFromArray(pattachment, "content", t, null);
+					Mixed content = ArgumentValidation.getItemFromArray(pattachment, "content", t, null);
 					if(!"".equals(fileName)) {
 						message.setFileName(fileName);
 					}
@@ -891,7 +941,7 @@ public class Web {
 					message.setContent(getContent(content, t), type);
 				} else {
 					Multipart mp = new MimeMultipart("alternative");
-					for(Construct attachment : attachments.asList()) {
+					for(Mixed attachment : attachments.asList()) {
 						CArray pattachment = ArgumentValidation.getArray(attachment, t);
 						final String type = ArgumentValidation.getItemFromArray(pattachment, "type", t, null).val();
 						final String fileName = ArgumentValidation.getItemFromArray(pattachment, "filename", t, new CString("", t)).val().trim();
@@ -978,10 +1028,10 @@ public class Web {
 		 * @param t
 		 * @return
 		 */
-		private Object getContent(Construct c, Target t) {
-			if(c instanceof CString) {
+		private Object getContent(Mixed c, Target t) {
+			if(c.isInstanceOf(CString.class)) {
 				return c.val();
-			} else if(c instanceof CByteArray) {
+			} else if(c.isInstanceOf(CByteArray.class)) {
 				CByteArray cb = (CByteArray) c;
 				return cb.asByteArrayCopy();
 			} else {
@@ -1006,7 +1056,7 @@ public class Web {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override

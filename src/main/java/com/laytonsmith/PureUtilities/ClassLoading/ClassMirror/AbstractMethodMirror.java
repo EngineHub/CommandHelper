@@ -138,27 +138,4 @@ public abstract class AbstractMethodMirror extends AbstractElementMirror {
 		return (Member) underlyingMethod;
 	}
 
-	/**
-	 * Loads the class that contains this method, using the default class loader.
-	 *
-	 * @return
-	 * @throws java.lang.ClassNotFoundException
-	 */
-	public Class loadParentClass() throws ClassNotFoundException {
-		return loadParentClass(AbstractMethodMirror.class.getClassLoader(), true);
-	}
-
-	/**
-	 * Loads the class that contains this method, using the default class loader.
-	 *
-	 * @param loader
-	 * @param initialize
-	 * @return
-	 * @throws java.lang.ClassNotFoundException
-	 */
-	public Class loadParentClass(ClassLoader loader, boolean initialize) throws ClassNotFoundException {
-		ClassReferenceMirror p = getDeclaringClass();
-		Objects.requireNonNull(p, "Declaring class is null!");
-		return p.loadClass(loader, initialize);
-	}
 }

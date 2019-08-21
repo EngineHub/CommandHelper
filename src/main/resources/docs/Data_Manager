@@ -134,6 +134,7 @@ following namespaces are reserved for future use, and should not be used outside
 * federation.**: The Federation system stores values here. The namespace should never be set to read only, and should be in a transient data source.
 * extension.&lt;extension name&gt;.**: Extensions may store data in this namespace.
 * custom.**: CommandHelper will not ever touch any values stored in here, and you may use this however you wish with external scripts.
+* l10n.**: Settings related to the Localization UI Tool.
 <!-- These are "reserved" but not listed.
 * snapin.**: Data about snapins resides here.
 * global.**: Values accessible from any script using the store_gvalue and get_gvalue functions. All scripts have 

@@ -1,6 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
-import com.laytonsmith.abstraction.MCLightningStrike;
+import com.laytonsmith.abstraction.entities.MCLightningStrike;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLightningStrike;

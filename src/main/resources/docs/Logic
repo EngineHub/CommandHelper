@@ -146,8 +146,13 @@ The following are considered to evaluate to true:
 * The keyword and boolean value <code>true</code>
 * Any non-empty string
 * Any number different from 0
+* A non-empty array
 
-Anything else, including arrays, are considered false.
+Null values are always considered false. All primitives, and some more complex objects implement the
+ms.lang.Booleanish type, which allows them to return true if the value is '''trueish''', meaning that while the value
+itself is not a boolean, it has a true/false interpretation, and can explicitely be cast to a boolean with the
+{{function|boolean}} function. This is a generic concept though, and so it's not possible to create a comprehensive
+list of things that are supported with this mechanism.
 
 ==else if==
 if/else if/else chains can be formed as well, if multiple conditions need to be checked. Using only

@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.mozilla.intl.chardet.nsDetector;
-import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
 import org.mozilla.intl.chardet.nsPSMDetector;
 
 /**
@@ -145,21 +144,59 @@ public final class FileUtil {
 	}
 
 	/**
-	 * Writes out a String to the given file, either appending or overwriting, depending on the selected mode. If create
+	 * Writes out string data as UTF-8 to the given file, either appending or overwriting, depending on the selected
+	 * mode. If create
+	 * is true, will attempt to create the file and parent directories if need be.
+	 *
+	 * @param data The string to write to the file
+	 * @param file The File to write to
+	 * @param mode The mode in which to write the file
+	 * @param create If true, will create the parent directories
+	 * @throws IOException If the File cannot be written to
+	 */
+	public static void write(String data, File file, FileWriteMode mode, boolean create) throws IOException {
+		write(data.getBytes("UTF-8"), file, mode, create);
+	}
+
+	/**
+	 * Writes out byte data to the given file, either appending or overwriting, depending on the selected mode. If create
+	 * is true, will attempt to create the file and parent directories if need be.
+	 *
+	 * @param data The data to write to the file
+	 * @param file The File to write to
+	 * @param mode The mode in which to write the file
+	 * @param create If true, will create the parent directories
+	 * @throws IOException If the File cannot be written to
+	 */
+	public static void write(byte[] data, File file, FileWriteMode mode, boolean create) throws IOException {
+		if(mode == FileWriteMode.SAFE_WRITE) {
+			if(file.exists()) {
+				throw new IOException("Cannot create file, SAFE_WRITE set, and file already exists [" + file + "]");
+			}
+			mode = FileWriteMode.OVERWRITE;
+		}
+		if(mode == FileWriteMode.OVERWRITE) {
+			write(data, file, OVERWRITE, create);
+		} else if(mode == FileWriteMode.APPEND) {
+			write(data, file, APPEND, create);
+		} else {
+			throw new Error("Unaccounted for FileWriteMode");
+		}
+	}
+
+	/**
+	 * Writes out byte data to the given file, either appending or overwriting, depending on the selected mode. If create
 	 * is true, will attempt to create the file and parent directories if need be.
 	 *
 	 * @param data The string to write to the file
 	 * @param file The File to write to
 	 * @param mode Either OVERWRITE or APPEND
+	 * @param create If true, will create the parent directories
 	 * @throws IOException If the File f cannot be written to
 	 */
 	public static void write(byte[] data, File file, int mode, boolean create) throws IOException {
 		boolean append;
-		if(mode == OVERWRITE) {
-			append = false;
-		} else {
-			append = true;
-		}
+		append = mode != OVERWRITE;
 		if(create && !file.exists()) {
 			if(file.getAbsoluteFile().getParentFile() != null) {
 				file.getAbsoluteFile().getParentFile().mkdirs();
@@ -392,8 +429,53 @@ public final class FileUtil {
 		}
 	}
 
+	public static interface FileHandler {
+		/**
+		 * Handles a file.
+		 * @param f
+		 * @throws java.io.IOException If the some operation on the file errored.
+		 */
+		void handle(File f) throws IOException;
+	}
+	/**
+	 * Recursively iterates through all files in this directory and all subdirectories. It takes a callback, which is
+	 * sent each file, in turn. The parent directory (the one passed in) is also sent to the handler. The callback
+	 * may throw an IOException, which stops further processing, and is rethrown.
+	 * @param file The file to start with
+	 * @param handler The handler to use to process the file
+	 * @throws java.io.IOException If the underlying handler throws an IOException. If the handler does not throw
+	 * an IOException, then this function will never otherwise do so. (SecurityExceptions may be thrown, however.)
+	 */
+	public static void recursiveFind(File file, FileHandler handler) throws IOException {
+		handler.handle(file);
+		if(file.isDirectory()) {
+			for(File f : file.listFiles()) {
+				recursiveFind(f, handler);
+			}
+		}
+	}
+
+	/**
+	 * Recursively deletes a file/folder structure on exit. This will not delete the file immediately, but it is not
+	 * an error to delete the file first.
+	 *
+	 * @param file
+	 */
+	public static void recursiveDeleteOnExit(File file) {
+		System.gc();
+		if(file.isDirectory()) {
+			for(File f : file.listFiles()) {
+				recursiveDelete(f);
+			}
+			file.deleteOnExit();
+		} else {
+			file.deleteOnExit();
+		}
+	}
+
 	/**
 	 * Returns the most likely character encoding for this file. The default is "ASCII" and is probably the most common.
+	 * Note that ASCII and UTF-8 are the same format when the character set is just the 8 byte characters.
 	 *
 	 * @param file
 	 * @return
@@ -403,12 +485,8 @@ public final class FileUtil {
 		int lang = nsPSMDetector.ALL;
 		nsDetector det = new nsDetector(lang);
 		final MutableObject result = new MutableObject("ASCII");
-		det.Init(new nsICharsetDetectionObserver() {
-
-			@Override
-			public void Notify(String charset) {
-				result.setObject(charset);
-			}
+		det.Init((String charset) -> {
+			result.setObject(charset);
 		});
 
 		BufferedInputStream imp = null;

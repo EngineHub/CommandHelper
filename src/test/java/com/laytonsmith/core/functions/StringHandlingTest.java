@@ -52,7 +52,7 @@ public class StringHandlingTest {
 	public void testConcat() throws Exception {
 		StringHandling.concat a = new StringHandling.concat();
 		assertCEquals(C.onstruct("1234"), a.exec(Target.UNKNOWN, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(4)));
-		assertCEquals(C.onstruct("astring"), a.exec(Target.UNKNOWN, null, C.onstruct("a"), C.onstruct("string")));
+		assertCEquals(C.onstruct("astring"), a.exec(Target.UNKNOWN, null, C.onstruct("a"), C.String("string")));
 		assertEquals("05", SRun("'0' . 5", null));
 	}
 
@@ -63,11 +63,15 @@ public class StringHandlingTest {
 		assertCEquals(C.onstruct(2), a.exec(Target.UNKNOWN, null, C.Array(C.onstruct(0), C.onstruct(1))));
 	}
 
-	@Test(timeout = 10000)
-	public void testParseArgs() {
+	@Test//(timeout = 10000)
+	public void testParseArgs() throws Exception {
+		SRun("msg(parse_args('o \"\\\\t\"', true))", fakePlayer);
+		verify(fakePlayer).sendMessage("{o, \\t}");
 		StringHandling.parse_args a = new StringHandling.parse_args();
 		assertCEquals(C.Array(C.onstruct("one"), C.onstruct("two")), a.exec(Target.UNKNOWN, null, C.onstruct("one   two")));
 		assertCEquals(C.Array(C.onstruct("one"), C.onstruct("two")), a.exec(Target.UNKNOWN, null, C.onstruct("one two")));
+		SRun("msg(parse_args('one \"two\"', true))", fakePlayer);
+		verify(fakePlayer).sendMessage("{one, two}");
 	}
 
 	@Test(timeout = 10000)

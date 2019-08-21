@@ -63,4 +63,89 @@ a block that looks like this:
 </script>
 %%
 
+== Testing Locally ==
 
+When making changes to the documentation, it may be worth running locally to see your changes before they go to the
+live site.
+
+There are multiple approaches here, this just provides one approach. The key is that you need a local web server
+running, it's not sufficient to simply open the raw html files in your browser. These directions are the minimal
+instructions, but you may use an existing server for viewing, or modify this approach to suit your needs.
+
+Following these directions will help you view the site locally:
+
+=== One time setup ===
+
+[https://docs.npmjs.com/downloading-and-installing-node-js-and-npm Install node and npm.]
+
+Create a configuration file somewhere on your file system, call it site-deploy-local.ini
+
+<%SYNTAX|ini|
+# This file is generated automatically. Changes made to the values of this file
+# will persist, but changes to comments will not.
+
+# The root location of the remote web server. This must be an absolute path. Note that this is the location of the *docs* 
+# folder. Files may be created one directory above this folder, in this folder, and in lower folders that are created by 
+# the site deploy tool. So if /var/www is your web root, then you should put /var/www/docs here. It will create an index 
+# file in /var/www, as well as in /var/www/docs, but the majority of files will be put in /var/www/docs/3.3.4. If you
+# are on Windows, use / as the directory separator, not \.
+directory=REPLACEME
+
+# The base url of the docs. This should begin with http:// or https://
+docs-base=http://localhost:8080/docs/
+
+# The hostname to scp to (not the hostname of the site). If the hostname is "localhost", this triggers special handling, 
+# which skips the upload, and simply saves to the specified location on local disk. This should work with all OSes, 
+# otherwise the host that this connects to must support ssh, though it does not necessarily have to be a unix based 
+# system. If the value is localhost, the values username, port, and use-password are irrelevant, and not used. This 
+# should NOT begin with a protocol, i.e. http://
+hostname=localhost
+
+
+# The base url of the site (where "home" should be). This should begin with http:// or https://
+site-base=http://localhost:8080/
+
+use-password=false
+username=
+validator-url=
+post-script=null
+port=22
+install-url=
+install-pub-keys=
+install-pem-file=
+show-template-credit=false
+github-base-url=
+
+
+%>
+
+Change the ''directory'' value to wherever you intend on installing this locally. Make sure this directory path
+ends in ''/docs''.
+
+Next, we need to do the initial generation:
+
+<%PRE|java -jar MethodScript.jar site-deploy -c site-deploy-local.ini%>
+
+On the first run, this may take a while, so just sit back and relax.
+
+=== Each dev session ===
+
+From the command prompt, ''cd'' to one folder above where you specified in the ''directory'' value in the config (that
+is, the root of the website) and run
+
+<%PRE|npx http-server -c-1 -o "http://localhost:8080/index.html"%>
+
+Alternatively, you can install the http-server package, and leave of the ''npx'' command. 
+
+Leave this command window open while you develop. You may also wish to disable the cache in your web browser, so that
+old versions of the pages won't be cached.
+
+=== After making a change ===
+
+Rebuild the project normally, using maven. (Note that it seems that maven doesn't always pick up the changes to resource
+files, so you may need to do clean and build.) Then, from the cmdline, run
+
+<%PRE|java -jar MethodScript.jar site-deploy -c site-deploy-local.ini --use-local-cache%>
+
+Adding the ''--use-local-cache'' flag will potentially speed up the deployment. Refresh the webpage that was launched
+by the http-server command.

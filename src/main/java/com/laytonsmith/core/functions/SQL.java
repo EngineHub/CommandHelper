@@ -8,8 +8,9 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -33,9 +34,11 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.Profiles;
+import com.laytonsmith.core.ProfilesImpl;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRESQLException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.database.SQLProfile;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -131,7 +134,7 @@ public class SQL {
 					// isValid is added in later versions. We want to continue working, (as if the connection
 					// is not valid) but still warn the user that this will
 					// be slower.
-					CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING, "SQL driver does not support the \"isValid\" method, which"
+					MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.WARNING, "SQL driver does not support the \"isValid\" method, which"
 							+ " is causing " + Implementation.GetServerType().getBranding() + " to use a slower method.", t);
 				}
 				if(c.isClosed() || !isValid) {
@@ -144,15 +147,15 @@ public class SQL {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
 				Profiles.Profile profile;
-				if(args[0] instanceof CArray) {
+				if(args[0].isInstanceOf(CArray.class)) {
 					Map<String, String> data = new HashMap<>();
 					for(String key : ((CArray) args[0]).stringKeySet()) {
 						data.put(key, ((CArray) args[0]).get(key, t).val());
 					}
-					profile = Profiles.getProfile(data);
+					profile = ProfilesImpl.getProfile(data);
 				} else {
 					Profiles profiles = environment.getEnv(GlobalEnv.class).getProfiles();
 					profile = profiles.getProfileById(args[0].val());
@@ -161,7 +164,7 @@ public class SQL {
 					throw new CRECastException("Profile must be an SQL type profile, but found \"" + profile.getType() + "\"", t);
 				}
 				String query = args[1].val();
-				Construct[] params = new Construct[args.length - 2];
+				Mixed[] params = new Mixed[args.length - 2];
 				for(int i = 2; i < args.length; i++) {
 					int index = i - 2;
 					params[index] = args[i];
@@ -192,16 +195,16 @@ public class SQL {
 							continue;
 						}
 						try {
-							if(params[i] instanceof CInt) {
+							if(params[i].isInstanceOf(CInt.class)) {
 								ps.setLong(i + 1, Static.getInt(params[i], t));
-							} else if(params[i] instanceof CDouble) {
+							} else if(params[i].isInstanceOf(CDouble.class)) {
 								ps.setDouble(i + 1, (Double) Static.getDouble(params[i], t));
-							} else if(params[i] instanceof CString) {
+							} else if(params[i].isInstanceOf(CString.class)) {
 								ps.setString(i + 1, (String) params[i].val());
-							} else if(params[i] instanceof CByteArray) {
+							} else if(params[i].isInstanceOf(CByteArray.class)) {
 								ps.setBytes(i + 1, ((CByteArray) params[i]).asByteArrayCopy());
-							} else if(params[i] instanceof CBoolean) {
-								ps.setBoolean(i + 1, Static.getBoolean(params[i], t));
+							} else if(params[i].isInstanceOf(CBoolean.class)) {
+								ps.setBoolean(i + 1, ArgumentValidation.getBoolean(params[i], t));
 							} else {
 								throw new CRECastException("The type " + params[i].getClass().getSimpleName()
 										+ " of parameter " + (i + 1) + " is not supported.", t);
@@ -305,25 +308,28 @@ public class SQL {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 2) {
 				throw new ConfigCompileException(getName() + " expects at least 2 arguments", t);
 			}
 			//We can check 2 things here, one, that the statement isn't dynamic, and if not, then
 			//2, that the parameter count matches the ? count. No checks can be done for typing,
 			//without making a connection to the db though, so we won't do that here.
-			Construct queryData = children.get(1).getData();
+			Mixed queryData = children.get(1).getData();
 			if(queryData instanceof CFunction) {
 				//If it's a concat or sconcat, warn them that this is bad
 				if(doWarn && ("sconcat".equals(queryData.val()) || "concat".equals(queryData.val()))) {
-					CHLog.GetLogger().w(CHLog.Tags.COMPILER, "Use of concatenated query detected! This"
+					MSLog.GetLogger().w(MSLog.Tags.COMPILER, "Use of concatenated query detected! This"
 							+ " is very bad practice, and could lead to SQL injection vulnerabilities"
 							+ " in your code. It is highly recommended that you use prepared queries,"
 							+ " which ensure that your parameters are properly escaped. If you really"
 							+ " must use concatenation, and you promise you know what you're doing, you"
 							+ " can use " + new unsafe_query().getName() + "() to supress this warning.", t);
 				}
-			} else if(queryData instanceof CString) {
+			} else if(queryData.isInstanceOf(CString.class)) {
 				//It's a hard coded query, so we can double check parameter lengths and other things
 				String query = queryData.val();
 				int count = 0;
@@ -344,7 +350,7 @@ public class SQL {
 				//Profile validation will simply ensure that the profile stated is listed in the profiles,
 				//and that a connection can in fact be made.
 				//Also need to figure out how to validate a prepared statement.
-//				if(children.get(0).isConst() && children.get(0).getData() instanceof CString){
+//				if(children.get(0).isConst() && children.get(0).getData().isInstanceOf(CString.class)){
 //					if(true){ //Prefs.verifyQueries()
 //						String profileName = children.get(0).getData().val();
 //						SQLProfiles.Profile profile = null;
@@ -380,7 +386,7 @@ public class SQL {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -413,7 +419,7 @@ public class SQL {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -472,34 +478,34 @@ public class SQL {
 		}
 
 		@Override
-		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			startup();
-			Construct arg = args[args.length - 1];
-			if(!(arg instanceof CClosure)) {
+			Mixed arg = args[args.length - 1];
+			if(!(arg.isInstanceOf(CClosure.class))) {
 				throw new CRECastException("The last argument to " + getName() + " must be a closure.", t);
 			}
 			final CClosure closure = ((CClosure) arg);
-			final Construct[] newArgs = new Construct[args.length - 1];
+			final Mixed[] newArgs = new Mixed[args.length - 1];
 			//Make a new array minus the closure
 			System.arraycopy(args, 0, newArgs, 0, newArgs.length);
 			queue.invokeLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
 				@Override
 				public void run() {
-					Construct returnValue = CNull.NULL;
-					Construct exception = CNull.NULL;
+					Mixed returnValue = CNull.NULL;
+					Mixed exception = CNull.NULL;
 					try {
 						returnValue = new query().exec(t, environment, newArgs);
 					} catch (ConfigRuntimeException ex) {
 						exception = ObjectGenerator.GetGenerator().exception(ex, environment, t);
 					}
-					final Construct cret = returnValue;
-					final Construct cex = exception;
+					final Mixed cret = returnValue;
+					final Mixed cex = exception;
 					StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
 						@Override
 						public void run() {
-							closure.execute(new Construct[]{cret, cex});
+							closure.executeCallable(new Mixed[]{cret, cex});
 						}
 					});
 				}
@@ -531,7 +537,7 @@ public class SQL {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}

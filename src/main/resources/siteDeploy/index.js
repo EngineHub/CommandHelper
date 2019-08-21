@@ -1,6 +1,7 @@
 (function ($, skel, wiky, bodyEscaped, showLearningTrail, pageRender) {
     var resourceBase = "%%resourceBase%%";
     var docsBase = "%%docsBase%%";
+	var productionTranslations = "%%productionTranslations%%";
     var $body = $("#body");
     var $learningTrail = $("#learningTrail");
     var learningTrailJSON = JSON.parse("%%js_string_learning_trail%%");
@@ -117,23 +118,32 @@
         html = wiky.process(html);
         html = html.replace(/{{TakeNote\|text=([\s\S]*?)}}/g, "<div class=\"TakeNote\"><strong>Note:</strong> $1</div>");
         html = html.replace(/{{Warning\|text=([\s\S]*?)}}/g, "<div class=\"Warning\"><strong>Warning:</strong> $1</div>");
+		var unimplemented = "These features are not implemented yet, and this page should only serve as a design document,"
+			+ " and is not necessarily an indication of how the feature will end up working once it is implemented.";
+		html = html.replace(/{{unimplemented}}/g, "<div class=\"Warning\"><strong>Warning: " + unimplemented 
+				+ "</strong></div>");
         html = html.replace(/\[(https?:\/\/.*?) (.*)\]/g, "<a href=\"$1\">$2</a>");
         html = html.replace(/__NOTOC__/g, "");
-        var internalLink = /\[\[(.*?)(?:\|(.*?))?\]\]/g;
+        var internalLink = /\[\[(.*?)(#.*?)?(?:\|(.*?))?\]\]/g;
         var result;
         while ((result = internalLink.exec(html)) !== null) {
             var replacement = result[0];
             var link = result[1];
-            var text = result[2] || null;
+            var anchor = result[2] || "";
+            var text = result[3] || null;
             if (text === null) {
                 text = link.replace(/_/g, " ");
             }
+			// If the link doesn't have an extension, add .html
+			if(link.indexOf(".") === -1) {
+				link += ".html";
+			}
             if (link.slice(0, 6) === "Image:") {
                 // image
                 html = html.replace(replacement, "<img class= \"maxWidth100Percent\" src=\"" + resourceBase + "images/" + link.substring(6) + "\" alt=\"" + link + "\" />");
             } else {
                 // plain link
-                html = html.replace(replacement, "<a href=\"" + link + "\">" + text + "</a>");
+                html = html.replace(replacement, "<a href=\"" + docsBase + link + anchor + "\">" + text + "</a>");
             }
         }
         if (/\{\{LearningTrail\}\}/.exec(html)) {
@@ -303,7 +313,9 @@
                     }
                     lastCellWasTH = false;
                     // don't split on || or it'll catch OR operators
-                    ret += "<td>" + line.substr(1); //join(line.substr(1).split(/\|\|/g), "</td><td>");
+					// however, <nowiki>||</nowiki> will fix that.
+                    ret += "<td>" + join(line.substr(1).split(/\|\|(?!<\/nowiki>)/g), "</td><td>")
+							.replace(/<nowiki>\|\|<\/nowiki>/g, '||');
                     finishLast = true;
                 } else {
                     // continuation of previous line, just output the line with \n
@@ -342,8 +354,76 @@
         return newHtml;
     }
 
+    function localize(t) {
+        t.forEach(element => {
+            let key = element.key;
+            let translation = element.translation;
+            // First escape all special characters
+            key = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            // Then replace %s with .*
+            key = key.replace(/%s/g, "(.*?)");
+            key = key.replace(/ /g, "\\s+");
+            // We only want to replace strings where the whole thing is within a border. For instance, if one segment
+            // is A, and another is ABC, we don't want to replace the A in ABC, because then the match for ABC won't
+            // work. Instead, we need to ensure that we're only replacing entire segments, which means essentially 
+            // reversing the segmentation logic that was originally used.
+            let spacer = "(\\s*(?:==+|\n\n|\n\*|\n#)\\s*)";
+            key = spacer + key + spacer; 
+            let count = 2;
+            translation = "$1" + translation;
+            while(translation.includes("%s")) {
+                translation = translation.replace(/%s/, "$" + count);
+                count++;
+            }
+            translation = translation + "$" + count;
+            bodyEscaped = bodyEscaped.replace(new RegExp(key, 'g'), translation);
+        });
+    }
+
     $(function () {
-        render();
+        var url = new URL(window.location.href);
+        var lang = url.searchParams.get("lang");
+        if(productionTranslations !== "" && lang !== null) {
+            // We need to download and parse the locale data first
+            let pageTranslations = productionTranslations + "/" + lang + "/" + window.location.pathname.replace(/\.html$/, ".tmem.xml");
+            $.get(pageTranslations, function(data) {
+                $data = $(data);
+                $blocks = $data.find("translationBlock");
+                let t = [];
+                for(var i = 0; i < $blocks.length; ++i) {
+                    var $block = $($blocks.get(i));
+                    var key = $block.find("key").text();
+                    var auto = $block.find("auto").text();
+                    var translation = $block.find("translation").text();
+                    if(auto === "" && translation === "") {
+                        // No translation available for this one, move along
+                        continue;
+                    }
+                    if(translation === "") {
+                        // Use the auto translation
+                        t.push({key: key, translation: auto});
+                    } else {
+                        // Use the manual translation
+                        t.push({key: key, translation: translation});
+                    }
+                }
+                t.sort(function(a, b) {
+                    a = a.key.length;
+                    b = b.key.length;
+                    if(a == b) {
+                        return 0;
+                    } else if (a < b) {
+                        return 1;
+                    } else {
+                        return -1;
+                    }
+                });
+                localize(t);
+                render();
+            }).fail(render);
+        } else {
+            render();
+        }
     });
     skel.on("change", function () {
         console.log("Current state is: " + skel.vars.stateId);

@@ -1,10 +1,9 @@
 package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.Common.UIUtils;
-import com.laytonsmith.tools.docgen.DocGenUI;
+import com.laytonsmith.tools.docgen.localization.LocalizationUI;
 import com.laytonsmith.tools.pnviewer.PNViewer;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -13,7 +12,6 @@ import javax.swing.AbstractListModel;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 /**
  *
@@ -26,22 +24,15 @@ public class UILauncher extends javax.swing.JFrame {
 	/**
 	 * Creates new form UILauncher
 	 */
+	@SuppressWarnings("OverridableMethodCallInConstructor")
 	public UILauncher() {
 		final String[] args = {};
-		uis.add(new UI("Persistence Network Viewer", "Allows easier visualization of the Persistence Network", new Runnable() {
-
-			@Override
-			public void run() {
-				PNViewer.main(args);
-			}
+		uis.add(new UI("Persistence Network Viewer", "Allows easier visualization of the Persistence Network", () -> {
+			PNViewer.main(args);
 		}));
-
-		uis.add(new UI("DocGen", "Allows uploading of the built-in documentation to MediaWiki software.", new Runnable() {
-
-			@Override
-			public void run() {
-				DocGenUI.main(args);
-			}
+		uis.add(new UI("Localization (L10n) UI", "Provides an easy to use UI to correctly edit localization files",
+				() -> {
+			LocalizationUI.launch(null);
 		}));
 
 		initComponents();
@@ -49,25 +40,17 @@ public class UILauncher extends javax.swing.JFrame {
 		setTitle("MethodScript UI Tool Launcher");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		launchButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if(selectedUI == null) {
-					JOptionPane.showMessageDialog(UILauncher.this, "Please select a tool from the list on the left.", "Error", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-				selectedUI.getLauncher().run();
-				UILauncher.this.setVisible(false);
+		launchButton.addActionListener((ActionEvent e) -> {
+			if(selectedUI == null) {
+				JOptionPane.showMessageDialog(UILauncher.this, "Please select a tool from the list on the left.", "Error", JOptionPane.ERROR_MESSAGE);
+				return;
 			}
+			selectedUI.getLauncher().run();
+			UILauncher.this.setVisible(false);
 		});
 
-		exitButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				System.exit(0);
-			}
+		exitButton.addActionListener((ActionEvent e) -> {
+			System.exit(0);
 		});
 
 		launcherList.setModel(new AbstractListModel() {
@@ -84,14 +67,10 @@ public class UILauncher extends javax.swing.JFrame {
 
 		});
 
-		launcherList.addListSelectionListener(new ListSelectionListener() {
-
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
-				UI ui = uis.get(e.getFirstIndex());
-				descriptionTextArea.setText(ui.getTooltip());
-				selectedUI = ui;
-			}
+		launcherList.addListSelectionListener((ListSelectionEvent e) -> {
+			UI ui = uis.get(e.getFirstIndex());
+			descriptionTextArea.setText(ui.getTooltip());
+			selectedUI = ui;
 		});
 
 		launcherList.addMouseListener(new MouseAdapter() {

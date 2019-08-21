@@ -61,6 +61,9 @@ public class AnnotationMirror implements Serializable {
 	 * then choose to load yourself (with either {@link ClassDiscovery#forName} or {@link Class#forName}). This is done
 	 * to prevent loading classes referenced in annotations by default.
 	 *
+	 * It is important to note that for array types, if there are no values defined, the value returned here will
+	 * be null.
+	 *
 	 * @param forName
 	 * @return
 	 */

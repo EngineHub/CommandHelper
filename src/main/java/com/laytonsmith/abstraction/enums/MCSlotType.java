@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("SlotType")
+@MEnum("com.commandhelper.SlotType")
 public enum MCSlotType {
 	/**
 	 * An armour slot in the player's inventory.

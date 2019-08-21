@@ -15,10 +15,11 @@ interface DeploymentMethod {
 	 *
 	 * @param data The data to write
 	 * @param toLocation The general location to write the file to.
+	 * @param overrideIdRsa The overridden id_rsa location, or null.
 	 * @return true, if the file was actually changed, false otherwise
 	 * @throws IOException
 	 */
-	boolean deploy(InputStream data, String toLocation) throws IOException;
+	boolean deploy(InputStream data, String toLocation, String overrideIdRsa) throws IOException;
 
 	/**
 	 * After the deployment is finished, this will be called. This can optionally clean up i.e. network connections if

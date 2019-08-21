@@ -4,9 +4,9 @@ actually write code, this article outlines the only "officially supported" workf
 tools, and a good command of Java to get started though, and so many concepts may be beyond the scope of this article.
 
 All contributions must be released according to the 
-[https://github.com/sk89q/commandhelper/blob/master/LICENSE.txt MIT submission license], including the 
-[https://github.com/sk89q/commandhelper/blob/master/SPECIAL_LICENSE.txt special license] for core code, and is expected 
-to conform to the [https://github.com/sk89q/commandhelper/blob/master/CONTRIBUTING.txt code standards]. All code must be 
+[https://github.com/EngineHub/CommandHelper/blob/master/LICENSE.txt MIT submission license], including the 
+[https://github.com/EngineHub/CommandHelper/blob/master/SPECIAL_LICENSE.txt special license] for core code, and is expected 
+to conform to the [https://github.com/EngineHub/CommandHelper/blob/master/CONTRIBUTING.txt code standards]. All code must be 
 submitted as a pull request via github to be considered.
 
 Due to the shear size of CommandHelper, it may not be a good starting point for someone that is wishing to get into open 
@@ -15,7 +15,7 @@ contribute. The code in CommandHelper is fairly well organized, follows good
 [http://en.wikipedia.org/wiki/Software_design_pattern software engineering design patterns], is unit tested, abstracted, 
 and is generally geared towards long term stability and maintainability. Generally speaking, it is not important to 
 fully understand the entirety of the code base before working on it, but you'll need to understand the 
-[[CommandHelper/Staged/Architecture|Basic Architecture]] before you'll be able to understand where to even begin. The 
+[[Architecture|Basic Architecture]] before you'll be able to understand where to even begin. The 
 purpose of this article is not to help you understand how to add code to the project, but instead is meant to help you 
 get set up and building the code locally.
 

@@ -11,8 +11,9 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.FullyQualifiedClassName;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -20,7 +21,9 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
@@ -28,7 +31,6 @@ import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.NativeTypeList;
@@ -65,11 +67,10 @@ public class Exceptions {
 
 	@api(environments = CommandHelperEnvironment.class)
 	@seealso({_throw.class, com.laytonsmith.tools.docgen.templates.Exceptions.class})
-	public static class _try extends AbstractFunction {
+	public static class _try extends AbstractFunction implements BranchStatement, VariableScope {
 
 		@Override
 		public String getName() {
-
 			return "try";
 		}
 
@@ -88,7 +89,7 @@ public class Exceptions {
 					+ " If the exception type matches one of the values listed, the exception will be caught, otherwise, the exception will continue up the stack."
 					+ " If exceptionTypes is missing, it will catch all exceptions."
 					+ " PLEASE NOTE! This function will not catch exceptions thrown by CommandHelper, only built in exceptions. "
-					+ " Please see [[CommandHelper/Exceptions|the wiki page on exceptions]] for more information about what possible "
+					+ " Please see [[Exceptions|the wiki page on exceptions]] for more information about what possible "
 					+ " exceptions can be thrown and where, and examples.";
 		}
 
@@ -108,8 +109,8 @@ public class Exceptions {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -118,7 +119,7 @@ public class Exceptions {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script that, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script that, ParseTree... nodes) {
 			ParseTree tryCode = nodes[0];
 			ParseTree varName = null;
 			ParseTree catchCode = null;
@@ -136,29 +137,29 @@ public class Exceptions {
 
 			IVariable ivar = null;
 			if(varName != null) {
-				Construct pivar = that.eval(varName, env);
+				Mixed pivar = that.eval(varName, env);
 				if(pivar instanceof IVariable) {
 					ivar = (IVariable) pivar;
 				} else {
 					throw new CRECastException("Expected argument 2 to be an IVariable", t);
 				}
 			}
-			List<String> interest = new ArrayList<String>();
+			List<FullyQualifiedClassName> interest = new ArrayList<>();
 			if(types != null) {
-				Construct ptypes = that.seval(types, env);
-				if(ptypes instanceof CString) {
-					interest.add(ptypes.val());
-				} else if(ptypes instanceof CArray) {
+				Mixed ptypes = that.seval(types, env);
+				if(ptypes.isInstanceOf(CString.class)) {
+					interest.add(FullyQualifiedClassName.forName(ptypes.val(), t, env));
+				} else if(ptypes.isInstanceOf(CArray.class)) {
 					CArray ca = (CArray) ptypes;
 					for(int i = 0; i < ca.size(); i++) {
-						interest.add(ca.get(i, t).val());
+						interest.add(FullyQualifiedClassName.forName(ca.get(i, t).val(), t, env));
 					}
 				} else {
 					throw new CRECastException("Expected argument 4 to be a string, or an array of strings.", t);
 				}
 			}
 
-			for(String in : interest) {
+			for(FullyQualifiedClassName in : interest) {
 				try {
 					NativeTypeList.getNativeClass(in);
 				} catch (ClassNotFoundException e) {
@@ -193,13 +194,39 @@ public class Exceptions {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
 		@Override
 		public boolean useSpecialExec() {
 			return true;
+		}
+
+		@Override
+		public List<Boolean> isBranch(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>();
+			ret.add(true);
+			if(children.size() == 2) {
+				ret.add(true);
+			} else if(children.size() == 3) {
+				ret.add(false);
+				ret.add(true);
+			} else if(children.size() == 4) {
+				ret.add(false);
+				ret.add(true);
+				ret.add(false);
+			}
+			return ret;
+		}
+
+		@Override
+		public List<Boolean> isScope(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>(children.size());
+			for(ParseTree child : children) {
+				ret.add(true);
+			}
+			return ret;
 		}
 
 	}
@@ -221,7 +248,7 @@ public class Exceptions {
 		@Override
 		public String docs() {
 			Set<Class<? extends CREThrowable>> e = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotationThatExtend(typeof.class, CREThrowable.class);
-			String exceptions = "\nValid Exceptions: ";
+			String exceptions = "\n";
 			List<String> ee = new ArrayList<>();
 			for(Class<? extends CREThrowable> c : e) {
 				String exceptionType = c.getAnnotation(typeof.class).value();
@@ -230,8 +257,10 @@ public class Exceptions {
 			Collections.sort(ee);
 			exceptions += StringUtils.Join(ee, ", ", ", and ");
 
-			return "nothing {exceptionType, msg, [causedBy] | exception} This function causes an exception to be thrown. exceptionType may be any valid exception type."
-					+ "\n\nThe core exception types are: " + exceptions + "\n\nThere may be other exception types as well, refer to the documentation of any extensions you have installed.";
+			return "nothing {exceptionType, msg, [causedBy] | exception} This function causes an exception to be thrown."
+					+ " The exceptionType may be any valid exception type."
+					+ "\n\nThe core exception types are: " + exceptions
+					+ "\n\nThere may be other exception types as well, refer to the documentation of any extensions you have installed.";
 		}
 
 		@Override
@@ -245,8 +274,8 @@ public class Exceptions {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_1_2;
+		public MSVersion since() {
+			return MSVersion.V3_1_2;
 		}
 
 		@Override
@@ -262,23 +291,22 @@ public class Exceptions {
 //			return true;
 //		}
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length == 1) {
 				try {
 					// Exception type
 					// We need to reverse the excpetion into an object
-					throw ObjectGenerator.GetGenerator().exception(Static.getArray(args[0], t), t);
+					throw ObjectGenerator.GetGenerator().exception(Static.getArray(args[0], t), t, env);
 				} catch (ClassNotFoundException ex) {
 					throw new CRECastException(ex.getMessage(), t);
 				}
 			} else {
 				if(args[0] instanceof CNull) {
-					CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR, "Uncatchable exceptions are no longer supported.", t);
 					throw new CRECastException("An exception type must be specified", t);
 				}
 				Class<? extends Mixed> c;
 				try {
-					c = NativeTypeList.getNativeClass(args[0].val());
+					c = NativeTypeList.getNativeClass(FullyQualifiedClassName.forName(args[0].val(), t, env));
 				} catch (ClassNotFoundException ex) {
 					throw new CREFormatException("Expected a valid exception type, but found \"" + args[0].val() + "\"", t);
 				}
@@ -318,8 +346,8 @@ public class Exceptions {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CClosure) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CClosure.class)) {
 				CClosure old = environment.getEnv(GlobalEnv.class).GetExceptionHandler();
 				environment.getEnv(GlobalEnv.class).SetExceptionHandler((CClosure) args[0]);
 				if(old == null) {
@@ -359,8 +387,8 @@ public class Exceptions {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -384,7 +412,7 @@ public class Exceptions {
 	@api
 	@hide("In general, this should never be used in the functional syntax, and should only be"
 			+ " automatically generated by the try keyword.")
-	public static class complex_try extends AbstractFunction implements Optimizable {
+	public static class complex_try extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
 
 		/**
 		 * Please do not change this name or make it final, it is used reflectively for testing
@@ -408,12 +436,12 @@ public class Exceptions {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			boolean exceptionCaught = false;
 			ConfigRuntimeException caughtException = null;
 			try {
@@ -435,7 +463,7 @@ public class Exceptions {
 							IVariableList varList = env.getEnv(GlobalEnv.class).GetVarList();
 							IVariable var = (IVariable) assign.getChildAt(1).getData();
 							// This should eventually be changed to be of the appropriate type. Unfortunately, that will
-							// require reworking basically everything. We need all functions to accept Mixed, instead of Construct.
+							// require reworking basically everything. We need all functions to accept Mixed, instead of Mixed.
 							// This will have to do in the meantime.
 							varList.set(new IVariable(CArray.TYPE, var.getVariableName(), e.getExceptionObject(), t));
 							parent.eval(nodes[i + 1], env);
@@ -461,7 +489,7 @@ public class Exceptions {
 						parent.eval(nodes[nodes.length - 1], env);
 					} catch (ConfigRuntimeException | FunctionReturnException ex) {
 						if(exceptionCaught && (doScreamError || Prefs.ScreamErrors() || Prefs.DebugMode())) {
-							CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.WARNING, "Exception was thrown and"
+							MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.WARNING, "Exception was thrown and"
 									+ " unhandled in any catch clause,"
 									+ " but is being hidden by a new exception being thrown in the finally clause.", t);
 							ConfigRuntimeException.HandleUncaughtException(caughtException, env);
@@ -491,17 +519,20 @@ public class Exceptions {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			List<CClassType> types = new ArrayList<>();
 			for(int i = 1; i < children.size() - 1; i += 2) {
 				// TODO: Eh.. should probably move this check into the keyword, since techincally
 				// catch (Exception @e = null) { } would work.
 				ParseTree assign = children.get(i);
-				if(assign.getChildAt(0).getData() instanceof CString) {
+				if(assign.getChildAt(0).getData().isInstanceOf(CString.class)) {
 					// This is an unknown exception type, because otherwise it would have been cast to a CClassType
 					throw new ConfigCompileException("Unknown class type: " + assign.getChildAt(0).getData().val(), t);
 				}
@@ -550,6 +581,29 @@ public class Exceptions {
 			return true;
 		}
 
+		@Override
+		public List<Boolean> isBranch(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>(children.size());
+			ret.add(true);
+			for(int i = 1; i < children.size() - 1; i += 2) {
+				ret.add(false);
+				ret.add(true);
+			}
+			if(children.size() % 2 == 0) {
+				ret.add(true);
+			}
+			return ret;
+		}
+
+		@Override
+		public List<Boolean> isScope(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>(children.size());
+			for(ParseTree children1 : children) {
+				ret.add(true);
+			}
+			return ret;
+		}
+
 	}
 
 	@api
@@ -572,7 +626,7 @@ public class Exceptions {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			StackTraceManager stManager = environment.getEnv(GlobalEnv.class).GetStackTraceManager();
 			List<ConfigRuntimeException.StackTraceElement> elements = stManager.getCurrentStackTrace();
 			CArray ret = new CArray(t);
@@ -600,7 +654,7 @@ public class Exceptions {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override

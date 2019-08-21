@@ -2,7 +2,10 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.objects.ObjectModifier;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  *
@@ -11,7 +14,7 @@ import com.laytonsmith.core.CHVersion;
 public final class CVoid extends Construct implements Cloneable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("void");
+	public static final CClassType TYPE = CClassType.get(CVoid.class);
 
 	/**
 	 * Void values do not normally need to be duplicated, since they are immutable, and for values that have an unknown
@@ -59,7 +62,7 @@ public final class CVoid extends Construct implements Cloneable {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_0_1;
+		return MSVersion.V3_0_1;
 	}
 
 	@Override
@@ -72,4 +75,8 @@ public final class CVoid extends Construct implements Cloneable {
 		throw new RuntimeException("Cannot call getInterfaces on void");
 	}
 
+	@Override
+	public Set<ObjectModifier> getObjectModifiers() {
+		return EnumSet.of(ObjectModifier.FINAL);
+	}
 }

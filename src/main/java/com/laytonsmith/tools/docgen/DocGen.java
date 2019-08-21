@@ -2,28 +2,21 @@ package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Installer;
-import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
-import com.laytonsmith.core.constructs.CFunction;
-import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.extensions.ExtensionManager;
-import com.laytonsmith.core.functions.ExampleScript;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.tools.SimpleSyntaxHighlighter;
-import com.laytonsmith.tools.docgen.templates.Template;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -55,10 +48,10 @@ public class DocGen {
 			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
 			Installer.Install(CommandHelperFileLocations.getDefault().getConfigDirectory());
 			Prefs.init(CommandHelperFileLocations.getDefault().getPreferencesFile());
-			CHLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
+			MSLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
 			//StreamUtils.GetSystemOut().println(functions("wiki", api.Platforms.INTERPRETER_JAVA, true));
-			StreamUtils.GetSystemOut().println(examples("if", true));
+//			StreamUtils.GetSystemOut().println(examples("if", true));
 			//System.exit(0);
 			//events("wiki");
 			//StreamUtils.GetSystemOut().println(Template("persistence_network"));
@@ -70,115 +63,115 @@ public class DocGen {
 		}
 	}
 
-	public static String examples(String function, boolean staged) throws Exception {
-		FunctionBase fb = FunctionList.getFunction(new CFunction(function, Target.UNKNOWN));
-		if(fb instanceof Function) {
-			Function f = (Function) fb;
-			String restricted = (f instanceof Function && ((Function) f).isRestricted()) ? "<div style=\"background-color: red; font-weight: bold; text-align: center;\">Yes</div>"
-					: "<div style=\"background-color: green; font-weight: bold; text-align: center;\">No</div>";
-			String optimizationMessage = "None";
-			if(f instanceof Optimizable) {
-				Set<Optimizable.OptimizationOption> options = ((Optimizable) f).optimizationOptions();
-				List<String> list = new ArrayList<String>();
-				for(Optimizable.OptimizationOption option : options) {
-					list.add("[[CommandHelper/" + (staged ? "Staged/" : "") + "Optimizer#" + option.name() + "|" + option.name() + "]]");
-				}
-				optimizationMessage = StringUtils.Join(list, "<br />");
-			}
-			DocInfo di = new DocInfo(f.docs());
-			StringBuilder thrown = new StringBuilder();
-			if(f instanceof Function && ((Function) f).thrown() != null) {
-				List thrownList = Arrays.asList(((Function) f).thrown());
-				for(int i = 0; i < thrownList.size(); i++) {
-					String t = ((Class<? extends CREThrowable>) thrownList.get(i)).getAnnotation(typeof.class).value();
-					if(i != 0) {
-						thrown.append("<br />\n");
-					}
-					thrown.append("[[CommandHelper/Exceptions#").append(t).append("|").append(t).append("]]");
-				}
-			}
-			String tableUsages = di.originalArgs.replace("|", "<hr />");
-			String[] usages = di.originalArgs.split("\\|");
-			StringBuilder usageBuilder = new StringBuilder();
-			for(String usage : usages) {
-				usageBuilder.append("<pre>\n").append(f.getName()).append("(").append(usage.trim()).append(")\n</pre>");
-			}
-			StringBuilder exampleBuilder = new StringBuilder();
-			if(f.examples() != null && f.examples().length > 0) {
-				int count = 1;
-				//If the output was automatically generated, change the color of the pre
-				for(ExampleScript es : f.examples()) {
-					exampleBuilder.append("====Example ").append(count).append("====\n")
-							.append(es.getDescription()).append("\n\n"
-							+ "Given the following code:\n");
-					exampleBuilder.append(SimpleSyntaxHighlighter.Highlight(es.getScript(), true)).append("\n");
-					String style = "";
-					if(es.isAutomatic()) {
-						style = " style=\"background-color: #BDC7E9\"";
-						exampleBuilder.append("\n\nThe output would be:\n<pre");
-					} else {
-						exampleBuilder.append("\n\nThe output might be:\n<pre");
-					}
-					exampleBuilder.append(style).append(">").append(es.getOutput()).append("</pre>\n");
-					count++;
-				}
-			} else {
-				exampleBuilder.append("Sorry, there are no examples for this function! :(");
-			}
-
-			Class[] seeAlso = f.seeAlso();
-			String seeAlsoText = "";
-			if(seeAlso != null && seeAlso.length > 0) {
-				seeAlsoText += "===See Also===\n";
-				boolean first = true;
-				for(Class c : seeAlso) {
-					if(!first) {
-						seeAlsoText += ", ";
-					}
-					first = false;
-					if(Function.class.isAssignableFrom(c)) {
-						Function f2 = (Function) c.newInstance();
-						seeAlsoText += "<code>[[CommandHelper/" + (staged ? "Staged/" : "") + "API/" + f2.getName() + "|" + f2.getName() + "]]</code>";
-					} else if(Template.class.isAssignableFrom(c)) {
-						Template t = (Template) c.newInstance();
-						seeAlsoText += "[[CommandHelper/" + (staged ? "Staged/" : "") + t.getName() + "|Learning Trail: " + t.getDisplayName() + "]]";
-					} else {
-						throw new Error("Unsupported class found in @seealso annotation: " + c.getName());
-					}
-				}
-			}
-
-			Map<String, String> templateFields = new HashMap<>();
-			templateFields.put("function_name", f.getName());
-			templateFields.put("returns", di.ret);
-			templateFields.put("tableUsages", tableUsages);
-			templateFields.put("throws", thrown.toString());
-			templateFields.put("since", f.since().toString());
-			templateFields.put("restricted", restricted);
-			templateFields.put("optimizationMessage", optimizationMessage);
-			templateFields.put("description", di.extendedDesc == null ? di.desc : di.topDesc + "\n\n" + di.extendedDesc);
-			templateFields.put("usages", usageBuilder.toString());
-			templateFields.put("examples", exampleBuilder.toString());
-			templateFields.put("staged", staged ? "Staged/" : "");
-			templateFields.put("seeAlso", seeAlsoText);
-
-			String template = StreamUtils.GetString(DocGenTemplates.class.getResourceAsStream("/templates/example_templates"));
-			//Find all the %%templates%% in the template
-			Matcher m = Pattern.compile("%%(.*?)%%").matcher(template);
-			try {
-				while(m.find()) {
-					String name = m.group(1);
-					String templateValue = templateFields.get(name);
-					template = template.replaceAll("%%" + Pattern.quote(name) + "%%", templateValue.replace("$", "\\$").replaceAll("\\'", "\\\\'"));
-				}
-				return template;
-			} catch (RuntimeException e) {
-				throw new RuntimeException("Caught a runtime exception while generating template for " + function, e);
-			}
-		} else {
-			throw new RuntimeException(function + " does not implement Function");
-		}
-	}
+//	private static String examples(String function, boolean staged) throws Exception {
+//		FunctionBase fb = FunctionList.getFunction(new CFunction(function, Target.UNKNOWN));
+//		if(fb instanceof Function) {
+//			Function f = (Function) fb;
+//			String restricted = (f instanceof Function && ((Function) f).isRestricted()) ? "<div style=\"background-color: red; font-weight: bold; text-align: center;\">Yes</div>"
+//					: "<div style=\"background-color: green; font-weight: bold; text-align: center;\">No</div>";
+//			String optimizationMessage = "None";
+//			if(f instanceof Optimizable) {
+//				Set<Optimizable.OptimizationOption> options = ((Optimizable) f).optimizationOptions();
+//				List<String> list = new ArrayList<String>();
+//				for(Optimizable.OptimizationOption option : options) {
+//					list.add("[[CommandHelper/" + (staged ? "Staged/" : "") + "Optimizer#" + option.name() + "|" + option.name() + "]]");
+//				}
+//				optimizationMessage = StringUtils.Join(list, "<br />");
+//			}
+//			DocInfo di = new DocInfo(f.docs());
+//			StringBuilder thrown = new StringBuilder();
+//			if(f instanceof Function && ((Function) f).thrown() != null) {
+//				List thrownList = Arrays.asList(((Function) f).thrown());
+//				for(int i = 0; i < thrownList.size(); i++) {
+//					String t = ((Class<? extends CREThrowable>) thrownList.get(i)).getAnnotation(typeof.class).value();
+//					if(i != 0) {
+//						thrown.append("<br />\n");
+//					}
+//					thrown.append("[[CommandHelper/Exceptions#").append(t).append("|").append(t).append("]]");
+//				}
+//			}
+//			String tableUsages = di.originalArgs.replace("|", "<hr />");
+//			String[] usages = di.originalArgs.split("\\|");
+//			StringBuilder usageBuilder = new StringBuilder();
+//			for(String usage : usages) {
+//				usageBuilder.append("<pre>\n").append(f.getName()).append("(").append(usage.trim()).append(")\n</pre>");
+//			}
+//			StringBuilder exampleBuilder = new StringBuilder();
+//			if(f.examples() != null && f.examples().length > 0) {
+//				int count = 1;
+//				//If the output was automatically generated, change the color of the pre
+//				for(ExampleScript es : f.examples()) {
+//					exampleBuilder.append("====Example ").append(count).append("====\n")
+//							.append(es.getDescription()).append("\n\n"
+//							+ "Given the following code:\n");
+//					exampleBuilder.append(SimpleSyntaxHighlighter.Highlight(es.getScript(), true)).append("\n");
+//					String style = "";
+//					if(es.isAutomatic()) {
+//						style = " style=\"background-color: #BDC7E9\"";
+//						exampleBuilder.append("\n\nThe output would be:\n<pre");
+//					} else {
+//						exampleBuilder.append("\n\nThe output might be:\n<pre");
+//					}
+//					exampleBuilder.append(style).append(">").append(es.getOutput()).append("</pre>\n");
+//					count++;
+//				}
+//			} else {
+//				exampleBuilder.append("Sorry, there are no examples for this function! :(");
+//			}
+//
+//			Class[] seeAlso = f.seeAlso();
+//			String seeAlsoText = "";
+//			if(seeAlso != null && seeAlso.length > 0) {
+//				seeAlsoText += "===See Also===\n";
+//				boolean first = true;
+//				for(Class c : seeAlso) {
+//					if(!first) {
+//						seeAlsoText += ", ";
+//					}
+//					first = false;
+//					if(Function.class.isAssignableFrom(c)) {
+//						Function f2 = (Function) c.newInstance();
+//						seeAlsoText += "<code>[[CommandHelper/" + (staged ? "Staged/" : "") + "API/" + f2.getName() + "|" + f2.getName() + "]]</code>";
+//					} else if(Template.class.isAssignableFrom(c)) {
+//						Template t = (Template) c.newInstance();
+//						seeAlsoText += "[[CommandHelper/" + (staged ? "Staged/" : "") + t.getName() + "|Learning Trail: " + t.getDisplayName() + "]]";
+//					} else {
+//						throw new Error("Unsupported class found in @seealso annotation: " + c.getName());
+//					}
+//				}
+//			}
+//
+//			Map<String, String> templateFields = new HashMap<>();
+//			templateFields.put("function_name", f.getName());
+//			templateFields.put("returns", di.ret);
+//			templateFields.put("tableUsages", tableUsages);
+//			templateFields.put("throws", thrown.toString());
+//			templateFields.put("since", f.since().toString());
+//			templateFields.put("restricted", restricted);
+//			templateFields.put("optimizationMessage", optimizationMessage);
+//			templateFields.put("description", di.extendedDesc == null ? di.desc : di.topDesc + "\n\n" + di.extendedDesc);
+//			templateFields.put("usages", usageBuilder.toString());
+//			templateFields.put("examples", exampleBuilder.toString());
+//			templateFields.put("staged", staged ? "Staged/" : "");
+//			templateFields.put("seeAlso", seeAlsoText);
+//
+//			String template = StreamUtils.GetString(DocGenTemplates.class.getResourceAsStream("/templates/example_templates"));
+//			//Find all the %%templates%% in the template
+//			Matcher m = Pattern.compile("%%(.*?)%%").matcher(template);
+//			try {
+//				while(m.find()) {
+//					String name = m.group(1);
+//					String templateValue = templateFields.get(name);
+//					template = template.replaceAll("%%" + Pattern.quote(name) + "%%", templateValue.replace("$", "\\$").replaceAll("\\'", "\\\\'"));
+//				}
+//				return template;
+//			} catch (RuntimeException e) {
+//				throw new RuntimeException("Caught a runtime exception while generating template for " + function, e);
+//			}
+//		} else {
+//			throw new RuntimeException(function + " does not implement Function");
+//		}
+//	}
 
 	/**
 	 * Returns the documentation for a single function.
@@ -191,7 +184,7 @@ public class DocGen {
 	 */
 	@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 	public static String functions(MarkupType type, api.Platforms platform, boolean staged) throws ConfigCompileException {
-		Set<FunctionBase> functions = FunctionList.getFunctionList(platform);
+		Set<FunctionBase> functions = FunctionList.getFunctionList(platform, null);
 		HashMap<Class, ArrayList<FunctionBase>> functionlist = new HashMap<Class, ArrayList<FunctionBase>>();
 		StringBuilder out = new StringBuilder();
 		for(FunctionBase f : functions) {
@@ -521,7 +514,6 @@ public class DocGen {
 						.replaceAll("<string match>", "&lt;String Match&gt;")
 						.replaceAll("<boolean match>", "&lt;Boolean Match&gt;")
 						.replaceAll("<regex>", "&lt;Regex&gt;")
-						.replaceAll("<item match>", "&lt;Item Match&gt;")
 						.replaceAll("<location match>", "&lt;Location Match&gt;")
 						.replaceAll("<math match>", "&lt;Math Match&gt;")
 						.replaceAll("<macro>", "&lt;Macro&gt;")
@@ -531,7 +523,6 @@ public class DocGen {
 						.replaceAll("<string match>", "[[CommandHelper/Events/Prefilters#String Match|String Match]]")
 						.replaceAll("<boolean match>", "[[CommandHelper/Events/Prefilters#Boolean Match|Boolean Match]]")
 						.replaceAll("<regex>", "[[CommandHelper/Events/Prefilters#Regex|Regex]]")
-						.replaceAll("<item match>", "[[CommandHelper/Events/Prefilters#Item Match|Item Match]]")
 						.replaceAll("<location match>", "[[CommandHelper/Events/Prefilters#Location Match|Location Match]]")
 						.replaceAll("<math match>", "[[CommandHelper/Events/Prefilters#Math Match|Math Match]]")
 						.replaceAll("<macro>", "[[CommandHelper/Events/Prefilters#Macro|Macro]]")
@@ -541,7 +532,6 @@ public class DocGen {
 						.replaceAll("<string match>", "<String Match>")
 						.replaceAll("<boolean match>", "<Boolean Match>")
 						.replaceAll("<regex>", "<Regex>")
-						.replaceAll("<item match>", "<Item Match>")
 						.replaceAll("<location match>", "<Location Match>")
 						.replaceAll("<math match>", "<Math Match>")
 						.replaceAll("<macro>", "<Macro>")
@@ -781,6 +771,8 @@ public class DocGen {
 					desc = topDesc = parts[0].trim();
 					extendedDesc = parts[1].trim();
 				}
+			} else {
+				throw new IllegalArgumentException("Could not generate DocInfo from string: " + doc);
 			}
 			args = originalArgs.replaceAll("\\|", "<hr />").replaceAll("\\[(.*?)\\]", "<strong>[</strong>$1<strong>]</strong>");
 		}

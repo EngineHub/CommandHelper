@@ -9,16 +9,19 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
@@ -26,10 +29,11 @@ import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
-import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -39,79 +43,6 @@ public class Echoes {
 
 	public static String docs() {
 		return "These functions allow you to echo information to the screen";
-	}
-
-	@api(environments = {CommandHelperEnvironment.class})
-	@noboilerplate
-	public static class die extends AbstractFunction implements Optimizable {
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{Integer.MAX_VALUE};
-		}
-
-		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException {
-			if(args.length == 0) {
-				throw new CancelCommandException("", t);
-			}
-			StringBuilder b = new StringBuilder();
-			for(Construct arg : args) {
-				b.append(arg.val());
-			}
-			try {
-				if(env.hasEnv(CommandHelperEnvironment.class)) {
-					Static.SendMessage(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), b.toString(), t);
-				} else {
-					String mes = Static.MCToANSIColors(b.toString());
-					if(mes.contains("\033")) {
-						//We have terminal colors, we need to reset them at the end
-						mes += TermColors.reset();
-					}
-					StreamUtils.GetSystemOut().println(mes);
-				}
-			} finally {
-				throw new CancelCommandException("", t);
-			}
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{};
-		}
-
-		@Override
-		public String getName() {
-			return "die";
-		}
-
-		@Override
-		public String docs() {
-			return "nothing {[var1, var2...,]} Kills the command immediately, without completing it. A message is"
-					+ " optional, but if provided, displayed to the user.";
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(
-					OptimizationOption.TERMINAL
-			);
-		}
 	}
 
 	//Technically it needs CommandHelperEnvironment, but we have special exception handling in case we're running
@@ -131,9 +62,9 @@ public class Echoes {
 		}
 
 		@Override
-		public Construct exec(final Target t, Environment env, final Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, Environment env, final Mixed... args) throws ConfigRuntimeException {
 			StringBuilder b = new StringBuilder();
-			for(Construct arg : args) {
+			for(Mixed arg : args) {
 				b.append(arg.val());
 			}
 			if(env.hasEnv(CommandHelperEnvironment.class)) {
@@ -167,8 +98,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -192,7 +123,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREInsufficientArgumentsException("You must send at least 2 arguments to tmsg", t);
 			}
@@ -228,8 +159,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -242,8 +173,8 @@ public class Echoes {
 	public static class title extends AbstractFunction {
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_2;
+		public MSVersion since() {
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -280,7 +211,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			int fadein = 10;
 			int stay = 70;
@@ -301,7 +232,7 @@ public class Echoes {
 				fadeout = Static.getInt32(args[4 + offset], t);
 			}
 
-			player.sendTitle(args[offset].nval(), args[1 + offset].nval(), fadein, stay, fadeout);
+			player.sendTitle(Construct.nval(args[offset]), Construct.nval(args[1 + offset]), fadein, stay, fadeout);
 			return CVoid.VOID;
 		}
 	}
@@ -332,9 +263,9 @@ public class Echoes {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String color = null;
-			String val = args[0].nval();
+			String val = Construct.nval(args[0]);
 			if(val == null) {
 				return new CString(MCChatColor.WHITE.toString(), t);
 			}
@@ -443,8 +374,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -491,8 +422,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -501,7 +432,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CString(MCChatColor.stripColor(args[0].val()), t);
 		}
 
@@ -521,7 +452,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Construct exec(final Target t, final Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(p != null) {
 				p.chat(args[0].val());
@@ -549,8 +480,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -590,12 +521,12 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_2;
+		public MSVersion since() {
+			return MSVersion.V3_0_2;
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			final MCPlayer player = Static.GetPlayer(args[0], t);
 			player.chat(args[1].val());
 			return CVoid.VOID;
@@ -623,9 +554,14 @@ public class Echoes {
 
 		@Override
 		public String docs() {
-			return "void {message, [permission] | message, [players]} Broadcasts a message to all or some players."
-					+ " If permission is given, only players with that permission will see the broadcast."
-					+ " If an array is given, only players in the list will see the broadcast.";
+			return "void {message, [permission] | message, [recipients]} Broadcasts a message to all or some players"
+					+ " and/or console."
+					+ " If permission is given, only players with that permission and console will see the broadcast."
+					+ " If an array of recipients is given, only online players in the list will see the broadcast."
+					+ " Console will receive the broadcast only when the array contains case-insensitive '~console'."
+					+ " Offline players and duplicate recipients in the list will be ignored."
+					+ " If permission/recipients is null, all players and console will see the broadcast."
+					+ " Throws FormatException when the given recipients array is associative.";
 		}
 
 		@Override
@@ -639,36 +575,52 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			final MCServer server = Static.getServer();
-			String permission = null;
-			if(args.length == 2) {
-				if(args[1] instanceof CArray) {
-					CArray array = (CArray) args[1];
-					if(!array.isAssociative()) {
-						for(Construct p : array.asList()) {
-							try {
-								Static.GetPlayer(p, t).sendMessage(args[0].val());
-							} catch (CREPlayerOfflineException cre) {
-								// ignore offline players
-							}
-						}
-						return CVoid.VOID;
-					}
-					throw new CREFormatException("Expected a normal array or permission as the second parameter.", t);
-				}
-				permission = args[1].nval();
-			}
-			if(permission == null) {
+
+			// Handle "broadcast(message, [null])".
+			if(args.length == 1 || Construct.nval(args[1]) == null) { // args.length can only be 1 or 2 due to the numArgs().
 				server.broadcastMessage(args[0].val());
-			} else {
-				server.broadcastMessage(args[0].val(), permission);
+				return CVoid.VOID;
 			}
+
+			// Handle "broadcast(message, recipientsArray)".
+			if(args[1].isInstanceOf(CArray.class)) {
+
+				// Get the CArray and validate that it is non-associative.
+				CArray array = (CArray) args[1];
+				if(array.isAssociative()) {
+					throw new CREFormatException(
+							"Expected a non-associative array or permission as the second parameter.", t);
+				}
+
+				// Get the recipients from the array.
+				Set<MCCommandSender> recipients = new HashSet<>();
+				for(Mixed p : array.asList()) {
+					if(p.val().equalsIgnoreCase("~console")) {
+						recipients.add(server.getConsole());
+					} else {
+						try {
+							recipients.add(Static.GetPlayer(p, t));
+						} catch (CREPlayerOfflineException cre) {
+							// Ignore offline players.
+						}
+					}
+				}
+
+				// Perform the broadcast and return cvoid.
+				server.broadcastMessage(args[0].val(), recipients);
+				return CVoid.VOID;
+			}
+
+			// Handle "broadcast(message, permission)".
+			String permission = Construct.nval(args[1]);
+			server.broadcastMessage(args[0].val(), permission);
 			return CVoid.VOID;
 		}
 
@@ -695,8 +647,10 @@ public class Echoes {
 
 		@Override
 		public String docs() {
-			return "void {message, [prefix]} Logs a message to the console. If prefix is true, prepends \"CommandHelper:\""
-					+ " to the message. Default is true.";
+			return "void {message, [prefix]} Logs a message to the console. If prefix is true, prepends "
+					+ "\"CommandHelper:\""
+					+ " to the message. Default is true. If you wish to set the default value of prefix to false,"
+					+ " use set_runtime_setting('function.console.prefix_default', false).";
 		}
 
 		@Override
@@ -710,17 +664,19 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_2;
+		public MSVersion since() {
+			return MSVersion.V3_0_2;
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String mes = Static.MCToANSIColors(args[0].val());
-			boolean prefix = true;
+			boolean prefix = ArgumentValidation.getBooleanish(env.getEnv(GlobalEnv.class)
+					.GetRuntimeSetting("function.console.prefix_default", CBoolean.TRUE), t);
 			if(args.length > 1) {
-				prefix = Static.getBoolean(args[1], t);
+				prefix = ArgumentValidation.getBoolean(args[1], t);
 			}
+
 			if(prefix) {
 				mes = "CommandHelper: " + mes;
 			}
@@ -760,13 +716,13 @@ public class Echoes {
 		color color = new color();
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Construct text = args[0];
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			Mixed text = args[0];
 			String symbol = "&";
 			if(args.length == 2) {
 				symbol = args[1].val();
 			}
-			if(text instanceof CString) {
+			if(text.isInstanceOf(CString.class)) {
 				String stext = text.val();
 				StringBuilder b = new StringBuilder();
 				int sl = symbol.length();
@@ -835,8 +791,8 @@ public class Echoes {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override

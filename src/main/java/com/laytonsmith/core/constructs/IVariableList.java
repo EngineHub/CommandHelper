@@ -1,7 +1,10 @@
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -27,25 +30,27 @@ public class IVariableList {
 		varList.put(v.getVariableName(), v);
 	}
 
-	public IVariable get(String name, Target t, boolean bypassAssignedCheck) {
-		if(!varList.containsKey(name)) {
-			this.set(new IVariable(Auto.TYPE, name, CNull.UNDEFINED, t));
-		}
+	public IVariable get(String name, Target t, boolean bypassAssignedCheck, Environment env) {
 		IVariable v = varList.get(name);
+		if(v == null) {
+			v = new IVariable(Auto.TYPE, name, CNull.UNDEFINED, t);
+			this.set(v);
+		}
 
 		// TODO: Once the compiler can handle this, this check should be moved out of here,
 		// and moved into the compiler. In strict mode, it will be a compiler error, in
 		// non-strict mode it will be a compiler warning.
 		// ==, not .equals
-		if(v.ival() == CNull.UNDEFINED && !bypassAssignedCheck) {
-			CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.ERROR, "Using undefined variable: " + name, t);
+		if(v.ival() == CNull.UNDEFINED && !bypassAssignedCheck
+				&& env.getEnv(GlobalEnv.class).GetFlag("no-check-undefined") == null) {
+			MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, "Using undefined variable: " + name, t);
 		}
 		v.setTarget(t);
 		return v;
 	}
 
-	public IVariable get(String name, Target t) {
-		return get(name, t, false);
+	public IVariable get(String name, Target t, Environment env) {
+		return get(name, t, false, env);
 	}
 
 	/**
@@ -79,7 +84,7 @@ public class IVariableList {
 	@Override
 	public IVariableList clone() {
 		IVariableList clone = new IVariableList();
-		clone.varList = new HashMap<String, IVariable>(varList);
+		clone.varList = new HashMap<>(varList);
 		return clone;
 	}
 

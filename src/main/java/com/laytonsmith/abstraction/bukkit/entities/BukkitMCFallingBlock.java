@@ -16,23 +16,13 @@ public class BukkitMCFallingBlock extends BukkitMCEntity implements MCFallingBlo
 	}
 
 	@Override
-	public byte getBlockData() {
-		return f.getBlockData();
-	}
-
-	@Override
-	public int getBlockId() {
-		return f.getBlockId();
-	}
-
-	@Override
 	public boolean getDropItem() {
 		return f.getDropItem();
 	}
 
 	@Override
 	public MCMaterial getMaterial() {
-		return new BukkitMCMaterial(f.getMaterial());
+		return new BukkitMCMaterial(f.getBlockData().getMaterial());
 	}
 
 	@Override
@@ -47,11 +37,7 @@ public class BukkitMCFallingBlock extends BukkitMCEntity implements MCFallingBlo
 
 	@Override
 	public void setHurtEntities(boolean hurt) {
-		try {
-			f.setHurtEntities(hurt);
-		} catch (NoSuchMethodError ex) {
-			// probably prior to 1.8.8
-		}
+		f.setHurtEntities(hurt);
 	}
 
 	@Override

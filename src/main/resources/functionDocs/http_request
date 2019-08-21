@@ -59,9 +59,9 @@ following fields set:
 * string name - The name of this cookie
 * string value - The value of this cookie
 * string path - The path under which this cookie applies in the domain
-* int expiration - When the cookie expires. 0 means it never expires, because it is a session cookie.
-The function will not send expired cookies, and will remove them from the cookie jar automatically. 
-Session cookies cannot technically expire, and must be removed manually by you, if you are storing cookies
+* int expiration - When the cookie expires. 0 means it never expires, because it is a session cookie. \
+The function will not send expired cookies, and will remove them from the cookie jar automatically. \
+Session cookies cannot technically expire, and must be removed manually by you, if you are storing cookies \
 for a long period of time.
 * boolean httpOnly - If true, this cookie shouldn't be provided to clients. In practice, this isn't very useful however.
 * boolean secureOnly - If true, this cookie only applies in https, not http.
@@ -80,9 +80,11 @@ care if a page redirects a few times first, and only want the resulting page.
 response is returned to this closure. The closure should accept 1 parameter, which will be the HTTP response object,
 which contains the following fields:
 
-* string body - The body content of the response. This is usually the only thing of interest in the response.
-* array headers - An associative array of arrays of the returned headers.
-Often times headers are not repeated, so @response['headers']['Server'][0] for instance will be acceptable.
+* string body - The string body content of the response. This is usually the only thing of interest in the response. \
+This will not be present if binary was true.
+* byte_array data - The binary content of the response. This will only be present if binary was true.
+* array headers - An associative array of arrays of the returned headers. \
+Often times headers are not repeated, so @response['headers']['Server'][0] for instance will be acceptable. \
 Headers are not usually needed for non-referencial purposes anyways.
 * int responseCode - The response code of the request, for instance 404 for pages that aren't found.
 * int responseText - The response text of the request, for instance "Not Found" for a 404
@@ -90,8 +92,9 @@ Headers are not usually needed for non-referencial purposes anyways.
 * boolean error - This bit is set to true if a 4xx or 5xx response code was received.
 
 Note that it is considered a success even if the request results in a non 200 response, the error
-handler is only called if the connection fails entirely. To check if the HTTP response is a valid
-response though, you can check the error bit, or check the responseCode yourself.
+handler is only called if the connection fails entirely, and no response could be retrieved from the server. 
+To check if the HTTP response is a considered an error response, you can check the error bit, or check the responseCode
+yourself.
 |-
 | error
 | closure
@@ -120,7 +123,8 @@ of web requests that can be running concurrently.
 | boolean
 | true
 | Automatically adds the default headers to this request, unless specifically overridden. Note that some headers
-simply cannot be overridden, for instance Host and User-Agent will ALWAYS be set. 
+simply cannot be overridden, for instance Host and User-Agent will ALWAYS be set. The default headers are: 
+<%DEFAULT_HEADERS%>
 |- 
 | trustStore
 | boolean or array
@@ -144,8 +148,25 @@ trusted.
 | string
 | null
 | If this is not null, the file will be downloaded instead of returned, and saved to the specified location on
-disk. Note that this is currently only enabled from cmdline mode, but will be added in general at a later date.
+disk. The contents are saved to disk as is, so the value of binary is not relevant, and is ignored.
+Note that this is currently only enabled from cmdline mode, but will be added in general at a later date.
 If this setting is set from non-cdmline mode, it is silently ignored.
+|-
+| downloadStrategy
+| FileWriteMode
+| SAFE_WRITE
+| If download is set, then this is the download strategy that will be used. OVERWRITE, APPEND, or SAFE_WRITE.
+|-
+| textEncoding
+| string
+| UTF-8
+| If binary is false, then this is the character encoding to assume.
+|-
+| binary
+| boolean
+| false
+| If true, a byte_array of the content is returned, instead of a string. If false, then the textEncoding parameter
+decides on the encoding format to use.
 |-
 | blocking
 | boolean

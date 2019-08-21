@@ -2,7 +2,7 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import java.math.BigDecimal;
 
@@ -10,11 +10,11 @@ import java.math.BigDecimal;
  *
  * @author cailin
  */
-@typeof("decimal")
+@typeof("ms.lang.decimal")
 public class CDecimal extends CPrimitive implements Cloneable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("decimal");
+	public static final CClassType TYPE = CClassType.get(CDecimal.class);
 
 	private final BigDecimal val;
 
@@ -30,6 +30,11 @@ public class CDecimal extends CPrimitive implements Cloneable {
 	public CDecimal(double value, Target t) {
 		super(Double.toString(value), ConstructType.DOUBLE, t);
 		val = new BigDecimal(value);
+	}
+
+	public CDecimal(BigDecimal value, Target t) {
+		super(value.toPlainString(), ConstructType.INT, t);
+		val = value;
 	}
 
 	@Override
@@ -60,7 +65,7 @@ public class CDecimal extends CPrimitive implements Cloneable {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_2;
+		return MSVersion.V3_3_2;
 	}
 
 	@Override
@@ -70,7 +75,17 @@ public class CDecimal extends CPrimitive implements Cloneable {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{};
+		return CClassType.EMPTY_CLASS_ARRAY;
+	}
+
+	@Override
+	public CDecimal duplicate() {
+		return new CDecimal(val, getTarget());
+	}
+
+	@Override
+	public boolean getBooleanValue(Target t) {
+		return val.compareTo(new BigDecimal(0)) != 0;
 	}
 
 }

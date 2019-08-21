@@ -2,8 +2,11 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.MCBlockStateMeta;
+import com.laytonsmith.core.Static;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.meta.BlockStateMeta;
+
+import java.util.logging.Level;
 
 public class BukkitMCBlockStateMeta extends BukkitMCItemMeta implements MCBlockStateMeta {
 
@@ -16,12 +19,16 @@ public class BukkitMCBlockStateMeta extends BukkitMCItemMeta implements MCBlockS
 
 	@Override
 	public MCBlockState getBlockState() {
+		BlockState bs;
 		try {
-			return BukkitConvertor.BukkitGetCorrectBlockState(bsm.getBlockState());
-		} catch (IllegalStateException ex) {
-			// BlockStateMeta that cannot get a BlockState
+			bs = bsm.getBlockState();
+		} catch (Exception ex) {
+			// Broken server implementation.
+			Static.getLogger().log(Level.WARNING, ex.getMessage() + " when"
+					+ " trying to get the BlockState from " + bsm.toString());
 			return null;
 		}
+		return BukkitConvertor.BukkitGetCorrectBlockState(bs);
 	}
 
 	@Override

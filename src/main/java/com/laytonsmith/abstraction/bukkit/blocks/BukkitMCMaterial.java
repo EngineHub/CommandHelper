@@ -1,10 +1,8 @@
 package com.laytonsmith.abstraction.bukkit.blocks;
 
-import com.laytonsmith.abstraction.MCMaterialData;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
-import com.laytonsmith.abstraction.bukkit.BukkitMCMaterialData;
 import org.bukkit.Material;
-import org.bukkit.material.MaterialData;
 
 public class BukkitMCMaterial implements MCMaterial {
 
@@ -15,6 +13,11 @@ public class BukkitMCMaterial implements MCMaterial {
 	}
 
 	@Override
+	public MCBlockData createBlockData() {
+		return new BukkitMCBlockData(m.createBlockData());
+	}
+
+	@Override
 	public short getMaxDurability() {
 		return this.m.getMaxDurability();
 	}
@@ -22,11 +25,6 @@ public class BukkitMCMaterial implements MCMaterial {
 	@Override
 	public int getType() {
 		return m.getId();
-	}
-
-	@Override
-	public MCMaterialData getData() {
-		return new BukkitMCMaterialData(new MaterialData(m));
 	}
 
 	@Override
@@ -82,6 +80,26 @@ public class BukkitMCMaterial implements MCMaterial {
 	@Override
 	public boolean isTransparent() {
 		return m.isTransparent();
+	}
+
+	@Override
+	public boolean isInteractable() {
+		return m.isInteractable();
+	}
+
+	@Override
+	public boolean isLegacy() {
+		return m.isLegacy();
+	}
+
+	@Override
+	public float getHardness() {
+		return m.getHardness();
+	}
+
+	@Override
+	public float getBlastResistance() {
+		return m.getBlastResistance();
 	}
 
 	@Override

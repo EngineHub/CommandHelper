@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("Art")
+@MEnum("com.commandhelper.Art")
 public enum MCArt {
 	KEBAB,
 	AZTEC,
@@ -27,7 +27,7 @@ public enum MCArt {
 	FIGHTERS,
 	POINTER,
 	PIGSCENE,
-	BURNINGSKULL,
+	BURNING_SKULL,
 	SKELETON,
-	DONKEYKONG
+	DONKEY_KONG
 }

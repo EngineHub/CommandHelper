@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,11 +38,12 @@ public abstract class AbstractDataSource implements DataSource {
 		}
 	}
 
-	protected AbstractDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions mixinOptions) throws DataSourceException {
+	protected AbstractDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions mixinOptions)
+			throws DataSourceException {
 		this.uri = uri;
 		this.mixinOptions = mixinOptions;
 		setInvalidModifiers();
-		DataSourceModifier[] implicit = this.implicitModifiers();
+		EnumSet<DataSourceModifier> implicit = this.implicitModifiers();
 		if(implicit != null) {
 			for(DataSourceModifier dsm : this.implicitModifiers()) {
 				addModifier(dsm);
@@ -59,7 +59,8 @@ public abstract class AbstractDataSource implements DataSource {
 	 */
 	protected ConnectionMixin getConnectionMixin() throws DataSourceException {
 		if(connectionMixin == null) {
-			connectionMixin = ConnectionMixinFactory.GetConnectionMixin(uri, modifiers, mixinOptions, getBlankDataModel());
+			connectionMixin = ConnectionMixinFactory.GetConnectionMixin(uri, modifiers, mixinOptions,
+					getBlankDataModel());
 		}
 		return connectionMixin;
 	}
@@ -83,6 +84,9 @@ public abstract class AbstractDataSource implements DataSource {
 	 * By default, we use the naive method to get the values, by getting the keys in step 1, then performing x gets to
 	 * retrieve the values. This can probably be optimized to reduce the number of get calls in some data sources, and
 	 * should be overridden if so.
+	 * @param leadKey
+	 * @return
+	 * @throws com.laytonsmith.persistence.DataSourceException
 	 */
 	protected Map<String[], String> getValues0(String[] leadKey) throws DataSourceException {
 		Map<String[], String> map = new HashMap<>();
@@ -115,10 +119,12 @@ public abstract class AbstractDataSource implements DataSource {
 
 	protected abstract void startTransaction0(DaemonManager dm);
 
-	protected abstract void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException, IOException;
+	protected abstract void stopTransaction0(DaemonManager dm, boolean rollback) throws DataSourceException,
+			IOException;
 
 	@Override
-	public final boolean set(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
+	public final boolean set(DaemonManager dm, String[] key, String value) throws ReadOnlyException,
+			DataSourceException, IOException {
 		checkSet(key);
 		return set0(dm, key, value);
 	}
@@ -127,6 +133,7 @@ public abstract class AbstractDataSource implements DataSource {
 	 * Subclasses should implement this, instead of set(), as our version of set() does some standard validation on the
 	 * input.
 	 *
+	 * @param dm
 	 * @param key
 	 * @param value
 	 * @return
@@ -134,7 +141,8 @@ public abstract class AbstractDataSource implements DataSource {
 	 * @throws DataSourceException
 	 * @throws IOException
 	 */
-	protected abstract boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException, DataSourceException, IOException;
+	protected abstract boolean set0(DaemonManager dm, String[] key, String value) throws ReadOnlyException,
+			DataSourceException, IOException;
 
 	/**
 	 * Subclasses should implement this, instead of get(), as our version of get() does some standard validation on the
@@ -142,6 +150,7 @@ public abstract class AbstractDataSource implements DataSource {
 	 *
 	 * @param key
 	 * @return
+	 * @throws com.laytonsmith.persistence.DataSourceException
 	 */
 	protected abstract String get0(String[] key) throws DataSourceException;
 
@@ -149,11 +158,13 @@ public abstract class AbstractDataSource implements DataSource {
 	 * The default implementation of string simply walks through keySet, and manually joins the keys together. If an
 	 * implementation can provide a more efficient method, this should be overridden.
 	 *
+	 * @param keyBase
 	 * @return
+	 * @throws com.laytonsmith.persistence.DataSourceException
 	 */
 	@Override
 	public Set<String> stringKeySet(String[] keyBase) throws DataSourceException {
-		Set<String> keys = new TreeSet<String>();
+		Set<String> keys = new TreeSet<>();
 		for(String[] key : keySet(keyBase)) {
 			keys.add(StringUtils.Join(key, "."));
 		}
@@ -162,7 +173,7 @@ public abstract class AbstractDataSource implements DataSource {
 
 	@Override
 	public Set<String[]> getNamespace(String[] namespace) throws DataSourceException {
-		Set<String[]> list = new HashSet<String[]>();
+		Set<String[]> list = new HashSet<>();
 		String ns = StringUtils.Join(namespace, ".");
 		for(String key : stringKeySet(namespace)) {
 			if("".equals(ns) //Blank string; this means they want it to always match.
@@ -175,11 +186,11 @@ public abstract class AbstractDataSource implements DataSource {
 	}
 
 	private void setInvalidModifiers() {
-		DataSourceModifier[] invalid = this.invalidModifiers();
+		EnumSet<DataSourceModifier> invalid = this.invalidModifiers();
 		if(invalid == null) {
 			return;
 		}
-		this.invalidModifiers = EnumSet.copyOf(Arrays.asList(invalid));
+		this.invalidModifiers = EnumSet.copyOf(invalid);
 	}
 
 	@Override
@@ -221,7 +232,8 @@ public abstract class AbstractDataSource implements DataSource {
 	}
 
 	@Override
-	public final void clearKey(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
+	public final void clearKey(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException,
+			IOException {
 		checkSet(key);
 		clearKey0(dm, key);
 	}
@@ -235,7 +247,8 @@ public abstract class AbstractDataSource implements DataSource {
 	 * @throws DataSourceException
 	 * @throws IOException
 	 */
-	protected void clearKey0(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException, IOException {
+	protected void clearKey0(DaemonManager dm, String[] key) throws ReadOnlyException, DataSourceException,
+			IOException {
 		set(dm, key, null);
 	}
 
@@ -250,19 +263,23 @@ public abstract class AbstractDataSource implements DataSource {
 		if(invalidModifiers != null) {
 			for(DataSourceModifier dsm : invalidModifiers) {
 				if(modifiers.contains(dsm)) {
-					errors.add(uri.toString() + " contains the modifier " + dsm.getName() + ", which is not applicable. This will be ignored.");
+					errors.add(uri.toString() + " contains the modifier " + dsm.getName() + ", which is not applicable."
+							+ " This will be ignored.");
 				}
 			}
 		}
 		if(modifiers.contains(DataSourceModifier.PRETTYPRINT) && modifiers.contains(DataSourceModifier.READONLY)) {
-			errors.add(uri.toString() + " contains both prettyprint and readonly modifiers, which doesn't make sense, because we cannot write out the file; prettyprint will be ignored.");
+			errors.add(uri.toString() + " contains both prettyprint and readonly modifiers, which doesn't make sense,"
+					+ " because we cannot write out the file; prettyprint will be ignored.");
 			modifiers.remove(DataSourceModifier.PRETTYPRINT);
 		}
-		if((modifiers.contains(DataSourceModifier.HTTP) || modifiers.contains(DataSourceModifier.HTTPS)) && modifiers.contains(DataSourceModifier.SSH)) {
+		if((modifiers.contains(DataSourceModifier.HTTP) || modifiers.contains(DataSourceModifier.HTTPS))
+				&& modifiers.contains(DataSourceModifier.SSH)) {
 			errors.add(uri.toString() + " contains both http(s) and ssh modifiers.");
 		}
 		if(modifiers.contains(DataSourceModifier.HTTP) && modifiers.contains(DataSourceModifier.HTTPS)) {
-			errors.add(uri.toString() + " contains both http and https modifiers. Because these are mutually exclusive, this doesn't make sense, and https will be assumed.");
+			errors.add(uri.toString() + " contains both http and https modifiers. Because these are mutually exclusive,"
+					+ " this doesn't make sense, and https will be assumed.");
 			modifiers.remove(DataSourceModifier.HTTP);
 		}
 		if(!errors.isEmpty()) {
@@ -275,16 +292,21 @@ public abstract class AbstractDataSource implements DataSource {
 		return modifiers.contains(modifier);
 	}
 
+	private void checkKey(String[] key) {
+		for(String namespace : key) {
+			if("_".equals(namespace)) {
+				throw new IllegalArgumentException("In the key \"" + StringUtils.Join(key, ".") + ", the namespace"
+						+ " \"_\" is not allowed."
+						+ " (Namespaces may contain an underscore, but may not be just an underscore.)");
+			}
+		}
+	}
+
 	/**
 	 * This method checks to see if a set operation should simply throw a ReadOnlyException based on the modifiers.
 	 */
 	private void checkSet(String[] key) throws ReadOnlyException {
-		for(String namespace : key) {
-			if("_".equals(namespace)) {
-				throw new IllegalArgumentException("In the key \"" + StringUtils.Join(key, ".") + ", the namespace \"_\" is not allowed."
-						+ " (Namespaces may contain an underscore, but may not be just an underscore.)");
-			}
-		}
+		checkKey(key);
 		if(modifiers.contains(DataSourceModifier.READONLY)) {
 			throw new ReadOnlyException();
 		}
@@ -295,15 +317,7 @@ public abstract class AbstractDataSource implements DataSource {
 	 * will do so.
 	 */
 	private void checkGet(String[] key) throws DataSourceException {
-		for(String namespace : key) {
-			if("_".equals(namespace)) {
-				throw new IllegalArgumentException("In the key \"" + StringUtils.Join(key, ".") + ", the namespace \"_\" is not allowed."
-						+ " (Namespaces may contain an underscore, but may not be just an underscore.)");
-			}
-		}
-		if(this.getModifiers().contains(DataSource.DataSourceModifier.TRANSIENT)) {
-			this.populate();
-		}
+		checkKey(key);
 		if(hasModifier(DataSourceModifier.TRANSIENT)) {
 			populate();
 		}
@@ -316,7 +330,7 @@ public abstract class AbstractDataSource implements DataSource {
 
 	/**
 	 * Subclasses that need a certain type of file to be the "blank" version of a data model can override this. By
-	 * default, null is returned.
+	 * default, empty string is returned.
 	 *
 	 * @return
 	 */

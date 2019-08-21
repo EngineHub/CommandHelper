@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("SoundCategory")
+@MEnum("com.commandhelper.SoundCategory")
 public enum MCSoundCategory {
 	MASTER,
 	MUSIC,

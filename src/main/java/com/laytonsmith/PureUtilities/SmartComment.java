@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
  * annotations, embedded, and normal. An embedded annotation is a data transformation construct, and a normal annotation
  * is stored separately from the "body" of the comment, and multiple of the same annotation are allowed. Embedded
  * annotations are transformed at parse time, and you provide the callback to do the transformation. For instance, the
- * embedded annotation {&#64; code myCode} can be configured to return "&lt;code&gt;myCode&lt;/code&gt;" Newlines and
+ * embedded annotation {&#64;code myCode} can be configured to return "&lt;code&gt;myCode&lt;/code&gt;" Newlines and
  * spaces are preserved in the body of the comment, but newlines are not stored with annotation parameters.
  *
  */
@@ -25,8 +25,8 @@ public class SmartComment {
 	private static final String LINE_START = "[\\t ]*\\* ?";
 	private String raw;
 	private String body;
-	private Map<String, List<String>> annotations = new HashMap<String, List<String>>();
-	private Map<String, Replacement> rplcmnt = new HashMap<String, Replacement>();
+	private final Map<String, List<String>> annotations = new HashMap<>();
+	private final Map<String, Replacement> rplcmnt = new HashMap<>();
 
 	/**
 	 * Creates a new smart comment.
@@ -48,7 +48,7 @@ public class SmartComment {
 	 */
 	public SmartComment(String comment, Map<String, Replacement> replacements) {
 		if(replacements == null) {
-			replacements = new HashMap<String, Replacement>();
+			replacements = new HashMap<>();
 		}
 
 		//Remove the @ at the beginning, if present.
@@ -121,7 +121,7 @@ public class SmartComment {
 
 	private void addAnnotation(String name, String value) {
 		if(!annotations.containsKey(name)) {
-			annotations.put(name, new ArrayList<String>());
+			annotations.put(name, new ArrayList<>());
 		}
 		annotations.get(name).add(value);
 	}
@@ -145,7 +145,7 @@ public class SmartComment {
 		if(!annotation.startsWith("@")) {
 			annotation = "@" + annotation;
 		}
-		return new ArrayList<String>(annotations.get(annotation));
+		return new ArrayList<>(annotations.get(annotation));
 	}
 
 	public static interface Replacement {

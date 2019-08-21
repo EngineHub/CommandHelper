@@ -95,13 +95,13 @@ public class BukkitMCCommandSender implements MCCommandSender {
 	public List<String> getGroups() {
 		// As in https://github.com/sk89q/WorldEdit/blob/master/
 		// worldedit-bukkit/src/main/java/com/sk89q/wepif/DinnerPermsResolver.java#L112-L126
-		List<String> groupNames = new ArrayList<String>();
+		List<String> groupNames = new ArrayList<>();
 		for(PermissionAttachmentInfo permAttach : c.getEffectivePermissions()) {
 			String perm = permAttach.getPermission();
-			if(!(perm.startsWith(Static.groupPrefix) && permAttach.getValue())) {
+			if(!(perm.startsWith(Static.GROUP_PREFIX) && permAttach.getValue())) {
 				continue;
 			}
-			groupNames.add(perm.substring(Static.groupPrefix.length(), perm.length()));
+			groupNames.add(perm.substring(Static.GROUP_PREFIX.length(), perm.length()));
 		}
 		return groupNames;
 	}

@@ -5,7 +5,7 @@ generally causes the compiler to be more pedantic.
 
 {{Warning|text=Note, putting your files in strict mode may require more work when upgrading, as your scripts may no
 longer compile. Future additions to strict mode will be implemented, and if your scripts do not conform, you will
-have to upgrade them.}}
+have to upgrade them immediately.}}
 
 Conforming to strict mode has its advantages, however. Errors that would have gone unnoticed are highlighted much more
 quickly. Strict mode enforces better programming practices and clearer and cleaner code. Strict mode will be expanded
@@ -16,6 +16,12 @@ notice, however, they will then be added to this documentation.
 One guarantee is that code that is written to conform to strict mode will always run the same in non-strict mode.
 
 Strict mode can be enabled per file with the appropriate [[File_Options|file option]] or globally with a config setting.
+It can also be set as a runtime setting, but this will only benefit files that have not been compiled yet (includes,
+eval'd code, etc). To enable this runtime setting, use:
+
+<%CODE|
+set_runtime_setting('system.strict_mode.enabled', true);
+%>
 
 == No Bare Strings ==
 

@@ -2,16 +2,18 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.natives.interfaces.Booleanish;
+import com.laytonsmith.core.natives.interfaces.ValueType;
 
 /**
  *
  */
-@typeof("primitive")
-public abstract class CPrimitive extends Construct {
+@typeof("ms.lang.primitive")
+public abstract class CPrimitive extends Construct implements ValueType, Booleanish {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("primitive");
+	public static final CClassType TYPE = CClassType.get(CPrimitive.class);
 
 	public CPrimitive(String value, ConstructType type, Target t) {
 		super(value, type, t);
@@ -19,11 +21,13 @@ public abstract class CPrimitive extends Construct {
 
 	@Override
 	public CClassType[] getSuperclasses() {
+		// Implemented in the Runner
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public CClassType[] getInterfaces() {
+		// Implemented in the Runner
 		throw new UnsupportedOperationException();
 	}
 
@@ -34,7 +38,7 @@ public abstract class CPrimitive extends Construct {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_0_1;
+		return MSVersion.V3_0_1;
 	}
 
 }

@@ -3,13 +3,17 @@ package com.laytonsmith.tools;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Color;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.KeywordList;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.constructs.NativeTypeList;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -153,7 +157,8 @@ public final class SimpleSyntaxHighlighter {
 		return "</span>";
 	}
 
-	private String highlight() throws ConfigCompileException {
+	private String highlight() throws Exception {
+		Environment env = Static.GenerateStandaloneEnvironment(false);
 		TokenStream tokens = MethodScriptCompiler.lex(code, null, inPureMscript, true);
 		// take out the last token, which is always a newline
 		tokens.remove(tokens.size() - 1);
@@ -220,11 +225,17 @@ public final class SimpleSyntaxHighlighter {
 						out.append(getCloseSpan());
 						break;
 					case LIT:
-						if(NativeTypeList.getNativeTypeList().contains(t.val())) {
-							out.append(getOpenSpan(ElementTypes.OBJECT_TYPE));
-							out.append("{{object|").append(t.val()).append("}}");
-							out.append(getCloseSpan());
-						} else {
+						String lit = t.val();
+						try {
+							FullyQualifiedClassName fqcn = FullyQualifiedClassName.forName(lit, Target.UNKNOWN, env);
+							if(NativeTypeList.getNativeTypeList().contains(fqcn)) {
+								out.append(getOpenSpan(ElementTypes.OBJECT_TYPE));
+								out.append("{{object|").append(t.val()).append("}}");
+								out.append(getCloseSpan());
+							} else {
+								out.append(escapeLit(t.val()));
+							}
+						} catch (CRECastException e) {
 							out.append(escapeLit(t.val()));
 						}
 						break;
@@ -429,7 +440,7 @@ public final class SimpleSyntaxHighlighter {
 	 * @param code The plain text code
 	 * @return The HTML highlighted code
 	 */
-	public static String Highlight(String code, boolean inPureMscript) throws ConfigCompileException {
+	public static String Highlight(String code, boolean inPureMscript) throws Exception {
 		return new SimpleSyntaxHighlighter(CLASSES, code, inPureMscript).highlight();
 	}
 
@@ -441,7 +452,7 @@ public final class SimpleSyntaxHighlighter {
 	 * @param code The plain text code
 	 * @return The HTML highlighted code
 	 */
-	public static String Highlight(EnumMap<ElementTypes, Color> colors, String code, boolean inPureMscript) throws ConfigCompileException {
+	public static String Highlight(EnumMap<ElementTypes, Color> colors, String code, boolean inPureMscript) throws Exception {
 		return new SimpleSyntaxHighlighter(colors, code, inPureMscript).highlight();
 	}
 

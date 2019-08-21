@@ -10,13 +10,12 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
-import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
@@ -26,7 +25,6 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -37,13 +35,12 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.persistence.DataSourceException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -80,9 +77,9 @@ public class FileHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
-			if(!Static.InCmdLine(env)) {
+			if(!Static.InCmdLine(env, true)) {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
 				if(!Security.CheckSecurity(location)) {
@@ -94,10 +91,10 @@ public class FileHandling {
 				s = s.replaceAll("\n|\r\n", "\n");
 				return new CString(s, t);
 			} catch (Exception ex) {
-				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.INFO, "Could not read in file while attempting to find "
+				MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.INFO, "Could not read in file while attempting to find "
 						+ location.getAbsolutePath()
 						+ "\nFile " + (location.exists() ? "exists" : "does not exist"), t);
-				throw new CREIOException("File could not be read in.", t);
+				throw new CREIOException("File \"" + location + "\" could not be read in.", t);
 			}
 		}
 
@@ -120,8 +117,8 @@ public class FileHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -156,7 +153,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CNull.NULL;
 		}
 
@@ -180,7 +177,7 @@ public class FileHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -189,15 +186,12 @@ public class FileHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.get(0).isDynamic()) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded paths.", t);
-			}
-			Environment env;
-			try {
-				env = Static.GenerateStandaloneEnvironment();
-			} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
-				throw new ConfigCompileException(ex.getMessage(), t, ex);
 			}
 			String ret = new read().exec(t, env, children.get(0).getData()).val();
 			ParseTree tree = new ParseTree(new CString(ret, t), fileOptions);
@@ -210,27 +204,29 @@ public class FileHandling {
 	@noboilerplate
 	public static class async_read extends AbstractFunction {
 
-		RunnableQueue queue = new RunnableQueue("MethodScript-asyncRead");
-		boolean started = false;
+		private static RunnableQueue queue;
+		private static volatile boolean started = false;
+		private static final Object LOCK = new Object();
 
+		// It's not really nested, it's within the callback, but the IDE doesn't understand that.
+		@SuppressWarnings("NestedSynchronizedStatement")
 		private void startup() {
 			if(!started) {
-				queue.invokeLater(null, new Runnable() {
-
-					@Override
-					public void run() {
-						//This warms up the queue. Apparently.
+				synchronized(LOCK) {
+					if(!started) {
+						queue = new RunnableQueue("MethodScript-asyncRead");
+						queue.invokeLater(null, () -> {
+							//This warms up the queue.
+						});
+						StaticLayer.GetConvertor().addShutdownHook(() -> {
+							synchronized(LOCK) {
+								queue.shutdown();
+								started = false;
+							}
+						});
+						started = true;
 					}
-				});
-				StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
-
-					@Override
-					public void run() {
-						queue.shutdown();
-						started = false;
-					}
-				});
-				started = true;
+				}
 			}
 		}
 
@@ -250,16 +246,16 @@ public class FileHandling {
 		}
 
 		@Override
-		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			startup();
 			final String file = args[0].val();
 			final CClosure callback;
-			if(!(args[1] instanceof CClosure)) {
+			if(!(args[1].isInstanceOf(CClosure.class))) {
 				throw new CRECastException("Expected paramter 2 of " + getName() + " to be a closure!", t);
 			} else {
 				callback = ((CClosure) args[1]);
 			}
-			if(!Static.InCmdLine(environment)) {
+			if(!Static.InCmdLine(environment, true)) {
 				if(!Security.CheckSecurity(file)) {
 					throw new CRESecurityException("You do not have permission to access the file '" + file + "'", t);
 				}
@@ -287,13 +283,13 @@ public class FileHandling {
 							exception = new CREIOException(ex.getMessage(), t, ex);
 						}
 					}
-					final Construct cret;
+					final Mixed cret;
 					if(returnString == null) {
 						cret = CNull.NULL;
 					} else {
 						cret = new CString(returnString, t);
 					}
-					final Construct cex;
+					final Mixed cex;
 					if(exception == null) {
 						cex = CNull.NULL;
 					} else {
@@ -303,7 +299,7 @@ public class FileHandling {
 
 						@Override
 						public void run() {
-							callback.execute(new Construct[]{cret, cex});
+							callback.executeCallable(new Mixed[]{cret, cex});
 						}
 					});
 				}
@@ -324,7 +320,7 @@ public class FileHandling {
 		@Override
 		public String docs() {
 			return "void {file, callback} Asyncronously reads in a file. ---- "
-					+ " This may be a remote file accessed with an SCP style path. (See the [[CommandHelper/SCP|wiki article]]"
+					+ " This may be a remote file accessed with an SCP style path. (See the [[SCP|wiki article]]"
 					+ " about SCP credentials for more information.) If the file is not found, or otherwise can't be read in, an IOException is thrown."
 					+ " If the file specified is not within base-dir (as specified in the preferences file), a SecurityException is thrown."
 					+ " (This is not applicable for remote files)"
@@ -334,12 +330,12 @@ public class FileHandling {
 					+ " If @contents is null, that indicates that an exception occured, and @exception will not be null, but instead have an"
 					+ " exeption array. Otherwise, @contents will contain the file's contents, and @exception will be null. This method is useful"
 					+ " to use in two cases, either you need a remote file via SCP, or a local file is big enough that you notice a delay when"
-					+ " simply using the read() function.";
+					+ " simply using the read() function. async_read is threadsafe.";
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -363,9 +359,9 @@ public class FileHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), environment, t, null);
-			if(!Security.CheckSecurity(location) && !Static.InCmdLine(environment)) {
+			if(!Security.CheckSecurity(location) && !Static.InCmdLine(environment, true)) {
 				throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 			}
 			return new CInt(location.length(), t);
@@ -387,8 +383,8 @@ public class FileHandling {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -412,9 +408,9 @@ public class FileHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
-			if(!Static.InCmdLine(env)) {
+			if(!Static.InCmdLine(env, true)) {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
 				if(!Security.CheckSecurity(location)) {
@@ -450,7 +446,7 @@ public class FileHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -474,9 +470,9 @@ public class FileHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
-			if(!Static.InCmdLine(env)) {
+			if(!Static.InCmdLine(env, true)) {
 				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
 				//Cmdline mode doesn't currently have this restriction.
 				if(!Security.CheckSecurity(location)) {
@@ -513,7 +509,7 @@ public class FileHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -537,7 +533,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			//TODO: Doesn't work yet.
 			//TODO: Be sure to change over to Static.GetFileFromArgument
 			String path = args[0].val().trim().replace('\\', '/');
@@ -576,7 +572,7 @@ public class FileHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -600,7 +596,7 @@ public class FileHandling {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			File f = Static.GetFileFromArgument(args[0].val(), environment, t, null);
 			try {
 				return new CString(f.getCanonicalPath(), t);
@@ -627,7 +623,7 @@ public class FileHandling {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}

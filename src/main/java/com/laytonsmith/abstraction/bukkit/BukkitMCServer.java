@@ -5,11 +5,12 @@ import com.laytonsmith.abstraction.MCBossBar;
 import com.laytonsmith.abstraction.MCCommandMap;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
-import com.laytonsmith.abstraction.MCHumanEntity;
+import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemFactory;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCMerchant;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPluginManager;
@@ -17,7 +18,8 @@ import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHumanEntity;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockData;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.pluginmessages.BukkitMCMessenger;
 import com.laytonsmith.abstraction.enums.MCBarColor;
@@ -35,9 +37,11 @@ import org.bukkit.World;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.server.BroadcastMessageEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.Recipe;
 
@@ -169,6 +173,17 @@ public class BukkitMCServer implements MCServer {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
+	public MCPlayer getPlayerExact(String name) {
+		Player p = s.getPlayerExact(name);
+		if(p == null) {
+			return null;
+		}
+		return new BukkitMCPlayer(p);
+	}
+
+	@Override
+	@SuppressWarnings("deprecation")
 	public MCPlayer getPlayer(String name) {
 		Player p = s.getPlayer(name);
 		if(p == null) {
@@ -184,6 +199,11 @@ public class BukkitMCServer implements MCServer {
 			return null;
 		}
 		return new BukkitMCPlayer(p);
+	}
+
+	@Override
+	public MCEntity getEntity(UUID uuid) {
+		return BukkitConvertor.BukkitGetCorrectEntity(s.getEntity(uuid));
 	}
 
 	@Override
@@ -206,12 +226,81 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public void broadcastMessage(String message) {
-		s.broadcastMessage(message);
+
+		// Get the set of online players and include console.
+		Set<CommandSender> recipients = new HashSet<>(this.s.getOnlinePlayers());
+		recipients.add(this.s.getConsoleSender());
+
+		// Perform the broadcast.
+		this.bukkitBroadcastMessage(message, recipients);
 	}
 
 	@Override
 	public void broadcastMessage(String message, String permission) {
-		s.broadcast(message, permission);
+
+		// Get the set of online players with the given permission and include console.
+		Set<CommandSender> recipients = new HashSet<>();
+		for(Player player : this.s.getOnlinePlayers()) {
+			if(player.hasPermission(permission)) {
+				recipients.add(player);
+			}
+		}
+		recipients.add(this.s.getConsoleSender());
+
+		// Perform the broadcast.
+		this.bukkitBroadcastMessage(message, recipients);
+	}
+
+	@Override
+	public void broadcastMessage(String message, Set<MCCommandSender> recipients) {
+
+		// Convert MCCommandsSender recipients to CommandSender recipients.
+		Set<CommandSender> bukkitRecipients = new HashSet<>();
+		if(recipients != null) {
+			for(MCCommandSender recipient : recipients) {
+				bukkitRecipients.add((CommandSender) recipient.getHandle());
+			}
+		}
+
+		// Perform the broadcast.
+		this.bukkitBroadcastMessage(message, bukkitRecipients);
+	}
+
+	/**
+	 * Broadcasts a message to a list of recipients, fireing a {@link BroadcastMessageEvent} before doing so.
+	 * {@link ConsoleCommandSender Console} has to be included in this list to receive the broadcast.
+	 * @param message - The message to broadcast.
+	 * @param recipients - A list of {@link MCCommandSender command senders} to send the message to.
+	 * @return The amount of recipients that received the message.
+	 */
+	@SuppressWarnings("deprecation")
+	private int bukkitBroadcastMessage(String message, Set<CommandSender> recipients) {
+
+		// Fire a BroadcastMessageEvent for this broadcast.
+		BroadcastMessageEvent broadcastMessageEvent;
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
+			broadcastMessageEvent = new BroadcastMessageEvent(!Bukkit.isPrimaryThread(), message, recipients);
+		} else {
+			broadcastMessageEvent = new BroadcastMessageEvent(message, recipients);
+		}
+		this.s.getPluginManager().callEvent(broadcastMessageEvent);
+
+		// Return if the event was cancelled.
+		if(broadcastMessageEvent.isCancelled()) {
+			return 0;
+		}
+
+		// Get the possibly modified message and recipients.
+		message = broadcastMessageEvent.getMessage();
+		recipients = broadcastMessageEvent.getRecipients(); // This returns the same reference, but breaks less likely.
+
+		// Perform the actual broadcast to all remaining recipients.
+		for(CommandSender recipient : recipients) {
+			recipient.sendMessage(message);
+		}
+
+		// Return the amount of recipients that received the message.
+		return recipients.size();
 	}
 
 	@Override
@@ -311,7 +400,10 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public String getServerName() {
-		return s.getServerName();
+		if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
+			return (String) ReflectionUtils.invokeMethod(Server.class, s, "getServerName");
+		}
+		return "";
 	}
 
 	@Override
@@ -328,7 +420,7 @@ public class BukkitMCServer implements MCServer {
 	public List<MCOfflinePlayer> getBannedPlayers() {
 		List<MCOfflinePlayer> list = new ArrayList<>();
 		for(OfflinePlayer p : s.getBannedPlayers()) {
-			list.add(getOfflinePlayer(p.getName()));
+			list.add(new BukkitMCOfflinePlayer(p));
 		}
 		return list;
 	}
@@ -337,7 +429,7 @@ public class BukkitMCServer implements MCServer {
 	public List<MCOfflinePlayer> getWhitelistedPlayers() {
 		List<MCOfflinePlayer> list = new ArrayList<>();
 		for(OfflinePlayer p : s.getWhitelistedPlayers()) {
-			list.add(getOfflinePlayer(p.getName()));
+			list.add(new BukkitMCOfflinePlayer(p));
 		}
 		return list;
 	}
@@ -346,7 +438,7 @@ public class BukkitMCServer implements MCServer {
 	public List<MCOfflinePlayer> getOperators() {
 		List<MCOfflinePlayer> list = new ArrayList<>();
 		for(OfflinePlayer p : s.getOperators()) {
-			list.add(getOfflinePlayer(p.getName()));
+			list.add(new BukkitMCOfflinePlayer(p));
 		}
 		return list;
 	}
@@ -373,53 +465,36 @@ public class BukkitMCServer implements MCServer {
 	}
 
 	@Override
-	public MCInventory createInventory(MCInventoryHolder holder, MCInventoryType type) {
-		InventoryHolder ih = null;
-
-		if(holder instanceof MCPlayer) {
-			ih = ((BukkitMCPlayer) holder)._Player();
-		} else if(holder instanceof MCHumanEntity) {
-			ih = ((BukkitMCHumanEntity) holder).asHumanEntity();
-		} else if(holder.getHandle() instanceof InventoryHolder) {
+	public MCInventory createInventory(MCInventoryHolder holder, MCInventoryType type, String title) {
+		InventoryHolder ih;
+		if(holder == null) {
+			ih = null;
+		} else {
 			ih = (InventoryHolder) holder.getHandle();
 		}
-
-		return new BukkitMCInventory(Bukkit.createInventory(ih, InventoryType.valueOf(type.name())));
-	}
-
-	@Override
-	public MCInventory createInventory(MCInventoryHolder holder, int size) {
-		InventoryHolder ih = null;
-
-		if(holder instanceof MCPlayer) {
-			ih = ((BukkitMCPlayer) holder)._Player();
-		} else if(holder instanceof MCHumanEntity) {
-			ih = ((BukkitMCHumanEntity) holder).asHumanEntity();
-		} else if(holder.getHandle() instanceof InventoryHolder) {
-			ih = (InventoryHolder) holder.getHandle();
+		if(title == null) {
+			return new BukkitMCInventory(Bukkit.createInventory(ih, InventoryType.valueOf(type.name())));
 		}
-
-		return new BukkitMCInventory(Bukkit.createInventory(ih, size));
+		return new BukkitMCInventory(Bukkit.createInventory(ih, InventoryType.valueOf(type.name()), title));
 	}
 
 	@Override
 	public MCInventory createInventory(MCInventoryHolder holder, int size, String title) {
-		InventoryHolder ih = null;
-
-		if(holder instanceof MCPlayer) {
-			ih = ((BukkitMCPlayer) holder)._Player();
-		} else if(holder instanceof MCHumanEntity) {
-			ih = ((BukkitMCHumanEntity) holder).asHumanEntity();
-		} else if(holder.getHandle() instanceof InventoryHolder) {
+		InventoryHolder ih;
+		if(holder == null) {
+			ih = null;
+		} else {
 			ih = (InventoryHolder) holder.getHandle();
 		}
-
+		if(title == null) {
+			return new BukkitMCInventory(Bukkit.createInventory(ih, size));
+		}
 		return new BukkitMCInventory(Bukkit.createInventory(ih, size, title));
 	}
 
 	@Override
-	public void banName(String name) {
-		s.getBanList(BanList.Type.NAME).addBan(name, null, null, null);
+	public void banName(String name, String reason, String source) {
+		s.getBanList(BanList.Type.NAME).addBan(name, reason, null, source);
 	}
 
 	@Override
@@ -474,7 +549,7 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public boolean addRecipe(MCRecipe recipe) {
-		return s.addRecipe(((BukkitMCRecipe) recipe).r);
+		return s.addRecipe((Recipe) recipe.getHandle());
 	}
 
 	@Override
@@ -490,8 +565,8 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public List<MCRecipe> allRecipes() {
 		List<MCRecipe> ret = new ArrayList<>();
-		for(Iterator recipes = s.recipeIterator(); recipes.hasNext();) {
-			Recipe recipe = (Recipe) recipes.next();
+		for(Iterator<Recipe> recipes = s.recipeIterator(); recipes.hasNext();) {
+			Recipe recipe = recipes.next();
 			ret.add(BukkitConvertor.BukkitGetRecipe(recipe));
 		}
 		return ret;
@@ -509,11 +584,16 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public MCBossBar createBossBar(String title, MCBarColor color, MCBarStyle style) {
-		try {
-			return new BukkitMCBossBar(s.createBossBar(title, BarColor.valueOf(color.name()), BarStyle.valueOf(style.name())));
-		} catch (NoSuchMethodError ex) {
-			// Probably prior to 1.9
-			return null;
-		}
+		return new BukkitMCBossBar(s.createBossBar(title, BarColor.valueOf(color.name()), BarStyle.valueOf(style.name())));
+	}
+
+	@Override
+	public MCBlockData createBlockData(String data) {
+		return new BukkitMCBlockData(s.createBlockData(data));
+	}
+
+	@Override
+	public MCMerchant createMerchant(String title) {
+		return new BukkitMCMerchant(__Server().createMerchant(title), title);
 	}
 }

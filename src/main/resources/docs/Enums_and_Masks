@@ -6,59 +6,62 @@ you should use the ''enum'' and ''mask'' types, respectively.
 == Enum Types ==
 An enum is a specially declared class, which follows certain extra rules, but otherwise behaves
 just like a normal class. It may have data members and methods, just like any other class. The
-exceptions are that the class may not extend any other classes, and the constructor, if provided, must be
-private. To declare a simple enum, use the following syntax:
+exceptions are that the class is effectively final (it cannot be extended by other classes/enums), 
+and the constructor, if provided, must be
+private. The default constructor for enum values are private as well. Essentially, there must be no
+way to instantiate the enum object outside of the context of the enum itself, and it can't be
+overridden. To declare a simple enum, use the following syntax:
 
-<pre>
+<%CODE|
 enum Day {
-	enums {
-		SUNDAY, MONDAY, TUESDAY, WEDNESDAY,
-		THURSDAY, FRIDAY, SATURDAY
-	}
+	SUNDAY, MONDAY, TUESDAY, WEDNESDAY,
+	THURSDAY, FRIDAY, SATURDAY
 }
-</pre>
+%>
 
-The enum values are considered as if they are <code>public static final</code> members
+The enum values are considered as if they are <code>public static final Day</code> members
 of the class Day. Therefore, you cannot have member variables with the same name as the
 enum. To use the enum value, you would use it the same as any other static member:
 
-<pre>
+<%CODE|
 Day::SUNDAY
-</pre>
+%>
 
-By convention, the names of enum values are all caps, with words separated by underscores.
+Note that there is no "@" symbol here, even though they in some ways act like a member variable.
+By convention, the names of enum values are all caps, with words separated by underscores, but
+this is not enforced.
 Enums can be {{function|switch}}'d over, as such:
 
-<pre>
-	Day @day = Day::MONDAY; # This might be from user input
-	switch(@day){
-		case MONDAY:
-			msg('Manic Monday');
-		case WEDNESDAY:
-			msg('Hump day!');
-		case FRIDAY:
-			msg('Almost to the weekend!')
-		case SATURDAY, SUNDAY:
-			msg('Yay, weekend!')
-		default:
-			msg('What is today again?')
-	}
-</pre>
+<%CODE|
+Day @day = Day::MONDAY; // This might be from user input
+switch(@day){
+	case MONDAY:
+		msg('Manic Monday');
+	case WEDNESDAY:
+		msg('Hump day!');
+	case FRIDAY:
+		msg('Almost to the weekend!')
+	case SATURDAY, SUNDAY:
+		msg('Yay, weekend!')
+	default:
+		msg('What is today again?')
+}
+%>
 
 Often times, you have a switch statement, which you need to be sure to update, if
 a new value is added. For this, you may use the {{function|switch_all}} function.
 This function requires that all enum constants have a case, and no default may be
 used.
 
-<pre>
-	Day @day = Day::MONDAY;
-	switch_all(@day){
-		case MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY:
-			msg('Weekday')
-		case SATURDAY: # Oops, forgot SUNDAY
-			msg('Weekend')
-	}
-</pre>
+<%CODE|
+Day @day = Day::MONDAY;
+switch_all(@day){
+	case MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY:
+		msg('Weekday')
+	case SATURDAY: // Oops, forgot SUNDAY, this is a compile error
+		msg('Weekend')
+}
+%>
 
 The above code will cause a compile time error, indicating that the SUNDAY enum
 was not provided for. This provides for better error checking, in the case where
@@ -72,33 +75,31 @@ is acceptable. The special constructor syntax is demonstrated in the example bel
 as well. As you can see, each parameter is passed in separately for each enum, so
 getInfo() for each one would return different data.
 
-<pre>
+<%CODE|
 enum Compass {
-	enums {
-		NORTH('up'), 
-		SOUTH('down'), 
-		EAST('right'), 
-		WEST('left')
-	}
-    members {
-        private final string @info
-    }
+	NORTH('up'), 
+	SOUTH('down'), 
+	EAST('right'), 
+	WEST('left');
+
+	private final string @info;
+
     private Compass(string @info){
-        this()->@info = @info;
+        @this->info = @info;
     }
     
     public string getInfo(){
 		return(@info);
 	}
 }
-</pre>
+%>
 
 Use of enum constants sometimes have special type inference. If the compiler can
 definitely determine the enum to use, the class name can be left off. So, if the
-procedure _func() is defined as such: <code>proc(_func, Compass @direction, ...)</code>
+procedure _func() is defined as such: <code>proc _func(Compass @direction, ...)</code>
 Then both <code>_func(Compass::NORTH)</code> and <code>_func(NORTH)</code> are
 acceptable. This is only possible when the declared type is a concrete enum type,
-and not the Enum or Object superclasses. Additionally, auto string types are cross
+and not the Enum or mixed superclasses. Additionally, auto string types are cross
 castable to an enum, so <code>_func('NORTH')</code> is also valid.
 
 All enums inherit a few static methods from the enum superclass as well, the
@@ -117,22 +118,20 @@ changing existing enum order (besides simply renaming them) causes any old integ
 to be incompatible with the new versions. To use a mask, you must use Mask's static
 method create(), and provide the enum class, if it can't be inferred.
 
-<pre>
-Mask<Day> @day = Mask.create(); # This can be inferred, because the return type must be Mask<Day>
-msg(Mask.create(Day)); # This must be specified, since the compiler can't infer the return type.
-</pre>
+<%CODE|
+Mask<Day> @day = Mask::create(); # This can be inferred, because the return type must be Mask<Day>
+msg(Mask::create(Day)); # This must be specified, since the compiler can't infer the return type.
+%>
 
 Mask implements Set, so all the operations available with a Set are also available to the Mask,
 but of note are two extra methods, toInt(), and the static fromInt().
 
-<pre>
+<%CODE|
 enum Compass {
-	enums {
-		NORTH, # mask value: 1
-		SOUTH, # mask value: 2
-		EAST,  # mask value: 4
-		WEST,  # mask value: 8
-	}
+	NORTH, // mask value: 1
+	SOUTH, // mask value: 2
+	EAST,  // mask value: 4
+	WEST,  // mask value: 8
 }
 
 Mask<Compass> @c = Mask::create();
@@ -140,17 +139,29 @@ Mask<Compass> @c = Mask::create();
 @c->add(SOUTH);
 msg(@c->toInt()); # returns 3, which is the equivalent of bit_or(1, 2), or 0011 in binary
 
-Mask<Compass> @c = Mask::fromInt(Compass, 12); # 12 in binary is 1100, which represents EAST and WEST
-</pre>
+Mask<Compass> @c = Mask::fromInt(12); // 12 in binary is 1100, which represents EAST and WEST
+msg(Mask::fromInt(Compass, 12)); // Required to provide the type, since inference won't work here
+%>
 
 The default implementation of mask() looks like this:
-<pre>
+<%CODE|
 public int mask(){
 	return(2 ** ordinal());
 }
-</pre>
+%>
 
 However, you may override this to return a different value, depending on the circumstances.
 Do note however, that overriding this method incurs a performance penalty, because you could
 dynamically change the mask values, when fromInt is called, it will not cache the mask values
 for your enum, like it will for the default.
+
+To see if an enum value is in the mask, use contains().
+
+<%CODE|
+Mask<Compass> @a = Mask::create();
+@a->add(NORTH);
+@a->add(SOUTH);
+
+msg(@a->contains(NORTH)); // true
+msg(@a->contains(WEST)); // false
+%>

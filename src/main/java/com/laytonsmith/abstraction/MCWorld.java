@@ -1,8 +1,11 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.entities.MCFirework;
+import com.laytonsmith.abstraction.entities.MCItem;
+import com.laytonsmith.abstraction.entities.MCLightningStrike;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCDifficulty;
 import com.laytonsmith.abstraction.enums.MCEffect;
@@ -16,6 +19,7 @@ import com.laytonsmith.abstraction.enums.MCTreeType;
 import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.Target;
 
 import java.util.List;
@@ -68,11 +72,15 @@ public interface MCWorld extends MCMetadatable {
 
 	MCChunk[] getLoadedChunks();
 
+	boolean isChunkLoaded(int x, int z);
+
 	boolean regenerateChunk(int x, int y);
 
 	MCEntity spawn(MCLocation l, Class mobType);
 
 	MCEntity spawn(MCLocation l, MCEntityType entType);
+
+	MCEntity spawn(MCLocation l, MCEntityType entType, final CClosure closure);
 
 	MCEntity spawn(MCLocation l, MCEntityType.MCVanillaEntityType entityType);
 
@@ -126,7 +134,7 @@ public interface MCWorld extends MCMetadatable {
 
 	CArray spawnMob(MCMobs name, String subClass, int qty, MCLocation location, Target t);
 
-	MCFallingBlock spawnFallingBlock(MCLocation loc, int type, byte data);
+	MCFallingBlock spawnFallingBlock(MCLocation loc, MCBlockData data);
 
 	MCFirework launchFirework(MCLocation l, int strength, List<MCFireworkEffect> effects);
 
@@ -146,4 +154,6 @@ public interface MCWorld extends MCMetadatable {
 	boolean exists();
 
 	void save();
+
+	void setKeepSpawnInMemory(boolean keepLoaded);
 }

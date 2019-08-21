@@ -1,4 +1,4 @@
 MethodScript has the ability to apply different optimization techniques, both at compile time and runtime.
 Due to the architecture of the engine, it is fairly straightforward to tag functions with various optimizations.
 
-%%optimization_explanations%%
+%%OPTIMIZATION_EXPLANATIONS%%

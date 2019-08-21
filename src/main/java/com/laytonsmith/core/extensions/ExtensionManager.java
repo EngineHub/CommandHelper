@@ -8,19 +8,18 @@ import com.laytonsmith.PureUtilities.ClassLoading.DynamicClassLoader;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.core.AliasCore;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -41,12 +40,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ExtensionManager {
 
-	private static final Map<URL, ExtensionTracker> EXTENSIONS = new HashMap<>();
+	private static final Map<URL, ExtensionTracker> EXTENSIONS = new ConcurrentHashMap<>();
 	private static final List<File> LOCATIONS = new ArrayList<>();
 
 	/**
@@ -237,7 +237,7 @@ public class ExtensionManager {
 
 				// Skip files already processed.
 				if(done.contains(f)) {
-					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.WARNING,
+					MSLog.GetLogger().Log(MSLog.Tags.EXTENSIONS, LogLevel.WARNING,
 							f.getAbsolutePath() + " contains more than one extension"
 							+ " descriptor. Bug someone about it!", Target.UNKNOWN);
 
@@ -255,7 +255,7 @@ public class ExtensionManager {
 					name += "-" + i;
 					namecount.put(name.toLowerCase(), i++);
 
-					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.WARNING,
+					MSLog.GetLogger().Log(MSLog.Tags.EXTENSIONS, LogLevel.WARNING,
 							f.getAbsolutePath() + " contains a duplicate internally"
 							+ " named extension (" + name + "). Bug someone"
 							+ " about it!", Target.UNKNOWN);
@@ -301,7 +301,7 @@ public class ExtensionManager {
 				if(cd.doesClassExtend(klass, Event.class)
 						|| cd.doesClassExtend(klass, Function.class)) {
 					// We're processing it here instead of above, complain about it.
-					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.WARNING,
+					MSLog.GetLogger().Log(MSLog.Tags.EXTENSIONS, LogLevel.WARNING,
 							f.getAbsolutePath() + " is an old-style extension!"
 							+ " Bug the author to update it to the new extension system!",
 							Target.UNKNOWN);
@@ -345,9 +345,8 @@ public class ExtensionManager {
 
 		// Grab files from the cache if on Windows. Otherwise just load
 		// directly from the stored locations.
-		boolean onWindows = (OSUtils.GetOS() == OSUtils.OS.WINDOWS);
 
-		if(onWindows) {
+		if(OSUtils.GetOS().isWindows()) {
 			toProcess.addAll(getFiles(CommandHelperFileLocations.getDefault().getExtensionCacheDirectory()));
 		} else {
 			for(File location : LOCATIONS) {
@@ -367,7 +366,7 @@ public class ExtensionManager {
 					dcl.addJar(jar);
 					cd.addDiscoveryLocation(jar);
 
-					CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.DEBUG, "Loaded " + f.getAbsolutePath(), Target.UNKNOWN);
+					MSLog.GetLogger().Log(MSLog.Tags.EXTENSIONS, LogLevel.DEBUG, "Loaded " + f.getAbsolutePath(), Target.UNKNOWN);
 				} catch (MalformedURLException ex) {
 					Static.getLogger().log(Level.SEVERE, null, ex);
 				}
@@ -423,14 +422,7 @@ public class ExtensionManager {
 			// use it.
 			if(trk.identifier == null) {
 				trk.identifier = ext.getName();
-				try {
-					trk.version = ext.getVersion();
-				} catch (AbstractMethodError ex) {
-					// getVersion() was added later. This is a temporary fix
-					// to allow extension authors some time to update.
-					// TODO: Remove this soon.
-					trk.version = new SimpleVersion("0.0.0");
-				}
+				trk.version = ext.getVersion();
 			}
 
 			trk.allExtensions.add(ext);
@@ -446,7 +438,7 @@ public class ExtensionManager {
 
 		// Loop over the classes, instantiate and register functions and events,
 		// and store the instances in their trackers.
-		for(ClassMirror klass : classes) {
+		classes.stream().forEach((klass) -> {
 			URL url = klass.getContainer();
 
 			if(cd.doesClassExtend(klass, Event.class)
@@ -462,7 +454,7 @@ public class ExtensionManager {
 					Static.getLogger().log(Level.SEVERE, "Could not load class '"
 							+ klass.getClassName() + "'");
 					ex.printStackTrace();
-					continue;
+					return;
 				}
 
 				ExtensionTracker trk = EXTENSIONS.get(url);
@@ -482,7 +474,7 @@ public class ExtensionManager {
 							// Abstract? Looks like they accidently @api'd
 							// a cheater class. We can't be sure that it is fully
 							// defined, so complain to the console.
-							CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR,
+							MSLog.GetLogger().Log(MSLog.Tags.EXTENSIONS, LogLevel.ERROR,
 									"Class " + c.getName() + " in " + url + " is"
 									+ " marked as an event but is also abstract."
 									+ " Bugs might occur! Bug someone about this!",
@@ -500,7 +492,7 @@ public class ExtensionManager {
 							// Abstract? Looks like they accidently @api'd
 							// a cheater class. We can't be sure that it is fully
 							// defined, so complain to the console.
-							CHLog.GetLogger().Log(CHLog.Tags.EXTENSIONS, LogLevel.ERROR,
+							MSLog.GetLogger().Log(MSLog.Tags.EXTENSIONS, LogLevel.ERROR,
 									"Class " + c.getName() + " in " + url + " is"
 									+ " marked as a function but is also abstract."
 									+ " Bugs might occur! Bug someone about this!",
@@ -518,22 +510,13 @@ public class ExtensionManager {
 					Static.getLogger().log(Level.SEVERE, null, ex);
 				}
 			}
-		}
+		});
 
 		// Lets print out the details to the console, if we are in debug mode.
 		try {
 			if(Prefs.DebugMode()) {
-				Collections.sort(events);
-				String eventString = StringUtils.Join(events, ", ", ", and ", " and ");
-				Collections.sort(functions);
-				String functionString = StringUtils.Join(functions, ", ", ", and ", " and ");
-
-				StreamUtils.GetSystemOut().println(Implementation.GetServerType().getBranding()
-						+ ": Loaded the following functions: " + functionString.trim());
 				StreamUtils.GetSystemOut().println(Implementation.GetServerType().getBranding()
 						+ ": Loaded " + functions.size() + " function" + (functions.size() == 1 ? "." : "s."));
-				StreamUtils.GetSystemOut().println(Implementation.GetServerType().getBranding()
-						+ ": Loaded the following events: " + eventString.trim());
 				StreamUtils.GetSystemOut().println(Implementation.GetServerType().getBranding()
 						+ ": Loaded " + events.size() + " event" + (events.size() == 1 ? "." : "s."));
 			}
@@ -718,17 +701,28 @@ public class ExtensionManager {
 		}
 	}
 
-	public static FunctionBase GetFunction(Construct c, api.Platforms platform) throws ConfigCompileException {
+	public static FunctionBase GetFunction(Construct c, api.Platforms platform,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs)
+			throws ConfigCompileException {
 		if(platform == null) {
 			//Default to the Java interpreter
 			platform = api.Platforms.INTERPRETER_JAVA;
 		}
 
 		if(c instanceof CFunction) {
-			for(ExtensionTracker trk : EXTENSIONS.values()) {
+			functionLoop: for(ExtensionTracker trk : EXTENSIONS.values()) {
 				if(trk.functions.get(platform).containsKey(c.val())
 						&& trk.supportedPlatforms.get(c.val()).contains(platform)) {
-					return trk.functions.get(platform).get(c.val());
+					FunctionBase func = trk.functions.get(platform).get(c.val());
+					if(envs != null) {
+						api api = func.getClass().getAnnotation(api.class);
+						for(Class<? extends Environment.EnvironmentImpl> epl : api.environments()) {
+							if(!envs.contains(epl)) {
+								continue functionLoop;
+							}
+						}
+					}
+					return func;
 				}
 			}
 
@@ -740,12 +734,13 @@ public class ExtensionManager {
 		}
 	}
 
-	public static Set<FunctionBase> GetFunctions(api.Platforms platform) {
+	public static Set<FunctionBase> GetFunctions(api.Platforms platform,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs) {
 		if(platform == null) {
 			Set<FunctionBase> retn = new HashSet<>();
 
 			for(api.Platforms p : api.Platforms.values()) {
-				retn.addAll(GetFunctions(p));
+				retn.addAll(GetFunctions(p, envs));
 			}
 
 			return retn;
@@ -754,7 +749,17 @@ public class ExtensionManager {
 		Set<FunctionBase> retn = new HashSet<>();
 
 		for(ExtensionTracker trk : EXTENSIONS.values()) {
-			for(FunctionBase func : trk.functions.get(platform).values()) {
+			addList: for(FunctionBase func : trk.functions.get(platform).values()) {
+				// Functions which use a given environment are not valid if the current runtime does not contain
+				// that environment.
+				if(envs != null) {
+					api api = func.getClass().getAnnotation(api.class);
+					for(Class<? extends Environment.EnvironmentImpl> epl : api.environments()) {
+						if(!envs.contains(epl)) {
+							continue addList;
+						}
+					}
+				}
 				retn.add(func);
 			}
 		}

@@ -2,21 +2,19 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
 import com.laytonsmith.annotations.MDynamicEnum;
-import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.core.Static;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@MDynamicEnum("BiomeType")
+@MDynamicEnum("com.commandhelper.BiomeType")
 public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVanillaBiomeType, Concrete> {
 
-	// To be filled by the implementer
-	protected static Map<String, MCBiomeType> mappings;
-	protected static Map<MCVanillaBiomeType, MCBiomeType> vanilla;
+	protected static final Map<String, MCBiomeType> MAP = new HashMap<>();
 
 	@SuppressWarnings("checkstyle:staticvariablename") // Fixing this violation might break dependents.
 	public static MCBiomeType NULL = null;
@@ -26,22 +24,15 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 	}
 
 	public static MCBiomeType valueOf(String test) throws IllegalArgumentException {
-		if(mappings == null) {
-			return null;
-		}
-		MCBiomeType ret = mappings.get(test);
+		MCBiomeType ret = MAP.get(test);
 		if(ret == null) {
 			throw new IllegalArgumentException("Unknown biome type: " + test);
 		}
 		return ret;
 	}
 
-	public static MCBiomeType valueOfVanillaType(MCVanillaBiomeType type) {
-		return vanilla.get(type);
-	}
-
 	/**
-	 * @return Names of available entity types
+	 * @return Names of available biome types
 	 */
 	public static Set<String> types() {
 		if(NULL == null) { // docs mode
@@ -51,13 +42,13 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 			}
 			return dummy;
 		}
-		return mappings.keySet();
+		return MAP.keySet();
 	}
 
 	/**
-	 * @return Our own EntityType list
+	 * @return Our own MCBiomeType list
 	 */
-	public static Collection<MCBiomeType> values() {
+	public static List<MCBiomeType> values() {
 		if(NULL == null) { // docs mode
 			ArrayList<MCBiomeType> dummy = new ArrayList<>();
 			for(final MCVanillaBiomeType t : MCVanillaBiomeType.values()) {
@@ -75,73 +66,85 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 			}
 			return dummy;
 		}
-		return mappings.values();
+		return new ArrayList<>(MAP.values());
 	}
 
-	@MEnum("VanillaBiomeType")
 	public enum MCVanillaBiomeType {
 		OCEAN,
 		PLAINS,
 		DESERT,
-		EXTREME_HILLS,
+		MOUNTAINS,
 		FOREST,
 		TAIGA,
-		SWAMPLAND,
+		SWAMP,
 		RIVER,
-		HELL,
-		SKY,
+		NETHER,
+		THE_END,
 		FROZEN_OCEAN,
 		FROZEN_RIVER,
-		ICE_PLAINS,
-		ICE_MOUNTAINS,
-		MUSHROOM_ISLAND,
-		MUSHROOM_SHORE,
-		BEACH(MCVersion.MC1_1),
-		DESERT_HILLS(MCVersion.MC1_1),
-		FOREST_HILLS(MCVersion.MC1_1),
-		TAIGA_HILLS(MCVersion.MC1_1),
-		SMALL_MOUNTAINS(MCVersion.MC1_1),
-		JUNGLE(MCVersion.MC1_2),
-		JUNGLE_HILLS(MCVersion.MC1_2),
-		JUNGLE_EDGE(MCVersion.MC1_7_2),
-		DEEP_OCEAN(MCVersion.MC1_7_2),
-		STONE_BEACH(MCVersion.MC1_7_2),
-		COLD_BEACH(MCVersion.MC1_7_2),
-		BIRCH_FOREST(MCVersion.MC1_7_2),
-		BIRCH_FOREST_HILLS(MCVersion.MC1_7_2),
-		ROOFED_FOREST(MCVersion.MC1_7_2),
-		COLD_TAIGA(MCVersion.MC1_7_2),
-		COLD_TAIGA_HILLS(MCVersion.MC1_7_2),
-		MEGA_TAIGA(MCVersion.MC1_7_2),
-		MEGA_TAIGA_HILLS(MCVersion.MC1_7_2),
-		EXTREME_HILLS_PLUS(MCVersion.MC1_7_2),
-		SAVANNA(MCVersion.MC1_7_2),
-		SAVANNA_PLATEAU(MCVersion.MC1_7_2),
-		MESA(MCVersion.MC1_7_2),
-		MESA_PLATEAU_FOREST(MCVersion.MC1_7_2),
-		MESA_PLATEAU(MCVersion.MC1_7_2),
-		SUNFLOWER_PLAINS(MCVersion.MC1_7_2),
-		DESERT_MOUNTAINS(MCVersion.MC1_7_2),
-		FLOWER_FOREST(MCVersion.MC1_7_2),
-		TAIGA_MOUNTAINS(MCVersion.MC1_7_2),
-		ICE_PLAINS_SPIKES(MCVersion.MC1_7_2),
-		JUNGLE_MOUNTAINS(MCVersion.MC1_7_2),
-		JUNGLE_EDGE_MOUNTAINS(MCVersion.MC1_7_2),
-		COLD_TAIGA_MOUNTAINS(MCVersion.MC1_7_2),
-		SAVANNA_MOUNTAINS(MCVersion.MC1_7_2),
-		SAVANNA_PLATEAU_MOUNTAINS(MCVersion.MC1_7_2),
-		MESA_BRYCE(MCVersion.MC1_7_2),
-		MESA_PLATEAU_FOREST_MOUNTAINS(MCVersion.MC1_7_2),
-		MESA_PLATEAU_MOUNTAINS(MCVersion.MC1_7_2),
-		BIRCH_FOREST_MOUNTAINS(MCVersion.MC1_7_2),
-		BIRCH_FOREST_HILLS_MOUNTAINS(MCVersion.MC1_7_2),
-		ROOFED_FOREST_MOUNTAINS(MCVersion.MC1_7_2),
-		MEGA_SPRUCE_TAIGA(MCVersion.MC1_7_2),
-		EXTREME_HILLS_MOUNTAINS(MCVersion.MC1_7_2),
-		EXTREME_HILLS_PLUS_MOUNTAINS(MCVersion.MC1_7_2),
-		SWAMPLAND_MOUNTAINS(MCVersion.MC1_7_2),
-		MEGA_SPRUCE_TAIGA_HILLS(MCVersion.MC1_7_2),
-		VOID(MCVersion.MC1_9),
+		SNOWY_TUNDRA,
+		SNOWY_MOUNTAINS,
+		MUSHROOM_FIELDS,
+		MUSHROOM_FIELD_SHORE,
+		BEACH,
+		DESERT_HILLS,
+		WOODED_HILLS,
+		TAIGA_HILLS,
+		MOUNTAIN_EDGE,
+		JUNGLE,
+		JUNGLE_HILLS,
+		JUNGLE_EDGE,
+		DEEP_OCEAN,
+		STONE_SHORE,
+		SNOWY_BEACH,
+		BIRCH_FOREST,
+		BIRCH_FOREST_HILLS,
+		DARK_FOREST,
+		SNOWY_TAIGA,
+		SNOWY_TAIGA_HILLS,
+		GIANT_TREE_TAIGA,
+		GIANT_TREE_TAIGA_HILLS,
+		WOODED_MOUNTAINS,
+		SAVANNA,
+		SAVANNA_PLATEAU,
+		BADLANDS,
+		WOODED_BADLANDS_PLATEAU,
+		BADLANDS_PLATEAU,
+		SUNFLOWER_PLAINS,
+		DESERT_LAKES,
+		FLOWER_FOREST,
+		TAIGA_MOUNTAINS,
+		ICE_SPIKES,
+		MODIFIED_JUNGLE,
+		MODIFIED_JUNGLE_EDGE,
+		SNOWY_TAIGA_MOUNTAINS,
+		SHATTERED_SAVANNA,
+		SHATTERED_SAVANNA_PLATEAU,
+		ERODED_BADLANDS,
+		MODIFIED_WOODED_BADLANDS_PLATEAU,
+		MODIFIED_BADLANDS_PLATEAU,
+		TALL_BIRCH_FOREST,
+		TALL_BIRCH_HILLS,
+		DARK_FOREST_HILLS,
+		GIANT_SPRUCE_TAIGA,
+		GRAVELLY_MOUNTAINS,
+		MODIFIED_GRAVELLY_MOUNTAINS,
+		SWAMP_HILLS,
+		GIANT_SPRUCE_TAIGA_HILLS,
+		THE_VOID,
+		SMALL_END_ISLANDS,
+		END_MIDLANDS,
+		END_HIGHLANDS,
+		END_BARRENS,
+		WARM_OCEAN,
+		LUKEWARM_OCEAN,
+		COLD_OCEAN,
+		DEEP_WARM_OCEAN,
+		DEEP_LUKEWARM_OCEAN,
+		DEEP_COLD_OCEAN,
+		DEEP_FROZEN_OCEAN,
+		BAMBOO_JUNGLE(MCVersion.MC1_14),
+		BAMBOO_JUNGLE_HILLS(MCVersion.MC1_14),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

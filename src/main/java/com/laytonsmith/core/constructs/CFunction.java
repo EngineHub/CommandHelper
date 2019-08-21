@@ -24,7 +24,7 @@ public class CFunction extends Construct {
 
 	@Override
 	public String toString() {
-		return getValue();
+		return val();
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public class CFunction extends Construct {
 	 */
 	public Function getFunction() throws ConfigCompileException {
 		if(function == null) {
-			function = (Function) FunctionList.getFunction(val(), this.getTarget());
+			function = (Function) FunctionList.getFunction(val(), null, this.getTarget());
 		}
 		return function;
 	}
@@ -66,7 +66,7 @@ public class CFunction extends Construct {
 	 * @param ofType
 	 * @return
 	 */
-	public static boolean IsFunction(Construct possibleFunction, Class<? extends Function> ofType) {
+	public static boolean IsFunction(Mixed possibleFunction, Class<? extends Function> ofType) {
 		Function f = ReflectionUtils.newInstance(ofType);
 		return possibleFunction instanceof CFunction && possibleFunction.val().equals(f.getName());
 	}

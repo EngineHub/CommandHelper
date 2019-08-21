@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.Repairable;
 
@@ -153,5 +154,34 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	@Override
 	public void setUnbreakable(boolean unbreakable) {
 		im.setUnbreakable(unbreakable);
+	}
+
+	@Override
+	public int getDamage() {
+		return ((Damageable) im).getDamage();
+	}
+
+	@Override
+	public void setDamage(int damage) {
+		((Damageable) im).setDamage(damage);
+	}
+
+	@Override
+	public boolean hasCustomModelData() {
+		return im.hasCustomModelData();
+	}
+
+	@Override
+	public int getCustomModelData() {
+		return im.getCustomModelData();
+	}
+
+	@Override
+	public void setCustomModelData(int id) {
+		try {
+			im.setCustomModelData(id);
+		} catch (NoSuchMethodError ex) {
+			// probably 1.13
+		}
 	}
 }

@@ -1,14 +1,14 @@
 package com.laytonsmith.core.compiler.keywords;
 
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.BasicLogic;
+import com.laytonsmith.core.functions.ControlFlow;
 import java.util.List;
 
 /**
@@ -17,7 +17,7 @@ import java.util.List;
 @Keyword.keyword("if")
 public class IfKeyword extends Keyword {
 
-	private static final String IFELSE = new BasicLogic.ifelse().getName();
+	private static final String IFELSE = new ControlFlow.ifelse().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
@@ -114,7 +114,7 @@ public class IfKeyword extends Keyword {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_1;
+		return MSVersion.V3_3_1;
 	}
 
 }

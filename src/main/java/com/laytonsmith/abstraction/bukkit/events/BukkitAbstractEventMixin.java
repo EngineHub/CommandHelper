@@ -3,12 +3,12 @@ package com.laytonsmith.abstraction.bukkit.events;
 import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.EventMixinInterface;
 import com.laytonsmith.core.exceptions.EventException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.entity.Entity;
@@ -40,8 +40,8 @@ public class BukkitAbstractEventMixin implements EventMixinInterface {
 	}
 
 	@Override
-	public Map<String, Construct> evaluate_helper(BindableEvent event) throws EventException {
-		Map<String, Construct> map = new HashMap<>();
+	public Map<String, Mixed> evaluate_helper(BindableEvent event) throws EventException {
+		Map<String, Mixed> map = new HashMap<>();
 		map.put("event_type", new CString(mySuper.getName(), Target.UNKNOWN));
 		String macro;
 		Object e = event._GetObject();

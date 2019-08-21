@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.api.Platforms;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ObjectGenerator;
@@ -38,7 +39,8 @@ import com.laytonsmith.core.functions.ArrayHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import org.bukkit.entity.Player;
 import org.junit.Before;
@@ -76,6 +78,8 @@ import java.util.HashSet;
 public class RandomTests {
 
 	MCPlayer fakePlayer;
+
+	Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
 
 	@Before
 	public void setUp() throws Exception {
@@ -122,7 +126,7 @@ public class RandomTests {
 		}
 		Set<String> classDocs = new TreeSet<>();
 
-		for(FunctionBase f : FunctionList.getFunctionList(null)) {
+		for(FunctionBase f : FunctionList.getFunctionList(null, envs)) {
 			try {
 				if(TESTED_FUNCTIONS.contains(f.getName())) {
 					continue;
@@ -186,7 +190,8 @@ public class RandomTests {
 	}
 
 	@Test
-	public void testClone() throws CloneNotSupportedException {
+	public void testClone() throws Exception {
+		Environment env = Static.GenerateStandaloneEnvironment(false);
 		CArray c1 = C.Array(C.Void(), C.Void()).clone();
 		CBoolean c2 = C.Boolean(true).clone();
 		CDouble c4 = C.Double(1).clone();
@@ -196,7 +201,7 @@ public class RandomTests {
 		CString c8 = C.String("").clone();
 		Construct c9 = C.Void().clone();
 		Command c10 = new Command("/c", Target.UNKNOWN).clone();
-		IVariable c12 = new IVariable(Auto.TYPE, "@name", C.Null(), Target.UNKNOWN).clone();
+		IVariable c12 = new IVariable(Auto.TYPE, "@name", C.Null(), Target.UNKNOWN, env).clone();
 		Variable c13 = new Variable("$name", "", false, false, Target.UNKNOWN);
 	}
 
@@ -325,7 +330,7 @@ public class RandomTests {
 			ConnectionMixinFactory.ConnectionMixinOptions options;
 			options = new ConnectionMixinFactory.ConnectionMixinOptions();
 			options.setWorkingDirectory(new File("."));
-			PersistenceNetwork network = new PersistenceNetwork("**=json://persistence.json", new URI("default"), options);
+			PersistenceNetworkImpl network = new PersistenceNetworkImpl("**=json://persistence.json", new URI("default"), options);
 			ReflectionUtils.set(GlobalEnv.class, g, "persistenceNetwork", network);
 			Run("store_value('t.test1', 'test')\n"
 					+ "store_value('t.test2', 'test')\n"
@@ -345,44 +350,60 @@ public class RandomTests {
 
 	@Test
 	public void testVoidAndReturnedVoidAreTheExactSame() throws Exception {
-		Environment env = Static.GenerateStandaloneEnvironment(false);
-		Construct returnedVoid = new ArrayHandling.array_insert().exec(Target.UNKNOWN, env,
-				C.Array(), C.String(""), C.Int(0));
-		Construct voidKeyword = Static.resolveConstruct("void", Target.UNKNOWN);
-		assertTrue(returnedVoid == voidKeyword);
+		try {
+			Environment env = Static.GenerateStandaloneEnvironment(true);
+			Mixed returnedVoid = new ArrayHandling.array_insert().exec(Target.UNKNOWN, env,
+					C.Array(), C.String(""), C.Int(0));
+			Construct voidKeyword = Static.resolveConstruct("void", Target.UNKNOWN);
+			assertTrue(returnedVoid == voidKeyword);
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+			throw e;
+		}
 	}
 
 	@Test
 	public void testVoidAndReturnedVoidAreSEqualsAndOthers() throws Exception {
 		assertEquals("true", SRun("array_insert(array(), '', 0) === void", fakePlayer));
 		assertEquals("void", SRun("typeof(array_insert(array(), '', 0))", fakePlayer));
-		assertEquals("ClassType", SRun("typeof(typeof(array_insert(array(), '', 0)))", fakePlayer));
+		assertEquals("ms.lang.ClassType", SRun("typeof(typeof(array_insert(array(), '', 0)))", fakePlayer));
 	}
 
 	@Test
 	public void testFunctionsAreOnlyDefinedOnce() throws Exception {
 		Set<String> uhohs = new HashSet<>();
 		Set<Class<Function>> set = ClassDiscovery.getDefaultInstance().loadClassesThatExtend(Function.class);
-		for(Class<Function> cf1 : set) {
-			for(Class<Function> cf2 : set) {
-				if(cf1 == cf2) {
-					continue;
-				}
-				api cf1a = cf1.getAnnotation(api.class);
-				api cf2a = cf2.getAnnotation(api.class);
-				if(cf1a == null || cf2a == null) {
-					continue;
-				}
-				if(!Arrays.equals(cf1a.platform(), cf2a.platform())) {
-					continue;
-				}
-				Function f1 = ReflectionUtils.instantiateUnsafe(cf1);
-				Function f2 = ReflectionUtils.instantiateUnsafe(cf2);
-				if(f1.getName().equals(f2.getName())) {
-					uhohs.add(f1.getName() + " is implemented in two places, " + cf1 + " and " + cf2);
-				}
+
+		// Iterate over all function classes, adding a message to "uhohs" if they are double defined.
+		Map<String, Class<Function>> funcMap = new HashMap<>();
+		for(Class<Function> funcClass : set) {
+
+			// Ignore non-api functions.
+			api funcClassApi = funcClass.getAnnotation(api.class);
+			if(funcClassApi == null) {
+				continue;
+			}
+
+			// Get the function name.
+			String funcName = ReflectionUtils.instantiateUnsafe(funcClass).getName();
+
+			// Create an identifier string of the function name and its platforms.
+			// Format: "funcName\tplatform1\tplatform2\t...platformN". Platforms are sorted to 'compare as sets'.
+			StringBuilder idStr = new StringBuilder(funcName);
+			Platforms[] platforms = funcClassApi.platform();
+			Arrays.sort(platforms, (Platforms p1, Platforms p2) -> p1.toString().compareTo(p2.toString()));
+			for(Platforms platform : platforms) {
+				idStr.append("\t").append(platform.toString());
+			}
+
+			// Store the function in the map by its identifier, adding an message if it is double defined.
+			Class<Function> replacedFuncClass = funcMap.put(idStr.toString(), funcClass);
+			if(replacedFuncClass != null) {
+				uhohs.add(funcName + " is implemented in two places, " + funcClass + " and " + replacedFuncClass);
 			}
 		}
+
+		// Fail if a function was double defined.
 		if(!uhohs.isEmpty()) {
 			fail(StringUtils.Join(uhohs, "\n"));
 		}

@@ -8,8 +8,9 @@ import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import com.laytonsmith.core.natives.interfaces.ObjectModifier;
-import com.laytonsmith.core.natives.interfaces.ObjectType;
+import com.laytonsmith.core.objects.AccessModifier;
+import com.laytonsmith.core.objects.ObjectModifier;
+import com.laytonsmith.core.objects.ObjectType;
 import java.io.File;
 import java.math.BigInteger;
 import java.net.URL;
@@ -20,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -39,7 +41,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT,
 		DOUBLE, BOOLEAN, NULL, STRING, VOID, IVARIABLE, CLOSURE, LABEL, SLICE,
 		SYMBOL, IDENTIFIER, BRACE, BRACKET, BYTE_ARRAY, RESOURCE, LOCK, MUTABLE_PRIMITIVE,
-		CLASS_TYPE;
+		CLASS_TYPE, FULLY_QUALIFIED_CLASS_NAME;
 	}
 
 	private final ConstructType ctype;
@@ -53,6 +55,20 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	/**
+	 * Convenience method to check if a Mixed value is of the specified type. If it is not, or it isn't a construct
+	 * in the first place, false is returned.
+	 * @param m
+	 * @param type
+	 * @return
+	 */
+	public static boolean IsCType(Mixed m, ConstructType type) {
+		if(m instanceof Construct) {
+			return ((Construct) m).getCType() == type;
+		}
+		return false;
+	}
+
+	/**
 	 * This method should only be used by Script when setting the children's target, if it's an ivariable.
 	 *
 	 * @param target
@@ -60,10 +76,6 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	@Override
 	public void setTarget(Target target) {
 		this.target = target;
-	}
-
-	public final String getValue() {
-		return val();
 	}
 
 	public int getLineNum() {
@@ -115,13 +127,33 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	/**
+	 * Sets the wasIdentifier property on the left side if and only if both values are constructs.
+	 * Default value can be provided if the left value is a construct, but not the right, then this value will
+	 * be set. If it is null, the default is preserved.
+	 * @param left
+	 * @param right
+	 */
+	public static void SetWasIdentifierHelper(Mixed left, Mixed right, Boolean defaultValue) {
+		if(right instanceof Construct) {
+			defaultValue = ((Construct) right).wasIdentifier();
+		}
+		if(left instanceof Construct && defaultValue != null) {
+			((Construct) left).setWasIdentifier(defaultValue);
+		}
+	}
+
+	/**
 	 * Returns the standard string representation of this Construct, except in the case that the construct is a CNull,
 	 * in which case it returns java null.
 	 *
+	 * @param value
 	 * @return
 	 */
-	public String nval() {
-		return val();
+	public static String nval(Mixed value) {
+		if(value instanceof CNull) {
+			return null;
+		}
+		return value.val();
 	}
 
 	@Override
@@ -153,12 +185,12 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @return
 	 * @throws com.laytonsmith.core.exceptions.MarshalException
 	 */
-	public static String json_encode(Construct c, Target t) throws MarshalException {
+	public static String json_encode(Mixed c, Target t) throws MarshalException {
 		return JSONValue.toJSONString(json_encode0(c, t));
 	}
 
-	private static Object json_encode0(Construct c, Target t) throws MarshalException {
-		if(c instanceof CString || c instanceof Command) {
+	private static Object json_encode0(Mixed c, Target t) throws MarshalException {
+		if(c.isInstanceOf(CString.class) || c instanceof Command) {
 			return c.val();
 		} else if(c instanceof CVoid) {
 			return "";
@@ -170,7 +202,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return ((CBoolean) c).getBoolean();
 		} else if(c instanceof CNull) {
 			return null;
-		} else if(c instanceof CArray) {
+		} else if(c.isInstanceOf(CArray.class)) {
 			CArray ca = (CArray) c;
 			if(!ca.inAssociativeMode()) {
 				List<Object> list = new ArrayList<Object>();
@@ -369,7 +401,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @return
 	 * @throws ClassCastException
 	 */
-	public static Object GetPOJO(Construct c) throws ClassCastException {
+	public static Object GetPOJO(Mixed c) throws ClassCastException {
 		if(c instanceof CNull) {
 			return null;
 		} else if(c instanceof CString) {
@@ -380,19 +412,19 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return Long.valueOf(((CInt) c).getInt());
 		} else if(c instanceof CDouble) {
 			return Double.valueOf(((CDouble) c).getDouble());
-		} else if(c instanceof CArray) {
+		} else if(c.isInstanceOf(CArray.class)) {
 			CArray ca = (CArray) c;
 			if(ca.inAssociativeMode()) {
 				//SortedMap
 				SortedMap<String, Object> map = new TreeMap<>();
-				for(Entry<String, Construct> entry : ca.getAssociativeArray().entrySet()) {
+				for(Entry<String, Mixed> entry : ca.getAssociativeArray().entrySet()) {
 					map.put(entry.getKey(), GetPOJO(entry.getValue()));
 				}
 				return map;
 			} else {
 				//ArrayList
 				ArrayList<Object> list = new ArrayList<Object>((int) ca.size());
-				for(Construct construct : ca.getArray()) {
+				for(Mixed construct : ca.getArray()) {
 					list.add(GetPOJO(construct));
 				}
 				return list;
@@ -417,6 +449,19 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	public abstract boolean isDynamic();
 
 	/**
+	 * If the underlying Mixed value is a Construct, returns the value of isDynamic. Otherwise, returns true.
+	 * @param m
+	 * @return
+	 */
+	public static boolean IsDynamicHelper(Mixed m) {
+		if(m instanceof Construct) {
+			return ((Construct) m).isDynamic();
+		}
+		// TODO: This needs to be changed once the concept of immutability is introduced
+		return true;
+	}
+
+	/**
 	 * Returns the underlying value, as a value that can be directly inserted into code. So, if the value were
 	 * {@code This is 'the value'}, then {@code 'This is \'the value\''} would be returned. (That is, characters needing
 	 * escapes will be escaped.) It includes the outer quotes as well. Numbers and other primitives may be able to
@@ -429,24 +474,27 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	/**
-	 * Returns the typeof this Construct, as a string. Not all constructs are annotated with the @typeof annotation, in
-	 * which case this is considered a "private" object, which can't be directly accessed via MethodScript. In this
+	 * Returns the typeof this Construct, as a CClassType. Not all constructs are annotated with the @typeof annotation,
+	 * in which case this is considered a "private" object, which can't be directly accessed via MethodScript. In this
 	 * case, an IllegalArgumentException is thrown.
 	 *
+	 * This method may be overridden in special cases, such as dynamic types, but for most types, this
 	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
 	 */
 	@Override
-	public final CClassType typeof() {
+	public CClassType typeof() {
 		return typeof(this);
 	}
 
+	/**
+	 * Returns the typeof for the given class, using the same mechanism as the default. (Whether or not that subtype
+	 * overrode the original typeof() method.
+	 * @param that
+	 * @return
+	 */
 	public static CClassType typeof(Mixed that) {
-		typeof ann = that.getClass().getAnnotation(typeof.class);
-		if(ann == null) {
-			throw new IllegalArgumentException();
-		}
-		return CClassType.get(ann.value());
+		return CClassType.get(that.getClass());
 	}
 
 	/**
@@ -504,13 +552,22 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	/**
+	 * By default, all native methodscript objects have no modifiers.
+	 * @return
+	 */
+	@Override
+	public Set<ObjectModifier> getObjectModifiers() {
+		return EnumSet.noneOf(ObjectModifier.class);
+	}
+
+	/**
 	 * By default, all native methodscript objects are public. If this is not true, this method must be overridden.
 	 *
 	 * @return
 	 */
 	@Override
-	public Set<ObjectModifier> getObjectModifiers() {
-		return EnumSet.of(ObjectModifier.PUBLIC);
+	public AccessModifier getAccessModifier() {
+		return AccessModifier.PUBLIC;
 	}
 
 	@Override
@@ -523,7 +580,15 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	public static boolean isInstanceof(Mixed that, Class<? extends Mixed> type) {
-		return that.typeof().doesExtend(CClassType.get(type.getAnnotation(typeof.class).value()));
+		if(that.getClass().getAnnotation(typeof.class) == null) {
+			// This can happen in cases where we are in the middle of optimization.
+			// This can perhaps be improved in the future, when we store the return
+			// type with the CFunction, and we can at least handle those cases,
+			// but anyways, for now, just return false.
+			return false;
+		}
+		// TODO: We need the compiler environment here so we can look up custom types.
+		return that.typeof().doesExtend(CClassType.get(type));
 	}
 
 	@Override
@@ -535,5 +600,17 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	public boolean isInstanceOf(Class<? extends Mixed> type) {
 		return isInstanceof(this, type);
 	}
+
+	/**
+	 * Provides a default implementation of hashCode for all constructs. In this implementation, the type of the
+	 * object is taken into account, as well as the underlying value.
+	 * @return
+	 */
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.getClass().getAnnotation(typeof.class), val());
+	}
+
+
 
 }

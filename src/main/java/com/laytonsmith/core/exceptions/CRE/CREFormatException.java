@@ -2,18 +2,18 @@ package com.laytonsmith.core.exceptions.CRE;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 
 /**
  *
  */
-@typeof("FormatException")
+@typeof("ms.lang.FormatException")
 public class CREFormatException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("FormatException");
+	public static final CClassType TYPE = CClassType.get(CREFormatException.class);
 
 	public CREFormatException(String msg, Target t) {
 		super(msg, t);
@@ -32,7 +32,7 @@ public class CREFormatException extends CREException {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_1;
+		return MSVersion.V3_3_1;
 	}
 
 	@Override

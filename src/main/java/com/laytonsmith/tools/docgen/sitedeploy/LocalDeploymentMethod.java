@@ -24,7 +24,7 @@ class LocalDeploymentMethod implements DeploymentMethod {
 	}
 
 	@Override
-	public boolean deploy(InputStream data, String toLocation) {
+	public boolean deploy(InputStream data, String toLocation, String ignored) {
 		File outLoc = new File(rootDirectory, toLocation);
 		try {
 			byte[] d = StreamUtils.GetBytes(data);

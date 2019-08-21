@@ -54,6 +54,10 @@ import org.apache.commons.io.FileUtils;
  * to appear continuous internally. Additionally, remote file systems can be mounted via ssh, and they will appear
  * continuous.
  *
+ * <p>
+ * In order to support the lower common denominator, files are case insensitive, and all files and globs are trimmed
+ * and lowercased before operations are performed.
+ *
  */
 public class VirtualFileSystem {
 
@@ -61,8 +65,22 @@ public class VirtualFileSystem {
 	public static final VirtualFile META_DIRECTORY = new VirtualFile("/" + META_DIRECTORY_PATH);
 	private static final String TMP_DIRECTORY_PATH = META_DIRECTORY_PATH + "/tmp";
 	public static final VirtualFile TMP_DIRECTORY = new VirtualFile("/" + TMP_DIRECTORY_PATH);
-	public static final String SYMLINK_FILE_NAME = "symlinks.txt";
-	public static final String MANIFEST_FILE_NAME = "manifest.txt";
+	/**
+	 * The name of the symlinks file. The symlinks file contains the list of "mount points" within the file system,
+	 * which is particularly useful
+	 */
+	public static final String SYMLINK_FILE_NAME = "symlinks.ini";
+	/**
+	 * The name of the manifest file. The manifest file is a newline separated list of files that are in the file
+	 * system. This file is only used if the file system is cordoned off, but if so, only files within this list
+	 * can be read from, written to, listed, or deleted, though it is possible to create new files, so long as these
+	 * files don't already exist in the underlying file system. The file contains a HashMap of listings in a java
+	 * serialization format.
+	 */
+	public static final String MANIFEST_FILE_NAME = "manifest.ser";
+	/**
+	 * The name of the settings file. The settings file contains the information about the system's configuration.
+	 */
 	public static final String SETTINGS_FILE_NAME = "settings.yml";
 
 	private final VirtualFileSystemSettings settings;
@@ -73,6 +91,10 @@ public class VirtualFileSystem {
 	private Thread fsSizeThread;
 	private final List<FileSystemLayer> currentTmpFiles = new ArrayList<FileSystemLayer>();
 	private final Map<VirtualGlob, URI> symlinks = new HashMap<VirtualGlob, URI>();
+	/**
+	 * If this FS is cordoned off, this will be non-null. If it is cordoned off, then this
+	 */
+	private final VirtualFileSystemManifest vfsManifest;
 
 	private static final Map<String, Constructor> FSL_PROVIDERS = new HashMap<String, Constructor>();
 
@@ -98,7 +120,7 @@ public class VirtualFileSystem {
 	 * Creates a new VirtualFileSystem, at the root specified. If the root doesn't exist, it will automatically be
 	 * created.
 	 *
-	 * @param root
+	 * @param root The root of the file system
 	 * @param settings The settings object, which represents this file system's settings. If null, it is assumed this is
 	 * a fresh installation, and will be handled accordingly.
 	 * @throws IOException If the file system cannot be initialized at this location
@@ -108,6 +130,12 @@ public class VirtualFileSystem {
 		this.root = root;
 		install();
 		symlinkFile = new File(root, META_DIRECTORY_PATH + "/" + SYMLINK_FILE_NAME);
+		if(this.settings.isCordonedOff()) {
+			File manifest = new File(new File(root, META_DIRECTORY_PATH), MANIFEST_FILE_NAME);
+			vfsManifest = SystemVirtualFileSystemManifest.getInstance(manifest);
+		} else {
+			vfsManifest = null;
+		}
 		//TODO: If it is cordoned off, we don't need this thread either, we need a different
 		//thread, but it only needs to run once
 		if(this.settings.hasQuota()) {
@@ -142,16 +170,11 @@ public class VirtualFileSystem {
 		meta.mkdir();
 
 		File settingsFile = new File(meta, SETTINGS_FILE_NAME);
-		File manifest = new File(meta, MANIFEST_FILE_NAME);
 		File symlinks = new File(meta, SYMLINK_FILE_NAME);
 		File tmpDir = new File(meta, "tmp");
 
 		if(!settingsFile.exists()) {
 			settingsFile.createNewFile();
-		}
-
-		if(!manifest.exists()) {
-			manifest.createNewFile();
 		}
 
 		if(!symlinks.exists()) {
@@ -169,13 +192,34 @@ public class VirtualFileSystem {
 		if(hidden) {
 			throw new PermissionException(file.getPath() + " cannot be read.");
 		}
+		boolean cordonedOff = settings.isCordonedOff();
+		if(cordonedOff) {
+			// Check in manifest, to see if this file is in it. If not, then this file doesn't exist, for this purpose,
+			// and so we throw a permission exception
+			if(!vfsManifest.fileInManifest(file)) {
+				throw new PermissionException(file.getPath() + " cannot be read.");
+			}
+		}
 	}
 
-	private void assertWritePermission(VirtualFile file) {
+	private void assertWritePermission(VirtualFile file) throws IOException {
 		Boolean readOnly = (Boolean) settings.getSetting(file, VirtualFileSystemSetting.READONLY);
 		Boolean hidden = (Boolean) settings.getSetting(file, VirtualFileSystemSetting.HIDDEN);
 		if(readOnly || hidden) {
 			throw new PermissionException(file.getPath() + " cannot be written to.");
+		}
+		boolean cordonedOff = settings.isCordonedOff();
+		if(cordonedOff) {
+			// If the file already exists in the manifest, then it's fine.
+			if(vfsManifest.fileInManifest(file)) {
+				return;
+			}
+			// Not in manifest
+			// Check if the underlying real file location exists already. If so, don't allow writing. If not,
+			// then writing is ok
+			if(normalize(file).exists()) {
+				throw new PermissionException(file.getPath() + " cannot be written to.");
+			}
 		}
 	}
 
@@ -333,7 +377,7 @@ public class VirtualFileSystem {
 		if(settings.isCordonedOff()) {
 			throw new UnsupportedOperationException("Not implemented yet.");
 		} else {
-			normalize(file).deleteOnExit();
+			normalize(file).deleteEventually();
 		}
 	}
 

@@ -17,20 +17,11 @@ public class BukkitMCShulker extends BukkitMCLivingEntity implements MCShulker {
 
 	@Override
 	public MCDyeColor getColor() {
-		try {
-			return BukkitMCDyeColor.getConvertor().getAbstractedEnum(sh.getColor());
-		} catch (NoSuchMethodError ex) {
-			// probably prior to 1.12
-		}
-		return MCDyeColor.PURPLE;
+		return BukkitMCDyeColor.getConvertor().getAbstractedEnum(sh.getColor());
 	}
 
 	@Override
 	public void setColor(MCDyeColor color) {
-		try {
-			sh.setColor(BukkitMCDyeColor.getConvertor().getConcreteEnum(color));
-		} catch (NoSuchMethodError ex) {
-			// probably prior to 1.12
-		}
+		sh.setColor(BukkitMCDyeColor.getConvertor().getConcreteEnum(color));
 	}
 }

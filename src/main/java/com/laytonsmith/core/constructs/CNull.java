@@ -2,16 +2,17 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.natives.interfaces.Booleanish;
 
 /**
  * Represents a MethodScript null value.
  */
 @typeof("null")
-public final class CNull extends Construct implements Cloneable {
+public final class CNull extends Construct implements Cloneable, Booleanish {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("null");
+	public static final CClassType TYPE = CClassType.get(CNull.class);
 
 	public static final long serialVersionUID = 1L;
 
@@ -67,11 +68,6 @@ public final class CNull extends Construct implements Cloneable {
 	}
 
 	@Override
-	public String nval() {
-		return null;
-	}
-
-	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof CNull;
 	}
@@ -94,7 +90,7 @@ public final class CNull extends Construct implements Cloneable {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_0_1;
+		return MSVersion.V3_0_1;
 	}
 
 	// null is so special, that if some code tries to call these methods on it, we
@@ -109,4 +105,11 @@ public final class CNull extends Construct implements Cloneable {
 	public CClassType[] getInterfaces() {
 		throw new RuntimeException("Cannot call getInterfaces on null");
 	}
+
+	@Override
+	public boolean getBooleanValue(Target t) {
+		return false;
+	}
+
+
 }

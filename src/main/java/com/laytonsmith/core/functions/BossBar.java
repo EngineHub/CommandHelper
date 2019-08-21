@@ -8,14 +8,14 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.enums.MCBarColor;
 import com.laytonsmith.abstraction.enums.MCBarStyle;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -28,6 +28,7 @@ import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,7 +55,7 @@ public class BossBar {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 	}
 
@@ -77,7 +78,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public CArray exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			CArray ca = new CArray(t);
 			for(String id : BARS.keySet()) {
 				ca.push(new CString(id, t), t);
@@ -117,7 +118,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			if(BARS.containsKey(id)) {
 				throw new CREIllegalArgumentException("That boss bar id is already in use.", t);
@@ -128,7 +129,7 @@ public class BossBar {
 			boolean visible = true;
 			double percent = 1.0;
 			if(args.length == 2) {
-				if(!(args[1] instanceof CArray)) {
+				if(!(args[1].isInstanceOf(CArray.class))) {
 					throw new CRECastException("Expected array for parameter 2 of create_bar()", t);
 				}
 				CArray ca = (CArray) args[1];
@@ -150,7 +151,7 @@ public class BossBar {
 					}
 				}
 				if(ca.containsKey("visible")) {
-					visible = Static.getBoolean(ca.get("visible", t), t);
+					visible = ArgumentValidation.getBoolean(ca.get("visible", t), t);
 				}
 				if(ca.containsKey("percent")) {
 					try {
@@ -161,12 +162,10 @@ public class BossBar {
 				}
 			}
 			MCBossBar bar = StaticLayer.GetServer().createBossBar(title, color, style);
-			if(bar != null) {
+			if(bar != null) { // if not tests
 				bar.setVisible(visible);
 				bar.setProgress(percent);
 				BARS.put(id, bar);
-			} else {
-				throw new CREException("Boss bar functions require Bukkit 1.9 or later.", t);
 			}
 			return CVoid.VOID;
 		}
@@ -201,21 +200,21 @@ public class BossBar {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			MCBossBar bar = BARS.get(id);
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
-			if(args[1] instanceof CString) {
+			if(args[1].isInstanceOf(CString.class)) {
 				bar.setTitle(args[1].val());
-			} else if(args[1] instanceof CDouble) {
+			} else if(args[1].isInstanceOf(CDouble.class)) {
 				try {
 					bar.setProgress(Static.getDouble(args[1], t));
 				} catch (IllegalArgumentException ex) {
 					throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 				}
-			} else if(args[1] instanceof CArray) {
+			} else if(args[1].isInstanceOf(CArray.class)) {
 				CArray ca = (CArray) args[1];
 				if(ca.containsKey("title")) {
 					bar.setTitle(ca.get("title", t).val());
@@ -235,7 +234,7 @@ public class BossBar {
 					}
 				}
 				if(ca.containsKey("visible")) {
-					bar.setVisible(Static.getBoolean(ca.get("visible", t), t));
+					bar.setVisible(ArgumentValidation.getBoolean(ca.get("visible", t), t));
 				}
 				if(ca.containsKey("percent")) {
 					try {
@@ -277,7 +276,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			MCBossBar bar = BARS.get(id);
 			if(bar == null) {
@@ -318,7 +317,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			MCBossBar bar = BARS.get(id);
 			if(bar == null) {
@@ -355,7 +354,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCBossBar bar = BARS.get(args[0].val());
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
@@ -389,7 +388,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCBossBar bar = BARS.get(args[0].val());
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
@@ -423,7 +422,7 @@ public class BossBar {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCBossBar bar = BARS.get(args[0].val());
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);

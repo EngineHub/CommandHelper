@@ -1,12 +1,13 @@
 package com.laytonsmith.tools.docgen.sitedeploy;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
-import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api.Platforms;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.compiler.Keyword;
@@ -39,14 +40,23 @@ import org.json.simple.JSONValue;
  */
 public class APIBuilder {
 
+	/**
+	 * Can be run independently, or by the programmer, but this will always print out to System.out the json. Extensions
+	 * are loaded first.
+	 * @param args Ignored.
+	 */
 	public static void main(String[] args) {
-		Implementation.setServerType(Implementation.Type.SHELL);
+		try {
+			Implementation.setServerType(Implementation.Type.SHELL);
+		} catch (RuntimeException e) {
+			// Eh.. in most cases this is wrong, but this will happen when json-api is called, and that's ok.
+		}
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(APIBuilder.class));
 		ExtensionManager.AddDiscoveryLocation(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
 		ExtensionManager.Cache(MethodScriptFileLocations.getDefault().getExtensionCacheDirectory());
 		ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
 		ExtensionManager.Startup();
-		System.out.println(JSONValue.toJSONString(new APIBuilder().build().get("objects")));
+		StreamUtils.GetSystemOut().println(JSONValue.toJSONString(new APIBuilder().build()));
 	}
 
 	/**
@@ -60,7 +70,7 @@ public class APIBuilder {
 		{
 			// functions
 			Map<String, Map<String, Object>> api = new TreeMap<>();
-			for(FunctionBase f : FunctionList.getFunctionList(Platforms.INTERPRETER_JAVA)) {
+			for(FunctionBase f : FunctionList.getFunctionList(Platforms.INTERPRETER_JAVA, null)) {
 				if(f instanceof Function) {
 					Function ff = (Function) f;
 					Map<String, Object> function = new TreeMap<>();
@@ -164,23 +174,22 @@ public class APIBuilder {
 		{
 			//objects
 			Map<String, Map<String, Object>> objects = new TreeMap<>();
-			for(String t : NativeTypeList.getNativeTypeList()) {
+			for(FullyQualifiedClassName t : NativeTypeList.getNativeTypeList()) {
 				try {
-					if("void".equals(t) || "null".equals(t)) {
+					if("void".equals(t.getFQCN()) || "null".equals(t.getFQCN())) {
 						// These are super special, and aren't really
 						// "real" datatypes, so shouldn't be included.
 						continue;
 					}
 					Map<String, Object> obj = new TreeMap<>();
-					Class<? extends Mixed> tt = NativeTypeList.getNativeClassOrInterfaceRunner(t);
 					String name;
 					String docs;
 					Version since;
 					URL source;
 					CClassType[] interfaces;
 					CClassType[] supers;
-					// else just use the real class
-					Mixed m = ReflectionUtils.instantiateUnsafe(tt);
+
+					Mixed m = NativeTypeList.getInvalidInstanceForUse(t);
 					name = m.getName();
 					docs = m.docs();
 					since = m.since();

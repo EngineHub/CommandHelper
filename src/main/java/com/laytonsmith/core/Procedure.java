@@ -9,7 +9,6 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
-import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -17,15 +16,17 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
-import com.laytonsmith.core.functions.DataHandling;
+import com.laytonsmith.core.functions.ControlFlow;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -44,7 +45,7 @@ public class Procedure implements Cloneable {
 
 	private final String name;
 	private Map<String, IVariable> varList;
-	private final Map<String, Construct> originals = new HashMap<>();
+	private final Map<String, Mixed> originals = new HashMap<>();
 	private final List<IVariable> varIndex = new ArrayList<>();
 	private ParseTree tree;
 	private CClassType returnType;
@@ -85,7 +86,7 @@ public class Procedure implements Cloneable {
 		if(true) {
 			return false;
 		}
-		if(!tree.getData().isDynamic()) {
+		if(!Construct.IsDynamicHelper(tree.getData())) {
 			//If it isn't dynamic, it certainly could be constant
 			return true;
 		} else if(tree.getData() instanceof IVariable) {
@@ -96,10 +97,10 @@ public class Procedure implements Cloneable {
 		} else if(tree.getData() instanceof CFunction) {
 			//If the function itself is not optimizable, we needn't recurse.
 			try {
-				FunctionBase fb = FunctionList.getFunction(tree.getData());
+				FunctionBase fb = FunctionList.getFunction((CFunction) tree.getData(), null);
 				if(fb instanceof Function) {
 					Function f = (Function) fb;
-					if(f instanceof DataHandling._return) {
+					if(f instanceof ControlFlow._return) {
 						//This is a special exception. Return itself is not optimizable,
 						//but if the contents are optimizable, it is still considered constant.
 						if(!tree.hasChildren()) {
@@ -159,8 +160,8 @@ public class Procedure implements Cloneable {
 	 * @param t
 	 * @return
 	 */
-	public Construct cexecute(List<ParseTree> args, Environment env, Target t) {
-		List<Construct> list = new ArrayList<>();
+	public Mixed cexecute(List<ParseTree> args, Environment env, Target t) {
+		List<Mixed> list = new ArrayList<>();
 		for(ParseTree arg : args) {
 			list.add(env.getEnv(GlobalEnv.class).GetScript().seval(arg, env));
 		}
@@ -170,36 +171,48 @@ public class Procedure implements Cloneable {
 	/**
 	 * Executes this procedure, with the arguments that were passed in
 	 *
-	 * @param args
-	 * @param env
+	 * @param args The arguments passed to the procedure call.
+	 * @param oldEnv The environment to be cloned.
 	 * @param t
 	 * @return
 	 */
-	public Construct execute(List<Construct> args, Environment env, Target t) {
-		env.getEnv(GlobalEnv.class).SetVarList(new IVariableList());
+	public Mixed execute(List<Mixed> args, Environment oldEnv, Target t) {
+		boolean prev = oldEnv.getEnv(GlobalEnv.class).getCloneVars();
+		oldEnv.getEnv(GlobalEnv.class).setCloneVars(false);
+		Environment env;
+		try {
+			env = oldEnv.clone();
+			env.getEnv(GlobalEnv.class).setCloneVars(true);
+		} catch (CloneNotSupportedException ex) {
+			throw new RuntimeException(ex);
+		}
+		oldEnv.getEnv(GlobalEnv.class).setCloneVars(prev);
+
 		//This is what will become our @arguments var
 		CArray arguments = new CArray(Target.UNKNOWN);
 		for(String key : originals.keySet()) {
-			Construct c = originals.get(key);
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, key, c, Target.UNKNOWN));
+			Mixed c = originals.get(key);
+			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, key, c, c.getTarget()));
 			arguments.push(c, t);
 		}
 		Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel()); // new Script(null, null);
 		for(int i = 0; i < args.size(); i++) {
-			Construct c = args.get(i);
+			Mixed c = args.get(i);
 			arguments.set(i, c, t);
 			if(varIndex.size() > i) {
-				String varname = varIndex.get(i).getVariableName();
-				if(c instanceof CNull || InstanceofUtil.isInstanceof(c, varIndex.get(i).getDefinedType()) || varIndex.get(i).getDefinedType().equals(Auto.TYPE)) {
-					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(varIndex.get(i).getDefinedType(), varname, c, c.getTarget()));
+				IVariable var = varIndex.get(i);
+				if(c instanceof CNull || var.getDefinedType().equals(Auto.TYPE)
+						|| InstanceofUtil.isInstanceof(c, var.getDefinedType(), env)) {
+					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
+							var.getVariableName(), c, c.getTarget()));
 				} else {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
-							+ varIndex.get(i).getDefinedType().val() + " in argument " + (i + 1) + ", but"
+							+ var.getDefinedType().val() + " in argument " + (i + 1) + ", but"
 							+ " a value of type " + c.typeof() + " was found instead.", c.getTarget());
 				}
 			}
 		}
-		env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, Target.UNKNOWN));
+		env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, t));
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
 		try {
@@ -221,16 +234,19 @@ public class Procedure implements Cloneable {
 			}
 		} catch (FunctionReturnException e) {
 			// Normal exit
-			stManager.popStackTraceElement();
-			Construct ret = e.getReturn();
-			if(!InstanceofUtil.isInstanceof(ret, returnType)) {
-				throw new CRECastException("Expected procedure \"" + name + "\" to return a value of type " + returnType.val()
-						+ " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
+			Mixed ret = e.getReturn();
+			if(returnType.equals(Auto.TYPE)) {
+				return ret;
+			}
+			if(returnType.equals(CVoid.TYPE) != ret.equals(CVoid.VOID)
+					|| !ret.equals(CNull.NULL) && !ret.equals(CVoid.VOID)
+					&& !InstanceofUtil.isInstanceof(ret, returnType, env)) {
+				throw new CRECastException("Expected procedure \"" + name + "\" to return a value of type "
+						+ returnType.val() + " but a value of type " + ret.typeof() + " was returned instead",
+						ret.getTarget());
 			}
 			return ret;
 		} catch (LoopManipulationException ex) {
-			// Not exactly normal, but pop anyways
-			stManager.popStackTraceElement();
 			// These cannot bubble up past procedure calls. This will eventually be
 			// a compile error.
 			throw ConfigRuntimeException.CreateUncatchableException("Loop manipulation operations (e.g. break() or continue()) cannot"
@@ -239,16 +255,16 @@ public class Procedure implements Cloneable {
 			if(e instanceof AbstractCREException) {
 				((AbstractCREException) e).freezeStackTraceElements(stManager);
 			}
-			stManager.popStackTraceElement();
 			throw e;
-		} catch (Throwable th) {
-			// Not sure. Pop, but rethrow
+		} catch (StackOverflowError e) {
+			throw new CREStackOverflowError(null, t, e);
+		} finally {
 			stManager.popStackTraceElement();
-			throw th;
 		}
 		// Normal exit, but no return.
-		stManager.popStackTraceElement();
 		// If we got here, then there was no return value. This is fine, but only for returnType void or auto.
+		// TODO: Once strong typing is implemented at a compiler level, this should be removed to increase runtime
+		// performance.
 		if(!(returnType.equals(Auto.TYPE) || returnType.equals(CVoid.TYPE))) {
 			throw new CRECastException("Expecting procedure \"" + name + "\" to return a value of type " + returnType.val() + ","
 					+ " but no value was returned.", tree.getTarget());

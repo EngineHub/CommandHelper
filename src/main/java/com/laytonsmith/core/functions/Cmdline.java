@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
@@ -9,14 +10,17 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
-import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -34,12 +38,15 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.CRE.CREShellException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +61,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -66,11 +72,12 @@ public class Cmdline {
 
 	public static String docs() {
 		return "This class contains functions that are mostly only useful for command line scripts, but in general may be used by any script. For"
-				+ " more information on running MethodScript from the command line, see [[CommandHelper/Command_Line_Scripting|this wiki page]].";
+				+ " more information on running MethodScript from the command line, see [[Command_Line_Scripting|this wiki page]].";
 	}
 
 	@api
 	@noboilerplate
+	@seealso(print_out.class)
 	public static class sys_out extends AbstractFunction {
 
 		@Override
@@ -89,7 +96,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CVoid exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String msg = Static.MCToANSIColors(args[0].val());
 			StreamUtils.GetSystemOut().print(msg);
 			if(msg.contains("\033")) {
@@ -119,8 +126,8 @@ public class Cmdline {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -134,6 +141,7 @@ public class Cmdline {
 
 	@api
 	@noboilerplate
+	@seealso(print_err.class)
 	public static class sys_err extends AbstractFunction {
 
 		@Override
@@ -152,7 +160,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CVoid exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String msg = Static.MCToANSIColors(args[0].val());
 			PrintStream se = StreamUtils.GetSystemErr();
 			se.print(msg);
@@ -183,8 +191,8 @@ public class Cmdline {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -197,6 +205,7 @@ public class Cmdline {
 
 	@api
 	@noboilerplate
+	@seealso(sys_out.class)
 	public static class print_out extends AbstractFunction {
 
 		@Override
@@ -215,7 +224,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CVoid exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String msg = Static.MCToANSIColors(args[0].val());
 			PrintStream so = StreamUtils.GetSystemOut();
 			so.print(msg);
@@ -240,18 +249,20 @@ public class Cmdline {
 					+ " cases they will behave the same. Unlike other print methdods, colors and other formatting characters WILL"
 					+ " \"bleed\" through, so"
 					+ " print_out(color(RED) . 'This is red') will also cause the next line to also be red,"
-					+ " so if you need to print multiple lines out, you should manually reset the color with print_out(color(RESET)).";
+					+ " so if you need to print multiple lines out, you should manually reset the color with print_out(color(RESET)),"
+					+ " or use sys_out..";
 		}
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
 
 	@api
 	@noboilerplate
+	@seealso(sys_err.class)
 	public static class print_err extends AbstractFunction {
 
 		@Override
@@ -270,7 +281,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CVoid exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String msg = Static.MCToANSIColors(args[0].val());
 			StreamUtils.GetSystemErr().print(msg);
 			StreamUtils.GetSystemErr().flush();
@@ -294,12 +305,13 @@ public class Cmdline {
 					+ " cases they will behave the same. Unlike other print methdods, colors and other formatting characters WILL"
 					+ " \"bleed\" through, so"
 					+ " print_err(color(RED) . 'This is red') will also cause the next line to also be red,"
-					+ " so if you need to print multiple lines out, you should manually reset the color with print_out(color(RESET)).";
+					+ " so if you need to print multiple lines out, you should manually reset the color with print_out(color(RESET)),"
+					+ " or use sys_err.";
 		}
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -324,15 +336,15 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			int exit_code = 0;
 			if(args.length == 1) {
 				exit_code = Static.getInt32(args[0], t);
 			}
-			if(Static.InCmdLine(environment)) {
+			if(Static.InCmdLine(environment, true)) {
 				System.exit(exit_code);
 			}
-			return new Echoes.die().exec(t, environment, args);
+			return new ControlFlow.die().exec(t, environment, args);
 		}
 
 		@Override
@@ -352,8 +364,8 @@ public class Cmdline {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -390,7 +402,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 1) {
 				String propName = args[0].val();
 				String prop;
@@ -420,7 +432,26 @@ public class Cmdline {
 		private Map<String, String> getMethodScriptProperties() {
 			Map<String, String> map = new HashMap<>();
 			for(Prefs.PNames name : Prefs.PNames.values()) {
-				map.put("methodscript.preference." + name.config(), Prefs.pref(name).toString());
+				Object o;
+				switch(name.type()) {
+					case BOOLEAN:
+						o = Prefs.prefB(name);
+						break;
+					case DOUBLE:
+					case NUMBER:
+						o = Prefs.prefD(name);
+						break;
+					case FILE:
+					case STRING:
+						o = Prefs.prefS(name);
+						break;
+					case INT:
+						o = Prefs.prefI(name);
+						break;
+					default:
+						throw new Error("switch is not exhaustive");
+				}
+				map.put("methodscript.preference." + name.config(), o.toString());
 			}
 			return map;
 		}
@@ -445,8 +476,8 @@ public class Cmdline {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -477,7 +508,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 1) {
 				return new CString(System.getenv(args[0].val()), t);
 			} else {
@@ -506,8 +537,8 @@ public class Cmdline {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -531,9 +562,9 @@ public class Cmdline {
 
 		@SuppressWarnings({"BroadCatchBlock", "TooBroadCatch", "UseSpecificCatch"})
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			//TODO: Make this more robust by having a local cache of the environment which we modify, and get_env returns from.
-			Map<String, String> newenv = new HashMap<String, String>(System.getenv());
+			Map<String, String> newenv = new HashMap<>(System.getenv());
 			newenv.put(args[0].val(), args[1].val());
 			boolean ret;
 			try {
@@ -565,13 +596,13 @@ public class Cmdline {
 				} catch (Exception e2) {
 					ret = false;
 					if(Prefs.DebugMode()) {
-						CHLog.GetLogger().e(CHLog.Tags.GENERAL, e2, t);
+						MSLog.GetLogger().e(MSLog.Tags.GENERAL, e2, t);
 					}
 				}
 			} catch (Exception e1) {
 				ret = false;
 				if(Prefs.DebugMode()) {
-					CHLog.GetLogger().e(CHLog.Tags.GENERAL, e1, t);
+					MSLog.GetLogger().e(MSLog.Tags.GENERAL, e1, t);
 				}
 			}
 			return CBoolean.get(ret);
@@ -596,8 +627,8 @@ public class Cmdline {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -622,31 +653,25 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(!Static.InCmdLine(environment)) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(!Static.InCmdLine(environment, true)) {
 				throw new CREInsufficientPermissionException(getName() + " cannot be used outside of cmdline mode.", t);
 			}
 			boolean mask = true;
 			if(args.length > 1) {
-				mask = Static.getBoolean(args[1], t);
+				mask = ArgumentValidation.getBoolean(args[1], t);
 			}
 
 			String prompt = args[0].val();
-			Character cha = new Character((char) 0);
+			Character cha = (char) 0;
 			if(mask) {
-				cha = new Character('*');
+				cha = '*';
 			}
-			jline.console.ConsoleReader reader = null;
-			try {
-				reader = new jline.console.ConsoleReader();
+			try(jline.console.ConsoleReader reader = new jline.console.ConsoleReader()) {
 				reader.setExpandEvents(false);
 				return new CSecureString(reader.readLine(Static.MCToANSIColors(prompt), cha).toCharArray(), t);
 			} catch (IOException ex) {
 				throw new CREIOException(ex.getMessage(), t);
-			} finally {
-				if(reader != null) {
-					reader.shutdown();
-				}
 			}
 
 		}
@@ -671,7 +696,7 @@ public class Cmdline {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -706,27 +731,34 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			requireCmdlineMode(environment, this, t);
 
 			String prompt = args[0].val();
-			StreamUtils.GetSystemOut().print(Static.MCToANSIColors(prompt));
-			StreamUtils.GetSystemOut().flush();
-			jline.console.ConsoleReader reader = null;
 			try {
-				reader = new jline.console.ConsoleReader();
-				reader.setExpandEvents(false);
-				char c = (char) reader.readCharacter();
-				StreamUtils.GetSystemOut().println(c);
+				char c = promptChar(Static.MCToANSIColors(prompt));
 				return new CString(c, t);
 			} catch (IOException ex) {
 				throw new CREIOException(ex.getMessage(), t);
-			} finally {
-				if(reader != null) {
-					reader.shutdown();
-				}
 			}
 
+		}
+
+		/**
+		 * Prompts for a single char from the console. The character typed is returned.
+		 * @param prompt
+		 * @return
+		 * @throws IOException
+		 */
+		public static char promptChar(String prompt) throws IOException {
+			StreamUtils.GetSystemOut().print(prompt);
+			StreamUtils.GetSystemOut().flush();
+			try(jline.console.ConsoleReader reader = new jline.console.ConsoleReader()) {
+				reader.setExpandEvents(false);
+				char c = (char) reader.readCharacter();
+				StreamUtils.GetSystemOut().println(c);
+				return c;
+			}
 		}
 
 		@Override
@@ -747,7 +779,7 @@ public class Cmdline {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -772,24 +804,18 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(!Static.InCmdLine(environment)) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(!Static.InCmdLine(environment, true)) {
 				throw new CREInsufficientPermissionException(getName() + " cannot be used outside of cmdline mode.", t);
 			}
 
 			String prompt = args[0].val();
-			jline.console.ConsoleReader reader = null;
-			try {
-				reader = new jline.console.ConsoleReader();
+			try(jline.console.ConsoleReader reader = new jline.console.ConsoleReader()) {
 				reader.setExpandEvents(false);
 				String line = reader.readLine(Static.MCToANSIColors(prompt));
 				return new CString(line, t);
 			} catch (IOException ex) {
 				throw new CREIOException(ex.getMessage(), t);
-			} finally {
-				if(reader != null) {
-					reader.shutdown();
-				}
 			}
 
 		}
@@ -812,7 +838,7 @@ public class Cmdline {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -837,7 +863,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			java.awt.Toolkit.getDefaultToolkit().beep();
 			return CVoid.VOID;
 		}
@@ -859,7 +885,7 @@ public class Cmdline {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -884,8 +910,8 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(Static.InCmdLine(environment)) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(Static.InCmdLine(environment, true)) {
 				try {
 					new jline.console.ConsoleReader().clearScreen();
 				} catch (IOException ex) {
@@ -912,7 +938,7 @@ public class Cmdline {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -938,8 +964,8 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(!Static.InCmdLine(environment)) {
+		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(!Static.InCmdLine(environment, true)) {
 				if(!Prefs.AllowShellCommands()) {
 					throw new CREInsufficientPermissionException("Shell commands are not allowed. Enable them in preferences.ini.", t);
 				}
@@ -953,7 +979,7 @@ public class Cmdline {
 			final CClosure stderr;
 			final CClosure exit;
 			final boolean subshell;
-			if(args[0] instanceof CArray) {
+			if(args[0].isInstanceOf(CArray.class)) {
 				CArray array = (CArray) args[0];
 				command = new String[(int) array.size()];
 				for(int i = 0; i < array.size(); i++) {
@@ -977,7 +1003,7 @@ public class Cmdline {
 				exit = (options.containsKey("exit") && !(options.get("exit", t) instanceof CNull)
 						? Static.getObject(options.get("exit", t), t, CClosure.class) : null);
 				subshell = (options.containsKey("subshell")
-						? Static.getBoolean(options.get("subshell", t), t) : false);
+						? ArgumentValidation.getBoolean(options.get("subshell", t), t) : false);
 			} else {
 				stdout = null;
 				stderr = null;
@@ -997,13 +1023,9 @@ public class Cmdline {
 					char c = (char) b;
 					if(c == '\n' || b == -1) {
 						try {
-							StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
-
-								@Override
-								public Object call() throws Exception {
-									stdout.execute(new CString(sbout.getObject(), t));
-									return null;
-								}
+							StaticLayer.GetConvertor().runOnMainThreadAndWait(() -> {
+								stdout.executeCallable(new CString(sbout.getObject(), t));
+								return null;
 							});
 						} catch (Exception ex) {
 							Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
@@ -1023,13 +1045,9 @@ public class Cmdline {
 					char c = (char) b;
 					if(c == '\n' || b == -1) {
 						try {
-							StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
-
-								@Override
-								public Object call() throws Exception {
-									stderr.execute(new CString(sberr.getObject(), t));
-									return null;
-								}
+							StaticLayer.GetConvertor().runOnMainThreadAndWait(() -> {
+								stderr.executeCallable(new CString(sberr.getObject(), t));
+								return null;
 							});
 						} catch (Exception ex) {
 							Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
@@ -1046,48 +1064,40 @@ public class Cmdline {
 				throw new CREIOException(ex.getMessage(), t);
 			}
 
-			Runnable run = new Runnable() {
-
-				@Override
-				public void run() {
-					environment.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
+			Runnable run = () -> {
+				environment.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
+				try {
+					final int exitCode = cmd.waitFor();
 					try {
-						final int exitCode = cmd.waitFor();
-						try {
-							cmd.getSystemOut().flush();
-							if(cmd.getSystemOut() != StreamUtils.GetSystemOut()) {
-								cmd.getSystemOut().close();
-							}
-						} catch (IOException ex) {
-							Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
+						cmd.getSystemOut().flush();
+						if(cmd.getSystemOut() != StreamUtils.GetSystemOut()) {
+							cmd.getSystemOut().close();
 						}
-						try {
-							cmd.getSystemErr().flush();
-							if(cmd.getSystemErr() != StreamUtils.GetSystemErr()) {
-								cmd.getSystemErr().close();
-							}
-						} catch (IOException ex) {
-							Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
-						}
-						if(exit != null) {
-							try {
-								StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
-
-									@Override
-									public Object call() throws Exception {
-										exit.execute(new CInt(exitCode, t));
-										return null;
-									}
-								});
-							} catch (Exception ex) {
-								Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
-							}
-						}
-					} catch (InterruptedException ex) {
-						throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
-					} finally {
-						environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
+					} catch (IOException ex) {
+						Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
 					}
+					try {
+						cmd.getSystemErr().flush();
+						if(cmd.getSystemErr() != StreamUtils.GetSystemErr()) {
+							cmd.getSystemErr().close();
+						}
+					} catch (IOException ex) {
+						Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
+					}
+					if(exit != null) {
+						try {
+							StaticLayer.GetConvertor().runOnMainThreadAndWait(() -> {
+								exit.executeCallable(new CInt(exitCode, t));
+								return null;
+							});
+						} catch (Exception ex) {
+							Logger.getLogger(Cmdline.class.getName()).log(Level.SEVERE, null, ex);
+						}
+					}
+				} catch (InterruptedException ex) {
+					throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
+				} finally {
+					environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
 				}
 			};
 			if(subshell) {
@@ -1130,7 +1140,7 @@ public class Cmdline {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -1156,8 +1166,8 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(!Static.InCmdLine(environment)) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(!Static.InCmdLine(environment, true)) {
 				if(!Prefs.AllowShellCommands()) {
 					throw new CREInsufficientPermissionException("Shell commands are not allowed. Enable them in preferences.ini.", t);
 				}
@@ -1168,7 +1178,7 @@ public class Cmdline {
 			String[] command;
 			int expectedExitCode = 0;
 			File workingDir = null;
-			if(args[0] instanceof CArray) {
+			if(args[0].isInstanceOf(CArray.class)) {
 				CArray array = (CArray) args[0];
 				command = new String[(int) array.size()];
 				for(int i = 0; i < array.size(); i++) {
@@ -1256,7 +1266,7 @@ public class Cmdline {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1290,7 +1300,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Set<OSUtils.OS> oses = new HashSet<>();
 			String osS = args[0].val();
 			for(String osSS : osS.split("\\|")) {
@@ -1330,7 +1340,7 @@ public class Cmdline {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 	}
@@ -1356,7 +1366,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Set<OSUtils.OS> oses = new HashSet<>();
 			String osS = args[0].val();
 			for(String osSS : osS.split("\\|")) {
@@ -1396,7 +1406,7 @@ public class Cmdline {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -1432,7 +1442,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CString(OSUtils.GetOS().name(), t);
 		}
 
@@ -1453,7 +1463,7 @@ public class Cmdline {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 	}
@@ -1477,8 +1487,8 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(!Static.InCmdLine(environment)) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(!Static.InCmdLine(environment, true)) {
 				throw new CREInsufficientPermissionException(getName() + " cannot be used outside of cmdline mode.", t);
 			}
 			if(System.console() != null) {
@@ -1486,7 +1496,7 @@ public class Cmdline {
 			}
 			boolean binary = false;
 			if(args.length > 0) {
-				binary = Static.getBoolean(args[0], t);
+				binary = ArgumentValidation.getBoolean(args[0], t);
 			}
 			try {
 				if(binary) {
@@ -1537,7 +1547,7 @@ public class Cmdline {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -1561,9 +1571,9 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			File root;
-			if(Static.InCmdLine(environment)) {
+			if(Static.InCmdLine(environment, true)) {
 				root = environment.getEnv(GlobalEnv.class).GetRootFolder();
 			} else if(t.file() == null) {
 				root = null;
@@ -1604,7 +1614,7 @@ public class Cmdline {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -1628,7 +1638,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			requireCmdlineMode(environment, this, t);
 			File cd = Static.GetFileFromArgument(args.length == 0 ? null : args[0].val(), environment, t, new File(System.getProperty("user.home")));
 			if(!cd.exists()) {
@@ -1656,7 +1666,7 @@ public class Cmdline {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -1680,7 +1690,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			requireCmdlineMode(environment, this, t);
 			CArray ca = new CArray(t);
 			File cwd = Static.GetFileFromArgument(args.length > 0 ? args[0].val() : null, environment, t, environment.getEnv(GlobalEnv.class).GetRootFolder());
@@ -1712,7 +1722,7 @@ public class Cmdline {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -1736,9 +1746,9 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			requireCmdlineMode(environment, this, t);
-			if(!(args[0] instanceof CClosure)) {
+			if(!(args[0].isInstanceOf(CClosure.class))) {
 				throw new CRECastException("Expecting a closure for argument 1 of " + getName(), t);
 			}
 			environment.getEnv(GlobalEnv.class).SetCustom("cmdline_prompt", args[0]);
@@ -1765,7 +1775,7 @@ public class Cmdline {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -1789,7 +1799,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			requireCmdlineMode(environment, this, t);
 			try {
 				int i = new jline.console.ConsoleReader().getTerminal().getWidth();
@@ -1817,7 +1827,7 @@ public class Cmdline {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -1841,7 +1851,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String name = StaticLayer.GetConvertor().GetUser(environment);
 			if(name == null) {
 				return CNull.NULL;
@@ -1869,7 +1879,7 @@ public class Cmdline {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -1893,8 +1903,8 @@ public class Cmdline {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CBoolean.GenerateCBoolean(Static.InCmdLine(environment), t);
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.GenerateCBoolean(Static.InCmdLine(environment, true), t);
 		}
 
 		@Override
@@ -1914,7 +1924,132 @@ public class Cmdline {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
+		}
+
+	}
+
+	@api
+	public static class x_find extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIllegalArgumentException.class, CREInsufficientPermissionException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			requireCmdlineMode(environment, this, t);
+			final CArray a = new CArray(t);
+			String regex = ArgumentValidation.getString(args[0], t);
+			String startFrom = environment.getEnv(GlobalEnv.class).GetRootFolder().getAbsolutePath();
+			Set<FindType> findTypes = EnumSet.allOf(FindType.class);
+			if(args.length == 2) {
+				if(args[1].isInstanceOf(CArray.class)) {
+					findTypes = ArgumentValidation.getEnumSet(args[1], FindType.class, t);
+				} else {
+					startFrom = ArgumentValidation.getString(args[1], t);
+				}
+			} else if(args.length > 2) {
+				startFrom = ArgumentValidation.getString(args[1], t);
+				findTypes = ArgumentValidation.getEnumSet(args[2], FindType.class, t);
+			}
+			if(findTypes.isEmpty()) {
+				throw new CREIllegalArgumentException("types must be a non-empty array, and not null", t);
+			}
+			File startFromF = new File(startFrom);
+			final Set<FindType> types = findTypes;
+			try {
+				FileUtil.recursiveFind(startFromF, (file) -> {
+					// We are such a potentially long running process, that we want to specially provide support
+					// for Ctrl-C, so we check for interruption here.
+					if(environment.getEnv(GlobalEnv.class).IsInterrupted()) {
+						throw new CancelCommandException("", Target.UNKNOWN);
+					}
+					if(!types.contains(FindType.FILE) && file.isHidden()) {
+						return;
+					}
+					if(!types.contains(FindType.DIRECTORY) && file.isDirectory()) {
+						return;
+					}
+					if(!types.contains(FindType.FILE) && file.isFile()) {
+						return;
+					}
+					if(file.getName().matches(regex)) {
+						a.push(new CString(file.getAbsolutePath(), t), t);
+					}
+				});
+			} catch (IOException ex) {
+				//
+			}
+			return a;
+		}
+
+		@Override
+		public String getName() {
+			return "x_find";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@MEnum("ms.lang.FindType")
+		public static enum FindType implements SimpleDocumentation {
+			DIRECTORY("Only processes directory names, not files.", MSVersion.V3_3_4),
+			FILE("Only processes files, not directories.", MSVersion.V3_3_4),
+			HIDDEN("Only processes files/folders that are hidden. Leave this off to ignore hidden files.",
+				MSVersion.V3_3_4);
+
+			String docs;
+			Version since;
+			private FindType(String docs, Version since) {
+				this.docs = docs;
+				this.since = since;
+			}
+			@Override
+			public String getName() {
+				return name();
+			}
+
+			@Override
+			public String docs() {
+				return docs;
+			}
+
+			@Override
+			public Version since() {
+				return since;
+			}
+		}
+
+		@Override
+		public String docs() {
+			return "array<string> {regex, [startFrom], [type] | regex, [startFrom], types} Returns a list of absolute"
+					+ " paths of files whose name"
+					+ " matches the given regex, searching recursively. Only available in cmdline mode."
+					+ " ---- Type may be a single value, or an array of values from the"
+					+ " following list:\n" + createEnumTable(FindType.class) + "\n\nIf the type is not specified,"
+					+ " this is the same as specifying all types. If an empty array is used, this causes an error. If"
+					+ " you wish to use the current directory as the starting point, use null as startFrom. Note"
+					+ " that if you only send two arguments to this function, the second one must be an array if it"
+					+ " is the types (it may contain a single value).";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
 		}
 
 	}
@@ -1928,7 +2063,7 @@ public class Cmdline {
 	 * @throws ConfigRuntimeException If not in cmdline mode.
 	 */
 	public static void requireCmdlineMode(Environment environment, Function f, Target t) throws ConfigRuntimeException {
-		if(!Static.InCmdLine(environment)) {
+		if(!Static.InCmdLine(environment, true)) {
 			throw new CREInsufficientPermissionException(f.getName() + " cannot be used outside of cmdline mode.", t);
 		}
 	}

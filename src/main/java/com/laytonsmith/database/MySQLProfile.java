@@ -76,8 +76,10 @@ public class MySQLProfile extends SQLProfile {
 			throw new SQLException("Cannot load MySQL. Check your installation and try again");
 		}
 		try {
-			return "jdbc:mysql://" + host + ":" + port + "/" + database + "?generateSimpleParameterMetadata=true"
+			return "jdbc:mysql://" + host + ":" + port + "/" + database
+					+ "?generateSimpleParameterMetadata=true"
 					+ "&jdbcCompliantTruncation=false"
+					+ "&autoReconnect=true"
 					+ (username == null ? "" : "&user=" + URLEncoder.encode(username, "UTF-8"))
 					+ (password == null ? "" : "&password=" + URLEncoder.encode(password, "UTF-8"))
 					+ (useSSL == null ? "" : "&useSSL=" + useSSL);

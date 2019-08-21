@@ -3,12 +3,13 @@ package com.laytonsmith.persistence;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.annotations.datasource;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -213,14 +214,14 @@ public final class MemoryDataSource extends AbstractDataSource {
 	}
 
 	@Override
-	public DataSourceModifier[] implicitModifiers() {
-		return new DataSourceModifier[]{};
+	public EnumSet<DataSourceModifier> implicitModifiers() {
+		return null;
 	}
 
 	@Override
-	public DataSourceModifier[] invalidModifiers() {
+	public EnumSet<DataSourceModifier> invalidModifiers() {
 		//No modifiers are appropriate on here
-		return DataSourceModifier.values();
+		return EnumSet.allOf(DataSourceModifier.class);
 	}
 
 	@Override
@@ -235,8 +236,8 @@ public final class MemoryDataSource extends AbstractDataSource {
 	}
 
 	@Override
-	public CHVersion since() {
-		return CHVersion.V3_3_1;
+	public MSVersion since() {
+		return MSVersion.V3_3_1;
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities.Web;
 
+import com.laytonsmith.PureUtilities.Common.FileWriteMode;
 import java.io.File;
 import java.net.Proxy;
 import java.util.Arrays;
@@ -17,6 +18,7 @@ public class RequestSettings {
 	private HTTPMethod method = HTTPMethod.GET;
 	private Map<String, List<String>> headers = null;
 	private Map<String, List<String>> parameters = null;
+	private Map<String, List<String>> queryParameters = null;
 	private CookieJar cookieJar = null;
 	private boolean followRedirects = true;
 	private int timeout = 60000;
@@ -25,12 +27,14 @@ public class RequestSettings {
 	private Proxy proxy = null;
 	private byte[] rawParameter;
 	private File downloadTo;
+	private FileWriteMode downloadStrategy = FileWriteMode.SAFE_WRITE;
 	private boolean blocking = false;
 	private boolean disableCertChecking = false;
 	private boolean useDefaultTrustStore = true;
 	private LinkedHashMap<String, String> trustStore = new LinkedHashMap<>();
 	@SuppressWarnings("NonConstantLogger")
 	private Logger logger;
+	private boolean disableDecompressionHandling = false;
 
 	/**
 	 *
@@ -93,7 +97,7 @@ public class RequestSettings {
 			this.parameters = null;
 			return this;
 		} else {
-			Map<String, List<String>> p = new HashMap<String, List<String>>();
+			Map<String, List<String>> p = new HashMap<>();
 			for(String key : parameters.keySet()) {
 				p.put(key, Arrays.asList(new String[]{parameters.get(key)}));
 			}
@@ -119,6 +123,48 @@ public class RequestSettings {
 	 */
 	public Map<String, List<String>> getParameters() {
 		return parameters;
+	}
+
+	/**
+	 *
+	 * @param parameters The parameters to be sent. Parameters can be also specified directly in the URL, and they will
+	 * be merged. May be null. This is a convenience method for setComplexParameters, because that is technically the
+	 * only way to set the parameters, because array parameters are supported, but often times this isn't needed, so
+	 * this is a simpler setter.
+	 * @return
+	 */
+	public RequestSettings setQueryParameters(Map<String, String> parameters) {
+		if(parameters == null) {
+			this.queryParameters = null;
+			return this;
+		} else {
+			Map<String, List<String>> p = new HashMap<>();
+			for(String key : parameters.keySet()) {
+				p.put(key, Arrays.asList(new String[]{parameters.get(key)}));
+			}
+			return setComplexQueryParameters(p);
+		}
+	}
+
+	/**
+	 * Sets the query parameters. Unlike the normal parameters, these are ALWAYS put in the query, regardless
+	 * of whether or not the method is GET or POST, which can be useful when a protocol requires an empty post body
+	 * as well as query parameters. If you are explicitely setting a post body, you may use either this or
+	 * setParameters, as the effect will be the same.
+	 * @param parameters
+	 * @return
+	 */
+	public RequestSettings setComplexQueryParameters(Map<String, List<String>> parameters) {
+		this.queryParameters = parameters;
+		return this;
+	}
+
+	/**
+	 * Returns the query parameters.
+	 * @return
+	 */
+	public Map<String, List<String>> getQueryParameters() {
+		return this.queryParameters;
 	}
 
 	/**
@@ -243,11 +289,29 @@ public class RequestSettings {
 	}
 
 	/**
+	 * Sets the download strategy.
+	 * @param downloadStrategy
+	 * @return
+	 */
+	public RequestSettings setDownloadStrategy(FileWriteMode downloadStrategy) {
+		this.downloadStrategy = downloadStrategy;
+		return this;
+	}
+
+	/**
 	 *
 	 * @return The file location to download to, or null if this shouldn't save the request as a file.
 	 */
 	public File getDownloadTo() {
 		return this.downloadTo;
+	}
+
+	/**
+	 * Returns the configured download strategy. The default is {@link FileWriteMode#SAFE_WRITE}
+	 * @return
+	 */
+	public FileWriteMode getDownloadStrategy() {
+		return this.downloadStrategy;
 	}
 
 	/**
@@ -352,6 +416,25 @@ public class RequestSettings {
 	 */
 	public LinkedHashMap<String, String> getTrustStore() {
 		return new LinkedHashMap<>(trustStore);
+	}
+
+	/**
+	 * Sets the disableCompressionHandling flag. If true, the content will be returned as is, no matter what the
+	 * value of the Content-Encoding header is, and must be processed manually.
+	 * @param disableCompressionHandling
+	 * @return
+	 */
+	public RequestSettings setDisableCompressionHandling(boolean disableCompressionHandling) {
+		this.disableDecompressionHandling = disableCompressionHandling;
+		return this;
+	}
+
+	/**
+	 * Returns the disableCompressionHandling flag. Defaults to false.
+	 * @return
+	 */
+	public boolean getDisableCompressionHandling() {
+		return this.disableDecompressionHandling;
 	}
 
 }

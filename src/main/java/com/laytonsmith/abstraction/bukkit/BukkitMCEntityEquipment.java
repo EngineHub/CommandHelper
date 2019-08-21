@@ -4,8 +4,6 @@ import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
-import com.laytonsmith.abstraction.enums.MCVersion;
-import com.laytonsmith.core.Static;
 import org.bukkit.inventory.EntityEquipment;
 
 import java.util.EnumMap;
@@ -43,9 +41,7 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 					slots.put(key, getWeapon());
 					break;
 				case OFF_HAND:
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-						slots.put(key, getItemInOffHand());
-					}
+					slots.put(key, getItemInOffHand());
 					break;
 				case HELMET:
 					slots.put(key, getHelmet());
@@ -74,9 +70,7 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 					setWeapon(stack);
 					break;
 				case OFF_HAND:
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-						setItemInOffHand(stack);
-					}
+					setItemInOffHand(stack);
 					break;
 				case HELMET:
 					setHelmet(stack);
@@ -103,9 +97,7 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 					slots.put(key, getWeaponDropChance());
 					break;
 				case OFF_HAND:
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-						slots.put(key, getOffHandDropChance());
-					}
+					slots.put(key, getOffHandDropChance());
 					break;
 				case HELMET:
 					slots.put(key, getHelmetDropChance());
@@ -134,9 +126,7 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 					setWeaponDropChance(chance);
 					break;
 				case OFF_HAND:
-					if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_9)) {
-						setOffHandDropChance(chance);
-					}
+					setOffHandDropChance(chance);
 					break;
 				case HELMET:
 					setHelmetDropChance(chance);
@@ -158,7 +148,7 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 	// anything below this line, but they are here for flexibility and completion
 	@Override
 	public MCItemStack getWeapon() {
-		return new BukkitMCItemStack(ee.getItemInHand());
+		return new BukkitMCItemStack(ee.getItemInMainHand());
 	}
 
 	@Override
@@ -188,7 +178,7 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 
 	@Override
 	public void setWeapon(MCItemStack stack) {
-		ee.setItemInHand(((BukkitMCItemStack) stack).asItemStack());
+		ee.setItemInMainHand(((BukkitMCItemStack) stack).asItemStack());
 	}
 
 	@Override
@@ -218,7 +208,7 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 
 	@Override
 	public float getWeaponDropChance() {
-		return ee.getItemInHandDropChance();
+		return ee.getItemInMainHandDropChance();
 	}
 
 	@Override
@@ -248,7 +238,7 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 
 	@Override
 	public void setWeaponDropChance(float chance) {
-		ee.setItemInHandDropChance(chance);
+		ee.setItemInMainHandDropChance(chance);
 	}
 
 	@Override

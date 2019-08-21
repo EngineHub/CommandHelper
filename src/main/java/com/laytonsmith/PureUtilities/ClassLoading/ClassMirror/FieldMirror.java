@@ -12,6 +12,7 @@ public class FieldMirror extends AbstractElementMirror {
 
 	private static final long serialVersionUID = 1L;
 	private final Object value;
+	private Field field;
 
 	/**
 	 * Creates a new FieldMirror based on an actual field, for easy comparisons.
@@ -20,10 +21,14 @@ public class FieldMirror extends AbstractElementMirror {
 	 */
 	public FieldMirror(Field field) {
 		super(field);
+		this.field = field;
+		@SuppressWarnings("LocalVariableHidesMemberVariable")
 		Object value = null;
 		try {
+			// Try to get the value. This will work if the value is hardcoded, i.e. public int i = 5; but will fail
+			// in some cases. In those cases, that's ok, we just will have a null value here.
 			value = field.get(null);
-		} catch (IllegalArgumentException | IllegalAccessException ex) {
+		} catch (IllegalArgumentException | IllegalAccessException | NullPointerException ex) {
 			//
 		}
 		this.value = value;
@@ -70,6 +75,42 @@ public class FieldMirror extends AbstractElementMirror {
 	/* package */ FieldMirror(ClassReferenceMirror parent, ModifierMirror modifiers, ClassReferenceMirror type, String name, Object value) {
 		super(parent, null, modifiers, type, name);
 		this.value = value;
+	}
+
+	/**
+	 * This loads the parent class, and returns the {@link Field} object. This also loads all field's type's class
+	 * as well.
+	 * <p>
+	 * If this class was created with an actual Field, then that is simply returned.
+	 *
+	 * @return
+	 * @throws java.lang.ClassNotFoundException
+	 */
+	public Field loadField() throws ClassNotFoundException {
+		return this.loadField(FieldMirror.class.getClassLoader(), true);
+	}
+
+	/**
+	 * This loads the parent class, and returns the {@link Method} object.
+	 * <p>
+	 * If this class was created with an actual Method, then that is simply returned.
+	 *
+	 * @param loader
+	 * @param initialize
+	 * @return
+	 * @throws ClassNotFoundException
+	 */
+	public Field loadField(ClassLoader loader, boolean initialize) throws ClassNotFoundException {
+		if(field != null) {
+			return field;
+		}
+		Class parent = loadParentClass(loader, initialize);
+		try {
+			field = parent.getDeclaredField(name);
+		} catch (NoSuchFieldException | SecurityException ex) {
+			throw new RuntimeException(ex);
+		}
+		return field;
 	}
 
 }

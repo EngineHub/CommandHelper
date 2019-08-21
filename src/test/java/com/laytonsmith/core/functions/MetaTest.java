@@ -9,8 +9,10 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import static com.laytonsmith.testing.StaticTest.GetFakeServer;
 import static com.laytonsmith.testing.StaticTest.GetOnlinePlayer;
 import static com.laytonsmith.testing.StaticTest.SRun;
+import java.util.Set;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -26,6 +28,11 @@ public class MetaTest {
 	MCServer fakeServer;
 	MCPlayer fakePlayer;
 	com.laytonsmith.core.environments.Environment env;
+	static Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs
+			= com.laytonsmith.core.environments.Environment.getDefaultEnvClasses();
+	static {
+		envs.add(CommandHelperEnvironment.class);
+	}
 
 	public MetaTest() {
 	}
@@ -58,7 +65,7 @@ public class MetaTest {
 		MCPlayer fakePlayer2 = GetOnlinePlayer("Player02", fakeServer);
 		when(fakeServer.getPlayer("Player02")).thenReturn(fakePlayer2);
 		when(fakePlayer.isOp()).thenReturn(true);
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 		//verify(fakePlayer2).performCommand("cmd yay");
 		verify(fakeServer).dispatchCommand(fakePlayer2, "cmd yay");
 	}
@@ -80,8 +87,20 @@ public class MetaTest {
 		String script = "scriptas('Player02', 'newlabel', msg(reflect_pull('label'))); msg(reflect_pull('label'))";
 		MCPlayer fakePlayer2 = GetOnlinePlayer("Player02", fakeServer);
 		when(fakeServer.getPlayer("Player02")).thenReturn(fakePlayer2);
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
 		verify(fakePlayer2).sendMessage("newlabel");
 		verify(fakePlayer).sendMessage("*");
+	}
+
+	@Test
+	public void testNameof() throws Exception {
+		assertEquals("@var", SRun("nameof(@var)", null));
+		assertEquals("$var", SRun("nameof($var)", null));
+		try {
+			SRun("nameof('string')", null);
+			fail();
+		} catch (Exception e) {
+			// pass
+		}
 	}
 }

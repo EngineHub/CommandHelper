@@ -36,6 +36,16 @@ public class HTMLUtils {
 				.replace("&quot;", "\"")
 				.replace("&gt;", ">")
 				.replace("&lt;", "<")
+				.replace("&nbsp;", " ")
+				.replace("&lpar;", "(")
+				.replace("&rpar;", ")")
+				.replace("&lcub;", "{")
+				.replace("&rcub;", "}")
+				.replace("&lsqb;", "[")
+				.replace("&rsqb;", "]")
+				.replace("&equals;", "=")
+				.replace("&num;", "#")
+				.replace("&ast;", "*")
 				.replace("&amp;", "&");
 	}
 }

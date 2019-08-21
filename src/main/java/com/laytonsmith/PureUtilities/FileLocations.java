@@ -1,6 +1,7 @@
 package com.laytonsmith.PureUtilities;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * This class contains several constant file locations, which can be used throughout the rest of the application. It
@@ -18,22 +19,29 @@ public class FileLocations {
 	private static final File USER_HOME;
 	private static final File USER_DIR;
 	private static final File JAVA_HOME;
+	private static final File TEMP_DIR;
 
 	static {
 		File userHome = null;
 		File userDir = null;
 		File javaHome = null;
+		File tempDir = null;
 		try {
 			userHome = new File(System.getProperty("user.home"));
 			userDir = new File(System.getProperty("user.dir"));
 			javaHome = new File(System.getProperty("java.home"));
-		} catch (SecurityException e) {
+			File tmp = File.createTempFile("FileLocationTempFile", ".tmp");
+			tempDir = tmp.getParentFile();
+			tmp.delete();
+			tmp.deleteOnExit();
+		} catch (SecurityException | IOException e) {
 			//This could happen in applets or some other wierd security configuration.
 			//Regardless, we don't want this to ever fail.
 		}
 		USER_HOME = userHome;
 		USER_DIR = userDir;
 		JAVA_HOME = javaHome;
+		TEMP_DIR = tempDir;
 	}
 
 	/**
@@ -83,5 +91,13 @@ public class FileLocations {
 	 */
 	public File getJavaHome() {
 		return JAVA_HOME;
+	}
+
+	/**
+	 * Returns the location of the system's temporary directory.
+	 * @return
+	 */
+	public File getTempDir() {
+		return TEMP_DIR;
 	}
 }

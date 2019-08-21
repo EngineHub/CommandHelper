@@ -1,0 +1,4 @@
+@{Target()}
+public annotation %s {
+
+}

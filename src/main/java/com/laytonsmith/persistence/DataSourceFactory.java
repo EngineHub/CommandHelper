@@ -2,7 +2,7 @@ package com.laytonsmith.persistence;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.annotations.datasource;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
@@ -28,7 +28,7 @@ public class DataSourceFactory {
 
 	private static void init() {
 		if(protocolHandlers == null) {
-			protocolHandlers = new HashMap<String, Class>();
+			protocolHandlers = new HashMap<>();
 			Set<Class<?>> classes = ClassDiscovery.getDefaultInstance().loadClassesWithAnnotation(datasource.class);
 			for(Class<?> c : classes) {
 				if(DataSource.class.isAssignableFrom(c)) {
@@ -50,13 +50,14 @@ public class DataSourceFactory {
 	 * @return A new DataSource object
 	 * @throws DataSourceException If there is a problem connecting to the data source
 	 */
-	public static DataSource GetDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
+	public static DataSource GetDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options)
+			throws DataSourceException {
 		init();
 		DataSource source = DATA_SOURCE_POOL.get(uri);
 		if(source != null) {
 			return source;
 		}
-		List<DataSource.DataSourceModifier> modifiers = new ArrayList<DataSource.DataSourceModifier>();
+		List<DataSource.DataSourceModifier> modifiers = new ArrayList<>();
 		while(DataSource.DataSourceModifier.isModifier(uri.getScheme())) {
 			modifiers.add(DataSource.DataSourceModifier.getModifier(uri.getScheme()));
 			try {
@@ -70,7 +71,8 @@ public class DataSourceFactory {
 			throw new DataSourceException("Invalid scheme: " + uri.getScheme());
 		}
 		try {
-			DataSource ds = (DataSource) c.getConstructor(URI.class, ConnectionMixinFactory.ConnectionMixinOptions.class).newInstance(uri, options);
+			DataSource ds = (DataSource) c.getConstructor(URI.class,
+					ConnectionMixinFactory.ConnectionMixinOptions.class).newInstance(uri, options);
 			for(DataSource.DataSourceModifier m : modifiers) {
 				ds.addModifier(m);
 			}
@@ -82,7 +84,7 @@ public class DataSourceFactory {
 				//Warning, for invalid modifiers. This isn't an error, invalid modifiers will just be
 				//ignored, but the user probably meant something else if they're getting this warning,
 				//so we still alert them to the issue.
-				CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.WARNING, e.getMessage(), Target.UNKNOWN);
+				MSLog.GetLogger().Log(MSLog.Tags.PERSISTENCE, LogLevel.WARNING, e.getMessage(), Target.UNKNOWN);
 			}
 			//If the data source is transient, it will populate itself later, as needed.
 			//Otherwise, we can go ahead and populate it now.
@@ -91,11 +93,13 @@ public class DataSourceFactory {
 			}
 			DATA_SOURCE_POOL.put(uri, ds);
 			return ds;
-		} catch (InvocationTargetException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | DataSourceException ex) {
+		} catch (InvocationTargetException | NoSuchMethodException | SecurityException | InstantiationException
+				| IllegalAccessException | IllegalArgumentException | DataSourceException ex) {
 			if(ex instanceof InvocationTargetException && ex.getCause() instanceof DataSourceException) {
 				throw (DataSourceException) ex.getCause();
 			}
-			throw new DataSourceException("Could not instantiate a DataSource for " + c.getName() + ": " + ex.getMessage(), ex);
+			throw new DataSourceException("Could not instantiate a DataSource for " + c.getName() + ": "
+					+ ex.getMessage(), ex);
 		}
 	}
 
@@ -110,7 +114,8 @@ public class DataSourceFactory {
 	 * @throws DataSourceException If there is a problem connecting to the data source
 	 * @throws URISyntaxException If the URI is invalid
 	 */
-	public static DataSource GetDataSource(String uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException, URISyntaxException {
+	public static DataSource GetDataSource(String uri, ConnectionMixinFactory.ConnectionMixinOptions options)
+			throws DataSourceException, URISyntaxException {
 		return GetDataSource(new URI(uri), options);
 	}
 
@@ -121,7 +126,7 @@ public class DataSourceFactory {
 	 */
 	public static Set<String> GetSupportedProtocols() {
 		init();
-		return new HashSet<String>(protocolHandlers.keySet());
+		return new HashSet<>(protocolHandlers.keySet());
 	}
 
 	/**
@@ -134,7 +139,7 @@ public class DataSourceFactory {
 			try {
 				ds.disconnect();
 			} catch (DataSourceException ex) {
-				CHLog.GetLogger().Log(CHLog.Tags.PERSISTENCE, LogLevel.WARNING, ex.getMessage(), Target.UNKNOWN);
+				MSLog.GetLogger().Log(MSLog.Tags.PERSISTENCE, LogLevel.WARNING, ex.getMessage(), Target.UNKNOWN);
 			}
 		}
 		DATA_SOURCE_POOL.clear();

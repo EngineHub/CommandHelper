@@ -7,7 +7,7 @@ import com.laytonsmith.abstraction.MCCommandMap;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -15,7 +15,6 @@ import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -23,6 +22,7 @@ import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,7 +62,7 @@ public class Commands {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
 			MCCommandMap map = s.getCommandMap();
 			if(map == null) {
@@ -84,8 +84,8 @@ public class Commands {
 		 * @param cmd
 		 * @param arg
 		 */
-		public static void customExec(Target t, Environment environment, MCCommand cmd, Construct arg) {
-			if(arg instanceof CClosure) {
+		public static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
+			if(arg.isInstanceOf(CClosure.class)) {
 				onTabComplete.remove(cmd.getName());
 				onTabComplete.put(cmd.getName(), (CClosure) arg);
 			} else {
@@ -114,7 +114,28 @@ public class Commands {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates completion suggestions for multiple arguments.",
+					"set_tabcompleter('cmd', closure(@alias, @sender, @args, @info) {\n"
+							+ "\t@input = @args[-1];\n"
+							+ "\t@completions = array();\n"
+							+ "\tif(array_size(@args) == 1) {\n"
+							+ "\t\t@completions = array('one', 'two', 'three');\n"
+							+ "\t} else if(array_size(@args) == 2) {\n"
+							+ "\t\t@completions = array('apple', 'orange', 'banana');\n"
+							+ "\t}\n"
+							+ "\treturn(array_filter(@completions, closure(@index, @string) {\n"
+							+ "\t\treturn(length(@input) <= length(@string) \n"
+							+ "\t\t\t\t&& equals_ic(@input, substr(@string, 0, length(@input))));\n"
+							+ "\t}));\n"
+							+ "});",
+					"Will only suggest 'orange' if given 'o' for the second argument for /cmd.")
+			};
 		}
 	}
 
@@ -137,7 +158,7 @@ public class Commands {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map == null) {
 				throw new CRENotFoundException(this.getName() + " is not supported in this mode (CommandMap not found).", t);
@@ -166,7 +187,7 @@ public class Commands {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -190,7 +211,7 @@ public class Commands {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map == null) {
 				throw new CRENotFoundException(this.getName() + " is not supported in this mode (CommandMap not found).", t);
@@ -201,7 +222,7 @@ public class Commands {
 				isnew = true;
 				cmd = StaticLayer.GetConvertor().getNewCommand(args[0].val().toLowerCase());
 			}
-			if(args[1] instanceof CArray) {
+			if(args[1].isInstanceOf(CArray.class)) {
 				CArray ops = (CArray) args[1];
 				if(ops.containsKey("permission")) {
 					cmd.setPermission(ops.get("permission", t).val());
@@ -216,10 +237,10 @@ public class Commands {
 					cmd.setPermissionMessage(ops.get("noPermMsg", t).val());
 				}
 				if(ops.containsKey("aliases")) {
-					if(ops.get("aliases", t) instanceof CArray) {
-						List<Construct> ca = ((CArray) ops.get("aliases", t)).asList();
+					if(ops.get("aliases", t).isInstanceOf(CArray.class)) {
+						List<Mixed> ca = ((CArray) ops.get("aliases", t)).asList();
 						List<String> aliases = new ArrayList<String>();
-						for(Construct c : ca) {
+						for(Mixed c : ca) {
 							aliases.add(c.val().toLowerCase());
 						}
 						cmd.setAliases(aliases);
@@ -270,7 +291,7 @@ public class Commands {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -283,26 +304,24 @@ public class Commands {
 				+ "\t'permission': 'perms.hugs',\n"
 				+ "\t'noPermMsg': 'You do not have permission to give hugs to players (Sorry :o).',\n"
 				+ "\t'tabcompleter': closure(@alias, @sender, @args) {\n"
-				+ "\t\t\tif(array_size(@args) == 0) {\n"
-				+ "\t\t\t\treturn(all_players());\n"
-				+ "\t\t\t}\n"
-				+ "\t\t\t@search = @args[array_size(@args) - 1];\n"
-				+ "\t\t\treturn(array_filter(all_players(), closure(@index, @player) {\n"
-				+ "\t\t\t\treturn(equals_ic(@search, substr(@player, 0, length(@search))));\n"
+				+ "\t\t@input = @args[-1];\n"
+				+ "\t\treturn(array_filter(all_players(), closure(@index, @player) {\n"
+				+ "\t\t\treturn(length(@input) <= length(@string)\n"
+				+ "\t\t\t\t\t&& equals_ic(@input, substr(@player, 0, length(@input))));\n"
 				+ "\t\t\t}));\n"
 				+ "\t\t},\n"
 				+ "\t'aliases':array('hugg', 'hugs'),\n"
 				+ "\t'executor': closure(@alias, @sender, @args) {\n"
-				+ "\t\t\tif(array_size(@args) == 1) {\n"
-				+ "\t\t\t\tif(ponline(@args[0])) {\n"
-				+ "\t\t\t\t\tbroadcast(colorize('&4'.@sender.' &6hugs &4'.@args[0]));\n"
-				+ "\t\t\t\t} else {\n"
-				+ "\t\t\t\t\ttmsg(@sender, colorize('&cThe given player is not online.'));\n"
-				+ "\t\t\t\t}\n"
-				+ "\t\t\t\treturn(true);\n"
+				+ "\t\tif(array_size(@args) == 1) {\n"
+				+ "\t\t\tif(ponline(@args[0])) {\n"
+				+ "\t\t\t\tbroadcast(colorize('&4'.@sender.' &6hugs &4'.@args[0]));\n"
+				+ "\t\t\t} else {\n"
+				+ "\t\t\t\ttmsg(@sender, colorize('&cThe given player is not online.'));\n"
 				+ "\t\t\t}\n"
-				+ "\t\t\treturn(false);\n"
+				+ "\t\t\treturn(true);\n"
 				+ "\t\t}\n"
+				+ "\t\treturn(false);\n"
+				+ "\t}\n"
 				+ "));",
 				"Registers the /hug command.")
 			};
@@ -328,7 +347,7 @@ public class Commands {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map == null) {
 				throw new CRENotFoundException(this.getName() + " is not supported in this mode (CommandMap not found).", t);
@@ -349,8 +368,8 @@ public class Commands {
 		 * @param cmd
 		 * @param arg
 		 */
-		public static void customExec(Target t, Environment environment, MCCommand cmd, Construct arg) {
-			if(arg instanceof CClosure) {
+		public static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
+			if(arg.isInstanceOf(CClosure.class)) {
 				onCommand.remove(cmd.getName());
 				onCommand.put(cmd.getName(), (CClosure) arg);
 			} else {
@@ -378,7 +397,7 @@ public class Commands {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -401,7 +420,7 @@ public class Commands {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map == null) {
 				return CNull.NULL;
@@ -412,7 +431,7 @@ public class Commands {
 				CArray ca = CArray.GetAssociativeArray(t);
 				ca.set("name", new CString(command.getName(), t), t);
 				ca.set("description", new CString(command.getDescription(), t), t);
-				Construct permission;
+				Mixed permission;
 				if(command.getPermission() == null) {
 					permission = CNull.NULL;
 				} else {
@@ -449,7 +468,7 @@ public class Commands {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -472,7 +491,7 @@ public class Commands {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map != null) {
 				map.clearCommands();
@@ -498,7 +517,7 @@ public class Commands {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 	}
 }

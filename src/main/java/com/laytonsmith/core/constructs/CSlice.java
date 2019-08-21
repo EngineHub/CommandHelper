@@ -2,13 +2,14 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.ArrayHandling;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.AbstractSet;
 import java.util.Iterator;
 import java.util.List;
@@ -19,11 +20,11 @@ import java.util.Stack;
  *
  *
  */
-@typeof("slice")
+@typeof("ms.lang.slice")
 public class CSlice extends CArray {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("slice");
+	public static final CClassType TYPE = CClassType.get(CSlice.class);
 
 	private long start;
 	private long finish;
@@ -67,7 +68,7 @@ public class CSlice extends CArray {
 	}
 
 	@Override
-	public List<Construct> asList() {
+	public List<Mixed> asList() {
 		CArray ca = new ArrayHandling.range().exec(Target.UNKNOWN, null, new CInt(start, Target.UNKNOWN), new CInt(finish, Target.UNKNOWN));
 		return ca.asList();
 	}
@@ -114,12 +115,12 @@ public class CSlice extends CArray {
 	}
 
 	@Override
-	public void set(Construct index, Construct c, Target t) {
+	public void set(Mixed index, Mixed c, Target t) {
 		throw new CRECastException("CSlices cannot set values", t);
 	}
 
 	@Override
-	public Construct get(Construct index, Target t) {
+	public Mixed get(Mixed index, Target t) {
 		long i = Static.getInt(index, t);
 		if(i > max) {
 			throw new CRERangeException("Index out of bounds. Index: " + i + " Size: " + max, t);
@@ -128,15 +129,15 @@ public class CSlice extends CArray {
 	}
 
 	@Override
-	public Set<Construct> keySet() {
+	public Set<Mixed> keySet() {
 		// To keep our memory footprint down, we create a "fake" keyset here, which doesn't
 		// require actually creating an entire Set. Removing items from the set isn't supported,
 		// but all iteration options are.
-		return new AbstractSet<Construct>() {
+		return new AbstractSet<Mixed>() {
 
 			@Override
-			public Iterator<Construct> iterator() {
-				return new Iterator<Construct>() {
+			public Iterator<Mixed> iterator() {
+				return new Iterator<Mixed>() {
 
 					int index = 0;
 
@@ -146,7 +147,7 @@ public class CSlice extends CArray {
 					}
 
 					@Override
-					public Construct next() {
+					public Mixed next() {
 						return new CInt(index++, Target.UNKNOWN);
 					}
 
@@ -170,7 +171,7 @@ public class CSlice extends CArray {
 	}
 
 	@Override
-	public boolean contains(Construct c) {
+	public boolean contains(Mixed c) {
 		try {
 			long i = Static.getInt(c, Target.UNKNOWN);
 			if(start < finish) {
@@ -200,7 +201,7 @@ public class CSlice extends CArray {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_1;
+		return MSVersion.V3_3_1;
 	}
 
 	@Override
@@ -210,6 +211,6 @@ public class CSlice extends CArray {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{};
+		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 }

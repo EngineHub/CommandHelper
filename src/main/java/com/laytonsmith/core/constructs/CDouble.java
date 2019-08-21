@@ -2,18 +2,18 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 
 /**
  *
  *
  */
-@typeof("double")
+@typeof("ms.lang.double")
 public class CDouble extends CNumber implements Cloneable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("double");
+	public static final CClassType TYPE = CClassType.get(CDouble.class);
 
 	public static final long serialVersionUID = 1L;
 	final double val;
@@ -54,7 +54,7 @@ public class CDouble extends CNumber implements Cloneable {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_0_1;
+		return MSVersion.V3_0_1;
 	}
 
 	@Override
@@ -64,7 +64,17 @@ public class CDouble extends CNumber implements Cloneable {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{};
+		return CClassType.EMPTY_CLASS_ARRAY;
+	}
+
+	@Override
+	public CDouble duplicate() {
+		return new CDouble(val, getTarget());
+	}
+
+	@Override
+	public double getNumber() {
+		return val;
 	}
 
 }

@@ -2,7 +2,7 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.environments.Environment;
@@ -15,6 +15,7 @@ import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -23,18 +24,21 @@ import java.util.logging.Logger;
 /**
  *
  */
-@typeof("iclosure")
+@typeof("ms.lang.iclosure")
 public class CIClosure extends CClosure {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("iclosure");
+	public static final CClassType TYPE = CClassType.get(CIClosure.class);
 
-	public CIClosure(ParseTree node, Environment env, CClassType returnType, String[] names, Construct[] defaults, CClassType[] types, Target t) {
+	public CIClosure(ParseTree node, Environment env, CClassType returnType, String[] names, Mixed[] defaults,
+			CClassType[] types, Target t) {
 		super(node, env, returnType, names, defaults, types, t);
 	}
 
 	@Override
-	public void execute(Construct... values) throws ConfigRuntimeException, ProgramFlowManipulationException, FunctionReturnException, CancelCommandException {
+	public void execute(Mixed... values)
+			throws ConfigRuntimeException, ProgramFlowManipulationException, FunctionReturnException,
+			CancelCommandException {
 		if(node == null) {
 			return;
 		}
@@ -52,13 +56,14 @@ public class CIClosure extends CClosure {
 			if(values != null) {
 				for(int i = 0; i < names.length; i++) {
 					String name = names[i];
-					Construct value;
+					Mixed value;
 					try {
 						value = values[i];
 					} catch (Exception e) {
 						value = defaults[i].clone();
 					}
-					environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value, getTarget()));
+					environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value,
+							getTarget(), environment));
 				}
 			}
 			boolean hasArgumentsParam = false;
@@ -72,49 +77,46 @@ public class CIClosure extends CClosure {
 			if(!hasArgumentsParam) {
 				CArray arguments = new CArray(node.getData().getTarget());
 				if(values != null) {
-					for(Construct value : values) {
+					for(Mixed value : values) {
 						arguments.push(value, node.getData().getTarget());
 					}
 				}
-				environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, node.getData().getTarget()));
+				environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
+						node.getData().getTarget()));
 			}
 
 			ParseTree newNode = new ParseTree(new CFunction("g", getTarget()), node.getFileOptions());
-			List<ParseTree> children = new ArrayList<ParseTree>();
+			List<ParseTree> children = new ArrayList<>();
 			children.add(node);
 			newNode.setChildren(children);
 			try {
-				MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class).GetScript());
+				MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class)
+						.GetScript());
 			} catch (LoopManipulationException e) {
-				// Not normal, but pop anyways
-				stManager.popStackTraceElement();
 				//This shouldn't ever happen.
 				LoopManipulationException lme = ((LoopManipulationException) e);
 				Target t = lme.getTarget();
-				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("A " + lme.getName() + "() bubbled up to the top of"
+				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("A "
+						+ lme.getName() + "() bubbled up to the top of"
 						+ " a closure, which is unexpected behavior.", t), environment);
 			} catch (FunctionReturnException ex) {
-				// Normal. Pop element
-				stManager.popStackTraceElement();
 				// Check the return type of the closure to see if it matches the defined type
-				Construct ret = ex.getReturn();
-				if(!InstanceofUtil.isInstanceof(ret, returnType)) {
+				Mixed ret = ex.getReturn();
+				if(!InstanceofUtil.isInstanceof(ret, returnType, environment)) {
 					throw new CRECastException("Expected closure to return a value of type " + returnType.val()
 							+ " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
 				}
 				// Now rethrow it
 				throw ex;
 			} catch (CancelCommandException e) {
-				stManager.popStackTraceElement();
 				// die()
 			} catch (ConfigRuntimeException ex) {
 				if(ex instanceof AbstractCREException) {
 					((AbstractCREException) ex).freezeStackTraceElements(stManager);
 				}
 				throw ex;
-			} catch (Throwable t) {
+			} finally {
 				stManager.popStackTraceElement();
-				throw t;
 			}
 			// If we got here, then there was no return type. This is fine, but only for returnType void or auto.
 			if(!(returnType.equals(Auto.TYPE) || returnType.equals(CVoid.TYPE))) {
@@ -128,13 +130,14 @@ public class CIClosure extends CClosure {
 
 	@Override
 	public String docs() {
-		return "An iclosure is an isolated scope closure. This is more efficient than a regular closure, but it doesn't allow"
+		return "An iclosure is an isolated scope closure. This is more efficient than a regular closure, but it"
+				+ " doesn't allow"
 				+ " for access of variables outside of the scope of the closure, other than values passed in.";
 	}
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_1;
+		return MSVersion.V3_3_1;
 	}
 
 	@Override
@@ -144,7 +147,7 @@ public class CIClosure extends CClosure {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{};
+		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 
 }

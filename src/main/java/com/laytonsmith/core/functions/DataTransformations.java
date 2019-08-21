@@ -5,7 +5,8 @@ import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CNull;
@@ -18,6 +19,7 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -62,7 +64,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray ca = Static.getArray(args[0], t);
 			try {
 				return new CString(Construct.json_encode(ca, t), t);
@@ -88,8 +90,8 @@ public class DataTransformations {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -112,7 +114,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String s = args[0].val();
 			try {
 				return Construct.json_decode(s, t);
@@ -139,8 +141,8 @@ public class DataTransformations {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -163,11 +165,11 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray ca = Static.getArray(args[0], t);
 			boolean prettyPrint = false;
 			if(args.length == 2) {
-				prettyPrint = Static.getBoolean(args[1], t);
+				prettyPrint = ArgumentValidation.getBoolean(args[1], t);
 			}
 			DumperOptions options = new DumperOptions();
 			if(prettyPrint) {
@@ -199,8 +201,8 @@ public class DataTransformations {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -223,7 +225,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String data = args[0].val();
 			Yaml yaml = new Yaml();
 			Object ret = null;
@@ -257,8 +259,8 @@ public class DataTransformations {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 	}
 
@@ -281,7 +283,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Properties props = new Properties();
 			CArray arr = Static.getArray(args[0], t);
 			String comment = null;
@@ -292,11 +294,11 @@ public class DataTransformations {
 				throw new CRECastException("Expecting an associative array", t);
 			}
 			for(String key : arr.stringKeySet()) {
-				Construct c = arr.get(key, t);
+				Mixed c = arr.get(key, t);
 				String val;
 				if(c instanceof CNull) {
 					val = "";
-				} else if(c instanceof CArray) {
+				} else if(c.isInstanceOf(CArray.class)) {
 					throw new CRECastException("Arrays cannot be encoded with ini_encode.", t);
 				} else {
 					val = c.val();
@@ -336,7 +338,7 @@ public class DataTransformations {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -360,7 +362,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Properties props = new Properties();
 			Reader reader = new StringReader(args[0].val());
 			try {
@@ -402,7 +404,7 @@ public class DataTransformations {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -427,7 +429,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			XMLDocument doc;
 			try {
 				doc = new XMLDocument(args[0].val());
@@ -459,7 +461,7 @@ public class DataTransformations {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 	}
@@ -483,7 +485,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 

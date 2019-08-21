@@ -11,7 +11,7 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Common.TemplateBuilder;
 import com.laytonsmith.PureUtilities.Common.UIUtils;
 import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -19,6 +19,7 @@ import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -228,7 +229,7 @@ public class PNViewer extends javax.swing.JFrame {
 
 					@Override
 					public String generate(String... args) {
-						return CHVersion.LATEST.toString();
+						return MSVersion.LATEST.toString();
 					}
 				});
 				builder.addTemplate("implementation", new TemplateBuilder.Generator() {
@@ -265,7 +266,7 @@ public class PNViewer extends javax.swing.JFrame {
 
 					@Override
 					public String generate(String... args) {
-						return "http://wiki.sk89q.com/wiki/CommandHelper/Staged/" + args[0];
+						return "https://methodscript.com/docs/" + MSVersion.LATEST + "/" + args[0] + ".html";
 					}
 				});
 				builder.addTemplate("jarName", new TemplateBuilder.Generator() {
@@ -707,7 +708,7 @@ public class PNViewer extends javax.swing.JFrame {
 		File config = new File(configPath);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(config.getParentFile().getParentFile());
-		return new PersistenceNetwork(config, new URI("sqlite://" + new File(config.getParentFile().getParentFile(), "persistence.db").toString().replace('\\', '/')), options);
+		return new PersistenceNetworkImpl(config, new URI("sqlite://" + new File(config.getParentFile().getParentFile(), "persistence.db").toString().replace('\\', '/')), options);
 	}
 
 	/**

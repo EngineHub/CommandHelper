@@ -1,29 +1,31 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Common.DateUtils;
+import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.XMLDocument;
+import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
-import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.MCMetadatable;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.abstraction.MCVehicle;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CClassType;
@@ -47,21 +49,25 @@ import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
-import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidPluginException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.core.taskmanager.TaskManager;
+import com.laytonsmith.core.taskmanager.TaskManagerImpl;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -71,7 +77,6 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -82,6 +87,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * This class contains several static methods to get various objects that really should be static in the first place,
@@ -96,7 +102,7 @@ public final class Static {
 	private Static() {
 	}
 
-	private static final Logger LOGGER = Logger.getLogger("CommandHelper");
+	private static Logger logger;
 
 	private static final Map<String, String> HOST_CACHE = new HashMap<String, String>();
 
@@ -113,12 +119,6 @@ public final class Static {
 	 * Third party APIs may provide better access.
 	 */
 	public static final String GROUP_PREFIX = "group.";
-	/**
-	 * @deprecated Use {@link #GROUP_PREFIX} instead.
-	 */
-	@Deprecated // Deprecated on 14-06-2018 dd-mm-yyyy.
-	@SuppressWarnings("checkstyle:constantname") // Fixing this violation might break dependents.
-	public static final String groupPrefix = GROUP_PREFIX;
 
 	/**
 	 * The label representing unrestricted access.
@@ -132,7 +132,7 @@ public final class Static {
 	 * @param t
 	 * @return
 	 */
-	public static CArray getArray(Construct construct, Target t) {
+	public static CArray getArray(Mixed construct, Target t) {
 		return ArgumentValidation.getArray(construct, t);
 	}
 
@@ -147,7 +147,7 @@ public final class Static {
 	 * @param clazz The type expected.
 	 * @return The properly cast object.
 	 */
-	public static <T extends Construct> T getObject(Construct construct, Target t, Class<T> clazz) {
+	public static <T extends Mixed> T getObject(Mixed construct, Target t, Class<T> clazz) {
 		return ArgumentValidation.getObject(construct, t, clazz);
 	}
 
@@ -172,7 +172,7 @@ public final class Static {
 	 * @param c
 	 * @return
 	 */
-	public static double getNumber(Construct c, Target t) {
+	public static double getNumber(Mixed c, Target t) {
 		return ArgumentValidation.getNumber(c, t);
 	}
 
@@ -182,11 +182,11 @@ public final class Static {
 	 * @param c
 	 * @return
 	 */
-	public static double getDouble(Construct c, Target t) {
+	public static double getDouble(Mixed c, Target t) {
 		return ArgumentValidation.getDouble(c, t);
 	}
 
-	public static float getDouble32(Construct c, Target t) {
+	public static float getDouble32(Mixed c, Target t) {
 		return ArgumentValidation.getDouble32(c, t);
 	}
 
@@ -194,9 +194,11 @@ public final class Static {
 	 * Returns an integer from any given construct.
 	 *
 	 * @param c
+	 * @throws CRERangeException If the value would be truncated
+	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
-	public static long getInt(Construct c, Target t) {
+	public static long getInt(Mixed c, Target t) {
 		return ArgumentValidation.getInt(c, t);
 	}
 
@@ -207,9 +209,11 @@ public final class Static {
 	 *
 	 * @param c
 	 * @param t
+	 * @throws CRERangeException If the value would be truncated
+	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
-	public static int getInt32(Construct c, Target t) {
+	public static int getInt32(Mixed c, Target t) {
 		return ArgumentValidation.getInt32(c, t);
 	}
 
@@ -220,9 +224,11 @@ public final class Static {
 	 *
 	 * @param c
 	 * @param t
+	 * @throws CRERangeException If the value would be truncated
+	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
-	public static short getInt16(Construct c, Target t) {
+	public static short getInt16(Mixed c, Target t) {
 		return ArgumentValidation.getInt16(c, t);
 	}
 
@@ -233,40 +239,32 @@ public final class Static {
 	 *
 	 * @param c
 	 * @param t
+	 * @throws CRERangeException If the value would be truncated
+	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
-	public static byte getInt8(Construct c, Target t) {
+	public static byte getInt8(Mixed c, Target t) {
 		return ArgumentValidation.getInt8(c, t);
 	}
 
 	/**
-	 * Returns a boolean from any given construct. Depending on the type of the construct being converted, it follows
-	 * the following rules: If it is an integer or a double, it is false if 0, true otherwise. If it is a string, if it
-	 * is empty, it is false, otherwise it is true.
-	 *
+	 * Currently forwards the call to
+	 * {@link ArgumentValidation#getBooleanish},
+	 * to keep backwards compatible behavior, but will be removed in a future release. Explicitely use either
+	 * {@link ArgumentValidation#getBooleanish} or {@link ArgumentValidation#getBooleanObject}.
 	 * @param c
 	 * @param t
 	 * @return
-	 */
-	public static boolean getBoolean(Construct c, Target t) {
-		return ArgumentValidation.getBoolean(c, t);
-	}
-
-	/**
-	 * Returns a boolean from any given construct. Depending on the type of the construct being converted, it follows
-	 * the following rules: If it is an integer or a double, it is false if 0, true otherwise. If it is a string, if it
-	 * is empty, it is false, otherwise it is true.
-	 *
-	 * @param c
-	 * @return
-	 * @deprecated Use
-	 * {@link #getBoolean(com.laytonsmith.core.constructs.Construct, com.laytonsmith.core.constructs.Target)}
-	 * instead, as it provides better error messages for users that use the string "false" as a boolean. This method
-	 * should be removed in version 3.3.3 or above.
+	 * @deprecated Use {@link ArgumentValidation#getBooleanish} for current behavior, or
+	 * {@link ArgumentValidation#getBooleanObject} for strict behavior. Note: While this is deprecated, and will be
+	 * removed from Static, it will not be removed until all the other methods that are duplicated here and in
+	 * {@link ArgumentValidation} are officially deprecated and removed, so there is no immediate need to backport older
+	 * code, as it will probably be easier to do it all at once later. However, new code should no longer use this
+	 * method. (Or any of the other methods that are duplicated.)
 	 */
 	@Deprecated
-	public static boolean getBoolean(Construct c) {
-		return getBoolean(c, Target.UNKNOWN);
+	public static boolean getBoolean(Mixed c, Target t) {
+		return ArgumentValidation.getBooleanish(c, t);
 	}
 
 	/**
@@ -276,7 +274,7 @@ public final class Static {
 	 * @param t
 	 * @return
 	 */
-	public static CPrimitive getPrimitive(Construct c, Target t) {
+	public static CPrimitive getPrimitive(Mixed c, Target t) {
 		return ArgumentValidation.getObject(c, t, CPrimitive.class);
 	}
 
@@ -287,7 +285,7 @@ public final class Static {
 	 * @param t
 	 * @return
 	 */
-	public static CByteArray getByteArray(Construct c, Target t) {
+	public static CByteArray getByteArray(Mixed c, Target t) {
 		return ArgumentValidation.getByteArray(c, t);
 	}
 
@@ -297,7 +295,7 @@ public final class Static {
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyDoubles(Construct... c) {
+	public static boolean anyDoubles(Mixed... c) {
 		return ArgumentValidation.anyDoubles(c);
 	}
 
@@ -307,7 +305,7 @@ public final class Static {
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyStrings(Construct... c) {
+	public static boolean anyStrings(Mixed... c) {
 		return ArgumentValidation.anyStrings(c);
 	}
 
@@ -317,7 +315,7 @@ public final class Static {
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyBooleans(Construct... c) {
+	public static boolean anyBooleans(Mixed... c) {
 		return ArgumentValidation.anyBooleans(c);
 	}
 
@@ -327,7 +325,7 @@ public final class Static {
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyNulls(Construct... c) {
+	public static boolean anyNulls(Mixed... c) {
 		return ArgumentValidation.anyNulls(c);
 	}
 
@@ -337,7 +335,14 @@ public final class Static {
 	 * @return
 	 */
 	public static Logger getLogger() {
-		return LOGGER;
+		if(logger == null) {
+			if(Implementation.GetServerType() == Implementation.Type.BUKKIT) {
+				logger = CommandHelperPlugin.self.getLogger();
+			} else {
+				logger = Logger.getLogger("MethodScript");
+			}
+		}
+		return logger;
 	}
 
 	/**
@@ -380,7 +385,7 @@ public final class Static {
 			v = com.laytonsmith.commandhelper.CommandHelperPlugin.version;
 		} else {
 			try {
-				v = Main.loadSelfVersion();
+				v = loadSelfVersion();
 			} catch (Exception ex) {
 				//Ignored
 			}
@@ -389,6 +394,36 @@ public final class Static {
 			throw new NotInitializedYetException("The plugin has not been initialized yet");
 		}
 		return v;
+	}
+
+	@SuppressWarnings({"ThrowableInstanceNotThrown", "ThrowableInstanceNeverThrown"})
+	public static SimpleVersion loadSelfVersion() throws Exception {
+		File file = new File(new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()), "plugin.yml");
+		ZipReader reader = new ZipReader(file);
+		if(!reader.exists()) {
+			throw new FileNotFoundException(String.format("%s does not exist", file.getPath()));
+		}
+		try {
+			String contents = reader.getFileContents();
+			Yaml yaml = new Yaml();
+			Map<String, Object> map = (Map<String, Object>) yaml.load(contents);
+			return new SimpleVersion((String) map.get("version"));
+		} catch (RuntimeException | IOException ex) {
+			throw new Exception(ex);
+		}
+	}
+
+	public static String getNoClassDefFoundErrorMessage(NoClassDefFoundError error) {
+		String ret = "The main class requires craftbukkit or bukkit to be included in order to run. If you are seeing"
+				+ " this message, you have two options. First, it seems you have renamed your craftbukkit jar, or"
+				+ " you are altogether not using craftbukkit. If this is the case, you can download craftbukkit and place"
+				+ " it in the correct directory (one above this one) or you can download bukkit, rename it to bukkit.jar,"
+				+ " and put it in the CommandHelper directory.";
+		//if(Prefs.DebugMode()) {
+		ret += " If you're dying for more details, here:\n";
+		ret += StackTraceUtils.GetStacktrace(error);
+		//}
+		return ret;
 	}
 
 	private static String debugLogFileCurrent = null;
@@ -467,6 +502,7 @@ public final class Static {
 	private static final Pattern VALID_DECIMAL = Pattern.compile("-?0m[0-9]+");
 	private static final Pattern INVALID_DECIMAL = Pattern.compile("-?0m[0-9]*[^0-9]+[0-9]*");
 
+
 	/**
 	 * Given a string input, creates and returns a Construct of the appropriate type. This takes into account that null,
 	 * true, and false are keywords.
@@ -477,6 +513,22 @@ public final class Static {
 	 * @throws ConfigRuntimeException If the value is a hex or binary value, but has invalid characters in it.
 	 */
 	public static Construct resolveConstruct(String val, Target t) throws ConfigRuntimeException {
+		return resolveConstruct(val, t, false);
+	}
+
+	/**
+	 * Given a string input, creates and returns a Construct of the appropriate type. This takes into account that null,
+	 * true, and false are keywords.
+	 *
+	 * If returnBareStrings is true, then we don't return CString, we return CBareString.
+	 * @param val
+	 * @param t
+	 * @param returnBareStrings
+	 * @return
+	 * @throws ConfigRuntimeException
+	 */
+	public static Construct resolveConstruct(String val, Target t, boolean returnBareStrings)
+			throws ConfigRuntimeException {
 		if(val == null) {
 			return new CString("", t);
 		}
@@ -532,10 +584,17 @@ public final class Static {
 				// Not a double either
 			}
 		}
-		// TODO: Once compiler environments are added, we would need to check to see if the value here is a custom
-		// type. However, as it stands, since we only support the native types, we will just hardcode the check here.
-		if(NativeTypeList.getNativeTypeList().contains(val)) {
-			return CClassType.get(val);
+		String fqType = NativeTypeList.resolveNativeType(val);
+		if(fqType != null) {
+			try {
+				return CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(fqType));
+			} catch (ClassNotFoundException ex) {
+				// Can't happen, because we just resolved the type, and it wasn't null.
+				throw new Error(ex);
+			}
+		}
+		if(returnBareStrings) {
+			return new CBareString(val, t);
 		} else {
 			return new CString(val, t);
 		}
@@ -626,7 +685,7 @@ public final class Static {
 	 * @param qty
 	 * @throws CREFormatException If the notation is invalid.
 	 * @return
-	 * @deprecated Use {@link StaticLayer#GetItemStack(int, int, int)} instead.
+	 * @deprecated Use MCMaterial instead
 	 */
 	@Deprecated
 	public static MCItemStack ParseItemNotation(String functionName, String notation, int qty, Target t) {
@@ -641,39 +700,16 @@ public final class Static {
 				type = Integer.parseInt(notation);
 			}
 		} catch (NumberFormatException e) {
-			throw new CREFormatException("Invalid item notation: " + notation, t);
+			throw new CREFormatException("Invalid item format: " + notation, t);
 		}
-		return StaticLayer.GetItemStack(type, data, qty);
-	}
-
-	/**
-	 * Works in reverse from the other ParseItemNotation
-	 *
-	 * @param is
-	 * @return
-	 */
-	public static String ParseItemNotation(MCItemStack is) {
-		if(is == null) {
-			return "0";
+		MCMaterial mat = StaticLayer.GetMaterialFromLegacy(type, data);
+		if(mat == null) {
+			throw new CREFormatException("Invalid item format: " + notation, t);
 		}
-		String append = null;
-		if(is.getDurability() != 0) {
-			append = Short.toString(is.getDurability());
-		} else {
-			MCMaterialData md = is.getData();
-			if(md != null) {
-				append = Integer.toString(md.getData());
-			}
-		}
-		return is.getTypeId() + (append == null ? "" : ":" + append);
-	}
-
-	public static String ParseItemNotation(MCBlock b) {
-		if(b == null || b.isNull()) {
-			return "0";
-		}
-		byte data = b.getData();
-		return b.getTypeId() + (data == 0 ? "" : ":" + Byte.toString(data));
+		MCItemStack is = StaticLayer.GetItemStack(mat, qty);
+		MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Item notation is deprecated."
+				+ " Converting '" + notation + "' to '" + is.getType().getName() + "'.", t);
+		return is;
 	}
 
 	private static final Map<String, MCCommandSender> INJECTED_PLAYERS = new HashMap<>();
@@ -703,15 +739,15 @@ public final class Static {
 						+ " but the given string was " + subject.length() + " characters.", t);
 			}
 		} catch (IllegalArgumentException iae) {
-			throw new CREIllegalArgumentException("A UUID length string was given, but was not a valid UUID.", t);
+			throw new CREFormatException("A UUID length string was given, but was not a valid UUID.", t);
 		}
 	}
 
-	public static UUID GetUUID(Construct subject, Target t) {
+	public static UUID GetUUID(Mixed subject, Target t) {
 		return GetUUID(subject.val(), t);
 	}
 
-	public static MCOfflinePlayer GetUser(Construct search, Target t) {
+	public static MCOfflinePlayer GetUser(Mixed search, Target t) {
 		return GetUser(search.val(), t);
 	}
 
@@ -732,7 +768,7 @@ public final class Static {
 			try {
 				ofp = getServer().getOfflinePlayer(GetUUID(search, t));
 			} catch (ConfigRuntimeException cre) {
-				if(cre instanceof CRELengthException) {
+				if(cre instanceof CREThrowable && ((CREThrowable) cre).isInstanceOf(CRELengthException.class)) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
 				} else {
@@ -766,7 +802,7 @@ public final class Static {
 			try {
 				m = getServer().getPlayer(GetUUID(player, t));
 			} catch (ConfigRuntimeException cre) {
-				if(cre instanceof CRELengthException) {
+				if(cre instanceof CREThrowable && ((CREThrowable) cre).isInstanceOf(CRELengthException.class)) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
 				} else {
@@ -787,7 +823,7 @@ public final class Static {
 		return p;
 	}
 
-	public static MCPlayer GetPlayer(Construct player, Target t) throws ConfigRuntimeException {
+	public static MCPlayer GetPlayer(Mixed player, Target t) throws ConfigRuntimeException {
 		return GetPlayer(player.val(), t);
 	}
 
@@ -837,7 +873,7 @@ public final class Static {
 		}
 	}
 
-	public static boolean isNull(Construct construct) {
+	public static boolean isNull(Mixed construct) {
 		return construct instanceof CNull;
 	}
 
@@ -845,11 +881,11 @@ public final class Static {
 		return java.lang.Math.min(max, java.lang.Math.max(min, i));
 	}
 
-	public static MCEntity getEntity(Construct id, Target t) {
+	public static MCEntity getEntity(Mixed id, Target t) {
 		return getEntityByUuid(GetUUID(id.val(), t), t);
 	}
 
-	public static MCLivingEntity getLivingEntity(Construct id, Target t) {
+	public static MCLivingEntity getLivingEntity(Mixed id, Target t) {
 		return getLivingByUUID(GetUUID(id.val(), t), t);
 	}
 
@@ -864,14 +900,11 @@ public final class Static {
 			// This entity is not in the world yet, but it was injected by the event
 			return injectedEntity;
 		}
-		for(MCWorld w : getServer().getWorlds()) {
-			for(MCEntity e : w.getEntities()) {
-				if(e.getUniqueId().compareTo(id) == 0) {
-					return StaticLayer.GetCorrectEntity(e);
-				}
-			}
+		MCEntity ent = getServer().getEntity(id);
+		if(ent == null) {
+			throw new CREBadEntityException("That entity (UUID: " + id + ") does not exist.", t);
 		}
-		throw new CREBadEntityException("That entity (UUID " + id + ") does not exist.", t);
+		return ent;
 	}
 
 	/**
@@ -887,41 +920,16 @@ public final class Static {
 			if(injectedEntity instanceof MCLivingEntity) {
 				return (MCLivingEntity) injectedEntity;
 			}
-			throw new CREBadEntityException("That entity (" + id + ") is not alive.", t);
+			throw new CREBadEntityException("That entity (UUID: " + id + ") is not alive.", t);
 		}
-		for(MCWorld w : Static.getServer().getWorlds()) {
-			for(MCLivingEntity e : w.getLivingEntities()) {
-				if(e.getUniqueId().compareTo(id) == 0) {
-					try {
-						return (MCLivingEntity) StaticLayer.GetCorrectEntity(e);
-					} catch (ClassCastException cce) {
-						throw new CREBadEntityException("The entity found was misinterpreted by the converter, this is"
-								+ " a developer mistake, please file a ticket.", t);
-					}
-				}
-			}
+		MCEntity ent = getServer().getEntity(id);
+		if(ent == null) {
+			throw new CREBadEntityException("That entity (UUID: " + id + ") does not exist.", t);
 		}
-		throw new CREBadEntityException("That entity (" + id + ") does not exist or is not alive.", t);
-	}
-
-	/**
-	 * Returns all vehicles from all maps.
-	 *
-	 * @return
-	 */
-	public static List<MCVehicle> getVehicles() {
-
-		List<MCVehicle> vehicles = new ArrayList<MCVehicle>();
-
-		for(MCWorld w : Static.getServer().getWorlds()) {
-			for(MCEntity e : w.getEntities()) {
-				MCEntity entity = StaticLayer.GetCorrectEntity(e);
-				if(entity instanceof MCVehicle) {
-					vehicles.add((MCVehicle) entity);
-				}
-			}
+		if(!(ent instanceof MCLivingEntity)) {
+			throw new CREBadEntityException("That entity (UUID: " + id + ") is not alive.", t);
 		}
-		return vehicles;
+		return (MCLivingEntity) ent;
 	}
 
 	/**
@@ -947,7 +955,7 @@ public final class Static {
 	 * @param t
 	 * @return
 	 */
-	public static MCWorld getWorld(Construct name, Target t) {
+	public static MCWorld getWorld(Mixed name, Target t) {
 		return getWorld(name.val(), t);
 	}
 
@@ -967,7 +975,7 @@ public final class Static {
 		}
 	}
 
-	public static MCPlugin getPlugin(Construct name, Target t) {
+	public static MCPlugin getPlugin(Mixed name, Target t) {
 		return getPlugin(name.val(), t);
 	}
 
@@ -979,8 +987,8 @@ public final class Static {
 	 * @param t
 	 * @return
 	 */
-	public static MCMetadatable getMetadatable(Construct construct, Target t) {
-		if(construct instanceof CArray) {
+	public static MCMetadatable getMetadatable(Mixed construct, Target t) {
+		if(construct.isInstanceOf(CArray.class)) {
 			return ObjectGenerator.GetGenerator().location(construct, null, t).getBlock();
 		} else if(construct instanceof CString) {
 			switch(construct.val().length()) {
@@ -1095,7 +1103,8 @@ public final class Static {
 			}
 		}
 		String timestamp = DateUtils.ParseCalendarNotation("%Y-%M-%D %h:%m.%s - ");
-		QuickAppend(Static.debugLogFile(root), timestamp + message + Static.LF());
+		QuickAppend(Static.debugLogFile(root), timestamp + "[" + Implementation.GetServerType().getBranding() + "]"
+				+ message + Static.LF());
 	}
 
 	public static void QuickAppend(FileWriter f, String message) throws IOException {
@@ -1229,7 +1238,6 @@ public final class Static {
 		if(p == null) {
 			throw new CREPlayerOfflineException("No player was specified!", t);
 		}
-		assert p != null;
 	}
 
 	public static long msToTicks(long ms) {
@@ -1262,13 +1270,17 @@ public final class Static {
 		}
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(platformFolder);
-		PersistenceNetwork persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
+		Profiles profiles = null;
+		if(MethodScriptFileLocations.getDefault().getProfilesFile().exists()) {
+			profiles = new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile());
+		}
+		PersistenceNetwork persistenceNetwork = new PersistenceNetworkImpl(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 				new URI(URLEncoder.encode("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace('\\', '/'), "UTF-8")), options);
 		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"),
 				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork, platformFolder,
-				new Profiles(MethodScriptFileLocations.getDefault().getProfilesFile()), new TaskManager());
+				profiles, new TaskManagerImpl());
 		gEnv.SetLabel(GLOBAL_PERMISSION);
-		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
+		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment(), new CompilerEnvironment());
 	}
 
 	public static Environment GenerateStandaloneEnvironment() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
@@ -1282,8 +1294,8 @@ public final class Static {
 	 * @param args
 	 * @throws ConfigRuntimeException
 	 */
-	public static void AssertNonCNull(Target t, Construct... args) throws ConfigRuntimeException {
-		for(Construct arg : args) {
+	public static void AssertNonCNull(Target t, Mixed... args) throws ConfigRuntimeException {
+		for(Mixed arg : args) {
 			if(arg instanceof CNull) {
 				throw new CRENullPointerException("Argument was null, and nulls are not allowed.", t);
 			}
@@ -1307,7 +1319,10 @@ public final class Static {
 	 *
 	 * This generally condenses a 5 or 6 line operation into 1 line.
 	 *
-	 * @param arg
+	 * @param arg The path to parse. May be null.
+	 * @param env The environment, required to properly resolve relative paths.
+	 * @param t Code target, for errors.
+	 * @param def The default file, which is returned if {@code arg} is null. (Maybe also be null).
 	 * @return
 	 */
 	public static File GetFileFromArgument(String arg, Environment env, Target t, File def) throws ConfigRuntimeException {
@@ -1323,7 +1338,7 @@ public final class Static {
 		}
 		//Ok, it's not absolute, so we need to see if we're in cmdline mode or not.
 		//If so, we use the root directory, not the target.
-		if(env != null && InCmdLine(env)) {
+		if(env != null && InCmdLine(env, true)) {
 			return new File(env.getEnv(GlobalEnv.class).GetRootFolder(), arg);
 		} else if(t.file() == null) {
 			throw new CREIOException("Unable to receive a non-absolute file with an unknown target", t);
@@ -1333,12 +1348,18 @@ public final class Static {
 	}
 
 	/**
-	 * Returns true if currently running in cmdline mode.
+	 * Returns true if currently running in cmdline mode. If the environment is null, or the GlobalEnv is
+	 * not available, then defaultValue is returned.
 	 *
 	 * @param environment
+	 * @param defaultValue What should be returned if the environment is null or GlobalEnv is not present. (Happens
+	 * during compile time.)
 	 * @return
 	 */
-	public static boolean InCmdLine(Environment environment) {
+	public static boolean InCmdLine(Environment environment, boolean defaultValue) {
+		if(environment == null || !environment.hasEnv(GlobalEnv.class)) {
+			return defaultValue;
+		}
 		return environment.getEnv(GlobalEnv.class).GetCustom("cmdline") instanceof Boolean
 				&& (Boolean) environment.getEnv(GlobalEnv.class).GetCustom("cmdline");
 	}
@@ -1359,8 +1380,8 @@ public final class Static {
 	 * @param t The code target
 	 * @return The value, cast to the desired type.
 	 */
-	public static <T extends Construct> T AssertType(Class<T> type, Construct[] args, int argNumber, Function func, Target t) {
-		Construct value = args[argNumber];
+	public static <T extends Mixed> T AssertType(Class<T> type, Mixed[] args, int argNumber, Function func, Target t) {
+		Mixed value = args[argNumber];
 		if(!type.isAssignableFrom(value.getClass())) {
 			typeof todesired = type.getAnnotation(typeof.class);
 			CClassType toactual = value.typeof();
@@ -1485,7 +1506,7 @@ public final class Static {
 	 * @param construct
 	 * @return
 	 */
-	public static Object getJavaObject(Construct construct) {
+	public static Object getJavaObject(Mixed construct) {
 		if((construct == null) || (construct instanceof CNull)) {
 			return null;
 		} else if(construct instanceof CVoid) {
@@ -1502,12 +1523,12 @@ public final class Static {
 			return ((CByteArray) construct).asByteArrayCopy();
 		} else if(construct instanceof CResource) {
 			return ((CResource) construct).getResource();
-		} else if(construct instanceof CArray) {
+		} else if(construct.isInstanceOf(CArray.class)) {
 			CArray array = (CArray) construct;
 			if(array.isAssociative()) {
 				HashMap<String, Object> map = new HashMap<>();
-				for(Construct key : array.keySet()) {
-					Construct c = array.get(key.val(), Target.UNKNOWN);
+				for(Mixed key : array.keySet()) {
+					Mixed c = array.get(key.val(), Target.UNKNOWN);
 					map.put(key.val(), (c == array) ? map : getJavaObject(c));
 				}
 				return map;
@@ -1516,7 +1537,7 @@ public final class Static {
 				boolean nullable = false;
 				Class<?> clazz = null;
 				for(int i = 0; i < array.size(); i++) {
-					Construct c = array.get(i, Target.UNKNOWN);
+					Mixed c = array.get(i, Target.UNKNOWN);
 					if(c == array) {
 						a[i] = a;
 					} else {

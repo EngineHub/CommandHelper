@@ -8,69 +8,146 @@
 * Write your own /tp, /time, or /warp
 * Do much more, from the simple to the complex, with zero Java code.
 
+'''MethodScript''' is the name of the programming language that CommandHelper uses, and there is a commandline version
+of MethodScript as well, that you can use outside of Minecraft. MethodScript is an imperative, dynamic, event driven,
+value-level, metaprogramming (reflective), structured (block-structured, semi-object-oriented, semi-class-based, 
+recursive), parallel, partially strongly typed language, and is an active work in progress.
+
+The developers of MethodScript do not recommend it (yet) for production or otherwise critical code, however,
+as a quick scripting language, or for use in Minecraft, it is highly recommended.
+
 Remember that [https://github.com/EngineHub/commandhelper CommandHelper is open source].
 
 == Installation ==
 
-{{:CommandHelper/Installation}}
+Only the latest development build is officially supported, but there is some community support for older builds, which
+you can get by joining IRC or Discord. For the latest builds, head to 
+[http://builds.enginehub.org/job/commandhelper?branch=master the build site], click the blue download button to the
+right of the topmost build, and then download the <code>commandhelper-%%CURRENT_VERSION%%-SNAPSHOT-full.jar</code> file.
+(Don't download the one without -full.) You can also download the versionless jar that corresponds to the exact version
+that this site was built with [[MethodScript.jar|here]], though this is not supported.
+
+Alternatively, for advanced users, you could download the sources and build it yourself locally. To do that, you need
+git, maven, and jdk >= 8. Pull down the code with <code>git clone git@github.com:EngineHub/CommandHelper.git</code>,
+then follow the directions in [https://github.com/EngineHub/CommandHelper/blob/master/README.md the README].
+
+=== Bukkit ===
+If you're using bukkit, throw the jar file in the plugins directory, and start your server. On first boot, the proper
+directory structure with placeholder files will be created, which you can then edit. The configuration directory will
+be called CommandHelper, and will be in the same directory as the jar.
+
+=== Cmdline ===
+If you're using the cmdline version, run "java -jar commandhelper-%%CURRENT_VERSION%%-SNAPSHOT-full.jar help" for a
+listing of the possible commands, and "java -jar commandhelper-%%CURRENT_VERSION%%-SNAPSHOT-full.jar install-cmdline"
+to install.
+The configuration directory will be called MethodScript, and will be in the same directory as the jar. If the name or
+path of the jar file changes, you'll need to re-install, so it may be prudent to name the jar with a neutral name that
+does not include the version number.
+
+==== Linux/MacOS ====
+On Unix systems, you'll need to run the command with sudo. The installer will install an mscript bash file in
+/usr/local/bin/mscript, which simply wraps the jar. Running ''mscript'' will launch the interpreter, running it with
+a file will run that file, and using ''mscript --'' followed by a verb (such as help) will run the cmdline utilities.
+
+==== Windows ====
+<%NOTE|Windows support is still fairly experimental, and is not recommended
+for normal use at this time. The uninstallation is unstable, and may require manual registry changes and other
+manual work to uninstall or update, so use it at your own risk.%>
+
+On Windows systems, you'll need to have launched your command prompt as Administrator. (To install on Windows
+Subsystem for Linux, follow the same instructions as for Unix.) A program ''mscript'' will be installed on your
+path, and a PowerShell Module will also be installed. Running ''mscript'' will launch the interpreter, running
+it with a file will run that file, and using ''mscript -Tool'' followed by a verb (such as help) will run the
+cmdline utilities.
 
 == Usage ==
 
 How do you use CommandHelper? We have a set of easy to follow articles that you can read!
 
-* '''Want to setup simple aliases?''' Try the [[Beginner's_Guide|Beginner's Guide]]
+* '''Want to setup simple aliases?''' Try the [[Beginner's_Guide.html|Beginner's Guide]]
 * '''Want to script completely new features?''' Follow the ''Learning Trail'' at the bottom of the page.
 * '''Just want the API?''' See the [[API.html|API reference]].
-* '''Want an example configuration?''' See the [[CommandHelper/Example Script|this example]].
 
-Need more help? Visit the [http://forum.sk89q.com/forums/commandhelper.20/ forums], or chat with us on IRC in [http://skq.me/irc/irc.esper.net/commandhelper/ #CommandHelper on irc.esper.net].
+Need more help? Chat with us on IRC in
+[[Help.html|#CommandHelper on irc.esper.net]], on [https://discord.gg/Z7jpHed Discord],
+or go to the [https://dev.enginehub.org/youtrack/issues/CMDHELPER issue tracker].
 {{LearningTrail}}
 
 == Tools ==
 
 === Syntax-coloring editors ===
 
-Tired of writing your scripts in a plain black and white text editor? Try these syntax hightlighters!
+Tired of writing your scripts in a plain black and white text editor? Try a syntax Highlighter!
 
-* TextWrangler and BBEdit - Mac OS X [http://forum.sk89q.com/threads/textwrangler-bbedit-language-module.382/ Forum Link] - Created by Connor Griffin (Very Outdated)
-* Notepad++ (Default Theme) - Windows [http://forum.sk89q.com/threads/syntax-highlighting-for-notepad.399/ Forum Link] - Created by MrMagical
-* Notepad++ (Obsidian Theme) - Windows [http://forum.sk89q.com/threads/notepad-syntax-highlighter-obsidian-theme.1033/ Forum Link] - Created by TTSDA (based on MrMagical's Highlighter)
-* gedit - GNOME/Cross-platform [http://forum.sk89q.com/threads/gedit-syntax-highlighting.1102/ Forum Link] - Created by MrMagical
+The Visual Studio Code 
+[https://marketplace.visualstudio.com/items?itemName=MethodScriptVSC.methodscriptvsc MethodScriptVSC]
+IDE is the only officially supported IDE/Syntax Highlighter, and is most likely the most feature rich and up-to-date 
+version, so it is highly recommended. To install, [https://code.visualstudio.com/Download download Visual Studio Code] 
+(free, on all platforms), and install the MethodScriptVSC extension from the extensions tab.
 
-If you create a syntax highlighter for your favorite text editor, put a link in the forum, and I'll add it to the wiki!
+If you prefer other text editors, there is community support for other text editors:
+
+* Atom - Cross-platform - Created by jacobwgillespie
+* gedit - GNOME/Cross-platform - Created by MrMagical
+* Notepad++ (Default Theme) - Windows - Created by MrMagical
+* Notepad++ (Obsidian Theme) - Windows - Created by TTSDA (based on MrMagical's Highlighter)
+* Sublime Text 3 - Cross-platform - Created by Ecconia
+* TextWrangler and BBEdit - Mac OS X - Created by Connor Griffin (Very Outdated)
+* and others
+
+If you create a syntax highlighter for your favorite text editor, contact us, and we can add it here!
 
 {{TakeNote|text=To generate up-to-the-minute syntax colors you can also run CommandHelper from the command line using
 <br>
 <code>java -jar CommandHelper.jar syntax npp obsidian</code>
 <br>
-For more detailed instructions, [[SyntaxHighlighting|see here]]}}
+For more detailed instructions, [[SyntaxHighlighting.html|see here]]}}
 
 == CommandHelper ==
 
 === Feature requests and bugs ===
 
-Long-term planned features can be found on the [[/Roadmap/|roadmap]], and short term features can be found on the issue tracker. To request your own features or file a bug, use [http://youtrack.sk89q.com/issues/CMDHELPER our issue tracker]. Known bugs can be found on the issue tracker.
+Long-term planned features can be found on the [[Roadmap.html|roadmap]], and short term features can be found on the
+issue tracker. To request your own features or file a bug, use
+[https://dev.enginehub.org/youtrack/issues/CMDHELPER our issue tracker]. Known bugs can be found on the issue tracker.
 
-If you would to request new functions, it is typically easy to add those, so please post your feature request in the issue tracker. If you happen to find a bug in the program, please let us know so we can fix it!
+If you would to request new functions, it is typically easy to add those, so please post your feature request in the
+issue tracker. If you happen to find a bug in the program, please let us know so we can fix it!
 
 === Want to help? ===
 
-CommandHelper is turning into a large project, and I would love for more people to help work on it. Don't know java? Great! There are things for you to do too! If you're interested in any of the following tasks, feel free to get in touch with me, and we can get you started!
+CommandHelper is turning into a large project, and I would love for more people to help work on it. Don't know java?
+Great! There are things for you to do too! If you're interested in any of the following tasks, feel free to get in touch
+with me, and we can get you started!
 
-* '''Documentation:''' There's lots of complexity in the plugin, and without solid documentation, it is nearly worthless. While some of the documentation is generated programmatically, many pages are not. The auto documentation generator leaves room for more detailed information too -- none of which is currently filled in :( From writing examples for each function, to working on the main documentation, and keeping the current documentation up to speed, there's actually alot to do that has nothing to do with coding!
-* '''Testing:''' While a large portion of CommandHelper has automated tests, there is still no substitute for running [http://builds.enginehub.org/ beta] versions of CommandHelper on a real server. It would be nice to know that several servers have put it through the ringer before a version goes to full release status.
-* '''Programming:''' From adding functions, to writing test cases, to working on the core aspects of CommandHelper, there are many different tasks to conquer.
-
-[[CommandHelper/Next Version|Next version notes staging area]]
+* '''Documentation:''' There's lots of complexity in the plugin, and without solid documentation, it is nearly \
+worthless. While some of the documentation is generated programmatically, many pages are not. The auto documentation \
+generator leaves room for more detailed information too -- none of which is currently filled in :( From writing \
+examples \
+for each function, to working on the main documentation, and keeping the current documentation up to speed, there's \
+actually a lot to do that has nothing to do with coding!
+* '''Testing:''' While a large portion of CommandHelper has automated tests, there is still no substitute for running \
+[http://builds.enginehub.org/ beta] versions of CommandHelper on a real server. It would be nice to know that several \
+servers have put it through the ringer before a version goes to full release status.
+* '''Programming:''' From adding functions, to writing test cases, to working on the core aspects of CommandHelper, \
+there are many different tasks to conquer.
 
 === Donations ===
 
-Do you like the plugin a lot? I certainly don't expect donations, and the any money I receive won't influence the amount of time I spend on the plugin (well, maybe it will), however I do spend a lot of time working on it, and I certainly won't turn anything down if you want to say thank you! If you reeeeally want a feature added to Command Helper, and you're willing to pay money, get in contact with me, and we can discuss contract work, and we can discuss your needs, but otherwise, donations are just a way for you to tell me thanks!
+Do you like the plugin a lot? I certainly don't expect donations, and the any money I receive won't necessarily
+influence the amount of time I spend on the plugin (well, maybe it will), however I do spend a lot of time working on
+it, and I certainly won't turn anything down if you want to say thank you! If you reeeeally want a feature added to
+CommandHelper, and you're willing to pay money, get in contact with me, and we can discuss contract work, and we can
+discuss your needs, but otherwise, donations are just a way for you to tell me thanks!
 
-[http://www.laytonsmith.com/#donations Donations]
+[http://patreon.com/MethodScript Donations]
 
 == Changelog ==
 
-For the full changelog, including the changelog for older releases, see [[Changelog|this page]]
+For the full changelog, including the changelog for older releases, see [[Changelog.html|this page]]
+
+== Previous Versions ==
+
+For previous versions of the documentation, see <a href="%%siteRoot%%docs/">here</a> for a directory.
 
 __NOTOC__

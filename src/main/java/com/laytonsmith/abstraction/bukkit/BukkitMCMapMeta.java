@@ -14,6 +14,21 @@ public class BukkitMCMapMeta extends BukkitMCItemMeta implements MCMapMeta {
 	}
 
 	@Override
+	public boolean hasMapId() {
+		return mm.hasMapId();
+	}
+
+	@Override
+	public int getMapId() {
+		return mm.getMapId();
+	}
+
+	@Override
+	public void setMapId(int id) {
+		mm.setMapId(id);
+	}
+
+	@Override
 	public MCColor getColor() {
 		if(mm.hasColor()) {
 			return BukkitMCColor.GetMCColor(mm.getColor());

@@ -2,7 +2,7 @@ package com.laytonsmith.core.exceptions.CRE;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 
@@ -10,11 +10,11 @@ import com.laytonsmith.core.constructs.Target;
  *
  * @author cailin
  */
-@typeof("OAuthException")
+@typeof("ms.lang.auth.OAuthException")
 public class CREOAuthException extends CREException {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("OAuthException");
+	public static final CClassType TYPE = CClassType.get(CREOAuthException.class);
 
 	public CREOAuthException(String msg, Target t) {
 		super(msg, t);
@@ -31,7 +31,7 @@ public class CREOAuthException extends CREException {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_2;
+		return MSVersion.V3_3_2;
 	}
 
 	@Override

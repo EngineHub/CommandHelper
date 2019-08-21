@@ -3,23 +3,21 @@ package com.laytonsmith.core.exceptions.CRE;
 import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import com.laytonsmith.core.natives.interfaces.ObjectModifier;
-import com.laytonsmith.core.natives.interfaces.ObjectType;
-import java.util.EnumSet;
-import java.util.Set;
+import com.laytonsmith.core.objects.ObjectType;
 
 /**
  *
  */
-@typeof("Throwable")
+@typeof("ms.lang.Throwable")
 public class CREThrowable extends AbstractCREException {
 
-	public static final CClassType TYPE = CClassType.get("Throwable");
+	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
+	public static final CClassType TYPE = CClassType.get(CREThrowable.class);
 
 	@ForceImplementation
 	public CREThrowable(String msg, Target t) {
@@ -39,7 +37,7 @@ public class CREThrowable extends AbstractCREException {
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_1;
+		return MSVersion.V3_3_1;
 	}
 
 	/**
@@ -53,7 +51,19 @@ public class CREThrowable extends AbstractCREException {
 		if(this.getClass() == CREThrowable.class) {
 			return new CClassType[]{Mixed.TYPE};
 		} else {
-			return new CClassType[]{CClassType.get(this.getClass().getSuperclass().getAnnotation(typeof.class).value())};
+//			try {
+				return new CClassType[]{
+					CClassType.get(
+							// The superclass of a subclass to this class will always be of type Mixed,
+							// so this cast will never fail, but we need it to convince the compiler this is ok.
+							(Class<? extends Mixed>) this.getClass().getSuperclass()
+					)
+				};
+//			} catch(ClassNotFoundException ex) {
+//				throw new Error("Subclasses can reliably return super.getSuperclasses() for this, ONLY if it follows"
+//						+ " the rule that it only has one superclass, and that superclass is the underlying java"
+//						+ " object as well. This appears to be wrong in " + this.getClass());
+//			}
 		}
 	}
 
@@ -66,18 +76,13 @@ public class CREThrowable extends AbstractCREException {
 		if(this.getClass() == CREThrowable.class) {
 			return new CClassType[]{ArrayAccess.TYPE};
 		} else {
-			return new CClassType[]{};
+			return CClassType.EMPTY_CLASS_ARRAY;
 		}
 	}
 
 	@Override
 	public ObjectType getObjectType() {
 		return ObjectType.CLASS;
-	}
-
-	@Override
-	public Set<ObjectModifier> getObjectModifiers() {
-		return EnumSet.of(ObjectModifier.PUBLIC);
 	}
 
 	@Override

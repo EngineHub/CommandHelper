@@ -6,7 +6,8 @@ import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Prefs;
@@ -15,13 +16,14 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECausedByWrapper;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,9 +35,28 @@ import java.util.List;
 public class ConfigRuntimeException extends RuntimeException {
 
 	/**
-	 * Creates a new instance of <code>ConfigRuntimeException</code> without detail message.
+	 * Creates a new ConfigRuntimeException.
+	 *
+	 * @param msg The message to be displayed
+	 * @param t The code target this exception is being thrown from
 	 */
-	protected ConfigRuntimeException() {
+	protected ConfigRuntimeException(String msg, Target t) {
+		super(msg);
+		createException(t);
+	}
+
+	/**
+	 * Creates a new ConfigRuntimeException.
+	 *
+	 * @param msg The message to be displayed
+	 * @param t The code target this exception is being thrown from
+	 * @param cause The chained cause. This is not used for normal execution, but is helpful when debugging errors.
+	 * Where exceptions are triggered by Java code (as opposed to organic MethodScript errors) this version should
+	 * always be preferred.
+	 */
+	protected ConfigRuntimeException(String msg, Target t, Throwable cause) {
+		super(msg, cause);
+		createException(t);
 	}
 
 	/**
@@ -86,8 +107,8 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * @return
 	 */
 	public static Reaction GetReaction(ConfigRuntimeException e, Environment env) {
-		//If there is an exception handler, call it to see what it says.
-		Reaction reaction = Reaction.REPORT;
+
+		// If there is an exception handler, call it to see what it says.
 		if(env.getEnv(GlobalEnv.class).GetExceptionHandler() != null) {
 			CClosure c = env.getEnv(GlobalEnv.class).GetExceptionHandler();
 			CArray ex = ObjectGenerator.GetGenerator().exception(e, env, Target.UNKNOWN);
@@ -95,23 +116,22 @@ public class ConfigRuntimeException extends RuntimeException {
 				MCCommandSender sender = e.getEnv().getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				c.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
 			}
-			Construct ret = CNull.NULL;
 			try {
-				c.execute(new Construct[]{ex});
-			} catch (FunctionReturnException retException) {
-				ret = retException.getReturn();
-			}
-			if(ret instanceof CNull || Prefs.ScreamErrors()) {
-				reaction = Reaction.REPORT;
-			} else {
-				if(Static.getBoolean(ret, Target.UNKNOWN)) {
-					reaction = Reaction.IGNORE;
-				} else {
-					reaction = Reaction.FATAL;
+				Mixed ret = c.executeCallable(env, Target.UNKNOWN, new Mixed[]{ex});
+				if(ret.isInstanceOf(CNull.class) || ret.isInstanceOf(CVoid.class) || Prefs.ScreamErrors()) {
+					return Reaction.REPORT; // Closure returned null or scream-errors was set in the config.
 				}
+				// Closure returned a boolean. TRUE -> IGNORE and FALSE -> FATAL.
+				return (ArgumentValidation.getBooleanObject(ret, Target.UNKNOWN) ? Reaction.IGNORE : Reaction.FATAL);
+			} catch (ConfigRuntimeException cre) {
+
+				// A CRE occurred in the exception handler. Report both exceptions.
+				HandleUncaughtException(cre, env, Reaction.REPORT);
+				return Reaction.REPORT;
 			}
+		} else {
+			return Reaction.REPORT; // No exception handler set -> REPORT.
 		}
-		return reaction;
 	}
 
 	/**
@@ -161,13 +181,11 @@ public class ConfigRuntimeException extends RuntimeException {
 	private static void HandleUncaughtException(ConfigRuntimeException e, Environment env, Reaction r) {
 		if(r == Reaction.IGNORE) {
 			//Welp, you heard the man.
-			CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.DEBUG, "An exception bubbled to the top, but was instructed by an event handler to not cause output.", e.getTarget());
+			MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.DEBUG, "An exception bubbled to the top, but was instructed by an event handler to not cause output.", e.getTarget());
 		} else if(r == ConfigRuntimeException.Reaction.REPORT) {
 			ConfigRuntimeException.DoReport(e, env);
 		} else if(r == ConfigRuntimeException.Reaction.FATAL) {
 			ConfigRuntimeException.DoReport(e, env);
-			//Well, here goes nothing
-			throw e;
 		}
 	}
 
@@ -190,15 +208,15 @@ public class ConfigRuntimeException extends RuntimeException {
 				simplepath = file.getName();
 			}
 
-			log.append("\t").append(proc).append(":").append(filepath).append(":")
+			log.append("\tat ").append(proc).append(":").append(filepath).append(":")
 					.append(line).append(".")
 					.append(column).append("\n");
-			console.append("\t").append(TermColors.GREEN).append(proc)
+			console.append("\t").append(TermColors.WHITE).append("at ").append(TermColors.GREEN).append(proc)
 					.append(TermColors.WHITE).append(":")
 					.append(TermColors.YELLOW).append(filepath)
 					.append(TermColors.WHITE).append(":")
 					.append(TermColors.CYAN).append(line).append(".").append(column).append("\n");
-			player.append("\t").append(MCChatColor.GREEN).append(proc)
+			player.append("\t").append(MCChatColor.WHITE).append("at ").append(MCChatColor.GREEN).append(proc)
 					.append(MCChatColor.WHITE).append(":")
 					.append(MCChatColor.YELLOW).append(simplepath)
 					.append(MCChatColor.WHITE).append(":")
@@ -253,11 +271,11 @@ public class ConfigRuntimeException extends RuntimeException {
 				CArray exception = ((CRECausedByWrapper) ex).getException();
 				CArray stackTrace = Static.getArray(exception.get("stackTrace", t), t);
 				List<StackTraceElement> newSt = new ArrayList<>();
-				for(Construct consElement : stackTrace.asList()) {
+				for(Mixed consElement : stackTrace.asList()) {
 					CArray element = Static.getArray(consElement, t);
 					int line = Static.getInt32(element.get("line", t), t);
 					File file = new File(element.get("file", t).val());
-					int col = element.getColumn();
+					int col = Static.getInt32(element.get("col", t), t);
 					Target stElementTarget = new Target(line, file, col);
 					newSt.add(new StackTraceElement(element.get("id", t).val(), stElementTarget));
 				}
@@ -273,7 +291,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		}
 		//Log
 		//Don't log to screen though, since we're ALWAYS going to do that ourselves.
-		CHLog.GetLogger().Log("COMPILE ERROR".equals(exceptionType) ? CHLog.Tags.COMPILER : CHLog.Tags.RUNTIME,
+		MSLog.GetLogger().Log("COMPILE ERROR".equals(exceptionType) ? MSLog.Tags.COMPILER : MSLog.Tags.RUNTIME,
 				LogLevel.ERROR, log.toString(), top, false);
 		//Console
 		StreamUtils.GetSystemOut().println(console.toString() + TermColors.reset());
@@ -363,46 +381,13 @@ public class ConfigRuntimeException extends RuntimeException {
 				exceptionMessage = MCChatColor.YELLOW + e.getMessage();
 			}
 			String message = exceptionMessage + MCChatColor.WHITE + optionalMessage;
-			CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING, Static.MCToANSIColors(message) + TermColors.reset(), t);
+			MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.WARNING, Static.MCToANSIColors(message) + TermColors.reset(), t);
 			//Warnings are not shown to players ever
 		}
 	}
 
 	private Environment env;
 	private Target target;
-
-	/**
-	 * Creates a new ConfigRuntimeException. If the exception is intended to be uncatchable, use
-	 * {@link #CreateUncatchableException} instead.
-	 *
-	 * @param msg The message to be displayed
-	 * @param t The code target this exception is being thrown from
-	 * @deprecated Use the {@link #BuildException(java.lang.String, com.laytonsmith.core.functions.Exceptions.ExceptionType, com.laytonsmith.core.constructs.Target)
-	 * } method instead.
-	 */
-	@Deprecated
-	public ConfigRuntimeException(String msg, Target t) {
-		this(msg, t, null);
-	}
-
-	/**
-	 * Creates a new ConfigRuntimeException. If the exception is intended to be uncatchable, use {@link #CreateUncatchableException(java.lang.String, com.laytonsmith.core.constructs.Target, java.lang.Throwable)
-	 * }
-	 * instead.
-	 *
-	 * @param msg The message to be displayed
-	 * @param t The code target this exception is being thrown from
-	 * @param cause The chained cause. This is not used for normal execution, but is helpful when debugging errors.
-	 * Where exceptions are triggered by Java code (as opposed to organic MethodScript errors) this version should
-	 * always be preferred.
-	 * @deprecated Use the {@link #BuildException(java.lang.String, com.laytonsmith.core.functions.Exceptions.ExceptionType, com.laytonsmith.core.constructs.Target, java.lang.Throwable)
-	 * } method instead.
-	 */
-	@Deprecated
-	public ConfigRuntimeException(String msg, Target t, Throwable cause) {
-		super(msg, cause);
-		createException(t);
-	}
 
 	private void createException(Target t) {
 		this.target = t;
@@ -529,9 +514,10 @@ public class ConfigRuntimeException extends RuntimeException {
 				if(getDefinedAt().file() != null) {
 					name = getDefinedAt().file().getAbsolutePath();
 				}
-				element.set("file", getDefinedAt().file().getAbsolutePath());
+				element.set("file", name);
 			}
 			element.set("line", new CInt(getDefinedAt().line(), Target.UNKNOWN), Target.UNKNOWN);
+			element.set("col", new CInt(getDefinedAt().col(), Target.UNKNOWN), Target.UNKNOWN);
 			return element;
 		}
 

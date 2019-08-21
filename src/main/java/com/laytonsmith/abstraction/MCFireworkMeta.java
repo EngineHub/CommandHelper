@@ -12,4 +12,6 @@ public interface MCFireworkMeta extends MCItemMeta {
 
 	void addEffect(MCFireworkEffect effect);
 
+	void clearEffects();
+
 }

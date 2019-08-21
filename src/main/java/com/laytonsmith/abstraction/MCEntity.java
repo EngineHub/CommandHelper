@@ -25,7 +25,7 @@ public interface MCEntity extends MCMetadatable {
 
 	List<MCEntity> getNearbyEntities(double x, double y, double z);
 
-	MCEntity getPassenger();
+	List<MCEntity> getPassengers();
 
 	MCServer getServer();
 

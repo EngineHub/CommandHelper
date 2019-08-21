@@ -11,7 +11,7 @@ array {entityID} Returns an associative array containing all the data of the giv
 * %KEY_AREAEFFECTCLOUD_DURATION%: The duration of the cloud in ticks.
 * %KEY_AREAEFFECTCLOUD_DURATIONONUSE%: The amount the duration will change when the effects are applied.
 * %KEY_AREAEFFECTCLOUD_PARTICLE%: The particle which comprises the cloud (can be %PARTICLE%).
-* %KEY_AREAEFFECTCLOUD_POTIONMETA%: The potion meta array for the cloud.
+* %KEY_AREAEFFECTCLOUD_POTIONMETA%: An array of potion effect arrays for the cloud.
 * %KEY_AREAEFFECTCLOUD_RADIUS%: The radius of the cloud.
 * %KEY_AREAEFFECTCLOUD_RADIUSONUSE%: The distance the radius will change when the effects are applied.
 * %KEY_AREAEFFECTCLOUD_RADIUSPERTICK%: The distance the radius will change per tick.
@@ -21,8 +21,10 @@ array {entityID} Returns an associative array containing all the data of the giv
 |-
 | ARROW
 | 
-* %KEY_ARROW_CRITICAL%: If this arrow is critical.
-* %KEY_ARROW_KNOCKBACK%: The knockback strength.
+* %KEY_ARROW_CRITICAL%: If this arrow is critical. (boolean)
+* %KEY_ARROW_KNOCKBACK%: The knockback strength. (double)
+* %KEY_ARROW_DAMAGE%: The amount of damage. (double)
+* %KEY_TIPPEDARROW_POTIONMETA%: An associative array with a "base" potion array and a "potions" array of effect arrays for a tipped arrow.
 |-
 | ARMOR_STAND
 |
@@ -41,6 +43,11 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | BOAT
 |
 * %KEY_BOAT_TYPE%: Which tree species the boat is composed of. (can be %TREE_SPECIES%)
+|-
+| CAT
+|
+* %KEY_CAT_TYPE%: The type of the cat. (can be %CAT_TYPE%)
+* %KEY_GENERIC_SITTING%: Whether or not the cat is sitting.
 |-
 | CREEPER
 | 
@@ -70,6 +77,12 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |
 * %KEY_ENDERDRAGON_PHASE%: What AI phase the EnderDragon is in. (can be %ENDERDRAGON_PHASE%)
 |-
+| ENDER_EYE
+|
+* %KEY_ENDEREYE_DESPAWNTICKS%: The number of ticks counted until despawn. (will despawn after 80 ticks)
+* %KEY_ENDEREYE_DROP%: Whether or not the EnderEye will drop an item on despawn.
+* %KEY_ENDEREYE_TARGET%: The target location array that the EnderEye will travel towards.
+|-
 | ENDERMAN
 | 
 * %KEY_ENDERMAN_CARRIED%: The block that the Enderman is carring.
@@ -92,21 +105,26 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_FIREBALL_DIRECTION%: The direction the fireball is heading toward.
 |-
-| GUARDIAN
-|
-* %KEY_GUARDIAN_ELDER%: Whether the guardian is an elder guardian. (deprecated)
+| FIREWORK
+| 
+* %KEY_FIREWORK_STRENGTH%: The firework rocket's flight time.
+* %KEY_FIREWORK_EFFECTS%: An array of firework effect arrays. (see {{function|launch_firework}})
+|-
+| FOX
+| 
+* %KEY_GENERIC_SITTING%: Whether or not the fox is sitting.
+* %KEY_FOX_CROUCHING%: Whether or not the fox is crouching.
+* %KEY_FOX_TYPE%: The type of fox. (can be %FOX_TYPE%)
 |-
 | HORSE
 | 
 * %KEY_HORSE_ARMOR%: An item pertaining to the armor a horse has put on.
-* %KEY_HORSE_CHEST%: Whether the horse has a chest equipped. (deprecated)
 * %KEY_HORSE_COLOR%: The horse's color (can be %HORSE_COLOR%).
 * %KEY_HORSE_DOMESTICATION%: The domestication level of the horse (can't be higher than the maximum domestication level).
 * %KEY_HORSE_JUMP%: The jump strength (between 1.0 and 2.0).
 * %KEY_HORSE_MAXDOMESTICATION%: The maximum domestication level of the horse.
 * %KEY_HORSE_SADDLE%: An item pertaining to the saddle a horse has put on. Can be anything.
 * %KEY_HORSE_STYLE%: The horse's style (can be %HORSE_STYLE%).
-* %KEY_HORSE_VARIANT%: The horse's variant (can be %HORSE_VARIANT%). (deprecated)
 |-
 | HUSK
 |
@@ -121,7 +139,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_ITEM_FRAME_ITEM%: The item in the frame.
 * %KEY_ITEM_FRAME_ROTATION%: The rotation of the frame's item (can be %ROTATION%).
 |-
-| LLAMA
+| LLAMA, TRADER_LLAMA
 |
 * %KEY_HORSE_CHEST%: Whether the horse has a chest equipped.
 * %KEY_HORSE_DOMESTICATION%: The domestication level of the horse (can't be higher than the maximum domestication level).
@@ -132,10 +150,6 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | LIGHTNING
 | 
 * %KEY_LIGHTNING_EFFECT%: Whether the strike is an effect that does no damage. Not editable.
-|-
-| LINGERING_POTION
-|
-* %KEY_SPLASH_POTION_ITEM%: The item for the thrown potion.
 |-
 | MAGMA_CUBE
 | 
@@ -153,10 +167,14 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_MINECART_BLOCK%: The material name of the block being displayed.
 * %KEY_MINECART_OFFSET%: The offset of the block being displayed.
 |- 
+| MUSHROOM_COW
+| 
+* %KEY_MUSHROOM_COW_TYPE%: The type of mushroom cow. (can be %MUSHROOM_COW_TYPE%).
+|- 
 | OCELOT
 | 
-* %KEY_OCELOT_SITTING%: If the ocelot is sitting.
-* %KEY_OCELOT_TYPE%: The type of the ocelot (can be %OCELOT_TYPE%).
+* %KEY_GENERIC_SITTING%: If the ocelot is sitting. (1.13 only)
+* %KEY_OCELOT_TYPE%: The type of the ocelot (can be %OCELOT_TYPE%). (1.13 only)
 |- 
 | PAINTING
 | 
@@ -164,7 +182,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |- 
 | PARROT
 | 
-* %KEY_PARROT_SITTING%: If the parrot is sitting.
+* %KEY_GENERIC_SITTING%: If the parrot is sitting.
 * %KEY_PARROT_TYPE%: The type of the parrot (can be %PARROT_TYPE%).
 |- 
 | PIG
@@ -199,11 +217,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |
 * %KEY_SHULKERBULLET_TARGET%: The UUID of the entity the bullet will head toward, or null if there is no target.
 |-
-| SKELETON
-| 
-* %KEY_SKELETON_TYPE%: The type of the skeleton (can be %SKELETON_TYPE%). (deprecated)
-|-
-| SKELTONHORSE, ZOMBIEHORSE
+| SKELETON_HORSE, ZOMBIE_HORSE
 |
 * %KEY_HORSE_DOMESTICATION%: The domestication level of the horse (can't be higher than the maximum domestication level).
 * %KEY_HORSE_JUMP%: The jump strength (between 1.0 and 2.0).
@@ -218,19 +232,39 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_SNOWMAN_DERP%: With derp mode set to true the snowman wears no pumpkin
 |-
-| SPLASH_POTION
+| SPECTRAL_ARROW
+| 
+* %KEY_ARROW_CRITICAL%: If this spectral arrow is critical. (boolean)
+* %KEY_ARROW_KNOCKBACK%: The knockback strength. (double)
+* %KEY_ARROW_DAMAGE%: The amount of damage. (double)
+* %KEY_SPECTRAL_ARROW_GLOWING_TICKS%: The number of ticks the hit entity will glow. (int)
+|-
+| SPLASH_POTION, LINGERING_POTION (removed in 1.14, use SPLASH_POTION)
 | 
 * %KEY_SPLASH_POTION_ITEM%: The item for the thrown potion.
 |-
-| TIPPED_ARROW
+| TIPPED_ARROW (removed in 1.14, use ARROW)
 |
-* %KEY_TIPPEDARROW_POTIONMETA%: The potion meta array for the tipped arrow.
-* %KEY_ARROW_CRITICAL%: If this arrow is critical.
-* %KEY_ARROW_KNOCKBACK%: The knockback strength.
+* %KEY_ARROW_CRITICAL%: If this arrow is critical. (boolean)
+* %KEY_ARROW_KNOCKBACK%: The knockback strength. (double)
+* %KEY_ARROW_DAMAGE%: The amount of damage. (double)
+* %KEY_TIPPEDARROW_POTIONMETA%: An associative array with a "base" potion array and a "potions" array of effect arrays for a tipped arrow.
+|-
+| TRIDENT
+| 
+* %KEY_ARROW_CRITICAL%: If this trident is critical. (boolean)
+* %KEY_ARROW_KNOCKBACK%: The knockback strength. (double)
+* %KEY_ARROW_DAMAGE%: The amount of damage. (double)
+|-
+| TROPICAL_FISH
+|
+* %KEY_TROPICALFISH_COLOR%: The base color of the fish (can be %DYE_COLOR%).
+* %KEY_TROPICALFISH_PATTERNCOLOR%: The color of the pattern on the fish.
+* %KEY_TROPICALFISH_PATTERN%: The pattern type on the fish (can be %FISH_PATTERN%).
 |-
 | VILLAGER
 | 
-* %KEY_VILLAGER_PROFESSION%: The profession of the villager (can be %PROFESSION%).
+* %KEY_VILLAGER_PROFESSION%: The profession of the villager (can be %PROFESSION%). This list differs in 1.14 from 1.13.
 |-
 | WITHER_SKULL
 | 
@@ -241,14 +275,13 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_WOLF_ANGRY%: If the wolf is angry.
 * %KEY_WOLF_COLOR%: The collar color of the wolf (can be %DYE_COLOR%).
-* %KEY_WOLF_SITTING%: If the wolf is sitting.
+* %KEY_GENERIC_SITTING%: If the wolf is sitting.
 |- 
-| ZOMBIE
+| ZOMBIE, HUSK, ZOMBIE_VILLAGER, DROWNED
 | 
 * %KEY_ZOMBIE_BABY%: Whether the zombie is a baby.
-* %KEY_ZOMBIE_VILLAGER%: Whether the zombie is a villager. (deprecated)
 |-
-| ZOMBIEVILLAGER
+| ZOMBIE_VILLAGER
 |
 * %KEY_ZOMBIE_BABY%: Whether the zombie is a baby.
 * %KEY_VILLAGER_PROFESSION%: The profession of the villager (can be %PROFESSION%).

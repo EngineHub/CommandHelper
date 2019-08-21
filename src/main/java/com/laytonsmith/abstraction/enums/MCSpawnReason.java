@@ -2,12 +2,15 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("SpawnReason")
+@MEnum("com.commandhelper.SpawnReason")
 public enum MCSpawnReason {
 	BREEDING,
 	BUILD_IRONGOLEM,
 	BUILD_SNOWMAN,
 	BUILD_WITHER,
+	/**
+	 * Deprecated as of 1.14, no longer used.
+	 */
 	CHUNK_GEN,
 	/**
 	 * Spawned by plugins
@@ -39,5 +42,8 @@ public enum MCSpawnReason {
 	SILVERFISH_BLOCK,
 	MOUNT,
 	TRAP,
-	ENDER_PEARL
+	ENDER_PEARL,
+	DROWNED,
+	SHEARED,
+	EXPLOSION
 }

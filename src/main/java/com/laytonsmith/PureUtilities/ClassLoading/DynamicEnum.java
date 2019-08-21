@@ -38,4 +38,8 @@ public abstract class DynamicEnum<Abstracted extends Enum, Concrete> {
 		return concrete;
 	}
 
+	@Override
+	public String toString() {
+		return name();
+	}
 }

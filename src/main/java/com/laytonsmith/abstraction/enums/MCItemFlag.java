@@ -5,7 +5,7 @@ import com.laytonsmith.annotations.MEnum;
 /**
  * A MCItemFlag can hide some Attributes from MCItemStacks, through MCItemMeta.
  */
-@MEnum("ItemFlag")
+@MEnum("com.commandhelper.ItemFlag")
 public enum MCItemFlag {
 	/**
 	 * Setting to show/hide enchants

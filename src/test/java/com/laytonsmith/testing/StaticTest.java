@@ -15,6 +15,7 @@ import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFireworkBuilder;
 import com.laytonsmith.abstraction.MCInventory;
+import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
@@ -42,7 +43,8 @@ import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.AliasCore;
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.Optimizable;
@@ -51,7 +53,6 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -72,6 +73,7 @@ import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import org.mockito.Mockito;
 
 import java.io.File;
@@ -105,6 +107,10 @@ import static org.mockito.Mockito.when;
 public class StaticTest {
 
 	static com.laytonsmith.core.environments.Environment env;
+	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
+	static {
+		envs.add(CommandHelperEnvironment.class);
+	}
 
 	static {
 		try {
@@ -225,7 +231,7 @@ public class StaticTest {
 				//er.. let's just try with 10...
 				i = 10;
 			}
-			Construct[] con = new Construct[i];
+			Mixed[] con = new Mixed[i];
 			//Throw the book at it. Most functions will fail, and that is ok, what isn't
 			//ok is if it throws an unexpected type of exception. It should only ever
 			//throw a ConfigRuntimeException, or a CancelCommandException. Further,
@@ -278,7 +284,11 @@ public class StaticTest {
 					// objects instead, but for now, it returns an enum. This will
 					// be a large change.
 					List<String> expectedNames = new ArrayList<>();
-					for(Class<? extends CREThrowable> tt : f.thrown()) {
+					Class[] thrown = f.thrown();
+					if(thrown == null) {
+						thrown = new Class[0];
+					}
+					for(Class<? extends CREThrowable> tt : thrown) {
 						expectedNames.add(tt.getAnnotation(typeof.class).value());
 					}
 					if(f.thrown() == null || !expectedNames.contains(name)) {
@@ -324,7 +334,7 @@ public class StaticTest {
 	 * @param c
 	 * @return
 	 */
-	public static Object Val(Construct c) {
+	public static Object Val(Mixed c) {
 		return c.val();
 	}
 
@@ -335,7 +345,7 @@ public class StaticTest {
 	 * @param expected
 	 * @param actual
 	 */
-	public static void assertCEquals(Construct expected, Construct actual) throws CancelCommandException {
+	public static void assertCEquals(Mixed expected, Mixed actual) throws CancelCommandException {
 		equals e = new equals();
 		CBoolean ret = (CBoolean) e.exec(Target.UNKNOWN, null, expected, actual);
 		if(ret.getBoolean() == false) {
@@ -350,7 +360,7 @@ public class StaticTest {
 	 * @param actual
 	 * @throws CancelCommandException
 	 */
-	public static void assertCNotEquals(Construct expected, Construct actual) throws CancelCommandException {
+	public static void assertCNotEquals(Mixed expected, Mixed actual) throws CancelCommandException {
 		equals e = new equals();
 		CBoolean ret = (CBoolean) e.exec(Target.UNKNOWN, null, expected, actual);
 		if(ret.getBoolean() == true) {
@@ -359,25 +369,25 @@ public class StaticTest {
 	}
 
 	/**
-	 * Verifies that the given construct <em>resolves</em> to true. The resolution uses Static.getBoolean to do the
+	 * Verifies that the given construct <em>resolves</em> to true. The resolution uses ArgumentValidation.getBoolean to do the
 	 * resolution.
 	 *
 	 * @param actual
 	 */
-	public static void assertCTrue(Construct actual) {
-		if(!Static.getBoolean(actual, Target.UNKNOWN)) {
+	public static void assertCTrue(Mixed actual) {
+		if(!ArgumentValidation.getBoolean(actual, Target.UNKNOWN)) {
 			fail("Expected '" + actual.val() + "' to resolve to true, but it did not");
 		}
 	}
 
 	/**
-	 * Verifies that the given construct <em>resolves</em> to false. The resolution uses Static.getBoolean to do the
+	 * Verifies that the given construct <em>resolves</em> to false. The resolution uses ArgumentValidation.getBoolean to do the
 	 * resolution.
 	 *
 	 * @param actual
 	 */
-	public static void assertCFalse(Construct actual) {
-		if(Static.getBoolean(actual, Target.UNKNOWN)) {
+	public static void assertCFalse(Mixed actual) {
+		if(ArgumentValidation.getBoolean(actual, Target.UNKNOWN)) {
 			fail("Expected '" + actual.val() + "' to resolve to false, but it did not");
 		}
 	}
@@ -388,7 +398,7 @@ public class StaticTest {
 	 * @param test
 	 * @param retTypes
 	 */
-	public static void assertReturn(Construct test, Class... retTypes) {
+	public static void assertReturn(Mixed test, Class... retTypes) {
 		if(!Arrays.asList(retTypes).contains(test.getClass())) {
 			StringBuilder b = new StringBuilder();
 			if(retTypes.length == 1) {
@@ -518,7 +528,7 @@ public class StaticTest {
 			env = StaticTest.env;
 		}
 		env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, done, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), env, envs), env, done, null);
 	}
 
 	public static void RunCommand(String combinedScript, MCCommandSender player, String command) throws Exception {
@@ -531,7 +541,7 @@ public class StaticTest {
 			env = StaticTest.env;
 		}
 		env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
-		List<Script> scripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(combinedScript, null, false));
+		List<Script> scripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(combinedScript, null, false), env.getEnvClasses());
 		for(Script s : scripts) {
 			s.compile();
 			if(s.match(command)) {
@@ -626,7 +636,7 @@ public class StaticTest {
 		} catch (IOException ex) {
 			Logger.getLogger(StaticTest.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		CHLog.initialize(new File("."));
+		MSLog.initialize(new File("."));
 	}
 
 	/**
@@ -692,49 +702,15 @@ public class StaticTest {
 		}
 
 		@Override
-		public int LookupItemId(String materialName) {
-			throw new UnsupportedOperationException("Not supported yet.");
-		}
-
-		@Override
-		public String LookupMaterialName(int id) {
-			throw new UnsupportedOperationException("Not supported yet.");
-		}
-
-		@Override
-		public MCItemStack GetItemStack(int type, int qty) {
-			Convertor c = new BukkitConvertor();
-			return c.GetItemStack(type, qty);
-		}
-
-		@Override
-		public MCItemStack GetItemStack(int type, int data, int qty) {
-			Convertor c = new BukkitConvertor();
-			return c.GetItemStack(type, data, qty);
-		}
-
-		@Override
 		public MCItemStack GetItemStack(MCMaterial type, int qty) {
 			Convertor c = new BukkitConvertor();
 			return c.GetItemStack(type, qty);
 		}
 
 		@Override
-		public MCItemStack GetItemStack(MCMaterial type, int data, int qty) {
-			Convertor c = new BukkitConvertor();
-			return c.GetItemStack(type, data, qty);
-		}
-
-		@Override
 		public MCItemStack GetItemStack(String type, int qty) {
 			Convertor c = new BukkitConvertor();
 			return c.GetItemStack(type, qty);
-		}
-
-		@Override
-		public MCItemStack GetItemStack(String type, int data, int qty) {
-			Convertor c = new BukkitConvertor();
-			return c.GetItemStack(type, data, qty);
 		}
 
 		@Override
@@ -777,6 +753,11 @@ public class StaticTest {
 
 		@Override
 		public MCInventory GetLocationInventory(MCLocation location) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public MCInventoryHolder CreateInventoryHolder(String id) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
@@ -832,7 +813,17 @@ public class StaticTest {
 		}
 
 		@Override
-		public MCMaterial getMaterial(int id) {
+		public MCMaterial[] GetMaterialValues() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public MCMaterial GetMaterialFromLegacy(String name, int data) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public MCMaterial GetMaterialFromLegacy(int id, int data) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
@@ -902,8 +893,8 @@ public class StaticTest {
 		}
 
 		@Override
-		public Map<String, Construct> evaluate_helper(BindableEvent e) throws EventException {
-			Map<String, Construct> map = new HashMap<String, Construct>();
+		public Map<String, Mixed> evaluate_helper(BindableEvent e) throws EventException {
+			Map<String, Mixed> map = new HashMap<>();
 			if(fakePlayer != null) {
 				map.put("player", new CString(fakePlayer.getName(), Target.UNKNOWN));
 			}
@@ -992,9 +983,9 @@ public class StaticTest {
 	 *
 	 * @return
 	 */
-	public static CHLog InstallFakeLogger() {
-		CHLog l = mock(CHLog.class);
-		SetPrivate(CHLog.class, "instance", l, CHLog.class);
+	public static MSLog InstallFakeLogger() {
+		MSLog l = mock(MSLog.class);
+		SetPrivate(MSLog.class, "instance", l, MSLog.class);
 		return l;
 	}
 

@@ -7,17 +7,18 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Window;
@@ -78,7 +79,7 @@ public class XGUI {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			JFrame frame = new JFrame();
 			int id = WINDOW_IDS.incrementAndGet();
 			String title = "";
@@ -122,7 +123,7 @@ public class XGUI {
 
 		@Override
 		public Version since() {
-			return CHVersion.V0_0_0;
+			return MSVersion.V0_0_0;
 		}
 
 	}
@@ -148,11 +149,11 @@ public class XGUI {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
 			boolean show = true;
 			if(args.length > 1) {
-				show = Static.getBoolean(args[1], t);
+				show = ArgumentValidation.getBoolean(args[1], t);
 			}
 			Window w = windows.get(id);
 			w.setVisible(show);
@@ -176,7 +177,7 @@ public class XGUI {
 
 		@Override
 		public Version since() {
-			return CHVersion.V0_0_0;
+			return MSVersion.V0_0_0;
 		}
 
 	}
@@ -202,7 +203,7 @@ public class XGUI {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			int windowID = Static.getInt32(args[0], t);
 			int x = Static.getInt32(args[1], t);
 			int y = Static.getInt32(args[2], t);
@@ -241,7 +242,7 @@ public class XGUI {
 
 		@Override
 		public Version since() {
-			return CHVersion.V0_0_0;
+			return MSVersion.V0_0_0;
 		}
 
 	}
@@ -267,7 +268,7 @@ public class XGUI {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String url = args[0].val();
 			try {
 				if(Desktop.isDesktopSupported()) {
@@ -325,7 +326,7 @@ public class XGUI {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 	}

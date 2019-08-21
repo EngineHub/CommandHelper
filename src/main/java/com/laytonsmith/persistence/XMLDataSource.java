@@ -1,8 +1,9 @@
 package com.laytonsmith.persistence;
 
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import java.net.URI;
+import java.util.EnumSet;
 
 /**
  *
@@ -30,12 +31,12 @@ public class XMLDataSource extends StringSerializableDataSource {
 	}
 
 	@Override
-	public DataSourceModifier[] implicitModifiers() {
+	public EnumSet<DataSourceModifier> implicitModifiers() {
 		return null;
 	}
 
 	@Override
-	public DataSourceModifier[] invalidModifiers() {
+	public EnumSet<DataSourceModifier> invalidModifiers() {
 		return null;
 	}
 
@@ -45,7 +46,7 @@ public class XMLDataSource extends StringSerializableDataSource {
 	}
 
 	@Override
-	public CHVersion since() {
-		return CHVersion.V0_0_0;
+	public MSVersion since() {
+		return MSVersion.V0_0_0;
 	}
 }

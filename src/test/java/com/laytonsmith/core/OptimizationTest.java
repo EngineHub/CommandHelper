@@ -1,9 +1,11 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.core.compiler.OptimizationUtilities;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
 import java.io.File;
+import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -15,13 +17,15 @@ import org.junit.Test;
  */
 public class OptimizationTest {
 
+	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
+
 	@BeforeClass
 	public static void setUpClass() {
 		StaticTest.InstallFakeServerFrontend();
 	}
 
 	public String optimize(String script) throws Exception {
-		return OptimizationUtilities.optimize(script, null);
+		return OptimizationUtilities.optimize(script, envs, null);
 	}
 
 	@Test
@@ -48,8 +52,8 @@ public class OptimizationTest {
 
 	@Test
 	public void testIfElseWithDie() throws Exception {
-		assertEquals("ifelse(is_null($pl),die(''),not(ponline(player($pl))),die(concat($pl,'')))",
-				optimize("if(is_null($pl)) {\ndie('') } else if(!ponline(player($pl))){ die($pl.'') }"));
+		assertEquals("ifelse(is_null($pl),die(''),not(dyn($pl)),die(concat($pl,'')))",
+				optimize("if(is_null($pl)) {\ndie('') } else if(!dyn($pl)){ die($pl.'') }"));
 	}
 
 	// Need to add this back too
@@ -101,13 +105,64 @@ public class OptimizationTest {
 
 	@Test
 	public void testUnreachableCode() throws Exception {
-		assertEquals("sconcat(assign(@a,0),if(@a,string(die()),sconcat(msg('2'),msg('3'))))", optimize("assign(@a, 0) if(@a){ die() msg('1') } else { msg('2') msg('3') }"));
-		assertEquals("string(die())", optimize("if(true){ die() msg('1') } else { msg('2') msg('3') }"));
+		assertEquals("if(dyn(0),sconcat(die()),sconcat(msg('2'),msg('3')))",
+				optimize("if(dyn(0)){ die() msg('1') } else { msg('2') msg('3') }"));
+		assertEquals("sconcat(die())", optimize("if(true){ die() msg('1') } else { msg('2') msg('3') }"));
 	}
 
 	@Test
 	public void testUnreachableCodeWithBranchTypeFunction() throws Exception {
 		assertEquals("if(@var,die(),msg(''))", optimize("if(@var){ die() } else { msg('') }"));
+		assertEquals("sconcat(while(lt(rand(),0.5),die()),msg('survived'))", optimize("while(rand() < 0.5) { die(); } msg('survived');"));
+	}
+
+	@Test
+	public void testUnreachableCodeComplex() throws Exception {
+		assertEquals("sconcat(assign(@a,closure(return(5))),execute(@a))",
+				optimize("@a = closure(){"
+						+ "return(5);"
+						+ "}"
+						+ "execute(@a);"));
+		assertEquals("sconcat(msg('a'),if(dyn(1),ifelse(dyn(1),sconcat(die()),dyn(2),sconcat(die()),sconcat(die())),msg('b')))",
+				optimize("msg('a');"
+						+ "if(dyn(1)){"
+						+ "	if(dyn(1)){"
+						+ "		die();"
+						+ "		msg('bad');"
+						+ "	} else if(dyn(2)){"
+						+ "		die();"
+						+ "		msg('bad');"
+						+ "	} else {"
+						+ "		die();"
+						+ "		msg('bad');"
+						+ "	}"
+						+ "} else {"
+						+ "	msg('b');"
+						+ "}"));
+		assertEquals("sconcat(msg('a'),die())",
+				optimize("msg('a');"
+						+ "die();"
+						+ "if(dyn(1)){"
+						+ "	if(dyn(1)){"
+						+ "		die();"
+						+ "		msg('bad');"
+						+ "	} else if(dyn(2)){"
+						+ "		die();"
+						+ "		msg('bad');"
+						+ "	} else {"
+						+ "		die();"
+						+ "		msg('bad');"
+						+ "	}"
+						+ "} else {"
+						+ "	msg('bad');"
+						+ "}"));
+	}
+
+	@Test
+	public void testInnerDie() throws Exception {
+		// Since p is not a branch function, we expect a die inside of that to bubble up
+		assertEquals("sconcat(p(concat(die())))",
+				optimize("p(concat(die(), msg('bad'))); msg('bad');"));
 	}
 
 	@Test
@@ -338,7 +393,7 @@ public class OptimizationTest {
 //	}
 	@Test
 	public void testNotinstanceofKeyword() throws Exception {
-		assertEquals("msg(not(instanceof(dyn(2),int)))", optimize("msg(dyn(2) notinstanceof int);"));
+		assertEquals("msg(not(instanceof(dyn(2),ms.lang.int)))", optimize("msg(dyn(2) notinstanceof int);"));
 	}
 
 	@Test

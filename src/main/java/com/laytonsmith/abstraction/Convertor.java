@@ -39,27 +39,19 @@ public interface Convertor {
 
 	MCServer GetServer();
 
-	MCItemStack GetItemStack(int type, int qty);
-
-	MCItemStack GetItemStack(int type, int data, int qty);
-
 	MCItemStack GetItemStack(MCMaterial type, int qty);
 
-	MCItemStack GetItemStack(MCMaterial type, int data, int qty);
-
 	MCItemStack GetItemStack(String type, int qty);
-
-	MCItemStack GetItemStack(String type, int data, int qty);
 
 	MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded);
 
 	void Startup(CommandHelperPlugin chp);
 
-	int LookupItemId(String materialName);
+	MCMaterial[] GetMaterialValues();
 
-	String LookupMaterialName(int id);
+	MCMaterial GetMaterialFromLegacy(String name, int data);
 
-	MCMaterial getMaterial(int id);
+	MCMaterial GetMaterialFromLegacy(int id, int data);
 
 	MCMaterial GetMaterial(String name);
 
@@ -127,6 +119,8 @@ public interface Convertor {
 	 * @return
 	 */
 	MCInventory GetLocationInventory(MCLocation location);
+
+	MCInventoryHolder CreateInventoryHolder(String id);
 
 	/**
 	 * Run whenever the server is shutting down (or restarting). There is no guarantee provided as to what thread the

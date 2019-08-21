@@ -16,7 +16,7 @@ public class VirtualFile {
 	private final boolean isAbsolute;
 
 	public VirtualFile(String path) {
-		String working = path;
+		String working = path.trim().toLowerCase();
 		working = working.replace('\\', '/');
 		for(String s : RESTRICTED_CHARS) {
 			if(working.contains(s)) {

@@ -2,14 +2,17 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.Callable;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
@@ -27,21 +30,22 @@ import java.util.logging.Logger;
  *
  *
  */
-@typeof("closure")
-public class CClosure extends Construct {
+@typeof("ms.lang.closure")
+public class CClosure extends Construct implements Callable {
 
 	public static final long serialVersionUID = 1L;
 	protected ParseTree node;
 	protected final Environment env;
 	protected final String[] names;
-	protected final Construct[] defaults;
+	protected final Mixed[] defaults;
 	protected final CClassType[] types;
 	protected final CClassType returnType;
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
-	public static final CClassType TYPE = CClassType.get("closure");
+	public static final CClassType TYPE = CClassType.get(CClosure.class);
 
-	public CClosure(ParseTree node, Environment env, CClassType returnType, String[] names, Construct[] defaults, CClassType[] types, Target t) {
+	public CClosure(ParseTree node, Environment env, CClassType returnType, String[] names, Mixed[] defaults,
+			CClassType[] types, Target t) {
 		super(node != null ? node.toString() : "", ConstructType.CLOSURE, t);
 		this.node = node;
 		this.env = env;
@@ -51,7 +55,7 @@ public class CClosure extends Construct {
 		this.returnType = returnType;
 		for(String pName : names) {
 			if(pName.equals("@arguments")) {
-				CHLog.GetLogger().w(CHLog.Tags.COMPILER, "This closure overrides the builtin @arguments parameter", t);
+				MSLog.GetLogger().w(MSLog.Tags.COMPILER, "This closure overrides the builtin @arguments parameter", t);
 				break;
 			}
 		}
@@ -77,10 +81,11 @@ public class CClosure extends Construct {
 				}
 			}
 			b.append(")");
-		} else if(node.getData() instanceof CString) {
-			CString data = (CString) node.getData();
+		} else if(node.getData().isInstanceOf(CString.class)) {
+			String data = ArgumentValidation.getString(node.getData(), node.getTarget());
 			// Convert: \ -> \\ and ' -> \'
-			b.append("'").append(data.val().replace("\\", "\\\\").replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n").replace("'", "\\'")).append("'");
+			b.append("'").append(data.replace("\\", "\\\\").replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n")
+					.replace("'", "\\'")).append("'");
 		} else if(node.getData() instanceof IVariable) {
 			b.append(((IVariable) node.getData()).getVariableName());
 		} else {
@@ -113,6 +118,22 @@ public class CClosure extends Construct {
 	}
 
 	/**
+	 * Shorthand for calling
+	 * {@link #executeCallable(com.laytonsmith.core.environments.Environment,
+	 * com.laytonsmith.core.constructs.Target, com.laytonsmith.core.natives.interfaces.Mixed...)}
+	 * with a null environment, and Target.UNKNOWN. Since closures don't need these parameters,
+	 * this is easier, however, Callables do not have this.
+	 * @param values
+	 * @return
+	 * @throws ConfigRuntimeException
+	 * @throws ProgramFlowManipulationException
+	 * @throws CancelCommandException
+	 */
+	public Mixed executeCallable(Mixed... values) {
+		return executeCallable(null, Target.UNKNOWN, values);
+	}
+
+	/**
 	 * Executes the closure, giving it the supplied arguments. {@code values} may be null, which means that no arguments
 	 * are being sent.
 	 *
@@ -131,13 +152,43 @@ public class CClosure extends Construct {
 	 * }
 	 * </pre>
 	 *
+	 * @param env Unused, since the environment is fixed at time of definition,
+	 * not at execution time.
+	 * @param t The target at which the closure is executed.
 	 * @param values The values to be passed to the closure
+	 * @return The return value of the closure, or VOID if nothing was returned
 	 * @throws ConfigRuntimeException If any call inside the closure causes a CRE
 	 * @throws ProgramFlowManipulationException If any ProgramFlowManipulationException is thrown (other than a
 	 * LoopManipulationException) within the closure
-	 * @throws FunctionReturnException If the closure has a return() call in it.
 	 */
-	public void execute(Construct... values) throws ConfigRuntimeException, ProgramFlowManipulationException, FunctionReturnException, CancelCommandException {
+	@Override
+	public Mixed executeCallable(Environment env, Target t, Mixed... values)
+			throws ConfigRuntimeException, ProgramFlowManipulationException, CancelCommandException {
+		try {
+			execute(values);
+		} catch (FunctionReturnException e) {
+			return e.getReturn();
+		}
+		return CVoid.VOID;
+	}
+
+	/**
+	 * @deprecated This method suffers from the fact that a FunctionReturnException may end up bubbling up past the
+	 * point of intended handling, given an error in the code that forgets to catch FunctionReturnException
+	 * (or a superclass), but may be
+	 * hard to detect. Instead, use {@link #ExecuteClosure} which unconditionally catches the exception, and then
+	 * returns it. This also simplifies the code. This will not be removed earlier than 3.3.5.
+	 * @param values
+	 * @throws ConfigRuntimeException
+	 * @throws ProgramFlowManipulationException
+	 * @throws FunctionReturnException
+	 * @throws CancelCommandException
+	 */
+	// This method actually shouldn't be removed when the deprecation period is over, it should just be made protected,
+	// since it is still the foundation of executeClosure.
+	@Deprecated
+	public void execute(Mixed... values) throws ConfigRuntimeException, ProgramFlowManipulationException,
+			FunctionReturnException, CancelCommandException {
 		if(node == null) {
 			return;
 		}
@@ -151,13 +202,14 @@ public class CClosure extends Construct {
 			if(values != null) {
 				for(int i = 0; i < names.length; i++) {
 					String name = names[i];
-					Construct value;
+					Mixed value;
 					try {
 						value = values[i];
 					} catch (Exception e) {
 						value = defaults[i].clone();
 					}
-					environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value, getTarget()));
+					environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value,
+							getTarget(), environment));
 				}
 			}
 			boolean hasArgumentsParam = false;
@@ -171,11 +223,12 @@ public class CClosure extends Construct {
 			if(!hasArgumentsParam) {
 				CArray arguments = new CArray(node.getData().getTarget());
 				if(values != null) {
-					for(Construct value : values) {
+					for(Mixed value : values) {
 						arguments.push(value, node.getData().getTarget());
 					}
 				}
-				environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, node.getData().getTarget()));
+				environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
+						node.getData().getTarget()));
 			}
 
 			ParseTree newNode = new ParseTree(new CFunction("g", getTarget()), node.getFileOptions());
@@ -183,18 +236,20 @@ public class CClosure extends Construct {
 			children.add(node);
 			newNode.setChildren(children);
 			try {
-				MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class).GetScript());
+				MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class)
+						.GetScript());
 			} catch (LoopManipulationException e) {
 				//This shouldn't ever happen.
 				LoopManipulationException lme = ((LoopManipulationException) e);
 				Target t = lme.getTarget();
-				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("A " + lme.getName() + "() bubbled up to the top of"
+				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("A "
+						+ lme.getName() + "() bubbled up to the top of"
 						+ " a closure, which is unexpected behavior.", t), environment);
 			} catch (FunctionReturnException ex) {
 				// Check the return type of the closure to see if it matches the defined type
 				// Normal execution.
-				Construct ret = ex.getReturn();
-				if(!InstanceofUtil.isInstanceof(ret, returnType)) {
+				Mixed ret = ex.getReturn();
+				if(!InstanceofUtil.isInstanceof(ret, returnType, environment)) {
 					throw new CRECastException("Expected closure to return a value of type " + returnType.val()
 							+ " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
 				}
@@ -207,9 +262,8 @@ public class CClosure extends Construct {
 					((AbstractCREException) ex).freezeStackTraceElements(stManager);
 				}
 				throw ex;
-			} catch (Throwable t) {
-				// Not sure. Pop and re-throw.
-				throw t;
+			} catch (StackOverflowError e) {
+				throw new CREStackOverflowError(null, node.getTarget(), e);
 			} finally {
 				stManager.popStackTraceElement();
 			}
@@ -230,13 +284,14 @@ public class CClosure extends Construct {
 
 	@Override
 	public String docs() {
-		return "A closure is a data type that contains executable code. This is similar to a procedure, but the value is first class,"
+		return "A closure is a data type that contains executable code. This is similar to a procedure, but the value"
+				+ " is first class,"
 				+ " and can be stored in variables, and executed.";
 	}
 
 	@Override
 	public Version since() {
-		return CHVersion.V3_3_1;
+		return MSVersion.V3_3_1;
 	}
 
 	@Override
@@ -246,7 +301,7 @@ public class CClosure extends Construct {
 
 	@Override
 	public CClassType[] getInterfaces() {
-		return new CClassType[]{};
+		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 
 }

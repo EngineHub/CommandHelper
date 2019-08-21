@@ -39,7 +39,7 @@ public class ClassMirror<T> implements Serializable {
 	 * The original URL that houses this class.
 	 *
 	 */
-	private final URL originalURL;
+	private URL originalURL;
 
 	protected ClassMirror(ClassInfo<T> info, URL originalURL) {
 		this.underlyingClass = null;
@@ -457,7 +457,7 @@ public class ClassMirror<T> implements Serializable {
 		try {
 			return info.classReferenceMirror.loadClass();
 		} catch (ClassNotFoundException ex) {
-			throw new NoClassDefFoundError();
+			throw new NoClassDefFoundError(ex.getMessage());
 		}
 	}
 

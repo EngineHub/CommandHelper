@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
 
-@MEnum("Instrument")
+@MEnum("com.commandhelper.Instrument")
 public enum MCInstrument {
 	PIANO,
 	BASS_DRUM,
@@ -13,5 +13,11 @@ public enum MCInstrument {
 	BELL,
 	GUITAR,
 	CHIME,
-	XYLOPHONE
+	XYLOPHONE,
+	IRON_XYLOPHONE,
+	COW_BELL,
+	DIDGERIDOO,
+	BIT,
+	BANJO,
+	PLING
 }

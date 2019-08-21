@@ -100,8 +100,19 @@ public final class StringUtils {
 	 * @param glue The glue to use
 	 * @return The concatenated string
 	 */
-	public static String Join(Set set, String glue) {
+	public static <T> String Join(Set<T> set, String glue) {
 		return Join(set, glue, null, null, null);
+	}
+
+	/**
+	 * Joins a set together, rendering each item with the custom renderer.
+	 * @param set
+	 * @param glue
+	 * @param r
+	 * @return
+	 */
+	public static <T> String Join(Set<T> set, String glue, Renderer<T> r) {
+		return Join(set, glue, null, null, null, r);
 	}
 
 	/**
@@ -150,7 +161,7 @@ public final class StringUtils {
 	 * @param empty If the set is completely empty, this string is simply returned. If null, an empty string is used.
 	 * @return The concatenated string
 	 */
-	public static String Join(Set set, String glue, String lastGlue, String glueForTwoItems, String empty) {
+	public static <T> String Join(Set<T> set, String glue, String lastGlue, String glueForTwoItems, String empty) {
 		return Join(set, glue, lastGlue, glueForTwoItems, empty, null);
 	}
 
@@ -254,6 +265,7 @@ public final class StringUtils {
 	/**
 	 * Joins an array together (using StringBuilder's {
 	 *
+	 * @param <T> The array type
 	 * @see StringBuilder#append(Object)} method to "toString" the Object) using the specified string for glue. If
 	 * lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
 	 * which is useful for lists that are being read by a human, to have a proper conjunction at the end.
@@ -267,11 +279,11 @@ public final class StringUtils {
 	 * used by default on each item.
 	 * @return The concatenated string
 	 */
-	public static String Join(final Object[] list, String glue, String lastGlue, String glueForTwoItems, String empty, Renderer<Object> renderer) {
-		return doJoin(new ItemGetter<Object>() {
+	public static <T> String Join(final T[] list, String glue, String lastGlue, String glueForTwoItems, String empty, Renderer<T> renderer) {
+		return doJoin(new ItemGetter<T>() {
 
 			@Override
-			public Object get(int index) {
+			public T get(int index) {
 				return list[index];
 			}
 
@@ -514,13 +526,17 @@ public final class StringUtils {
 	 * @return
 	 */
 	public static List<String> ArgParser(String args) {
-		List<String> arguments = new ArrayList<String>();
+		List<String> arguments = new ArrayList<>();
 		StringBuilder buf = new StringBuilder();
 		char escape = 0;
 		char quote = 0;
 		boolean wasQuote = false;
 		for(int i = 0; i < args.length(); i++) {
 			char ch = args.charAt(i);
+			char ch2 = 0;
+			if(args.length() > i + 1) {
+				ch2 = args.charAt(i + 1);
+			}
 			if(quote != 0) {  // we're in a quote
 				if(escape != 0) {  // we're in an escape too
 					if(ch == quote) {  // escaping the same quote gives just that quote
@@ -559,13 +575,19 @@ public final class StringUtils {
 				}
 			}
 			// escape handling and default handling can fall through from either branch to here
-			switch(ch) {
-				case '\\':
-					escape = ch;
-					break;
-				default:
-					buf.append(ch);
+			if(ch == '\\' && ch2 == quote) {
+				buf.append(ch2);
+				i++;
+			} else {
+				buf.append(ch);
 			}
+//			switch(ch) {
+//				case '\\':
+//					escape = ch;
+//					break;
+//				default:
+//					buf.append(ch);
+//			}
 		}
 		if(escape != 0) {  // makes trailing escapes be appended (erroneous string, though, IMO)
 			buf.append(escape);

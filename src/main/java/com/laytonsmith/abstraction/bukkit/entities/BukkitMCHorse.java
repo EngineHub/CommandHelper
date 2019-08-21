@@ -1,40 +1,21 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.abstraction.bukkit.BukkitMCInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
 import com.laytonsmith.annotations.abstractionenum;
-import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.LogLevel;
-import com.laytonsmith.core.constructs.Target;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 
-/**
- *
- * @author jb_aero
- */
-public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
+public class BukkitMCHorse extends BukkitMCAbstractHorse implements MCHorse {
 
 	Horse h;
 
 	public BukkitMCHorse(Entity t) {
 		super(t);
 		this.h = (Horse) t;
-	}
-
-	@Override
-	public MCInventory getInventory() {
-		return new BukkitMCInventory(h.getInventory());
-	}
-
-	@Override
-	public MCHorseVariant getVariant() {
-		return BukkitMCHorseVariant.getConvertor().getAbstractedEnum(h.getVariant());
 	}
 
 	@Override
@@ -48,17 +29,6 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 	}
 
 	@Override
-	public void setVariant(MCHorseVariant variant) {
-		try {
-			h.setVariant(BukkitMCHorseVariant.getConvertor().getConcreteEnum(variant));
-		} catch (UnsupportedOperationException ex) {
-			// 1.11 or later
-			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR,
-					"Cannot change Horse variant in Minecraft 1.11+", Target.UNKNOWN);
-		}
-	}
-
-	@Override
 	public void setColor(MCHorseColor color) {
 		h.setColor(BukkitMCHorseColor.getConvertor().getConcreteEnum(color));
 	}
@@ -69,62 +39,6 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 	}
 
 	@Override
-	public double getJumpStrength() {
-		return h.getJumpStrength();
-	}
-
-	@Override
-	public void setJumpStrength(double strength) {
-		h.setJumpStrength(strength);
-	}
-
-	@Override
-	public boolean hasChest() {
-		return h.isCarryingChest();
-	}
-
-	@Override
-	public void setHasChest(boolean hasChest) {
-		try {
-			h.setCarryingChest(hasChest);
-		} catch (UnsupportedOperationException ex) {
-			// 1.11 or later
-			CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.ERROR,
-					"Horse cannot have chest in Minecraft 1.11+", Target.UNKNOWN);
-		}
-	}
-
-	@Override
-	public int getDomestication() {
-		return h.getDomestication();
-	}
-
-	@Override
-	public int getMaxDomestication() {
-		return h.getMaxDomestication();
-	}
-
-	@Override
-	public void setDomestication(int level) {
-		h.setDomestication(level);
-	}
-
-	@Override
-	public void setMaxDomestication(int level) {
-		h.setMaxDomestication(level);
-	}
-
-	@Override
-	public void setSaddle(MCItemStack stack) {
-		h.getInventory().setSaddle(((BukkitMCItemStack) stack).asItemStack());
-	}
-
-	@Override
-	public MCItemStack getSaddle() {
-		return new BukkitMCItemStack(h.getInventory().getSaddle());
-	}
-
-	@Override
 	public void setArmor(MCItemStack stack) {
 		h.getInventory().setArmor(((BukkitMCItemStack) stack).asItemStack());
 	}
@@ -132,47 +46,6 @@ public class BukkitMCHorse extends BukkitMCTameable implements MCHorse {
 	@Override
 	public MCItemStack getArmor() {
 		return new BukkitMCItemStack(h.getInventory().getArmor());
-	}
-
-	@abstractionenum(
-			implementation = Implementation.Type.BUKKIT,
-			forAbstractEnum = MCHorseVariant.class,
-			forConcreteEnum = Horse.Variant.class
-	)
-	public static class BukkitMCHorseVariant extends EnumConvertor<MCHorseVariant, Horse.Variant> {
-
-		private static BukkitMCHorseVariant instance;
-
-		public static BukkitMCHorseVariant getConvertor() {
-			if(instance == null) {
-				instance = new BukkitMCHorseVariant();
-			}
-			return instance;
-		}
-
-		@Override
-		protected MCHorseVariant getAbstractedEnumCustom(Horse.Variant concrete) {
-			switch(concrete) {
-				case SKELETON_HORSE:
-					return MCHorseVariant.SKELETON;
-				case UNDEAD_HORSE:
-					return MCHorseVariant.ZOMBIE;
-				case LLAMA:
-					return MCHorseVariant.HORSE;
-			}
-			return super.getAbstractedEnumCustom(concrete);
-		}
-
-		@Override
-		protected Horse.Variant getConcreteEnumCustom(MCHorseVariant abstracted) {
-			switch(abstracted) {
-				case SKELETON:
-					return Horse.Variant.SKELETON_HORSE;
-				case ZOMBIE:
-					return Horse.Variant.UNDEAD_HORSE;
-			}
-			return super.getConcreteEnumCustom(abstracted);
-		}
 	}
 
 	@abstractionenum(

@@ -1,8 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
-import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.ArgumentParser.ArgumentBuilder;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -10,6 +9,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -25,16 +25,16 @@ import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.core.taskmanager.TaskManager;
+import com.laytonsmith.core.taskmanager.TaskManagerImpl;
 import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.MemoryDataSource;
-import com.laytonsmith.persistence.PersistenceNetwork;
+import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,8 +43,8 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -52,7 +52,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 /**
@@ -67,10 +66,9 @@ public class AliasCore {
 	private final File auxAliases;
 	private final File prefFile;
 	private final File mainFile;
-	//AliasConfig config;
 	private List<Script> scripts;
-	static final Logger LOGGER = Logger.getLogger("Minecraft");
-	private final Set<String> echoCommand = new HashSet<String>();
+	private final Set<String> echoCommand = new HashSet<>();
+	private CompilerEnvironment compilerEnv;
 	public List<File> autoIncludes;
 	public static CommandHelperPlugin parent;
 
@@ -93,119 +91,81 @@ public class AliasCore {
 	}
 
 	public List<Script> getScripts() {
-		return new ArrayList<Script>(scripts);
+		return new ArrayList<>(scripts);
 	}
 
 	/**
-	 * This is the workhorse function. It takes a given command, then converts it into the actual command(s). If the
-	 * command maps to a defined alias, it will run the specified alias. It will search through the global list of
-	 * aliases, as well as the aliases defined for that specific player. This function doesn't handle the /alias command
-	 * however.
+	 * This takes a given command, then if the command maps to a defined alias, it will run the specified alias.
 	 *
-	 * @param command
-	 * @return
+	 * @param command The full command string sent, including the forward slash
+	 * @param sender The command sender
+	 * @return True if the command was handled by an alias
 	 */
-	public boolean alias(String command, final MCCommandSender player) {
+	public boolean alias(String command, final MCCommandSender sender) {
 		if(scripts == null) {
-			throw ConfigRuntimeException.CreateUncatchableException("Cannot run alias commands, no config file is loaded", Target.UNKNOWN);
+			throw ConfigRuntimeException.CreateUncatchableException("Cannot run alias commands."
+					+ " No alias files are loaded.", Target.UNKNOWN);
 		}
 
-		boolean match = false;
-		try { //catch RuntimeException
-			//If player is null, we are running the test harness, so don't
-			//actually add the player to the array.
-			if(player != null && player instanceof MCPlayer && echoCommand.contains(((MCPlayer) player).getName())) {
-				//we are running one of the expanded commands, so exit with false
-				return false;
+		if(sender instanceof MCPlayer && echoCommand.contains(sender.getName())) {
+			// We are already running an alias, so exit to prevent infinite loops from macros.
+			// This only needs to be checked for players due to use of chat output for macros.
+			return false;
+		}
+
+		Script script = null;
+		for(Script s : scripts) {
+			if(s.match(command)) {
+				script = s;
+				break;
 			}
-			for(Script s : scripts) {
-				try {
-					if(s.match(command)) {
-						this.addPlayerReference(player);
-						if(Prefs.ConsoleLogCommands() && s.doLog()) {
-							StringBuilder b = new StringBuilder("CH: Running original command ");
-							if(player instanceof MCPlayer) {
-								b.append("on player ").append(((MCPlayer) player).getName());
-							} else {
-								b.append("from a MCCommandSender");
-							}
-							b.append(" ----> ").append(command);
-							Static.getLogger().log(Level.INFO, b.toString());
-						}
+		}
+		if(script == null) {
+			// No matching alias definition found
+			return false;
+		}
 
-						GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
-								MethodScriptFileLocations.getDefault().getConfigDirectory(),
-								parent.profiles, new TaskManager());
-						CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
-						cEnv.SetCommandSender(player);
-						Environment env = Environment.createEnvironment(gEnv, cEnv);
+		if(Prefs.ConsoleLogCommands() && script.doLog()) {
+			Static.getLogger().log(Level.INFO, "Running alias on " + sender.getName() + " ---> " + command);
+		}
 
-						try {
-							env.getEnv(CommandHelperEnvironment.class).SetCommand(command);
-							ProfilePoint alias = env.getEnv(GlobalEnv.class).GetProfiler().start("Global Alias - \"" + command + "\"", LogLevel.ERROR);
-							try {
-								s.run(s.getVariables(command), env, new MethodScriptComplete() {
-									@Override
-									public void done(String output) {
-										try {
-											if(output != null) {
-												if(!output.trim().isEmpty() && output.trim().startsWith("/")) {
-													if(Prefs.DebugMode()) {
-														if(player instanceof MCPlayer) {
-															Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((MCPlayer) player).getName() + ": " + output.trim());
-														} else {
-															Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + output.trim());
-														}
-													}
+		GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
+				MethodScriptFileLocations.getDefault().getConfigDirectory(),
+				parent.profiles, new TaskManagerImpl());
+		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
+		cEnv.SetCommandSender(sender);
+		cEnv.SetCommand(command);
+		Environment env = Environment.createEnvironment(gEnv, cEnv, compilerEnv);
 
-													if(player instanceof MCPlayer) {
-														((MCPlayer) player).chat(output.trim());
-													} else {
-														Static.getServer().dispatchCommand(player, output.trim().substring(1));
-													}
-												}
-											}
-										} catch (Throwable e) {
-											StreamUtils.GetSystemErr().println(e.getMessage());
-											player.sendMessage(MCChatColor.RED + e.getMessage());
-										} finally {
-											Static.getAliasCore().removePlayerReference(player);
-										}
-									}
-								});
-							} finally {
-								alias.stop();
-							}
-						} catch (ConfigRuntimeException ex) {
-							ex.setEnv(env);
-							ConfigRuntimeException.HandleUncaughtException(ex, env);
-						} catch (Throwable e) {
-							//This is not a simple user script error, this is a deeper problem, so we always handle this.
-							StreamUtils.GetSystemErr().println("An unexpected exception occured: " + e.getClass().getSimpleName());
-							player.sendMessage("An unexpected exception occured: " + MCChatColor.RED + e.getClass().getSimpleName());
-							e.printStackTrace();
-						} finally {
-							Static.getAliasCore().removePlayerReference(player);
-						}
-						match = true;
-						break;
-					}
-				} catch (Exception e) {
-					StreamUtils.GetSystemErr().println("An unexpected exception occured inside the command " + s.toString());
-					e.printStackTrace();
+		this.addPlayerReference(sender);
+		ProfilePoint alias = gEnv.GetProfiler().start("Alias - \"" + command + "\"", LogLevel.ERROR);
+		try {
+			script.run(script.getVariables(command), env, output -> {
+				// If this is a macro, we need to run the output as a command
+				if(output == null) {
+					return;
 				}
-			}
-
-		} catch (Throwable e) {
-			//Not only did an error happen, an error happened in our error handler
-			throw new InternalException(TermColors.RED + "An unexpected error occured in the CommandHelper plugin. "
-					+ "Further, this is likely an error with the error handler, so it may be caused by your script, "
-					+ "however, there is no more information at this point. Check your script, but also report this "
-					+ "as a bug in CommandHelper. Also, it's possible that some commands will no longer work. As a temporary "
-					+ "workaround, restart the server, and avoid doing whatever it is you did to make this happen.\nThe error is as follows: "
-					+ e.toString() + "\n" + TermColors.reset() + "Stack Trace:\n" + StringUtils.Join(Arrays.asList(e.getStackTrace()), "\n"));
+				output = output.trim();
+				if(!output.isEmpty() && output.startsWith("/")) {
+					if(Prefs.DebugMode()) {
+						Static.getLogger().log(Level.INFO, "Executing command on " + sender.getName() + ": " + output);
+					}
+					if(sender instanceof MCPlayer) {
+						// Using chat method ensures that a PlayerCommandPreprocessEvent fires
+						((MCPlayer) sender).chat(output);
+					} else {
+						Static.getServer().dispatchCommand(sender, output.substring(1));
+					}
+				}
+			});
+		} catch (ConfigRuntimeException ex) {
+			ex.setEnv(env);
+			ConfigRuntimeException.HandleUncaughtException(ex, env);
+		} finally {
+			alias.stop();
+			this.removePlayerReference(sender);
 		}
-		return match;
+		return true;
 	}
 
 	/**
@@ -224,14 +184,18 @@ public class AliasCore {
 			if(player != null) {
 				player.sendMessage(ex.getMessage());
 			} else {
-				StreamUtils.GetSystemOut().println(ex.getMessage());
+				Static.getLogger().log(Level.SEVERE, ex.getMessage());
 			}
 			return;
 		}
 		try {
+			// TODO: Maybe consider adding a ReloadOption for this? Probably not though, that would cause
+			// a huge headache.
+			compilerEnv = new CompilerEnvironment();
 			if(Prefs.AllowDynamicShell()) {
-				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING, "allow-dynamic-shell is set to true in "
-						+ CommandHelperFileLocations.getDefault().getProfilerConfigFile().getName() + " you should set this to false, except during development.", Target.UNKNOWN);
+				MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.WARNING, "allow-dynamic-shell is set to true in "
+						+ CommandHelperFileLocations.getDefault().getProfilerConfigFile().getName()
+						+ " you should set this to false, except during development.", Target.UNKNOWN);
 			}
 
 			if(parent.profiler == null || options.reloadProfiler()) {
@@ -262,7 +226,7 @@ public class AliasCore {
 				}
 			}
 
-			CHLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
+			MSLog.initialize(MethodScriptFileLocations.getDefault().getConfigDirectory());
 
 			//Clear out the data source cache
 			DataSourceFactory.DisconnectAll();
@@ -276,14 +240,14 @@ public class AliasCore {
 					extensionManagerStartup.stop();
 				}
 			}
-			CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
+			MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
 			if(parent.persistenceNetwork == null || options.reloadPersistenceConfig()) {
 				ProfilePoint persistenceConfigReload = parent.profiler.start("Reloading persistence configuration", LogLevel.VERBOSE);
 				try {
 					MemoryDataSource.ClearDatabases();
 					ConnectionMixinFactory.ConnectionMixinOptions mixinOptions = new ConnectionMixinFactory.ConnectionMixinOptions();
 					mixinOptions.setWorkingDirectory(MethodScriptFileLocations.getDefault().getConfigDirectory());
-					parent.persistenceNetwork = new PersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
+					parent.persistenceNetwork = new PersistenceNetworkImpl(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 							new URI("sqlite:/" + MethodScriptFileLocations.getDefault().getDefaultPersistenceDBFile()
 									.getCanonicalFile().toURI().getRawSchemeSpecificPart().replace('\\', '/')), mixinOptions);
 				} finally {
@@ -291,14 +255,14 @@ public class AliasCore {
 				}
 			}
 			try {
-				parent.profiles = new Profiles(MethodScriptFileLocations.getDefault().getProfilesFile());
+				parent.profiles = new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile());
 			} catch (IOException | Profiles.InvalidProfileException ex) {
-				CHLog.GetLogger().e(CHLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
+				MSLog.GetLogger().e(MSLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
 				return;
 			}
 			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
 					MethodScriptFileLocations.getDefault().getConfigDirectory(),
-					parent.profiles, new TaskManager());
+					parent.profiles, new TaskManagerImpl());
 			gEnv.SetLabel(Static.GLOBAL_PERMISSION);
 			if(options.reloadExecutionQueue()) {
 				ProfilePoint stoppingExecutionQueue = parent.profiler.start("Stopping execution queues", LogLevel.VERBOSE);
@@ -309,7 +273,7 @@ public class AliasCore {
 				}
 			}
 			CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
-			Environment env = Environment.createEnvironment(gEnv, cEnv);
+			Environment env = Environment.createEnvironment(gEnv, cEnv, compilerEnv);
 			if(options.reloadGlobals()) {
 				ProfilePoint clearingGlobals = parent.profiler.start("Clearing globals", LogLevel.VERBOSE);
 				try {
@@ -336,7 +300,7 @@ public class AliasCore {
 					sampAliases = sampAliases.replaceAll("\n|\r\n", System.getProperty("line.separator"));
 					file_put_contents(aliasConfig, sampAliases, "o");
 				} catch (Exception e) {
-					LOGGER.log(Level.WARNING, "CommandHelper: Could not write sample config file");
+					Static.getLogger().log(Level.WARNING, "Could not write sample config file");
 				}
 			}
 
@@ -348,7 +312,7 @@ public class AliasCore {
 					sampMain = sampMain.replaceAll("\n|\r\n", System.getProperty("line.separator"));
 					file_put_contents(mainFile, sampMain, "o");
 				} catch (Exception e) {
-					LOGGER.log(Level.WARNING, "CommandHelper: Could not write sample main file");
+					Static.getLogger().log(Level.WARNING, "Could not write sample main file");
 				}
 			}
 
@@ -369,10 +333,14 @@ public class AliasCore {
 				} finally {
 					runningExtensionHooks.stop();
 				}
-				IncludeCache.clearCache(); //Clear the include cache, so it re-pulls files
-				Static.getServer().getMessenger().closeAllChannels(); // Close all channel messager channels registered by CH.
 
-				scripts = new ArrayList<Script>();
+				//Clear the include cache, so it re-pulls files.
+				IncludeCache.clearCache();
+
+				// Close all channel messenger channels registered by CH.
+				Static.getServer().getMessenger().closeAllChannels();
+
+				scripts = new ArrayList<>();
 
 				LocalPackage localPackages = new LocalPackage();
 
@@ -404,14 +372,14 @@ public class AliasCore {
 				}
 				ProfilePoint compilerMSA = parent.profiler.start("Compilation of MSA files in Local Packages", LogLevel.VERBOSE);
 				try {
-					localPackages.compileMSA(scripts, player);
+					localPackages.compileMSA(scripts, player, env.getEnvClasses());
 				} finally {
 					compilerMSA.stop();
 				}
 			}
 		} catch (IOException ex) {
-			LOGGER.log(Level.SEVERE, "[CommandHelper]: Path to config file is not correct/accessable. Please"
-					+ " check the location and try loading the plugin again.");
+			Static.getLogger().log(Level.SEVERE, "Path to config file is not correct/accessible."
+					+ " Please check the location and try loading the plugin again.");
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
@@ -438,17 +406,32 @@ public class AliasCore {
 		boolean extensions;
 
 		private final ArgumentParser options = ArgumentParser.GetParser()
-				.addFlag("whitelist", "Sets the list of arguments to be a whitelist, that is,"
+				.addArgument(new ArgumentBuilder().setDescription("Sets the list of arguments to be a whitelist, that is,"
 						+ " only the specified modules get reloaded, the rest will be skipped. Without this option,"
 						+ " the specified modules don't get reloaded.")
-				.addFlag('g', "globals", "Specifies that globals memory (values stored with export/import) should be preserved.")
-				.addFlag('t', "tasks", "Specifies that tasks registered with set_interval/set_timeout should be preserved.")
-				.addFlag('e', "execution-queue", "Specifies that tasks registered in execution queues should be preserved.")
-				.addFlag('r', "persistence-config", "Specifies that the persistence config file should not be reloaded.")
-				.addFlag('f', "profiler", "Specifies that the profiler config should not be reloaded.")
-				.addFlag('s', "scripts", "Specifies that scripts should not be reloaded.")
-				.addFlag('x', "extensions", "Specifies that extensions should not be reloaded.")
-				.addFlag('h', "help", "Prints this list and returns. Nothing is reloaded if this option is set.");
+						.asFlag().setName("whitelist"))
+				.addArgument(new ArgumentBuilder().setDescription("Specifies that globals memory (values stored with"
+						+ " export/import) should be preserved.")
+						.asFlag().setName('g', "globals"))
+				.addArgument(new ArgumentBuilder().setDescription("Specifies that tasks registered with"
+						+ " set_interval/set_timeout should be preserved.")
+						.asFlag().setName('t', "tasks"))
+				.addArgument(new ArgumentBuilder().setDescription("Specifies that tasks registered in execution queues"
+						+ " should be preserved.")
+						.asFlag().setName('e', "execution-queue"))
+				.addArgument(new ArgumentBuilder().setDescription("Specifies that the persistence config file should"
+						+ " not be reloaded.")
+						.asFlag().setName('r', "persistence-config"))
+				.addArgument(new ArgumentBuilder().setDescription("Specifies that the profiler config should not be"
+						+ " reloaded.")
+						.asFlag().setName('f', "profiler"))
+				.addArgument(new ArgumentBuilder().setDescription("Specifies that scripts should not be reloaded.")
+						.asFlag().setName('s', "scripts"))
+				.addArgument(new ArgumentBuilder().setDescription("Specifies that extensions should not be reloaded.")
+						.asFlag().setName('x', "extensions"))
+				.addArgument(new ArgumentBuilder().setDescription("Prints this list and returns. Nothing is reloaded"
+						+ " if this option is set.")
+						.asFlag().setName('h', "help"));
 
 		public ReloadOptions(String[] settings) throws ArgumentParser.ValidationException {
 			globals = true;
@@ -536,14 +519,15 @@ public class AliasCore {
 	 * @throws Exception if the file cannot be found
 	 */
 	public static String file_get_contents(String fileLocation) throws IOException {
-		BufferedReader in = new BufferedReader(new FileReader(fileLocation));
-		String ret = "";
-		String str;
-		while((str = in.readLine()) != null) {
-			ret += str + "\n";
+		StringBuilder ret = new StringBuilder();
+		try(BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(fileLocation),
+				Charset.forName("UTF-8")))) {
+			String str;
+			while((str = in.readLine()) != null) {
+				ret.append(str).append('\n');
+			}
 		}
-		in.close();
-		return ret;
+		return ret.toString();
 	}
 
 	/**
@@ -607,19 +591,19 @@ public class AliasCore {
 	public void removePlayerReference(MCCommandSender p) {
 		//If they're not a player, oh well.
 		if(p instanceof MCPlayer) {
-			echoCommand.remove(((MCPlayer) p).getName());
+			echoCommand.remove(p.getName());
 		}
 	}
 
 	public void addPlayerReference(MCCommandSender p) {
 		if(p instanceof MCPlayer) {
-			echoCommand.add(((MCPlayer) p).getName());
+			echoCommand.add(p.getName());
 		}
 	}
 
 	public boolean hasPlayerReference(MCCommandSender p) {
 		if(p instanceof MCPlayer) {
-			return echoCommand.contains(((MCPlayer) p).getName());
+			return echoCommand.contains(p.getName());
 		} else {
 			return false;
 		}
@@ -645,16 +629,16 @@ public class AliasCore {
 				return file;
 			}
 		}
-		private final List<File> autoIncludes = new ArrayList<File>();
-		private final List<FileInfo> ms = new ArrayList<FileInfo>();
-		private final List<FileInfo> msa = new ArrayList<FileInfo>();
+		private final List<File> autoIncludes = new ArrayList<>();
+		private final List<FileInfo> ms = new ArrayList<>();
+		private final List<FileInfo> msa = new ArrayList<>();
 
 		public List<FileInfo> getMSFiles() {
-			return new ArrayList<FileInfo>(ms);
+			return new ArrayList<>(ms);
 		}
 
 		public List<FileInfo> getMSAFiles() {
-			return new ArrayList<FileInfo>(msa);
+			return new ArrayList<>(msa);
 		}
 
 		private List<File> getAutoIncludes() {
@@ -673,23 +657,31 @@ public class AliasCore {
 			ms.add(new FileInfo(s, path));
 		}
 
-		public void compileMSA(List<Script> scripts, MCPlayer player) {
-
+		public void compileMSA(List<Script> scripts, MCPlayer player,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs) {
 			for(FileInfo fi : msa) {
 				List<Script> tempScripts;
 				try {
-					tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents, fi.file, false));
+					ProfilePoint p = parent.profiler.start("Compiling " + fi.file, LogLevel.WARNING);
+					try {
+						tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents,
+								fi.file, false), envs);
+					} finally {
+						p.stop();
+					}
 					for(Script s : tempScripts) {
 						try {
 							try {
 								s.compile();
-								s.checkAmbiguous((ArrayList<Script>) scripts);
+								s.checkAmbiguous(scripts);
 								scripts.add(s);
 							} catch (ConfigCompileException e) {
-								ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", player);
+								ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script."
+										+ " Compilation will attempt to continue, however.", player);
 							} catch (ConfigCompileGroupException ex) {
 								for(ConfigCompileException e : ex.getList()) {
-									ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script. Compilation will attempt to continue, however.", player);
+									ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script."
+											+ " Compilation will attempt to continue, however.", player);
 								}
 							}
 						} catch (RuntimeException ee) {
@@ -699,7 +691,8 @@ public class AliasCore {
 						}
 					}
 				} catch (ConfigCompileException e) {
-					ConfigRuntimeException.HandleUncaughtException(e, "Could not compile file " + fi.file + " compilation will halt.", player);
+					ConfigRuntimeException.HandleUncaughtException(e, "Could not compile file " + fi.file
+							+ ", so compilation will halt.", player);
 					return;
 				}
 			}
@@ -710,14 +703,19 @@ public class AliasCore {
 				}
 			}
 			if(errors > 0) {
-				StreamUtils.GetSystemOut().println(TermColors.YELLOW + "[CommandHelper]: " + (scripts.size() - errors) + " alias(es) defined, " + TermColors.RED + "with " + errors + " aliases with compile errors." + TermColors.reset());
+				Static.getLogger().log(Level.INFO, TermColors.YELLOW
+						+ (scripts.size() - errors) + " aliases defined, " + TermColors.RED + "with "
+						+ errors + " aliases with compile errors." + TermColors.reset());
 				if(player != null) {
-					player.sendMessage(MCChatColor.YELLOW + "[CommandHelper]: " + (scripts.size() - errors) + " alias(es) defined, " + MCChatColor.RED + "with " + errors + " aliases with compile errors.");
+					player.sendMessage(MCChatColor.YELLOW + "[CommandHelper] "
+							+ (scripts.size() - errors) + " aliases defined, " + MCChatColor.RED + "with "
+							+ errors + " aliases with compile errors.");
 				}
 			} else {
-				StreamUtils.GetSystemOut().println(TermColors.YELLOW + "[CommandHelper]: " + scripts.size() + " alias(es) defined." + TermColors.reset());
+				Static.getLogger().log(Level.INFO, TermColors.YELLOW + scripts.size() + " aliases defined."
+						+ TermColors.reset());
 				if(player != null) {
-					player.sendMessage(MCChatColor.YELLOW + "[CommandHelper]: " + scripts.size() + " alias(es) defined.");
+					player.sendMessage(MCChatColor.YELLOW + "[CommandHelper] " + scripts.size() + " aliases defined.");
 				}
 			}
 		}
@@ -726,34 +724,42 @@ public class AliasCore {
 			for(FileInfo fi : ms) {
 				boolean exception = false;
 				try {
-					MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file, true)), env, null, null);
+					MethodScriptCompiler.execute(MethodScriptCompiler.compile(
+							MethodScriptCompiler.lex(fi.contents, fi.file, true), env, env.getEnvClasses()),
+							env, null, null);
 				} catch (ConfigCompileGroupException e) {
 					exception = true;
-					ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath() + " could not be compiled, due to compile errors.", player);
+					ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath()
+							+ " could not be compiled, due to compile errors.", player);
 				} catch (ConfigCompileException e) {
 					exception = true;
-					ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath() + " could not be compiled, due to a compile error.", player);
+					ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath()
+							+ " could not be compiled, due to a compile error.", player);
 				} catch (ConfigRuntimeException e) {
 					exception = true;
 					ConfigRuntimeException.HandleUncaughtException(e, env);
 				} catch (CancelCommandException e) {
 					if(e.getMessage() != null && !"".equals(e.getMessage().trim())) {
-						LOGGER.log(Level.INFO, e.getMessage());
+						Static.getLogger().log(Level.INFO, e.getMessage());
 					}
 				} catch (ProgramFlowManipulationException e) {
 					exception = true;
-					ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Cannot break program flow in main files.", e.getTarget()), env);
+					ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException(
+							"Cannot break program flow in main files.", e.getTarget()), env);
 				}
 				if(exception) {
 					if(Prefs.HaltOnFailure()) {
-						LOGGER.log(Level.SEVERE, TermColors.RED + "[CommandHelper]: Compilation halted due to unrecoverable failure." + TermColors.reset());
+						Static.getLogger().log(Level.SEVERE, TermColors.RED
+								+ "Compilation halted due to unrecoverable failure." + TermColors.reset());
 						return;
 					}
 				}
 			}
-			LOGGER.log(Level.INFO, TermColors.YELLOW + "[CommandHelper]: MethodScript files processed" + TermColors.reset());
+			Static.getLogger().log(Level.INFO, TermColors.YELLOW
+					+ (ms.size() + autoIncludes.size()) + " MethodScript files processed" + TermColors.reset());
 			if(player != null) {
-				player.sendMessage(MCChatColor.YELLOW + "[CommandHelper]: MethodScript files processed");
+				player.sendMessage(MCChatColor.YELLOW + "[CommandHelper] "
+						+  (ms.size() + autoIncludes.size())  + " MethodScript files processed");
 			}
 		}
 	}
@@ -783,8 +789,6 @@ public class AliasCore {
 			} else if(start.getName().endsWith(".mslp")) {
 				try {
 					GetAuxZipAliases(new ZipFile(start), pack);
-				} catch (ZipException ex) {
-					Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
 				} catch (IOException ex) {
 					Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
 				}
@@ -802,14 +806,16 @@ public class AliasCore {
 					pack.addAutoInclude(new File(file.getName() + File.separator + ze.getName()));
 				} else {
 					try {
-						pack.appendMS(Installer.parseISToString(file.getInputStream(ze)), new File(file.getName() + File.separator + ze.getName()));
+						pack.appendMS(Installer.parseISToString(file.getInputStream(ze)), new File(file.getName()
+								+ File.separator + ze.getName()));
 					} catch (IOException ex) {
 						Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
 			} else if(ze.getName().endsWith(".msa")) {
 				try {
-					pack.appendMSA(Installer.parseISToString(file.getInputStream(ze)), new File(file.getName() + File.separator + ze.getName()));
+					pack.appendMSA(Installer.parseISToString(file.getInputStream(ze)), new File(file.getName()
+							+ File.separator + ze.getName()));
 				} catch (IOException ex) {
 					Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
 				}

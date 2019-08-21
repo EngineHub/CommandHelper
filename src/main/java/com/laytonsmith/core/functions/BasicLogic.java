@@ -2,11 +2,10 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.annotations.breakable;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
@@ -15,16 +14,11 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CFunction;
-import com.laytonsmith.core.constructs.CIdentifier;
 import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CKeyword;
-import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.CSlice;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -35,14 +29,11 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.LoopBreakException;
-import java.util.ArrayList;
-import java.util.Comparator;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  *
@@ -52,691 +43,6 @@ public class BasicLogic {
 
 	public static String docs() {
 		return "These functions provide basic logical operations.";
-	}
-
-	@api
-	public static class _if extends AbstractFunction implements Optimizable {
-
-		@Override
-		public String getName() {
-			return "if";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{Integer.MAX_VALUE};
-		}
-
-		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			for(ParseTree node : nodes) {
-				if(node.getData() instanceof CIdentifier) {
-					return new ifelse().execs(t, env, parent, nodes);
-				}
-			}
-			ParseTree condition = nodes[0];
-			ParseTree __if = nodes[1];
-			ParseTree __else = null;
-			if(nodes.length == 3) {
-				__else = nodes[2];
-			}
-
-			if(Static.getBoolean(parent.seval(condition, env), t)) {
-				return parent.seval(__if, env);
-			} else {
-				if(__else == null) {
-					return CVoid.VOID;
-				}
-				return parent.seval(__else, env);
-			}
-		}
-
-		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			return CVoid.VOID;
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
-		}
-
-		@Override
-		public String docs() {
-			return "mixed {cond, trueRet, [falseRet]} If the first argument evaluates to a true value, the second argument is returned, otherwise the third argument is returned."
-					+ " If there is no third argument, it returns void.";
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public boolean preResolveVariables() {
-			return false;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
-		}
-		//Doesn't matter, this function is run out of state
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(
-					OptimizationOption.OPTIMIZE_DYNAMIC
-			);
-		}
-
-		@SuppressWarnings("checkstyle:constantname")
-		private static final String and = new and().getName();
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> args, FileOptions fileOptions) throws ConfigCompileException {
-			//Check for too many/few arguments
-			if(args.size() < 2) {
-				throw new ConfigCompileException("Too few arguments passed to if()", t);
-			}
-			if(args.size() > 3) {
-				throw new ConfigCompileException("if() can only have 3 parameters", t);
-			}
-			if(args.get(0).isConst()) {
-				// We can optimize this one way or the other, since the condition is const
-				if(Static.getBoolean(args.get(0).getData(), t)) {
-					// It's true, return the true condition
-					return args.get(1);
-				} else // If there are three args, return the else condition, otherwise,
-				// have it entirely remove us from the parse tree.
-				if(args.size() == 3) {
-					return args.get(2);
-				} else {
-					return Optimizable.REMOVE_ME;
-				}
-			}
-			// If the code looks like this:
-			// if(@a){
-			//		if(@b){
-			//		}
-			// }
-			// then we can turn this into if(@a && @b){ }, as they are functionally
-			// equivalent, and this construct tends to be faster (less stack frames, presumably).
-			// The caveat is that if the inner if statement has an else statement (or is ifelse)
-			// or there are other nodes inside the statement, or we have an else clause
-			// we cannot do this optimization, as it then has side effects.
-			if(args.get(1).getData() instanceof CFunction && args.get(1).getData().val().equals("if") && args.size() == 2) {
-				ParseTree _if = args.get(1);
-				if(_if.getChildren().size() == 2) {
-					// All the conditions are met, move this up
-					ParseTree myCondition = args.get(0);
-					ParseTree theirCondition = _if.getChildAt(0);
-					ParseTree theirCode = _if.getChildAt(1);
-					ParseTree andClause = new ParseTree(new CFunction(and, t), fileOptions);
-					// If it's already an and(), just tack the other condition on
-					if(myCondition.getData() instanceof CFunction && myCondition.getData().val().equals(and)) {
-						andClause = myCondition;
-						andClause.addChild(theirCondition);
-					} else {
-						andClause.addChild(myCondition);
-						andClause.addChild(theirCondition);
-					}
-					args.set(0, andClause);
-					args.set(1, theirCode);
-				}
-			}
-			return null;
-		}
-
-		@Override
-		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{
-				new ExampleScript("Functional usage", "if(true, msg('This is true'), msg('This is false'))"),
-				new ExampleScript("With braces, true condition", "if(true){\n\tmsg('This is true')\n}"),
-				new ExampleScript("With braces, false condition", "msg('Start')\nif(false){\n\tmsg('This will not show')\n}\nmsg('Finish')")};
-		}
-
-	}
-
-	@api(environments = {GlobalEnv.class})
-	public static class ifelse extends AbstractFunction implements Optimizable {
-
-		@Override
-		public String getName() {
-			return "ifelse";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{Integer.MAX_VALUE};
-		}
-
-		@Override
-		public String docs() {
-			return "mixed {[boolean1, code]..., [elseCode]} Provides a more convenient method"
-					+ " for running if/else chains. If none of the conditions are true, and"
-					+ " there is no 'else' condition, void is returned.";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREInsufficientArgumentsException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public boolean preResolveVariables() {
-			return false;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CNull.NULL;
-		}
-
-		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			if(nodes.length < 2) {
-				throw new CREInsufficientArgumentsException("ifelse expects at least 2 arguments", t);
-			}
-			for(int i = 0; i <= nodes.length - 2; i += 2) {
-				ParseTree statement = nodes[i];
-				ParseTree code = nodes[i + 1];
-				Construct evalStatement = parent.seval(statement, env);
-				if(evalStatement instanceof CIdentifier) {
-					evalStatement = parent.seval(((CIdentifier) evalStatement).contained(), env);
-				}
-				if(Static.getBoolean(evalStatement, t)) {
-					Construct ret = env.getEnv(GlobalEnv.class).GetScript().eval(code, env);
-					return ret;
-				}
-			}
-			if(nodes.length % 2 == 1) {
-				Construct ret = env.getEnv(GlobalEnv.class).GetScript().seval(nodes[nodes.length - 1], env);
-				if(ret instanceof CIdentifier) {
-					return parent.seval(((CIdentifier) ret).contained(), env);
-				} else {
-					return ret;
-				}
-			}
-			return CVoid.VOID;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
-		public Set<Optimizable.OptimizationOption> optimizationOptions() {
-			return EnumSet.of(
-					Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC
-			);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			// TODO: Redo this optimization.
-			return null;
-		}
-
-		@Override
-		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{
-				new ExampleScript("Functional usage", "ifelse(false, msg('This is false'), true, msg('This is true'))"),
-				new ExampleScript("With braces", "if(false){\n\tmsg('This is false')\n} else {\n\tmsg('This is true')\n}"),
-				new ExampleScript("With braces, with else if", "if(false){\n\tmsg('This will not show')\n} else if(false){\n"
-				+ "\n\tmsg('This will not show')\n} else {\n\tmsg('This will show')\n}")};
-		}
-	}
-
-	@api
-	@breakable
-	public static class _switch extends AbstractFunction implements Optimizable {
-
-		@Override
-		public String getName() {
-			return "switch";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{Integer.MAX_VALUE};
-		}
-
-		@Override
-		public String docs() {
-			return "mixed {value, [equals, code]..., [defaultCode]} Provides a switch statement. If none of the conditions"
-					+ " match, and no default is provided, void is returned."
-					+ " See the documentation on [[CommandHelper/Logic|Logic]] for more information. ----"
-					+ " In addition, slices may be used to indicate ranges of integers that should trigger the specified"
-					+ " case. Slices embedded in an array are fine as well. Switch statements also support brace/case/default"
-					+ " syntax, as in most languages, althrough unlike most languages, fallthrough isn't supported. Breaking"
-					+ " with break() isn't required, but recommended. A number greater than 1 may be sent to break, and breaking"
-					+ " out of the switch will consume a \"break counter\" and the break will continue up the chain."
-					+ " If you do use break(), the return value of switch is ignored. See the examples for usage"
-					+ " of brace/case/default syntax, which is highly recommended.";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREInsufficientArgumentsException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return false;
-		}
-
-		@Override
-		public boolean preResolveVariables() {
-			return false;
-		}
-
-		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return null;
-		}
-
-		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return CNull.NULL;
-		}
-
-		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			Construct value = parent.seval(nodes[0], env);
-			equals equals = new equals();
-			try {
-				for(int i = 1; i <= nodes.length - 2; i += 2) {
-					ParseTree statement = nodes[i];
-					ParseTree code = nodes[i + 1];
-					Construct evalStatement = parent.seval(statement, env);
-					if(evalStatement instanceof CSlice) { //More specific subclass of array, we can do more optimal handling here
-						long rangeLeft = ((CSlice) evalStatement).getStart();
-						long rangeRight = ((CSlice) evalStatement).getFinish();
-						if(value instanceof CInt) {
-							long v = Static.getInt(value, t);
-							if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
-									|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
-									|| (rangeLeft == rangeRight && v == rangeLeft)) {
-								return parent.seval(code, env);
-							}
-						}
-					} else if(evalStatement instanceof CArray) {
-						for(String index : ((CArray) evalStatement).stringKeySet()) {
-							Construct inner = ((CArray) evalStatement).get(index, t);
-							if(inner instanceof CSlice) {
-								long rangeLeft = ((CSlice) inner).getStart();
-								long rangeRight = ((CSlice) inner).getFinish();
-								if(value instanceof CInt) {
-									long v = Static.getInt(value, t);
-									if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
-											|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
-											|| (rangeLeft == rangeRight && v == rangeLeft)) {
-										return parent.seval(code, env);
-									}
-								}
-							} else if(equals.exec(t, env, value, inner).getBoolean()) {
-								return parent.seval(code, env);
-							}
-						}
-					} else if(equals.exec(t, env, value, evalStatement).getBoolean()) {
-						return parent.seval(code, env);
-					}
-				}
-				if(nodes.length % 2 == 0) {
-					return parent.seval(nodes[nodes.length - 1], env);
-				}
-			} catch (LoopBreakException ex) {
-				//Ignored, unless the value passed in is greater than 1, in which case
-				//we rethrow.
-				if(ex.getTimes() > 1) {
-					ex.setTimes(ex.getTimes() - 1);
-					throw ex;
-				}
-			}
-			return CVoid.VOID;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
-
-		@Override
-		public ExampleScript[] examples() throws ConfigCompileException {
-			return new ExampleScript[]{
-				new ExampleScript("With braces/case/default", "switch('theValue'){\n"
-				+ "\tcase 'notTheValue':\n"
-				+ "\t\tmsg('Nope')\n"
-				+ "\t\tbreak();\n"
-				+ "\tcase 'theValue':\n"
-				+ "\t\tmsg('Success')\n"
-				+ "\t\tbreak();\n"
-				+ "}"),
-				new ExampleScript("With braces/case/default. Note the lack of fallthrough, even without a break(),"
-				+ " except where two cases are directly back to back.",
-				"@a = 5\nswitch(@a){\n"
-				+ "\tcase 1:\n"
-				+ "\tcase 2:\n"
-				+ "\t\tmsg('1 or 2');\n"
-				+ "\tcase 3..4:\n"
-				+ "\t\tmsg('3 or 4');\n"
-				+ "\t\tbreak(); // This is optional, as it would break here anyways, but is recommended.\n"
-				+ "\tcase 5..6:\n"
-				+ "\tcase 8:\n"
-				+ "\t\tmsg('5, 6, or 8')\n"
-				+ "\tdefault:\n"
-				+ "\t\tmsg('Any other value'); # A default is optional\n"
-				+ "}\n"),
-				new ExampleScript("With default condition", "switch('noMatch'){\n"
-				+ "\tcase 'notIt1':\n"
-				+ "\t\tmsg('Nope');\n"
-				+ "\t\tbreak();\n"
-				+ "\tcase 'notIt2':\n"
-				+ "\t\tmsg('Nope');\n"
-				+ "\t\tbreak();\n"
-				+ "\tdefault:\n"
-				+ "\t\tmsg('Success');\n"
-				+ "\t\tbreak();\n"
-				+ "}"),
-				new ExampleScript("With slices", "switch(5){\n"
-				+ "\tcase 1..2:\n"
-				+ "\t\tmsg('First');\n"
-				+ "\t\tbreak();\n"
-				+ "\tcase 3..5:\n"
-				+ "\t\tmsg('Second');\n"
-				+ "\t\tbreak();\n"
-				+ "\tcase 6..8:\n"
-				+ "\t\tmsg('Third');\n"
-				+ "\t\tbreak();\n"
-				+ "}"),
-				new ExampleScript("Functional usage", "switch('theValue',\n"
-				+ "\t'notTheValue',\n"
-				+ "\t\tmsg('Nope'),\n"
-				+ "\t'theValue',\n"
-				+ "\t\tmsg('Success')\n"
-				+ ")"),
-				new ExampleScript("With multiple matches using an array", "switch('string',\n"
-				+ "\tarray('value1', 'value2', 'string'),\n"
-				+ "\t\tmsg('Match'),\n"
-				+ "\t'value3',\n"
-				+ "\t\tmsg('No match')\n"
-				+ ")"),
-				new ExampleScript("With slices in an array", "switch(5,\n"
-				+ "\tarray(1..2, 3..5),\n"
-				+ "\t\tmsg('First'),\n"
-				+ "\t6..8,\n"
-				+ "\t\tmsg('Second')\n"
-				+ ")")};
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() > 1 && children.get(1).getData() instanceof CFunction
-					&& new StringHandling.sconcat().getName().equals(children.get(1).getData().val())) {
-				//This is the brace/case/default usage of switch, probably. We need
-				//to refactor the data into the old switch format.
-				List<ParseTree> newChildren = new ArrayList<>();
-				newChildren.add(children.get(0)); //Initial child
-				List<ParseTree> c = children.get(1).getChildren();
-				List<ParseTree> lastCodeBlock = new ArrayList<>();
-				CArray conditions = new CArray(t);
-				boolean inCase = false;
-				boolean inDefault = false;
-				for(int i = 0; i < c.size(); i++) {
-					//Need up to a 2 lookahead
-					ParseTree c1 = c.get(i);
-					ParseTree c2 = null;
-					if(i + 1 < c.size()) {
-						c2 = c.get(i + 1);
-					}
-					if(CKeyword.isKeyword(c1, "case")) {
-						//If this is a case AND the next one is
-						//a label, this is a case.
-						if(c2 != null && c2.getData() instanceof CLabel) {
-							if(inDefault) {
-								//Default must come last
-								throw new ConfigCompileException("Unexpected case; the default case must come last.", t);
-							}
-							if(lastCodeBlock.size() > 0) {
-								//Ok, need to push some stuff on to the new children
-								newChildren.add(new ParseTree(conditions, c2.getFileOptions()));
-								conditions = new CArray(t);
-								ParseTree codeBlock = new ParseTree(new CFunction(new StringHandling.sconcat().getName(), t), c2.getFileOptions());
-								for(ParseTree line : lastCodeBlock) {
-									codeBlock.addChild(line);
-								}
-								if(codeBlock.getChildren().size() == 1) {
-									codeBlock = codeBlock.getChildAt(0);
-								}
-								newChildren.add(codeBlock);
-								lastCodeBlock = new ArrayList<>();
-							}
-							//Yes, it is. Now we also have to look ahead for
-							//other cases, because
-							//case 1:
-							//case 2:
-							//	code()
-							//would be turned into array(1, 2), code() in the
-							//old style.
-							conditions.push(((CLabel) c2.getData()).cVal(), t);
-							inCase = true;
-							i++;
-							continue;
-						}
-					}
-					if(c1.getData() instanceof CLabel && CKeyword.isKeyword(((CLabel) c1.getData()).cVal(), "default")) {
-						//Default case
-						if(lastCodeBlock.size() > 0) {
-							//Ok, need to push some stuff on to the new children
-							newChildren.add(new ParseTree(conditions, c1.getFileOptions()));
-							conditions = new CArray(t);
-							ParseTree codeBlock = new ParseTree(new CFunction(new StringHandling.sconcat().getName(), t), c1.getFileOptions());
-							for(ParseTree line : lastCodeBlock) {
-								codeBlock.addChild(line);
-							}
-							if(codeBlock.getChildren().size() == 1) {
-								codeBlock = codeBlock.getChildAt(0);
-							}
-							newChildren.add(codeBlock);
-							lastCodeBlock = new ArrayList<>();
-						} else if(conditions.size() > 0) {
-							//Special case where they have
-							//case 0:
-							//default:
-							//	code();
-							//This causes there to be conditions, but no code,
-							//which throws off the argument length. In actuality,
-							//we can simply throw out the conditions, because
-							//this block of code will run if 0 or the default is
-							//hit, and if 0 is the condition provided, it would
-							//work the same if it weren't specified at all.
-							conditions = new CArray(t);
-						}
-						inDefault = true;
-						continue;
-					}
-
-					//Loop forward until we get to the next case
-					if(inCase || inDefault) {
-						lastCodeBlock.add(c1);
-					}
-				}
-				if(conditions.size() > 0) {
-					newChildren.add(new ParseTree(conditions, children.get(0).getFileOptions()));
-				}
-				if(lastCodeBlock.size() > 0) {
-					ParseTree codeBlock = new ParseTree(new CFunction(new StringHandling.sconcat().getName(), t), lastCodeBlock.get(0).getFileOptions());
-					for(ParseTree line : lastCodeBlock) {
-						codeBlock.addChild(line);
-					}
-					if(codeBlock.getChildren().size() == 1) {
-						codeBlock = codeBlock.getChildAt(0);
-					}
-					newChildren.add(codeBlock);
-				}
-				children.clear();
-				children.addAll(newChildren);
-			}
-
-			//Loop through all the conditions and make sure each is unique. Also
-			//make sure that each value is not dynamic.
-			String notConstant = "Cases for a switch statement must be constant, not variable";
-			String alreadyContains = "The switch statement already contains a case for this value, remove the duplicate value";
-			final equals equals = new equals();
-			Set<Construct> values = new TreeSet<>(new Comparator<Construct>() {
-
-				@Override
-				public int compare(Construct t, Construct t1) {
-					if(equals.exec(Target.UNKNOWN, null, t, t1).getBoolean()) {
-						return 0;
-					} else {
-						return t.val().compareTo(t1.val());
-					}
-				}
-			});
-			final boolean hasDefaultCase = (children.size() & 0b00000001) == 0; // size % 2 == 0 -> Even number means there is a default.
-			for(int i = 1; i < children.size(); i += 2) {
-				if(hasDefaultCase && i == children.size() - 1) {
-					// This is the default case code. Stop checking here.
-					break;
-				}
-				//To standardize the rest of the code (and to optimize), go ahead and resolve array()
-				if(children.get(i).getData() instanceof CFunction
-						&& new DataHandling.array().getName().equals(children.get(i).getData().val())) {
-					CArray data = new CArray(t);
-					for(ParseTree child : children.get(i).getChildren()) {
-						if(child.getData().isDynamic()) {
-							throw new ConfigCompileException(notConstant, child.getTarget());
-						}
-						data.push(child.getData(), t);
-					}
-					children.set(i, new ParseTree(data, children.get(i).getFileOptions()));
-				}
-				//Now we validate that the values are constant and non-repeating.
-				if(children.get(i).getData() instanceof CArray) {
-					List<Construct> list = ((CArray) children.get(i).getData()).asList();
-					for(Construct c : list) {
-						if(c instanceof CSlice) {
-							for(Construct cc : ((CSlice) c).asList()) {
-								if(values.contains(cc)) {
-									throw new ConfigCompileException(alreadyContains, cc.getTarget());
-								}
-								values.add(cc);
-							}
-						} else {
-							if(c.isDynamic()) {
-								throw new ConfigCompileException(notConstant, c.getTarget());
-							}
-							if(values.contains(c)) {
-								throw new ConfigCompileException(alreadyContains, c.getTarget());
-							}
-							values.add(c);
-						}
-					}
-				} else {
-					Construct c = children.get(i).getData();
-					if(c.isDynamic()) {
-						throw new ConfigCompileException(notConstant, c.getTarget());
-					}
-					if(values.contains(c)) {
-						throw new ConfigCompileException(alreadyContains, c.getTarget());
-					}
-					values.add(c);
-				}
-			}
-
-			if((children.size() > 3 || (children.size() > 1 && children.get(1).getData() instanceof CArray))
-					//No point in doing this optimization if there are only 3 args and the case is flat.
-					//Also, doing this check prevents an inifinite loop during optimization.
-					&& (children.size() > 0 && !children.get(0).getData().isDynamic())) {
-				ParseTree toReturn = null;
-				//The item passed in is constant (or has otherwise been made constant)
-				//so we can go ahead and condense this down to the single code path
-				//in the switch.
-				for(int i = 1; i < children.size(); i += 2) {
-					Construct data = children.get(i).getData();
-
-					if(!(data instanceof CArray) || data instanceof CSlice) {
-						//Put it in an array to make the rest of this parsing easier.
-						data = new CArray(t);
-						((CArray) data).push(children.get(i).getData(), t);
-					}
-					for(Construct value : ((CArray) data).asList()) {
-						if(value instanceof CSlice) {
-							long rangeLeft = ((CSlice) value).getStart();
-							long rangeRight = ((CSlice) value).getFinish();
-							if(children.get(0).getData() instanceof CInt) {
-								long v = Static.getInt(children.get(0).getData(), t);
-								if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
-										|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
-										|| (rangeLeft == rangeRight && v == rangeLeft)) {
-									toReturn = children.get(i + 1);
-									break;
-								}
-							}
-						} else if(equals.exec(t, null, children.get(0).getData(), value).getBoolean()) {
-							toReturn = children.get(i + 1);
-							break;
-						}
-					}
-				}
-				//None of the values match. Return the default case, if it exists, or remove the switch entirely
-				//if it doesn't.
-				if(toReturn == null) {
-					if(children.size() % 2 == 0) {
-						toReturn = children.get(children.size() - 1);
-					} else {
-						return Optimizable.REMOVE_ME;
-					}
-				}
-				//Unfortunately, we can't totally remove this, because otherwise break()s in the code
-				//will go unchecked, so we need to keep switch in the code somehow. To make it easy though,
-				//we'll make the most efficient switch we can.
-				ParseTree ret = new ParseTree(new CFunction(new _switch().getName(), t), fileOptions);
-				ret.addChild(new ParseTree(new CInt(1, t), fileOptions));
-				ret.addChild(new ParseTree(new CInt(1, t), fileOptions));
-				ret.addChild(toReturn);
-				return ret;
-			}
-			return null;
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC, OptimizationOption.PRIORITY_OPTIMIZATION);
-		}
 	}
 
 	@api
@@ -753,7 +59,7 @@ public class BasicLogic {
 		 * @param two
 		 * @return
 		 */
-		public static boolean doEquals(Construct one, Construct two) {
+		public static boolean doEquals(Mixed one, Mixed two) {
 			CBoolean ret = SELF.exec(Target.UNKNOWN, null, one, two);
 			return ret.getBoolean();
 		}
@@ -769,7 +75,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length <= 1) {
 				throw new CREInsufficientArgumentsException("At least two arguments must be passed to equals", t);
 			}
@@ -785,7 +91,7 @@ public class BasicLogic {
 			}
 			if(Static.anyNulls(args)) {
 				boolean equals = true;
-				for(Construct c : args) {
+				for(Mixed c : args) {
 					if(!(c instanceof CNull)) {
 						equals = false;
 					}
@@ -795,8 +101,8 @@ public class BasicLogic {
 			if(Static.anyBooleans(args)) {
 				boolean equals = true;
 				for(int i = 1; i < args.length; i++) {
-					boolean arg1 = Static.getBoolean(args[i - 1], t);
-					boolean arg2 = Static.getBoolean(args[i], t);
+					boolean arg1 = ArgumentValidation.getBoolean(args[i - 1], t);
+					boolean arg2 = ArgumentValidation.getBoolean(args[i], t);
 					if(arg1 != arg2) {
 						equals = false;
 						break;
@@ -855,8 +161,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -918,8 +224,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -928,12 +234,12 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
 			if(args[1].typeof().equals(args[0].typeof())) {
-				if(args[0] instanceof CString && args[1] instanceof CString) {
+				if(args[0].isInstanceOf(CString.class) && args[1].isInstanceOf(CString.class)) {
 					// Check for actual string equality, so we don't do type massaging
 					// for numeric strings. Thus '2' !== '2.0'
 					return CBoolean.get(args[0].val().equals(args[1].val()));
@@ -997,13 +303,13 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new sequals().exec(t, environment, args).not();
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1056,8 +362,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -1066,7 +372,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new equals().exec(t, env, args).not();
 		}
 
@@ -1118,8 +424,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_2_0;
+		public MSVersion since() {
+			return MSVersion.V3_2_0;
 		}
 
 		@Override
@@ -1128,15 +434,15 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args.length <= 1) {
 				throw new CREInsufficientArgumentsException("At least two arguments must be passed to equals_ic", t);
 			}
 			if(Static.anyBooleans(args)) {
 				boolean equals = true;
 				for(int i = 1; i < args.length; i++) {
-					boolean arg1 = Static.getBoolean(args[i - 1], t);
-					boolean arg2 = Static.getBoolean(args[i], t);
+					boolean arg1 = ArgumentValidation.getBoolean(args[i - 1], t);
+					boolean arg2 = ArgumentValidation.getBoolean(args[i], t);
 					if(arg1 != arg2) {
 						equals = false;
 						break;
@@ -1214,9 +520,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			Construct v1 = args[0];
-			Construct v2 = args[1];
+		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			Mixed v1 = args[0];
+			Mixed v2 = args[1];
 			if(!v2.getClass().equals(v1.getClass())) {
 				return CBoolean.FALSE;
 			}
@@ -1242,7 +548,7 @@ public class BasicLogic {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1295,8 +601,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -1305,7 +611,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new equals_ic().exec(t, environment, args).not();
 		}
 
@@ -1344,8 +650,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CArray && args[1] instanceof CArray) {
+		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CArray.class) && args[1].isInstanceOf(CArray.class)) {
 				return CBoolean.get(args[0] == args[1]);
 			} else {
 				return new equals().exec(t, environment, args);
@@ -1370,8 +676,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -1407,7 +713,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -1433,8 +739,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -1474,7 +780,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -1500,8 +806,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -1541,7 +847,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -1567,8 +873,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -1609,7 +915,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -1635,8 +941,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -1676,11 +982,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Construct... args) {
+		public CBoolean exec(Target t, Environment env, Mixed... args) {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
-			for(Construct c : args) {
-				if(!Static.getBoolean(c, t)) {
+			for(Mixed c : args) {
+				if(!ArgumentValidation.getBoolean(c, t)) {
 					return CBoolean.FALSE;
 				}
 			}
@@ -1690,8 +996,8 @@ public class BasicLogic {
 		@Override
 		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for(ParseTree tree : nodes) {
-				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				boolean b = Static.getBoolean(c, t);
+				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
+				boolean b = ArgumentValidation.getBoolean(c, t);
 				if(b == false) {
 					return CBoolean.FALSE;
 				}
@@ -1717,8 +1023,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -1732,7 +1038,10 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, getName());
 			Iterator<ParseTree> it = children.iterator();
 			boolean foundFalse = false;
@@ -1748,7 +1057,7 @@ public class BasicLogic {
 					continue;
 				}
 				if(child.isConst()) {
-					if(Static.getBoolean(child.getData(), t) == true) {
+					if(ArgumentValidation.getBoolean(child.getData(), t) == true) {
 						it.remove();
 					} else {
 						foundFalse = true;
@@ -1762,7 +1071,7 @@ public class BasicLogic {
 //				//However, we can remove any functions that have no side effects that come before the false.
 //				it = children.iterator();
 //				while(it.hasNext()){
-//					Construct data = it.next().getData();
+//					Mixed data = it.next().getData();
 //					if(data instanceof CFunction && ((CFunction)data).getFunction() instanceof Optimizable){
 //						if(((Optimizable)((CFunction)data).getFunction()).optimizationOptions().contains(OptimizationOption.NO_SIDE_EFFECTS)){
 //							it.remove();
@@ -1772,7 +1081,7 @@ public class BasicLogic {
 //			}
 			// At this point, it could be that there are some conditions with side effects, followed by a final false. However,
 			// if false is the only remaining condition (which could be) then we can simply return false here.
-			if(children.size() == 1 && children.get(0).isConst() && Static.getBoolean(children.get(0).getData(), t) == false) {
+			if(children.size() == 1 && children.get(0).isConst() && ArgumentValidation.getBoolean(children.get(0).getData(), t) == false) {
 				return new ParseTree(CBoolean.FALSE, fileOptions);
 			}
 			if(children.isEmpty()) {
@@ -1821,15 +1130,15 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for(ParseTree tree : nodes) {
-				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if(!Static.getBoolean(c, t)) {
+				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
+				if(!ArgumentValidation.getBoolean(c, t)) {
 					return c;
 				}
 			}
@@ -1837,7 +1146,10 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, getName());
 			Iterator<ParseTree> it = children.iterator();
 			boolean foundFalse = false;
@@ -1853,7 +1165,7 @@ public class BasicLogic {
 					continue;
 				}
 				if(child.isConst()) {
-					if(Static.getBoolean(child.getData(), t) == true) {
+					if(ArgumentValidation.getBoolean(child.getData(), t) == true) {
 						it.remove();
 					} else {
 						foundFalse = true;
@@ -1867,7 +1179,7 @@ public class BasicLogic {
 //				//However, we can remove any functions that have no side effects that come before the false.
 //				it = children.iterator();
 //				while(it.hasNext()){
-//					Construct data = it.next().getData();
+//					Mixed data = it.next().getData();
 //					if(data instanceof CFunction && ((CFunction)data).getFunction() instanceof Optimizable){
 //						if(((Optimizable)((CFunction)data).getFunction()).optimizationOptions().contains(OptimizationOption.NO_SIDE_EFFECTS)){
 //							it.remove();
@@ -1877,7 +1189,7 @@ public class BasicLogic {
 //			}
 			// At this point, it could be that there are some conditions with side effects, followed by a final false. However,
 			// if false is the only remaining condition (which could be) then we can simply return false here.
-			if(children.size() == 1 && children.get(0).isConst() && Static.getBoolean(children.get(0).getData(), t) == false) {
+			if(children.size() == 1 && children.get(0).isConst() && ArgumentValidation.getBoolean(children.get(0).getData(), t) == false) {
 				return new ParseTree(children.get(0).getData(), fileOptions);
 			}
 			if(children.isEmpty()) {
@@ -1907,7 +1219,7 @@ public class BasicLogic {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -1932,11 +1244,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment env, Construct... args) {
+		public CBoolean exec(Target t, Environment env, Mixed... args) {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handle it appropriately.
-			for(Construct c : args) {
-				if(Static.getBoolean(c, t)) {
+			for(Mixed c : args) {
+				if(ArgumentValidation.getBoolean(c, t)) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -1946,8 +1258,8 @@ public class BasicLogic {
 		@Override
 		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for(ParseTree tree : nodes) {
-				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if(Static.getBoolean(c, t)) {
+				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
+				if(ArgumentValidation.getBoolean(c, t)) {
 					return CBoolean.TRUE;
 				}
 			}
@@ -1972,8 +1284,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -1987,7 +1299,10 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, getName());
 			Iterator<ParseTree> it = children.iterator();
 			boolean foundTrue = false;
@@ -2003,7 +1318,10 @@ public class BasicLogic {
 					continue;
 				}
 				if(child.isConst()) {
-					if(Static.getBoolean(child.getData(), t) == false) {
+					if(child.getData() instanceof CSymbol) {
+						throw new ConfigCompileException("Unexpected symbol: \"" + child.getData().val() + "\"", t);
+					}
+					if(ArgumentValidation.getBoolean(child.getData(), t) == false) {
 						it.remove();
 					} else {
 						foundTrue = true;
@@ -2017,7 +1335,7 @@ public class BasicLogic {
 //				//However, we can remove any functions that have no side effects that come before the true.
 //				it = children.iterator();
 //				while(it.hasNext()){
-//					Construct data = it.next().getData();
+//					Mixed data = it.next().getData();
 //					if(data instanceof CFunction && ((CFunction)data).getFunction() instanceof Optimizable){
 //						if(((Optimizable)((CFunction)data).getFunction()).optimizationOptions().contains(OptimizationOption.NO_SIDE_EFFECTS)){
 //							it.remove();
@@ -2027,7 +1345,7 @@ public class BasicLogic {
 //			}
 			// At this point, it could be that there are some conditions with side effects, followed by a final true. However,
 			// if true is the only remaining condition (which could be) then we can simply return true here.
-			if(children.size() == 1 && children.get(0).isConst() && Static.getBoolean(children.get(0).getData(), t) == true) {
+			if(children.size() == 1 && children.get(0).isConst() && ArgumentValidation.getBoolean(children.get(0).getData(), t) == true) {
 				return new ParseTree(CBoolean.TRUE, fileOptions);
 			}
 			if(children.isEmpty()) {
@@ -2076,15 +1394,15 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for(ParseTree tree : nodes) {
-				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if(Static.getBoolean(c, t)) {
+				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
+				if(ArgumentValidation.getBoolean(c, t)) {
 					return c;
 				}
 			}
@@ -2092,7 +1410,10 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, getName());
 			Iterator<ParseTree> it = children.iterator();
 			boolean foundTrue = false;
@@ -2108,7 +1429,7 @@ public class BasicLogic {
 					continue;
 				}
 				if(child.isConst()) {
-					if(Static.getBoolean(child.getData(), t) == false) {
+					if(ArgumentValidation.getBoolean(child.getData(), t) == false) {
 						it.remove();
 					} else {
 						foundTrue = true;
@@ -2122,7 +1443,7 @@ public class BasicLogic {
 //				//However, we can remove any functions that have no side effects that come before the true.
 //				it = children.iterator();
 //				while(it.hasNext()){
-//					Construct data = it.next().getData();
+//					Mixed data = it.next().getData();
 //					if(data instanceof CFunction && ((CFunction)data).getFunction() instanceof Optimizable){
 //						if(((Optimizable)((CFunction)data).getFunction()).optimizationOptions().contains(OptimizationOption.NO_SIDE_EFFECTS)){
 //							it.remove();
@@ -2132,7 +1453,7 @@ public class BasicLogic {
 //			}
 			// At this point, it could be that there are some conditions with side effects, followed by a final true. However,
 			// if true is the only remaining condition (which could be) then we can simply return true here.
-			if(children.size() == 1 && children.get(0).isConst() && Static.getBoolean(children.get(0).getData(), t) == true) {
+			if(children.size() == 1 && children.get(0).isConst() && ArgumentValidation.getBoolean(children.get(0).getData(), t) == true) {
 				return new ParseTree(children.get(0).getData(), fileOptions);
 			}
 			if(children.isEmpty()) {
@@ -2162,7 +1483,7 @@ public class BasicLogic {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_2;
+			return MSVersion.V3_3_2;
 		}
 
 		@Override
@@ -2194,11 +1515,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args.length != 1) {
 				throw new CREFormatException(this.getName() + " expects 1 argument.", t);
 			}
-			return CBoolean.get(!Static.getBoolean(args[0], t));
+			return CBoolean.get(!ArgumentValidation.getBoolean(args[0], t));
 		}
 
 		@Override
@@ -2217,8 +1538,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_0_1;
+		public MSVersion since() {
+			return MSVersion.V3_0_1;
 		}
 
 		@Override
@@ -2273,8 +1594,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2283,12 +1604,12 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			boolean val1 = Static.getBoolean(args[0], t);
-			boolean val2 = Static.getBoolean(args[1], t);
+			boolean val1 = ArgumentValidation.getBoolean(args[0], t);
+			boolean val2 = ArgumentValidation.getBoolean(args[1], t);
 			return CBoolean.get(val1 ^ val2);
 		}
 
@@ -2341,8 +1662,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2351,7 +1672,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) {
 			return CNull.NULL;
 		}
 
@@ -2402,8 +1723,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2412,7 +1733,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) {
+		public Mixed exec(Target t, Environment environment, Mixed... args) {
 			return CNull.NULL;
 		}
 
@@ -2463,8 +1784,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2473,7 +1794,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -2528,8 +1849,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2538,7 +1859,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREFormatException(this.getName() + " expects at least 2 arguments.", t);
 			}
@@ -2567,7 +1888,10 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 2) {
 				throw new ConfigCompileException("bit_and() requires at least 2 arguments.", t);
 			}
@@ -2604,8 +1928,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2614,7 +1938,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREFormatException(this.getName() + " expects at least 2 arguments.", t);
 			}
@@ -2645,7 +1969,10 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 2) {
 				throw new ConfigCompileException("bit_or() requires at least 2 arguments.", t);
 			}
@@ -2682,8 +2009,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
+		public MSVersion since() {
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -2692,7 +2019,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREFormatException(this.getName() + " expects at least 2 arguments.", t);
 			}
@@ -2719,7 +2046,10 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 2) {
 				throw new ConfigCompileException("bit_xor() requires at least 2 arguments.", t);
 			}
@@ -2756,8 +2086,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2766,7 +2096,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 1) {
 				throw new CREFormatException(this.getName() + " expects 1 argument.", t);
 			}
@@ -2817,8 +2147,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2827,7 +2157,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -2880,8 +2210,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2890,7 +2220,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -2945,8 +2275,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CHVersion since() {
-			return CHVersion.V3_3_0;
+		public MSVersion since() {
+			return MSVersion.V3_3_0;
 		}
 
 		@Override
@@ -2955,7 +2285,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
@@ -2999,7 +2329,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
 		}
 
@@ -3022,7 +2352,7 @@ public class BasicLogic {
 
 		@Override
 		public Version since() {
-			return CHVersion.V3_3_1;
+			return MSVersion.V3_3_1;
 		}
 
 		@Override
@@ -3031,7 +2361,10 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.isEmpty()) {
 				throw new CREFormatException(this.getName() + " expects at least 1 argument.", t);
 			}
@@ -3047,6 +2380,62 @@ public class BasicLogic {
 				throw new CREFormatException(this.getName() + " expects at least 1 argument.", t);
 			}
 			throw new ConfigCompileException(children.get(0).getData().val(), t);
+		}
+
+	}
+
+	@api
+	public static class hash extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			return new CInt(args[0].hashCode(), t);
+		}
+
+		@Override
+		public String getName() {
+			return "hash";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "int {value} Hashes the value, and returns an int representing that value.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_3;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[] {
+				new ExampleScript("", "hash(1);"),
+				new ExampleScript("", "hash(2);"),
+				new ExampleScript("", "hash(3);"),
+				new ExampleScript("", "hash('Hello World!');"),
+				new ExampleScript("", "hash(array(1, 2, 3));")
+			};
 		}
 
 	}

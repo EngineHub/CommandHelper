@@ -63,7 +63,7 @@ public class StreamUtils {
 			encoding = "UTF-8";
 		}
 		if(in == null) {
-			throw new NullPointerException();
+			throw new NullPointerException("InputStream is null");
 		}
 		InputStreamReader input;
 		input = new InputStreamReader(new BufferedInputStream(in), encoding);
@@ -85,6 +85,7 @@ public class StreamUtils {
 
 	/**
 	 * Fully reads in a stream, as efficiently as possible, and returns a byte array.
+	 * The input stream is not closed afterwards.
 	 *
 	 * @param in
 	 * @return
@@ -92,7 +93,7 @@ public class StreamUtils {
 	 */
 	public static byte[] GetBytes(InputStream in) throws IOException {
 		BufferedInputStream bis = new BufferedInputStream(in);
-		List<Byte> bytes = new ArrayList<Byte>();
+		List<Byte> bytes = new ArrayList<>();
 		int i;
 		while((i = bis.read()) != -1) {
 			bytes.add(((byte) i));
@@ -149,6 +150,39 @@ public class StreamUtils {
 	public static PrintStream GetSystemErr() {
 		try {
 			return new PrintStream(System.err, true, "UTF-8");
+		} catch (UnsupportedEncodingException ex) {
+			throw new Error(ex);
+		}
+	}
+
+	/**
+	 * Gets a resource string with the specified encoding, relative to the class that is calling this method.
+	 * @param name The name of the resource. The name should follow the same naming conventions used by
+	 * {@link Class#getResource(java.lang.String)}.
+	 * @param encoding The encoding to use on the resource.
+	 * @return A string depiction of the specified resource.
+	 * @throws java.io.UnsupportedEncodingException If the encoding is not supported.
+	 * @throws java.lang.IllegalArgumentException If the resource was not found.
+	 */
+	public static final String GetResource(String name, String encoding) throws UnsupportedEncodingException,
+			IllegalArgumentException {
+		InputStream is = StackTraceUtils.getCallingClass().getResourceAsStream(name);
+		if(is == null) {
+			throw new IllegalArgumentException("Could not find resource " + name);
+		}
+		return GetString(is, encoding);
+	}
+
+	/**
+	 * Gets a resource as a UTF-8 encoded string, relative to the class that is calling this method.
+	 * @param name The name of the resource. The name should follow the same naming conventions used by
+	 * {@link Class#getResource(java.lang.String)}.
+	 * @return A string depiction of the specified resource.
+	 * @throws java.lang.IllegalArgumentException If the resource was not found.
+	 */
+	public static final String GetResource(String name) throws IllegalArgumentException {
+		try {
+			return GetResource(name, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
