@@ -1,8 +1,8 @@
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -30,11 +30,13 @@ import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.Driver;
+import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.ArrayList;
@@ -464,7 +466,30 @@ public class ServerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
-			throw new UnsupportedOperationException("Not supported yet.");
+
+			// Get the player recipients.
+			Mixed cRecipients = manualObject.get("player_recipients", t);
+			if(!(cRecipients instanceof CArray) && !(cRecipients instanceof CNull)) {
+				throw new CRECastException("Expected player_recepients to be an array, but received: "
+						+ cRecipients.typeof().toString(), t);
+			}
+			Set<MCCommandSender> recipients = new HashSet<>();
+			CArray recipientsArray = (CArray) cRecipients;
+			for(int i = 0; i < recipientsArray.size(); i++) {
+				MCPlayer player = Static.GetPlayer(recipientsArray.get(i, t), t);
+				recipients.add(player);
+			}
+
+			// Get the message.
+			Mixed cMessage = manualObject.get("message", t);
+			if(!(cMessage instanceof CString)) {
+				throw new CRECastException("Expected message to be a string, but received: "
+						+ cMessage.typeof().toString(), t);
+			}
+
+			// Instantiate and return the event.
+			return EventBuilder.instantiate(MCBroadcastMessageEvent.class,
+					Construct.nval((CString) cMessage), recipients);
 		}
 
 		@Override
