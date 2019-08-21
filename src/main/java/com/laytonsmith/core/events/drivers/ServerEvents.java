@@ -468,7 +468,7 @@ public class ServerEvents {
 		public BindableEvent convert(CArray manualObject, Target t) {
 
 			// Get the player recipients.
-			Construct cRecipients = manualObject.get("player_recipients", t);
+			Mixed cRecipients = manualObject.get("player_recipients", t);
 			if(!(cRecipients instanceof CArray) && !(cRecipients instanceof CNull)) {
 				throw new CRECastException("Expected player_recepients to be an array, but received: "
 						+ cRecipients.typeof().toString(), t);
@@ -481,7 +481,7 @@ public class ServerEvents {
 			}
 
 			// Get the message.
-			Construct cMessage = manualObject.get("message", t);
+			Mixed cMessage = manualObject.get("message", t);
 			if(!(cMessage instanceof CString)) {
 				throw new CRECastException("Expected message to be a string, but received: "
 						+ cMessage.typeof().toString(), t);
@@ -489,7 +489,7 @@ public class ServerEvents {
 
 			// Instantiate and return the event.
 			return EventBuilder.instantiate(MCBroadcastMessageEvent.class,
-					((CString) cMessage).nval(), recipients);
+					Construct.nval((CString) cMessage), recipients);
 		}
 
 		@Override

@@ -5,7 +5,6 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
-import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
