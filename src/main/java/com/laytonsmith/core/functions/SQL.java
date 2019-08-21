@@ -150,7 +150,7 @@ public class SQL {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
 				Profiles.Profile profile;
-				if(args[0].isInstanceOf(CArray.class)) {
+				if(args[0].isInstanceOf(CArray.TYPE)) {
 					Map<String, String> data = new HashMap<>();
 					for(String key : ((CArray) args[0]).stringKeySet()) {
 						data.put(key, ((CArray) args[0]).get(key, t).val());
@@ -195,15 +195,15 @@ public class SQL {
 							continue;
 						}
 						try {
-							if(params[i].isInstanceOf(CInt.class)) {
+							if(params[i].isInstanceOf(CInt.TYPE)) {
 								ps.setLong(i + 1, Static.getInt(params[i], t));
-							} else if(params[i].isInstanceOf(CDouble.class)) {
+							} else if(params[i].isInstanceOf(CDouble.TYPE)) {
 								ps.setDouble(i + 1, (Double) Static.getDouble(params[i], t));
-							} else if(params[i].isInstanceOf(CString.class)) {
+							} else if(params[i].isInstanceOf(CString.TYPE)) {
 								ps.setString(i + 1, (String) params[i].val());
-							} else if(params[i].isInstanceOf(CByteArray.class)) {
+							} else if(params[i].isInstanceOf(CByteArray.TYPE)) {
 								ps.setBytes(i + 1, ((CByteArray) params[i]).asByteArrayCopy());
-							} else if(params[i].isInstanceOf(CBoolean.class)) {
+							} else if(params[i].isInstanceOf(CBoolean.TYPE)) {
 								ps.setBoolean(i + 1, ArgumentValidation.getBoolean(params[i], t));
 							} else {
 								throw new CRECastException("The type " + params[i].getClass().getSimpleName()
@@ -329,7 +329,7 @@ public class SQL {
 							+ " must use concatenation, and you promise you know what you're doing, you"
 							+ " can use " + new unsafe_query().getName() + "() to supress this warning.", t);
 				}
-			} else if(queryData.isInstanceOf(CString.class)) {
+			} else if(queryData.isInstanceOf(CString.TYPE)) {
 				//It's a hard coded query, so we can double check parameter lengths and other things
 				String query = queryData.val();
 				int count = 0;
@@ -350,7 +350,7 @@ public class SQL {
 				//Profile validation will simply ensure that the profile stated is listed in the profiles,
 				//and that a connection can in fact be made.
 				//Also need to figure out how to validate a prepared statement.
-//				if(children.get(0).isConst() && children.get(0).getData().isInstanceOf(CString.class)){
+//				if(children.get(0).isConst() && children.get(0).getData().isInstanceOf(CString.TYPE)){
 //					if(true){ //Prefs.verifyQueries()
 //						String profileName = children.get(0).getData().val();
 //						SQLProfiles.Profile profile = null;
@@ -481,7 +481,7 @@ public class SQL {
 		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			startup();
 			Mixed arg = args[args.length - 1];
-			if(!(arg.isInstanceOf(CClosure.class))) {
+			if(!(arg.isInstanceOf(CClosure.TYPE))) {
 				throw new CRECastException("The last argument to " + getName() + " must be a closure.", t);
 			}
 			final CClosure closure = ((CClosure) arg);

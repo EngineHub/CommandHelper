@@ -979,7 +979,7 @@ public class Cmdline {
 			final CClosure stderr;
 			final CClosure exit;
 			final boolean subshell;
-			if(args[0].isInstanceOf(CArray.class)) {
+			if(args[0].isInstanceOf(CArray.TYPE)) {
 				CArray array = (CArray) args[0];
 				command = new String[(int) array.size()];
 				for(int i = 0; i < array.size(); i++) {
@@ -1178,7 +1178,7 @@ public class Cmdline {
 			String[] command;
 			int expectedExitCode = 0;
 			File workingDir = null;
-			if(args[0].isInstanceOf(CArray.class)) {
+			if(args[0].isInstanceOf(CArray.TYPE)) {
 				CArray array = (CArray) args[0];
 				command = new String[(int) array.size()];
 				for(int i = 0; i < array.size(); i++) {
@@ -1748,7 +1748,7 @@ public class Cmdline {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			requireCmdlineMode(environment, this, t);
-			if(!(args[0].isInstanceOf(CClosure.class))) {
+			if(!(args[0].isInstanceOf(CClosure.TYPE))) {
 				throw new CRECastException("Expecting a closure for argument 1 of " + getName(), t);
 			}
 			environment.getEnv(GlobalEnv.class).SetCustom("cmdline_prompt", args[0]);
@@ -1955,7 +1955,7 @@ public class Cmdline {
 			String startFrom = environment.getEnv(GlobalEnv.class).GetRootFolder().getAbsolutePath();
 			Set<FindType> findTypes = EnumSet.allOf(FindType.class);
 			if(args.length == 2) {
-				if(args[1].isInstanceOf(CArray.class)) {
+				if(args[1].isInstanceOf(CArray.TYPE)) {
 					findTypes = ArgumentValidation.getEnumSet(args[1], FindType.class, t);
 				} else {
 					startFrom = ArgumentValidation.getString(args[1], t);

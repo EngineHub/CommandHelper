@@ -222,12 +222,12 @@ public class BlockEvents {
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("type")) {
 				Mixed cid = prefilter.get("type");
-				if(cid.isInstanceOf(CInt.class)) {
+				if(cid.isInstanceOf(CInt.TYPE)) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("data")) {
 						Mixed cdata = prefilter.get("data");
-						if(cdata.isInstanceOf(CInt.class)) {
+						if(cdata.isInstanceOf(CInt.TYPE)) {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
@@ -301,7 +301,7 @@ public class BlockEvents {
 
 			if(key.equals("drops")) {
 				List<MCItemStack> drops = new ArrayList<>();
-				if(value.isInstanceOf(CArray.class)) {
+				if(value.isInstanceOf(CArray.TYPE)) {
 					CArray arr = (CArray) value;
 					for(int i = 0; i < arr.size(); i++) {
 						CArray item = Static.getArray(arr.get(i, value.getTarget()), value.getTarget());
@@ -316,7 +316,7 @@ public class BlockEvents {
 			}
 
 			if(key.equals("xp")) {
-				if(value.isInstanceOf(CInt.class)) {
+				if(value.isInstanceOf(CInt.TYPE)) {
 					int xp = Integer.parseInt(value.val());
 					event.setExpToDrop(xp);
 					return true;
@@ -368,12 +368,12 @@ public class BlockEvents {
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("type")) {
 				Mixed cid = prefilter.get("type");
-				if(cid.isInstanceOf(CInt.class)) {
+				if(cid.isInstanceOf(CInt.TYPE)) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("data")) {
 						Mixed cdata = prefilter.get("data");
-						if(cdata.isInstanceOf(CInt.class)) {
+						if(cdata.isInstanceOf(CInt.TYPE)) {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
@@ -463,7 +463,7 @@ public class BlockEvents {
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), value.getTarget());
 				return true;
 			} else if(key.equals("type")) {
-				if(value.isInstanceOf(CInt.class)) {
+				if(value.isInstanceOf(CInt.TYPE)) {
 					MCMaterial mat = StaticLayer.GetMaterialFromLegacy((int) ((CInt) value).getInt(), 0);
 					event.getBlock().setType(mat);
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Mutable data key \"type\" in " + getName()
@@ -517,12 +517,12 @@ public class BlockEvents {
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("type")) {
 				Mixed cid = prefilter.get("type");
-				if(cid.isInstanceOf(CInt.class)) {
+				if(cid.isInstanceOf(CInt.TYPE)) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("data")) {
 						Mixed cdata = prefilter.get("data");
-						if(cdata.isInstanceOf(CInt.class)) {
+						if(cdata.isInstanceOf(CInt.TYPE)) {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
@@ -703,12 +703,12 @@ public class BlockEvents {
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("type")) {
 				Mixed cid = prefilter.get("type");
-				if(cid.isInstanceOf(CInt.class)) {
+				if(cid.isInstanceOf(CInt.TYPE)) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("data")) {
 						Mixed cdata = prefilter.get("data");
-						if(cdata.isInstanceOf(CInt.class)) {
+						if(cdata.isInstanceOf(CInt.TYPE)) {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
@@ -728,12 +728,12 @@ public class BlockEvents {
 						+ " is deprecated for \"toblock\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("totype")) {
 				Mixed cid = prefilter.get("totype");
-				if(cid.isInstanceOf(CInt.class)) {
+				if(cid.isInstanceOf(CInt.TYPE)) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("todata")) {
 						Mixed cdata = prefilter.get("todata");
-						if(cdata.isInstanceOf(CInt.class)) {
+						if(cdata.isInstanceOf(CInt.TYPE)) {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
@@ -811,7 +811,7 @@ public class BlockEvents {
 			MCBlockFromToEvent e = (MCBlockFromToEvent) event;
 			if(key.equals("block")) {
 				MCBlock block = e.getBlock();
-				if(value.isInstanceOf(CArray.class)) {
+				if(value.isInstanceOf(CArray.TYPE)) {
 					CArray blockArray = (CArray) value;
 					if(blockArray.containsKey("name")) {
 						Mixed name = blockArray.get("name", value.getTarget());
@@ -867,7 +867,7 @@ public class BlockEvents {
 			}
 			if(key.equals("toblock")) {
 				MCBlock block = e.getToBlock();
-				if(value.isInstanceOf(CArray.class)) {
+				if(value.isInstanceOf(CArray.TYPE)) {
 					CArray blockArray = (CArray) value;
 					if(blockArray.containsKey("name")) {
 						Mixed name = blockArray.get("name", value.getTarget());
@@ -998,7 +998,7 @@ public class BlockEvents {
 
 			// Allow changing everything at once.
 			if(key.equals("text")) {
-				if(!(value.isInstanceOf(CArray.class))) {
+				if(!(value.isInstanceOf(CArray.TYPE))) {
 					return false;
 				}
 
@@ -1169,12 +1169,12 @@ public class BlockEvents {
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("oldtype")) {
 				Mixed cid = prefilter.get("oldtype");
-				if(cid.isInstanceOf(CInt.class)) {
+				if(cid.isInstanceOf(CInt.TYPE)) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("olddata")) {
 						Mixed cdata = prefilter.get("olddata");
-						if(cdata.isInstanceOf(CInt.class)) {
+						if(cdata.isInstanceOf(CInt.TYPE)) {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
@@ -1194,12 +1194,12 @@ public class BlockEvents {
 						+ " is deprecated for \"newblock\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("newtype")) {
 				Mixed cid = prefilter.get("newtype");
-				if(cid.isInstanceOf(CInt.class)) {
+				if(cid.isInstanceOf(CInt.TYPE)) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("newdata")) {
 						Mixed cdata = prefilter.get("newdata");
-						if(cdata.isInstanceOf(CInt.class)) {
+						if(cdata.isInstanceOf(CInt.TYPE)) {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
@@ -1383,7 +1383,7 @@ public class BlockEvents {
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("oldtype")) {
 				Mixed cid = prefilter.get("oldtype");
-				if(cid.isInstanceOf(CInt.class)) {
+				if(cid.isInstanceOf(CInt.TYPE)) {
 					int id = (int) ((CInt) cid).getInt();
 					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(id, 0);
 					if(mat == null) {

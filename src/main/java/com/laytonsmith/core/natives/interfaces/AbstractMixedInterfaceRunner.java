@@ -120,7 +120,7 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 	}
 
 	@Override
-	public boolean isInstanceOf(CClassType type) throws ClassNotFoundException {
+	public boolean isInstanceOf(CClassType type) {
 		return Construct.isInstanceof(this, type);
 	}
 

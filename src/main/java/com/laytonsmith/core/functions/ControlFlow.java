@@ -441,7 +441,7 @@ public class ControlFlow {
 					if(evalStatement instanceof CSlice) { //Can do more optimal handling for this Array subclass
 						long rangeLeft = ((CSlice) evalStatement).getStart();
 						long rangeRight = ((CSlice) evalStatement).getFinish();
-						if(value.isInstanceOf(CInt.class)) {
+						if(value.isInstanceOf(CInt.TYPE)) {
 							long v = Static.getInt(value, t);
 							if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
 									|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
@@ -449,13 +449,13 @@ public class ControlFlow {
 								return parent.seval(code, env);
 							}
 						}
-					} else if(evalStatement.isInstanceOf(CArray.class)) {
+					} else if(evalStatement.isInstanceOf(CArray.TYPE)) {
 						for(String index : ((CArray) evalStatement).stringKeySet()) {
 							Mixed inner = ((CArray) evalStatement).get(index, t);
 							if(inner instanceof CSlice) {
 								long rangeLeft = ((CSlice) inner).getStart();
 								long rangeRight = ((CSlice) inner).getFinish();
-								if(value.isInstanceOf(CInt.class)) {
+								if(value.isInstanceOf(CInt.TYPE)) {
 									long v = Static.getInt(value, t);
 									if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
 											|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
@@ -708,7 +708,7 @@ public class ControlFlow {
 					children.set(i, new ParseTree(data, children.get(i).getFileOptions()));
 				}
 				//Now we validate that the values are constant and non-repeating.
-				if(children.get(i).getData().isInstanceOf(CArray.class)) {
+				if(children.get(i).getData().isInstanceOf(CArray.TYPE)) {
 					List<Mixed> list = ((CArray) children.get(i).getData()).asList();
 					for(Mixed c : list) {
 						if(c instanceof CSlice) {
@@ -740,7 +740,7 @@ public class ControlFlow {
 				}
 			}
 
-			if((children.size() > 3 || (children.size() > 1 && children.get(1).getData().isInstanceOf(CArray.class)))
+			if((children.size() > 3 || (children.size() > 1 && children.get(1).getData().isInstanceOf(CArray.TYPE)))
 					//No point in doing this optimization if there are only 3 args and the case is flat.
 					//Also, doing this check prevents an inifinite loop during optimization.
 					&& (children.size() > 0 && !Construct.IsDynamicHelper(children.get(0).getData()))) {
@@ -751,7 +751,7 @@ public class ControlFlow {
 				for(int i = 1; i < children.size(); i += 2) {
 					Mixed data = children.get(i).getData();
 
-					if(!(data.isInstanceOf(CArray.class)) || data instanceof CSlice) {
+					if(!(data.isInstanceOf(CArray.TYPE)) || data instanceof CSlice) {
 						//Put it in an array to make the rest of this parsing easier.
 						data = new CArray(t);
 						((CArray) data).push(children.get(i).getData(), t);
@@ -760,7 +760,7 @@ public class ControlFlow {
 						if(value instanceof CSlice) {
 							long rangeLeft = ((CSlice) value).getStart();
 							long rangeRight = ((CSlice) value).getFinish();
-							if(children.get(0).getData().isInstanceOf(CInt.class)) {
+							if(children.get(0).getData().isInstanceOf(CInt.TYPE)) {
 								long v = Static.getInt(children.get(0).getData(), t);
 								if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
 										|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
@@ -1501,7 +1501,7 @@ public class ControlFlow {
 
 			Mixed data = parent.seval(array, env);
 
-			if(!(data.isInstanceOf(CArray.class)) && !(data instanceof CSlice)) {
+			if(!(data.isInstanceOf(CArray.TYPE)) && !(data instanceof CSlice)) {
 				throw new CRECastException(getName() + " expects an array for parameter 1", t);
 			}
 
@@ -1885,7 +1885,7 @@ public class ControlFlow {
 							+ " be hard coded, and should not be dynamically determinable, since this is always a sign"
 							+ " of loose code flow, which should be avoided.", t);
 				}
-				if(!(children.get(0).getData().isInstanceOf(CInt.class))) {
+				if(!(children.get(0).getData().isInstanceOf(CInt.TYPE))) {
 					throw new ConfigCompileException("break() only accepts integer values.", t);
 				}
 			}

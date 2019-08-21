@@ -85,7 +85,7 @@ public class Commands {
 		 * @param arg
 		 */
 		public static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
-			if(arg.isInstanceOf(CClosure.class)) {
+			if(arg.isInstanceOf(CClosure.TYPE)) {
 				onTabComplete.remove(cmd.getName());
 				onTabComplete.put(cmd.getName(), (CClosure) arg);
 			} else {
@@ -222,7 +222,7 @@ public class Commands {
 				isnew = true;
 				cmd = StaticLayer.GetConvertor().getNewCommand(args[0].val().toLowerCase());
 			}
-			if(args[1].isInstanceOf(CArray.class)) {
+			if(args[1].isInstanceOf(CArray.TYPE)) {
 				CArray ops = (CArray) args[1];
 				if(ops.containsKey("permission")) {
 					cmd.setPermission(ops.get("permission", t).val());
@@ -237,7 +237,7 @@ public class Commands {
 					cmd.setPermissionMessage(ops.get("noPermMsg", t).val());
 				}
 				if(ops.containsKey("aliases")) {
-					if(ops.get("aliases", t).isInstanceOf(CArray.class)) {
+					if(ops.get("aliases", t).isInstanceOf(CArray.TYPE)) {
 						List<Mixed> ca = ((CArray) ops.get("aliases", t)).asList();
 						List<String> aliases = new ArrayList<String>();
 						for(Mixed c : ca) {
@@ -369,7 +369,7 @@ public class Commands {
 		 * @param arg
 		 */
 		public static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
-			if(arg.isInstanceOf(CClosure.class)) {
+			if(arg.isInstanceOf(CClosure.TYPE)) {
 				onCommand.remove(cmd.getName());
 				onCommand.put(cmd.getName(), (CClosure) arg);
 			} else {

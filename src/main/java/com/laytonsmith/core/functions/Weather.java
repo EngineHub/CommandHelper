@@ -67,7 +67,7 @@ public class Weather {
 			MCWorld w = null;
 			boolean safe = false;
 			int safeIndex = 1;
-			if(args[0].isInstanceOf(CArray.class)) {
+			if(args[0].isInstanceOf(CArray.TYPE)) {
 				CArray a = (CArray) args[0];
 				MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				MCLocation l = ObjectGenerator.GetGenerator().location(a, p == null ? null : p.getWorld(), t);
@@ -141,9 +141,9 @@ public class Weather {
 			MCWorld w = null;
 			int duration = -1;
 			if(args.length == 2) {
-				if(args[1].isInstanceOf(CString.class)) {
+				if(args[1].isInstanceOf(CString.TYPE)) {
 					w = Static.getServer().getWorld(args[1].val());
-				} else if(args[1].isInstanceOf(CInt.class)) {
+				} else if(args[1].isInstanceOf(CInt.TYPE)) {
 					duration = Static.getInt32(args[1], t);
 				} else {
 					throw new CREFormatException("", t);

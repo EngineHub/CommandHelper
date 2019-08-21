@@ -154,14 +154,14 @@ public abstract class AbstractFunction implements Function {
 				b.append(", ");
 			}
 			first = false;
-			if(ccc.isInstanceOf(CArray.class)) {
+			if(ccc.isInstanceOf(CArray.TYPE)) {
 				//Arrays take too long to toString, so we don't want to actually toString them here if
 				//we don't need to.
 				b.append("<arrayNotShown size:").append(((CArray) ccc).size()).append(">");
-			} else if(ccc.isInstanceOf(CClosure.class)) {
+			} else if(ccc.isInstanceOf(CClosure.TYPE)) {
 				//The toString of a closure is too long, so let's not output them either.
 				b.append("<closureNotShown>");
-			} else if(ccc.isInstanceOf(CString.class)) {
+			} else if(ccc.isInstanceOf(CString.TYPE)) {
 				String val = ccc.val().replace("\\", "\\\\").replace("'", "\\'");
 				int max = 1000;
 				if(val.length() > max) {

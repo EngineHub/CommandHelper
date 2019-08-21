@@ -59,7 +59,7 @@ public class Crypto {
 
 	private static byte[] getByteArrayFromArg(Mixed c) {
 		byte[] val;
-		if(c.isInstanceOf(CSecureString.class)) {
+		if(c.isInstanceOf(CSecureString.TYPE)) {
 			val = ArrayUtils.charToBytes(((CSecureString) c).getDecryptedCharArray());
 		} else {
 			val = c.val().getBytes();
@@ -448,7 +448,7 @@ public class Crypto {
 			}
 			try {
 				String val;
-				if(args[0].isInstanceOf(CSecureString.class)) {
+				if(args[0].isInstanceOf(CSecureString.TYPE)) {
 					val = new String(((CSecureString) args[0]).getDecryptedCharArray());
 				} else {
 					val = args[0].val();
@@ -519,7 +519,7 @@ public class Crypto {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String val;
-			if(args[0].isInstanceOf(CSecureString.class)) {
+			if(args[0].isInstanceOf(CSecureString.TYPE)) {
 				val = new String(((CSecureString) args[0]).getDecryptedCharArray());
 			} else {
 				val = args[0].val();

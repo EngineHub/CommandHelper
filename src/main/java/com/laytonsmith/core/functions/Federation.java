@@ -263,7 +263,7 @@ public class Federation {
 //			final String allow_from;
 //			final int master_port;
 //
-//			if(!(args[0].isInstanceOf(CArray.class))) {
+//			if(!(args[0].isInstanceOf(CArray.TYPE))) {
 //				throw new Exceptions.CastException("Expecting argument 1 to be an array.", t);
 //			}
 //

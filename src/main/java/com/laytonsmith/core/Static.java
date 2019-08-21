@@ -768,7 +768,7 @@ public final class Static {
 			try {
 				ofp = getServer().getOfflinePlayer(GetUUID(search, t));
 			} catch (ConfigRuntimeException cre) {
-				if(cre instanceof CREThrowable && ((CREThrowable) cre).isInstanceOf(CRELengthException.class)) {
+				if(cre instanceof CREThrowable && ((CREThrowable) cre).isInstanceOf(CRELengthException.TYPE)) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
 				} else {
@@ -802,7 +802,7 @@ public final class Static {
 			try {
 				m = getServer().getPlayer(GetUUID(player, t));
 			} catch (ConfigRuntimeException cre) {
-				if(cre instanceof CREThrowable && ((CREThrowable) cre).isInstanceOf(CRELengthException.class)) {
+				if(cre instanceof CREThrowable && ((CREThrowable) cre).isInstanceOf(CRELengthException.TYPE)) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
 				} else {
@@ -988,7 +988,7 @@ public final class Static {
 	 * @return
 	 */
 	public static MCMetadatable getMetadatable(Mixed construct, Target t) {
-		if(construct.isInstanceOf(CArray.class)) {
+		if(construct.isInstanceOf(CArray.TYPE)) {
 			return ObjectGenerator.GetGenerator().location(construct, null, t).getBlock();
 		} else if(construct instanceof CString) {
 			switch(construct.val().length()) {
@@ -1523,7 +1523,7 @@ public final class Static {
 			return ((CByteArray) construct).asByteArrayCopy();
 		} else if(construct instanceof CResource) {
 			return ((CResource) construct).getResource();
-		} else if(construct.isInstanceOf(CArray.class)) {
+		} else if(construct.isInstanceOf(CArray.TYPE)) {
 			CArray array = (CArray) construct;
 			if(array.isAssociative()) {
 				HashMap<String, Object> map = new HashMap<>();

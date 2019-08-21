@@ -250,7 +250,7 @@ public class FileHandling {
 			startup();
 			final String file = args[0].val();
 			final CClosure callback;
-			if(!(args[1].isInstanceOf(CClosure.class))) {
+			if(!(args[1].isInstanceOf(CClosure.TYPE))) {
 				throw new CRECastException("Expected paramter 2 of " + getName() + " to be a closure!", t);
 			} else {
 				callback = ((CClosure) args[1]);

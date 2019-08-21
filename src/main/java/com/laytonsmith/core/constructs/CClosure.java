@@ -81,7 +81,7 @@ public class CClosure extends Construct implements Callable {
 				}
 			}
 			b.append(")");
-		} else if(node.getData().isInstanceOf(CString.class)) {
+		} else if(node.getData().isInstanceOf(CString.TYPE)) {
 			String data = ArgumentValidation.getString(node.getData(), node.getTarget());
 			// Convert: \ -> \\ and ' -> \'
 			b.append("'").append(data.replace("\\", "\\\\").replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n")

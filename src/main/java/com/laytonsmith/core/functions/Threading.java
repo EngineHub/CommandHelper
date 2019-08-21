@@ -72,7 +72,7 @@ public class Threading {
 		@Override
 		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
-			if(!(args[1].isInstanceOf(CClosure.class))) {
+			if(!(args[1].isInstanceOf(CClosure.TYPE))) {
 				throw new CRECastException("Expected closure for arg 2", t);
 			}
 			final CClosure closure = (CClosure) args[1];
@@ -377,7 +377,7 @@ public class Threading {
 				throw new CRENullPointerException("Synchronization object may not be null in " + getName() + "().", t);
 			}
 			Object syncObject;
-			if(cSyncObject.isInstanceOf(CArray.class)) {
+			if(cSyncObject.isInstanceOf(CArray.TYPE)) {
 				syncObject = cSyncObject;
 			} else {
 				syncObject = cSyncObject.val();

@@ -13,9 +13,9 @@ public class BashPlatformResolver implements PlatformResolver {
 
 	@Override
 	public String outputConstant(Mixed c) {
-		if(c.isInstanceOf(CString.class)) {
+		if(c.isInstanceOf(CString.TYPE)) {
 			return "\"" + c.val() + "\"";
-		} else if(c.isInstanceOf(CArray.class)) {
+		} else if(c.isInstanceOf(CArray.TYPE)) {
 			throw new RuntimeException("Not implemented yet");
 		} else {
 			return c.val();

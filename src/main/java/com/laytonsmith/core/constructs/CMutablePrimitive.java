@@ -45,7 +45,7 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 	 * @param t
 	 */
 	public void set(Mixed value, Target t) {
-		if(!value.isInstanceOf(ValueType.class)) {
+		if(!value.isInstanceOf(ValueType.TYPE)) {
 			throw new CREFormatException("mutable_primitives can only store primitive values.", t);
 		}
 		this.value = value;
@@ -101,7 +101,7 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 
 	@Override
 	public long size() {
-		if(value.isInstanceOf(Sizeable.class)) {
+		if(value.isInstanceOf(Sizeable.TYPE)) {
 			return ArgumentValidation.getObject(value, Target.UNKNOWN, Sizeable.class).size();
 		} else {
 			return 0;

@@ -357,7 +357,7 @@ public class EntityEvents {
 					return true;
 				}
 				if(key.equals("blocks")) {
-					if(value.isInstanceOf(CArray.class)) {
+					if(value.isInstanceOf(CArray.TYPE)) {
 						CArray ba = (CArray) value;
 						List<MCBlock> blocks = new ArrayList<MCBlock>();
 						for(String b : ba.stringKeySet()) {
@@ -709,7 +709,7 @@ public class EntityEvents {
 					if(value instanceof CNull) {
 						value = new CArray(value.getTarget());
 					}
-					if(!(value.isInstanceOf(CArray.class))) {
+					if(!(value.isInstanceOf(CArray.TYPE))) {
 						throw new CRECastException("drops must be an array, or null", value.getTarget());
 					}
 					e.clearDrops();
@@ -1369,7 +1369,7 @@ public class EntityEvents {
 			MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
 
 			if(key.equals("amount")) {
-				if(value.isInstanceOf(CInt.class)) {
+				if(value.isInstanceOf(CInt.TYPE)) {
 					event.setDamage(Integer.parseInt(value.val()));
 
 					return true;
@@ -1453,7 +1453,7 @@ public class EntityEvents {
 					if(value instanceof CNull) {
 						ete.setTarget(null);
 						return true;
-					} else if(value.isInstanceOf(CString.class)) {
+					} else if(value.isInstanceOf(CString.TYPE)) {
 						MCPlayer p = Static.GetPlayer(value.val(), value.getTarget());
 
 						if(p.isOnline()) {
@@ -1577,7 +1577,7 @@ public class EntityEvents {
 			Map<String, Mixed> prefilter = event.getPrefilter();
 			if(prefilter.containsKey("from")) {
 				Mixed type = prefilter.get("from");
-				if(type.isInstanceOf(CString.class) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+				if(type.isInstanceOf(CString.TYPE) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The 0:0 block format in " + getName()
 							+ " is deprecated in \"from\" prefilter.", event.getTarget());
 					MCItemStack is = Static.ParseItemNotation(null, type.val(), 1, event.getTarget());
@@ -1586,7 +1586,7 @@ public class EntityEvents {
 			}
 			if(prefilter.containsKey("to")) {
 				Mixed type = prefilter.get("to");
-				if(type.isInstanceOf(CString.class) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+				if(type.isInstanceOf(CString.TYPE) && type.val().contains(":") || ArgumentValidation.isNumber(type)) {
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The 0:0 block format in " + getName()
 							+ " is deprecated in \"to\" prefilter.", event.getTarget());
 					MCItemStack is = Static.ParseItemNotation(null, type.val(), 1, event.getTarget());
@@ -1677,7 +1677,7 @@ public class EntityEvents {
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("block")) {
 				Mixed ctype = prefilter.get("block");
-				if(ctype.isInstanceOf(CString.class) && ctype.val().contains(":") || ArgumentValidation.isNumber(ctype)) {
+				if(ctype.isInstanceOf(CString.TYPE) && ctype.val().contains(":") || ArgumentValidation.isNumber(ctype)) {
 					int type;
 					String notation = ctype.val();
 					int separatorIndex = notation.indexOf(':');
