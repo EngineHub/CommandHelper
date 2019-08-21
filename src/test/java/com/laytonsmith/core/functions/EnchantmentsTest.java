@@ -35,6 +35,7 @@ public class EnchantmentsTest {
 	public EnchantmentsTest() throws Exception {
 		InstallFakeServerFrontend();
 		env = Static.GenerateStandaloneEnvironment();
+		env = env.cloneAndAdd(new CommandHelperEnvironment());
 	}
 
 	@BeforeClass

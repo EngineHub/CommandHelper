@@ -42,6 +42,7 @@ public class ArrayHandlingTest {
 	public ArrayHandlingTest() throws Exception {
 		StaticTest.InstallFakeServerFrontend();
 		env = Static.GenerateStandaloneEnvironment();
+		env = env.cloneAndAdd(new CommandHelperEnvironment());
 	}
 
 	@Before

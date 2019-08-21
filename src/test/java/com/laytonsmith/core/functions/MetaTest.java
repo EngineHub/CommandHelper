@@ -51,6 +51,7 @@ public class MetaTest {
 		fakeServer = GetFakeServer();
 		CommandHelperPlugin.myServer = fakeServer;
 		env = Static.GenerateStandaloneEnvironment();
+		env = env.cloneAndAdd(new CommandHelperEnvironment());
 		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
 	}
 

@@ -96,26 +96,22 @@ import java.util.logging.Logger;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-//import static org.powermock.api.mockito.PowerMockito.mock;
-//import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  *
  *
  */
-//@RunWith(PowerMockRunner.class)
 public class StaticTest {
 
 	static com.laytonsmith.core.environments.Environment env;
 	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
-	static {
-		envs.add(CommandHelperEnvironment.class);
-	}
 
 	static {
 		try {
+			envs.add(CommandHelperEnvironment.class);
 			Implementation.setServerType(Implementation.Type.TEST);
 			env = Static.GenerateStandaloneEnvironment();
+			env = env.cloneAndAdd(new CommandHelperEnvironment());
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}

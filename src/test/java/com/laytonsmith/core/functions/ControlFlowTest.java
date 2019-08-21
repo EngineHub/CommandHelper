@@ -29,6 +29,7 @@ public class ControlFlowTest {
 
 	public ControlFlowTest() throws Exception {
 		env = Static.GenerateStandaloneEnvironment();
+		env = env.cloneAndAdd(new CommandHelperEnvironment());
 	}
 
 	@BeforeClass

@@ -1280,7 +1280,7 @@ public final class Static {
 				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork, platformFolder,
 				profiles, new TaskManagerImpl());
 		gEnv.SetLabel(GLOBAL_PERMISSION);
-		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment(), new CompilerEnvironment());
+		return Environment.createEnvironment(gEnv, new CompilerEnvironment());
 	}
 
 	public static Environment GenerateStandaloneEnvironment() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {

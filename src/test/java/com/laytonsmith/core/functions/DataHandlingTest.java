@@ -40,6 +40,7 @@ public class DataHandlingTest {
 	public DataHandlingTest() throws Exception {
 		StaticTest.InstallFakeServerFrontend();
 		env = Static.GenerateStandaloneEnvironment();
+		env = env.cloneAndAdd(new CommandHelperEnvironment());
 	}
 
 	@BeforeClass

@@ -133,7 +133,7 @@ On the first run, this may take a while, so just sit back and relax.
 From the command prompt, ''cd'' to one folder above where you specified in the ''directory'' value in the config (that
 is, the root of the website) and run
 
-<%PRE|npx http-server -c-1 -o "http://localhost:8080/index.html"%>
+<%PRE|npx http-server -p 8080 -c-1 -o "http://localhost:8080/index.html"%>
 
 Alternatively, you can install the http-server package, and leave of the ''npx'' command. 
 

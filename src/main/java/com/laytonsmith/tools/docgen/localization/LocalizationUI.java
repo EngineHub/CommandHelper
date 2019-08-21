@@ -15,6 +15,7 @@ import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.ProfilesImpl;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.functions.OAuth;
 import com.laytonsmith.core.profiler.Profiler;
@@ -1340,6 +1341,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
 	private void initialize() {
 
 		try {
+			Static.GenerateStandaloneEnvironment(true);
 			pn = getPersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig());
 			if(pn != null) {
 				storedLocation = pn.get(new String[]{"l10n", "lastLoadedDb"});

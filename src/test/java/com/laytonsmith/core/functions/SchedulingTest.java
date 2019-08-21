@@ -33,6 +33,7 @@ public class SchedulingTest {
 	public void setUp() throws Exception {
 		StaticTest.InstallFakeServerFrontend();
 		env = Static.GenerateStandaloneEnvironment();
+		env = env.cloneAndAdd(new CommandHelperEnvironment());
 		fakePlayer = StaticTest.GetOnlinePlayer();
 		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
 	}

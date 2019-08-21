@@ -55,7 +55,7 @@ public class EventBinding {
 
 	private static final AtomicInteger BIND_COUNTER = new AtomicInteger(0);
 
-	@api(environments = CommandHelperEnvironment.class)
+	@api
 	public static class bind extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
 
 		@Override
@@ -72,7 +72,7 @@ public class EventBinding {
 		public String docs() {
 			return "string {event_name, options, prefilter, event_obj, [custom_params], &lt;code&gt;} Binds some functionality to an event, so that"
 					+ " when said event occurs, the event handler will fire. Returns the id of this event, so it can be unregistered"
-					+ " later, if need be.";
+					+ " later, if need be. See more on the page detailing [[Events]].";
 		}
 
 		@Override

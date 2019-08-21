@@ -60,6 +60,7 @@ public class MathTest {
 		varList.set(new IVariable(Auto.TYPE, "var", C.onstruct(1), Target.UNKNOWN, env));
 		varList.set(new IVariable(Auto.TYPE, "var2", C.onstruct(2.5), Target.UNKNOWN, env));
 		env = Static.GenerateStandaloneEnvironment();
+		env = env.cloneAndAdd(new CommandHelperEnvironment());
 		env.getEnv(GlobalEnv.class).SetVarList(varList);
 		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
 	}

@@ -41,6 +41,7 @@ public class MinecraftTest {
 		fakePlayer = StaticTest.GetOnlinePlayer();
 		fakeServer = StaticTest.GetFakeServer();
 		env = Static.GenerateStandaloneEnvironment();
+		env = env.cloneAndAdd(new CommandHelperEnvironment());
 		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
 	}
 

@@ -116,7 +116,15 @@ public class ExtensionMeta {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded string values", t);
 			}
 
-			return new ParseTree(this.exec(t, null, children.get(0).getData()), children.get(0).getFileOptions());
+			CBoolean val;
+			try {
+				FunctionList.getFunction(children.get(0).getData().val(), envs, t);
+				val = CBoolean.TRUE;
+			} catch (ConfigCompileException ex) {
+				val = CBoolean.FALSE;
+			}
+
+			return new ParseTree(val, children.get(0).getFileOptions());
 		}
 
 		@Override

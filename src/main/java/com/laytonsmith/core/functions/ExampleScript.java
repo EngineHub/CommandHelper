@@ -204,6 +204,11 @@ public class ExampleScript {
 		Environment env;
 		try {
 			env = Static.GenerateStandaloneEnvironment();
+			// We must have CommandHelperEnvironment to generate the docs. This should be removed
+			// before CH/MS can be split, but that means a lot of examples probably need to change
+			// first. We use GenerateStandaloneEnvironment to use the standardized creation of
+			// GlobalEnv and CompilerEnv, but then add CHEnv as well.
+			env = env.cloneAndAdd(new CommandHelperEnvironment());
 		} catch (Profiles.InvalidProfileException ex) {
 			throw new RuntimeException(ex);
 		}

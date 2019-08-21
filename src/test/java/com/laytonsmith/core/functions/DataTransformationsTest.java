@@ -29,6 +29,7 @@ public class DataTransformationsTest {
 	public DataTransformationsTest() throws Exception {
 		StaticTest.InstallFakeServerFrontend();
 		env = Static.GenerateStandaloneEnvironment();
+		env = env.cloneAndAdd(new CommandHelperEnvironment());
 	}
 
 	@BeforeClass

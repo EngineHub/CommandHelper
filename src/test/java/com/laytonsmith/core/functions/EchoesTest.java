@@ -51,6 +51,7 @@ public class EchoesTest {
 		fakeServer = GetFakeServer();
 		fakePlayer = GetOnlinePlayer(fakeServer);
 		env = Static.GenerateStandaloneEnvironment();
+		env = env.cloneAndAdd(new CommandHelperEnvironment());
 		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
 	}
 

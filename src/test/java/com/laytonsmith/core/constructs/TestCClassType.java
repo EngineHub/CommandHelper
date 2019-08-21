@@ -3,6 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.testing.StaticTest;
@@ -32,6 +33,7 @@ public class TestCClassType {
 	public void load() throws Exception {
 		StaticTest.InstallFakeServerFrontend();
 		env = Static.GenerateStandaloneEnvironment(false);
+		env = env.cloneAndAdd(new CommandHelperEnvironment());
 	}
 
 	private static CClassType get(String... types) throws ClassNotFoundException {

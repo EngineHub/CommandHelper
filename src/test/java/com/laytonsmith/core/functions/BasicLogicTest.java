@@ -48,6 +48,7 @@ public class BasicLogicTest {
 
 	public BasicLogicTest() throws Exception {
 		env = Static.GenerateStandaloneEnvironment();
+		env = env.cloneAndAdd(new CommandHelperEnvironment());
 	}
 
 	@BeforeClass
