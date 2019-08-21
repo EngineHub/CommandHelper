@@ -70,7 +70,7 @@ public class MSLog {
 		 * @return
 		 */
 		String getName();
-		
+
 		/**
 		 * The comment description that will be provided in the preferences file. This should describe what events
 		 * in general are logged under this tag.
