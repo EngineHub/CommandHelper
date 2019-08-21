@@ -4,6 +4,8 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
+import com.laytonsmith.annotations.hide;
+import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
@@ -463,6 +465,9 @@ public class EventBinding {
 	}
 
 	@api
+	@hide("At the time this function was hidden, it was completely broken. Before unhiding this function, implement a"
+			+ " working version, reviewing at least the following points: Should all events implement support for this?"
+			+ " Should usage of this function change to support getting event results (cancelled, modified)?")
 	public static class trigger extends AbstractFunction {
 
 		@Override
@@ -477,17 +482,20 @@ public class EventBinding {
 
 		@Override
 		public String docs() {
-			return "void {eventName, eventObject, [serverWide]} Manually triggers bound events. The event object passed to this function is "
-					+ " sent directly as-is to the bound events. Check the documentation for each event to see what is required."
-					+ " No checks will be done on the data here, but it is not recommended to fail to send all parameters required."
-					+ " If serverWide is true, the event is triggered directly in the server, unless it is a CommandHelper specific"
-					+ " event, in which case, serverWide is irrelevant. Defaults to false, which means that only CommandHelper code"
-					+ " will receive the event.";
+			return "void {eventName, eventObject, [serverWide]} Manually triggers bound events. The event object passed"
+					+ " to this function is sent directly as-is to the bound events. Check the documentation for each"
+					+ " event to see what is required. No checks will be done on the data here, but it is not"
+					+ " recommended to fail to send all parameters required."
+					+ " If serverWide is true, the event is triggered directly in the server, unless it is a"
+					+ " CommandHelper specific event, in which case, serverWide is irrelevant."
+					+ " Defaults to false, which means that only CommandHelper code will receive the event."
+					+ " Throws a CastException when eventObject is not an array and not null."
+					+ " Throws a BindException when " + getName() + "() is not yet supported by the given event.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CREBindException.class};
 		}
 
 		@Override
