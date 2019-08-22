@@ -17,6 +17,7 @@ import com.laytonsmith.core.objects.ObjectDefinitionNotFoundException;
 import com.laytonsmith.core.objects.ObjectDefinitionTable;
 import com.laytonsmith.core.objects.UserObject;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -455,7 +456,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * @return
 	 */
 	protected Set<CClassType> getTypes() {
-		Set<CClassType> t = new HashSet<>();
+		Set<CClassType> t = new TreeSet<>(Comparator.comparing(CClassType::getFQCN));
 		for(FullyQualifiedClassName type : types) {
 			try {
 				t.add(CClassType.get(type));
