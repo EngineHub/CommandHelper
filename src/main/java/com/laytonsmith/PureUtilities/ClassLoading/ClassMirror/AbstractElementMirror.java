@@ -44,6 +44,9 @@ abstract class AbstractElementMirror implements Serializable {
 	 */
 	private final ClassReferenceMirror parent;
 
+
+	protected final ElementSignature signature;
+
 	protected AbstractElementMirror(Field field) {
 		Objects.requireNonNull(field);
 		this.type = ClassReferenceMirror.fromClass(field.getType());
@@ -56,6 +59,7 @@ abstract class AbstractElementMirror implements Serializable {
 		this.annotations = list;
 		this.parent = ClassReferenceMirror.fromClass(field.getDeclaringClass());
 		Objects.requireNonNull(this.parent);
+		this.signature = null;
 	}
 
 	protected AbstractElementMirror(Member method) {
@@ -87,9 +91,11 @@ abstract class AbstractElementMirror implements Serializable {
 		this.annotations = list;
 		this.parent = ClassReferenceMirror.fromClass(method.getDeclaringClass());
 		Objects.requireNonNull(this.parent);
+		this.signature = null;
 	}
 
-	protected AbstractElementMirror(ClassReferenceMirror parent, List<AnnotationMirror> annotations, ModifierMirror modifiers, ClassReferenceMirror type, String name) {
+	protected AbstractElementMirror(ClassReferenceMirror parent, List<AnnotationMirror> annotations,
+			ModifierMirror modifiers, ClassReferenceMirror type, String name, String signature) {
 		this.annotations = annotations;
 		if(this.annotations == null) {
 			this.annotations = new ArrayList<>();
@@ -102,6 +108,10 @@ abstract class AbstractElementMirror implements Serializable {
 		Objects.requireNonNull(modifiers);
 		Objects.requireNonNull(type);
 		Objects.requireNonNull(name);
+//		if(signature != null) {
+//			System.out.println("Signature was non-null for " + parent + "(" + name + "): " + signature + ". Has type " + type.getJVMName());
+//		}
+		this.signature = ElementSignature.GetSignature(signature);
 	}
 
 	/**
@@ -244,6 +254,15 @@ abstract class AbstractElementMirror implements Serializable {
 		ClassReferenceMirror p = getDeclaringClass();
 		Objects.requireNonNull(p, "Declaring class is null!");
 		return p.loadClass(loader, initialize);
+	}
+
+	/**
+	 * Returns the ElementSignature for this element. This will be null if the element was not defined with any
+	 * generic parameters, or if it was constructed from an instance of a real class.
+	 * @return
+	 */
+	public ElementSignature getElementSignature() {
+		return signature;
 	}
 
 }

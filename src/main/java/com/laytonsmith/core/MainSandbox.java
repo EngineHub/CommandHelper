@@ -1,10 +1,11 @@
 package com.laytonsmith.core;
 
-import java.awt.*;
-import javax.swing.*;
-import java.net.URL;
-import java.util.Locale;
-
+import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.FieldMirror;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.MethodMirror;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This class is for testing concepts
@@ -12,19 +13,34 @@ import java.util.Locale;
 public class MainSandbox {
 
 
-    public static void main(String[] args) throws Exception {
-        // This font is < 35Kb.
-        URL fontUrl = new URL("http://webpagepublicity.com/" +
-            "free-fonts/a/Airacobra%20Condensed.ttf");
-        Font font = Font.createFont(Font.TRUETYPE_FONT, fontUrl.openStream());
-        GraphicsEnvironment ge =
-            GraphicsEnvironment.getLocalGraphicsEnvironment();
-        ge.registerFont(font);
-        for(Font f : ge.getAllFonts()) {
-			System.out.println(f.getFamily());
-			System.out.println(f.getName());
-			System.out.println();
+	static class Test<T> {
+		<J extends List> J method(Class<J> c) {
+			return null;
 		}
-    }
+
+		T method2(int i, int j, int k) {
+			return null;
+		}
+
+		T field;
+	}
+
+	static class Test2 extends Test<List> {
+
+	}
+
+    public static void main(String[] args) throws Exception {
+		ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
+		cd.addThisJar();
+
+		ClassMirror<Test2> cm = cd.getMirrorFromClass(Test2.class);
+		FieldMirror field = cm.getField("field");
+		MethodMirror method = cm.getMethod("method", Class.class);
+		MethodMirror method2 = cm.getMethod("method2", new Class[]{int.class, int.class, int.class});
+//		System.out.println(method.getElementSignature());
+//		System.out.println(method2.getElementSignature());
+//		System.out.println(field.getElementSignature());
+		System.out.println(method2.loadMethod().getGenericReturnType());
+	}
 
 }

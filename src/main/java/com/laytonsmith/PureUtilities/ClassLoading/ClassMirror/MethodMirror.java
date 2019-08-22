@@ -13,8 +13,9 @@ public class MethodMirror extends AbstractMethodMirror {
 	private static final long serialVersionUID = 2L;
 
 	public MethodMirror(ClassReferenceMirror parentClass, List<AnnotationMirror> annotations, ModifierMirror modifiers,
-			ClassReferenceMirror type, String name, List<ClassReferenceMirror> params, boolean isVararg, boolean isSynthetic) {
-		super(parentClass, annotations, modifiers, type, name, params, isVararg, isSynthetic);
+			ClassReferenceMirror type, String name, List<ClassReferenceMirror> params, boolean isVararg,
+			boolean isSynthetic, String signature) {
+		super(parentClass, annotations, modifiers, type, name, params, isVararg, isSynthetic, signature);
 	}
 
 	public MethodMirror(Method method) {
@@ -22,8 +23,8 @@ public class MethodMirror extends AbstractMethodMirror {
 	}
 
 	/* package */ MethodMirror(ClassReferenceMirror parentClass, ModifierMirror modifiers, ClassReferenceMirror type,
-			String name, List<ClassReferenceMirror> params, boolean isVararg, boolean isSynthetic) {
-		super(parentClass, null, modifiers, type, name, params, isVararg, isSynthetic);
+			String name, List<ClassReferenceMirror> params, boolean isVararg, boolean isSynthetic, String signature) {
+		super(parentClass, null, modifiers, type, name, params, isVararg, isSynthetic, signature);
 	}
 
 	/**
@@ -63,12 +64,34 @@ public class MethodMirror extends AbstractMethodMirror {
 		for(ClassReferenceMirror c : getParams()) {
 			cParams.add(c.loadClass(loader, initialize));
 		}
+
+		NoSuchMethodException nsfe = null;
+		Method method = null;
+		do {
+			try {
+				method = parent.getDeclaredMethod(name, cParams.toArray(new Class[cParams.size()]));
+				break;
+			} catch (NoSuchMethodException ex) {
+				nsfe = ex;
+			} catch (SecurityException ex) {
+				throw new RuntimeException(ex);
+			}
+			parent = parent.getSuperclass();
+		} while(parent != null);
+
+		// Try one last time
 		try {
-			return parent.getMethod(name, cParams.toArray(new Class[cParams.size()]));
-		} catch (NoSuchMethodException | SecurityException ex) {
-			//There's really no way for any exception to happen here, so just rethrow
+			method = loadParentClass(loader, initialize).getMethod(name, cParams.toArray(new Class[cParams.size()]));
+		} catch (NoSuchMethodException ex) {
+			nsfe = ex;
+		} catch (SecurityException ex) {
 			throw new RuntimeException(ex);
 		}
+
+		if(method == null && nsfe != null) {
+			throw new RuntimeException(nsfe);
+		}
+		return method;
 	}
 
 	@Override

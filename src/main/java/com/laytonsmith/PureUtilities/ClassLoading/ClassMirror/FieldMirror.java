@@ -43,9 +43,11 @@ public class FieldMirror extends AbstractElementMirror {
 	 * @param name
 	 * @param value
 	 * @param parent
+	 * @param signature
 	 */
-	public FieldMirror(ClassReferenceMirror parent, List<AnnotationMirror> annotations, ModifierMirror modifiers, ClassReferenceMirror type, String name, Object value) {
-		super(parent, annotations, modifiers, type, name);
+	public FieldMirror(ClassReferenceMirror parent, List<AnnotationMirror> annotations, ModifierMirror modifiers,
+			ClassReferenceMirror type, String name, Object value, String signature) {
+		super(parent, annotations, modifiers, type, name, signature);
 		this.value = value;
 	}
 
@@ -72,8 +74,9 @@ public class FieldMirror extends AbstractElementMirror {
 
 
 	// Package methods/constructor
-	/* package */ FieldMirror(ClassReferenceMirror parent, ModifierMirror modifiers, ClassReferenceMirror type, String name, Object value) {
-		super(parent, null, modifiers, type, name);
+	/* package */ FieldMirror(ClassReferenceMirror parent, ModifierMirror modifiers, ClassReferenceMirror type,
+			String name, Object value, String signature) {
+		super(parent, null, modifiers, type, name, signature);
 		this.value = value;
 	}
 
@@ -105,10 +108,29 @@ public class FieldMirror extends AbstractElementMirror {
 			return field;
 		}
 		Class parent = loadParentClass(loader, initialize);
+		NoSuchFieldException nsfe = null;
+		do {
+			try {
+				field = parent.getDeclaredField(name);
+				break;
+			} catch (NoSuchFieldException ex) {
+				nsfe = ex;
+			} catch (SecurityException ex) {
+				throw new RuntimeException(ex);
+			}
+			parent = parent.getSuperclass();
+		} while(parent != null);
+		// Try one last time
 		try {
-			field = parent.getDeclaredField(name);
-		} catch (NoSuchFieldException | SecurityException ex) {
+			field = loadParentClass(loader, initialize).getField(name);
+		} catch (NoSuchFieldException ex) {
+			nsfe = ex;
+		} catch (SecurityException ex) {
 			throw new RuntimeException(ex);
+		}
+
+		if(field == null && nsfe != null) {
+			throw new RuntimeException(nsfe);
 		}
 		return field;
 	}

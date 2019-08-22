@@ -123,7 +123,8 @@ public class ClassMirrorVisitor extends ClassVisitor {
 				new ModifierMirror(ModifierMirror.Type.FIELD, access),
 				new ClassReferenceMirror(desc),
 				name,
-				value
+				value,
+				signature
 		);
 		return new FieldVisitor(ASM5, super.visitField(access, name, desc, signature, value)) {
 			@Override
@@ -171,7 +172,8 @@ public class ClassMirrorVisitor extends ClassVisitor {
 					name,
 					parameterMirrors,
 					(access & ACC_VARARGS) == ACC_VARARGS,
-					(access & ACC_SYNTHETIC) == ACC_SYNTHETIC
+					(access & ACC_SYNTHETIC) == ACC_SYNTHETIC,
+					signature
 			);
 		} else {
 			methodMirror = new MethodMirror(
@@ -181,7 +183,8 @@ public class ClassMirrorVisitor extends ClassVisitor {
 					name,
 					parameterMirrors,
 					(access & ACC_VARARGS) == ACC_VARARGS,
-					(access & ACC_SYNTHETIC) == ACC_SYNTHETIC
+					(access & ACC_SYNTHETIC) == ACC_SYNTHETIC,
+					signature
 			);
 		}
 		final AbstractMethodMirror finalMethodMirror = methodMirror;

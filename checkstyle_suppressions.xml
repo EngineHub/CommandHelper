@@ -3,7 +3,8 @@
 
 <suppressions>
 	
-	<!-- Allow star imports in "...Test.java" files -->
+	<!-- Ignore certain checks in test files -->
+	<suppress checks="MemberName" files=".*Test\.java$" />
 	<suppress checks="AvoidStarImport" files=".*Test\.java$"/>
 	
 	<!-- Ignore type name check for package "com.laytonsmith.core.functions" since function classes use a different format -->
@@ -14,6 +15,7 @@
 	
 	<!-- Ignore type name check for package "com.laytonsmith.core.events drivers" since event driver classes use a different format -->
 	<suppress checks="TypeName" files="com[\\/]laytonsmith[\\/]core[\\/]events[\\/]drivers.*\.java$"/>
+	
 	
 	<!-- It's too difficult to manage checkstyle for half generated files, so just exclude them. -->
 	<suppress checks=".*" files="com[\\/]laytonsmith[\\/]tools[\\/]docgen[\\/]localization[\\/]LocalizationUI.java$"/>

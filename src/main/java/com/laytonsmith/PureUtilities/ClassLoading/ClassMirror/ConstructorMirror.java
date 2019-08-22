@@ -6,6 +6,7 @@ import java.util.List;
 
 /**
  * This wraps a constructor, which is essentially a method.
+ * @param <T>
  */
 public class ConstructorMirror<T> extends AbstractMethodMirror {
 
@@ -14,21 +15,25 @@ public class ConstructorMirror<T> extends AbstractMethodMirror {
 	 */
 	public static final String INIT = "<init>";
 
-	public ConstructorMirror(ClassReferenceMirror parentClass, List<AnnotationMirror> annotations, ModifierMirror modifiers, ClassReferenceMirror type, String name, List<ClassReferenceMirror> params, boolean isVararg, boolean isSynthetic) {
-		super(parentClass, annotations, modifiers, type, name, params, isVararg, isSynthetic);
+	public ConstructorMirror(ClassReferenceMirror parentClass, List<AnnotationMirror> annotations,
+			ModifierMirror modifiers, ClassReferenceMirror type, String name, List<ClassReferenceMirror> params,
+			boolean isVararg, boolean isSynthetic, String signature) {
+		super(parentClass, annotations, modifiers, type, name, params, isVararg, isSynthetic, signature);
 	}
 
 	public ConstructorMirror(Constructor cons) {
 		super(cons);
 	}
 
-	/* package */ ConstructorMirror(ClassReferenceMirror parentClass, ModifierMirror modifiers, ClassReferenceMirror type,
-			String name, List<ClassReferenceMirror> params, boolean isVararg, boolean isSynthetic) {
-		super(parentClass, modifiers, type, name, params, isVararg, isSynthetic);
+	/* package */ ConstructorMirror(ClassReferenceMirror parentClass, ModifierMirror modifiers,
+			ClassReferenceMirror type, String name, List<ClassReferenceMirror> params, boolean isVararg,
+			boolean isSynthetic, String signature) {
+		super(parentClass, modifiers, type, name, params, isVararg, isSynthetic, signature);
 	}
 
 	public ConstructorMirror(MethodMirror copy) {
-		super(copy.getDeclaringClass(), copy.modifiers, copy.type, copy.name, copy.getParams(), copy.isVararg(), copy.isSynthetic());
+		super(copy.getDeclaringClass(), copy.modifiers, copy.type, copy.name, copy.getParams(), copy.isVararg(),
+				copy.isSynthetic(), copy.signature.toString());
 		if(!INIT.equals(copy.name)) {
 			throw new IllegalArgumentException("Only constructors may be mirrored by " + this.getClass().getSimpleName());
 		}

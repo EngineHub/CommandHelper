@@ -17,6 +17,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -93,6 +94,13 @@ public class DataTransformations {
 		public MSVersion since() {
 			return MSVersion.V3_3_1;
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Simple usage", "json_encode(array(emptyObject: associative_array(), anArray: array(1, 2, 3), anObject: array(one: 1, two: 2)));")
+			};
+		}
 	}
 
 	@api
@@ -143,6 +151,13 @@ public class DataTransformations {
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Simple usage", "json_decode(\"{\\\"one\\\": 1, \\\"two\\\": [1, 2, 3]}\");")
+			};
 		}
 	}
 
@@ -397,7 +412,7 @@ public class DataTransformations {
 					+ " stored as strings, so if 1 was stored, it will be returned as a string '1'. This is a limitation"
 					+ " of the ini format, as it is expected that the code that reads the ini knows what the type of the"
 					+ " data is anticipated, not the data itself. You can easily cast data that is expected to be numeric"
-					+ " via the {{function|integer}} and {{function|float}} functions when reading in the data if exact types"
+					+ " via the {{function|integer}} and {{function|double}} functions when reading in the data if exact types"
 					+ " are truly needed. INI doesn't easily support non-string values, if that is needed, consider using"
 					+ " {{function|json_encode}}/{{function|json_decode}} instead.";
 		}

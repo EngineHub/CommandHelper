@@ -143,6 +143,12 @@ public class ClassDiscovery {
 	private final Map<Class<? extends Annotation>, Set<ConstructorMirror<?>>> constructorAnnotationCache = new HashMap<>();
 	private final Map<Pair<Class<? extends Annotation>, Class<?>>, Set<ClassMirror<?>>>
 			classesWithAnnotationThatExtendCache = new HashMap<>();
+
+	/**
+	 * Cache for mapping real classes to class mirrors. This is not cleared when a new URL is added, since the mapping
+	 * would always be the same anyways.
+	 */
+	private final Map<Class<?>, ClassMirror<?>> classToMirrorCache = new HashMap<>();
 	/**
 	 * By default null, but this can be set per instance.
 	 */
@@ -752,6 +758,35 @@ public class ClassDiscovery {
 		}
 		classesWithAnnotationThatExtendCache.put(id, (Set<ClassMirror<?>>) (Object) mirrors);
 		return mirrors;
+	}
+
+	/**
+	 * Returns the ClassMirror for the given Class, if it exists in the ecosystem. This is useful for obtaining
+	 * reflective information that ClassMirror provides, but Class doesn't. Note, however, this will only be able
+	 * to find classes that were loaded into the ecosystem in the first place, which may preclude most classes in
+	 * the actual ecosystem, including the core Java classes.
+	 * @param <T>
+	 * @param clazz
+	 * @return
+	 * @throws NoClassDefFoundError
+	 */
+	public <T> ClassMirror<T> getMirrorFromClass(Class<T> clazz) throws NoClassDefFoundError {
+		ClassMirror<?> cm = classToMirrorCache.get(clazz);
+		if(cm == null) {
+			for(ClassMirror<?> m : getKnownClasses()) {
+				if(m.getClassName().equals(clazz.getName().replace("$", "."))) {
+					cm = m;
+					classToMirrorCache.put(clazz, cm);
+					break;
+				}
+			}
+			if(cm == null) {
+				throw new NoClassDefFoundError("ClassDiscovery was unable to locate the class "
+						+ clazz + ". This can only load classes that are available to the ClassDiscovery system.");
+			}
+		}
+		return (ClassMirror<T>) cm;
+
 	}
 
 	/**

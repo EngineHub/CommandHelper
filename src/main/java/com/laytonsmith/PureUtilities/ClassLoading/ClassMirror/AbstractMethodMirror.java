@@ -23,9 +23,10 @@ public abstract class AbstractMethodMirror extends AbstractElementMirror {
 	 */
 	private Member underlyingMethod = null;
 
-	public AbstractMethodMirror(ClassReferenceMirror parentClass, List<AnnotationMirror> annotations, ModifierMirror modifiers,
-			ClassReferenceMirror type, String name, List<ClassReferenceMirror> params, boolean isVararg, boolean isSynthetic) {
-		super(parentClass, annotations, modifiers, type, name);
+	public AbstractMethodMirror(ClassReferenceMirror parentClass, List<AnnotationMirror> annotations,
+			ModifierMirror modifiers, ClassReferenceMirror type, String name, List<ClassReferenceMirror> params,
+			boolean isVararg, boolean isSynthetic, String signature) {
+		super(parentClass, annotations, modifiers, type, name, signature);
 		Objects.requireNonNull(params, "params cannot be null");
 		this.params = params;
 		this.isVararg = isVararg;
@@ -38,9 +39,10 @@ public abstract class AbstractMethodMirror extends AbstractElementMirror {
 		this.params = null;
 	}
 
-	/* package */ AbstractMethodMirror(ClassReferenceMirror parentClass, ModifierMirror modifiers, ClassReferenceMirror type,
-			String name, List<ClassReferenceMirror> params, boolean isVararg, boolean isSynthetic) {
-		super(parentClass, null, modifiers, type, name);
+	/* package */ AbstractMethodMirror(ClassReferenceMirror parentClass, ModifierMirror modifiers,
+			ClassReferenceMirror type, String name, List<ClassReferenceMirror> params, boolean isVararg,
+			boolean isSynthetic, String signature) {
+		super(parentClass, null, modifiers, type, name, signature);
 		annotations = new ArrayList<>();
 		Objects.requireNonNull(params, "params cannot be null");
 		this.params = params;

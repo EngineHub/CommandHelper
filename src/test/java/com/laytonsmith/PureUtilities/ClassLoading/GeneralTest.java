@@ -47,7 +47,7 @@ public class GeneralTest {
 
 	@BeforeClass
 	public static void setUpClass() {
-		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(GeneralTest.class));
+		ClassDiscovery.getDefaultInstance().addThisJar();
 	}
 
 	@Before

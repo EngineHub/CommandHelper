@@ -448,7 +448,7 @@ public final class Static {
 			if(!new File(debugLogFileCurrent).exists()) {
 				new File(debugLogFileCurrent).createNewFile();
 			}
-			debugLogFileHandle = new FileWriter(currentFileName);
+			debugLogFileHandle = new FileWriter(currentFileName, true);
 		}
 		return debugLogFileHandle;
 	}
