@@ -207,4 +207,77 @@ public class JSONUtilTest {
 		String s = jd.serialize(a);
 		Assert.assertThat(s, Is.is("{\"s\":[\"s\",\"t\",\"r\"],\"i\":[1,2,3],\"I\":[]}"));
 	}
+
+	static enum EnumTest {
+		ZERO, ONE, TWO
+	}
+
+	static class EnumContainer {
+		public int id;
+		public EnumTest enumValue;
+	}
+
+	@Test
+	public void testEnumDeserialization() throws Exception {
+		EnumContainer ec = jd.deserialize("{\"id\": 55, \"enumValue\": 2}", EnumContainer.class);
+		assertTrue(ec.id == 55);
+		assertTrue(ec.enumValue == EnumTest.TWO);
+	}
+
+	@Test
+	public void testEnumSerialization() throws Exception {
+		EnumContainer c = new EnumContainer();
+		c.id = 45;
+		c.enumValue = EnumTest.ONE;
+		String s = jd.serialize(c);
+		Assert.assertThat(s, Is.is("{\"enumValue\":1,\"id\":45}"));
+	}
+
+	static enum EnumTest2 implements JSONUtil.CustomLongEnum<EnumTest2> {
+		FIRST(100),
+		SECOND(200),
+		THIRD(300);
+
+		private final long id;
+
+		private EnumTest2(int id) {
+			this.id = id;
+		}
+
+		@Override
+		public EnumTest2 getFromValue(Long value) {
+			for(EnumTest2 e : values()) {
+				if(value == e.id) {
+					return e;
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public Long getValue() {
+			return id;
+		}
+	}
+
+	static class EnumContainer2 {
+		public int id;
+		public EnumTest2 et;
+	}
+
+	@Test
+	public void testEnumDeserializationCustom() throws Exception {
+		EnumContainer2 ec = jd.deserialize("{\"id\": 55, \"et\": 200}", EnumContainer2.class);
+		assertTrue(ec.id == 55);
+		assertTrue(ec.et == EnumTest2.SECOND);
+	}
+
+	@Test
+	public void testEnumSerializationCustom() throws Exception {
+		EnumContainer2 c = new EnumContainer2();
+		c.id = 45;
+		c.et = EnumTest2.FIRST;
+		String s = jd.serialize(c);
+		Assert.assertThat(s, Is.is("{\"id\":45,\"et\":100}"));
+	}
 }
