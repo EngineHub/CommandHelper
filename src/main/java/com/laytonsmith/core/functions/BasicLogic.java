@@ -1402,7 +1402,7 @@ public class BasicLogic {
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for(ParseTree tree : nodes) {
 				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				if(ArgumentValidation.getBoolean(c, t)) {
+				if(ArgumentValidation.getBooleanish(c, t)) {
 					return c;
 				}
 			}

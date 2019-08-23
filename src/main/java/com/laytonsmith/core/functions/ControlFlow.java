@@ -93,7 +93,7 @@ public class ControlFlow {
 				__else = nodes[2];
 			}
 
-			if(ArgumentValidation.getBoolean(parent.seval(condition, env), t)) {
+			if(ArgumentValidation.getBooleanish(parent.seval(condition, env), t)) {
 				return parent.seval(__if, env);
 			} else {
 				if(__else == null) {
@@ -306,7 +306,7 @@ public class ControlFlow {
 				if(evalStatement instanceof CIdentifier) {
 					evalStatement = parent.seval(((CIdentifier) evalStatement).contained(), env);
 				}
-				if(ArgumentValidation.getBoolean(evalStatement, t)) {
+				if(ArgumentValidation.getBooleanish(evalStatement, t)) {
 					Mixed ret = env.getEnv(GlobalEnv.class).GetScript().eval(code, env);
 					return ret;
 				}

@@ -18,6 +18,7 @@ import com.laytonsmith.core.constructs.CMutablePrimitive;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CNumber;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Booleanish;
@@ -363,6 +364,11 @@ public final class ArgumentValidation {
 	 * @return
 	 */
 	public static boolean getBooleanish(Mixed c, Target t) {
+		if(c instanceof CVoid) {
+			// Eventually, we may want to turn this into a warning, maybe even a compiler error, but for now,
+			// to keep backwards compatibility, we want to keep this as is.
+			return false;
+		}
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
