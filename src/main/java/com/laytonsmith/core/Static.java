@@ -1188,6 +1188,10 @@ public final class Static {
 
 	}
 
+	public static MCCommandSender GetInjectedPlayer(String name) {
+		return INJECTED_PLAYERS.get(name);
+	}
+
 	public static void InjectPlayer(MCCommandSender player) {
 		String name = player.getName();
 		if("CONSOLE".equals(name)) {

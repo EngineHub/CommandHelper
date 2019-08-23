@@ -2,6 +2,7 @@ package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
@@ -16,7 +17,6 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
-import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
@@ -28,6 +28,7 @@ import com.laytonsmith.core.profiler.ProfilePoint;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * This helper class implements a few of the common functions in event, and most (all?) Events should extend this class.
@@ -88,10 +89,14 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 		// Do this after preExcecution() in case the particular event needs to inject the player first.
 		Mixed c = activeEvent.getParsedEvent().get("player");
 		if(c != null) {
-			try {
-				MCPlayer p = Static.GetPlayer(c, Target.UNKNOWN);
-				env.getEnv(CommandHelperEnvironment.class).SetPlayer(p);
-			} catch (CREPlayerOfflineException e) {
+			MCCommandSender p = Static.getServer().getPlayer(c.val());
+			if(p == null) {
+				p = Static.GetInjectedPlayer(c.val());
+			}
+			if(p != null) {
+				env.getEnv(CommandHelperEnvironment.class).SetPlayer((MCPlayer) p);
+			} else {
+				Static.getLogger().log(Level.WARNING, "Player missing from player event: " + b.getEventName());
 				// Set env CommandSender to prevent incorrect inherited player from being used in a player event.
 				if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 					env.getEnv(CommandHelperEnvironment.class).SetCommandSender(Static.getServer().getConsole());
