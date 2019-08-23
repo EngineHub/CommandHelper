@@ -43,7 +43,6 @@ import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.extensions.ExtensionTracker;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
-import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
 
@@ -311,7 +310,7 @@ public class Script {
 			}
 			final Function f;
 			try {
-				f = (Function) FunctionList.getFunction((CFunction) m, env.getEnvClasses());
+				f = ((CFunction) m).getFunction();
 			} catch (ConfigCompileException | ClassCastException e) {
 				//Turn it into a config runtime exception. This shouldn't ever happen though.
 				throw ConfigRuntimeException.CreateUncatchableException("Unable to find function " + m.val(), m.getTarget());
