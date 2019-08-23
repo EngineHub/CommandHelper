@@ -50,6 +50,10 @@ import java.util.List;
  *    <td>(Ljava/lang/Class&lt;*>;)Ljava/lang/Class&lt;-Ljava/lang/String;>;</td>
  *    <td>Class&lt;? super String> method(Class&gt;?> c)</td>
  *    <td>A lower bounded wildcard</td></tr>
+ *  <tr>
+ *    <td>()Lmy/obj/Name<TT;>.InnerClass</td>
+ *    <td>InnerClass method()</td>
+ *    <td>A method that returns an instance of a non-static inner class</td></tr>
  * </table>
  * <p>
  * The main points to notice here are the general format is {@code (params;...)returnType;} for methods, and just
@@ -74,10 +78,12 @@ public final class ElementSignature implements Serializable {
 	 * @return
 	 */
 	public static ElementSignature GetSignature(String signature) {
-		if(signature == null) {
+		// Inner non-static classes are not currently handled, so let's just disable processing of this for now.
+		// We can revist this later if we actually need this functionality, but the parsing logic needs to change.
+//		if(signature == null) {
 			return null;
-		}
-		return new ElementSignature(signature);
+//		}
+//		return new ElementSignature(signature);
 	}
 
 	private final String signature;
@@ -110,41 +116,44 @@ public final class ElementSignature implements Serializable {
 		ClassReferenceMirror genericDeclaration = null;
 		@SuppressWarnings("LocalVariableHidesMemberVariable")
 		ClassReferenceMirror[] parameters = null;
+		try {
+			for(int i = 0; i < signature.length(); i++) {
+				char c = signature.charAt(i);
+				if(inGenericDeclaration) {
+					if(c == '>') {
+						String[] parts = buffer.toString().split(":");
+						genericDeclaration = new ClassReferenceMirror(parts[1], parts[0]);
+						buffer = new StringBuilder();
+						inGenericDeclaration = false;
+						// Parameters always follow generic templates, since fields can't define a template
+						inParameters = true;
+						i++;
+						continue;
+					} else {
+						buffer.append(c);
+					}
+				}
+				if(inParameters) {
+					if(c == ')') {
+						parameters = parseParameters(buffer.toString());
+						buffer = new StringBuilder();
+						inParameters = false;
+						continue;
+					} else {
+						buffer.append(c);
+					}
+				}
+				if(!inGenericDeclaration && !inParameters) {
+					buffer.append(c);
+				}
+			}
 
-		for(int i = 0; i < signature.length(); i++) {
-			char c = signature.charAt(i);
-			if(inGenericDeclaration) {
-				if(c == '>') {
-					String[] parts = buffer.toString().split(":");
-					genericDeclaration = new ClassReferenceMirror(parts[1], parts[0]);
-					buffer = new StringBuilder();
-					inGenericDeclaration = false;
-					// Parameters always follow generic templates, since fields can't define a template
-					inParameters = true;
-					i++;
-					continue;
-				} else {
-					buffer.append(c);
-				}
-			}
-			if(inParameters) {
-				if(c == ')') {
-					parameters = parseParameters(buffer.toString());
-					buffer = new StringBuilder();
-					inParameters = false;
-					continue;
-				} else {
-					buffer.append(c);
-				}
-			}
-			if(!inGenericDeclaration && !inParameters) {
-				buffer.append(c);
-			}
+			this.genericDeclaration = genericDeclaration;
+			this.parameters = parameters;
+			this.type = parseParameters(buffer.toString())[0];
+		} catch (StackOverflowError e) {
+			throw new Error("Got SOE while processing " + signature, e);
 		}
-
-		this.genericDeclaration = genericDeclaration;
-		this.parameters = parameters;
-		this.type = parseParameters(buffer.toString())[0];
 	}
 
 	private ClassReferenceMirror[] parseParameters(String params) {
