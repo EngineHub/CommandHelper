@@ -1,0 +1,17 @@
+
+Extensions are a way to extend MethodScript using native Java code. Extensions can add a number of types of
+functionality, from new functions and events, to new commandline tools.
+
+While the extension framework is officially supported, no individual extensions are themselves officially supported.
+Extension developers do not need to register with the project, and there is no central repository of extensions, so
+it isn't possible to say what extensions are out there. A number of extensions can be found 
+[https://letsbuild.net/jenkins/ here], but note that this is not exhaustive, and is a community supported effort.
+
+{{TakeNote|text=Note that extensions completely bypass the security restrictions in place in MethodScript, and therefore
+should be carefully installed, and only downloaded from trusted sources.}}
+
+In order to install extensions, simply drop the jar into the extensions folder, in your MethodScript installation, and
+restart. The extensions will be automatically loaded from there.
+
+Extensions can provide access to any features that can be provided in Java, and so can therefore be quite powerful. If
+you're interested in developing your own extension, see the page on [[Extension_Development|Extension Development]].

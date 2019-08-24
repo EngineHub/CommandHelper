@@ -79,6 +79,18 @@ Notice that the event classes extend <code>AbstractEvent</code>. As one can see,
 
 Events can be triggered from anywhere, with a call to <code>EventUtils.TriggerListener(Driver.EXTENSION, &lt;event name&gt;, &lt;event instance&gt;);</code>. The event name given must be the same as given in the event that has been defined, and the event instance an instance of that event.
 
+=== Other Extension Points ===
+
+==== Command Line Tools ====
+
+Implement the CommandLineTool interface (or extend the AbstractCommandLineTool class) and tag the class with the @tool
+annotation. All of the built in tools use this mechanism, and extensions can provide new tools just the same way.
+
+==== Persistence Network Data Sources ====
+
+Implement the DataSource interface (or extend the AbstractDataSource class) and tag the class with the @datasource
+annotation. 
+
 === Maven ===
 
 Our build and dependency manager of choice is maven. While a quick and dirty setup with a bare-minimal pom is possible, run-time speedups and compile-time checks will be missed out on if a few details aren't included.

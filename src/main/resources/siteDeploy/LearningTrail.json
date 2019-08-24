@@ -1,64 +1,65 @@
 [
-    {"CommandHelper": [
-        {"Beginner's_Guide": "Beginner's Guide"},
-        {"Advanced_Guide": "Advanced Guide"},
-        {"Permissions_Settings": "Permissions Settings"},
-        {"Advanced_Scripts": "Advanced Scripts"},
-        "Cookbook",
-        "FAQ"
-    ]},
-    {"MethodScript": [
-        "Numbers",
-        "Strings",
-        "Variables",
-        "Operators",
-        "Logic",
-        "Loops",
-        "Arrays",
-        "Exceptions",
-        "Events",
-        {"Execution_Queue": "Execution Queue"},
-        {"Understanding_References": "Understanding References"},
-        {"Array_Iteration": "Array Iteration"},
-        "Closures",
-        "SQL",
-        "Debugging",
-        "Profiler",
-        {"File_Options": "File Options"},
-        {"Strict_Mode": "Strict Mode"}
-    ]},
-    {"Select Functions/Classes": [
-        "Regex",
-        "IRC"
-    ]},
-    {"API": [
-        {"API.html": "API"},
-        {"Event_API.html": "Event API"},
-        {"Builtin_Object_Info": "Builtin Object Info"},
-        {"Interpreter_Mode": "Interpreter Mode"}
-    ]},
-    {"Tools": [
-        {"Persistence_Network": "Persistence Network"},
-        {"SyntaxHighlighting": "Syntax Highlighting"},
-        {"Local_Packages": "Local Packages"},
-        {"CommandLineTools": "Command Line Tools"},
-        {"Server_Profiler-Debugger": "Profiling/Debugging Server"},
-        {"Data_Manager": "Data Manager"},
-        "Optimizer",
-        {"Command_Line_Scripting": "Command Line Scripting"},
-        "Logging"
-    ]},
-    {"Future/Next Version": [
-        "Roadmap",
-        {"Dev": "Development Versions"}
-    ]},
-    {"Development": [
-        "Architecture",
-        "Contributing",
-        "Compatibility",
-        {"DesignEthos": "Design Ethos"},
-        {"Extension_Development": "Extension Development"},
-        {"api.json": "api.json"},
-        {"SiteDeployTool": "Site Deploy Tool"}
-    ]}
+	{"CommandHelper": [
+		{"Beginner's_Guide": "Beginner's Guide"},
+		{"Advanced_Guide": "Advanced Guide"},
+		{"Permissions_Settings": "Permissions Settings"},
+		{"Advanced_Scripts": "Advanced Scripts"},
+		"Cookbook",
+		"FAQ"
+	]},
+	{"MethodScript": [
+		"Numbers",
+		"Strings",
+		"Variables",
+		"Operators",
+		"Logic",
+		"Loops",
+		"Arrays",
+		"Exceptions",
+		"Events",
+		{"Execution_Queue": "Execution Queue"},
+		{"Understanding_References": "Understanding References"},
+		{"Array_Iteration": "Array Iteration"},
+		"Closures",
+		"SQL",
+		"Debugging",
+		"Profiler",
+		{"File_Options": "File Options"},
+		{"Strict_Mode": "Strict Mode"},
+		"Extensions"
+	]},
+	{"Select Functions/Classes": [
+		"Regex",
+		"IRC"
+	]},
+	{"API": [
+		{"API.html": "API"},
+		{"Event_API.html": "Event API"},
+		{"Builtin_Object_Info": "Builtin Object Info"},
+		{"Interpreter_Mode": "Interpreter Mode"}
+	]},
+	{"Tools": [
+		{"Persistence_Network": "Persistence Network"},
+		{"SyntaxHighlighting": "Syntax Highlighting"},
+		{"Local_Packages": "Local Packages"},
+		{"CommandLineTools": "Command Line Tools"},
+		{"Server_Profiler-Debugger": "Profiling/Debugging Server"},
+		{"Data_Manager": "Data Manager"},
+		"Optimizer",
+		{"Command_Line_Scripting": "Command Line Scripting"},
+		"Logging"
+	]},
+	{"Future/Next Version": [
+		"Roadmap",
+		{"Dev": "Development Versions"}
+	]},
+	{"Development": [
+		"Architecture",
+		"Contributing",
+		"Compatibility",
+		{"DesignEthos": "Design Ethos"},
+		{"Extension_Development": "Extension Development"},
+		{"api.json": "api.json"},
+		{"SiteDeployTool": "Site Deploy Tool"}
+	]}
 ]
