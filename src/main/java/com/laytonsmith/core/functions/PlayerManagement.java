@@ -18,7 +18,9 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.entities.MCCommandMinecart;
+import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCGameMode;
+import com.laytonsmith.abstraction.enums.MCPlayerStatistic;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
@@ -81,9 +83,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- *
- */
 public class PlayerManagement {
 
 	public static String docs() {
@@ -2931,7 +2930,7 @@ public class PlayerManagement {
 
 			Static.AssertPlayerNonNull(m, t);
 
-			return new CDouble(((double) m.getWalkSpeed()), t);
+			return new CDouble(m.getWalkSpeed(), t);
 		}
 	}
 
@@ -3053,7 +3052,7 @@ public class PlayerManagement {
 
 			Static.AssertPlayerNonNull(m, t);
 
-			return new CDouble(((double) m.getFlySpeed()), t);
+			return new CDouble(m.getFlySpeed(), t);
 		}
 	}
 
@@ -4657,7 +4656,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {[player]} Forces a player to leave their vehicile."
+			return "boolean {[player]} Forces a player to leave their vehicle."
 					+ " This returns false if the player is not riding a vehicle.";
 		}
 
@@ -5785,4 +5784,211 @@ public class PlayerManagement {
 		}
 
 	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class pstatistic extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "pstatistic";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "int {[player], statistic, [type]} Returns the specified statistic for the player."
+					+ " Some statistics require a block, item or entity type. An IllegalArgumentException will"
+					+ " be thrown if the statistic is invalid, or if the type is invalid for that statistic."
+					+ " The player argument is required before the type argument is."
+					+ " ---- Valid statistics are: " + StringUtils.Join(MCPlayerStatistic.values(), ", ", ", or ", " or ");
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			String filter = null;
+			MCPlayerStatistic stat;
+			int offset = 0;
+			if(args.length > 1) {
+				offset = 1;
+				p = Static.GetPlayer(args[0], t);
+				if(args.length > 2) {
+					filter = args[2].val().toUpperCase();
+				}
+			}
+
+			try {
+				stat = MCPlayerStatistic.valueOf(args[offset].val().toUpperCase());
+			} catch (IllegalArgumentException ex) {
+				throw new CREIllegalArgumentException("Invalid statistic type: " + args[offset].val(), t);
+			}
+
+			MCPlayerStatistic.Type type = stat.getType();
+			int ret = 0;
+			if(type != MCPlayerStatistic.Type.NONE) {
+				if(filter == null) {
+					throw new CREInsufficientArgumentsException("Missing " + type.name().toLowerCase()
+							+ " type for statistic: " + args[offset].val(), t);
+				}
+				switch(type) {
+					case BLOCK:
+						MCMaterial block = StaticLayer.GetMaterial(filter);
+						if(block == null || !block.isBlock()) {
+							throw new CREIllegalArgumentException("Invalid block type: " + filter, t);
+						}
+						ret = p.getStatistic(stat, block);
+						break;
+					case ENTITY:
+						try {
+							ret = p.getStatistic(stat, MCEntityType.valueOf(filter.toUpperCase()));
+						} catch (IllegalArgumentException ex) {
+							throw new CREIllegalArgumentException("Invalid entity type: " + filter, t);
+						}
+						break;
+					case ITEM:
+						MCMaterial item = StaticLayer.GetMaterial(filter);
+						if(item == null) {
+							throw new CREIllegalArgumentException("Invalid item type: " + filter, t);
+						}
+						ret = p.getStatistic(stat, item);
+						break;
+				}
+			} else {
+				ret = p.getStatistic(stat);
+			}
+			return new CInt(ret, t);
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIllegalArgumentException.class, CREPlayerOfflineException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_pstatistic extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_pstatistic";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3, 4};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], statistic, [type], amount} Sets the specified statistic for the player."
+					+ " Some statistics require a block, item or entity type. An IllegalArgumentException will"
+					+ " be thrown if the statistic is invalid, or if the type is invalid for that statistic."
+					+ " The player argument is required before the type argument is."
+					+ " ---- Valid statistics are: " + StringUtils.Join(MCPlayerStatistic.values(), ", ", ", or ", " or ");
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			String filter = null;
+			MCPlayerStatistic stat;
+			int offset = 0;
+			int amount = 0;
+			if(args.length > 2) {
+				offset = 1;
+				p = Static.GetPlayer(args[0], t);
+				if(args.length == 3) {
+					amount = Static.getInt32(args[2], t);
+				} else {
+					filter = args[2].val().toUpperCase();
+					amount = Static.getInt32(args[3], t);
+				}
+			}
+
+			try {
+				stat = MCPlayerStatistic.valueOf(args[offset].val().toUpperCase());
+			} catch (IllegalArgumentException ex) {
+				throw new CREIllegalArgumentException("Invalid statistic type: " + args[offset].val(), t);
+			}
+
+			if(amount < 0) {
+				throw new CRERangeException("Amount must not be negative.", t);
+			}
+
+			MCPlayerStatistic.Type type = stat.getType();
+			if(type != MCPlayerStatistic.Type.NONE) {
+				if(filter == null) {
+					throw new CREInsufficientArgumentsException("Missing " + type.name().toLowerCase()
+							+ " type for statistic: " + args[offset].val(), t);
+				}
+				switch(type) {
+					case BLOCK:
+						MCMaterial block = StaticLayer.GetMaterial(filter);
+						if(block == null || !block.isBlock()) {
+							throw new CREIllegalArgumentException("Invalid block type: " + filter, t);
+						}
+						p.setStatistic(stat, block, amount);
+						break;
+					case ENTITY:
+						try {
+							p.setStatistic(stat, MCEntityType.valueOf(filter.toUpperCase()), amount);
+						} catch (IllegalArgumentException ex) {
+							throw new CREIllegalArgumentException("Invalid entity type: " + filter, t);
+						}
+						break;
+					case ITEM:
+						MCMaterial item = StaticLayer.GetMaterial(filter);
+						if(item == null) {
+							throw new CREIllegalArgumentException("Invalid item type: " + filter, t);
+						}
+						p.setStatistic(stat, item, amount);
+						break;
+				}
+			} else {
+				p.setStatistic(stat, amount);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CREPlayerOfflineException.class, CRECastException.class,
+					CREIllegalArgumentException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
 }

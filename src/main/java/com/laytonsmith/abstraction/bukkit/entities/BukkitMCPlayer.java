@@ -13,19 +13,23 @@ import com.laytonsmith.abstraction.MCPlayerInventory;
 import com.laytonsmith.abstraction.MCScoreboard;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCColor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCScoreboard;
+import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCParticle;
+import com.laytonsmith.abstraction.enums.MCPlayerStatistic;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCWeather;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPlayerStatistic;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSound;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSoundCategory;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCWeather;
@@ -33,11 +37,13 @@ import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Note;
 import org.bukkit.Particle;
 import org.bukkit.Server;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.PermissionAttachmentInfo;
@@ -631,6 +637,40 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	@Override
 	public void updateInventory() {
 		p.updateInventory();
+	}
+
+	@Override
+	public int getStatistic(MCPlayerStatistic stat) {
+		return p.getStatistic(BukkitMCPlayerStatistic.getConvertor().getConcreteEnum(stat));
+	}
+
+	@Override
+	public int getStatistic(MCPlayerStatistic stat, MCEntityType type) {
+		EntityType bukkitType = (EntityType) type.getConcrete();
+		return p.getStatistic(BukkitMCPlayerStatistic.getConvertor().getConcreteEnum(stat), bukkitType);
+	}
+
+	@Override
+	public int getStatistic(MCPlayerStatistic stat, MCMaterial type) {
+		Material bukkitType = (Material) type.getHandle();
+		return p.getStatistic(BukkitMCPlayerStatistic.getConvertor().getConcreteEnum(stat), bukkitType);
+	}
+
+	@Override
+	public void setStatistic(MCPlayerStatistic stat, int amount) {
+		p.setStatistic(BukkitMCPlayerStatistic.getConvertor().getConcreteEnum(stat), amount);
+	}
+
+	@Override
+	public void setStatistic(MCPlayerStatistic stat, MCEntityType type, int amount) {
+		EntityType bukkitType = (EntityType) type.getConcrete();
+		p.setStatistic(BukkitMCPlayerStatistic.getConvertor().getConcreteEnum(stat), bukkitType, amount);
+	}
+
+	@Override
+	public void setStatistic(MCPlayerStatistic stat, MCMaterial type, int amount) {
+		Material bukkitType = (Material) type.getHandle();
+		p.setStatistic(BukkitMCPlayerStatistic.getConvertor().getConcreteEnum(stat), bukkitType, amount);
 	}
 
 	@Override

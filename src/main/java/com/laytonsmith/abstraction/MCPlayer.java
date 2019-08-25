@@ -1,8 +1,11 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlockData;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCParticle;
+import com.laytonsmith.abstraction.enums.MCPlayerStatistic;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
@@ -167,4 +170,16 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 	boolean isFlying();
 
 	void updateInventory();
+
+	int getStatistic(MCPlayerStatistic stat);
+
+	int getStatistic(MCPlayerStatistic stat, MCEntityType type);
+
+	int getStatistic(MCPlayerStatistic stat, MCMaterial type);
+
+	void setStatistic(MCPlayerStatistic stat, int amount);
+
+	void setStatistic(MCPlayerStatistic stat, MCEntityType type, int amount);
+
+	void setStatistic(MCPlayerStatistic stat, MCMaterial type, int amount);
 }
