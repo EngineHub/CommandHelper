@@ -32,6 +32,14 @@ import java.util.Set;
 @SuppressWarnings("checkstyle:finalclass") // StaticTest.InstallFakeLogger() mocks this class, so it cannot be final.
 public class MSLog {
 
+	/**
+	 * A StringProvider is a small object which returns a string. This is useful to defer creation of strings
+	 * unless actually necessary, when construction of the string could potentially be an expensive operation.
+	 */
+	public static interface StringProvider {
+		String getString();
+	}
+
 	private MSLog() {
 	}
 
@@ -318,6 +326,14 @@ public class MSLog {
 		Log(modules, level, message, t, true);
 	}
 
+	public void Log(Tag modules, LogLevel level, StringProvider message, Target t) {
+		Log(modules, level, message, t, true);
+	}
+
+	public void Log(Tag modules, LogLevel level, String message, Target t, boolean printScreen) {
+		Log(modules, level, () -> message, t, printScreen);
+	}
+
 	/**
 	 * Logs the given message at the specified level.
 	 *
@@ -327,7 +343,7 @@ public class MSLog {
 	 * @param t
 	 * @param printScreen
 	 */
-	public void Log(Tag modules, LogLevel level, String message, Target t, boolean printScreen) {
+	public void Log(Tag modules, LogLevel level, StringProvider message, Target t, boolean printScreen) {
 		LogLevel moduleLevel = GetLevel(modules);
 		if(moduleLevel == LogLevel.OFF && !Prefs.ScreamErrors()) {
 			return; //Bail as quick as we can!
@@ -335,7 +351,7 @@ public class MSLog {
 		if(moduleLevel.level >= level.level || (moduleLevel == LogLevel.ERROR && Prefs.ScreamErrors())) {
 			//We want to do the log
 			try {
-				Static.LogDebug(root, "[" + level.name() + "][" + modules.getName() + "] " + message
+				Static.LogDebug(root, "[" + level.name() + "][" + modules.getName() + "] " + message.getString()
 						+ (t != Target.UNKNOWN ? " " + t.toString() : ""), level, printScreen);
 			} catch (IOException e) {
 				//Well, shoot.

@@ -382,6 +382,12 @@
 			<artifactId>activation</artifactId>
 			<version>1.1.1</version>
 		</dependency>
+		<!-- Eclipse Public License, Version 2.0 -->
+		<dependency>
+			<groupId>org.eclipse.lsp4j</groupId>
+			<artifactId>org.eclipse.lsp4j</artifactId>
+			<version>0.8.0</version>
+		</dependency>
 	</dependencies>
 	<distributionManagement>
 		<site>
@@ -537,6 +543,18 @@
 									<include>postgresql:postgresql:jar:*</include>
 									<include>org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:jar:*</include>
 									<include>org.brotli:dec:jar:*</include>
+									<include>org.eclipse.lsp4j:org.eclipse.lsp4j:jar:*</include>
+									<include>org.eclipse.lsp4j:org.eclipse.lsp4j.generator:jar:*</include>
+									<include>org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc:jar:*</include>
+									<include>org.eclipse.xtend:org.eclipse.xtend.lib:jar:*</include>
+									<include>org.eclipse.xtend:org.eclipse.xtend.lib.macro:jar:*</include>
+									<include>org.eclipse.xtext:org.eclipse.xtext.xbase.lib:jar:*</include>
+									<!-- We don't currently actually depend on these 2, but lsp4j does, so we
+										need to shade it in. In the future, we may rip out org.json:json,
+										and replace it with this, however, in which case we only need to
+										add it to the dependecies list to fully integrate it. -->
+									<include>com.google.code.gson:gson:jar:*</include>
+									<include>com.google.guava:guava:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -640,6 +658,14 @@
 									<pattern>org.brotli</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.brotli</shadedPattern>
 								</relocation>
+								<relocation>
+									<pattern>org.eclipse</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.eclipse</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.google</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.google</shadedPattern>
+								</relocation>
 							</relocations>
 							<filters>
 								<filter>
@@ -735,6 +761,79 @@
 										<include>**</include>
 									</includes>
 								</filter>
+								<filter>
+									<artifact>org.eclipse.lsp4j:org.eclipse.lsp4j:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>org.eclipse.lsp4j:org.eclipse.lsp4j.generator:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>org.eclipse.xtend:org.eclipse.xtend.lib:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>org.eclipse.xtend:org.eclipse.xtend.lib.macro:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>org.eclipse.xtext:org.eclipse.xtext.xbase.lib:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>com.google.code.gson:gson:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>com.google.guava:guava:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								
 							</filters>
 						</configuration>
 					</execution>

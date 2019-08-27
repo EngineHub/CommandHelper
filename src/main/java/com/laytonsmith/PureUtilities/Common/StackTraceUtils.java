@@ -58,4 +58,48 @@ public final class StackTraceUtils {
 			throw new RuntimeException(ex);
 		}
 	}
+
+	/**
+	 * Returns the name of the current method. This method is lambda aware, that is, if a code inside a lambda
+	 * calls this method, it continues walking up the chain until it finds the actual full method that's calling
+	 * this method.
+	 * @return
+	 */
+	public static String currentMethod() {
+		// We unfortunately need to duplicate code here, since we can't add to the stack.
+		StackTraceElement[] st = Thread.currentThread().getStackTrace();
+		String found = null;
+		int trace = 1;
+		while(found == null) {
+			trace++;
+			String m = st[trace].getMethodName();
+			// If this is a lambda, we want to go up one more.
+			if(!m.startsWith("lambda$")) {
+				found = m;
+			}
+		}
+		return found;
+	}
+
+	/**
+	 * Returns the name of the current method. This method is lambda aware, that is, if a code inside a lambda
+	 * calls this method, it continues walking up the chain until it finds the actual full method that's calling
+	 * this method, unless includeLambdas is false.
+	 * @param includeLambdas
+	 * @return
+	 */
+	public static String currentMethod(boolean includeLambdas) {
+		StackTraceElement[] st = Thread.currentThread().getStackTrace();
+		String found = null;
+		int trace = 1;
+		while(found == null) {
+			trace++;
+			String m = st[trace].getMethodName();
+			// If this is a lambda, we want to go up one more.
+			if(includeLambdas || !m.startsWith("lambda$")) {
+				found = m;
+			}
+		}
+		return found;
+	}
 }

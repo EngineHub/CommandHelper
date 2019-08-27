@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.FieldMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.MethodMirror;
+import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,17 +31,18 @@ public class MainSandbox {
 	}
 
     public static void main(String[] args) throws Exception {
-		ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
-		cd.addThisJar();
+		System.out.println(StackTraceUtils.currentMethod());
+		next();
+	}
 
-		ClassMirror<Test2> cm = cd.getMirrorFromClass(Test2.class);
-		FieldMirror field = cm.getField("field");
-		MethodMirror method = cm.getMethod("method", Class.class);
-		MethodMirror method2 = cm.getMethod("method2", new Class[]{int.class, int.class, int.class});
-//		System.out.println(method.getElementSignature());
-//		System.out.println(method2.getElementSignature());
-//		System.out.println(field.getElementSignature());
-		System.out.println(method2.loadMethod().getGenericReturnType());
+	public static void next() {
+		MSLog.StringProvider p = () -> "Method: " + StackTraceUtils.currentMethod(true);
+		System.out.println(p.getString());
+		System.out.println(lambda().getString());
+	}
+
+	public static MSLog.StringProvider lambda() {
+		return () -> "Method: " + StackTraceUtils.currentMethod();
 	}
 
 }
