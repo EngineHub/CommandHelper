@@ -366,30 +366,10 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		return this;
 	}
 
-	@Override
-	public void didOpen(DidOpenTextDocumentParams params) {
-		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
-//		params.getTextDocument().
-//		documents.put(params.getTextDocument(), )
-	}
-
-	@Override
-	public void didChange(DidChangeTextDocumentParams params) {
-		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
-		logv(() -> "Changing " + params);
-	}
-
-	@Override
-	public void didClose(DidCloseTextDocumentParams params) {
-		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
-	}
-
-	@Override
-	public void didSave(DidSaveTextDocumentParams params) {
-		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
+	public void doCompilation(String uri) {
 		processors.execute(() -> {
 			Set<ConfigCompileException> exceptions = new HashSet<>();
-			String code = null;
+			String code;
 			// Eventually we want to rework this so that this is available
 			Set<Class<? extends Environment.EnvironmentImpl>> envs = new HashSet<>();
 			for(Class<Environment.EnvironmentImpl> c
@@ -398,7 +378,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 			}
 			TokenStream tokens = null;
 			try {
-				File f = new File(params.getTextDocument().getUri().replaceFirst("file://", ""));
+				File f = new File(uri.replaceFirst("file://", ""));
 				logd(() -> "Compiling " + f);
 				code = FileUtil.read(f);
 				tokens = MethodScriptCompiler.lex(code, f, true);
@@ -423,9 +403,32 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 			}
 			// We need to report to the client always, with an empty list, implying that all problems are fixed.
 			PublishDiagnosticsParams diagnostics
-					= new PublishDiagnosticsParams(params.getTextDocument().getUri(), diagnosticsList);
+					= new PublishDiagnosticsParams(uri, diagnosticsList);
 			client.publishDiagnostics(diagnostics);
 		});
+	}
+
+	@Override
+	public void didOpen(DidOpenTextDocumentParams params) {
+		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
+		doCompilation(params.getTextDocument().getUri());
+	}
+
+	@Override
+	public void didChange(DidChangeTextDocumentParams params) {
+		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
+		logv(() -> "Changing " + params);
+	}
+
+	@Override
+	public void didClose(DidCloseTextDocumentParams params) {
+		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
+	}
+
+	@Override
+	public void didSave(DidSaveTextDocumentParams params) {
+		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
+		doCompilation(params.getTextDocument().getUri());
 	}
 
 	public Range convertTargetToRange(TokenStream tokens, Target t) {
@@ -443,7 +446,11 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 			// Something went wrong, but we always want an error to show up, so set this here
 			tokenLength = 1;
 		}
-		return new Range(new Position(t.line() - 1, t.col()), new Position(t.line() - 1, t.col() + tokenLength));
+		// I'm not sure if the column offset -2 is because of a bug in the code target calculation,
+		// or due to how VSCode indexes the column numbers, but either way it seems most all errors
+		// suffer from the weird -2 offset.
+		return new Range(new Position(t.line() - 1, t.col() - 2),
+				new Position(t.line() - 1, t.col() + tokenLength - 2));
 	}
 
 	@Override

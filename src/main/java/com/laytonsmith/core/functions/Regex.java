@@ -634,7 +634,7 @@ public class Regex {
 		try {
 			return Pattern.compile(regex, flags);
 		} catch (PatternSyntaxException e) {
-			throw new CREFormatException(e.getMessage(), t);
+			throw new CREFormatException(e.getMessage(), c.getTarget());
 		}
 	}
 
