@@ -116,15 +116,20 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 					.addArgument(new ArgumentParser.ArgumentBuilder()
 						.setDescription("The host location that the client is running on.")
 						.setUsageName("host")
-						.setRequired()
+						.setOptional()
 						.setName("host")
 						.setArgType(ArgumentParser.ArgumentBuilder.BuilderTypeNonFlag.STRING))
 					.addArgument(new ArgumentParser.ArgumentBuilder()
 						.setDescription("The port the client is running on.")
 						.setUsageName("port")
-						.setRequired()
+						.setOptional()
 						.setName("port")
 						.setArgType(ArgumentParser.ArgumentBuilder.BuilderTypeNonFlag.NUMBER))
+
+					.addArgument(new ArgumentParser.ArgumentBuilder()
+						.setDescription("If set, stdio is used instead of socket connections.")
+						.asFlag()
+						.setName("stdio"))
 
 					.setErrorOnUnknownArgs(false)
 					.addArgument(new ArgumentParser.ArgumentBuilder()
@@ -138,21 +143,35 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		@Override
 		@SuppressWarnings("UseSpecificCatch")
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
-			String hostname = parsedArgs.getStringArgument("host");
-			int port = parsedArgs.getNumberArgument("port").intValue();
+			boolean useStdio = parsedArgs.isFlagSet("stdio");
+			String hostname = null;
+			int port = 0;
+			if(!useStdio) {
+				hostname = parsedArgs.getStringArgument("host");
+				port = parsedArgs.getNumberArgument("port").intValue();
+			}
 
-			LangServ langserv = new LangServ();
+			LangServ langserv = new LangServ(useStdio);
 			langserv.log("Starting up Language Server: " + parsedArgs.getRawArguments(), LogLevel.INFO);
 			try {
-				Socket socket = new Socket(hostname, port);
-				socket.setKeepAlive(true);
-
-				InputStream is = socket.getInputStream();
-				OutputStream os = socket.getOutputStream();
+				InputStream is;
+				OutputStream os;
+				if(!useStdio) {
+					Socket socket = new Socket(hostname, port);
+					socket.setKeepAlive(true);
+					is = socket.getInputStream();
+					os = socket.getOutputStream();
+				} else {
+					is = System.in;
+					os = System.out;
+				}
 				Launcher<LanguageClient> launcher = LSPLauncher.createServerLauncher(langserv, is, os);
 				LanguageClient client = launcher.getRemoteProxy();
 				((LanguageClientAware) langserv).connect(client);
 				langserv.log("Starting language server", LogLevel.INFO);
+				if(useStdio) {
+					System.err.println("Started Language Server, awaiting connections");
+				}
 				launcher.startListening();
 			} catch (Throwable t) {
 				t.printStackTrace(System.err);
@@ -225,6 +244,12 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		log(s, LogLevel.VERBOSE);
 	}
 	//</editor-fold>
+
+	public LangServ(boolean useStdio) {
+		this.usingStdio = useStdio;
+	}
+
+	private final boolean usingStdio;
 
 	private LanguageClient client;
 	private final Map<String, Map<Integer, ParseTree>> documents = new HashMap<>();
@@ -358,6 +383,9 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				"i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "_"));
 		sc.setCompletionProvider(co);
 		cf.complete(new InitializeResult(sc));
+		if(usingStdio) {
+			System.err.println("Language Server Connected");
+		}
 		return cf;
 	}
 

@@ -1,0 +1,46 @@
+
+When writing a programming language, it can be extremely helpful to use the tools available to you to assist you in
+development. A lot of work has gone into the tooling surrounding the language, to help you code better and faster.
+
+The only officially supported Development Environment is the Visual Studio Code editor, though good support exists for
+other environments as well. This page will highlight the recommended setup to help you get started faster. If you
+already have a preferred environment, you may find it interesting to know that MethodScript implements the 
+[https://microsoft.github.io/language-server-protocol/ Language Server Protocol], and so it may be quite easy to plug
+into other environments that aren't listed here.
+
+There is basic syntax highlighter support for several environments as well, which you can generate locally yourself with
+the command line tool "java -jar MethodScript.jar syntax". Run the tool to see what environments are supported.
+
+=== Visual Studio Code ===
+
+Going far beyond basic syntax highlighting, Visual Studio Code (VSCode) is the only officially supported environment. 
+VSCode is cross platform, open source, and provides great support for the Language Server. First, install VSCode from
+[https://code.visualstudio.com/download here].
+
+Once VSCode is installed, open the extensions tab on the left, and search for the "MethodScriptVSC" extension in
+the marketplace. Install, and restart VSCode.
+
+On first launch, you need to select your profile. Your profile is simply the location of your jar file, and multiple
+versions can be supported, if you're using older or newer versions of MethodScript. You will be prompted to select
+your profile when you first open an .ms or .msa file, but you can actively select your profile at any time by using
+the command palette (Ctrl+Shift+P/Cmd+Shift+P) and typing "Choose MethodScript Profile".
+
+This does two things, first, it loads up syntax highlighting files directly from the jar, and secondly, it kicks off
+the MethodScript Language Server. The syntax highlighting provides basic syntax support, and also provides the hover
+text that appears when you hover over a method. However, the most useful part is the language server. Each time you
+save a file, it is automatically compiled and checked for compiler errors and warnings. These are highlighted for you
+both directly in the text editor window, but also in the problems list (Ctrl+Shift+M/Cmd+Shift+M). This can help you
+see at a glance if your scripts will compile. Code completion is also provided. Function names can be autocompleted,
+just by beginning to type, or by hitting Ctrl+Space to bring up the IntelliSense panel. The function names are all
+listed, and you can also see information about parameters and general function documentation.
+
+=== Vim ===
+
+Minimal support can also be obtained in vim, though this is not nearly as feature rich as other IDEs. First, you should
+install the syntax highlighter files, which provides basic support for highlighting. Next, install the vim-lsp plugin,
+found [https://github.com/prabirshrestha/vim-lsp here]. For the cmd, use
+<%PRE|['java', '-jar', 'absolute-path-to-jar-file', 'lang-serv', '--stdio']%>
+
+And for the whitelist, use TODO: Need to figure out what the whitelist parameter should be.
+
+Instructions for configuring the vim-lsp plugin can be found in the readme.
