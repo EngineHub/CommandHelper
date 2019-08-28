@@ -66,7 +66,7 @@ public class MetaTest {
 		MCPlayer fakePlayer2 = GetOnlinePlayer("Player02", fakeServer);
 		when(fakeServer.getPlayer("Player02")).thenReturn(fakePlayer2);
 		when(fakePlayer.isOp()).thenReturn(true);
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, null, true), null, envs), env, null, null);
 		//verify(fakePlayer2).performCommand("cmd yay");
 		verify(fakeServer).dispatchCommand(fakePlayer2, "cmd yay");
 	}
@@ -88,7 +88,7 @@ public class MetaTest {
 		String script = "scriptas('Player02', 'newlabel', msg(reflect_pull('label'))); msg(reflect_pull('label'))";
 		MCPlayer fakePlayer2 = GetOnlinePlayer("Player02", fakeServer);
 		when(fakeServer.getPlayer("Player02")).thenReturn(fakePlayer2);
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), null, envs), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, null, true), null, envs), env, null, null);
 		verify(fakePlayer2).sendMessage("newlabel");
 		verify(fakePlayer).sendMessage("*");
 	}

@@ -48,12 +48,17 @@ public class OptimizationUtilities {
 	 * This function takes a string script, and returns an equivalent, optimized script.
 	 *
 	 * @param script
+	 * @param env
+	 * @param envs
+	 * @param source
 	 * @return
 	 * @throws ConfigCompileException
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileGroupException
 	 */
-	public static String optimize(String script, Set<Class<? extends Environment.EnvironmentImpl>> envs,
+	public static String optimize(String script, Environment env,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs,
 			File source) throws ConfigCompileException, ConfigCompileGroupException {
-		ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, source, true), null, envs);
+		ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, source, true), null, envs);
 		StringBuilder b = new StringBuilder();
 		//The root always contains null.
 		for(ParseTree child : tree.getChildren()) {

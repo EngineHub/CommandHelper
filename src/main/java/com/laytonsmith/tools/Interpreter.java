@@ -769,7 +769,7 @@ public final class Interpreter {
 		ProfilePoint compile = env.getEnv(GlobalEnv.class).GetProfiler().start("Compilation", LogLevel.VERBOSE);
 		final ParseTree tree;
 		try {
-			TokenStream stream = MethodScriptCompiler.lex(script, fromFile, true);
+			TokenStream stream = MethodScriptCompiler.lex(script, env, fromFile, true);
 			tree = MethodScriptCompiler.compile(stream, env, env.getEnvClasses());
 		} finally {
 			compile.stop();

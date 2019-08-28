@@ -25,7 +25,7 @@ public class OptimizationTest {
 	}
 
 	public String optimize(String script) throws Exception {
-		return OptimizationUtilities.optimize(script, envs, null);
+		return OptimizationUtilities.optimize(script, null, envs, null);
 	}
 
 	@Test
@@ -420,6 +420,6 @@ public class OptimizationTest {
 
 	@Test
 	public void testCommentBlock() throws Exception {
-		assertEquals(2, MethodScriptCompiler.lex("/*/ still a comment -()*/", new File("OptimizationTest"), true, true).size());
+		assertEquals(2, MethodScriptCompiler.lex("/*/ still a comment -()*/", null, new File("OptimizationTest"), true, true).size());
 	}
 }

@@ -5,17 +5,23 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.AbstractCommandLineTool;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Profiles;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -24,12 +30,14 @@ import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.tool;
+import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.tools.docgen.DocGen;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -220,11 +228,27 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 
 	private LanguageClient client;
 	private final Map<String, Map<Integer, ParseTree>> documents = new HashMap<>();
-	private final Executor processors = Executors.newFixedThreadPool(5, new ThreadFactory() {
+	/**
+	 * This executor uses an unbounded thread pool, and should only be used for task in which a user is actively
+	 * waiting for results, however, tasks submitted to this processor will begin immediately, as opposed to the
+	 * lowPriorityProcessors queue, which has a fixed size thread pool.
+	 */
+	private final Executor highPriorityProcessors = Executors.newCachedThreadPool(new ThreadFactory() {
 		private int count = 0;
 		@Override
 		public Thread newThread(Runnable r) {
-			return new Thread(r, "Thread-pool" + (++count));
+			return new Thread(r, "HighPriority-thread-pool-" + (++count));
+		}
+	});
+	/**
+	 * This executor uses a bounded thread pool, and should be used for all tasks that a user is not actively waiting
+	 * on, for instance, compilation of files that are not open.
+	 */
+	private final Executor lowPriorityProcessors = Executors.newFixedThreadPool(5, new ThreadFactory() {
+		private int count = 0;
+		@Override
+		public Thread newThread(Runnable r) {
+			return new Thread(r, "LowPriority-thread-pool-" + (++count));
 		}
 	});
 	private List<CompletionItem> functionCompletionItems = null;
@@ -237,11 +261,14 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	public void connect(LanguageClient client) {
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
 		this.client = client;
-		processors.execute(() -> {
+		highPriorityProcessors.execute(() -> {
 			// Create the base completion list.
 			{
 				List<CompletionItem> list = new ArrayList<>();
 				for(FunctionBase fb : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA, null)) {
+					if(fb.getClass().getAnnotation(hide.class) != null) {
+						continue;
+					}
 					CompletionItem ci = new CompletionItem(fb.getName());
 					ci.setCommitCharacters(Arrays.asList("("));
 					ci.setKind(CompletionItemKind.Function);
@@ -259,7 +286,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				for(Event e : EventList.GetEvents()) {
 					CompletionItem ci = new CompletionItem(e.getName());
 					ci.setCommitCharacters(Arrays.asList("'", "\""));
-					ci.setKind(CompletionItemKind.Event);
+					ci.setKind(CompletionItemKind.Function);
 					final DocGen.EventDocInfo edi = new DocGen.EventDocInfo(e.docs(), e.getName());
 					ci.setDetail("Event Type");
 					StringBuilder description = new StringBuilder();
@@ -366,8 +393,13 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		return this;
 	}
 
-	public void doCompilation(String uri) {
-		processors.execute(() -> {
+	/**
+	 * Compiles the file, on the given thread pool.
+	 * @param threadPool
+	 * @param uri
+	 */
+	public void doCompilation(Executor threadPool, String uri) {
+		threadPool.execute(() -> {
 			Set<ConfigCompileException> exceptions = new HashSet<>();
 			String code;
 			// Eventually we want to rework this so that this is available
@@ -376,13 +408,26 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 					: ClassDiscovery.getDefaultInstance().loadClassesThatExtend(Environment.EnvironmentImpl.class)) {
 				envs.add(c);
 			}
+			Environment env;
+			try {
+				env = Static.GenerateStandaloneEnvironment(false);
+			} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
+				throw new RuntimeException(ex);
+			}
+			CompilerEnvironment compilerEnv = env.getEnv(CompilerEnvironment.class);
+			compilerEnv.setLogCompilerWarnings(false); // No one would see them
+			GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
+			// This disables things like security checks and whatnot. These may be present in the runtime environment,
+			// but it's not possible for us to tell that at this point.
+			gEnv.SetCustom("cmdline", true);
+			File f = new File(uri.replaceFirst("file://", ""));
+			gEnv.SetRootFolder(f.getParentFile());
 			TokenStream tokens = null;
 			try {
-				File f = new File(uri.replaceFirst("file://", ""));
 				logd(() -> "Compiling " + f);
 				code = FileUtil.read(f);
-				tokens = MethodScriptCompiler.lex(code, f, true);
-				MethodScriptCompiler.compile(tokens, null, envs);
+				tokens = MethodScriptCompiler.lex(code, env, f, true);
+				MethodScriptCompiler.compile(tokens, env, envs);
 			} catch (ConfigCompileException e) {
 				exceptions.add(e);
 			} catch (ConfigCompileGroupException e) {
@@ -401,6 +446,17 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 					diagnosticsList.add(d);
 				}
 			}
+			List<CompilerWarning> warnings = compilerEnv.getCompilerWarnings();
+			if(!warnings.isEmpty()) {
+				for(CompilerWarning c : warnings) {
+					Diagnostic d = new Diagnostic();
+					d.setRange(convertTargetToRange(tokens, c.getTarget()));
+					d.setSeverity(DiagnosticSeverity.Warning);
+					d.setMessage(c.getMessage());
+					diagnosticsList.add(d);
+				}
+			}
+
 			// We need to report to the client always, with an empty list, implying that all problems are fixed.
 			PublishDiagnosticsParams diagnostics
 					= new PublishDiagnosticsParams(uri, diagnosticsList);
@@ -411,7 +467,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	@Override
 	public void didOpen(DidOpenTextDocumentParams params) {
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
-		doCompilation(params.getTextDocument().getUri());
+		doCompilation(highPriorityProcessors, params.getTextDocument().getUri());
 	}
 
 	@Override
@@ -428,7 +484,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	@Override
 	public void didSave(DidSaveTextDocumentParams params) {
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
-		doCompilation(params.getTextDocument().getUri());
+		doCompilation(highPriorityProcessors, params.getTextDocument().getUri());
 	}
 
 	public Range convertTargetToRange(TokenStream tokens, Target t) {
@@ -449,8 +505,21 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		// I'm not sure if the column offset -2 is because of a bug in the code target calculation,
 		// or due to how VSCode indexes the column numbers, but either way it seems most all errors
 		// suffer from the weird -2 offset.
-		return new Range(new Position(t.line() - 1, t.col() - 2),
-				new Position(t.line() - 1, t.col() + tokenLength - 2));
+		Position start = new Position(t.line() - 1, t.col() - 2);
+		Position end = new Position(t.line() - 1, t.col() + tokenLength - 2);
+		if(start.getLine() < 0) {
+			start.setLine(0);
+		}
+		if(start.getCharacter() < 0) {
+			start.setCharacter(0);
+		}
+		if(end.getLine() < 0) {
+			end.setLine(0);
+		}
+		if(end.getCharacter() < 0) {
+			end.setCharacter(1);
+		}
+		return new Range(start, end);
 	}
 
 	@Override
@@ -477,7 +546,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
 		logv(() -> String.format("Completion request sent: %s", position));
 		CompletableFuture<Either<List<CompletionItem>, CompletionList>> result = new CompletableFuture<>();
-		processors.execute(() -> {
+		highPriorityProcessors.execute(() -> {
 			result.complete(Either.forLeft(functionCompletionItems));
 			logv(() -> "Completion list returned with " + functionCompletionItems.size() + " items");
 		});

@@ -1,6 +1,6 @@
 <!
 	strict;
-	name: ArrayAccess;
+	name: ArrayAccess.ms;
 	author: cailin;
 	created: 2019-04-14;
 	description: The file containing the type ms.lang.ArrayAccess;
@@ -21,7 +21,7 @@ public native interface ms.lang.ArrayAccess<K, V> {
 	 * @throws RangeException If the value is out of range, that is, the key does not exist.
 	 */
 	V get(K @key) throws RangeException;
-	
+
 	/**
 	 * Returns a set of all possible keys in this object.
 	 */

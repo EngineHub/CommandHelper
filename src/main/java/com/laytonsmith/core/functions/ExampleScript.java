@@ -110,7 +110,7 @@ public class ExampleScript {
 				+ c.getEnclosingClass().getSimpleName() + ":" + functionName + "(): \"" + description + "\"\n" + MCChatColor.PLAIN_WHITE);
 		try {
 			Environment env = Static.GenerateStandaloneEnvironment();
-			this.script = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script,
+			this.script = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null,
 					new File((OSUtils.GetOS() == OSUtils.OS.WINDOWS ? "C:\\" : "/") + "Examples.ms"), true), env,
 					// We can't send null here, or it errors out, but we really do want to bypass the linking in
 					// this instance. Therefore, we just return a list of all environments. We can't run the examples

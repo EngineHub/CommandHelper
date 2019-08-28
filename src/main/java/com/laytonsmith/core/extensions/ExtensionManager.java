@@ -5,9 +5,11 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscoveryCache;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.AnnotationMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicClassLoader;
+import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
@@ -31,8 +33,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+//import java.nio.file.Files;
+//import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -149,13 +151,14 @@ public class ExtensionManager {
 		// don't load stuff we aren't supposed to. This is in case the shutdown
 		// cleanup wasn't successful on the last run.
 		for(File f : extCache.listFiles()) {
-			try {
-				Files.delete(f.toPath());
-			} catch (IOException ex) {
-				Static.getLogger().log(Level.WARNING,
-						"[CommandHelper] Could not delete loose file "
-						+ f.getAbsolutePath() + ": " + ex.getMessage());
-			}
+//			try {
+				FileUtil.recursiveDelete(f);
+//				Files.delete(f.toPath());
+//			} catch (IOException ex) {
+//				Static.getLogger().log(Level.WARNING,
+//						"[CommandHelper] Could not delete loose file "
+//						+ f.getAbsolutePath() + ": " + ex.getMessage());
+//			}
 		}
 
 		// The cache, cd and dcl here will just be thrown away.
@@ -267,7 +270,8 @@ public class ExtensionManager {
 				File newFile = new File(extCache, name.toLowerCase() + ".jar");
 
 				try {
-					Files.copy(f.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+					FileUtil.copy(f, newFile, true);
+//					Files.copy(f.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException ex) {
 					Static.getLogger().log(Level.SEVERE, "Could not copy '"
 							+ f.getName() + "' to cache: " + ex.getMessage());
@@ -311,7 +315,8 @@ public class ExtensionManager {
 					File newFile = new File(extCache, "oldstyle-" + f.getName());
 
 					try {
-						Files.copy(f.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+						FileUtil.copy(f, newFile, true);
+//						Files.copy(f.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 					} catch (IOException ex) {
 						Static.getLogger().log(Level.SEVERE, "Could not copy '"
 								+ f.getName() + "' to cache: " + ex.getMessage());
@@ -460,7 +465,10 @@ public class ExtensionManager {
 
 				if(trk == null) {
 					trk = new ExtensionTracker(url, cd, dcl);
-
+					if(trk.identifier == null) {
+						trk.identifier = StringUtils.replaceLast(new java.io.File(url.getPath().replaceFirst("/", ""))
+								.getName(), ".jar", "");
+					}
 					EXTENSIONS.put(url, trk);
 				}
 
@@ -557,12 +565,13 @@ public class ExtensionManager {
 
 		// Try to delete any loose files in the cache dir.
 		for(File f : cacheDir.listFiles()) {
-			try {
-				Files.delete(f.toPath());
-			} catch (IOException ex) {
-				StreamUtils.GetSystemOut().println("[CommandHelper] Could not delete loose file "
-						+ f.getAbsolutePath() + ": " + ex.getMessage());
-			}
+//			try {
+				FileUtil.recursiveDelete(f);
+//				Files.delete(f.toPath());
+//			} catch (IOException ex) {
+//				StreamUtils.GetSystemOut().println("[CommandHelper] Could not delete loose file "
+//						+ f.getAbsolutePath() + ": " + ex.getMessage());
+//			}
 		}
 	}
 

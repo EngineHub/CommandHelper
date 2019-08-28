@@ -35,6 +35,8 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.ProfilesImpl;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRESQLException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -322,12 +324,14 @@ public class SQL {
 			if(queryData instanceof CFunction) {
 				//If it's a concat or sconcat, warn them that this is bad
 				if(doWarn && ("sconcat".equals(queryData.val()) || "concat".equals(queryData.val()))) {
-					MSLog.GetLogger().w(MSLog.Tags.COMPILER, "Use of concatenated query detected! This"
+					String msg = "Use of concatenated query detected! This"
 							+ " is very bad practice, and could lead to SQL injection vulnerabilities"
 							+ " in your code. It is highly recommended that you use prepared queries,"
 							+ " which ensure that your parameters are properly escaped. If you really"
 							+ " must use concatenation, and you promise you know what you're doing, you"
-							+ " can use " + new unsafe_query().getName() + "() to supress this warning.", t);
+							+ " can use " + new unsafe_query().getName() + "() to supress this warning.";
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+							new CompilerWarning(msg, t, null));
 				}
 			} else if(queryData.isInstanceOf(CString.TYPE)) {
 				//It's a hard coded query, so we can double check parameter lengths and other things

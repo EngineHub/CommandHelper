@@ -36,7 +36,7 @@ public class ObjectManagementTest {
 	}
 
 	public static void Run(String code, Environment env) throws Exception {
-		MethodScriptCompiler.compile(MethodScriptCompiler.lex(code, new File("test.ms"), true), env, envs);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex(code, null, new File("test.ms"), true), env, envs);
 	}
 
 	public ObjectManagementTest() {

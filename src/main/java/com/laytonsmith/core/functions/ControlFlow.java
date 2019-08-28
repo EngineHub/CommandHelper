@@ -8,7 +8,6 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Optimizable;
@@ -17,6 +16,8 @@ import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.BranchStatement;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.compiler.keywords.InKeyword;
@@ -2090,9 +2091,11 @@ public class ControlFlow {
 				throw new CREInsufficientArgumentsException("Expecting at least one argument to " + getName(), t);
 			}
 			if(children.get(0).isConst()) {
-				MSLog.GetLogger().Log(MSLog.Tags.COMPILER, LogLevel.WARNING, "Hardcoding procedure name in "
+				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+						new CompilerWarning("Hardcoding procedure name in "
 						+ getName() + ", which is inefficient. Consider calling the procedure directly if the"
-						+ " procedure name is known at compile time.", t);
+						+ " procedure name is known at compile time.", t,
+								FileOptions.SuppressWarning.HardcodedDynamicParameter));
 			}
 			return null;
 		}

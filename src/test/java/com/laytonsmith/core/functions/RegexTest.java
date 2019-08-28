@@ -97,7 +97,7 @@ public class RegexTest {
 	//Here, it's a compile error, since we're using it statically
 	@Test(expected = ConfigCompileException.class)
 	public void testRegFailureStatic() throws Exception {
-		MethodScriptCompiler.compile(MethodScriptCompiler.lex("reg_match('(?i)asd(', 'irrelevant')", null, true), null,
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex("reg_match('(?i)asd(', 'irrelevant')", null, null, true), null,
 				envs);
 	}
 

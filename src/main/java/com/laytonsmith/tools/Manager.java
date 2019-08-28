@@ -97,7 +97,7 @@ public class Manager {
 		pl("Starting the Data Manager...");
 		try {
 			Environment env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
-			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("msg()", null, true),
+			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("msg()", env, null, true),
 					env, null), env, null, null);
 		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
 		}
@@ -454,7 +454,7 @@ public class Manager {
 		try {
 			Environment env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
 			Mixed c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(
-					MethodScriptCompiler.lex(valueScript, null, true), env, null), env, null, null);
+					MethodScriptCompiler.lex(valueScript, env, null, true), env, null), env, null, null);
 			String value = Construct.json_encode(c, Target.UNKNOWN);
 			pl(CYAN + "Adding: " + WHITE + value);
 			String[] k = key.split("\\.");

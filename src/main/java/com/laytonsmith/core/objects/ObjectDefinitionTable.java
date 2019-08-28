@@ -120,7 +120,7 @@ public final class ObjectDefinitionTable implements Iterable<ObjectDefinition> {
 					.forEach((file) -> {
 						try {
 							String script = FileUtil.read(file);
-							TokenStream ts = MethodScriptCompiler.lex(script, file, true);
+							TokenStream ts = MethodScriptCompiler.lex(script, env, file, true);
 							MethodScriptCompiler.compile(ts, env, envs);
 						} catch (ConfigCompileGroupException g) {
 							oops.addAll(g.getList());

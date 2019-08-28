@@ -31,16 +31,20 @@ public final class MethodScriptStaticCompiler {
 	 *
 	 * @param script
 	 * @param platform
+	 * @param env
 	 * @param envs
 	 * @param file
 	 * @return
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileGroupException
 	 */
 	public static String compile(String script, api.Platforms platform,
+			Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, File file)
 			throws ConfigCompileException, ConfigCompileGroupException {
 		//First, we optimize. The "core" functions are always run through
 		//the native interpreter's compiler for optimization.
-		ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, file, true), null, envs);
+		ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, file, true), null, envs);
 		StringBuilder b = new StringBuilder();
 		for(ParseTree node : tree.getChildren()) {
 			go(node, b, platform, envs);

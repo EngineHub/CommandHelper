@@ -21,6 +21,8 @@ import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.BranchStatement;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.constructs.Auto;
@@ -377,7 +379,9 @@ public class DataHandling {
 					&& children.get(1).getData() instanceof IVariable) {
 				if(((IVariable) children.get(0).getData()).getVariableName().equals(
 						((IVariable) children.get(1).getData()).getVariableName())) {
-					MSLog.GetLogger().Log(MSLog.Tags.COMPILER, LogLevel.WARNING, "Assigning a variable to itself", t);
+					String msg = "Assigning a variable to itself";
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+							new CompilerWarning(msg, t, null));
 				}
 			}
 			if(children.get(0).getData() instanceof CFunction && array_get.equals(children.get(0).getData().val())) {
@@ -2767,7 +2771,7 @@ public class DataHandling {
 				if(script.isInstanceOf(CClosure.TYPE)) {
 					throw new CRECastException("Closures cannot be eval'd directly. Use execute() instead.", t);
 				}
-				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file(), true),
+				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), env, t.file(), true),
 						env, env.getEnvClasses());
 				StringBuilder b = new StringBuilder();
 				int count = 0;
@@ -2825,8 +2829,10 @@ public class DataHandling {
 				throw new ConfigCompileException(getName() + " expects only one argument", t);
 			}
 			if(children.get(0).isConst()) {
-				MSLog.GetLogger().Log(MSLog.Tags.COMPILER, LogLevel.WARNING, "Eval'd code is hardcoded, consider simply using the code directly, as wrapping"
-						+ " hardcoded code in " + getName() + " is much less efficient.", t);
+				String msg = "Eval'd code is hardcoded, consider simply using the code directly, as wrapping"
+						+ " hardcoded code in " + getName() + " is much less efficient.";
+				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+						new CompilerWarning(msg, t, FileOptions.SuppressWarning.HardcodedDynamicParameter));
 			}
 			return null;
 		}

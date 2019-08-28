@@ -2,6 +2,7 @@ package com.laytonsmith.tools.docgen.sitedeploy;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api.Platforms;
@@ -105,7 +106,17 @@ public class APIBuilder {
 					hide athide = ff.getClass().getAnnotation(hide.class);
 					String hidden = athide == null ? null : athide.value();
 					function.put("hidden", hidden);
-					String extId = ExtensionManager.getTrackers().get(ff.getSourceJar()).getIdentifier();
+					ExtensionTracker et = ExtensionManager.getTrackers().get(ff.getSourceJar());
+					String extId;
+					if(et != null) {
+						extId = et.getIdentifier();
+					} else {
+						// Legacy extensions don't have an ExtensionTracker, so we need to come up with a name
+						// for them. Just use the jar name, but remove the oldstyle- that is prepended by the
+						// extension manager.
+						extId = StringUtils.replaceLast(new java.io.File(ff.getSourceJar().getPath().replaceFirst("/", ""))
+								.getName().replaceFirst("oldstyle-", ""), ".jar", "");
+					}
 					function.put("source", extId);
 					api.put(ff.getName(), function);
 				}

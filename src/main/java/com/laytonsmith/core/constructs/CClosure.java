@@ -3,11 +3,13 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Callable;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
@@ -55,7 +57,10 @@ public class CClosure extends Construct implements Callable {
 		this.returnType = returnType;
 		for(String pName : names) {
 			if(pName.equals("@arguments")) {
-				MSLog.GetLogger().w(MSLog.Tags.COMPILER, "This closure overrides the builtin @arguments parameter", t);
+				env.getEnv(CompilerEnvironment.class)
+						.addCompilerWarning(node.getFileOptions(),
+								new CompilerWarning("This closure overrides the builtin @arguments parameter",
+								t, FileOptions.SuppressWarning.OverrideArguments));
 				break;
 			}
 		}

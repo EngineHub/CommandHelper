@@ -326,7 +326,8 @@ public final class FileUtil {
 						System.in));
 				response = in.readLine();
 			}
-			if((overwrite != null && overwrite == false) || (!response.equals("Y") && !response.equals("y"))) {
+			if((overwrite != null && overwrite == false)
+					|| (response != null && !response.equals("Y") && !response.equals("y"))) {
 				throw new IOException("FileCopy: "
 						+ "existing file was not overwritten.");
 			}

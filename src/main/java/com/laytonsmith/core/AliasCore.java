@@ -665,7 +665,7 @@ public class AliasCore {
 					ProfilePoint p = parent.profiler.start("Compiling " + fi.file, LogLevel.WARNING);
 					try {
 						tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents,
-								fi.file, false), envs);
+								null, fi.file, false), envs);
 					} finally {
 						p.stop();
 					}
@@ -725,7 +725,7 @@ public class AliasCore {
 				boolean exception = false;
 				try {
 					MethodScriptCompiler.execute(MethodScriptCompiler.compile(
-							MethodScriptCompiler.lex(fi.contents, fi.file, true), env, env.getEnvClasses()),
+							MethodScriptCompiler.lex(fi.contents, env, fi.file, true), env, env.getEnvClasses()),
 							env, null, null);
 				} catch (ConfigCompileGroupException e) {
 					exception = true;

@@ -561,7 +561,7 @@ public class Compiler {
 					}
 				}
 				ParseTree tree;
-				FileOptions options = new FileOptions(new HashMap<String, String>());
+				FileOptions options = new FileOptions(new HashMap<>());
 				Target t = Target.UNKNOWN;
 				if(!list.isEmpty()) {
 					options = list.get(0).getFileOptions();

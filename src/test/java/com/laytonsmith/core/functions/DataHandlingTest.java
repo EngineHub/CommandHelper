@@ -86,7 +86,7 @@ public class DataHandlingTest {
 		//Create the test file
 		File test = new File("unit_test_inc.ms");
 		FileUtil.write("msg('hello')", test);
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("./script.txt"), true), null, envs), env, null, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, new File("./script.txt"), true), null, envs), env, null, null, null);
 		verify(fakePlayer).sendMessage("hello");
 		//delete the test file
 		test.delete();

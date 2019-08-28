@@ -53,6 +53,8 @@ public final class FileOptions {
 	//TODO: Make this non-public once this is all finished.
 
 	public FileOptions(Map<String, String> parsedOptions) {
+		// Note that the keys are lowercased in the map, so they should be lowercase when selecting them from the
+		// map as well.
 		rawOptions = new HashMap<>(parsedOptions);
 		strict = parseBoolean(getDefault(parsedOptions, "strict", null));
 		suppressWarnings = parseEnumSet(getDefault(parsedOptions, "suppresswarnings", ""), SuppressWarning.class);
@@ -100,7 +102,7 @@ public final class FileOptions {
 		List<String> sList = parseList(list);
 		for(String s : sList) {
 			for(T e : type.getEnumConstants()) {
-				if(e.name().equals(s)) {
+				if(e.name().equalsIgnoreCase(s)) {
 					set.add(e);
 					break;
 				}
@@ -292,12 +294,15 @@ public final class FileOptions {
 
 	}
 
+	// TODO: Make these extensible, so extensions can add their own easily
 	public static enum SuppressWarning implements Documentation {
-		// In the future, when some are added, this can be removed, and the rest of the system will work
-		// quite nicely. Perhaps a good first candidate would be to allow string "false" coerced to boolean warning
-		// to be suppressed on a per file basis?
-		Note("There are currently no warning suppressions defined, but some will be added in the future",
-			MSVersion.V0_0_0);
+		UnreachableCode("Code that comes after methods such as return() or exit() won't be run, and represents dead"
+				+ " code, which should usually be removed, or can represent an error with your branching logic.",
+			MSVersion.V3_3_4),
+		HardcodedDynamicParameter("Code that is hardcoded and sent to eval is going to perform worse than simply writing the code"
+				+ " normally.", MSVersion.V3_3_4),
+		OverrideArguments("Defining a variable called @arguments overrides the built in @arguments value,"
+				+ " making it impossible to access.", MSVersion.V3_3_4);
 
 		private SuppressWarning(String docs, Version version) {
 			this.docs = docs;

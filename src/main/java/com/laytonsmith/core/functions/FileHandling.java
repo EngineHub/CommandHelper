@@ -193,6 +193,7 @@ public class FileHandling {
 			if(children.get(0).isDynamic()) {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded paths.", t);
 			}
+
 			String ret = new read().exec(t, env, children.get(0).getData()).val();
 			ParseTree tree = new ParseTree(new CString(ret, t), fileOptions);
 			return tree;

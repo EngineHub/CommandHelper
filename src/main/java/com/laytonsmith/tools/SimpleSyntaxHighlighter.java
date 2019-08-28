@@ -29,7 +29,7 @@ public final class SimpleSyntaxHighlighter {
 
 	public static void main(String[] args) throws Exception {
 		String script = "<!\nstrict: on;\n>";
-		List<Token> ts = MethodScriptCompiler.lex(script, null, true, true);
+		List<Token> ts = MethodScriptCompiler.lex(script, null, null, true, true);
 		for(Token t : ts) {
 			System.out.println(t.type);
 			System.out.println(t.value);
@@ -159,7 +159,7 @@ public final class SimpleSyntaxHighlighter {
 
 	private String highlight() throws Exception {
 		Environment env = Static.GenerateStandaloneEnvironment(false);
-		TokenStream tokens = MethodScriptCompiler.lex(code, null, inPureMscript, true);
+		TokenStream tokens = MethodScriptCompiler.lex(code, env, null, inPureMscript, true);
 		// take out the last token, which is always a newline
 		tokens.remove(tokens.size() - 1);
 		// if the first token is a newline, also take that out.

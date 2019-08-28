@@ -43,7 +43,7 @@ public class TokenStream extends LinkedList<Token> {
 
 	private static FileOptions parseFileOptions(String options) {
 		//Only ; needs escaping. Everything else is just trimmed, and added to the map.
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		boolean inKey = true;
 		StringBuilder buffer = new StringBuilder();
 		String keyName = "";

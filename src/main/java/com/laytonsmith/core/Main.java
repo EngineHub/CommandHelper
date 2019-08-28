@@ -875,12 +875,14 @@ public class Main {
 			ExtensionManager.Cache(MethodScriptFileLocations.getDefault().getExtensionCacheDirectory());
 			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
 			ExtensionManager.Startup();
+			Environment env = Environment.createEnvironment(new CompilerEnvironment());
+			env.getEnv(CompilerEnvironment.class).setLogCompilerWarnings(false);
 			Set<Class<? extends Environment.EnvironmentImpl>> envs = GetEnvironmentValue(parsedArgs);
 			File f = new File(file);
 			String script = FileUtil.read(f);
 			try {
 				try {
-					MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, f, file.endsWith("ms")), null,
+					MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, f, file.endsWith("ms")), null,
 							envs);
 				} catch (ConfigCompileException ex) {
 					Set<ConfigCompileException> s = new HashSet<>(1);
@@ -931,9 +933,11 @@ public class Main {
 			String plain = FileUtil.read(source);
 			Security.setSecurityEnabled(false);
 			String optimized;
+			Environment env = Environment.createEnvironment(new CompilerEnvironment());
+			env.getEnv(CompilerEnvironment.class).setLogCompilerWarnings(false);
 			try {
 				try {
-					optimized = OptimizationUtilities.optimize(plain, envs, source);
+					optimized = OptimizationUtilities.optimize(plain, null, envs, source);
 				} catch (ConfigCompileException ex) {
 					Set<ConfigCompileException> group = new HashSet<>();
 					group.add(ex);

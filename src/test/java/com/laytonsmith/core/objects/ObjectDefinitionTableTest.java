@@ -27,7 +27,7 @@ public class ObjectDefinitionTableTest {
 	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
 
 	private void doCompile(String script) throws Exception {
-		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("Test.ms"), true), env, null);
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, new File("Test.ms"), true), env, null);
 	}
 
 	private ObjectDefinition getObjectDefinition(String fqcn) throws Exception {
