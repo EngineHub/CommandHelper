@@ -136,6 +136,21 @@ public class ParseTree implements Cloneable {
 	}
 
 	/**
+	 * Returns a flat list of all ParseTree nodes. This can be used when an entire tree needs to be scoured for
+	 * information, regardless of visitation order.
+	 *
+	 * @return
+	 */
+	public List<ParseTree> getAllNodes() {
+		List<ParseTree> list = new ArrayList<>();
+		list.add(this);
+		for(ParseTree node : getChildren()) {
+			list.addAll(node.getAllNodes());
+		}
+		return list;
+	}
+
+	/**
 	 * Returns a list of direct children
 	 *
 	 * @return

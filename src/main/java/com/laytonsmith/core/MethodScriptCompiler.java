@@ -12,6 +12,7 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.KeywordList;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.compiler.keywords.ObjectDefinitionKeyword;
+import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CDecimal;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
@@ -1747,6 +1748,7 @@ public final class MethodScriptCompiler {
 		link(tree, compilerErrors, envs);
 		checkLabels(tree, compilerErrors);
 		checkBreaks(tree, compilerErrors);
+		checkLinearComponents(tree, environment, compilerErrors);
 		eliminateDeadCode(tree, environment, envs);
 		if(!compilerErrors.isEmpty()) {
 			if(compilerErrors.size() == 1) {
@@ -1761,6 +1763,22 @@ public final class MethodScriptCompiler {
 		parents.pop();
 		tree = parents.pop();
 		return tree;
+	}
+
+	private static void checkLinearComponents(ParseTree tree, Environment env,
+			Set<ConfigCompileException> compilerErrors) {
+		for(ParseTree m : tree.getAllNodes()) {
+			if(m.getData() instanceof CBareString) {
+				if(m.getFileOptions().isStrict()) {
+					compilerErrors.add(new ConfigCompileException("Use of bare strings in strict mode is not"
+							+ " allowed.", m.getTarget()));
+				} else {
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(m.getFileOptions(),
+							new CompilerWarning("Use of bare string", m.getTarget(),
+									FileOptions.SuppressWarning.UseBareStrings));
+				}
+			}
+		}
 	}
 
 	/**

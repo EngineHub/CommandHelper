@@ -302,7 +302,10 @@ public final class FileOptions {
 		HardcodedDynamicParameter("Code that is hardcoded and sent to eval is going to perform worse than simply writing the code"
 				+ " normally.", MSVersion.V3_3_4),
 		OverrideArguments("Defining a variable called @arguments overrides the built in @arguments value,"
-				+ " making it impossible to access.", MSVersion.V3_3_4);
+				+ " making it impossible to access.", MSVersion.V3_3_4),
+		UseBareStrings("Using bare strings can cause code to error or worse silently change behavior when using future"
+				+ " versions of MethodScript that introduce new keywords. Therefore, it is always recommended to quote"
+				+ " all strings. In strict mode, this is always an error that can't be suppressed.", MSVersion.V3_3_4);
 
 		private SuppressWarning(String docs, Version version) {
 			this.docs = docs;
