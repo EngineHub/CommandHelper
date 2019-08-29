@@ -1,6 +1,6 @@
 <!
 	strict;
-	name: Regex;
+	name: ValidUri.ms;
 	author: cailin;
 	created: 2019-03-13;
 	description: The file containing the type ms.lang.validators.ValidUri;
@@ -19,10 +19,10 @@
  */
 @{Target(value: DECLARATION, type: string)}
 @{RegexValidator(
-	// Stolen shamelessly and without looking back from 
+	// Stolen shamelessly and without looking back from
 	// https://stackoverflow.com/a/190405/731752
 	comp_read('uri_validator.txt')
 )}
 public annotation ms.lang.validators.ValidUri {
-	
+
 }

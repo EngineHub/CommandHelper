@@ -299,7 +299,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 						continue;
 					}
 					CompletionItem ci = new CompletionItem(fb.getName());
-					ci.setCommitCharacters(Arrays.asList("("));
+//					ci.setCommitCharacters(Arrays.asList("("));
 					ci.setKind(CompletionItemKind.Function);
 					DocGen.DocInfo di = new DocGen.DocInfo(fb.docs());
 					ci.setDetail(di.ret);
@@ -308,7 +308,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 					list.add(ci);
 				}
 				functionCompletionItems = list;
-				logv("Function completion list completed.");
+				logv("Function completion list completed. (" + list.size() + ")");
 			}
 			{
 				List<CompletionItem> list = new ArrayList<>();
@@ -348,7 +348,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 					list.add(ci);
 				}
 				eventCompletionItems = list;
-				logv("Event completion list completed.");
+				logv("Event completion list completed. (" + list.size() + ")");
 			}
 			{
 				List<CompletionItem> list = new ArrayList<>();
@@ -366,7 +366,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 					}
 				}
 				objectCompletionItems = list;
-				logv("Object completion list completed.");
+				logv("Object completion list completed. (" + list.size() + ")");
 			}
 			allCompletionItems = new ArrayList<>();
 			allCompletionItems.addAll(functionCompletionItems);

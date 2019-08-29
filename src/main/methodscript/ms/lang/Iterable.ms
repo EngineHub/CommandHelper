@@ -1,6 +1,6 @@
 <!
 	strict;
-	name: Iterable;
+	name: Iterable.ms;
 	author: cailin;
 	created: 2019-04-13;
 	description: The file containing the type ms.lang.Iterable;

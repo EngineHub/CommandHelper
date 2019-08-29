@@ -1,6 +1,6 @@
 <!
 	strict;
-	name: Signature;
+	name: Signature.ms;
 	author: cailin;
 	created: 2019-04-14;
 	description: The file containing the type ms.lang.Signature;
@@ -8,7 +8,7 @@
 >
 
 /**
- * When added to an annotation, implies that this annotation can only be added to a method with the given signature. 
+ * When added to an annotation, implies that this annotation can only be added to a method with the given signature.
  * It is an error to add this to an annotation that itself does not itself target {@link TargetType::METHOD}. The return
  * type of the method can be specified, using the {@code type} parameter of the Target annotation, this annotation
  * specifies the parameter types.

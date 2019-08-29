@@ -1,6 +1,6 @@
 <!
 	strict;
-	name: Comparable;
+	name: Comparable.ms;
 	author: cailin;
 	created: 2019-04-08;
 	description: The file containing the type ms.lang.Comparable;
@@ -23,7 +23,7 @@ public interface ms.lang.Comparable<T> {
 	 * If this returns true, that indicates that this object is less than (and not equal to) the passed in object.
 	 * If these were numbers, and @this were 1, and @obj were 2, this should return true. If @obj were 1, this should
 	 * return false. If @obj were 0, this should return false.
-	 * 
+	 *
 	 * @param obj The parameter to compare against
 	 */
 	@{BinaryOperatorOverload("<")}
@@ -33,7 +33,7 @@ public interface ms.lang.Comparable<T> {
 	 * If this returns true, that indicates that this object is greater than (and not equal to) the passed in object.
 	 * If these were numbers, and @this were 1, and @obj were 2, this should return false. If @obj were 1, this should
 	 * return false. If @obj were 0, this should return true.
-	 * 
+	 *
 	 * @param obj The parameter to compare against
 	 */
 	@{BinaryOperatorOverload(">")}

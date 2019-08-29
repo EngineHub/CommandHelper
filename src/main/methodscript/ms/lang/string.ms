@@ -1,6 +1,6 @@
 <!
 	strict;
-	name: string;
+	name: string.ms;
 	author: cailin;
 	created: 2019-03-15;
 	description: The file containing the type ms.lang.string;
@@ -24,7 +24,7 @@ public native class ms.lang.string implements Sliceable, Iterable {
 	 * Creates a new string, equal to the provided string. The two instances will be equal, but not ref_equal.
 	 */
 	public native string(string @copy);
-	
+
 	/**
 	 * Returns a new string that has been lowercased, per the current locale definition of "lowercase".
 	 * @returns A lowercased string.
@@ -65,5 +65,5 @@ public native class ms.lang.string implements Sliceable, Iterable {
 
 	@{Override}
 	public native int size();
-	
+
 }

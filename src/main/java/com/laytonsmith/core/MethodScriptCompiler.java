@@ -1742,7 +1742,7 @@ public final class MethodScriptCompiler {
 
 		Stack<List<Procedure>> procs = new Stack<>();
 		procs.add(new ArrayList<>());
-		processKeywords(tree);
+		processKeywords(tree, compilerErrors);
 		optimizeAutoconcats(tree, environment, envs, compilerErrors);
 		optimize(tree, environment, envs, procs, compilerErrors);
 		link(tree, compilerErrors, envs);
@@ -2501,14 +2501,14 @@ public final class MethodScriptCompiler {
 	 *
 	 * @param tree
 	 */
-	private static void processKeywords(ParseTree tree) throws ConfigCompileException {
+	private static void processKeywords(ParseTree tree, Set<ConfigCompileException> compileErrors) {
 		// Keyword processing
 		List<ParseTree> children = tree.getChildren();
 		for(int i = 0; i < children.size(); i++) {
 			ParseTree node = children.get(i);
 			// Keywords can be standalone, or a function can double as a keyword. So we have to check for both
 			// conditions.
-			processKeywords(node);
+			processKeywords(node, compileErrors);
 			if(node.getData() instanceof CKeyword
 					|| (node.getData() instanceof CLabel && ((CLabel) node.getData()).cVal() instanceof CKeyword)
 					|| (node.getData() instanceof CFunction && KeywordList.getKeywordByName(node.getData().val()) != null)) {
@@ -2516,10 +2516,14 @@ public final class MethodScriptCompiler {
 				// remaining nodes, so that subchildren that need processing will be finished, and our current tree level will
 				// be able to independently process it. We don't want to process THIS level though, just the children of this level.
 				for(int j = i + 1; j < children.size(); j++) {
-					processKeywords(children.get(j));
+					processKeywords(children.get(j), compileErrors);
 				}
 				// Now that all the children of the rest of the chain are processed, we can do the processing of this level.
-				i = KeywordList.getKeywordByName(node.getData().val()).process(children, i);
+				try {
+					i = KeywordList.getKeywordByName(node.getData().val()).process(children, i);
+				} catch (ConfigCompileException ex) {
+					compileErrors.add(ex);
+				}
 			}
 		}
 

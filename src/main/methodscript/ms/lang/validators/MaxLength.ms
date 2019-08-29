@@ -1,6 +1,6 @@
 <!
 	strict;
-	name: Regex;
+	name: MaxLength.ms;
 	author: cailin;
 	created: 2019-03-13;
 	description: The file containing the type ms.lang.validators.MaxLength;

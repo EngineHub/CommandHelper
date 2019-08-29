@@ -1,6 +1,6 @@
 <!
 	strict;
-	name: Equals;
+	name: Equals.ms;
 	author: cailin;
 	created: 2019-04-08;
 	description: The file containing the type ms.lang.Equals;

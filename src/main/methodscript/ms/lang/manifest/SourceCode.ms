@@ -1,6 +1,6 @@
 <!
 	strict;
-	name: SourceCode;
+	name: SourceCode.ms;
 	author: cailin;
 	created: 2019-03-13;
 	description: The file containing the type ms.lang.manifest.SourceCode;
@@ -23,7 +23,7 @@ public interface ms.lang.manifest.SourceCode {
 	 */
 	string @system;
 
-	
+
 	/**
 	 * The URL to the source control system, which should be used for opening in a web browser.
 	 */

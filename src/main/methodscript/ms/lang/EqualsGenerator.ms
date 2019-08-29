@@ -1,6 +1,6 @@
 <!
 	strict;
-	name: EqualsGenerator;
+	name: EqualsGenerator.ms;
 	author: cailin;
 	created: 2019-04-08;
 	description: The file containing the type ms.lang.EqualsGenerator;
@@ -11,10 +11,10 @@
  * This annotation can be tagged on classes that wish to use the modified default
  * equals and hashCode handling. Any fields that should be considered in the calculation of object
  * equality should be further tagged with the @{Equals} annotation. This mechanism
- * provides both an equals method and if the class implements Hashable, a hashCode method, 
+ * provides both an equals method and if the class implements Hashable, a hashCode method,
  * and it is an error to both tag
  * a class with this annotation, and provide an implementation of equals (or hashCode).
- * 
+ *
  * If the tagged class does not implement Hashable, then no hashCode method is provided.
  *
  * If a class that is tagged with this annotation is subclassed, then the subclass will
@@ -24,9 +24,9 @@
  * be wrong (though not necessarily, which is why the annotation is not automatically inherited.)
  *
  * The default implementation of hashCode provided by this mechanism is based on the implementation suggested in
- * Josh Bloch's *Effective Java*. Two random, large, prime numbers are picked, a, and b. The hash is set to 
+ * Josh Bloch's *Effective Java*. Two random, large, prime numbers are picked, a, and b. The hash is set to
  * a, then, for each field that is marked with @{Equals}, the hash is multiplied by b, and then the hash code
- * of the field is added to it (0 is used if the field is null). 
+ * of the field is added to it (0 is used if the field is null).
  * This process is repeated, until all fields are considered. In general, this
  * is considered a good and robust hashCode, and should generally suffice for most all use cases. However, this
  * runs the risk that each time the code is recompiled, the prime values selected will change. This is generally

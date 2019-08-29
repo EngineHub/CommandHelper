@@ -1,6 +1,6 @@
 <!
 	strict;
-	name: mixed;
+	name: mixed.ms;
 	author: cailin;
 	created: 2019-04-08;
 	description: The file containing the type ms.lang.mixed;
@@ -15,7 +15,7 @@
  * Despite being the base class, mixed is abstract; it cannot be instantiated directly.
  */
 public native abstract class ms.lang.mixed {
-	
+
 	// TODO: Consider if this should just do a shallow field comparison, instead of doing reference checks?
 	// This is probably the default use case anyways, and use of ref_equals is should probably be fairly rare.
 	// On the other hand, this is so ubiquitous, maybe it would be confusing to do something else? Additionally,
@@ -42,7 +42,7 @@ public native abstract class ms.lang.mixed {
 	 * - If the input type is not of the same class type (or a subclass), it should always return false,
 	 * except in the case where the input value is cross-castable to this class. In that case, the class
 	 * should be cross cast, then equality should be considered.
-	 * 
+	 *
 	 * If the method is not overridden by the subclass, then the default method is inherited, which just
 	 * calls {@function ref_equals} on @this and the input object. For value types, this will return true
 	 * if the values are the same.
@@ -53,7 +53,7 @@ public native abstract class ms.lang.mixed {
 	 *
 	 * Since implementation of this method is often the same for all classes, and is relatively difficult
 	 * to implement properly, a shortcut is available
-	 * to ease the implementation, and remain within these contracts. 
+	 * to ease the implementation, and remain within these contracts.
 	 * Simply tag the class with the @{EqualsGenerator} annotation, and then
 	 * tag any fields within the class that should be considered when calculating equality with the @{Equals}
 	 * annotation. The method is then generated for you, (along with the hashCode method) with all the complexities
@@ -101,10 +101,10 @@ public native abstract class ms.lang.mixed {
 	 *
 	 * If implementing this without the EqualsGenerator, the generally accepted best approach to
 	 * implementing a good hashCode method is taken from Josh Bloch's *Effective Java*.
-	 * Two random, large, prime numbers are picked, a, and b. The hash is set to 
+	 * Two random, large, prime numbers are picked, a, and b. The hash is set to
 	 * a, then, for each field that is of signifigance (that is, it is used in the calculation of equals),
 	 * the hash is multiplied by b, and then the hash code
-	 * of the field is added to it (0 is used if the field is null). 
+	 * of the field is added to it (0 is used if the field is null).
 	 * This process is repeated, until all fields are considered. If the class is immutable (either in fact
 	 * because of the immutable keyword, or in essense) it may be worth caching the return value,
 	 * so it does not have to be recalculated each time.
@@ -144,7 +144,7 @@ public native abstract class ms.lang.mixed {
 	// to certain subclasses. However,
 	// there are other ways around that, and I am intentionally choosing to provide the absolute bare minimum
 	// default methods, since literally every single class would otherwise inherit them. The finalize method is
-	// also missing. This will be implemented in the same way as 
+	// also missing. This will be implemented in the same way as
 	// https://docs.oracle.com/javase/9/docs/api/java/lang/ref/Cleaner.html and
 	// https://docs.oracle.com/javase/9/docs/api/java/lang/ref/PhantomReference.html.
 	// hashCode *is* defined here. At first glance, one might think it's easy enough to move it to

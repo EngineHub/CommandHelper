@@ -1,6 +1,6 @@
 <!
 	strict;
-	name: RegexValidator;
+	name: RegexValidator.ms;
 	author: cailin;
 	created: 2019-03-14;
 	description: The file containing the type ms.lang.validators.RegexValidator;
