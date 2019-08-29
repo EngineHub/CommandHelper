@@ -86,8 +86,8 @@ public class NativeTypeList {
 			synchronized(NATIVE_TYPE_LOCK) {
 				nativeTypes = NativeTypeList.nativeTypes;
 				if(nativeTypes == null) {
-					NativeTypeList.nativeTypes = nativeTypes = new HashSet<>();
-					fqNativeTypes = new HashSet<>();
+					Set<FullyQualifiedClassName> fqNativeTypesPrivate = new HashSet<>();
+					nativeTypes = new HashSet<>();
 
 					// Ensure that the jar is loaded. This is mostly useful to not have to worry about unit tests, but
 					// in production, this should actually be redundant.
@@ -97,22 +97,24 @@ public class NativeTypeList {
 					for(ClassMirror<? extends Mixed> c : ClassDiscovery.getDefaultInstance()
 							.getClassesWithAnnotationThatExtend(typeof.class, Mixed.class)) {
 						nativeTypes.add((String) c.getAnnotation(typeof.class).getValue("value"));
-						fqNativeTypes.add(FullyQualifiedClassName.forNativeClass(c.loadClass()));
+						fqNativeTypesPrivate.add(FullyQualifiedClassName.forNativeClass(c.loadClass()));
 					}
 
 					for(ClassMirror<? extends Enum> c : ClassDiscovery.getDefaultInstance()
 							.getClassesWithAnnotationThatExtend(MEnum.class, Enum.class)) {
 						String name = (String) c.getAnnotation(MEnum.class).getValue("value");
 						nativeTypes.add(name);
-						fqNativeTypes.add(FullyQualifiedClassName.forNativeEnum(c.loadClass()));
+						fqNativeTypesPrivate.add(FullyQualifiedClassName.forFullyQualifiedClass(name));
 					}
 
 					for(ClassMirror<? extends DynamicEnum> c : ClassDiscovery.getDefaultInstance()
 							.getClassesWithAnnotationThatExtend(MDynamicEnum.class, DynamicEnum.class)) {
 						String name = (String) c.getAnnotation(MDynamicEnum.class).getValue("value");
 						nativeTypes.add(name);
-						fqNativeTypes.add(FullyQualifiedClassName.forFullyQualifiedClass(name));
+						fqNativeTypesPrivate.add(FullyQualifiedClassName.forFullyQualifiedClass(name));
 					}
+					fqNativeTypes = fqNativeTypesPrivate;
+					NativeTypeList.nativeTypes = nativeTypes;
 				}
 			}
 		}

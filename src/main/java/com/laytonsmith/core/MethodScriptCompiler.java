@@ -2083,6 +2083,8 @@ public final class MethodScriptCompiler {
 				if(op.optimizationOptions().contains(OptimizationOption.CUSTOM_LINK)) {
 					try {
 						op.link(tree.getData().getTarget(), tree.getChildren());
+					} catch (ConfigRuntimeException ex) {
+						compilerErrors.add(new ConfigCompileException(ex));
 					} catch (ConfigCompileException ex) {
 						compilerErrors.add(ex);
 					}

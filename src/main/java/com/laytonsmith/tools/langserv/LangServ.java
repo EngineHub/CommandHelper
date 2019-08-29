@@ -20,6 +20,7 @@ import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.Event;
@@ -37,7 +38,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -72,6 +75,7 @@ import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
+import org.eclipse.lsp4j.WorkspaceFolder;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.launch.LSPLauncher;
@@ -392,7 +396,20 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	@Override
 	public void initialized(InitializedParams params) {
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
-
+		client.workspaceFolders().thenAccept((List<WorkspaceFolder> t) -> {
+			for(WorkspaceFolder f : t) {
+				File workspace = new File(f.getUri().replaceFirst("file://", ""));
+				try {
+					FileUtil.recursiveFind(workspace, (File f1) -> {
+						if(f1.isFile() && f1.getName().endsWith(".ms") || f1.getName().endsWith(".msa")) {
+							doCompilation(lowPriorityProcessors, f1.toURI().toString());
+						}
+					});
+				} catch (IOException ex) {
+					client.logMessage(new MessageParams(MessageType.Warning, ex.getMessage()));
+				}
+			}
+		});
 	}
 
 	@Override
@@ -426,69 +443,79 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	 * @param threadPool
 	 * @param uri
 	 */
+	@SuppressWarnings("UseSpecificCatch")
 	public void doCompilation(Executor threadPool, String uri) {
 		threadPool.execute(() -> {
-			Set<ConfigCompileException> exceptions = new HashSet<>();
-			String code;
-			// Eventually we want to rework this so that this is available
-			Set<Class<? extends Environment.EnvironmentImpl>> envs = new HashSet<>();
-			for(Class<Environment.EnvironmentImpl> c
-					: ClassDiscovery.getDefaultInstance().loadClassesThatExtend(Environment.EnvironmentImpl.class)) {
-				envs.add(c);
-			}
-			Environment env;
 			try {
-				env = Static.GenerateStandaloneEnvironment(false);
-			} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
-				throw new RuntimeException(ex);
-			}
-			CompilerEnvironment compilerEnv = env.getEnv(CompilerEnvironment.class);
-			compilerEnv.setLogCompilerWarnings(false); // No one would see them
-			GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
-			// This disables things like security checks and whatnot. These may be present in the runtime environment,
-			// but it's not possible for us to tell that at this point.
-			gEnv.SetCustom("cmdline", true);
-			File f = new File(uri.replaceFirst("file://", ""));
-			gEnv.SetRootFolder(f.getParentFile());
-			TokenStream tokens = null;
-			try {
-				logd(() -> "Compiling " + f);
-				code = FileUtil.read(f);
-				tokens = MethodScriptCompiler.lex(code, env, f, true);
-				MethodScriptCompiler.compile(tokens, env, envs);
-			} catch (ConfigCompileException e) {
-				exceptions.add(e);
-			} catch (ConfigCompileGroupException e) {
-				exceptions.addAll(e.getList());
-			} catch (IOException e) {
-				// Just skip this, we can't do much here.
-			}
-			List<Diagnostic> diagnosticsList = new ArrayList<>();
-			if(!exceptions.isEmpty()) {
-				logi(() -> "Errors found, reporting " + exceptions.size() + " errors");
-				for(ConfigCompileException e : exceptions) {
-					Diagnostic d = new Diagnostic();
-					d.setRange(convertTargetToRange(tokens, e.getTarget()));
-					d.setSeverity(DiagnosticSeverity.Error);
-					d.setMessage(e.getMessage());
-					diagnosticsList.add(d);
+				Set<ConfigCompileException> exceptions = new HashSet<>();
+				String code;
+				// Eventually we want to rework this so that this is available
+				Set<Class<? extends Environment.EnvironmentImpl>> envs = new HashSet<>();
+				for(Class<Environment.EnvironmentImpl> c
+						: ClassDiscovery.getDefaultInstance().loadClassesThatExtend(Environment.EnvironmentImpl.class)) {
+					envs.add(c);
 				}
-			}
-			List<CompilerWarning> warnings = compilerEnv.getCompilerWarnings();
-			if(!warnings.isEmpty()) {
-				for(CompilerWarning c : warnings) {
-					Diagnostic d = new Diagnostic();
-					d.setRange(convertTargetToRange(tokens, c.getTarget()));
-					d.setSeverity(DiagnosticSeverity.Warning);
-					d.setMessage(c.getMessage());
-					diagnosticsList.add(d);
+				Environment env;
+				try {
+					env = Static.GenerateStandaloneEnvironment(false);
+					// Make this configurable at some point. For now, however, we need this so we can get
+					// correct handling on minecraft functions.
+					env = env.cloneAndAdd(new CommandHelperEnvironment());
+				} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
+					throw new RuntimeException(ex);
 				}
-			}
+				CompilerEnvironment compilerEnv = env.getEnv(CompilerEnvironment.class);
+				compilerEnv.setLogCompilerWarnings(false); // No one would see them
+				GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
 
-			// We need to report to the client always, with an empty list, implying that all problems are fixed.
-			PublishDiagnosticsParams diagnostics
-					= new PublishDiagnosticsParams(uri, diagnosticsList);
-			client.publishDiagnostics(diagnostics);
+				// This disables things like security checks and whatnot. These may be present in the runtime environment,
+				// but it's not possible for us to tell that at this point.
+				gEnv.SetCustom("cmdline", true);
+				File f = Paths.get(new URI(uri)).toFile();
+				gEnv.SetRootFolder(f.getParentFile());
+				TokenStream tokens = null;
+				try {
+					logd(() -> "Compiling " + f);
+					code = FileUtil.read(f);
+					tokens = MethodScriptCompiler.lex(code, env, f, true);
+					MethodScriptCompiler.compile(tokens, env, envs);
+				} catch (ConfigCompileException e) {
+					exceptions.add(e);
+				} catch (ConfigCompileGroupException e) {
+					exceptions.addAll(e.getList());
+				} catch (IOException e) {
+					// Just skip this, we can't do much here.
+				}
+				List<Diagnostic> diagnosticsList = new ArrayList<>();
+				if(!exceptions.isEmpty()) {
+					logi(() -> "Errors found, reporting " + exceptions.size() + " errors");
+					for(ConfigCompileException e : exceptions) {
+						Diagnostic d = new Diagnostic();
+						d.setRange(convertTargetToRange(tokens, e.getTarget()));
+						d.setSeverity(DiagnosticSeverity.Error);
+						d.setMessage(e.getMessage());
+						diagnosticsList.add(d);
+					}
+				}
+				List<CompilerWarning> warnings = compilerEnv.getCompilerWarnings();
+				if(!warnings.isEmpty()) {
+					for(CompilerWarning c : warnings) {
+						Diagnostic d = new Diagnostic();
+						d.setRange(convertTargetToRange(tokens, c.getTarget()));
+						d.setSeverity(DiagnosticSeverity.Warning);
+						d.setMessage(c.getMessage());
+						diagnosticsList.add(d);
+					}
+				}
+
+				// We need to report to the client always, with an empty list, implying that all problems are fixed.
+				PublishDiagnosticsParams diagnostics
+						= new PublishDiagnosticsParams(uri, diagnosticsList);
+				client.publishDiagnostics(diagnostics);
+			} catch (Throwable t) {
+				client.logMessage(new MessageParams(MessageType.Error, t.getMessage() + "\n"
+						+ StackTraceUtils.GetStacktrace(t)));
+			}
 		});
 	}
 
