@@ -56,7 +56,6 @@ public class APIBuilder {
 		ExtensionManager.AddDiscoveryLocation(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
 		ExtensionManager.Cache(MethodScriptFileLocations.getDefault().getExtensionCacheDirectory());
 		ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
-		ExtensionManager.Startup();
 		StreamUtils.GetSystemOut().println(JSONValue.toJSONString(new APIBuilder().build()));
 	}
 

@@ -550,6 +550,11 @@ public class Main {
 			System.exit(0);
 		}
 
+		@Override
+		public boolean startupExtensionManager() {
+			return false;
+		}
+
 	}
 
 	@tool("doc-export")
@@ -874,7 +879,6 @@ public class Main {
 			ClassDiscovery.getDefaultInstance().addThisJar();
 			ExtensionManager.Cache(MethodScriptFileLocations.getDefault().getExtensionCacheDirectory());
 			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
-			ExtensionManager.Startup();
 			Environment env = Environment.createEnvironment(new CompilerEnvironment());
 			env.getEnv(CompilerEnvironment.class).setLogCompilerWarnings(false);
 			Set<Class<? extends Environment.EnvironmentImpl>> envs = GetEnvironmentValue(parsedArgs);

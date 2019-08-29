@@ -255,7 +255,7 @@ public class ExtensionManager {
 				if(namecount.containsKey(name.toLowerCase())) {
 					int i = namecount.get(name.toLowerCase());
 					name += "-" + i;
-					namecount.put(name.toLowerCase(), i++);
+					namecount.put(name.toLowerCase(), ++i);
 
 					MSLog.GetLogger().Log(MSLog.Tags.EXTENSIONS, LogLevel.WARNING,
 							f.getAbsolutePath() + " contains a duplicate internally"
