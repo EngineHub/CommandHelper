@@ -224,12 +224,20 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		}
 	}
 
-	public void logd(String s) {
-		log(s, LogLevel.DEBUG);
+	public void loge(String s) {
+		log(s, LogLevel.ERROR);
 	}
 
-	public void logd(MSLog.StringProvider s) {
-		log(s, LogLevel.DEBUG);
+	public void loge(MSLog.StringProvider s) {
+		log(s, LogLevel.ERROR);
+	}
+
+	public void logw(String s) {
+		log(s, LogLevel.WARNING);
+	}
+
+	public void logw(MSLog.StringProvider s) {
+		log(s, LogLevel.WARNING);
 	}
 
 	public void logi(String s) {
@@ -238,6 +246,14 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 
 	public void logi(MSLog.StringProvider s) {
 		log(s, LogLevel.INFO);
+	}
+
+	public void logd(String s) {
+		log(s, LogLevel.DEBUG);
+	}
+
+	public void logd(MSLog.StringProvider s) {
+		log(s, LogLevel.DEBUG);
 	}
 
 	public void logv(String s) {
@@ -477,14 +493,28 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				try {
 					logd(() -> "Compiling " + f);
 					code = FileUtil.read(f);
-					tokens = MethodScriptCompiler.lex(code, env, f, true);
-					MethodScriptCompiler.compile(tokens, env, envs);
+					if(f.getName().endsWith(".ms")) {
+						tokens = MethodScriptCompiler.lex(code, env, f, true);
+						MethodScriptCompiler.compile(tokens, env, envs);
+					} else if(f.getName().endsWith(".msa")) {
+						tokens = MethodScriptCompiler.lex(code, env, f, false);
+						MethodScriptCompiler.preprocess(tokens, envs).forEach((script) -> {
+							try {
+								script.compile();
+							} catch( ConfigCompileException ex) {
+								exceptions.add(ex);
+							} catch (ConfigCompileGroupException ex) {
+								exceptions.addAll(ex.getList());
+							}
+						});
+					}
 				} catch (ConfigCompileException e) {
 					exceptions.add(e);
 				} catch (ConfigCompileGroupException e) {
 					exceptions.addAll(e.getList());
-				} catch (IOException e) {
+				} catch (Throwable e) {
 					// Just skip this, we can't do much here.
+					loge(() -> StackTraceUtils.GetStacktrace(e));
 				}
 				List<Diagnostic> diagnosticsList = new ArrayList<>();
 				if(!exceptions.isEmpty()) {
