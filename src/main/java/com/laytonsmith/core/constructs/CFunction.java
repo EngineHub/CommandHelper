@@ -72,7 +72,7 @@ public class CFunction extends Construct {
 	}
 
 	/**
-	 * Returns true if the data in the ParseTree is a funciton, and is of the specified type.
+	 * Returns true if the data in the ParseTree is a function, and is of the specified type.
 	 *
 	 * @param tree
 	 * @param ofType

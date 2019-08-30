@@ -374,7 +374,7 @@ public class Debug {
 						+ TermColors.RESET + ": " + val.val());
 				return CVoid.VOID;
 			} else {
-				throw new CRECastException("Expecting an ivar, but recieved " + args[0].typeof().getSimpleName()
+				throw new CRECastException("Expecting an ivar, but received " + args[0].typeof().getSimpleName()
 						+ " instead", t);
 			}
 		}

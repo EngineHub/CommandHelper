@@ -241,7 +241,7 @@ public class NativeTypeList {
 	}
 
 	/**
-	 * Like {@link #getNativeClass(java.lang.String)}, except if there is an interface runner for this type, that class
+	 * Like {@link #getNativeClass(FullyQualifiedClassName)}, except if there is an interface runner for this type, that class
 	 * is returned instead. This works, because MixedInterfaceRunner extends Mixed. In general, if you need to construct
 	 * an object to call the methods defined in MixedInterfaceRunner, this is the method you should use. Despite being
 	 * an instanceof Mixed, you should only call the methods defined in {@link MixedInterfaceRunner}, as all other

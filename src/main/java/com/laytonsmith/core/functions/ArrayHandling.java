@@ -193,7 +193,7 @@ public class ArrayHandling {
 					try {
 						if(!ca.inAssociativeMode()) {
 							if(index instanceof CNull) {
-								throw new CRECastException("Expected a number, but recieved null instead", t);
+								throw new CRECastException("Expected a number, but received null instead", t);
 							}
 							long iindex = Static.getInt(index, t);
 							if(iindex < 0) {

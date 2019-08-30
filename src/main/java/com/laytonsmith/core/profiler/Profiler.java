@@ -228,7 +228,7 @@ public final class Profiler {
 							FileUtil.APPEND, //We want to append
 							true); //Create it for us if it doesn't exist
 				} catch (IOException ex) {
-					StreamUtils.GetSystemErr().println("While trying to write to the profiler log file (" + file.getAbsolutePath() + "), recieved an IOException: " + ex.getMessage());
+					StreamUtils.GetSystemErr().println("While trying to write to the profiler log file (" + file.getAbsolutePath() + "), received an IOException: " + ex.getMessage());
 				}
 			}
 		});

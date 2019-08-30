@@ -501,7 +501,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 						MethodScriptCompiler.preprocess(tokens, envs).forEach((script) -> {
 							try {
 								script.compile();
-							} catch( ConfigCompileException ex) {
+							} catch (ConfigCompileException ex) {
 								exceptions.add(ex);
 							} catch (ConfigCompileGroupException ex) {
 								exceptions.addAll(ex.getList());

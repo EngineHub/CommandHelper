@@ -108,7 +108,7 @@ public class CString extends CPrimitive implements Cloneable,
 			int i = Integer.parseInt(index);
 			return get(i, t);
 		} catch (NumberFormatException e) {
-			throw new CREFormatException("Expecting numerical index, but recieved " + index, t);
+			throw new CREFormatException("Expecting numerical index, but received " + index, t);
 		}
 	}
 

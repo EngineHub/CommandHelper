@@ -106,7 +106,7 @@ public class PacketJumper {
 
 	//TODO: Add interceptor listeners, and make this support more than one. It should
 	//probably support binds even.
-	public static void setPacketRecievedInterceptor(int id, PacketHandler handler) {
+	public static void setPacketReceivedInterceptor(int id, PacketHandler handler) {
 		try {
 			waitForInitialization();
 		} catch (InterruptedException ex) {
