@@ -42,6 +42,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -180,6 +182,9 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				Launcher<LanguageClient> launcher = LSPLauncher.createServerLauncher(langserv, is, os);
 				LanguageClient client = launcher.getRemoteProxy();
 				((LanguageClientAware) langserv).connect(client);
+				RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
+				List<String> arguments = runtimeMxBean.getInputArguments();
+				langserv.log("Java started with args: " + arguments.toString(), LogLevel.DEBUG);
 				langserv.log("Starting language server", LogLevel.INFO);
 				if(useStdio) {
 					System.err.println("Started Language Server, awaiting connections");
@@ -756,5 +761,4 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		});
 		return result;
 	}
-
 }

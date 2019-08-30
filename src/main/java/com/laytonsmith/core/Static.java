@@ -1330,7 +1330,8 @@ public final class Static {
 	 * @param def The default file, which is returned if {@code arg} is null. (Maybe also be null).
 	 * @return
 	 */
-	public static File GetFileFromArgument(String arg, Environment env, Target t, File def) throws ConfigRuntimeException {
+	public static File GetFileFromArgument(String arg, Environment env, Target t, File def)
+			throws ConfigRuntimeException {
 		if(arg == null) {
 			return def;
 		}

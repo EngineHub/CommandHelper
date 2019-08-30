@@ -522,18 +522,22 @@ public class Sandbox {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			File file = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			int num = 0;
-			if(Security.CheckSecurity(file)) {
-				if(file.isDirectory()) {
-					HashMap<File, ParseTree> files = compileDirectory(file, env, t);
-					IncludeCache.addAll(files);
-					num = files.size();
-				} else if(IncludeCache.has(file)) {
-					IncludeCache.add(file, compileFile(file, env, t));
-					num = 1;
+			try {
+				if(Security.CheckSecurity(file)) {
+					if(file.isDirectory()) {
+						HashMap<File, ParseTree> files = compileDirectory(file, env, t);
+						IncludeCache.addAll(files);
+						num = files.size();
+					} else if(IncludeCache.has(file)) {
+						IncludeCache.add(file, compileFile(file, env, t));
+						num = 1;
+					}
+				} else {
+					throw new CRESecurityException("The script cannot access " + file
+							+ " due to restrictions imposed by the base-dir setting.", t);
 				}
-			} else {
-				throw new CRESecurityException("The script cannot access " + file
-						+ " due to restrictions imposed by the base-dir setting.", t);
+			} catch (IOException ex) {
+				throw new CREIOException(ex.getMessage(), t, ex);
 			}
 			return new CInt(num, t);
 		}

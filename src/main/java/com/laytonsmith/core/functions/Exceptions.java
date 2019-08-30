@@ -35,7 +35,6 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
@@ -65,7 +64,7 @@ public class Exceptions {
 		return "This class contains functions related to Exception handling in MethodScript";
 	}
 
-	@api(environments = CommandHelperEnvironment.class)
+	@api
 	@seealso({_throw.class, com.laytonsmith.tools.docgen.templates.Exceptions.class})
 	public static class _try extends AbstractFunction implements BranchStatement, VariableScope {
 

@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  *
@@ -18,20 +19,21 @@ public final class Security {
 	 *
 	 * @param location
 	 * @return
+	 * @throws java.io.IOException
 	 */
-	public static boolean CheckSecurity(String location) {
+	public static boolean CheckSecurity(String location) throws IOException {
 		if(on) {
 			String pref = Prefs.BaseDir();
 			if(pref.trim().isEmpty()) {
 				pref = ".";
 			}
 			File baseDir = new File(pref);
-			String baseFinal = baseDir.getAbsolutePath();
+			String baseFinal = baseDir.getCanonicalPath();
 			if(baseFinal.endsWith(".")) {
 				baseFinal = baseFinal.substring(0, baseFinal.length() - 1);
 			}
 			File loc = new File(location);
-			return loc.getAbsolutePath().startsWith(baseFinal);
+			return loc.getCanonicalPath().startsWith(baseFinal);
 		} else {
 			return true;
 		}
@@ -42,8 +44,9 @@ public final class Security {
 	 *
 	 * @param location
 	 * @return
+	 * @throws java.io.IOException
 	 */
-	public static boolean CheckSecurity(File location) {
+	public static boolean CheckSecurity(File location) throws IOException {
 		return CheckSecurity(location.getAbsolutePath());
 	}
 

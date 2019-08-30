@@ -44,13 +44,13 @@ public class IncludeCache {
 		}
 		MSLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Cache does not already contain file. Compiling and caching.", t);
 		//We have to pull the file from the FS, and compile it.
-		if(!Security.CheckSecurity(file)) {
-			throw new CRESecurityException("The script cannot access " + file
-					+ " due to restrictions imposed by the base-dir setting.", t);
-		}
 		MSLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Security check passed", t);
 		Profiler profiler = env.getEnv(GlobalEnv.class).GetProfiler();
 		try {
+			if(!Security.CheckSecurity(file)) {
+				throw new CRESecurityException("The script cannot access " + file
+						+ " due to restrictions imposed by the base-dir setting.", t);
+			}
 			String s = new ZipReader(file).getFileContents();
 			ProfilePoint p = profiler.start("Compiling " + file, LogLevel.WARNING);
 			ParseTree tree;
@@ -74,7 +74,7 @@ public class IncludeCache {
 			}
 			throw new CREIncludeException(b.toString(), t);
 		} catch (IOException ex) {
-			throw new CREIOException("The script at " + file + " could not be found or read in.", t);
+			throw new CREIOException("The script at " + file + " could not be found or read in.", t, ex);
 		}
 	}
 

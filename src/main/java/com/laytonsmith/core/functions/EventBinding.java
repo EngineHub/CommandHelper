@@ -280,7 +280,7 @@ public class EventBinding {
 		}
 	}
 
-	@api(environments = CommandHelperEnvironment.class)
+	@api
 	public static class unbind extends AbstractFunction {
 
 		@Override
@@ -351,7 +351,7 @@ public class EventBinding {
 		}
 	}
 
-	@api(environments = CommandHelperEnvironment.class)
+	@api
 	public static class cancel extends AbstractFunction {
 
 		@Override

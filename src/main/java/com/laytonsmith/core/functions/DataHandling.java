@@ -20,6 +20,7 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
@@ -53,7 +54,6 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
-import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREIncludeException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
@@ -70,6 +70,7 @@ import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.tools.docgen.templates.ArrayIteration;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -1429,19 +1430,41 @@ public class DataHandling {
 		public ParseTree optimizeDynamic(Target t, Environment env,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children,
 				FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.isEmpty()) {
+				throw new ConfigCompileException("include() expects 1 argument.", t);
+			}
 			//We can't optimize per se, but if the path is constant, and the code is uncompilable, we
 			//can give a warning, and go ahead and cache the tree.
 			if(children.get(0).isConst()) {
 				String path = children.get(0).getData().val();
 				File file = Static.GetFileFromArgument(path, env, t, null);
-				try {
-					IncludeCache.get(file, env, t);
-				} catch (CREIOException ex) {
-					// This is thrown if a file doesn't exist. When it actually runs, this is definitely an error,
-					// for now we just want it to be a warning.
+				if(!file.exists()) {
 					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
-							new CompilerWarning(ex.getMessage(), children.get(0).getTarget(), null));
+							new CompilerWarning("File doesn't exist, this will be an error at runtime.",
+									children.get(0).getTarget(), FileOptions.SuppressWarning.IncludedFileNotFound));
 				}
+				try {
+					if(!Security.CheckSecurity(file)) {
+						throw new ConfigCompileException("Included file is inaccessible due to the base-dir setting",
+								children.get(0).getTarget());
+					}
+				} catch (IOException ex) {
+					// Just ignore it. This is not something we can deal with anyways, and if it's still a problem
+					// at runtime, it will be reported through existing means.
+				}
+				// Some users have dynamic inclusion solutions, because for larger codebases, compilation is a non
+				// trival amount of time, and currently this happens on the main thread. Once compilation happens on
+				// a background thread, (or at least recompiles on a background thread) this code can be revisted, and
+				// re-added if needed. Having said that, a code ecosystem that determines inter-script dependencies
+				// would likely obsolete the need for this anyways.
+//				try {
+//					IncludeCache.get(file, env, t);
+//				} catch (CREIOException ex) {
+//					// This is thrown if a file doesn't exist. When it actually runs, this is definitely an error,
+//					// for now we just want it to be a warning.
+//					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+//							new CompilerWarning(ex.getMessage(), children.get(0).getTarget(), null));
+//				}
 			}
 			return null;
 		}
