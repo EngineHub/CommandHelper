@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.annotations.DocumentLink;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
@@ -52,6 +53,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREIncludeException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
@@ -1343,10 +1345,8 @@ public class DataHandling {
 	}
 
 	@api
-	public static class include extends AbstractFunction /*implements Optimizable*/ {
-		// Can't currently optimize this, because it depends on knowing whether or not
-		// we are in cmdline mode, which is included with the environment, which doesn't
-		// exist in optimizations yet.
+	@DocumentLink(0)
+	public static class include extends AbstractFunction implements Optimizable, DocumentLinkProvider {
 
 		@Override
 		public String getName() {
@@ -1418,22 +1418,33 @@ public class DataHandling {
 			return true;
 		}
 
-//		@Override
-//		public Set<OptimizationOption> optimizationOptions() {
-//			return EnumSet.of(
-//					OptimizationOption.OPTIMIZE_CONSTANT
-//			);
-//		}
-//
-//		@Override
-//		public Mixed optimize(Target t, Mixed... args) throws ConfigCompileException {
-//			//We can't optimize per se, but if the path is constant, and the code is uncompilable, we
-//			//can give a warning, and go ahead and cache the tree.
-//			String path = args[0].val();
-//			File file = Static.GetFileFromArgument(path, env, t, null);
-//			IncludeCache.get(file, t);
-//			return null;
-//		}
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					OptimizationOption.OPTIMIZE_DYNAMIC
+			);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children,
+				FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			//We can't optimize per se, but if the path is constant, and the code is uncompilable, we
+			//can give a warning, and go ahead and cache the tree.
+			if(children.get(0).isConst()) {
+				String path = children.get(0).getData().val();
+				File file = Static.GetFileFromArgument(path, env, t, null);
+				try {
+					IncludeCache.get(file, env, t);
+				} catch (CREIOException ex) {
+					// This is thrown if a file doesn't exist. When it actually runs, this is definitely an error,
+					// for now we just want it to be a warning.
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+							new CompilerWarning(ex.getMessage(), children.get(0).getTarget(), null));
+				}
+			}
+			return null;
+		}
 
 		@Override
 		public LogLevel profileAt() {

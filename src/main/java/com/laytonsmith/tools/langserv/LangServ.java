@@ -13,10 +13,13 @@ import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Profiles;
+import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.TokenStream;
+import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
@@ -27,6 +30,8 @@ import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
+import com.laytonsmith.core.functions.DocumentLinkProvider;
+import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -65,6 +70,9 @@ import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
+import org.eclipse.lsp4j.DocumentLink;
+import org.eclipse.lsp4j.DocumentLinkOptions;
+import org.eclipse.lsp4j.DocumentLinkParams;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.InitializedParams;
@@ -222,6 +230,10 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				client.showMessage(new MessageParams(MessageType.Error, full));
 			}
 		}
+	}
+
+	public void loge(Throwable t) {
+		log(StackTraceUtils.GetStacktrace(t), LogLevel.ERROR);
 	}
 
 	public void loge(String s) {
@@ -395,9 +407,14 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	@Override
 	public CompletableFuture<InitializeResult> initialize(InitializeParams params) {
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
+		// So base dir restrictions won't apply
+		Security.setSecurityEnabled(false);
 		CompletableFuture<InitializeResult> cf = new CompletableFuture<>();
 		ServerCapabilities sc = new ServerCapabilities();
 		sc.setTextDocumentSync(TextDocumentSyncKind.Full);
+		DocumentLinkOptions documentLinkOptions = new DocumentLinkOptions();
+		documentLinkOptions.setResolveProvider(false);
+		sc.setDocumentLinkProvider(documentLinkOptions);
 //		sc.setHoverProvider(true);
 		CompletionOptions co = new CompletionOptions(true, Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h",
 				"i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "_"));
@@ -418,7 +435,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				try {
 					FileUtil.recursiveFind(workspace, (File f1) -> {
 						if(f1.isFile() && f1.getName().endsWith(".ms") || f1.getName().endsWith(".msa")) {
-							doCompilation(lowPriorityProcessors, f1.toURI().toString());
+							doCompilation(null, lowPriorityProcessors, f1.toURI().toString());
 						}
 					});
 				} catch (IOException ex) {
@@ -456,11 +473,12 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 
 	/**
 	 * Compiles the file, on the given thread pool.
+	 * @param future After compilation is done, the parse tree is returned. May be null if you don't need it.
 	 * @param threadPool
 	 * @param uri
 	 */
 	@SuppressWarnings("UseSpecificCatch")
-	public void doCompilation(Executor threadPool, String uri) {
+	public void doCompilation(CompletableFuture<ParseTree> future, Executor threadPool, String uri) {
 		threadPool.execute(() -> {
 			try {
 				Set<ConfigCompileException> exceptions = new HashSet<>();
@@ -490,14 +508,17 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				File f = Paths.get(new URI(uri)).toFile();
 				gEnv.SetRootFolder(f.getParentFile());
 				TokenStream tokens = null;
+				ParseTree tree = null;
 				try {
+					ParseTree fTree;
 					logd(() -> "Compiling " + f);
 					code = FileUtil.read(f);
 					if(f.getName().endsWith(".ms")) {
 						tokens = MethodScriptCompiler.lex(code, env, f, true);
-						MethodScriptCompiler.compile(tokens, env, envs);
+						fTree = MethodScriptCompiler.compile(tokens, env, envs);
 					} else if(f.getName().endsWith(".msa")) {
 						tokens = MethodScriptCompiler.lex(code, env, f, false);
+						fTree = new ParseTree(null);
 						MethodScriptCompiler.preprocess(tokens, envs).forEach((script) -> {
 							try {
 								script.compile();
@@ -506,8 +527,12 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 							} catch (ConfigCompileGroupException ex) {
 								exceptions.addAll(ex.getList());
 							}
+							script.getTrees().forEach(r -> fTree.addChild(r));
 						});
+					} else {
+						return;
 					}
+					tree = fTree;
 				} catch (ConfigCompileException e) {
 					exceptions.add(e);
 				} catch (ConfigCompileGroupException e) {
@@ -542,17 +567,22 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				PublishDiagnosticsParams diagnostics
 						= new PublishDiagnosticsParams(uri, diagnosticsList);
 				client.publishDiagnostics(diagnostics);
+
+				if(future != null && tree != null) {
+					future.complete(tree);
+				}
 			} catch (Throwable t) {
 				client.logMessage(new MessageParams(MessageType.Error, t.getMessage() + "\n"
 						+ StackTraceUtils.GetStacktrace(t)));
 			}
+
 		});
 	}
 
 	@Override
 	public void didOpen(DidOpenTextDocumentParams params) {
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
-		doCompilation(highPriorityProcessors, params.getTextDocument().getUri());
+		doCompilation(null, highPriorityProcessors, params.getTextDocument().getUri());
 	}
 
 	@Override
@@ -569,7 +599,38 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	@Override
 	public void didSave(DidSaveTextDocumentParams params) {
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
-		doCompilation(highPriorityProcessors, params.getTextDocument().getUri());
+		doCompilation(null, highPriorityProcessors, params.getTextDocument().getUri());
+	}
+
+	public Range convertTargetToRange(ParseTree node) {
+		String val = Construct.nval(node.getData());
+		if(val == null) {
+			val = "null";
+		}
+		int tokenLength = val.length();
+		Target t = node.getTarget();
+		if(tokenLength < 1) {
+			// Something went wrong, but we always want an error to show up, so set this here
+			tokenLength = 1;
+		}
+		// I'm not sure if the column offset -2 is because of a bug in the code target calculation,
+		// or due to how VSCode indexes the column numbers, but either way it seems most all errors
+		// suffer from the weird -2 offset.
+		Position start = new Position(t.line() - 1, t.col() - 2);
+		Position end = new Position(t.line() - 1, t.col() + tokenLength - 2);
+		if(start.getLine() < 0) {
+			start.setLine(0);
+		}
+		if(start.getCharacter() < 0) {
+			start.setCharacter(0);
+		}
+		if(end.getLine() < 0) {
+			end.setLine(0);
+		}
+		if(end.getCharacter() < 0) {
+			end.setCharacter(1);
+		}
+		return new Range(start, end);
 	}
 
 	public Range convertTargetToRange(TokenStream tokens, Target t) {
@@ -648,6 +709,52 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		return result;
 	}
 
-
+	@Override
+	public CompletableFuture<List<DocumentLink>> documentLink(DocumentLinkParams params) {
+		String uri = params.getTextDocument().getUri();
+		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
+		logv(() -> "Requested " + uri);
+		CompletableFuture<ParseTree> future = new CompletableFuture<>();
+		CompletableFuture<List<DocumentLink>> result = new CompletableFuture<>();
+		doCompilation(future, lowPriorityProcessors, uri);
+		future.thenAccept((tree) -> {
+			Environment env;
+			try {
+				env = Static.GenerateStandaloneEnvironment(false);
+			} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
+				loge(ex);
+				result.cancel(true);
+				return;
+			}
+			List<DocumentLink> links = new ArrayList<>();
+			tree.getAllNodes().forEach(node -> {
+				if(node.getData() instanceof CFunction) {
+					try {
+						Function f = ((CFunction) (node.getData())).getFunction();
+						if(f instanceof DocumentLinkProvider) {
+							logv(() -> "Found DocumentLinkProvider " + f.getName());
+							for(ParseTree link : ((DocumentLinkProvider) f).getDocumentLinks(node.getChildren())) {
+								if(link.isConst()) {
+									File file = Static.GetFileFromArgument(link.getData().val(), env, link.getTarget(),
+											null);
+									if(file != null && file.exists() && file.isFile()) {
+										logv(() -> "Found document link to " + file.toURI());
+										DocumentLink docLink = new DocumentLink();
+										docLink.setRange(convertTargetToRange(link));
+										docLink.setTarget(file.toURI().toString());
+										links.add(docLink);
+									}
+								}
+							}
+						}
+					} catch (ConfigCompileException ex) {
+						loge(ex);
+					}
+				}
+			});
+			result.complete(links);
+		});
+		return result;
+	}
 
 }

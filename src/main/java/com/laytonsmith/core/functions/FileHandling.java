@@ -7,6 +7,7 @@ import com.laytonsmith.PureUtilities.SSHWrapper;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.annotations.DocumentLink;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
@@ -60,7 +61,8 @@ public class FileHandling {
 
 	@api
 	@noboilerplate
-	public static class read extends AbstractFunction {
+	@DocumentLink(0)
+	public static class read extends AbstractFunction implements DocumentLinkProvider {
 
 		public static String file_get_contents(String fileLocation) throws Exception {
 			return new ZipReader(new File(fileLocation)).getFileContents();
@@ -135,7 +137,8 @@ public class FileHandling {
 
 	@api
 	@noboilerplate
-	public static class comp_read extends AbstractFunction implements Optimizable {
+	@DocumentLink(0)
+	public static class comp_read extends AbstractFunction implements Optimizable, DocumentLinkProvider {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -203,7 +206,8 @@ public class FileHandling {
 
 	@api
 	@noboilerplate
-	public static class async_read extends AbstractFunction {
+	@DocumentLink(0)
+	public static class async_read extends AbstractFunction implements DocumentLinkProvider {
 
 		private static RunnableQueue queue;
 		private static volatile boolean started = false;
@@ -342,7 +346,8 @@ public class FileHandling {
 	}
 
 	@api
-	public static class file_size extends AbstractFunction {
+	@DocumentLink(0)
+	public static class file_size extends AbstractFunction implements DocumentLinkProvider {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -579,7 +584,8 @@ public class FileHandling {
 	}
 
 	@api
-	public static class file_resolve extends AbstractFunction {
+	@DocumentLink(0)
+	public static class file_resolve extends AbstractFunction implements DocumentLinkProvider {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {

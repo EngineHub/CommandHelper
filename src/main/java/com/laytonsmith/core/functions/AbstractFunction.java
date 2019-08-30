@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.annotations.DocumentLink;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
@@ -29,6 +30,7 @@ import com.laytonsmith.tools.docgen.DocGenTemplates;
 import com.laytonsmith.tools.docgen.DocGenTemplates.Generator.GenerateException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -288,6 +290,22 @@ public abstract class AbstractFunction implements Function {
 	@Override
 	public int compareTo(Function o) {
 		return this.getName().compareTo(o.getName());
+	}
+
+	public Set<ParseTree> getDocumentLinks(List<ParseTree> children) {
+		Set<ParseTree> files = new HashSet<>();
+		DocumentLink documentLink = this.getClass().getAnnotation(DocumentLink.class);
+		if(documentLink != null && this instanceof DocumentLinkProvider) {
+			for(int i : documentLink.value()) {
+				if(children.size() >= i) {
+					files.add(children.get(i));
+				}
+			}
+		} else {
+			throw new Error(this.getClass() + " is not tagged with the DocumentLink annotation, or does not"
+					+ " implement DocumentLinkProvider, and this method cannot be called on it.");
+		}
+		return files;
 	}
 
 }

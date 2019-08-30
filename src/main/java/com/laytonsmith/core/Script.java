@@ -879,6 +879,14 @@ public class Script {
 		}
 	}
 
+	/**
+	 * Returns the parse trees representing the right side of all scripts.
+	 * @return
+	 */
+	public List<ParseTree> getTrees() {
+		return new ArrayList<>(cright);
+	}
+
 	public void checkAmbiguous(List<Script> scripts) throws ConfigCompileException {
 		List<Construct> thisCommand = this.cleft;
 		for(Script script : scripts) {
