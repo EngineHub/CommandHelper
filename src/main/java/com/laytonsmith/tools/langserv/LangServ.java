@@ -472,7 +472,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				CommandProvider cp;
 				try {
 					cp = c.newInstance();
-				} catch(InstantiationException | IllegalAccessException ex) {
+				} catch (InstantiationException | IllegalAccessException ex) {
 					// We can't recover from this, so just skip it
 					Logger.getLogger(LangServ.class.getName()).log(Level.SEVERE, null, ex);
 					continue;
