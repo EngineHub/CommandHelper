@@ -28,7 +28,6 @@ import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.pluginmessages.MCMessenger;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.Target;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -445,8 +444,7 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public void runasConsole(String cmd) {
-		CommandSender sender = (CommandSender) Static.GetCommandSender("~console", Target.UNKNOWN).getHandle();
-		s.dispatchCommand(sender, cmd);
+		s.dispatchCommand(s.getConsoleSender(), cmd);
 	}
 
 	@Override

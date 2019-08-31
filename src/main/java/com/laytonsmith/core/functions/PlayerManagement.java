@@ -5715,7 +5715,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class ptellraw extends AbstractFunction {
 
 		@Override
@@ -5735,10 +5735,16 @@ public class PlayerManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			String selector = ArgumentValidation.getString(args[0], t);
-			CArray raw = ArgumentValidation.getArray(args[1], t);
-			String json = new DataTransformations.json_encode().exec(t, environment, raw).val();
-			return new Meta.run().exec(t, environment, new CString("/tellraw " + selector + " " + json, t));
+			String selector = "@s";
+			String json;
+			if(args.length == 1) {
+				json = new DataTransformations.json_encode().exec(t, environment, args[0]).val();
+			} else {
+				selector = ArgumentValidation.getString(args[0], t);
+				json = new DataTransformations.json_encode().exec(t, environment, args[1]).val();
+			}
+			new Meta.sudo().exec(t, environment, new CString("/minecraft:tellraw " + selector + " " + json, t));
+			return CVoid.VOID;
 		}
 
 		@Override
@@ -5748,18 +5754,20 @@ public class PlayerManagement {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{1, 2};
 		}
 
 		@Override
 		public String docs() {
-			return "void {string selector, array raw} A thin wrapper around the /tellraw command, this simply passes"
-					+  "the input ot the Minecraft tellraw command. The raw is passed in as a normal (possibly"
-					+ " associative) array, and json encoded. No validation is done on the input, so the command may"
-					+ " fail. The specification of the array may change from version to version of Minecraft,"
-					+ " but is documented here https://minecraft.gamepedia.com/Commands#Raw_JSON_text. ----"
-					+ " This function is simply written in terms of json_encode and run, and is otherwise equivalent"
-					+ " to run('/tellraw ' . @selector . ' ' . json_encode(@raw))";
+			return "void {[string selector], array raw} A thin wrapper around the tellraw command from player context,"
+					+ " this simply passes the input to the command. The raw is passed in as a normal"
+					+ " (possibly associative) array, and json encoded. No validation is done on the input,"
+					+ " so the command may fail. If not provided, the selector defaults to @s. Do not use double quotes"
+					+ " (smart string) when providing the selector. See {{function|tellraw}} if you don't need player"
+					+ " context. ---- The specification of the array may change from version to version of Minecraft,"
+					+ " but is documented here https://minecraft.gamepedia.com/Commands#Raw_JSON_text."
+					+ " This function is simply written in terms of json_encode and sudo, and is otherwise equivalent"
+					+ " to sudo('/minecraft:tellraw ' . @selector . ' ' . json_encode(@raw))";
 		}
 
 		@Override
@@ -5772,14 +5780,21 @@ public class PlayerManagement {
 			return new ExampleScript[] {
 				new ExampleScript("Simple usage with a plain message",
 						"ptellraw('@a', array('text': 'Hello World!'));",
-						"<<Would output the plain message to the player.>>"),
+						"<<Would output the plain message to all player.>>"),
+				new ExampleScript("Advanced usage with embedded selectors.",
+						"ptellraw('@a', array(\n"
+								+ "\tarray('selector': '@s'), // prints current player\n"
+								+ "\tarray('text': ': Hello '),\n"
+								+ "\tarray('selector': '@p') // prints receiving player\n"
+								+ "));",
+						"<<Would output a message from the current player to all players.>>"),
 				new ExampleScript("Complex object",
-						"ptellraw('@s', array(\n"
+						"ptellraw(array(\n"
 								+ "\tarray('text': 'Hello '),\n"
-								+ "\tarray('text': 'World', 'color': color(LIGHT_PURPLE)),\n"
+								+ "\tarray('text': 'World', 'color': 'light_purple'),\n"
 								+ "\tarray('text': '!')\n"
 								+ "));",
-						"<<Would output the colorful message to the player>>")
+						"<<Would output the colorful message to the current player>>")
 			};
 		}
 

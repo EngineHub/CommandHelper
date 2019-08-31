@@ -29,6 +29,7 @@ import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Collections;
@@ -167,6 +168,77 @@ public class Echoes {
 		public Boolean runAsync() {
 			return false;
 		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class tellraw extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			String selector = "@a";
+			String json;
+			if(args.length == 1) {
+				json = new DataTransformations.json_encode().exec(t, environment, args[0]).val();
+			} else {
+				selector = ArgumentValidation.getString(args[0], t);
+				json = new DataTransformations.json_encode().exec(t, environment, args[1]).val();
+			}
+			Static.getServer().runasConsole("minecraft:tellraw " + selector + " " + json);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "tellraw";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[string selector], array raw} A thin wrapper around the tellraw command from console context,"
+					+ " this simply passes the input to the command. The raw is passed in as a normal"
+					+ " (possibly associative) array, and json encoded. No validation is done on the input, so the"
+					+ " command may fail. If not provided, the selector defaults to @a. Do not use double quotes"
+					+ " (smart string) when providing the selector. See {{function|ptellraw}} if you need player"
+					+ " context. ---- The specification of the array may change from version to version of Minecraft,"
+					+ " but is documented here https://minecraft.gamepedia.com/Commands#Raw_JSON_text."
+					+ " This function is simply written in terms of json_encode and runas, and is otherwise equivalent"
+					+ " to runas('~console', '/minecraft:tellraw ' . @selector . ' ' . json_encode(@raw))";
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[] {
+				new ExampleScript("Simple usage with a plain message",
+						"tellraw(array('text': 'Hello World!'));",
+						"<<Would output the plain message to all players.>>")
+			};
+		}
+
 	}
 
 	@api

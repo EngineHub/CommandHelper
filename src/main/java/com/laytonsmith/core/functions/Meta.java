@@ -220,16 +220,16 @@ public class Meta {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			if(Construct.nval(args[0]) == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
-				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
-			}
-			String cmd = args[0].val().substring(1);
 			//If the command sender is null, then just try to run() this. It's unclear to me what
 			//would cause this for sure, but just in case. Regardless, this allows us to consolidate the error checking
 			//into the run function
 			if(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() == null) {
 				return new run().exec(t, env, args);
 			}
+			if(Construct.nval(args[0]) == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
+				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
+			}
+			String cmd = args[0].val().substring(1);
 			//Store their current op status
 			Boolean isOp = env.getEnv(CommandHelperEnvironment.class).GetCommandSender().isOp();
 
