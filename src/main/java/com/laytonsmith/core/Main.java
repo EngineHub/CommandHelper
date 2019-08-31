@@ -450,10 +450,14 @@ public class Main {
 
 		@Override
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws IOException {
+			CreateNewFiles(parsedArgs.getStringListArgument(), parsedArgs.isFlagSet('f'));
+		}
+
+		public static void CreateNewFiles(List<String> files, boolean force) throws IOException {
 			String li = OSUtils.GetLineEnding();
-			for(String file : parsedArgs.getStringListArgument()) {
+			for(String file : files) {
 				File f = new File(file);
-				if(f.exists() && !parsedArgs.isFlagSet('f')) {
+				if(f.exists() && !force) {
 					System.out.println(file + " already exists, refusing to create");
 					continue;
 				}

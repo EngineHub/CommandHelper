@@ -59,6 +59,8 @@ public class ClassDiscoveryCache {
 		this.logger = logger;
 	}
 
+	private static final Object CACHE_WRITE_LOCK = new Object();
+
 	/**
 	 * Given a file location, retrieves the ClassDiscoveryURLCache from it. If it is a jar, the file is hashed, and
 	 * checked for a local cache copy, and if one exists, that cache is returned. If not, the jar is scanned for a
@@ -128,9 +130,11 @@ public class ClassDiscoveryCache {
 
 			if(cacheOutputName != null) {
 				try {
-					try(ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(cacheOutputName, false))) {
-						zos.putNextEntry(new ZipEntry("data"));
-						cache.writeDescriptor(zos);
+					synchronized(CACHE_WRITE_LOCK) {
+						try(ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(cacheOutputName, false))) {
+							zos.putNextEntry(new ZipEntry("data"));
+							cache.writeDescriptor(zos);
+						}
 					}
 				} catch (IOException ex) {
 					//Well, we couldn't write it out, so report the error, but continue anyways.

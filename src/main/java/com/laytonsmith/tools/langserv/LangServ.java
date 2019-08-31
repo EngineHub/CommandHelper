@@ -42,6 +42,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.net.Socket;
@@ -59,6 +62,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionItemKind;
 import org.eclipse.lsp4j.CompletionList;
@@ -75,6 +80,8 @@ import org.eclipse.lsp4j.DidSaveTextDocumentParams;
 import org.eclipse.lsp4j.DocumentLink;
 import org.eclipse.lsp4j.DocumentLinkOptions;
 import org.eclipse.lsp4j.DocumentLinkParams;
+import org.eclipse.lsp4j.ExecuteCommandOptions;
+import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.InitializedParams;
@@ -84,6 +91,7 @@ import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.WorkspaceFolder;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
@@ -289,7 +297,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	private final boolean usingStdio;
 
 	private LanguageClient client;
-	private final Map<String, Map<Integer, ParseTree>> documents = new HashMap<>();
+
 	/**
 	 * This executor uses an unbounded thread pool, and should only be used for task in which a user is actively
 	 * waiting for results, however, tasks submitted to this processor will begin immediately, as opposed to the
@@ -409,6 +417,42 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		});
 	}
 
+	@java.lang.annotation.Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface Command {
+		/**
+		 * The name of the command.
+		 * @return
+		 */
+		String value();
+	}
+
+	public static interface CommandProvider {
+		CompletableFuture<Object> execute(LanguageClient client, ExecuteCommandParams params);
+	}
+
+	// Need to implement stuff in the extension before this is useful
+//	@Command("new-ms-file")
+//	public static class NewMsFileCommand implements CommandProvider {
+//
+//		@Override
+//		public CompletableFuture<Object> execute(LanguageClient client, ExecuteCommandParams params) {
+//			CompletableFuture<Object> result = new CompletableFuture<>();
+////			ShowMessageRequestParams smrp = new ShowMessageRequestParams();
+////			MessageActionItem action = new MessageActionItem();
+////			action.setTitle("Name of file");
+////			smrp.setActions(Arrays.asList(action));
+////			client.showMessageRequest(smrp).thenAccept(action -> {
+////				action.
+////			});
+//			result.complete(null);
+//			return result;
+//		}
+//
+//	}
+
+	private Map<String, CommandProvider> commandProviders = new HashMap<>();
+
 	@Override
 	public CompletableFuture<InitializeResult> initialize(InitializeParams params) {
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
@@ -420,7 +464,26 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		DocumentLinkOptions documentLinkOptions = new DocumentLinkOptions();
 		documentLinkOptions.setResolveProvider(false);
 		sc.setDocumentLinkProvider(documentLinkOptions);
-//		sc.setHoverProvider(true);
+		{
+			ExecuteCommandOptions eco = new ExecuteCommandOptions();
+			List<String> commands = new ArrayList<>();
+			for(Class<? extends CommandProvider> c : ClassDiscovery.getDefaultInstance()
+					.loadClassesWithAnnotationThatExtend(Command.class, CommandProvider.class)) {
+				CommandProvider cp;
+				try {
+					cp = c.newInstance();
+				} catch(InstantiationException | IllegalAccessException ex) {
+					// We can't recover from this, so just skip it
+					Logger.getLogger(LangServ.class.getName()).log(Level.SEVERE, null, ex);
+					continue;
+				}
+				String command = c.getAnnotation(Command.class).value();
+				commands.add(command);
+				commandProviders.put(command, cp);
+			}
+			eco.setCommands(commands);
+			sc.setExecuteCommandProvider(eco);
+		}
 		CompletionOptions co = new CompletionOptions(true, Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h",
 				"i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "_"));
 		sc.setCompletionProvider(co);
@@ -507,7 +570,8 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				compilerEnv.setLogCompilerWarnings(false); // No one would see them
 				GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
 
-				// This disables things like security checks and whatnot. These may be present in the runtime environment,
+				// This disables things like security checks and whatnot.
+				// These may be present in the runtime environment,
 				// but it's not possible for us to tell that at this point.
 				gEnv.SetCustom("cmdline", true);
 				File f = Paths.get(new URI(uri)).toFile();
@@ -517,7 +581,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				try {
 					ParseTree fTree;
 					logd(() -> "Compiling " + f);
-					code = FileUtil.read(f);
+					code = getDocument(uri);
 					if(f.getName().endsWith(".ms")) {
 						tokens = MethodScriptCompiler.lex(code, env, f, true);
 						fTree = MethodScriptCompiler.compile(tokens, env, envs);
@@ -584,28 +648,76 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		});
 	}
 
+	//<editor-fold defaultstate="collapsed" desc="DocumentManagement">
+
+	/**
+	 * Maps from URI to document text. If the document isn't in this map, it may be safely read from disk.
+	 */
+	private final Map<String, String> documents = new HashMap<>();
+
+	/**
+	 * Returns the document text either from the document cache, if the client is managing the document, or from
+	 * the file system if it isn't.
+	 * @param uri
+	 * @return
+	 * @throws java.io.IOException
+	 */
+	public String getDocument(String uri) throws IOException {
+		if(documents.containsKey(uri)) {
+			return documents.get(uri);
+		}
+		File f;
+		try {
+			f = Paths.get(new URI(uri)).toFile();
+		} catch (URISyntaxException ex) {
+			throw new RuntimeException(ex);
+		}
+		return FileUtil.read(f);
+	}
+
 	@Override
 	public void didOpen(DidOpenTextDocumentParams params) {
+		// The document open notification is sent from the client to the server to signal newly opened text documents.
+		// The document’s truth is now managed by the client and the server must not try to read the document’s truth
+		// using the document’s Uri.
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
-		doCompilation(null, highPriorityProcessors, params.getTextDocument().getUri());
+		String uri = params.getTextDocument().getUri();
+		documents.put(uri, params.getTextDocument().getText());
+		doCompilation(null, highPriorityProcessors, uri);
 	}
 
 	@Override
 	public void didChange(DidChangeTextDocumentParams params) {
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
 		logv(() -> "Changing " + params);
+		String uri = params.getTextDocument().getUri();
+		// If the processing mode is changed to incremental, this logic needs modification
+//		String text = documents.get(uri);
+		if(params.getContentChanges().size() > 1) {
+			logw("Unexpected size from didChange event.");
+		}
+		for(TextDocumentContentChangeEvent change : params.getContentChanges()) {
+			String newText = change.getText();
+			documents.put(uri, newText);
+		}
+		doCompilation(null, highPriorityProcessors, uri);
 	}
 
 	@Override
 	public void didClose(DidCloseTextDocumentParams params) {
+		// The document close notification is sent from the client to the server when the document got closed in the
+		// client. The document’s truth now exists where the document’s Uri points to (e.g. if the document’s Uri is
+		// a file Uri the truth now exists on disk).
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
+		documents.remove(params.getTextDocument().getUri());
 	}
 
 	@Override
 	public void didSave(DidSaveTextDocumentParams params) {
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
-		doCompilation(null, highPriorityProcessors, params.getTextDocument().getUri());
 	}
+
+	//</editor-fold>
 
 	public Range convertTargetToRange(ParseTree node) {
 		String val = Construct.nval(node.getData());
@@ -760,5 +872,10 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 			result.complete(links);
 		});
 		return result;
+	}
+
+	@Override
+	public CompletableFuture<Object> executeCommand(ExecuteCommandParams params) {
+		return commandProviders.get(params.getCommand()).execute(client, params);
 	}
 }
