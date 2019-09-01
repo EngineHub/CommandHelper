@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.MEnum;
+import com.laytonsmith.annotations.OperatorPreferred;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
@@ -59,6 +60,7 @@ public class Math {
 
 	@api
 	@seealso({subtract.class, multiply.class, divide.class})
+	@OperatorPreferred("+")
 	public static class add extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -144,6 +146,7 @@ public class Math {
 
 	@api
 	@seealso({add.class, multiply.class, divide.class})
+	@OperatorPreferred("-")
 	public static class subtract extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -217,6 +220,7 @@ public class Math {
 
 	@api
 	@seealso({divide.class, add.class, subtract.class})
+	@OperatorPreferred("*")
 	public static class multiply extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -300,6 +304,7 @@ public class Math {
 
 	@api
 	@seealso({multiply.class, add.class, subtract.class})
+	@OperatorPreferred("/")
 	public static class divide extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -375,6 +380,7 @@ public class Math {
 	}
 
 	@api
+	@OperatorPreferred("%")
 	public static class mod extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -439,6 +445,7 @@ public class Math {
 	}
 
 	@api
+	@OperatorPreferred("**")
 	public static class pow extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -585,6 +592,7 @@ public class Math {
 
 	@api
 	@seealso({dec.class, postdec.class, postinc.class})
+	@OperatorPreferred("++")
 	public static class inc extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -702,6 +710,7 @@ public class Math {
 
 	@api
 	@seealso({postdec.class, inc.class, dec.class})
+	@OperatorPreferred("++")
 	public static class postinc extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -829,6 +838,7 @@ public class Math {
 
 	@api
 	@seealso({inc.class, postdec.class, postinc.class})
+	@OperatorPreferred("--")
 	public static class dec extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -946,6 +956,7 @@ public class Math {
 
 	@api
 	@seealso({postinc.class, inc.class, dec.class})
+	@OperatorPreferred("--")
 	public static class postdec extends AbstractFunction implements Optimizable {
 
 		@Override

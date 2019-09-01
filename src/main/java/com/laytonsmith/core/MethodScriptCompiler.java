@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.annotations.OperatorPreferred;
 import com.laytonsmith.annotations.breakable;
 import com.laytonsmith.annotations.nolinking;
 import com.laytonsmith.annotations.unbreakable;
@@ -1423,6 +1424,23 @@ public final class MethodScriptCompiler {
 
 			if(t.type.equals(TType.FUNC_NAME)) {
 				CFunction func = new CFunction(t.val(), t.target);
+				{
+					// Check for code upgrade warning
+					try {
+						OperatorPreferred opPref = func.getFunction().getClass().getAnnotation(OperatorPreferred.class);
+						if(opPref != null) {
+							String msg = "The operator \"" + opPref.value() + "\" is preferred over the functional"
+									+ " usage.";
+							CompilerWarning warning = new CompilerWarning(msg, t.target,
+									FileOptions.SuppressWarning.CodeUpgradeNotices);
+							environment.getEnv(CompilerEnvironment.class).addCodeUpgradeNotice(fileOptions, warning);
+						}
+					} catch (ConfigCompileException ex) {
+						// The function doesn't exist. It may be a compile error later (or maybe not, if it's
+						// preprocessed out) but we don't want to handle that at this point either way. In any
+						// case, we can't find it, so don't report it.
+					}
+				}
 				ParseTree f = new ParseTree(func, fileOptions);
 				tree.addChild(f);
 				constructCount.push(new AtomicInteger(0));

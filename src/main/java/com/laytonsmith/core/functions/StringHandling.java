@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils.ReflectionException;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.MEnum;
+import com.laytonsmith.annotations.OperatorPreferred;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
@@ -69,6 +70,7 @@ public class StringHandling {
 	}
 
 	@api
+	@OperatorPreferred(".")
 	public static class concat extends AbstractFunction implements Optimizable {
 
 		@Override

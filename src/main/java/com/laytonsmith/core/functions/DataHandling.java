@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.annotations.DocumentLink;
+import com.laytonsmith.annotations.OperatorPreferred;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.hide;
@@ -258,6 +259,7 @@ public class DataHandling {
 
 	@api
 	@seealso({com.laytonsmith.tools.docgen.templates.Variables.class})
+	@OperatorPreferred("=")
 	public static class assign extends AbstractFunction implements Optimizable {
 
 		@Override

@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.MEnum;
+import com.laytonsmith.annotations.OperatorPreferred;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
@@ -329,6 +330,7 @@ public class ArrayHandling {
 
 	@api
 	@seealso({array_get.class, array.class, array_push.class, com.laytonsmith.tools.docgen.templates.Arrays.class})
+	@OperatorPreferred("@array[@key] = @value")
 	public static class array_set extends AbstractFunction {
 
 		@Override
@@ -421,6 +423,7 @@ public class ArrayHandling {
 
 	@api
 	@seealso({array_set.class, array_push_all.class})
+	@OperatorPreferred("@array[] = @value")
 	public static class array_push extends AbstractFunction {
 
 		@Override

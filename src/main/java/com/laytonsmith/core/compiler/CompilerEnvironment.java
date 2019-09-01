@@ -142,6 +142,31 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl {
 	}
 
 	/**
+	 * Code upgrade notices are similar to compiler warnings in all ways except the logic for deciding when to display
+	 * them. They only display when strict mode is enabled, and they can even still be suppressed. The CompilerWarning
+	 * object should have the {@link FileOptions.SuppressWarning#CodeUpgradeNotices} type, but it is ignored either way.
+	 * <p>
+	 * Warnings added in this way show up in {@link #getCompilerWarnings()}.
+	 * @param fileOptions
+	 * @param warning
+	 */
+	public void addCodeUpgradeNotice(FileOptions fileOptions, CompilerWarning warning) {
+		if(fileOptions == null) {
+			return;
+		}
+		if(!fileOptions.isStrict()) {
+			return;
+		}
+		if(fileOptions.isWarningSuppressed(FileOptions.SuppressWarning.CodeUpgradeNotices)) {
+			return;
+		}
+		this.compilerWarnings.add(warning);
+		if(logCompilerWarnings) {
+			MSLog.GetLogger().Log(MSLog.Tags.COMPILER, LogLevel.WARNING, warning.getMessage(), warning.getTarget());
+		}
+	}
+
+	/**
 	 * Returns a list of compiler warnings that were logged during compilation.
 	 * @return
 	 */

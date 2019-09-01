@@ -308,7 +308,10 @@ public final class FileOptions {
 				+ " all strings. In strict mode, this is always an error that can't be suppressed.", MSVersion.V3_3_4),
 		IncludedFileNotFound("When an include is encountered by the compiler, it checks to ensure that the file being"
 				+ " included exists. It doesn't actually need to exist until runtime, but a warning is issued at"
-				+ " compile time if it can't be found.", MSVersion.V3_3_4);
+				+ " compile time if it can't be found.", MSVersion.V3_3_4),
+		CodeUpgradeNotices("Code that uses old formats should generally be upgraded to newer versions."
+				+ " This is encouraged to make code more readable, and is not a deprecation notice. This type of"
+				+ " warning is only displayed in strict mode, and is even still suppressable.", MSVersion.V3_3_4);
 
 		private SuppressWarning(String docs, Version version) {
 			this.docs = docs;

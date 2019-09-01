@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.annotations.OperatorPreferred;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
@@ -47,6 +48,7 @@ public class BasicLogic {
 
 	@api
 	@seealso({nequals.class, sequals.class, snequals.class})
+	@OperatorPreferred("==")
 	public static class equals extends AbstractFunction implements Optimizable {
 
 		private static final equals SELF = new equals();
@@ -189,6 +191,7 @@ public class BasicLogic {
 
 	@api
 	@seealso({equals.class, nequals.class, snequals.class})
+	@OperatorPreferred("===")
 	public static class sequals extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -269,6 +272,7 @@ public class BasicLogic {
 
 	@api
 	@seealso({sequals.class})
+	@OperatorPreferred("!==")
 	public static class snequals extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -332,6 +336,7 @@ public class BasicLogic {
 
 	@api
 	@seealso({equals.class, sequals.class, snequals.class})
+	@OperatorPreferred("!=")
 	public static class nequals extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -700,6 +705,7 @@ public class BasicLogic {
 
 	@api
 	@seealso({gt.class, lte.class, gte.class})
+	@OperatorPreferred("<")
 	public static class lt extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -767,6 +773,7 @@ public class BasicLogic {
 
 	@api
 	@seealso({lt.class, lte.class, gte.class})
+	@OperatorPreferred(">")
 	public static class gt extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -834,6 +841,7 @@ public class BasicLogic {
 
 	@api
 	@seealso({lt.class, gt.class, gte.class})
+	@OperatorPreferred("<=")
 	public static class lte extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -902,6 +910,7 @@ public class BasicLogic {
 
 	@api
 	@seealso({lt.class, gt.class, lte.class})
+	@OperatorPreferred(">=")
 	public static class gte extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -969,6 +978,7 @@ public class BasicLogic {
 
 	@api(environments = {GlobalEnv.class})
 	@seealso({or.class})
+	@OperatorPreferred("&&")
 	public static class and extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1231,6 +1241,7 @@ public class BasicLogic {
 
 	@api(environments = {GlobalEnv.class})
 	@seealso({and.class})
+	@OperatorPreferred("||")
 	public static class or extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1457,6 +1468,7 @@ public class BasicLogic {
 	}
 
 	@api
+	@OperatorPreferred("!")
 	public static class not extends AbstractFunction implements Optimizable {
 
 		@Override
