@@ -26,6 +26,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.InvalidEnvironmentException;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
 import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
@@ -280,6 +281,14 @@ public class Script {
 			}
 		}
 
+		final CFunction possibleFunction;
+		try {
+			possibleFunction = (CFunction) m;
+		} catch (ClassCastException e) {
+			throw ConfigRuntimeException.CreateUncatchableException("Expected to find CFunction at runtime but found: "
+					+ m.val(), m.getTarget());
+		}
+
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 		boolean addedRootStackElement = false;
 		try {
@@ -290,7 +299,8 @@ public class Script {
 			}
 			stManager.setCurrentTarget(c.getTarget());
 			env.getEnv(GlobalEnv.class).SetScript(this);
-			if(m.val().charAt(0) == '_' && m.val().charAt(1) != '_') {
+
+			if(possibleFunction.hasProcedure()) {
 				//Not really a function, so we can't put it in Function.
 				Procedure p = getProc(m.val());
 				if(p == null) {
@@ -307,13 +317,27 @@ public class Script {
 					pp.stop();
 				}
 				return ret;
+			} else if(possibleFunction.hasIVariable()) {
+				//Check if this ivar is a closure and execute it
+				Mixed closure = env.getEnv(GlobalEnv.class).GetVarList().get(m.val(), m.getTarget(), env).ival();
+				if(!closure.isInstanceOf(CClosure.TYPE)) {
+					throw new CRECastException("Expecting variable to contain a closure to execute, but found type: "
+							+ closure.typeof().getSimpleName(), m.getTarget());
+				}
+				Mixed[] list = new Mixed[c.numberOfChildren()];
+				for(int i = 0; i < c.numberOfChildren(); i++) {
+					list[i] = env.getEnv(GlobalEnv.class).GetScript().seval(c.getChildAt(i), env);
+				}
+				return ((CClosure) closure).executeCallable(list);
 			}
+
 			final Function f;
 			try {
-				f = ((CFunction) m).getFunction();
-			} catch (ConfigCompileException | ClassCastException e) {
+				f = possibleFunction.getFunction();
+			} catch (ConfigCompileException e) {
 				//Turn it into a config runtime exception. This shouldn't ever happen though.
-				throw ConfigRuntimeException.CreateUncatchableException("Unable to find function " + m.val(), m.getTarget());
+				throw ConfigRuntimeException.CreateUncatchableException("Unable to find function at runtime: "
+						+ m.val(), m.getTarget());
 			}
 
 			ArrayList<Mixed> args = new ArrayList<>();

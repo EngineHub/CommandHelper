@@ -196,7 +196,7 @@ public class RandomTests {
 		CArray c1 = C.Array(C.Void(), C.Void()).clone();
 		CBoolean c2 = C.Boolean(true).clone();
 		CDouble c4 = C.Double(1).clone();
-		CFunction c5 = new CFunction("", Target.UNKNOWN).clone();
+		CFunction c5 = new CFunction("__", Target.UNKNOWN).clone();
 		CInt c6 = C.Int(1).clone();
 		CNull c7 = C.Null().clone();
 		CString c8 = C.String("").clone();

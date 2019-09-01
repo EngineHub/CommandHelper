@@ -845,7 +845,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 			}
 			List<DocumentLink> links = new ArrayList<>();
 			tree.getAllNodes().forEach(node -> {
-				if(node.getData() instanceof CFunction) {
+				if(node.getData() instanceof CFunction && ((CFunction) (node.getData())).hasFunction()) {
 					try {
 						Function f = ((CFunction) (node.getData())).getFunction();
 						if(f instanceof DocumentLinkProvider) {

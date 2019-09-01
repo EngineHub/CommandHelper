@@ -38,6 +38,33 @@ public class CFunction extends Construct {
 	}
 
 	/**
+	 * Returns true if this CFunction is expected to represent a procedure based on the format.
+	 *
+	 * @return
+	 */
+	public boolean hasProcedure() {
+		return val().charAt(0) == '_' && val().charAt(1) != '_';
+	}
+
+	/**
+	 * Returns true if this CFunction is expected to represent an IVariable based on the format.
+	 *
+	 * @return
+	 */
+	public boolean hasIVariable() {
+		return val().charAt(0) == '@';
+	}
+
+	/**
+	 * Returns true if this CFunction is expected to represent a function based on the format.
+	 *
+	 * @return
+	 */
+	public boolean hasFunction() {
+		return !hasProcedure() && !hasIVariable();
+	}
+
+	/**
 	 * Returns the underlying function for this construct.
 	 *
 	 * @return

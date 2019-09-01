@@ -1824,8 +1824,8 @@ public final class MethodScriptCompiler {
 			//Don't care about these
 			return;
 		}
-		if(tree.getData().val().startsWith("_")) {
-			//It's a proc. We need to recurse, but not check this "function"
+		if(!((CFunction) tree.getData()).hasFunction()) {
+			//We need to recurse, but this is not expected to be a function
 			for(ParseTree child : tree.getChildren()) {
 				checkBreaks0(child, currentLoops, lastUnbreakable, compilerErrors);
 			}
@@ -2094,7 +2094,7 @@ public final class MethodScriptCompiler {
 		// Walk the children
 		for(ParseTree child : tree.getChildren()) {
 			if(child.getData() instanceof CFunction) {
-				if(child.getData().val().charAt(0) != '_' || child.getData().val().charAt(1) == '_') {
+				if(((CFunction) child.getData()).hasFunction()) {
 					// This will throw an exception if the function doesn't exist.
 					try {
 						FunctionList.getFunction((CFunction) child.getData(), envs);
@@ -2430,7 +2430,7 @@ public final class MethodScriptCompiler {
 		//For the time being, we will simply say that if a function uses execs, it
 		//is a branch (branches always use execs, though using execs doesn't strictly
 		//mean you are a branch type function).
-		if(tree.getData() instanceof CFunction) {
+		if(tree.getData() instanceof CFunction && ((CFunction) tree.getData()).hasFunction()) {
 			Function f;
 			try {
 				f = (Function) FunctionList.getFunction(((CFunction) tree.getData()), envs);
@@ -2471,6 +2471,9 @@ public final class MethodScriptCompiler {
 				}
 				ParseTree child = children.get(m);
 				if(child.getData() instanceof CFunction) {
+					if(!((CFunction) child.getData()).hasFunction()) {
+						continue;
+					}
 					Function c;
 					try {
 						c = (Function) FunctionList.getFunction(((CFunction) child.getData()), envs);
