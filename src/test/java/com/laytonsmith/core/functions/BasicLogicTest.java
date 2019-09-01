@@ -395,6 +395,12 @@ public class BasicLogicTest {
 	}
 
 	@Test
+	public void testDor2() throws Exception {
+		SRun("msg(typeof(dor('', null)))", fakePlayer);
+		verify(fakePlayer).sendMessage("null");
+	}
+
+	@Test
 	public void testDand() throws Exception {
 		SRun("msg(typeof(dand('a', 'b', false)))", fakePlayer);
 		verify(fakePlayer).sendMessage("ms.lang.boolean");

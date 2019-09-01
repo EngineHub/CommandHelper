@@ -1415,51 +1415,6 @@ public class BasicLogic {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, getName());
-			Iterator<ParseTree> it = children.iterator();
-			boolean foundTrue = false;
-			while(it.hasNext()) {
-				//Remove hard coded false values, they won't affect the calculation at all
-				//Also walk through the children, and if we find a hardcoded true, discard all the following values.
-				//If we do find a hardcoded true, though we can know ahead of time that this statement as a whole
-				//will be true, we can't remove everything, as the parameters beforehand may have side effects, so
-				//we musn't remove them.
-				ParseTree child = it.next();
-				if(foundTrue) {
-					it.remove();
-					continue;
-				}
-				if(child.isConst()) {
-					if(ArgumentValidation.getBoolean(child.getData(), t) == false) {
-						it.remove();
-					} else {
-						foundTrue = true;
-					}
-				}
-			}
-			// TODO: Can't do this yet, because children of side effect free functions may still have side effects that
-			// we need to maintain. However, with complications introduced by code branch functions, we can't process
-			// this yet.
-//			if(foundTrue){
-//				//However, we can remove any functions that have no side effects that come before the true.
-//				it = children.iterator();
-//				while(it.hasNext()){
-//					Mixed data = it.next().getData();
-//					if(data instanceof CFunction && ((CFunction)data).getFunction() instanceof Optimizable){
-//						if(((Optimizable)((CFunction)data).getFunction()).optimizationOptions().contains(OptimizationOption.NO_SIDE_EFFECTS)){
-//							it.remove();
-//						}
-//					}
-//				}
-//			}
-			// At this point, it could be that there are some conditions with side effects, followed by a final true. However,
-			// if true is the only remaining condition (which could be) then we can simply return true here.
-			if(children.size() == 1 && children.get(0).isConst() && ArgumentValidation.getBoolean(children.get(0).getData(), t) == true) {
-				return new ParseTree(children.get(0).getData(), fileOptions);
-			}
-			if(children.isEmpty()) {
-				//We've removed all the children, so return false, because they were all false.
-				return new ParseTree(CBoolean.FALSE, fileOptions);
-			}
 			return null;
 		}
 
@@ -1488,7 +1443,7 @@ public class BasicLogic {
 
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC, OptimizationOption.CONSTANT_OFFLINE);
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 
 		@Override

@@ -408,10 +408,10 @@ public class OptimizationTest {
 		assertEquals("dand(dyn(''),dyn('a'),dyn('b'))", optimize("dyn('') &&& dyn('a') &&& dyn('b')"));
 	}
 
-	@Test
-	public void testDorOptimization() throws Exception {
-		assertEquals("'a'", optimize("dor(false, false, 'a')"));
-	}
+//	@Test
+//	public void testDorOptimization() throws Exception {
+//		assertEquals("'a'", optimize("dor(false, false, 'a')"));
+//	}
 
 	@Test
 	public void testDandOptimization() throws Exception {
