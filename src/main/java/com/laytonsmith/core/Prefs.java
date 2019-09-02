@@ -121,9 +121,17 @@ public final class Prefs {
 				+ " commandhelper.interpreter permission, but"
 				+ " setting it to false prevents all players from accessing the interpreter regardless of their"
 				+ " permissions."));
-		a.add(new Preference(PNames.BASE_DIR.config(), "", Preferences.Type.STRING, "The base directory that scripts"
+		a.add(new Preference(PNames.BASE_DIR.config(), "", Preferences.Type.STRING, "The base directory/directories"
+				+ " that scripts"
 				+ " can read and write to. If left blank, then the default of the server directory will be used. "
-				+ "This setting affects functions like include and read."));
+				+ "This setting affects functions like include and read. Multiple directories may be specified, use ';'"
+				+ " to separate file paths. For security reasons, symlinks are resolved to their actual location on"
+				+ " disk, so if you intend"
+				+ " for a symlinked folder to be accessible, you need to mark the location of the actual folder"
+				+ " as accessible, even if the symlink itself is within another entry in the list. Note that empty"
+				+ " paths are supported when splitting the path, and having a trailing ';' will cause the default"
+				+ " path to be added, so don't end the path with a trailing ; if you don't intend for the path to"
+				+ " include the default."));
 		a.add(new Preference(PNames.PLAY_DIRTY.config(), "false", Preferences.Type.BOOLEAN, "Makes CommandHelper play"
 				+ " dirty and break all sorts of programming rules, so that other plugins can't interfere with the"
 				+ " operations that you defined. Note that doing this essentially makes CommandHelper have absolute"
@@ -232,6 +240,10 @@ public final class Prefs {
 		return prefB(PNames.ENABLE_INTERPRETER);
 	}
 
+	/**
+	 * Note that this should be split(';', -1) to get the individual file paths.
+	 * @return
+	 */
 	public static String BaseDir() {
 		return prefS(PNames.BASE_DIR);
 	}

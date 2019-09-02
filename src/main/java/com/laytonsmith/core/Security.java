@@ -23,17 +23,22 @@ public final class Security {
 	 */
 	public static boolean CheckSecurity(String location) throws IOException {
 		if(on) {
-			String pref = Prefs.BaseDir();
-			if(pref.trim().isEmpty()) {
-				pref = ".";
+			// If the location is within any of the paths, it is allowed.
+			for(String pref : Prefs.BaseDir().split(";", -1)) {
+				if(pref.trim().isEmpty()) {
+					pref = ".";
+				}
+				File baseDir = new File(pref);
+				String baseFinal = baseDir.getCanonicalPath();
+				if(baseFinal.endsWith(".")) {
+					baseFinal = baseFinal.substring(0, baseFinal.length() - 1);
+				}
+				File loc = new File(location);
+				if(loc.getCanonicalPath().startsWith(baseFinal)) {
+					return true;
+				}
 			}
-			File baseDir = new File(pref);
-			String baseFinal = baseDir.getCanonicalPath();
-			if(baseFinal.endsWith(".")) {
-				baseFinal = baseFinal.substring(0, baseFinal.length() - 1);
-			}
-			File loc = new File(location);
-			return loc.getCanonicalPath().startsWith(baseFinal);
+			return false;
 		} else {
 			return true;
 		}
