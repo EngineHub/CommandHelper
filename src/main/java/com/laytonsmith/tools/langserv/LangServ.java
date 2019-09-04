@@ -916,7 +916,8 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 							}
 						}
 					} catch (ConfigCompileException ex) {
-						loge(ex);
+						// Ignore this. This can be caused by procs, or other errors, but the point is, it's not a
+						// DocumentLinkProvider.
 					}
 				}
 			});
