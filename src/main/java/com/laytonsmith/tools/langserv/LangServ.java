@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
+import com.laytonsmith.PureUtilities.Triplet;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.AbstractCommandLineTool;
@@ -503,7 +504,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				try {
 					FileUtil.recursiveFind(workspace, (File f1) -> {
 						if(f1.isFile() && f1.getName().endsWith(".ms") || f1.getName().endsWith(".msa")) {
-							doCompilation(null, lowPriorityProcessors, f1.toURI().toString());
+							doCompilation(null, lowPriorityProcessors, f1.toURI().toString(), false);
 						}
 					});
 				} catch (IOException ex) {
@@ -539,14 +540,63 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		return this;
 	}
 
+	private static final int COMPILATION_DELAY = 3;
+
+	private final Map<String, Triplet<Long, Executor, CompletableFuture<ParseTree>>> compileDelays = new HashMap<>();
+
+	private Thread compilerDelayThread = null;
 	/**
 	 * Compiles the file, on the given thread pool.
 	 * @param future After compilation is done, the parse tree is returned. May be null if you don't need it.
 	 * @param threadPool
 	 * @param uri
+	 * @param withDelay If true, waits {@link #COMPILATION_DELAY} seconds before compiling, resetting the timer if
+	 * another request to compile the file comes in before the timer is up.
 	 */
-	@SuppressWarnings("UseSpecificCatch")
-	public void doCompilation(CompletableFuture<ParseTree> future, Executor threadPool, String uri) {
+	@SuppressWarnings({"UseSpecificCatch", "SleepWhileInLoop"})
+	public void doCompilation(CompletableFuture<ParseTree> future, Executor threadPool, String uri, boolean withDelay) {
+		// This has to be finished before compile on change can be enavled, but for now compile on save is good enough
+//		if(compilerDelayThread == null) {
+//			compilerDelayThread = new Thread(() -> {
+//				try {
+//					while(true) {
+//						Thread.sleep(1000);
+//						if(compileDelays.isEmpty()) {
+//							continue;
+//						}
+//						Map<String, Triplet<Long, Executor, CompletableFuture<ParseTree>>> localCompileDelays;
+//						synchronized(compileDelays) {
+//							// Don't do the compilation while in the synchronized block,
+//							// we want to just copy the map then leave the block
+//							localCompileDelays = new HashMap<>(compileDelays);
+//						}
+//						for(Map.Entry<String, Triplet<Long, Executor, CompletableFuture<ParseTree>>> entry :
+//								localCompileDelays.entrySet()) {
+//							Triplet<Long, Executor, CompletableFuture<ParseTree>> params = entry.getValue();
+//							if(params.getFirst() < System.currentTimeMillis()) {
+//								doCompilation(params.getThird(), params.getSecond(), entry.getKey(), false);
+//							}
+//						}
+//					}
+//				} catch (InterruptedException ex) {
+//					//
+//				}
+//			}, "CompilerDelayThread");
+//			compilerDelayThread.setDaemon(true);
+//			compilerDelayThread.start();
+//		}
+//		if(withDelay) {
+//			synchronized(compileDelays) {
+//				compileDelays.put(uri, new Triplet<>(System.currentTimeMillis() + (COMPILATION_DELAY * 1000),
+//						threadPool, future));
+//				return;
+//			}
+//		} else {
+//			// If a compilation request withDelay = false comes in, we need to clear out the queue, since it will be
+//			// compiled immediately anyways.
+//		}
+
+
 		threadPool.execute(() -> {
 			try {
 				Set<ConfigCompileException> exceptions = new HashSet<>();
@@ -683,7 +733,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
 		String uri = params.getTextDocument().getUri();
 		documents.put(uri, params.getTextDocument().getText());
-		doCompilation(null, highPriorityProcessors, uri);
+		doCompilation(null, highPriorityProcessors, uri, false);
 	}
 
 	@Override
@@ -700,7 +750,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 			String newText = change.getText();
 			documents.put(uri, newText);
 		}
-		doCompilation(null, highPriorityProcessors, uri);
+//		doCompilation(null, highPriorityProcessors, uri, true);
 	}
 
 	@Override
@@ -715,6 +765,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	@Override
 	public void didSave(DidSaveTextDocumentParams params) {
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
+		doCompilation(null, highPriorityProcessors, params.getTextDocument().getUri(), false);
 	}
 
 	//</editor-fold>
@@ -833,7 +884,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		logv(() -> "Requested " + uri);
 		CompletableFuture<ParseTree> future = new CompletableFuture<>();
 		CompletableFuture<List<DocumentLink>> result = new CompletableFuture<>();
-		doCompilation(future, lowPriorityProcessors, uri);
+		doCompilation(future, lowPriorityProcessors, uri, false);
 		future.thenAccept((tree) -> {
 			Environment env;
 			try {
