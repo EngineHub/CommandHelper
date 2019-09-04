@@ -2314,6 +2314,8 @@ public final class MethodScriptCompiler {
 				} catch (ConfigRuntimeException e) {
 					//Turn it into a compile exception, then rethrow
 					throw new ConfigCompileException(e);
+				} catch (Error t) {
+					throw new Error("The linked Error had a code target on or around " + tree.getData().getTarget(), t);
 				}
 				if(tempNode == Optimizable.PULL_ME_UP) {
 					if(tree.hasChildren()) {
