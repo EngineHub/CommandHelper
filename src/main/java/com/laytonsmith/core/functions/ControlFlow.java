@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.breakable;
 import com.laytonsmith.annotations.core;
@@ -22,6 +23,7 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.compiler.keywords.InKeyword;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CIdentifier;
 import com.laytonsmith.core.constructs.CInt;
@@ -29,6 +31,7 @@ import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CSlice;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
@@ -416,7 +419,7 @@ public class ControlFlow {
 		}
 
 		@Override
-		public MSVersion since() {
+		public Version since() {
 			return MSVersion.V3_3_0;
 		}
 
@@ -825,6 +828,69 @@ public class ControlFlow {
 			// It's the exact same logic as the branches
 			return isBranch(children);
 		}
+	}
+
+	@api
+	public static class switch_ic extends _switch implements Optimizable, BranchStatement, VariableScope {
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			throw new Error();
+		}
+
+		@Override
+		public String getName() {
+			return "switch_ic";
+		}
+
+		@Override
+		public String docs() {
+			return "mixed {value, [equals, code]..., [defaultCode]} Provides a case insensitive switch statement, for"
+					+ " switching over strings. This works by compiler transformations, transforming this into a normal"
+					+ " switch statement, with each case lowercased, and the input to the switch wrapped in to_lower."
+					+ " The case statements must be strings, however, which is the main difference between this method"
+					+ " and the normal switch statement. The lowercasing is done with the system's default locale.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children,
+				FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			// Allow the normal switch optimization to run, which does the heavy lifting of getting the code into the
+			// functional format, which becomes easier for us to parse.
+			ParseTree switchTree = super.optimizeDynamic(t, env, envs, children, fileOptions);
+			// Replace the 0th child with to_lower(child)
+			ParseTree condition = children.get(0);
+			if(!CFunction.IsFunction(condition, StringHandling.to_lower.class)) {
+				// Don't re-add it if it's already there
+				ParseTree to_lower = new ParseTree(new CFunction(new StringHandling.to_lower().getName(), t),
+						fileOptions);
+				to_lower.addChild(condition);
+				children.set(0, to_lower);
+			}
+			// Now loop through the children, looking for the case statements. Also ensure each is a string.
+			for(int i = 1; i < children.size(); i += 2) {
+				ParseTree cseArray = children.get(i);
+				CArray newData = new CArray(cseArray.getTarget());
+				for(Mixed cse : ((CArray) cseArray.getData()).asList()) {
+					if(cse instanceof CString) {
+						CString data = (CString) cse;
+						newData.push(new CString(data.val().toLowerCase(), data.getTarget()), data.getTarget());
+					} else {
+						throw new ConfigCompileException(getName() + " can only accept strings in case statements.",
+								cse.getTarget());
+					}
+				}
+				cseArray.setData(newData);
+			}
+			return switchTree;
+		}
+
 	}
 
 	@api

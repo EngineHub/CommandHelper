@@ -422,4 +422,10 @@ public class OptimizationTest {
 	public void testCommentBlock() throws Exception {
 		assertEquals(2, MethodScriptCompiler.lex("/*/ still a comment -()*/", null, new File("OptimizationTest"), true, true).size());
 	}
+
+	@Test
+	public void testSwitchIc() throws Exception {
+		assertEquals("switch_ic(to_lower(dyn('AsDf')),array('asdf'),msg('hello'),array('fdsa'),msg('nope'))",
+				optimize("switch_ic(dyn('AsDf')) { case 'aSdF': msg('hello'); case 'fdsa': msg('nope'); }"));
+	}
 }
