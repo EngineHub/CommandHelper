@@ -214,7 +214,7 @@ public class EventBinding {
 			try {
 				EventUtils.verifyEventName(name);
 			} catch (IllegalArgumentException ex) {
-				throw new ConfigCompileException(ex.getMessage(), t);
+				throw new ConfigCompileException(ex.getMessage(), children.get(0).getTarget());
 			}
 		}
 
