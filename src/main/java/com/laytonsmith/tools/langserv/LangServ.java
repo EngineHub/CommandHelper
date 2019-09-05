@@ -12,6 +12,7 @@ import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Security;
@@ -31,6 +32,7 @@ import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
+import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.functions.DocumentLinkProvider;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
@@ -164,6 +166,11 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		}
 
 		@Override
+		public boolean startupExtensionManager() {
+			return false;
+		}
+
+		@Override
 		@SuppressWarnings("UseSpecificCatch")
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
 			boolean useStdio = parsedArgs.isFlagSet("stdio");
@@ -173,6 +180,10 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				hostname = parsedArgs.getStringArgument("host");
 				port = parsedArgs.getNumberArgument("port").intValue();
 			}
+
+			ExtensionManager.AddDiscoveryLocation(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
+			ExtensionManager.Cache(MethodScriptFileLocations.getDefault().getExtensionCacheDirectory());
+			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
 
 			LangServ langserv = new LangServ(useStdio);
 			langserv.log("Starting up Language Server: " + parsedArgs.getRawArguments(), LogLevel.INFO);
@@ -503,7 +514,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				File workspace = new File(f.getUri().replaceFirst("file://", ""));
 				try {
 					FileUtil.recursiveFind(workspace, (File f1) -> {
-						if(f1.isFile() && f1.getName().endsWith(".ms") || f1.getName().endsWith(".msa")) {
+						if(f1.isFile() && (f1.getName().endsWith(".ms") || f1.getName().endsWith(".msa"))) {
 							doCompilation(null, lowPriorityProcessors, f1.toURI().toString(), false);
 						}
 					});
