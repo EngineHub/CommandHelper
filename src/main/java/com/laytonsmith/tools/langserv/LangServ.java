@@ -556,6 +556,21 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	private final Map<String, Triplet<Long, Executor, CompletableFuture<ParseTree>>> compileDelays = new HashMap<>();
 
 	private Thread compilerDelayThread = null;
+
+	private static DiagnosticSeverity getSeverity(CompilerWarning warning) {
+		if(warning.getSuppressCategory() == null) {
+			return DiagnosticSeverity.Warning;
+		}
+		switch(warning.getSuppressCategory().getSeverityLevel()) {
+			case HIGH:
+				return DiagnosticSeverity.Warning;
+			case MEDIUM:
+				return DiagnosticSeverity.Information;
+			case LOW:
+				return DiagnosticSeverity.Hint;
+		}
+		throw new Error("Unaccounted for case: " + warning.getSuppressCategory());
+	}
 	/**
 	 * Compiles the file, on the given thread pool.
 	 * @param future After compilation is done, the parse tree is returned. May be null if you don't need it.
@@ -687,7 +702,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 					for(CompilerWarning c : warnings) {
 						Diagnostic d = new Diagnostic();
 						d.setRange(convertTargetToRange(tokens, c.getTarget()));
-						d.setSeverity(DiagnosticSeverity.Warning);
+						d.setSeverity(getSeverity(c));
 						d.setMessage(c.getMessage());
 						diagnosticsList.add(d);
 					}

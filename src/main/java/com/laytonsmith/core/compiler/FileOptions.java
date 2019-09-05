@@ -294,32 +294,60 @@ public final class FileOptions {
 
 	}
 
+	/**
+	 * This determines the severity level of the warning. Different severities may be handled differently by
+	 * the view code.
+	 */
+	public static enum SeverityLevel {
+		/**
+		 * High impact warnings are ones that have a performance impact, or can cause issues with upgrading in
+		 * the future. These should usually be shown in the UI and not ignored.
+		 */
+		HIGH,
+		/**
+		 * Medium impact warnings are ones that are likely to point to a bug, but may not. These should usually
+		 * not show up readily in the UI, but should show up in lists of issues.
+		 */
+		MEDIUM,
+		/**
+		 * Low impact warnings are ones that are generally safe to completely ignore, but may point to poor
+		 * coding practices or less readability. These should only show up in the UI if the user is looking
+		 * directly at the code.
+		 */
+		LOW;
+	}
+
 	// TODO: Make these extensible, so extensions can add their own easily
 	public static enum SuppressWarning implements Documentation {
 		UnreachableCode("Code that comes after methods such as return() or exit() won't be run, and represents dead"
 				+ " code, which should usually be removed, or can represent an error with your branching logic.",
-			MSVersion.V3_3_4),
+			MSVersion.V3_3_4, SeverityLevel.MEDIUM),
 		HardcodedDynamicParameter("Code that is hardcoded and sent to eval is going to perform worse than simply"
-				+ " writing the code normally.", MSVersion.V3_3_4),
+				+ " writing the code normally.", MSVersion.V3_3_4, SeverityLevel.HIGH),
 		OverrideArguments("Defining a variable called @arguments overrides the built in @arguments value,"
-				+ " making it impossible to access.", MSVersion.V3_3_4),
+				+ " making it impossible to access.", MSVersion.V3_3_4, SeverityLevel.HIGH),
 		UseBareStrings("Using bare strings can cause code to error or worse silently change behavior when using future"
 				+ " versions of MethodScript that introduce new keywords. Therefore, it is always recommended to quote"
-				+ " all strings. In strict mode, this is always an error that can't be suppressed.", MSVersion.V3_3_4),
+				+ " all strings. In strict mode, this is always an error that can't be suppressed.", MSVersion.V3_3_4,
+				SeverityLevel.HIGH),
 		IncludedFileNotFound("When an include is encountered by the compiler, it checks to ensure that the file being"
 				+ " included exists. It doesn't actually need to exist until runtime, but a warning is issued at"
-				+ " compile time if it can't be found.", MSVersion.V3_3_4),
+				+ " compile time if it can't be found.", MSVersion.V3_3_4, SeverityLevel.MEDIUM),
 		CodeUpgradeNotices("Code that uses old formats should generally be upgraded to newer versions."
 				+ " This is encouraged to make code more readable, and is not a deprecation notice. This type of"
-				+ " warning is only displayed in strict mode, and is even still suppressable.", MSVersion.V3_3_4);
+				+ " warning is only displayed in strict mode, and is even still suppressable.", MSVersion.V3_3_4,
+				SeverityLevel.LOW);
 
-		private SuppressWarning(String docs, Version version) {
+		private SuppressWarning(String docs, Version version, SeverityLevel severityLevel) {
 			this.docs = docs;
 			this.version = version;
+			this.severityLevel = severityLevel;
 		}
 
 		private final String docs;
 		private final Version version;
+		private final SeverityLevel severityLevel;
+
 		@Override
 		public URL getSourceJar() {
 			return ClassDiscovery.GetClassContainer(this.getClass());
@@ -344,6 +372,11 @@ public final class FileOptions {
 		public Version since() {
 			return version;
 		}
+
+		public SeverityLevel getSeverityLevel() {
+			return severityLevel;
+		}
+
 	}
 
 	@Target(ElementType.FIELD)
