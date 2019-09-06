@@ -351,10 +351,17 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 					if(fb.getClass().getAnnotation(hide.class) != null) {
 						continue;
 					}
+					DocGen.DocInfo di;
+					try {
+						di = new DocGen.DocInfo(fb.docs());
+					} catch (IllegalArgumentException ex) {
+						MSLog.GetLogger().Log(LANGSERVLOGTAG, LogLevel.ERROR, "Error parsing function \""
+								+ fb.getName() + "\". " + ex.getMessage(), Target.UNKNOWN);
+						continue;
+					}
 					CompletionItem ci = new CompletionItem(fb.getName());
 //					ci.setCommitCharacters(Arrays.asList("("));
 					ci.setKind(CompletionItemKind.Function);
-					DocGen.DocInfo di = new DocGen.DocInfo(fb.docs());
 					ci.setDetail(di.ret);
 					ci.setDocumentation(di.originalArgs + "\n\n" + di.desc
 							+ (di.extendedDesc == null ? "" : "\n\n" + di.extendedDesc));
@@ -366,10 +373,16 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 			{
 				List<CompletionItem> list = new ArrayList<>();
 				for(Event e : EventList.GetEvents()) {
+					final DocGen.EventDocInfo edi;
+					try {
+						edi = new DocGen.EventDocInfo(e.docs(), e.getName());
+					} catch (IllegalArgumentException ex) {
+						MSLog.GetLogger().Log(LANGSERVLOGTAG, LogLevel.ERROR, ex.getMessage(), Target.UNKNOWN);
+						continue;
+					}
 					CompletionItem ci = new CompletionItem(e.getName());
 					ci.setCommitCharacters(Arrays.asList("'", "\""));
 					ci.setKind(CompletionItemKind.Function);
-					final DocGen.EventDocInfo edi = new DocGen.EventDocInfo(e.docs(), e.getName());
 					ci.setDetail("Event Type");
 					StringBuilder description = new StringBuilder();
 					description.append(edi.description).append("\n");

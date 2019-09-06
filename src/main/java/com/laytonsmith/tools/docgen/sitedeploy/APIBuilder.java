@@ -73,8 +73,13 @@ public class APIBuilder {
 			for(FunctionBase f : FunctionList.getFunctionList(Platforms.INTERPRETER_JAVA, null)) {
 				if(f instanceof Function) {
 					Function ff = (Function) f;
+					DocGen.DocInfo di;
+					try {
+						di = new DocGen.DocInfo(ff.docs());
+					} catch (IllegalArgumentException ex) {
+						continue;
+					}
 					Map<String, Object> function = new TreeMap<>();
-					DocGen.DocInfo di = new DocGen.DocInfo(ff.docs());
 					function.put("name", ff.getName());
 					function.put("ret", di.ret);
 					function.put("args", di.originalArgs);
@@ -127,9 +132,14 @@ public class APIBuilder {
 			Map<String, Map<String, Object>> events = new TreeMap<>();
 			for(Event e : EventList.GetEvents()) {
 				try {
+					DocGen.EventDocInfo edi;
+					try {
+						edi = new DocGen.EventDocInfo(e.docs(), e.getName());
+					} catch (IllegalArgumentException ex) {
+						continue;
+					}
 					Map<String, Object> event = new TreeMap<>();
 					event.put("name", e.getName());
-					DocGen.EventDocInfo edi = new DocGen.EventDocInfo(e.docs(), e.getName());
 					event.put("desc", edi.description);
 					Map<String, String> ed = new TreeMap<>();
 					for(DocGen.EventDocInfo.EventData edd : edi.eventData) {

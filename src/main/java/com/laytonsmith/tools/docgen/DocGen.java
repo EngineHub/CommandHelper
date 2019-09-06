@@ -727,7 +727,7 @@ public class DocGen {
 					mutability.add(new MutabilityData(d[0], d.length > 1 ? d[1] : ""));
 				}
 			} else {
-				throw new RuntimeException("Invalid data from " + eventName + ": " + docs);
+				throw new IllegalArgumentException("Invalid docs formatting for " + eventName + ": \"" + docs + "\"");
 			}
 		}
 	}
@@ -772,7 +772,7 @@ public class DocGen {
 					extendedDesc = parts[1].trim();
 				}
 			} else {
-				throw new IllegalArgumentException("Could not generate DocInfo from string: " + doc);
+				throw new IllegalArgumentException("Could not generate DocInfo from string: \"" + doc + "\"");
 			}
 			args = originalArgs.replaceAll("\\|", "<hr />").replaceAll("\\[(.*?)\\]", "<strong>[</strong>$1<strong>]</strong>");
 		}
