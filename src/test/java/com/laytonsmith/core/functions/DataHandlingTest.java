@@ -296,6 +296,26 @@ public class DataHandlingTest {
 		verify(fakePlayer2).sendMessage("newlabel");
 	}
 
+	@Test(timeout = 10000)
+	public void testClosure11() throws Exception {
+		SRun("@c = closure(@msg){msg(@msg)};\n"
+				+ "@c('Hello World');", fakePlayer);
+		verify(fakePlayer).sendMessage("Hello World");
+	}
+
+	@Test(timeout = 10000)
+	public void testClosure12() throws Exception {
+		SRun("@c = closure(@msg = 'Hello World'){msg(@msg)};\n"
+				+ "@c();", fakePlayer);
+		verify(fakePlayer).sendMessage("Hello World");
+	}
+
+	@Test(timeout = 10000, expected = CRECastException.class)
+	public void testClosure13() throws Exception {
+		SRun("@s = 'string';\n"
+				+ "@s();", fakePlayer);
+	}
+
 	@Test
 	public void testToRadix() throws Exception {
 		assertEquals("f", SRun("to_radix(15, 16)", null));

@@ -104,6 +104,12 @@ public class OptimizationTest {
 	}
 
 	@Test
+	public void testClosure() throws Exception {
+		assertEquals("sconcat(assign(@c,closure(@target,msg(concat('Hello ',@target,'!')))),@c('world'))",
+				optimize("@c = closure(@target) {msg('Hello '.@target.'!')}; @c('world');"));
+	}
+
+	@Test
 	public void testUnreachableCode() throws Exception {
 		assertEquals("if(dyn(0),sconcat(die()),sconcat(msg('2'),msg('3')))",
 				optimize("if(dyn(0)){ die() msg('1') } else { msg('2') msg('3') }"));
