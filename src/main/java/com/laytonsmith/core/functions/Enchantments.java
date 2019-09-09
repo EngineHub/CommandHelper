@@ -12,6 +12,8 @@ import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -137,7 +139,7 @@ public class Enchantments {
 
 	@api(environments = {CommandHelperEnvironment.class})
 	@hide("Deprecated for enchant_item().")
-	public static class enchant_inv extends AbstractFunction {
+	public static class enchant_inv extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -224,6 +226,21 @@ public class Enchantments {
 			}
 			return CVoid.VOID;
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+					new CompilerWarning(getName() + " is deprecated for enchant_item().", t, null));
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -307,7 +324,7 @@ public class Enchantments {
 
 	@api(environments = {CommandHelperEnvironment.class})
 	@hide("Deprecated for remove_item_enchant()")
-	public static class enchant_rm_inv extends AbstractFunction {
+	public static class enchant_rm_inv extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -376,6 +393,21 @@ public class Enchantments {
 				is.removeEnchantment(e);
 			}
 			return CVoid.VOID;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+					new CompilerWarning(getName() + " is deprecated for remove_item_enchant().", t, null));
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -456,7 +488,7 @@ public class Enchantments {
 
 	@api(environments = {CommandHelperEnvironment.class})
 	@hide("Deprecated for get_item_enchants()")
-	public static class get_enchant_inv extends AbstractFunction {
+	public static class get_enchant_inv extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -522,6 +554,21 @@ public class Enchantments {
 			}
 
 			return new CArray(t, enchants, levels);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+					new CompilerWarning(getName() + " is deprecated for get_item_enchants().", t, null));
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 	}
 
@@ -638,7 +685,8 @@ public class Enchantments {
 				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children,
 				FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
-			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, getName() + " is deprecated for can_enchant_item()", t);
+			env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+					new CompilerWarning(getName() + " is deprecated for can_enchant_item().", t, null));
 			return null;
 		}
 

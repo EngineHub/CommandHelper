@@ -34,6 +34,8 @@ import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -78,7 +80,7 @@ public class MobManagement {
 
 	@api(environments = {CommandHelperEnvironment.class})
 	@hide("Deprecated for spawn_entity().")
-	public static class spawn_mob extends AbstractFunction {
+	public static class spawn_mob extends AbstractFunction implements Optimizable {
 
 		// The max amount of mobs that can be spawned at once by this function.
 		private static final int SPAWN_LIMIT = 10000;
@@ -178,6 +180,21 @@ public class MobManagement {
 				throw new CREFormatException("Invalid mob name: " + mob, t);
 			}
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+					new CompilerWarning(getName() + " is deprecated for spawn_entity().", t, null));
+			return null;
+		}
+
+		@Override
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -262,7 +279,8 @@ public class MobManagement {
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
-			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The function tame_mob() is deprecated for set_mob_owner().", t);
+			env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+					new CompilerWarning(getName() + " is deprecated for set_mob_owner().", t, null));
 			return null;
 		}
 
