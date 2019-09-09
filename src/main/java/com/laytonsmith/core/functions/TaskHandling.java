@@ -54,7 +54,7 @@ public class TaskHandling {
 			TaskManager tm = environment.getEnv(GlobalEnv.class).GetTaskManager();
 			CArray ret = new CArray(t);
 			for(TaskHandler task : tm.getTasks()) {
-				CArray tt = new CArray(t);
+				CArray tt = CArray.GetAssociativeArray(t);
 				tt.set("id", new CInt(task.getID(), t), t);
 				tt.set("type", task.getType().name());
 				tt.set("state", task.getState().name());

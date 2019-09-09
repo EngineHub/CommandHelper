@@ -500,7 +500,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		}
 
 		public CArray getObjectFor() {
-			CArray element = new CArray(Target.UNKNOWN);
+			CArray element = CArray.GetAssociativeArray(Target.UNKNOWN);
 			element.set("id", getProcedureName());
 			try {
 				String name = "Unknown file";

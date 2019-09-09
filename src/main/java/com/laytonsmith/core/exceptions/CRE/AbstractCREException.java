@@ -113,7 +113,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 * @return
 	 */
 	public CArray getExceptionObject() {
-		CArray ret = new CArray(Target.UNKNOWN);
+		CArray ret = CArray.GetAssociativeArray(Target.UNKNOWN);
 		ret.set("classType", this.getExceptionType(), Target.UNKNOWN);
 		ret.set("message", this.getMessage());
 		CArray stackTrace = new CArray(Target.UNKNOWN);
