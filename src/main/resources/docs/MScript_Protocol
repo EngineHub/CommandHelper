@@ -6,7 +6,7 @@ Mechanisms exist to support passing of data, (primitives and objects/arrays), fu
 == Overview ==
 The end of each pipe must simply implement a two way protocol, which translates network/remote requests into UTF-8 strings, which are passed to/from
 the MScript interpreter. The interpreter will always provide at minimum a TCP socket connection, but other platforms/extensions may provide support
-for others, such as DBus or named pipe communication. Connections may be stateless, though maintaining psuedo state is the responsibility
+for others, such as DBus or named pipe communication. Connections may be stateless, though maintaining pseudo state is the responsibility
 of the transport extension, and the interpreter expects the connection to appear stateful.
 
 ===Authentication===

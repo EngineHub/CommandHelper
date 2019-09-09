@@ -54,7 +54,7 @@ facilitates easier integration into existing paradigms. Secondly, as a scripting
 plain text, which makes it perfect for simple configuration and customization. Finally, it has many built in features 
 that simplify development, such as the include() function. With everything, there are drawbacks though. Since it is not 
 strongly typed, this makes it easier to use, but harder to maintain. It is not possible to easily refactor dynamic 
-elements. Though it will be psuedo object oriented, it is somewhat added on top, it wasn't initially designed with this 
+elements. Though it will be pseudo object oriented, it is somewhat added on top, it wasn't initially designed with this 
 in mind. Though the design of the object oriented features should be properly designed, they are being designed inside 
 the existing constraints of the non-object oriented features. 
 

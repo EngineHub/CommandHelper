@@ -66,8 +66,8 @@ public final class Marquee {
 				try {
 					while(run) {
 						final String composite;
-						String psuedoText = text + text + text;
-						composite = psuedoText.substring(loopPointer, maxChars + loopPointer);
+						String pseudoText = text + text + text;
+						composite = pseudoText.substring(loopPointer, maxChars + loopPointer);
 						loopPointer++;
 						if(loopPointer > text.length()) {
 							//reset it once we go over the length
