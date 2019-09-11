@@ -398,7 +398,7 @@
             let pageTranslations = productionTranslations + "/" + lang + "/" 
 					+ window.location.pathname.replace(/\.html$/, ".tmem.xml");
             $.get(pageTranslations, function(data) {
-                $data = $(data);
+                $data = $($.parseXML(data));
                 $blocks = $data.find("translationBlock");
                 let t = [];
                 for(var i = 0; i < $blocks.length; ++i) {
