@@ -949,7 +949,7 @@ public class MobManagement {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage",
-				"set_mob_equipment(spawn_mob('SKELETON')[0], array(WEAPON: array(name: BOW)))",
+				"set_mob_equipment(spawn_mob('SKELETON')[0], array(WEAPON: array(name: 'BOW')))",
 				"Gives a bow to a skeleton")
 			};
 		}

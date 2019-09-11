@@ -443,9 +443,17 @@ public class TranslationMaster {
 			"NOTE"
 	));
 
+	/**
+	 * These are segments that are in the frame, and therefore in all pages. They are outside of the normal
+	 * parsing system, so need to be added manually.
+	 */
+	private static final Set<String> FRAME_SEGMENTS = new HashSet<>(Arrays.asList(
+			"Home", "Docs", "Help", "%s Team. All rights reserved.", "About", "Privacy Policy", "Sponsors"
+	));
+
 
 	/**
-	 * Splits an input string intos segments, which can be used to create smaller individual memories, increasing
+	 * Splits an input string into segments, which can be used to create smaller individual memories, increasing
 	 * the chance of collisions, as well as reducing the chance of retranslation needed when just parts of a page
 	 * change. This is a best effort attempt, and isn't perfect.
 	 * @param inputString
@@ -458,6 +466,10 @@ public class TranslationMaster {
 		inputString = inputString.replaceAll("\\\\\n", "");
 		inputString = inputString.replaceAll("(?s)<script.*?</script>", "");
 		{
+			// Some templates are immune to this, because it breaks the segments otherwise. So we need to first %s a few
+			// special templates.
+			inputString = inputString.replaceAll("%%CURRENT_VERSION%%", "%s");
+			inputString = inputString.replaceAll("<%CURRENT_VERSION%>", "%s");
 			inputString = inputString.replaceAll("(?s)%%.*?%%", "");
 			// Template removal. We can't use regex here, because <% %> templates can be nested. Eventually, we want
 			// to use the whitelist, but for now, just remove all templates.
@@ -492,6 +504,7 @@ public class TranslationMaster {
 		inputString = inputString.replaceAll("\\{\\{.*?\\}\\}", "%s");
 		inputString = inputString.replaceAll("\\[\\[.*?\\|(.*?)\\]\\]", "[[%s|$1]]");
 		inputString = inputString.replaceAll("\\[\\[File:.*?\\]\\]", "");
+		inputString = inputString.replaceAll("\\[\\[Image:.*?\\]\\]", "");
 		inputString = inputString.replaceAll("\\[" + URL_PATTERN + "( .*?)\\]", "[%s$1]");
 		inputString = inputString.replaceAll(URL_PATTERN, "%s");
 		inputString = inputString.replaceAll("(?s)<.*?>", "%s");
@@ -523,6 +536,7 @@ public class TranslationMaster {
 		inputString = inputString.replaceAll(TABLE_PATTERN_STRING, "");
 
 		segments.addAll(Arrays.asList(SPLIT_PATTERN.split(inputString)));
+		segments.addAll(FRAME_SEGMENTS);
 
 		return segments.stream()
 			.filter(string -> string != null)

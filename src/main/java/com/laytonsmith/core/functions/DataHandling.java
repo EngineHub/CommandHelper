@@ -1793,7 +1793,7 @@ public class DataHandling {
 				+ "@array[0] = 4;\n"
 				+ "@array2 = import('array');\n"
 				+ "msg(@array2);"),
-				new ExampleScript("Array key usage", "@key = array(custom, name);\n"
+				new ExampleScript("Array key usage", "@key = array('custom', 'name');\n"
 				+ "export(@key, 'value');\n"
 				+ "@value = import(@key);\n"
 				+ "msg(@value);"),
@@ -3002,11 +3002,11 @@ public class DataHandling {
 				+ "msg('@val + 5: ' . (@val + 5)); // Works as if it were a primitive with most functions\n"
 				+ "(++@val); // As a special exception to how assignments work, increment/decrement works as well\n"
 				+ "msg(@val); // 1\n"),
-				new ExampleScript("Basic usage with procs", "proc(_testWithMutable, @a){\n"
+				new ExampleScript("Basic usage with procs", "proc _testWithMutable(@a){\n"
 				+ "\t@a[] = 5;\n"
 				+ "}\n\n"
 				+ ""
-				+ "proc(_testWithoutMutable, @a){\n"
+				+ "proc _testWithoutMutable(@a){\n"
 				+ "\t@a = 10;\n"
 				+ "}\n\n"
 				+ ""

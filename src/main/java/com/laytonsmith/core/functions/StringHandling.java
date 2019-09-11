@@ -2652,8 +2652,8 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Typical usage", "uuid()", "46fa3d0e-0178-4384-8a9c-2f0df1cada2b"),
-				new ExampleScript("Explicit RANDOM uuid", "uuid(RANDOM)", "fb9f9a7b-76c2-40e3-ba20-8ab23553b9d6"),
-				new ExampleScript("NIL uuid", "uuid(NIL)")
+				new ExampleScript("Explicit RANDOM uuid", "uuid('RANDOM')", "fb9f9a7b-76c2-40e3-ba20-8ab23553b9d6"),
+				new ExampleScript("NIL uuid", "uuid('NIL')")
 			};
 		}
 	}

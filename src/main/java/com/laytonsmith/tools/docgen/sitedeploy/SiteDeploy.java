@@ -103,7 +103,7 @@ public final class SiteDeploy {
 	private static final String INSTALL_PUB_KEYS = "install-pub-keys";
 
 	private static final String PRODUCTION_TRANSLATIONS_URL
-			= "https://github.com/LadyCailin/MethodScriptTranslationDB/blob/master/";
+			= "https://raw.githubusercontent.com/LadyCailin/MethodScriptTranslationDB/master/";
 
 	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public static void run(boolean generatePrefs, boolean useLocalCache, File sitedeploy, String password,

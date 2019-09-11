@@ -239,12 +239,12 @@ public class ItemMeta {
 				"set_itemmeta(5, array(potions: array(array(id: 8, strength: 4, seconds: 90, ambient: true))))",
 				"Turns the potion in slot 5 into a Potion of Leaping V"),
 				new ExampleScript("Demonstrates hiding a potion effect",
-				"set_itemmeta(4, array(flags: array(HIDE_POTION_EFFECTS)))",
+				"set_itemmeta(4, array(flags: array('HIDE_POTION_EFFECTS')))",
 				"Hides the text indicating meta information for the item in slot 4."
 				+ " The flag HIDE_POTION_EFFECTS hides specific item meta like book meta, potion effects,"
 				+ " a music disc's author and name, firework meta, map meta, and stored enchantments."),
 				new ExampleScript("Demonstrates making a custom banner",
-				"set_itemmeta(0, array(basecolor: SILVER, patterns: array(array(color: BLACK, shape: SKULL))))",
+				"set_itemmeta(0, array(basecolor: 'SILVER', patterns: array(array(color: 'BLACK', shape: 'SKULL'))))",
 				"This banner will be silver with a black skull."),
 				new ExampleScript("Demonstrates making a custom firework",
 				"set_itemmeta(null, array('firework': array('strength': 1, 'effects': array(array("

@@ -3228,13 +3228,13 @@ public class ArrayHandling {
 				new ExampleScript("Usage with normal arrays. The default comparison method is HASH",
 						"array_intersect(array(1, 2, 3), array(2, 3, 4))"),
 				new ExampleScript("Demonstrates that STRICT_EQUALS does not consider different types to be equal",
-						"array_intersect(array('1', '2', '3'), array(1, 2, 3), STRICT_EQUALS)"),
+						"array_intersect(array('1', '2', '3'), array(1, 2, 3), 'STRICT_EQUALS')"),
 				new ExampleScript("Note that the results of this method are the same as the previous example,"
 						+ " but this version would be faster, and is preferred in all but the most exceptional cases.",
-						"array_intersect(array('1', '2', '3'), array(1, 2, 3), HASH)"),
+						"array_intersect(array('1', '2', '3'), array(1, 2, 3), 'HASH')"),
 				new ExampleScript("Demonstrates usage with equals. Note that '1' == 1 (but does not === 1) but since"
 						+ " the comparison method uses equals, not sequals, these arrays are considered equivalent.",
-						"array_intersect(array('1', '2', '3'), array(1, 2, 3), EQUALS)"),
+						"array_intersect(array('1', '2', '3'), array(1, 2, 3), 'EQUALS')"),
 				new ExampleScript("Usage with a custom closure", "array_intersect(\n"
 						+ "\tarray(array(id: 1, qty: 2), array(id: 2, qty: 5)),\n"
 						+ "\tarray(array(id: 1, qty: 2), array(id: 5, qty: 10)),\n"
@@ -3324,12 +3324,12 @@ public class ArrayHandling {
 				+ "@arrayB = array(0, 2, 5, 9)\n"
 				+ "array_subset_of(@arrayA, @arrayB)"),
 				new ExampleScript("Mix array",
-				"@arrayA = array(a: 1, b: array(one, two))\n"
-				+ "@arrayB = array(a: 1, b: array(one, two, three), c: 3)\n"
+				"@arrayA = array(a: 1, b: array('one', 'two'))\n"
+				+ "@arrayB = array(a: 1, b: array('one', 'two', 'three'), c: 3)\n"
 				+ "array_subset_of(@arrayA, @arrayB)"),
 				new ExampleScript("Mix array",
-				"@arrayA = array(a: 1, b: array(one, two))\n"
-				+ "@arrayB = array(a: 1, b: array(two, one, three), c: 3)\n"
+				"@arrayA = array(a: 1, b: array('one', 'two'))\n"
+				+ "@arrayB = array(a: 1, b: array('two', 'one', 'three'), c: 3)\n"
 				+ "array_subset_of(@arrayA, @arrayB)")
 			};
 		}
