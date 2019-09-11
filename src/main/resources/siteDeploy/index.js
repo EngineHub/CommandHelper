@@ -456,7 +456,7 @@
 			// the Accept-Language header that the browser sends. But that isn't available through client side
 			// scripting for some unknown reason.
             $.ajax({
-                url: "http://ajaxhttpheaders.appspot.com", 
+                url: "//ajaxhttpheaders.appspot.com", 
                 dataType: 'jsonp', 
                 success: function(headers) {
                     language = headers['Accept-Language'];
