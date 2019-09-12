@@ -1767,7 +1767,6 @@ public final class MethodScriptCompiler {
 		checkLabels(tree, compilerErrors);
 		checkBreaks(tree, compilerErrors);
 		checkLinearComponents(tree, environment, compilerErrors);
-		eliminateDeadCode(tree, environment, envs);
 		if(!compilerErrors.isEmpty()) {
 			if(compilerErrors.size() == 1) {
 				// Just throw the one CCE
@@ -1778,6 +1777,7 @@ public final class MethodScriptCompiler {
 				throw new ConfigCompileGroupException(compilerErrors);
 			}
 		}
+		eliminateDeadCode(tree, environment, envs);
 		parents.pop();
 		tree = parents.pop();
 		return tree;
