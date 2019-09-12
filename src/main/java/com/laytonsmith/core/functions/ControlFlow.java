@@ -1495,6 +1495,9 @@ public class ControlFlow {
 						value = c.get(3);
 					}
 				}
+				if(array == null) {
+					throw new ConfigCompileException("Invalid argument format passed to " + getName(), t);
+				}
 				if(key != null && key.getData() instanceof CLabel) {
 					if(!(((CLabel) key.getData()).cVal() instanceof IVariable)
 							&& !(((CLabel) key.getData()).cVal() instanceof CFunction
