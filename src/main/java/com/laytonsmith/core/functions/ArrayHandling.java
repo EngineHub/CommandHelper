@@ -861,7 +861,7 @@ public class ArrayHandling {
 					if(!ca.inAssociativeMode()) {
 						try {
 							int index = Static.getInt32(args[i], t);
-							if(index >= ca.size()) {
+							if(index >= ca.size() || index < 0) {
 								return CBoolean.FALSE;
 							}
 						} catch (ConfigRuntimeException e) {
