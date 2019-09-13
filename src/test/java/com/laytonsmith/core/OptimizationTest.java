@@ -212,6 +212,42 @@ public class OptimizationTest {
 	}
 
 	@Test
+	public void testAssignWithOr() throws Exception {
+		assertEquals("assign(@one,or(@two,not(@three)))",
+				optimize("@one = @two || !@three"));
+	}
+
+	@Test
+	public void testAssignWithInc() throws Exception {
+		assertEquals("assign(@one,or(inc(@two),inc(@three)))",
+				optimize("@one = ++@two || ++@three"));
+	}
+
+	@Test
+	public void testAssignWithEquals() throws Exception {
+		assertEquals("assign(@one,and(@two,equals(postinc(@three),neg(@four))))",
+				optimize("@one = @two && @three++ == -@four"));
+	}
+
+	@Test
+	public void testAssignWithComplexSymbols() throws Exception {
+		assertEquals("assign(@one,or(postinc(@one),add(inc(@two),@three)))",
+				optimize("@one = @one++ || ++@two + @three"));
+	}
+
+	@Test
+	public void testMultipleAdjacentAssignment() throws Exception {
+		assertEquals("sconcat(assign(@one,inc(@two)),assign(ms.lang.int,@three,0),assign(@four,'test'))",
+				optimize("@one = ++@two; int @three = 0; @four = 'test';"));
+	}
+
+	@Test
+	public void testAdditiveAssignmentWithInc() throws Exception {
+		assertEquals("assign(@one,add(@one,subtract(inc(@two),inc(@three))))",
+				optimize("@one += ++@two - ++@three"));
+	}
+
+	@Test
 	public void testAssignmentMixedWithAddition1() throws Exception {
 		assertEquals("add(1,assign(@a,1))", optimize("1 + @a = 1"));
 	}
@@ -239,6 +275,12 @@ public class OptimizationTest {
 	@Test
 	public void testAssignmentMixedWithAddition6() throws Exception {
 		assertEquals("sconcat(add(1,assign(@_,assign(@a,add(@a,@b,@c,2)))),'blah')", optimize("1 + @_ = @a += @b + @c + 2 'blah'"));
+	}
+
+	@Test
+	public void testAssignmentMixedWithAddition7() throws Exception {
+		assertEquals("add(@one,assign(@one,inc(@two)),@three)",
+				optimize("@one + (@one = ++@two) + @three"));
 	}
 
 	@Test
