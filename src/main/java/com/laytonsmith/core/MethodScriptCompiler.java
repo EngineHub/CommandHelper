@@ -1362,7 +1362,7 @@ public final class MethodScriptCompiler {
 				int array = arrayStack.pop().get();
 				//index is the location of the first node with the index
 				int index = array + 1;
-				if(!tree.hasChildren() || array == -1) {
+				if(array == -1 || array >= tree.numberOfChildren()) {
 					throw new ConfigCompileException("Brackets are illegal here", t.target);
 				}
 
