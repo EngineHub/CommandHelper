@@ -312,7 +312,7 @@ public class ClassDiscovery {
 									f.getAbsolutePath().replaceFirst(Pattern.quote(new File(root).getAbsolutePath() + File.separator), "")));
 							ClassReader reader = new ClassReader(stream);
 							ClassMirrorVisitor mirrorVisitor = new ClassMirrorVisitor();
-							reader.accept(mirrorVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+							reader.accept(mirrorVisitor, ClassReader.SKIP_FRAMES);
 							mirrors.add(mirrorVisitor.getMirror(new URL(url)));
 						} catch (IOException ex) {
 							Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);

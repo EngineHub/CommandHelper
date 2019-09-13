@@ -34,8 +34,10 @@ public class ConstructorMirror<T> extends AbstractMethodMirror {
 	public ConstructorMirror(MethodMirror copy) {
 		super(copy.getDeclaringClass(), copy.modifiers, copy.type, copy.name, copy.getParams(), copy.isVararg(),
 				copy.isSynthetic(), copy.signature.toString());
+		this.setLineNumber(copy.getLineNumber());
 		if(!INIT.equals(copy.name)) {
-			throw new IllegalArgumentException("Only constructors may be mirrored by " + this.getClass().getSimpleName());
+			throw new IllegalArgumentException("Only constructors may be mirrored by "
+					+ this.getClass().getSimpleName());
 		}
 	}
 

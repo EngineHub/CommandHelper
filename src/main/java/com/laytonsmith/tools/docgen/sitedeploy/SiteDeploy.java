@@ -2,6 +2,7 @@ package com.laytonsmith.tools.docgen.sitedeploy;
 
 import com.laytonsmith.tools.docgen.localization.TranslationMaster;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.MethodMirror;
 import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.GNUErrorMessageFormat;
 import com.laytonsmith.PureUtilities.Common.HTMLUtils;
@@ -1465,9 +1466,18 @@ public final class SiteDeploy {
 		while(container.getEnclosingClass() != null) {
 			container = container.getEnclosingClass();
 		}
+		int lineNum = 0;
+		try {
+			MethodMirror m = ClassDiscovery.getDefaultInstance().forName(f.getClass().getName())
+					.getMethod("docs", new Class[0]);
+			lineNum = m.getLineNumber();
+		} catch (NoSuchMethodException | ClassNotFoundException ex) {
+			// Oh well.
+		}
 		String bW = "<p id=\"edit_this_page\">"
 				+ EDIT_THIS_PAGE_PREAMBLE
-				+ String.format(githubBaseUrl, "java/" + container.getName().replace(".", "/")) + ".java"
+				+ String.format(githubBaseUrl, "java/" + container.getName().replace(".", "/")) + ".java#L"
+				+ (lineNum < 10 ? lineNum : lineNum + 10) // Add 10, so we scroll a bit more in view
 				+ EDIT_THIS_PAGE_POSTAMBLE
 				+ " (Note this page is automatically generated from the documentation in the source code.)</p>";
 		page.append(bW);
