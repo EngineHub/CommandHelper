@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.SemVer2;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.Version;
 
@@ -20,7 +21,7 @@ public enum MSVersion implements Version {
 	V3_3_2("3.3.2"),
 	V3_3_3("3.3.3"),
 	V3_3_4("3.3.4");
-	final SimpleVersion version;
+	final SemVer2 version;
 
 	/**
 	 * This points to the latest version in the series. This should normally only be used for things that report the
@@ -41,7 +42,7 @@ public enum MSVersion implements Version {
 	}
 
 	MSVersion(String version) {
-		this.version = new SimpleVersion(version);
+		this.version = new SemVer2(version);
 	}
 
 	public String getVersionString() {
@@ -54,7 +55,11 @@ public enum MSVersion implements Version {
 	}
 
 	public int compareTo(Version o) {
-		return this.version.compareTo(o);
+		if(o instanceof SemVer2) {
+			return this.version.compareTo((SemVer2) o);
+		} else {
+			return new SimpleVersion(this.version.toString()).compareTo(o);
+		}
 	}
 
 	@Override
@@ -70,6 +75,18 @@ public enum MSVersion implements Version {
 	@Override
 	public int getSupplemental() {
 		return this.version.getSupplemental();
+	}
+
+	public int getPatch() {
+		return this.version.getPatch();
+	}
+
+	public String getPrerelease() {
+		return this.version.getPrerelease();
+	}
+
+	public String getBuildMetaData() {
+		return this.version.getBuildMetaData();
 	}
 
 	@Override

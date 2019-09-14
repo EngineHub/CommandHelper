@@ -6,6 +6,10 @@ import java.util.regex.Pattern;
 /**
  * A version is formatted as such: 1.2.10 beta-1 where 1 is the major version, 2 is the minor version, 10 is the
  * supplemental version, and beta-1 is the tag. When comparing two versions, the tag is not considered.
+ *
+ * Generally speaking, this shouldn't be used in favor of {@link SemVer2}, but it is not deprecated, since third
+ * party version numbers may not conform to the SemVer2 standard, which is quite strict. However, new code should
+ * use SemVer2 where possible.
  */
 public class SimpleVersion implements Version {
 
@@ -14,16 +18,16 @@ public class SimpleVersion implements Version {
 	private int supplemental;
 	private String tag;
 
+	private static final Pattern PATTERN = Pattern.compile("(\\d+)(?:\\.(\\d+))?(?:\\.(\\d+))?(?:\\s+(.*))?");
+
 	/**
 	 * Creates a new SimpleVersion object from a string version number. The tag is optional, but all other parameters
 	 * are required. If left off, each version part is set to 0.
 	 *
 	 * @param version The version, as a string
 	 */
-	Pattern p = Pattern.compile("(\\d+)(?:\\.(\\d+))?(?:\\.(\\d+))?(?:\\s+(.*))?");
-
 	public SimpleVersion(String version) {
-		Matcher m = p.matcher(version);
+		Matcher m = PATTERN.matcher(version);
 		if(m.find()) {
 			try {
 				major = Integer.parseInt(m.group(1) == null ? "0" : m.group(1));

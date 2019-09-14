@@ -30,7 +30,7 @@ public interface Version {
 	int getMinor();
 
 	/**
-	 * Returns the supplemental version.
+	 * Returns the supplemental version, aka, the patch version.
 	 *
 	 * @return
 	 */
