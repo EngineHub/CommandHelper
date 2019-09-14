@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 
 import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
