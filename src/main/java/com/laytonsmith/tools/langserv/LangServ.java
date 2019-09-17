@@ -593,7 +593,8 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	 * another request to compile the file comes in before the timer is up.
 	 */
 	@SuppressWarnings({"UseSpecificCatch", "SleepWhileInLoop"})
-	public void doCompilation(CompletableFuture<ParseTree> future, Executor threadPool, String uri, boolean withDelay) {
+	public void doCompilation(CompletableFuture<ParseTree> future, Executor threadPool, final String uri,
+			boolean withDelay) {
 		// This has to be finished before compile on change can be enavled, but for now compile on save is good enough
 //		if(compilerDelayThread == null) {
 //			compilerDelayThread = new Thread(() -> {
@@ -663,7 +664,17 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				// These may be present in the runtime environment,
 				// but it's not possible for us to tell that at this point.
 				gEnv.SetCustom("cmdline", true);
-				File f = Paths.get(new URI(uri)).toFile();
+				URI uuri = new URI(uri);
+				File f;
+				if("untitled".equals(uuri.getScheme())) {
+					// For open files that aren't saved to disk, the client sends something like "untitled:untitled-1",
+					// which isn't a valid file provider, so we can't call Paths.get on it. Instead, we just mock
+					// the name here. We also need to provide getAbsoluteFile, so that the below call to getParentFile
+					// will work.
+					f = new File(uuri.getSchemeSpecificPart()).getAbsoluteFile();
+				} else {
+					f = Paths.get(uuri).toFile();
+				}
 				gEnv.SetRootFolder(f.getParentFile());
 				TokenStream tokens = null;
 				ParseTree tree = null;
@@ -671,10 +682,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 					ParseTree fTree;
 					logd(() -> "Compiling " + f);
 					code = getDocument(uri);
-					if(f.getName().endsWith(".ms")) {
-						tokens = MethodScriptCompiler.lex(code, env, f, true);
-						fTree = MethodScriptCompiler.compile(tokens, env, envs);
-					} else if(f.getName().endsWith(".msa")) {
+					if(f.getName().endsWith(".msa")) {
 						tokens = MethodScriptCompiler.lex(code, env, f, false);
 						fTree = new ParseTree(null);
 						MethodScriptCompiler.preprocess(tokens, envs).forEach((script) -> {
@@ -688,7 +696,10 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 							script.getTrees().forEach(r -> fTree.addChild(r));
 						});
 					} else {
-						return;
+						// Actually, for untitled files, this may not be a correct default. However, there's no
+						// other good way of determining that, so let's just assume it's pure methodscript.
+						tokens = MethodScriptCompiler.lex(code, env, f, true);
+						fTree = MethodScriptCompiler.compile(tokens, env, envs);
 					}
 					tree = fTree;
 				} catch (ConfigCompileException e) {

@@ -531,7 +531,7 @@ public class EventBinding {
 		}
 	}
 
-	@api(environments = CommandHelperEnvironment.class)
+	@api
 	public static class modify_event extends AbstractFunction {
 
 		@Override
