@@ -181,10 +181,6 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				port = parsedArgs.getNumberArgument("port").intValue();
 			}
 
-			ExtensionManager.AddDiscoveryLocation(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
-			ExtensionManager.Cache(MethodScriptFileLocations.getDefault().getExtensionCacheDirectory());
-			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
-
 			LangServ langserv = new LangServ(useStdio);
 			langserv.log("Starting up Language Server: " + parsedArgs.getRawArguments(), LogLevel.INFO);
 			try {

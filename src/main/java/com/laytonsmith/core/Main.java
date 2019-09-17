@@ -154,7 +154,9 @@ public class Main {
 		}
 
 		cd.addAllJarsInFolder(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
-
+		ExtensionManager.AddDiscoveryLocation(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
+		ExtensionManager.Cache(MethodScriptFileLocations.getDefault().getExtensionCacheDirectory());
+		ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
 
 		if(args.length == 0) {
 			args = new String[]{"help"};
@@ -194,9 +196,6 @@ public class Main {
 			CommandLineTool tool = collection.getDynamicTools().get(mode);
 			tool.setSuite(suite);
 			if(tool.startupExtensionManager()) {
-				ExtensionManager.AddDiscoveryLocation(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
-				ExtensionManager.Cache(MethodScriptFileLocations.getDefault().getExtensionCacheDirectory());
-				ExtensionManager.Initialize(cd);
 				ExtensionManager.Startup();
 			}
 			tool.execute(parsedArgs);
@@ -840,23 +839,7 @@ public class Main {
 						.setDescription("The file to check")
 						.setUsageName("file")
 						.setRequiredAndDefault())
-				.addArgument(GetEnvironmentParameter())
-				.addArgument(new ArgumentBuilder()
-					.setDescription("Adds the given folder(s) to the extension discovery location. By default,"
-							+ " no extensions are loaded, not even default MethodScript extensions, but you"
-							+ " can provide that location by using the string \"--load-default\" flag, or explicitely"
-							+ " provide the path with this argument.")
-					.setUsageName("directories")
-					.setOptional()
-					.setName("extension-dirs")
-					.setArgType(ArgumentBuilder.BuilderTypeNonFlag.ARRAY_OF_STRINGS))
-				.addArgument(new ArgumentBuilder()
-					.setDescription("Adds the default MethodScript extension directory to the extension discovery"
-							+ " mechanism. By default no extensions are loaded. This is equivalent to adding"
-							+ " " + MethodScriptFileLocations.getDefault().getExtensionsDirectory().getAbsolutePath()
-							+ " to the --extension-dirs argument list.")
-					.asFlag()
-					.setName('d', "default-extensions"));
+				.addArgument(GetEnvironmentParameter());
 		}
 
 		@Override
@@ -872,17 +855,6 @@ public class Main {
 				System.exit(1);
 			}
 
-			for(String dir : parsedArgs.getStringListArgument("extension-dirs", new ArrayList<>())) {
-				ExtensionManager.AddDiscoveryLocation(new File(dir));
-			}
-
-			if(parsedArgs.isFlagSet("default-extensions")) {
-				ExtensionManager.AddDiscoveryLocation(MethodScriptFileLocations.getDefault().getExtensionsDirectory());
-			}
-
-			ClassDiscovery.getDefaultInstance().addThisJar();
-			ExtensionManager.Cache(MethodScriptFileLocations.getDefault().getExtensionCacheDirectory());
-			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
 			Environment env = Environment.createEnvironment(new CompilerEnvironment());
 			env.getEnv(CompilerEnvironment.class).setLogCompilerWarnings(false);
 			Set<Class<? extends Environment.EnvironmentImpl>> envs = GetEnvironmentValue(parsedArgs);
@@ -1304,16 +1276,10 @@ public class Main {
 				}
 				String password = parsedArgs.getStringArgument("password");
 				if("".equals(password)) {
-					ConsoleReader reader = null;
-					try {
-						reader = new ConsoleReader();
+					try (ConsoleReader reader = new ConsoleReader()) {
 						reader.setExpandEvents(false);
-						Character cha = new Character((char) 0);
+						Character cha = (char) 0;
 						password = reader.readLine("Enter password: ", cha);
-					} finally {
-						if(reader != null) {
-							reader.close();
-						}
 					}
 				}
 				if(password == null) {
@@ -1441,6 +1407,7 @@ public class Main {
 		}
 
 		@Override
+		@SuppressWarnings("UseSpecificCatch")
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
 			try {
 				new CommandExecutor("git --version").start().waitFor();
