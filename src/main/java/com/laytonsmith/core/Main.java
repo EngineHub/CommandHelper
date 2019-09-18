@@ -1276,7 +1276,7 @@ public class Main {
 				}
 				String password = parsedArgs.getStringArgument("password");
 				if("".equals(password)) {
-					try (ConsoleReader reader = new ConsoleReader()) {
+					try(ConsoleReader reader = new ConsoleReader()) {
 						reader.setExpandEvents(false);
 						Character cha = (char) 0;
 						password = reader.readLine("Enter password: ", cha);
