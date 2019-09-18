@@ -915,6 +915,116 @@ class A {
 }
 %>
 
+=== Immutable classes and immutable variables ===
+Classes may be marked as immutable, which means that none of the fields in the class may be changed after construction
+is complete.
+
+<%CODE|
+immutable class A {
+	string @myProperty;
+	// This is effectively constant due to the fact that we don't modify the value in the constructor
+	string @constant = "const"; 
+	public A(string @value) {
+		@myProperty = @value;
+	}
+
+	public void m() {
+		// Can't do this, would be a compile error
+		// @myProperty = "test";
+	}
+}
+%>
+
+Immutable classes may be useful from a business logic standpoint, as it allows enforcement of immutability by the
+compiler. However, the compiler/runtime can also do some optimizations when immutable classes are used, for instance,
+classes that are immutable can be passed either by value or reference, and the effective result will be the same. So
+the runtime may choose the most performant method if a class is marked as immutable. 
+
+Individual fields may be marked as immutable as well. This has the effect of making the class immutable, but only
+through that particular object reference.
+
+<%CODE|
+// Note that MyObject is not immutable
+class MyObject {
+	public string @value;
+
+	public void setValue(string @v) {
+		@value = @v;
+	}
+}
+
+class A {
+	MyObject @a;
+	immutable MyObject @b;
+	
+	public A(MyObject @a, MyObject @b) {
+		this->@a = @a;
+		this->@b = @b;
+		// This is valid. Immutable values are not "frozen" until construction is complete.
+		this->@b->@value = "initial value";
+		this->setup();
+	}
+
+	public void m() {
+		// Valid
+		this->@a->@value = "test";
+		this->@a->setValue("test");
+		
+		// Compile error, fields in @b may not be modified, either directly or indirectly
+		// this->@b->@value = "test2";
+		// this->@b->setValue("test2");
+		// this->setup();
+	}
+
+	private void setup() {
+		// This is valid too, but only because the setup method is only called from the constructor. Note that this
+		// method is actually not available to the reflection mechanism either, as it is inlined in the constructor.
+		this->@b->@value = "called from setup";
+	}
+
+	public void publicSetup() {
+		// This isn't valid, because the method is public. Methods that modify immutable values are only allowed
+		// to be private, and are only allowed to be called from the constructor.
+		// this->@b->@value = "invalid";
+	}
+}
+%>
+
+Immutable fields are a sort of overloaded type. That is, ''MyObject'' is different
+than ''immutable MyObject'', and it is required to declare them differently in each use. Mutable fields may safely
+be cast to the immutable variant, but not vice versa.
+
+<%CODE|
+class A {
+	immutable MyObject @immutable;
+	MyObject @mutable;
+	
+	public void set(immutable MyObject @v) {
+		this->@immutable = @v;
+	}
+
+	public void set(MyObject @v) {
+		this->@mutable = @v;
+	}
+}
+
+A @a = new A();
+@a->set(new immutable MyObject()); // sets the immutable object
+@a->set(new MyObject()); // sets the mutable object
+@mo = new MyObject();
+@a->set((immutable MyObject) @mo); // sets the immutable object, despite the @mo value being mutable
+%>
+
+It's also worth pointing out that an immutable field is not constant, and the referenced object may be changed, 
+(unless the field is marked as ''final'' in addition). The previous example shows this, when we set ''@immutable'' 
+in the set method, this is allowed. What we cannot do, however, is set some field within the MyObject instance, 
+even if MyObject normally does declare some publicly accessible methods that set fields.
+
+If a class itself is marked as immutable, it is not an error to also mark an instance of the field as immutable. This
+can be desirable anyways, in cases where it's possible that the class itself becomes mutable in the future, but 
+regardless, you wish this field to always be immutable. In general, however, it's bad practice to change a class's 
+mutability after release.
+
 === Class Library ===
 In general, MethodScript prefers to work with classes that are defined in the '''Class \
 Library'''. When using the class library, this prevents complex management of include

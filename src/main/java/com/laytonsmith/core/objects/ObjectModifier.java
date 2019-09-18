@@ -31,5 +31,9 @@ public enum ObjectModifier {
 	 * there does exist a native class. Additionally, the signatures of the methods and fields that are defined
 	 * in this class must match the elements tagged with the {@link ExposedElement} annotations, or it will be an error.
 	 */
-	NATIVE;
+	NATIVE,
+	/**
+	 * An immutable object is one in which none of the fields may be set, other than within the constructor.
+	 */
+	IMMUTABLE;
 }

@@ -25,5 +25,13 @@ public enum ElementModifier {
 	 * A native element is one whose value is drawn from the native code. This is only valid in a class that is itself
 	 * marked as native.
 	 */
-	NATIVE;
+	NATIVE,
+	/**
+	 * An immutable object is one in which none of the fields may be set, other than within the constructor.
+	 * When used on a variable definition (which creates a type overload, {@code int} is not the same type as
+	 * {@code immutable int}), this prevents use of any methods which could directly or
+	 * indirectly set a field (or setting of fields directly).
+	 * Mutable fields may be cast to immutable fields, but not vice versa.
+	 */
+	IMMUTABLE;
 }
