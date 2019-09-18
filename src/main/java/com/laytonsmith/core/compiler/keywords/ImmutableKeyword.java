@@ -13,7 +13,7 @@ import java.util.List;
 /**
  *
  */
-@Keyword.keyword("public")
+@Keyword.keyword("immutable")
 public class ImmutableKeyword extends Keyword {
 
 	@Override
