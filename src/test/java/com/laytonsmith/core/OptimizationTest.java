@@ -476,4 +476,11 @@ public class OptimizationTest {
 		assertEquals("switch_ic(to_lower(dyn('AsDf')),array('asdf'),msg('hello'),array('fdsa'),msg('nope'))",
 				optimize("switch_ic(dyn('AsDf')) { case 'aSdF': msg('hello'); case 'fdsa': msg('nope'); }"));
 	}
+
+	@Test
+	public void testNotNot() throws Exception {
+		assertEquals("@value", optimize("!!@value"));
+		assertEquals("not(@value)", optimize("!@value"));
+		// !!!!@value (or more than 2 !!) is broken in the compiler -.-
+	}
 }

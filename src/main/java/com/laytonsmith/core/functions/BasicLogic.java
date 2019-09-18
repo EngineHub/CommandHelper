@@ -15,6 +15,7 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
@@ -1518,8 +1519,18 @@ public class BasicLogic {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
-					OptimizationOption.CACHE_RETURN
+					OptimizationOption.CACHE_RETURN,
+					OptimizationOption.OPTIMIZE_DYNAMIC
 			);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env, Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if(CFunction.IsFunction(children.get(0), not.class)) {
+				// not(not(val)) == val
+				return children.get(0).getChildAt(0);
+			}
+			return null;
 		}
 
 		@Override
