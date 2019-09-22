@@ -91,7 +91,7 @@ public class Statistics {
 
 		@Override
 		public String docs() {
-			return "number {array<number> | number input...} Returns the average (also known as the mean) across all"
+			return "number {array<number> | number input...} Returns the average (also known as the arithmetic mean) across all"
 					+ " the numbers in the set. The input may be an array of numbers, or individual numbers as"
 					+ " arguments. The average of a set of numbers is the result of adding all the numbers in the"
 					+ " set, and dividing it by the number of values in the set."
