@@ -1756,7 +1756,12 @@ public class ObjectGenerator {
 		boolean first = true;
 		for(String key : ca.stringKeySet()) {
 			if(key.equals("block")) {
-				b.insert(0, ca.get("block", t).val());
+				String block = ca.get("block", t).val();
+				if(Character.isUpperCase(block.charAt(0))) {
+					// support material enum input
+					block = block.toLowerCase();
+				}
+				b.insert(0, block);
 			} else {
 				if(first) {
 					first = false;
