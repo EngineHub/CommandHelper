@@ -1242,8 +1242,9 @@ public final class SiteDeploy {
 						List<String> exc = new ArrayList<>();
 						if(f.thrown() != null) {
 							for(Class<? extends CREThrowable> e : f.thrown()) {
-								CREThrowable ct = ReflectionUtils.instantiateUnsafe(e);
-								exc.add("{{object|" + ct.getName() + "}}");
+								// for the API reference page we want the simple name
+								String[] splitType = ReflectionUtils.instantiateUnsafe(e).getName().split("\\.");
+								exc.add("{{object|" + (splitType[splitType.length - 1]) + "}}");
 							}
 						}
 						c.add(StringUtils.Join(exc, "<br>"));
@@ -1291,12 +1292,12 @@ public final class SiteDeploy {
 						String docs = (String) ReflectionUtils.invokeMethod(clazz, null, "docs");
 						b.append("<div>").append(docs).append("</div>\n\n");
 						b.append("{|\n|-\n");
-						b.append("! scope=\"col\" width=\"6%\" | Function Name\n"
-								+ "! scope=\"col\" width=\"5%\" | Returns\n"
-								+ "! scope=\"col\" width=\"10%\" | Arguments\n"
-								+ "! scope=\"col\" width=\"10%\" | Throws\n"
-								+ "! scope=\"col\" width=\"64%\" | Description\n"
-								+ "! scope=\"col\" width=\"5%\" |"
+						b.append("! scope=\"col\" width=\"8%\" | Function Name\n"
+								+ "! scope=\"col\" width=\"4%\" | Returns\n"
+								+ "! scope=\"col\" width=\"16%\" | Arguments\n"
+								+ "! scope=\"col\" width=\"8%\" | Throws\n"
+								+ "! scope=\"col\" width=\"62%\" | Description\n"
+								+ "! scope=\"col\" width=\"2%\" |"
 								+ " <span class=\"abbr\" title=\"Restricted\">Res</span>\n");
 						for(List<String> row : clazzData) {
 							b.append("|-");
