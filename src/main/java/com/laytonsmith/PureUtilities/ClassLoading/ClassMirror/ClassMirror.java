@@ -38,7 +38,7 @@ public class ClassMirror<T> implements Serializable {
 	/**
 	 * The original URL that houses this class.
 	 */
-	private final URL originalURL;
+	private URL originalURL; // reflectively modified in ClassDiscoveryURLCache
 
 	protected ClassMirror(ClassInfo<T> info, URL originalURL) {
 		this.underlyingClass = null;
