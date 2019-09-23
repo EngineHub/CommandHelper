@@ -35,6 +35,7 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -1410,7 +1411,7 @@ public class ArrayHandling {
 			}
 			boolean first = true;
 			for(Mixed key : ca.keySet()) {
-				Mixed value = ca.get(key.val(), t);
+				Mixed value = ca.get(key, t);
 				if(!first) {
 					b.append(glue).append(value.val());
 				} else {
@@ -3420,5 +3421,68 @@ public class ArrayHandling {
 			return getBundledCode();
 		}
 
+	}
+
+	@api
+	@seealso(array_rand.class)
+	public static class array_get_rand extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "array_get_rand";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "mixed {array} Returns a random value from an array."
+					+ " If the array is empty a LengthException is thrown.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRELengthException.class};
+		}
+
+		Random rand = new Random();
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray array = Static.getArray(args[0], t);
+			if(array.isEmpty()) {
+				throw new CRELengthException("Array is empty", t);
+			}
+			List<Mixed> keySet = new ArrayList<>(array.keySet());
+			return array.get(keySet.get(java.lang.Math.abs(rand.nextInt() % (int) array.size())), t);
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+					new ExampleScript("Normal array usage",
+							"array_get_rand(array(1, 2, 3, 4, 5))"),
+					new ExampleScript("Associative array usage",
+							"array_get_rand(array(one: 1, two: 2, three: 3, four: 4, five: 5))"),
+			};
+		}
 	}
 }
