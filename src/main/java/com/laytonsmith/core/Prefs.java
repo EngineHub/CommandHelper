@@ -100,6 +100,10 @@ public final class Prefs {
 		}
 	}
 
+	private static final String LOGGING_GROUP = "Logging";
+	private static final String PROFILING_GROUP = "Profiling";
+	private static final String SECURITY_GROUP = "Security";
+	private static final String DEBUG_GROUP = "Debugging";
 	/**
 	 * Initializes the global Prefs to this file.
 	 *
@@ -109,18 +113,18 @@ public final class Prefs {
 	public static void init(final File f) throws IOException {
 		ArrayList<Preferences.Preference> a = new ArrayList<>();
 		a.add(new Preference(PNames.DEBUG_MODE.config(), "false", Preferences.Type.BOOLEAN, "Whether or not to display"
-				+ " debug information in the console"));
+				+ " debug information in the console", DEBUG_GROUP));
 		a.add(new Preference(PNames.SHOW_WARNINGS.config(), "true", Preferences.Type.BOOLEAN, "Whether or not to display"
 				+ " warnings in the console, while compiling"));
 		a.add(new Preference(PNames.CONSOLE_LOG_COMMANDS.config(), "true", Preferences.Type.BOOLEAN, "Whether or not to"
-				+ " display the original command in the console when it is run"));
+				+ " display the original command in the console when it is run", LOGGING_GROUP));
 		a.add(new Preference(PNames.SCRIPT_NAME.config(), "aliases.msa", Preferences.Type.STRING, "The path to the"
 				+ " default config file, relative to the CommandHelper plugin folder"));
 		a.add(new Preference(PNames.ENABLE_INTERPRETER.config(), "false", Preferences.Type.BOOLEAN, "Whether or not to"
 				+ " enable the /interpreter command. Note that even with this enabled, a player must still have the"
 				+ " commandhelper.interpreter permission, but"
 				+ " setting it to false prevents all players from accessing the interpreter regardless of their"
-				+ " permissions."));
+				+ " permissions.", SECURITY_GROUP));
 		a.add(new Preference(PNames.BASE_DIR.config(), "", Preferences.Type.STRING, "The base directory/directories"
 				+ " that scripts"
 				+ " can read and write to. If left blank, then the default of the server directory will be used. "
@@ -131,7 +135,7 @@ public final class Prefs {
 				+ " as accessible, even if the symlink itself is within another entry in the list. Note that empty"
 				+ " paths are supported when splitting the path, and having a trailing ';' will cause the default"
 				+ " path to be added, so don't end the path with a trailing ; if you don't intend for the path to"
-				+ " include the default."));
+				+ " include the default.", SECURITY_GROUP));
 		a.add(new Preference(PNames.PLAY_DIRTY.config(), "false", Preferences.Type.BOOLEAN, "Makes CommandHelper play"
 				+ " dirty and break all sorts of programming rules, so that other plugins can't interfere with the"
 				+ " operations that you defined. Note that doing this essentially makes CommandHelper have absolute"
@@ -143,7 +147,7 @@ public final class Prefs {
 		a.add(new Preference(PNames.MAIN_FILE.config(), "main.ms", Preferences.Type.STRING, "The path to the main file,"
 				+ " relative to the CommandHelper folder"));
 		a.add(new Preference(PNames.ALLOW_DEBUG_LOGGING.config(), "false", Preferences.Type.BOOLEAN, "If set to false,"
-				+ " the Debug class of functions will do nothing."));
+				+ " the Debug class of functions will do nothing.", LOGGING_GROUP));
 		a.add(new Preference(PNames.DEBUG_LOG_FILE.config(), "logs/debug/%Y-%M-%D-debug.log", Preferences.Type.STRING,
 				"The path to the debug output log file. Six variables are available, %Y, %M, and %D, %h, %m, %s, which"
 				+ " are replaced with the current year, month, day, hour, minute and second respectively. It is"
@@ -151,19 +155,19 @@ public final class Prefs {
 				+ " reason leaving logging on, otherwise the file size would get excessively large. The path"
 				+ " is relative to the CommandHelper directory and is not bound by the base-dir restriction."
 				+ " The logger preferences file is created in the same directory this file is in as well, and"
-				+ " is named loggerPreferences.txt"));
+				+ " is named loggerPreferences.txt", LOGGING_GROUP));
 		a.add(new Preference(PNames.STANDARD_LOG_FILE.config(), "logs/%Y-%M-%D-commandhelper.log",
 				Preferences.Type.STRING, "The path the standard log files that the log() function writes to. Six"
 				+ " variables are available, %Y, %M, and %D, %h, %m, %s, which are replaced with the current"
 				+ " year, month, day, hour, minute and second respectively. It is highly recommended that you"
 				+ " use at least year, month, and day if you are actively logging things, otherwise the file"
 				+ " size would get excessively large. The path is relative to the CommandHelper directory and"
-				+ " is not bound by the base-dir restriction."));
+				+ " is not bound by the base-dir restriction.", LOGGING_GROUP));
 		a.add(new Preference(PNames.ALLOW_PROFILING.config(), "false", Preferences.Type.BOOLEAN, "If set to false, the"
-				+ " Profiling class of functions will do nothing."));
+				+ " Profiling class of functions will do nothing.", PROFILING_GROUP));
 		a.add(new Preference(PNames.PROFILING_FILE.config(), "logs/profiling/%Y-%M-%D-profiling.log",
 				Preferences.Type.STRING, "The path to the profiling logs. These logs are perf4j formatted logs. Consult"
-				+ " the documentation for more information."));
+				+ " the documentation for more information.", PROFILING_GROUP));
 		a.add(new Preference(PNames.SHOW_SPLASH_SCREEN.config(), "true", Preferences.Type.BOOLEAN, "Whether or not to"
 				+ " show the splash screen at server startup"));
 		a.add(new Preference(PNames.USE_COLORS.config(),
@@ -173,31 +177,31 @@ public final class Prefs {
 				+ " halt compilation of pure mscript files if a compilation failure occurs in any one of the files."));
 		a.add(new Preference(PNames.USE_SUDO_FALLBACK.config(), "false", Preferences.Type.BOOLEAN, "If true, sudo()"
 				+ " will use a less safe fallback method if it fails. See the documentation on the sudo function for"
-				+ " more details. If this is true, a warning is issued at startup."));
+				+ " more details. If this is true, a warning is issued at startup.", SECURITY_GROUP));
 		a.add(new Preference(PNames.ALLOW_SHELL_COMMANDS.config(), "false", Preferences.Type.BOOLEAN, "If true, allows"
 				+ " for the shell functions to be used from outside of cmdline mode. WARNING: Enabling these functions"
 				+ " can be extremely dangerous if you accidentally allow uncontrolled access to them, and can"
 				+ " grant full control of your server if not careful. Leave this set to false unless you really know"
-				+ " what you're doing."));
+				+ " what you're doing.", SECURITY_GROUP));
 		a.add(new Preference(PNames.ALLOW_DYNAMIC_SHELL.config(), "false", Preferences.Type.BOOLEAN, "If true, allows"
 				+ " use of the shell() functions from dynamic code sources, i.e"
 				+ " interpreter or eval(). This almost certainly should always remain false, and if enabled, enabled"
 				+ " only temporarily. If this is true, if an account with"
 				+ " interpreter mode is compromised, the attacker could gain access to your entire server, under the"
-				+ " user running minecraft, not just the game server."));
+				+ " user running minecraft, not just the game server.", SECURITY_GROUP));
 		a.add(new Preference(PNames.SCREAM_ERRORS.config(), "false", Preferences.Type.BOOLEAN, "Setting this to true"
 				+ " allows you to scream errors. Regardless of other settings"
 				+ " that you may have unintentionally configured, this will override all ways of suppressing fatal"
 				+ " errors, including uncaught exception"
 				+ " handlers, error logging turned off, etc. This is meant as a last ditch effort to diagnosing an"
 				+ " error. This implicitely turns debug mode"
-				+ " on as well, which will cause even more error logging to occur."));
+				+ " on as well, which will cause even more error logging to occur.", DEBUG_GROUP));
 		a.add(new Preference(PNames.INTERPRETER_TIMEOUT.config(), "15", Preferences.Type.INT, "Sets the time (in"
 				+ " minutes) that interpreter mode is unlocked for when /interpreter-on is run from console. Set to 0"
 				+ " (or a negative number)"
 				+ " to disable this feature, and allow interpreter mode all the time. It is highly recommended that"
 				+ " you leave this set to some number greater than 0, to enhance"
-				+ " server security, and require a \"two step\" authentication for interpreter mode."));
+				+ " server security, and require a \"two step\" authentication for interpreter mode.", SECURITY_GROUP));
 		a.add(new Preference(PNames.STRICT_MODE.config(), "false", Preferences.Type.BOOLEAN, "If set to true, forces"
 				+ " all files that do not specifically set strict mode on or off into strict mode. See the"
 				+ " documentation for more information about what strict mode does."));
