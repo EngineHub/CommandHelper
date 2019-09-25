@@ -29,6 +29,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.extensions.Extension;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.extensions.ExtensionTracker;
 import com.laytonsmith.core.functions.FunctionBase;
@@ -47,6 +48,7 @@ import com.laytonsmith.tools.SyntaxHighlighters;
 import com.laytonsmith.tools.UILauncher;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenExportTool;
+import com.laytonsmith.tools.docgen.DocGenTemplates;
 import com.laytonsmith.tools.docgen.ExtensionDocGen;
 import com.laytonsmith.tools.docgen.sitedeploy.APIBuilder;
 import com.laytonsmith.tools.docgen.sitedeploy.SiteDeploy;
@@ -67,6 +69,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -1528,4 +1532,49 @@ public class Main {
 		}
 
 	}
+
+	@tool("help-topic")
+	public static class HelpTopicMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+					.addDescription("Provides information on a general topic. To see the list of topics, run with"
+							+ " no arguments.")
+					.addArgument(new ArgumentBuilder()
+						.setDescription("The topic to read more about.")
+						.setUsageName("topic name")
+						.setOptionalAndDefault()
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			Map<String, String> topics = new HashMap<>();
+			for(ExtensionTracker t : ExtensionManager.getTrackers().values()) {
+				for(Extension e : t.getExtensions()) {
+					Map<String, String> extTopics = e.getHelpTopics();
+					if(extTopics != null) {
+						topics.putAll(extTopics);
+					}
+				}
+			}
+			String arg = parsedArgs.getStringArgument();
+			if("".equals(arg)) {
+				SortedSet<String> st = new TreeSet<>(topics.keySet());
+				System.out.println(StringUtils.Join(st, ", "));
+			} else {
+				if(topics.containsKey(arg)) {
+					String output = topics.get(arg);
+					output = DocGenTemplates.DoTemplateReplacement(output, DocGenTemplates.GetGenerators());
+					output = Interpreter.reverseHTML(output);
+					System.out.println(output);
+				} else {
+					System.out.println(TermColors.RED + "Could not find that help topic." + TermColors.RESET);
+				}
+			}
+		}
+
+	}
+
 }

@@ -1,11 +1,17 @@
 package com.laytonsmith.core.extensions;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.core.AliasCore;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -93,4 +99,36 @@ public abstract class AbstractExtension implements Extension {
 	@Override
 	public void onShutdown() {
 	}
+
+	@Override
+	public Map<String, String> getHelpTopics() {
+		return new HashMap<>();
+	}
+
+	/**
+	 * If your help topics are all in your resources folder in a folder called "docs", you can just return
+	 * the value of this method in getHelpTopics(). Make sure that forClass is a class that is contained inside
+	 * of your extension jar.
+	 * @param forClass A class inside your jar.
+	 * @return
+	 */
+	protected Map<String, String> getDocsResourceFolder(Class<?> forClass) {
+		try {
+			Map<String, String> m = new HashMap<>();
+			File root = new File(ClassDiscovery.GetClassContainer(forClass).toExternalForm() + "/docs");
+			ZipReader zReader = new ZipReader(root);
+			String path = Pattern.quote(zReader.getFile().getAbsolutePath());
+			for(File r : zReader.listFiles()) {
+				String filename = r.getAbsolutePath().replaceFirst(path, "");
+				String s = StreamUtils.GetString(forClass
+						.getResourceAsStream(("/docs" + filename).replace('\\', '/')));
+				m.put(r.getName(), s);
+			}
+			return m;
+		} catch (IOException ex) {
+			return new HashMap<>();
+		}
+	}
+
+
 }

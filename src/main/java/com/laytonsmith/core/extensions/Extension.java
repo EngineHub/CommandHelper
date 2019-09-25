@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.AliasCore;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  *
@@ -65,4 +66,11 @@ public interface Extension {
 	 * Called when server is shutting down, or during a /reloadaliases call.
 	 */
 	void onShutdown();
+
+	/**
+	 * Returns a list of help topics, mapping topic name to help text. This is used by the help-topic cmdline tool.
+	 * It may return null or empty Map.
+	 * @return
+	 */
+	Map<String, String> getHelpTopics();
 }

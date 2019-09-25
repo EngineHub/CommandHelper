@@ -576,7 +576,7 @@ public final class Interpreter {
 		return b.toString();
 	}
 
-	private static String reverseHTML(String input) {
+	public static String reverseHTML(String input) {
 		input = input
 				.replaceAll("\\<br(.*?)>", "\n")
 				.replaceAll("</div>", "\n")

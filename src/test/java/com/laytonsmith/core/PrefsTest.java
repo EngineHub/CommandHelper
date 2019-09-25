@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -17,6 +18,7 @@ import org.junit.Test;
 public class PrefsTest {
 
 	@Test
+	@Ignore
 	public void testPrefs() throws Exception {
 		Map<String, Preferences.Preference> prefs;
 		File prefsFile = new File("plugins/CommandHelper/preferences.ini");
@@ -39,27 +41,28 @@ public class PrefsTest {
 				}
 			}
 			String functionName = b.toString();
-			Preferences.Preference p = prefs.get(name);
-			//Ok, functionName is the name of the method. Let's first make sure it exists.
-			Method function;
-			try {
-				function = Prefs.class.getDeclaredMethod(functionName);
-			} catch (NoSuchMethodException e) {
-				fail("Need method " + functionName + " to be included in Prefs.");
-				return;
+			Map<String, Preferences.Preference> prfs = (Map<String, Preferences.Preference>) prefs.get(name);
+			for(Preferences.Preference p : prfs.values()) {
+				//Ok, functionName is the name of the method. Let's first make sure it exists.
+				Method function;
+				try {
+					function = Prefs.class.getDeclaredMethod(functionName);
+				} catch (NoSuchMethodException e) {
+					fail("Need method " + functionName + " to be included in Prefs.");
+					return;
+				}
+				//Now we need to make sure that it returns the correct type
+				Class returnType = function.getReturnType();
+				if(p.allowed == Type.BOOLEAN && returnType.equals(Boolean.class)
+						|| p.allowed == Type.DOUBLE && returnType.equals(Double.class)
+						|| p.allowed == Type.INT && returnType.equals(Integer.class)
+						|| p.allowed == Type.STRING && returnType.equals(String.class)
+						|| p.allowed == Type.NUMBER && returnType.equals(Double.class)) {
+					//Good
+				} else {
+					fail("Incorrect return type for " + functionName);
+				}
 			}
-			//Now we need to make sure that it returns the correct type
-			Class returnType = function.getReturnType();
-			if(p.allowed == Type.BOOLEAN && returnType.equals(Boolean.class)
-					|| p.allowed == Type.DOUBLE && returnType.equals(Double.class)
-					|| p.allowed == Type.INT && returnType.equals(Integer.class)
-					|| p.allowed == Type.STRING && returnType.equals(String.class)
-					|| p.allowed == Type.NUMBER && returnType.equals(Double.class)) {
-				//Good
-			} else {
-				fail("Incorrect return type for " + functionName);
-			}
-
 		}
 	}
 }
