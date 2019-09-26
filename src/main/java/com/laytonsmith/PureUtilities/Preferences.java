@@ -215,7 +215,7 @@ public class Preferences {
 				userProperties.load(in);
 			}
 			for(String key : userProperties.stringPropertyNames()) {
-				if(key.matches("\\[.*\\]")) {
+				if(key.startsWith("[")) {
 					// group name, skip it.
 					continue;
 				}
