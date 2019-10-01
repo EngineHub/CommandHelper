@@ -180,6 +180,11 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_PAINTING_ART%: The art on the painting (can be %ART%).
 |- 
+| PANDA
+| 
+* %KEY_PANDA_MAINGENE%: The dominant trait for this panda (can be %PANDA_GENE%).
+* %KEY_PANDA_HIDDENGENE%: The recessive trait for this panda.
+|- 
 | PARROT
 | 
 * %KEY_GENERIC_SITTING%: If the parrot is sitting.
@@ -265,6 +270,8 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | VILLAGER
 | 
 * %KEY_VILLAGER_PROFESSION%: The profession of the villager (can be %PROFESSION%). This list differs in 1.14 from 1.13.
+* %KEY_VILLAGER_EXPERIENCE%: The amount of experience in the villager's profession towards the next level. (not in 1.13)
+* %KEY_VILLAGER_LEVEL%: The level of villager's profession. Can be 1-5. (not in 1.13)
 |-
 | WITHER_SKULL
 | 

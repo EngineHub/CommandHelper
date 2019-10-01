@@ -56,6 +56,7 @@ import com.laytonsmith.abstraction.entities.MCMinecart;
 import com.laytonsmith.abstraction.entities.MCMushroomCow;
 import com.laytonsmith.abstraction.entities.MCOcelot;
 import com.laytonsmith.abstraction.entities.MCPainting;
+import com.laytonsmith.abstraction.entities.MCPanda;
 import com.laytonsmith.abstraction.entities.MCParrot;
 import com.laytonsmith.abstraction.entities.MCPig;
 import com.laytonsmith.abstraction.entities.MCPigZombie;
@@ -1689,6 +1690,7 @@ public class EntityManagement {
 			docs = docs.replace("%CAT_TYPE%", StringUtils.Join(MCCatType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%FOX_TYPE%", StringUtils.Join(MCFoxType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%MUSHROOM_COW_TYPE%", StringUtils.Join(MCMushroomCowType.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%PANDA_GENE%", StringUtils.Join(MCPanda.Gene.values(), ", ", ", or ", " or "));
 			for(Field field : entity_spec.class.getDeclaredFields()) {
 				try {
 					String name = field.getName();
@@ -1934,6 +1936,11 @@ public class EntityManagement {
 					MCPainting painting = (MCPainting) entity;
 					specArray.set(entity_spec.KEY_PAINTING_ART, new CString(painting.getArt().name(), t), t);
 					break;
+				case PANDA:
+					MCPanda panda = (MCPanda) entity;
+					specArray.set(entity_spec.KEY_PANDA_MAINGENE, new CString(panda.getMainGene().name(), t), t);
+					specArray.set(entity_spec.KEY_PANDA_HIDDENGENE, new CString(panda.getHiddenGene().name(), t), t);
+					break;
 				case PARROT:
 					MCParrot parrot = (MCParrot) entity;
 					specArray.set(entity_spec.KEY_GENERIC_SITTING, CBoolean.get(parrot.isSitting()), t);
@@ -2031,6 +2038,8 @@ public class EntityManagement {
 				case VILLAGER:
 					MCVillager villager = (MCVillager) entity;
 					specArray.set(entity_spec.KEY_VILLAGER_PROFESSION, new CString(villager.getProfession().name(), t), t);
+					specArray.set(entity_spec.KEY_VILLAGER_LEVEL, new CInt(villager.getLevel(), t), t);
+					specArray.set(entity_spec.KEY_VILLAGER_EXPERIENCE, new CInt(villager.getExperience(), t), t);
 					break;
 				case WITHER_SKULL:
 					MCWitherSkull skull = (MCWitherSkull) entity;
@@ -2130,6 +2139,8 @@ public class EntityManagement {
 		private static final String KEY_MUSHROOM_COW_TYPE = "type";
 		private static final String KEY_OCELOT_TYPE = "type";
 		private static final String KEY_PAINTING_ART = "type";
+		private static final String KEY_PANDA_MAINGENE = "maingene";
+		private static final String KEY_PANDA_HIDDENGENE = "hiddengene";
 		private static final String KEY_PARROT_TYPE = "type";
 		private static final String KEY_PIG_SADDLED = "saddled";
 		private static final String KEY_PIG_ZOMBIE_ANGRY = "angry";
@@ -2150,6 +2161,8 @@ public class EntityManagement {
 		private static final String KEY_TROPICALFISH_PATTERN = "pattern";
 		private static final String KEY_TROPICALFISH_PATTERNCOLOR = "patterncolor";
 		private static final String KEY_VILLAGER_PROFESSION = "profession";
+		private static final String KEY_VILLAGER_LEVEL = "level";
+		private static final String KEY_VILLAGER_EXPERIENCE = "experience";
 		private static final String KEY_WITHER_SKULL_CHARGED = "charged";
 		private static final String KEY_WOLF_ANGRY = "angry";
 		private static final String KEY_WOLF_COLOR = "color";
@@ -2903,6 +2916,29 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case PANDA:
+					MCPanda panda = (MCPanda) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_PANDA_MAINGENE:
+								try {
+									panda.setMainGene(MCPanda.Gene.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid panda gene: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							case entity_spec.KEY_PANDA_HIDDENGENE:
+								try {
+									panda.setHiddenGene(MCPanda.Gene.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid panda gene: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case PARROT:
 					MCParrot parrot = (MCParrot) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -3240,6 +3276,22 @@ public class EntityManagement {
 									villager.setProfession(MCProfession.valueOf(specArray.get(index, t).val().toUpperCase()));
 								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid profession: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							case entity_spec.KEY_VILLAGER_LEVEL:
+								try {
+									villager.setLevel(Static.getInt32(specArray.get(index, t), t));
+								} catch (IllegalArgumentException exception) {
+									throw new CRERangeException("Expected profession level to be 1-5, but got "
+											+ specArray.get(index, t).val(), t);
+								}
+								break;
+							case entity_spec.KEY_VILLAGER_EXPERIENCE:
+								try {
+									villager.setExperience(Static.getInt32(specArray.get(index, t), t));
+								} catch (IllegalArgumentException exception) {
+									throw new CRERangeException("Expected experience to be a positive number, but got "
+											+ specArray.get(index, t).val(), t);
 								}
 								break;
 							default:
