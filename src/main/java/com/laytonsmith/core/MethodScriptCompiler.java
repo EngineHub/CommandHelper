@@ -1762,11 +1762,11 @@ public final class MethodScriptCompiler {
 		procs.add(new ArrayList<>());
 		processKeywords(tree, compilerErrors);
 		optimizeAutoconcats(tree, environment, envs, compilerErrors);
+		checkLinearComponents(tree, environment, compilerErrors);
 		optimize(tree, environment, envs, procs, compilerErrors);
 		link(tree, compilerErrors, envs);
 		checkLabels(tree, compilerErrors);
 		checkBreaks(tree, compilerErrors);
-		checkLinearComponents(tree, environment, compilerErrors);
 		if(!compilerErrors.isEmpty()) {
 			if(compilerErrors.size() == 1) {
 				// Just throw the one CCE
@@ -1786,7 +1786,7 @@ public final class MethodScriptCompiler {
 	private static void checkLinearComponents(ParseTree tree, Environment env,
 			Set<ConfigCompileException> compilerErrors) {
 		for(ParseTree m : tree.getAllNodes()) {
-			if(m.getData() instanceof CBareString) {
+			if(m.getData().isInstanceOf(CBareString.TYPE)) {
 				if(m.getFileOptions().isStrict()) {
 					compilerErrors.add(new ConfigCompileException("Use of bare strings in strict mode is not"
 							+ " allowed.", m.getTarget()));
@@ -1794,6 +1794,7 @@ public final class MethodScriptCompiler {
 					env.getEnv(CompilerEnvironment.class).addCompilerWarning(m.getFileOptions(),
 							new CompilerWarning("Use of bare string", m.getTarget(),
 									FileOptions.SuppressWarning.UseBareStrings));
+					return; // for now, only one warning per file
 				}
 			}
 		}
