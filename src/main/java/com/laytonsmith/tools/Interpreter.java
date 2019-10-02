@@ -1034,12 +1034,15 @@ public final class Interpreter {
 					FileUtil.write(powershellManifest, new File("C:/Program Files/WindowsPowerShell/Modules/"
 							+ "MethodScript/MethodScript.psd1"));
 
-					// 5. Put the mscript.cmd file in C:\Program Files\MethodScript
-					String batchScript = Static.GetStringResource("/interpreter-helpers/windows/mscript.cmd");
-					FileUtil.write(batchScript, new File("C:/Program Files/MethodScript/mscript.cmd"),
+					// 5. Put the mscript.exe file in C:\Program Files\MethodScript
+					byte[] exe = StreamUtils.GetBytes(Interpreter.class
+							.getResource("/interpreter-helpers/windows/mscript.exe").openStream());
+
+					//= Static.GetStringResource("/interpreter-helpers/windows/mscript.cmd");
+					FileUtil.write(exe, new File("C:/Program Files/MethodScript/mscript.exe"),
 							FileWriteMode.OVERWRITE, true);
 
-					// 6. Add C:\Program Files\MethodScript\mscript.cmd to the PATH, checking first if it's already
+					// 6. Add C:\Program Files\MethodScript to the PATH, checking first if it's already
 					// there.
 					if(!System.getenv("PATH").contains("MethodScript")) {
 						String pathKey = "System\\CurrentControlSet\\Control\\Session Manager\\Environment";

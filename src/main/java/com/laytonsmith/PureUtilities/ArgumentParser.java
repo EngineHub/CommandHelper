@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+// TODO: Add enum type to arg types, as well as providing hooks for autocomplete and custom argument validators
+
 /**
  * An ArgumentParser allows for programmatic registration of arguments, which
  * will be automatically parsed and validated. Additionally, automatically

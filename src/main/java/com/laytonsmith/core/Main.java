@@ -138,8 +138,50 @@ public class Main {
 		return new CmdlineToolCollection(suite, dynamicTools);
 	}
 
+	/**
+	 * For some commands, where we don't need to initialize the discovery engine (which is relatively expensive),
+	 * we can pre-load into this fast startup list. This facility is unfortunately not available to extensions, due
+	 * to the nature of how extensions are discovered, but for built in facilities where it makes sense, there's no
+	 * need to discover them the slow way. However, if we forget to update this class, we will still fallback anyways,
+	 * and always find the classes. Classes that are added to this list must be able to function without extensions,
+	 * and without engine startup, as those will not be loaded when the command is executed.
+	 */
+	private static final Class[] FAST_STARTUP = new Class[]{
+		CopyrightMode.class,
+		InstallCmdlineMode.class,
+		NewMode.class,
+		NewTypeMode.class,
+		JavaVersionMode.class
+	};
+
 	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public static void main(String[] args) throws Exception {
+		if(args.length > 0) {
+			for(Class c : FAST_STARTUP) {
+				String tool = ((tool) c.getAnnotation(tool.class)).value();
+				if(args[0].equals(tool)) {
+					String[] a;
+					if(args.length > 1) {
+						a = ArrayUtils.slice(args, 1, args.length - 1);
+					} else {
+						a = new String[0];
+					}
+					CommandLineTool t = (CommandLineTool) c.newInstance();
+					ArgumentParser.ArgumentParserResults res;
+					try {
+						res	= t.getArgumentParser().match(a);
+					} catch (ArgumentParser.ResultUseException | ArgumentParser.ValidationException e) {
+						// They screwed up the args. Rather than just throwing the exception, or duplicating
+						// code below, let's just stop trying to do the fast startup mode and skip down to
+						// normal mode, which will still fail, but will prevent us from having to duplicate
+						// that code up here.
+						break;
+					}
+					t.execute(res);
+					return;
+				}
+			}
+		}
 		ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
 		cd.addThisJar();
 		Implementation.setServerType(Implementation.Type.SHELL);
@@ -471,7 +513,7 @@ public class Main {
 						+ "<!" + li
 						+ "\tstrict;" + li
 						+ "\tname: " + f.getName() + ";" + li
-						+ "\tauthor: " + StaticLayer.GetConvertor().GetUser(null) + ";" + li
+						+ "\tauthor: " + System.getProperty("user.name") + ";" + li
 						+ "\tcreated: " + new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString("yyyy-MM-dd", Target.UNKNOWN)).val() + ";" + li
 						+ "\tdescription: " + ";" + li
 						+ ">" + li + li, f, true);
@@ -481,7 +523,7 @@ public class Main {
 	}
 
 	@tool("new-type")
-	public static class NewTypeTool extends AbstractCommandLineTool {
+	public static class NewTypeMode extends AbstractCommandLineTool {
 
 		@Override
 		public ArgumentParser getArgumentParser() {
@@ -515,19 +557,20 @@ public class Main {
 						+ validTemplates.toString());
 			}
 			String classSimpleName;
-			String[] split = clazz.split("\\.");
+			String[] split = clazz.split("\\.", -1);
 			classSimpleName = split[split.length - 1];
 
-			// TODO: Detect if this class is a ms.* class. If so, automatically add the compilerOptions: UltraStrict
-			// option.
-			String author = StaticLayer.GetConvertor().GetUser(null);
-			String created = new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString("yyyy-MM-dd", Target.UNKNOWN)).val();
+			String author = System.getProperty("user.name");
+			String created = new Scheduling.simple_date().exec(Target.UNKNOWN, null,
+					new CString("yyyy-MM-dd", Target.UNKNOWN)).val();
 			File file = new File(clazz.replace(".", "/") + ".ms");
 			if(file.exists()) {
 				System.err.println("File " + file + " already exists. Refusing to continue.");
 				System.exit(1);
 			}
-			file.getParentFile().mkdirs();
+			if(file.getParentFile() != null) {
+				file.getParentFile().mkdirs();
+			}
 			String allTemplate;
 			if(split[0].equals("ms")) {
 				allTemplate = StreamUtils.GetResource("/templates/new-type-templates/native-all.ms");
@@ -1574,7 +1617,22 @@ public class Main {
 				}
 			}
 		}
-
 	}
 
+	@tool("java-version")
+	public static class JavaVersionMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+					.addDescription("Prints the current major java version then exits.");
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			System.out.println(JavaVersion.getMajorVersion());
+			System.exit(0);
+		}
+
+	}
 }
