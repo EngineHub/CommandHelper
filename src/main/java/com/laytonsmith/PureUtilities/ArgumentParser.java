@@ -451,6 +451,7 @@ public final class ArgumentParser {
 	 * A description of the command itself.
 	 */
 	String description = "";
+	String extendedDescription = "";
 	/**
 	 * The model for the arguments
 	 */
@@ -1068,6 +1069,17 @@ public final class ArgumentParser {
 	}
 
 	/**
+	 * Provides an extended description. This is not returned with {@link #getDescription()}, but is included
+	 * as part of the built description.
+	 * @param extendedDescription
+	 * @return
+	 */
+	public ArgumentParser addExtendedDescription(String extendedDescription) {
+		this.extendedDescription = extendedDescription;
+		return this;
+	}
+
+	/**
 	 * If set to true (which is the default), then unknown options will cause an error. If false,
 	 * they will not cause an error, and can even still be accessed in the results. However, this is
 	 * only recommended for situations where arguments are processed in a later step as well, if all
@@ -1100,6 +1112,9 @@ public final class ArgumentParser {
 		//Now, we need to go through and get all the switch names in alphabetical
 		//order.
 		b.append("\t").append(this.description).append("\n\n");
+		if(!this.extendedDescription.equals("")) {
+			b.append("\t").append(this.extendedDescription).append("\n\n");
+		}
 		List<Character> shortCodes = new ArrayList<>();
 		List<String> longCodes = new ArrayList<>();
 		List<Character> shortCodesDone = new ArrayList<>();
@@ -1284,10 +1299,9 @@ public final class ArgumentParser {
 	}
 
 	/**
-	 * Returns just the description that was registered with {
+	 * Returns just the description that was registered with {@link #addDescription(java.lang.String)}
 	 *
-	 * @see #addDescription(String)}.
-	 * @return The description, or null, if one has not been set yet.
+	 * @return The description, or empty string, if one has not been set yet.
 	 * @see #getBuiltDescription()
 	 */
 	public String getDescription() {

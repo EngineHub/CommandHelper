@@ -1642,32 +1642,61 @@ public class Main {
 
 	}
 
+	public static String GetDirectoryTextEditor() {
+		String cmd;
+		if(OSUtils.GetOS().isWindows()) {
+			cmd = "code.cmd";
+		} else {
+			cmd = "vim";
+		}
+
+		if(OSUtils.GetOS().isUnixLike()) {
+			if(System.getenv("EDITOR") != null) {
+				cmd = System.getenv("EDITOR");
+			}
+			if(System.getenv("VISUAL") != null) {
+				cmd = System.getenv("VISUAL");
+			}
+		}
+
+
+		if(System.getenv("MS_EDITOR") != null && !System.getenv("MS_EDITOR").equals("")) {
+			cmd = System.getenv("MS_EDITOR");
+		}
+
+		return cmd;
+	}
+
 	@tool("edit-prefs")
 	public static class EditPrefsMode extends AbstractCommandLineTool {
 
 		@Override
 		public ArgumentParser getArgumentParser() {
 			return ArgumentParser.GetParser()
-					.addDescription("Launches the prefs directory in a default text editor, or your defined editor."
-							+ " The default varies based on OS and installed/detectible editors.")
+					.addDescription("Launches the prefs directory in a default text editor, or your defined editor.")
+					.addExtendedDescription("By default, on Windows, \"code.cmd\" (Visual Studio Code)"
+							+ " is the default editor. On"
+							+ " Linux systems, vim is default, though if $EDITOR is set, that is used, or if"
+							+ " $VISUAL is also set, that is used instead. In all OSes, you can override the"
+							+ " default editor with the MS_EDITOR environment variable. The prefs folder is passed"
+							+ " as the last argument to the command. Passing in the editor to the command will"
+							+ " bypass all these mechanisms, and use the specified editor in that one launch.")
 					.addArgument(new ArgumentBuilder()
 						.setDescription("Waits for the editor to finish. This is implied for some known programs,"
-								+ " where that is necessary (for instance known command line editors) but may be"
-								+ " specified manually. This is generally not necessary for GUI editors that"
+								+ " where that is necessary (" + StringUtils.Join(NEEDS_WAIT, ", ", ", and ", " and ")
+								+ ") but may be specified manually. This is generally not necessary for GUI editors that"
 								+ " open in a new window.")
 						.asFlag()
 						.setName("wait"))
 					.addArgument(new ArgumentBuilder()
 						.setDescription("Uses a different command to open the editor. This overrides the environment"
-								+ " value (if set), but uses the same format. The value should follow the format"
-								+ " \"command %s\" where %s is replaced with the path to the prefs directory for"
-								+ " this installation. Instead of setting this in command line mode, you can also"
-								+ " set the \"MS_EDITOR\" environment variable.")
+								+ " value (if set).")
 						.setUsageName("command")
 						.setOptionalAndDefault()
 						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
 						.setDefaultVal(""));
 		}
+		private static final String[] NEEDS_WAIT = new String[] {"vim", "nano", "emacs"};
 
 		@Override
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
@@ -1679,23 +1708,14 @@ public class Main {
 			}
 			String cmd;
 			boolean wait = false;
-			String[] needsWait = new String[] {"vim", "nano"};
-			if(OSUtils.GetOS() == OSUtils.OS.WINDOWS) {
-				cmd = "code.cmd %s";
-			} else {
-				cmd = "vim %s";
-			}
 
-
-			if(System.getenv("MS_EDITOR") != null && !System.getenv("MS_EDITOR").equals("")) {
-				cmd = System.getenv("MS_EDITOR");
-			}
+			cmd = GetDirectoryTextEditor() + " %s";
 			if(!parsedArgs.getStringArgument().equals("")) {
 				cmd = parsedArgs.getStringArgument();
 			}
 
-			for(String nw : needsWait) {
-				if(cmd.startsWith(nw)) {
+			for(String nw : NEEDS_WAIT) {
+				if(cmd.startsWith(nw + " ")) {
 					wait = true;
 					break;
 				}
@@ -1704,7 +1724,11 @@ public class Main {
 			CommandExecutor c = new CommandExecutor(String.format(cmd, "\"" + MethodScriptFileLocations.getDefault()
 					.getPreferencesDirectory()) + "\"");
 			c.setSystemInputsAndOutputs();
-			c.start();
+			try {
+				c.start();
+			} catch (IOException ex) {
+				System.err.println("Could not launch editor: " + ex.getMessage());
+			}
 			if(parsedArgs.isFlagSet("wait") || wait) {
 				c.waitFor();
 			}
