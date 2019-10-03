@@ -51,7 +51,7 @@ namespace mscript {
 					p.WaitForExit();
 				}
 				int javaVersion = int.Parse(strOutput);
-				if(javaVersion > 7) {
+				if(javaVersion > 8) {
 					ZipArchive zipFile = ZipFile.OpenRead(jarLocation);
 					ZipArchiveEntry file = zipFile.Entries.Where((ZipArchiveEntry e) => {
 						return e.FullName.Equals("interpreter-helpers/modules");

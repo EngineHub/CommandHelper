@@ -115,6 +115,7 @@ public class CommandExecutor {
 	private Thread outThread;
 	private Thread errThread;
 	private Thread inThread;
+	private boolean inheritStandards = false;
 
 	public CommandExecutor(String... command) {
 		args = command;
@@ -128,6 +129,11 @@ public class CommandExecutor {
 	 */
 	public CommandExecutor start() throws IOException {
 		ProcessBuilder builder = new ProcessBuilder(args);
+		if(inheritStandards) {
+			builder.redirectError(ProcessBuilder.Redirect.INHERIT);
+			builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+			builder.redirectInput(ProcessBuilder.Redirect.INHERIT);
+		}
 		builder.directory(workingDir);
 		process = builder.start();
 		outThread = new Thread(() -> {
@@ -319,6 +325,7 @@ public class CommandExecutor {
 		setSystemOut(new CloseShieldOutputStream(StreamUtils.GetSystemOut()));
 		setSystemErr(new CloseShieldOutputStream(StreamUtils.GetSystemErr()));
 		setSystemIn(new CloseShieldInputStream(System.in));
+		inheritStandards = true;
 		return this;
 	}
 

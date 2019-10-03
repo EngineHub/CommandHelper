@@ -151,7 +151,8 @@ public class Main {
 		InstallCmdlineMode.class,
 		NewMode.class,
 		NewTypeMode.class,
-		JavaVersionMode.class
+		JavaVersionMode.class,
+		EditPrefsMode.class
 	};
 
 	@SuppressWarnings("ResultOfObjectAllocationIgnored")
@@ -1574,6 +1575,11 @@ public class Main {
 			}
 		}
 
+		@Override
+		public boolean startupExtensionManager() {
+			return false;
+		}
+
 	}
 
 	@tool("help-topic")
@@ -1631,6 +1637,78 @@ public class Main {
 		@Override
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
 			System.out.println(JavaVersion.getMajorVersion());
+			System.exit(0);
+		}
+
+	}
+
+	@tool("edit-prefs")
+	public static class EditPrefsMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+					.addDescription("Launches the prefs directory in a default text editor, or your defined editor."
+							+ " The default varies based on OS and installed/detectible editors.")
+					.addArgument(new ArgumentBuilder()
+						.setDescription("Waits for the editor to finish. This is implied for some known programs,"
+								+ " where that is necessary (for instance known command line editors) but may be"
+								+ " specified manually. This is generally not necessary for GUI editors that"
+								+ " open in a new window.")
+						.asFlag()
+						.setName("wait"))
+					.addArgument(new ArgumentBuilder()
+						.setDescription("Uses a different command to open the editor. This overrides the environment"
+								+ " value (if set), but uses the same format. The value should follow the format"
+								+ " \"command %s\" where %s is replaced with the path to the prefs directory for"
+								+ " this installation. Instead of setting this in command line mode, you can also"
+								+ " set the \"MS_EDITOR\" environment variable.")
+						.setUsageName("command")
+						.setOptionalAndDefault()
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING)
+						.setDefaultVal(""));
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			Implementation.forceServerType(Implementation.Type.SHELL);
+			if(!MethodScriptFileLocations.getDefault()
+					.getPreferencesDirectory().exists()) {
+				System.err.println("Prefs directory does not exist!");
+				System.exit(1);
+			}
+			String cmd;
+			boolean wait = false;
+			String[] needsWait = new String[] {"vim", "nano"};
+			if(OSUtils.GetOS() == OSUtils.OS.WINDOWS) {
+				cmd = "code.cmd %s";
+			} else {
+				cmd = "vim %s";
+			}
+
+
+			if(System.getenv("MS_EDITOR") != null && !System.getenv("MS_EDITOR").equals("")) {
+				cmd = System.getenv("MS_EDITOR");
+			}
+			if(!parsedArgs.getStringArgument().equals("")) {
+				cmd = parsedArgs.getStringArgument();
+			}
+
+			for(String nw : needsWait) {
+				if(cmd.startsWith(nw)) {
+					wait = true;
+					break;
+				}
+			}
+
+			CommandExecutor c = new CommandExecutor(String.format(cmd, "\"" + MethodScriptFileLocations.getDefault()
+					.getPreferencesDirectory()) + "\"");
+			c.setSystemInputsAndOutputs();
+			c.start();
+			if(parsedArgs.isFlagSet("wait") || wait) {
+				c.waitFor();
+			}
+
 			System.exit(0);
 		}
 
