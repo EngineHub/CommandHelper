@@ -1,23 +1,34 @@
-CommandHelper has grown into quite a large plugin from its humble beginnings as a simple alias plugin. 
-Due to this, if you desire to contribute to CommandHelper, you may not even know where to begin! This 
+MethodScript has grown into quite a large project from its humble beginnings as a simple alias plugin for Minecraft. 
+Due to this, if you desire to contribute to MethodScript, you may not even know where to begin! This 
 document will hopefully get you at least pointed in the right direction, though there is no replacement 
 for digging through the code some yourself. This document is just going over the high level details, and 
 won't cover anything too specific, and is not aimed at the typical user, though it will not cover 
 anything too java specific. Also included are sections that cover the testing architecture, and build process.
 
 ==Core Architecture==
-There are 5 main "components" to CommandHelper, each of which is addressed separately below, 
-and a final section speaks as to how they all integrate with each other. Pictures are good, 
-right? Here's a picture that shows on a high level how the various components work together.
-
-[[File:CHDiagram.png]]
+There are 5 main "components" to MethodScript, each of which is addressed separately below, 
+and a final section speaks as to how they all integrate with each other.
 
 ===Core===
-The core is what glues everything together. The core knows how to register the plugin with 
+The core is what glues everything together. The core knows how start up the program initially,
+and set up all of the initial parameters that are needed to run. There are 2 cores in MethodScript,
+the "MethodScript core" which is the command line version of MethodScript, and the "CommandHelper core",
+which is the core that the Minecraft server starts with.
+
+The CommandHelper core registers the plugin with 
 bukkit and handles the builtin commands. When the plugin starts up initially, it starts in
 bukkit specific code, which sets the abstraction layer type, as well as hands control off to
 the more generic core.
 
+While there is currently no difference between a "MethodScript" and "CommandHelper" executable,
+this is intended to change in the future, as the CommandHelper and Minecraft specific portions
+are intended to be removed to their own repository, and embed MethodScript, while the MethodScript
+core is meant to be used as either a standalone general purpose programming language, or as
+an embeddable programming language, primarily by CommandHelper at first, but perhaps in other
+projects in the future. Unfortunately, this design distinction was not put in place from the
+beginning, so actually separating the two parts is non-trivial, and is currently a long term
+goal. However, new code written tends to respect this distinction, and so there are some differences
+when running in standalone mode and as a Minecraft plugin.
 
 ===Compiler===
 The compiler takes the source code it is given, then lexes, parses and optimizes it. Lexing 
@@ -30,9 +41,9 @@ are also stored in memory, to be executed when an applicable event occurs. Techn
 this mechanism is part of the Compiler proper, however it is really a separate mechanism, 
 and could easily be split off from the actual compilation procedure, so in the future, if 
 the compiled tree were to be saved to disk for instance, this could easily be accomplished 
-in the future. In addition, because the Abstract Syntax Tree is separate at this point, 
+in the future. In addition, because the Abstract Syntax Tree (AST) is separate at this point, 
 much of the battle is done to turning this into a full blown compiler; compiling to some 
-other platform's native code base (for instance, DCPU).
+other platform's native code base (for instance, LLVM).
 
 ====Lexing====
 [http://en.wikipedia.org/wiki/Lexing Lexing] looks at each individual character in the 
@@ -49,7 +60,7 @@ it will be converted to this parse tree:
 msg(if(@variable, 'True text', 'False text'))
 %%
 
-[[File:ParseTree.png]]
+[[Image:ParseTree.png]]
 
 You can see that it roughly corresponds with each token being it's own node, and 
 "(" denoting a child beginning, "," denoting a sibling, and ")" denoting the end of 
@@ -140,11 +151,11 @@ msg('Var is 1')
 %%
 
 ===Annotation Processor and meta programming===
-CommandHelper makes heavy use of annotations to provide functionality. Annotations are
+MethodScript makes heavy use of annotations to provide functionality. Annotations are
 a [http://docs.oracle.com/javase/1.5.0/docs/guide/language/annotations.html Java feature]
 that provides a way to "meta program" in Java. An annotation is a "tag" that can be
 use to mark various methods, fields, classes, or other constructs in that Java language.
-This meta programming allows for several different advantages, the main one in CommandHelper
+This meta programming allows for several different advantages, the main one in MethodScript
 being the ability to maintain all information about classes in one place, instead of
 spreading the information around several different files. In general, when adding a new
 class, it is customary to copy paste another class, then modify it. The ability to do
@@ -152,19 +163,19 @@ this in one place, instead of having to modify an existing list manually is foll
 a principal known as the [https://en.wikipedia.org/wiki/Open/closed_principle open/closed]
 principal, and is one of the key components of a [https://en.wikipedia.org/wiki/SOLID_%28object-oriented_design%29 SOLID]
 architecture. It also enables easier Dependency Injection, one of the other heavily followed
-design principles. In general, CommandHelper uses annotations to mark events, functions,
+design principles. In general, MethodScript uses annotations to mark events, functions,
 and other resources for addition to the api, and inherently allows for one-to-many relationships
-between code. An additional feature that CommandHelper includes is a 
+between code. An additional feature that MethodScript includes is a 
 %%GET_SIMPLE_CLASS|.*|ClassDiscovery%% utility class, which provides the means
 to dynamically discover the constructs that are tagged with the various annotations,
 as well as providing other methods for meta class discovery for java sources that
-aren't aware of CommandHelper.
+aren't aware of MethodScript.
 
 
 ===Abstraction Layer===
-The abstraction layer handles all communication between CommandHelper and Bukkit. 
+The abstraction layer handles all communication between MethodScript and Bukkit. 
 It is the only place in the code that should directly reference bukkit. All methods 
-of communication from CommandHelper to Bukkit are defined as interfaces, which 
+of communication from MethodScript to Bukkit are defined as interfaces, which 
 must be implemented once per server type, but are all that are required to be 
 implemented to add another server type. This will allow for easier migration to 
 and from Bukkit and other server mods, with minimal effort on the part of the 
@@ -173,17 +184,17 @@ use the tools available to you in an IDE, this should not be a huge barrier,
 and the advantages far outweigh the problems.
 
 ===Functions===
-For a function to exist, it must tag itself with @%%GET_SIMPLE_CLASS|.*|api%%, and implement %%GET_CLASS|.*|Function%%. 
-In most cases, it may extend %%GET_SIMPLE_CLASS|.*|AbstractFunction%%, and most likely not have to override anything. 
+For a function to exist, it must tag itself with @<%GET_SIMPLE_CLASS|.*|api%>, and implement <%GET_CLASS|.*|Function%>. 
+In most cases, it may extend <%GET_SIMPLE_CLASS|.*|AbstractFunction%>, and most likely not have to override anything. 
 Details about what each method expects is covered in source comments. The main method however, 
-exec is worth discussing. It is passed a %%GET_SIMPLE_CLASS|.*|Target%%, 
-an %%GET_SIMPLE_CLASS|.*.environments|Environment%%, and an array of %%GET_SIMPLE_CLASS|.*|Construct%%s. 
+exec is worth discussing. It is passed a <%GET_SIMPLE_CLASS|.*|Target%>, 
+an <%GET_SIMPLE_CLASS|.*.environments|Environment%>, and an array of <%GET_SIMPLE_CLASS|.*|Construct%>s. 
 At this point, all the Constructs are guaranteed to be atomic values, and if preResolveVariables 
-returns true (the default) they will not be %%GET_SIMPLE_CLASS|.*|IVariable%%s either. This means that the function will 
+returns true (the default) they will not be <%GET_SIMPLE_CLASS|.*|IVariable%>s either. This means that the function will 
 only need to be able to deal with the primitive types: integer, double, string (and as a side 
 effect, void also, however that will act like an empty string), null, and arrays. (Very special 
 cases may have to deal with other data types, but those are primarily optimized out, and in any 
-case can be handled like strings.) In most cases, the %%GET_SIMPLE_CLASS|.*|Static%% class provides methods for converting 
+case can be handled like strings.) In most cases, the <%GET_SIMPLE_CLASS|.*|Static%> class provides methods for converting 
 Constructs into Java primitives, and automatically throwing exceptions should a value be 
 uncastable to the said type. The code target indicates where in the codebase this function 
 is occurring in, and should be provided to any exception that is thrown, or can otherwise 
@@ -194,7 +205,7 @@ environment, which can be freely used inside the function.
 
 ==Testing Architecture==
 
-You may have noticed that CommandHelper has a large base of unit tests. I take automated 
+You may have noticed that MethodScript has a large base of unit tests. I take automated 
 testing very seriously; there is no way for me to scale up and maintain any semblance of 
 quality without automating as much testing as possible. This is where the unit tests come 
 in. Each time a new build occurs, all the unit tests are run, and failing tests are reported, 
@@ -203,20 +214,24 @@ particular use case working in the final product. This allows you to have much h
 in the product, despite most functionality not being manually tested before a release.
 
 ===JUnit===
+JUnit is the test driver. Essentially, each test is generally supposed to test a small unit of code, though
+it tends to be easier to write integration tests, so there is a framework in place to simply run MethodScript
+and check the outputs, to verify correctness. There are also unit tests surrounding the documentation
+and other boilerplate tests to ensure basic consistency of code.
 
 ===Mockito===
-
-===PowerMock===
+Mockito is the mocking framework in place. This allows creations of testing mocks, which allow parts of code
+to be replaced by simple mocks, which don't do anything, but generally look like the code they're replacing.
 
 ==Build Architecture==
 
-For the most part, because we use maven, building CommandHelper is as trivial as running 
+For the most part, because we use maven, building MethodScript is as trivial as running 
 <code>mvn clean install</code>, but it is nice to understand what actually happens when 
 you do that, and what things could cause that to go wrong.
 
 ===Git/Github===
 
-CommandHelper uses git as its version control system, and the code is hosted on github. 
+MethodScript uses git as its version control system, and the code is hosted on github. 
 To get the source, you can use <code>git clone https://github.com/sk89q/commandhelper.git</code>
 
 ===Maven===
@@ -235,7 +250,7 @@ many of the possible elements in a pom, which can at first be confusing.
 ===Dependencies===
 
 The main dependency of CommandHelper is (of course) Spigot, but if you look 
-at it's dependency tree, you see almost 20 different dependencies! Not to worry, 
+at it's dependency tree, you see more than 30 different dependencies! Not to worry, 
 most of those are not actually included by CH, they are transitive dependencies, 
 but anyways, with a few exceptions, they are not strictly required at runtime, 
 just build time. There are a few exceptions, but for the most part, for these 
@@ -248,6 +263,10 @@ huge and cheap, so even if you double the size of the jar, it won't make a dent 
 the remaining free space for a person's disk drive. The advantage is that you only 
 need to distribute one single file instead of several, which tends to greatly 
 de-complicate the distribution process.
+
+To embed MethodScript into another jar may cause issues when shading this way,
+however, hence why 2 jars are created in the build process. The one ending in
+''-full'' is the one that has the dependencies shaded in it.
 
 
 ===Common Failure Reasons===
@@ -262,18 +281,16 @@ have not yet been downloaded. Try to build it, this should download the resource
 for you, which should the make the compile errors go away. This is known as priming 
 the build.
 
-===Jenkins===
+===CI===
 
-Jenkins is a <code>Continuous Integration Server</code>, which automatically builds 
+Azure DevOps is a <code>Continuous Integration Server</code>, which automatically builds 
 the project based on the code currently in the github repository. This allows for 
 quick detection of failures, which also usually leads to quick resolutions. This 
 also has the benefit of providing a convenient place to download the newest development 
 versions, without having to compile the code yourself.
 
-When Jenkins builds, if the build fails due to either compilation failures or unit 
-test failures, the IRC channel is notified. (Actually successful builds are pinged 
-as well.) When a successful build occurs, A link to the build is also posted in IRC. 
+When the CI builds, if the build fails due to either compilation failures or unit 
+test failures, an email is sent. (Actually successful builds are emailed 
+as well.)
 Commits to the github account trigger a new build, so these builds are the freshest 
 you could possibly have, unless you're the developer.
-
-{{LearningTrail}}

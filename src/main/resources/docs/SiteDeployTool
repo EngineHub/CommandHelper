@@ -135,7 +135,7 @@ is, the root of the website) and run
 
 <%PRE|npx http-server -p 8080 -c-1 -o "http://localhost:8080/index.html"%>
 
-Alternatively, you can install the http-server package, and leave of the ''npx'' command. 
+Alternatively, you can install the http-server package, and leave off the ''npx'' command. 
 
 Leave this command window open while you develop. You may also wish to disable the cache in your web browser, so that
 old versions of the pages won't be cached.
