@@ -169,13 +169,16 @@ public class Exceptions {
 			try {
 				that.eval(tryCode, env);
 			} catch (ConfigRuntimeException e) {
-				String name = AbstractCREException.getExceptionName(e);
+				if(!(e instanceof AbstractCREException)) {
+					throw e;
+				}
+				FullyQualifiedClassName name = ((AbstractCREException) e).getExceptionType().getFQCN();
 				if(Prefs.DebugMode()) {
 					StreamUtils.GetSystemOut().println("[" + Implementation.GetServerType().getBranding() + "]:"
 							+ " Exception thrown (debug mode on) -> " + e.getMessage() + " :: " + name + ":"
 							+ e.getTarget().file() + ":" + e.getTarget().line());
 				}
-				if(name != null && (interest.isEmpty() || interest.contains(name))) {
+				if(interest.isEmpty() || interest.contains(name)) {
 					if(catchCode != null) {
 						CArray ex = ObjectGenerator.GetGenerator().exception(e, env, t);
 						if(ivar != null) {
