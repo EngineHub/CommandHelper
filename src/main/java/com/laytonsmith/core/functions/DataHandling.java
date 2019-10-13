@@ -2733,7 +2733,7 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "ClassType {arg} Returns a string value of the typeof a value. For instance 'array' is returned"
+			return "ClassType {arg} Returns a ClassType value of the typeof a value. For instance 'array' is returned"
 					+ " for typeof(array()). This is a generic replacement for the is_* series of functions.";
 		}
 

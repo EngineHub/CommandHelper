@@ -454,7 +454,8 @@ public class FileHandling {
 		@Override
 		public String docs() {
 			return "byte_array {file} Reads in a gzipped file, and returns a byte_array for it. The file is returned"
-					+ " exactly as is on disk, no conversions are done. base-dir restrictions are enforced for the"
+					+ " exactly as is on disk, no conversions are done other than unzipping it."
+					+ " base-dir restrictions are enforced for the"
 					+ " path, the same as read(). If file is relative, it is assumed to be relative to this file.";
 		}
 

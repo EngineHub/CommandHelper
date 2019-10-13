@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Preferences;
+import com.laytonsmith.PureUtilities.Preferences.GroupData;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
 import com.laytonsmith.PureUtilities.TermColors;
 import java.io.File;
@@ -100,10 +101,15 @@ public final class Prefs {
 		}
 	}
 
-	private static final String LOGGING_GROUP = "Logging";
-	private static final String PROFILING_GROUP = "Profiling";
-	private static final String SECURITY_GROUP = "Security";
-	private static final String DEBUG_GROUP = "Debugging";
+	private static final GroupData GENERAL_GROUP = new GroupData("General").setSortOrder(0);
+	private static final GroupData LOGGING_GROUP = new GroupData("Logging")
+			.setDescription("Settings related to logging capabilities.");
+	private static final GroupData PROFILING_GROUP = new GroupData("Profiling")
+			.setDescription("Settings related to the built in profiler.");
+	private static final GroupData SECURITY_GROUP = new GroupData("Security")
+			.setDescription("Security related settings. Please ensure you understand the impact"
+					+ " of changing these, as the defaults have been carefully selected.");
+	private static final GroupData DEBUG_GROUP = new GroupData("Debugging");
 	/**
 	 * Initializes the global Prefs to this file.
 	 *
@@ -115,11 +121,11 @@ public final class Prefs {
 		a.add(new Preference(PNames.DEBUG_MODE.config(), "false", Preferences.Type.BOOLEAN, "Whether or not to display"
 				+ " debug information in the console", DEBUG_GROUP));
 		a.add(new Preference(PNames.SHOW_WARNINGS.config(), "true", Preferences.Type.BOOLEAN, "Whether or not to display"
-				+ " warnings in the console, while compiling"));
+				+ " warnings in the console, while compiling", GENERAL_GROUP));
 		a.add(new Preference(PNames.CONSOLE_LOG_COMMANDS.config(), "true", Preferences.Type.BOOLEAN, "Whether or not to"
 				+ " display the original command in the console when it is run", LOGGING_GROUP));
 		a.add(new Preference(PNames.SCRIPT_NAME.config(), "aliases.msa", Preferences.Type.STRING, "The path to the"
-				+ " default config file, relative to the CommandHelper plugin folder"));
+				+ " default config file, relative to the CommandHelper plugin folder", GENERAL_GROUP));
 		a.add(new Preference(PNames.ENABLE_INTERPRETER.config(), "false", Preferences.Type.BOOLEAN, "Whether or not to"
 				+ " enable the /interpreter command. Note that even with this enabled, a player must still have the"
 				+ " commandhelper.interpreter permission, but"
@@ -140,12 +146,12 @@ public final class Prefs {
 				+ " dirty and break all sorts of programming rules, so that other plugins can't interfere with the"
 				+ " operations that you defined. Note that doing this essentially makes CommandHelper have absolute"
 				+ " say over commands. Use this setting only if you can't get another plugin to cooperate with CH,"
-				+ " because it is a global setting."));
+				+ " because it is a global setting.", GENERAL_GROUP));
 		a.add(new Preference(PNames.CASE_SENSITIVE.config(), "false", Preferences.Type.BOOLEAN, "Makes command matching"
 				+ " be case sensitive. If set to false, if your config defines /cmd, but the user runs /CMD, it will"
-				+ " trigger the command anyways."));
+				+ " trigger the command anyways.", GENERAL_GROUP));
 		a.add(new Preference(PNames.MAIN_FILE.config(), "main.ms", Preferences.Type.STRING, "The path to the main file,"
-				+ " relative to the CommandHelper folder"));
+				+ " relative to the CommandHelper folder", GENERAL_GROUP));
 		a.add(new Preference(PNames.ALLOW_DEBUG_LOGGING.config(), "false", Preferences.Type.BOOLEAN, "If set to false,"
 				+ " the Debug class of functions will do nothing.", LOGGING_GROUP));
 		a.add(new Preference(PNames.DEBUG_LOG_FILE.config(), "logs/debug/%Y-%M-%D-debug.log", Preferences.Type.STRING,
@@ -169,12 +175,13 @@ public final class Prefs {
 				Preferences.Type.STRING, "The path to the profiling logs. These logs are perf4j formatted logs. Consult"
 				+ " the documentation for more information.", PROFILING_GROUP));
 		a.add(new Preference(PNames.SHOW_SPLASH_SCREEN.config(), "true", Preferences.Type.BOOLEAN, "Whether or not to"
-				+ " show the splash screen at server startup"));
+				+ " show the splash screen at server startup", GENERAL_GROUP));
 		a.add(new Preference(PNames.USE_COLORS.config(),
 				"true", Preferences.Type.BOOLEAN, "Whether or"
-				+ " not to use console colors."));
+				+ " not to use console colors.", GENERAL_GROUP));
 		a.add(new Preference(PNames.HALT_ON_FAILURE.config(), "false", Preferences.Type.BOOLEAN, "Whether or not to"
-				+ " halt compilation of pure mscript files if a compilation failure occurs in any one of the files."));
+				+ " halt compilation of pure mscript files if a compilation failure occurs in any one of the files.",
+				GENERAL_GROUP));
 		a.add(new Preference(PNames.USE_SUDO_FALLBACK.config(), "false", Preferences.Type.BOOLEAN, "If true, sudo()"
 				+ " will use a less safe fallback method if it fails. See the documentation on the sudo function for"
 				+ " more details. If this is true, a warning is issued at startup.", SECURITY_GROUP));
@@ -204,7 +211,7 @@ public final class Prefs {
 				+ " server security, and require a \"two step\" authentication for interpreter mode.", SECURITY_GROUP));
 		a.add(new Preference(PNames.STRICT_MODE.config(), "false", Preferences.Type.BOOLEAN, "If set to true, forces"
 				+ " all files that do not specifically set strict mode on or off into strict mode. See the"
-				+ " documentation for more information about what strict mode does."));
+				+ " documentation for more information about what strict mode does.", GENERAL_GROUP));
 		prefs = new Preferences("CommandHelper", Static.getLogger(), a);
 		prefs.init(f);
 	}

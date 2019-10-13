@@ -25,7 +25,7 @@ import java.util.logging.Logger;
  */
 public class Preferences {
 
-	private final Map<String, Map<String, Preference>> prefs = new HashMap<>();
+	private final Map<GroupData, Map<String, Preference>> prefs = new HashMap<>();
 	private final String appName;
 	@SuppressWarnings("NonConstantLogger")
 	private final Logger logger;
@@ -101,10 +101,10 @@ public class Preferences {
 		public Object objectValue;
 
 		/**
-		 * The group name, by default the empty string, meaning don't group it.
+		 * The group name, by default a group named "General" with no description, and a sort order of 0
 		 */
 		@ObjectHelpers.ToString
-		public String group = "";
+		public GroupData group = new GroupData("General").setSortOrder(0);
 		/**
 		 * The preference sort order, by default 100. Sorting takes place within groups, with preferences
 		 * with identical sort values sorted alphabetically.
@@ -118,7 +118,7 @@ public class Preferences {
 			this.description = description;
 		}
 
-		public Preference(String name, String def, Type allowed, String description, String group) {
+		public Preference(String name, String def, Type allowed, String description, GroupData group) {
 			this(name, def, allowed, description);
 			this.group = group;
 		}
@@ -128,7 +128,7 @@ public class Preferences {
 			this.sort = sort;
 		}
 
-		public Preference(String name, String def, Type allowed, String description, String group, int sort) {
+		public Preference(String name, String def, Type allowed, String description, GroupData group, int sort) {
 			this(name, def, allowed, description, group);
 			this.sort = sort;
 		}
@@ -172,6 +172,63 @@ public class Preferences {
 		if(!header.trim().isEmpty()) {
 			this.header = "#  " + header.replaceAll("\n", "\n#  ");
 		}
+	}
+
+	/**
+	 * A class that represents the groups that preferences can be in. The only required parameter is the name.
+	 */
+	public static class GroupData implements Comparable<GroupData> {
+		private final String name;
+		private int sort = 100;
+		private String description = null;
+
+		public GroupData(String name) {
+			this.name = name;
+		}
+
+		/**
+		 * Sets the sort order. If the sort order is the same, it is alphabetical.
+		 * @param sort
+		 * @return
+		 */
+		public GroupData setSortOrder(int sort) {
+			this.sort = sort;
+			return this;
+		}
+
+		/**
+		 * A description of the category itself. If empty, no description is added.
+		 * @param description
+		 * @return
+		 */
+		public GroupData setDescription(String description) {
+			this.description = description;
+			return this;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public int getSort() {
+			return sort;
+		}
+
+		public String getDescription() {
+			return description;
+		}
+
+		@Override
+		public int compareTo(GroupData o) {
+			if(this.sort < o.sort) {
+				return -1;
+			} else if(this.sort > o.sort) {
+				return 1;
+			} else {
+				return this.name.compareTo(o.name);
+			}
+		}
+
 	}
 
 	/**
@@ -420,10 +477,16 @@ public class Preferences {
 			for(Map<String, Preference> m : prefs.values()) {
 				prfs.addAll(m.values());
 			}
-			String currentGroup = "";
+			GroupData currentGroup = null;
 			for(Preference p : prfs) {
 				if(!p.group.equals(currentGroup)) {
-					b.append("[").append(p.group).append("]\n");
+					b.append("[").append(p.group.getName()).append("]\n");
+					if(p.group.getDescription() != null && !p.group.getDescription().trim().equals("")) {
+						for(String line2 : StringUtils.lineSplit(p.group.getDescription(), lineLength)) {
+							b.append("# ").append(line2).append(nl);
+						}
+						b.append(nl);
+					}
 					currentGroup = p.group;
 				}
 //				Preference p = getPrefFromKey(key);
