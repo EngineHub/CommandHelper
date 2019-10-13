@@ -12,6 +12,7 @@ import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -89,17 +90,25 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 		// Do this after preExcecution() in case the particular event needs to inject the player first.
 		Mixed c = activeEvent.getParsedEvent().get("player");
 		if(c != null) {
-			MCCommandSender p = Static.getServer().getPlayer(c.val());
-			if(p == null) {
-				p = Static.GetInjectedPlayer(c.val());
-			}
-			if(p != null) {
-				env.getEnv(CommandHelperEnvironment.class).SetPlayer((MCPlayer) p);
-			} else {
-				Static.getLogger().log(Level.WARNING, "Player missing from player event: " + b.getEventName());
-				// Set env CommandSender to prevent incorrect inherited player from being used in a player event.
+			if(c instanceof CNull) {
+				// This is a CNull "player", likely from an entity event, so we need to ensure player() does
+				// not return a player inherited from the bind's parent environment.
 				if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 					env.getEnv(CommandHelperEnvironment.class).SetCommandSender(Static.getServer().getConsole());
+				}
+			} else {
+				MCCommandSender p = Static.getServer().getPlayer(c.val());
+				if(p == null) {
+					p = Static.GetInjectedPlayer(c.val());
+				}
+				if(p != null) {
+					env.getEnv(CommandHelperEnvironment.class).SetPlayer((MCPlayer) p);
+				} else {
+					Static.getLogger().log(Level.WARNING, "Player missing in player event (NPC?): " + b.getEventName());
+					// Set env CommandSender to prevent incorrect inherited player from being used in a player event.
+					if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+						env.getEnv(CommandHelperEnvironment.class).SetCommandSender(Static.getServer().getConsole());
+					}
 				}
 			}
 		}
