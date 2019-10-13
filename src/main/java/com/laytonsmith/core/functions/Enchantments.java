@@ -253,7 +253,7 @@ public class Enchantments {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{3};
+			return new Integer[]{3, 4};
 		}
 
 		@Override

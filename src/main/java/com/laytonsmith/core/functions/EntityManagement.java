@@ -2305,7 +2305,7 @@ public class EntityManagement {
 								}
 								break;
 							case entity_spec.KEY_ARROW_DAMAGE:
-								double d = Static.getDouble32(specArray.get(index, t), t);
+								double d = Static.getDouble(specArray.get(index, t), t);
 								if(d < 0) {
 									throw new CRERangeException("Damage cannot be negative.", t);
 								}
@@ -3126,7 +3126,7 @@ public class EntityManagement {
 								}
 								break;
 							case entity_spec.KEY_ARROW_DAMAGE:
-								double d = Static.getDouble32(specArray.get(index, t), t);
+								double d = Static.getDouble(specArray.get(index, t), t);
 								if(d < 0) {
 									throw new CRERangeException("Damage cannot be negative.", t);
 								}
@@ -3174,7 +3174,7 @@ public class EntityManagement {
 								}
 								break;
 							case entity_spec.KEY_ARROW_DAMAGE:
-								double d = Static.getDouble32(specArray.get(index, t), t);
+								double d = Static.getDouble(specArray.get(index, t), t);
 								if(d < 0) {
 									throw new CRERangeException("Damage cannot be negative.", t);
 								}
@@ -3226,7 +3226,7 @@ public class EntityManagement {
 								}
 								break;
 							case entity_spec.KEY_ARROW_DAMAGE:
-								double d = Static.getDouble32(specArray.get(index, t), t);
+								double d = Static.getDouble(specArray.get(index, t), t);
 								if(d < 0) {
 									throw new CRERangeException("Damage cannot be negative.", t);
 								}
