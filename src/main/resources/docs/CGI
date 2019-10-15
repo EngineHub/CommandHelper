@@ -1,0 +1,102 @@
+MethodScript has support for running as a cgi-bin in a webserver. The setup for this is slightly different, and
+the sections below outline how to setup each server type. For other server types, it may still be possible to run, but
+you'll need to modify the instructions to cater to your server type.
+
+Regardless, you'll need Java and your server of choice installed, as well as the MethodScript jar. Installation of these
+things is outside the scope of this tutorial, and it is assumed that you have basic web pages being displayed through
+your server. The guide also assumes that you're running on Ubuntu Linux. If this is not the case, the basic setup should
+nonetheless be the same, but you may need to modify file paths.
+
+<%TakeNote|Note that CGI is very inefficient, and has extremely limited flexibility, and so this setup is not
+necessarily recommended, but is shown to demonstrate the capabilities of MethodScript. Better solutions will be
+provided in the future.%>
+
+== Apache2 ==
+
+First step is to enable the CGID mod
+
+<%PRE|a2enmod cgid%>
+
+Next, add either a ScriptAlias directive or AddHandler directive.
+
+For ScriptAlias, add the following line to either apache2.conf, httpd.conf, or the given config file in your 
+sites-available directory. This should point to the directory that you want your scripts to be loaded from, along
+with the url that should be intercepted. For instance:
+
+<%PRE|ScriptAlias "/" "/var/www/html/"%>
+
+Alternatively, and probably preferably, if you have mixed file types in a given folder, add this to your site config
+file:
+
+<%PRE|
+<Directory "/var/www/html">
+	Options +ExecCGI
+	AddHandler cgi-script .ms
+</Directory>
+%>
+
+Doing it this way allows for .ms files to be run as scripts, but not other files, such as html and css files.
+
+Would cause calls to /var/www/html/index.ms via "http://example.com/index.ms" to be run as scripts,
+rather than simply serving the resource as plain text. You may modify this to reflect where you wish to actually
+put the scripts, and what the url should be. This works with no further configuration on Ubuntu, however.
+
+Now, we need to install MethodScript itself. The jar may be installed anywhere, but keep in mind the configuration
+files are created beside the jar, and need to be writable by the server process, www-data. To do that, place the
+MethodScript jar in /opt/mscript, create a folder /opt/mscript/MethodScript, and run
+
+<%PRE|
+sudo chmod -R a+wrx MethodScript;
+sudo mkdir /var/www/.mscript;
+sudo touch /var/www/.mscript/auto_include.ms;
+%>
+
+This will set up the necessary files and folder so that MethodScript can properly run under the www-data user.
+
+Be sure to restart apache after all the configuration changes to make them apply.
+
+Headers and other data are provided through the environment variables, which you can access with {{function|get_env}}.
+See this script for an example of how to provide basic functionality:
+
+<%CODE|
+#!/usr/bin/env /usr/local/bin/mscript
+
+// This is extremely rudimentary, but it works well, and is only a few lines of code,
+// and requires no special support in MethodScript!
+if(string_contains(get_env('QUERY_STRING'), 'src=true')) {
+        if(!has_value('code_hit_count')) {
+                store_value('code_hit_count', 0);
+        }
+        store_value('code_hit_count', get_value('code_hit_count') + 1);
+        msg("Content-type: text/plain\n");
+        msg(read(reflect_pull('file')));
+} else {
+        msg("Content-type: text/html\n\n");
+        msg("<html><body><h1>Hello MethodScript!</h1><br>");
+        msg("<div>Click <a href=\"" . get_env('REQUEST_URI') . "?src=true\">here</a> to see the source code.</div>");
+        msg('<h2>Environment values</h2>');
+        msg("<table border=\"1\">");
+        foreach(@key: @value in get_env()) {
+                msg("<tr><td>@key</td><td>@value</td></tr>");
+        }
+        msg("</table>");
+        if(!has_value('hit_count')) {
+                store_value('hit_count', 0);
+        }
+        @hitCount = get_value('hit_count') + 1;
+        store_value('hit_count', @hitCount);
+        msg('<h2>Server data</h2><table border="1">');
+        @serverData = array(
+                'Engine Build Date': simple_date('yyyy-MM-dd', engine_build_date()),
+                'Engine Location': engine_location(),
+                'Hit Count': @hitCount,
+                'Source Code Hit Count': get_value('code_hit_count'),
+        );
+        foreach(@key: @value in @serverData) {
+                msg("<tr><td>@key</td><td>@value</td></tr>");
+        }
+        msg('</table>');
+}
+%>
+
+This is a very rudimentary example, but it demonstrates how to properly interact with the system at a very low level.
