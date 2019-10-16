@@ -50,6 +50,8 @@ public interface MCCommand extends AbstractionObject {
 
 	void setTabCompleter(MCPlugin plugin);
 
+	List<String> tabComplete(MCCommandSender sender, String alias, String[] args);
+
 	List<String> handleTabComplete(MCCommandSender sender, String alias, String[] args);
 
 	boolean handleCustomCommand(MCCommandSender sender, String label, String[] args);

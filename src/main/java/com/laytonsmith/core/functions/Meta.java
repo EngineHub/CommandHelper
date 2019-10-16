@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
+import com.laytonsmith.abstraction.MCCommand;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -42,6 +43,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -49,6 +51,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -402,6 +405,86 @@ public class Meta {
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_0_1;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_cmd_completions extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_cmd_completions";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+			MCCommandSender sender;
+			String commandString;
+			List<Mixed> argList;
+			if(args.length == 2) {
+				sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+				commandString = args[0].val();
+				argList = Static.getArray(args[1], t).asList();
+			} else {
+				sender = Static.GetCommandSender(args[0].val(), t);
+				commandString = args[1].val();
+				argList = Static.getArray(args[2], t).asList();
+			}
+
+			if(commandString.length() < 1 || commandString.charAt(0) != '/') {
+				throw new CREFormatException("The first character of the command must be a forward slash (i.e. '/give')", t);
+			}
+			commandString = commandString.substring(1);
+			MCCommand command = Static.getServer().getCommandMap().getCommand(commandString);
+			if(command == null) {
+				throw new CRENotFoundException("Command does not exist: " + commandString, t);
+			}
+
+			String[] arguments = new String[argList.size()];
+			for(int i = 0; i < argList.size(); i++) {
+				arguments[i] = argList.get(i).val();
+			}
+
+			List<String> completions = command.tabComplete(sender, commandString, arguments);
+			CArray ret = new CArray(t);
+			for(String s : completions) {
+				ret.push(new CString(s, t), t);
+			}
+			return ret;
+		}
+
+		@Override
+		public String docs() {
+			return "array {[player], command, args} Runs a plugin command's tab completer and returns an array of"
+					+ " possible completions for the final argument. ----"
+					+ " The args parameter must be an array of strings."
+					+ " A command prefix can be used to specify a specific plugin. (eg. \"/worldedit:remove\")"
+					+ " Throws a NotFoundException if the command does not exist.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CREPluginInternalException.class, CRENotFoundException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
 		}
 
 		@Override
