@@ -7,9 +7,9 @@ things is outside the scope of this tutorial, and it is assumed that you have ba
 your server. The guide also assumes that you're running on Ubuntu Linux. If this is not the case, the basic setup should
 nonetheless be the same, but you may need to modify file paths.
 
-<%TakeNote|Note that CGI is very inefficient, and has extremely limited flexibility, and so this setup is not
+{{TakeNote|text=Note that CGI is very inefficient, and has extremely limited flexibility, and so this setup is not
 necessarily recommended, but is shown to demonstrate the capabilities of MethodScript. Better solutions will be
-provided in the future.%>
+provided in the future.}}
 
 == Apache2 ==
 
@@ -25,6 +25,10 @@ with the url that should be intercepted. For instance:
 
 <%PRE|ScriptAlias "/" "/var/www/html/"%>
 
+This would cause calls to /var/www/html/index.ms via "http://example.com/index.ms" to be run as scripts,
+rather than simply serving the resource as plain text. You may modify this to reflect where you wish to actually
+put the scripts, and what the url should be. This works with no further configuration on Ubuntu, however.
+
 Alternatively, and probably preferably, if you have mixed file types in a given folder, add this to your site config
 file:
 
@@ -36,10 +40,6 @@ file:
 %>
 
 Doing it this way allows for .ms files to be run as scripts, but not other files, such as html and css files.
-
-Would cause calls to /var/www/html/index.ms via "http://example.com/index.ms" to be run as scripts,
-rather than simply serving the resource as plain text. You may modify this to reflect where you wish to actually
-put the scripts, and what the url should be. This works with no further configuration on Ubuntu, however.
 
 Now, we need to install MethodScript itself. The jar may be installed anywhere, but keep in mind the configuration
 files are created beside the jar, and need to be writable by the server process, www-data. To do that, place the
@@ -68,7 +68,9 @@ if(string_contains(get_env('QUERY_STRING'), 'src=true')) {
                 store_value('code_hit_count', 0);
         }
         store_value('code_hit_count', get_value('code_hit_count') + 1);
-        msg("Content-type: text/plain\n");
+        msg("Content-type: text/plain");
+		// Flush the headers
+		msg();
         msg(read(reflect_pull('file')));
 } else {
         msg("Content-type: text/html\n\n");

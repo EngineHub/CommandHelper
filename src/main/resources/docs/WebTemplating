@@ -9,11 +9,11 @@ shortcomings of existing templating systems. PHP was originally designed as a te
 language. In fact, there are still relics in PHP that support inline template syntax
 for mostly HTML pages:
 
-<pre>
+<%PRE|
 <?php if ($a == 5): ?>
 inline html
 <?php endif; ?>
-</pre>
+%>
 
 This approach is very useful, however due to the unrestricted nature of PHP, it can cause
 problems with separating concerns. [http://www.smarty.net/ Smarty] was created to assist with
@@ -70,31 +70,31 @@ the rendered xhtml to the client. (It can output any text in reality, which is u
 in the course of ajax request responses.) HTTP headers may be buffered at any point before this,
 and are sent just before the body of the HTTP response. Let's look at example code.
 
-<pre>
+<%CODE|
 XHTML @page = new XHTML();
 @page->setTitle('Page title');
 @page->setDescription('This escapes special symbols like & when used this way');
 @page->addChild(new XHTMLDiv('Inner text'));
 @page->display();
-</pre>
+%>
 
 This renders the following markup (assuming the output is set to be tidied and configured
 to output xhtml):
 
-<pre>
+<%PRE|
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<meta name="description" content="This escapes special symbols like &amp;amp; when used this way" />
+		<meta name="description" content="This escapes special symbols like &amp; when used this way" />
 		<title>Page title</title>
 	</head>
 	<body>
 		<div>Inner text</div>
 	</body>
 </html>
-</pre>
+%>
 
 In fact, if you put the rendered XHTML into a template file, it would essentially compile
 to equivalent MethodScript.
@@ -109,44 +109,44 @@ class (which all the XHTML objects extend). The class name is the name of the fi
 is in, and it extends whatever type the root element is. For instance, if we had a simple
 component that has static text inside a div (assuming it is saved in MyDiv.mst), we can write this:
 
-<pre>
+<%PRE|
 <?xml version="1.0" encoding="UTF-8"?>
 <div>
 	Inner text
 </div>
-</pre>
+%>
 
 Since the root element is a div, the doctype is inherited from it, though
 attributes and elements can be added as well. Because of this, all
 elements have a doctype, even if it isn't directly specified.
 Written in equivalent pure mscript, this class would look like this:
 
-<pre>
+<%CODE|
 @{XHTML}
 class MyDiv extends Div {
 	public MyDiv(){
 		this->addChild('Inner text');
 	}
 }
-</pre>
+%>
 
 and regardless of how we just defined that, we can use it via pure MethodScript like
 this:
 
-<pre>
+<%CODE|
 XHTML @page = new XHTML();
 @page->addChild(new MyDiv());
 @page->display();
-</pre>
+%>
 
 or like this in another template:
 
-<pre>
+<%PRE|
 <?xml version="1.0" encoding="UTF-8"?>
 <div>
 	<MyDiv />
 </div>
-</pre>
+%>
 
 The @{XHTML} annotation is used to tell the UI compiler that this class is available
 in mst templates. More advanced usage is shown later in this tutorial.
@@ -176,8 +176,7 @@ and cannot be objects.
 
 For example:
 
-<pre>
-
+<%CODE|
 @{XHTML(attributesClass: MyDivAttributes)}
 class MyDiv extends Div {
 
@@ -191,7 +190,7 @@ class MyDiv extends Div {
 		this->addChild(new Div('Age: '.@options->age));
 	}
 }
-</pre>
+%>
 
 The equivalent structure written in a MyDiv.mst file is slightly simpler, because
 the attributes simply need to be declared with a type, and possibly a default value,
@@ -200,13 +199,13 @@ is checked at compile time, so if you forget to declare one of them, then use it
 it will be a compile error. All attributes from the parent are also available to
 be used as well inside of the template.
 
-<pre>
+<%PRE|
 <?xml version="1.0" encoding="UTF-8"?>
 <div attr="string name; int age=21;">
 	<div>Name: $name</div>
 	<div>Age: $age</div>
 </div>
-</pre>
+%>
 
 If you have an attribute named $var, and you need a literal <code>$var</code>, you
 can use the xml escape sequence &amp;#36;var. 
@@ -225,28 +224,26 @@ is cross compiled to javascript, and included as part of the entire output html.
 A very simple Hello World program would look like this:
 
 HelloWorld.mst:
-<pre>
+<%PRE|
 <?xml version="1.0" encoding="UTF-8"?>
 <div attr="string output;">
 	<script type="text/mscript">
-		&lt;![CDATA[
 		JS::alert($output);
-		]]&gt;
 	</script>
 </div>
-</pre>
+%>
 
 We would deliver this to the browser using the following main code:
 
-<pre>
+<%CODE|
 XHTML @page = new XHTML();
 @page->addChild(new HelloWorld({output: 'Hello World!'}));
 @page->display();
-</pre>
+%>
 
 which would result in the the following html:
 
-<pre>
+<%PRE|
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -256,18 +253,16 @@ which would result in the the following html:
 	</head>
 	<body>
 		<script type="text/javascript">
-		&lt;![CDATA[
 			alert('Hello World!');
-		]]&gt;
 		</script>
 	</body>
 </html>
-</pre>
+%>
 
 As you can see, MethodScript does most of the work for you, making it far simpler
 to use than javascript. However, this does not stop you from using javascript yourself.
 Any javascript you embed in the template will be included exactly as is, so existing
-javascript librarys can be used. Unfortunately, you cannot interface MethodScript
+javascript libraries can be used. Unfortunately, you cannot interface MethodScript
 with javascript directly, though MethodScript can call javascript functions indirectly.
 Inside of the tag, the <code>this</code> keyword is available, and refers to that instance
 of the html tag.
@@ -277,7 +272,7 @@ less clear. The important thing to remember is that this uses rclosure linking r
 The XHTML->addScript method is used to add a script to an element. The same template
 shown above would be written in pure MethodScript like this:
 
-<pre>
+<%CODE|
 @{XHTML(attributeClass: HelloWorldAttributes)}
 public class HelloWorld extends Div {
 	public static struct HelloWorldAttributes {
@@ -289,7 +284,7 @@ public class HelloWorld extends Div {
 		});
 	}
 }
-</pre>
+%>
 
 In the case of using pure MethodScript, you can even conditionally add scripts if needed.
 In either case however, before the script is cross compiled to javascript, it is optimized
@@ -319,25 +314,23 @@ example would be for a div to hide itself after a few seconds. To do this, we ca
 use the methods in the XHTML class in a script block.
 
 FadeDiv.mst:
-<pre>
+<%PRE|
 <?xml version="1.0" encoding="UTF-8"?>
 <div>
 	<script type="text/mscript">
-		&lt;![CDATA[
 		set_timeout(5000, closure(){
 			@hideThis->style->display = Display::NONE;
 		});
-		]]&gt;
 	</script>
 	<div id="hideThis">
 		Hide me!
 	</div>
 </div>
-</pre>
+%>
 
 This would compile to the following output:
 
-<pre>
+<%PRE|
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -350,15 +343,13 @@ This would compile to the following output:
 			Hide me!
 		</div>
 		<script type="text/javascript">
-		&lt;![CDATA[
 			setTimeout(function(){
 				document.getElementById("hideThis").style.display = "none";
 			}, 5000);
-		]]&gt;
 		</script>
 	</body>
 </html>
-</pre>
+%>
 
 As you can see, the dom access is generally easier, or just as easy in javascript,
 but we get the advantage that in MethodScript, many invalid operations become
@@ -366,12 +357,12 @@ a compile error. For instance, the display property only recognizes some string
 values, so that is an enum, so the following code would cause a compile error,
 even though it would work (though it would be ignored) in javascript.
 
-<pre>
+<%CODE|
 #Works
 hideThis->style->display = "none";
 #Compile error!
 hideThis->style->display = "invalid";
-</pre>
+%>
 
 Additionally, when working with specific elements with ids, we don't need
 to use document.getElementById("id"), we can simply use id. The compile figures
@@ -393,34 +384,32 @@ If a first class mapping doesn't exist, or you are trying to access experimental
 you can use the reflection mechanism to bypass the compiler, just as you would in normal MethodScript
 code.
 
-<pre>
-hideThis->style['display'] = "experimental value";
-</pre>
+<%CODE|
+@hideThis->style['display'] = "experimental value";
+%>
 
 The dynamic scripting can also be used to make html changes at compile time. For instance,
 given the following template:
 
 Optimized.mst:
-<pre>
+<%PRE|
 <?xml version="1.0" encoding="UTF-8"?>
 <div>
 	<script type="text/mscript">
-		&lt;![CDATA[
 			@hideThis->style->display = Display::NONE;
-		]]&gt;
 	</script>
 	<div id="hideThis">
 		Hide me!
 	</div>
 </div>
-</pre>
+%>
 
 This would actually result in html code that had no javascript in it, because
 the dom manipulation would happen at compile time, because all the components
 are known to the compiler, and they don't require any javascript to be run by the
 client. The output html would be simple:
 
-<pre>
+<%PRE|
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -434,7 +423,7 @@ client. The output html would be simple:
 		</div>
 	</body>
 </html>
-</pre>
+%>
 
 As you can see, the html is already pre-rendered with the correct styling. If you actually
 did intend on the code to remain javascript for whatever reason (perhaps you wanted it to
@@ -458,26 +447,24 @@ has its own events available to it via javascript compiled MethodScript. A simpl
 is a button that pops up an alert when it is clicked.
 
 Alert.mst:
-<pre>
+<%PRE|
 <?xml version="1.0" encoding="UTF-8"?>
 <div>
 	<script type="text/mscript">
-		&lt;![CDATA[
-			int @i = 0;
-			@clickMe->onClick(closure(MouseEvent @event){
-				@i++;
-				alert('The button was clicked '.@i.' time(s)');
-			});
-		]]&gt;
+		int @i = 0;
+		@clickMe->onClick(closure(MouseEvent @event){
+			@i++;
+			JS::alert('The button was clicked '.@i.' time(s)');
+		});
 	</script>
 	<button id="clickMe" value="Click Me" />
 </div>
-</pre>
+%>
 
 This results in the following equivalent html (the actual html rendered will be
-more complicated, but for this example, it has be simplified to equivalent javascript):
+more complicated, but for this example, it has been simplified to equivalent javascript):
 
-<pre>
+<%PRE|
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -488,17 +475,15 @@ more complicated, but for this example, it has be simplified to equivalent javas
 	<body>
 		<button id="clickMe" value="Click Me" />
 		<script type="text/javascript">
-		&lt;![CDATA[
 			var i = 0;
 			document.getElementById("clickMe").onclick = function(event){
 				i++;
 				alert("The button was clicked " + i + " time(s)");
 			};
-		]]&gt;
 		</script>
 	</body>
 </html>
-</pre>
+%>
 
 Each event has its own event object that is passed in, and has all the data that
 would be in the equivalent javascript event, allowing full access to the event.
@@ -514,7 +499,7 @@ can simply use async_get_value like normal (get_value isn't available in the jav
 compiler), and the call will still work.
 
 persist.mst:
-<pre>
+<%PRE|
 <?xml version="1.0" encoding="UTF-8"?>
 <div>
 	<script type="text/mscript">
@@ -530,7 +515,7 @@ persist.mst:
 	<button id="load" value="Load" />
 	<div id="output"></div>
 </div>
-</pre>
+%>
 
 This transforms into fairly complicated HTML, because as much code as possible is
 converted to client side javascript, but since much of the script still must run
@@ -539,7 +524,7 @@ and responds appropriately to the call. Since the script may expose security hol
 if the data isn't properly validated, even more complication may be added to the
 javascript and server side compiled script. Essentially, this turns into the following
 javascript (client side):
-<pre>
+<%SYNTAX|javascript|
 //Pretend the ajax function exists.
 document.getElementById("load").onclick = function(event){
 	ajax("server_url.com/pathToAutomaticallyGeneratedFileThatWillRespondToThis?v1="
@@ -547,16 +532,16 @@ document.getElementById("load").onclick = function(event){
 			document.getElementById("output").innerHTML = escapeSpecialChars(response.value);
 		});
 };
-</pre>
+%>
 
 and the following equivalent pseudo MethodScript (server side):
 
-<pre>
+<%CODE|
 @v1 = get_request_var('v1');
 @ret = get_value('userInput.'.@v1);
 output(@ret);
 die();
-</pre>
+%>
 
 All server data methods are individually supported in this equivalent manner, that is,
 whatever data is needed to run the script on the server is requested from the client,
