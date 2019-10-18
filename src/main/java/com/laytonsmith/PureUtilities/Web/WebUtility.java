@@ -29,6 +29,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -283,7 +284,7 @@ public final class WebUtility {
 			if(b.length() != 0) {
 				b.append("&");
 			}
-			b.append(encodeParameters(parameters));
+			b.append(encodeListParameters(parameters));
 			// Setting this to null avoids further processing below
 			parameters = null;
 			String query = b.toString();
@@ -295,7 +296,7 @@ public final class WebUtility {
 			if(query == null) {
 				query = "?";
 			}
-			query += encodeParameters(queryParameters);
+			query += encodeListParameters(queryParameters);
 			url = new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getPath() + query);
 		}
 		if(logger != null) {
@@ -498,7 +499,7 @@ public final class WebUtility {
 				if(logger != null) {
 					logger.log(Level.INFO, "Parameters are added, and content type set to application/x-www-form-urlencoded");
 				}
-				params = encodeParameters(parameters).getBytes("UTF-8");
+				params = encodeListParameters(parameters).getBytes("UTF-8");
 				conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 			} else if(settings.getRawParameter() != null) {
 				if(logger != null) {
@@ -580,7 +581,24 @@ public final class WebUtility {
 	 * @param parameters
 	 * @return
 	 */
-	public static String encodeParameters(Map<String, List<String>> parameters) {
+	public static String encodeParameters(Map<String, String> parameters) {
+		Map<String, List<String>> p = new HashMap<>();
+		for(Map.Entry<String, String> e : parameters.entrySet()) {
+			List<String> list = new ArrayList<>();
+			list.add(e.getValue());
+			p.put(e.getKey(), list);
+		}
+		return encodeListParameters(p);
+	}
+
+	/**
+	 * Returns a properly encoded string of parameters. Array types are returned using bracket notation,
+	 * for instance, if the input is {@code {a: [1, 2]}, then the output will be {@code a[]=1&a[]=2}.
+	 *
+	 * @param parameters
+	 * @return
+	 */
+	public static String encodeListParameters(Map<String, List<String>> parameters) {
 		if(parameters == null) {
 			return "";
 		}
@@ -662,13 +680,19 @@ public final class WebUtility {
 	}
 
 	/**
-	 * Given a query string "a=1&b=2", returns a map of that data
+	 * Given a query string "a=1&b=2", returns a map of that data. Note that this method does not properly
+	 * support array values, which are generally supported in the url format, so "a[]=1&a[]=2" and "a=1&a=2",
+	 * while technically
+	 * allowed in the specification, will not be returned correctly here, and the key will be a[]/a, and the value
+	 * will be either 1 or 2, which one is selected is undefined. If you are 100% certain the query string
+	 * will not contain array values, it is safe to use this method anyways, but if there is the possibility
+	 * of array values being present, use {@link #getQueryMapList} instead.
 	 *
 	 * @param query
 	 * @return
 	 */
 	public static Map<String, String> getQueryMap(String query) {
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		if(query == null) {
 			return map;
 		}
@@ -677,6 +701,38 @@ public final class WebUtility {
 			String name = param.split("=")[0];
 			String value = param.split("=")[1];
 			map.put(name, value);
+		}
+		return map;
+	}
+
+	/**
+	 * Given a query string "a=1&b=2", returns a map of that data. Note that this method properly
+	 * supports array values, so "a[]=1&a[]=2" and "a=1&a=2", will both return a map like
+	 * {@code {a: [1, 2]}}. In any case, multidimensional arrays are not supported.
+	 *
+	 * @param query
+	 * @return
+	 */
+	public static Map<String, List<String>> getQueryMapList(String query) {
+		Map<String, List<String>> map = new HashMap<>();
+		if(query == null) {
+			return map;
+		}
+		String[] params = query.split("&");
+		for(String param : params) {
+			String name = param.split("=")[0];
+			String value = param.split("=")[1];
+			if(name.endsWith("[]")) {
+				name = name.substring(0, name.length() - 2);
+			}
+			List<String> values;
+			if(map.containsKey(name)) {
+				values = map.get(name);
+			} else {
+				values = new ArrayList<>();
+				map.put(name, values);
+			}
+			values.add(value);
 		}
 		return map;
 	}
