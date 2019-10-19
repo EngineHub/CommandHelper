@@ -201,7 +201,7 @@ public class MySQLDataSource extends SQLDataSource {
 
 	@Override
 	public String docs() {
-		return "MySQL {mysql://[user[:password]@]host[:port]/database/table}"
+		return "MySQL {mysql://[user[:password]@]host[:port]/database/table?extraParameters}"
 				+ " This type stores data in a MySQL database. Unlike the"
 				+ " file based systems, this is extremely efficient, but"
 				+ " requires a database connection already set up to work."
@@ -211,7 +211,10 @@ public class MySQLDataSource extends SQLDataSource {
 				+ " based data sources, without risking either data corruption,"
 				+ " or extremely low efficiency. The layout of the table"
 				+ " in the database is required to be of a specific format: <%SYNTAX|sql|"
-				+ getTableCreationQuery("testTable") + "%>";
+				+ getTableCreationQuery("testTable") + "%>\n\n"
+				+ "Extra parameters may provided to the MySQL connection, and they are"
+				+ " merged with the existing required parameters and sent through as"
+				+ " is to the server. They should be in the format \"a=1&b=2\".";
 	}
 
 	@Override
