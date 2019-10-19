@@ -123,7 +123,9 @@ public class MySQLDataSource extends SQLDataSource {
 					+ "&jdbcCompliantTruncation=false"
 					+ (username == null ? "" : "&user=" + URLEncoder.encode(username, "UTF-8"))
 					+ (password == null ? "" : "&password=" + URLEncoder.encode(password, "UTF-8"));
-			s += WebUtility.encodeParameters(extraParameters);
+			if(!extraParameters.isEmpty()) {
+				s += "&" + WebUtility.encodeParameters(extraParameters);
+			}
 			return s;
 		} catch (UnsupportedEncodingException ex) {
 			throw new Error(ex);
