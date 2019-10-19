@@ -82,7 +82,9 @@ public class MySQLDataSource extends SQLDataSource {
 			}
 		} catch (IOException | SQLException ex) {
 			throw new DataSourceException("Could not connect to MySQL data source \"" + uri.toString() + "\""
-					+ " (using \"" + getConnectionString() + "\" to connect): " + ex.getMessage(), ex);
+					+ " (using \""
+					+ (password != null ? getConnectionString().replace(password, "<password>") : getConnectionString())
+					+ "\" to connect): " + ex.getMessage(), ex);
 		}
 
 	}
