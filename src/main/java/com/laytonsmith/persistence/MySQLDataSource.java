@@ -81,7 +81,8 @@ public class MySQLDataSource extends SQLDataSource {
 				statement.executeUpdate(getTableCreationQuery(table));
 			}
 		} catch (IOException | SQLException ex) {
-			throw new DataSourceException("Could not connect to MySQL data source \"" + uri.toString() + "\""
+			throw new DataSourceException("Could not connect to MySQL data source \""
+					+ (password != null ? uri.toString().replace(password, "<password>") : uri.toString()) + "\""
 					+ " (using \""
 					+ (password != null ? getConnectionString().replace(password, "<password>") : getConnectionString())
 					+ "\" to connect): " + ex.getMessage(), ex);
