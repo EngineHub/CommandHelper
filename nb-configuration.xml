@@ -33,5 +33,9 @@
         <org-netbeans-modules-editor-indent.CodeStyle.project.text-limit-width>120</org-netbeans-modules-editor-indent.CodeStyle.project.text-limit-width>
         <org-netbeans-modules-editor-indent.CodeStyle.project.expand-tabs>false</org-netbeans-modules-editor-indent.CodeStyle.project.expand-tabs>
         <org-netbeans-modules-editor-indent.CodeStyle.usedProfile>project</org-netbeans-modules-editor-indent.CodeStyle.usedProfile>
+        <org-netbeans-modules-editor-indent.text.plain.CodeStyle.project.wrapProperties>WRAP_ALWAYS</org-netbeans-modules-editor-indent.text.plain.CodeStyle.project.wrapProperties>
+        <org-netbeans-modules-editor-indent.text.plain.CodeStyle.project.wrapArrayInit>WRAP_ALWAYS</org-netbeans-modules-editor-indent.text.plain.CodeStyle.project.wrapArrayInit>
+        <org-netbeans-modules-editor-indent.text.plain.CodeStyle.project.wrapArrayInitItems>WRAP_ALWAYS</org-netbeans-modules-editor-indent.text.plain.CodeStyle.project.wrapArrayInitItems>
+        <org-netbeans-modules-editor-indent.text.plain.CodeStyle.project.wrapObjects>WRAP_ALWAYS</org-netbeans-modules-editor-indent.text.plain.CodeStyle.project.wrapObjects>
     </properties>
 </project-shared-configuration>

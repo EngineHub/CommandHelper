@@ -1,0 +1,24 @@
+
+html body {
+	color: white;
+}
+
+body {
+	background-color: #383838;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	color: #afafaf;
+}
+
+strong, b {
+	color: #888;
+}
+
+#edit_this_page {
+	color: white;
+}
+
+.methodscript_code {
+	color: black;
+}

@@ -149,3 +149,10 @@ code {
     display: none;
 }
 
+#theme-select {
+    height: 1.75em;
+}
+
+#theme-select option {
+    color: black;
+}
