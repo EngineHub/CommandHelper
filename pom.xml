@@ -666,6 +666,7 @@
 									<pattern>com.google</pattern>
 									<shadedPattern>com.laytonsmith.libs.com.google</shadedPattern>
 									<excludes>
+										<!-- Conflict with Spigot -->
 										<exclude>com.google.common.collect.*</exclude>
 									</excludes>
 								</relocation>
@@ -834,6 +835,8 @@
 									</includes>
 									<excludes>
 										<exclude>META-INF/**</exclude>
+										<!-- Conflict with Spigot -->
+										<exlude>com/google/common/collect/**</exlude>
 									</excludes>
 								</filter>
 								
