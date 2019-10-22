@@ -314,7 +314,7 @@ public class BukkitPlayerListener implements Listener {
 	public void onPlayerMove(PlayerMoveEvent event) {
 		Location from = event.getFrom();
 		Location to = event.getTo();
-		if(from.getX() == to.getX() && from.getY() == to.getY() && from.getZ() == to.getZ()) {
+		if(to == null || from.getX() == to.getX() && from.getY() == to.getY() && from.getZ() == to.getZ()) {
 			return;
 		}
 		String p = event.getPlayer().getName();

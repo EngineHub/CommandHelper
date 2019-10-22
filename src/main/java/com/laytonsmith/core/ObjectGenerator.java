@@ -1,6 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Vector3D;
+import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCBannerMeta;
 import com.laytonsmith.abstraction.MCBlockStateMeta;
 import com.laytonsmith.abstraction.MCBookMeta;
@@ -48,8 +49,10 @@ import com.laytonsmith.abstraction.blocks.MCDispenser;
 import com.laytonsmith.abstraction.blocks.MCDropper;
 import com.laytonsmith.abstraction.blocks.MCFurnace;
 import com.laytonsmith.abstraction.entities.MCTropicalFish;
+import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
@@ -82,6 +85,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * This file is responsible for converting CH objects into server objects, and vice versa
@@ -439,6 +443,13 @@ public class ObjectGenerator {
 			}
 			ma.set("flags", flagArray, t);
 
+			List<MCAttributeModifier> modifierList = meta.getAttributeModifiers();
+			if(modifierList == null) {
+				ma.set("modifiers", CNull.NULL, t);
+			} else {
+				ma.set("modifiers", attributeModifiers(meta.getAttributeModifiers(), t), t);
+			}
+
 			// Damageable items only
 			if(is.getType().getMaxDurability() > 0) {
 				ma.set("damage", new CInt(meta.getDamage(), t), t);
@@ -706,6 +717,17 @@ public class ObjectGenerator {
 						}
 					} else {
 						throw new CREFormatException("Itemflags was expected to be an array of flags.", t);
+					}
+				}
+
+				if(ma.containsKey("modifiers")) {
+					Mixed modifiers = ma.get("modifiers", t);
+					if(modifiers instanceof CNull) {
+						// no modifiers
+					} else if(modifiers.isInstanceOf(CArray.TYPE)) {
+						meta.setAttributeModifiers(attributeModifiers((CArray) modifiers, t));
+					} else {
+						throw new CREFormatException("Attribute modifiers were expected to be an array.", t);
 					}
 				}
 
@@ -1261,6 +1283,84 @@ public class ObjectGenerator {
 			ret.put(etype, elevel);
 		}
 		return ret;
+	}
+
+	public CArray attributeModifiers(List<MCAttributeModifier> modifierList, Target t) {
+		CArray modifiers = new CArray(t);
+		for(MCAttributeModifier m : modifierList) {
+			CArray modifier = CArray.GetAssociativeArray(t);
+			modifier.set("attribute", m.getAttribute().name());
+			modifier.set("name", m.getAttributeName());
+			modifier.set("operation", m.getOperation().name());
+			modifier.set("uuid", m.getUniqueId().toString());
+			modifier.set("amount", new CDouble(m.getAmount(), t), t);
+
+			MCEquipmentSlot slot = m.getEquipmentSlot();
+			if(slot == null) {
+				modifier.set("slot", CNull.NULL, t);
+			} else {
+				modifier.set("slot", slot.name());
+			}
+			modifiers.push(modifier, t);
+		}
+		return modifiers;
+	}
+
+	public List<MCAttributeModifier> attributeModifiers(CArray modifierArray, Target t) {
+		if(modifierArray.isAssociative()) {
+			throw new CREFormatException("Array of attribute modifiers cannot be associative.", t);
+		}
+		List<MCAttributeModifier> modifiers = new ArrayList<>();
+		for(String key : modifierArray.stringKeySet()) {
+			CArray m = Static.getArray(modifierArray.get(key, t), t);
+			if(!m.isAssociative()) {
+				throw new CREFormatException("Attribute modifier array must be associative.", t);
+			}
+
+			MCAttribute attribute;
+			MCAttributeModifier.Operation operation;
+			double amount;
+			UUID uuid = null;
+			String name = null;
+			MCEquipmentSlot slot = null;
+
+			try {
+				attribute = MCAttribute.valueOf(m.get("attribute", t).val());
+			} catch (IllegalArgumentException ex) {
+				throw new CREFormatException("Invalid attribute name:" + m.get("attribute", t), t);
+			}
+
+			try {
+				operation = MCAttributeModifier.Operation.valueOf(m.get("operation", t).val());
+			} catch (IllegalArgumentException ex) {
+				throw new CREFormatException("Invalid operation name:" + m.get("operation", t), t);
+			}
+
+			amount = Static.getDouble(m.get("amount", t), t);
+
+			if(m.containsKey("name")) {
+				name = m.get("name", t).val();
+			}
+
+			if(m.containsKey("uuid")) {
+				try {
+					uuid = UUID.fromString(m.get("uuid", t).val());
+				} catch (IllegalArgumentException ex) {
+					throw new CREFormatException("Invalid UUID format:" + m.get("uuid", t), t);
+				}
+			}
+
+			if(m.containsKey("slot")) {
+				try {
+					slot = MCEquipmentSlot.valueOf(m.get("slot", t).val());
+				} catch (IllegalArgumentException ex) {
+					throw new CREFormatException("Invalid equipment slot name:" + m.get("slot", t), t);
+				}
+			}
+
+			modifiers.add(StaticLayer.GetConvertor().GetAttributeModifier(attribute, uuid, name, amount, operation, slot));
+		}
+		return modifiers;
 	}
 
 	public CArray potions(List<MCLivingEntity.MCEffect> effectList, Target t) {

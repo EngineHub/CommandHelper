@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.abstraction.AbstractConvertor;
 import com.laytonsmith.abstraction.ConvertorHelper;
 import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommand;
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -61,14 +62,18 @@ import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitServerListener;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitVehicleListener;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitWeatherListener;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitWorldListener;
+import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.abstraction.enums.MCVersion;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAttribute;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPatternShape;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionType;
@@ -88,6 +93,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Beacon;
 import org.bukkit.block.BlockState;
@@ -150,6 +156,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -265,6 +272,20 @@ public class BukkitConvertor extends AbstractConvertor {
 	public MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded) {
 		return new BukkitMCPotionData(new PotionData(
 				BukkitMCPotionType.getConvertor().getConcreteEnum(type), extended, upgraded));
+	}
+
+	@Override
+	public MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlot slot) {
+		if(name == null) {
+			name = " "; // Spigot does not allow an empty name even though Minecraft and Paper allow it
+		}
+		if(id == null) {
+			id = UUID.randomUUID();
+		}
+		AttributeModifier mod = new AttributeModifier(id, name, amt,
+				BukkitMCAttributeModifier.Operation.getConvertor().getConcreteEnum(op),
+				BukkitMCEquipmentSlot.getConvertor().getConcreteEnum(slot));
+		return new BukkitMCAttributeModifier(BukkitMCAttribute.getConvertor().getConcreteEnum(attr), mod);
 	}
 
 	@Override

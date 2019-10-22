@@ -258,7 +258,7 @@ public class Enchantments {
 
 		@Override
 		public String docs() {
-			return "void {[player], slot, type, level | [player], slot, enchantsArray} Adds enchantments to an item in"
+			return "void {[player], slot, type, level | player, slot, enchantsArray} Adds enchantments to an item in"
 					+ " the player's inventory. A single enchantment type and level can be specified or an"
 					+ " enchantment array may be given. If slot is null, the currently selected slot is used."
 					+ " If an enchantment cannot be applied to the specified item, an EnchantmentException is thrown."

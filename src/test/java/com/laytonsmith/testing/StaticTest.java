@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.AbstractConvertor;
 import com.laytonsmith.abstraction.Convertor;
 import com.laytonsmith.abstraction.ConvertorHelper;
 import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
@@ -33,7 +34,9 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
+import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.abstraction.enums.MCRecipeType;
@@ -90,6 +93,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -713,6 +717,11 @@ public class StaticTest {
 		public MCPotionData GetPotionData(MCPotionType type, boolean extended, boolean upgraded) {
 			Convertor c = new BukkitConvertor();
 			return c.GetPotionData(type, extended, upgraded);
+		}
+
+		@Override
+		public MCAttributeModifier GetAttributeModifier(MCAttribute attr, UUID id, String name, double amt, MCAttributeModifier.Operation op, MCEquipmentSlot slot) {
+			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
 		@Override

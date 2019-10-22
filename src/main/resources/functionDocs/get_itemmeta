@@ -15,6 +15,7 @@ Below are the available fields in the item meta array. Fields can be null when t
 * '''model''' : (int) Represents vanilla's CustomModelData tag for use with resource packs.
 * '''flags''' : (array) Possible flags: ''%ITEM_FLAGS%''.
 * '''repair''' : (int) The cost to repair or combine this item in an anvil.
+* '''modifiers''' : (array) An array of attribute modifier arrays, each with keys: attribute, operation, amount (double), uuid (optional), name (optional), and slot (optional). Possible attributes: ''%ATTRIBUTES%''. Possible operations: ''%OPERATIONS%''. Possible slots: ''%SLOTS%''.
 |-
 | Damageable Items
 |

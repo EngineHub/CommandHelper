@@ -116,4 +116,8 @@ public interface MCItemMeta extends AbstractionObject {
 	int getCustomModelData();
 
 	void setCustomModelData(int id);
+
+	List<MCAttributeModifier> getAttributeModifiers();
+
+	void setAttributeModifiers(List<MCAttributeModifier> modifiers);
 }

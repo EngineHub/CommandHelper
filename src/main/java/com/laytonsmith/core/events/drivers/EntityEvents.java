@@ -2068,7 +2068,7 @@ public class EntityEvents {
 			if(event instanceof MCEntityRegainHealthEvent) {
 				MCEntityRegainHealthEvent e = (MCEntityRegainHealthEvent) event;
 				if(key.equalsIgnoreCase("amount")) {
-					e.setAmount(Static.getDouble32(value, value.getTarget()));
+					e.setAmount(Static.getDouble(value, value.getTarget()));
 					return true;
 				}
 			}

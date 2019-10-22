@@ -665,6 +665,9 @@
 								<relocation>
 									<pattern>com.google</pattern>
 									<shadedPattern>com.laytonsmith.libs.com.google</shadedPattern>
+									<excludes>
+										<exclude>com.google.common.collect.*</exclude>
+									</excludes>
 								</relocation>
 							</relocations>
 							<filters>

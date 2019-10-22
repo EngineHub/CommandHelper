@@ -4,16 +4,25 @@
  */
 package com.laytonsmith.abstraction.bukkit;
 
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 import com.laytonsmith.abstraction.AbstractionObject;
+import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAttribute;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.Damageable;
@@ -183,5 +192,28 @@ public class BukkitMCItemMeta implements MCItemMeta {
 		} catch (NoSuchMethodError ex) {
 			// probably 1.13
 		}
+	}
+
+	@Override
+	public List<MCAttributeModifier> getAttributeModifiers() {
+		Multimap<Attribute, AttributeModifier> modifiers = im.getAttributeModifiers();
+		if(modifiers == null) {
+			return null;
+		}
+		List<MCAttributeModifier> ret = new ArrayList<>();
+		for(Entry<Attribute, AttributeModifier> modifier : modifiers.entries()) {
+			ret.add(new BukkitMCAttributeModifier(modifier.getKey(), modifier.getValue()));
+		}
+		return ret;
+	}
+
+	@Override
+	public void setAttributeModifiers(List<MCAttributeModifier> modifiers) {
+		Multimap<Attribute, AttributeModifier> map = LinkedHashMultimap.create();
+		for(MCAttributeModifier m : modifiers) {
+			map.put(BukkitMCAttribute.getConvertor().getConcreteEnum(m.getAttribute()),
+					(AttributeModifier) m.getHandle());
+		}
+		im.setAttributeModifiers(map);
 	}
 }

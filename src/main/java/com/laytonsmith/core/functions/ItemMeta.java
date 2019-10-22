@@ -5,13 +5,16 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLeatherArmorMeta;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.entities.MCTropicalFish;
+import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCItemFlag;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
@@ -115,6 +118,9 @@ public class ItemMeta {
 				}
 			}
 			docs = docs.replace("%ENTITY_TYPES%", StringUtils.Join(spawnable, ", ", ", or ", " or "));
+			docs = docs.replace("%ATTRIBUTES%", StringUtils.Join(MCAttribute.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%OPERATIONS%", StringUtils.Join(MCAttributeModifier.Operation.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%SLOTS%", StringUtils.Join(MCEquipmentSlot.values(), ", ", ", or ", " or "));
 			return docs;
 		}
 
