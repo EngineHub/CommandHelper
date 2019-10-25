@@ -84,7 +84,7 @@ public final class ZipMaker {
 			in.close();
 			//JVM Bug
 			in = null;
-			System.gc();
+			GCUtil.BlockUntilGC();
 		}
 
 		// Complete the ZIP file

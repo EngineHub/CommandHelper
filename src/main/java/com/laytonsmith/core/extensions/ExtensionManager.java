@@ -10,6 +10,7 @@ import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.GCUtil;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
@@ -330,8 +331,8 @@ public class ExtensionManager {
 		dcl.destroy();
 
 		// Explicit call. Without this, jar files won't actually get unlocked on
-		// Windows. Of course, this is hit and miss, but that's fine; we tried.
-		System.gc();
+		// Windows.
+		GCUtil.BlockUntilGC();
 	}
 
 	/**
@@ -554,8 +555,8 @@ public class ExtensionManager {
 		}
 
 		// Explicit call. Without this, jar files won't actually get unlocked on
-		// Windows. Of course, this is hit and miss, but that's fine; we tried.
-		System.gc();
+		// Windows.
+		GCUtil.BlockUntilGC();
 
 		File cacheDir = CommandHelperFileLocations.getDefault().getExtensionCacheDirectory();
 

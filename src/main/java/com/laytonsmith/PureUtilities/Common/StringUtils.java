@@ -684,8 +684,8 @@ public final class StringUtils {
 	/**
 	 * Convenience method for HumanReadableByteCount(bytes, true).
 	 *
-	 * @param bytes
-	 * @return
+	 * @param bytes The total number of bytes.
+	 * @return The number of bytes, rounded to the nearest uppermost unit. For instance, 1024 will return "1.0 kB"
 	 */
 	public static String HumanReadableByteCount(long bytes) {
 		return HumanReadableByteCount(bytes, true);
@@ -694,9 +694,10 @@ public final class StringUtils {
 	/**
 	 * Returns a human readable byte count, given a byte count.
 	 *
-	 * @param bytes
-	 * @param si
-	 * @return
+	 * @param bytes The total number of bytes.
+	 * @param si If true, the unit division is 1000, if false, it's 1024.
+	 * @return The number of bytes, rounded to the nearest uppermost unit. For instance, 1024 will return "1.0 kiB" or
+	 * "1.0 kB" if si is true.
 	 */
 	public static String HumanReadableByteCount(long bytes, boolean si) {
 		int unit = si ? 1000 : 1024;

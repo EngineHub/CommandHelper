@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities.Common;
 
+import com.laytonsmith.PureUtilities.GCUtil;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -92,7 +93,7 @@ public final class FileUtil {
 					//JVM bug with files
 					fis.close();
 					fis = null;
-					System.gc();
+					GCUtil.BlockUntilGC();
 				}
 			} else {
 				throw ex;
@@ -413,7 +414,7 @@ public final class FileUtil {
 		//collection happens, the system will still
 		//have file locks on the file, even if the Streams
 		//were properly closed.
-		System.gc();
+		GCUtil.BlockUntilGC();
 		if(file.isDirectory()) {
 			boolean ret = true;
 			for(File f : file.listFiles()) {
