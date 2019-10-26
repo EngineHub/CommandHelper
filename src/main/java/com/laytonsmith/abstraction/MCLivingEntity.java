@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.core.constructs.Target;
 
@@ -111,6 +112,22 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 	void kill();
 
 	boolean isTameable();
+
+	double getAttributeValue(MCAttribute attr);
+
+	double getAttributeDefault(MCAttribute attr);
+
+	double getAttributeBase(MCAttribute attr);
+
+	void setAttributeBase(MCAttribute attr, double base);
+
+	void resetAttributeBase(MCAttribute attr);
+
+	List<MCAttributeModifier> getAttributeModifiers(MCAttribute attr);
+
+	void addAttributeModifier(MCAttributeModifier modifier);
+
+	void removeAttributeModifier(MCAttributeModifier modifier);
 
 	class MCEffect {
 

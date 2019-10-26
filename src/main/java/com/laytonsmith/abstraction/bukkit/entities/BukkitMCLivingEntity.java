@@ -1,5 +1,6 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
+import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCLivingEntity;
@@ -8,16 +9,20 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
+import com.laytonsmith.abstraction.bukkit.BukkitMCAttributeModifier;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntityEquipment;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAttribute;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -28,6 +33,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -384,5 +390,64 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	@Override
 	public boolean isTameable() {
 		return false;
+	}
+
+	private AttributeInstance getAttributeInstance(MCAttribute attr) {
+		AttributeInstance instance = le.getAttribute(BukkitMCAttribute.getConvertor().getConcreteEnum(attr));
+		if(instance == null) {
+			throw new IllegalArgumentException("This attribute is not applicable to this entity type.");
+		}
+		return instance;
+	}
+
+	@Override
+	public double getAttributeValue(MCAttribute attr) {
+		return getAttributeInstance(attr).getValue();
+	}
+
+	@Override
+	public double getAttributeDefault(MCAttribute attr) {
+		return getAttributeInstance(attr).getDefaultValue();
+	}
+
+	@Override
+	public double getAttributeBase(MCAttribute attr) {
+		return getAttributeInstance(attr).getBaseValue();
+	}
+
+	@Override
+	public void setAttributeBase(MCAttribute attr, double base) {
+		getAttributeInstance(attr).setBaseValue(base);
+	}
+
+	@Override
+	public void resetAttributeBase(MCAttribute attr) {
+		AttributeInstance instance = getAttributeInstance(attr);
+		instance.setBaseValue(instance.getDefaultValue());
+	}
+
+	@Override
+	public List<MCAttributeModifier> getAttributeModifiers(MCAttribute attr) {
+		Attribute bukkitAttribute = BukkitMCAttribute.getConvertor().getConcreteEnum(attr);
+		AttributeInstance instance = le.getAttribute(bukkitAttribute);
+		if(instance == null) {
+			throw new IllegalArgumentException("This attribute is not applicable to this entity type.");
+		}
+		Collection<AttributeModifier> modifiers = instance.getModifiers();
+		List<MCAttributeModifier> ret = new ArrayList<>();
+		for(AttributeModifier modifier : modifiers) {
+			ret.add(new BukkitMCAttributeModifier(bukkitAttribute, modifier));
+		}
+		return ret;
+	}
+
+	@Override
+	public void addAttributeModifier(MCAttributeModifier modifier) {
+		getAttributeInstance(modifier.getAttribute()).addModifier((AttributeModifier) modifier.getHandle());
+	}
+
+	@Override
+	public void removeAttributeModifier(MCAttributeModifier modifier) {
+		getAttributeInstance(modifier.getAttribute()).removeModifier((AttributeModifier) modifier.getHandle());
 	}
 }

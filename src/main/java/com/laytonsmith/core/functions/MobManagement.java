@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.MCAttributeModifier;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.MCAnimalTamer;
 import com.laytonsmith.abstraction.MCEntity;
@@ -15,6 +16,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.entities.MCAgeable;
 import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.entities.MCTameable;
+import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCCreeperType;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
@@ -70,6 +72,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 public class MobManagement {
 
@@ -1681,6 +1684,495 @@ public class MobManagement {
 		@Override
 		public Version since() {
 			return MSVersion.V3_3_3;
+		}
+	}
+
+	@api
+	public static class entity_attribute_value extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "entity_attribute_value";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "double {entityUUID, attribute} Gets the effective value for the attribute of this entity"
+					+ " after all modifiers have been applied to the base value. ----"
+					+ " Available attributes: " + StringUtils.Join(MCAttribute.values(), ", ", ", and ");
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRELengthException.class, CREFormatException.class,
+					CREBadEntityTypeException.class, CREBadEntityException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCLivingEntity e = Static.getLivingEntity(args[0], t);
+			MCAttribute attribute;
+			try {
+				attribute = MCAttribute.valueOf(args[1].val());
+			} catch (IllegalArgumentException ex) {
+				throw new CREFormatException("Invalid attribute name: " + args[1].val(), t);
+			}
+			try {
+				return new CDouble(e.getAttributeValue(attribute), t);
+			} catch (IllegalArgumentException ex) {
+				throw new CREBadEntityTypeException(ex.getMessage(), t);
+			}
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api
+	public static class entity_attribute_base extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "entity_attribute_base";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "double {entityUUID, attribute} Gets the base value for the given attribute of this entity."
+					+ " ---- Available attributes: " + StringUtils.Join(MCAttribute.values(), ", ", ", and ");
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRELengthException.class, CREFormatException.class,
+					CREBadEntityTypeException.class, CREBadEntityException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCLivingEntity e = Static.getLivingEntity(args[0], t);
+			MCAttribute attribute;
+			try {
+				attribute = MCAttribute.valueOf(args[1].val());
+			} catch (IllegalArgumentException ex) {
+				throw new CREFormatException("Invalid attribute name: " + args[1].val(), t);
+			}
+			try {
+				return new CDouble(e.getAttributeBase(attribute), t);
+			} catch (IllegalArgumentException ex) {
+				throw new CREBadEntityTypeException(ex.getMessage(), t);
+			}
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api
+	public static class entity_attribute_default extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "entity_attribute_default";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "double {entityUUID, attribute} Gets the default value for the attribute of this entity's type."
+					+ " ---- Available attributes: " + StringUtils.Join(MCAttribute.values(), ", ", ", and ");
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRELengthException.class, CREFormatException.class,
+					CREBadEntityTypeException.class, CREBadEntityException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCLivingEntity e = Static.getLivingEntity(args[0], t);
+			MCAttribute attribute;
+			try {
+				attribute = MCAttribute.valueOf(args[1].val());
+			} catch (IllegalArgumentException ex) {
+				throw new CREFormatException("Invalid attribute name: " + args[1].val(), t);
+			}
+			try {
+				return new CDouble(e.getAttributeDefault(attribute), t);
+			} catch (IllegalArgumentException ex) {
+				throw new CREBadEntityTypeException(ex.getMessage(), t);
+			}
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api
+	public static class entity_attribute_modifiers extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "entity_attribute_modifiers";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "array {entityUUID, attribute} Gets an array of modifier arrays for this entity's attribute."
+					+ " ---- Available attributes: " + StringUtils.Join(MCAttribute.values(), ", ", ", and ");
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRELengthException.class, CREFormatException.class,
+					CREBadEntityTypeException.class, CREBadEntityException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCLivingEntity e = Static.getLivingEntity(args[0], t);
+			MCAttribute attribute;
+			try {
+				attribute = MCAttribute.valueOf(args[1].val());
+			} catch (IllegalArgumentException ex) {
+				throw new CREFormatException("Invalid attribute name: " + args[1].val(), t);
+			}
+			try {
+				CArray ret = new CArray(t);
+				for(MCAttributeModifier m : e.getAttributeModifiers(attribute)) {
+					ret.push(ObjectGenerator.GetGenerator().attributeModifier(m, t), t);
+				}
+				return ret;
+			} catch (IllegalArgumentException ex) {
+				throw new CREBadEntityTypeException(ex.getMessage(), t);
+			}
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api
+	public static class set_entity_attribute_base extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_entity_attribute_base";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID, attribute, value} Sets the base value for the entity attribute."
+					+ " Accepts a double as the value."
+					+ " ---- Available attributes: " + StringUtils.Join(MCAttribute.values(), ", ", ", and ");
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRELengthException.class, CREFormatException.class,
+					CREBadEntityTypeException.class, CREBadEntityException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCLivingEntity e = Static.getLivingEntity(args[0], t);
+			MCAttribute attribute;
+			try {
+				attribute = MCAttribute.valueOf(args[1].val());
+			} catch (IllegalArgumentException ex) {
+				throw new CREFormatException("Invalid attribute name: " + args[1].val(), t);
+			}
+			double base = Static.getDouble(args[2], t);
+			try {
+				e.setAttributeBase(attribute, base);
+			} catch (IllegalArgumentException ex) {
+				throw new CREBadEntityTypeException(ex.getMessage(), t);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api
+	public static class reset_entity_attribute_base extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "reset_entity_attribute_base";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID, attribute} Resets the base attribute value to the default for this entity."
+					+ " ---- Available attributes: " + StringUtils.Join(MCAttribute.values(), ", ", ", and ");
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRELengthException.class, CREFormatException.class,
+					CREBadEntityTypeException.class, CREBadEntityException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCLivingEntity e = Static.getLivingEntity(args[0], t);
+			MCAttribute attribute;
+			try {
+				attribute = MCAttribute.valueOf(args[1].val());
+			} catch (IllegalArgumentException ex) {
+				throw new CREFormatException("Invalid attribute name: " + args[1].val(), t);
+			}
+			try {
+				e.resetAttributeBase(attribute);
+			} catch (IllegalArgumentException ex) {
+				throw new CREBadEntityTypeException(ex.getMessage(), t);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api
+	public static class add_entity_attribute_modifier extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "add_entity_attribute_modifier";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID, modifier} Adds an attribute modifier to an entity."
+					+ " Throws BadEntityTypeException if the attribute type does not apply to this entity type."
+					+ " See {function|get_itemmeta} for how to define an attribute modifier array.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRELengthException.class,
+					CREBadEntityTypeException.class, CREBadEntityException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCLivingEntity e = Static.getLivingEntity(args[0], t);
+			MCAttributeModifier modifier = ObjectGenerator.GetGenerator().attributeModifier(Static.getArray(args[1], t), t);
+			try {
+				e.addAttributeModifier(modifier);
+			} catch (IllegalArgumentException ex) {
+				throw new CREBadEntityTypeException(ex.getMessage(), t);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api
+	public static class remove_entity_attribute_modifier extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "remove_entity_attribute_modifier";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID, modifier | entityUUID, attribute, id} Removes an attribute modifier from an"
+					+ " entity. A modifier array can be provided, or both an attribute name and either the UUID or"
+					+ " name (if it's unique) for the modifier can be provided as the identifier.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRELengthException.class, CREFormatException.class,
+					CREBadEntityTypeException.class, CREBadEntityException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCLivingEntity e = Static.getLivingEntity(args[0], t);
+			MCAttributeModifier modifier = null;
+			if(args.length == 2) {
+				modifier = ObjectGenerator.GetGenerator().attributeModifier(Static.getArray(args[1], t), t);
+			} else {
+				MCAttribute attribute;
+				try {
+					attribute = MCAttribute.valueOf(args[1].val());
+				} catch (IllegalArgumentException ex) {
+					throw new CREFormatException("Invalid attribute name: " + args[1].val(), t);
+				}
+				List<MCAttributeModifier> modifiers = e.getAttributeModifiers(attribute);
+				String name = args[2].val();
+				UUID id = null;
+				if(name.length() == 36 || name.length() == 32) {
+					try {
+						id = UUID.fromString(name);
+					} catch (IllegalArgumentException ex) {
+						// not UUID
+					}
+				}
+				for(MCAttributeModifier m : modifiers) {
+					if(id != null && m.getUniqueId().compareTo(id) == 0
+							|| id == null && name.equals(m.getAttributeName())) {
+						modifier = m;
+						break;
+					}
+				}
+				if(modifier == null) {
+					return CVoid.VOID;
+				}
+			}
+			try {
+				e.removeAttributeModifier(modifier);
+			} catch (IllegalArgumentException ex) {
+				throw new CREBadEntityTypeException(ex.getMessage(), t);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
 		}
 	}
 }

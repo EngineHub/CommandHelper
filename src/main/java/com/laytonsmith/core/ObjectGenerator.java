@@ -447,7 +447,11 @@ public class ObjectGenerator {
 			if(modifierList == null) {
 				ma.set("modifiers", CNull.NULL, t);
 			} else {
-				ma.set("modifiers", attributeModifiers(meta.getAttributeModifiers(), t), t);
+				CArray modifiers = new CArray(t);
+				for(MCAttributeModifier m : meta.getAttributeModifiers()) {
+					modifiers.push(attributeModifier(m, t), t);
+				}
+				ma.set("modifiers", modifiers, t);
 			}
 
 			// Damageable items only
@@ -725,7 +729,15 @@ public class ObjectGenerator {
 					if(modifiers instanceof CNull) {
 						// no modifiers
 					} else if(modifiers.isInstanceOf(CArray.TYPE)) {
-						meta.setAttributeModifiers(attributeModifiers((CArray) modifiers, t));
+						CArray modifierArray = (CArray) modifiers;
+						if(modifierArray.isAssociative()) {
+							throw new CREFormatException("Array of attribute modifiers cannot be associative.", t);
+						}
+						List<MCAttributeModifier> modifierList = new ArrayList<>();
+						for(String key : modifierArray.stringKeySet()) {
+							modifierList.add(attributeModifier(Static.getArray(modifierArray.get(key, t), t), t));
+						}
+						meta.setAttributeModifiers(modifierList);
 					} else {
 						throw new CREFormatException("Attribute modifiers were expected to be an array.", t);
 					}
@@ -1285,82 +1297,73 @@ public class ObjectGenerator {
 		return ret;
 	}
 
-	public CArray attributeModifiers(List<MCAttributeModifier> modifierList, Target t) {
-		CArray modifiers = new CArray(t);
-		for(MCAttributeModifier m : modifierList) {
-			CArray modifier = CArray.GetAssociativeArray(t);
-			modifier.set("attribute", m.getAttribute().name());
-			modifier.set("name", m.getAttributeName());
-			modifier.set("operation", m.getOperation().name());
-			modifier.set("uuid", m.getUniqueId().toString());
-			modifier.set("amount", new CDouble(m.getAmount(), t), t);
+	public CArray attributeModifier(MCAttributeModifier m, Target t) {
+		CArray modifier = CArray.GetAssociativeArray(t);
+		modifier.set("attribute", m.getAttribute().name());
+		modifier.set("name", m.getAttributeName());
+		modifier.set("operation", m.getOperation().name());
+		modifier.set("uuid", m.getUniqueId().toString());
+		modifier.set("amount", new CDouble(m.getAmount(), t), t);
 
-			MCEquipmentSlot slot = m.getEquipmentSlot();
-			if(slot == null) {
-				modifier.set("slot", CNull.NULL, t);
-			} else {
-				modifier.set("slot", slot.name());
-			}
-			modifiers.push(modifier, t);
+		MCEquipmentSlot slot = m.getEquipmentSlot();
+		if(slot == null) {
+			modifier.set("slot", CNull.NULL, t);
+		} else {
+			modifier.set("slot", slot.name());
 		}
-		return modifiers;
+		return modifier;
 	}
 
-	public List<MCAttributeModifier> attributeModifiers(CArray modifierArray, Target t) {
-		if(modifierArray.isAssociative()) {
-			throw new CREFormatException("Array of attribute modifiers cannot be associative.", t);
+	public MCAttributeModifier attributeModifier(CArray m, Target t) {
+		if(!m.isAssociative()) {
+			throw new CREFormatException("Attribute modifier array must be associative.", t);
 		}
-		List<MCAttributeModifier> modifiers = new ArrayList<>();
-		for(String key : modifierArray.stringKeySet()) {
-			CArray m = Static.getArray(modifierArray.get(key, t), t);
-			if(!m.isAssociative()) {
-				throw new CREFormatException("Attribute modifier array must be associative.", t);
-			}
 
-			MCAttribute attribute;
-			MCAttributeModifier.Operation operation;
-			double amount;
-			UUID uuid = null;
-			String name = null;
-			MCEquipmentSlot slot = null;
+		MCAttribute attribute;
+		MCAttributeModifier.Operation operation;
+		double amount;
+		UUID uuid = null;
+		String name = null;
+		MCEquipmentSlot slot = null;
 
+		try {
+			attribute = MCAttribute.valueOf(m.get("attribute", t).val());
+		} catch (IllegalArgumentException ex) {
+			throw new CREFormatException("Invalid attribute name: " + m.get("attribute", t), t);
+		}
+
+		try {
+			operation = MCAttributeModifier.Operation.valueOf(m.get("operation", t).val());
+		} catch (IllegalArgumentException ex) {
+			throw new CREFormatException("Invalid operation name: " + m.get("operation", t), t);
+		}
+
+		amount = Static.getDouble(m.get("amount", t), t);
+
+		if(m.containsKey("name")) {
+			name = m.get("name", t).val();
+		}
+
+		if(m.containsKey("uuid")) {
 			try {
-				attribute = MCAttribute.valueOf(m.get("attribute", t).val());
+				uuid = UUID.fromString(m.get("uuid", t).val());
 			} catch (IllegalArgumentException ex) {
-				throw new CREFormatException("Invalid attribute name:" + m.get("attribute", t), t);
+				throw new CREFormatException("Invalid UUID format: " + m.get("uuid", t), t);
 			}
+		}
 
-			try {
-				operation = MCAttributeModifier.Operation.valueOf(m.get("operation", t).val());
-			} catch (IllegalArgumentException ex) {
-				throw new CREFormatException("Invalid operation name:" + m.get("operation", t), t);
-			}
-
-			amount = Static.getDouble(m.get("amount", t), t);
-
-			if(m.containsKey("name")) {
-				name = m.get("name", t).val();
-			}
-
-			if(m.containsKey("uuid")) {
+		if(m.containsKey("slot")) {
+			Mixed s = m.get("slot", t);
+			if(!(s instanceof CNull)) {
 				try {
-					uuid = UUID.fromString(m.get("uuid", t).val());
+					slot = MCEquipmentSlot.valueOf(s.val());
 				} catch (IllegalArgumentException ex) {
-					throw new CREFormatException("Invalid UUID format:" + m.get("uuid", t), t);
+					throw new CREFormatException("Invalid equipment slot name: " + m.get("slot", t), t);
 				}
 			}
-
-			if(m.containsKey("slot")) {
-				try {
-					slot = MCEquipmentSlot.valueOf(m.get("slot", t).val());
-				} catch (IllegalArgumentException ex) {
-					throw new CREFormatException("Invalid equipment slot name:" + m.get("slot", t), t);
-				}
-			}
-
-			modifiers.add(StaticLayer.GetConvertor().GetAttributeModifier(attribute, uuid, name, amount, operation, slot));
 		}
-		return modifiers;
+
+		return StaticLayer.GetConvertor().GetAttributeModifier(attribute, uuid, name, amount, operation, slot);
 	}
 
 	public CArray potions(List<MCLivingEntity.MCEffect> effectList, Target t) {
