@@ -1101,7 +1101,8 @@ public class Main {
 		@Override
 		public ArgumentParser getArgumentParser() {
 			return ArgumentParser.GetParser()
-				.addDescription("Installs one of the built in LocalPackage examples, which may in and of itself be useful.")
+				.addDescription("Installs one of the built in LocalPackage examples, which may in and of itself be"
+						+ " useful, but is primarily meant to showcase various features.")
 				.addArgument(new ArgumentBuilder()
 						.setDescription("The name of the package to install. Leave blank to see a list of examples to"
 								+ " choose from.")

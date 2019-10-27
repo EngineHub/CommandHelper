@@ -16,10 +16,11 @@ public final class GCUtil {
 	private GCUtil() {}
 
 	public static void main(String[] args) {
+		debug = true;
 		BlockUntilGC();
 	}
 
-	private static final boolean DEBUG = false;
+	private static boolean debug = false;
 
 	/**
 	 * This method calls System.gc, but it blocks until it detects that a garbage collection has run. This
@@ -79,7 +80,7 @@ public final class GCUtil {
 	}
 
 	private static void debug(StringProvider msg) {
-		if(DEBUG) {
+		if(debug) {
 			System.out.println(msg.provide());
 		}
 	}
