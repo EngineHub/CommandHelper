@@ -4,8 +4,9 @@ you'll need to modify the instructions to cater to your server type.
 
 Regardless, you'll need Java and your server of choice installed, as well as the MethodScript jar. Installation of these
 things is outside the scope of this tutorial, and it is assumed that you have basic web pages being displayed through
-your server. The guide also assumes that you're running on Ubuntu Linux. If this is not the case, the basic setup should
-nonetheless be the same, but you may need to modify file paths.
+your server. The guide also assumes that you're running on Ubuntu Linux, except for IIS, which is assumed to be running
+on Windows Server Datacenter 2019. If this is not the case, the basic setup should nonetheless be the same, but you may 
+need to modify file paths.
 
 {{TakeNote|text=Note that CGI is very inefficient, and has extremely limited flexibility, and so this setup is not
 necessarily recommended, but is shown to demonstrate the capabilities of MethodScript. Better solutions will be
@@ -54,6 +55,32 @@ sudo touch /var/www/.mscript/auto_include.ms;
 This will set up the necessary files and folder so that MethodScript can properly run under the www-data user.
 
 Be sure to restart apache after all the configuration changes to make them apply.
+
+== IIS ==
+
+=== Enable CGI ===
+By default, the ability to run CGI applications is disabled, and must be enabled. In general, these instructions
+are taken from https://docs.microsoft.com/en-us/iis/configuration/system.webserver/cgi (where you can also find other
+versions).
+
+Launch the Server Manager from the task bar, click Manage
+(at the top right) then "Add Roles and Features". On Installation Type, select "Role-based or feature-based
+installation". Select the local server. Expand "Web Server (IIS)", "Web Server", "Application Development" and
+select CGI. (Note that this also installs FastCGI capabilities.) Click Next on the Select Features page, then 
+check the restart automatically checkbox, then Install. Restart IIS Manager, and the icon should appear.
+
+=== Configure CGI ===
+We need to grant the IUSR user permission to access the relevant folders. Create a new folder under ProgramFiles named
+MethodScript, and place the MethodScript jar in this folder. We also need to install the cmdline version, as IIS will
+not run the jar, but needs an .exe file. From an Administrator command prompt, run 
+'''java -jar MethodScript.jar install-cmdline'''. This will install mscript.exe in ProgramFiles/MethodScript. Grant the
+'''IUSR''' user access to read, execute, and write to this folder.
+
+Create a second folder which will contain the scripts. The location is not relevant, but this assumes a bin/ folder
+on your Desktop.
+
+
+== Example Script ==
 
 Headers and other data are provided through the environment variables, which you can access with {{function|get_env}}.
 See this script for an example of how to provide basic functionality:
