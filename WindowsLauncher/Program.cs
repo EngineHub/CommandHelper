@@ -32,7 +32,12 @@ namespace mscript {
 				startFile = activationData[0];
 			}
 
-			string jarLocation = Registry.CurrentUser.OpenSubKey("Software\\MethodScript").GetValue("JarLocation").ToString();
+			string jarLocation = Registry.CurrentUser.OpenSubKey("Software\\MethodScript")?.GetValue("JarLocation")?.ToString();
+			if(jarLocation == null) {
+				Console.WriteLine("Cannot locate jar file, Registry Key HKCU\\Software\\MethodScript\\JarLocation is not set.");
+				Environment.Exit(1);
+			}
+
 			List<string> modulesArgs = new List<string>();
 			// Pull out the modules and add them here if java > 8
 			{
