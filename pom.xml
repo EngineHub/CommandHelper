@@ -157,6 +157,12 @@
 			<id>Java.Net</id>
 			<url>http://download.java.net/maven/2/</url>
 		</repository>
+		
+		<repository>
+          <id>github</id>
+          <name>GitHub LadyCailin Apache Maven Packages</name>
+          <url>https://maven.pkg.github.com/LadyCailin</url>
+        </repository>
 	</repositories>
 	<dependencies>
 		<!-- Please update the Compatibility docs page whenever
@@ -388,6 +394,11 @@
 			<artifactId>org.eclipse.lsp4j</artifactId>
 			<version>0.8.0</version>
 		</dependency>
+		<dependency>
+			<groupId>io.github.ladycailin</groupId>
+			<artifactId>QRTerminal</artifactId>
+			<version>1.0.0-snapshot</version>
+		</dependency>
 	</dependencies>
 	<distributionManagement>
 		<site>
@@ -555,6 +566,7 @@
 										add it to the dependecies list to fully integrate it. -->
 									<include>com.google.code.gson:gson:jar:*</include>
 									<include>com.google.guava:guava:jar:*</include>
+									<include>io.github.ladycailin:qrterminal:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -669,6 +681,10 @@
 										<!-- Conflict with Spigot -->
 										<exclude>com.google.common.collect.*</exclude>
 									</excludes>
+								</relocation>
+								<relocation>
+									<pattern>io.github.ladycailin</pattern>
+									<shadedPattern>com.laytonsmith.libs.io.github.ladycailin</shadedPattern>
 								</relocation>
 							</relocations>
 							<filters>
@@ -838,6 +854,12 @@
 										<!-- Conflict with Spigot -->
 										<exlude>com/google/common/collect/**</exlude>
 									</excludes>
+								</filter>
+								<filter>
+									<artifact>io.github.ladycailin:qrterminal:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>							
 								</filter>
 								
 							</filters>

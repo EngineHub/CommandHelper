@@ -47,6 +47,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import io.github.ladycailin.qrterminal.QRTerminal;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -2045,6 +2046,57 @@ public class Cmdline {
 					+ " you wish to use the current directory as the starting point, use null as startFrom. Note"
 					+ " that if you only send two arguments to this function, the second one must be an array if it"
 					+ " is the types (it may contain a single value).";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+	}
+
+	@api
+	public static class qr_code extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			String input = args[0].val();
+			boolean small = true;
+			if(args.length > 1) {
+				small = ArgumentValidation.getBooleanish(args[1], t);
+			}
+			return new CString(new QRTerminal().generate(input, new QRTerminal.QRCodeOptions().setIsSmall(small)), t);
+		}
+
+		@Override
+		public String getName() {
+			return "qr_code";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "string {input, [small]} Returns a QR code as a string that can be printed to a terminal. Small"
+					+ " defaults to true.";
 		}
 
 		@Override
