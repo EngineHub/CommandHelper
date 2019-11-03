@@ -903,7 +903,12 @@ public final class Static {
 		}
 		MCEntity ent = getServer().getEntity(id);
 		if(ent == null) {
-			throw new CREBadEntityException("That entity (UUID: " + id + ") does not exist.", t);
+			// Sometimes a bug may cause a player entity to be missing from entity lists in the server,
+			// so we'll double check the player list.
+			ent = getServer().getPlayer(id);
+			if(ent == null) {
+				throw new CREBadEntityException("That entity (UUID: " + id + ") does not exist.", t);
+			}
 		}
 		return ent;
 	}
