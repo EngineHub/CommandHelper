@@ -154,6 +154,7 @@ public class Enchantments {
 		@Override
 		public String docs() {
 			return "void {[player], slot, type, level} Adds an enchantment to an item in the player's inventory."
+					+ " (deprecated for {{function|enchant_item}}) ----"
 					+ " Type can be a single string, or an array of enchantment names. If slot is null, the currently"
 					+ " selected slot is used. If the enchantment cannot be applied to the specified item,"
 					+ " an EnchantmentException is thrown, and if the level specified is not valid, a RangeException"
@@ -339,6 +340,7 @@ public class Enchantments {
 		@Override
 		public String docs() {
 			return "void {[player], slot, type} Removes an enchantment from an item."
+					+ " (deprecated for {{function|remove_item_enchant}}) ----"
 					+ " The type may be a valid enchantment, or an array of enchantment names."
 					+ " It can also be null, and all enchantments will be removed. If an enchantment is specified,"
 					+ " and the item is not enchanted with that, it is simply ignored.";
@@ -503,7 +505,8 @@ public class Enchantments {
 		@Override
 		public String docs() {
 			return "array {[player], slot} Returns an array of arrays of the enchantments and their levels on the given"
-					+ " item. For example: array(array(DAMAGE_ALL, DAMAGE_UNDEAD), array(1, 2))";
+					+ " item. (deprecated for {{function|get_item_enchants}}) ----"
+					+ " For example: array(array(DAMAGE_ALL, DAMAGE_UNDEAD), array(1, 2))";
 		}
 
 		@Override
@@ -649,6 +652,7 @@ public class Enchantments {
 		public String docs() {
 			return "boolean {name, item} Given an enchantment name and an item type,"
 					+ " returns whether or not that item can be enchanted with that enchantment."
+					+ " (deprecated for {{function|can_enchant_item}}) ----"
 					+ " Throws an EnchantmentException if the name is not a valid enchantment type.";
 		}
 

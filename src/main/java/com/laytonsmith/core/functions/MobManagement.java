@@ -102,7 +102,7 @@ public class MobManagement {
 		public String docs() {
 			return "array {mobType, [qty], [location]} Spawns qty mob of one of the following types at location."
 					+ " qty defaults to 1, and location defaults to the location of the player."
-					+ " An array of the entity UUIDs spawned is returned."
+					+ " An array of the entity UUIDs spawned is returned. (deprecated for {{function|spawn_entity}})"
 					+ " ---- mobType can be one of: " + StringUtils.Join(MCMobs.values(), ", ", ", or ", " or ") + "."
 					+ " Further, subtypes can be applied by specifying MOBTYPE:SUBTYPE,"
 					+ " for example the sheep subtype can be any of the dye colors: "
@@ -216,10 +216,11 @@ public class MobManagement {
 
 		@Override
 		public String docs() {
-			return "void {[player], entityUUID} Tames any tameable mob to the specified player. Offline players are"
-					+ " supported, but this means that partial matches are NOT supported. You must type the players"
-					+ " name exactly. Setting the player to null will untame the mob. If the entity doesn't exist,"
-					+ " nothing happens.";
+			return "void {[player], entityUUID} Tames any tameable mob to the specified player."
+					+ " (deprecated for {{function|set_mob_owner}}) ----"
+					+ " Offline players are supported, but this means that partial matches are NOT supported."
+					+ " You must type the players name exactly. Setting the player to null will untame the mob."
+					+ " If the entity doesn't exist, nothing happens.";
 		}
 
 		@Override
@@ -2055,7 +2056,7 @@ public class MobManagement {
 		public String docs() {
 			return "void {entityUUID, modifier} Adds an attribute modifier to an entity."
 					+ " Throws BadEntityTypeException if the attribute type does not apply to this entity type."
-					+ " See {function|get_itemmeta} for how to define an attribute modifier array.";
+					+ " See {{function|get_itemmeta}} for how to define an attribute modifier array.";
 		}
 
 		@Override

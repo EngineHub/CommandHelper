@@ -433,11 +433,12 @@ public class Environment {
 		@Override
 		public String docs() {
 			return "string {x, y, z, [world] | locationArray, [world]} Gets the id of the block at the coordinates."
+					+ " (deprecated for {{function|get_block}}) ----"
 					+ " The format of the return will be x:y where x is the id of the block,"
 					+ " and y is the meta data for the block. All blocks will return in this format,"
 					+ " but blocks that don't have meta data will return 0 in y (eg. air is \"0:0\")."
 					+ " If a world isn't provided in the location array or as an argument,"
-					+ " the current player's world is used. (deprecated for get_block())";
+					+ " the current player's world is used.";
 		}
 
 		@Override
@@ -538,11 +539,13 @@ public class Environment {
 		@Override
 		public String docs() {
 			return "void {x, y, z, id, [world] [physics] | locationArray, id, [physics]} Sets the id of the block at"
-					+ " the x y z coordinates specified. The id must be an integer or a blocktype identifier similar to"
+					+ " the x y z coordinates specified."
+					+ " (deprecated for {{function|set_block}}) ----"
+					+ " The id must be an integer or a blocktype identifier similar to"
 					+ " the type returned from get_block_at (eg. \"0:0\"). If the meta value is not specified,"
 					+ " 0 is used. If world isn't specified, the current player's world is used."
 					+ " Physics (which defaults to true) specifies whether or not to update the surrounding blocks when"
-					+ " this block is set. (deprecated for set_block())";
+					+ " this block is set.";
 		}
 
 		@Override
