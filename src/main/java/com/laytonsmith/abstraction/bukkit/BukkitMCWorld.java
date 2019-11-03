@@ -711,6 +711,8 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 							o.setCatType(BukkitMCOcelotType.getConvertor().getConcreteEnum(otype));
 						} catch (IllegalArgumentException ex) {
 							throw new CREFormatException(type + " is not an ocelot type", t);
+						} catch (UnsupportedOperationException ex) {
+							// This is probably 1.14+, so we can't set the type anymore.
 						}
 					}
 				} else if(e instanceof Creeper) {
