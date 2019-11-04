@@ -1786,7 +1786,7 @@ public final class MethodScriptCompiler {
 	private static void checkLinearComponents(ParseTree tree, Environment env,
 			Set<ConfigCompileException> compilerErrors) {
 		for(ParseTree m : tree.getAllNodes()) {
-			if(m.getData().isInstanceOf(CBareString.TYPE)) {
+			if(m.getData() instanceof CBareString && !(m.getData() instanceof CKeyword)) {
 				if(m.getFileOptions().isStrict()) {
 					compilerErrors.add(new ConfigCompileException("Use of bare strings in strict mode is not"
 							+ " allowed.", m.getTarget()));
