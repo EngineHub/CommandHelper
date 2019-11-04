@@ -593,12 +593,15 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
 	@Override
 	public boolean isInstanceOf(CClassType type) {
+		if(type.getNativeType() != null) {
+			return type.getNativeType().isAssignableFrom(this.getClass());
+		}
 		return isInstanceof(this, type);
 	}
 
 	@Override
 	public boolean isInstanceOf(Class<? extends Mixed> type) {
-		return isInstanceof(this, type);
+		return type.isAssignableFrom(this.getClass());
 	}
 
 	/**
