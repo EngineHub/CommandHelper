@@ -21,7 +21,7 @@ public final class GCUtil {
 		BlockUntilGC();
 	}
 
-	private static boolean debug = true;
+	private static boolean debug = false;
 
 	/**
 	 * This method calls System.gc, but it blocks until it detects that a garbage collection has run. This
