@@ -34,9 +34,31 @@ public final class GCUtil {
 	 * <p>
 	 * If -XX:+DisableExplicitGC was specified on the command line, this function respects that, and silently returns
 	 * (otherwise we would block for quite some time waiting for a natural garbage collection to happen).
+	 * <p>
+	 * This overload uses a default timeout of 100ms.
 	 */
 	public static void BlockUntilGC() {
-		debug(() -> "Starting");
+		BlockUntilGC(100);
+	}
+
+	/**
+	 * This method calls System.gc, but it blocks until it detects that a garbage collection has run. This
+	 * should only be used when absolutely necessary, for instance, with file based operations.
+	 * There is one caveat, the Epsilon GC does
+	 * nothing, ever. So if we run this method with that GC, we get stuck in an infinite loop until we die due
+	 * to out of memory error. So if that garbage collector is the only one, then we just throw without blocking.
+	 * In such a situation, since no garbage collection will ever occur anyways, whatever was trying to be
+	 * accomplished by calling this method will never happen anyways.
+	 * <p>
+	 * If -XX:+DisableExplicitGC was specified on the command line, this function respects that, and silently returns
+	 * (otherwise we would block for quite some time waiting for a natural garbage collection to happen).
+	 * @param timeout The amount of time in ms to wait before giving up. If the value is 0 or less, the system will only
+	 * try once.
+	 */
+	public static void BlockUntilGC(int timeout) {
+		final long start = System.currentTimeMillis();
+		final long finish = start + timeout;
+		debug(() -> "Starting (now: " + start + "; stopping at: " + finish + ")");
 
 		RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
 		List<String> arguments = runtimeMxBean.getInputArguments();
@@ -80,6 +102,10 @@ public final class GCUtil {
 					debug(() -> "Found that " + g.getObjectName() + " has run, returning");
 					break outer;
 				}
+			}
+			if(System.currentTimeMillis() > finish) {
+				debug(() -> "I've waited too long, so I'm giving up now.");
+				return;
 			}
 		}
 	}
