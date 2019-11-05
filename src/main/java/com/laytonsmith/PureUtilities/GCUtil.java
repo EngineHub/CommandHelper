@@ -3,6 +3,7 @@ package com.laytonsmith.PureUtilities;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -20,7 +21,7 @@ public final class GCUtil {
 		BlockUntilGC();
 	}
 
-	private static boolean debug = false;
+	private static boolean debug = true;
 
 	/**
 	 * This method calls System.gc, but it blocks until it detects that a garbage collection has run. This
@@ -30,9 +31,21 @@ public final class GCUtil {
 	 * to out of memory error. So if that garbage collector is the only one, then we just throw without blocking.
 	 * In such a situation, since no garbage collection will ever occur anyways, whatever was trying to be
 	 * accomplished by calling this method will never happen anyways.
+	 * <p>
+	 * If -XX:+DisableExplicitGC was specified on the command line, this function respects that, and silently returns
+	 * (otherwise we would block for quite some time waiting for a natural garbage collection to happen).
 	 */
 	public static void BlockUntilGC() {
 		debug(() -> "Starting");
+
+		RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
+		List<String> arguments = runtimeMxBean.getInputArguments();
+		for(String arg : arguments) {
+			if(arg.matches("(?i)\\+DisableExplicitGC")) {
+				debug(() -> "Found +DisableExplicitGC, returning with no action.");
+				return;
+			}
+		}
 		/*
 		There may be multiple garbage collectors on a system, for instance, old generations and new generations.
 		We want to ensure that at least one has run before moving on. There is one caveat, the Epsilon GC does
