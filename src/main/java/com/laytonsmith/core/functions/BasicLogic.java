@@ -15,9 +15,11 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CNumber;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.CVoid;
@@ -148,6 +150,12 @@ public class BasicLogic {
 		}
 
 		@Override
+		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
+				throws ConfigCompileException {
+			return CBoolean.class;
+		}
+
+		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREInsufficientArgumentsException.class};
 		}
@@ -255,6 +263,12 @@ public class BasicLogic {
 		}
 
 		@Override
+		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
+				throws ConfigCompileException {
+			return CBoolean.class;
+		}
+
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
@@ -310,6 +324,12 @@ public class BasicLogic {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new sequals().exec(t, environment, args).not();
+		}
+
+		@Override
+		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
+				throws ConfigCompileException {
+			return CBoolean.class;
 		}
 
 		@Override
@@ -380,6 +400,12 @@ public class BasicLogic {
 		@Override
 		public CBoolean exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			return new equals().exec(t, env, args).not();
+		}
+
+		@Override
+		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
+				throws ConfigCompileException {
+			return CBoolean.class;
 		}
 
 		@Override
@@ -492,6 +518,12 @@ public class BasicLogic {
 		}
 
 		@Override
+		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
+				throws ConfigCompileException {
+			return CBoolean.class;
+		}
+
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
@@ -533,6 +565,12 @@ public class BasicLogic {
 				return CBoolean.FALSE;
 			}
 			return new equals_ic().exec(t, environment, v1, v2);
+		}
+
+		@Override
+		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
+				throws ConfigCompileException {
+			return CBoolean.class;
 		}
 
 		@Override
@@ -622,6 +660,12 @@ public class BasicLogic {
 		}
 
 		@Override
+		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
+				throws ConfigCompileException {
+			return CBoolean.class;
+		}
+
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
@@ -662,6 +706,12 @@ public class BasicLogic {
 			} else {
 				return new equals().exec(t, environment, args);
 			}
+		}
+
+		@Override
+		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
+				throws ConfigCompileException {
+			return CBoolean.class;
 		}
 
 		@Override
@@ -727,6 +777,24 @@ public class BasicLogic {
 			double arg1 = Static.getNumber(args[0], t);
 			double arg2 = Static.getNumber(args[1], t);
 			return CBoolean.get(arg1 < arg2);
+		}
+
+		@Override
+		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
+				throws ConfigCompileException {
+			if(argTypes.size() == 2) {
+				Class<? extends Mixed> t1 = argTypes.get(0);
+				Class<? extends Mixed> t2 = argTypes.get(1);
+				if(t1 != null && !CNumber.class.isAssignableFrom(t1)) {
+					throw new ConfigCompileException("Expected type " + CNumber.TYPE.getSimpleName()
+							+ ", but received type " + CClassType.get(t1).getSimpleName() + " instead.", t);
+				}
+				if(t2 != null && !CNumber.class.isAssignableFrom(t2)) {
+					throw new ConfigCompileException("Expected type " + CNumber.TYPE.getSimpleName()
+							+ ", but received type " + CClassType.get(t2).getSimpleName() + " instead.", t);
+				}
+			}
+			return CBoolean.class;
 		}
 
 		@Override
@@ -1265,6 +1333,24 @@ public class BasicLogic {
 				}
 			}
 			return CBoolean.FALSE;
+		}
+
+		@Override
+		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
+				throws ConfigCompileException {
+			if(argTypes.size() == 2) {
+				Class<? extends Mixed> t1 = argTypes.get(0);
+				Class<? extends Mixed> t2 = argTypes.get(1);
+				if(t1 != null && !CBoolean.class.isAssignableFrom(t1)) {
+					throw new ConfigCompileException("Expected type " + CBoolean.TYPE.getSimpleName()
+							+ ", but received type " + CClassType.get(t1).getSimpleName() + " instead.", t);
+				}
+				if(t2 != null && !CBoolean.class.isAssignableFrom(t2)) {
+					throw new ConfigCompileException("Expected type " + CBoolean.TYPE.getSimpleName()
+							+ ", but received type " + CClassType.get(t2).getSimpleName() + " instead.", t);
+				}
+			}
+			return CBoolean.class;
 		}
 
 		@Override

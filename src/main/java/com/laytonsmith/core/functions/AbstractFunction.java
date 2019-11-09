@@ -64,6 +64,25 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 * By default, null is returned.
+	 */
+	@Override
+	public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
+			throws ConfigCompileException {
+		return null; // Null means that no information is available about the return type.
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * By default, {@code true} is returned.
+	 */
+	@Override
+	public boolean hasStaticSideEffects() {
+		return true; // Assuming that a function does 'something' is safe in terms of not optimizing it away.
+	}
+
+	/**
 	 * By default, we return false, because most functions do not need this
 	 *
 	 * @return
