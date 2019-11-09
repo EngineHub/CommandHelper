@@ -75,6 +75,28 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException;
 
 	/**
+	 * Gets the return type of this function, based on the types of the passed arguments.
+	 * @param t - The code target, used for setting the code target in thrown exceptions.
+	 * @param argTypes - The types of the passed arguments.
+	 * @return The return type of this function when invoked with the given argument types. If the return type
+	 * is unknown, null is returned, indicating that this value cannot be used for static type checking.
+	 * @throws ConfigCompileException If the given argument types are not valid for this function.
+	 */
+	public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes) throws ConfigCompileException;
+
+	/**
+	 * Gets whether or not this function has static side effects. Static side effects are defined as side effects that
+	 * can occur in a statically type-safe program.
+	 * Examples:<br>
+	 * {@code @arr[0]} has side effects due to being able to throw an ArrayOutOfBoundsException.<br>
+	 * {@code @a[0] = 1} has side effects due to assigning a variable.<br>
+	 * {@code @a < @b} does not have static side effects, as static type safety prevents a CastException from
+	 * being thrown.
+	 * @return {@code true} if the function has static side effects, {@code false} otherwise.
+	 */
+	public boolean hasStaticSideEffects();
+
+	/**
 	 * If a function needs a code tree instead of a resolved construct, it should return true here. Most functions will
 	 * return false for this value.
 	 *
