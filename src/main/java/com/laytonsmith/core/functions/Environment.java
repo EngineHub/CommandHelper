@@ -1394,19 +1394,17 @@ public class Environment {
 					+ " parameter can be one player or an array of players. If none is given, all players within 32"
 					+ " meters will see the particle. The particle parameter can be a particle name or an associative"
 					+ " array defining the characteristics of the particle to be spawned. The array requires the"
-					+ " particle name under the key \"particle\"."
-					+ " ---- Possible particles: " + StringUtils.Join(MCParticle.types(), ", ", ", or ", " or ")
-					+ " \n\nSome particles have more specific keys and/or special behavior, but the common keys for the"
+					+ " particle name under the key \"particle\". ----"
+					+ " Possible particle types: " + StringUtils.Join(MCParticle.types(), ", ", ", or ", " or ") + ".\n"
+					+ " Some particles have more specific keys and/or special behavior, but the common keys for the"
 					+ " particle array are \"count\" (usually the number of particles to be spawned), \"speed\""
 					+ " (usually the velocity of the particle), \"xoffset\", \"yoffset\", and \"zoffset\""
-					+ " (usually the ranges from center within which the particle may be offset on that axis)."
-					+ " The BLOCK_DUST, BLOCK_CRACK and FALLING_DUST particles can take a block type name parameter"
-					+ " under the key \"block\".\n\n"
-					+ " The ITEM_CRACK particle can take an item array under the key \"item\".\n\n"
-					+ " The REDSTONE particle can take a color array (or name)"
-					+ " under the key \"color\"."
-					+ " If a block, item or color is provided for a particle type that doesn't support it,"
-					+ " an IllegalArgumentException will be thrown.";
+					+ " (usually the ranges from center within which the particle may be offset on that axis).\n"
+					+ " BLOCK_DUST, BLOCK_CRACK and FALLING_DUST particles can take a block type name parameter"
+					+ " under the key \"block\" (default: STONE).\n"
+					+ " ITEM_CRACK particles can take an item array or name under the key \"item\" (default: STONE).\n"
+					+ " REDSTONE particles take an RGB color array (each 0 - 255) or name under the key \"color\""
+					+ " (default: RED).";
 		}
 
 		@Override
@@ -1475,7 +1473,21 @@ public class Environment {
 					}
 
 				} else if(pa.containsKey("item")) {
-					data = ObjectGenerator.GetGenerator().item(pa.get("item", t), t);
+					Mixed value = pa.get("item", t);
+					if(value.isInstanceOf(CArray.TYPE)) {
+						data = ObjectGenerator.GetGenerator().item(pa.get("item", t), t);
+					} else {
+						MCMaterial mat = StaticLayer.GetMaterial(value.val());
+						if(mat != null) {
+							if(mat.isItem()) {
+								data = StaticLayer.GetItemStack(mat, 1);
+							} else {
+								throw new CREIllegalArgumentException(value + " is not an item type.", t);
+							}
+						} else {
+							throw new CREIllegalArgumentException("Could not find material from " + value, t);
+						}
+					}
 
 				} else if(pa.containsKey("color")) {
 					Mixed c = pa.get("color", t);

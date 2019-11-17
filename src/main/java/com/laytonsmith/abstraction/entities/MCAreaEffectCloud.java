@@ -47,7 +47,7 @@ public interface MCAreaEffectCloud extends MCEntity {
 
 	void setDurationOnUse(int ticks);
 
-	void setParticle(MCParticle particle);
+	void setParticle(MCParticle particle, Object data);
 
 	void setRadius(float radius);
 

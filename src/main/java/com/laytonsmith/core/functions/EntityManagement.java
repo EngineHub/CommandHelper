@@ -2222,11 +2222,67 @@ public class EntityManagement {
 								cloud.setDurationOnUse(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_AREAEFFECTCLOUD_PARTICLE:
-								String particleName = specArray.get(index, t).val();
-								try {
-									cloud.setParticle(MCParticle.valueOf(particleName));
-								} catch (IllegalArgumentException ex) {
-									throw new CREFormatException("Invalid particle type: " + particleName, t);
+								if(specArray.get(index, t).isInstanceOf(CArray.TYPE)) {
+									Object data = null;
+									CArray pa = (CArray) specArray.get(index, t);
+									MCParticle p;
+									try {
+										p = MCParticle.valueOf(pa.get("particle", t).val().toUpperCase());
+									} catch (IllegalArgumentException ex) {
+										throw new CREIllegalArgumentException("Particle name '"
+												+ pa.get("particle", t).val() + "' is invalid.", t);
+									}
+									if(pa.containsKey("block")) {
+										// BLOCK_DUST, BLOCK_CRACK, FALLING_DUST
+										String value = pa.get("block", t).val();
+										MCMaterial mat = StaticLayer.GetMaterial(value);
+										if(mat != null) {
+											try {
+												data = mat.createBlockData();
+											} catch (IllegalArgumentException ex) {
+												throw new CREIllegalArgumentException(value + " is not a block.", t);
+											}
+										} else {
+											throw new CREIllegalArgumentException("Could not find material from " + value, t);
+										}
+									} else if(pa.containsKey("item")) {
+										// ITEM_CRACK
+										Mixed value = pa.get("item", t);
+										if(value.isInstanceOf(CArray.TYPE)) {
+											data = ObjectGenerator.GetGenerator().item(pa.get("item", t), t);
+										} else {
+											MCMaterial mat = StaticLayer.GetMaterial(value.val());
+											if(mat != null) {
+												if(mat.isItem()) {
+													data = StaticLayer.GetItemStack(mat, 1);
+												} else {
+													throw new CREIllegalArgumentException(value + " is not an item type.", t);
+												}
+											} else {
+												throw new CREIllegalArgumentException("Could not find material from " + value, t);
+											}
+										}
+									} else if(pa.containsKey("color")) {
+										// REDSTONE
+										Mixed c = pa.get("color", t);
+										if(c.isInstanceOf(CArray.TYPE)) {
+											data = ObjectGenerator.GetGenerator().color((CArray) c, t);
+										} else {
+											data = StaticLayer.GetConvertor().GetColor(c.val(), t);
+										}
+									}
+									try {
+										cloud.setParticle(p, data);
+									} catch (IllegalArgumentException ex) {
+										throw new CREFormatException("Invalid particle data for " + p.name(), t);
+									}
+								} else {
+									String particleName = specArray.get(index, t).val();
+									try {
+										cloud.setParticle(MCParticle.valueOf(particleName), null);
+									} catch (IllegalArgumentException ex) {
+										throw new CREFormatException("Invalid particle data: " + particleName, t);
+									}
 								}
 								break;
 							case entity_spec.KEY_AREAEFFECTCLOUD_POTIONMETA:

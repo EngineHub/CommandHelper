@@ -48,6 +48,11 @@ public class BukkitMCMaterial implements MCMaterial {
 	}
 
 	@Override
+	public boolean isItem() {
+		return m.isItem();
+	}
+
+	@Override
 	public boolean isBurnable() {
 		return m.isBurnable();
 	}

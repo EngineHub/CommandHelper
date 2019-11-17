@@ -7,10 +7,12 @@ array {entityID} Returns an associative array containing all the data of the giv
 |-
 | AREA_EFFECT_CLOUD
 |
-* %KEY_AREAEFFECTCLOUD_COLOR%: The color array of the particle.
+* %KEY_AREAEFFECTCLOUD_COLOR%: The color array of the particle, if applicable (eg. SPELL_MOB particle type).
 * %KEY_AREAEFFECTCLOUD_DURATION%: The duration of the cloud in ticks.
 * %KEY_AREAEFFECTCLOUD_DURATIONONUSE%: The amount the duration will change when the effects are applied.
-* %KEY_AREAEFFECTCLOUD_PARTICLE%: The particle which comprises the cloud (can be %PARTICLE%).
+* %KEY_AREAEFFECTCLOUD_PARTICLE%: The particle type which comprises the cloud (can be %PARTICLE%).
+Can accept a particle array for setting index data required for specific particle types.
+This particle array must contain a "particle" key, and supports the keys "block", "item", or "color" when applicable.
 * %KEY_AREAEFFECTCLOUD_POTIONMETA%: An array of potion effect arrays for the cloud.
 * %KEY_AREAEFFECTCLOUD_RADIUS%: The radius of the cloud.
 * %KEY_AREAEFFECTCLOUD_RADIUSONUSE%: The distance the radius will change when the effects are applied.

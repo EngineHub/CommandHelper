@@ -1,9 +1,11 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
 import com.laytonsmith.abstraction.MCColor;
+import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.MCProjectileSource;
+import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCColor;
@@ -13,8 +15,12 @@ import com.laytonsmith.abstraction.entities.MCAreaEffectCloud;
 import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCParticle;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
+import org.bukkit.Color;
+import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.entity.AreaEffectCloud;
 import org.bukkit.entity.Entity;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -136,8 +142,35 @@ public class BukkitMCAreaEffectCloud extends BukkitMCEntity implements MCAreaEff
 	}
 
 	@Override
-	public void setParticle(MCParticle particle) {
-		aec.setParticle(((BukkitMCParticle) particle).getConcrete());
+	public void setParticle(MCParticle particle, Object data) {
+		Particle type = ((BukkitMCParticle) particle).getConcrete();
+		switch(type) {
+			case BLOCK_DUST:
+			case BLOCK_CRACK:
+			case FALLING_DUST:
+				if(data instanceof MCBlockData) {
+					aec.setParticle(type, ((MCBlockData) data).getHandle());
+				} else {
+					aec.setParticle(type, Material.STONE.createBlockData());
+				}
+				return;
+			case ITEM_CRACK:
+				if(data instanceof MCItemStack) {
+					aec.setParticle(type, ((MCItemStack) data).getHandle());
+				} else {
+					aec.setParticle(type, new ItemStack(Material.STONE, 1));
+				}
+				return;
+			case REDSTONE:
+				if(data instanceof MCColor) {
+					Particle.DustOptions color = new Particle.DustOptions(BukkitMCColor.GetColor((MCColor) data), 1.0F);
+					aec.setParticle(type, color);
+				} else {
+					aec.setParticle(type, new Particle.DustOptions(Color.RED, 1.0F));
+				}
+				return;
+		}
+		aec.setParticle(type);
 	}
 
 	@Override

@@ -63,6 +63,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import org.bukkit.Chunk;
+import org.bukkit.Color;
 import org.bukkit.Effect;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
@@ -126,6 +127,7 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
 import org.bukkit.entity.ZombieHorse;
 import org.bukkit.entity.ZombieVillager;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.util.Consumer;
 
@@ -339,18 +341,38 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	public void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data) {
 		Particle type = (Particle) pa.getConcrete();
 		Location loc = (Location) l.getHandle();
-		if(data != null) {
-			if(data instanceof MCItemStack) {
-				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, ((MCItemStack) data).getHandle());
-			} else if(data instanceof MCBlockData) {
-				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, ((MCBlockData) data).getHandle());
-			} else if(data instanceof MCColor) {
-				Particle.DustOptions color = new Particle.DustOptions(BukkitMCColor.GetColor((MCColor) data), 1.0F);
+		switch(type) {
+			case BLOCK_DUST:
+			case BLOCK_CRACK:
+			case FALLING_DUST:
+				BlockData bd;
+				if(data instanceof MCBlockData) {
+					bd = (BlockData) ((MCBlockData) data).getHandle();
+				} else {
+					bd = Material.STONE.createBlockData();
+				}
+				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, bd);
+				return;
+			case ITEM_CRACK:
+				ItemStack is;
+				if(data instanceof MCItemStack) {
+					is = (ItemStack) ((MCItemStack) data).getHandle();
+				} else {
+					is = new ItemStack(Material.STONE, 1);
+				}
+				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, is);
+				return;
+			case REDSTONE:
+				Particle.DustOptions color;
+				if(data instanceof MCColor) {
+					color = new Particle.DustOptions(BukkitMCColor.GetColor((MCColor) data), 1.0F);
+				} else {
+					color =  new Particle.DustOptions(Color.RED, 1.0F);
+				}
 				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, color);
-			}
-		} else {
-			w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity);
+				return;
 		}
+		w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity);
 	}
 
 	@Override

@@ -18,6 +18,8 @@ public interface MCMaterial extends AbstractionObject {
 
 	boolean isBlock();
 
+	boolean isItem();
+
 	boolean isBurnable();
 
 	boolean isEdible();
