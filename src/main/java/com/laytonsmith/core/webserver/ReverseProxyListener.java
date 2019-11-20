@@ -2,10 +2,8 @@ package com.laytonsmith.core.webserver;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ArgumentParser.ArgumentBuilder;
-import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
-import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.core.AbstractCommandLineTool;
 import com.laytonsmith.core.Main;
 import com.laytonsmith.core.tool;
@@ -13,9 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.apache.commons.io.input.CloseShieldInputStream;
 
 /**
  *
@@ -120,6 +115,7 @@ public class ReverseProxyListener {
 			WebServerController.GetWebServer().start();
 		}
 
+		@SuppressWarnings("SleepWhileInLoop")
 		private void restartInForeground() throws IOException {
 			List<String> largs = new ArrayList<>();
 			largs.add("mscript");
@@ -132,7 +128,7 @@ public class ReverseProxyListener {
 			while(!WebServerController.GetWebServer().isServerUp()) {
 				try {
 					Thread.sleep(1000);
-				} catch(InterruptedException ex) {
+				} catch (InterruptedException ex) {
 					//
 				}
 			}
@@ -143,10 +139,10 @@ public class ReverseProxyListener {
 		private void stop(boolean graceful) {
 			try {
 				WebServerController.GetWebServer().writeCmd(WebServerController.Verb.STOP, new byte[]{graceful ? (byte) 1 : (byte) 0});
-			} catch(ServerNotRunningException ex) {
+			} catch (ServerNotRunningException ex) {
 				System.err.println("Server not running");
 				System.exit(1);
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				System.err.println("Could not communicate with server:");
 				ex.printStackTrace(System.err);
 				System.exit(1);
@@ -158,10 +154,10 @@ public class ReverseProxyListener {
 			try {
 				WebServerController.GetWebServer().writeCmd(WebServerController.Verb.RECOMPILE, ArrayUtils.EMPTY_BYTE_ARRAY);
 				// TODO: Wait for and read any error messages printed out
-			} catch(ServerNotRunningException ex) {
+			} catch (ServerNotRunningException ex) {
 				System.err.println("Server not running");
 				System.exit(1);
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				System.err.println("Could not communicate with server:");
 				ex.printStackTrace(System.err);
 				System.exit(1);

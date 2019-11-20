@@ -64,6 +64,21 @@ public final class FileUtil {
 	}
 
 	/**
+	 * Fully reads data from the given file channel, and returns it as a UTF-8 string. If the file is too large to
+	 * fit in memory, an IOException is thrown.
+	 * @param channel
+	 * @return
+	 * @throws IOException
+	 */
+	public static String read(FileChannel channel) throws IOException {
+		return new String(readData(channel), "UTF-8");
+	}
+
+	public static String read(File file, String charset) throws IOException {
+		return StreamUtils.GetString(readAsStream(file), charset);
+	}
+
+	/**
 	 * Fully reads data from the given file channel, and returns a byte array. If the file is too large to fit
 	 * in memory, an IOException is thrown.
 	 * @param channel
@@ -77,21 +92,6 @@ public final class FileUtil {
 		ByteBuffer buffer = ByteBuffer.allocate((int) channel.size());
 		channel.read(buffer);
 		return buffer.array();
-	}
-
-	/**
-	 * Fully reads data from the given file channel, and returns it as a UTF-8 string. If the file is too large to
-	 * fit in memory, an IOException is thrown.
-	 * @param channel
-	 * @return
-	 * @throws IOException
-	 */
-	public static String read(FileChannel channel) throws IOException {
-		return new String(readData(channel), "UTF-8");
-	}
-
-	public static String read(File file, String charset) throws IOException {
-		return StreamUtils.GetString(readAsStream(file), charset);
 	}
 
 	/**
@@ -241,7 +241,7 @@ public final class FileUtil {
 	public static void write(FileChannel fileChannel, String data) throws IOException {
 		try {
 			write(fileChannel, data.getBytes("UTF-8"));
-		} catch(UnsupportedEncodingException ex) {
+		} catch (UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
 	}

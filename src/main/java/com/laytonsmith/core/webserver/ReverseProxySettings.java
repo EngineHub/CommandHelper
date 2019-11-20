@@ -21,6 +21,7 @@ public class ReverseProxySettings {
 
 	/**
 	 * The path to the preferences file. By default, this is not created, unlike most pref files.
+	 *
 	 * @return
 	 */
 	public static File getPrefsFile() {
@@ -37,19 +38,19 @@ public class ReverseProxySettings {
 
 	public static void init(final File f) throws IOException {
 		ArrayList<Preferences.Preference> a = new ArrayList<>();
-        a.add(new Preferences.Preference("port", "16438",
-                Preferences.Type.NUMBER,
-                "The port to bind to.", GENERAL_GROUP));
+		a.add(new Preferences.Preference("port", "16438",
+				Preferences.Type.NUMBER,
+				"The port to bind to.", GENERAL_GROUP));
 		a.add(new Preferences.Preference("root", OSUtils.GetOS().isUnixLike() ? "/var/www" : "C:/inetpub/wwwroot",
 				Preferences.Type.FILE,
 				"The root of the web server.", GENERAL_GROUP));
 		a.add(new Preferences.Preference("threads", "10",
 				Preferences.Type.INT,
 				"The number of concurrent requests to handle. The server will spin up this many threads at most"
-						+ " to handle the incoming requests.", GENERAL_GROUP));
+				+ " to handle the incoming requests.", GENERAL_GROUP));
 
 		prefs = new Preferences(Implementation.GetServerType().getBranding() + " webserver", Static.getLogger(), a);
-        prefs.init(f);
+		prefs.init(f);
 	}
 
 	public static int getPort() {

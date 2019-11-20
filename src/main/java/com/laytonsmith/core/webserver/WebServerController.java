@@ -25,9 +25,9 @@ public final class WebServerController {
 	private static final int HARD_SHUTDOWN = 1 << 0;
 
 
-	private final File CTRL = ReverseProxySettings.getCtrlFolder();
-	private final File PID = new File(CTRL, "pid");
-	private final File CMD = new File(CTRL, "cmd");
+	private final File ctrlDir = ReverseProxySettings.getCtrlFolder();
+	private final File pidFile = new File(ctrlDir, "pid");
+	private final File cmdFile = new File(ctrlDir, "cmd");
 
 	private final WebServer server;
 
@@ -118,7 +118,7 @@ public final class WebServerController {
 		if(!isServerUp()) {
 			throw new ServerNotRunningException();
 		}
-		FileChannel ch = FileChannel.open(CMD.toPath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+		FileChannel ch = FileChannel.open(cmdFile.toPath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
 		FileLock lock = null;
 		try {
 			lock = ch.lock();
@@ -142,10 +142,10 @@ public final class WebServerController {
 	 * @throws java.io.IOException
 	 */
 	public boolean isServerUp() throws IOException {
-		if(!CTRL.exists()) {
+		if(!ctrlDir.exists()) {
 			return false;
 		}
-		if(!PID.exists()) {
+		if(!pidFile.exists()) {
 			return false;
 		}
 
@@ -154,7 +154,7 @@ public final class WebServerController {
 	}
 
 	public long getPid() throws IOException {
-		FileChannel ch = FileChannel.open(PID.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE);
+		FileChannel ch = FileChannel.open(pidFile.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE);
 		FileLock lock = null;
 		try {
 			lock = ch.lock();
@@ -183,13 +183,13 @@ public final class WebServerController {
 	/**
 	 * On Windows, this resolves to a bogus file, but doesn't matter, it isn't used.
 	 */
-	private final File SYSTEMD = new File("/lib/systemd/system");
+	private static final File SYSTEMD = new File("/lib/systemd/system");
 
 	private void installUnix() throws IOException {
 		if(!SYSTEMD.exists()) {
 			return;
 		}
-		FileUtil.write(StreamUtils.GetResource("systemd.service").replace("%%PIDFILE%%", PID.getAbsolutePath()),
+		FileUtil.write(StreamUtils.GetResource("systemd.service").replace("%%PIDFILE%%", pidFile.getAbsolutePath()),
 				new File(SYSTEMD, "msws.service"), true);
 	}
 
@@ -201,7 +201,7 @@ public final class WebServerController {
 		log("Starting up...");
 		File prefs = ReverseProxySettings.getPrefsFile();
 		ReverseProxySettings.init(prefs);
-		CTRL.mkdirs();
+		ctrlDir.mkdirs();
 		registerPid();
 		startWatchDog();
 		registerShutdownListeners();
@@ -216,32 +216,17 @@ public final class WebServerController {
 			shutdown(false);
 			return true;
 		});
-
-//		Thread ctrlD = new Thread(() -> {
-//			try (BufferedReader systemIn = new BufferedReader(new InputStreamReader(System.in, "UTF-8"))) {
-//				// Await a Ctrl+D.
-//
-//				String line;
-//				while((line = systemIn.readLine()) != null) {}
-//				// Ctrl-D (Ctrl-Z + enter on Windows) detected, perform graceful shutdown
-//				shutdown(true);
-//			} catch(IOException ex) {
-//				Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
-//			}
-//		}, "CtrlDListener");
-//		ctrlD.setDaemon(true);
-//		ctrlD.start();
 	}
 
 	private void registerPid() throws IOException {
-		FileChannel ch = FileChannel.open(PID.toPath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+		FileChannel ch = FileChannel.open(pidFile.toPath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
 		FileLock lock = null;
 		try {
 			lock = ch.lock();
 			FileUtil.write(ch, Long.toString(OSUtils.GetMyPid()));
 		} finally {
-			PID.deleteOnExit();
-			CMD.deleteOnExit();
+			pidFile.deleteOnExit();
+			cmdFile.deleteOnExit();
 			if(lock != null) {
 				lock.release();
 			}
@@ -292,10 +277,10 @@ public final class WebServerController {
 	 * @throws InvalidVerbException
 	 */
 	private void readCmd() throws IOException, InvalidVerbException {
-		if(!CMD.exists()) {
+		if(!cmdFile.exists()) {
 			return;
 		}
-		FileChannel ch = FileChannel.open(CMD.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE);
+		FileChannel ch = FileChannel.open(cmdFile.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE);
 		FileLock lock = null;
 		try {
 			lock = ch.lock();
@@ -325,7 +310,7 @@ public final class WebServerController {
 		server.stop();
 		try {
 			stopWatchdog();
-		} catch(InterruptedException ex) {
+		} catch (InterruptedException ex) {
 			//
 		}
 		System.exit(NORMAL_SHUTDOWN);

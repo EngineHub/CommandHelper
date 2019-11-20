@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This class contains utilities that help with OS specific tasks.
@@ -115,6 +113,7 @@ public class OSUtils {
 	 * @throws UnsupportedOperationException If the java implementation does not have correct support for this
 	 * operation.
 	 */
+	@SuppressWarnings("checkstyle:localvariablename")
 	public static long GetMyPid() throws UnsupportedOperationException {
 		if(JavaVersion.getMajorVersion() >= 9) {
 			try {
@@ -125,7 +124,7 @@ public class OSUtils {
 				Object current = ReflectionUtils.invokeMethod(ProcessHandle, null, "current");
 				Object pid = ReflectionUtils.invokeMethod(ProcessHandle, current, "pid");
 				return (Long) pid;
-			} catch(ClassNotFoundException ex) {
+			} catch (ClassNotFoundException ex) {
 				throw new UnsupportedOperationException(ex);
 			}
 		} else {
@@ -142,8 +141,8 @@ public class OSUtils {
 	}
 
 	public static class ProcessInfo {
-		private long pid;
-		private String command;
+		private final long pid;
+		private final String command;
 
 		ProcessInfo(long pid, String command) {
 			this.pid = pid;
@@ -186,7 +185,7 @@ public class OSUtils {
 			} else {
 				throw new UnsupportedOperationException("Unsupported OS");
 			}
-		} catch(IOException | InterruptedException ex) {
+		} catch (IOException | InterruptedException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
