@@ -74,4 +74,28 @@ public class SignalHandler {
 		boolean handle(SignalType type);
 	}
 
+	/**
+	 * In many cases, you just want to register for the signals that are meant to terminate the program, so you can
+	 * do a graceful shutdown. In those cases, you can simply call this method, and provide the handler, and it will
+	 * register it with the SIGINT and SIGTERM signals.
+	 * <p>
+	 * Unlike {@link #addHandler}, this provides no way to obtain previously registered handlers. Also unlike
+	 * addHandler, no {@link IllegalArgumentException} will be thrown if the signals can't be bound. Thus, this is
+	 * a best effort attempt, and if you need to positively know if a signal couldn't be bound, don't use this
+	 * method.
+	 * @param handler
+	 */
+	public static void addStopHandlers(SignalCallback handler) {
+		try {
+			addHandler(Signals.SIGTERM, handler);
+		} catch (IllegalArgumentException ex) {
+			//
+		}
+		try {
+			addHandler(Signals.SIGINT, handler);
+		} catch (IllegalArgumentException ex) {
+			//
+		}
+	}
+
 }

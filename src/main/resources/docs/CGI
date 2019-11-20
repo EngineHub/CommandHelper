@@ -56,6 +56,7 @@ This will set up the necessary files and folder so that MethodScript can properl
 
 Be sure to restart apache after all the configuration changes to make them apply.
 
+<!-- IIS is terrible.
 == IIS ==
 
 === Enable CGI ===
@@ -78,6 +79,72 @@ not run the jar, but needs an .exe file. From an Administrator command prompt, r
 
 Create a second folder which will contain the scripts. The location is not relevant, but this assumes a bin/ folder
 on your Desktop.
+
+-->
+
+== NGINX ==
+
+First, ensure that nginx is properly installed and running. We will be using the fastcgi wrapper, though we will not
+be taking advantage of its daemon features, so this is not a true FastCGI application.
+
+<%PRE|apt-get install fcgiwrap%>
+
+Copy the example config file into the nginx config directory.
+<%PRE|cp /usr/share/doc/fcgiwrap/examples/nginx.conf /etc/nginx/fcgiwrap.conf%>
+
+Create a file at /etc/nginx/fcgiwrap.conf, with the following content:
+
+<%SYNTAX|nginx|
+# Include this file on your nginx.conf to support debian cgi-bin scripts using
+# fcgiwrap
+location /cgi-bin/ {
+  # Disable gzip (it makes scripts feel slower since they have to complete
+  # before getting gzipped)
+  gzip off;
+
+  # Set the root to /usr/lib (inside this location this means that we are
+  # giving access to the files under /usr/lib/cgi-bin)
+  root  /var/www;                                                                                                                                                                                                                     
+  # Fastcgi socket
+  fastcgi_pass  unix:/var/run/fcgiwrap.socket;
+
+  # Fastcgi parameters, include the standard ones
+  include /etc/nginx/fastcgi_params;
+
+  # Adjust non standard parameters (SCRIPT_FILENAME) 
+ fastcgi_param SCRIPT_FILENAME  $document_root$fastcgi_script_name;                                                                                                                                                                  }
+%>
+
+Create the cgi-bin folder, and assign the correct permissions.
+
+<%PRE|
+mkdir /var/www/cgi-bin
+chmod 755 /var/www/cgi-bin
+%>
+
+Edit the /etc/nginx/sites-available/default file. Within the server {} section, add a link to the config file.
+
+<%SYNTAX|nginx|
+server {
+        ...
+        include fcgiwrap.conf;
+		...
+}
+%>
+
+Restart nginx.
+
+<%PRE|systemctl restart nginx%>
+
+Now, we need to install MethodScript itself. The jar may be installed anywhere, but keep in mind the configuration
+files are created beside the jar, and need to be writable by the server process, www-data. To do that, place the
+MethodScript jar in /opt/mscript, create a folder /opt/mscript/MethodScript, and run
+
+<%PRE|
+sudo chmod -R a+wrx MethodScript;
+sudo mkdir /var/www/.mscript;
+sudo touch /var/www/.mscript/auto_include.ms;
+%>
 
 
 == Example Script ==

@@ -29,6 +29,10 @@ public class CREUnsupportedOperationException extends CREException {
 		super(msg, t, cause);
 	}
 
+	public CREUnsupportedOperationException(UnsupportedOperationException ex, Target t) {
+		super(ex.getMessage(), t, ex);
+	}
+
 	@Override
 	public String docs() {
 		return "If an operation is not supported, this exception can be thrown.";

@@ -1,7 +1,7 @@
 package com.laytonsmith.PureUtilities;
 
 /**
- *
+ * The interface for various signal types. See {@link Signals} for various default implementations.
  */
 public interface SignalType {
 

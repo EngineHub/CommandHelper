@@ -10,6 +10,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
@@ -58,11 +61,33 @@ public final class FileUtil {
 
 	public static String read(File f) throws IOException {
 		return org.apache.commons.io.FileUtils.readFileToString(f, "UTF-8");
-//		try {
-//			return read(f, "UTF-8");
-//		} catch (UnsupportedEncodingException ex) {
-//			throw new Error(ex);
-//		}
+	}
+
+	/**
+	 * Fully reads data from the given file channel, and returns a byte array. If the file is too large to fit
+	 * in memory, an IOException is thrown.
+	 * @param channel
+	 * @return
+	 * @throws IOException
+	 */
+	public static byte[] readData(FileChannel channel) throws IOException {
+		if(channel.size() > Integer.MAX_VALUE) {
+			throw new IOException("File too large to read into memory. Use a stream reader.");
+		}
+		ByteBuffer buffer = ByteBuffer.allocate((int) channel.size());
+		channel.read(buffer);
+		return buffer.array();
+	}
+
+	/**
+	 * Fully reads data from the given file channel, and returns it as a UTF-8 string. If the file is too large to
+	 * fit in memory, an IOException is thrown.
+	 * @param channel
+	 * @return
+	 * @throws IOException
+	 */
+	public static String read(FileChannel channel) throws IOException {
+		return new String(readData(channel), "UTF-8");
 	}
 
 	public static String read(File file, String charset) throws IOException {
@@ -205,63 +230,30 @@ public final class FileUtil {
 			file.getAbsoluteFile().createNewFile();
 		}
 		FileUtils.writeByteArrayToFile(file, data, append);
-//		try {
-//			synchronized (getLock(file)) {
-//				int sleepTime = 0;
-//				int sleepTimes = 0;
-//				loop: while(true){
-//					try {
-//						Thread.sleep(sleepTime);
-//						sleepTime += 10;
-//						sleepTimes++;
-//					} catch (InterruptedException ex) {
-//						//
-//					}
-//					RandomAccessFile raf = new RandomAccessFile(file, "rw");
-//					FileLock lock = null;
-//					try {
-//						lock = raf.getChannel().lock();
-//						//Clear out the file
-//						if(!append) {
-//							raf.getChannel().truncate(0);
-//						} else {
-//							raf.seek(raf.length());
-//						}
-//						//Write out the data
-//						MappedByteBuffer buf = raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, data.length);
-//						buf.put(data);
-//						buf.force();
-//						//We assume it worked at this point, so let's break;
-//						break loop;
-//						//raf.getChannel().write(ByteBuffer.wrap(data));
-//					} catch (IOException e){
-//						//If we get this dumb message, we're on windows. We'll try again here shortly,
-//						//but we don't want to bother the user with this exception if we can help it.
-//						//http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6354433
-//						if(!"The requested operation cannot be performed on a file with a user-mapped section open"
-//								.equals(e.getMessage())){
-//							throw e;
-//						}
-//						if(sleepTimes > 10){
-//							//Eh. Gotta give up some time.
-//							throw e;
-//						}
-//					} finally {
-//						if(lock != null) {
-//							lock.release();
-//						}
-//						raf.close();
-//						raf = null;
-//						System.gc();
-//					}
-//				}
-//			}
-//		} finally {
-//			freeLock(file);
-//		}
-//		FileWriter fw = new FileWriter(f, append);
-//		fw.write(s);
-//		fw.close();
+	}
+
+	/**
+	 * Writes the given string to the existing file channel. UTF-8 encoding is assumed.
+	 * @param fileChannel
+	 * @param data
+	 * @throws IOException
+	 */
+	public static void write(FileChannel fileChannel, String data) throws IOException {
+		try {
+			write(fileChannel, data.getBytes("UTF-8"));
+		} catch(UnsupportedEncodingException ex) {
+			throw new Error(ex);
+		}
+	}
+
+	/**
+	 * Writes the given data to the existing file channel.
+	 * @param fileChannel
+	 * @param data
+	 * @throws IOException
+	 */
+	public static void write(FileChannel fileChannel, byte[] data) throws IOException {
+		fileChannel.write(ByteBuffer.wrap(data));
 	}
 
 	/**

@@ -54,22 +54,23 @@ else
 	MPATH=""
 fi
 
+DEBUG=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=9001
+if [ -z "$DEBUG_MSCRIPT" ]; then
+	DEBUG=""
+fi
+
+
 if [ "$#" -eq 0 ]; then
-		java $MPATH -jar "%%LOCATION%%" interpreter --location----- $(pwd)
+		java $DEBUG $MPATH -jar "%%LOCATION%%" interpreter --location----- $(pwd)
 else
 		SCRIPT="$1"
 		shift 1
 		if [ $SCRIPT = '--' ]; then
 			# Script passthrough to java -jar CH.jar <arguments>
-			java $MPATH -Xrs -jar "%%LOCATION%%" $@
+			java $DEBUG $MPATH -Xrs -jar "%%LOCATION%%" $@
 			exit
 		fi
-		if [ -z "$DEBUG_MSCRIPT" ]; then
-			java $MPATH -Xrs -jar "%%LOCATION%%" cmdline "$SCRIPT" "$@"
-			exit
-		else
-			#Start in debug mode
-			java $MPATH -Xrs -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=9001 -jar "%%LOCATION%%" cmdline "$SCRIPT" "$@"
-			exit
-		fi
+
+		java $DEBUG $MPATH -Xrs -jar "%%LOCATION%%" cmdline "$SCRIPT" "$@"
+		exit
 fi

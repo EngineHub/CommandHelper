@@ -1,0 +1,80 @@
+MethodScript supports running as a web server behind a web server frontend, such as Apache or Nginx. This functionality
+is not installed, configured, or running by default, so a bit of setup is required to enable the feature.
+
+Before starting, you must choose a server frontend. This may be any server that supports reverse proxying, but Apache
+and Nginx are the only tested server types. While possible, it is highly discouraged from exposing the MethodScript
+web server directly to the internet, and further, since it does not support serving static files, it cannot be used
+in a useful way otherwise.
+
+== Installing MSWS ==
+
+The zeroth step is to install MethodScript to the command line. To do this, run
+
+<%PRE|java -jar MethodScript.jar install-cmdline%>
+
+as root/Administrator. If prompted, reboot your computer. Note that this step is not optional -- several portions
+of the system assume there is an executable binary named "mscript" on your system.
+
+The next step is to install the webserver component. This creates the necessary config files, as well as integrating
+with systemd on unix systems, if installed. To install, run
+
+<%PRE|mscript -- webserver --install%>
+
+as root/Administrator. This will create a configuration file in your prefs folder, named webserver.ini. Open this file
+in a text editor, and configure it to your liking. Reasonable defaults have been selected, but you may wish to choose
+different values for this, particularly the server root.
+
+== Using MSWS ==
+
+On all systems, a basic frontend is included by default. This allows you to start and stop the webserver, as well
+as recompile on demand. To increase performance, all server files are compiled once at startup, and then are no longer
+scanned, so recompilation is necessary during active development. In any case, the first step is to start up the web
+server. For test purposes, we will start the server in the foreground, so we can see any logging output.
+
+<%PRE|mscript -- webserver --start --foreground%>
+
+Ensure that the server starts up correctly. If so, kill the process with ctrl+c, so we can start it back up in
+background mode (daemon mode).
+
+<%PRE|mscript -- webserver --start%>
+
+Next, we want to test to ensure that a connection can be made to the server.
+Take note of the port listed in webserver.ini. By default, this is 16438, though if you changed this, use the new value
+in place. On Windows, open a web browser, and go to "https://localhost:16438". 
+(On Linux, run curl "https://localhost:16438) If everything is working, you should get
+a 404. Since we have not created any scripts, this is expected, but it means that the server is up and accepting
+connections. If you get a connection refused error, restart the server in --foreground mode, and check the server
+startup logs to see if there is an error.
+
+While developing, you can recompile scripts with
+
+<%PRE|mscript -- webserver --recompile%>
+
+If you want to stop the server when it's running in background mode, you can run
+
+<%PRE|mscript -- webserver --stop%>
+
+=== Systemd integration ===
+
+On unix systems where systemd is installed (or more specifically, where a folder exists at /lib/systemd/system, msws
+integrates with systemd. It supports starting, stopping, restarting, and reloading. Reloading maps to the --recompile
+flag. The name of the service is "msws".
+
+If you would like the server to start on server boot, run
+
+<%PRE|systemctl enable msws%>
+
+== Integrating with a server frontend ==
+
+Since MSWS is not expected to be directly exposed to the internet, we require a frontend server, such as Apache or
+Nginx. MSWS communicates via standard http, and both Apache and Nginx have good support for "Reverse Proxying". In
+general, however, you are not limited to Apache or Nginx, however, they are the only frontends documented here. Using
+another web server should be possible if you adapt these instructions to that platform.
+
+MSWS can only serve scripts. Therefore, you need to configure your primary web server to serve static files, such as
+css and javascript files, and only configure the frontend server to call to MSWS for .ms files.
+
+== Apache ==
+
+== Nginx ==
+
