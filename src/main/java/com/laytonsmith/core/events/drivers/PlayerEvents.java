@@ -214,7 +214,8 @@ public class PlayerEvents {
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerItemConsumeEvent) {
 				MCPlayerItemConsumeEvent event = (MCPlayerItemConsumeEvent) e;
-				Prefilters.match(prefilter, "itemname", event.getItem().getType().getName(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "itemname", event.getItem().getType().getName(),
+						PrefilterType.STRING_MATCH);
 				return true;
 			}
 			return false;
@@ -223,7 +224,8 @@ public class PlayerEvents {
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
 			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
-			MCItemStack i = ObjectGenerator.GetGenerator().item(manualObject.get("item", Target.UNKNOWN), Target.UNKNOWN);
+			MCItemStack i = ObjectGenerator.GetGenerator().item(manualObject.get("item", Target.UNKNOWN),
+					Target.UNKNOWN);
 			return EventBuilder.instantiate(MCPlayerItemConsumeEvent.class, p, i);
 		}
 
@@ -285,7 +287,8 @@ public class PlayerEvents {
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerKickEvent) {
-				Prefilters.match(prefilter, "player", ((MCPlayerKickEvent) e).getPlayer().getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "player", ((MCPlayerKickEvent) e).getPlayer().getName(),
+						PrefilterType.MACRO);
 				Prefilters.match(prefilter, "reason", ((MCPlayerKickEvent) e).getReason(), PrefilterType.MACRO);
 				return true;
 			}
@@ -353,9 +356,11 @@ public class PlayerEvents {
 			return "{player: <string match> The player that teleport. Switching worlds will trigger this event, but"
 					+ " world_changed is called after, only if this isn't cancelled first. | type: <string match>"
 					+ "| from: <location match> This should be a location array (x, y, z, world)."
-					+ "| to: <location match> The location the player is now in. This should be a location array as well.} "
-					+ "{player | from: The location the player is coming from | to: The location the player is now in | "
-					+ "type: the type of teleport occuring, one of " + StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
+					+ "| to: <location match> The location the player is now in. This should be a location array as"
+					+ " well.} "
+					+ "{player | from: The location the player is coming from | to: The location the player is now in |"
+					+ " type: the type of teleport occuring, one of "
+					+ StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
 					+ "{to}"
 					+ "{}";
 		}
@@ -390,8 +395,10 @@ public class PlayerEvents {
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
 			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
-			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN), p.getWorld(), manualObject.getTarget());
-			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN), p.getWorld(), manualObject.getTarget());
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN),
+					p.getWorld(), manualObject.getTarget());
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN),
+					p.getWorld(), manualObject.getTarget());
 			return EventBuilder.instantiate(MCPlayerTeleportEvent.class, p, from, to);
 		}
 
@@ -487,8 +494,10 @@ public class PlayerEvents {
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
 			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
-			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN), p.getWorld(), manualObject.getTarget());
-			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN), p.getWorld(), manualObject.getTarget());
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN),
+					p.getWorld(), manualObject.getTarget());
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN),
+					p.getWorld(), manualObject.getTarget());
 			return EventBuilder.instantiate(MCPlayerPortalEvent.class, p, from, to);
 		}
 
@@ -686,7 +695,8 @@ public class PlayerEvents {
 					+ "join_message: <regex>} This event is called when a player logs in. "
 					+ "Setting join_message to null causes it to not be displayed at all. Cancelling "
 					+ "the event does not prevent them from logging in. Instead, you should just pkick() them."
-					+ "{player: The player's name | world | join_message: The default join message | first_login: True if this is the first time"
+					+ "{player: The player's name | world | join_message: The default join message |"
+					+ " first_login: True if this is the first time"
 					+ " the player has logged in.}"
 					+ "{join_message}"
 					+ "{player|world|join_message}";
@@ -751,7 +761,8 @@ public class PlayerEvents {
 
 		@Override
 		public BindableEvent convert(CArray manual, Target t) {
-			MCPlayerJoinEvent e = EventBuilder.instantiate(MCPlayerJoinEvent.class, Static.GetPlayer(manual.get("player", Target.UNKNOWN).val(), Target.UNKNOWN),
+			MCPlayerJoinEvent e = EventBuilder.instantiate(MCPlayerJoinEvent.class,
+					Static.GetPlayer(manual.get("player", Target.UNKNOWN).val(), Target.UNKNOWN),
 					manual.get("join_message", Target.UNKNOWN).val());
 			return e;
 		}
@@ -791,13 +802,16 @@ public class PlayerEvents {
 					+ " itemname: <string match> The item type they are holding when they interacted, or null |"
 					+ " hand: <string match> The hand the player clicked with |"
 					+ " player: <macro> The player that triggered the event} "
-					+ "Fires when a player left or right clicks a block or the air"
+					+ "Fires when a player left or right clicks a block or the air. Note that this event may fire for"
+					+ " the main hand, off hand, or twice, one for each hand, depending on the item priority and what"
+					+ " is clicked. If you don't want multiple events, you can prefilter on hand."
 					+ "{action: One of either left_click_block, right_click_block, left_click_air, or right_click_air"
 					+ " | block: The type of block they clicked, or null if they clicked air. If they clicked air,"
 					+ " neither facing nor location will be present."
 					+ " | item: The item array the player used to click, or null if not holding anything in that hand"
 					+ " | player: The player associated with this event"
-					+ " | facing: The (lowercase) face of the block they clicked. (One of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ") + ") |"
+					+ " | facing: The (lowercase) face of the block they clicked. (One of "
+					+ StringUtils.Join(MCBlockFace.values(), ", ", ", or ") + ") |"
 					+ "location: The (x, y, z, world) location of the block they clicked |"
 					+ "hand: The hand used to click with, can be either main_hand or off_hand}"
 					+ "{}"
@@ -827,7 +841,8 @@ public class PlayerEvents {
 			}
 			if(prefilter.containsKey("block")) {
 				Mixed ctype = prefilter.get("block");
-				if(ctype.isInstanceOf(CString.TYPE) && ctype.val().contains(":") || ArgumentValidation.isNumber(ctype)) {
+				if(ctype.isInstanceOf(CString.TYPE) && ctype.val().contains(":")
+						|| ArgumentValidation.isNumber(ctype)) {
 					int type;
 					String notation = ctype.val();
 					int separatorIndex = notation.indexOf(':');
@@ -853,12 +868,14 @@ public class PlayerEvents {
 				MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
 
 				if(prefilter.containsKey("button")) {
-					if(pie.getAction().equals(MCAction.LEFT_CLICK_AIR) || pie.getAction().equals(MCAction.LEFT_CLICK_BLOCK)) {
+					if(pie.getAction().equals(MCAction.LEFT_CLICK_AIR)
+							|| pie.getAction().equals(MCAction.LEFT_CLICK_BLOCK)) {
 						if(!prefilter.get("button").val().toLowerCase().equals("left")) {
 							return false;
 						}
 					}
-					if(pie.getAction().equals(MCAction.RIGHT_CLICK_AIR) || pie.getAction().equals(MCAction.RIGHT_CLICK_BLOCK)) {
+					if(pie.getAction().equals(MCAction.RIGHT_CLICK_AIR)
+							|| pie.getAction().equals(MCAction.RIGHT_CLICK_BLOCK)) {
 						if(!prefilter.get("button").val().toLowerCase().equals("right")) {
 							return false;
 						}
@@ -916,7 +933,8 @@ public class PlayerEvents {
 				}
 				if(a == MCAction.LEFT_CLICK_BLOCK || a == MCAction.RIGHT_CLICK_BLOCK) {
 					map.put("facing", new CString(pie.getBlockFace().name().toLowerCase(), Target.UNKNOWN));
-					map.put("location", ObjectGenerator.GetGenerator().location(pie.getClickedBlock().getLocation(), false));
+					map.put("location", ObjectGenerator.GetGenerator().location(pie.getClickedBlock().getLocation(),
+							false));
 				}
 				map.put("world", new CString(pie.getPlayer().getWorld().getName(), Target.UNKNOWN));
 				map.put("item", ObjectGenerator.GetGenerator().item(pie.getItem(), Target.UNKNOWN));
@@ -936,8 +954,10 @@ public class PlayerEvents {
 		public BindableEvent convert(CArray manual, Target t) {
 			MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN), Target.UNKNOWN);
 			MCAction a = MCAction.valueOf(manual.get("action", Target.UNKNOWN).val().toUpperCase());
-			MCItemStack is = Static.ParseItemNotation("player_interact event", manual.get("item", Target.UNKNOWN).val(), 1, Target.UNKNOWN);
-			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN), null, Target.UNKNOWN).getBlock();
+			MCItemStack is = Static.ParseItemNotation("player_interact event", manual.get("item", Target.UNKNOWN).val(),
+					1, Target.UNKNOWN);
+			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN), null,
+					Target.UNKNOWN).getBlock();
 			MCBlockFace bf = MCBlockFace.valueOf(manual.get("facing", Target.UNKNOWN).val().toUpperCase());
 			MCPlayerInteractEvent e = EventBuilder.instantiate(MCPlayerInteractEvent.class, p, a, is, b, bf);
 			return e;
@@ -986,7 +1006,8 @@ public class PlayerEvents {
 			MCPlayerEnterBedEvent be = (MCPlayerEnterBedEvent) e;
 
 			if(prefilter.containsKey("location")) {
-				MCLocation loc = ObjectGenerator.GetGenerator().location(prefilter.get("location"), null, Target.UNKNOWN);
+				MCLocation loc = ObjectGenerator.GetGenerator().location(prefilter.get("location"), null,
+						Target.UNKNOWN);
 
 				if(!be.getBed().getLocation().equals(loc)) {
 					return false;
@@ -1066,7 +1087,8 @@ public class PlayerEvents {
 			MCPlayerLeaveBedEvent be = (MCPlayerLeaveBedEvent) e;
 
 			if(prefilter.containsKey("location")) {
-				MCLocation loc = ObjectGenerator.GetGenerator().location(prefilter.get("location"), null, Target.UNKNOWN);
+				MCLocation loc = ObjectGenerator.GetGenerator().location(prefilter.get("location"), null,
+						Target.UNKNOWN);
 
 				if(!be.getBed().getLocation().equals(loc)) {
 					return false;
@@ -1118,12 +1140,16 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{location: <location match> The location of the pressure plate | activated: <boolean match> If true, only will trigger when the plate is stepped on. Currently,"
-					+ " this will only be true, since the event is only triggered on activations, not deactivations, but is reserved for future use.} "
+			return "{location: <location match> The location of the pressure plate |"
+					+ " activated: <boolean match> If true, only will trigger when the plate is stepped on. Currently,"
+					+ " this will only be true, since the event is only triggered on activations, not deactivations,"
+					+ " but is reserved for future use.} "
 					+ "Fires when a player steps on a pressure plate"
 					+ "{location: The location of the pressure plate |"
-					+ " activated: If true, then the player has stepped on the plate, if false, they have gotten off of it. Currently,"
-					+ " this will always be true, because the event is only triggered for activations, not deactivations, but is reserved"
+					+ " activated: If true, then the player has stepped on the plate, if false, they have gotten off"
+					+ " of it. Currently,"
+					+ " this will always be true, because the event is only triggered for activations, not"
+					+ " deactivations, but is reserved"
 					+ " for future use. |"
 					+ " player: The player associated with this event}"
 					+ "{}"
@@ -1134,7 +1160,8 @@ public class PlayerEvents {
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerInteractEvent) {
 				MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
-				Prefilters.match(prefilter, "location", pie.getClickedBlock().getLocation(), PrefilterType.LOCATION_MATCH);
+				Prefilters.match(prefilter, "location", pie.getClickedBlock().getLocation(),
+						PrefilterType.LOCATION_MATCH);
 //				if(prefilter.containsKey("activated")) {
 //					//TODO: Once activation is supported, check for that here
 //				}
@@ -1146,8 +1173,10 @@ public class PlayerEvents {
 		@Override
 		public BindableEvent convert(CArray manual, Target t) {
 			MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN), Target.UNKNOWN);
-			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN), null, Target.UNKNOWN).getBlock();
-			MCPlayerInteractEvent e = EventBuilder.instantiate(MCPlayerInteractEvent.class, p, MCAction.PHYSICAL, null, b, MCBlockFace.UP);
+			MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN), null,
+					Target.UNKNOWN).getBlock();
+			MCPlayerInteractEvent e = EventBuilder.instantiate(MCPlayerInteractEvent.class, p, MCAction.PHYSICAL, null,
+					b, MCBlockFace.UP);
 			return e;
 		}
 
@@ -1156,7 +1185,8 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerInteractEvent) {
 				MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
-				map.put("location", ObjectGenerator.GetGenerator().location(pie.getClickedBlock().getLocation(), false));
+				map.put("location", ObjectGenerator.GetGenerator().location(pie.getClickedBlock().getLocation(),
+						false));
 				//TODO: Once activation is supported, set that appropriately here.
 				map.put("activated", CBoolean.TRUE);
 				return map;
@@ -1194,9 +1224,11 @@ public class PlayerEvents {
 		public String docs() {
 			return "{x: <expression>| y: <expression>| z: <expression>| world: <string match>| player: <macro>}"
 					+ "Fires when a player respawns. Technically during this time, the player is not considered to be"
-					+ " 'online'. This can cause problems if you try to run an external command with run() or something."
+					+ " 'online'. This can cause problems if you try to run an external command with run() or"
+					+ " something."
 					+ " CommandHelper takes into account the fact that the player is offline, and works around this, so"
-					+ " all CH functions should respond correctly, as if the player was online, however other plugins or"
+					+ " all CH functions should respond correctly, as if the player was online, however other plugins"
+					+ " or"
 					+ " plain text commands that are run may not."
 					+ "{player: The player that is respawning | "
 					+ "location: The location they are going to respawn at | "
@@ -1223,7 +1255,8 @@ public class PlayerEvents {
 				Prefilters.match(prefilter, "x", event.getRespawnLocation().getBlockX(), PrefilterType.EXPRESSION);
 				Prefilters.match(prefilter, "y", event.getRespawnLocation().getBlockY(), PrefilterType.EXPRESSION);
 				Prefilters.match(prefilter, "z", event.getRespawnLocation().getBlockZ(), PrefilterType.EXPRESSION);
-				Prefilters.match(prefilter, "world", event.getRespawnLocation().getWorld().getName(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "world", event.getRespawnLocation().getWorld().getName(),
+						PrefilterType.STRING_MATCH);
 				return true;
 			}
 			return false;
@@ -1249,7 +1282,8 @@ public class PlayerEvents {
 			//For firing off the event manually, we have to convert the CArray into an
 			//actual object that will trigger it
 			MCPlayer p = Static.GetPlayer(manual.get("player", Target.UNKNOWN), Target.UNKNOWN);
-			MCLocation l = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN), p.getWorld(), Target.UNKNOWN);
+			MCLocation l = ObjectGenerator.GetGenerator().location(manual.get("location", Target.UNKNOWN), p.getWorld(),
+					Target.UNKNOWN);
 			MCPlayerRespawnEvent e = EventBuilder.instantiate(MCPlayerRespawnEvent.class, p, l, false);
 			return e;
 		}
@@ -1260,7 +1294,8 @@ public class PlayerEvents {
 				MCPlayerRespawnEvent e = (MCPlayerRespawnEvent) event;
 				if(key.equals("location")) {
 					//Change this parameter in e to value
-					e.setRespawnLocation(ObjectGenerator.GetGenerator().location(value, e.getPlayer().getWorld(), Target.UNKNOWN));
+					e.setRespawnLocation(ObjectGenerator.GetGenerator().location(value, e.getPlayer().getWorld(),
+							Target.UNKNOWN));
 					return true;
 				}
 			}
@@ -1309,7 +1344,8 @@ public class PlayerEvents {
 					+ " new_level: The player's level when they will respawn |"
 					+ " new_total_exp: The player's total experience when they will respawn |"
 					+ " killer: The name of the killer if a player killed them, otherwise null}"
-					+ "{xp | drops: The items will be replaced by the given items | death_message | keep_inventory | keep_level | new_exp | new_level | new_total_exp}"
+					+ "{xp | drops: The items will be replaced by the given items | death_message | keep_inventory |"
+					+ " keep_level | new_exp | new_level | new_total_exp}"
 					+ "{}";
 		}
 
@@ -1369,7 +1405,8 @@ public class PlayerEvents {
 			for(String key : clist.stringKeySet()) {
 				list.add(ObjectGenerator.GetGenerator().item(clist.get(key, Target.UNKNOWN), clist.getTarget()));
 			}
-			MCPlayerDeathEvent e = EventBuilder.instantiate(MCPlayerDeathEvent.class, Static.GetPlayer(splayer, Target.UNKNOWN), list,
+			MCPlayerDeathEvent e = EventBuilder.instantiate(MCPlayerDeathEvent.class, Static.GetPlayer(splayer,
+					Target.UNKNOWN), list,
 					0, deathMessage);
 			return e;
 		}
@@ -1437,7 +1474,8 @@ public class PlayerEvents {
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerQuitEvent) {
-				Prefilters.match(prefilter, "player", ((MCPlayerQuitEvent) e).getPlayer().getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "player", ((MCPlayerQuitEvent) e).getPlayer().getName(),
+						PrefilterType.MACRO);
 				return true;
 			}
 			return false;
@@ -1535,10 +1573,12 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerChatEvent) {
 				//As a very special case, if this player is currently in interpreter mode, we do not want to
 				//intercept their chat event
-				if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerChatEvent) e).getPlayer().getName())) {
+				if(CommandHelperPlugin.self.interpreterListener
+						.isInInterpreterMode(((MCPlayerChatEvent) e).getPlayer().getName())) {
 					throw new PrefilterNonMatchException();
 				}
-				Prefilters.match(prefilter, "player", ((MCPlayerChatEvent) e).getPlayer().getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "player", ((MCPlayerChatEvent) e).getPlayer().getName(),
+						PrefilterType.MACRO);
 				return true;
 			}
 			return false;
@@ -1601,21 +1641,27 @@ public class PlayerEvents {
 				if("format".equals(key)) {
 					String format = Construct.nval(value);
 					if(format == null) {
-						throw new CRENullPointerException("The \"format\" key in " + new modify_event().getName() + " for the " + this.getName()
+						throw new CRENullPointerException("The \"format\" key in " + new modify_event().getName()
+								+ " for the " + this.getName()
 								+ " event may not be null.", value.getTarget());
 					}
 					try {
 						// Throws UnknownFormatConversionException, MissingFormatException,
-						// IllegalFormatConversionException, FormatFlagsConversionMismatchException, NullPointerException and possibly more.
+						// IllegalFormatConversionException, FormatFlagsConversionMismatchException,
+						// NullPointerException and possibly more.
 						e.setFormat(format);
 					} catch (Exception ex) {
 						// Check the format to give a better exception message.
 						if(format.replaceAll("%%", "").replaceAll("\\%\\%|\\%[12]\\$s", "").contains("%")) {
-							throw new CREFormatException("The \"format\" key in " + modify_event.class.getSimpleName() + " for the " + this.getName()
-									+ " event only accepts %1$s and %2$s as format specifiers. Use a \"%%\" to display a single \"%\".", value.getTarget());
+							throw new CREFormatException("The \"format\" key in " + modify_event.class.getSimpleName()
+									+ " for the " + this.getName()
+									+ " event only accepts %1$s and %2$s as format specifiers. Use a \"%%\" to display"
+											+ " a single \"%\".", value.getTarget());
 						} else {
-							throw new CREFormatException("The \"format\" key in " + modify_event.class.getSimpleName() + " for the " + this.getName()
-									+ " event was set to an invalid value: " + format + ". The original exception message is: " + ex.getMessage(), value.getTarget());
+							throw new CREFormatException("The \"format\" key in " + modify_event.class.getSimpleName()
+									+ " for the " + this.getName()
+									+ " event was set to an invalid value: " + format + ". The original exception"
+											+ " message is: " + ex.getMessage(), value.getTarget());
 						}
 					}
 				}
@@ -1638,8 +1684,10 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{player: <macro>}"
-					+ "Fired when any player attempts to send a chat message. The event handler is run on the async thread, and not"
-					+ " the main server thread, which can lead to undefined results if your code accesses non-threadsafe methods, hence"
+					+ "Fired when any player attempts to send a chat message. The event handler is run on the async"
+					+ " thread, and not"
+					+ " the main server thread, which can lead to undefined results if your code accesses"
+					+ " non-threadsafe methods, hence"
 					+ " why this feature is undocumented. If this event is cancelled, player_chat binds will not fire."
 					+ "{message: The message to be sent | recipients | format}"
 					+ "{message|recipients: An array of"
@@ -1666,10 +1714,12 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerChatEvent) {
 				//As a very special case, if this player is currently in interpreter mode, we do not want to
 				//intercept their chat event
-				if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerChatEvent) e).getPlayer().getName())) {
+				if(CommandHelperPlugin.self.interpreterListener
+						.isInInterpreterMode(((MCPlayerChatEvent) e).getPlayer().getName())) {
 					throw new PrefilterNonMatchException();
 				}
-				Prefilters.match(prefilter, "player", ((MCPlayerChatEvent) e).getPlayer().getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "player", ((MCPlayerChatEvent) e).getPlayer().getName(),
+						PrefilterType.MACRO);
 				return true;
 			}
 			return false;
@@ -1754,7 +1804,7 @@ public class PlayerEvents {
 			return "{command: <string match> The entire command the player ran "
 					+ "| prefix: <string match> Just the first part of the command, i.e. '/cmd' in '/cmd blah blah'"
 					+ "| player: <macro> The player using the command}"
-					+ "This event is fired off when a player runs any command at all. This actually fires before normal "
+					+ "This event is fired off when a player runs any command at all. This actually fires before normal"
 					+ " CommandHelper aliases, allowing you to insert control before defined aliases, even."
 					+ "{command: The entire command | prefix: Just the prefix of the command}"
 					+ "{command}"
@@ -1949,13 +1999,15 @@ public class PlayerEvents {
 			return "{player: <macro> The player that moved. Switching worlds does not trigger this event. "
 					+ "| world: <string match> The world the player moved in."
 					+ "| from: <location match> This should be a location array (x, y, z, world)."
-					+ "| to: <location match> The location the player is now in. This should be a location array as well."
+					+ "| to: <location match> The location the player is now in. This should be a location array as"
+					+ " well."
 					+ "| threshold: <custom> The minimum distance the player must have travelled before the event"
 					+ " will be triggered. This is based on the 3D distance, and is measured in block units.}"
 					+ " This event is fired off after a player has moved a certain distance. Due to the high frequency"
 					+ " of this event, prefilters are extremely important to use -- especially a threshold -- so that"
 					+ " the script doesn't run every time."
-					+ "{player | world | from: The location the player is coming from | to: The location the player is now in}"
+					+ "{player | world | from: The location the player is coming from | to: The location the player is"
+					+ " now in}"
 					+ "{}"
 					+ "{}";
 		}
@@ -2017,8 +2069,10 @@ public class PlayerEvents {
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
 			MCPlayer p = Static.GetPlayer(manualObject.get("player", Target.UNKNOWN), Target.UNKNOWN);
-			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN), p.getWorld(), manualObject.getTarget());
-			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN), p.getWorld(), manualObject.getTarget());
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from", Target.UNKNOWN),
+					p.getWorld(), manualObject.getTarget());
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to", Target.UNKNOWN),
+					p.getWorld(), manualObject.getTarget());
 			return EventBuilder.instantiate(MCPlayerMoveEvent.class, p, from, to);
 		}
 
@@ -2080,7 +2134,8 @@ public class PlayerEvents {
 				MCPlayerFishEvent event = (MCPlayerFishEvent) e;
 				Prefilters.match(prefilter, "state", event.getState().name(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "world", event.getPlayer().getWorld().getName(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "world", event.getPlayer().getWorld().getName(),
+						PrefilterType.STRING_MATCH);
 				return true;
 			}
 			return false;
@@ -2318,7 +2373,8 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <macro> The player which edited the book | signing: <boolean match> Whether or not the book is being signed}"
+			return "{player: <macro> The player which edited the book | signing: <boolean match> Whether or not the"
+					+ " book is being signed}"
 					+ " This event is called when a player edit a book."
 					+ " {player: The player which edited the book | slot: The inventory slot number where the book is |"
 					+ " oldbook: The book before the editing (an array with keys title, author and pages) |"
@@ -2464,9 +2520,11 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <macro> The player who toggled their flying state | flying: <boolean match> Whether or not the player is trying to start or stop flying | world: <macro>}"
+			return "{player: <macro> The player who toggled their flying state | flying: <boolean match> Whether or not"
+					+ " the player is trying to start or stop flying | world: <macro>}"
 					+ " Called when a player toggles their flying state."
-					+ " {player: The player who toggled their flying state | flying: Whether or not the player is trying to start or stop flying |"
+					+ " {player: The player who toggled their flying state | flying: Whether or not the player is"
+					+ " trying to start or stop flying |"
 					+ " location: Where the player is}"
 					+ " {}"
 					+ " {}";
@@ -2530,9 +2588,11 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <macro> The player who toggled their sneaking state | sneaking: <boolean match> Whether or not the player is now sneaking | world: <macro>}"
+			return "{player: <macro> The player who toggled their sneaking state | sneaking: <boolean match> Whether"
+					+ " or not the player is now sneaking | world: <macro>}"
 					+ " Called when a player toggles their sneaking state."
-					+ " {player: The player who toggled their sneaking state | sneaking: Whether or not the player is now sneaking |"
+					+ " {player: The player who toggled their sneaking state | sneaking: Whether or not the player is"
+					+ " now sneaking |"
 					+ " location: Where the player is}"
 					+ " {}"
 					+ " {}";
@@ -2596,9 +2656,11 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <macro> The player who toggled their sprinting state | sprinting: <boolean match> Whether or not the player is now sprinting | world: <macro>}"
+			return "{player: <macro> The player who toggled their sprinting state | sprinting: <boolean match> Whether"
+					+ " or not the player is now sprinting | world: <macro>}"
 					+ " Called when a player toggles their sprinting state."
-					+ " {player: The player who toggled their sprinting state | sprinting: Whether or not the player is now sprinting |"
+					+ " {player: The player who toggled their sprinting state | sprinting: Whether or not the player"
+					+ " is now sprinting |"
 					+ " location: Where the player is}"
 					+ " {}"
 					+ " {}";
