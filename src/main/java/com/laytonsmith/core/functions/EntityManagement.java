@@ -73,6 +73,7 @@ import com.laytonsmith.abstraction.entities.MCThrownPotion;
 import com.laytonsmith.abstraction.entities.MCTippedArrow;
 import com.laytonsmith.abstraction.entities.MCTrident;
 import com.laytonsmith.abstraction.entities.MCTropicalFish;
+import com.laytonsmith.abstraction.entities.MCVex;
 import com.laytonsmith.abstraction.entities.MCVillager;
 import com.laytonsmith.abstraction.entities.MCWitherSkull;
 import com.laytonsmith.abstraction.entities.MCWolf;
@@ -2035,6 +2036,10 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_TROPICALFISH_PATTERN, new CString(fish.getPattern().name(), t), t);
 					specArray.set(entity_spec.KEY_TROPICALFISH_PATTERNCOLOR, new CString(fish.getPatternColor().name(), t), t);
 					break;
+				case VEX:
+					MCVex vex = (MCVex) entity;
+					specArray.set(entity_spec.KEY_VEX_CHARGING, CBoolean.get(vex.isCharging()), t);
+					break;
 				case VILLAGER:
 					MCVillager villager = (MCVillager) entity;
 					specArray.set(entity_spec.KEY_VILLAGER_PROFESSION, new CString(villager.getProfession().name(), t), t);
@@ -2160,6 +2165,7 @@ public class EntityManagement {
 		private static final String KEY_TROPICALFISH_COLOR = "color";
 		private static final String KEY_TROPICALFISH_PATTERN = "pattern";
 		private static final String KEY_TROPICALFISH_PATTERNCOLOR = "patterncolor";
+		private static final String KEY_VEX_CHARGING = "charging";
 		private static final String KEY_VILLAGER_PROFESSION = "profession";
 		private static final String KEY_VILLAGER_LEVEL = "level";
 		private static final String KEY_VILLAGER_EXPERIENCE = "experience";
@@ -3317,6 +3323,18 @@ public class EntityManagement {
 								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid fish pattern: " + specArray.get(index, t).val(), t);
 								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case VEX:
+					MCVex vex = (MCVex) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_VEX_CHARGING:
+								vex.setCharging(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);

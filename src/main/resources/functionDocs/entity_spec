@@ -269,6 +269,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_TROPICALFISH_PATTERNCOLOR%: The color of the pattern on the fish.
 * %KEY_TROPICALFISH_PATTERN%: The pattern type on the fish (can be %FISH_PATTERN%).
 |-
+| VEX
+| 
+* %KEY_VEX_CHARGING%: Whether or not this vex is charging.
+|-
 | VILLAGER
 | 
 * %KEY_VILLAGER_PROFESSION%: The profession of the villager (can be %PROFESSION%). This list differs in 1.14 from 1.13.
