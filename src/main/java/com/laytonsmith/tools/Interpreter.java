@@ -1182,7 +1182,7 @@ public final class Interpreter {
 		}
 
 		@Override
-		public MCInventoryHolder CreateInventoryHolder(String id) {
+		public MCInventoryHolder CreateInventoryHolder(String id, String title) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 

@@ -125,7 +125,7 @@ public interface Convertor {
 	 */
 	MCInventory GetLocationInventory(MCLocation location);
 
-	MCInventoryHolder CreateInventoryHolder(String id);
+	MCInventoryHolder CreateInventoryHolder(String id, String title);
 
 	/**
 	 * Run whenever the server is shutting down (or restarting). There is no guarantee provided as to what thread the

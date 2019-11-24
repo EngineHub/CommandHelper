@@ -153,7 +153,7 @@ public class BukkitMCInventory implements MCInventory {
 		} else if(ih == null) {
 			for(Map.Entry<String, MCInventory> entry : InventoryManagement.VIRTUAL_INVENTORIES.entrySet()) {
 				if(entry.getValue().equals(this)) {
-					return new BukkitMCVirtualInventoryHolder(entry.getKey());
+					return new BukkitMCVirtualInventoryHolder(entry.getKey(), getTitle());
 				}
 			}
 		}
@@ -162,6 +162,10 @@ public class BukkitMCInventory implements MCInventory {
 
 	@Override
 	public String getTitle() {
-		return ((Nameable) i.getHolder()).getCustomName();
+		Nameable n = ((Nameable) i.getHolder());
+		if(n == null) {
+			return null;
+		}
+		return n.getCustomName();
 	}
 }

@@ -1047,7 +1047,7 @@ public class InventoryManagement {
 						"Could not find the inventory of the given player (are you running in cmdline mode?)", t);
 			}
 
-			for(int i = 35; i >= 0; i--) {
+			for(int i = 0; i <= 40; i++) {
 				MCItemStack iis = inv.getItem(i);
 				if(remaining <= 0) {
 					break;
@@ -1830,7 +1830,7 @@ public class InventoryManagement {
 			MCInventory inventory = InventoryManagement.GetInventory(args[0], w, t);
 			try {
 				return new CString(inventory.getTitle(), t);
-			} catch (NullPointerException | ClassCastException ex) {
+			} catch (ClassCastException ex) {
 				throw new CREIllegalArgumentException("This inventory is not capable of being named.", t);
 			}
 		}
@@ -1847,8 +1847,9 @@ public class InventoryManagement {
 
 		@Override
 		public String docs() {
-			return "string {specifier} Returns the name of the inventory specified. If the block or entity"
-					+ " can't have an inventory or a name, an IllegalArgumentException is thrown.";
+			return "string {specifier} Returns the name of the inventory holder specified. If the block or entity"
+					+ " can't have an inventory or a name, an IllegalArgumentException is thrown."
+					+ " If the inventory was not given a title, an empty string is returned.";
 		}
 
 		@Override
@@ -2707,7 +2708,7 @@ public class InventoryManagement {
 				}
 			}
 
-			MCInventoryHolder holder = StaticLayer.GetConvertor().CreateInventoryHolder(id);
+			MCInventoryHolder holder = StaticLayer.GetConvertor().CreateInventoryHolder(id, title);
 			MCInventory inv;
 			if(type == null) {
 				inv = Static.getServer().createInventory(holder, size, title);

@@ -762,7 +762,7 @@ public class StaticTest {
 		}
 
 		@Override
-		public MCInventoryHolder CreateInventoryHolder(String id) {
+		public MCInventoryHolder CreateInventoryHolder(String id, String title) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 

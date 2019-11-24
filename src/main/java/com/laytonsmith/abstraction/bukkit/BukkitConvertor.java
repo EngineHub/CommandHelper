@@ -583,8 +583,8 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	@Override
-	public MCInventoryHolder CreateInventoryHolder(String id) {
-		return new BukkitMCVirtualInventoryHolder(id);
+	public MCInventoryHolder CreateInventoryHolder(String id, String title) {
+		return new BukkitMCVirtualInventoryHolder(id, title);
 	}
 
 	@Override
