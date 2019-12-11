@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.annotations.MEnum;
+import com.laytonsmith.core.Static;
 
 @MEnum("com.commandhelper.PlayerStatistic")
 public enum MCPlayerStatistic {
@@ -80,16 +81,24 @@ public enum MCPlayerStatistic {
 	INTERACT_WITH_STONECUTTER,
 	BELL_RING,
 	RAID_TRIGGER,
-	RAID_WIN;
+	RAID_WIN,
+	INTERACT_WITH_ANVIL,
+	INTERACT_WITH_GRINDSTONE;
 
 	private final Type type;
+	private final MCVersion since;
 
 	MCPlayerStatistic() {
-		this.type = Type.NONE;
+		this(Type.NONE);
 	}
 
 	MCPlayerStatistic(Type type) {
+		this(type, MCVersion.MC1_0);
+	}
+
+	MCPlayerStatistic(Type type, MCVersion since) {
 		this.type = type;
+		this.since = since;
 	}
 
 	public Type getType() {
@@ -101,5 +110,9 @@ public enum MCPlayerStatistic {
 		ENTITY,
 		ITEM,
 		NONE
+	}
+
+	public boolean existsInCurrent() {
+		return Static.getServer().getMinecraftVersion().gte(since);
 	}
 }

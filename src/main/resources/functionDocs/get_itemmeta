@@ -97,4 +97,8 @@ Below are the available fields in the item meta array. Fields can be null when t
 |
 * '''mapid''' : (int) The unique id for a map on the server.
 * '''color''' : (array) An array of the map item's color, with '''"r"''', '''"g"''', and '''"b"''' keys that have values ranging from 0 to 255.
+|-
+| Beehive
+|
+* '''flowerlocation''' : (array) The location of a flower for bees to target, or null if there is none.
 |}

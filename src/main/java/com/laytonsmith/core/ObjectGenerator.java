@@ -39,6 +39,7 @@ import com.laytonsmith.abstraction.MCStonecuttingRecipe;
 import com.laytonsmith.abstraction.MCTropicalFishBucketMeta;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.blocks.MCBeehive;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
@@ -527,6 +528,14 @@ public class ObjectGenerator {
 						invData.set("smelting", ObjectGenerator.GetGenerator().item(inv.getSmelting(), t), t);
 					}
 					ma.set("inventory", invData, t);
+				} else if(bs instanceof MCBeehive) {
+					MCBeehive hive = (MCBeehive) bs;
+					MCLocation flowerLoc = hive.getFlowerLocation();
+					if(flowerLoc == null) {
+						ma.set("flowerlocation", CNull.NULL, t);
+					} else {
+						ma.set("flowerlocation", location(flowerLoc, false), t);
+					}
 				}
 			} else if(meta instanceof MCFireworkEffectMeta) {
 				MCFireworkEffectMeta mcfem = (MCFireworkEffectMeta) meta;
@@ -881,6 +890,16 @@ public class ObjectGenerator {
 							}
 							if(invData.containsKey("smelting")) {
 								inv.setSmelting(ObjectGenerator.GetGenerator().item(invData.get("smelting", t), t));
+							}
+						}
+						bsm.setBlockState(bs);
+					} else if(bs instanceof MCBeehive) {
+						MCBeehive hive = (MCBeehive) bs;
+						if(ma.containsKey("flowerlocation")) {
+							Mixed possibleLoc = ma.get("flowerlocation", t);
+							if(!(possibleLoc instanceof CNull)) {
+								MCLocation flowerLoc = location(possibleLoc, null, t);
+								hive.setFlowerLocation(flowerLoc);
 							}
 						}
 						bsm.setBlockState(bs);

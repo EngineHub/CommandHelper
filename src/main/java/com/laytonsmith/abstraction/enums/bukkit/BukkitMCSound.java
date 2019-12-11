@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.Sound;
 
@@ -29,7 +30,7 @@ public class BukkitMCSound extends MCSound<Sound> {
 	public static void build() {
 		NULL = new BukkitMCSound(MCVanillaSound.UNKNOWN, null);
 		for(MCVanillaSound v : MCVanillaSound.values()) {
-			if(v.existsInCurrent()) {
+			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
 				Sound sound;
 				try {
 					sound = getBukkitType(v);

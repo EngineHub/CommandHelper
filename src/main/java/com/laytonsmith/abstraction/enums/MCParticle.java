@@ -131,6 +131,10 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		FALLING_LAVA(MCVersion.MC1_14),
 		LANDING_LAVA(MCVersion.MC1_14),
 		FALLING_WATER(MCVersion.MC1_14),
+		DRIPPING_HONEY(MCVersion.MC1_15),
+		FALLING_HONEY(MCVersion.MC1_15),
+		FALLING_NECTAR(MCVersion.MC1_15),
+		LANDING_HONEY(MCVersion.MC1_15),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

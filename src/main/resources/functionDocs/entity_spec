@@ -42,6 +42,14 @@ relative to the default position (where all angles are 0). Setting these values 
 where only values specified will be changed. This allows you to rotate a single body part around a single axis
 without knowing the rotations on the other axis or of other body parts beforehand.
 |-
+| BEE
+|
+* %KEY_BEE_ANGER%: The remaining time in ticks that the bee is angry.
+* %KEY_BEE_FLOWER_LOCATION%: The location array of the flower the bee is targeting, or null.
+* %KEY_BEE_HIVE_LOCATION%: The location array of the bee's hive, or null.
+* %KEY_BEE_NECTAR%: Whether or not the bee is carrying pollen.
+* %KEY_BEE_STUNG%: Whether or not the bee has stung something.
+|-
 | BOAT
 |
 * %KEY_BOAT_TYPE%: Which tree species the boat is composed of. (can be %TREE_SPECIES%)

@@ -5841,6 +5841,10 @@ public class PlayerManagement {
 			} catch (IllegalArgumentException ex) {
 				throw new CREIllegalArgumentException("Invalid statistic type: " + args[offset].val(), t);
 			}
+			if(!stat.existsInCurrent()) {
+				throw new CREIllegalArgumentException("The statistic type \"" + args[offset].val() + "\""
+						+ " does not exist in this version.", t);
+			}
 
 			MCPlayerStatistic.Type type = stat.getType();
 			int ret = 0;
@@ -5943,6 +5947,10 @@ public class PlayerManagement {
 				stat = MCPlayerStatistic.valueOf(args[offset].val().toUpperCase());
 			} catch (IllegalArgumentException ex) {
 				throw new CREIllegalArgumentException("Invalid statistic type: " + args[offset].val(), t);
+			}
+			if(!stat.existsInCurrent()) {
+				throw new CREIllegalArgumentException("The statistic type \"" + args[offset].val() + "\""
+						+ " does not exist in this version.", t);
 			}
 
 			if(amount < 0) {

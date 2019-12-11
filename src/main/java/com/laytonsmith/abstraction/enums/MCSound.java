@@ -2,7 +2,6 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
 import com.laytonsmith.annotations.MDynamicEnum;
-import com.laytonsmith.core.Static;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,10 +35,9 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 		if(NULL == null) { // docs mode
 			Set<String> dummy = new HashSet<>();
 			for(final MCVanillaSound s : MCVanillaSound.values()) {
-				if(s.equals(MCVanillaSound.UNKNOWN)) {
-					continue;
+				if(s.existsIn(MCVersion.CURRENT)) {
+					dummy.add(s.name());
 				}
-				dummy.add(s.name());
 			}
 			return dummy;
 		}
@@ -50,7 +48,7 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 		if(NULL == null) { // docs mode
 			ArrayList<MCSound> dummy = new ArrayList<>();
 			for(final MCVanillaSound s : MCVanillaSound.values()) {
-				if(s.equals(MCVanillaSound.UNKNOWN)) {
+				if(!s.existsIn(MCVersion.CURRENT)) {
 					continue;
 				}
 				dummy.add(new MCSound<Object>(s, null) {
@@ -303,11 +301,11 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 		ENTITY_PARROT_IMITATE_BLAZE,
 		ENTITY_PARROT_IMITATE_CREEPER,
 		ENTITY_PARROT_IMITATE_ELDER_GUARDIAN,
-		ENTITY_PARROT_IMITATE_ENDERMAN,
+		ENTITY_PARROT_IMITATE_ENDERMAN(MCVersion.MC1_9, MCVersion.MC1_14_X),
 		ENTITY_PARROT_IMITATE_ENDERMITE,
 		ENTITY_PARROT_IMITATE_GHAST,
 		ENTITY_PARROT_IMITATE_HUSK,
-		ENTITY_PARROT_IMITATE_POLAR_BEAR,
+		ENTITY_PARROT_IMITATE_POLAR_BEAR(MCVersion.MC1_9, MCVersion.MC1_14_X),
 		ENTITY_PARROT_IMITATE_SHULKER,
 		ENTITY_PARROT_IMITATE_SILVERFISH,
 		ENTITY_PARROT_IMITATE_SKELETON,
@@ -318,9 +316,9 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 		ENTITY_PARROT_IMITATE_WITCH,
 		ENTITY_PARROT_IMITATE_WITHER,
 		ENTITY_PARROT_IMITATE_WITHER_SKELETON,
-		ENTITY_PARROT_IMITATE_WOLF,
+		ENTITY_PARROT_IMITATE_WOLF(MCVersion.MC1_9, MCVersion.MC1_14_X),
 		ENTITY_PARROT_IMITATE_ZOMBIE,
-		ENTITY_PARROT_IMITATE_ZOMBIE_PIGMAN,
+		ENTITY_PARROT_IMITATE_ZOMBIE_PIGMAN(MCVersion.MC1_9, MCVersion.MC1_14_X),
 		ENTITY_PARROT_IMITATE_ZOMBIE_VILLAGER,
 		ENTITY_PARROT_STEP,
 		ENTITY_PIG_AMBIENT,
@@ -812,7 +810,7 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 		ENTITY_PANDA_STEP(MCVersion.MC1_14),
 		ENTITY_PANDA_WORRIED_AMBIENT(MCVersion.MC1_14),
 		ENTITY_PARROT_IMITATE_GUARDIAN(MCVersion.MC1_14),
-		ENTITY_PARROT_IMITATE_PANDA(MCVersion.MC1_14),
+		ENTITY_PARROT_IMITATE_PANDA(MCVersion.MC1_14, MCVersion.MC1_14_X),
 		ENTITY_PARROT_IMITATE_PILLAGER(MCVersion.MC1_14),
 		ENTITY_PARROT_IMITATE_RAVAGER(MCVersion.MC1_14),
 		ENTITY_PILLAGER_AMBIENT(MCVersion.MC1_14),
@@ -874,9 +872,32 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 		UI_STONECUTTER_SELECT_RECIPE(MCVersion.MC1_14),
 		UI_STONECUTTER_TAKE_RESULT(MCVersion.MC1_14),
 
+		// 1.15 additions
+		BLOCK_BEEHIVE_DRIP(MCVersion.MC1_15),
+		BLOCK_BEEHIVE_ENTER(MCVersion.MC1_15),
+		BLOCK_BEEHIVE_EXIT(MCVersion.MC1_15),
+		BLOCK_BEEHIVE_SHEAR(MCVersion.MC1_15),
+		BLOCK_BEEHIVE_WORK(MCVersion.MC1_15),
+		BLOCK_HONEY_BLOCK_BREAK(MCVersion.MC1_15),
+		BLOCK_HONEY_BLOCK_FALL(MCVersion.MC1_15),
+		BLOCK_HONEY_BLOCK_HIT(MCVersion.MC1_15),
+		BLOCK_HONEY_BLOCK_PLACE(MCVersion.MC1_15),
+		BLOCK_HONEY_BLOCK_SLIDE(MCVersion.MC1_15),
+		BLOCK_HONEY_BLOCK_STEP(MCVersion.MC1_15),
+		ENTITY_BEE_DEATH(MCVersion.MC1_15),
+		ENTITY_BEE_HURT(MCVersion.MC1_15),
+		ENTITY_BEE_LOOP(MCVersion.MC1_15),
+		ENTITY_BEE_LOOP_AGGRESSIVE(MCVersion.MC1_15),
+		ENTITY_BEE_POLLINATE(MCVersion.MC1_15),
+		ENTITY_BEE_STING(MCVersion.MC1_15),
+		ENTITY_IRON_GOLEM_DAMAGE(MCVersion.MC1_15),
+		ENTITY_IRON_GOLEM_REPAIR(MCVersion.MC1_15),
+		ITEM_HONEY_BOTTLE_DRINK(MCVersion.MC1_15),
+
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;
+		private final MCVersion until;
 
 		MCVanillaSound() {
 			this(MCVersion.MC1_9);
@@ -884,10 +905,16 @@ public abstract class MCSound<Concrete> extends DynamicEnum<MCSound.MCVanillaSou
 
 		MCVanillaSound(MCVersion since) {
 			this.since = since;
+			this.until = MCVersion.FUTURE;
 		}
 
-		public boolean existsInCurrent() {
-			return Static.getServer().getMinecraftVersion().gte(since);
+		MCVanillaSound(MCVersion since, MCVersion until) {
+			this.since = since;
+			this.until = until;
+		}
+
+		public boolean existsIn(MCVersion version) {
+			return version.gte(since) && version.lte(until);
 		}
 	}
 }

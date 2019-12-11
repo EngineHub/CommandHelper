@@ -74,6 +74,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Bat;
+import org.bukkit.entity.Bee;
 import org.bukkit.entity.Blaze;
 import org.bukkit.entity.CaveSpider;
 import org.bukkit.entity.Chicken;
@@ -497,6 +498,9 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 			switch(name) {
 				case BAT:
 					mobType = Bat.class;
+					break;
+				case BEE:
+					mobType = Bee.class;
 					break;
 				case BLAZE:
 					mobType = Blaze.class;

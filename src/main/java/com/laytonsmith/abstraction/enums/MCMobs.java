@@ -9,6 +9,7 @@ import com.laytonsmith.annotations.MEnum;
 @MEnum("com.commandhelper.Mobs")
 public enum MCMobs {
 	BAT,
+	BEE,
 	BLAZE,
 	CAVESPIDER,
 	CHICKEN,

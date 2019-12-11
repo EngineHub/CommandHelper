@@ -28,6 +28,7 @@ import com.laytonsmith.abstraction.entities.MCAbstractHorse;
 import com.laytonsmith.abstraction.entities.MCAreaEffectCloud;
 import com.laytonsmith.abstraction.entities.MCArmorStand;
 import com.laytonsmith.abstraction.entities.MCArrow;
+import com.laytonsmith.abstraction.entities.MCBee;
 import com.laytonsmith.abstraction.entities.MCBoat;
 import com.laytonsmith.abstraction.entities.MCCat;
 import com.laytonsmith.abstraction.entities.MCChestedHorse;
@@ -1766,6 +1767,24 @@ public class EntityManagement {
 					}
 					specArray.set(entity_spec.KEY_ARMORSTAND_POSES, poses, t);
 					break;
+				case BEE:
+					MCBee bee = (MCBee) entity;
+					specArray.set(entity_spec.KEY_BEE_ANGER, new CInt(bee.getAnger(), t), t);
+					specArray.set(entity_spec.KEY_BEE_NECTAR, CBoolean.get(bee.hasNectar()), t);
+					specArray.set(entity_spec.KEY_BEE_STUNG, CBoolean.get(bee.hasStung()), t);
+					MCLocation flower = bee.getFlowerLocation();
+					if(flower == null) {
+						specArray.set(entity_spec.KEY_BEE_FLOWER_LOCATION, CNull.NULL, t);
+					} else {
+						specArray.set(entity_spec.KEY_BEE_FLOWER_LOCATION, ObjectGenerator.GetGenerator().location(flower), t);
+					}
+					MCLocation hive = bee.getHiveLocation();
+					if(hive == null) {
+						specArray.set(entity_spec.KEY_BEE_HIVE_LOCATION, CNull.NULL, t);
+					} else {
+						specArray.set(entity_spec.KEY_BEE_HIVE_LOCATION, ObjectGenerator.GetGenerator().location(hive), t);
+					}
+					break;
 				case BOAT:
 					MCBoat boat = (MCBoat) entity;
 					specArray.set(entity_spec.KEY_BOAT_TYPE, new CString(boat.getWoodType().name(), t), t);
@@ -2100,6 +2119,11 @@ public class EntityManagement {
 		private static final String KEY_ARMORSTAND_POSES = "poses";
 		private static final String KEY_ARMORSTAND_SMALLSIZE = "small";
 		private static final String KEY_ARMORSTAND_VISIBLE = "visible";
+		private static final String KEY_BEE_HIVE_LOCATION = "hivelocation";
+		private static final String KEY_BEE_FLOWER_LOCATION = "flowerlocation";
+		private static final String KEY_BEE_NECTAR = "nector";
+		private static final String KEY_BEE_STUNG = "stung";
+		private static final String KEY_BEE_ANGER = "anger";
 		private static final String KEY_BOAT_TYPE = "type";
 		private static final String KEY_CAT_TYPE = "type";
 		private static final String KEY_CAT_COLOR = "color";
@@ -2448,6 +2472,40 @@ public class EntityManagement {
 								}
 								stand.setAllPoses(poseMap);
 								break;
+						}
+					}
+					break;
+				case BEE:
+					MCBee bee = (MCBee) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_BEE_ANGER:
+								bee.setAnger(ArgumentValidation.getInt32(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_BEE_NECTAR:
+								bee.setHasNectar(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_BEE_STUNG:
+								bee.setHasStung(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_BEE_FLOWER_LOCATION:
+								Mixed flower = specArray.get(index, t);
+								if(flower instanceof CNull) {
+									bee.setFlowerLocation(null);
+								} else {
+									bee.setFlowerLocation(ObjectGenerator.GetGenerator().location(flower, null, t));
+								}
+								break;
+							case entity_spec.KEY_BEE_HIVE_LOCATION:
+								Mixed hive = specArray.get(index, t);
+								if(hive instanceof CNull) {
+									bee.setHiveLocation(null);
+								} else {
+									bee.setHiveLocation(ObjectGenerator.GetGenerator().location(hive, null, t));
+								}
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;

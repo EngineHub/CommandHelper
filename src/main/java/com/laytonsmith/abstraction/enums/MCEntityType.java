@@ -129,6 +129,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		ARMOR_STAND,
 		ARROW,
 		BAT,
+		BEE(true, false, MCVersion.MC1_15),
 		BLAZE,
 		BOAT,
 		CAT(true, false, MCVersion.MC1_14),

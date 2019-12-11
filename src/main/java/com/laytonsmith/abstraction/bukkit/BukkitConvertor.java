@@ -31,6 +31,7 @@ import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBanner;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBeacon;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBeehive;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBrewingStand;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCContainer;
@@ -96,6 +97,7 @@ import org.bukkit.World;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Beacon;
+import org.bukkit.block.Beehive;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.BrewingStand;
 import org.bukkit.block.Container;
@@ -125,6 +127,7 @@ import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.inventory.BlastingRecipe;
 import org.bukkit.inventory.CampfireRecipe;
+import org.bukkit.inventory.ComplexRecipe;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -518,6 +521,9 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14) && bs instanceof Lectern) {
 			return new BukkitMCLectern((Lectern) bs);
 		}
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_15) && bs instanceof Beehive) {
+			return new BukkitMCBeehive((Beehive) bs);
+		}
 		return new BukkitMCBlockState(bs);
 	}
 
@@ -682,6 +688,8 @@ public class BukkitConvertor extends AbstractConvertor {
 					return new BukkitMCCookingRecipe(new SmokingRecipe(nskey, is, Material.AIR, 0.0F, 200), type);
 				case STONECUTTING:
 					return new BukkitMCStonecuttingRecipe(new StonecuttingRecipe(nskey, is, Material.AIR));
+				case COMPLEX:
+					throw new IllegalArgumentException("Unable to generate recipe type: " + type.name());
 			}
 		} catch (NoClassDefFoundError ex) {
 			// doesn't exist on this version.
@@ -706,6 +714,8 @@ public class BukkitConvertor extends AbstractConvertor {
 				return new BukkitMCCookingRecipe(r, MCRecipeType.SMOKING);
 			} else if(r instanceof StonecuttingRecipe) {
 				return new BukkitMCStonecuttingRecipe((StonecuttingRecipe) r);
+			} else if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_15) && r instanceof ComplexRecipe) {
+				return new BukkitMCComplexRecipe(r);
 			}
 		}
 		if(r instanceof ShapelessRecipe) {

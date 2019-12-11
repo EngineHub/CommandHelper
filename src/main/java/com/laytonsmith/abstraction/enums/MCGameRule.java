@@ -10,14 +10,20 @@ public enum MCGameRule {
 	ANNOUNCEADVANCEMENTS("announceAdvancements"),
 	COMMANDBLOCKOUTPUT("commandBlockOutput"),
 	DISABLEELYTRAMOVEMENTCHECK("disableElytraMovementCheck"),
+	DISABLERAIDS("disableRaids"),
 	DODAYLIGHTCYCLE("doDaylightCycle"),
 	DOENTITYDROPS("doEntityDrops"),
 	DOFIRETICK("doFireTick"),
+	DOIMMEDIATERESPAWN("doImmediateRespawn"),
+	DOINSOMNIA("doInsomnia"),
 	DOLIMITEDCRAFTING("doLimitedCrafting"),
 	DOMOBLOOT("doMobLoot"),
 	DOMOBSPAWNING("doMobSpawning"),
 	DOTILEDROPS("doTileDrops"),
 	DOWEATHERCYCLE("doWeatherCycle"),
+	DROWNINGDAMAGE("drowningDamage"),
+	FALLDAMAGE("fallDamage"),
+	FIREDAMAGE("fireDamage"),
 	KEEPINVENTORY("keepInventory"),
 	LOGADMINCOMMANDS("logAdminCommands"),
 	MAXCOMMANDCHAINLENGTH("maxCommandChainLength", CInt.class),
@@ -29,8 +35,7 @@ public enum MCGameRule {
 	SENDCOMMANDFEEDBACK("sendCommandFeedback"),
 	SHOWDEATHMESSAGES("showDeathMessages"),
 	SPAWNRADIUS("spawnRadius", CInt.class),
-	SPECTATORSGENERATECHUNKS("spectatorsGenerateChunks"),
-	DISABLERAIDS("disableRaids");
+	SPECTATORSGENERATECHUNKS("spectatorsGenerateChunks");
 
 	private final String gameRule;
 	private final Class<? extends Mixed> ruleType;
