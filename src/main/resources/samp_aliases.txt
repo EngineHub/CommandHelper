@@ -25,7 +25,7 @@
 	Suppose we have a plugin that broadcasts messages only to moderators and it's a very long command.
 	We also want to add the name of the player running the command. For that we can use the function player().
 */
-/mb $ = /mod-broadcast '('.player().')' $
+/mb $ = '/mod-broadcast ('.player().')' $
 
 # Lets notify our users to use the new, shorter version
 /mod-broadcast [$] = msg(color('red').'Use /mb instead of /mod-broadcast')
@@ -34,9 +34,9 @@
 	Give kit with a macro
 	Gives a diamond pickaxe, shovel, and axe. Note that commands are separated by \ and this creates a macro.
 */
-/kit diamond = /give player() diamond_pickaxe \
-	/give player() diamond_shovel \
-	/give player() diamond_axe
+/kit diamond = /give player() 'diamond_pickaxe' \
+	/give player() 'diamond_shovel' \
+	/give player() 'diamond_axe'
 
 /*
 	Give item command with optional item quantity.
