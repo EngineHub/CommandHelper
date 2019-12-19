@@ -82,8 +82,8 @@ public enum MCPlayerStatistic {
 	BELL_RING,
 	RAID_TRIGGER,
 	RAID_WIN,
-	INTERACT_WITH_ANVIL,
-	INTERACT_WITH_GRINDSTONE;
+	INTERACT_WITH_ANVIL(Type.NONE, MCVersion.MC1_15),
+	INTERACT_WITH_GRINDSTONE(Type.NONE, MCVersion.MC1_15);
 
 	private final Type type;
 	private final MCVersion since;

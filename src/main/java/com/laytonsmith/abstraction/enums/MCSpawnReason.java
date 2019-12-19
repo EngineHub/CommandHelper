@@ -4,6 +4,7 @@ import com.laytonsmith.annotations.MEnum;
 
 @MEnum("com.commandhelper.SpawnReason")
 public enum MCSpawnReason {
+	BEEHIVE,
 	BREEDING,
 	BUILD_IRONGOLEM,
 	BUILD_SNOWMAN,
