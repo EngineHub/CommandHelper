@@ -1922,6 +1922,112 @@ public class Environment {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_sky_light_at extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREInvalidWorldException.class,
+					CREFormatException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String getName() {
+			return "get_sky_light_at";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "int {locationArray} Returns the sky light level for a location."
+					+ " Disregards all block sources of light, where 15 is directly beneath the sky during the day.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
+				throws ConfigRuntimeException {
+			MCWorld w = null;
+			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(pl != null) {
+				w = pl.getWorld();
+			}
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			return new CInt(loc.getBlock().getLightFromSky(), t);
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_block_light_at extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREInvalidWorldException.class,
+					CREFormatException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String getName() {
+			return "get_block_light_at";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "int {locationArray} Returns the block light level at a location."
+					+ " This counts block sources like torches and lava, disregarding light from the sky.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
+				throws ConfigRuntimeException {
+			MCWorld w = null;
+			MCPlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(pl != null) {
+				w = pl.getWorld();
+			}
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			return new CInt(loc.getBlock().getLightFromBlocks(), t);
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class is_block_powered extends AbstractFunction {
 
 		@Override
