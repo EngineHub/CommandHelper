@@ -93,6 +93,24 @@ public class BukkitBlockEvents {
 		}
 
 		@Override
+		public List<MCBlock> getAffectedBlocks() {
+			List<Block> bukkitBlocks;
+			if(event instanceof BlockPistonExtendEvent) {
+				bukkitBlocks = ((BlockPistonExtendEvent) event).getBlocks();
+			} else if(event instanceof BlockPistonRetractEvent) {
+				bukkitBlocks = ((BlockPistonRetractEvent) event).getBlocks();
+			} else {
+				throw new Error("Unsupported piston event: " + event.getClass().getName());
+			}
+
+			List<MCBlock> blocks = new ArrayList<>(bukkitBlocks.size());
+			for(Block b : bukkitBlocks) {
+				blocks.add(new BukkitMCBlock(b));
+			}
+			return blocks;
+		}
+
+		@Override
 		public boolean isCancelled() {
 			return event.isCancelled();
 		}
@@ -112,17 +130,6 @@ public class BukkitBlockEvents {
 			super(e);
 
 			event = e;
-		}
-
-		@Override
-		public List<MCBlock> getPushedBlocks() {
-			List<MCBlock> blocks = new ArrayList<>();
-
-			for(Block b : event.getBlocks()) {
-				blocks.add(new BukkitMCBlock(b));
-			}
-
-			return blocks;
 		}
 	}
 
