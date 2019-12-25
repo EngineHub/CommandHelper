@@ -16,7 +16,6 @@ import com.laytonsmith.abstraction.events.MCBlockFromToEvent;
 import com.laytonsmith.abstraction.events.MCBlockGrowEvent;
 import com.laytonsmith.abstraction.events.MCBlockIgniteEvent;
 import com.laytonsmith.abstraction.events.MCBlockPistonEvent;
-import com.laytonsmith.abstraction.events.MCBlockPistonExtendEvent;
 import com.laytonsmith.abstraction.events.MCBlockPistonRetractEvent;
 import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
 import com.laytonsmith.abstraction.events.MCNotePlayEvent;
@@ -76,16 +75,28 @@ public class BlockEvents {
 			return false;
 		}
 
-		Map<String, Mixed> evaluate_stub(BindableEvent e) throws EventException {
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCBlockPistonEvent event = (MCBlockPistonEvent) e;
 			Target t = Target.UNKNOWN;
 			Map<String, Mixed> map = evaluate_helper(event);
 
-			MCBlock block = event.getBlock();
-
-			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
+			map.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 			map.put("isSticky", CBoolean.get(event.isSticky()));
 			map.put("direction", new CString(event.getDirection().name(), t));
+
+			CArray affected = new CArray(t);
+			for(MCBlock block : event.getAffectedBlocks()) {
+				MCMaterial mat = block.getType();
+				CArray blk = CArray.GetAssociativeArray(t);
+				blk.set("name", mat.getName(), t);
+				blk.set("x", new CInt(block.getX(), t), t);
+				blk.set("y", new CInt(block.getY(), t), t);
+				blk.set("z", new CInt(block.getZ(), t), t);
+				blk.set("world", new CString(block.getWorld().getName(), t), t);
+				affected.push(blk, t);
+			}
+			map.put("affectedBlocks", affected);
 
 			return map;
 		}
@@ -104,7 +115,7 @@ public class BlockEvents {
 			return "{} "
 					+ "This event is called when a piston is extended. Cancelling the event cancels the move."
 					+ "{location: the locationArray of this piston | direction: direction of travel"
-					+ " | sticky: true if the piston is sticky | affectedBlocks: blocks pushed}"
+					+ " | sticky: true if the piston is sticky, false otherwise | affectedBlocks: blocks pushed/pulled}"
 					+ "{} "
 					+ "{} "
 					+ "{}";
@@ -113,27 +124,6 @@ public class BlockEvents {
 		@Override
 		public Driver driver() {
 			return Driver.PISTON_EXTEND;
-		}
-
-		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
-			MCBlockPistonExtendEvent event = (MCBlockPistonExtendEvent) e;
-			Target t = Target.UNKNOWN;
-			Map<String, Mixed> map = evaluate_stub(e);
-
-			CArray affected = new CArray(t);
-			for(MCBlock block : event.getPushedBlocks()) {
-				MCMaterial mat = block.getType();
-				CArray blk = CArray.GetAssociativeArray(t);
-				blk.set("name", mat.getName(), t);
-				blk.set("x", new CInt(block.getX(), t), t);
-				blk.set("y", new CInt(block.getY(), t), t);
-				blk.set("z", new CInt(block.getZ(), t), t);
-				blk.set("world", new CString(block.getWorld().getName(), t), t);
-				affected.push(blk, t);
-			}
-			map.put("affectedBlocks", affected);
-			return map;
 		}
 
 		@Override
@@ -155,8 +145,9 @@ public class BlockEvents {
 			return "{} "
 					+ "This event is called when a piston is retracted. Cancelling the event cancels the move."
 					+ "{location: the locationArray of this piston | direction: direction of travel"
-					+ " | sticky: true if the piston is sticky | retractedLocation: if the piston"
-					+ " is sticky and attached to a block, where the attached block would end up }"
+					+ " | sticky: true if the piston is sticky, false otherwise | affectedBlocks: blocks pushed/pulled"
+					+ " | retractedLocation: if the piston is sticky and attached to a block, where the attached"
+					+ " block would end up }"
 					+ "{} "
 					+ "{} "
 					+ "{}";
@@ -170,7 +161,7 @@ public class BlockEvents {
 		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			MCBlockPistonRetractEvent event = (MCBlockPistonRetractEvent) e;
-			Map<String, Mixed> map = evaluate_stub(e);
+			Map<String, Mixed> map = super.evaluate(e);
 			map.put("retractedLocation", ObjectGenerator.GetGenerator().location(event.getRetractedLocation(), false));
 			return map;
 		}
