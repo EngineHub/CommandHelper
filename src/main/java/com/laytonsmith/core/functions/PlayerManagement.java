@@ -1345,7 +1345,7 @@ public class PlayerManagement {
 					+ " Gets or sets the direction the player is facing."
 					+ " ---- When using the first variation, expects an integer 0-3, which will set the direction the"
 					+ " player faces using their existing pitch (up and down) but sets their yaw (left and right) to"
-					+ " one of the cardinal directions, as follows: 0 - West, 1 - South, 2 - East, 3 - North, which"
+					+ " one of the cardinal directions, as follows: 0 - South, 1 - West, 2 - North, 3 - East, which"
 					+ " corresponds to the directions given by F when viewed with F3."
 					+ " In the second variation, specific yaw and pitches can be provided."
 					+ " If the player is not specified, the current player is used."
@@ -1358,7 +1358,7 @@ public class PlayerManagement {
 					+ " and 90 being the player looking down. Yaw will always be a number between 0 and 359.9~."
 					+ " When setting the facing, pitch must be a number between -90 and 90, and yaw may be any number."
 					+ " If the number given is not between 0 and 359.9~, it will be normalized first."
-					+ " 0 is dead west, 90 is north, etc.";
+					+ " 0 is due south, 90 is west, etc.";
 		}
 
 		@Override
