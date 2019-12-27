@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
+import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCCommandBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
@@ -38,6 +39,7 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
@@ -2226,6 +2228,218 @@ public class Environment {
 			MCPlayer psender = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], (psender != null ? psender.getWorld() : null), t);
 			return CBoolean.get(location.getWorld().generateTree(location, treeType));
+		}
+	}
+
+	@api
+	public static class is_block_lockable extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "is_block_lockable";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {locationArray} Returns whether or not the block is lockable."
+					+ " ---- Locks prevent players from accessing the block's interface unless they are holding an item"
+					+ " key with the same display name as the lock.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
+				throws ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			return CBoolean.get(loc.getBlock().getState().isLockable());
+		}
+	}
+
+	@api
+	public static class is_block_locked extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "is_block_locked";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class,
+					CREIllegalArgumentException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {locationArray} Returns whether or not the block is locked if its lockable."
+					+ " ---- Locks prevent players from accessing the block's interface unless they are holding an item"
+					+ " key with the same display name as the lock."
+					+ " Throws IllegalArgumentException if used on a block that isn't lockable.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
+				throws ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCBlockState block = loc.getBlock().getState();
+			if(!block.isLockable()) {
+				throw new CREIllegalArgumentException("Block is not lockable.", t);
+			}
+			return CBoolean.get(block.isLocked());
+		}
+	}
+
+	@api
+	public static class get_block_lock extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_block_lock";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class,
+					CREIllegalArgumentException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String docs() {
+			return "string {locationArray} Returns the string lock for this block if its lockable."
+					+ " ---- Locks prevent players from accessing the block's interface unless they are holding an item"
+					+ " key with the same display name as the lock."
+					+ " Throws IllegalArgumentException if used on a block that isn't lockable.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
+				throws ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCBlockState block = loc.getBlock().getState();
+			if(!block.isLockable()) {
+				throw new CREIllegalArgumentException("Block is not lockable.", t);
+			}
+			return new CString(block.getLock(), t);
+		}
+	}
+
+	@api
+	public static class set_block_lock extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_block_lock";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class,
+					CREIllegalArgumentException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public String docs() {
+			return "void {locationArray, string} Sets the string lock for this block if its lockable."
+					+ " Set an empty string or null to remove lock."
+					+ " ---- Locks prevent players from accessing the block's interface unless they are holding an item"
+					+ " key with the same display name as the lock."
+					+ " Throws IllegalArgumentException if used on a block that isn't lockable.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
+				throws ConfigRuntimeException {
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], null, t);
+			MCBlockState block = loc.getBlock().getState();
+			if(!block.isLockable()) {
+				throw new CREIllegalArgumentException("Block is not lockable.", t);
+			}
+			block.setLock(Construct.nval(args[1]));
+			return CVoid.VOID;
 		}
 	}
 

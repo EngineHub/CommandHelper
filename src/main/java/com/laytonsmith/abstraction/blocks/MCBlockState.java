@@ -12,4 +12,13 @@ public interface MCBlockState extends MCMetadatable {
 	MCLocation getLocation();
 
 	void update();
+
+	boolean isLockable();
+
+	boolean isLocked();
+
+	String getLock();
+
+	void setLock(String key);
+
 }
