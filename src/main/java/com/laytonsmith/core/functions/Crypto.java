@@ -226,8 +226,8 @@ public class Crypto {
 
 		@Override
 		public String docs() {
-			return "string {val} Returns the sha1 hash of the specified string. Note that sha1 is considered more secure than md5,"
-					+ " but is also not considered secure. sha-256 should be used instead for storing sensitive"
+			return "string {val} Returns the sha1 hash of the specified string. Note that sha1 is considered no more secure than md5,"
+					+ " and should not be used in a security context. sha-256 should be used instead for storing sensitive"
 					+ " data. It is a one way hashing algorithm. This function is aware of and compatible with"
 					+ " secure_string.";
 		}
