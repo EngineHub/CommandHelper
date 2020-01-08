@@ -370,6 +370,11 @@ they are not separated by commas, operators, or other symbols, they are automati
 behavior exhibited by a simple alias that uses non-strict formatting: <code>/cmd = /real command</code>. 
 '/real' and 'command' are automatically sconcatenated together, and then run.
 
+=== Source File Encoding ===
+MethodScript files, both ms and msa files should have UTF-8 encoding. A byte order mark (BOM) may or may not be present. 
+While other encodings may work, particularly ASCII and others, the source files will be parsed using UTF-8. In the future,
+other encodings may be supported, but there is currently no plans to add this support in the near term.
+
 ===Continued Learning===
 
 Many of the scripting concepts are addressed in greater depth in the Learning Trail, shown below. The MScript topics
