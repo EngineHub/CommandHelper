@@ -1011,7 +1011,11 @@
 	<pluginRepositories>
 		<pluginRepository>
 			<id>maven-annotation-plugin</id>
-			<url>http://maven-annotation-plugin.googlecode.com/svn/trunk/mavenrepo</url>
+			<url>https://maven-annotation-plugin.googlecode.com/svn/trunk/mavenrepo</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>maven-central</id>
+			<url>https://repo.maven.apache.org/maven2/</url>
 		</pluginRepository>
 	</pluginRepositories>
 	<reporting>
