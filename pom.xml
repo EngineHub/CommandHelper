@@ -137,7 +137,7 @@
 		<!-- Repository for other dependencies of SK's -->
 		<repository>
 			<id>sk89q-maven</id>
-			<url>https://maven.sk89q.com/repo/</url>
+			<url>http://maven.sk89q.com/repo/</url>
 		</repository>
 
 		<!-- Repository for Bukkit -->
