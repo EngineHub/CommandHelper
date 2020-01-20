@@ -385,10 +385,6 @@
 		</dependency>
 	</dependencies>
 	<distributionManagement>
-		<site>
-			<id>sk89q-docs-upload</id>
-			<url>ftp://sk89q-maven-deploy/commandhelper/</url>
-		</site>
 		<repository>
 			<id>maven.sk89q.com</id>
 			<url>http://maven.sk89q.com/artifactory/libs-release-local</url>
@@ -400,14 +396,6 @@
 	</distributionManagement>
 	<build>
 		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
-
-		<extensions>
-			<extension>
-				<groupId>org.apache.maven.wagon</groupId>
-				<artifactId>wagon-ftp</artifactId>
-				<version>3.2.0</version>
-			</extension>
-		</extensions>
 
 		<!-- Resources -->
 		<resources>
@@ -925,13 +913,6 @@
 				<version>2.4</version>
 			</plugin>
 
-			<!-- Site / report generation -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<version>3.1</version>
-			</plugin>
-			
 			<!-- Checkstyle plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
