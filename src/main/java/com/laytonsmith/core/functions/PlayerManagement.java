@@ -2140,7 +2140,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "boolean {player, potionEffect, [strength], [seconds], [ambient], [particles], [icon]}"
+			return "boolean {player, potionEffect, [strength], [seconds], [ambient], [particles]}"
 					+ " Adds one, or modifies an existing, potion effect on a mob."
 					+ " The potionEffect can be " + StringUtils.Join(MCPotionEffectType.types(), ", ", ", or ", " or ")
 					+ ". It also accepts an integer corresponding to the effect id listed on the Minecraft wiki."
@@ -2149,7 +2149,6 @@ public class PlayerManagement {
 					+ " If seconds is less than 0 or greater than 107374182 a RangeException is thrown."
 					+ " Ambient takes a boolean of whether the particles should be more transparent."
 					+ " Particles takes a boolean of whether the particles should be visible at all."
-					+ " Icon takes a boolean for whether or not to show the icon to the player."
 					+ " The function returns whether or not the effect was modified.";
 		}
 
