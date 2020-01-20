@@ -137,7 +137,7 @@
 		<!-- Repository for other dependencies of SK's -->
 		<repository>
 			<id>sk89q-maven</id>
-			<url>http://maven.sk89q.com/repo</url>
+			<url>https://maven.sk89q.com/repo/</url>
 		</repository>
 
 		<!-- Repository for Bukkit -->
@@ -149,14 +149,9 @@
 		<!-- Other repositories -->
 		<repository>
 			<id>maven-central</id>
-			<url>http://repo1.maven.org/maven2/</url>
+			<url>https://repo.maven.apache.org/maven2/</url>
 		</repository>
 
-		<!-- Java Mail -->
-		<repository>
-			<id>Java.Net</id>
-			<url>http://download.java.net/maven/2/</url>
-		</repository>
 	</repositories>
 	<dependencies>
 		<!-- Please update the Compatibility docs page whenever
