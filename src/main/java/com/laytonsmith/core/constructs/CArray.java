@@ -93,7 +93,11 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			if(items != null) {
 				for(Mixed item : items) {
 					if(item instanceof CEntry) {
-						associativeArray.put(normalizeConstruct(((CEntry) item).ckey), ((CEntry) item).construct);
+						Mixed value = ((CEntry) item).construct;
+						associativeArray.put(normalizeConstruct(((CEntry) item).ckey), value);
+						if(value.isInstanceOf(CArray.TYPE)) {
+							((CArray) value).parent = this;
+						}
 					} else {
 						int max = Integer.MIN_VALUE;
 						for(String key : associativeArray.keySet()) {
