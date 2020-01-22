@@ -1839,7 +1839,8 @@ public class EntityManagement {
 				case ENDERMAN:
 					MCEnderman enderman = (MCEnderman) entity;
 					MCBlockData carried = enderman.getCarriedMaterial();
-					specArray.set(entity_spec.KEY_ENDERMAN_CARRIED, new CString(carried.getMaterial().getName(), t), t);
+					specArray.set(entity_spec.KEY_ENDERMAN_CARRIED,
+							(carried == null ? CNull.NULL : new CString(carried.getMaterial().getName(), t)), t);
 					break;
 				case EVOKER_FANGS:
 					MCEvokerFangs fangs = (MCEvokerFangs) entity;

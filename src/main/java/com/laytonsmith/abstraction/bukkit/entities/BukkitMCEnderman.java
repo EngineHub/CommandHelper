@@ -18,7 +18,8 @@ public class BukkitMCEnderman extends BukkitMCLivingEntity implements MCEnderman
 
 	@Override
 	public MCBlockData getCarriedMaterial() {
-		return new BukkitMCBlockData(e.getCarriedBlock());
+		BlockData data = e.getCarriedBlock();
+		return (data == null ? null : new BukkitMCBlockData(data));
 	}
 
 	@Override
