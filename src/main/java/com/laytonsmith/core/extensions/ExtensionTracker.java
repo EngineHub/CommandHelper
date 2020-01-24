@@ -28,7 +28,7 @@ import java.util.TreeSet;
 /**
  * Extension tracking and control class.
  *
- * @author Jason Unger <entityreborn@gmail.com>
+ * @author Jason Unger (entityreborn@gmail.com)
  */
 public class ExtensionTracker {
 

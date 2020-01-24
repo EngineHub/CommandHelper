@@ -8,7 +8,7 @@ import java.util.Map;
 
 /**
  *
- * @author Jason Unger <entityreborn@gmail.com>
+ * @author Jason Unger (entityreborn@gmail.com)
  */
 public interface Extension {
 

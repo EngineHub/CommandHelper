@@ -593,10 +593,10 @@ public final class WebUtility {
 
 	/**
 	 * Returns a properly encoded string of parameters. Array types are returned using bracket notation,
-	 * for instance, if the input is {@code {a: [1, 2]}, then the output will be {@code a[]=1&a[]=2}.
+	 * for instance, if the input is {@code {a: [1, 2]}}, then the output will be {@code a[]=1&a[]=2}.
 	 *
 	 * @param parameters
-	 * @return
+	 * @return The properly encoded string of parameters.
 	 */
 	public static String encodeListParameters(Map<String, List<String>> parameters) {
 		if(parameters == null) {

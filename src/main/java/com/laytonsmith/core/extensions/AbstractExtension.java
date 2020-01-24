@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author Jason Unger <entityreborn@gmail.com>
+ * @author Jason Unger (entityreborn@gmail.com)
  */
 public abstract class AbstractExtension implements Extension {
 

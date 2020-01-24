@@ -22,7 +22,7 @@ import javax.tools.Diagnostic.Kind;
  * the first it finds, in terms of identification, yet in case of multiples, a warning will be printed, and the system
  * will call the appropriate methods on all lifecycle classes it finds, so that extensions aren't left hanging.
  *
- * @author Jason Unger <entityreborn@gmail.com>
+ * @author Jason Unger (entityreborn@gmail.com)
  */
 @SupportedAnnotationTypes({"com.laytonsmith.core.extensions.MSExtension"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)

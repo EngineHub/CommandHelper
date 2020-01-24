@@ -19,9 +19,7 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Joins a map together (using StringBuilder's {
-	 *
-	 * @see StringBuilder#append(Object)} method to "toString" the Object)
+	 * Joins a map together (using StringBuilder's {@link StringBuilder#append(Object)} method to "toString" the Object)
 	 *
 	 * @param map The map to concatenate
 	 * @param entryGlue The glue to use between the key and value of each pair in the map
@@ -33,9 +31,7 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Joins a map together (using StringBuilder's {
-	 *
-	 * @see StringBuilder#append(Object)} method to "toString" the Object)
+	 * Joins a map together (using StringBuilder's {@link StringBuilder#append(Object)} method to "toString" the Object)
 	 *
 	 * @param map The map to concatenate
 	 * @param entryGlue The glue to use between the key and value of each pair in the map
@@ -51,9 +47,7 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Joins a map together (using StringBuilder's {
-	 *
-	 * @see StringBuilder#append(Object)} method to "toString" the Object)
+	 * Joins a map together (using StringBuilder's {@link StringBuilder#append(Object)} method to "toString" the Object)
 	 *
 	 * @param map The map to concatenate
 	 * @param entryGlue The glue to use between the key and value of each pair in the map
@@ -68,9 +62,7 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Joins a map together (using StringBuilder's {
-	 *
-	 * @see StringBuilder#append(Object)} method to "toString" the Object)
+	 * Joins a map together (using StringBuilder's {@link StringBuilder#append(Object)} method to "toString" the Object)
 	 *
 	 * @param map The map to concatenate
 	 * @param entryGlue The glue to use between the key and value of each pair in the map
@@ -93,9 +85,8 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Joins a set together (using StringBuilder's {
-	 *
-	 * @see StringBuilder#append(Object)} method to "toString" the Object) using the specified string for glue.
+	 * Joins a set together (using StringBuilder's {@link StringBuilder#append(Object)} method to "toString" the Object)
+	 * using the specified string for glue.
 	 * @param list The set to concatenate
 	 * @param glue The glue to use
 	 * @return The concatenated string
@@ -116,9 +107,8 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Joins a set together (using StringBuilder's {
-	 *
-	 * @see StringBuilder#append(Object)} method to "toString" the Object) using the specified string for glue. If
+	 * Joins a set together (using StringBuilder's {@link StringBuilder#append(Object)} method to "toString" the Object)
+	 * using the specified string for glue. If
 	 * lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
 	 * which is useful for sets that are being read by a human, to have a proper conjunction at the end.
 	 * @param list The set to concatenate
@@ -131,10 +121,9 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Joins a set together (using StringBuilder's {
-	 *
-	 * @see StringBuilder#append(Object)} method to "toString" the Object) using the specified string for glue. If
-	 * lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
+	 * Joins a set together (using StringBuilder's {@link StringBuilder#append(Object)} method to "toString" the Object)
+	 * using the specified string for glue.
+	 * If lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
 	 * which is useful for sets that are being read by a human, to have a proper conjunction at the end.
 	 * @param list The set to concatenate
 	 * @param glue The glue to use
@@ -148,10 +137,9 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Joins a set together (using StringBuilder's {
-	 *
-	 * @see StringBuilder#append(Object)} method to "toString" the Object) using the specified string for glue. If
-	 * lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
+	 * Joins a set together (using StringBuilder's {@link StringBuilder#append(Object)} method to "toString" the Object)
+	 * using the specified string for glue.
+	 * If lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
 	 * which is useful for sets that are being read by a human, to have a proper conjunction at the end.
 	 * @param list The set to concatenate
 	 * @param glue The glue to use
@@ -166,10 +154,9 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Joins a set together (using StringBuilder's {
-	 *
-	 * @see StringBuilder#append(Object)} method to "toString" the Object) using the specified string for glue. If
-	 * lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
+	 * Joins a set together (using StringBuilder's {@link StringBuilder#append(Object)} method to "toString" the Object)
+	 * using the specified string for glue.
+	 * If lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
 	 * which is useful for sets that are being read by a human, to have a proper conjunction at the end.
 	 * @param list The set to concatenate
 	 * @param glue The glue to use
@@ -201,9 +188,8 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Joins an array together (using StringBuilder's {
-	 *
-	 * @see StringBuilder#append(Object)} method to "toString" the Object) using the specified string for glue.
+	 * Joins an array together (using StringBuilder's {@link StringBuilder#append(Object)} method
+	 * to "toString" the Object) using the specified string for glue.
 	 * @param list The array to concatenate
 	 * @param glue The glue to use
 	 * @return The concatenated string
@@ -213,10 +199,9 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Joins an array together (using StringBuilder's {
-	 *
-	 * @see StringBuilder#append(Object)} method to "toString" the Object) using the specified string for glue. If
-	 * lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
+	 * Joins an array together (using StringBuilder's {@link StringBuilder#append(Object)} method
+	 * to "toString" the Object) using the specified string for glue.
+	 * If lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
 	 * which is useful for lists that are being read by a human, to have a proper conjunction at the end.
 	 * @param list The array to concatenate
 	 * @param glue The glue to use
@@ -228,10 +213,9 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Joins an array together (using StringBuilder's {
-	 *
-	 * @see StringBuilder#append(Object)} method to "toString" the Object) using the specified string for glue. If
-	 * lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
+	 * Joins an array together (using StringBuilder's {@link StringBuilder#append(Object)} method
+	 * to "toString" the Object) using the specified string for glue.
+	 * If lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
 	 * which is useful for lists that are being read by a human, to have a proper conjunction at the end.
 	 * @param list The array to concatenate
 	 * @param glue The glue to use
@@ -245,10 +229,9 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Joins an array together (using StringBuilder's {
-	 *
-	 * @see StringBuilder#append(Object)} method to "toString" the Object) using the specified string for glue. If
-	 * lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
+	 * Joins an array together (using StringBuilder's {@link StringBuilder#append(Object)} method
+	 * to "toString" the Object) using the specified string for glue.
+	 * If lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
 	 * which is useful for lists that are being read by a human, to have a proper conjunction at the end.
 	 * @param list The array to concatenate
 	 * @param glue The glue to use
@@ -263,12 +246,11 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Joins an array together (using StringBuilder's {
-	 *
-	 * @param <T> The array type
-	 * @see StringBuilder#append(Object)} method to "toString" the Object) using the specified string for glue. If
-	 * lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
+	 * Joins an array together (using StringBuilder's {@link StringBuilder#append(Object)} method
+	 * to "toString" the Object) using the specified string for glue.
+	 * If lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
 	 * which is useful for lists that are being read by a human, to have a proper conjunction at the end.
+	 * @param <T> The array type
 	 * @param list The array to concatenate
 	 * @param glue The glue to use
 	 * @param lastGlue The glue for the last two elements
@@ -300,9 +282,8 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Joins a list together (using StringBuilder's {
-	 *
-	 * @see StringBuilder#append(Object)} method to "toString" the Object) using the specified string for glue.
+	 * Joins a list together (using StringBuilder's {@link StringBuilder#append(Object)} method
+	 * to "toString" the Object) using the specified string for glue.
 	 * @param list The list to concatenate
 	 * @param glue The glue to use
 	 * @return The concatenated string
@@ -312,10 +293,9 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Joins a list together (using StringBuilder's {
-	 *
-	 * @see StringBuilder#append(Object)} method to "toString" the Object) using the specified string for glue. If
-	 * lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
+	 * Joins a list together (using StringBuilder's {@link StringBuilder#append(Object)} method
+	 * to "toString" the Object) using the specified string for glue.
+	 * If lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
 	 * which is useful for lists that are being read by a human, to have a proper conjunction at the end.
 	 * @param list The list to concatenate
 	 * @param glue The glue to use
@@ -327,10 +307,9 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Joins a list together (using StringBuilder's {
-	 *
-	 * @see StringBuilder#append(Object)} method to "toString" the Object) using the specified string for glue. If
-	 * lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
+	 * Joins a list together (using StringBuilder's {@link StringBuilder#append(Object)} method
+	 * to "toString" the Object) using the specified string for glue.
+	 * If lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
 	 * which is useful for lists that are being read by a human, to have a proper conjunction at the end.
 	 * @param list The list to concatenate
 	 * @param glue The glue to use
@@ -344,10 +323,9 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Joins a list together (using StringBuilder's {
-	 *
-	 * @see StringBuilder#append(Object)} method to "toString" the Object) using the specified string for glue. If
-	 * lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
+	 * Joins a list together (using StringBuilder's {@link StringBuilder#append(Object)} method
+	 * to "toString" the Object) using the specified string for glue.
+	 * If lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
 	 * which is useful for lists that are being read by a human, to have a proper conjunction at the end.
 	 * @param list The list to concatenate
 	 * @param glue The glue to use
@@ -362,10 +340,9 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Joins a list together (using StringBuilder's {
-	 *
-	 * @see StringBuilder#append(Object)} method to "toString" the Object) using the specified string for glue. If
-	 * lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
+	 * Joins a list together (using StringBuilder's {@link StringBuilder#append(Object)} method
+	 * to "toString" the Object) using the specified string for glue.
+	 * If lastGlue is null, it is the same as glue, but otherwise it is used to glue just the last two items together,
 	 * which is useful for lists that are being read by a human, to have a proper conjunction at the end.
 	 * @param list The list to concatenate
 	 * @param glue The glue to use
@@ -727,10 +704,11 @@ public final class StringUtils {
 	 * Returns a properly agreeing subject verb clause given a count, and singular subject. This version assumes that
 	 * the plural subject can be made simply by appending <code>s</code> to the singular subject, which is not always
 	 * true. This is useful in cases where forming a sentence requires different wording depending on the count.
-	 * Usually, you might use a fairly complex tertiary statement, for instance: <code>String message = "There " + (count==1?"is":"are") +
-	 * " " + count + " test failure" + (count==1?"":"s");</code> This is time consuming, and easy to mess up or
+	 * Usually, you might use a fairly complex tertiary statement, for instance:
+	 * <code>String message = "There " + (count==1?"is":"are") + " " + count + " test failure" + (count==1?"":"s");
+	 * </code> This is time consuming, and easy to mess up or
 	 * accidentally reverse. Instead, you can use this function. Note that this will add <code>is</code> or
-	 * </code>are</code> for you. You need only to provide the count, singular subject, and plural subject. If the
+	 * <code>are</code> for you. You need only to provide the count, singular subject, and plural subject. If the
 	 * subject cannot be made plural with just an <code>s</code>, use
 	 * {@link #PluralHelper(int, java.lang.String, java.lang.String)} instead. Usage example:
 	 *
@@ -754,7 +732,7 @@ public final class StringUtils {
 	 * use a fairly complex tertiary statement, for instance: <code>String message = "There " + (count==1?"is":"are") +
 	 * " " + count + " test failure" + (count==1?"":"s");</code> This is time consuming, and easy to mess up or
 	 * accidentally reverse. Instead, you can use this function. Note that this will add <code>is</code> or
-	 * </code>are</code> for you. You need only to provide the count, singular subject, and plural subject. If the
+	 * <code>are</code> for you. You need only to provide the count, singular subject, and plural subject. If the
 	 * subject can be made plural with just an <code>s</code>, use {@link #PluralHelper(int, java.lang.String)} instead.
 	 * Usage example:
 	 *

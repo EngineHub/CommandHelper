@@ -29,7 +29,7 @@ import java.util.Set;
 
 /**
  *
- * @author Jason Unger <entityreborn@gmail.com>
+ * @author Jason Unger (entityreborn@gmail.com)
  */
 public class ExtensionMeta {
 

@@ -51,7 +51,7 @@ import java.util.List;
  *    <td>Class&lt;? super String> method(Class&gt;?> c)</td>
  *    <td>A lower bounded wildcard</td></tr>
  *  <tr>
- *    <td>()Lmy/obj/Name<TT;>.InnerClass</td>
+ *    <td>()Lmy/obj/Name&ltTT;>.InnerClass</td>
  *    <td>InnerClass method()</td>
  *    <td>A method that returns an instance of a non-static inner class</td></tr>
  * </table>

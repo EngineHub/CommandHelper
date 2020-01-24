@@ -10,7 +10,7 @@ import org.bukkit.plugin.messaging.PluginMessageListenerRegistration;
 
 /**
  *
- * @author Jason Unger <entityreborn@gmail.com>
+ * @author Jason Unger (entityreborn@gmail.com)
  */
 public class BukkitMCMessenger implements MCMessenger {
 
