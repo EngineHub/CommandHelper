@@ -54,7 +54,7 @@ else
 	MPATH=""
 fi
 
-DEBUG=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=9001
+DEBUG="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=9001"
 if [ -z "$DEBUG_MSCRIPT" ]; then
 	DEBUG=""
 fi
