@@ -69,9 +69,7 @@ public class ArgumentSuite {
 	}
 
 	/**
-	 * Adds a description, which is used in {
-	 *
-	 * @see #getBuiltDescription}
+	 * Adds a description, which is used in {@link #getBuiltDescription()}.
 	 * @param description
 	 * @return
 	 */

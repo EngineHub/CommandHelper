@@ -139,7 +139,7 @@ import java.util.Set;
  *   public static class GeneratedIDV2 extends GeneratedID {}
  *
  *   {@code @ExhaustiveVisitor.VisitorInfo(baseClass = UserID.class, directSubclassOnly = false)}
- *    public static class CanadianVisitor extends ExhaustiveVisitor<UserID> {
+ *    public static class CanadianVisitor extends ExhaustiveVisitor&ltUserID> {
  *	public void visit(PhoneNumber n) {
  *		System.out.println("Canadian PhoneNumber");
  *	}
@@ -154,7 +154,7 @@ import java.util.Set;
  *   }
  *
  *   {@code @ExhaustiveVisitor.VisitorInfo(baseClass = UserID.class, directSubclassOnly = false)}
- *   public static class AmericanVisitor extends ExhaustiveVisitor<UserID> {
+ *   public static class AmericanVisitor extends ExhaustiveVisitor&ltUserID> {
  *	public void visit(PhoneNumber n) {
  *		System.out.println("American PhoneNumber");
  *	}

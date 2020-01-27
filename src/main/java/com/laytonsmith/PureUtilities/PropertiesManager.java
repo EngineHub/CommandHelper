@@ -68,26 +68,22 @@ public class PropertiesManager extends LinkedHashMap<String, String> {
 	 * As an example, each of the following three lines specifies the key <code>"Truth"</code> and the associated
 	 * element value <code>"Beauty"</code>:
 	 * <p>
-	 * <
-	 * pre>
+	 * <pre>
 	 * Truth = Beauty Truth:Beauty Truth :Beauty
 	 * </pre> As another example, the following three lines specify a single property:
 	 * <p>
-	 * <
-	 * pre>
+	 * <pre>
 	 * fruits apple, banana, pear, \ cantaloupe, watermelon, \ kiwi, mango
 	 * </pre> The key is <code>"fruits"</code> and the associated element is:
 	 * <p>
-	 * <
-	 * pre>"apple, banana, pear, cantaloupe, watermelon, kiwi, mango"</pre> Note that a space appears before each
+	 * <pre>"apple, banana, pear, cantaloupe, watermelon, kiwi, mango"</pre> Note that a space appears before each
 	 * <code>\</code> so that a space will appear after each comma in the final result; the <code>\</code>, line
 	 * terminator, and leading white space on the continuation line are merely discarded and are <i>not</i> replaced by
 	 * one or more other characters.
 	 * <p>
 	 * As a third example, the line:
 	 * <p>
-	 * <
-	 * pre>cheeses
+	 * <pre>cheeses
 	 * </pre> specifies that the key is <code>"cheeses"</code> and the associated element is the empty string
 	 * <code>""</code>.<p>
 	 * <p>
@@ -117,6 +113,7 @@ public class PropertiesManager extends LinkedHashMap<String, String> {
 	 * characters preceded by a backslash still yield single and double quote characters, respectively.
 	 *
 	 * <li> Only a single 'u' character is allowed in a Uniocde escape sequence.
+	 * </ul>
 	 */
 	public PropertiesManager(String properties) {
 		try {

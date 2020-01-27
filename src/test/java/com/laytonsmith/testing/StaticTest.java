@@ -615,9 +615,8 @@ public class StaticTest {
 	private static boolean frontendInstalled = false;
 
 	/**
-	 * This installs a fake server frontend. You must have already included
-	 *
-	 * @PrepareForTest(Static.class) in the calling test code, which will allow the proper static methods to be mocked.
+	 * This installs a fake server frontend. You must have already included {@code @PrepareForTest(Static.class)} in
+	 * the calling test code, which will allow the proper static methods to be mocked.
 	 */
 	public static void InstallFakeServerFrontend() {
 		if(frontendInstalled) {

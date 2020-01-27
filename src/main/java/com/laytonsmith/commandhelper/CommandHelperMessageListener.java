@@ -8,7 +8,7 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 
 /**
  *
- * @author Jason Unger <entityreborn@gmail.com>
+ * @author Jason Unger (entityreborn@gmail.com)
  */
 public final class CommandHelperMessageListener implements PluginMessageListener {
 

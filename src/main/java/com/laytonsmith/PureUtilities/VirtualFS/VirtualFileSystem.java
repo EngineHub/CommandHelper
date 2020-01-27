@@ -350,12 +350,10 @@ public class VirtualFileSystem {
 
 	/**
 	 * Deletes a file or folder. Note that if this is cordoned off, and this is a directory, the directory may appear to
-	 * be empty according to {
-	 *
-	 * @see #list}, but it won't be deleted if other files are actually living in it, but regardless, the entry will be
-	 * removed from the manifest, and further calls to list will show it having been deleted. Requires write permission.
+	 * be empty according to {@link #list(VirtualFile)} method, but it won't be deleted if other files are actually
+	 * living in it, but regardless, the entry will be removed from the manifest, and further calls to list will show
+	 * it having been deleted. Requires write permission.
 	 * @param file
-	 * @return
 	 */
 	public void delete(VirtualFile file) throws IOException {
 		assertWritePermission(file);
@@ -367,9 +365,8 @@ public class VirtualFileSystem {
 	}
 
 	/**
-	 * Works the same as {
-	 *
-	 * @see #delete}, but the file will be deleted upon exit of the JVM. Requires write permission.
+	 * Works the same as {@link #delete(VirtualFile)}, but the file will be deleted upon exit of the JVM.
+	 * Requires write permission.
 	 * @param file
 	 */
 	public void deleteOnExit(VirtualFile file) throws IOException {

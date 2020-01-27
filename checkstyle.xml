@@ -26,13 +26,9 @@
 		<!-- Enable usage of "@SuppressWarnings(checkstyle:<CHECK>)" to suppress checkstyle violations -->
 		<module name="SuppressWarningsHolder"/>
 		
-		<!-- Set tabWidth property for checks such as line length -->
-		<property name="tabWidth" value="4"/>
-		
-		<!-- Line length <= 120 characters -->
-		<module name="LineLength">
-			<property name="severity" value="ignore"/> <!-- TODO: Change to "error" once the >7000 violations have been resolved -->
-			<property name="max" value="120"/>
+		<!-- Suppress JavaDoc parse errors caused by leaving @return tags empty -->
+		<module name="SuppressionXpathSingleFilter">
+			<property name="message" value="Javadoc comment at column [\d]+ has parse error\. Details: no viable alternative at input '[\\t]+ \*' while parsing JAVADOC_TAG"/>
 		</module>
 		
 		<!-- Indent must use tab characters -->
@@ -198,6 +194,13 @@
 		<!-- Ensure that long constants are defined using an 'L', rather than an 'l' -->
 		<module name="UpperEll"/>
 		
+	</module>
+	
+	<!-- Line length <= 120 characters -->
+	<module name="LineLength">
+		<property name="severity" value="ignore"/> <!-- TODO: Change to "error" once the >7000 violations have been resolved -->
+		<property name="max" value="120"/>
+		<property name="tabWidth" value="4"/>
 	</module>
 	
 	<!-- Disallow trailing whitespaces/tabs -->

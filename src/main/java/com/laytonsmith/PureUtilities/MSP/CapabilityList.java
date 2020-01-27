@@ -117,9 +117,7 @@ public class CapabilityList {
 		DYNAMIC(true),
 		/**
 		 * This is the "default" value, that is, if a client does not know if a server supports this capabilty, it works
-		 * like {
-		 *
-		 * @see #DYNAMIC}, but the server's response will be cached.
+		 * like {@link #DYNAMIC}, but the server's response will be cached.
 		 */
 		UNKNOWN(false);
 
