@@ -2463,9 +2463,15 @@ public final class MethodScriptCompiler {
 			if(f instanceof BranchStatement) {
 				branches = ((BranchStatement) f).isBranch(children);
 				if(branches.size() != children.size()) {
+					List<Integer> numArgs = Arrays.asList(f.numArgs());
+					if(!numArgs.contains(Integer.MAX_VALUE) && !numArgs.contains(children.size())) {
+						// Incorrect number of arguments passed to the function, not a branch implementation error.
+						return false;
+					}
 					throw new Error(f.getName() + " does not properly implement isBranch. It does not return a value"
-							+ " with the same count as the actual children. Expected: " + children.size() + ";"
-							+ " Actual: " + branches.size() + "; Code target causing this: "
+							+ " with the same count as the actual children. Children: " + children.size() + ";"
+							+ " Branches: " + branches.size() + ";"
+							+ " Code target causing this: "
 							+ tree.getTarget());
 				}
 			} else {

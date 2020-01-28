@@ -209,6 +209,9 @@ public class EventBinding {
 
 		@Override
 		public void link(Target t, List<ParseTree> children) throws ConfigCompileException {
+			if(children.size() < 5) {
+				throw new CREInsufficientArgumentsException("bind accepts 5 or more parameters", t);
+			}
 			String name = children.get(0).getData().val();
 			try {
 				EventUtils.verifyEventName(name);
