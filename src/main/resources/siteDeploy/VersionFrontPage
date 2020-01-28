@@ -47,7 +47,7 @@ does not include the version number.
 ==== Linux/MacOS ====
 On Unix systems, you'll need to run the command with sudo. The installer will install an mscript bash file in
 /usr/local/bin/mscript, which simply wraps the jar. Running ''mscript'' will launch the interpreter, running it with
-a file will run that file, and using ''mscript --'' followed by a verb (such as help) will run the cmdline utilities.
+a file will run that file, and using ''mscript -- '' followed by a verb (such as help) will run the cmdline utilities.
 
 ==== Windows ====
 <%NOTE|Windows support is still fairly experimental, and is not recommended
@@ -57,7 +57,7 @@ manual work to uninstall or update, so use it at your own risk.%>
 On Windows systems, you'll need to have launched your command prompt as Administrator. (To install on Windows
 Subsystem for Linux, follow the same instructions as for Unix.) A program ''mscript'' will be installed on your
 path, and a PowerShell Module will also be installed. Running ''mscript'' will launch the interpreter, running
-it with a file will run that file, and using ''mscript -Tool'' followed by a verb (such as help) will run the
+it with a file will run that file, and using ''mscript -- '' followed by a verb (such as help) will run the
 cmdline utilities.
 
 == Usage ==

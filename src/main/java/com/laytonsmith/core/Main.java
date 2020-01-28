@@ -112,9 +112,13 @@ public class Main {
 	public static CmdlineToolCollection GetCommandLineTools() {
 		ArgumentSuite suite = new ArgumentSuite()
 			.addDescription("These are the command line tools for MethodScript. For more information about a"
-					+ " particular mode, run help <mode name>. To run a command, in general, use the command:\n\n"
+					+ " particular mode, run the help mode with the mode you need help in as the argument."
+					+ " To run a command, in general, use the command:\n\n"
 					+ "\tjava -jar " + MethodScriptFileLocations.getDefault().getJarFile().getName()
-					+ " <mode name> <[mode specific arguments]>\n");
+					+ " <mode name> <[mode specific arguments]>\n"
+					+ "or\n"
+					+ "\tmscript -- <mode name> <[mode specific arguments]>\n"
+					+ "if you have previously installed the command line version.");
 
 		Map<ArgumentParser, CommandLineTool> dynamicTools = new HashMap<>();
 		for(Class<? extends CommandLineTool> ctool : ClassDiscovery.getDefaultInstance()

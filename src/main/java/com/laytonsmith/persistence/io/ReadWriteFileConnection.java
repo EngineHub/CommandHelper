@@ -1,6 +1,7 @@
 package com.laytonsmith.persistence.io;
 
 import com.laytonsmith.PureUtilities.Common.FileUtil;
+import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.persistence.ReadOnlyException;
@@ -18,7 +19,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.log4j.lf5.util.StreamUtils;
 
 /**
  *
@@ -107,7 +107,7 @@ public class ReadWriteFileConnection implements ConnectionMixin {
 
 				@Override
 				public byte[] call() throws Exception {
-					return StreamUtils.getBytes(FileUtil.readAsStream(file));
+					return StreamUtils.GetBytes(FileUtil.readAsStream(file));
 				}
 			});
 		}
