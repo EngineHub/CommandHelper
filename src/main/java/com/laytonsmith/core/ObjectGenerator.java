@@ -398,7 +398,7 @@ public class ObjectGenerator {
 	}
 
 	private static MCItemStack EmptyItem() {
-		return StaticLayer.GetItemStack("AIR", 1);
+		return StaticLayer.GetItemStack("AIR", 0);
 	}
 
 	public Construct itemMeta(MCItemStack is, Target t) {
