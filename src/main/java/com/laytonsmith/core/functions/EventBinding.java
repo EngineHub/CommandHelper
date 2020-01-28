@@ -21,7 +21,6 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.BoundEvent;
@@ -410,7 +409,7 @@ public class EventBinding {
 		}
 	}
 
-	@api(environments = CommandHelperEnvironment.class)
+	@api
 	public static class is_cancelled extends AbstractFunction {
 
 		@Override
@@ -613,7 +612,7 @@ public class EventBinding {
 		}
 	}
 
-	@api(environments = CommandHelperEnvironment.class)
+	@api
 	public static class lock extends AbstractFunction {
 
 		@Override
@@ -682,7 +681,7 @@ public class EventBinding {
 		}
 	}
 
-	@api(environments = CommandHelperEnvironment.class)
+	@api
 	public static class is_locked extends AbstractFunction {
 
 		@Override
@@ -732,7 +731,7 @@ public class EventBinding {
 		}
 	}
 
-	@api(environments = CommandHelperEnvironment.class)
+	@api
 	public static class consume extends AbstractFunction {
 
 		@Override
@@ -782,7 +781,7 @@ public class EventBinding {
 		}
 	}
 
-	@api(environments = CommandHelperEnvironment.class)
+	@api
 	public static class is_consumed extends AbstractFunction {
 
 		@Override
@@ -838,7 +837,7 @@ public class EventBinding {
 //	@api public static class when_cancelled extends AbstractFunction{
 //
 //	}
-	@api(environments = CommandHelperEnvironment.class)
+	@api
 	public static class event_meta extends AbstractFunction {
 
 		@Override
