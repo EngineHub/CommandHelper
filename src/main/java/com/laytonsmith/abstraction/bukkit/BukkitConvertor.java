@@ -40,6 +40,7 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDropper;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFurnace;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCLectern;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCSkull;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCAgeable;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCComplexEntityPart;
@@ -106,6 +107,7 @@ import org.bukkit.block.Dispenser;
 import org.bukkit.block.Dropper;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.Lectern;
+import org.bukkit.block.Skull;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
@@ -494,6 +496,22 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	public static MCBlockState BukkitGetCorrectBlockState(BlockState bs) {
+		if(bs instanceof Container) {
+			// This code block should only contain checks for blockstates that implement Container.
+			if(bs instanceof BrewingStand) {
+				return new BukkitMCBrewingStand((BrewingStand) bs);
+			}
+			if(bs instanceof Dispenser) {
+				return new BukkitMCDispenser((Dispenser) bs);
+			}
+			if(bs instanceof Dropper) {
+				return new BukkitMCDropper((Dropper) bs);
+			}
+			if(bs instanceof Furnace) {
+				return new BukkitMCFurnace((Furnace) bs);
+			}
+			return new BukkitMCContainer((Container) bs);
+		}
 		if(bs instanceof Banner) {
 			return new BukkitMCBanner((Banner) bs);
 		}
@@ -503,20 +521,8 @@ public class BukkitConvertor extends AbstractConvertor {
 		if(bs instanceof Beacon) {
 			return new BukkitMCBeacon((Beacon) bs);
 		}
-		if(bs instanceof BrewingStand) {
-			return new BukkitMCBrewingStand((BrewingStand) bs);
-		}
-		if(bs instanceof Dispenser) {
-			return new BukkitMCDispenser((Dispenser) bs);
-		}
-		if(bs instanceof Dropper) {
-			return new BukkitMCDropper((Dropper) bs);
-		}
-		if(bs instanceof Furnace) {
-			return new BukkitMCFurnace((Furnace) bs);
-		}
-		if(bs instanceof Container) { // needs to be after all specific containers
-			return new BukkitMCContainer((Container) bs);
+		if(bs instanceof Skull) {
+			return new BukkitMCSkull((Skull) bs);
 		}
 		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14) && bs instanceof Lectern) {
 			return new BukkitMCLectern((Lectern) bs);

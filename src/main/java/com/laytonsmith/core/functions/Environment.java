@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNote;
+import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -14,6 +15,7 @@ import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCCommandBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
+import com.laytonsmith.abstraction.blocks.MCSkull;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCParticle;
@@ -851,6 +853,142 @@ public class Environment {
 			}
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 			return CBoolean.get(l.getBlock().isSign());
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_skull_owner extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_skull_owner";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {locationArray, owner}"
+					+ " Sets the owner of the skull at the given location by name or uuid."
+					+ " Supplying null will clear the skull owner, but due to limitations in Bukkit, clients will only"
+					+ " see this change after reloading the block."
+					+ " If no world is provided and the function is executed by a player, the player's world is used."
+					+ " If the block at the given location isn't a skull, a RangeException is thrown.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CREFormatException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
+				throws ConfigRuntimeException {
+			MCWorld defaultWorld = null;
+			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			if(sender instanceof MCPlayer) {
+				defaultWorld = ((MCPlayer) sender).getWorld();
+			}
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], defaultWorld, t);
+			MCBlock block = loc.getBlock();
+			MCBlockState blockState = block.getState();
+			if(blockState instanceof MCSkull) {
+				MCSkull skull = (MCSkull) blockState;
+				MCOfflinePlayer owner = (args[1] instanceof CNull ? null : Static.GetUser(args[1], t));
+				skull.setOwningPlayer(owner);
+				skull.update();
+				return CVoid.VOID;
+			} else {
+				throw new CRERangeException("The block at the specified location is not a skull", t);
+			}
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_skull_owner extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_skull_owner";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "array {locationArray}"
+					+ " Returns the owner name and uuid of the skull at the given location as an array in format:"
+					+ " {name: NAME, uuid: UUID}, or null if the skull does not have an owner. The value at the 'name'"
+					+ " key will be an empty string if the server does not know the player's name."
+					+ " If no world is provided and the function is executed by a player, the player's world is used."
+					+ " If the block at the given location isn't a skull, a RangeException is thrown.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CREFormatException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
+				throws ConfigRuntimeException {
+			MCWorld defaultWorld = null;
+			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			if(sender instanceof MCPlayer) {
+				defaultWorld = ((MCPlayer) sender).getWorld();
+			}
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], defaultWorld, t);
+			MCBlockState blockState = loc.getBlock().getState();
+			if(blockState instanceof MCSkull) {
+				MCSkull skull = (MCSkull) blockState;
+				MCOfflinePlayer owner = skull.getOwningPlayer();
+				if(owner == null) {
+					return CNull.NULL;
+				} else {
+					CArray ret = new CArray(t);
+					ret.set("name", owner.getName());
+					ret.set("uuid", owner.getUniqueID().toString());
+					return ret;
+				}
+			} else {
+				throw new CRERangeException("The block at the specified location is not a skull", t);
+			}
 		}
 	}
 

@@ -12,7 +12,7 @@ import com.laytonsmith.abstraction.blocks.MCDispenser;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
-import com.laytonsmith.abstraction.bukkit.BukkitMCCreatureSpawner;
+import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCMetadatable;
@@ -21,9 +21,7 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.CommandBlock;
-import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Dispenser;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
@@ -96,11 +94,7 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 
 	@Override
 	public MCBlockState getState() {
-		BlockState bs = b.getState();
-		if(bs instanceof CreatureSpawner) {
-			return new BukkitMCCreatureSpawner((CreatureSpawner) bs);
-		}
-		return new BukkitMCBlockState(bs);
+		return BukkitConvertor.BukkitGetCorrectBlockState(b.getState());
 	}
 
 	@Override

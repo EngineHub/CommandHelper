@@ -14,7 +14,7 @@ public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOffl
 
 	OfflinePlayer op;
 
-	BukkitMCOfflinePlayer(OfflinePlayer offlinePlayer) {
+	public BukkitMCOfflinePlayer(OfflinePlayer offlinePlayer) {
 		super(offlinePlayer);
 		this.op = offlinePlayer;
 	}
