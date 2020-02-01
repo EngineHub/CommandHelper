@@ -126,9 +126,17 @@ public class CommandHelperInterpreterListener implements Listener {
 		}
 	}
 
+	/**
+	 * Executes the given script as the given player in a new environment. Exceptions in script runtime are printed
+	 * to the player.
+	 * If the player is in interpreter mode, then this mode is removed until the script execution terminates.
+	 * @param script - The script to execute.
+	 * @param p - The player to execute the script as.
+	 * @throws ConfigCompileException If compilation fails.
+	 * @throws ConfigCompileGroupException Container for multiple {@link ConfigCompileException}s.
+	 */
 	public void execute(String script, final MCPlayer p) throws ConfigCompileException, ConfigCompileGroupException {
 		TokenStream stream = MethodScriptCompiler.lex(script, null, new File("Interpreter"), true);
-		interpreterMode.remove(p.getName());
 		GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler, plugin.persistenceNetwork,
 				CommandHelperFileLocations.getDefault().getConfigDirectory(),
 				plugin.profiles, new TaskManagerImpl());
@@ -139,6 +147,7 @@ public class CommandHelperInterpreterListener implements Listener {
 		compilerEnv.setLogCompilerWarnings(false);
 		Environment env = Environment.createEnvironment(gEnv, cEnv, compilerEnv);
 		ParseTree tree = MethodScriptCompiler.compile(stream, env, env.getEnvClasses());
+		final boolean isInterpeterMode = interpreterMode.remove(p.getName());
 		try {
 			MethodScriptCompiler.registerAutoIncludes(env, null);
 			MethodScriptCompiler.execute(tree, env, output -> {
@@ -155,17 +164,20 @@ public class CommandHelperInterpreterListener implements Listener {
 						Static.SendMessage(p, ":" + MCChatColor.GREEN + output);
 					}
 				}
-				interpreterMode.add(p.getName());
+				if(isInterpeterMode) {
+					interpreterMode.add(p.getName());
+				}
 			}, null);
+			return;
 		} catch (CancelCommandException e) {
-			interpreterMode.add(p.getName());
 		} catch (ConfigRuntimeException e) {
 			ConfigRuntimeException.HandleUncaughtException(e, env);
 			Static.SendMessage(p, MCChatColor.RED + e.toString());
-			interpreterMode.add(p.getName());
 		} catch (Exception e) {
 			Static.SendMessage(p, MCChatColor.RED + e.toString());
 			Static.getLogger().log(Level.SEVERE, null, e);
+		}
+		if(isInterpeterMode) {
 			interpreterMode.add(p.getName());
 		}
 	}
