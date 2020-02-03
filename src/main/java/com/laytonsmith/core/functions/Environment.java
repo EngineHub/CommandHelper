@@ -33,6 +33,8 @@ import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -516,7 +518,8 @@ public class Environment {
 				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
-			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The function get_block_at() is deprecated. Use get_block().", t);
+			env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+					new CompilerWarning("The function " + getName() + " is deprecated. Use get_block().", t, null));
 			return null;
 		}
 
@@ -641,7 +644,8 @@ public class Environment {
 				Set<Class<? extends com.laytonsmith.core.environments.Environment.EnvironmentImpl>> envs,
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
-			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The function set_block_at() is deprecated. Use set_block().", t);
+			env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+					new CompilerWarning("The function " + getName() + " is deprecated. Use set_block().", t, null));
 			return null;
 		}
 
@@ -1135,7 +1139,8 @@ public class Environment {
 				try {
 					MCBiomeType.valueOf(c.val());
 				} catch (IllegalArgumentException ex) {
-					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, ex.getMessage(), t);
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+							new CompilerWarning(ex.getMessage(), t, null));
 				}
 			}
 			return null;
@@ -1804,7 +1809,8 @@ public class Environment {
 							try {
 								MCSound.MCVanillaSound.valueOf(children.get(1).getData().val().toUpperCase());
 							} catch (IllegalArgumentException ex) {
-								MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, ex.getMessage(), t);
+								env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+										new CompilerWarning(ex.getMessage(), t, null));
 							}
 						}
 					}

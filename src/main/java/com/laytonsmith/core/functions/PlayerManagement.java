@@ -36,6 +36,8 @@ import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -4178,7 +4180,8 @@ public class PlayerManagement {
 			}
 			String value = children.get(children.size() - 1).getData().val();
 			if(value.contains(":") && value.length() <= 6) { // longest valid item format without being blockdata string
-				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The 1:1 format is deprecated in psend_block_change()", t);
+				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+						new CompilerWarning("The 1:1 format is deprecated in " + getName(), t, null));
 			}
 			return null;
 		}

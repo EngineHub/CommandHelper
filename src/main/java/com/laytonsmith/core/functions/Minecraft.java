@@ -8,7 +8,6 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlugin;
-import com.laytonsmith.abstraction.MCPluginManager;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -23,6 +22,8 @@ import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -159,7 +160,8 @@ public class Minecraft {
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
-			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "data_values() is deprecated.", t);
+			env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+					new CompilerWarning(getName() + " is deprecated.", t, null));
 			return null;
 		}
 
@@ -385,7 +387,8 @@ public class Minecraft {
 			}
 			if(children.get(0).getData().isInstanceOf(CString.TYPE) && children.get(0).getData().val().contains(":")
 					|| ArgumentValidation.isNumber(children.get(0).getData())) {
-				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Numeric ids are deprecated in max_stack_size()", t);
+				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+						new CompilerWarning("Numeric ids are deprecated in " + getName(), t, null));
 			}
 			return null;
 		}
@@ -490,7 +493,8 @@ public class Minecraft {
 				try {
 					MCEffect.valueOf(effectName);
 				} catch (IllegalArgumentException ex) {
-					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The effect type " + effectName + " is not valid", t);
+					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+							new CompilerWarning("The effect type " + effectName + " is not valid", t, null));
 				}
 			}
 			return null;
@@ -1192,7 +1196,8 @@ public class Minecraft {
 				return null;
 			}
 			if(ArgumentValidation.isNumber(children.get(0).getData())) {
-				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Numeric ids are deprecated in material_info()", t);
+				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+						new CompilerWarning("Numeric ids are deprecated in " + getName() + ".", t, null));
 			}
 			return null;
 		}

@@ -6,7 +6,6 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
-import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -870,7 +869,8 @@ public class Enchantments {
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 1
 					&& (children.get(0).getData().isInstanceOf(CString.TYPE) || children.get(0).getData().isInstanceOf(CInt.TYPE))) {
-				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
 			return null;
 		}

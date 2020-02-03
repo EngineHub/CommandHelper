@@ -19,12 +19,13 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -704,7 +705,8 @@ public class InventoryManagement {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 0 && children.get(children.size() - 1).getData().isInstanceOf(CString.TYPE)) {
-				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
 			return null;
 		}
@@ -826,7 +828,8 @@ public class InventoryManagement {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 0 && children.get(children.size() - 1).getData().isInstanceOf(CString.TYPE)) {
-				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
 			return null;
 		}
@@ -960,7 +963,8 @@ public class InventoryManagement {
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
 					&& (children.get(1).getData().isInstanceOf(CString.TYPE) || children.get(1).getData().isInstanceOf(CInt.TYPE))) {
-				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
 			return null;
 		}
@@ -1081,7 +1085,8 @@ public class InventoryManagement {
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
 					&& (children.get(1).getData().isInstanceOf(CString.TYPE) || children.get(1).getData().isInstanceOf(CInt.TYPE))) {
-				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
 			return null;
 		}
@@ -1214,7 +1219,8 @@ public class InventoryManagement {
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
 					&& (children.get(1).getData().isInstanceOf(CString.TYPE) || children.get(1).getData().isInstanceOf(CInt.TYPE))) {
-				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
 			return null;
 		}
@@ -1333,7 +1339,8 @@ public class InventoryManagement {
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2 || children.size() == 2
 					&& (children.get(1).getData().isInstanceOf(CString.TYPE) || children.get(1).getData().isInstanceOf(CInt.TYPE))) {
-				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
 			return null;
 		}
@@ -2144,7 +2151,8 @@ public class InventoryManagement {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 2) {
-				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
 			return null;
 		}
@@ -2240,7 +2248,8 @@ public class InventoryManagement {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 3) {
-				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The string item format in " + getName() + " is deprecated.", t);
+				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
 			return null;
 		}

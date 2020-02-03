@@ -21,12 +21,13 @@ import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -1157,7 +1158,8 @@ public class World {
 				List<ParseTree> children, FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() > 1 && children.get(1).getData().val().contains(":")) {
-				MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The 1:1 format is deprecated in spawn_falling_block()", t);
+				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+						new CompilerWarning("The 1:1 format is deprecated in " + getName(), t, null));
 			}
 			return null;
 		}
