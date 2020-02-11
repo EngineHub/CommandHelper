@@ -8,7 +8,7 @@
 	<inceptionYear>2010</inceptionYear>
 	<organization>
 		<name>MethodScript Team</name>
-		<url>http://wiki.sk89q.com/CommandHelper</url>
+		<url>https://methodscript.com</url>
 	</organization>
 	<developers>
 		<developer>
@@ -110,8 +110,8 @@
 		</contributor>
 	</contributors>
 	<issueManagement>
-		<system>sk89q's Youtrack</system>
-		<url>http://youtrack.sk89q.com/issues/CMDHELPER</url>
+		<system>EngineHub Youtrack</system>
+		<url>https://dev.enginehub.org/youtrack/issues/CMDHELPER</url>
 	</issueManagement>
 	<ciManagement>
 		<system>TeamCity</system>
@@ -134,10 +134,9 @@
 		<maven.test.failure.ignore>true</maven.test.failure.ignore>
 	</properties>
 	<repositories>
-		<!-- Repository for other dependencies of SK's -->
 		<repository>
-			<id>sk89q-maven</id>
-			<url>http://maven.sk89q.com/repo/</url>
+			<id>enginehub-maven</id>
+			<url>https://maven.enginehub.org/repo/</url>
 		</repository>
 
 		<!-- Repository for Bukkit -->
@@ -387,12 +386,12 @@
 	</dependencies>
 	<distributionManagement>
 		<repository>
-			<id>maven.sk89q.com</id>
-			<url>http://maven.sk89q.com/artifactory/libs-release-local</url>
+			<id>maven.enginehub.org</id>
+			<url>https://maven.enginehub.org/artifactory/libs-release-local</url>
 		</repository>
 		<snapshotRepository>
-			<id>maven.sk89q.com-snapshot</id>
-			<url>http://maven.sk89q.com/artifactory/libs-snapshot-local</url>
+			<id>maven.enginehub.org-snapshot</id>
+			<url>https://maven.enginehub.org/artifactory/libs-snapshot-local</url>
 		</snapshotRepository>
 	</distributionManagement>
 	<build>
