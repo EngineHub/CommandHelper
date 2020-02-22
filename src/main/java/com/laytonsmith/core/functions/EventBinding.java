@@ -14,6 +14,8 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
+import com.laytonsmith.core.compiler.analysis.Scope;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CNull;
@@ -182,6 +184,36 @@ public class EventBinding {
 				}
 			}
 			return id;
+		}
+
+		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+
+			// Fully ignore the bind() if it will generate an exception later anyways.
+			if(ast.numberOfChildren() < 5) {
+				return parentScope;
+			}
+
+			ParseTree eventName = ast.getChildAt(0);
+			ParseTree options = ast.getChildAt(1);
+			ParseTree prefilter = ast.getChildAt(2);
+			ParseTree eventObj = ast.getChildAt(3);
+			ParseTree code = ast.getChildAt(ast.numberOfChildren() - 1);
+
+			// Order: eventName -> options -> prefilter -> eventObj -> (params)* -> code.
+			Scope eventNameScope = StaticAnalysis.linkScope(parentScope, eventName, exceptions);
+			Scope optionsScope = StaticAnalysis.linkScope(eventNameScope, options, exceptions);
+			Scope prefilterScope = StaticAnalysis.linkScope(optionsScope, prefilter, exceptions);
+			Scope eventObjScope = StaticAnalysis.linkParamScope(prefilterScope, eventObj, exceptions);
+			Scope paramScope = eventObjScope;
+			for(int paramInd = 4; paramInd < ast.numberOfChildren() - 1; paramInd++) {
+				ParseTree param = ast.getChildAt(paramInd);
+				paramScope = StaticAnalysis.linkParamScope(paramScope, param, exceptions);
+			}
+			StaticAnalysis.linkScope(paramScope, code, exceptions);
+
+			// Code after bind() can access its argument scopes, except the code scope.
+			return paramScope;
 		}
 
 		@Override
