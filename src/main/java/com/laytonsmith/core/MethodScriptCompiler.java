@@ -1794,8 +1794,9 @@ public final class MethodScriptCompiler {
 		processKeywords(tree, compilerErrors);
 		optimizeAutoconcats(tree, environment, envs, compilerErrors);
 		checkLinearComponents(tree, environment, compilerErrors);
-		optimize(tree, environment, envs, procs, compilerErrors);
 		link(tree, compilerErrors, envs);
+		optimize(tree, environment, envs, procs, compilerErrors);
+		checkFunctionsExist(tree, compilerErrors, envs);
 		checkLabels(tree, compilerErrors);
 		checkBreaks(tree, compilerErrors);
 		checkTypes(tree, compilerErrors);
@@ -2143,8 +2144,10 @@ public final class MethodScriptCompiler {
 
 	/**
 	 * Recurses down the tree and
-	 * <ul><li>Links functions</li>
-	 * <li>Checks function arguments</li></ul>
+	 * <ul>
+	 *     <li>Links functions</li>
+	 *     <li>Validates function argument size</li>
+	 * </ul>
 	 * This is a separate process from optimization, because optimization ignores any missing functions.
 	 *
 	 * @param tree
@@ -2186,17 +2189,40 @@ public final class MethodScriptCompiler {
 		// Walk the children
 		for(ParseTree child : tree.getChildren()) {
 			if(child.getData() instanceof CFunction) {
-				if(((CFunction) child.getData()).hasFunction()) {
-					// This will throw an exception if the function doesn't exist.
-					try {
-						FunctionList.getFunction((CFunction) child.getData(), envs);
-					} catch (ConfigCompileException ex) {
-						compilerErrors.add(ex);
-					} catch (ClassCastException ex) {
-						throw new RuntimeException(ex);
-					}
-				}
 				link(child, compilerErrors, envs);
+			}
+		}
+	}
+
+	/**
+	 * Recurses down the tree and checks whether functions exist in the given environments, generating compile errors
+	 * if they don't. This should be called after optimization, since it's okay to use undefined functions as long as
+	 * static optimization can determine that they are never called in the current environment.
+	 * This check ignores child nodes of functions with the {@link nolinking} annotation.
+	 * @param tree
+	 */
+	private static void checkFunctionsExist(ParseTree tree, Set<ConfigCompileException> compilerErrors,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs) {
+
+		// Ignore non-CFunction nodes.
+		if(tree.getData() instanceof CFunction) {
+
+			// Check current node, returning if it is a 'nolinking' function.
+			CFunction cFunc = (CFunction) tree.getData();
+			if(cFunc.hasFunction()) {
+				try {
+					FunctionBase func = FunctionList.getFunction(cFunc, envs);
+					if(func.getClass().getAnnotation(nolinking.class) != null) {
+						return; // Don't check children of 'nolinking' functions.
+					}
+				} catch (ConfigCompileException ex) {
+					compilerErrors.add(ex);
+				}
+			}
+
+			// Recursively check children.
+			for(ParseTree child : tree.getChildren()) {
+				checkFunctionsExist(child, compilerErrors, envs);
 			}
 		}
 	}
