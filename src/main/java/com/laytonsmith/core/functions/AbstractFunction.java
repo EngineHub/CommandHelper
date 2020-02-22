@@ -48,7 +48,7 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	/**
-	 * {@inheritDocs}
+	 * {@inheritDoc}
 	 * 
 	 * By default, we return CVoid.
 	 *
