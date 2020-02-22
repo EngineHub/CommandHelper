@@ -2098,6 +2098,70 @@ public class DataHandling {
 		}
 
 		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			return this.linkScope(parentScope, ast, exceptions, true);
+		}
+
+		public Scope linkScope(Scope parentScope, ParseTree ast,
+				Set<ConfigCompileException> exceptions, boolean codeInheritsParentScope) {
+
+			// Handle empty closure.
+			if(ast.numberOfChildren() == 0) {
+				return parentScope;
+			}
+
+			// Handle optional return type argument.
+			int ind = 0;
+			Scope retTypeScope = (ast.getChildAt(ind).getData().isInstanceOf(CClassType.TYPE)
+					? StaticAnalysis.linkScope(parentScope, ast.getChildAt(ind++), exceptions) : parentScope);
+
+			// Create parameter scope.
+			Scope paramScope = new Scope();
+
+			// Insert @arguments parameter.
+			paramScope.addDeclaration(new Declaration(Namespace.IVARIABLE, "@arguments", CArray.TYPE, ast.getTarget()));
+
+			// Handle custom parameters.
+			while(ind < ast.numberOfChildren() - 1) {
+				ParseTree param = ast.getChildAt(ind++);
+
+				// Resolve parameters in outer scope.
+				Scope paramDeclScope = StaticAnalysis.linkParamScope(retTypeScope, param, exceptions);
+				if(paramDeclScope != retTypeScope) { // Ensure that we're no longer in the passed scope.
+
+					// Get the parameter declaration.
+					Set<Declaration> decls = paramDeclScope.getAllDeclarationsLocal(Namespace.IVARIABLE);
+					if(decls.size() == 1) { // If this is not the case, the type checker should give a compile error.
+						Declaration decl = decls.iterator().next();
+
+						// Detect duplicate parameter names.
+						Declaration dupDecl = paramScope.getDeclaration(Namespace.IVARIABLE, decl.getIdentifier());
+						if(dupDecl != null) {
+							exceptions.add(new ConfigCompileException("Duplicate parameter declaration: Parameter "
+									+ decl.getIdentifier() + " is already declared at "
+									+ dupDecl.getTarget().toString(), decl.getTarget()));
+						}
+
+						// Add the declaration to the closure param scope.
+						paramScope.addDeclaration(decl);
+					}
+				}
+			}
+
+			// Set a parent scope if this closure type should be allowed to resolve in the parent scope.
+			if(codeInheritsParentScope) {
+				paramScope.setParent(parentScope);
+			}
+
+			// Handle code.
+			ParseTree code = ast.getChildAt(ast.numberOfChildren() - 1);
+			StaticAnalysis.linkScope(paramScope, code, exceptions);
+
+			// Return the parent scope, as parameters and their default values are not accessible after the closure.
+			return parentScope;
+		}
+
+		@Override
 		public Version since() {
 			return MSVersion.V3_3_0;
 		}
@@ -2220,6 +2284,11 @@ public class DataHandling {
 			// This ensures it's not unintentionally retaining values in memory cloned from the original scope.
 			myEnv.getEnv(GlobalEnv.class).SetVarList(null);
 			return new CIClosure(nodes[nodes.length - 1], myEnv, returnType, names, defaults, types, t);
+		}
+
+		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			return this.linkScope(parentScope, ast, exceptions, false);
 		}
 
 		@Override
