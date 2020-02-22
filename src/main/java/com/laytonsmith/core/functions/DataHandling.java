@@ -29,6 +29,10 @@ import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
+import com.laytonsmith.core.compiler.analysis.Declaration;
+import com.laytonsmith.core.compiler.analysis.Namespace;
+import com.laytonsmith.core.compiler.analysis.Scope;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -321,6 +325,59 @@ public class DataHandling {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			if(ast.getChildren().size() == 3) { // Variable declaration + assign: assign(type, var, val).
+
+				// Handle the assigned value.
+				Scope valScope = StaticAnalysis.linkScope(parentScope, ast.getChildAt(2), exceptions);
+
+				// Create a new scope and put the variable declaration in that scope.
+				Scope declScope = valScope.createNewChild();
+				Mixed rawType = ast.getChildAt(0).getData();
+				Mixed rawIVar = ast.getChildAt(1).getData();
+				if(rawType instanceof CClassType && rawIVar instanceof IVariable) {
+					CClassType type = (CClassType) rawType;
+					IVariable iVar = (IVariable) rawIVar;
+
+					// Detect duplicate variable declarations (or declaration after assign).
+					Declaration decl = valScope.getDeclaration(Namespace.IVARIABLE, iVar.getVariableName());
+					if(decl != null) {
+						exceptions.add(new ConfigCompileException("Duplicate variable declaration: Variable "
+								+ iVar.getVariableName() + " is already declared at "
+								+ decl.getTarget().toString(), iVar.getTarget()));
+					}
+
+					// Add the new variable declaration.
+					declScope.addDeclaration(new Declaration(
+							Namespace.IVARIABLE, iVar.getVariableName(), type, ast.getTarget()));
+				}
+
+				// Return the declaration scope.
+				return declScope;
+
+			} else if(ast.getChildren().size() == 2) { // Variable assign: assign(var, val).
+
+				// Declare the variable as 'auto' if it it has not yet been declared.
+				Scope newScope = parentScope.createNewChild();
+				Mixed rawIVar = ast.getChildAt(0).getData();
+				if(rawIVar instanceof IVariable) {
+					IVariable iVar = (IVariable) rawIVar;
+					Declaration decl = parentScope.getDeclaration(Namespace.IVARIABLE, iVar.getVariableName());
+					if(decl == null) {
+
+						// Add the new variable declaration.
+						newScope.addDeclaration(new Declaration(
+								Namespace.IVARIABLE, iVar.getVariableName(), CClassType.AUTO, ast.getTarget()));
+					}
+				}
+
+				// Proceed on the assigned value and return the resulting scope.
+				return StaticAnalysis.linkScope(newScope, ast.getChildAt(1), exceptions);
+			}
+			return super.linkScope(parentScope, ast, exceptions);
 		}
 
 		@Override
