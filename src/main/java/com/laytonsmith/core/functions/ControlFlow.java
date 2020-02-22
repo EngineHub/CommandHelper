@@ -21,6 +21,8 @@ import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
+import com.laytonsmith.core.compiler.analysis.Scope;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.keywords.InKeyword;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CFunction;
@@ -91,10 +93,7 @@ public class ControlFlow {
 			}
 			ParseTree condition = nodes[0];
 			ParseTree __if = nodes[1];
-			ParseTree __else = null;
-			if(nodes.length == 3) {
-				__else = nodes[2];
-			}
+			ParseTree __else = (nodes.length == 3 ? nodes[2] : null);
 
 			if(ArgumentValidation.getBooleanish(parent.seval(condition, env), t)) {
 				return parent.seval(__if, env);
@@ -115,6 +114,25 @@ public class ControlFlow {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			if(ast.numberOfChildren() < 2) {
+				return parentScope;
+			}
+
+			// Handle condition in parent scope.
+			Scope condScope = StaticAnalysis.linkScope(parentScope, ast.getChildAt(0), exceptions);
+
+			// Handle if and else branches in separate scopes.
+			StaticAnalysis.linkScope(condScope.createNewChild(), ast.getChildAt(1), exceptions);
+			if(ast.numberOfChildren() == 3) {
+				StaticAnalysis.linkScope(condScope.createNewChild(), ast.getChildAt(2), exceptions);
+			}
+
+			// Return the condition scope.
+			return condScope;
 		}
 
 		@Override
@@ -331,6 +349,33 @@ public class ControlFlow {
 		}
 
 		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			Scope firstCondScope = null;
+			for(int i = 0; i <= ast.numberOfChildren() - 2; i += 2) {
+				ParseTree cond = ast.getChildAt(i);
+				ParseTree code = ast.getChildAt(i + 1);
+
+				// Handle condition in parent scope.
+				Scope condScope = StaticAnalysis.linkScope(parentScope, cond, exceptions);
+				if(firstCondScope == null) {
+					firstCondScope = condScope;
+				}
+
+				// Handle code branches in separate scope.
+				StaticAnalysis.linkScope(condScope.createNewChild(), code, exceptions);
+			}
+
+			// Handle optional else branch in separate scope.
+			if((ast.numberOfChildren() & 0x01) == 0x01) { // (size % 2) == 1.
+				StaticAnalysis.linkScope(
+						parentScope.createNewChild(), ast.getChildAt(ast.numberOfChildren() - 1), exceptions);
+			}
+
+			// Return the first condition scope if available, as this is the only code that always runs.
+			return (firstCondScope != null ? firstCondScope : parentScope);
+		}
+
+		@Override
 		public Set<Optimizable.OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC
@@ -486,6 +531,30 @@ public class ControlFlow {
 				}
 			}
 			return CVoid.VOID;
+		}
+
+		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			List<ParseTree> children = ast.getChildren();
+			for(int i = 0; i <= children.size() - 2; i += 2) {
+				ParseTree cond = children.get(i);
+				ParseTree code = children.get(i + 1);
+
+				// Handle condition in parent scope.
+				Scope condScope = StaticAnalysis.linkScope(parentScope, cond, exceptions);
+
+				// Handle code branches in separate scope.
+				StaticAnalysis.linkScope(condScope.createNewChild(), code, exceptions);
+			}
+
+			// Handle optional default branch in separate scope.
+			if((children.size() & 0x01) == 0x01) { // (size % 2) == 1.
+				StaticAnalysis.linkScope(
+						parentScope.createNewChild(), children.get(children.size() - 1), exceptions);
+			}
+
+			// Return the parent scope.
+			return parentScope;
 		}
 
 		@Override
@@ -930,6 +999,22 @@ public class ControlFlow {
 		}
 
 		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			if(ast.numberOfChildren() >= 4) {
+				ParseTree assign = ast.getChildAt(0);
+				ParseTree cond = ast.getChildAt(1);
+				ParseTree exp = ast.getChildAt(2);
+				ParseTree code = ast.getChildAt(3);
+
+				Scope assignScope = StaticAnalysis.linkScope(parentScope, assign, exceptions);
+				Scope condScope = StaticAnalysis.linkScope(assignScope, cond, exceptions);
+				Scope expScope = StaticAnalysis.linkScope(condScope, exp, exceptions);
+				StaticAnalysis.linkScope(expScope, code, exceptions);
+			}
+			return parentScope;
+		}
+
+		@Override
 		public String docs() {
 			return "void {assign, condition, expression1, expression2} Acts as a typical for loop. The assignment is"
 					+ " first run. Then, a condition is checked. If that condition is checked and returns true,"
@@ -1119,6 +1204,27 @@ public class ControlFlow {
 				parent.eval(elseCode, env);
 			}
 			return CVoid.VOID;
+		}
+
+		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			if(ast.numberOfChildren() >= (this.runAsFor ? 3 : 4)) {
+				ParseTree assign = ast.getChildAt(0);
+				ParseTree cond = ast.getChildAt(1);
+				ParseTree exp = ast.getChildAt(2);
+				ParseTree code = ast.getChildAt(3);
+				ParseTree elseCode = (this.runAsFor ? null : ast.getChildAt(4));
+
+				// Order: assign -> cond -> (code -> exp -> cond)* -> elseCode?.
+				Scope assignScope = StaticAnalysis.linkScope(parentScope, assign, exceptions);
+				Scope condScope = StaticAnalysis.linkScope(assignScope, cond, exceptions);
+				Scope codeScope = StaticAnalysis.linkScope(condScope, code, exceptions);
+				StaticAnalysis.linkScope(codeScope, exp, exceptions);
+				if(elseCode != null) {
+					StaticAnalysis.linkScope(condScope, code, exceptions);
+				}
+			}
+			return parentScope;
 		}
 
 		@Override
@@ -1332,6 +1438,24 @@ public class ControlFlow {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CRERangeException.class};
+		}
+
+		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			if(ast.numberOfChildren() >= 3) {
+				int ind = 0;
+				ParseTree array = ast.getChildAt(ind++);
+				ParseTree key = (ast.numberOfChildren() == 4 ? ast.getChildAt(ind++) : null);
+				ParseTree val = ast.getChildAt(ind++);
+				ParseTree code = ast.getChildAt(ind++);
+
+				// Order: array -> [key] -> val -> code?.
+				Scope arrayScope = StaticAnalysis.linkScope(parentScope, array, exceptions);
+				Scope keyScope = (key == null ? arrayScope : StaticAnalysis.linkParamScope(arrayScope, key, exceptions));
+				Scope valScope = StaticAnalysis.linkParamScope(keyScope, val, exceptions);
+				StaticAnalysis.linkScope(valScope, code, exceptions);
+			}
+			return parentScope;
 		}
 
 		@Override
@@ -1587,6 +1711,26 @@ public class ControlFlow {
 		}
 
 		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			if(ast.numberOfChildren() >= 4) {
+				int ind = 0;
+				ParseTree array = ast.getChildAt(ind++);
+				ParseTree key = (ast.numberOfChildren() == 5 ? ast.getChildAt(ind++) : null);
+				ParseTree val = ast.getChildAt(ind++);
+				ParseTree code = ast.getChildAt(ind++);
+				ParseTree elseCode = ast.getChildAt(ind++);
+
+				// Order: array -> [key] -> val -> code? | array -> elseCode.
+				Scope arrayScope = StaticAnalysis.linkScope(parentScope, array, exceptions);
+				Scope keyScope = (key == null ? arrayScope : StaticAnalysis.linkParamScope(arrayScope, key, exceptions));
+				Scope valScope = StaticAnalysis.linkParamScope(keyScope, val, exceptions);
+				StaticAnalysis.linkScope(valScope, code, exceptions);
+				StaticAnalysis.linkScope(arrayScope, elseCode, exceptions);
+			}
+			return parentScope;
+		}
+
+		@Override
 		public String getName() {
 			return "foreachelse";
 		}
@@ -1720,6 +1864,22 @@ public class ControlFlow {
 		}
 
 		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			if(ast.numberOfChildren() >= 1) {
+				ParseTree cond = ast.getChildAt(0);
+				ParseTree code = (ast.numberOfChildren() > 1 ? ast.getChildAt(1) : null);
+
+				// Order: cond -> (code -> cond)*.
+				Scope condScope = StaticAnalysis.linkScope(parentScope, cond, exceptions);
+				if(code != null) {
+					StaticAnalysis.linkScope(condScope, code, exceptions);
+				}
+			}
+
+			return parentScope;
+		}
+
+		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "assign(@i, 5)\nwhile(@i > 0,\n"
@@ -1831,6 +1991,19 @@ public class ControlFlow {
 				}
 			}
 			return CVoid.VOID;
+		}
+
+		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			if(ast.numberOfChildren() >= 2) {
+				ParseTree code = ast.getChildAt(0);
+				ParseTree cond = ast.getChildAt(1);
+
+				// Order: (code -> cond)*.
+				Scope codeScope = StaticAnalysis.linkScope(parentScope, code, exceptions);
+				StaticAnalysis.linkScope(codeScope, cond, exceptions);
+			}
+			return parentScope;
 		}
 
 		@Override
