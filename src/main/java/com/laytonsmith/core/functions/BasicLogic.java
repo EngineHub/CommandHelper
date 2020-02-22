@@ -1338,16 +1338,10 @@ public class BasicLogic {
 		@Override
 		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
 				throws ConfigCompileException {
-			if(argTypes.size() == 2) {
-				Class<? extends Mixed> t1 = argTypes.get(0);
-				Class<? extends Mixed> t2 = argTypes.get(1);
-				if(t1 != null && !CBoolean.class.isAssignableFrom(t1)) {
+			for(Class<? extends Mixed> argType : argTypes) {
+				if(argType != null && !CBoolean.class.isAssignableFrom(argType)) {
 					throw new ConfigCompileException("Expected type " + CBoolean.TYPE.getSimpleName()
-							+ ", but received type " + CClassType.get(t1).getSimpleName() + " instead.", t);
-				}
-				if(t2 != null && !CBoolean.class.isAssignableFrom(t2)) {
-					throw new ConfigCompileException("Expected type " + CBoolean.TYPE.getSimpleName()
-							+ ", but received type " + CClassType.get(t2).getSimpleName() + " instead.", t);
+							+ ", but received type " + CClassType.get(argType).getSimpleName() + " instead.", t);
 				}
 			}
 			return CBoolean.class;
