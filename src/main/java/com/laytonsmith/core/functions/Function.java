@@ -4,6 +4,7 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -12,6 +13,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Note that to "activate" this class as a function, you must prefix the '@api' annotation to it.
@@ -95,6 +97,18 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * @return {@code true} if the function has static side effects, {@code false} otherwise.
 	 */
 	public boolean hasStaticSideEffects();
+
+	/**
+	 * If functions cause declarations that should not be accessible from their parent scope (earlier lines in code),
+	 * then these functions should create a new scope, link it to the parent scope if it is allowed to perform lookups
+	 * in there, put the new declaration in the new scope and return this new scope.
+	 * Functions are also responsible for calling this method on their children to further generate the scope graph.
+	 * @param parentScope - The current scope.
+	 * @param ast - The abstract syntax tree representing this function.
+	 * @param exceptions - A set to put compile errors in.
+	 * @return The new (linked) scope, or the parent scope if this function does not require a new scope.
+	 */
+	public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions);
 
 	/**
 	 * If a function needs a code tree instead of a resolved construct, it should return true here. Most functions will

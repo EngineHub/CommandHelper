@@ -14,6 +14,8 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.analysis.Scope;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
@@ -80,6 +82,20 @@ public abstract class AbstractFunction implements Function {
 	@Override
 	public boolean hasStaticSideEffects() {
 		return true; // Assuming that a function does 'something' is safe in terms of not optimizing it away.
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * By default, the parent scope is passed to the first child, the result is passed to the second child, etc.
+	 * This method returns the scope as returned by the last child, or the parent scope if it does not have children.
+	 */
+	@Override
+	public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+		Scope scope = parentScope;
+		for(ParseTree child : ast.getChildren()) {
+			scope = StaticAnalysis.linkScope(scope, child, exceptions);
+		}
+		return scope;
 	}
 
 	/**
