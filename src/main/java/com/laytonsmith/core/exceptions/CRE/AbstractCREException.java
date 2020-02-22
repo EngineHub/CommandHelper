@@ -92,7 +92,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 	/**
 	 * Returns the name of the exception. If the exception is an instanceof AbstractCREException, this is equivalent to
-	 * calling {@link #getName() }. Otherwise, the java class name is returned.
+	 * calling {@link #getName()}. Otherwise, the java class name is returned.
 	 *
 	 * @param ex
 	 * @return

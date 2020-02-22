@@ -1489,7 +1489,7 @@ public class DataHandling {
 
 	}
 
-	@api(environments = CommandHelperEnvironment.class)
+	@api
 	public static class is_proc extends AbstractFunction {
 
 		@Override

@@ -6,7 +6,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,8 +20,8 @@ import java.util.Set;
  */
 public class DynamicClassLoader extends ClassLoader {
 
-	private final Map<URL, URLClassLoader> classLoaders = new LinkedHashMap<URL, URLClassLoader>();
-	private final Set<URL> urls = new HashSet<URL>();
+	private final Map<URL, URLClassLoader> classLoaders = new LinkedHashMap<>();
+	private final Set<URL> urls = new HashSet<>();
 	private boolean destroyed = false;
 
 	/**
@@ -72,8 +74,31 @@ public class DynamicClassLoader extends ClassLoader {
 	}
 
 	@Override
+	public Enumeration<URL> getResources(String name) throws IOException {
+		List<URL> locations = new ArrayList<>();
+		for(ClassLoader c : classLoaders.values()) {
+			Enumeration<URL> res = c.getResources(name);
+			while(res.hasMoreElements()) {
+				locations.add(res.nextElement());
+			}
+		}
+		Iterator<URL> iterator = locations.iterator();
+		return new Enumeration() {
+			@Override
+			public boolean hasMoreElements() {
+				return iterator.hasNext();
+			}
+
+			@Override
+			public Object nextElement() {
+				return iterator.next();
+			}
+		};
+	}
+
+	@Override
 	protected synchronized Package[] getPackages() {
-		List<Package> packages = new ArrayList<Package>();
+		List<Package> packages = new ArrayList<>();
 		for(ClassLoader c : classLoaders.values()) {
 			packages.addAll(Arrays.asList((Package[]) ReflectionUtils.invokeMethod(c.getClass(), c, "getPackages")));
 		}
@@ -118,7 +143,8 @@ public class DynamicClassLoader extends ClassLoader {
 
 	private void checkDestroy() {
 		if(destroyed) {
-			throw new RuntimeException("Cannot access this instance of " + DynamicClassLoader.class.getSimpleName() + ", as it has already been destroyed.");
+			throw new RuntimeException("Cannot access this instance of " + DynamicClassLoader.class.getSimpleName()
+					+ ", as it has already been destroyed.");
 		}
 	}
 
