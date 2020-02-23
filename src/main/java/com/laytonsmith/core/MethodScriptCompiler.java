@@ -1819,11 +1819,11 @@ public final class MethodScriptCompiler {
 		processKeywords(tree, compilerErrors);
 		optimizeAutoconcats(tree, environment, envs, compilerErrors);
 		checkLinearComponents(tree, environment, compilerErrors);
-		link(tree, compilerErrors, envs);
 		if(doStaticAnalysis) {
 			new StaticAnalysis(tree).analyze(compilerErrors);
 		}
 		optimize(tree, environment, envs, procs, compilerErrors);
+		link(tree, compilerErrors, envs);
 		checkFunctionsExist(tree, compilerErrors, envs);
 		checkLabels(tree, compilerErrors);
 		checkBreaks(tree, compilerErrors);
