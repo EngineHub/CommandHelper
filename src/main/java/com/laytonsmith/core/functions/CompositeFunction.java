@@ -42,7 +42,7 @@ public abstract class CompositeFunction extends AbstractFunction {
 
 				String script = script();
 				tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, null, true),
-						env, env.getEnvClasses())
+						env, env.getEnvClasses(), false)
 						// the root of the tree is null, so go ahead and pull it up
 						.getChildAt(0);
 			} catch (ConfigCompileException | ConfigCompileGroupException ex) {
