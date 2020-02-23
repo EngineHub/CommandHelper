@@ -1342,6 +1342,78 @@ public class DataHandling {
 		}
 
 		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+
+			// Handle not enough arguments.
+			if(ast.numberOfChildren() < 2) {
+				return parentScope;
+			}
+
+			// Handle optional return type argument (CClassType or CVoid, default to AUTO).
+			int ind = 0;
+			CClassType retType;
+			if(ast.getChildAt(ind).getData() instanceof CClassType) {
+				retType = (CClassType) ast.getChildAt(ind++).getData();
+			} else if(ast.getChildAt(ind).getData().equals(CVoid.VOID)) {
+				ind++;
+				retType = CVoid.TYPE;
+			} else {
+				retType = CClassType.AUTO;
+			}
+
+			// Get proc name.
+			ParseTree procNameNode = ast.getChildAt(ind++);
+			String procName = procNameNode.getData().val();
+
+			// Create parameter scope.
+			Scope outerParamScope = parentScope;
+			Scope innerParamScope = new Scope();
+
+			// Insert @arguments parameter.
+			innerParamScope.addDeclaration(
+					new Declaration(Namespace.IVARIABLE, "@arguments", CArray.TYPE, ast.getTarget()));
+
+			// Handle custom parameters.
+			while(ind < ast.numberOfChildren() - 1) {
+				ParseTree param = ast.getChildAt(ind++);
+
+				// Resolve parameters from left to right, starting in the outer scope.
+				Scope oldOuterParamScope = outerParamScope;
+				outerParamScope = StaticAnalysis.linkParamScope(outerParamScope, param, exceptions);
+				if(outerParamScope != oldOuterParamScope) { // Ensure that we're no longer in the passed scope.
+
+					// Get the parameter declaration.
+					Set<Declaration> decls = outerParamScope.getAllDeclarationsLocal(Namespace.IVARIABLE);
+					if(decls.size() == 1) { // If this is not the case, the type checker should give a compile error.
+						Declaration decl = decls.iterator().next();
+
+						// Detect duplicate parameter names.
+						Declaration dupDecl = innerParamScope.getDeclaration(Namespace.IVARIABLE, decl.getIdentifier());
+						if(dupDecl != null) {
+							exceptions.add(new ConfigCompileException("Duplicate parameter declaration: Parameter "
+									+ decl.getIdentifier() + " is already declared at "
+									+ dupDecl.getTarget().toString(), decl.getTarget()));
+						}
+
+						// Add the declaration to the proc param scope.
+						innerParamScope.addDeclaration(decl);
+					}
+				}
+			}
+
+			// Handle code.
+			ParseTree code = ast.getChildAt(ast.numberOfChildren() - 1);
+			StaticAnalysis.linkScope(innerParamScope, code, exceptions);
+
+			// Create proc declaration.
+			// TODO - Include proc signature (argument types and number of arguments) in declaration.
+			parentScope.addDeclaration(new Declaration(Namespace.PROCEDURE, procName, retType, ast.getTarget()));
+
+			// Return the parent scope, as parameters and their default values are not accessible after the closure.
+			return parentScope;
+		}
+
+		@Override
 		public boolean useSpecialExec() {
 			return true;
 		}
