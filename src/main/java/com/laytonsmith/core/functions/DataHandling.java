@@ -360,8 +360,11 @@ public class DataHandling {
 
 			} else if(ast.getChildren().size() == 2) { // Variable assign: assign(var, val).
 
+				// Handle the assigned value.
+				Scope valScope = StaticAnalysis.linkScope(parentScope, ast.getChildAt(1), exceptions);
+
 				// Declare the variable as 'auto' if it it has not yet been declared.
-				Scope newScope = parentScope.createNewChild();
+				Scope newScope = valScope.createNewChild();
 				Mixed rawIVar = ast.getChildAt(0).getData();
 				if(rawIVar instanceof IVariable) {
 					IVariable iVar = (IVariable) rawIVar;
@@ -374,8 +377,8 @@ public class DataHandling {
 					}
 				}
 
-				// Proceed on the assigned value and return the resulting scope.
-				return StaticAnalysis.linkScope(newScope, ast.getChildAt(1), exceptions);
+				// Return the new scope.
+				return newScope;
 			}
 			return super.linkScope(parentScope, ast, exceptions);
 		}
