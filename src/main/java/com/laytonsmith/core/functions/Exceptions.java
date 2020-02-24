@@ -24,6 +24,8 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
+import com.laytonsmith.core.compiler.analysis.Scope;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
@@ -198,6 +200,35 @@ public class Exceptions {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return CVoid.VOID;
+		}
+
+		@Override
+		@SuppressWarnings({"checkstyle:fallthrough", "checkstyle:defaultcomeslast"}) // Intended for control flow.
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			int numArgs = ast.numberOfChildren();
+			Scope catchParentScope = parentScope;
+			switch(numArgs) {
+				default: // Too many arguments, just analyze the first 4, this will cause a compile error later.
+				case 4: { // try(tryCode, exParam, catchCode, exTypes).
+					ParseTree exTypes = ast.getChildAt(3);
+					StaticAnalysis.linkScope(parentScope, exTypes, exceptions);
+				}
+				case 3: { // try(tryCode, exParam, catchCode).
+					ParseTree exParam = ast.getChildAt(1);
+					catchParentScope = StaticAnalysis.linkParamScope(parentScope, exParam, exceptions);
+				}
+				case 2: { // try(tryCode, [exParam], catchCode).
+					ParseTree catchCode = ast.getChildAt(numArgs == 2 ? 1 : 2);
+					StaticAnalysis.linkScope(catchParentScope, catchCode, exceptions);
+				}
+				case 1: { // try(tryCode).
+					ParseTree tryCode = ast.getChildAt(0);
+					StaticAnalysis.linkScope(parentScope, tryCode, exceptions);
+				}
+				case 0: {
+					return parentScope;
+				}
+			}
 		}
 
 		@Override
@@ -502,6 +533,31 @@ public class Exceptions {
 			}
 
 			return CVoid.VOID;
+		}
+
+		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			if(ast.numberOfChildren() >= 1) {
+
+				// Handle try code.
+				ParseTree tryCode = ast.getChildAt(0);
+				StaticAnalysis.linkScope(parentScope, tryCode, exceptions);
+
+				// Handle catch blocks with a catch variable.
+				for(int i = 1; i < ast.numberOfChildren(); i += 2) {
+					ParseTree exParam = ast.getChildAt(i);
+					ParseTree catchCode = ast.getChildAt(i + 1);
+					Scope exParamScope = StaticAnalysis.linkParamScope(parentScope, exParam, exceptions);
+					StaticAnalysis.linkScope(exParamScope, catchCode, exceptions);
+				}
+
+				// Handle optional last catch block.
+				if((ast.numberOfChildren() & 0x01) == 0x00) { // (size % 2) == 0.
+					ParseTree catchCode = ast.getChildAt(ast.numberOfChildren() - 1);
+					StaticAnalysis.linkScope(parentScope, catchCode, exceptions);
+				}
+			}
+			return parentScope;
 		}
 
 		@Override
