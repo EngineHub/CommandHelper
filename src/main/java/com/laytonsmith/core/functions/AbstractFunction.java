@@ -99,6 +99,29 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	/**
+	 * Functions that use lazy evaluation where the first argument is always evaluated, and later arguments might not
+	 * be evaluated depending on the outcome of previous arguments.
+	 * @param parentScope - The current scope.
+	 * @param ast - The abstract syntax tree representing this function.
+	 * @param exceptions - A set to put compile errors in.
+	 * @return The new (linked) scope from the first argument, or the parent scope if no arguments are available or
+	 * if this function does not require a new scope.
+	 */
+	protected Scope linkScopeLazy(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+		if(ast.numberOfChildren() >= 1) {
+
+			// Order: arg1 -> ((arg2? -> arg3?) -> ...) (lazy evaluation).
+			Scope firstArgScope = StaticAnalysis.linkScope(parentScope, ast.getChildAt(0), exceptions);
+			Scope lastArgScope = firstArgScope;
+			for(int i = 1; i < ast.numberOfChildren(); i++) {
+				lastArgScope = StaticAnalysis.linkScope(lastArgScope, ast.getChildAt(i), exceptions);
+			}
+			return firstArgScope;
+		}
+		return parentScope;
+	}
+
+	/**
 	 * By default, we return false, because most functions do not need this
 	 *
 	 * @return
