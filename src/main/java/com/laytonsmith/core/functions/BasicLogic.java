@@ -13,6 +13,7 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
+import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
@@ -1090,6 +1091,11 @@ public class BasicLogic {
 		}
 
 		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			return this.linkScopeLazy(parentScope, ast, exceptions);
+		}
+
+		@Override
 		public String docs() {
 			return "boolean {var1, [var2...]} Returns the boolean value of a logical AND across all arguments. Uses lazy determination, so once "
 					+ "an argument returns false, the function returns. Operator syntax is supported:"
@@ -1222,6 +1228,11 @@ public class BasicLogic {
 				}
 			}
 			return CBoolean.TRUE;
+		}
+
+		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			return this.linkScopeLazy(parentScope, ast, exceptions);
 		}
 
 		@Override
@@ -1364,6 +1375,11 @@ public class BasicLogic {
 		}
 
 		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			return this.linkScopeLazy(parentScope, ast, exceptions);
+		}
+
+		@Override
 		public String docs() {
 			return "boolean {var1, [var2...]} Returns the boolean value of a logical OR across all arguments. Uses lazy"
 					+ " determination, so once an argument resolves to true, the function returns. Operator syntax is also"
@@ -1499,6 +1515,11 @@ public class BasicLogic {
 				}
 			}
 			return env.getEnv(GlobalEnv.class).GetScript().seval(nodes[nodes.length - 1], env);
+		}
+
+		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			return this.linkScopeLazy(parentScope, ast, exceptions);
 		}
 
 		@Override
@@ -1740,6 +1761,11 @@ public class BasicLogic {
 		}
 
 		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			return this.linkScopeLazy(parentScope, ast, exceptions);
+		}
+
+		@Override
 		public boolean useSpecialExec() {
 			return true;
 		}
@@ -1798,6 +1824,11 @@ public class BasicLogic {
 		@Override
 		public CBoolean execs(Target t, Environment environment, Script parent, ParseTree... args) throws ConfigRuntimeException {
 			return new or().execs(t, environment, parent, args).not();
+		}
+
+		@Override
+		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+			return this.linkScopeLazy(parentScope, ast, exceptions);
 		}
 
 		@Override
