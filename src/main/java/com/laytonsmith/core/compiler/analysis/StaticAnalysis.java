@@ -73,6 +73,24 @@ public class StaticAnalysis {
 					exceptions.add(new ConfigCompileException(
 							"Variable cannot be resolved: " + cFunc.val(), cFunc.getTarget()));
 				}
+			} else if(cFunc.hasProcedure()) {
+
+				// The function is a procedure reference.
+				/*
+				 *  TODO - Add a proc reference to the scope graph.
+				 *  As procedures in different files can depend on each other, this requires resolving references in
+				 *  the scope graph after all files have been processed.
+				 */
+
+				// Handle the proc call arguments.
+				Scope scope = parentScope;
+				for(ParseTree child : ast.getChildren()) {
+					scope = linkScope(scope, child, exceptions);
+				}
+				return scope;
+			} else {
+				throw new Error("Unsupported " + CFunction.class.getSimpleName()
+						+ " type in static analysis for node with value: " + cFunc.val());
 			}
 		} else if(node instanceof IVariable) {
 			IVariable ivar = (IVariable) node;
