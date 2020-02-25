@@ -105,7 +105,7 @@ public class Compiler {
 	@api
 	@noprofile
 	@hide("This is only used internally by the compiler.")
-	public static class __autoconcat__ extends DummyFunction implements Optimizable {
+	public static class __autoconcat__ extends DummyFunction {
 
 		public static ParseTree getParseTree(List<ParseTree> children, FileOptions fo, Target t) {
 			CFunction ac = new CFunction(new __autoconcat__().getName(), t);
@@ -134,31 +134,20 @@ public class Compiler {
 					+ " may be undefined if it is used in code.";
 		}
 
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(
-					OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env,
-				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> list, FileOptions fileOptions) throws ConfigCompileException {
-			return optimizeSpecial(list, true, envs);
-		}
-
 		private static final String ASSIGN = new DataHandling.assign().getName();
 
 		/**
-		 * __autoconcat__ has special optimization techniques needed, since it's really a part of the compiler itself,
-		 * and not so much a function. It being a function is merely a convenience, so we can defer processing until
-		 * after parsing. While it is tightly coupled with the compiler, this is ok, since it's really a compiler
-		 * mechanism more than a function.
+		 * Rewrites this __autoconcat__ node to an executable AST node as part of compilation. This either results in
+		 * this __autoconcat__ node being replaced or in a compile error if the __autoconcat__ cannot be converted to
+		 * an executable AST node. This being a function is merely a convenient way to defer processing until after
+		 * parsing, meaning that it should ALWAYS be rewritten before executing the AST.
 		 *
 		 * @param list
 		 * @param returnSConcat
-		 * @return
+		 * @return The executable AST node, representing the code/tokens in this __autoconcat__.
+		 * @throws ConfigCompileException If this __autoconcat__ cannot be converted to an executable AST node.
 		 */
-		public ParseTree optimizeSpecial(List<ParseTree> list, boolean returnSConcat,
+		public ParseTree rewrite(List<ParseTree> list, boolean returnSConcat,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs) throws ConfigCompileException {
 			//If any of our nodes are CSymbols, we have different behavior
 			boolean inSymbolMode = false; //caching this can save Xn
@@ -291,7 +280,7 @@ public class Compiler {
 								list.remove(k);
 								break;
 							}
-							conversion.addChild(optimizeSpecial(ac, returnSConcat, envs));
+							conversion.addChild(rewrite(ac, returnSConcat, envs));
 						}
 					}
 

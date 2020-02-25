@@ -1817,7 +1817,7 @@ public final class MethodScriptCompiler {
 		Stack<List<Procedure>> procs = new Stack<>();
 		procs.add(new ArrayList<>());
 		processKeywords(tree, compilerErrors);
-		optimizeAutoconcats(tree, environment, envs, compilerErrors);
+		rewriteAutoconcats(tree, environment, envs, compilerErrors);
 		checkLinearComponents(tree, environment, compilerErrors);
 		if(doStaticAnalysis) {
 			new StaticAnalysis(tree).analyze(compilerErrors);
@@ -2123,30 +2123,34 @@ public final class MethodScriptCompiler {
 //	}
 
 	/**
-	 * Optimizing __autoconcat__ out should happen early, and should happen regardless of whether or not optimizations
-	 * are on or off. So this is broken off into a separate optimization procedure, so that the intricacies of the
-	 * normal optimizations don't apply to __autoconcat__.
+	 * Rewrites __autoconcat__ AST nodes to executable AST nodes. This should be called before AST optimization,
+	 * static analysis and anything else that requires a fully executable AST.
+	 * When this method returns, any __autoconcat__ that did not contain compile errors has been rewritten.
 	 *
 	 * @param root
 	 * @param compilerExceptions
 	 */
-	private static void optimizeAutoconcats(ParseTree root, Environment env,
+	private static void rewriteAutoconcats(ParseTree root, Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs,
 			Set<ConfigCompileException> compilerExceptions) {
 		for(ParseTree child : root.getChildren()) {
 			if(child.hasChildren()) {
-				optimizeAutoconcats(child, env, envs, compilerExceptions);
+				rewriteAutoconcats(child, env, envs, compilerExceptions);
 			}
 		}
 		if(root.getData() instanceof CFunction && root.getData().val().equals(__autoconcat__)) {
 			try {
 				ParseTree ret = ((Compiler.__autoconcat__) ((CFunction) root.getData()).getFunction())
-						.optimizeDynamic(root.getTarget(), env, envs, root.getChildren(), root.getFileOptions());
+						.rewrite(root.getChildren(), true, envs);
 				root.setData(ret.getData());
 				root.setChildren(ret.getChildren());
 			} catch (ConfigCompileException ex) {
 				compilerExceptions.add(ex);
+				return;
 			}
+
+			// __autoconcat__'s AST rewrite can include new __autoconcat__'s, so handle them again.
+			rewriteAutoconcats(root, env, envs, compilerExceptions);
 		}
 	}
 
