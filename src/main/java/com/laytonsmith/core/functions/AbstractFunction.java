@@ -18,6 +18,7 @@ import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.IVariable;
@@ -36,6 +37,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 /**
  *
@@ -110,11 +112,38 @@ public abstract class AbstractFunction implements Function {
 	protected Scope linkScopeLazy(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
 		if(ast.numberOfChildren() >= 1) {
 
-			// Order: arg1 -> ((arg2? -> arg3?) -> ...) (lazy evaluation).
-			Scope firstArgScope = StaticAnalysis.linkScope(parentScope, ast.getChildAt(0), exceptions);
-			Scope lastArgScope = firstArgScope;
-			for(int i = 1; i < ast.numberOfChildren(); i++) {
-				lastArgScope = StaticAnalysis.linkScope(lastArgScope, ast.getChildAt(i), exceptions);
+			// Get this lazy function's name.
+			String funcName = ((CFunction) ast.getData()).val();
+
+			// Create a stack with the function's arguments.
+			Stack<ParseTree> argsStack = new Stack<>();
+			for(int i = ast.numberOfChildren() - 1; i >= 0; i--) {
+				argsStack.push(ast.getChildAt(i));
+			}
+
+			// Handle each argument, unfolding children that represent the same lazy function.
+			// This essentially mimics optimization and(and(a, b), c) -> and(a, b, c).
+			// Omitting this optimization causes 'c' not to be able to resolve in 'b' its scope.
+			Scope firstArgScope = null;
+			Scope lastArgScope = null;
+			while(!argsStack.empty()) {
+				ParseTree arg = argsStack.pop();
+
+				// Unfold children that represent the same lazy function.
+				if(arg.getData() instanceof CFunction && ((CFunction) arg.getData()).val().equals(funcName)) {
+					for(int i = arg.numberOfChildren() - 1; i >= 0; i--) {
+						argsStack.push(arg.getChildAt(i));
+					}
+					continue;
+				}
+
+				// Handle 'normal' argument. Order: arg1 -> ((arg2? -> arg3?) -> ...) (lazy evaluation).
+				if(firstArgScope == null) {
+					firstArgScope = StaticAnalysis.linkScope(parentScope, arg, exceptions);
+					lastArgScope = firstArgScope;
+				} else {
+					lastArgScope = StaticAnalysis.linkScope(lastArgScope, arg, exceptions);
+				}
 			}
 			return firstArgScope;
 		}
