@@ -290,7 +290,7 @@ public final class EventUtils {
 		Event driver = EventList.getEvent(type, eventName);
 		if(driver == null) {
 			throw ConfigRuntimeException.CreateUncatchableException("Tried to fire an unknown event: " + eventName, Target.UNKNOWN);
-		} else {
+		} else if(!(driver instanceof AbstractEvent) || ((AbstractEvent) driver).shouldFire(e)) {
 			FireListeners(GetMatchingEvents(type, eventName, e, driver), driver, e);
 		}
 	}
