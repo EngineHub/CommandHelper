@@ -28,6 +28,17 @@ public interface EventMixinInterface {
 	public boolean isCancellable(BindableEvent o);
 
 	/**
+	 * Return true if the event should be fired.
+	 * This occurs before prefiltering to allow the implementation to have a say.
+	 *
+	 * @param e The bindable event itself
+	 * @return {@code true} if the event should fire
+	 */
+	default boolean shouldFire(BindableEvent e) {
+		return true;
+	}
+
+	/**
 	 * This constructs the common elements in an event.
 	 *
 	 * @param e

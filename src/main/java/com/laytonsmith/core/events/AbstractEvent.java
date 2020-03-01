@@ -50,6 +50,17 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 	}
 
 	/**
+	 * This function should return true if the event code should be run, based on implementation specific conditions
+	 * for the BindableEvent.
+	 *
+	 * @param e The bindable event itself
+	 * @return {@code true} if the event code should be run
+	 */
+	public boolean shouldFire(BindableEvent e) {
+		return this.mixin.shouldFire(e);
+	}
+
+	/**
 	 * If the event needs to run special code when a player binds the event, it can be done here. By default, an
 	 * UnsupportedOperationException is thrown, but is caught and ignored.
 	 */

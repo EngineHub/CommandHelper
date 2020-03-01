@@ -40,6 +40,17 @@ public class BukkitAbstractEventMixin implements EventMixinInterface {
 	}
 
 	@Override
+	public boolean shouldFire(BindableEvent event) {
+		Object e = event._GetObject();
+		if(e instanceof PlayerEvent) {
+			return !((PlayerEvent) e).getPlayer().hasMetadata("NPC");
+		} else if(e instanceof EntityEvent && ((EntityEvent) e).getEntity() instanceof Player) {
+			return !((EntityEvent) e).getEntity().hasMetadata("NPC");
+		}
+		return true;
+	}
+
+	@Override
 	public Map<String, Mixed> evaluate_helper(BindableEvent event) throws EventException {
 		Map<String, Mixed> map = new HashMap<>();
 		map.put("event_type", new CString(mySuper.getName(), Target.UNKNOWN));
