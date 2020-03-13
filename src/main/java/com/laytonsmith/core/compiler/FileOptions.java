@@ -336,7 +336,12 @@ public final class FileOptions {
 		CodeUpgradeNotices("Code that uses old formats should generally be upgraded to newer versions."
 				+ " This is encouraged to make code more readable, and is not a deprecation notice. This type of"
 				+ " warning is only displayed in strict mode, and is even still suppressable.", MSVersion.V3_3_4,
-				SeverityLevel.LOW);
+				SeverityLevel.LOW),
+		UseOfSecureString("When storing sensitive information such as passwords, it is adviseable to use the"
+				+ " secure_string class instead of string. There is first class language support for this in"
+				+ " many places, but in general makes it harder to accidentally leak sensitive data in for"
+				+ " example log messages, even when passing the data around to code that accepts strings.",
+				MSVersion.V3_3_4, SeverityLevel.MEDIUM);
 
 		private SuppressWarning(String docs, Version version, SeverityLevel severityLevel) {
 			this.docs = docs;

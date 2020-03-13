@@ -154,7 +154,7 @@ public class BasicLogic {
 
 		@Override
 		public String docs() {
-			return "boolean {var1, var2[, varX...]} Returns true or false if all the arguments are equal. Operator syntax is"
+			return "boolean {var1, var2[, varX...]} Returns true if all the arguments are equal. Operator syntax is"
 					+ " also supported: @a == @b";
 		}
 

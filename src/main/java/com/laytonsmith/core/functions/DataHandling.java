@@ -389,6 +389,21 @@ public class DataHandling {
 							new CompilerWarning(msg, t, null));
 				}
 			}
+			{
+				// Check for declaration of variables named "pass" or "password" and see if it's defined as a
+				// secure_string. If not, warn.
+				if(children.get(0).getData() instanceof CClassType && children.get(1).getData() instanceof IVariable) {
+					boolean isString
+							= ((CClassType) children.get(0).getData()).getNativeType() == CString.class;
+					String varName = ((IVariable) children.get(1).getData()).getVariableName();
+					if((varName.equalsIgnoreCase("pass") || varName.equalsIgnoreCase("password"))
+							&& isString) {
+						String msg = "";
+						env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+								new CompilerWarning(msg, t, FileOptions.SuppressWarning.CodeUpgradeNotices));
+					}
+				}
+			}
 			if(children.get(0).getData() instanceof CFunction && array_get.equals(children.get(0).getData().val())) {
 				if(children.get(0).getChildAt(1).getData() instanceof CSlice) {
 					CSlice cs = (CSlice) children.get(0).getChildAt(1).getData();
@@ -410,6 +425,7 @@ public class DataHandling {
 					return tree;
 				}
 			}
+
 			return null;
 		}
 
