@@ -1,6 +1,8 @@
 == Developing an extension ==
 
-Extensions provide a means of adding functionality to CommandHelper and the MethodScript engine. While the API used is under construction still, it is still deemed stable enough for production use. Any breakages will be minimal, and deprecation will be used where it applies.
+Extensions provide a means of adding functionality to CommandHelper and the MethodScript engine. While the API used is
+under construction still, it is still deemed stable enough for production use. Any breakages will be minimal, and
+deprecation will be used where it applies.
 
 An extension currently consists of three core parts:
 

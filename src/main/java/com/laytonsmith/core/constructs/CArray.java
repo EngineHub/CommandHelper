@@ -600,7 +600,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return deepClone(this, t, new ArrayList<>());
 	}
 
-	private static CArray deepClone(CArray array, Target t, ArrayList<CArray[]> cloneRefs) {
+	protected CArray deepClone(CArray array, Target t, ArrayList<CArray[]> cloneRefs) {
 
 		// Return the clone reference if this array has been cloned before (both clones will have the same reference).
 		for(CArray[] refCouple : cloneRefs) {

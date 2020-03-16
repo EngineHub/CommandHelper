@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import com.laytonsmith.core.natives.interfaces.Sizeable;
+import java.util.ArrayList;
 import java.util.EnumSet;
 
 /**
@@ -493,6 +494,15 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	@Override
 	public Set<Mixed> keySet() {
 		throw new UnsupportedOperationException("Not supported.");
+	}
+
+	@Override
+	protected CArray deepClone(CArray array, Target t, ArrayList<CArray[]> cloneRefs) {
+		CByteArray that = (CByteArray) array;
+		byte[] original = that.data.array();
+		byte[] newArray = new byte[that.maxValue];
+		System.arraycopy(original, 0, newArray, 0, that.maxValue);
+		return CByteArray.wrap(newArray, t);
 	}
 
 	@Override
