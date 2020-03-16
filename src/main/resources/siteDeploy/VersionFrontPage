@@ -109,7 +109,7 @@ For more detailed instructions, [[SyntaxHighlighting.html|see here]]}}
 
 Long-term planned features can be found on the [[Roadmap.html|roadmap]], and short term features can be found on the
 issue tracker. To request your own features or file a bug, use
-[https://dev.enginehub.org/youtrack/issues/CMDHELPER our issue tracker]. Known bugs can be found on the issue tracker.
+[https://github.com/EngineHub/CommandHelper/issues our issue tracker]. Known bugs can be found on the issue tracker.
 
 If you would to request new functions, it is typically easy to add those, so please post your feature request in the
 issue tracker. If you happen to find a bug in the program, please let us know so we can fix it!
