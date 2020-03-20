@@ -505,7 +505,7 @@ public class ControlFlow {
 				+ "\t\tbreak();\n"
 				+ "}"),
 				new ExampleScript("With braces/case/default. Note the lack of fallthrough, even without a break(),"
-				+ " except where two cases are directly back to back.",
+				+ " except where cases are directly back to back.",
 				"@a = 5\nswitch(@a){\n"
 				+ "\tcase 1:\n"
 				+ "\tcase 2:\n"
