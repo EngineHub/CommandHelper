@@ -92,18 +92,19 @@ Create a configuration file somewhere on your file system, call it site-deploy-l
 directory=REPLACEME
 
 # The base url of the docs. This should begin with http:// or https://
-docs-base=http://localhost:8080/docs/
+docs-base=http://127.0.0.1:8080/docs/
 
-# The hostname to scp to (not the hostname of the site). If the hostname is "localhost", this triggers special handling, 
+# The hostname to scp to (not the hostname of the site). If the hostname is "localhost", or "127.0.0.1"
+# this triggers special handling, 
 # which skips the upload, and simply saves to the specified location on local disk. This should work with all OSes, 
 # otherwise the host that this connects to must support ssh, though it does not necessarily have to be a unix based 
 # system. If the value is localhost, the values username, port, and use-password are irrelevant, and not used. This 
 # should NOT begin with a protocol, i.e. http://
-hostname=localhost
+hostname=127.0.0.1
 
 
 # The base url of the site (where "home" should be). This should begin with http:// or https://
-site-base=http://localhost:8080/
+site-base=http://127.0.0.1:8080/
 
 use-password=false
 username=
@@ -133,7 +134,7 @@ On the first run, this may take a while, so just sit back and relax.
 From the command prompt, ''cd'' to one folder above where you specified in the ''directory'' value in the config (that
 is, the root of the website) and run
 
-<%PRE|npx http-server -p 8080 -c-1 -o "http://localhost:8080/index.html"%>
+<%PRE|npx http-server -p 8080 -c-1 -o "index.html"%>
 
 Alternatively, you can install the http-server package, and leave off the ''npx'' command. 
 

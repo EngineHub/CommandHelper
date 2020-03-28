@@ -13,7 +13,7 @@
     if(apiData) {
         api = $.Deferred();
         api.resolve(JSON.parse(apiData));
-    } else { 
+    } else {
         api = $.getJSON(apiURL).promise();
     }
     api.fail(function() {
@@ -474,5 +474,6 @@
     skel.on("-medium", renderLarge);
     skel.on("+medium", renderSmall);
     skel.on("-xsmall", renderNoXSmall);
-    skel.on("+xsmall", renderXSmall);
+	skel.on("+xsmall", renderXSmall);
+	search.load(docsBase);
 })(jQuery, skel, wiky, bodyEscaped, showLearningTrail, pageRender);

@@ -41,6 +41,9 @@ import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import com.laytonsmith.tools.docgen.DocGenTemplates.Generator;
 import com.laytonsmith.tools.docgen.DocGenTemplates.Generator.GenerateException;
+import com.laytonsmith.tools.docgen.localization.Locale;
+import com.laytonsmith.tools.docgen.localization.MasterSearchIndex;
+import com.laytonsmith.tools.docgen.localization.TranslationMemory;
 import com.laytonsmith.tools.docgen.templates.Template;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -115,11 +118,13 @@ public final class SiteDeploy {
 		defaults.add(new Preferences.Preference(USERNAME, "", Preferences.Type.STRING, "The username to scp with"));
 		defaults.add(new Preferences.Preference(HOSTNAME, "", Preferences.Type.STRING, "The hostname to scp to (not the"
 				+ " hostname of the site). If"
-				+ " the hostname is \"localhost\", this triggers special handling, which skips the upload, and simply"
+				+ " the hostname is \"localhost\", or \"127.0.0.1\" this triggers special handling,"
+				+ " which skips the upload, and simply"
 				+ " saves to the specified location on local disk. This should work with all OSes, otherwise the host"
 				+ " that this connects to must support ssh, though it does not necessarily have to be a unix"
 				+ " based system."
-				+ " If the value is localhost, the values " + USERNAME + ", " + PORT + ", and " + PASSWORD + " are"
+				+ " If the value is localhost/127.0.0.1, the values " + USERNAME + ", " + PORT + ", and " + PASSWORD
+				+ " are"
 				+ " irrelevant, and not used. This should NOT begin with a protocol, i.e. http://"));
 		defaults.add(new Preferences.Preference(PORT, "22", Preferences.Type.INT, "The port to use for SCP"));
 		defaults.add(new Preferences.Preference(DIRECTORY, "/var/www/docs", Preferences.Type.STRING,
@@ -229,7 +234,7 @@ public final class SiteDeploy {
 			if(!siteBase.startsWith("https://") && !siteBase.startsWith("http://")) {
 				configErrors.add("SiteBase must begin with either http:// or https://");
 			}
-			if(!"localhost".equals(hostname)) {
+			if(!"localhost".equalsIgnoreCase(hostname) && !"127.0.0.1".equals(hostname)) {
 				if(port < 0 || port > 65535) {
 					configErrors.add("Port must be a number between 0 and 65535.");
 				}
@@ -322,7 +327,7 @@ public final class SiteDeploy {
 			}
 		}
 		DeploymentMethod deploymentMethod;
-		if("localhost".equals(hostname)) {
+		if("localhost".equalsIgnoreCase(hostname) || "127.0.0.1".equals(hostname)) {
 			deploymentMethod = new LocalDeploymentMethod(directory + "/");
 		} else {
 			/**
@@ -387,6 +392,11 @@ public final class SiteDeploy {
 						writeMasterTranslations();
 					} catch (Throwable ex) {
 						writeLog("Could not write out translations!", ex);
+					}
+					try {
+						writeSearchIndex();
+					} catch (Throwable ex) {
+						writeLog("Could not write out search index!", ex);
 					}
 					uploadQueue.shutdown();
 				} else {
@@ -1050,6 +1060,25 @@ public final class SiteDeploy {
 				writeStatus("Writing out translation database (" + ((int) current) + "/"
 						+ ((int) total) + ")");
 			});
+		}
+	}
+
+	/**
+	 * If the masterMemories is not null, this writes out the search index file. In any case, writes out a small page
+	 * (which can be loaded on each page load)
+	 * called "searchIndexExists.json" which states whether or not the index exists, so the search bar can be
+	 * shown only if the index is present.
+	 * @throws IOException
+	 */
+	private void writeSearchIndex() throws IOException {
+		if(masterMemories != null) {
+			writeStatus("Generating and uploading search index");
+			MasterSearchIndex index = masterMemories.getSearchIndex();
+			writeFromString(index.getIndex(), "searchIndex.json");
+			// For now, just hardcode false, until it's ready to be switched on.
+			writeFromString("{\"searchIndexExists\":false}", "searchIndexExists.json");
+		} else {
+			writeFromString("{\"searchIndexExists\":false}", "searchIndexExists.json");
 		}
 	}
 

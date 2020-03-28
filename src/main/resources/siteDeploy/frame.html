@@ -1,63 +1,64 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta name="keywords" content="%%keywords%%" />
-        <meta name="author" content="%%branding%% Team">
-        <meta name="description" content="%%description%%">
-        <meta name="robots" content="index, follow">
-        <meta name="slurp" content="index, follow">
-        <title>%%title%% - %%branding%%</title>
-        <script type="text/javascript">
-            if ("%%useHttps%%" === "true" && window.location.protocol !== "https:") {
-                window.location.href = "https:" + window.location.href.substring(window.location.protocol.length);
-            }
-            var RESOURCE_BASE = "%%resourceBase%%";
-            var showLearningTrail = true;
-        </script>
-        <!--[if lte IE 8]><script src="%%cacheBuster|css/ie/html5shiv.js%%"></script><![endif]-->
-        <script src="%%cacheBuster|js/jquery.min.js%%" type="text/javascript"></script>
-        <script src="%%cacheBuster|js/js.cookie.js%%" type="text/javascript"></script>
-        <script type="text/javascript">
-            // There is a second, javascript step to render the wiki markup. When that wiki markup is
-            // completed, this promise will be called, and any javascript within the page can be run
-            // by calling pageRender.then(function() {});
-            var pageRender = $.Deferred();
-        </script>		
-		
-        <link rel="stylesheet" href="%%cacheBuster|css/style-xlarge.css%%" />
-        <link rel="stylesheet" href="%%cacheBuster|css/skel.css%%" />
-        <link rel="stylesheet" href="%%cacheBuster|css/style.css%%" />
-        <script src="%%cacheBuster|js/skel.min.js%%"></script>
-        <script src="%%cacheBuster|js/skel-layers.min.js%%"></script>
-        <script src="%%cacheBuster|js/init.js%%"></script>
-        <!--[if lte IE 8]><link rel="stylesheet" href="%%cacheBuster|css/ie/v8.css%%" /><![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta name="keywords" content="%%keywords%%" />
+		<meta name="author" content="%%branding%% Team">
+		<meta name="description" content="%%description%%">
+		<meta name="robots" content="index, follow">
+		<meta name="slurp" content="index, follow">
+		<title>%%title%% - %%branding%%</title>
+		<script type="text/javascript">
+			if ("%%useHttps%%" === "true" && window.location.protocol !== "https:") {
+				window.location.href = "https:" + window.location.href.substring(window.location.protocol.length);
+			}
+			var RESOURCE_BASE = "%%resourceBase%%";
+			var showLearningTrail = true;
+		</script>
+		<!--[if lte IE 8]><script src="%%cacheBuster|css/ie/html5shiv.js%%"></script><![endif]-->
+		<script src="%%cacheBuster|js/jquery.min.js%%" type="text/javascript"></script>
+		<script src="%%cacheBuster|js/js.cookie.js%%" type="text/javascript"></script>
+		<script src="%%cacheBuster|js/search.js%%" type="text/javascript"></script>
+		<script type="text/javascript">
+			// There is a second, javascript step to render the wiki markup. When that wiki markup is
+			// completed, this promise will be called, and any javascript within the page can be run
+			// by calling pageRender.then(function() {});
+			var pageRender = $.Deferred();
+		</script>
+
+		<link rel="stylesheet" href="%%cacheBuster|css/style-xlarge.css%%" />
+		<link rel="stylesheet" href="%%cacheBuster|css/skel.css%%" />
+		<link rel="stylesheet" href="%%cacheBuster|css/style.css%%" />
+		<script src="%%cacheBuster|js/skel.min.js%%"></script>
+		<script src="%%cacheBuster|js/skel-layers.min.js%%"></script>
+		<script src="%%cacheBuster|js/init.js%%"></script>
+		<!--[if lte IE 8]><link rel="stylesheet" href="%%cacheBuster|css/ie/v8.css%%" /><![endif]-->
 
 
-        <link rel="stylesheet" href="%%cacheBuster|css/styles.css%%" type="text/css"/>
+		<link rel="stylesheet" href="%%cacheBuster|css/styles.css%%" type="text/css"/>
 
-        <script src="%%cacheBuster|js/wiky.js%%" type="text/javascript"></script>
-        <link rel="stylesheet" href="%%cacheBuster|css/tooltipster.bundle.min.css%%" />
-        <link rel="stylesheet" href="%%cacheBuster|css/tooltipster-sideTip-shadow.min.css%%" />
-        <script src="%%cacheBuster|js/tooltipster.bundle.min.js%%" type="text/javascript"></script>
+		<script src="%%cacheBuster|js/wiky.js%%" type="text/javascript"></script>
+		<link rel="stylesheet" href="%%cacheBuster|css/tooltipster.bundle.min.css%%" />
+		<link rel="stylesheet" href="%%cacheBuster|css/tooltipster-sideTip-shadow.min.css%%" />
+		<script src="%%cacheBuster|js/tooltipster.bundle.min.js%%" type="text/javascript"></script>
 
-        <!--[if lt IE 9]>
-          <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
-        <![endif]-->
-        <link rel="shortcut icon" href="%%cacheBuster|images/favicon.ico%%" type="image/x-icon">
-        <link rel="icon" href="%%cacheBuster|images/favicon.ico%%" type="image/x-icon">
-        
-        <link rel="stylesheet" href="%%cacheBuster|css/highlight/default.css%%" />
+		<!--[if lt IE 9]>
+		  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+		<![endif]-->
+		<link rel="shortcut icon" href="%%cacheBuster|images/favicon.ico%%" type="image/x-icon">
+		<link rel="icon" href="%%cacheBuster|images/favicon.ico%%" type="image/x-icon">
+
+		<link rel="stylesheet" href="%%cacheBuster|css/highlight/default.css%%" />
 				
-        <script src="%%cacheBuster|js/highlight.pack.js%%" type="text/javascript"></script>
+		<script src="%%cacheBuster|js/highlight.pack.js%%" type="text/javascript"></script>
 		<!-- Theme CSS must come after all other css -->
 		<!-- Want to help build new themes? Drop a css file in the themes folder, and add a link to it here. -->
 		<link data-style-name="Dark" rel="stylesheet" type="text/css" href="%%cacheBuster|css/themes/dark.css%%" disabled="true"/>
 		<link data-style-name="Nilleke Dark" rel="stylesheet" type="text/css" href="%%cacheBuster|css/themes/nilleke_dark.css%%" disabled="true"/>
 		<!-- End Theme CSS -->
-        <script type="text/javascript">
+		<script type="text/javascript">
 			var theme = Cookies.get("site-theme");
-			function setTheme(theme) {					
+			function setTheme(theme) {
 				$('[data-style-name]').each(function(index, element) {
 					if(theme === $(element).attr('data-style-name')) {
 						element.disabled = false;	
@@ -67,86 +68,110 @@
 				});
 			}
 			setTheme(theme);
-            pageRender.then(function() {
-                $('pre code').each(function(i, block) {
-                    hljs.highlightBlock(block);
-                });
-                $('#loadingSpinner').hide();
-            });
-        </script>
-    </head>
+			pageRender.then(function() {
+				$('pre code').each(function(i, block) {
+					hljs.highlightBlock(block);
+				});
+				$('#loadingSpinner').hide();
+			});
+		</script>
+	</head>
 
-    <body>
-        <!-- Header -->
-        <header id="header">
-            <img src="%%cacheBuster|images/CommandHelper_Icon.png%%" alt=""/>
-            <h1><a id="mainBranding" href="%%siteRoot%%">%%branding%%</a></h1>
-            <nav id="nav">
-                <ul>
-                    <li><a href="%%siteRoot%%" data-l10n>Home</a></li>
-                    <li><a href="%%siteRoot%%docs/" data-l10n>Docs</a></li>
-                    <li><a href="%%docsBase%%Help.html" data-l10n>Help</a></li>
+	<body>
+		<!-- Header -->
+		<header id="header">
+			<img src="%%cacheBuster|images/CommandHelper_Icon.png%%" alt=""/>
+			<h1><a id="mainBranding" href="%%siteRoot%%">%%branding%%</a></h1>
+			<nav id="nav">
+				<ul>
+					<li class="searchNav" style="display: none;">
+						<div id="sb-search" class="sb-search">
+							<form autocomplete="off">
+								<input class="sb-search-input" type="search" value="" name="search" id="search">
+								<div id="sb-search-results" class="sb-search-results">
+									<div class="sb-search-results-loading">
+										<img src="%%cacheBuster|images/loading.svg%%" alt="Loading">
+									</div>
+									<div class="sb-search-results-nothing" data-l10n>
+										No results found
+									</div>
+									<ul class="sb-search-results-found">
+										<li>Result 1</li>
+										<li>Result 2</li>
+									</ul>
+								</div>
+								<input class="sb-search-submit" type="submit" value="">
+								<span class="sb-icon-search">
+									<img src="%%cacheBuster|images/search-icon.png%%" class="sb-icon-search-normal">
+									<img src="%%cacheBuster|images/close-button.svg%%" class="sb-icon-search-close" style="display:none;">
+								</span>
+							</form>
+						</div>
+					</li>
+					<li><a href="%%siteRoot%%" data-l10n>Home</a></li>
+					<li><a href="%%siteRoot%%docs/" data-l10n>Docs</a></li>
+					<li><a href="%%docsBase%%Help.html" data-l10n>Help</a></li>
 					<li><select name="theme-select" id="theme-select"></select></li>
-                </ul>
-            </nav>
-        </header>
+				</ul>
+			</nav>
+		</header>
 
-        <!-- Main -->
-        <section id="main" class="wrapper">
-            <div class="container">
-                <noscript>
-                    <div class="center">Sorry! This site requires JavaScript to use. Please enable JavaScript to continue.</div>
-                </noscript>
-                <div id="body" style="display: none;">
-                    %%body%%
-                </div>
-                <img src="%%cacheBuster|images/loading.svg%%" alt="" id="loadingSpinner" style="width: 20em; margin: 0 auto; display: block;"/>
-            </div>
-        </section>
-        
-        <div class="center">··</div>
+		<!-- Main -->
+		<section id="main" class="wrapper">
+			<div class="container">
+				<noscript>
+					<div class="center">Sorry! This site requires JavaScript to use. Please enable JavaScript to continue.</div>
+				</noscript>
+				<div id="body" style="display: none;">
+					%%body%%
+				</div>
+				<img src="%%cacheBuster|images/loading.svg%%" alt="" id="loadingSpinner" style="width: 20em; margin: 0 auto; display: block;"/>
+			</div>
+		</section>
 
-        <!-- Footer -->
-        <footer id="footer">
-            <div class="container">
-                <div class="row">
-                    <div id="learningTrail"></div>
-                </div>
-                <ul class="copyright">
-                    <li data-l10n>&copy; 2016 - %%CURRENTYEAR%% %%branding%% Team. All rights reserved.</li>
-                    <li><a href="%%docsBase%%About.html" data-l10n>About</a></li>
-                    <li style="%%showTemplateCredit%%">Design: <a href="http://templated.co">TEMPLATED</a></li>
-                    <li><a href="%%docsBase%%privacy_policy.html" data-l10n>Privacy Policy</a></li>
-                    <li><a href="/sponsors.html" data-l10n>Sponsors</a></li>
-                </ul>
-            </div>
-        </footer>
+		<div class="center">··</div>
 
-        <script type="text/javascript">
-            var bodyEscaped = '%%bodyEscaped%%';
-            var apiJsonVersion = '%%apiJsonVersion%%';
-        </script>
-        
-        <div class="hidden">
-            <div id="function_tooltip_content">
-                <div class="loadingDiv hidden">
-                    <img src="%%cacheBuster|images/gears.gif%%" alt="loading...">
-                </div>
-                <div class="loadedDiv">
-                    <div><span class="ret">return</span> <span class="name">func</span> (<span class="args">args</span>);</div>
-                    <div class="desc">desc</div>
-                </div>
-            </div>
-            <div id="keyword_tooltip_content">
-                <div class="loadingDiv hidden">
-                    <img src="%%cacheBuster|images/gears.gif%%" alt="loading...">
-                </div>
-                <div class="loadedDiv">
-                    <div class="desc">desc</div>
-                </div>
-            </div>
-        </div>
-        <script type="text/javascript" src="%%cacheBuster|/siteDeploy/index.js|js/index.js%%"></script>
+		<!-- Footer -->
+		<footer id="footer">
+			<div class="container">
+				<div class="row">
+					<div id="learningTrail"></div>
+				</div>
+				<ul class="copyright">
+					<li data-l10n>&copy; 2016 - %%CURRENTYEAR%% %%branding%% Team. All rights reserved.</li>
+					<li><a href="%%docsBase%%About.html" data-l10n>About</a></li>
+					<li style="%%showTemplateCredit%%">Design: <a href="http://templated.co">TEMPLATED</a></li>
+					<li><a href="%%docsBase%%privacy_policy.html" data-l10n>Privacy Policy</a></li>
+					<li><a href="/sponsors.html" data-l10n>Sponsors</a></li>
+				</ul>
+			</div>
+		</footer>
+
+		<script type="text/javascript">
+			var bodyEscaped = '%%bodyEscaped%%';
+			var apiJsonVersion = '%%apiJsonVersion%%';
+		</script>
+
+		<div class="hidden">
+			<div id="function_tooltip_content">
+				<div class="loadingDiv hidden">
+					<img src="%%cacheBuster|images/gears.gif%%" alt="loading...">
+				</div>
+				<div class="loadedDiv">
+					<div><span class="ret">return</span> <span class="name">func</span> (<span class="args">args</span>);</div>
+					<div class="desc">desc</div>
+				</div>
+			</div>
+			<div id="keyword_tooltip_content">
+				<div class="loadingDiv hidden">
+					<img src="%%cacheBuster|images/gears.gif%%" alt="loading...">
+				</div>
+				<div class="loadedDiv">
+					<div class="desc">desc</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="%%cacheBuster|/siteDeploy/index.js|js/index.js%%"></script>
 		<script type="text/javascript">
 			(function(){
 				var themes = [];
@@ -173,6 +198,6 @@
 				});
 			}());
 		</script>
-    </body>
+	</body>
 </html>
 

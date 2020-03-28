@@ -62,26 +62,50 @@ public class TranslationMemory implements Comparable<TranslationMemory> {
 		this.automaticTranslation = automaticTranslation;
 	}
 
+	/**
+	 * The English Key is the "master" value for this translation.
+	 * @return
+	 */
 	public String getEnglishKey() {
 		return englishKey;
 	}
 
+	/**
+	 * The locale that this {@code TranslationMemory} is associated with.
+	 * @return
+	 */
 	public Locale getLocale() {
 		return locale;
 	}
 
+	/**
+	 * The local specific comment for this translation.
+	 * @return
+	 */
 	public String getComment() {
 		return comment;
 	}
 
+	/**
+	 * The unique id for this translation.
+	 * @return
+	 */
 	public int getId() {
 		return translationId;
 	}
 
+	/**
+	 * The machine translation, or null if not set.
+	 * @return
+	 */
 	public String getMachineTranslation() {
 		return this.automaticTranslation;
 	}
 
+	/**
+	 * The human translation, or null if not set.
+	 * @return
+	 */
 	public String getTranslation() {
 		return this.translation;
 	}

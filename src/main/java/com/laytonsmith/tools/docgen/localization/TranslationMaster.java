@@ -31,6 +31,7 @@ public class TranslationMaster {
 	private final File translationDb;
 	private final TranslationSummary translationSummary;
 	private final ProgressIterator progressCallback;
+	private final MasterSearchIndex masterSearchIndex = new MasterSearchIndex();
 
 	/**
 	 * Creates an object that represents a full translation database, located at the given local location.
@@ -176,9 +177,18 @@ public class TranslationMaster {
 		return allLocales.get(locale).master.containsKey(key);
 	}
 
+	/**
+	 * Given a page, filters and segments the input string to create translation segments. In addition, creates
+	 * a search index based on the input segments. For English, this index can be used as is, but for other languages,
+	 * this index must also be localized. The index segments will all be in the translation database, however, so
+	 * this process can be automatic. In any case, this function does not handle that.
+	 * @param toLocation
+	 * @param inputString
+	 */
 	public void createTranslationMemory(String toLocation, String inputString) {
 		Set<String> segments = TranslationMaster.findSegments(inputString);
 		for(String segment : segments) {
+			masterSearchIndex.addSegment(toLocation, segment);
 			int id;
 			if(!translationSummary.containsTranslation(segment)) {
 				id = getNewId();
@@ -362,6 +372,10 @@ public class TranslationMaster {
 	 */
 	public TranslationMemory generateNewTranslation(Locale locale, String englishKey, int id) {
 		return new TranslationMemory(englishKey, locale, "", "", "", id);
+	}
+
+	public MasterSearchIndex getSearchIndex() {
+		return this.masterSearchIndex;
 	}
 
 	private static final String[] SEGMENT_SEP = new String[]{
