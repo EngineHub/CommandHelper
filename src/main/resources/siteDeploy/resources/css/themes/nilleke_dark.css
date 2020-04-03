@@ -83,7 +83,7 @@ table div[style*="background-color: green; font-weight: bold; text-align: center
 	left: 3.5em;
 }
 
-#header img {
+.header-icon {
 	margin-bottom: -1em;
 	margin-left: .5em;
 }

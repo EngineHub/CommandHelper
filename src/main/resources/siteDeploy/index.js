@@ -1,6 +1,6 @@
-/* global Cookies, showLearningTrail, skel, pageRender, wiky, bodyEscaped, apiJsonVersion */
+/* global Cookies, showLearningTrail, skel, pageRender, wiky, bodyEscaped, apiJsonVersion, search */
 
-(function ($, skel, wiky, bodyEscaped, showLearningTrail, pageRender) {
+(function ($, skel, wiky, bodyEscaped, showLearningTrail, pageRender, search) {
     var resourceBase = "%%resourceBase%%";
     var docsBase = "%%docsBase%%";
 	var productionTranslations = "%%productionTranslations%%";
@@ -230,7 +230,7 @@
     }
 
     function renderSmall() {
-        $learningTrail.html(generateLearningTrail(learningTrailJSON, false));
+        $learningTrail.html(generateLearningTrail(learningTrailJSON, false));		
     }
 
     function renderXSmall() {
@@ -439,7 +439,7 @@
 
     $(function () {
         var url = new URL(window.location.href);
-		if(url.hostname === "localhost") {
+		if(url.hostname === "localhost" || url.hostname === "127.0.0.1") {
             $("#header").css("background-color", "red");
             $("#mainBranding").text("------LOCALHOST DOCS------");
         }
@@ -475,5 +475,5 @@
     skel.on("+medium", renderSmall);
     skel.on("-xsmall", renderNoXSmall);
 	skel.on("+xsmall", renderXSmall);
-	search.load(docsBase);
-})(jQuery, skel, wiky, bodyEscaped, showLearningTrail, pageRender);
+	search.load(docsBase, skel);
+})(jQuery, skel, wiky, bodyEscaped, showLearningTrail, pageRender, search);

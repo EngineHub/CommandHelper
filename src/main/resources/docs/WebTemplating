@@ -1,3 +1,5 @@
+{{unimplemented}}
+
 MethodScript supports templating for web (or any other template needs) through template
 language tags. In many ways, the support for templates is much like JSP and PHP, but
 differs in a few key ways, which allow greater flexibility when creating text via

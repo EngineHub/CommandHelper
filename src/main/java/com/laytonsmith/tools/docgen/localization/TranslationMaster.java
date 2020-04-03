@@ -182,13 +182,19 @@ public class TranslationMaster {
 	 * a search index based on the input segments. For English, this index can be used as is, but for other languages,
 	 * this index must also be localized. The index segments will all be in the translation database, however, so
 	 * this process can be automatic. In any case, this function does not handle that.
-	 * @param toLocation
-	 * @param inputString
+	 * @param title The page title, used for the search feature
+	 * @param toLocation The location of the page
+	 * @param type The result type
+	 * @param inputString The page content
 	 */
-	public void createTranslationMemory(String toLocation, String inputString) {
-		Set<String> segments = TranslationMaster.findSegments(inputString);
+	public void createTranslationMemory(String title, String toLocation,
+			ResultType type, String inputString) {
+		for(String searchSegment : TranslationMaster.findSegments(inputString, true)) {
+			masterSearchIndex.addSegment(title, toLocation, type, searchSegment);
+		}
+		Set<String> segments = TranslationMaster.findSegments(inputString, false);
+
 		for(String segment : segments) {
-			masterSearchIndex.addSegment(toLocation, segment);
 			int id;
 			if(!translationSummary.containsTranslation(segment)) {
 				id = getNewId();
@@ -471,9 +477,10 @@ public class TranslationMaster {
 	 * the chance of collisions, as well as reducing the chance of retranslation needed when just parts of a page
 	 * change. This is a best effort attempt, and isn't perfect.
 	 * @param inputString
+	 * @param forSearch For search segment purposes, we want to not filter out some segments.
 	 * @return
 	 */
-	public static Set<String> findSegments(String inputString) {
+	public static Set<String> findSegments(String inputString, boolean forSearch) {
 		Set<String> segments = new HashSet<>();
 		// First, remove all things that shouldn't be translated, code blocks, html, etc
 		inputString = inputString.replaceAll("\r", "");
@@ -523,16 +530,18 @@ public class TranslationMaster {
 		inputString = inputString.replaceAll(URL_PATTERN, "%s");
 		inputString = inputString.replaceAll("(?s)<.*?>", "%s");
 
-		for(String uniqueSegment : UNIQUE_SEGMENTS) {
-			if(inputString.contains(uniqueSegment)) {
-				// We have to add it here so it ends up in the page file
-				segments.add(uniqueSegment);
-				inputString = inputString.replace(uniqueSegment, "");
+		if(!forSearch) {
+			for(String uniqueSegment : UNIQUE_SEGMENTS) {
+				if(inputString.contains(uniqueSegment)) {
+					// We have to add it here so it ends up in the page file
+					segments.add(uniqueSegment);
+					inputString = inputString.replace(uniqueSegment, "");
+				}
 			}
-		}
 
-		for(String functionNames : FUNCTION_IDENTIFIERS) {
-			inputString = inputString.replaceAll(functionNames, "%s");
+			for(String functionNames : FUNCTION_IDENTIFIERS) {
+				inputString = inputString.replaceAll(functionNames, "%s");
+			}
 		}
 
 		// Process tables
@@ -557,9 +566,11 @@ public class TranslationMaster {
 			.map(string -> {
 				string = string.trim();
 				string = string.replace("\n", " ");
-				for(String className : CLASS_NAMES) {
-					// These are fully qualified, so they are certainly not meant to be translated.
-					string = string.replace(className, "%s");
+				if(!forSearch) {
+					for(String className : CLASS_NAMES) {
+						// These are fully qualified, so they are certainly not meant to be translated.
+						string = string.replace(className, "%s");
+					}
 				}
 				// Removing beginning and ending %s in the string has no impact on whether or not a string
 				// matches, but does increase the performance of the regex, and simplifies the segment for
@@ -582,7 +593,7 @@ public class TranslationMaster {
 			// Strings that are just symbols (or %s) in their entirety can be removed.
 			.filter((string) -> !string.matches("^(?:[^a-zA-Z]|%s)+$"))
 			// Segments that are entirely just a function name are removed.
-			.filter((string) -> !FUNCTION_NAMES.contains(string))
+			.filter((string) -> !forSearch ? (!FUNCTION_NAMES.contains(string)) : (true))
 			.filter((string) -> !USELESS_SEGMENTS.contains(string))
 			.collect(Collectors.toSet());
 	}

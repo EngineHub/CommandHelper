@@ -42,6 +42,7 @@ import com.laytonsmith.tools.docgen.DocGenTemplates;
 import com.laytonsmith.tools.docgen.DocGenTemplates.Generator;
 import com.laytonsmith.tools.docgen.DocGenTemplates.Generator.GenerateException;
 import com.laytonsmith.tools.docgen.localization.MasterSearchIndex;
+import com.laytonsmith.tools.docgen.localization.ResultType;
 import com.laytonsmith.tools.docgen.templates.Template;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -908,7 +909,7 @@ public final class SiteDeploy {
 				+ String.format(githubBaseUrl, "resources" + resource)
 				+ EDIT_THIS_PAGE_POSTAMBLE
 				+ "</p>";
-		writePage(title.replace("_", " "), s, toLocation, keywords, description);
+		writePage(title.replace("_", " "), s, ResultType.ARTICLE, toLocation, keywords, description);
 	}
 
 	/**
@@ -930,10 +931,11 @@ public final class SiteDeploy {
 	 *
 	 * @param title The title of the page
 	 * @param body The content body
+	 * @param type The page type
 	 * @param toLocation the location on the remote server
 	 */
-	private void writePage(String title, String body, String toLocation) {
-		writePage(title, body, toLocation, null, "");
+	private void writePage(String title, String body, ResultType type, String toLocation) {
+		writePage(title, body, type, toLocation, null, "");
 	}
 
 	/**
@@ -941,12 +943,14 @@ public final class SiteDeploy {
 	 * substituting the body into the frame, and handling all the other connections.
 	 *
 	 * @param body The content body
+	 * @param type The type of page this is
 	 * @param title The title of the page
 	 * @param toLocation the location on the remote server
 	 * @param keywords A list of keywords to be added to the meta tag on the page
 	 * @param description A description of the page's content
 	 */
-	private void writePage(final String title, final String body, final String toLocation,
+	private void writePage(final String title, final String body, final ResultType type,
+			final String toLocation,
 			List<String> keywords, final String description) {
 		if(keywords == null) {
 			keywords = new ArrayList<>();
@@ -968,7 +972,7 @@ public final class SiteDeploy {
 					if(translationMemoryDb != null) {
 						generateQueue.submit(() -> {
 							try {
-								createTranslationMemory(toLocation, body);
+								createTranslationMemory(title, toLocation, type, body);
 							} catch (Throwable t) {
 								writeLog("While generating translation memory for " + toLocation + "an error occured: ",
 										t);
@@ -1039,13 +1043,15 @@ public final class SiteDeploy {
 	 * necessary, so the translation memories (tmem) files are created and committed to a repository, so PRs can
 	 * be created. This function is charged with orchestrating the process, which is comprised of several smaller tasks.
 	 * @param toLocation
+	 * @param resultType
 	 * @param inputString
 	 */
-	private void createTranslationMemory(String toLocation, String inputString) throws IOException {
+	private void createTranslationMemory(String title, String toLocation, ResultType type,
+			String inputString) throws IOException {
 		toLocation = StringUtils.replaceLast(toLocation, "\\.html", ".tmem.xml");
 		String location = "%s/docs/" + MSVersion.V3_3_4 + "/" + toLocation;
 		writeStatus("Creating memory file for " + location);
-		masterMemories.createTranslationMemory(location, inputString);
+		masterMemories.createTranslationMemory(title, location, type, inputString);
 	}
 
 	private void writeMasterTranslations() throws IOException {
@@ -1073,8 +1079,7 @@ public final class SiteDeploy {
 			writeStatus("Generating and uploading search index");
 			MasterSearchIndex index = masterMemories.getSearchIndex();
 			writeFromString(index.getIndex(), "searchIndex.json");
-			// For now, just hardcode false, until it's ready to be switched on.
-			writeFromString("{\"searchIndexExists\":false}", "searchIndexExists.json");
+			writeFromString("{\"searchIndexExists\":true}", "searchIndexExists.json");
 		} else {
 			writeFromString("{\"searchIndexExists\":false}", "searchIndexExists.json");
 		}
@@ -1353,7 +1358,7 @@ public final class SiteDeploy {
 						+ "});\n"
 						+ "});\n"
 						+ "</script>");
-				writePage("API", b.toString(), "API.html",
+				writePage("API", b.toString(), ResultType.API, "API.html",
 						Arrays.asList(new String[]{"API", "functions"}),
 						"A list of all " + Implementation.GetServerType().getBranding() + " functions");
 				currentGenerateTask.addAndGet(1);
@@ -1510,7 +1515,8 @@ public final class SiteDeploy {
 				+ " (Note this page is automatically generated from the documentation in the source code.)</p>";
 		page.append(bW);
 		String description = f.getName() + "() api page";
-		writePage(f.getName(), page.toString(), "API/functions/" + f.getName() + ".html", Arrays.asList(
+		writePage(f.getName(), page.toString(), ResultType.FUNCTION, "API/functions/" + f.getName() + ".html",
+				Arrays.asList(
 				new String[]{f.getName(), f.getName() + " api", f.getName() + " example", f.getName()
 						+ " description"}), description);
 	}
@@ -1615,7 +1621,7 @@ public final class SiteDeploy {
 						writeLog("While processing " + clazz + " got:", ex);
 					}
 				}
-				writePage("Event API", b.toString(), "Event_API.html",
+				writePage("Event API", b.toString(), ResultType.API, "Event_API.html",
 						Arrays.asList(new String[]{"API", "events"}),
 						"A list of all " + Implementation.GetServerType().getBranding() + " events");
 				currentGenerateTask.addAndGet(1);

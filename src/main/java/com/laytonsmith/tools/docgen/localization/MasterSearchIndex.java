@@ -11,13 +11,42 @@ import org.json.simple.JSONObject;
  */
 public class MasterSearchIndex {
 
-	private final Map<String, List<String>> segments = new HashMap<>();
+	private static class IndexEntry {
+		private final List<String> segments;
+		private final String title;
+		private final ResultType type;
 
-	void addSegment(String toLocation, String segment) {
-		if(!segments.containsKey(toLocation)) {
-			segments.put(toLocation, new ArrayList<>());
+		public IndexEntry(String title, ResultType type) {
+			this.segments = new ArrayList<>();
+			this.title = title;
+			this.type = type;
 		}
-		segments.get(toLocation).add(segment);
+
+		public void addSegment(String segment) {
+			this.segments.add(segment);
+		}
+
+		public List<String> getSegments() {
+			return this.segments;
+		}
+
+		public String getTitle() {
+			return this.title;
+		}
+
+		public ResultType getType() {
+			return type;
+		}
+
+	}
+
+	private final Map<String, IndexEntry> segments = new HashMap<>();
+
+	void addSegment(String title, String toLocation, ResultType type, String segment) {
+		if(!segments.containsKey(toLocation)) {
+			segments.put(toLocation, new IndexEntry(title, type));
+		}
+		segments.get(toLocation).addSegment(segment);
 	}
 
 	/**
@@ -37,14 +66,19 @@ public class MasterSearchIndex {
 	 * @return
 	 */
 	public String getIndex() {
-		Map<String, List<String>> index = new HashMap<>();
-		for(Map.Entry<String, List<String>> entry : segments.entrySet()) {
+		Map<String, List<Object>> index = new HashMap<>();
+		for(Map.Entry<String, IndexEntry> entry : segments.entrySet()) {
 			String location = entry.getKey();
-			for(String string : entry.getValue()) {
+			String title = entry.getValue().getTitle();
+			for(String string : entry.getValue().getSegments()) {
 				if(!index.containsKey(string)) {
 					index.put(string, new ArrayList<>());
 				}
-				index.get(string).add(location);
+				Map<String, String> locationData = new HashMap<>();
+				locationData.put("location", location);
+				locationData.put("title", title);
+				locationData.put("type", entry.getValue().getType().name());
+				index.get(string).add(locationData);
 			}
 		}
 		return JSONObject.toJSONString(index);

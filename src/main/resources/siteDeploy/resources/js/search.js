@@ -3,15 +3,16 @@ var search = {};
 
 search.index = null;
 
-search.load = function(docsBase) {
+search.load = function(docsBase, skel) {	
 
 	function searchIndex(string) {
 		let matches = {};
-		// Probably need to make this a tree, rather than a linear lookup
+		// Probably need to make this a tree, rather than a linear lookup, but this seems to have good
+		// enough performance for now.
 		for (const property in search.index) {
 			let s = property;
 			let pages = search.index[s];
-			if(s === string || s.match(string)) {
+			if(s === string || s.toUpperCase().match(string.toUpperCase())) {
 				matches[s] = pages;
 			}
 		}
@@ -20,17 +21,17 @@ search.load = function(docsBase) {
 
 	function setupNav() {
 		$('.searchNav').show();
-		$body = $('body');
-		$sbSearch = $('.sb-search');
-		$sbSearchInput = $('input.sb-search-input');
-		$sbSearchSubmit = $('input.sb-search-submit');
-		$sbSearchIcon = $('span.sb-icon-search');
-		$sbResult = $('.sb-search-results');
-		$sbResultLoading = $('.sb-search-results-loading');
-		$sbResultNothing = $('.sb-search-results-nothing');
-		$sbResultFound = $('.sb-search-results-found');
-		$sbIconNormal = $('.sb-icon-search-normal');
-		$sbIconClose = $('.sb-icon-search-close');
+		let $body = $('body');
+		let $sbSearch = $('.sb-search');
+		let $sbSearchInput = $('input.sb-search-input');
+		let $sbSearchSubmit = $('input.sb-search-submit');
+		let $sbSearchIcon = $('span.sb-icon-search');
+		let $sbResult = $('.sb-search-results');
+		let $sbResultLoading = $('.sb-search-results-loading');
+		let $sbResultNothing = $('.sb-search-results-nothing');
+		let $sbResultFound = $('.sb-search-results-found');
+		let $sbIconNormal = $('.sb-icon-search-normal');
+		let $sbIconClose = $('.sb-icon-search-close');
 
 		function resetUI() {
 			$sbSearch.removeClass('sb-search-open');
@@ -55,15 +56,21 @@ search.load = function(docsBase) {
 				let resultSet = new Set();
 				for(var string in results) {
 					for(var page in results[string]) {
-						resultSet.add(results[string][page]);
+						// Ughhhhh JavaScript Set only really works with primitives, since {} !== {}, so we stringify
+						// the object before putting it in the set.
+						resultSet.add(JSON.stringify(results[string][page]));
 					}
 				}
 
 				for(let entry of resultSet) {
-					entry = entry.replace('%s', docsBase + '../..');
+					entry = JSON.parse(entry);
+					entry.location = entry.location.replace('%s', docsBase + '../..');
 					// TODO: Remove this
-					entry = entry.replace('.tmem.xml', '.html');
-					$sbResultFound.append("<li><a href=\"" + entry + "\">" + entry + "</></li>");
+					entry.location = entry.location.replace('.tmem.xml', '.html');
+					$sbResultFound.append("<li><a href=\"" + entry.location + "\">" + entry.title 
+							+ " <span class=\"sb-search-result-type\">"
+							+ entry.type
+							+ "</span></></li>");
 				}
 			}
 		}
@@ -85,7 +92,7 @@ search.load = function(docsBase) {
 		$sbSearchSubmit.on('click', function() {
 			if($sbSearchInput.val()) {
 				// Do search
-				formatResults(searchIndex($sbSearchInput.val()))
+				formatResults(searchIndex($sbSearchInput.val()));
 			} else {
 				$sbSearch.removeClass('sb-search-open');
 				$sbIconNormal.show();
@@ -102,7 +109,7 @@ search.load = function(docsBase) {
 				return false;
 			}
 			let val = $sbSearchInput.val();
-			if(val == "") {
+			if(val === "") {
 				$sbResult.hide();
 				$sbIconNormal.hide();
 				$sbIconClose.show();
@@ -125,7 +132,7 @@ search.load = function(docsBase) {
 
 	$.getJSON(docsBase + "searchIndexExists.json", null, function(data) {
 		if(data && data.hasOwnProperty("searchIndexExists") && data.searchIndexExists) {
-			$.getJSON("searchIndex.json", null, function(data) {
+			$.getJSON(docsBase + "searchIndex.json", null, function(data) {
 				search.index = data;
 				$(function() {
 					setupNav();
@@ -133,4 +140,19 @@ search.load = function(docsBase) {
 			});
 		}
 	});
+	
+	// For small screens, the search bar should just be hidden for now. In the 
+	// future, there's no reason it can't be made to work, but it won't work as
+	// is, and it looks like it will be a decent amount of work to get it working,
+	// so save that for later.
+	function turnOff() {
+		$(".searchNav").hide();
+	}
+	
+	function turnOn() {
+		$(".searchNav").show();
+	}
+	
+	skel.on("-medium", turnOn); // large
+    skel.on("+medium", turnOff); // small
 };

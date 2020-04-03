@@ -190,27 +190,7 @@ code {
 	font-family: inherit;
 	font-size: 20px;
 	color: #2c3e50;
-}
-
-input[type="text"].sb-search-input {
 	-webkit-appearance: none;
-	-webkit-border-radius: 0px;
-}
-
-.sb-search-input::-webkit-input-placeholder {
-	color: #efb480;
-}
-
-.sb-search-input:-moz-placeholder {
-	color: #efb480;
-}
-
-.sb-search-input::-moz-placeholder {
-	color: #efb480;
-}
-
-.sb-search-input:-ms-input-placeholder {
-	color: #efb480;
 }
 
 .sb-icon-search,
@@ -274,12 +254,21 @@ input[type="text"].sb-search-input {
 .sb-search-results {
 	left: -220px;
     top: 40px;
-    min-width: 280px;
+    min-width: 500px;
     position: absolute;
     background-color: #202222;
     color: black;
 	border: green 2px solid;
 	display: none; /* Initially hidden, until the user types something*/
+	overflow: auto;
+	max-width: 750px;
+	max-height: 80vh;
+}
+
+.sb-search-result-type {
+	font-variant: small-caps;
+	font-size: x-small;
+	color: gray;
 }
 
 .sb-search-results a {
@@ -317,6 +306,7 @@ input[type="text"].sb-search-input {
 	text-align: center;
 	margin: 0;
 	display: none;
+	color: white;
 }
 
 .sb-icon-search-close {
