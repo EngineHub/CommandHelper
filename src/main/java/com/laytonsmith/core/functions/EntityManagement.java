@@ -1210,13 +1210,13 @@ public class EntityManagement {
 			}
 			return "array {entityType, [qty], [location], [closure]} Spawns the specified number of entities of the"
 					+ " given type at the given location. Returns an array of entity UUIDs of what is spawned."
-					+ "  Qty defaults to 1 and location defaults to the location of the commandsender,"
+					+ " Qty defaults to 1 and location defaults to the location of the commandsender,"
 					+ " if it is a block or player. If the commandsender is console, location must be supplied."
 					+ " ---- Entitytype can be one of " + StringUtils.Join(spawnable, ", ", " or ", ", or ") + "."
-					+ " FALLING_BLOCK will be always be sand with this function (see {{function|spawn_falling_block}})."
-					+ " DROPPED_ITEM will be dirt by default (see {{function|drop_item}})."
-					+ " A closure can be used as the last argument to modify the entity before adding it to the world."
-					+ " The entity's UUID is passed to the closure. FALLING_BLOCK does not support closures.";
+					+ " FALLING_BLOCK will be SAND (can use {{function|spawn_falling_block}} instead)."
+					+ " DROPPED_ITEM will be STONE (can use {{function|drop_item}} instead)."
+					+ " If not FALLING_BLOCK or DROPPED_ITEM, a closure can be used as the last argument to modify the"
+					+ " entity before adding it to the world. The entity's UUID is passed to the closure.";
 		}
 
 		@Override

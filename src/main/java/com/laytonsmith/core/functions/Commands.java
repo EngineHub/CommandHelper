@@ -511,8 +511,8 @@ public class Commands {
 
 		@Override
 		public String docs() {
-			return "void {} Attempts to clear all registered commands on the server. Note that this probably has some special"
-					+ " limitations, but they are a bit unclear as to what commands can and cannot be unregistered.";
+			return "void {} Attempts to clear all registered commands on the server. Vanilla and default Spigot"
+					+ " functions are not affected, but all plugins commands are.";
 		}
 
 		@Override
