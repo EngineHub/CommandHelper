@@ -115,7 +115,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 				if(p != null) {
 					env.getEnv(CommandHelperEnvironment.class).SetPlayer((MCPlayer) p);
 				} else {
-					Static.getLogger().log(Level.WARNING, "Player missing in player event (NPC?): " + b.getEventName());
+					Static.getLogger().log(Level.WARNING, "Player offline for event: " + b.getEventName());
 					// Set env CommandSender to prevent incorrect inherited player from being used in a player event.
 					if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 						env.getEnv(CommandHelperEnvironment.class).SetCommandSender(Static.getServer().getConsole());
