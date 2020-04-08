@@ -59,6 +59,7 @@ import com.laytonsmith.abstraction.entities.MCOcelot;
 import com.laytonsmith.abstraction.entities.MCPainting;
 import com.laytonsmith.abstraction.entities.MCPanda;
 import com.laytonsmith.abstraction.entities.MCParrot;
+import com.laytonsmith.abstraction.entities.MCPhantom;
 import com.laytonsmith.abstraction.entities.MCPig;
 import com.laytonsmith.abstraction.entities.MCPigZombie;
 import com.laytonsmith.abstraction.entities.MCProjectile;
@@ -1967,6 +1968,10 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_GENERIC_SITTING, CBoolean.get(parrot.isSitting()), t);
 					specArray.set(entity_spec.KEY_PARROT_TYPE, new CString(parrot.getVariant().name(), t), t);
 					break;
+				case PHANTOM:
+					MCPhantom phantom = (MCPhantom) entity;
+					specArray.set(entity_spec.KEY_PHANTOM_SIZE, new CInt(phantom.getSize(), t), t);
+					break;
 				case PIG:
 					MCPig pig = (MCPig) entity;
 					specArray.set(entity_spec.KEY_PIG_SADDLED, CBoolean.get(pig.isSaddled()), t);
@@ -2172,6 +2177,7 @@ public class EntityManagement {
 		private static final String KEY_PANDA_MAINGENE = "maingene";
 		private static final String KEY_PANDA_HIDDENGENE = "hiddengene";
 		private static final String KEY_PARROT_TYPE = "type";
+		private static final String KEY_PHANTOM_SIZE = "size";
 		private static final String KEY_PIG_SADDLED = "saddled";
 		private static final String KEY_PIG_ZOMBIE_ANGRY = "angry";
 		private static final String KEY_PIG_ZOMBIE_ANGER = "anger";
@@ -3073,6 +3079,18 @@ public class EntityManagement {
 								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid parrot type: " + specArray.get(index, t).val(), t);
 								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case PHANTOM:
+					MCPhantom phantom = (MCPhantom) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_PHANTOM_SIZE:
+								phantom.setSize(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);

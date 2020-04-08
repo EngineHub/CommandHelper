@@ -200,6 +200,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_GENERIC_SITTING%: If the parrot is sitting.
 * %KEY_PARROT_TYPE%: The type of the parrot (can be %PARROT_TYPE%).
 |- 
+| PHANTOM
+| 
+* %KEY_PHANTOM_SIZE%: The size of the phantom. Clamped to 0 - 64 (default: 0). Phantoms deal (6 + size) damage.
+|- 
 | PIG
 | 
 * %KEY_PIG_SADDLED%: If the pig has a saddle.
