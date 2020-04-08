@@ -28,7 +28,7 @@ import java.util.Map;
  * ...
  * </pre>
  *
- * Additionally, the alias function can be overriden to provide for aliased values, which will be accepted as
+ * Additionally, the alias function can be overridden to provide for aliased values, which will be accepted as
  * non-dynamic parameters that point to the real fields. They will not be included during serialization, however, reads
  * and writes to these fields will work correctly.
  *

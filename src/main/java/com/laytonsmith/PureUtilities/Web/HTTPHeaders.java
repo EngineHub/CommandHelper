@@ -68,7 +68,7 @@ public class HTTPHeaders implements Iterable<HTTPHeader> {
 	 * forwarding a message.
 	 * </code></pre>
 	 *
-	 * Therefore, this method is a convenience method to implementing the correct symantics described here. If
+	 * Therefore, this method is a convenience method to implementing the correct semantics described here. If
 	 * there are multiple headers with the same name, then they are concatenated together with a comma, and returned
 	 * as if they were a single header.
 	 *

@@ -243,7 +243,7 @@ public class Token {
 		}
 
 		/**
-		 * Returns true if this is an assigment operator = += etc
+		 * Returns true if this is an assignment operator = += etc
 		 *
 		 * @return
 		 */
@@ -357,7 +357,7 @@ public class Token {
 	}
 
 	/**
-	 * Returns a string that can be output as useable code. Values that had been escaped internally will be escaped
+	 * Returns a string that can be output as usable code. Values that had been escaped internally will be escaped
 	 * again. This only affects strings and smart strings. All other tokens return the same as {@link #val()}
 	 *
 	 * @return

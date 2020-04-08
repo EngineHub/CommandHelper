@@ -17,7 +17,7 @@ import java.net.URL;
 import javax.swing.JOptionPane;
 
 /**
- * Provides common UI utilites
+ * Provides common UI utilities
  */
 public class UIUtils {
 

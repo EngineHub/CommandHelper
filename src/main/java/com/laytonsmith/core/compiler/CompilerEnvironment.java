@@ -47,7 +47,7 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl {
 	/**
 	 * Classes are generally defined at compile time, and anyways, the object definitions that are available are
 	 * compiled into the ObjectDefinitionTable. Methods and internal pieces may not be fully defined yet, however,
-	 * but at runtime these will be fully useable mechanisms. During compile time, care must be taken not to use
+	 * but at runtime these will be fully usable mechanisms. During compile time, care must be taken not to use
 	 * a potentially partially defined class.
 	 */
 	private final ObjectDefinitionTable objectDefinitionTable = ObjectDefinitionTable.GetBlankInstance();
@@ -121,7 +121,7 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl {
 	 * Adds the compiler warning object to the environment, which can be used later by tools and such in a tool
 	 * specific way. Additionally, unless set in the environment otherwise, also logs the warning to the console.
 	 * @param fileOptions The file options. May be null if not available, but then that means this warning is not
-	 * suppressable.
+	 * suppressible.
 	 * @param warning The compiler warning itself. Note that if the suppression category is null, this will neither
 	 * be added to the list, nor logged.
 	 */

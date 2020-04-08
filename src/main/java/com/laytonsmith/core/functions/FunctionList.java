@@ -19,7 +19,7 @@ public class FunctionList {
 	 * always be populated.
 	 * @param s The function name
 	 * @param envs The environments that will be present at runtime. May be null, which bypasses the filtering.
-	 * @param t The code target, to indicate where in user code the error occured, if the function isn't found.
+	 * @param t The code target, to indicate where in user code the error occurred, if the function isn't found.
 	 * @return The selected function
 	 * @throws ConfigCompileException If the specified function doesn't exist (or it does exist, but requires an
 	 * environment that was not specified in {@code envs}.
@@ -38,7 +38,7 @@ public class FunctionList {
 	 * @param s The function name
 	 * @param platform The compiler platform.
 	 * @param envs The environments that will be present at runtime. May be null, which bypasses the filtering.
-	 * @param t The code target, to indicate where in user code the error occured, if the function isn't found.
+	 * @param t The code target, to indicate where in user code the error occurred, if the function isn't found.
 	 * @return The selected function
 	 * @throws ConfigCompileException If the specified function doesn't exist (or it does exist, but requires an
 	 * environment that was not specified in {@code envs}.
@@ -50,7 +50,7 @@ public class FunctionList {
 	}
 
 	/**
-	 * Returns the given function in the INTERPETER_JAVA platform, that applies to the given environments.
+	 * Returns the given function in the INTERPRETER_JAVA platform, that applies to the given environments.
 	 * If you are doing a meta
 	 * operation, you may pass null for envs, and all functions will be returned, but during normal runtime, this should
 	 * always be populated.

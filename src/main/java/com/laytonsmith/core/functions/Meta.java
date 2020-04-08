@@ -105,7 +105,7 @@ public class Meta {
 
 		public String docs() {
 			return "boolean {} Returns true if the scripts have not been reloaded since the plugin was enabled."
-					+ " In otherwords, using this in main.ms will return false when you do /reloadaliases.";
+					+ " In other words, using this in main.ms will return false when you do /reloadaliases.";
 		}
 
 		public Version since() {

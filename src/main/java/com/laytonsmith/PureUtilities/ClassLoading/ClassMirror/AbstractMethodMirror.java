@@ -97,7 +97,7 @@ public abstract class AbstractMethodMirror extends AbstractElementMirror {
 	 * the class files, so Mirrors constructed with real Members will return 0 for this. Also note that due to the
 	 * jvm specification, only lines with executable instructions contain values in the line number table. Therefore,
 	 * things like empty methods will not be in the line number table at all, and thus will return line 0 for this
-	 * value. Therefore, it is very important to not rely on this returning a useable value, and having a fallback
+	 * value. Therefore, it is very important to not rely on this returning a usable value, and having a fallback
 	 * mechanism if this returns 0. It's also important to note that this will not return the line number for the
 	 * method itself, since that isn't an executable statement.
 	 * @return

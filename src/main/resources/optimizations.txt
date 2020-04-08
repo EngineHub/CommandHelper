@@ -89,7 +89,7 @@ for(assign(@a, 0), @a < 5, @a++,
 We can detect this case, because we can use static code analysis to generate an
 algorithm, and we see that it will never have an intersection. 
 This does require special analysis on the part of the for loop however. The general
-idea is that as long as the equation is decideable, and it intersects, the loop
+idea is that as long as the equation is decidable, and it intersects, the loop
 can be optimized out fully, and if it can be shown that an equation will NEVER
 have an intersection, we can actually cause a compile error.
 

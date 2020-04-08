@@ -39,7 +39,7 @@ import java.util.Set;
  * }
  * </code></pre>
  *
- * This code can be better written with a Vistor pattern
+ * This code can be better written with a Visitor pattern
  *
  * <pre><code>
  *

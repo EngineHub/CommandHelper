@@ -96,7 +96,7 @@ public abstract class SQLDataSource extends AbstractDataSource {
 			needToConnect = true;
 		} else if(lastConnected < System.currentTimeMillis() - 10000) {
 			// If we connected more than 10 seconds ago, we should re-test
-			// the connection explicitely, because isClosed may return false,
+			// the connection explicitly, because isClosed may return false,
 			// even if the connection will fail. The only real way to test
 			// if the connection is actually open is to run a test query, but
 			// doing that too often will cause unneccessary delay, so we

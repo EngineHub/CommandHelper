@@ -79,7 +79,7 @@ public final class ElementSignature implements Serializable {
 	 */
 	public static ElementSignature GetSignature(String signature) {
 		// Inner non-static classes are not currently handled, so let's just disable processing of this for now.
-		// We can revist this later if we actually need this functionality, but the parsing logic needs to change.
+		// We can revisit this later if we actually need this functionality, but the parsing logic needs to change.
 //		if(signature == null) {
 			return null;
 //		}
@@ -166,7 +166,7 @@ public final class ElementSignature implements Serializable {
 		for(int i = 0; i < params.length(); i++) {
 			char c = params.charAt(i);
 			if(c == 'Z') {
-				// Booelan
+				// Boolean
 				ret.add(new ClassReferenceMirror(StringUtils.stringMultiply(arrayStack, "[") + "Z"));
 				arrayStack = 0;
 			} else if(c == 'B') {

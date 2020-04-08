@@ -148,7 +148,7 @@ public class BukkitPlayerListener implements Listener {
 
 //				SortedSet<BoundEvent> events = EventUtils.GetEvents(Driver.PLAYER_CHAT);
 //				Event driver = EventList.getEvent(Driver.PLAYER_CHAT, "player_chat");
-//				//Unfortunately, due to priority issues, if any event is syncronous, all of them
+//				//Unfortunately, due to priority issues, if any event is synchronous, all of them
 //				//have to be synchronous.
 //				boolean canBeAsync = true;
 //				boolean actuallyNeedToFire = false;

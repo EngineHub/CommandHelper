@@ -419,7 +419,7 @@ public class World {
 				x = Static.getInt32(args[1], t);
 				z = Static.getInt32(args[2], t);
 			}
-			if(world == null) { // Happends when m is a fake console or null command sender.
+			if(world == null) { // Happens when m is a fake console or null command sender.
 				throw new CREInvalidWorldException("No world specified", t);
 			}
 			world.unloadChunk(x, z);

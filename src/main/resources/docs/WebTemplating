@@ -496,7 +496,7 @@ Check the API for each event for more information about each.
 Some functions cannot be run directly on the client side, because they need data from the server.
 In this case, many functions transparently will compile to applicable javascript, and
 handle both the server and client side code to do manage this process for you. For instance,
-let's assume we want to read information from the persistance data on the server. We
+let's assume we want to read information from the persistence data on the server. We
 can simply use async_get_value like normal (get_value isn't available in the javascript
 compiler), and the call will still work.
 

@@ -12,7 +12,7 @@ of the transport extension, and the interpreter expects the connection to appear
 ===Authentication===
 In the first stage of connection, the interpreter handshakes with the remote connection, and requests an initial capabilities list. 
 These capabilities are considered non-authoritative client side, but are used to minimize
-network connections that would fail. All capabilites may be claimed to be dynamic however, and the server is free
+network connections that would fail. All capabilities may be claimed to be dynamic however, and the server is free
 to send meta information to adjust this list at any time. The client has the option in certain circumstances to ignore this list,
 so it is important to note that this is not a security mechanism. If a request does fail for capability reasons,
 that information is cached in these tables. This capability list doubles as a "permission" list.

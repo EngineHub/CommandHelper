@@ -58,7 +58,7 @@ public class SimpleVersion implements Version {
 	}
 
 	/**
-	 * Creates a new version with programmatic parameters, and an emtpy tag.
+	 * Creates a new version with programmatic parameters, and an empty tag.
 	 *
 	 * @param major
 	 * @param minor

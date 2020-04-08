@@ -16,7 +16,7 @@ public enum CoreTaskType implements TaskType {
 			+ " between runs.", MSVersion.V3_3_1),
 	EXECUTION("Execution Task", "An execution task is a way for tasks to be scheduled to be run as soon as possible, though at"
 			+ " some deferred time.", MSVersion.V3_3_1),
-	THREAD("Thread", "A thread is a separate, user defined task that runs asyncronously from the main thread. The user controls all"
+	THREAD("Thread", "A thread is a separate, user defined task that runs asynchronously from the main thread. The user controls all"
 			+ " aspects about this task.", MSVersion.V3_3_1),
 	ASYNC_TASK("Async Task", "An async task is some task that various individual functions use to do some processing off of the main"
 			+ " thread. Usually, once the processing is complete, the task will return control to the main thread, and execute"

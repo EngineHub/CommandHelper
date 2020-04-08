@@ -1098,7 +1098,7 @@ public class StringHandling {
 
 		@Override
 		public String docs() {
-			return "int {haystack, needle} Finds the numeric position of the first occurence of needle in haystack. haystack is the string"
+			return "int {haystack, needle} Finds the numeric position of the first occurrence of needle in haystack. haystack is the string"
 					+ " to search in, and needle is the string to search with. Returns the position of the needle (starting with 0) or -1 if"
 					+ " the string is not found at all.";
 		}
@@ -1178,7 +1178,7 @@ public class StringHandling {
 		@Override
 		public String docs() {
 			return "boolean {haystack, needle} Returns true if the string needle is found anywhere within the string haystack."
-					+ " This is functionally equivalent to string_postion(@haystack, @needle) != -1, but is generally clearer.";
+					+ " This is functionally equivalent to string_position(@haystack, @needle) != -1, but is generally clearer.";
 		}
 
 		@Override
@@ -1240,7 +1240,7 @@ public class StringHandling {
 		@Override
 		public String docs() {
 			return "boolean {haystack, needle} Returns true if the string needle is found anywhere within the string haystack (while ignoring case)."
-					+ " This is functionally equivalent to string_postion(to_lower(@haystack), to_lower(@needle)) != -1, but is generally clearer.";
+					+ " This is functionally equivalent to string_position(to_lower(@haystack), to_lower(@needle)) != -1, but is generally clearer.";
 		}
 
 		@Override
@@ -2461,14 +2461,14 @@ public class StringHandling {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Demonstrates secure value", "msg(secure_string(\"test\"));"),
-				new ExampleScript("Demonstrates common useage", "secure_string @secure = secure_string(array('p','a','s','s'));\n"
+				new ExampleScript("Demonstrates common usage", "secure_string @secure = secure_string(array('p','a','s','s'));\n"
 				+ "msg(@secure); // Won't print the actual password to screen\n"
 				+ "msg(decrypt_secure_string(@secure)); // Prints the actual password (as a char array)"),
 				new ExampleScript("Demonstrates compatibility with other functions", "@profile = array(\n"
 				+ "\tuser: 'username',\n\tpassword: secure_string('password')\n"
 				+ ");\n"
 				+ "msg(@profile);"),
-				new ExampleScript("Demonstrates compability with string class", "string @sec = secure_string('password');"
+				new ExampleScript("Demonstrates compatibility with string class", "string @sec = secure_string('password');"
 				+ " // Not an error, because secure_string extends string\n"
 				+ "msg(decrypt_secure_string(@sec));")
 			};

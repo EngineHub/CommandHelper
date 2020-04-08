@@ -68,7 +68,7 @@ public interface ArrayAccess extends Mixed {
 	public boolean isAssociative();
 
 	/**
-	 * Just because it is accessible as an array doesn't mean it will be associative. For optimiziation purposes, it may
+	 * Just because it is accessible as an array doesn't mean it will be associative. For optimization purposes, it may
 	 * be possible to check at compile time if the code is attempting to send a non-integral index, in which case we can
 	 * throw a compile error. This is a compile time flag, and is not used during the runtime, just during compilation.
 	 *

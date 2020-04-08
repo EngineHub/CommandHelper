@@ -14,7 +14,7 @@ import java.util.Objects;
  * <li>sourcefile:line1-line2: message</li>
  * </ul>
  *
- * Currently, explicitely <strong>not</strong> supported are the following otherwise valid GNU error message formats:
+ * Currently, explicitly <strong>not</strong> supported are the following otherwise valid GNU error message formats:
  * <ul>
  * <li>file1:line1.column1-file2:line2.column2: message</li>
  * <li>program:sourcefile:lineno: message</li>

@@ -75,7 +75,7 @@ This will install the `mscript` program and add it to your path,
 which can be used to start a REPL shell for quick tasks, execute a script file, or
 easily run the commandline tools. On Windows, this also installs a PowerShell module,
 which can be used with `Import-Module -Name MethodScript` and `Invoke-MethodScript`. On Windows,
-you must reboot your system after installatation to use the `mscript` command in cmd.exe.
+you must reboot your system after installation to use the `mscript` command in cmd.exe.
 You can install MethodScript using the same jar that is used in the Minecraft server,
 though two different environments are used, with separate folders for the CommandHelper
 installation, and the MethodScript installation. You can symlink these folders together if you

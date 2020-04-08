@@ -186,7 +186,7 @@ public class CSecureString extends CString {
 
 	/**
 	 * This method is quite expensive, 500ms per my measurements. We want to avoid static calling
-	 * of this method unless the code is explicitely using it, so should not be called from
+	 * of this method unless the code is explicitly using it, so should not be called from
 	 * a static initializer.
 	 */
 	private static void fixKeyLength() {

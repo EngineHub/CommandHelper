@@ -16,7 +16,7 @@ public enum ObjectModifier {
 	FINAL,
 	/**
 	 * A static class is one that is not tied to the containing class's instance scope, but is tied to the static scope.
-	 * This in not useable in top level classes, as it wouldn't make sense otherwise.
+	 * This in not usable in top level classes, as it wouldn't make sense otherwise.
 	 */
 	STATIC,
 	/**

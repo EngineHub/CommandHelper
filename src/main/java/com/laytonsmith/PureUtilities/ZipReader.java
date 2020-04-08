@@ -204,8 +204,8 @@ public class ZipReader {
 	}
 
 	/**
-	 * Returns a raw input stream for this file. If you just need the string contents, it would probably be easer to use
-	 * getFileContents instead, however, this method is necessary for accessing binary files.
+	 * Returns a raw input stream for this file. If you just need the string contents, it would probably be easier to
+	 * use getFileContents instead, however, this method is necessary for accessing binary files.
 	 *
 	 * @return An InputStream that will read the specified file
 	 * @throws FileNotFoundException If the file is not found

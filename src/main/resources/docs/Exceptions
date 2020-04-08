@@ -26,7 +26,7 @@ CastException: Expecting a double, but received string instead
 
 The stack trace can help you trace back the actual error, as the error itself is not necessarily with the top
 line in the stacktrace, which is where the actual exception was thrown. Instead, it might be because you're
-passing in an invalid paramter to a proc, so it may be useful to step back a few items in the stack trace to
+passing in an invalid parameter to a proc, so it may be useful to step back a few items in the stack trace to
 see what's calling what. Several things are added to the stack trace, particularly procedure stack, but also
 closures and includes.
 

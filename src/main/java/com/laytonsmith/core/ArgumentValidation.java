@@ -101,7 +101,7 @@ public final class ArgumentValidation {
 		} else {
 			String expectedClassName = ClassDiscovery.GetClassAnnotation(clazz, typeof.class).value();
 			String actualClassName = ClassDiscovery.GetClassAnnotation(construct.getClass(), typeof.class).value();
-			throw new CRECastException("Expecting " + expectedClassName + " but receieved " + construct.val()
+			throw new CRECastException("Expecting " + expectedClassName + " but received " + construct.val()
 					+ " (" + actualClassName + ") instead.", t);
 		}
 	}
@@ -340,7 +340,7 @@ public final class ArgumentValidation {
 	/**
 	 * Currently forwards the call to
 	 * {@link #getBooleanish},
-	 * to keep backwards compatible behavior, but will be removed in a future release. Explicitely use either
+	 * to keep backwards compatible behavior, but will be removed in a future release. Explicitly use either
 	 * {@link #getBooleanish} or {@link #getBooleanObject}.
 	 * @param c
 	 * @param t

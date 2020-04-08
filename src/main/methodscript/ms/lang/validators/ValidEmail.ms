@@ -15,7 +15,7 @@
  * accept what should otherwise be a valid address based on the standard, so
  * validating against this only provides a small amount of assurance that
  * this will be a *useful* email address, however, if it does not match this, it
- * most assureadly is not a email address. However, email addresses such as "email@/" will pass
+ * most assuredly is not a email address. However, email addresses such as "email@/" will pass
  * validation, so further parsing is likely needed.
  */
 @{Target(value: DECLARATION, type: string)}

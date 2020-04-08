@@ -8,7 +8,7 @@
 >
 
 /**
- * A version is represented by a string, containing 3 or 4 parts, seprated by the dot character.
+ * A version is represented by a string, containing 3 or 4 parts, separated by the dot character.
  * The first three parts must be integers, and the fourth part may be any string that does not
  * contain spaces or dots. It is intended that version numbers of this type follow the
  * Symantic Versioning standard, which can be found here: https://semver.org/

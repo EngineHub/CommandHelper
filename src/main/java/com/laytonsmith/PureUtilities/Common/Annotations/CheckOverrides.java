@@ -186,7 +186,7 @@ public class CheckOverrides extends AbstractProcessor {
 			}
 			//Now all the overridden methods have been removed from the list of methods in all the
 			//classes. We now need to go through and find out which of the remaining methods *could*
-			//be overriden, as many may not be overrides anyways.
+			//be overridden, as many may not be overrides anyways.
 			Set<Method> methodsInError = new HashSet<>();
 			for(Class c : methods.keySet()) {
 				Set<Method> mm = methods.get(c);

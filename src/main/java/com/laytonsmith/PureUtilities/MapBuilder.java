@@ -50,7 +50,7 @@ public class MapBuilder<K, V> extends AbstractMap<K, V> implements Map<K, V> {
 	 * may also be non-empty if you wish to prepopulate the map through other means.
 	 * @param <T> The key type.
 	 * @param <U> The value type.
-	 * @param existingMap An exisiting Map.
+	 * @param existingMap An existing Map.
 	 * @return A new MapBuilder object wrapping the provided Map instance.
 	 */
 	public static <T, U> MapBuilder<T, U> empty(Map<T, U> existingMap) {

@@ -71,7 +71,7 @@ cross cast.
 It is also worth noting that when using the auto keyword explicitly, this can open the
 door to failure to catch errors at compile time, as demonstrated in the above example
 with the auto keyword usage. Generally speaking, well maintainable software should not
-need to use the auto keyword explictly, though it is ok to take advantage of the cross casting
+need to use the auto keyword explicitly, though it is ok to take advantage of the cross casting
 features when using hardcoded instances of objects, such as in example 4 above.
 
 <%NOTE|It is important to ensure that classes are cross-castable amongst themselves, and

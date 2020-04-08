@@ -55,7 +55,7 @@ get will specify function names. Associativity tells in which order operators wi
 | Using square braces allows for array accesses, and in combination with the <code>=</code> sign, setting sub-indices.
 If the array set appears on the right hand side of an assignment, or in a general statement without an assign, it is an
 array_get operation. If it appears on the left hand side of an assignment, it is an array_set operation. The brackets
-apply to the element just preceeding, for instance with <code>@var['index']</code>, it is assumed that <code>@var</code>
+apply to the element just preceding, for instance with <code>@var['index']</code>, it is assumed that <code>@var</code>
 is an array or array like value. Empty braces, <code>[]</code>, when on the left hand side works as an array push, and
 when on the right hand side, or in a general statement without an assign, it is an array clone operation (which ultimately
 still uses array_get). Sub-strings within strings may be pulled out using the bracket notation as well, and slices are supported.
@@ -128,6 +128,6 @@ operators are infrequently used, and may be used for other operations in the fut
 Also of note, auto-concatenation always takes lowest priority to all other operations.
 
 When in strict mode, use of functional notation instead of operators triggers a compiler warning. This warning is
-suppressable, however.
+suppressible, however.
 
 {{LearningTrail}}

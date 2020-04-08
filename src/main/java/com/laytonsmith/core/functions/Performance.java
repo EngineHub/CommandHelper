@@ -58,7 +58,7 @@ public class Performance {
 			return "void {boolean} Enables performance logging. The allow-profiling option must be set to true in your preferences file,"
 					+ " and play-dirty mode must be active. If allow-profiling is set to false, a SecurityException is thrown."
 					+ " The debug filters are used by the performance logger, if you choose to filter through the events."
-					+ " See the documenation"
+					+ " See the documentation"
 					+ " for more details on performance logging.";
 		}
 

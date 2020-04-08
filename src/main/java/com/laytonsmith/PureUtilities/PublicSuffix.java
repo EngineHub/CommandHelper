@@ -270,7 +270,7 @@ public final class PublicSuffix {
 	}
 
 	/**
-	 * Immmutable subdomain node.
+	 * Immutable subdomain node.
 	 */
 	private static class SubdomainNode {
 

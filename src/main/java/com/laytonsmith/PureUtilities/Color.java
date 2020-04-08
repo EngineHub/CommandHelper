@@ -4,7 +4,7 @@ import java.beans.ConstructorProperties;
 
 /**
  * This class is meant as a near drop in replacement for java.awt.Color, except it doesn't initialize the GUI framework,
- * which is undesireable in cmdline applications. An instance of this class can be converted to a java.awt.Color,
+ * which is undesirable in cmdline applications. An instance of this class can be converted to a java.awt.Color,
  * however, if absolutely necessary.
  *
  * While this is attempting to (mostly) be a drop in replacement, not all features are available, particularly the ones

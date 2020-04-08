@@ -29,7 +29,7 @@ proc(_start_marquee, @name,
     assign(@locs, array())
     while(true,
         if(has_value('chmarquee.' . @name . '.signloc.' . (@count + 1))){
-            # Grab the sign locations, so we don't incure a io hit each time we want to rotate the text
+            # Grab the sign locations, so we don't incur an io hit each time we want to rotate the text
             array_push(@locs, get_value('chmarquee.' . @name . '.signloc.' . (@count + 1)))
             @count++
         } else {

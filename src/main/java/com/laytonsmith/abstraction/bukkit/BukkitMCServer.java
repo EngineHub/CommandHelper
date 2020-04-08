@@ -266,7 +266,7 @@ public class BukkitMCServer implements MCServer {
 	}
 
 	/**
-	 * Broadcasts a message to a list of recipients, fireing a {@link BroadcastMessageEvent} before doing so.
+	 * Broadcasts a message to a list of recipients, firing a {@link BroadcastMessageEvent} before doing so.
 	 * {@link ConsoleCommandSender Console} has to be included in this list to receive the broadcast.
 	 * @param message - The message to broadcast.
 	 * @param recipients - A list of {@link MCCommandSender command senders} to send the message to.

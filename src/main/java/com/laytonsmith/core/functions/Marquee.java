@@ -89,7 +89,7 @@ public class Marquee {
 					} catch (Exception e) {
 						//We don't want this to affect our code, so just log it,
 						//but we also want to stop this marquee
-						String message = "An error occured while running " + (marqueeName == null ? "an unnamed marquee" : "the " + marqueeName + " marquee")
+						String message = "An error occurred while running " + (marqueeName == null ? "an unnamed marquee" : "the " + marqueeName + " marquee")
 								+ ". To prevent further errors, it has been temporarily stopped.";
 						Logger.getLogger(Marquee.class.getName()).log(Level.SEVERE, message, e);
 						m.stop();
@@ -126,8 +126,8 @@ public class Marquee {
 					+ " split up a given string for you, and call the callback. The split string will automatically wrap, handle"
 					+ " buffering spaces, and scroll through the text. ---- marqueeName is optional, but required if you wish"
 					+ " to stop the marquee at any point. text is the text that the marquee should scroll, stringWidth is the"
-					+ " width of the string you wish to recieve, delayTime is the"
-					+ " time between character scrolls, and callback is a closure that should recieve a string which will be exactly"
+					+ " width of the string you wish to receive, delayTime is the"
+					+ " time between character scrolls, and callback is a closure that should receive a string which will be exactly"
 					+ " stringWidth long. (The string will have been wrapped as needed if it is less than that size.)"
 					+ " This is usually used in combination with signs, but in theory could be used with anything that uses text.";
 		}

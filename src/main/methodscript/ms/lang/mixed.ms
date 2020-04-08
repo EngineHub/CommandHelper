@@ -8,7 +8,7 @@
 >
 
 /**
- * mixed is the base class for all subclasses. Whether or not a defined class expressely extends
+ * mixed is the base class for all subclasses. Whether or not a defined class expressly extends
  * this class, it is none-the-less an extension of this class. Due to that, all methods in this
  * class are available to all objects.
  *
@@ -92,7 +92,7 @@ public native abstract class ms.lang.mixed {
 	 *
 	 * The default implementation of this simply returns 0, which is extremely inefficient, but
 	 * meets the base requirements of a hashCode implementation, therefore preventing hard-to-detect bugs.
-	 * You will instead find easy-to-spot performance degredation.
+	 * You will instead find easy-to-spot performance degradation.
 	 * Given how inefficient it is, if it is possible that your object is
 	 * used as part of an object that needs to be added to, for instance, a HashMap, it is highly
 	 * recommended to provide a better implementation. The method generated from EqualsGenerator is
@@ -102,11 +102,11 @@ public native abstract class ms.lang.mixed {
 	 * If implementing this without the EqualsGenerator, the generally accepted best approach to
 	 * implementing a good hashCode method is taken from Josh Bloch's *Effective Java*.
 	 * Two random, large, prime numbers are picked, a, and b. The hash is set to
-	 * a, then, for each field that is of signifigance (that is, it is used in the calculation of equals),
+	 * a, then, for each field that is of significance (that is, it is used in the calculation of equals),
 	 * the hash is multiplied by b, and then the hash code
 	 * of the field is added to it (0 is used if the field is null).
 	 * This process is repeated, until all fields are considered. If the class is immutable (either in fact
-	 * because of the immutable keyword, or in essense) it may be worth caching the return value,
+	 * because of the immutable keyword, or in essence) it may be worth caching the return value,
 	 * so it does not have to be recalculated each time.
 	 */
 	public int hashCode() {

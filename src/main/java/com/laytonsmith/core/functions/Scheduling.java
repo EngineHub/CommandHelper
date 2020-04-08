@@ -246,7 +246,7 @@ public class Scheduling {
 			return "int {timeInMS, [initialDelayInMS,] closure} Sets a task to run every so often. This works similarly to set_timeout,"
 					+ " except the task will automatically re-register itself to run again. Note that the resolution"
 					+ " of the time is in ms, however, the server will only have a resolution of up to 50 ms, meaning"
-					+ " that a time of 1-50ms is essentially the same as 50ms. The inital delay defaults to the same"
+					+ " that a time of 1-50ms is essentially the same as 50ms. The initial delay defaults to the same"
 					+ " thing as timeInMS, that is, there will be a pause between registration and initial firing. However,"
 					+ " this can be set to 0 (or some other number) to adjust how long of a delay there is before it begins.";
 		}

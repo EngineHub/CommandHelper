@@ -251,7 +251,7 @@ public final class Static {
 	/**
 	 * Currently forwards the call to
 	 * {@link ArgumentValidation#getBooleanish},
-	 * to keep backwards compatible behavior, but will be removed in a future release. Explicitely use either
+	 * to keep backwards compatible behavior, but will be removed in a future release. Explicitly use either
 	 * {@link ArgumentValidation#getBooleanish} or {@link ArgumentValidation#getBooleanObject}.
 	 * @param c
 	 * @param t
@@ -577,7 +577,7 @@ public final class Static {
 			try {
 				if(!(val.contains(" ") || val.contains("\t"))) {
 					//Interesting behavior in Double.parseDouble causes it to "trim" strings first, then
-					//try to parse them, which is not desireable in our case. So, if the value contains
+					//try to parse them, which is not desirable in our case. So, if the value contains
 					//any characters other than [\-0-9\.], we want to make it a string instead
 					return new CDouble(Double.parseDouble(val), t);
 				}
@@ -1034,7 +1034,7 @@ public final class Static {
 	}
 
 	/**
-	 * Returns the system based line seperator character
+	 * Returns the system based line separator character
 	 *
 	 * @return
 	 */
@@ -1379,7 +1379,7 @@ public final class Static {
 	 * This verifies that the type required is actually present, and returns the value, cast to the appropriate type,
 	 * or, if not the correct type, a CRE.
 	 * <p>
-	 * Note that this does not do type coersion, and therefore does not work on primitives, and is only meant for
+	 * Note that this does not do type coercion, and therefore does not work on primitives, and is only meant for
 	 * arrays, closures, and other complex types.
 	 *
 	 * @param <T> The type desired to be cast to

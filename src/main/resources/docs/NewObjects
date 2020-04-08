@@ -141,7 +141,7 @@ new A()->method(1, 1);
 // TODO: Actually, should this be allowed? When it comes to inheritance, we will
 // probably run into the same problem as with varied return types.
 
-// This is allowed, however, because we are explicitely typing the method, which allows
+// This is allowed, however, because we are explicitly typing the method, which allows
 // us to exactly distinguish the method. This notation is in general allowed for any
 // method, though is not necessary most of the time.
 new A()->method<void, int, number>(1, 1);
@@ -503,7 +503,7 @@ class B extends A {
 Note that we are explicitely calling A's constructor with the call to super, 
 and A's method2. If there had been several parents, this could be used to 
 "un-override" a call, or otherwise explicitely selected a method that had been 
-overriden by multiple children. This is useful outside of diamond inheritance, 
+overridden by multiple children. This is useful outside of diamond inheritance, 
 but is more often used when dealing with multiple inheritance. Note that in the 
 case of super() constructors, it is always an error to cause a child's 
 constructor to be invoked before the parent's constructor. Calling a parent's
@@ -1040,7 +1040,7 @@ the classLibrary/ folder in your installation, but each LocalPackage may have th
 classLibrary folder as well. MSLP files will have their own class library bundled in
 as well. When an .ms file is defined within a class library, the rest of your code does
 not have to do anything extra to load them in; at compile time, they will all be loaded
-automatically, and added to the object definition table that is useable at runtime
+automatically, and added to the object definition table that is usable at runtime
 throughout the rest of your code. There can be no directly executable code within these
 file, however, and this is enforced by the compiler. There may be only one outer class
 definition per file, and the fully qualified class name will be the path of the class,

@@ -268,7 +268,7 @@ public class Regex {
 
 		@Override
 		public String docs() {
-			return "string {pattern, replacement, subject} Replaces any occurances of pattern with the replacement in subject."
+			return "string {pattern, replacement, subject} Replaces any occurrences of pattern with the replacement in subject."
 					+ " Back references are allowed.";
 		}
 
@@ -482,7 +482,7 @@ public class Regex {
 
 		@Override
 		public String docs() {
-			return "int {pattern, subject} Counts the number of occurances in the subject.";
+			return "int {pattern, subject} Counts the number of occurrences in the subject.";
 		}
 
 		@Override

@@ -149,7 +149,7 @@ public class RequestSettings {
 	/**
 	 * Sets the query parameters. Unlike the normal parameters, these are ALWAYS put in the query, regardless
 	 * of whether or not the method is GET or POST, which can be useful when a protocol requires an empty post body
-	 * as well as query parameters. If you are explicitely setting a post body, you may use either this or
+	 * as well as query parameters. If you are explicitly setting a post body, you may use either this or
 	 * setParameters, as the effect will be the same.
 	 * @param parameters
 	 * @return

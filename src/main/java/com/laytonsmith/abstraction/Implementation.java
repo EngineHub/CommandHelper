@@ -49,7 +49,7 @@ public final class Implementation {
 	 * Sets the server type in normal usage. In normal usage, this can only be called once, and additional calls
 	 * are an error. While {@link #forceServerType(com.laytonsmith.abstraction.Implementation.Type)} does exist, and
 	 * can be used to bypass this, and it may be tempting to check server if {@link #GetServerType} throws an exception
-	 * before setting this, these temptations should be avoided (except where explicitely allowed) as fixing your code
+	 * before setting this, these temptations should be avoided (except where explicitly allowed) as fixing your code
 	 * in any other way will inevitably lead to other problems down the road. This code should only be called once,
 	 * with the correct type, since the code makes assumptions based on the first type sent to it. Additionally, setting
 	 * the type twice with the same type, while it would not directly cause an error, is still a serious code smell, and

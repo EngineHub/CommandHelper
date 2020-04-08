@@ -146,7 +146,7 @@ public class PacketJumper {
 		 * The packet to be processed/sent is passed to this method, and it is expected that this method returns a
 		 * packet (which is actually going to be sent) or null, which cancels the packet send entirely.
 		 *
-		 * @param player The player sending/recieving the packet
+		 * @param player The player sending/receiving the packet
 		 * @param packet The packet in question
 		 * @return
 		 */

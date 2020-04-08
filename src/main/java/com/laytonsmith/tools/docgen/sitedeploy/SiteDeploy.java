@@ -147,7 +147,7 @@ public final class SiteDeploy {
 		// Other options
 		defaults.add(new Preferences.Preference(SHOW_TEMPLATE_CREDIT, "true", Preferences.Type.BOOLEAN, "Whether or not"
 				+ " to show the template credit. (Design by TEMPLATED logo in bottom.) If you set this to false, you"
-				+ " agree that you have purchased a license for your deployment, and are legally allowed to supress"
+				+ " agree that you have purchased a license for your deployment, and are legally allowed to suppress"
 				+ " this from the templates."));
 		defaults.add(new Preferences.Preference(GITHUB_BASE_URL, "", Preferences.Type.STRING, "The base url for"
 				+ " the github project. If empty string, then the value " + DEFAULT_GITHUB_BASE_URL + " is used."));
@@ -546,7 +546,7 @@ public final class SiteDeploy {
 	 * The master memories object exists purely to prevent duplicate translations being requested from the
 	 * translation server for new translations. However, identical keys may be translated differently
 	 * on different pages, and that's ok. The TM that gets set in here is non deterministic, but only the
-	 * firstt time, because after that, each page should have it's own TM, and if the one that was picked
+	 * first time, because after that, each page should have it's own TM, and if the one that was picked
 	 * was wrong, then once it's manually corrected, it will stay correct forever.
 	 */
 	private final TranslationMaster masterMemories;
@@ -974,7 +974,7 @@ public final class SiteDeploy {
 							try {
 								createTranslationMemory(title, toLocation, type, body);
 							} catch (Throwable t) {
-								writeLog("While generating translation memory for " + toLocation + "an error occured: ",
+								writeLog("While generating translation memory for " + toLocation + "an error occurred: ",
 										t);
 							}
 							currentGenerateTask.addAndGet(1);
@@ -1028,7 +1028,7 @@ public final class SiteDeploy {
 					currentGenerateTask.addAndGet(1);
 					writeStatus("");
 				} catch (Exception ex) {
-					writeLog("While writing " + toLocation + " the following error occured:", ex);
+					writeLog("While writing " + toLocation + " the following error occurred:", ex);
 				}
 			} catch (Throwable t) {
 				writeLog("Failure!", t);

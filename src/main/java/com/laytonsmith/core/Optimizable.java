@@ -153,7 +153,7 @@ public interface Optimizable extends Function {
 	 * ConfigCompileException.
 	 *
 	 * @param t
-	 * @param env The environment. The only guaranteed useable environment is the {@link CompilerEnvironment}.
+	 * @param env The environment. The only guaranteed usable environment is the {@link CompilerEnvironment}.
 	 * @param args
 	 * @return
 	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
@@ -167,7 +167,7 @@ public interface Optimizable extends Function {
 	 * the default).
 	 *
 	 * @param t
-	 * @param env The environment. The only guaranteed useable environment is the {@link CompilerEnvironment}.
+	 * @param env The environment. The only guaranteed usable environment is the {@link CompilerEnvironment}.
 	 * @param envs The target environments. Unfortunately, we cannot use the environment list in {@code env}, as that
 	 * does not represent the runtime environment.
 	 * @param children The children that are being passed to this function

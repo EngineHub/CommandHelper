@@ -34,7 +34,7 @@ public class CapabilityList {
 		if(value.serverReturnable()) {
 			caps.put(capability, value);
 		} else {
-			throw new RuntimeException("An error occured during runtime, the server returned an invalid capability: " + value);
+			throw new RuntimeException("An error occurred during runtime, the server returned an invalid capability: " + value);
 		}
 	}
 

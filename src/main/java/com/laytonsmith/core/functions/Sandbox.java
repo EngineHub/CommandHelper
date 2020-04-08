@@ -77,7 +77,7 @@ public class Sandbox {
 			return "void {} \"Super Cancels\" an event. This only will work if play-dirty is set to true. If an event is"
 					+ " super cancelled, not only is the cancelled flag set to true, the event stops propagating down, so"
 					+ " no other plugins (as in other server plugins, not just CH scripts) will receive the event at all "
-					+ " (other than monitor level plugins). This is useful for overridding"
+					+ " (other than monitor level plugins). This is useful for overriding"
 					+ " event handlers for plugins that don't respect the cancelled flag. This function hooks into the play-dirty"
 					+ " framework that injects custom event handlers into bukkit.";
 		}
@@ -642,7 +642,7 @@ public class Sandbox {
 		public String docs() {
 			return "void {path, content, [mode]} Writes a file to the file system. This method only works from the"
 					+ " cmdline,"
-					+ " if not in cmdline, a SecurityExcpetion is thrown. Because of this, there is no check against"
+					+ " if not in cmdline, a SecurityException is thrown. Because of this, there is no check against"
 					+ " the base-dir path. ---- The path, if relative, is relative to this script"
 					+ " file. If the path already exists, and is a directory, an IOException is thrown."
 					+ " The content may be a string, in which case it is written out as UTF-8 text. It could also"

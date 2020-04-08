@@ -6,8 +6,8 @@ command line.
 ==Installation==
 To install MethodScript on your system, download the CommandHelper jar, and place it in a sensible location. If you are 
 already running a Minecraft server with CommandHelper installed, the jar file there will suffice, though you may wish to 
-place a copy of it elsewhere, as otherwise your persistance databases and settings will be combined. (Keep in mind that 
-using serialized persistance is NOT thread safe, and so you run the risk of corrupting your database by having two 
+place a copy of it elsewhere, as otherwise your persistence databases and settings will be combined. (Keep in mind that 
+using serialized persistence is NOT thread safe, and so you run the risk of corrupting your database by having two 
 instances of CH running at once, if they are both writing to the persistence db.)
 
 Run the command:

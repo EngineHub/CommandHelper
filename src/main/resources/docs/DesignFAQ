@@ -40,7 +40,7 @@ them either. Javascript will however "insert" them for you wherever you have
 a newline. Eventually, MethodScript will require them in a very few cases, at which
 point they will be introduced. Additionally, it will be possible to detect when an ambiguous
 situation is present, and trigger a compile error, instead of using javascript's approach
-and inferring where the seperators are needed. They will be required once execution
+and inferring where the separators are needed. They will be required once execution
 of closures via () is added. Consider the following theoretical syntax:
 
 <pre>
@@ -103,7 +103,7 @@ If the second usage is actually desired, the following would be required:
 (++@a)
 </pre>
 
-Besides making this more readable anyways, neither of these cases are ambiguious
+Besides making this more readable anyways, neither of these cases are ambiguous
 anymore, and an error can be raised if a loose parenthetical is used alongside
 an actual function, and it will only attempt to call the procedure if two loose
 parentheticals are next to each other.

@@ -934,7 +934,7 @@ public class Script {
 					if(k < thatCommand.size()) {
 						Construct c2 = thatCommand.get(k);
 
-						// Commands are not ambigous if they have unequal commands or strings at
+						// Commands are not ambiguous if they have unequal commands or strings at
 						// the same argument position.
 						if(c1.getCType() == c2.getCType()
 								&& (c1.getCType() == ConstructType.STRING || c1.getCType() == ConstructType.COMMAND)) {
@@ -947,12 +947,12 @@ public class Script {
 					} else {
 
 						// thatCommand is shorter than thisCommand.
-						// Commands are not ambigous if thisCommand contains a non-variable or a non-optional variable
+						// Commands are not ambiguous if thisCommand contains a non-variable or a non-optional variable
 						// after the last Construct in thatCommand.
 						if(!(c1 instanceof Variable) || (c1 instanceof Variable && !((Variable) c1).isOptional())) {
 							break matchScope;
 						} else {
-							break; // There is no need to loop over later Constructs, the commands are ambigous.
+							break; // There is no need to loop over later Constructs, the commands are ambiguous.
 						}
 
 					}
@@ -960,7 +960,7 @@ public class Script {
 				if(thatCommand.size() > thisCommand.size()) {
 
 					// thisCommand is shorter than thatCommand.
-					// Commands are not ambigous if thatCommand contains a non-variable or a non-optional variable
+					// Commands are not ambiguous if thatCommand contains a non-variable or a non-optional variable
 					// after the last Construct in thisCommand.
 					Construct c2 = thatCommand.get(thisCommand.size());
 					if(!(c2 instanceof Variable) || (c2 instanceof Variable && !((Variable) c2).isOptional())) {
@@ -969,7 +969,7 @@ public class Script {
 
 				}
 
-				// The signature of thisCommand and thatCommand are ambigous. Throw a compile exception.
+				// The signature of thisCommand and thatCommand are ambiguous. Throw a compile exception.
 				String commandThis = "";
 				for(Construct c : thisCommand) {
 					commandThis += c.val() + " ";

@@ -47,7 +47,7 @@ data from external or even remote applications, which will allow you to do all s
 
 ==Using the Data Manager==
 The data manager is an interactive shell program that runs as a standalone program. Before using the data manager to 
-edit your data, you should first ensure that nothing else is using your persistance files (so, shut down your server). 
+edit your data, you should first ensure that nothing else is using your persistence files (so, shut down your server). 
 The only exception to this is for locking databases, such as SQL based backends, there should be no issues with 
 read/write access, even if the server is running, and read access for all other backends. 
 
@@ -86,9 +86,9 @@ just a few commands.
 
 ===refactor===
 THIS FEATURE IS NOT YET IMPLEMENTED. Refactoring allows you to transfer your data from one backend to the other. By 
-default, CommandHelper uses the SerializedPersistance backend, but say after running your server for a while, you 
+default, CommandHelper uses the SerializedPersistence backend, but say after running your server for a while, you 
 decide to switch to another backend type, perhaps MySQL. You can use the refactor tool to easily transfer all of your 
-data from the SerializedPersistance backend to the new MySQL backend, without any hassle, and without losing any data. 
+data from the SerializedPersistence backend to the new MySQL backend, without any hassle, and without losing any data. 
 As new backend providers become available, this tool will be updated, so you are able to switch around as often as 
 desired.
 
@@ -110,7 +110,7 @@ destination database, and it moves ALL the keys over to the new database, withou
 key conflicts, it will prompt you for a decision, so it should be safe from accidental data loss. The merge tool isn't 
 necessarily a replacement for the import and export tools, because it doesn't work transparently; it will only operate 
 on entire databases at a time, as opposed to namespaces and such. However, it can be used as a crude method of importing 
-and exporting, and if your entire persistance network is contained in one database, it will work exactly like a full 
+and exporting, and if your entire persistence network is contained in one database, it will work exactly like a full 
 import/export.
 -->
 

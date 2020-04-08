@@ -656,7 +656,7 @@ public class Main {
 					}
 				}
 			} else {
-				StreamUtils.GetSystemErr().println("Extension directory specificed doesn't exist: "
+				StreamUtils.GetSystemErr().println("Extension directory specified doesn't exist: "
 						+ extensionDirS + ". Continuing anyways.");
 			}
 			new DocGenExportTool(cd, outputFile).export();
@@ -758,7 +758,7 @@ public class Main {
 						+ " versions will not be accounted for or uploaded. This process, if desired, must be done manually. If this"
 						+ " option is configured, the installation will occur before the upload or processing of files. During installation,"
 						+ " a \"lock\" file will be created, and if that file is present, it is assumed that the installation"
-						+ " has already occured on the instance, and will not be repeated. This is a safety measure to ensure"
+						+ " has already occurred on the instance, and will not be repeated. This is a safety measure to ensure"
 						+ " that the instance will not attempt to be redeployed, making it safe to always add the install"
 						+ " flag. If this flag is set, additional options need to be added to the config file. The remote server"
 						+ " is assumed to be an already running AWS ubuntu instance, with security groups configured and a pem"

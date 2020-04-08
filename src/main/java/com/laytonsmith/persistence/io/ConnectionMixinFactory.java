@@ -60,7 +60,7 @@ public final class ConnectionMixinFactory {
 	/**
 	 * A ConnectionMixin class dictates how a data source connects to its data. This can vary depending on the URI, and
 	 * so this class grabs the appropriate mixin based on the original URI. It isn't always the case that a connection
-	 * mixin will exist for this URI, if the data source implicitely provides it's own connection, it won't need this.
+	 * mixin will exist for this URI, if the data source implicitly provides it's own connection, it won't need this.
 	 * This is generally the case for non-string based connections. If the data source does provide it's own connection
 	 * information, this should be ignored, because it will probably not return the correct type anyways.
 	 *

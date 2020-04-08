@@ -256,7 +256,7 @@ public class FileHandling {
 			final String file = args[0].val();
 			final CClosure callback;
 			if(!(args[1].isInstanceOf(CClosure.TYPE))) {
-				throw new CRECastException("Expected paramter 2 of " + getName() + " to be a closure!", t);
+				throw new CRECastException("Expected parameter 2 of " + getName() + " to be a closure!", t);
 			} else {
 				callback = ((CClosure) args[1]);
 			}
@@ -336,8 +336,8 @@ public class FileHandling {
 					+ " The line endings for the string returned will always be \\n, even if they originally were \\r\\n."
 					+ " This method will immediately return, and asynchronously read in the file, and finally send the contents"
 					+ " to the callback once the task completes. The callback should have the following signature: closure(@contents, @exception){ &lt;code&gt; }."
-					+ " If @contents is null, that indicates that an exception occured, and @exception will not be null, but instead have an"
-					+ " exeption array. Otherwise, @contents will contain the file's contents, and @exception will be null. This method is useful"
+					+ " If @contents is null, that indicates that an exception occurred, and @exception will not be null, but instead have an"
+					+ " exception array. Otherwise, @contents will contain the file's contents, and @exception will be null. This method is useful"
 					+ " to use in two cases, either you need a remote file via SCP, or a local file is big enough that you notice a delay when"
 					+ " simply using the read() function. async_read is threadsafe.";
 		}

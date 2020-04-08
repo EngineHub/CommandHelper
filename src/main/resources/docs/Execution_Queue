@@ -38,7 +38,7 @@ To make a new queue, just use a new name, it will be created automatically.
 
 == Delays ==
 Delays can be inserted into a queue as well. This delay will suspend the queue's operation momentarily, but will not 
-freeze the server, since the delay will be on the execution queue's thread, not the server thread. This is a seperate 
+freeze the server, since the delay will be on the execution queue's thread, not the server thread. This is a separate 
 operation, and uses the {{function|queue_delay}} function.
 
 <%CODE|queue_delay(1000, 'default'); #Put a 1 second delay on the default queue. 'default' is optional.%>
@@ -88,6 +88,6 @@ queue_push(closure() {
 }, 'block-set');
 %>
 
-Queing up the operations should complete relatively fast, but the full task will take a while.
+Queueing up the operations should complete relatively fast, but the full task will take a while.
 
 

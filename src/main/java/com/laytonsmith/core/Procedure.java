@@ -220,7 +220,7 @@ public class Procedure implements Cloneable {
 					&& "sconcat".equals(tree.getData().val())) {
 				//If the inner tree is just an sconcat, we can optimize by
 				//simply running the arguments to the sconcat. We're not going
-				//to use the results, after all, and this is a common occurance,
+				//to use the results, after all, and this is a common occurrence,
 				//because the compiler will often put it there automatically.
 				//We *could* optimize this by removing it from the compiled code,
 				//and we still should do that, but this check is quick enough,

@@ -129,7 +129,7 @@ public class XGUI {
 	}
 
 	@api
-	@hide("Expreimental")
+	@hide("Experimental")
 	@noboilerplate
 	public static class x_show_window extends AbstractFunction {
 

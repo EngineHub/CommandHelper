@@ -329,7 +329,7 @@ public class SQL {
 							+ " in your code. It is highly recommended that you use prepared queries,"
 							+ " which ensure that your parameters are properly escaped. If you really"
 							+ " must use concatenation, and you promise you know what you're doing, you"
-							+ " can use " + new unsafe_query().getName() + "() to supress this warning.";
+							+ " can use " + new unsafe_query().getName() + "() to suppress this warning.";
 					env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 							new CompilerWarning(msg, t, null));
 				}

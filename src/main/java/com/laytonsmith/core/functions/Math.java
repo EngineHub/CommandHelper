@@ -1155,7 +1155,7 @@ public class Math {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage, with one paramter", "rand(10)", ":5"),
+				new ExampleScript("Basic usage, with one parameter", "rand(10)", ":5"),
 				new ExampleScript("Basic usage, with a range", "rand(50, 100)", ":95"),
 				new ExampleScript("Usage with no parameters", "rand()", ":0.720543709668052")
 			};
@@ -2597,20 +2597,20 @@ public class Math {
 
 		@MEnum("ms.lang.MathConstants")
 		public static enum MathConstants implements SimpleDocumentation {
-			NaN(Double.NaN, "A representation of an undefinied number (Not a Number), per the IEEE 754 standard"),
+			NaN(Double.NaN, "A representation of an undefined number (Not a Number), per the IEEE 754 standard"),
 			NEGATIVE_INFINITY(Double.NEGATIVE_INFINITY, "A representation of negative infinity, per the IEEE 754 standard"),
 			INFINITY(Double.POSITIVE_INFINITY, "A representation of positive infinity, per the IEEE 754 standard"),
-			DOUBLE_MAX(Double.MAX_VALUE, "The higest number that can be represented as a double"),
+			DOUBLE_MAX(Double.MAX_VALUE, "The highest number that can be represented as a double"),
 			DOUBLE_MIN(Double.MIN_VALUE, "The lowest number that can be represented as a double"),
-			LONG_MAX(Long.MAX_VALUE, "The higest number that can be represented as a long"),
+			LONG_MAX(Long.MAX_VALUE, "The highest number that can be represented as a long"),
 			LONG_MIN(Long.MIN_VALUE, "The lowest number that can be represented as a long"),
-			SHORT_MAX(Short.MAX_VALUE, "The higest number that can be represented as a short"),
+			SHORT_MAX(Short.MAX_VALUE, "The highest number that can be represented as a short"),
 			SHORT_MIN(Short.MIN_VALUE, "The lowest number that can be represented as a short"),
-			INTEGER_MAX(Integer.MAX_VALUE, "The higest number that can be represented as a integer"),
+			INTEGER_MAX(Integer.MAX_VALUE, "The highest number that can be represented as a integer"),
 			INTEGER_MIN(Integer.MIN_VALUE, "The lowest number that can be represented as an integer"),
-			FLOAT_MAX(Float.MAX_VALUE, "The higest number that can be represented as a float"),
+			FLOAT_MAX(Float.MAX_VALUE, "The highest number that can be represented as a float"),
 			FLOAT_MIN(Float.MIN_VALUE, "The lowest number that can be represented as a float"),
-			BYTE_MAX(Byte.MAX_VALUE, "The higest number that can be represented as a byte"),
+			BYTE_MAX(Byte.MAX_VALUE, "The highest number that can be represented as a byte"),
 			BYTE_MIN(Byte.MIN_VALUE, "The lowest number that can be represented as a byte"),
 			E(java.lang.Math.E, "The mathematical constant e, also known as Euler's number (not to be confused with the Euler-Mascheroni constant)"),
 			PI(java.lang.Math.PI, "The value of π (pi)"),

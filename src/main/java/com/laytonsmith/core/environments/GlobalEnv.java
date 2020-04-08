@@ -78,7 +78,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 *
 	 * @param queue The ExecutionQueue object to use
 	 * @param profiler The Profiler to use
-	 * @param network The pre-configured PersistenecNetwork object to use
+	 * @param network The pre-configured PersistenceNetwork object to use
 	 * @param root The root working directory to use
 	 * @param profiles The Profiles object to use
 	 * @param taskManager The TaskManager object to use

@@ -174,8 +174,9 @@ public final class EventUtils {
 					driver.manualTrigger(driver.convert(object, t));
 				}
 			} else {
-				//They have fired a non existant event
-				ConfigRuntimeException.DoWarning(ConfigRuntimeException.CreateUncatchableException("Non existant event is being triggered: " + eventName, object.getTarget()));
+				//They have fired a non existent event
+				ConfigRuntimeException.DoWarning(ConfigRuntimeException.CreateUncatchableException(
+						"Non existent event is being triggered: " + eventName, object.getTarget()));
 			}
 		}
 	}

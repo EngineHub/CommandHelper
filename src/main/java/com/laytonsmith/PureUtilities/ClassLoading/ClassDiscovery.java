@@ -532,7 +532,7 @@ public class ClassDiscovery {
 			//just return all known classes here.
 			// Ugh, this double cast though. This is definitely safe, since
 			// everything extends Object in java, but to get the compiler to
-			// shut up, we have to supress warnings and double cast it.
+			// shut up, we have to suppress warnings and double cast it.
 			return (Set<ClassMirror<T>>) (Set<?>) getKnownClasses();
 		}
 		if(classSubtypeCache.containsKey(superType)) {
@@ -568,7 +568,7 @@ public class ClassDiscovery {
 		//Well, crap, more complicated. Ok, so, the list of supers
 		//can probably be walked up even further, so we need to find
 		//the supers of these (and make sure it's not in the ClassMirror
-		//cache, to avoid loading classes unneccessarily) and then load
+		//cache, to avoid loading classes unnecessarily) and then load
 		//the actual Class object for them. Essentially, this falls back
 		//to loading the class when it
 		//can't be found in the mirrors pool.
@@ -858,7 +858,7 @@ public class ClassDiscovery {
 			} catch (NoClassDefFoundError e) {
 				if(IS_DEBUG) {
 					// This is tough. Normally, we really want to ignore this error, but during development, it can be
-					// a critical error to see to diagnose a very hard to find error. So we compromize here, and only
+					// a critical error to see to diagnose a very hard to find error. So we compromise here, and only
 					// print error details out while in debug mode.
 					System.err.println("While trying to process " + cm.toString() + ", an error occurred. It it"
 							+ " probably safe to ignore this error, but if you're debugging to figure out why an"

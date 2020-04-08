@@ -249,15 +249,15 @@ public final class FileOptions {
 	}
 
 	public static enum CompilerOption implements Documentation {
-		AllowAmbiguousCommands("Disables compiler validation for ambigous commands (only applicable to MSA files).",
+		AllowAmbiguousCommands("Disables compiler validation for ambiguous commands (only applicable to MSA files).",
 			MSVersion.V3_3_4),
 		UltraStrict("Provides an extra strict programming environment. Nitpicky details may be covered in ultra strict"
 				+ " mode, and will turn almost all warnings into compiler errors. This will also apply all lint"
 				+ " settings that would be warnings into errors as well, and is generally the most pedantic"
-				+ " version of strict mode available. This is used in native code, but is not necessarily recommened,"
+				+ " version of strict mode available. This is used in native code, but is not necessarily recommended,"
 				+ " since it offers no flexibility, however, code that passes ultra strict mode will generally be"
 				+ " considered \"ideal\" code, and enshrines the standard code layout. Warnings that"
-				+ " are explicitely suppressed are not errors in this mode.", MSVersion.V3_3_4);
+				+ " are explicitly suppressed are not errors in this mode.", MSVersion.V3_3_4);
 
 		private final String docs;
 		private final Version version;
@@ -335,9 +335,9 @@ public final class FileOptions {
 				+ " compile time if it can't be found.", MSVersion.V3_3_4, SeverityLevel.MEDIUM),
 		CodeUpgradeNotices("Code that uses old formats should generally be upgraded to newer versions."
 				+ " This is encouraged to make code more readable, and is not a deprecation notice. This type of"
-				+ " warning is only displayed in strict mode, and is even still suppressable.", MSVersion.V3_3_4,
+				+ " warning is only displayed in strict mode, and is even still suppressible.", MSVersion.V3_3_4,
 				SeverityLevel.LOW),
-		UseOfSecureString("When storing sensitive information such as passwords, it is adviseable to use the"
+		UseOfSecureString("When storing sensitive information such as passwords, it is advisable to use the"
 				+ " secure_string class instead of string. There is first class language support for this in"
 				+ " many places, but in general makes it harder to accidentally leak sensitive data in for"
 				+ " example log messages, even when passing the data around to code that accepts strings.",

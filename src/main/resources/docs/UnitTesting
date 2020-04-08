@@ -221,7 +221,7 @@ be mocked, there is no shortcut for leaving off the arguments.
 
 In some cases, a more complex mechanism needs to be used, particularly when the item under test does not return a value,
 but interacts with a value passed in, most generally a closure. In that case, you can use thenDo to give it an action to
-do when it is called, rather than having it return a value. The closure sent to thenDo will recieve the arguments that
+do when it is called, rather than having it return a value. The closure sent to thenDo will receive the arguments that
 were passed in to the original function.
 
 <%CODE|
@@ -275,7 +275,7 @@ suite, the state of the environment is not reset before each test, though @{Befo
 before and after the test. There is also a guarantee that tests will run in order, from top to bottom, and they will
 not run in parallel. In general, this has many drawbacks, however, and will considerably slow down your unit tests, so
 should be used sparingly, if ever. Generally, the better solution is to refactor your actual code and tests such that 
-the tests can run indepenedently of each other.
+the tests can run independently of each other.
 
 == Integration Testing ==
 In general, the unit test framework can be used without mocking, and across larger sets of objects to accomplish what

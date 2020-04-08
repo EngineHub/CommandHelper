@@ -25,7 +25,7 @@ public class VirtualFile {
 		}
 		//Now, remove duplicate slashes
 		working = working.replaceAll("[/]{2,}", "/");
-		//Remove unneccessary dots
+		//Remove unnecessary dots
 		if(working.startsWith("./")) {
 			working = working.substring(2);
 		}

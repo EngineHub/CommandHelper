@@ -27,7 +27,7 @@ public abstract class LoopManipulationException extends ProgramFlowManipulationE
 	}
 
 	/**
-	 * Sets the number of times remaining in the loop manipulation. After handling an interation, you should decrement
+	 * Sets the number of times remaining in the loop manipulation. After handling an iteration, you should decrement
 	 * the number and set it here.
 	 *
 	 * @param number

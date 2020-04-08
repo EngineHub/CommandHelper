@@ -35,7 +35,7 @@ public class FileLocations {
 			tmp.delete();
 			tmp.deleteOnExit();
 		} catch (SecurityException | IOException e) {
-			//This could happen in applets or some other wierd security configuration.
+			//This could happen in applets or some other weird security configuration.
 			//Regardless, we don't want this to ever fail.
 		}
 		USER_HOME = userHome;

@@ -15,7 +15,7 @@
  * accept what should otherwise be a valid URI based on the standard, so
  * validating against this only provides a small amount of assurance that
  * this will be a *useful* URI, however, if it does not match this, it
- * most assureadly is not a URI.
+ * most assuredly is not a URI.
  */
 @{Target(value: DECLARATION, type: string)}
 @{RegexValidator(

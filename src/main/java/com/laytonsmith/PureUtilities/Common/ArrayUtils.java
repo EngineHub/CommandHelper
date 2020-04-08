@@ -804,8 +804,8 @@ public class ArrayUtils {
 	}
 
 	/**
-	 * Converts a byte aray to a char array, assuming the given encoding. This is done in a secure manner, and
-	 * potentially sensitive data is cleared from memory after the encoding isdone.
+	 * Converts a byte array to a char array, assuming the given encoding. This is done in a secure manner, and
+	 * potentially sensitive data is cleared from memory after the encoding is done.
 	 *
 	 * @param bytes The byte array to convert
 	 * @param encoding The encoding to use

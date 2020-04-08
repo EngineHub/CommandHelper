@@ -221,7 +221,7 @@ public class Federation {
 //				+ "\t\tthrow(@exception);\n"
 //				+ "\t}\n"
 //				+ "\tif(@timeoutError){\n"
-//				+ "\t\tmsg('A timeout error occured.');\n"
+//				+ "\t\tmsg('A timeout error occurred.');\n"
 //				+ "\t\treturn();\n"
 //				+ "\t}\n"
 //				+ "\t// else the remoteReturn value is usable\n"
@@ -521,7 +521,7 @@ public class Federation {
 //		@Override
 //		public String docs() {
 //			return "void {serverName} Given a previously registered server name in this server, this disconnects that connection"
-//					+ " from all remotes, and prevents future requests from occuring. This \"closes\" the connections allowed by"
+//					+ " from all remotes, and prevents future requests from occurring. This \"closes\" the connections allowed by"
 //					+ " {{function|federation_remote_allow}}. ---- If the server name doesn't exist on this server, (or has been"
 //					+ " previously disconnected) a FormatException is thrown. If this was the last connection on this server, the"
 //					+ " listener is shutdown as well, and future calls from remotes will timeout.";

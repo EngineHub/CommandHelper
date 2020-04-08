@@ -32,7 +32,7 @@ public enum AccessModifier {
 	PROTECTED,
 	/**
 	 * A private class is one that can only be accessed from other classes within the same containing class. This is not
-	 * useable in top level classes, as it wouldn't make sense otherwise.
+	 * usable in top level classes, as it wouldn't make sense otherwise.
 	 */
 	PRIVATE,
 	/**

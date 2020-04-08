@@ -78,7 +78,7 @@ details that don't really matter. For instance, if I told you to go water the la
 and there are two hoses in the garage, you're not going to need to come back
 and ask me which host to use, you would just select one. However, if one were broken,
 I would have to go out of my way to tell you to use the one on the left, but this
-is an exceptional circumstance, and I shouldn't have to explicitely tell you every
+is an exceptional circumstance, and I shouldn't have to explicitly tell you every
 detail in the typical case.
 
 == Try not to special case things ==

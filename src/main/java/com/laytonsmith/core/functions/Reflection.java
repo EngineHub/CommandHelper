@@ -95,7 +95,7 @@ public class Reflection {
 		@Override
 		public String docs() {
 			return "mixed {param, [args, ...]} Returns information about the runtime in a usable"
-					+ " format. Depending on the information returned, it may be useable directly,"
+					+ " format. Depending on the information returned, it may be usable directly,"
 					+ " or it may be more of a referential format. ---- The following items can be retrieved:"
 					+ "{|\n"
 					+ "|-\n"
@@ -333,7 +333,7 @@ public class Reflection {
 			Pattern p = Pattern.compile("(?s)\\s*(.*?)\\s*\\{(.*?)\\}\\s*(.*)\\s*");
 			Matcher m = p.matcher(docs);
 			if(!m.find()) {
-				throw new Error("An error has occured in " + getName() + ". While trying to get the documentation"
+				throw new Error("An error has occurred in " + getName() + ". While trying to get the documentation"
 						+ ", it was unable to parse this: " + docs);
 			}
 			if(field == DocField.RETURN || field == DocField.TYPE) {

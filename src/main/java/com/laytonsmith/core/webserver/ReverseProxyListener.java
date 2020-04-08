@@ -62,7 +62,7 @@ public class ReverseProxyListener {
 					.addArgument(new ArgumentBuilder()
 						.setDescription("(Used with the --stop flag) By default, the server stops gracefully,"
 								+ " allowing running scripts to finish,"
-								+ " but stopping accepting new connections. If you wish to force an immmediate shutdown"
+								+ " but stopping accepting new connections. If you wish to force an immediate shutdown"
 								+ " however, you can use this flag.")
 						.asFlag()
 						.setName("force"))

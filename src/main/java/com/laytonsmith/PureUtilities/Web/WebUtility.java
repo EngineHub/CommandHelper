@@ -275,7 +275,7 @@ public final class WebUtility {
 		}
 		//First, let's check to see that the url is properly formatted. If there are parameters,
 		//and this is a GET request, we want to tack them on to the end. OR, if there is a raw parameter and parameters,
-		//and this is a post reqest, put the parameters on anyways.
+		//and this is a post request, put the parameters on anyways.
 		if(parameters != null && !parameters.isEmpty()
 				&& (method == HTTPMethod.GET
 				|| (method != HTTPMethod.GET

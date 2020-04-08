@@ -98,7 +98,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 	public final void execute(ParseTree tree, BoundEvent b, Environment env, BoundEvent.ActiveEvent activeEvent) throws ConfigRuntimeException {
 		preExecution(env, activeEvent);
 		// Various events have a player to put into the env.
-		// Do this after preExcecution() in case the particular event needs to inject the player first.
+		// Do this after preExecution() in case the particular event needs to inject the player first.
 		Mixed c = activeEvent.getParsedEvent().get("player");
 		if(c != null) {
 			if(c instanceof CNull) {

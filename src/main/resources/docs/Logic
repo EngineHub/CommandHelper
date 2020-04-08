@@ -150,7 +150,7 @@ The following are considered to evaluate to true:
 
 Null values are always considered false. All primitives, and some more complex objects implement the
 ms.lang.Booleanish type, which allows them to return true if the value is '''trueish''', meaning that while the value
-itself is not a boolean, it has a true/false interpretation, and can explicitely be cast to a boolean with the
+itself is not a boolean, it has a true/false interpretation, and can explicitly be cast to a boolean with the
 {{function|boolean}} function. This is a generic concept though, and so it's not possible to create a comprehensive
 list of things that are supported with this mechanism.
 

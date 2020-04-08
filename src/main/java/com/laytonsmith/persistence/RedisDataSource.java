@@ -71,10 +71,10 @@ public class RedisDataSource extends AbstractDataSource {
 			needToConnect = true;
 		} else if(lastConnected < System.currentTimeMillis() - 10000) {
 			// If we connected more than 10 seconds ago, we should re-test
-			// the connection explicitely, because isConnected may return true,
+			// the connection explicitly, because isConnected may return true,
 			// even if the connection will fail. The only real way to test
 			// if the connection is actually open is to run a test query, but
-			// doing that too often will cause unneccessary delay, so we
+			// doing that too often will cause unnecessary delay, so we
 			// wait an arbitrary amount, in this case, 10 seconds.
 			try {
 				// We don't actually care if this value exists or not, just

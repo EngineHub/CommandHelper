@@ -171,7 +171,7 @@ it can be caught and handled separately.&lt;-
 
 This will cause the routines that are currently blocked to throw the exception,
 and future calls to rwait will immediately throw as well. This provides a convenient
-"out" for the routines, if an indeterminant amount of data is being processed.
+"out" for the routines, if an indeterminate amount of data is being processed.
 
 === Blocking calls ===
 

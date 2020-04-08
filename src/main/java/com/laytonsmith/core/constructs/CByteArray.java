@@ -454,7 +454,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * Returns a new read only CArray object with integers at each index, representing the underlying byte array. They
 	 * are not linked. This array is faster than normal CArrays, at the cost of being read only. Cloning the array is
 	 * supported, however, so it is possible to convert this into a fully functional array that way. The backing for the
-	 * CArray is independant of this CByteArray (it is a new copy).
+	 * CArray is independent of this CByteArray (it is a new copy).
 	 *
 	 * @param t
 	 * @return

@@ -470,7 +470,7 @@ public class ServerEvents {
 			// Get the player recipients.
 			Mixed cRecipients = manualObject.get("player_recipients", t);
 			if(!(cRecipients instanceof CArray) && !(cRecipients instanceof CNull)) {
-				throw new CRECastException("Expected player_recepients to be an array, but received: "
+				throw new CRECastException("Expected player_recipients to be an array, but received: "
 						+ cRecipients.typeof().toString(), t);
 			}
 			Set<MCCommandSender> recipients = new HashSet<>();

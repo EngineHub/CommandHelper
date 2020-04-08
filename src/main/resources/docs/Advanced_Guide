@@ -73,7 +73,7 @@ able to be cast into other data types, but can contain values of any data type.
 * null - Created with the "null" keyword: null
 * void - Some functions return void, which is actually a datatype. When viewed as a string, it is equivalent to an 
 empty string. Cannot be created directly.
-* ivariable - An ivarible (or simply a variable) is a variable that can be defined and used from within the script. 
+* ivariable - An ivariable (or simply a variable) is a variable that can be defined and used from within the script. 
 Constant variables ($var), are assigned by the user at command runtime, and are technically constants as far as the 
 rest of the script is concerned. IVariables can be defined by the script writer and assigned various values that can 
 change throughout the script running. To define and use an ivariable, use the assign() function, or the = operator. 
@@ -185,7 +185,7 @@ and any new commands are re-registered.
 * <u>G</u>lobals - Global values, set with {{function|export}} are cleared out.
 * <u>T</u>asks - Any tasks set with {{function|set_interval}} or {{function|set_timeout}} are cleared.
 * <u>E</u>xecution-Queue - Any tasks queued up with the queue_* family of functions is cleared.
-* Pe<u>r</u>sistance-Config - Any changes to the persistance.config file are reloaded
+* Pe<u>r</u>sistence-Config - Any changes to the persistence.ini file are reloaded
 * Pro<u>f</u>iler - The profiler.config file is reloaded
 * E<u>x</u>tensions - Extensions are reloaded
 
@@ -195,7 +195,7 @@ blacklisted, which aren't reloaded. In whitelist mode, only the specified module
 letter to refer to that specific module. For instance, if you want to reload everything but leave the exported variables 
 and execution queue alone, you can run <code>/recompile -ge</code>. If you ONLY want to reload tasks, you can
 run <code>/recompile --whitelist -t</code>. Note that reloading individual modules isn't normally encouraged,
-because it can put your server in an inconsistent and unreproducable state if you aren't careful. Running 
+because it can put your server in an inconsistent and unreproducible state if you aren't careful. Running 
 <code>/recompile</code> by itself (which reloads everything) is recommended. You can also run 
 <code>/recompile -h</code> for the usage instructions and long options list.
 

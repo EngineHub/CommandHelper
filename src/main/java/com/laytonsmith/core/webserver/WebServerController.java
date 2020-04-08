@@ -112,7 +112,7 @@ public final class WebServerController {
 	 * @param params If the verb accepts arguments, these are provided here. The verbs are individually responsible
 	 * for deserializing the parameters.
 	 * @throws ServerNotRunningException If the server does not appear to be running.
-	 * @throws java.io.IOException If an IOException occured, for instance if the ctrl files can't be read/written to.
+	 * @throws java.io.IOException If an IOException occurred, for instance if the ctrl files can't be read/written to.
 	 */
 	public synchronized void writeCmd(Verb cmd, byte[] params) throws ServerNotRunningException, IOException {
 		if(!isServerUp()) {
@@ -269,7 +269,7 @@ public final class WebServerController {
 	/**
 	 * The watchdog timer reads commands at a steady rate of 1 per second or so. The command is read, cleared from
 	 * the file, a new thread kicked off to actually handle the command, and then the command file unlocked.
-	 * It is super important that this thread continues to run until explicitely shut down, which is the absolute
+	 * It is super important that this thread continues to run until explicitly shut down, which is the absolute
 	 * last operation, so that if an operator wishes to try a graceful shutdown at first, but can't, they can still
 	 * issue commands to the server (for instance a non-graceful shutdown). Therefore, we can't make any assumptions
 	 * here about what a given command does.

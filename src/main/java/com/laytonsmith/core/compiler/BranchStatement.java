@@ -27,7 +27,7 @@ public interface BranchStatement {
 	 * For functions that are lazily evaluated, for instance {@code and()}, this is not truly a branch statement,
 	 * and should not be considered as such, even though at first glance it seems like it would be. The reason for this
 	 * is that in some cases, ALL children will be run, whereas in the case of {@code if()}, if one branch is run,
-	 * the other most certainly will not. Therefore, in cases where all arguments could potentially be evaluaed,
+	 * the other most certainly will not. Therefore, in cases where all arguments could potentially be evaluated,
 	 * this should not be considered a branch function.
 	 * @param children The (unevaluated) children that will be passed (evaluated) to this function call at runtime. It
 	 * may not be necessary to determine what the branch is, but it may be useful/necessary to determine, and so is

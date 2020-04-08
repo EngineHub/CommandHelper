@@ -201,7 +201,7 @@ public final class Prefs {
 				+ " that you may have unintentionally configured, this will override all ways of suppressing fatal"
 				+ " errors, including uncaught exception"
 				+ " handlers, error logging turned off, etc. This is meant as a last ditch effort to diagnosing an"
-				+ " error. This implicitely turns debug mode"
+				+ " error. This implicitly turns debug mode"
 				+ " on as well, which will cause even more error logging to occur.", DEBUG_GROUP));
 		a.add(new Preference(PNames.INTERPRETER_TIMEOUT.config(), "15", Preferences.Type.INT, "Sets the time (in"
 				+ " minutes) that interpreter mode is unlocked for when /interpreter-on is run from console. Set to 0"

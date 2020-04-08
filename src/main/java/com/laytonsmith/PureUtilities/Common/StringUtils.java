@@ -851,7 +851,7 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Splits a string on word boundries.
+	 * Splits a string on word boundaries.
 	 *
 	 * @param text
 	 * @param len

@@ -9,7 +9,7 @@
 <module name="Checker">
 	<property name="severity" value="error"/>
 	
-	<!-- Supression filter to disable specified modules/checks for specified files -->
+	<!-- Suppression filter to disable specified modules/checks for specified files -->
 	<module name="SuppressionFilter">
 		<property name="file" value="${config_loc}/checkstyle_suppressions.xml"/>
 		<property name="optional" value="false"/>

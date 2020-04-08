@@ -147,7 +147,7 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 
 	@Override
 	public String docs() {
-		return "A mutible primitive is a special data type that allows you to store primitives by reference, instead of value.";
+		return "A mutable primitive is a special data type that allows you to store primitives by reference, instead of value.";
 	}
 
 	@Override

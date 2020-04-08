@@ -307,7 +307,7 @@ public class ObjectManagement {
 				if(elementDefinitions.get("<constructor>").isEmpty()) {
 					throw new CREClassDefinitionError(name + " was defined as a native class, but did not define"
 							+ " any constructors. Native classes do not get a default constructor, and so must"
-							+ " explicitely define at least one. (It may have no arguments and point to an"
+							+ " explicitly define at least one. (It may have no arguments and point to an"
 							+ " @ExposedProperty constructor in the native code, however.) At least one"
 							+ " native constructor must be defined, and called during construction.", t);
 				}
@@ -352,7 +352,7 @@ public class ObjectManagement {
 					for(ConfigCompileException e : ex.getList()) {
 						msgs.add(e.getMessage() + " - " + e.getTarget());
 					}
-					throw new CREClassDefinitionError("One or more compile errors occured while trying to compile "
+					throw new CREClassDefinitionError("One or more compile errors occurred while trying to compile "
 							+ def.getName() + ":\n" + StringUtils.Join(msgs, "\n"), t);
 				}
 			}

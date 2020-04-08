@@ -12,7 +12,7 @@
  * the given operator.
  *
  * For unary operations, that is, where (|operator| @this) or (@this |operator|), that is turned into
- * @this->|method|() where |operator| is the value provided in the OperatorOveralod annotation, and
+ * @this->|method|() where |operator| is the value provided in the OperatorOverload annotation, and
  * |method| is the method it is tagged on.
  *
  * The various properties of this annotation control if this is a binary operator or unary operator, and if unary,

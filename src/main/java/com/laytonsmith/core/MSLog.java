@@ -113,7 +113,7 @@ public class MSLog {
 		@LogTag
 		RUNTIME("runtime", "Logs runtime errors, (exceptions that bubble all the way to the top)", LogLevel.ERROR),
 		@LogTag
-		FALSESTRING("falsestring", "Logs coersion of the string \"false\" to boolean, which is actually true",
+		FALSESTRING("falsestring", "Logs coercion of the string \"false\" to boolean, which is actually true",
 			LogLevel.ERROR),
 		@LogTag
 		DEPRECATION("deprecation", "Shows deprecation warnings", LogLevel.WARNING),
@@ -261,7 +261,7 @@ public class MSLog {
 	/**
 	 * From the given MsgBundles, picks the most appropriate log level, tending towards more verbose, and uses that
 	 * message. This is useful if a message would be different, not just more information, given a level. For instance,
-	 * given the following: LogOne(Tags.tag, new MsgBundle(Level.ERROR, "An error occured"), new
+	 * given the following: LogOne(Tags.tag, new MsgBundle(Level.ERROR, "An error occurred"), new
 	 * MsgBundle(Level.VERBOSE, "An error occured, and here is why")), if the level was set to ERROR, only "An error
 	 * occured" would show. If the level was set to VERBOSE, only "An error occured, and here is why" would show.
 	 *
