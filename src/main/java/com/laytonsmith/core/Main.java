@@ -161,6 +161,7 @@ public class Main {
 
 	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public static void main(String[] args) throws Exception {
+		Implementation.setServerType(Implementation.Type.SHELL);
 		if(args.length > 0) {
 			for(Class c : FAST_STARTUP) {
 				String tool = ((tool) c.getAnnotation(tool.class)).value();
@@ -189,7 +190,6 @@ public class Main {
 		}
 		ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
 		cd.addThisJar();
-		Implementation.setServerType(Implementation.Type.SHELL);
 		MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
 		ClassDiscoveryCache cdcCache
 				= new ClassDiscoveryCache(MethodScriptFileLocations.getDefault().getCacheDirectory());
