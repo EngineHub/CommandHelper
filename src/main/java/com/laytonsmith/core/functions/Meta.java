@@ -493,7 +493,7 @@ public class Meta {
 		}
 	}
 
-	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class is_alias extends AbstractFunction {
 
 		@Override

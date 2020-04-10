@@ -541,7 +541,7 @@ public class Reflection {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_aliases extends AbstractFunction {
 
 		@Override
