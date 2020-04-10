@@ -40,6 +40,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCCommand;
 import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
@@ -61,6 +62,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistence.PersistenceNetwork;
+import org.bukkit.Bukkit;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -75,7 +77,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.plugin.EventExecutor;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
+import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.TimedRegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -321,6 +325,25 @@ public class CommandHelperPlugin extends JavaPlugin {
 		}
 
 		if(firstLoad) {
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_15_X)) {
+				// Add dependency on every loaded plugin on Spigot 1.15.2 and later.
+				// This suppresses warnings from the PluginClassLoader due to extensions using a plugin API.
+				// This should be done before ExtensionManager.Initialize().
+				try {
+					Object dependencyGraph = ReflectionUtils.get(SimplePluginManager.class, Bukkit.getPluginManager(),
+							"dependencyGraph");
+					for(Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
+						if(plugin == self) {
+							continue;
+						}
+						ReflectionUtils.invokeMethod(dependencyGraph, "putEdge", self.getDescription().getName(),
+								plugin.getName());
+					}
+				} catch (ReflectionUtils.ReflectionException ex) {
+					// While this failed, nothing breaks. The server may still get class load warnings, though.
+				}
+			}
+
 			ExtensionManager.Initialize(ClassDiscovery.getDefaultInstance());
 			getLogger().log(Level.INFO, "Extensions initialized.");
 		}
