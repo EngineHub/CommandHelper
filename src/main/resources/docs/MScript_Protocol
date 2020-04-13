@@ -1,3 +1,5 @@
+{{unimplemented}}
+
 The MScript protocol is a defined standard which works much like [http://en.wikipedia.org/wiki/Remote_procedure_call RPC], but is specific to MScript.
 The advantages it offers over other protocols is that the underlying transport mechanism is undefined, leaving it open to specific needs, depending
 on the means of connection to the remote system (i.e. TCP, HTTP, DBus, etc). All data is passed as UTF-8 strings, and is interpreted on the remote end.

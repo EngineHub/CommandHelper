@@ -1333,7 +1333,9 @@ public final class SiteDeploy {
 								+ " <span class=\"abbr\" title=\"Restricted\">Res</span>\n");
 						for(List<String> row : clazzData) {
 							b.append("|-");
-							if(hiddenFunctions.contains(row.get(0))) {
+							String fName = row.get(0);
+							fName = fName.replaceAll(".*\\[\\[.*?\\|(.*?)\\]\\].*", "$1");
+							if(hiddenFunctions.contains(fName)) {
 								b.append(" class=\"hiddenFunction\"");
 							}
 							b.append("\n");
