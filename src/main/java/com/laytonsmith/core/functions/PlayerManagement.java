@@ -223,7 +223,9 @@ public class PlayerManagement {
 		public String docs() {
 			return "string {[player], [dashless]} Returns the UUID of the current player or the specified player."
 					+ " This will attempt to find an offline player, but if that also fails,"
-					+ " a PlayerOfflineException will be thrown.";
+					+ " a PlayerOfflineException will be thrown. ---- It is not recommended to give this user input."
+					+ " If the player is offline and hasn't visited the server recently (so that they're not in the"
+					+ " user cache), the server may block the main thread with an HTTP request to Mojang's servers.";
 		}
 
 		@Override
@@ -1085,7 +1087,7 @@ public class PlayerManagement {
 
 		@Override
 		public Boolean runAsync() {
-			return true;
+			return false;
 		}
 
 		@Override
@@ -1762,7 +1764,7 @@ public class PlayerManagement {
 
 		@Override
 		public Boolean runAsync() {
-			return true;
+			return false;
 		}
 
 		@Override
@@ -4717,9 +4719,12 @@ public class PlayerManagement {
 			MCServer s = Static.getServer();
 			CArray ret = new CArray(t);
 			// This causes the function to return an empty array for a fake/null server.
-			if(s != null && s.getOfflinePlayers() != null) {
-				for(MCOfflinePlayer offp : s.getOfflinePlayers()) {
-					ret.push(new CString(offp.getName(), t), t);
+			if(s != null) {
+				MCOfflinePlayer[] players = s.getOfflinePlayers();
+				if(players != null) {
+					for(MCOfflinePlayer offp : players) {
+						ret.push(new CString(offp.getName(), t), t);
+					}
 				}
 			}
 			return ret;

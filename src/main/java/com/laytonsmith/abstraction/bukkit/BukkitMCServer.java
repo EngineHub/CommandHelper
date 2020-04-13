@@ -172,7 +172,6 @@ public class BukkitMCServer implements MCServer {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public MCPlayer getPlayerExact(String name) {
 		Player p = s.getPlayerExact(name);
 		if(p == null) {
@@ -182,7 +181,6 @@ public class BukkitMCServer implements MCServer {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public MCPlayer getPlayer(String name) {
 		Player p = s.getPlayer(name);
 		if(p == null) {
@@ -319,7 +317,13 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public MCOfflinePlayer getOfflinePlayer(String player) {
-		return new BukkitMCOfflinePlayer(s.getOfflinePlayer(player));
+		OfflinePlayer ofp = s.getOfflinePlayer(player);
+		if(ofp.getUniqueId().version() != 4) {
+			// Not an actual MC profile UUID.
+			// This can happen if the server generates a new UUID when it can't find an account by that name.
+			return null;
+		}
+		return new BukkitMCOfflinePlayer(ofp);
 	}
 
 	@Override
