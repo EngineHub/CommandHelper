@@ -303,7 +303,8 @@ public class ConfigRuntimeException extends RuntimeException {
 
 	private static void DoReport(ConfigRuntimeException e, Environment env) {
 		MCPlayer p = null;
-		if(e.getEnv() != null && e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+		if(e.getEnv() != null && e.getEnv().hasEnv(CommandHelperEnvironment.class)
+				&& e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
 			p = e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer();
 		}
 		List<StackTraceElement> st = new ArrayList<>();
