@@ -2050,8 +2050,12 @@ public class ControlFlow {
 
 		@Override
 		public String docs() {
-			return "nothing {mixed} Returns the specified value from this procedure."
-					+ " It cannot be called outside a procedure.";
+			return "nothing {mixed} Returns the specified value from this procedure or closure."
+					+ " It cannot be called outside a procedure or closure. The function itself does"
+					+ " not return a value as such, as it is a terminal function, and prevents further"
+					+ " execution within the calling code. Instead it causes the host procedure or closure"
+					+ " to return the specified value, and ends termination. (There are exceptions to this rule,"
+					+ " see the docs on try/catch, particularly the finally clause for example).";
 		}
 
 		@Override

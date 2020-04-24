@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.ArgumentParser.ValidationException;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import java.util.TreeMap;
 public class ArgumentSuite {
 
 	private final Map<String, ArgumentParser> suite;
+	private final Map<String, Boolean> undocumentedSuites;
 	private final Map<String, String> aliases;
 	private String description;
 
@@ -29,6 +31,7 @@ public class ArgumentSuite {
 		suite = new TreeMap<>((o1, o2) -> {
 			return o1.compareTo(o2);
 		});
+		undocumentedSuites = new HashMap<>();
 		aliases = new LinkedHashMap<>();
 	}
 
@@ -38,12 +41,15 @@ public class ArgumentSuite {
 	 *
 	 * @param modeName The name of this mode. This may not contain spaces.
 	 * @param mode The sub-ArgumentParser that will be used when in this mode.
+	 * @param undocumented Undocumented tools do not show up in the built description, though otherwise work and
+	 * can be retrieved as usual through the getMode methods.
 	 * @return
 	 * @throws IllegalArgumentException if the name of the mode contains spaces
 	 */
-	public ArgumentSuite addMode(String modeName, ArgumentParser mode) {
+	public ArgumentSuite addMode(String modeName, ArgumentParser mode, boolean undocumented) {
 		validateModeName(modeName);
 		suite.put(modeName, mode);
+		undocumentedSuites.put(modeName, undocumented);
 		return this;
 	}
 
@@ -156,6 +162,11 @@ public class ArgumentSuite {
 		}
 		b.append("Modes: (a mode must be the first argument) \n");
 		for(String mode : suite.keySet()) {
+			if(undocumentedSuites.get(mode) == true) {
+				// Skip undocumented values.
+				continue;
+			}
+
 			b.append("\t").append(TermColors.BOLD).append(TermColors.BRIGHT_GREEN).append(mode);
 			if(aliases.containsValue(mode)) {
 				List<String> keys = new ArrayList<>();

@@ -33,4 +33,11 @@ public @interface tool {
 	 */
 	String[] aliases() default {};
 
+	/**
+	 * Default to false, but if set to true, does not show up in the help file, though will still be shown if
+	 * specifically requested. This is meant for incubating features.
+	 * @return
+	 */
+	boolean undocumented() default false;
+
 }

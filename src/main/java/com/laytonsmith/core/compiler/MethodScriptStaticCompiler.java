@@ -46,33 +46,33 @@ public final class MethodScriptStaticCompiler {
 		//the native interpreter's compiler for optimization.
 		ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, file, true), null, envs);
 		StringBuilder b = new StringBuilder();
-		for(ParseTree node : tree.getChildren()) {
-			go(node, b, platform, envs);
-		}
+//		for(ParseTree node : tree.getChildren()) {
+//			go(node, b, platform, envs);
+//		}
 		return b.toString();
 	}
 
-	private static void go(ParseTree node, StringBuilder b, api.Platforms platform,
-			Set<Class<? extends Environment.EnvironmentImpl>> envs) throws ConfigCompileException {
-		if(node.hasChildren()) {
-			FunctionBase f = FunctionList.getFunction((CFunction) node.getData(), platform, envs);
-			if(!(f instanceof CompiledFunction)) {
-				throw new ConfigCompileException("The function " + f.getName() + " is unknown in this platform.", node.getData().getTarget());
-			}
-			CompiledFunction cf = (CompiledFunction) f;
-			List<String> children = new ArrayList<String>();
-			for(ParseTree baby : node.getChildren()) {
-				StringBuilder bb = new StringBuilder();
-				go(baby, bb, platform, envs);
-				children.add(bb.toString());
-			}
-			b.append(cf.compile(node.getData().getTarget(), children.toArray(new String[children.size()])));
-		} else {
-			if(platform.getResolver() == null) {
-				b.append(node.getData().val());
-			} else {
-				b.append(platform.getResolver().outputConstant(node.getData()));
-			}
-		}
-	}
+//	private static void go(ParseTree node, StringBuilder b, api.Platforms platform,
+//			Set<Class<? extends Environment.EnvironmentImpl>> envs) throws ConfigCompileException {
+//		if(node.hasChildren()) {
+//			FunctionBase f = FunctionList.getFunction((CFunction) node.getData(), platform, envs);
+//			if(!(f instanceof CompiledFunction)) {
+//				throw new ConfigCompileException("The function " + f.getName() + " is unknown in this platform.", node.getData().getTarget());
+//			}
+//			CompiledFunction cf = (CompiledFunction) f;
+//			List<String> children = new ArrayList<String>();
+//			for(ParseTree baby : node.getChildren()) {
+//				StringBuilder bb = new StringBuilder();
+//				go(baby, bb, platform, envs);
+//				children.add(bb.toString());
+//			}
+//			b.append(cf.compile(node.getData().getTarget(), children.toArray(new String[children.size()])));
+//		} else {
+//			if(platform.getResolver() == null) {
+//				b.append(node.getData().val());
+//			} else {
+//				b.append(platform.getResolver().outputConstant(node.getData()));
+//			}
+//		}
+//	}
 }

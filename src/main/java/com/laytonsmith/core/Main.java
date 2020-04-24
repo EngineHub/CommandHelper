@@ -127,7 +127,7 @@ public class Main {
 				CommandLineTool tool = ctool.newInstance();
 				ArgumentParser ap = tool.getArgumentParser();
 				String toolName = ctool.getAnnotation(tool.class).value();
-				suite.addMode(toolName, ap);
+				suite.addMode(toolName, ap, ctool.getAnnotation(tool.class).undocumented());
 				String[] aliases = ctool.getAnnotation(tool.class).aliases();
 				if(aliases != null) {
 					for(String alias : aliases) {
@@ -1127,10 +1127,8 @@ public class Main {
 		@Override
 		public ArgumentParser getArgumentParser() {
 			return ArgumentParser.GetParser()
-				.addDescription("Given a source file, runs it in cmdline mode. This is similar to"
-						+ " the interpreter mode, but allows for tty input (which is required for some functions,"
-						+ " like the prompt_* functions) and provides better information for errors, as the"
-						+ " file is known.")
+				.addDescription("Given a source file, runs it in cmdline mode. This is the \"main\" way"
+						+ " of executing source files.")
 				.addArgument(new ArgumentBuilder()
 						.setDescription("File path/arguments")
 						.setUsageName("file and args")
@@ -1572,7 +1570,8 @@ public class Main {
 			modeForHelp = getSuite().getModeFromAlias(modeForHelp);
 			if(modeForHelp == null) {
 				//Display the general help
-				StreamUtils.GetSystemOut().println(getSuite().getBuiltDescription());
+				ArgumentSuite suite = getSuite();
+				StreamUtils.GetSystemOut().println(suite.getBuiltDescription());
 				System.exit(0);
 			} else {
 				//Display the help for this mode

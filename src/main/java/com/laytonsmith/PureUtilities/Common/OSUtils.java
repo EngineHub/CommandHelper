@@ -13,6 +13,20 @@ import java.util.List;
  */
 public class OSUtils {
 
+	/**
+	 * The bit depth of the OS.
+	 */
+	public static enum BitDepth {
+		/**
+		 * The OS is a 32 bit architecture.
+		 */
+		B32,
+		/**
+		 * The OS is a 64 bit architecture.
+		 */
+		B64
+	}
+
 	public static enum OS {
 		WINDOWS,
 		MAC,
@@ -187,6 +201,21 @@ public class OSUtils {
 			}
 		} catch (IOException | InterruptedException ex) {
 			throw new RuntimeException(ex);
+		}
+	}
+
+	public static BitDepth GetOSBitDepth() {
+		if(GetOS().isWindows()) {
+			// Windows lies if we're running 32 bit java on a 64 bit architecture, but this really isn't
+			// what we need to know, so "thanks".
+			String arch = System.getenv("PROCESSOR_ARCHITECTURE");
+			String wow64Arch = System.getenv("PROCESSOR_ARCHITEW6432");
+
+			return arch != null && arch.endsWith("64")
+							  || wow64Arch != null && wow64Arch.endsWith("64")
+								  ? BitDepth.B64 : BitDepth.B64;
+		} else {
+			return System.getProperty("os.arch").endsWith("64") ? BitDepth.B64 : BitDepth.B32;
 		}
 	}
 

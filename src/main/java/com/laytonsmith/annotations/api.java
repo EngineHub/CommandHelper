@@ -1,6 +1,7 @@
 package com.laytonsmith.annotations;
 
 import com.laytonsmith.core.PlatformResolver;
+import com.laytonsmith.core.asm.LLVMPlatformResolver;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.functions.bash.BashPlatformResolver;
 import java.lang.annotation.ElementType;
@@ -22,7 +23,8 @@ public @interface api {
 
 	public enum Platforms {
 		INTERPRETER_JAVA(null, "Java Interpreter"),
-		COMPILER_BASH(new BashPlatformResolver(), "Bash Compiler");
+		COMPILER_BASH(new BashPlatformResolver(), "Bash Compiler"),
+		COMPILER_LLVM(new LLVMPlatformResolver(), "LLVM Compiler");
 		private final PlatformResolver resolver;
 		private final String platformName;
 
