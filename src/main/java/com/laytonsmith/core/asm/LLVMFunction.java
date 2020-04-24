@@ -50,7 +50,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 		try {
 			FunctionBase fb = getDefaultFunction();
 			return fb.docs();
-		} catch(ConfigCompileException ex) {
+		} catch (ConfigCompileException ex) {
 			return "mixed {...} This function is missing documentation. Please report it.";
 		}
 	}

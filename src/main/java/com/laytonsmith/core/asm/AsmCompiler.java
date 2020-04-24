@@ -20,20 +20,16 @@ import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.persistence.DataSourceException;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  */
 public class AsmCompiler {
 
-	private final static Set<Class<? extends Environment.EnvironmentImpl>> ENVS = new HashSet<>();
+	private static final Set<Class<? extends Environment.EnvironmentImpl>> ENVS = new HashSet<>();
 	static {
 		ENVS.add(GlobalEnv.class);
 		ENVS.add(CompilerEnvironment.class);

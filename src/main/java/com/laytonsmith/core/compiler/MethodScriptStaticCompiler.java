@@ -3,16 +3,10 @@ package com.laytonsmith.core.compiler;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
-import com.laytonsmith.core.functions.CompiledFunction;
-import com.laytonsmith.core.functions.FunctionBase;
-import com.laytonsmith.core.functions.FunctionList;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 /**
