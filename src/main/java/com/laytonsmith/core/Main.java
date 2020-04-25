@@ -1753,7 +1753,7 @@ public class Main {
 								+ " the engine overhead. Meant for"
 								+ " performance testing of the engine itself. Note that the first run will install"
 								+ " various things, which should not be compared against second startup. In general,"
-								+ " you can time this command, with, for instance ");
+								+ " you can time this command, with, for instance `time` on linux.");
 		}
 
 		@Override
