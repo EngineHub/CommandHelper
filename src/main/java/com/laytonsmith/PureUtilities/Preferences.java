@@ -319,12 +319,13 @@ public class Preferences {
 					logger.log(Level.WARNING, "[" + appName + "] expects the value of " + p.name + " to be an double. Using the default of " + p.value);
 					return Double.parseDouble(p.value);
 				}
-			case BOOLEAN:
-				try {
-					return getBoolean(value);
-				} catch (NumberFormatException e) {
-					logger.log(Level.WARNING, "[" + appName + "] expects the value of " + p.name + " to be an boolean. Using the default of " + p.value);
-					return getBoolean(p.value);
+			case BOOLEAN: {
+					Boolean v = getBoolean(value);
+					if(v == null) {
+						logger.log(Level.WARNING, "[" + appName + "] expects the value of " + p.name + " to be an boolean. Using the default of " + p.value);
+						return getBoolean(p.value);
+					}
+					return v;
 				}
 			case NUMBER:
 				try {
@@ -353,7 +354,16 @@ public class Preferences {
 
 	}
 
-	private Boolean getBoolean(String value) {
+	/**
+	 * Given a preference string, determines whether or not this is a Boolean object.
+	 * The following string values are considered true: "true", "yes", "on", a non-zero double
+	 * The following string values are considered false: "false", "no", "off", zero
+	 *
+	 * For any other value, this method returns null.
+	 * @param value
+	 * @return
+	 */
+	public static Boolean getBoolean(String value) {
 		if(value.equalsIgnoreCase("true")) {
 			return true;
 		} else if(value.equalsIgnoreCase("false")) {
@@ -367,8 +377,12 @@ public class Preferences {
 		} else if(value.equalsIgnoreCase("off")) {
 			return false;
 		} else {
-			double d = Double.parseDouble(value);
-			return d != 0;
+			try {
+				double d = Double.parseDouble(value);
+				return d != 0;
+			} catch (NumberFormatException e) {
+				return null;
+			}
 		}
 	}
 

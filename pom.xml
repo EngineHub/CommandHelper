@@ -383,6 +383,12 @@
 			<artifactId>org.eclipse.lsp4j</artifactId>
 			<version>0.8.0</version>
 		</dependency>
+		<dependency>
+			<!-- MIT -->
+			<groupId>com.microsoft.azure</groupId>
+			<artifactId>applicationinsights-core</artifactId>
+			<version>2.5.0</version>
+		</dependency>
 	</dependencies>
 	<distributionManagement>
 		<repository>
@@ -538,6 +544,7 @@
 										add it to the dependecies list to fully integrate it. -->
 									<include>com.google.code.gson:gson:jar:*</include>
 									<include>com.google.guava:guava:jar:*</include>
+									<include>com.microsoft.azure:applicationinsights-core:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -652,6 +659,10 @@
 										<!-- Conflict with Spigot -->
 										<exclude>com.google.common.collect.*</exclude>
 									</excludes>
+								</relocation>
+								<relocation>
+									<pattern>com.microsoft.azure</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.microsoft.azure</shadedPattern>
 								</relocation>
 							</relocations>
 							<filters>
@@ -822,7 +833,15 @@
 										<exlude>com/google/common/collect/**</exlude>
 									</excludes>
 								</filter>
-								
+								<filter>
+									<artifact>com.microsoft.azure:applicationinsights-core:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
 							</filters>
 						</configuration>
 					</execution>

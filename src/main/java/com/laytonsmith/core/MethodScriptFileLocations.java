@@ -208,4 +208,13 @@ public class MethodScriptFileLocations extends FileLocations {
 	public File getExtensionDirectory(Extension ext) {
 		return ext.getConfigDir();
 	}
+
+	/**
+	 * Returns the location of the telemetry config file.
+	 *
+	 * @return
+	 */
+	public File getTelemetryConfigFile() {
+		return new File(getPreferencesDirectory(), "telemetry.ini");
+	}
 }

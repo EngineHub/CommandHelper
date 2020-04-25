@@ -1,0 +1,59 @@
+The Telemetry module gathers general information about your use of MethodScript, in order to understand which features
+are being used, and how you have configured MethodScript. No personal information is ever collected, particularly things
+like individual values of strings, passwords, your location, specific details in error messages, and other personally
+identifiable or sensitive information. Your help by allowing anonymous data collection makes a huge difference in the
+quality of the project, and advocates on your behalf, by ensuring that the dev team sees that you are using specific
+features, and so changing or removing those features would negatively affect you, so please consider helping us help
+you by enabling these metrics.
+
+The primary purpose of gathering telemetry is to be able to understand which features you are (or are not) using, so
+changes and removals of those features will have minimal impact. Additionally, we collect crashdump data when
+an error is detected in MethodScript itself, so we can automatically see and fix these errors in the future. Error
+messages themselves are not collected, as these may contain sensitive information, however, things like stacktraces
+and the type of error may be collected.
+
+What information in particular is collected is completely under your control. First, no data is collected at all unless
+you have specifically opted in by setting the "telemetry-on" setting to "true" in your preferences.ini file. Secondly,
+you have fine grained control of what data is collected (or not) by editing this file. New data collection categories
+may be added in the future, and you can set those to default to "nag" so that you have to specifically opt in to those
+as well. You can set the telemetry-pref-default-collect setting to false to do so, and you will be given a nag message
+to check this file to specifically opt in or out to that particular category.
+
+The telemetry data is currently stored in Microsoft Azure's datacenter in Ireland, though this is subject to change
+without notice (though this header will be updated accordingly). In any case, the data will be treated as if GDPR is
+applicable to it, whether or not this is legally speaking required, or whatever the local prevailing regulations are,
+whichever is stricter. This means that you have certain rights in regards
+to your data. However, since we do not collect personally identifiable data, many of the GDPR requirements do not
+apply here. In any case, we try to comply with the spirit of the law and do things like requiring specific
+opt-in before data collection occurs, and ensuring that data is collected in a fair and transparent way. In addition,
+access to the data, even in aggregate, anonymized form, is only accessible to a limited number of collaborators, who
+are required to have two factor authentication enabled to see the data. Results of data analysis may be released to the
+wider community publicly, but only in a way that won't allow reverse engineering of the data. In general, we rely on
+Microsoft to implement the remaining technical measures to prevent unauthorized access. At any point, if you wish to
+opt out of this data collection, simply set the telemetry-on setting to "false", and restart the application. Data
+collection will be disabled, and you will not be asked again. If you are under 16, please do not turn on telemetry
+logging without your parent or guardian's consent.
+
+Each setting below explains what data is collected. There are two general types of data, metrics, and logs. Metrics
+are simple data points which happen in an instant, and the fact that the data point was triggered is the complete data.
+Logs contain additional information associated with the event, such as the Java stacktrace in the case of errors, or
+the startup mode in the case of startup logs.
+
+Please note that extensions are able to upload additional data, potentially sensitive data, and while the extension
+authors will not be able to see the data that is uploaded using these mechanisms, you may be subjecting yourself to
+sensitive data leaks by using them, so ensure that you trust the extension authors as much as you trust us before using
+them. There are no technical ways for us to prevent a motivated and malicious extension author from bypassing any means
+we might put in place to prevent this data upload, so there is nothing we can do if you install a malicious extension.
+
+We reserve the right to update this privacy policy without notice, and your continued use of the software constitutes
+acceptance of the policy contained in the current version of the software, however, we will always use good faith
+efforts to notify users in public channels when this changes materially.
+
+If you wish to audit the data that is being sent, you may configure the telemetry-audit setting in preferences.ini. If
+turned on, then the data that would be sent to Azure will instead be printed to stdout, allowing you to validate that
+no more data than you anticipate is actually being sent, and that the data is being properly anonymized. It's also worth
+noting that each full startup (that is, a brand new startup of the process) gives you a new session id, so you are not
+able to be easily tracked between runs. 
+
+All of the settings below can have a tri-state value set. The category can be enabled (on/yes/true), disabled
+(off/no/false) or set to alert you that you have not set a value yet (nag).
