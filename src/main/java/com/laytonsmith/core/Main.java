@@ -26,6 +26,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -1738,6 +1739,32 @@ public class Main {
 			}
 
 			System.exit(0);
+		}
+
+	}
+
+	@tool(value = "cycle", undocumented = true)
+	public static class CycleMode extends AbstractCommandLineTool {
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser()
+						.addDescription("Fully starts up the interpreter engine, and runs exit(0), which represents"
+								+ " the engine overhead. Meant for"
+								+ " performance testing of the engine itself. Note that the first run will install"
+								+ " various things, which should not be compared against second startup. In general,"
+								+ " you can time this command, with, for instance ");
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			Environment env = Static.GenerateStandaloneEnvironment(true);
+			try {
+				MethodScriptCompiler.execute("exit(0);", null, true, env, Environment.getDefaultEnvClasses(),
+						(output) -> {}, null, null);
+			} catch (CancelCommandException ex) {
+				//
+			}
 		}
 
 	}
