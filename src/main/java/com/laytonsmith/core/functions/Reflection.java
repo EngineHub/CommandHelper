@@ -204,7 +204,7 @@ public class Reflection {
 					return new CString("Unknown (maybe the interpreter?)", t);
 				} else {
 					try {
-						String dir = t.file().getParentFile().getCanonicalPath().replace('\\', '/');
+						String dir = t.file().getParentFile().getCanonicalPath().replace('\\', '/') + "/";
 						return new CString(dir, t);
 					} catch (IOException ex) {
 						throw new CREIOException(ex.getMessage(), t);
