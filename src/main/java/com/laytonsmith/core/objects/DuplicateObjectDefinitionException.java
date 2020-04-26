@@ -7,13 +7,13 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
  * Thrown if an ObjectDefintion is attempted to be redefined. An ObjectDefinition is uniquely identified by its fully
  * qualified class name, as a String.
  */
-public class DuplicateObjectDefintionException extends ConfigCompileException {
+public class DuplicateObjectDefinitionException extends ConfigCompileException {
 	private final boolean wasCopy;
-	public DuplicateObjectDefintionException(Target t, boolean isCopy) {
+	public DuplicateObjectDefinitionException(Target t, boolean isCopy) {
 		this(null, t, isCopy);
 	}
 
-	public DuplicateObjectDefintionException(String message, Target t, boolean isCopy) {
+	public DuplicateObjectDefinitionException(String message, Target t, boolean isCopy) {
 		super(message, t);
 		this.wasCopy = isCopy;
 	}
