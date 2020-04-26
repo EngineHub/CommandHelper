@@ -55,7 +55,7 @@ public class ObjectDefinitionTableTest {
 			ObjectDefinition d = table.get(CString.class);
 			table.add(d, Target.UNKNOWN);
 			fail();
-		} catch (DuplicateObjectDefintionException e) {
+		} catch (DuplicateObjectDefinitionException e) {
 			// pass
 		}
 		// Sanity check
