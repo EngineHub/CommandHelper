@@ -1287,6 +1287,9 @@ public final class MethodScriptCompiler {
 			}
 
 			if(t.type == TType.RCURLY_BRACKET) {
+				if(braceCount == 0) {
+					throw new ConfigCompileException("Unexpected end curly brace", t.target);
+				}
 				braceCount--;
 				if(constructCount.peek().get() > 1) {
 					//We need to autoconcat some stuff
