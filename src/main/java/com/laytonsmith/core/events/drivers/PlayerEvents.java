@@ -1141,18 +1141,10 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{location: <location match> The location of the pressure plate |"
-					+ " activated: <boolean match> If true, only will trigger when the plate is stepped on. Currently,"
-					+ " this will only be true, since the event is only triggered on activations, not deactivations,"
-					+ " but is reserved for future use.} "
-					+ "Fires when a player steps on a pressure plate"
-					+ "{location: The location of the pressure plate |"
-					+ " activated: If true, then the player has stepped on the plate, if false, they have gotten off"
-					+ " of it. Currently,"
-					+ " this will always be true, because the event is only triggered for activations, not"
-					+ " deactivations, but is reserved"
-					+ " for future use. |"
-					+ " player: The player associated with this event}"
+			return "{location: <location match> | player: <string match>} "
+					+ "Fires when a player steps on a pressure plate or other interactable block."
+					+ "{location: The location of the block | activated: (deprecated)"
+					+ " | player: The player associated with this event}"
 					+ "{}"
 					+ "{}";
 		}
@@ -1161,11 +1153,9 @@ public class PlayerEvents {
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerInteractEvent) {
 				MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
+				Prefilters.match(prefilter, "player", pie.getPlayer().getName(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "location", pie.getClickedBlock().getLocation(),
 						PrefilterType.LOCATION_MATCH);
-//				if(prefilter.containsKey("activated")) {
-//					//TODO: Once activation is supported, check for that here
-//				}
 				return true;
 			}
 			return false;
@@ -1188,8 +1178,7 @@ public class PlayerEvents {
 				Map<String, Mixed> map = evaluate_helper(e);
 				map.put("location", ObjectGenerator.GetGenerator().location(pie.getClickedBlock().getLocation(),
 						false));
-				//TODO: Once activation is supported, set that appropriately here.
-				map.put("activated", CBoolean.TRUE);
+				map.put("activated", CBoolean.TRUE); // was never used, but was documented; remove in 3.3.5
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to PlayerInteractEvent");
