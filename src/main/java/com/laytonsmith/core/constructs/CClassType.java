@@ -3,9 +3,11 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
@@ -432,8 +434,14 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 */
 	public CClassType[] getSuperclassesForType(Environment env) {
 		instantiateInvalidType(env);
-		return Stream.of(invalidType).flatMap(e -> Stream.of(e.getSuperclasses()))
-				.collect(Collectors.toSet()).toArray(CClassType.EMPTY_CLASS_ARRAY);
+		try {
+			return Stream.of(invalidType).flatMap(e -> Stream.of(e.getSuperclasses()))
+					.collect(Collectors.toSet()).toArray(CClassType.EMPTY_CLASS_ARRAY);
+		} catch (NullPointerException ex) {
+			// There is apparently some case where this can throw an NPE. It's completely unclear
+			// why or how this happens, so just catch it, log details about this class, and rethrow.
+			throw new RuntimeException("NPE while calling getSuperclassesForType for type " + getFQCN(), ex);
+		}
 	}
 
 	/**

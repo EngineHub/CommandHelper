@@ -35,10 +35,11 @@ public final class GCUtil {
 	 * If -XX:+DisableExplicitGC was specified on the command line, this function respects that, and silently returns
 	 * (otherwise we would block for quite some time waiting for a natural garbage collection to happen).
 	 * <p>
-	 * This overload uses a default timeout of 100ms.
+	 * This overload uses a default timeout of 0ms, which means that it is basically equivalent to just calling
+	 * {@code System.gc()}.
 	 */
 	public static void BlockUntilGC() {
-		BlockUntilGC(100);
+		BlockUntilGC(0);
 	}
 
 	/**
