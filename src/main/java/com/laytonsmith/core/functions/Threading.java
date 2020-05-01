@@ -8,6 +8,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
@@ -23,6 +24,8 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
+import com.laytonsmith.core.exceptions.CRE.CREInterruptedException;
 import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
@@ -36,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 
 /**
@@ -48,6 +52,8 @@ public class Threading {
 		return "This experimental and private API is subject to removal, or incompatible changes, and should not"
 				+ " be yet heavily relied on in normal development.";
 	}
+
+	private static final Map<String, Thread> threadIds = new WeakHashMap<>();
 
 	@api
 	@noboilerplate
@@ -76,7 +82,7 @@ public class Threading {
 				throw new CRECastException("Expected closure for arg 2", t);
 			}
 			final CClosure closure = (CClosure) args[1];
-			new Thread(new Runnable() {
+			Thread th = new Thread(new Runnable() {
 
 				@Override
 				public void run() {
@@ -97,7 +103,9 @@ public class Threading {
 						dm.deactivateThread(Thread.currentThread());
 					}
 				}
-			}, "(" + Implementation.GetServerType().getBranding() + ") " + id).start();
+			}, "(" + Implementation.GetServerType().getBranding() + ") " + id);
+			th.start();
+			threadIds.put(id, th);
 			return CVoid.VOID;
 		}
 
@@ -513,6 +521,67 @@ public class Threading {
 			ret.add(false);
 			ret.add(true);
 			return ret;
+		}
+	}
+
+	@api
+	public static class x_thread_join extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREIllegalArgumentException.class, CREInterruptedException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			String id = args[0].val();
+			Thread th = threadIds.get(id);
+			if(th == null) {
+				throw new CREIllegalArgumentException("Unknown thread id", t);
+			}
+			int wait = 0;
+			if(args.length > 1) {
+				wait = ArgumentValidation.getInt32(args[1], t);
+			}
+			try {
+				th.join(wait);
+			} catch (InterruptedException ex) {
+				throw new CREInterruptedException(ex, t);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "x_thread_join";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {string id, int maxWait} Waits for the thread with the given id to exit. By default, we wait"
+					+ " potentially forever, but if maxWait is specified, we will only wait that many milliseconds."
+					+ " (Sending 0 for this value causes an infinite wait.) If the timeout occurs, an"
+					+ " InterruptedException is thrown. If the id is unknown, an IllegalArgumentException is thrown.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
 		}
 
 	}
