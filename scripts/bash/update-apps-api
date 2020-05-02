@@ -1,0 +1,172 @@
+#!/bin/bash
+
+# NOTE: This is a Bash version of the equivalent PowerShell script. If you make modifications to this file,
+# you MUST make similar modifications to the PowerShell equivalent.
+
+set -e
+
+# This is the checkout which we build against for the swagger-codegen project. This can be a tag or a commit (or technically a branch)
+# but is meant to be relatively stable, and regardless only intentionally updated, so that builds are generally speaking reproducable.
+CheckoutId="a68e47087060c6f246c35a213f8e47709a4f8ab2"
+
+SkipBuild=0
+SkipUpdate=0
+
+while test $# -gt 0
+do
+	case "$1" in
+		--SkipBuild)
+		SkipBuild=1
+			;;
+		--SkipUpdate)
+		SkipUpdate=1
+			;;
+	esac
+	shift
+done
+
+echo "SkipBuild=$SkipBuild"
+
+function Status {
+	echo -e "\e[32m$1\e[0m"
+}
+
+function ErrorAndQuit {
+	echo -e "\e[31m$1\e[0m"
+	exit 1
+}
+
+function TestSoftware {
+	softwares=("java" "git" "mvn")
+	notFound=()
+
+	for s in "${softwares[@]}"
+	do
+		if ! [[ $(command -v $s) ]]; then
+			# not found
+			notFound+=("$s")
+		fi
+	done
+
+	if ! [[ "${#notFound[@]}" -eq 0 ]]; then
+		echo "One or more required software packages are not installed, and must be installed and available on your path before continuing."
+		echo "Please install the following software before trying again:"
+		for software in "${notFound[@]}"
+		do
+			echo "$software"
+		done
+		exit
+	fi
+}
+
+function TestProjectFile {
+	Path="$1"
+	if ! [[ -d "$1" ]]; then
+		read -p "Creating $Path, continue? [y/n] " -n 1 -r
+		echo
+		if [[ $REPLY =~ ^[Yy]$ ]]; then
+			mkdir -p "$Path"
+		else
+			exit
+		fi
+	else
+		echo "Using $Path"
+	fi
+}
+
+function CloneOrCheckout {
+	repo="$1"
+	localPath="$2"
+	branch="$3"
+
+	if [[ -z "$(ls -A $localPath)" ]]; then
+		#Clone
+		Status "Cloning $repo into $localPath"
+		git clone "$repo" "$localPath" --branch "$branch"
+	else
+		Status "Updating $localPath"
+		#Pull
+		status=$(git status --porcelain)
+
+		if [[ -z "$status" ]]; then
+			# :thumbsup:
+			git fetch
+			git checkout "$branch"
+		else
+			# :thumbsdown:
+			ErrorAndQuit "$localPath has local changes, refusing to continue. Please stash or otherwise revert your changes before continuing."
+		fi
+	fi
+}
+
+function CheckFileOrExit {
+	Path="$1"
+	if [[ -d "$Path" ]]; then
+		ErrorAndQuit "Could not find $Path, exiting"
+	fi
+}
+
+function StartMain {
+	SwaggerGenerator="$1"
+	JavaRepo="$2"
+	NodeRepo="$3"
+	InputSpec="$4"
+	TemplateDir="$5"
+
+	Status "Ensuring prerequisite software is installed"
+	TestSoftware
+
+	Status "Creating directories if needed"
+	TestProjectFile "$SwaggerGenerator"
+	TestProjectFile "$JavaRepo"
+	TestProjectFile "$NodeRepo"
+
+	SwaggerGenerator=$(realpath "$SwaggerGenerator")
+	JavaRepo=$(realpath "$JavaRepo")
+	NodeRepo=$(realpath "$NodeRepo")
+	MethodScriptDirectory=$(realpath $( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )/../../)
+
+	cd "$SwaggerGenerator"
+
+	if [[ "$SkipUpdate" -eq 0 ]]; then
+		Status "Getting Swagger Codegen"
+		# Checkout SwaggerGenerator
+		CloneOrCheckout "https://github.com/swagger-api/swagger-codegen" "$SwaggerGenerator" "$CheckoutId"
+	fi
+
+	if [[ "$SkipBuild" -eq 0 ]]; then
+		Status "Building Swagger Codegen"
+		mvn -Dmaven.test.skip=true clean package
+	fi
+
+	GeneratorJar=$(realpath modules/swagger-codegen-cli/target/swagger-codegen-cli.jar)
+	CheckFileOrExit "$GeneratorJar"
+
+	Status "Using $InputSpec as the input spec"
+
+	Status "Generating Java Client"
+	java -jar "$GeneratorJar" generate -i "$InputSpec" -l java -o "$JavaRepo"
+
+	# Copy in src/main/java
+	Status "Moving API files into MethodScript"
+	cd "$MethodScriptDirectory"
+	mkdir -p "$MethodScriptDirectory/src/main/java/io/swagger/client"
+	rm -rf "$MethodScriptDirectory/src/main/java/io/swagger/client"
+	mkdir "$MethodScriptDirectory/src/main/java/io/swagger/client"
+	cp -R "$JavaRepo/src/main/java/io/swagger/client/" "$MethodScriptDirectory/src/main/java/io/swagger/"
+
+	Status "Generating Node Server"
+	java -jar "$GeneratorJar" generate -i "$InputSpec" -l nodejs-server -o "$NodeRepo" --disable-examples --template-dir "$TemplateDir"
+
+	Status "Done!"
+}
+
+SwaggerGeneratorDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )/../../../SwaggerGenerator"
+JavaRepoDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )/../../../MethodScriptAppsJavaApi"
+NodeRepoDirectory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )/../../../apps.methodscript.com"
+InputSpec="$(realpath $( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )/../../src/main/resources/apps.methodscript.com.yaml)"
+TemplateDir="$NodeRepoDirectory/mustacheTemplates"
+
+StartMain "$SwaggerGeneratorDirectory" "$JavaRepoDirectory" "$NodeRepoDirectory" "$InputSpec" "$TemplateDir"
+
+exit 0

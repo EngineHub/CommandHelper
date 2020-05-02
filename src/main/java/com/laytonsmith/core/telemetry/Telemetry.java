@@ -90,7 +90,7 @@ public class Telemetry {
 			StringWriter writer = new StringWriter();
 			try {
 				item.serialize(new JsonTelemetryDataSerializer(writer));
-			} catch(IOException ex) {
+			} catch (IOException ex) {
 				ex.printStackTrace(StreamUtils.GetSystemErr());
 			}
 			StreamUtils.GetSystemOut().println("Telemetry data: " + writer.toString());
