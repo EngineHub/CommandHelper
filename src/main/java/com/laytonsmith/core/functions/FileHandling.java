@@ -82,12 +82,10 @@ public class FileHandling {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			try {
-				if(!Static.InCmdLine(env, true)) {
-					//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
-					//Cmdline mode doesn't currently have this restriction.
-					if(!Security.CheckSecurity(location)) {
-						throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
-					}
+				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
+				//Cmdline mode doesn't currently have this restriction.
+				if(!Static.InCmdLine(env, true) && !Security.CheckSecurity(location)) {
+					throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 				}
 				String s = file_get_contents(location.getAbsolutePath());
 				s = s.replaceAll("\n|\r\n", "\n");
@@ -372,7 +370,7 @@ public class FileHandling {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), environment, t, null);
 			try {
-				if(!Security.CheckSecurity(location) && !Static.InCmdLine(environment, true)) {
+				if(!Static.InCmdLine(environment, true) && !Security.CheckSecurity(location)) {
 					throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 				}
 			} catch (IOException ex) {
@@ -488,12 +486,10 @@ public class FileHandling {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			try {
-				if(!Static.InCmdLine(env, true)) {
-					//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
-					//Cmdline mode doesn't currently have this restriction.
-					if(!Security.CheckSecurity(location)) {
-						throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
-					}
+				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
+				//Cmdline mode doesn't currently have this restriction.
+				if(!Static.InCmdLine(env, true) && !Security.CheckSecurity(location)) {
+					throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 				}
 				InputStream stream = new BufferedInputStream(new FileInputStream(location));
 				return CByteArray.wrap(StreamUtils.GetBytes(stream), t);
