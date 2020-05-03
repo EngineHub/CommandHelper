@@ -30,6 +30,8 @@ import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.compiler.analysis.Declaration;
+import com.laytonsmith.core.compiler.analysis.IVariableAssignDeclaration;
+import com.laytonsmith.core.compiler.analysis.IncludeReference;
 import com.laytonsmith.core.compiler.analysis.Namespace;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
@@ -328,27 +330,29 @@ public class DataHandling {
 		}
 
 		@Override
-		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
+				Environment env, Set<ConfigCompileException> exceptions) {
 			if(ast.getChildren().size() == 3) { // Variable declaration + assign: assign(type, var, val).
 
 				// Handle the assigned value.
-				Scope valScope = StaticAnalysis.linkScope(parentScope, ast.getChildAt(2), exceptions);
+				Scope valScope = analysis.linkScope(parentScope, ast.getChildAt(2), env, exceptions);
 
 				// Create a new scope and put the variable declaration in that scope.
-				Scope declScope = valScope.createNewChild();
+				Scope declScope = analysis.createNewScope(valScope);
 				Mixed rawType = ast.getChildAt(0).getData();
 				Mixed rawIVar = ast.getChildAt(1).getData();
 				if(rawType instanceof CClassType && rawIVar instanceof IVariable) {
 					CClassType type = (CClassType) rawType;
 					IVariable iVar = (IVariable) rawIVar;
 
-					// Detect duplicate variable declarations (or declaration after assign).
-					Declaration decl = valScope.getDeclaration(Namespace.IVARIABLE, iVar.getVariableName());
-					if(decl != null) {
-						exceptions.add(new ConfigCompileException("Duplicate variable declaration: Variable "
-								+ iVar.getVariableName() + " is already declared at "
-								+ decl.getTarget().toString(), iVar.getTarget()));
-					}
+					// TODO - Move this check to the second pass (unresolved includes affect this).
+//					// Detect duplicate variable declarations (or declaration after assign).
+//					Declaration decl = valScope.getDeclaration(Namespace.IVARIABLE, iVar.getVariableName());
+//					if(decl != null) {
+//						exceptions.add(new ConfigCompileException("Duplicate variable declaration: Variable "
+//								+ iVar.getVariableName() + " is already declared at "
+//								+ decl.getTarget().toString(), iVar.getTarget()));
+//					}
 
 					// Add the new variable declaration.
 					declScope.addDeclaration(new Declaration(
@@ -361,26 +365,32 @@ public class DataHandling {
 			} else if(ast.getChildren().size() == 2) { // Variable assign: assign(var, val).
 
 				// Handle the assigned value.
-				Scope valScope = StaticAnalysis.linkScope(parentScope, ast.getChildAt(1), exceptions);
+				Scope valScope = analysis.linkScope(parentScope, ast.getChildAt(1), env, exceptions);
 
-				// Declare the variable as 'auto' if it it has not yet been declared.
-				Scope newScope = valScope.createNewChild();
+				// Declare the variable as 'auto' if it it has not yet been declared. // TODO - Implement elsewhere.
+				Scope newScope = analysis.createNewScope(valScope);
 				Mixed rawIVar = ast.getChildAt(0).getData();
 				if(rawIVar instanceof IVariable) {
 					IVariable iVar = (IVariable) rawIVar;
-					Declaration decl = parentScope.getDeclaration(Namespace.IVARIABLE, iVar.getVariableName());
-					if(decl == null) {
 
-						// Add the new variable declaration.
-						newScope.addDeclaration(new Declaration(
-								Namespace.IVARIABLE, iVar.getVariableName(), CClassType.AUTO, ast.getTarget()));
-					}
+					// Add ivariable assign declaration in a new scope.
+					newScope.addDeclaration(new IVariableAssignDeclaration(iVar.getVariableName(), iVar.getTarget()));
+
+					// TODO - Move this to the second pass (unresolved includes affect this).
+					// TODO - Do add a variable reference here, to be resolved later (might be a declaration).
+//					Declaration decl = parentScope.getDeclaration(Namespace.IVARIABLE, iVar.getVariableName());
+//					if(decl == null) {
+//
+//						// Add the new variable declaration.
+//						newScope.addDeclaration(new Declaration(
+//								Namespace.IVARIABLE, iVar.getVariableName(), CClassType.AUTO, ast.getTarget()));
+//					}
 				}
 
 				// Return the new scope.
 				return newScope;
 			}
-			return super.linkScope(parentScope, ast, exceptions);
+			return super.linkScope(analysis, parentScope, ast, env, exceptions);
 		}
 
 		@Override
@@ -1345,7 +1355,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
+				Environment env, Set<ConfigCompileException> exceptions) {
 
 			// Handle not enough arguments.
 			if(ast.numberOfChildren() < 2) {
@@ -1370,7 +1381,7 @@ public class DataHandling {
 
 			// Create parameter scope.
 			Scope outerParamScope = parentScope;
-			Scope innerParamScope = new Scope();
+			Scope innerParamScope = analysis.createNewScope();
 
 			// Insert @arguments parameter.
 			innerParamScope.addDeclaration(
@@ -1382,17 +1393,19 @@ public class DataHandling {
 
 				// Resolve parameters from left to right, starting in the outer scope.
 				Scope oldOuterParamScope = outerParamScope;
-				outerParamScope = StaticAnalysis.linkParamScope(outerParamScope, param, exceptions);
+				outerParamScope = analysis.linkParamScope(outerParamScope, param, env, exceptions);
 				if(outerParamScope != oldOuterParamScope) { // Ensure that we're no longer in the passed scope.
 
 					// Get the parameter declaration.
 					Set<Declaration> decls = outerParamScope.getAllDeclarationsLocal(Namespace.IVARIABLE);
+					decls.addAll(outerParamScope.getAllDeclarationsLocal(Namespace.IVARIABLE_ASSIGN));
 					if(decls.size() == 1) { // If this is not the case, the type checker should give a compile error.
 						Declaration decl = decls.iterator().next();
 
 						// Detect duplicate parameter names.
-						Declaration dupDecl = innerParamScope.getDeclaration(Namespace.IVARIABLE, decl.getIdentifier());
-						if(dupDecl != null) {
+						Set<Declaration> dupDecls = innerParamScope
+								.getDeclarations(Namespace.IVARIABLE, decl.getIdentifier());
+						for(Declaration dupDecl : dupDecls) {
 							exceptions.add(new ConfigCompileException("Duplicate parameter declaration: Parameter "
 									+ decl.getIdentifier() + " is already declared at "
 									+ dupDecl.getTarget().toString(), decl.getTarget()));
@@ -1406,7 +1419,7 @@ public class DataHandling {
 
 			// Handle code.
 			ParseTree code = ast.getChildAt(ast.numberOfChildren() - 1);
-			StaticAnalysis.linkScope(innerParamScope, code, exceptions);
+			analysis.linkScope(innerParamScope, code, env, exceptions);
 
 			// Create proc declaration.
 			// TODO - Include proc signature (argument types and number of arguments) in declaration.
@@ -1504,6 +1517,8 @@ public class DataHandling {
 	@DocumentLink(0)
 	public static class include extends AbstractFunction implements Optimizable, DocumentLinkProvider {
 
+		private StaticAnalysis dynamicStaticAnalysis = null;
+
 		@Override
 		public String getName() {
 			return "include";
@@ -1549,6 +1564,7 @@ public class DataHandling {
 			ParseTree tree = nodes[0];
 			Mixed arg = parent.seval(tree, env);
 			String location = arg.val();
+			// TODO - Run static analysis from the outer file start scope if available.
 			File file = Static.GetFileFromArgument(location, env, t, null);
 			ParseTree include = IncludeCache.get(file, env, t);
 			if(include != null) {
@@ -1567,6 +1583,39 @@ public class DataHandling {
 				}
 			}
 			return CVoid.VOID;
+		}
+
+		@Override
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			System.out.println("[DEBUG] Include linkScope called."); // TODO - Remove debug.
+
+			// Store references for static includes and a static analysis for dynamic includes.
+			if(ast.numberOfChildren() == 1) {
+				Mixed includePathNode = ast.getChildAt(0).getData();
+				if(includePathNode instanceof CString) {
+					System.out.println("[DEBUG] Static include detected."); // TODO - Remove debug.
+
+					// Create a new unlinked scope to leave a gap for the include scopes.
+					// Create a reference with these unlinked scopes to be able to perform linkage at a later stage.
+					Scope outScope = analysis.createNewScope();
+					parentScope.addReference(new IncludeReference(
+							includePathNode.val(), parentScope, outScope, ast.getTarget()));
+					return outScope;
+				} else {
+					System.out.println("[DEBUG] Dynamic include detected."); // TODO - Remove debug.
+
+					// The include is dynamic, so it cannot be checked in compile time.
+					// Create static analysis to check the file as soon as it is loaded in runtime.
+					// TODO - Replace this by storage in IncludeCache?
+					this.dynamicStaticAnalysis = new StaticAnalysis(parentScope, false);
+				}
+			} else {
+				System.out.println("[DEBUG] Faulty include detected."); // TODO - Remove debug.
+			}
+
+			// Fall back to default behavior for invalid syntax.
+			return super.linkScope(analysis, parentScope, ast, env, exceptions);
 		}
 
 		@Override
@@ -2173,12 +2222,13 @@ public class DataHandling {
 		}
 
 		@Override
-		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
-			return this.linkScope(parentScope, ast, exceptions, true);
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			return this.linkScope(analysis, parentScope, ast, env, exceptions, true);
 		}
 
-		public Scope linkScope(Scope parentScope, ParseTree ast,
-				Set<ConfigCompileException> exceptions, boolean codeInheritsParentScope) {
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
+				Environment env, Set<ConfigCompileException> exceptions, boolean codeInheritsParentScope) {
 
 			// Handle empty closure.
 			if(ast.numberOfChildren() == 0) {
@@ -2188,10 +2238,10 @@ public class DataHandling {
 			// Handle optional return type argument.
 			int ind = 0;
 			Scope retTypeScope = (ast.getChildAt(ind).getData().isInstanceOf(CClassType.TYPE)
-					? StaticAnalysis.linkScope(parentScope, ast.getChildAt(ind++), exceptions) : parentScope);
+					? analysis.linkScope(parentScope, ast.getChildAt(ind++), env, exceptions) : parentScope);
 
 			// Create parameter scope.
-			Scope paramScope = new Scope();
+			Scope paramScope = analysis.createNewScope();
 
 			// Insert @arguments parameter.
 			paramScope.addDeclaration(new Declaration(Namespace.IVARIABLE, "@arguments", CArray.TYPE, ast.getTarget()));
@@ -2201,7 +2251,7 @@ public class DataHandling {
 				ParseTree param = ast.getChildAt(ind++);
 
 				// Resolve parameters in outer scope.
-				Scope paramDeclScope = StaticAnalysis.linkParamScope(retTypeScope, param, exceptions);
+				Scope paramDeclScope = analysis.linkParamScope(retTypeScope, param, env, exceptions);
 				if(paramDeclScope != retTypeScope) { // Ensure that we're no longer in the passed scope.
 
 					// Get the parameter declaration.
@@ -2210,8 +2260,9 @@ public class DataHandling {
 						Declaration decl = decls.iterator().next();
 
 						// Detect duplicate parameter names.
-						Declaration dupDecl = paramScope.getDeclaration(Namespace.IVARIABLE, decl.getIdentifier());
-						if(dupDecl != null) {
+						Set<Declaration> dupDecls = paramScope
+								.getDeclarations(Namespace.IVARIABLE, decl.getIdentifier());
+						for(Declaration dupDecl : dupDecls) {
 							exceptions.add(new ConfigCompileException("Duplicate parameter declaration: Parameter "
 									+ decl.getIdentifier() + " is already declared at "
 									+ dupDecl.getTarget().toString(), decl.getTarget()));
@@ -2225,12 +2276,12 @@ public class DataHandling {
 
 			// Set a parent scope if this closure type should be allowed to resolve in the parent scope.
 			if(codeInheritsParentScope) {
-				paramScope.setParent(parentScope);
+				paramScope.addParent(parentScope);
 			}
 
 			// Handle code.
 			ParseTree code = ast.getChildAt(ast.numberOfChildren() - 1);
-			StaticAnalysis.linkScope(paramScope, code, exceptions);
+			analysis.linkScope(paramScope, code, env, exceptions);
 
 			// Return the parent scope, as parameters and their default values are not accessible after the closure.
 			return parentScope;
@@ -2362,8 +2413,9 @@ public class DataHandling {
 		}
 
 		@Override
-		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
-			return this.linkScope(parentScope, ast, exceptions, false);
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			return this.linkScope(analysis, parentScope, ast, env, exceptions, false);
 		}
 
 		@Override

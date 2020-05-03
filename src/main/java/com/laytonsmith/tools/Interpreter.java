@@ -62,6 +62,7 @@ import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.TokenStream;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
@@ -149,6 +150,7 @@ public final class Interpreter {
 	private boolean inShellMode = false;
 	private String script = "";
 	private Environment env;
+	private StaticAnalysis staticAnalysis;
 	private Thread scriptThread = null;
 
 	private volatile boolean isExecuting = false;
@@ -340,6 +342,7 @@ public final class Interpreter {
 
 		env = Static.GenerateStandaloneEnvironment(false);
 		env.getEnv(GlobalEnv.class).SetCustom("cmdline", true);
+		staticAnalysis = new StaticAnalysis(true);
 		if(Prefs.UseColors()) {
 			TermColors.EnableColors();
 		} else {
@@ -774,7 +777,8 @@ public final class Interpreter {
 		final ParseTree tree;
 		try {
 			TokenStream stream = MethodScriptCompiler.lex(script, env, fromFile, true);
-			tree = MethodScriptCompiler.compile(stream, env, env.getEnvClasses());
+			tree = MethodScriptCompiler.compile(stream, env, env.getEnvClasses(), staticAnalysis);
+			staticAnalysis = new StaticAnalysis(staticAnalysis.getEndScope(), true); // Continue analysis in end scope.
 		} finally {
 			compile.stop();
 		}

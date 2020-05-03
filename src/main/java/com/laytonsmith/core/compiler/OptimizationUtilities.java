@@ -60,7 +60,7 @@ public class OptimizationUtilities {
 			Set<Class<? extends Environment.EnvironmentImpl>> envs,
 			File source) throws ConfigCompileException, ConfigCompileGroupException {
 		ParseTree tree = MethodScriptCompiler.compile(
-				MethodScriptCompiler.lex(script, env, source, true), null, envs, false);
+				MethodScriptCompiler.lex(script, env, source, true), null, envs, null);
 		StringBuilder b = new StringBuilder();
 		//The root always contains null.
 		for(ParseTree child : tree.getChildren()) {

@@ -529,7 +529,7 @@ public class StaticTest {
 		}
 		env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
 		MethodScriptCompiler.execute(MethodScriptCompiler.compile(
-				MethodScriptCompiler.lex(script, env, null, true), env, envs, false), env, done, null);
+				MethodScriptCompiler.lex(script, env, null, true), env, envs, null), env, done, null);
 	}
 
 	public static void RunCommand(String combinedScript, MCCommandSender player, String command) throws Exception {

@@ -92,10 +92,11 @@ public abstract class AbstractFunction implements Function {
 	 * This method returns the scope as returned by the last child, or the parent scope if it does not have children.
 	 */
 	@Override
-	public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+	public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
+			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 		Scope scope = parentScope;
 		for(ParseTree child : ast.getChildren()) {
-			scope = StaticAnalysis.linkScope(scope, child, exceptions);
+			scope = analysis.linkScope(scope, child, env, exceptions);
 		}
 		return scope;
 	}
@@ -103,13 +104,16 @@ public abstract class AbstractFunction implements Function {
 	/**
 	 * Functions that use lazy evaluation where the first argument is always evaluated, and later arguments might not
 	 * be evaluated depending on the outcome of previous arguments.
+	 * @param analysis - The {@link StaticAnalysis}.
 	 * @param parentScope - The current scope.
 	 * @param ast - The abstract syntax tree representing this function.
+	 * @param env - The environment.
 	 * @param exceptions - A set to put compile errors in.
 	 * @return The new (linked) scope from the first argument, or the parent scope if no arguments are available or
 	 * if this function does not require a new scope.
 	 */
-	protected Scope linkScopeLazy(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+	protected Scope linkScopeLazy(StaticAnalysis analysis, Scope parentScope,
+			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 		if(ast.numberOfChildren() >= 1) {
 
 			// Get this lazy function's name.
@@ -139,10 +143,10 @@ public abstract class AbstractFunction implements Function {
 
 				// Handle 'normal' argument. Order: arg1 -> ((arg2? -> arg3?) -> ...) (lazy evaluation).
 				if(firstArgScope == null) {
-					firstArgScope = StaticAnalysis.linkScope(parentScope, arg, exceptions);
+					firstArgScope = analysis.linkScope(parentScope, arg, env, exceptions);
 					lastArgScope = firstArgScope;
 				} else {
-					lastArgScope = StaticAnalysis.linkScope(lastArgScope, arg, exceptions);
+					lastArgScope = analysis.linkScope(lastArgScope, arg, env, exceptions);
 				}
 			}
 			return firstArgScope;
