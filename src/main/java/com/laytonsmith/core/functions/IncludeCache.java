@@ -6,6 +6,7 @@ import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Security;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
@@ -47,7 +48,7 @@ public class IncludeCache {
 		MSLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Security check passed", t);
 		Profiler profiler = env.getEnv(GlobalEnv.class).GetProfiler();
 		try {
-			if(!Security.CheckSecurity(file)) {
+			if(!Static.InCmdLine(env, true) && !Security.CheckSecurity(file)) {
 				throw new CRESecurityException("The script cannot access " + file
 						+ " due to restrictions imposed by the base-dir setting.", t);
 			}

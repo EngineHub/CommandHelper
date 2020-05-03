@@ -523,7 +523,7 @@ public class Sandbox {
 			File file = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			int num = 0;
 			try {
-				if(Security.CheckSecurity(file)) {
+				if(Static.InCmdLine(env, true) || Security.CheckSecurity(file)) {
 					if(file.isDirectory()) {
 						HashMap<File, ParseTree> files = compileDirectory(file, env, t);
 						IncludeCache.addAll(files);
