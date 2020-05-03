@@ -14,6 +14,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.compiler.analysis.Scope;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
@@ -1091,8 +1092,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
-			return this.linkScopeLazy(parentScope, ast, exceptions);
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			return this.linkScopeLazy(analysis, parentScope, ast, env, exceptions);
 		}
 
 		@Override
@@ -1231,8 +1233,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
-			return this.linkScopeLazy(parentScope, ast, exceptions);
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			return this.linkScopeLazy(analysis, parentScope, ast, env, exceptions);
 		}
 
 		@Override
@@ -1375,8 +1378,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
-			return this.linkScopeLazy(parentScope, ast, exceptions);
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			return this.linkScopeLazy(analysis, parentScope, ast, env, exceptions);
 		}
 
 		@Override
@@ -1518,8 +1522,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
-			return this.linkScopeLazy(parentScope, ast, exceptions);
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			return this.linkScopeLazy(analysis, parentScope, ast, env, exceptions);
 		}
 
 		@Override
@@ -1761,8 +1766,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
-			return this.linkScopeLazy(parentScope, ast, exceptions);
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			return this.linkScopeLazy(analysis, parentScope, ast, env, exceptions);
 		}
 
 		@Override
@@ -1827,8 +1833,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
-			return this.linkScopeLazy(parentScope, ast, exceptions);
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			return this.linkScopeLazy(analysis, parentScope, ast, env, exceptions);
 		}
 
 		@Override

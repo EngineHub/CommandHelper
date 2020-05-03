@@ -7,5 +7,7 @@ package com.laytonsmith.core.compiler.analysis;
 public enum Namespace {
 	VARIABLE,
 	IVARIABLE,
-	PROCEDURE
+	IVARIABLE_ASSIGN,
+	PROCEDURE,
+	INCLUDE
 }

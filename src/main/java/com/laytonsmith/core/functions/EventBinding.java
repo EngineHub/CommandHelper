@@ -187,7 +187,8 @@ public class EventBinding {
 		}
 
 		@Override
-		public Scope linkScope(Scope parentScope, ParseTree ast, Set<ConfigCompileException> exceptions) {
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 
 			// Fully ignore the bind() if it will generate an exception later anyways.
 			if(ast.numberOfChildren() < 5) {
@@ -201,16 +202,16 @@ public class EventBinding {
 			ParseTree code = ast.getChildAt(ast.numberOfChildren() - 1);
 
 			// Order: eventName -> options -> prefilter -> eventObj -> (params)* -> code.
-			Scope eventNameScope = StaticAnalysis.linkScope(parentScope, eventName, exceptions);
-			Scope optionsScope = StaticAnalysis.linkScope(eventNameScope, options, exceptions);
-			Scope prefilterScope = StaticAnalysis.linkScope(optionsScope, prefilter, exceptions);
-			Scope eventObjScope = StaticAnalysis.linkParamScope(prefilterScope, eventObj, exceptions);
+			Scope eventNameScope = analysis.linkScope(parentScope, eventName, env, exceptions);
+			Scope optionsScope = analysis.linkScope(eventNameScope, options, env, exceptions);
+			Scope prefilterScope = analysis.linkScope(optionsScope, prefilter, env, exceptions);
+			Scope eventObjScope = analysis.linkParamScope(prefilterScope, eventObj, env, exceptions);
 			Scope paramScope = eventObjScope;
 			for(int paramInd = 4; paramInd < ast.numberOfChildren() - 1; paramInd++) {
 				ParseTree param = ast.getChildAt(paramInd);
-				paramScope = StaticAnalysis.linkParamScope(paramScope, param, exceptions);
+				paramScope = analysis.linkParamScope(paramScope, param, env, exceptions);
 			}
-			StaticAnalysis.linkScope(paramScope, code, exceptions);
+			analysis.linkScope(paramScope, code, env, exceptions);
 
 			// Code after bind() can access its argument scopes, except the code scope.
 			return paramScope;

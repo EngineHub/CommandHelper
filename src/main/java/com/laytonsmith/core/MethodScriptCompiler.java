@@ -1225,7 +1225,7 @@ public final class MethodScriptCompiler {
 	public static ParseTree compile(TokenStream stream, Environment environment,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs) throws ConfigCompileException,
 			ConfigCompileGroupException {
-		return compile(stream, environment, envs, true);
+		return compile(stream, environment, envs, new StaticAnalysis(true));
 	}
 
 	/**
@@ -1237,7 +1237,9 @@ public final class MethodScriptCompiler {
 	 * and used.
 	 * @param envs The environments that are going to be present at runtime. Even if the {@code environment} parameter
 	 * is null, this still must be non-null and populated with one or more values.
-	 * @param doStaticAnalysis When {@code false}, (advanced) static analysis and type checking will be skipped.
+	 * @param staticAnalysis The static analysis object, or {@code null} to not perform static analysis. This object
+	 * is used to perform static analysis on the AST that results from parsing, before any AST optimizations.
+	 * this method has finished execution.
 	 * @return A fully compiled, optimized, and reduced parse tree. If {@code stream} is null or empty, null is
 	 * returned.
 	 * @throws ConfigCompileException If the script contains syntax errors. Additionally, during optimization, certain
@@ -1247,7 +1249,7 @@ public final class MethodScriptCompiler {
 	 * a collection of single {@link ConfigCompileException}s.
 	 */
 	public static ParseTree compile(TokenStream stream, Environment environment,
-			Set<Class<? extends Environment.EnvironmentImpl>> envs, boolean doStaticAnalysis)
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, StaticAnalysis staticAnalysis)
 			throws ConfigCompileException, ConfigCompileGroupException {
 		Objects.requireNonNull(envs, () -> "envs parameter must not be null");
 		try {
@@ -1819,8 +1821,8 @@ public final class MethodScriptCompiler {
 		processKeywords(tree, compilerErrors);
 		rewriteAutoconcats(tree, environment, envs, compilerErrors);
 		checkLinearComponents(tree, environment, compilerErrors);
-		if(doStaticAnalysis) {
-			new StaticAnalysis(tree).analyze(compilerErrors);
+		if(staticAnalysis != null) {
+			staticAnalysis.analyze(tree, environment, compilerErrors);
 		}
 		optimize(tree, environment, envs, procs, compilerErrors);
 		link(tree, compilerErrors, envs);

@@ -4,6 +4,10 @@ import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.compiler.analysis.Declaration;
+import com.laytonsmith.core.compiler.analysis.Namespace;
+import com.laytonsmith.core.compiler.analysis.Scope;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.IVariable;
@@ -41,8 +45,11 @@ public abstract class CompositeFunction extends AbstractFunction {
 			try {
 
 				String script = script();
+				Scope rootScope = new Scope();
+				rootScope.addDeclaration(
+						new Declaration(Namespace.IVARIABLE, "@arguments", CArray.TYPE, Target.UNKNOWN));
 				tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, null, true),
-						env, env.getEnvClasses(), false)
+						env, env.getEnvClasses(), new StaticAnalysis(rootScope, true))
 						// the root of the tree is null, so go ahead and pull it up
 						.getChildAt(0);
 			} catch (ConfigCompileException | ConfigCompileGroupException ex) {
