@@ -53,7 +53,7 @@ public class Threading {
 				+ " be yet heavily relied on in normal development.";
 	}
 
-	private static final Map<String, Thread> threadIds = new WeakHashMap<>();
+	private static final Map<String, Thread> THREAD_ID_MAP = new WeakHashMap<>();
 
 	@api
 	@noboilerplate
@@ -105,7 +105,7 @@ public class Threading {
 				}
 			}, "(" + Implementation.GetServerType().getBranding() + ") " + id);
 			th.start();
-			threadIds.put(id, th);
+			THREAD_ID_MAP.put(id, th);
 			return CVoid.VOID;
 		}
 
@@ -545,7 +545,7 @@ public class Threading {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
-			Thread th = threadIds.get(id);
+			Thread th = THREAD_ID_MAP.get(id);
 			if(th == null) {
 				throw new CREIllegalArgumentException("Unknown thread id", t);
 			}
