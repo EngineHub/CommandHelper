@@ -11,6 +11,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -46,7 +47,7 @@ public class Recipes {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class add_recipe extends recipeFunction {
 
 		@Override
@@ -145,7 +146,7 @@ public class Recipes {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_recipes_for extends recipeFunction {
 
 		@Override
@@ -189,7 +190,7 @@ public class Recipes {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_all_recipes extends recipeFunction {
 
 		@Override
@@ -230,7 +231,7 @@ public class Recipes {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class clear_recipes extends recipeFunction {
 
 		@Override
@@ -266,7 +267,7 @@ public class Recipes {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class reset_recipes extends recipeFunction {
 
 		@Override

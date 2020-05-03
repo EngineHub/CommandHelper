@@ -17,6 +17,7 @@ import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREException;
@@ -59,7 +60,7 @@ public class BossBar {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_bars extends BossBarFunction {
 
 		@Override
@@ -93,7 +94,7 @@ public class BossBar {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class create_bar extends BossBarFunction {
 
 		@Override
@@ -178,7 +179,7 @@ public class BossBar {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class update_bar extends BossBarFunction {
 
 		@Override
@@ -257,7 +258,7 @@ public class BossBar {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_bar extends BossBarFunction {
 
 		@Override
@@ -298,7 +299,7 @@ public class BossBar {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class remove_bar extends BossBarFunction {
 
 		@Override
@@ -335,7 +336,7 @@ public class BossBar {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class bar_add_player extends BossBarFunction {
 
 		@Override
@@ -369,7 +370,7 @@ public class BossBar {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class bar_remove_player extends BossBarFunction {
 
 		@Override
@@ -403,7 +404,7 @@ public class BossBar {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_bar_players extends BossBarFunction {
 
 		@Override

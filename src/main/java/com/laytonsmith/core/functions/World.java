@@ -285,7 +285,7 @@ public class World {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class load_chunk extends AbstractFunction {
 
 		@Override
@@ -448,7 +448,7 @@ public class World {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_loaded_chunks extends AbstractFunction {
 
 		@Override
@@ -1170,7 +1170,7 @@ public class World {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class world_info extends AbstractFunction {
 
 		@Override
@@ -1227,7 +1227,7 @@ public class World {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class unload_world extends AbstractFunction {
 
 		@Override
@@ -1280,7 +1280,7 @@ public class World {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_difficulty extends AbstractFunction {
 
 		@Override
@@ -1329,7 +1329,7 @@ public class World {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_difficulty extends AbstractFunction {
 
 		@Override
@@ -1397,7 +1397,7 @@ public class World {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_pvp extends AbstractFunction {
 
 		@Override
@@ -1445,7 +1445,7 @@ public class World {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pvp extends AbstractFunction {
 
 		@Override
@@ -1502,7 +1502,7 @@ public class World {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_gamerule extends AbstractFunction {
 
 		@Override
@@ -1572,7 +1572,7 @@ public class World {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_gamerule extends AbstractFunction {
 
 		@Override
@@ -1634,7 +1634,7 @@ public class World {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_keep_spawn_loaded extends AbstractFunction {
 
 		@Override
@@ -1683,7 +1683,7 @@ public class World {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class location_shift extends AbstractFunction {
 
 		@Override
@@ -1761,7 +1761,7 @@ public class World {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_yaw extends AbstractFunction {
 
 		@Override
@@ -1829,7 +1829,7 @@ public class World {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_pitch extends AbstractFunction {
 
 		@Override
@@ -1940,7 +1940,7 @@ public class World {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class distance extends AbstractFunction {
 
 		@Override
@@ -1991,7 +1991,7 @@ public class World {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class save_world extends AbstractFunction {
 
 		@Override
@@ -2038,7 +2038,7 @@ public class World {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_temperature extends AbstractFunction {
 
 		@Override
@@ -2088,7 +2088,7 @@ public class World {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_world_border extends AbstractFunction {
 
 		@Override
@@ -2145,7 +2145,7 @@ public class World {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_world_border extends AbstractFunction {
 
 		@Override

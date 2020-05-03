@@ -34,7 +34,7 @@ public class PluginMeta {
 		return "This class contains the functions use to communicate with other plugins and the server in general.";
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class fake_incoming_plugin_message extends AbstractFunction {
 
 		@Override
@@ -97,7 +97,7 @@ public class PluginMeta {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class send_plugin_message extends AbstractFunction {
 
 		@Override
@@ -162,7 +162,7 @@ public class PluginMeta {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class register_channel extends AbstractFunction {
 
 		@Override
@@ -227,7 +227,7 @@ public class PluginMeta {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class unregister_channel extends AbstractFunction {
 
 		@Override
@@ -289,7 +289,7 @@ public class PluginMeta {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class is_channel_registered extends AbstractFunction {
 
 		@Override
@@ -343,7 +343,7 @@ public class PluginMeta {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_registered_channels extends AbstractFunction {
 
 		@Override

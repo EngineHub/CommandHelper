@@ -25,6 +25,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
@@ -240,7 +241,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_pscoreboard extends SBFunction {
 
 		@Override
@@ -284,7 +285,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pscoreboard extends SBFunction {
 
 		@Override
@@ -322,7 +323,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_scoreboards extends SBFunction {
 
 		@Override
@@ -362,7 +363,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_objectives extends SBFunction {
 
 		@Override
@@ -426,7 +427,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_teams extends SBFunction {
 
 		@Override
@@ -468,7 +469,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class create_scoreboard extends SBFunction {
 
 		@Override
@@ -510,7 +511,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class create_objective extends SBFunction {
 
 		@Override
@@ -567,7 +568,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class create_team extends SBFunction {
 
 		@Override
@@ -613,7 +614,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_objective_display extends SBFunction {
 
 		@Override
@@ -692,7 +693,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_team_display extends SBFunction {
 
 		@Override
@@ -799,7 +800,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class team_add_player extends SBFunction {
 
 		@Override
@@ -844,7 +845,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class team_remove_player extends SBFunction {
 
 		@Override
@@ -879,7 +880,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_pteam extends SBFunction {
 
 		@Override
@@ -915,7 +916,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class remove_scoreboard extends SBFunction {
 
 		@Override
@@ -972,7 +973,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class remove_objective extends SBFunction {
 
 		@Override
@@ -1010,7 +1011,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class remove_team extends SBFunction {
 
 		@Override
@@ -1048,7 +1049,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_pscore extends SBFunction {
 
 		@Override
@@ -1092,7 +1093,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pscore extends SBFunction {
 
 		@Override
@@ -1138,7 +1139,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class reset_all_pscores extends SBFunction {
 
 		@Override
@@ -1169,7 +1170,7 @@ public class Scoreboards {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_team_options extends SBFunction {
 
 		@Override

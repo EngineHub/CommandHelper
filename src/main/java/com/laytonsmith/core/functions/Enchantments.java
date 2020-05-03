@@ -633,7 +633,7 @@ public class Enchantments {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	@hide("Deprecated for can_enchant_item()")
 	public static class can_enchant_target extends AbstractFunction implements Optimizable {
 
@@ -699,7 +699,7 @@ public class Enchantments {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class can_enchant_item extends AbstractFunction {
 
 		@Override
@@ -748,7 +748,7 @@ public class Enchantments {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_enchant_max extends AbstractFunction {
 
 		@Override
@@ -794,7 +794,7 @@ public class Enchantments {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_enchants extends AbstractFunction implements Optimizable {
 
 		private static final Map<String, CArray> CACHE = new HashMap<>();
@@ -881,7 +881,7 @@ public class Enchantments {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class is_enchantment extends AbstractFunction {
 
 		@Override
@@ -930,7 +930,7 @@ public class Enchantments {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class enchantment_list extends AbstractFunction {
 
 		@Override
