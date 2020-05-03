@@ -1,7 +1,8 @@
 package com.laytonsmith.core.telemetry;
 
 /**
- *
+ * If you want to add a new telemetry object, you also have to add it to apps.methodscript.com, or the server
+ * will reject it.
  */
 public class DefaultTelemetry {
 

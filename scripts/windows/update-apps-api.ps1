@@ -138,7 +138,7 @@ function Start-Main([string] $SwaggerGenerator,
 	Status "Using $InputSpec as the input spec"
 
 	Status "Generating Java Client"
-	java -jar $GeneratorJar generate -i $InputSpec -l java -o $JavaRepo
+	java -jar $GeneratorJar generate -i $InputSpec -l java -o $JavaRepo "--template-dir" "$MethodScriptDirectory/mustacheTemplates"
 
 	# Copy in src/main/java
 	Status "Moving API files into MethodScript"

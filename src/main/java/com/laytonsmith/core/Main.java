@@ -21,6 +21,7 @@ import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.apps.AppsApiUtil;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CString;
@@ -232,6 +233,9 @@ public class Main {
 				}
 			}
 		}
+
+		AppsApiUtil.ConfigureDefaults();
+
 		ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
 		cd.addThisJar();
 		MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());

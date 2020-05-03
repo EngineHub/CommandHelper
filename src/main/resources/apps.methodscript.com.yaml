@@ -2,7 +2,7 @@
 # This is the openapi spec for apps.methodscript.com. If you make changes to this file, you must 
 # regenerate the API code using the update-apps-api.cmd script at the root of the project (cross platform script).
 # To keep diffs to a minimum, changes to this file MUST be contained to its own pull request.
-# The OpenAPI 3.0.3 reference can be found here https://swagger.io/specification/
+# The OpenAPI 3.0.3 reference can be found here https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md
 # It is much easier to edit this file if you use the Swagger Editor. Clone the project
 # https://github.com/swagger-api/swagger-editor install node/npm, and run
 # `npm start` in the directory. Copy this file into the editor, edit it, then copy it back in here when finished.
@@ -25,6 +25,8 @@ tags:
     externalDocs:
       description: Find out more
       url: 'https://methodscript.com'
+  - name: telemetry
+    description: Telemetry related services
 paths:
   /:
     get:
@@ -58,7 +60,65 @@ paths:
             text/plain:
               schema:
                 type: string
-                example: "Pong!"
+  /telemetry:
+    description: Obtains a telemetry key, which is used for future requests
+    get:
+      tags:
+        - telemetry
+      summary: Obtains a telemetry key, which is used for future requests
+      responses:
+        '200':
+          description: >-
+            Unless the client has been blocked, this call will always be
+            successful.
+          content:
+            text/plain:
+              schema:
+                type: string
+        '403':
+          description: >-
+            If this client has been blocked, this will not return a key.
+  /telemetry/{key}:
+    description: Submits a telemetry event
+    post:
+      tags:
+        - telemetry
+      summary: Submits a telemetry event.
+      description: >-
+        Submits a telemetry event, which is forwarded to the Application Insights
+        application.
+      parameters:
+        - name: key
+          in: path
+          schema:
+            type: string
+          required: true
+          description: The previously obtained key
+      requestBody:
+        required: true
+        description: >-
+          The telemetry event. The content should be text/plain, even though it
+          will actually be json, as server merely forwards the content on to
+          ApplicationInsights.
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: If the payload was successfully forwarded.
+        '403':
+          description: >-
+            If the key was rejected. This can happen for a number of reasons,
+            including things like server restart or key expiry. In any case, simply re-request
+            a new key and try again. It can also happen if the server detects you're trying to
+            do bad things.
+        '502':
+          description: >-
+            If the submission was successful, but Application Insights rejected
+            or otherwise unsuccessfully processed the request.
+            
+          
       
 externalDocs:
   description: Find out more about MethodScript

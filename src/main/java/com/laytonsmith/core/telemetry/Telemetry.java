@@ -9,7 +9,6 @@ import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.applicationinsights.TelemetryConfiguration;
 import com.microsoft.applicationinsights.channel.TelemetryChannel;
 import com.microsoft.applicationinsights.channel.TelemetrySampler;
-import com.microsoft.applicationinsights.channel.concrete.inprocess.InProcessTelemetryChannel;
 import com.microsoft.applicationinsights.telemetry.JsonTelemetryDataSerializer;
 import java.io.File;
 import java.io.IOException;
@@ -69,21 +68,19 @@ public class Telemetry {
 				+ " features you're using and are most important to you. No personal information is collected.\n";
 	}
 
-	// change this, don't hardcode it, but at least make it a server lookup so it can be easily rotated.
-	private static final String INSTRUMENTATION_KEY = "asdf";
+	// This is not the real instrumentation key, it is replaced with the real one on the server side.
+	private static final String INSTRUMENTATION_KEY = "28cb72ef-45fe-4634-b7e3-ea672db27cf0";
 
 	private boolean enabled = false;
 	private TelemetryClient client;
-	private TelemetryChannel stdoutChannel = new TelemetryChannel() {
+	private static final TelemetryChannel STDOUT_CHANNEL = new TelemetryChannel() {
 		@Override
 		public boolean isDeveloperMode() {
 			return false;
 		}
 
 		@Override
-		public void setDeveloperMode(boolean value) {
-
-		}
+		public void setDeveloperMode(boolean value) {}
 
 		@Override
 		public void send(com.microsoft.applicationinsights.telemetry.Telemetry item) {
@@ -97,21 +94,48 @@ public class Telemetry {
 		}
 
 		@Override
-		public void stop(long timeout, TimeUnit timeUnit) {
-
-		}
+		public void stop(long timeout, TimeUnit timeUnit) {}
 
 		@Override
-		public void flush() {
-
-		}
+		public void flush() {}
 
 		@Override
-		public void setSampler(TelemetrySampler telemetrySampler) {
-
-		}
+		public void setSampler(TelemetrySampler telemetrySampler) {}
 
 	};
+
+	private ProxyTelemetryChannel proxyChannel;
+	class ProxyTelemetryChannel implements TelemetryChannel {
+
+		private final TelemetryProxy proxy;
+
+		public ProxyTelemetryChannel(TelemetryProxy proxy) {
+			this.proxy = proxy;
+		}
+
+		@Override
+		public boolean isDeveloperMode() {
+			return false;
+		}
+
+		@Override
+		public void setDeveloperMode(boolean value) {}
+
+		@Override
+		public void send(com.microsoft.applicationinsights.telemetry.Telemetry item) {
+			String body = item.toString();
+			proxy.submit(body);
+		}
+
+		@Override
+		public void stop(long timeout, TimeUnit timeUnit) {}
+
+		@Override
+		public void flush() {}
+
+		@Override
+		public void setSampler(TelemetrySampler telemetrySampler) {}
+	}
 
 	/**
 	 * Nags the user, but only if the preference is set to nag them.
@@ -127,7 +151,6 @@ public class Telemetry {
 			// to fail completely silently.
 		}
 	}
-
 
 	public void initializeTelemetry() {
 		try {
@@ -149,9 +172,10 @@ public class Telemetry {
 				TelemetryConfiguration configuration = new TelemetryConfiguration();
 				configuration.setInstrumentationKey(INSTRUMENTATION_KEY);
 				if(Prefs.TelemetryAudit()) {
-					configuration.setChannel(stdoutChannel);
+					configuration.setChannel(STDOUT_CHANNEL);
 				} else {
-					configuration.setChannel(new InProcessTelemetryChannel());
+					proxyChannel = new ProxyTelemetryChannel(new TelemetryProxy());
+					configuration.setChannel(proxyChannel);
 				}
 				TelemetryClient tc = new TelemetryClient(configuration);
 				String session = UUID.randomUUID().toString();
