@@ -15,6 +15,7 @@ import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -65,7 +66,7 @@ public class BukkitMetadata {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_metadata extends MetadataFunction {
 
 		@Override
@@ -135,7 +136,7 @@ public class BukkitMetadata {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	@seealso(get_metadata.class)
 	public static class has_metadata extends MetadataFunction {
 
@@ -187,7 +188,7 @@ public class BukkitMetadata {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	@seealso(get_metadata.class)
 	public static class set_metadata extends MetadataFunction {
 
@@ -237,7 +238,7 @@ public class BukkitMetadata {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	@seealso(get_metadata.class)
 	public static class remove_metadata extends MetadataFunction {
 

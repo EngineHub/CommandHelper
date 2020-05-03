@@ -71,7 +71,7 @@ public class Environment {
 		return "Allows you to manipulate the environment around the player";
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_block extends AbstractFunction {
 
 		@Override
@@ -123,7 +123,7 @@ public class Environment {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_block extends AbstractFunction {
 
 		@Override
@@ -180,7 +180,7 @@ public class Environment {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_blockdata_string extends AbstractFunction {
 
 		@Override
@@ -232,7 +232,7 @@ public class Environment {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_blockdata_string extends AbstractFunction {
 
 		@Override
@@ -295,7 +295,7 @@ public class Environment {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_blockdata extends AbstractFunction {
 
 		@Override
@@ -346,7 +346,7 @@ public class Environment {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_blockdata extends AbstractFunction {
 
 		@Override
@@ -1515,7 +1515,7 @@ public class Environment {
 	}
 
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class spawn_particle extends AbstractFunction {
 
 		@Override
@@ -1673,7 +1673,7 @@ public class Environment {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class play_sound extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1825,7 +1825,7 @@ public class Environment {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class play_named_sound extends AbstractFunction {
 
 		@Override
@@ -2316,7 +2316,7 @@ public class Environment {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class generate_tree extends AbstractFunction {
 
 		@Override
@@ -2375,7 +2375,7 @@ public class Environment {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class is_block_lockable extends AbstractFunction {
 
 		@Override
@@ -2423,7 +2423,7 @@ public class Environment {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class is_block_locked extends AbstractFunction {
 
 		@Override
@@ -2477,7 +2477,7 @@ public class Environment {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_block_lock extends AbstractFunction {
 
 		@Override
@@ -2531,7 +2531,7 @@ public class Environment {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_block_lock extends AbstractFunction {
 
 		@Override
@@ -2587,7 +2587,7 @@ public class Environment {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_block_command extends AbstractFunction {
 
 		@Override
@@ -2638,7 +2638,7 @@ public class Environment {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_block_command extends AbstractFunction {
 
 		@Override
@@ -2699,7 +2699,7 @@ public class Environment {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_command_block_name extends AbstractFunction {
 
 		@Override
@@ -2750,7 +2750,7 @@ public class Environment {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_command_block_name extends AbstractFunction {
 
 		@Override

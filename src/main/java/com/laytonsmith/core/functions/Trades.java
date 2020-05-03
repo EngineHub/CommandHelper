@@ -21,6 +21,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -47,7 +48,7 @@ public class Trades {
 				+ " which may or may not be attached to a Villager or Wandering Trader.";
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_merchant_trades extends Recipes.recipeFunction {
 
 		@Override
@@ -86,7 +87,7 @@ public class Trades {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_merchant_trades extends Recipes.recipeFunction {
 
 		@Override
@@ -159,7 +160,7 @@ public class Trades {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_virtual_merchants extends Recipes.recipeFunction {
 
 		@Override
@@ -202,7 +203,7 @@ public class Trades {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class create_virtual_merchant extends Recipes.recipeFunction {
 
 		@Override
@@ -245,7 +246,7 @@ public class Trades {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class delete_virtual_merchant extends Recipes.recipeFunction {
 
 		@Override
@@ -280,7 +281,7 @@ public class Trades {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class popen_trading extends Recipes.recipeFunction {
 
 		@Override
@@ -334,7 +335,7 @@ public class Trades {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class merchant_trader extends Recipes.recipeFunction {
 
 		@Override

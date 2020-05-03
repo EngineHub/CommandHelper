@@ -2549,7 +2549,7 @@ public class InventoryManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_inventory_viewers extends AbstractFunction {
 
 		@Override
@@ -2600,7 +2600,7 @@ public class InventoryManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_virtual_inventories extends AbstractFunction {
 
 		@Override
@@ -2648,7 +2648,7 @@ public class InventoryManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class create_virtual_inventory extends AbstractFunction {
 
 		@Override
@@ -2773,7 +2773,7 @@ public class InventoryManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class delete_virtual_inventory extends AbstractFunction {
 
 		@Override

@@ -294,7 +294,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_mob_owner extends AbstractFunction {
 
 		@Override
@@ -349,7 +349,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_mob_owner extends AbstractFunction {
 
 		@Override
@@ -407,7 +407,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_entity_health extends AbstractFunction {
 
 		@Override
@@ -461,7 +461,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_entity_health extends AbstractFunction {
 
 		@Override
@@ -507,7 +507,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_entity_breedable extends EntityManagement.EntityGetterFunction {
 
 		@Override
@@ -537,7 +537,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_entity_breedable extends EntityManagement.EntitySetterFunction {
 
 		@Override
@@ -571,7 +571,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_mob_age extends EntityManagement.EntityGetterFunction {
 
 		@Override
@@ -610,7 +610,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_mob_age extends EntityManagement.EntityFunction {
 
 		@Override
@@ -662,7 +662,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_mob_effects extends EntityManagement.EntityGetterFunction {
 
 		@Override
@@ -696,7 +696,7 @@ public class MobManagement {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_mob_effect extends EntityManagement.EntityFunction {
 
 		@Override
@@ -792,7 +792,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_mob_target extends EntityManagement.EntityGetterFunction {
 
 		@Override
@@ -822,7 +822,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_mob_target extends EntityManagement.EntitySetterFunction {
 
 		@Override
@@ -858,7 +858,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_mob_equipment extends EntityManagement.EntityGetterFunction {
 
 		@Override
@@ -904,7 +904,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_mob_equipment extends EntityManagement.EntitySetterFunction {
 
 		@Override
@@ -963,7 +963,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_max_health extends EntityManagement.EntityGetterFunction {
 
 		@Override
@@ -988,7 +988,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_max_health extends EntityManagement.EntitySetterFunction {
 
 		@Override
@@ -1022,7 +1022,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_equipment_droprates extends EntityManagement.EntityGetterFunction {
 
 		@Override
@@ -1055,7 +1055,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_equipment_droprates extends EntityManagement.EntitySetterFunction {
 
 		@Override
@@ -1103,7 +1103,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class can_pickup_items extends EntityManagement.EntityGetterFunction {
 
 		@Override
@@ -1127,7 +1127,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_can_pickup_items extends EntityManagement.EntitySetterFunction {
 
 		@Override
@@ -1152,7 +1152,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_entity_persistence extends EntityManagement.EntityGetterFunction {
 
 		@Override
@@ -1177,7 +1177,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_entity_persistence extends EntityManagement.EntitySetterFunction {
 
 		@Override
@@ -1202,7 +1202,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_leashholder extends EntityManagement.EntityGetterFunction {
 
 		@Override
@@ -1231,7 +1231,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_leashholder extends EntityManagement.EntitySetterFunction {
 
 		@Override
@@ -1267,7 +1267,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class entity_air extends EntityManagement.EntityGetterFunction {
 
 		@Override
@@ -1291,7 +1291,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_entity_air extends EntityManagement.EntitySetterFunction {
 
 		@Override
@@ -1316,7 +1316,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class entity_max_air extends EntityManagement.EntityGetterFunction {
 
 		@Override
@@ -1340,7 +1340,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_entity_max_air extends EntityManagement.EntitySetterFunction {
 
 		@Override
@@ -1365,7 +1365,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class entity_line_of_sight extends EntityManagement.EntityFunction {
 
 		@Override
@@ -1439,7 +1439,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class entity_can_see extends EntityManagement.EntityFunction {
 
 		@Override
@@ -1477,7 +1477,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class damage_entity extends EntityManagement.EntityFunction {
 
 		@Override
@@ -1530,7 +1530,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_entity_gliding extends EntityManagement.EntitySetterFunction {
 
 		@Override
@@ -1559,7 +1559,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_entity_gliding extends EntityManagement.EntityGetterFunction {
 
 		@Override
@@ -1583,7 +1583,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_entity_ai extends EntityManagement.EntityGetterFunction {
 
 		@Override
@@ -1607,7 +1607,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_entity_ai extends EntityManagement.EntitySetterFunction {
 
 		@Override
@@ -1636,7 +1636,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class is_mob_collidable extends EntityManagement.EntityGetterFunction {
 
 		@Override
@@ -1660,7 +1660,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_mob_collidable extends EntityManagement.EntitySetterFunction {
 
 		@Override
@@ -1687,7 +1687,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class entity_attribute_value extends AbstractFunction {
 
 		@Override
@@ -1745,7 +1745,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class entity_attribute_base extends AbstractFunction {
 
 		@Override
@@ -1802,7 +1802,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class entity_attribute_default extends AbstractFunction {
 
 		@Override
@@ -1859,7 +1859,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class entity_attribute_modifiers extends AbstractFunction {
 
 		@Override
@@ -1920,7 +1920,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_entity_attribute_base extends AbstractFunction {
 
 		@Override
@@ -1980,7 +1980,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class reset_entity_attribute_base extends AbstractFunction {
 
 		@Override
@@ -2038,7 +2038,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class add_entity_attribute_modifier extends AbstractFunction {
 
 		@Override
@@ -2092,7 +2092,7 @@ public class MobManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class remove_entity_attribute_modifier extends AbstractFunction {
 
 		@Override

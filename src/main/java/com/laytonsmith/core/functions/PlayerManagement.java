@@ -666,7 +666,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class ptarget_space extends AbstractFunction {
 
 		@Override
@@ -4943,7 +4943,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class plast_known_name extends AbstractFunction {
 
 		@Override
@@ -4997,7 +4997,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class save_players extends AbstractFunction {
 
 		@Override
@@ -5042,7 +5042,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	@seealso({set_pflight.class})
 	public static class set_pflying extends AbstractFunction {
 
@@ -5111,7 +5111,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pspectator_target extends AbstractFunction {
 
 		@Override
@@ -5171,7 +5171,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pspectator_target extends AbstractFunction {
 
 		@Override
@@ -5235,7 +5235,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	@seealso({com.laytonsmith.core.functions.Environment.play_sound.class})
 	public static class stop_sound extends AbstractFunction {
 
@@ -5305,7 +5305,7 @@ public class PlayerManagement {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	@seealso({com.laytonsmith.core.functions.Environment.play_named_sound.class})
 	public static class stop_named_sound extends AbstractFunction {
 
@@ -5368,7 +5368,7 @@ public class PlayerManagement {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pcooldown extends AbstractFunction {
 
 		@Override
@@ -5431,7 +5431,7 @@ public class PlayerManagement {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pcooldown extends AbstractFunction {
 
 		@Override

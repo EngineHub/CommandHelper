@@ -184,7 +184,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class all_entities extends EntityFunction {
 
 		@Override
@@ -281,7 +281,7 @@ public class EntityManagement {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class entity_exists extends EntityGetterFunction {
 
 		@Override
@@ -311,7 +311,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class is_entity_living extends EntityGetterFunction {
 
 		@Override
@@ -343,7 +343,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class is_tameable extends AbstractFunction {
 
 		@Override
@@ -388,7 +388,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class entity_loc extends EntityGetterFunction {
 
 		@Override
@@ -424,7 +424,7 @@ public class EntityManagement {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_entity_loc extends EntitySetterFunction {
 
 		@Override
@@ -481,7 +481,7 @@ public class EntityManagement {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class entity_velocity extends EntityGetterFunction {
 
 		@Override
@@ -519,7 +519,7 @@ public class EntityManagement {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_entity_velocity extends EntitySetterFunction {
 
 		@Override
@@ -570,7 +570,7 @@ public class EntityManagement {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class entity_remove extends EntityGetterFunction {
 
 		@Override
@@ -605,7 +605,7 @@ public class EntityManagement {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class entity_type extends EntityGetterFunction {
 
 		@Override
@@ -641,7 +641,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_entity_age extends EntityGetterFunction {
 
 		@Override
@@ -670,7 +670,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_entity_age extends EntitySetterFunction {
 
 		@Override
@@ -945,7 +945,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class entity_onfire extends EntityGetterFunction {
 
 		@Override
@@ -972,7 +972,7 @@ public class EntityManagement {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_entity_onfire extends EntitySetterFunction {
 
 		@Override
@@ -1007,7 +1007,7 @@ public class EntityManagement {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class play_entity_effect extends EntitySetterFunction {
 
 		@Override
@@ -1046,7 +1046,7 @@ public class EntityManagement {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_mob_name extends EntityGetterFunction {
 
 		@Override
@@ -1075,7 +1075,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_mob_name extends EntitySetterFunction {
 
 		@Override
@@ -1235,7 +1235,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_entity_rider extends EntitySetterFunction {
 
 		@Override
@@ -1291,7 +1291,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_entity_rider extends EntityGetterFunction {
 
 		@Override
@@ -1321,7 +1321,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_entity_riders extends EntityGetterFunction {
 
 		@Override
@@ -1351,7 +1351,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_entity_vehicle extends EntityGetterFunction {
 
 		@Override
@@ -1379,7 +1379,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_entity_max_speed extends EntityGetterFunction {
 
 		@Override
@@ -1412,7 +1412,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_entity_max_speed extends EntitySetterFunction {
 
 		@Override
@@ -1449,7 +1449,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_name_visible extends EntityGetterFunction {
 
 		@Override
@@ -1479,7 +1479,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_name_visible extends EntitySetterFunction {
 
 		@Override
@@ -1510,7 +1510,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_art_at extends AbstractFunction {
 
 		@Override
@@ -1567,7 +1567,7 @@ public class EntityManagement {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_art_at extends AbstractFunction {
 
 		@Override
@@ -1639,7 +1639,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class entity_grounded extends EntityGetterFunction {
 
 		@Override
@@ -1663,7 +1663,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	@seealso(set_entity_spec.class)
 	public static class entity_spec extends EntityGetterFunction {
 
@@ -2206,7 +2206,7 @@ public class EntityManagement {
 		private static final String KEY_ZOMBIE_BABY = "baby";
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	@seealso(entity_spec.class)
 	public static class set_entity_spec extends EntitySetterFunction {
 
@@ -3535,7 +3535,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_projectile_shooter extends EntityGetterFunction {
 
 		@Override
@@ -3574,7 +3574,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_projectile_shooter extends EntitySetterFunction {
 
 		@Override
@@ -3616,7 +3616,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_projectile_bounce extends EntityGetterFunction {
 
 		@Override
@@ -3645,7 +3645,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_projectile_bounce extends EntitySetterFunction {
 
 		@Override
@@ -3675,7 +3675,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class entity_fall_distance extends EntityGetterFunction {
 
 		@Override
@@ -3699,7 +3699,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_entity_fall_distance extends EntitySetterFunction {
 
 		@Override
@@ -3724,7 +3724,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_entity_glowing extends EntitySetterFunction {
 
 		@Override
@@ -3749,7 +3749,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_entity_glowing extends EntityGetterFunction {
 
 		@Override
@@ -3774,7 +3774,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_entity_silent extends EntityGetterFunction {
 
 		@Override
@@ -3798,7 +3798,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_entity_silent extends EntitySetterFunction {
 
 		@Override
@@ -3824,7 +3824,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_entity_gravity extends EntityGetterFunction {
 
 		@Override
@@ -3848,7 +3848,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_entity_gravity extends EntitySetterFunction {
 
 		@Override
@@ -3874,7 +3874,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_entity_invulnerable extends EntityGetterFunction {
 
 		@Override
@@ -3898,7 +3898,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_entity_invulnerable extends EntitySetterFunction {
 
 		@Override
@@ -3925,7 +3925,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_scoreboard_tags extends EntityGetterFunction {
 
 		@Override
@@ -3954,7 +3954,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class add_scoreboard_tag extends EntitySetterFunction {
 
 		@Override
@@ -3979,7 +3979,7 @@ public class EntityManagement {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class remove_scoreboard_tag extends EntitySetterFunction {
 
 		@Override

@@ -110,7 +110,7 @@ public class Echoes {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class tmsg extends AbstractFunction {
 
 		@Override
@@ -241,7 +241,7 @@ public class Echoes {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class title extends AbstractFunction {
 
 		@Override
@@ -563,7 +563,7 @@ public class Echoes {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class chatas extends AbstractFunction {
 
 		@Override
@@ -611,7 +611,7 @@ public class Echoes {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class broadcast extends AbstractFunction {
 
 		@Override
