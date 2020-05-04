@@ -1,23 +1,17 @@
 package com.laytonsmith.core.telemetry;
 
+import com.laytonsmith.core.telemetry.ApplicationInsights.Envelope;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Prefs;
-import com.microsoft.applicationinsights.TelemetryClient;
-import com.microsoft.applicationinsights.TelemetryConfiguration;
-import com.microsoft.applicationinsights.channel.TelemetryChannel;
-import com.microsoft.applicationinsights.channel.TelemetrySampler;
-import com.microsoft.applicationinsights.telemetry.JsonTelemetryDataSerializer;
+import com.laytonsmith.core.telemetry.ApplicationInsights.TelemetryUtil;
 import java.io.File;
-import java.io.IOException;
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -25,6 +19,8 @@ import java.util.concurrent.TimeUnit;
 public class Telemetry {
 
 	private static volatile Telemetry telemetry = null;
+	// This is not the real instrumentation key, it is replaced with the real one on the server side.
+	private static final String INSTRUMENTATION_KEY = "28cb72ef-45fe-4634-b7e3-ea672db27cf0";
 
 	/**
 	 * Gets the default {@link Telemetry} object.
@@ -68,74 +64,17 @@ public class Telemetry {
 				+ " features you're using and are most important to you. No personal information is collected.\n";
 	}
 
-	// This is not the real instrumentation key, it is replaced with the real one on the server side.
-	private static final String INSTRUMENTATION_KEY = "28cb72ef-45fe-4634-b7e3-ea672db27cf0";
-
 	private boolean enabled = false;
-	private TelemetryClient client;
+	private TelemetryChannel channel;
+	private TelemetryUtil client;
+
 	private static final TelemetryChannel STDOUT_CHANNEL = new TelemetryChannel() {
+
 		@Override
-		public boolean isDeveloperMode() {
-			return false;
+		public void send(Envelope item) {
+			StreamUtils.GetSystemOut().println("Telemetry data: " + item.serialize());
 		}
-
-		@Override
-		public void setDeveloperMode(boolean value) {}
-
-		@Override
-		public void send(com.microsoft.applicationinsights.telemetry.Telemetry item) {
-			StringWriter writer = new StringWriter();
-			try {
-				item.serialize(new JsonTelemetryDataSerializer(writer));
-			} catch (IOException ex) {
-				ex.printStackTrace(StreamUtils.GetSystemErr());
-			}
-			StreamUtils.GetSystemOut().println("Telemetry data: " + writer.toString());
-		}
-
-		@Override
-		public void stop(long timeout, TimeUnit timeUnit) {}
-
-		@Override
-		public void flush() {}
-
-		@Override
-		public void setSampler(TelemetrySampler telemetrySampler) {}
-
 	};
-
-	private ProxyTelemetryChannel proxyChannel;
-	class ProxyTelemetryChannel implements TelemetryChannel {
-
-		private final TelemetryProxy proxy;
-
-		public ProxyTelemetryChannel(TelemetryProxy proxy) {
-			this.proxy = proxy;
-		}
-
-		@Override
-		public boolean isDeveloperMode() {
-			return false;
-		}
-
-		@Override
-		public void setDeveloperMode(boolean value) {}
-
-		@Override
-		public void send(com.microsoft.applicationinsights.telemetry.Telemetry item) {
-			String body = item.toString();
-			proxy.submit(body);
-		}
-
-		@Override
-		public void stop(long timeout, TimeUnit timeUnit) {}
-
-		@Override
-		public void flush() {}
-
-		@Override
-		public void setSampler(TelemetrySampler telemetrySampler) {}
-	}
 
 	/**
 	 * Nags the user, but only if the preference is set to nag them.
@@ -169,31 +108,16 @@ public class Telemetry {
 
 		if(enabled) {
 			try {
-				TelemetryConfiguration configuration = new TelemetryConfiguration();
-				configuration.setInstrumentationKey(INSTRUMENTATION_KEY);
+				client = new TelemetryUtil(INSTRUMENTATION_KEY);
 				if(Prefs.TelemetryAudit()) {
-					configuration.setChannel(STDOUT_CHANNEL);
+					channel = STDOUT_CHANNEL;
 				} else {
-					proxyChannel = new ProxyTelemetryChannel(new TelemetryProxy());
-					configuration.setChannel(proxyChannel);
+					channel = new ProxyTelemetryChannel(new TelemetryProxy());
 				}
-				TelemetryClient tc = new TelemetryClient(configuration);
 				String session = UUID.randomUUID().toString();
-				tc.getContext().getSession().setId(session);
-				tc.getContext().getSession().setIsNewSession(true);
-				tc.getContext().getCloud().setRoleInstance("");
-				tc.getContext().getInternal().setNodeName(session);
-				client = tc;
-				// Use whatever mechanism works.
-				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-					tc.flush();
-				}));
-				StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
-					@Override
-					public void run() {
-						tc.flush();
-					}
-				});
+				client.setSessionName(session);
+				client.setNewSession(true);
+
 			} catch (Throwable t) {
 				StreamUtils.GetSystemErr().println("Could not initialize telemetry!");
 				t.printStackTrace(StreamUtils.GetSystemErr());
@@ -218,7 +142,7 @@ public class Telemetry {
 		}
 
 		if(client != null) {
-			client.trackEvent(tc.type().getPrefix() + "." + tc.name());
+			channel.send(client.newEvent(tc.type().getPrefix() + "." + tc.name(), null, null));
 		}
 	}
 
@@ -247,8 +171,32 @@ public class Telemetry {
 		}
 
 		if(client != null) {
-			client.trackEvent(tc.type().getPrefix() + "." + tc.name(), properties, metrics);
+			channel.send(client.newEvent(tc.type().getPrefix() + "." + tc.name(),
+					new ConcurrentHashMap<>(properties),
+					new ConcurrentHashMap<>(metrics)));
 		}
 	}
 
+	private interface TelemetryChannel {
+		/**
+		 * Sends the envelope to the correct channel.
+		 * @param envelope
+		 */
+		void send(Envelope envelope);
+	}
+
+	class ProxyTelemetryChannel implements TelemetryChannel {
+
+		private final TelemetryProxy proxy;
+
+		public ProxyTelemetryChannel(TelemetryProxy proxy) {
+			this.proxy = proxy;
+		}
+
+		@Override
+		public void send(Envelope item) {
+			String body = item.toString();
+			proxy.submit(body);
+		}
+	}
 }

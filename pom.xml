@@ -389,12 +389,6 @@
 			<version>0.8.0</version>
 		</dependency>
 		<dependency>
-			<!-- MIT -->
-			<groupId>com.microsoft.azure</groupId>
-			<artifactId>applicationinsights-core</artifactId>
-			<version>2.5.0</version>
-		</dependency>
-		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-annotations</artifactId>
 			<version>${swagger-core-version}</version>
@@ -702,8 +696,8 @@
 									</excludes>
 								</relocation>
 								<relocation>
-									<pattern>com.microsoft.azure</pattern>
-									<shadedPattern>com.laytonsmith.libs.com.microsoft.azure</shadedPattern>
+									<pattern>com.microsoft</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.microsoft</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>com.squareup.okhttp</pattern>
@@ -892,9 +886,6 @@
 								</filter>
 								<filter>
 									<artifact>com.microsoft.azure:applicationinsights-core:jar:*</artifact>
-									<includes>
-										<include>**</include>
-									</includes>
 									<excludes>
 										<exclude>META-INF/**</exclude>
 									</excludes>

@@ -87,6 +87,9 @@ import org.json.simple.JSONValue;
  */
 public class Main {
 
+	private static final boolean IS_DEBUG = java.lang.management.ManagementFactory.getRuntimeMXBean()
+			.getInputArguments().toString().contains("jdwp");
+
 	public static class CmdlineToolCollection {
 		private final ArgumentSuite suite;
 		private final Map<ArgumentParser, CommandLineTool> dynamicTools;
@@ -199,7 +202,10 @@ public class Main {
 		} catch (Throwable ex) {
 			// Well, that sucks. Normally we want to report these kinds of things, but in this case, we don't, because
 			// if telemetry is off, we don't want to bug the user about telemetry stuff at all. Oh well, not much to
-			// be done here.
+			// be done here. Though at least if we're debugging, let's report it.
+			if(IS_DEBUG) {
+				ex.printStackTrace(StreamUtils.GetSystemErr());
+			}
 		}
 	}
 

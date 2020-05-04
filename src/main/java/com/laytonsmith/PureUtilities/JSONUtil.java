@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities;
 
+import com.google.gson.Gson;
 import com.laytonsmith.PureUtilities.Common.ClassUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import java.lang.reflect.Array;
@@ -230,13 +231,7 @@ public class JSONUtil {
 	}
 
 	public String serialize(Object obj) {
-		Object r;
-		if(obj.getClass().isArray()) {
-			r = fromArrayType(obj);
-		} else {
-			r = fromType(obj);
-		}
-		return JSONValue.toJSONString(r);
+		return new Gson().toJson(obj);
 	}
 
 	private <T> JSONArray fromArrayType(Object array) {
