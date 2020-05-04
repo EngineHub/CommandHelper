@@ -195,7 +195,7 @@ public class Telemetry {
 
 		@Override
 		public void send(Envelope item) {
-			String body = item.toString();
+			String body = item.serialize();
 			proxy.submit(body);
 		}
 	}
