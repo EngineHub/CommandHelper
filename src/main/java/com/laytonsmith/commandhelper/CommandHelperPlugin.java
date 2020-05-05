@@ -289,9 +289,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 		Telemetry.GetDefault().initializeTelemetry();
 		Telemetry.GetDefault().doNag();
-		Telemetry.GetDefault().metric(DefaultTelemetry.StartupMetric.class);
 		Telemetry.GetDefault().log(DefaultTelemetry.StartupModeMetric.class,
-				MapBuilder.start("mode", "CommandHelper"), null);
+				MapBuilder.start("mode", Implementation.GetServerType().getBranding()), null);
 
 		loadingThread = new Thread("extensionloader") {
 			@Override

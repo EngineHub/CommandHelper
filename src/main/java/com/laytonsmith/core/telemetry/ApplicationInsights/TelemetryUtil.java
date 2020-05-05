@@ -31,6 +31,10 @@ public class TelemetryUtil {
 		this.sessionName = sessionName;
 	}
 
+	public String getSessionName() {
+		return this.sessionName;
+	}
+
 	public void setNewSession(boolean newSession) {
 		this.newSession = newSession;
 	}

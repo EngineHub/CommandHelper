@@ -45,6 +45,7 @@ import com.laytonsmith.core.natives.interfaces.MEnumTypeValue;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.ObjectDefinition;
 import com.laytonsmith.core.objects.ObjectDefinitionTable;
+import com.laytonsmith.core.telemetry.Telemetry;
 import com.laytonsmith.persistence.DataSourceFactory;
 import com.laytonsmith.persistence.PersistenceNetwork;
 
@@ -145,6 +146,15 @@ public class Reflection {
 					+ "| [keyword name]\n"
 					+ "| Lists the keywords, if no parameter is provided, otherwise"
 					+ " provides the documentation for the specified keyword\n"
+					+ "|-\n"
+					+ "| telemetry_session\n"
+					+ "|\n"
+					+ "| The session id used in telemetry for the current session. This will return null if"
+					+ " telemetry is disabled. In general, this key is used to track individual sessions. If"
+					+ " needed, this can be provided to the maintainers to associate your data with you. If"
+					+ " you wish for your telemetry data to remain anonymous, do not provide this key to the"
+					+ " maintainers. (People without access to the telemetry system cannot do anything with"
+					+ " the key anyways.)"
 					+ "|}";
 		}
 
@@ -268,6 +278,12 @@ public class Reflection {
 					}
 					return new CString(k.docs(), Target.UNKNOWN);
 				}
+			} else if("telemetry_session".equalsIgnoreCase(param)) {
+				String session = Telemetry.GetDefault().getSessionId();
+				if(session == null) {
+					return CNull.NULL;
+				}
+				return new CString(session, t);
 			}
 
 			throw new CREFormatException("The arguments passed to " + getName() + " are incorrect. Please check them and try again.", t);

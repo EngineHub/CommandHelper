@@ -131,6 +131,17 @@ public class Telemetry {
 	}
 
 	/**
+	 * Returns the session id, or null if telemetry is off (or not initialized yet).
+	 * @return
+	 */
+	public String getSessionId() {
+		if(client == null) {
+			return null;
+		}
+		return client.getSessionName();
+	}
+
+	/**
 	 * Sends a point in time metric.
 	 * @param type
 	 */
