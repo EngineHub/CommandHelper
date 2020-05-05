@@ -287,6 +287,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 		MSLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
 
+		Telemetry.GetDefault().initializeTelemetry();
 		Telemetry.GetDefault().doNag();
 		Telemetry.GetDefault().metric(DefaultTelemetry.StartupMetric.class);
 		Telemetry.GetDefault().log(DefaultTelemetry.StartupModeMetric.class,
