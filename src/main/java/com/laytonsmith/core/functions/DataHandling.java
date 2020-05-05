@@ -1462,7 +1462,7 @@ public class DataHandling {
 									children.get(0).getTarget(), FileOptions.SuppressWarning.IncludedFileNotFound));
 				}
 				try {
-					if(!Security.CheckSecurity(file)) {
+					if(!Static.InCmdLine(env, true) && !Security.CheckSecurity(file)) {
 						throw new ConfigCompileException("Included file is inaccessible due to the base-dir setting",
 								children.get(0).getTarget());
 					}

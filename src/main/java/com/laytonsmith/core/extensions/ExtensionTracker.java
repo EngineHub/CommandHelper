@@ -48,7 +48,7 @@ public class ExtensionTracker {
 		supportedPlatforms = new HashMap<>();
 
 		for(api.Platforms p : api.Platforms.values()) {
-			functions.put(p, new HashMap<String, FunctionBase>());
+			functions.put(p, new HashMap<>());
 		}
 
 		this.events = new EnumMap<>(Driver.class);
@@ -93,7 +93,7 @@ public class ExtensionTracker {
 		return retn;
 	}
 
-	public void registerFunction(FunctionBase f) {
+	public synchronized void registerFunction(FunctionBase f) {
 		api api = f.getClass().getAnnotation(api.class);
 		api.Platforms[] platforms = api.platform();
 
@@ -102,8 +102,8 @@ public class ExtensionTracker {
 		}
 
 		if(supportedPlatforms.get(f.getName()) == null) {
-			supportedPlatforms.put(f.getName(), EnumSet.noneOf(api.Platforms.class));
-		}
+					supportedPlatforms.put(f.getName(), EnumSet.noneOf(api.Platforms.class));
+				}
 
 		supportedPlatforms.get(f.getName()).addAll(Arrays.asList(platforms));
 
@@ -139,7 +139,8 @@ public class ExtensionTracker {
 		return retn;
 	}
 
-	public void registerEvent(Event e) {
+	@SuppressWarnings("UseSpecificCatch")
+	public synchronized void registerEvent(Event e) {
 		if(e instanceof AbstractEvent) {
 			AbstractEvent ae = (AbstractEvent) e;
 			//Get the mixin for this server, and add it to e
@@ -158,7 +159,7 @@ public class ExtensionTracker {
 
 		//Finally, add it to the list, and hook it.
 		if(!events.containsKey(e.driver())) {
-			events.put(e.driver(), new TreeSet<Event>());
+			events.put(e.driver(), new TreeSet<>());
 		}
 
 		events.get(e.driver()).add(e);

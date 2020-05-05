@@ -124,6 +124,10 @@ public class Reflection {
 					+ "|\n"
 					+ "| The absolute path to the current file\n"
 					+ "|-\n"
+					+ "| dir\n"
+					+ "|\n"
+					+ "| The absolute path to the directory that the current file is in\n"
+					+ "|-\n"
 					+ "| col\n"
 					+ "|\n"
 					+ "| The current column number\n"
@@ -191,6 +195,17 @@ public class Reflection {
 				} else {
 					try {
 						return new CString(t.file().getCanonicalPath().replace('\\', '/'), t);
+					} catch (IOException ex) {
+						throw new CREIOException(ex.getMessage(), t);
+					}
+				}
+			} else if("dir".equalsIgnoreCase(param)) {
+				if(t.file() == null) {
+					return new CString("Unknown (maybe the interpreter?)", t);
+				} else {
+					try {
+						String dir = t.file().getParentFile().getCanonicalPath().replace('\\', '/') + "/";
+						return new CString(dir, t);
 					} catch (IOException ex) {
 						throw new CREIOException(ex.getMessage(), t);
 					}

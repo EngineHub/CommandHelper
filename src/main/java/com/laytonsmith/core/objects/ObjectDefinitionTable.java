@@ -199,9 +199,9 @@ public final class ObjectDefinitionTable implements Iterable<ObjectDefinition> {
 	 * Adds a new ObjectDefinition to the ObjectTable.
 	 * @param object The ObjectDefinition to add.
 	 * @param t
-	 * @throws DuplicateObjectDefintionException If an object with this name already exists.
+	 * @throws DuplicateObjectDefinitionException If an object with this name already exists.
 	 */
-	public void add(ObjectDefinition object, Target t) throws DuplicateObjectDefintionException {
+	public void add(ObjectDefinition object, Target t) throws DuplicateObjectDefinitionException {
 		if(this.classList.containsKey(object.getClassName())) {
 			String msg = "The class " + object.getClassName() + " was attempted to be redefined.";
 			boolean isCopy = false;
@@ -209,7 +209,7 @@ public final class ObjectDefinitionTable implements Iterable<ObjectDefinition> {
 				msg += " The object appears to be an identical definition, is code running twice that shouldn't?";
 				isCopy = true;
 			}
-			throw new DuplicateObjectDefintionException(msg, t, isCopy);
+			throw new DuplicateObjectDefinitionException(msg, t, isCopy);
 		}
 		this.classList.put(object.getClassName(), object);
 	}

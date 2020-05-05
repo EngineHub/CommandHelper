@@ -43,6 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -169,7 +170,7 @@ public class ExtensionManager {
 				CommandHelperFileLocations.getDefault().getCacheDirectory());
 		cache.setLogger(Static.getLogger());
 		DynamicClassLoader dcl = new DynamicClassLoader();
-		ClassDiscovery cd = new ClassDiscovery();
+		ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
 
 		cd.setClassDiscoveryCache(cache);
 		cd.addDiscoveryLocation(ClassDiscovery.GetClassContainer(ExtensionManager.class));
@@ -438,12 +439,12 @@ public class ExtensionManager {
 		Set<ClassMirror<?>> classes = cd.getClassesWithAnnotation(api.class);
 
 		// Temp tracking for loading messages later on.
-		List<String> events = new ArrayList<>();
-		List<String> functions = new ArrayList<>();
+		AtomicInteger events = new AtomicInteger(0);
+		AtomicInteger functions = new AtomicInteger(0);
 
 		// Loop over the classes, instantiate and register functions and events,
 		// and store the instances in their trackers.
-		classes.stream().forEach((klass) -> {
+		classes.parallelStream().forEach((klass) -> {
 			URL url = klass.getContainer();
 
 			if(cd.doesClassExtend(klass, Event.class)
@@ -465,12 +466,16 @@ public class ExtensionManager {
 				ExtensionTracker trk = EXTENSIONS.get(url);
 
 				if(trk == null) {
-					trk = new ExtensionTracker(url, cd, dcl);
-					if(trk.identifier == null) {
-						trk.identifier = StringUtils.replaceLast(new java.io.File(url.getPath().replaceFirst("/", ""))
-								.getName(), ".jar", "");
+					synchronized(ExtensionManager.class) {
+						if(trk == null) {
+							trk = new ExtensionTracker(url, cd, dcl);
+							if(trk.identifier == null) {
+								trk.identifier = StringUtils.replaceLast(new java.io.File(url.getPath().replaceFirst("/", ""))
+										.getName(), ".jar", "");
+							}
+							EXTENSIONS.put(url, trk);
+						}
 					}
-					EXTENSIONS.put(url, trk);
 				}
 
 				// Instantiate, register and store.
@@ -490,7 +495,7 @@ public class ExtensionManager {
 						}
 
 						Event e = cls.newInstance();
-						events.add(e.getName());
+						events.addAndGet(1);
 
 						trk.registerEvent(e);
 					} else if(Function.class.isAssignableFrom(c)) {
@@ -508,7 +513,7 @@ public class ExtensionManager {
 						}
 
 						Function f = cls.newInstance();
-						functions.add(f.getName());
+						functions.addAndGet(0);
 
 						trk.registerFunction(f);
 					}
@@ -524,9 +529,9 @@ public class ExtensionManager {
 		try {
 			if(Prefs.DebugMode()) {
 				StreamUtils.GetSystemOut().println(Implementation.GetServerType().getBranding()
-						+ ": Loaded " + functions.size() + " function" + (functions.size() == 1 ? "." : "s."));
+						+ ": Loaded " + functions.get() + " function" + (functions.get() == 1 ? "." : "s."));
 				StreamUtils.GetSystemOut().println(Implementation.GetServerType().getBranding()
-						+ ": Loaded " + events.size() + " event" + (events.size() == 1 ? "." : "s."));
+						+ ": Loaded " + events.get() + " event" + (events.get() == 1 ? "." : "s."));
 			}
 		} catch (Throwable e) {
 			// Prefs weren't loaded, probably caused by running tests.

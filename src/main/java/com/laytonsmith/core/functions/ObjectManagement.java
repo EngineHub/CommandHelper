@@ -34,7 +34,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.MAnnotation;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.AccessModifier;
-import com.laytonsmith.core.objects.DuplicateObjectDefintionException;
+import com.laytonsmith.core.objects.DuplicateObjectDefinitionException;
 import com.laytonsmith.core.objects.ElementDefinition;
 import com.laytonsmith.core.objects.ObjectDefinition;
 import com.laytonsmith.core.objects.ObjectDefinitionNotFoundException;
@@ -334,7 +334,7 @@ public class ObjectManagement {
 			ObjectDefinitionTable odt = env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
 			try {
 				odt.add(def, t);
-			} catch (DuplicateObjectDefintionException ex) {
+			} catch (DuplicateObjectDefinitionException ex) {
 				throw new CREClassDefinitionError("Class " + name + " already defined, cannot redefine!", t);
 			}
 

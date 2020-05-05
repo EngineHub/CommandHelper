@@ -86,7 +86,7 @@ public class Minecraft {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class data_values extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -172,7 +172,7 @@ public class Minecraft {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class data_name extends AbstractFunction {
 
 		@Override
@@ -256,7 +256,7 @@ public class Minecraft {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class convert_legacy_item extends AbstractFunction {
 
 		@Override
@@ -310,7 +310,7 @@ public class Minecraft {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class max_stack_size extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -923,7 +923,7 @@ public class Minecraft {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class send_resourcepack extends AbstractFunction {
 
 		@Override
@@ -973,7 +973,7 @@ public class Minecraft {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_ip_bans extends AbstractFunction {
 
 		@Override
@@ -1022,7 +1022,7 @@ public class Minecraft {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_ip_banned extends AbstractFunction {
 
 		@Override
@@ -1074,7 +1074,7 @@ public class Minecraft {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class material_info extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1209,7 +1209,7 @@ public class Minecraft {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class shutdown_server extends AbstractFunction implements Optimizable {
 
 		@Override
@@ -1261,7 +1261,7 @@ public class Minecraft {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class monitor_redstone extends AbstractFunction {
 
 		@Override
@@ -1325,7 +1325,7 @@ public class Minecraft {
 
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class all_materials extends AbstractFunction {
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {

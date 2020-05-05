@@ -16,6 +16,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
@@ -43,7 +44,7 @@ public class Commands {
 	public static Map<String, CClosure> onCommand = new HashMap<String, CClosure>();
 	public static Map<String, CClosure> onTabComplete = new HashMap<String, CClosure>();
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_tabcompleter extends AbstractFunction {
 
 		@Override
@@ -139,7 +140,7 @@ public class Commands {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class unregister_command extends AbstractFunction {
 
 		@Override
@@ -191,7 +192,7 @@ public class Commands {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class register_command extends AbstractFunction {
 
 		@Override
@@ -328,7 +329,7 @@ public class Commands {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_executor extends AbstractFunction {
 
 		@Override
@@ -401,7 +402,7 @@ public class Commands {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_commands extends AbstractFunction {
 
 		@Override
@@ -472,7 +473,7 @@ public class Commands {
 		}
 	}
 
-	@api
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class clear_commands extends AbstractFunction {
 
 		@Override
