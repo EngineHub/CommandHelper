@@ -17,14 +17,12 @@
 * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 * DEALINGS IN THE SOFTWARE.
- */
- /*
+*/
+/*
  * Generated from ExceptionDetails.bond (https://github.com/Microsoft/bond)
  */
 package com.laytonsmith.core.telemetry.ApplicationInsights;
 
-import com.laytonsmith.PureUtilities.JSONUtil;
-import com.laytonsmith.PureUtilities.MapBuilder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,15 +67,8 @@ public class ExceptionDetails {
 	private List<StackFrame> parsedStack;
 
 	/**
-	 * Initializes a new instance of the ExceptionDetails class.
-	 */
-	@SuppressWarnings("OverridableMethodCallInConstructor")
-	public ExceptionDetails() {
-		this.InitializeFields();
-	}
-
-	/**
 	 * Gets the Id property.
+	 *
 	 * @return
 	 */
 	public int getId() {
@@ -86,6 +77,7 @@ public class ExceptionDetails {
 
 	/**
 	 * Sets the Id property.
+	 *
 	 * @param value
 	 */
 	public void setId(int value) {
@@ -94,6 +86,7 @@ public class ExceptionDetails {
 
 	/**
 	 * Gets the OuterId property.
+	 *
 	 * @return
 	 */
 	public int getOuterId() {
@@ -102,6 +95,7 @@ public class ExceptionDetails {
 
 	/**
 	 * Sets the OuterId property.
+	 *
 	 * @param value
 	 */
 	public void setOuterId(int value) {
@@ -110,6 +104,7 @@ public class ExceptionDetails {
 
 	/**
 	 * Gets the TypeName property.
+	 *
 	 * @return
 	 */
 	public String getTypeName() {
@@ -118,6 +113,7 @@ public class ExceptionDetails {
 
 	/**
 	 * Sets the TypeName property.
+	 *
 	 * @param value
 	 */
 	public void setTypeName(String value) {
@@ -126,6 +122,7 @@ public class ExceptionDetails {
 
 	/**
 	 * Gets the Message property.
+	 *
 	 * @return
 	 */
 	public String getMessage() {
@@ -134,6 +131,7 @@ public class ExceptionDetails {
 
 	/**
 	 * Sets the Message property.
+	 *
 	 * @param value
 	 */
 	public void setMessage(String value) {
@@ -142,6 +140,7 @@ public class ExceptionDetails {
 
 	/**
 	 * Gets the HasFullStack property.
+	 *
 	 * @return
 	 */
 	public boolean getHasFullStack() {
@@ -150,6 +149,7 @@ public class ExceptionDetails {
 
 	/**
 	 * Sets the HasFullStack property.
+	 *
 	 * @param value
 	 */
 	public void setHasFullStack(boolean value) {
@@ -158,6 +158,7 @@ public class ExceptionDetails {
 
 	/**
 	 * Gets the Stack property.
+	 *
 	 * @return
 	 */
 	public String getStack() {
@@ -166,6 +167,7 @@ public class ExceptionDetails {
 
 	/**
 	 * Sets the Stack property.
+	 *
 	 * @param value
 	 */
 	public void setStack(String value) {
@@ -174,6 +176,7 @@ public class ExceptionDetails {
 
 	/**
 	 * Gets the ParsedStack property.
+	 *
 	 * @return
 	 */
 	public List<StackFrame> getParsedStack() {
@@ -185,34 +188,11 @@ public class ExceptionDetails {
 
 	/**
 	 * Sets the ParsedStack property.
+	 *
 	 * @param value
 	 */
 	public void setParsedStack(List<StackFrame> value) {
 		this.parsedStack = value;
 	}
 
-	/**
-	 * Serializes the beginning of this object to the passed in writer.
-	 *
-	 * @return
-	 */
-//	@Override
-//	public String serialize() {
-//		MapBuilder<String, Object> builder = MapBuilder.empty(String.class, Object.class)
-//			.set("id", id)
-//			.set("outerId", outerId)
-//			.set("typeName", typeName)
-//			.set("message", message)
-//			.set("hasFullStack", hasFullStack)
-//			.set("stack", stack)
-//			.set("parsedStack", parsedStack);
-//		return new JSONUtil().serialize(builder.build());
-//	}
-
-	/**
-	 * Optionally initializes fields for the current context.
-	 */
-	protected void InitializeFields() {
-
-	}
 }

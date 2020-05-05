@@ -17,14 +17,11 @@
 * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 * DEALINGS IN THE SOFTWARE.
- */
- /*
+*/
+/*
  * Generated from StackFrame.bond (https://github.com/Microsoft/bond)
  */
 package com.laytonsmith.core.telemetry.ApplicationInsights;
-
-import com.laytonsmith.PureUtilities.JSONUtil;
-import com.laytonsmith.PureUtilities.MapBuilder;
 
 /**
  * Data contract class StackFrame.
@@ -57,14 +54,8 @@ public final class StackFrame {
 	private int line;
 
 	/**
-	 * Initializes a new instance of the StackFrame class.
-	 */
-	public StackFrame() {
-		this.InitializeFields();
-	}
-
-	/**
 	 * Gets the Level property.
+	 *
 	 * @return
 	 */
 	public int getLevel() {
@@ -73,6 +64,7 @@ public final class StackFrame {
 
 	/**
 	 * Sets the Level property.
+	 *
 	 * @param value
 	 */
 	public void setLevel(int value) {
@@ -81,6 +73,7 @@ public final class StackFrame {
 
 	/**
 	 * Gets the Method property.
+	 *
 	 * @return
 	 */
 	public String getMethod() {
@@ -89,6 +82,7 @@ public final class StackFrame {
 
 	/**
 	 * Sets the Method property.
+	 *
 	 * @param value
 	 */
 	public void setMethod(String value) {
@@ -97,6 +91,7 @@ public final class StackFrame {
 
 	/**
 	 * Gets the Assembly property.
+	 *
 	 * @return
 	 */
 	public String getAssembly() {
@@ -105,6 +100,7 @@ public final class StackFrame {
 
 	/**
 	 * Sets the Assembly property.
+	 *
 	 * @param value
 	 */
 	public void setAssembly(String value) {
@@ -113,6 +109,7 @@ public final class StackFrame {
 
 	/**
 	 * Gets the FileName property.
+	 *
 	 * @return
 	 */
 	public String getFileName() {
@@ -121,6 +118,7 @@ public final class StackFrame {
 
 	/**
 	 * Sets the FileName property.
+	 *
 	 * @param value
 	 */
 	public void setFileName(String value) {
@@ -129,6 +127,7 @@ public final class StackFrame {
 
 	/**
 	 * Gets the Line property.
+	 *
 	 * @return
 	 */
 	public int getLine() {
@@ -137,31 +136,11 @@ public final class StackFrame {
 
 	/**
 	 * Sets the Line property.
+	 *
 	 * @param value
 	 */
 	public void setLine(int value) {
 		this.line = value;
 	}
 
-	/**
-	 * Serializes the beginning of this object to the passed in writer.
-	 * @return
-	 */
-//	@Override
-//	public String serialize() {
-//		MapBuilder<String, Object> builder = MapBuilder.empty(String.class, Object.class)
-//			.set("level", level)
-//			.set("method", method)
-//			.set("assembly", assembly)
-//			.set("fileName", fileName)
-//			.set("line", line);
-//		return new JSONUtil().serialize(builder.build());
-//	}
-
-	/**
-	 * Optionally initializes fields for the current context.
-	 */
-	protected void InitializeFields() {
-
-	}
 }

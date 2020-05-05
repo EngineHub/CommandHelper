@@ -17,16 +17,14 @@
 * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 * DEALINGS IN THE SOFTWARE.
- */
- /*
+*/
+/*
  * Generated from MetricData.bond (https://github.com/Microsoft/bond)
  */
 package com.laytonsmith.core.telemetry.ApplicationInsights;
 
-import com.laytonsmith.PureUtilities.MapBuilder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -51,14 +49,8 @@ public final class MetricData extends Domain {
 	private ConcurrentMap<String, String> properties;
 
 	/**
-	 * Initializes a new instance of the MetricData class.
-	 */
-	public MetricData() {
-		this.InitializeFields();
-	}
-
-	/**
 	 * Gets the Ver property.
+	 *
 	 * @return
 	 */
 	public int getVer() {
@@ -67,6 +59,7 @@ public final class MetricData extends Domain {
 
 	/**
 	 * Sets the Ver property.
+	 *
 	 * @param value
 	 */
 	public void setVer(int value) {
@@ -75,6 +68,7 @@ public final class MetricData extends Domain {
 
 	/**
 	 * Gets the Metrics property.
+	 *
 	 * @return
 	 */
 	public List<DataPoint> getMetrics() {
@@ -86,6 +80,7 @@ public final class MetricData extends Domain {
 
 	/**
 	 * Sets the Metrics property.
+	 *
 	 * @param value
 	 */
 	public void setMetrics(List<DataPoint> value) {
@@ -94,6 +89,7 @@ public final class MetricData extends Domain {
 
 	/**
 	 * Gets the Properties property.
+	 *
 	 * @return
 	 */
 	public ConcurrentMap<String, String> getProperties() {
@@ -105,31 +101,11 @@ public final class MetricData extends Domain {
 
 	/**
 	 * Sets the Properties property.
+	 *
 	 * @param value
 	 */
 	public void setProperties(ConcurrentMap<String, String> value) {
 		this.properties = value;
 	}
 
-	/**
-	 * Serializes the beginning of this object to the passed in writer.
-	 *
-	 * @return
-	 */
-	@Override
-	public Map<String, Object> serializeSubclass() {
-		MapBuilder<String, Object> builder = MapBuilder.empty(String.class, Object.class)
-			.set("ver", ver)
-			.set("metrics", metrics)
-			.set("properties", properties);
-		return builder.build();
-	}
-
-	/**
-	 * Optionally initializes fields for the current context.
-	 */
-	@Override
-	protected void InitializeFields() {
-
-	}
 }

@@ -1,11 +1,11 @@
 package com.laytonsmith.core.telemetry.ApplicationInsights;
 
 import com.laytonsmith.PureUtilities.Common.OSUtils;
-import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.functions.Meta;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -43,15 +43,15 @@ public class TelemetryUtil {
 	 * @return
 	 */
 	public Envelope newEvent(String metricName,
-			ConcurrentMap<String, String> properties,
-			ConcurrentMap<String, Double> measurements) {
+			Map<String, String> properties,
+			Map<String, Double> measurements) {
 		Envelope env = new Envelope();
 		env.setVer(1);
 		env.setName("Microsoft.ApplicationInsights." + iKeyDashless + ".Event");
 		env.setTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(new Date()));
 		env.setSampleRate(100);
 		env.setIKey(instrumentationKey);
-		ConcurrentMap<String, String> tags = generateStandardTags();
+		Map<String, String> tags = generateStandardTags();
 		tags.put("ai.internal.nodeName", sessionName);
 		tags.put("ai.session.id", sessionName);
 		tags.put("ai.session.isNew", Boolean.toString(newSession));
@@ -61,11 +61,11 @@ public class TelemetryUtil {
 
 		eventData.setVer(2);
 		eventData.setName(metricName);
-		if(properties != null) {
+		if(properties != null && !properties.isEmpty()) {
 			eventData.setProperties(properties);
 		}
 
-		if(measurements != null) {
+		if(measurements != null && !measurements.isEmpty()) {
 			eventData.setMeasurements(measurements);
 		}
 

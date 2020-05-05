@@ -2,6 +2,7 @@ package com.laytonsmith.core.telemetry;
 
 import com.laytonsmith.core.telemetry.ApplicationInsights.Envelope;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.PureUtilities.JSONUtil;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Prefs;
@@ -72,7 +73,9 @@ public class Telemetry {
 
 		@Override
 		public void send(Envelope item) {
-			StreamUtils.GetSystemOut().println("Telemetry data: " + item.serialize());
+			JSONUtil.Options options = new JSONUtil.Options();
+			options.skipNulls = true;
+			StreamUtils.GetSystemOut().println("Telemetry data: " + new JSONUtil(options).serialize(item));
 		}
 	};
 
@@ -195,7 +198,9 @@ public class Telemetry {
 
 		@Override
 		public void send(Envelope item) {
-			String body = item.serialize();
+			JSONUtil.Options options = new JSONUtil.Options();
+			options.skipNulls = true;
+			String body = new JSONUtil(options).serialize(item);
 			proxy.submit(body);
 		}
 	}

@@ -1132,18 +1132,19 @@ public class Meta {
 		}
 
 		public static long GetEngineBuildDate() {
-			return new engine_build_date().exec(Target.UNKNOWN, null).getInt();
+			Mixed m = new engine_build_date().exec(Target.UNKNOWN, null);
+			return m instanceof CNull ? 0 : ((CInt) m).getInt();
 		}
 
 		@Override
-		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			JarFile jf;
 			try {
 				String jar = ClassDiscovery.GetClassContainer(Meta.class).toString();
 				jar = jar.replaceFirst("file:", "");
 				jf = new JarFile(jar);
 			} catch (IOException ex) {
-				throw new CREIOException(ex.getMessage(), t, ex);
+				return CNull.NULL;
 			}
 			ZipEntry manifest = jf.getEntry("META-INF/MANIFEST.MF");
 			long manifestTime = manifest.getTime();

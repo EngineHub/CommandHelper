@@ -17,15 +17,12 @@
 * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 * DEALINGS IN THE SOFTWARE.
- */
- /*
+*/
+/*
  * Generated from ExceptionData.bond (https://github.com/Microsoft/bond)
  */
 package com.laytonsmith.core.telemetry.ApplicationInsights;
 
-import com.laytonsmith.PureUtilities.MapBuilder;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -43,7 +40,7 @@ public final class ExceptionData extends Domain {
 	/**
 	 * Backing field for property Exceptions.
 	 */
-	private List<ExceptionDetails> exceptions;
+	private ExceptionDetails[] exceptions;
 
 	/**
 	 * Backing field for property SeverityLevel.
@@ -58,23 +55,16 @@ public final class ExceptionData extends Domain {
 	/**
 	 * Backing field for property Properties.
 	 */
-	private ConcurrentMap<String, String> properties;
+	private Map<String, String> properties;
 
 	/**
 	 * Backing field for property Measurements.
 	 */
-	private ConcurrentMap<String, Double> measurements;
-
-	/**
-	 * Initializes a new instance of the ExceptionData class.
-	 */
-	@SuppressWarnings("OverridableMethodCallInConstructor")
-	public ExceptionData() {
-		this.InitializeFields();
-	}
+	private Map<String, Double> measurements;
 
 	/**
 	 * Gets the Ver property.
+	 *
 	 * @return
 	 */
 	public int getVer() {
@@ -83,6 +73,7 @@ public final class ExceptionData extends Domain {
 
 	/**
 	 * Sets the Ver property.
+	 *
 	 * @param value
 	 */
 	public void setVer(int value) {
@@ -91,25 +82,28 @@ public final class ExceptionData extends Domain {
 
 	/**
 	 * Gets the Exceptions property.
+	 *
 	 * @return
 	 */
-	public List<ExceptionDetails> getExceptions() {
+	public ExceptionDetails[] getExceptions() {
 		if(this.exceptions == null) {
-			this.exceptions = new ArrayList<>();
+			this.exceptions = new ExceptionDetails[0];
 		}
 		return this.exceptions;
 	}
 
 	/**
 	 * Sets the Exceptions property.
+	 *
 	 * @param value
 	 */
-	public void setExceptions(List<ExceptionDetails> value) {
+	public void setExceptions(ExceptionDetails[] value) {
 		this.exceptions = value;
 	}
 
 	/**
 	 * Gets the SeverityLevel property.
+	 *
 	 * @return
 	 */
 	public SeverityLevel getSeverityLevel() {
@@ -118,6 +112,7 @@ public final class ExceptionData extends Domain {
 
 	/**
 	 * Sets the SeverityLevel property.
+	 *
 	 * @param value
 	 */
 	public void setSeverityLevel(SeverityLevel value) {
@@ -126,6 +121,7 @@ public final class ExceptionData extends Domain {
 
 	/**
 	 * Gets the ProblemId property.
+	 *
 	 * @return
 	 */
 	public String getProblemId() {
@@ -134,6 +130,7 @@ public final class ExceptionData extends Domain {
 
 	/**
 	 * Sets the ProblemId property.
+	 *
 	 * @param value
 	 */
 	public void setProblemId(String value) {
@@ -142,9 +139,10 @@ public final class ExceptionData extends Domain {
 
 	/**
 	 * Gets the Properties property.
+	 *
 	 * @return
 	 */
-	public ConcurrentMap<String, String> getProperties() {
+	public Map<String, String> getProperties() {
 		if(this.properties == null) {
 			this.properties = new ConcurrentHashMap<>();
 		}
@@ -153,6 +151,7 @@ public final class ExceptionData extends Domain {
 
 	/**
 	 * Sets the Properties property.
+	 *
 	 * @param value
 	 */
 	public void setProperties(ConcurrentMap<String, String> value) {
@@ -161,9 +160,10 @@ public final class ExceptionData extends Domain {
 
 	/**
 	 * Gets the Measurements property.
+	 *
 	 * @return
 	 */
-	public ConcurrentMap<String, Double> getMeasurements() {
+	public Map<String, Double> getMeasurements() {
 		if(this.measurements == null) {
 			this.measurements = new ConcurrentHashMap<>();
 		}
@@ -172,34 +172,11 @@ public final class ExceptionData extends Domain {
 
 	/**
 	 * Sets the Measurements property.
+	 *
 	 * @param value
 	 */
 	public void setMeasurements(ConcurrentMap<String, Double> value) {
 		this.measurements = value;
 	}
 
-	/**
-	 * Serializes the beginning of this object to the passed in writer.
-	 *
-	 * @return
-	 */
-	@Override
-	public Map<String, Object> serializeSubclass() {
-		MapBuilder<String, Object> builder = MapBuilder.empty(String.class, Object.class)
-			.set("ver", ver)
-			.set("exceptions", exceptions)
-			.set("severityLevel", severityLevel)
-			.set("problemId", problemId, 1024)
-			.set("properties", properties)
-			.set("measurements", measurements);
-		return builder.build();
-	}
-
-	/**
-	 * Optionally initializes fields for the current context.
-	 */
-	@Override
-	protected void InitializeFields() {
-
-	}
 }

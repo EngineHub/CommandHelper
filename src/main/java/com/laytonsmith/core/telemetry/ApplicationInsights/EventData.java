@@ -17,16 +17,15 @@
 * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 * DEALINGS IN THE SOFTWARE.
- */
- /*
+*/
+/*
  * Generated from EventData.bond (https://github.com/Microsoft/bond)
  */
 package com.laytonsmith.core.telemetry.ApplicationInsights;
 
-import com.laytonsmith.PureUtilities.MapBuilder;
+import com.laytonsmith.PureUtilities.JSONUtil;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Data contract class EventData.
@@ -46,22 +45,18 @@ public final class EventData extends Domain {
 	/**
 	 * Backing field for property Properties.
 	 */
-	private ConcurrentMap<String, String> properties;
+//	@JSONUtil.MapType(String.class)
+	private Map<String, String> properties;
 
 	/**
 	 * Backing field for property Measurements.
 	 */
-	private ConcurrentMap<String, Double> measurements;
-
-	/**
-	 * Initializes a new instance of the EventData class.
-	 */
-	public EventData() {
-		this.InitializeFields();
-	}
+	@JSONUtil.MapType(Double.class)
+	private Map<String, Double> measurements;
 
 	/**
 	 * Gets the Ver property.
+	 *
 	 * @return
 	 */
 	public int getVer() {
@@ -70,6 +65,7 @@ public final class EventData extends Domain {
 
 	/**
 	 * Sets the Ver property.
+	 *
 	 * @param value
 	 */
 	public void setVer(int value) {
@@ -78,6 +74,7 @@ public final class EventData extends Domain {
 
 	/**
 	 * Gets the Name property.
+	 *
 	 * @return
 	 */
 	public String getName() {
@@ -86,6 +83,7 @@ public final class EventData extends Domain {
 
 	/**
 	 * Sets the Name property.
+	 *
 	 * @param value
 	 */
 	public void setName(String value) {
@@ -94,9 +92,10 @@ public final class EventData extends Domain {
 
 	/**
 	 * Gets the Properties property.
+	 *
 	 * @return
 	 */
-	public ConcurrentMap<String, String> getProperties() {
+	public Map<String, String> getProperties() {
 		if(this.properties == null) {
 			this.properties = new ConcurrentHashMap<>();
 		}
@@ -105,17 +104,19 @@ public final class EventData extends Domain {
 
 	/**
 	 * Sets the Properties property.
+	 *
 	 * @param value
 	 */
-	public void setProperties(ConcurrentMap<String, String> value) {
+	public void setProperties(Map<String, String> value) {
 		this.properties = value;
 	}
 
 	/**
 	 * Gets the Measurements property.
+	 *
 	 * @return
 	 */
-	public ConcurrentMap<String, Double> getMeasurements() {
+	public Map<String, Double> getMeasurements() {
 		if(this.measurements == null) {
 			this.measurements = new ConcurrentHashMap<>();
 		}
@@ -124,32 +125,11 @@ public final class EventData extends Domain {
 
 	/**
 	 * Sets the Measurements property.
+	 *
 	 * @param value
 	 */
-	public void setMeasurements(ConcurrentMap<String, Double> value) {
+	public void setMeasurements(Map<String, Double> value) {
 		this.measurements = value;
 	}
 
-	/**
-	 * Serializes the beginning of this object to the passed in writer.
-	 *
-	 * @return
-	 */
-	@Override
-	protected Map<String, Object> serializeSubclass() {
-		MapBuilder<String, Object> builder = MapBuilder.empty(String.class, Object.class)
-			.set("ver", ver)
-			.set("name", name)
-			.set("properties", properties)
-			.set("measurements", measurements);
-		return builder.build();
-	}
-
-	/**
-	 * Optionally initializes fields for the current context.
-	 */
-	@Override
-	protected void InitializeFields() {
-
-	}
 }

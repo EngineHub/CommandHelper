@@ -17,18 +17,14 @@
 * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 * DEALINGS IN THE SOFTWARE.
- */
- /*
+*/
+/*
  * This has been ripped from the Application Insights SDK.
  */
 package com.laytonsmith.core.telemetry.ApplicationInsights;
 
-import com.laytonsmith.PureUtilities.JSONUtil;
-import com.laytonsmith.PureUtilities.MapBuilder;
-import java.io.IOException;
-import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Data contract class Envelope.
@@ -68,7 +64,7 @@ public final class Envelope {
 	/**
 	 * Backing field for property Tags.
 	 */
-	private ConcurrentMap<String, String> tags;
+	private Map<String, String> tags;
 
 	/**
 	 * Backing field for property Data.
@@ -76,14 +72,8 @@ public final class Envelope {
 	private Base data;
 
 	/**
-	 * Initializes a new instance of the Envelope class.
-	 */
-	public Envelope() {
-		this.InitializeFields();
-	}
-
-	/**
 	 * Gets the Ver property.
+	 *
 	 * @return
 	 */
 	public int getVer() {
@@ -92,6 +82,7 @@ public final class Envelope {
 
 	/**
 	 * Sets the Ver property.
+	 *
 	 * @param value
 	 */
 	public void setVer(int value) {
@@ -100,6 +91,7 @@ public final class Envelope {
 
 	/**
 	 * Gets the Name property.
+	 *
 	 * @return
 	 */
 	public String getName() {
@@ -108,6 +100,7 @@ public final class Envelope {
 
 	/**
 	 * Sets the Name property.
+	 *
 	 * @param value
 	 */
 	public void setName(String value) {
@@ -116,6 +109,7 @@ public final class Envelope {
 
 	/**
 	 * Gets the Time property.
+	 *
 	 * @return
 	 */
 	public String getTime() {
@@ -124,6 +118,7 @@ public final class Envelope {
 
 	/**
 	 * Sets the Time property.
+	 *
 	 * @param value
 	 */
 	public void setTime(String value) {
@@ -132,6 +127,7 @@ public final class Envelope {
 
 	/**
 	 * Gets the SampleRate property.
+	 *
 	 * @return
 	 */
 	public double getSampleRate() {
@@ -140,6 +136,7 @@ public final class Envelope {
 
 	/**
 	 * Sets the SampleRate property.
+	 *
 	 * @param value
 	 */
 	public void setSampleRate(double value) {
@@ -148,6 +145,7 @@ public final class Envelope {
 
 	/**
 	 * Gets the Seq property.
+	 *
 	 * @return
 	 */
 	public String getSeq() {
@@ -156,6 +154,7 @@ public final class Envelope {
 
 	/**
 	 * Sets the Seq property.
+	 *
 	 * @param value
 	 */
 	public void setSeq(String value) {
@@ -164,6 +163,7 @@ public final class Envelope {
 
 	/**
 	 * Gets the IKey property.
+	 *
 	 * @return
 	 */
 	public String getIKey() {
@@ -172,6 +172,7 @@ public final class Envelope {
 
 	/**
 	 * Sets the IKey property.
+	 *
 	 * @param value
 	 */
 	public void setIKey(String value) {
@@ -180,9 +181,10 @@ public final class Envelope {
 
 	/**
 	 * Gets the Tags property.
+	 *
 	 * @return
 	 */
-	public ConcurrentMap<String, String> getTags() {
+	public Map<String, String> getTags() {
 		if(this.tags == null) {
 			this.tags = new ConcurrentHashMap<>();
 		}
@@ -192,14 +194,16 @@ public final class Envelope {
 	/**
 	 * Sets the Tags property. See available options here:
 	 * https://github.com/microsoft/ApplicationInsights-Home/blob/master/EndpointSpecs/Schemas/Bond/ContextTagKeys.bond
+	 *
 	 * @param value
 	 */
-	public void setTags(ConcurrentMap<String, String> value) {
+	public void setTags(Map<String, String> value) {
 		this.tags = value;
 	}
 
 	/**
 	 * Gets the Data property.
+	 *
 	 * @return
 	 */
 	public Base getData() {
@@ -208,37 +212,10 @@ public final class Envelope {
 
 	/**
 	 * Sets the Data property.
+	 *
 	 * @param value
 	 */
 	public void setData(Base value) {
 		this.data = value;
-	}
-
-	/**
-	 * Serializes the beginning of this object to the passed in writer.
-	 *
-	 * @return
-	 */
-	public String serialize() {
-		MapBuilder<String, Object> builder = MapBuilder.empty(String.class, Object.class)
-			.set("ver", ver)
-			.set("name", name)
-			.set("time", time);
-		if(this.sampleRate > 0.0d) {
-			builder.set("sampleRate", sampleRate);
-		}
-		builder
-			.set("seq", seq, 64)
-			.set("iKey", iKey, 40)
-			.set("tags", tags)
-			.set("data", data);
-		return new JSONUtil().serialize(builder.build());
-	}
-
-	/**
-	 * Optionally initializes fields for the current context.
-	 */
-	protected void InitializeFields() {
-
 	}
 }

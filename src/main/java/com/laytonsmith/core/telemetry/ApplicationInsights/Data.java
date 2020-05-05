@@ -17,16 +17,15 @@
 * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 * DEALINGS IN THE SOFTWARE.
- */
- /*
+*/
+/*
  * Generated from Data.bond (https://github.com/Microsoft/bond)
  */
 package com.laytonsmith.core.telemetry.ApplicationInsights;
 
-import com.laytonsmith.PureUtilities.MapBuilder;
-
 /**
  * Data contract class Data.
+ *
  * @param <TDomain>
  */
 public class Data<TDomain extends Domain> extends Base {
@@ -37,14 +36,8 @@ public class Data<TDomain extends Domain> extends Base {
 	private TDomain baseData;
 
 	/**
-	 * Initializes a new instance of the Data{TDomain} class.
-	 */
-	public Data() {
-		this.InitializeFields();
-	}
-
-	/**
 	 * Gets the BaseData property.
+	 *
 	 * @return
 	 */
 	public TDomain getBaseData() {
@@ -53,29 +46,11 @@ public class Data<TDomain extends Domain> extends Base {
 
 	/**
 	 * Sets the BaseData property.
+	 *
 	 * @param value
 	 */
 	public void setBaseData(TDomain value) {
 		this.baseData = value;
 	}
 
-	/**
-	 * Serializes the beginning of this object to the passed in writer.
-	 *
-	 * @return
-	 */
-	@Override
-	public MapBuilder<String, Object> serializeSubclass() {
-		MapBuilder<String, Object> builder = MapBuilder.empty(String.class, Object.class)
-			.set("baseData", getBaseData());
-		return builder;
-	}
-
-	/**
-	 * Optionally initializes fields for the current context.
-	 */
-	@Override
-	protected void InitializeFields() {
-
-	}
 }

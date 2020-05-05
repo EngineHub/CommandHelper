@@ -17,14 +17,11 @@
 * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 * DEALINGS IN THE SOFTWARE.
- */
- /*
+*/
+/*
  * Generated from DataPoint.bond (https://github.com/Microsoft/bond)
  */
 package com.laytonsmith.core.telemetry.ApplicationInsights;
-
-import com.laytonsmith.PureUtilities.JSONUtil;
-import com.laytonsmith.PureUtilities.MapBuilder;
 
 /**
  * Data contract class DataPoint.
@@ -65,13 +62,6 @@ public final class DataPoint {
 	 * Backing field for property StdDev.
 	 */
 	private Double stdDev;
-
-	/**
-	 * Initializes a new instance of the DataPoint class.
-	 */
-	public DataPoint() {
-		this.InitializeFields();
-	}
 
 	/**
 	 * Gets the Name property.
@@ -199,28 +189,4 @@ public final class DataPoint {
 		this.stdDev = value;
 	}
 
-	/**
-	 * Serializes the beginning of this object to the passed in writer.
-	 *
-	 * @return
-	 */
-//	@Override
-//	public String serialize() {
-//		MapBuilder<String, Object> builder = MapBuilder.empty(String.class, Object.class)
-//			.set("name", name)
-//			.set("kind", kind)
-//			.set("value", value)
-//			.set("count", count)
-//			.set("min", min)
-//			.set("max", max)
-//			.set("stdDev", stdDev);
-//		return new JSONUtil().serialize(builder.build());
-//	}
-
-	/**
-	 * Optionally initializes fields for the current context.
-	 */
-	protected void InitializeFields() {
-
-	}
 }

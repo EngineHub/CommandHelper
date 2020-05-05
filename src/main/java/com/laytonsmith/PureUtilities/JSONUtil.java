@@ -1,11 +1,16 @@
 package com.laytonsmith.PureUtilities;
 
-import com.google.gson.Gson;
 import com.laytonsmith.PureUtilities.Common.ClassUtils;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -102,10 +107,21 @@ public class JSONUtil {
 
 	}
 
+	public static class Options {
+		/**
+		 * Skip values altogether if they're null.
+		 */
+		public boolean skipNulls = false;
+	}
 
+	private final Options options;
 
 	public JSONUtil() {
+		options = new Options();
+	}
 
+	public JSONUtil(Options options) {
+		this.options = options;
 	}
 
 	/**
@@ -133,7 +149,7 @@ public class JSONUtil {
 			throw new JSONException("Value is not an object!");
 		}
 
-		T t = getType(obj, bean);
+		T t = getType(obj, bean, null);
 		return t;
 	}
 
@@ -158,11 +174,11 @@ public class JSONUtil {
 			throw new JSONException("Value is not an array!");
 		}
 		Class<?> arrayClass = ClassUtils.getArrayClassFromType(bean);
-		return (T[]) getType(obj, arrayClass);
+		return (T[]) getType(obj, arrayClass, null);
 	}
 
 	@SuppressWarnings("UnnecessaryBoxing") // Actually is necessary
-	private <T> T getType(Object o, Class<T> c) {
+	private <T> T getType(Object o, Class<T> c, Field holder) {
 		if(o == null) {
 			if(c == int.class) {
 				return (T) new Integer(0);
@@ -173,12 +189,12 @@ public class JSONUtil {
 			}
 			return null;
 		}
-		// TODO Support enums
+
 		if(c.isArray()) {
 			JSONArray a = (JSONArray) o;
 			Object array = Array.newInstance(c.getComponentType(), a.size());
 			for(int i = 0; i < a.size(); i++) {
-				Object subValue = getType(a.get(i), c.getComponentType());
+				Object subValue = getType(a.get(i), c.getComponentType(), null);
 				Array.set(array, i, subValue);
 			}
 			return (T) array;
@@ -210,6 +226,18 @@ public class JSONUtil {
 		} else {
 			// Another bean, we need to loop through it and recurse
 			JSONObject obj = (JSONObject) o;
+			if(Map.class.isAssignableFrom(c)) {
+				MapType type = holder.getAnnotation(MapType.class);
+				if(type == null) {
+					throw new Error(holder.getDeclaringClass() + "." + holder.getName()
+						+ " must have the @MapType annotation");
+				}
+				Map<String, Object> map = new HashMap<>();
+				for(Object key : obj.keySet()) {
+					map.put(key.toString(), getType(obj.get(key), type.value(), null));
+				}
+				return (T) map;
+			}
 			T t = ReflectionUtils.newInstance(c);
 			Class clz = c;
 			Set<String> setFields = new HashSet<>();
@@ -221,7 +249,7 @@ public class JSONUtil {
 					if(setFields.contains(f.getName())) {
 						continue;
 					}
-					ReflectionUtils.set(clz, t, f.getName(), getType(obj.get(f.getName()), f.getType()));
+					ReflectionUtils.set(clz, t, f.getName(), getType(obj.get(f.getName()), f.getType(), f));
 					setFields.add(f.getName());
 				}
 				clz = clz.getSuperclass();
@@ -231,7 +259,13 @@ public class JSONUtil {
 	}
 
 	public String serialize(Object obj) {
-		return new Gson().toJson(obj);
+		Object r;
+		if(obj.getClass().isArray()) {
+			r = fromArrayType(obj);
+		} else {
+			r = fromType(obj);
+		}
+		return JSONValue.toJSONString(r);
 	}
 
 	private <T> JSONArray fromArrayType(Object array) {
@@ -260,10 +294,31 @@ public class JSONUtil {
 		}
 		JSONObject r = new JSONObject();
 		Class clz = obj.getClass();
+		if(Map.class.isAssignableFrom(clz)) {
+			Map map = (Map) obj;
+			r.putAll(map);
+			return r;
+		}
 		do {
-			for(Field f : obj.getClass().getDeclaredFields()) {
+			for(Field f : clz.getDeclaredFields()) {
 				String name = f.getName();
-				Object o = ReflectionUtils.get(clz, obj, name);
+				Class walkUp = obj.getClass();
+				Object o = null;
+				boolean found = false;
+				do {
+					try {
+						o = ReflectionUtils.get(walkUp, obj, name);
+						found = true;
+					} catch (ReflectionUtils.ReflectionException ex) {
+						walkUp = walkUp.getSuperclass();
+					}
+				} while(walkUp != clz.getSuperclass() && !found);
+				if(o == null) {
+					if(!options.skipNulls) {
+						r.put(name, null);
+					}
+					continue;
+				}
 				Class c = o.getClass();
 				if(c.isArray()) {
 					o = fromArrayType(o);
@@ -278,11 +333,26 @@ public class JSONUtil {
 						|| boolean.class.isAssignableFrom(c) || Boolean.class.isAssignableFrom(c))) {
 					o = fromType(o);
 				}
-				// TODO support enums
+
 				r.put(name, o);
 			}
 			clz = clz.getSuperclass();
 		} while(clz != Object.class);
 		return r;
+	}
+
+	/**
+	 * Annotates a map, so we can know the type of the value during deserialization.
+	 * Note that the key value is always a string.
+	 */
+	@Target(ElementType.FIELD)
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface MapType {
+
+		/**
+		 * The type of the value.
+		 * @return
+		 */
+		Class value();
 	}
 }
