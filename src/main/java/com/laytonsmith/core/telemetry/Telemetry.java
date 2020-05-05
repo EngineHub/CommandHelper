@@ -134,17 +134,18 @@ public class Telemetry {
 	 * Sends a point in time metric.
 	 * @param type
 	 */
-	public void metric(Class<? extends TelemetryValue> type) {
-		TelemetryCategory tc = TelemetryValue.Helper.GetCategory(type);
-		if(tc.type() != TelemetryType.METRIC) {
-			return;
-		}
-
-		if(!TelemetryPrefs.GetTelemetryLoggable(type)) {
-			return;
-		}
-
+	public void metric(Class<? extends MetricTelemetryValue> type) {
+		// Client is null if we're globally disabled
 		if(client != null) {
+			TelemetryCategory tc = TelemetryValue.Helper.GetCategory(type);
+			if(tc.type() != TelemetryType.METRIC) {
+				return;
+			}
+
+			if(!TelemetryPrefs.GetTelemetryLoggable(type)) {
+				return;
+			}
+
 			channel.send(client.newEvent(tc.type().getPrefix() + "." + tc.name(), null, null));
 		}
 	}
@@ -155,25 +156,26 @@ public class Telemetry {
 	 * @param properties A map of string to string properties. May be null.
 	 * @param metrics A map of string to double metrics. May be null.
 	 */
-	public void log(Class<? extends TelemetryValue> type, Map<String, String> properties, Map<String, Double> metrics) {
-		TelemetryCategory tc = TelemetryValue.Helper.GetCategory(type);
-		if(tc.type() != TelemetryType.LOG) {
-			return;
-		}
-
-		if(!TelemetryPrefs.GetTelemetryLoggable(type)) {
-			return;
-		}
-
-		if(properties == null) {
-			properties = new HashMap<>();
-		}
-
-		if(metrics == null) {
-			metrics = new HashMap<>();
-		}
-
+	public void log(Class<? extends LogTelemetryValue> type, Map<String, String> properties, Map<String, Double> metrics) {
+		// Client is null if we're globally disabled
 		if(client != null) {
+			TelemetryCategory tc = TelemetryValue.Helper.GetCategory(type);
+			if(tc.type() != TelemetryType.LOG) {
+				return;
+			}
+
+			if(!TelemetryPrefs.GetTelemetryLoggable(type)) {
+				return;
+			}
+
+			if(properties == null) {
+				properties = new HashMap<>();
+			}
+
+			if(metrics == null) {
+				metrics = new HashMap<>();
+			}
+
 			channel.send(client.newEvent(tc.type().getPrefix() + "." + tc.name(),
 					new ConcurrentHashMap<>(properties),
 					new ConcurrentHashMap<>(metrics)));
