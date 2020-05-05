@@ -6,6 +6,8 @@
 package com.laytonsmith.PureUtilities;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import java.util.HashMap;
+import java.util.Map;
 import org.hamcrest.core.Is;
 import org.junit.Assert;
 import static org.junit.Assert.assertTrue;
@@ -279,5 +281,28 @@ public class JSONUtilTest {
 		c.et = EnumTest2.FIRST;
 		String s = jd.serialize(c);
 		Assert.assertThat(s, Is.is("{\"id\":45,\"et\":100}"));
+	}
+
+	static class MapContainer {
+		@JSONUtil.MapType(value = String.class)
+		Map<String, String> map;
+	}
+
+	@Test
+	public void testMapSerialization() throws Exception {
+		MapContainer mc = new MapContainer();
+		mc.map = new HashMap<>();
+		mc.map.put("one", "one");
+		mc.map.put("two", "two");
+		String s = jd.serialize(mc);
+		Assert.assertThat(s, Is.is("{\"map\":{\"two\":\"two\",\"one\":\"one\"}}"));
+	}
+
+	@Test
+	public void testMapDeserialization() throws Exception {
+		MapContainer mc = jd.deserialize("{\"map\":{\"two\":\"two\",\"one\":\"one\"}}", MapContainer.class);
+		Assert.assertNotNull(mc.map);
+		Assert.assertThat(mc.map.get("one"), Is.is("one"));
+		Assert.assertThat(mc.map.get("two"), Is.is("two"));
 	}
 }

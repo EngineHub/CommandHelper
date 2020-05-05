@@ -27,6 +27,7 @@ import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Common.TimeConversionUtil;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
+import com.laytonsmith.PureUtilities.MapBuilder;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
@@ -58,9 +59,12 @@ import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.UpgradeLog;
+import com.laytonsmith.core.apps.AppsApiUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.profiler.Profiler;
+import com.laytonsmith.core.telemetry.DefaultTelemetry;
+import com.laytonsmith.core.telemetry.Telemetry;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import org.bukkit.Bukkit;
 import org.bukkit.command.BlockCommandSender;
@@ -125,7 +129,9 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 	@Override
 	public void onLoad() {
+		AppsApiUtil.ConfigureDefaults();
 		Implementation.setServerType(Implementation.Type.BUKKIT);
+
 		self = this;
 
 		CommandHelperFileLocations.setDefault(new CommandHelperFileLocations());
@@ -280,6 +286,11 @@ public class CommandHelperPlugin extends JavaPlugin {
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(CommandHelperPlugin.class));
 
 		MSLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
+
+		Telemetry.GetDefault().initializeTelemetry();
+		Telemetry.GetDefault().doNag();
+		Telemetry.GetDefault().log(DefaultTelemetry.StartupModeMetric.class,
+				MapBuilder.start("mode", Implementation.GetServerType().getBranding()), null);
 
 		loadingThread = new Thread("extensionloader") {
 			@Override

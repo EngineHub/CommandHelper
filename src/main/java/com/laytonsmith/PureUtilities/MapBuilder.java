@@ -71,6 +71,22 @@ public class MapBuilder<K, V> extends AbstractMap<K, V> implements Map<K, V> {
 	}
 
 	/**
+	 * Puts a new entry in the map, unless the value is null, in which case the default is used instead.
+	 * @param key The key to add.
+	 * @param value The value to add, possibly null.
+	 * @param def The value to use if the provided value is null.
+	 * @return The MapBuilder object, for easy chaining.
+	 */
+	public MapBuilder<K, V> set(K key, V value, V def) {
+		if(value == null) {
+			set(key, def);
+		} else {
+			set(key, value);
+		}
+		return this;
+	}
+
+	/**
 	 * Puts a new entry in the map only if the value is not null. If it is null, nothing is changed. Either way,
 	 * the MapBuilder object is returned.
 	 * @param key The key to add.
@@ -223,5 +239,13 @@ public class MapBuilder<K, V> extends AbstractMap<K, V> implements Map<K, V> {
 	@Override
 	public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
 		return map.merge(key, value, remappingFunction);
+	}
+
+	/**
+	 * Returns a cloned version of the internal Map object.
+	 * @return
+	 */
+	public Map<K, V> build() {
+		return new HashMap<>(map);
 	}
 }

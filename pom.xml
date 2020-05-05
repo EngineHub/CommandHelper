@@ -132,6 +132,11 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.test.failure.ignore>true</maven.test.failure.ignore>
+		<swagger-core-version>2.0.0</swagger-core-version>
+		<okhttp-version>2.7.5</okhttp-version>
+		<gson-version>2.8.1</gson-version>
+		<gson-fire-version>1.8.3</gson-fire-version>
+		<threetenbp-version>1.3.5</threetenbp-version>
 	</properties>
 	<repositories>
 		<repository>
@@ -383,6 +388,36 @@
 			<artifactId>org.eclipse.lsp4j</artifactId>
 			<version>0.8.0</version>
 		</dependency>
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-annotations</artifactId>
+			<version>${swagger-core-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>${okhttp-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp</groupId>
+			<artifactId>logging-interceptor</artifactId>
+			<version>${okhttp-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>${gson-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.gsonfire</groupId>
+			<artifactId>gson-fire</artifactId>
+			<version>${gson-fire-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.threeten</groupId>
+			<artifactId>threetenbp</artifactId>
+			<version>${threetenbp-version}</version>
+		</dependency>
 	</dependencies>
 	<distributionManagement>
 		<repository>
@@ -538,6 +573,13 @@
 										add it to the dependecies list to fully integrate it. -->
 									<include>com.google.code.gson:gson:jar:*</include>
 									<include>com.google.guava:guava:jar:*</include>
+									<include>com.microsoft.azure:applicationinsights-core:jar:*</include>
+									<!-- Swagger dependencies -->
+									<include>com.squareup.okhttp:okhttp:jar:*</include>
+									<include>com.squareup.okio:okio:jar:*</include>
+									<include>org.threeten:threetenbp:jar:*</include>
+									<include>io.gsonfire:gson-fire:jar:*</include>
+									<include>com.squareup.okhttp:logging-interceptor:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -653,7 +695,27 @@
 										<exclude>com.google.common.collect.*</exclude>
 									</excludes>
 								</relocation>
-							</relocations>
+								<relocation>
+									<pattern>com.microsoft</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.microsoft</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.squareup.okhttp</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.squareup.okhttp</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>okio</pattern>
+									<shadedPattern>com.laytonsmith.libs.okio</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.threeten</pattern>
+									<shadedPattern>com.laytonsmith.libs.threeten</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>io.gsonfire</pattern>
+									<shadedPattern>com.laytonsmith.libs.io.gsonfire</shadedPattern>
+								</relocation>
+							</relocations>							
 							<filters>
 								<filter>
 									<artifact>org.xerial:sqlite-jdbc:jar:*</artifact>
@@ -822,7 +884,57 @@
 										<exlude>com/google/common/collect/**</exlude>
 									</excludes>
 								</filter>
-								
+								<filter>
+									<artifact>com.microsoft.azure:applicationinsights-core:jar:*</artifact>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>com.squareup.okhttp:okhttp:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>com.squareup.okio:okio:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>org.threeten:threetenbp:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>io.gsonfire:gson-fire:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>com.squareup.okhttp:logging-interceptor:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
 							</filters>
 						</configuration>
 					</execution>

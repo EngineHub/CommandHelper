@@ -15,11 +15,13 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Common.UIUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.JavaVersion;
+import com.laytonsmith.PureUtilities.MapBuilder;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.apps.AppsApiUtil;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CString;
@@ -37,6 +39,8 @@ import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.Meta;
 import com.laytonsmith.core.functions.Scheduling;
+import com.laytonsmith.core.telemetry.DefaultTelemetry;
+import com.laytonsmith.core.telemetry.Telemetry;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
@@ -83,6 +87,9 @@ import org.json.simple.JSONValue;
  *
  */
 public class Main {
+
+	private static final boolean IS_DEBUG = java.lang.management.ManagementFactory.getRuntimeMXBean()
+			.getInputArguments().toString().contains("jdwp");
 
 	public static class CmdlineToolCollection {
 		private final ArgumentSuite suite;
@@ -160,6 +167,49 @@ public class Main {
 		EditPrefsMode.class
 	};
 
+	/**
+	 * In general, since fast startup modes don't load things like preferences and whatnot, we couldn't normally
+	 * get telemetry on those modes. However, this is valuable information to have, so we write the metrics output
+	 * locally, and upload them at another time.
+	 * @param mode
+	 * @param full If this is a full startup, then we check all metrics and upload them, including this mode's
+	 * startup. Otherwise we just log the information to another directory and deal with it later during a full
+	 * startup.
+	 */
+	private static void HandleModeStartupTelemetry(String mode, boolean full) {
+		try {
+			File cache = new File(MethodScriptFileLocations.getDefault().getCacheDirectory(), "telemetry.cache");
+			if(!full) {
+				FileUtil.write(mode + "\n", cache, com.laytonsmith.PureUtilities.Common.FileWriteMode.APPEND, true);
+			} else {
+				Telemetry.GetDefault().initializeTelemetry();
+				if(cache.exists()) {
+					String[] previousStarts = FileUtil.read(cache).split("\n");
+					for(String s : previousStarts) {
+						if(s.trim().equals("")) {
+							continue;
+						}
+						Telemetry.GetDefault().log(DefaultTelemetry.StartupModeMetric.class,
+								MapBuilder.start("mode", s),
+								null);
+					}
+					cache.delete();
+					cache.deleteOnExit();
+				}
+				Telemetry.GetDefault().log(DefaultTelemetry.StartupModeMetric.class, MapBuilder.start("mode", mode),
+						null);
+
+			}
+		} catch (Throwable ex) {
+			// Well, that sucks. Normally we want to report these kinds of things, but in this case, we don't, because
+			// if telemetry is off, we don't want to bug the user about telemetry stuff at all. Oh well, not much to
+			// be done here. Though at least if we're debugging, let's report it.
+			if(IS_DEBUG) {
+				ex.printStackTrace(StreamUtils.GetSystemErr());
+			}
+		}
+	}
+
 	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public static void main(String[] args) throws Exception {
 		Implementation.setServerType(Implementation.Type.SHELL);
@@ -173,6 +223,7 @@ public class Main {
 					} else {
 						a = new String[0];
 					}
+					HandleModeStartupTelemetry(tool, false);
 					CommandLineTool t = (CommandLineTool) c.newInstance();
 					ArgumentParser.ArgumentParserResults res;
 					try {
@@ -189,6 +240,9 @@ public class Main {
 				}
 			}
 		}
+
+		AppsApiUtil.ConfigureDefaults();
+
 		ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
 		cd.addThisJar();
 		MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
@@ -250,6 +304,7 @@ public class Main {
 			if(tool.startupExtensionManager()) {
 				ExtensionManager.Startup();
 			}
+			HandleModeStartupTelemetry(args[0], true);
 			tool.execute(parsedArgs);
 			if(wasError) {
 				System.exit(1);
@@ -475,6 +530,7 @@ public class Main {
 		@Override
 		@SuppressWarnings("ResultOfObjectAllocationIgnored")
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			Telemetry.GetDefault().doNag();
 			new Interpreter(parsedArgs.getStringListArgument(), parsedArgs.getStringArgument("location-----"));
 		}
 

@@ -1131,6 +1131,11 @@ public class Meta {
 			return null;
 		}
 
+		public static long GetEngineBuildDate() {
+			Mixed m = new engine_build_date().exec(Target.UNKNOWN, null);
+			return m instanceof CNull ? 0 : ((CInt) m).getInt();
+		}
+
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			JarFile jf;

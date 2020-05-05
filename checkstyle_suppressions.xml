@@ -26,5 +26,7 @@
 	
 	<suppress checks=".*" files="com[\\/]laytonsmith[\\/]core[\\/]MainSandbox.java$"/>
 	
+	<suppress checks=".*" files="io[\\/]swagger[\\/].*\.java$"/>
+	
 	
 </suppressions>

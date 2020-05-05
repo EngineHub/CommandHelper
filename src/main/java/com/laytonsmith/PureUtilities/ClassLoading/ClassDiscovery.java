@@ -860,7 +860,7 @@ public class ClassDiscovery {
 					// This is tough. Normally, we really want to ignore this error, but during development, it can be
 					// a critical error to see to diagnose a very hard to find error. So we compromise here, and only
 					// print error details out while in debug mode.
-					System.err.println("While trying to process " + cm.toString() + ", an error occurred. It it"
+					System.err.println("While trying to process " + cm.toString() + ", an error occurred. It is"
 							+ " probably safe to ignore this error, but if you're debugging to figure out why an"
 							+ " expected class is not showing up, then this is probably why.");
 					e.printStackTrace(System.err);

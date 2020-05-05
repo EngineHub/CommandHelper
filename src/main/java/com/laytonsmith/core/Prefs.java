@@ -78,7 +78,10 @@ public final class Prefs {
 		ALLOW_DYNAMIC_SHELL("allow-dynamic-shell", Preferences.Type.BOOLEAN),
 		SCREAM_ERRORS("scream-errors", Preferences.Type.BOOLEAN),
 		INTERPRETER_TIMEOUT("interpreter-timeout", Preferences.Type.INT),
-		STRICT_MODE("strict-mode", Preferences.Type.BOOLEAN);
+		STRICT_MODE("strict-mode", Preferences.Type.BOOLEAN),
+		TELEMETRY_ON("telemetry-on", Preferences.Type.STRING),
+		TELEMETRY_PREF_DEFAULT_COLLECT("telemetry-pref-default-collect", Preferences.Type.BOOLEAN),
+		TELEMETRY_AUDIT("telemetry-audit", Preferences.Type.BOOLEAN);
 		private final String name;
 		private final Preferences.Type type;
 
@@ -110,6 +113,9 @@ public final class Prefs {
 			.setDescription("Security related settings. Please ensure you understand the impact"
 					+ " of changing these, as the defaults have been carefully selected.");
 	private static final GroupData DEBUG_GROUP = new GroupData("Debugging");
+	private static final GroupData TELEMETRY_GROUP = new GroupData("Telemetry")
+			.setDescription("Help make MethodScript better! These settings control the telemetry mechanism."
+					+ " Your privacy is extremely important, see the telemetry.ini config file for more information.");
 	/**
 	 * Initializes the global Prefs to this file.
 	 *
@@ -212,6 +218,20 @@ public final class Prefs {
 		a.add(new Preference(PNames.STRICT_MODE.config(), "false", Preferences.Type.BOOLEAN, "If set to true, forces"
 				+ " all files that do not specifically set strict mode on or off into strict mode. See the"
 				+ " documentation for more information about what strict mode does.", GENERAL_GROUP));
+		a.add(new Preference(PNames.TELEMETRY_ON.config(), "nag", PNames.TELEMETRY_ON.type(), "If set to \"nag\","
+				+ " shows a request to enable telemetry. If \"false\", telemetry is not logged, and the request to"
+				+ " enable is removed. If set to \"true\", telemetry is enabled per the telemetry config.",
+				TELEMETRY_GROUP));
+		a.add(new Preference(PNames.TELEMETRY_PREF_DEFAULT_COLLECT.config(), "on",
+				PNames.TELEMETRY_PREF_DEFAULT_COLLECT.type(), "If telemetry data collection is turned on, and you"
+						+ " update, and a new collection mechanism was added to the telemetry.ini file, and this is"
+						+ " enabled, the new value in the configuration will default to being collected. Otherwise,"
+						+ " if this is false, it will default to \"nag\". In any case, this setting doesn't matter"
+						+ " if telemetry-on is \"false\".", TELEMETRY_GROUP));
+		a.add(new Preference(PNames.TELEMETRY_AUDIT.config(), "off", PNames.TELEMETRY_AUDIT.type(), "If enabled,"
+				+ " instead of sending Telemetry data to the server, it prints to screen. This allows you to validate"
+				+ " that no more data than you expect is being sent as part of the telemetry data set.",
+				TELEMETRY_GROUP));
 		prefs = new Preferences("CommandHelper", Static.getLogger(), a);
 		prefs.init(f);
 	}
@@ -329,5 +349,21 @@ public final class Prefs {
 			i = 0;
 		}
 		return i;
+	}
+
+	public static Boolean TelemetryOn() {
+		String p = prefS(Prefs.PNames.TELEMETRY_ON);
+		if("nag".equalsIgnoreCase(p)) {
+			return null;
+		}
+		return Preferences.getBoolean(p);
+	}
+
+	public static Boolean TelemetryCollectByDefault() {
+		return prefB(Prefs.PNames.TELEMETRY_PREF_DEFAULT_COLLECT);
+	}
+
+	public static Boolean TelemetryAudit() {
+		return prefB(Prefs.PNames.TELEMETRY_AUDIT);
 	}
 }
