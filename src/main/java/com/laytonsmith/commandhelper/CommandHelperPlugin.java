@@ -131,10 +131,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public void onLoad() {
 		AppsApiUtil.ConfigureDefaults();
 		Implementation.setServerType(Implementation.Type.BUKKIT);
-		Telemetry.GetDefault().doNag();
-		Telemetry.GetDefault().metric(DefaultTelemetry.StartupMetric.class);
-		Telemetry.GetDefault().log(DefaultTelemetry.StartupModeMetric.class,
-				MapBuilder.start("mode", "CommandHelper"), null);
+
 		self = this;
 
 		CommandHelperFileLocations.setDefault(new CommandHelperFileLocations());
@@ -289,6 +286,11 @@ public class CommandHelperPlugin extends JavaPlugin {
 		ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(CommandHelperPlugin.class));
 
 		MSLog.initialize(CommandHelperFileLocations.getDefault().getConfigDirectory());
+
+		Telemetry.GetDefault().doNag();
+		Telemetry.GetDefault().metric(DefaultTelemetry.StartupMetric.class);
+		Telemetry.GetDefault().log(DefaultTelemetry.StartupModeMetric.class,
+				MapBuilder.start("mode", "CommandHelper"), null);
 
 		loadingThread = new Thread("extensionloader") {
 			@Override
