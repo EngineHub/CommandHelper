@@ -190,13 +190,13 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	}
 
 	@Override
-	public int getMaximumNoDamageTicks() {
-		return le.getMaximumNoDamageTicks();
-	}
-
-	@Override
 	public int getNoDamageTicks() {
-		return le.getNoDamageTicks();
+		// Minecraft checks for noDamageTicks > 10 before causing damage.
+		// Since this is useless and confusing, return the actual amount of immunity ticks.
+		if(le.getNoDamageTicks() < 10) {
+			return 0;
+		}
+		return le.getNoDamageTicks() - 10;
 	}
 
 	@Override
@@ -264,13 +264,9 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	}
 
 	@Override
-	public void setMaximumNoDamageTicks(int ticks) {
-		le.setMaximumNoDamageTicks(ticks);
-	}
-
-	@Override
 	public void setNoDamageTicks(int ticks) {
-		le.setNoDamageTicks(ticks);
+		// Minecraft checks for noDamageTicks > 10 before causing damage, so adjust for the actual immunity ticks.
+		le.setNoDamageTicks(ticks + 10);
 	}
 
 	@Override

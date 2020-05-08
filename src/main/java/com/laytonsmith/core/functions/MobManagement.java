@@ -2175,4 +2175,54 @@ public class MobManagement {
 			return MSVersion.V3_3_4;
 		}
 	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_entity_immunity_ticks extends EntityManagement.EntityGetterFunction {
+
+		@Override
+		public String getName() {
+			return "get_entity_immunity_ticks";
+		}
+
+		@Override
+		public String docs() {
+			return "int {entityUUID} Gets the number of immunity ticks a living entity has remaining."
+					+ " After being damaged, an entity is given 10 ticks of immunity from equal or lesser damage.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			return new CInt(Static.getLivingEntity(args[0], t).getNoDamageTicks(), t);
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_entity_immunity_ticks extends EntityManagement.EntitySetterFunction {
+
+		@Override
+		public String getName() {
+			return "set_entity_immunity_ticks";
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID, int} Sets the number of immunity ticks a living entity has remaining.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			Static.getLivingEntity(args[0], t).setNoDamageTicks(Static.getInt32(args[1], t));
+			return CVoid.VOID;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+	}
 }

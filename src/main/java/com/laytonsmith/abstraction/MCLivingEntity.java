@@ -61,8 +61,6 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 
 	int getMaximumAir();
 
-	int getMaximumNoDamageTicks();
-
 	int getNoDamageTicks();
 
 	int getRemainingAir();
@@ -88,8 +86,6 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 	void setMaxHealth(double health);
 
 	void setMaximumAir(int ticks);
-
-	void setMaximumNoDamageTicks(int ticks);
 
 	void setNoDamageTicks(int ticks);
 
