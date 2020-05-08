@@ -361,7 +361,10 @@ public class Environment {
 
 		@Override
 		public String docs() {
-			return "void {locationArray, data, [physics]} Sets the block at the location from a blockdata object.";
+			return "void {locationArray, data, [physics]} Sets the block at the location from a blockdata object."
+					+ " Blockdata can be an associative array or string format."
+					+ " If an array, a 'block' key must exist with the block material."
+					+ " All the other keys must be a blockstate and its value.";
 		}
 
 		@Override
@@ -394,7 +397,7 @@ public class Environment {
 					bd = Static.getServer().createBlockData(args[1].val());
 				}
 			} catch (IllegalArgumentException ex) {
-				throw new CREIllegalArgumentException("Cannot create block data from string: " + args[1].val(), t);
+				throw new CREIllegalArgumentException("Cannot create block data from: " + args[1].val(), t);
 			}
 			b.setBlockData(bd, physics);
 			return CVoid.VOID;

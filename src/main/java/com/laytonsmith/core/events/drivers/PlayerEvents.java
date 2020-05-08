@@ -1141,7 +1141,7 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{location: <location match> | player: <string match>} "
+			return "{location: <location match> | player: <macro>} "
 					+ "Fires when a player steps on a pressure plate or other interactable block."
 					+ "{location: The location of the block | activated: (deprecated)"
 					+ " | player: The player associated with this event}"
