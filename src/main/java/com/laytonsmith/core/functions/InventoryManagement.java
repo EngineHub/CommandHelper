@@ -2886,8 +2886,8 @@ public class InventoryManagement {
 	}
 
 	private static final String ITEM_MATCHING = " ---- The item array also serves as a map for what to compare."
-			+ " If included in the array, the values for the keys \"display\", \"lore\" and "
-			+ " \"enchants\" from the meta array, will be compared to the items in the inventory."
+			+ " If included in the array, the values for the keys \"display\", \"lore\", \"enchants\", and \"model\""
+			+ " from the meta array, will be compared to the items in the inventory."
 			+ " More keys may be added in the future.";
 
 	/**
@@ -2929,6 +2929,10 @@ public class InventoryManagement {
 					return false;
 				}
 				if(metamap.containsKey("enchants") && !im.getEnchants().equals(iim.getEnchants())) {
+					return false;
+				}
+				if(metamap.containsKey("model") && im.hasCustomModelData()
+						&& im.getCustomModelData() != iim.getCustomModelData()) {
 					return false;
 				}
 			}
