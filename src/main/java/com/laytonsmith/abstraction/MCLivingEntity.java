@@ -125,6 +125,8 @@ public interface MCLivingEntity extends MCEntity, MCProjectileSource {
 
 	void removeAttributeModifier(MCAttributeModifier modifier);
 
+	boolean isSleeping();
+
 	class MCEffect {
 
 		private MCPotionEffectType type;

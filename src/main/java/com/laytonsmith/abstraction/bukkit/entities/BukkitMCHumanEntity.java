@@ -69,11 +69,6 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 	}
 
 	@Override
-	public boolean isSleeping() {
-		return he.isSleeping();
-	}
-
-	@Override
 	public void setGameMode(MCGameMode mode) {
 		he.setGameMode(org.bukkit.GameMode.valueOf(mode.name()));
 	}

@@ -20,8 +20,6 @@ public interface MCHumanEntity extends MCInventoryHolder, MCLivingEntity, MCAnim
 
 	boolean isBlocking();
 
-	boolean isSleeping();
-
 	MCInventoryView openEnchanting(MCLocation location, boolean force);
 
 	MCInventoryView openInventory(MCInventory inventory);

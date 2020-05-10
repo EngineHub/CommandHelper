@@ -446,4 +446,9 @@ public class BukkitMCLivingEntity extends BukkitMCEntityProjectileSource impleme
 	public void removeAttributeModifier(MCAttributeModifier modifier) {
 		getAttributeInstance(modifier.getAttribute()).removeModifier((AttributeModifier) modifier.getHandle());
 	}
+
+	@Override
+	public boolean isSleeping() {
+		return le.isSleeping();
+	}
 }

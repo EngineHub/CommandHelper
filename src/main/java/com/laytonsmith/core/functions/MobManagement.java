@@ -2225,4 +2225,29 @@ public class MobManagement {
 			return MSVersion.V3_3_4;
 		}
 	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class is_entity_sleeping extends EntityManagement.EntityGetterFunction {
+
+		@Override
+		public String getName() {
+			return "is_entity_sleeping";
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {entityUUID} Gets if a living entity is sleeping or not."
+					+ " Only some entity types can sleep.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(Static.getLivingEntity(args[0], t).isSleeping());
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+	}
 }
