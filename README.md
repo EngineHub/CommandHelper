@@ -84,5 +84,4 @@ wish your configuration to be the same for both environments.
 Commandline Tools: Various command line tools are available for use, and are useful
 both for those that use the jar as a plugin, or as a general purpose language. Run
 `java -jar MethodScript.jar help` for a list of these tools, or if you have installed
-the commandline version, you can use `mscript -- help` on unix, or `mscript -Tool help`
-on Windows.
+the commandline version, you can use `mscript -- help.
