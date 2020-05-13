@@ -30,6 +30,7 @@ import com.laytonsmith.abstraction.pluginmessages.MCMessenger;
 import com.laytonsmith.core.Static;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -552,6 +553,11 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public boolean addRecipe(MCRecipe recipe) {
 		return s.addRecipe((Recipe) recipe.getHandle());
+	}
+
+	@Override
+	public boolean removeRecipe(String key) {
+		return s.removeRecipe(NamespacedKey.minecraft(key));
 	}
 
 	@Override

@@ -142,6 +142,8 @@ public interface MCServer extends AbstractionObject {
 
 	boolean addRecipe(MCRecipe recipe);
 
+	boolean removeRecipe(String key);
+
 	List<MCRecipe> getRecipesFor(MCItemStack result);
 
 	List<MCRecipe> allRecipes();

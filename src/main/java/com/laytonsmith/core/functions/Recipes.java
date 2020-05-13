@@ -147,6 +147,41 @@ public class Recipes {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	public static class remove_recipe extends recipeFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[0];
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(Static.getServer().removeRecipe(args[0].val()));
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public String getName() {
+			return "remove_recipe";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {recipe_key} Remove a certain recipe by its registered key."
+					+ " Returns whether the recipe was removed successfully or not.";
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_recipes_for extends recipeFunction {
 
 		@Override
