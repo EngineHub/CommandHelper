@@ -177,7 +177,7 @@ public class Recipes {
 		@Override
 		public String docs() {
 			return "boolean {recipe_key} Remove a certain recipe by its registered key."
-					+ " If the recipe didn't exist, nothing happens.";
+					+ " Returns whether the recipe was removed successfully or not.";
 		}
 	}
 
