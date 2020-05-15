@@ -128,7 +128,16 @@ public class ArgumentSuite {
 		if(suite.containsKey(mode)) {
 			return new ArgumentSuiteResults(mode, suite.get(mode), suite.get(mode).match(nonModeArgs));
 		} else {
-			throw new ModeNotFoundException("Mode " + mode + " was not found.");
+			String msg = "";
+			for(String key : suite.keySet()) {
+				if(StringUtils.LevenshteinDistance(key, mode) <= 2) {
+					if("".equals(msg)) {
+						msg = "\nDid you mean:\n";
+					}
+					msg += "\t" + key + "\n";
+				}
+			}
+			throw new ResultUseException("Mode " + mode + " was not found." + msg);
 		}
 	}
 
