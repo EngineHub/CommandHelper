@@ -131,6 +131,7 @@ public class ClassDiscoveryCache {
 			if(cacheOutputName != null) {
 				try {
 					synchronized(CACHE_WRITE_LOCK) {
+						cacheOutputName.getParentFile().mkdirs();
 						try(ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(cacheOutputName, false))) {
 							zos.putNextEntry(new ZipEntry("data"));
 							cache.writeDescriptor(zos);
