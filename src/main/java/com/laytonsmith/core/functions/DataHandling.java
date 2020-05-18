@@ -1421,12 +1421,13 @@ public class DataHandling {
 			ParseTree code = ast.getChildAt(ast.numberOfChildren() - 1);
 			analysis.linkScope(innerParamScope, code, env, exceptions);
 
-			// Create proc declaration.
+			// Create proc declaration in a new scope.
 			// TODO - Include proc signature (argument types and number of arguments) in declaration.
-			parentScope.addDeclaration(new Declaration(Namespace.PROCEDURE, procName, retType, ast.getTarget()));
+			Scope declScope = analysis.createNewScope(parentScope);
+			declScope.addDeclaration(new Declaration(Namespace.PROCEDURE, procName, retType, ast.getTarget()));
 
-			// Return the parent scope, as parameters and their default values are not accessible after the closure.
-			return parentScope;
+			// Return the declaration scope. Parameters and their default values are not accessible after the closure.
+			return declScope;
 		}
 
 		@Override
