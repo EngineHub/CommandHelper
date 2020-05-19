@@ -557,7 +557,12 @@ public class BukkitMCServer implements MCServer {
 
 	@Override
 	public boolean removeRecipe(String key) {
-		return s.removeRecipe(NamespacedKey.minecraft(key));
+		try {
+			return s.removeRecipe(NamespacedKey.minecraft(key));
+		} catch (NoSuchMethodError ex) {
+			// probably before 1.15.2
+			return false;
+		}
 	}
 
 	@Override
