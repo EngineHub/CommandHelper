@@ -1290,12 +1290,12 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{id: <macro> The entityID | damager: <macro>} "
+			return "{player: <string match> | id: <macro> | damager: <macro>} "
 					+ "This event is called when a player is damaged by another entity."
 					+ "{player: The player being damaged | damager: The type of entity causing damage"
 					+ " | amount: raw amount of damage caused | finalamount: health player will lose after modifiers"
 					+ " | cause: the cause of damage | data: the attacking player's name or the shooter if damager is a"
-					+ " projectile | id: EntityID of the damager | location} "
+					+ " projectile | id: The entity UUID of the damager | location} "
 					+ "{amount} "
 					+ "{player|amount|damager|cause|data|id}";
 		}
@@ -1305,6 +1305,8 @@ public class EntityEvents {
 				throws PrefilterNonMatchException {
 			if(e instanceof MCEntityDamageByEntityEvent) {
 				MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
+				Prefilters.match(prefilter, "player", ((MCPlayer) event.getEntity()).getName(),
+						PrefilterType.STRING_MATCH);
 				Prefilters.match(prefilter, "id", event.getDamager().getUniqueId().toString(), PrefilterType.MACRO);
 				Prefilters.match(prefilter, "damager", event.getDamager().getType().name(), PrefilterType.MACRO);
 				return event.getEntity() instanceof MCPlayer;
