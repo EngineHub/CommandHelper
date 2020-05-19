@@ -316,6 +316,14 @@ public class DataHandlingTest {
 				+ "@s();", fakePlayer);
 	}
 
+	@Test(timeout = 10000)
+	public void testIClosure1() throws Exception {
+		SRun("@s = 'string';\n"
+				+ "@c = iclosure(@var){msg(reflect_pull('varlist'))};\n"
+				+ "execute(@c);", fakePlayer);
+		verify(fakePlayer).sendMessage("{@var, @arguments}");
+	}
+
 	@Test
 	public void testToRadix() throws Exception {
 		assertEquals("f", SRun("to_radix(15, 16)", null));

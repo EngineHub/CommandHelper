@@ -1901,7 +1901,7 @@ public class DataHandling {
 			try {
 				myEnv = env.clone();
 			} catch (CloneNotSupportedException ex) {
-				myEnv = env;
+				throw new RuntimeException(ex);
 			}
 			for(int i = 0; i < nodes.length - 1; i++) {
 				ParseTree node = nodes[i];
@@ -2024,7 +2024,7 @@ public class DataHandling {
 			try {
 				myEnv = env.clone();
 			} catch (CloneNotSupportedException ex) {
-				myEnv = env;
+				throw new RuntimeException(ex);
 			}
 			for(int i = 0; i < nodes.length - 1; i++) {
 				ParseTree node = nodes[i];
@@ -2047,8 +2047,10 @@ public class DataHandling {
 					Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
-			CIClosure closure = new CIClosure(nodes[nodes.length - 1], myEnv, returnType, names, defaults, types, t);
-			return closure;
+			// Now that iclosure is done with the current variable list, it can be removed from the cloned environment.
+			// This ensures it's not unintentionally retaining values in memory cloned from the original scope.
+			myEnv.getEnv(GlobalEnv.class).SetVarList(null);
+			return new CIClosure(nodes[nodes.length - 1], myEnv, returnType, names, defaults, types, t);
 		}
 
 		@Override
@@ -2908,9 +2910,6 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			for(int i = 0; i < args.length; i++) {
-				args[i].val();
-			}
 			return CVoid.VOID;
 		}
 
