@@ -3,6 +3,7 @@ package com.laytonsmith.core;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CNull;
@@ -201,7 +202,12 @@ public class Procedure implements Cloneable {
 			arguments.set(i, c, t);
 			if(varIndex.size() > i) {
 				IVariable var = varIndex.get(i);
-				if(c instanceof CNull || var.getDefinedType().equals(Auto.TYPE)
+				if(c instanceof CVoid
+						&& !(var.getDefinedType().equals(Auto.TYPE) || var.getDefinedType().equals(CVoid.TYPE))) {
+					throw new CRECastException("Procudure \"" + name + "\" expects a value of type "
+							+ var.getDefinedType().val() + " in argument " + (i + 1) + ", but"
+							+ " a void value was found instead.", c.getTarget());
+				} else if(!(c instanceof CVoid) && c instanceof CNull || var.getDefinedType().equals(Auto.TYPE)
 						|| InstanceofUtil.isInstanceof(c, var.getDefinedType(), env)) {
 					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
 							var.getVariableName(), c, c.getTarget()));
