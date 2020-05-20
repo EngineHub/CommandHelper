@@ -110,8 +110,8 @@
 		</contributor>
 	</contributors>
 	<issueManagement>
-		<system>EngineHub Youtrack</system>
-		<url>https://dev.enginehub.org/youtrack/issues/CMDHELPER</url>
+		<system>Github Issues</system>
+		<url>https://github.com/EngineHub/CommandHelper/issues</url>
 	</issueManagement>
 	<ciManagement>
 		<system>TeamCity</system>

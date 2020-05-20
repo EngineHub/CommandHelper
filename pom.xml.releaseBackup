@@ -98,8 +98,8 @@
 		</contributor>
 	</contributors>
 	<issueManagement>
-		<system>sk89q's Youtrack</system>
-		<url>http://youtrack.sk89q.com/issues/CMDHELPER</url>
+		<system>Github Issues</system>
+		<url>https://github.com/EngineHub/CommandHelper/issues</url>
 	</issueManagement>
 	<ciManagement>
 		<system>TeamCity</system>

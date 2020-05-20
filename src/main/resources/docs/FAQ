@@ -24,7 +24,7 @@ an error message is unclear (or wrong) it may be a bug in CommandHelper, so jump
 forum, but try to understand what the message says before you ask for help.%>
 
 ==Dev builds, Bug reporting, Releases==
-<%QA|Where can I report bugs?|http://youtrack.sk89q.com%>
+<%QA|Where can I report bugs?|https://github.com/EngineHub/CommandHelper/issues%>
 <%QA|Where can I get the latest dev builds?|http://builds.enginehub.org/job/commandhelper/ Note that the latest build is 
 the only version that is supported however, so if you're using a random build, expect to have to upgrade if we can't 
 quickly figure out a problem you're having.%>
