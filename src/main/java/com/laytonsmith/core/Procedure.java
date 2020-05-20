@@ -204,7 +204,7 @@ public class Procedure implements Cloneable {
 				IVariable var = varIndex.get(i);
 				if(c instanceof CVoid
 						&& !(var.getDefinedType().equals(Auto.TYPE) || var.getDefinedType().equals(CVoid.TYPE))) {
-					throw new CRECastException("Procudure \"" + name + "\" expects a value of type "
+					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
 							+ var.getDefinedType().val() + " in argument " + (i + 1) + ", but"
 							+ " a void value was found instead.", c.getTarget());
 				} else if(!(c instanceof CVoid) && c instanceof CNull || var.getDefinedType().equals(Auto.TYPE)
