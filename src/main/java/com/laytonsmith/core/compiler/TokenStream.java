@@ -24,13 +24,13 @@ public class TokenStream extends LinkedList<Token> {
 		this.fileOptions = options;
 	}
 
-	public TokenStream(List<Token> list, String fileOptions) {
+	public TokenStream(List<Token> list, String fileOptions, Map<String, String> defaults) {
 		super(list);
-		this.fileOptions = parseFileOptions(fileOptions);
+		this.fileOptions = parseFileOptions(fileOptions, defaults);
 	}
 
-	public void setFileOptions(String fileOptions) {
-		this.fileOptions = parseFileOptions(fileOptions);
+	public void setFileOptions(String fileOptions, Map<String, String> defaults) {
+		this.fileOptions = parseFileOptions(fileOptions, defaults);
 	}
 
 	public void setFileOptions(FileOptions fileOptions) {
@@ -41,9 +41,9 @@ public class TokenStream extends LinkedList<Token> {
 		return this.fileOptions;
 	}
 
-	private static FileOptions parseFileOptions(String options) {
+	public static FileOptions parseFileOptions(String options, Map<String, String> defaults) {
 		//Only ; needs escaping. Everything else is just trimmed, and added to the map.
-		Map<String, String> map = new HashMap<>();
+		Map<String, String> map = new HashMap<>(defaults);
 		boolean inKey = true;
 		StringBuilder buffer = new StringBuilder();
 		String keyName = "";

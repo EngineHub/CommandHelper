@@ -340,6 +340,8 @@ public class Script {
 						+ m.val(), m.getTarget());
 			}
 
+			env.getEnv(GlobalEnv.class).SetFileOptions(c.getFileOptions());
+
 			ArrayList<Mixed> args = new ArrayList<>();
 			try {
 				if(f.isRestricted() && !Static.hasCHPermission(f.getName(), env)) {

@@ -6,6 +6,7 @@ import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -192,7 +193,7 @@ class LexerObject {
 
 	public TokenStream lex() throws ConfigCompileException {
 		if(tokenList != null) {
-			return new TokenStream(new ArrayList<Token>(tokenList), "");
+			return new TokenStream(new ArrayList<Token>(tokenList), "", new HashMap<>());
 		} else {
 			tokenList = new ArrayList<Token>();
 		}
@@ -513,7 +514,7 @@ class LexerObject {
 			buffer(c);
 		}
 		parseBuffer();
-		return new TokenStream(new ArrayList<Token>(tokenList), fileopts.toString());
+		return new TokenStream(new ArrayList<Token>(tokenList), fileopts.toString(), new HashMap<>());
 	}
 
 	/**

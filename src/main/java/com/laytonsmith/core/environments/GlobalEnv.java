@@ -10,6 +10,7 @@ import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CNull;
@@ -72,6 +73,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private final WeakHashMap<Thread, StackTraceManager> stackTraceManagers = new WeakHashMap<>();
 	private final MutableObject<Map<String, Mixed>> runtimeSettings
 			= new MutableObject<>(new ConcurrentHashMap<>());
+	private FileOptions fileOptions;
 
 	/**
 	 * Creates a new GlobalEnvironment. All fields in the constructor are required, and cannot be null.
@@ -565,5 +567,23 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		} else {
 			runtimeSettings.getObject().put(name, value);
 		}
+	}
+
+	/**
+	 * The file options should be set before execution of each function, so the function can have
+	 * access to the current parse tree's file options.
+	 * @param options
+	 */
+	public void SetFileOptions(FileOptions options) {
+		this.fileOptions = options;
+	}
+
+	/**
+	 * The FileOptions are set for each function, so calling this returns the file options for the current
+	 * function execution, which will vary from place to place.
+	 * @return
+	 */
+	public FileOptions GetFileOptions() {
+		return this.fileOptions;
 	}
 }

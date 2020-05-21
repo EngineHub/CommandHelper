@@ -1,19 +1,29 @@
 File options are a way to granularly control options for a single file. Some file options affect the compiler directly,
-others are simply used by the reflection mechanism to provide info during runtime. Unrecognized file options are
-ignored, but are otherwise not an error, however, you should prefix all custom file options with "x-" to prevent future
-conflicts if new file options are introduced.
+others are simply used by the reflection mechanism to provide info during runtime, or for future readers of the code.
+Unrecognized file options are ignored, but are otherwise not an error, however, you should prefix all custom file
+options with "x-" to prevent future conflicts if new file options are introduced.
 
 The general format of a file option is: <code>option: value;</code> where the semicolon is optional for the last value.
 However, some file options are booleans. For booleans, either "true" or "on" are considered positive values, and "false"
 or "off" are considered negative values. Furthermore, leaving the value off entirely, e.g. <code>option;</code> is
 equivalent to <code>option: on;</code>
 
-The file options must be defined at the top of the file, and can only be proceeded by comments, and start with 
-<code>&lt;!</code> and end with 
+The file options must be defined at the top of the file, and can only be proceeded by comments, and start with
+<code>&lt;!</code> and end with
 <code>&gt;</code>. Newlines within the file options are acceptable. If, within the value, you need a literal
 &gt; or semicolon, you must escape it with \, so <code>\&gt;</code> or <code>\;</code>.
 
-Some examples:
+== Inheritance ==
+
+Default file options can be supplied on a per directory basis, by creating a file named <code>.msfileoptions</code> in
+any directory. Scripts in that directory as well as subdirectories will then use the defaults set in this file. If there
+are multiple .msfileoption files in the parent directory chain, they are read in from root to subfolder, using the value
+set in the lowest file. That is, if you have a file <code>/.msfileoptions</code> and
+<code>/scripts/.msfileoptions</code>, with options that are set in both files, <code>/scripts/.msfileoptions</code> will
+take precedence. In any case, the file options in the file itself always take precedence.
+
+The format of this file is the same as for file options directly in source code, except you leave off the beginning
+<code>&lt;!</code> and end <code>&gt;</code>.
 
 == Examples ==
 <%CODE|<! strict >%>
@@ -25,7 +35,7 @@ Enables strict mode.
 >%>
 Enables strict mode and adds a description to the file
 
-<%CODE|<!    
+<%CODE|<!
     strict: off;
     description: Description
 >%>
@@ -40,7 +50,7 @@ mode actually does.
 
 == suppressWarnings ==
 
-Suppresses the given compiler warnings for this file. The list should be comma separated, but can contain multiple 
+Suppresses the given compiler warnings for this file. The list should be comma separated, but can contain multiple
 types.
 
 <%SUPPRESS_WARNINGS_LIST%>
@@ -55,18 +65,27 @@ spaces in file paths are allowed.
 
 == author ==
 
-The author of this file. This value is not used currently, but will eventually be available in the reflection 
-information.
+The author of this file. This value is not used by the system, but is available using {{function|reflect_pull}}.
 
 == created ==
 
-The date this file was created. This value is not used by the compiler, but is perhaps useful information for future 
-readers of the script. This will eventually be available in the reflection information.
+The date this file was created. This value is not used by the compiler, but is perhaps useful information for future
+readers of the script. This value is accessible via {{function|reflect_pull}}.
 
 == description ==
 
-A description of this file. This value is not used by the compiler, but is perhaps useful information for future 
-readers of the script. This will eventually be available in the reflection information.
+A description of this file. This value is not used by the compiler, but is perhaps useful information for future
+readers of the script. This value is accessible via {{function|reflect_pull}}.
+
+== copyright ==
+
+The copyright information for the file. This value is accessible via {{function|reflect_pull}}.
+
+== license ==
+
+The license under which the code is released. This can be the full license text or just the name of the license,
+or perhaps a link to the full license file. Generally, proprietary code does not need a license.
+This value is accessible via {{function|reflect_pull}}.
 
 == requiredExtensions ==
 

@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.OperatorPreferred;
 import com.laytonsmith.annotations.breakable;
@@ -59,6 +60,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EmptyStackException;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -134,7 +136,7 @@ public final class MethodScriptCompiler {
 			env = env.cloneAndAdd(new CompilerEnvironment());
 		}
 		if(script.isEmpty()) {
-			return new TokenStream(new LinkedList<>(), "");
+			return new TokenStream(new LinkedList<>(), "", new HashMap<>());
 		}
 		if((int) script.charAt(0) == 65279) {
 			// Remove the UTF-8 Byte Order Mark, if present.
@@ -916,7 +918,32 @@ public final class MethodScriptCompiler {
 		}
 
 		// Set file options
-		tokenList.setFileOptions(fileOptions.toString());
+		{
+			Map<String, String> defaults = new HashMap<>();
+			List<File> dirs = new ArrayList<>();
+			if(file != null) {
+				File f = file.getParentFile();
+				while(true) {
+					if(f == null) {
+						break;
+					}
+					File fileOptionDefaults = new File(f, ".msfileoptions");
+					if(fileOptionDefaults.exists()) {
+						dirs.add(fileOptionDefaults);
+					}
+					f = f.getParentFile();
+				}
+			}
+			Collections.reverse(dirs);
+			for(File d : dirs) {
+				try {
+					defaults.putAll(TokenStream.parseFileOptions(FileUtil.read(d), defaults).getRawOptions());
+				} catch(IOException ex) {
+					throw new ConfigCompileException("Cannot read " + d.getAbsolutePath(), Target.UNKNOWN, ex);
+				}
+			}
+			tokenList.setFileOptions(fileOptions.toString(), defaults);
+		}
 		// Make sure that the file options are the first non-comment code in the file
 		{
 			boolean foundCode = false;

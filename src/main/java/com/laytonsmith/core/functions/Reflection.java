@@ -154,7 +154,32 @@ public class Reflection {
 					+ " needed, this can be provided to the maintainers to associate your data with you. If"
 					+ " you wish for your telemetry data to remain anonymous, do not provide this key to the"
 					+ " maintainers. (People without access to the telemetry system cannot do anything with"
-					+ " the key anyways.)"
+					+ " the key anyways.)\n"
+					+ "|-\n"
+					+ "| file_options_author\n"
+					+ "|\n"
+					+ "| Returns the author name, as set in the file options. Empty string is returned if it"
+					+ " is not set."
+					+ "|-\n"
+					+ "| file_options_created\n"
+					+ "|\n"
+					+ "| Returns the created date, as set in the file options. Empty string is returned if it"
+					+ " is not set."
+					+ "|-\n"
+					+ "| file_options_description\n"
+					+ "|\n"
+					+ "| Returns the file description, as set in the file options. Empty string is returned if it"
+					+ " is not set."
+					+ "|-\n"
+					+ "| file_options_copyright\n"
+					+ "|\n"
+					+ "| Returns the copyright information, as set in the file options. Empty string is returned if it"
+					+ " is not set."
+					+ "|-\n"
+					+ "| file_options_license\n"
+					+ "|\n"
+					+ "| Returns the code license, as set in the file options. Empty string is returned if it"
+					+ " is not set."
 					+ "|}";
 		}
 
@@ -284,6 +309,21 @@ public class Reflection {
 					return CNull.NULL;
 				}
 				return new CString(session, t);
+			} else if("file_options_author".equalsIgnoreCase(param)) {
+				String author = env.getEnv(GlobalEnv.class).GetFileOptions().getAuthor();
+				return new CString(author, t);
+			} else if("file_options_created".equalsIgnoreCase(param)) {
+				String created = env.getEnv(GlobalEnv.class).GetFileOptions().getCreated();
+				return new CString(created, t);
+			} else if("file_options_description".equalsIgnoreCase(param)) {
+				String description = env.getEnv(GlobalEnv.class).GetFileOptions().getDescription();
+				return new CString(description, t);
+			} else if("file_options_copyright".equalsIgnoreCase(param)) {
+				String copyright = env.getEnv(GlobalEnv.class).GetFileOptions().getCopyright();
+				return new CString(copyright, t);
+			} else if("file_options_license".equalsIgnoreCase(param)) {
+				String license = env.getEnv(GlobalEnv.class).GetFileOptions().getLicense();
+				return new CString(license, t);
 			}
 
 			throw new CREFormatException("The arguments passed to " + getName() + " are incorrect. Please check them and try again.", t);
