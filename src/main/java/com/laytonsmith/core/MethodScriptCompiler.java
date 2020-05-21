@@ -938,7 +938,7 @@ public final class MethodScriptCompiler {
 			for(File d : dirs) {
 				try {
 					defaults.putAll(TokenStream.parseFileOptions(FileUtil.read(d), defaults).getRawOptions());
-				} catch(IOException ex) {
+				} catch (IOException ex) {
 					throw new ConfigCompileException("Cannot read " + d.getAbsolutePath(), Target.UNKNOWN, ex);
 				}
 			}
