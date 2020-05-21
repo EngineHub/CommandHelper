@@ -140,6 +140,9 @@ public class ObjectDefinition implements Commentable {
 	 * @return
 	 */
 	public Set<ObjectModifier> getObjectModifiers() {
+		if(objectModifiers.isEmpty()) {
+			return EnumSet.noneOf(ObjectModifier.class);
+		}
 		return EnumSet.copyOf(objectModifiers);
 	}
 

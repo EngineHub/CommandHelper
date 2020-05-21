@@ -160,10 +160,10 @@ public class ObjectManagement {
 			return n;
 		}
 
-		private CArray evaluateArrayNoNull(ParseTree data, Target t) {
+		private CArray evaluateArrayNoNull(ParseTree data, String component, Target t) {
 			Mixed d = evaluateArray(data, t);
 			if(d instanceof CNull) {
-				throw new CREClassDefinitionError("Unexpected null value, expected an array", t);
+				throw new CREClassDefinitionError("Unexpected null value for " + component + ", expected an array", t);
 			}
 			return (CArray) d;
 		}
@@ -187,8 +187,21 @@ public class ObjectManagement {
 
 		private Mixed evaluateMixed(ParseTree data, Target t) {
 			if(data.isDynamic()) {
-				throw new CREClassDefinitionError("Expected a non-dynamic value, but " + data.getData()
-						+ " was found.", t);
+			// TODO: Since CClassType doesn't know about other classes yet, we can't allow hardcoding yet, as it's
+			// a chicken and egg problem. Eventually, when we get a two pass compiler, this can be re-allowed, but
+			// until then, we have to accept dynamic input. "Dynamic input" in this case is just the
+			// __to_class_reference__ function however.
+//				throw new CREClassDefinitionError("Expected a non-dynamic value, but " + data.getData()
+//						+ " was found.", t);
+				if(!(data.getData() instanceof CFunction) || !data.getData().val().equals("__to_class_reference__")) {
+					throw new CREClassDefinitionError("Expected __to_class_reference__, but found " + data.getData()
+							+ " instead", t);
+				}
+				return new __to_class_reference__().exec(t, null,
+						data.getChildren().stream()
+								.map((parseTree -> parseTree.getData()))
+								.collect(Collectors.toList())
+								.toArray(new Mixed[1]));
 			}
 			return data.getData();
 		}
@@ -200,7 +213,7 @@ public class ObjectManagement {
 					AccessModifier.class, t);
 
 			// 1 - Object Modifiers
-			Set<ObjectModifier> objectModifiers = evaluateArrayNoNull(nodes[1], t).asList().stream()
+			Set<ObjectModifier> objectModifiers = evaluateArrayNoNull(nodes[1], "object modifiers", t).asList().stream()
 					.map((item) -> ArgumentValidation.getEnum(item, ObjectModifier.class, t))
 					.collect(Collectors.toSet());
 
@@ -214,7 +227,7 @@ public class ObjectManagement {
 			// 4 - Superclasses
 			Set<UnqualifiedClassName> superclasses = new HashSet<>();
 			{
-				CArray su = evaluateArrayNoNull(nodes[4], t);
+				CArray su = evaluateArrayNoNull(nodes[4], "superclasses", t);
 				if(!type.canUseExtends() && !su.isEmpty()) {
 					throw new CREClassDefinitionError("An object definition of type " + type.name().toLowerCase()
 							+ " may not extend"
@@ -237,7 +250,7 @@ public class ObjectManagement {
 			// 5 - Interfaces
 			Set<UnqualifiedClassName> interfaces = new HashSet<>();
 			{
-				CArray su = evaluateArrayNoNull(nodes[5], t);
+				CArray su = evaluateArrayNoNull(nodes[5], "interfaces", t);
 				for(Mixed m : su) {
 					if(m instanceof CClassType) {
 						interfaces.add(new UnqualifiedClassName(((CClassType) m).getFQCN()));
@@ -278,6 +291,7 @@ public class ObjectManagement {
 
 			// 10 - Class Comment
 			SmartComment classComment = null;
+			// TODO
 
 			Class<? extends Mixed> nativeClass = null;
 			if(objectModifiers.contains(ObjectModifier.NATIVE)) {
@@ -568,6 +582,27 @@ public class ObjectManagement {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+	}
+
+	@api
+	@hide("This is only used internally to solve the chicken and egg problem")
+	public static class __to_class_reference__ extends DummyFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREClassDefinitionError.class};
+		}
+
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			try {
+				return CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(args[0].val()));
+			} catch (ClassNotFoundException ex) {
+				throw new CREClassDefinitionError(ex.getMessage(), t, ex);
+			}
 		}
 
 	}
