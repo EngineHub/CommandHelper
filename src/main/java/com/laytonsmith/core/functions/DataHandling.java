@@ -290,7 +290,7 @@ public class DataHandling {
 						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR,
 								"The variable " + name + " is hiding another value of the"
 								+ " same name in the main scope.", t);
-					} else {
+					} else if(t == Target.UNKNOWN || t != list.get(name, t, true, env).getDefinedTarget()) {
 						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, name + " was already defined at "
 								+ list.get(name, t, true, env).getDefinedTarget() + " but is being redefined.", t);
 					}

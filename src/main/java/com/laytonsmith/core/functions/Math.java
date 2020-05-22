@@ -638,7 +638,7 @@ public class Math {
 				if(v.ival() instanceof CMutablePrimitive) {
 					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
 				}
-				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t, env);
+				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return v;
 			} else if(Static.anyDoubles(args[0])) {
@@ -762,7 +762,7 @@ public class Math {
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t, env);
+				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return oldVal;
 			} else if(Static.anyDoubles(args[0])) {
@@ -884,7 +884,7 @@ public class Math {
 				if(v.ival() instanceof CMutablePrimitive) {
 					newVal = ((CMutablePrimitive) v.ival()).setAndReturn(newVal, t);
 				}
-				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t, env);
+				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return v;
 			} else if(Static.anyDoubles(args[0])) {
@@ -1008,7 +1008,7 @@ public class Math {
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, t, env);
+				v = new IVariable(v.getDefinedType(), v.getVariableName(), newVal, v.getDefinedTarget(), env);
 				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return oldVal;
 			} else if(Static.anyDoubles(args[0])) {
