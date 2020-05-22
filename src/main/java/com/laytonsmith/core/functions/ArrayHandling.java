@@ -171,9 +171,17 @@ public class ArrayHandling {
 						//Convert negative indexes
 						if(start < 0) {
 							start = ca.size() + start;
+							if(start < 0) {
+								throw new CREIndexOverflowException("The element at index \""
+										+ ((CSlice) index).getStart() + "\" does not exist", t);
+							}
 						}
 						if(finish < 0) {
 							finish = ca.size() + finish;
+							if(finish < 0) {
+								throw new CREIndexOverflowException("The element at index \""
+										+ ((CSlice) index).getFinish() + "\" does not exist", t);
+							}
 						}
 						CArray na = ca.createNew(t);
 						if(finish < start) {
@@ -201,6 +209,10 @@ public class ArrayHandling {
 							if(iindex < 0) {
 								//negative index, convert to positive index
 								iindex = ca.size() + iindex;
+								if(iindex < 0) {
+									throw new CREIndexOverflowException("The element at index \"" + index.val()
+											+ "\" does not exist", t);
+								}
 							}
 							return ca.get(iindex, t);
 						} else {
