@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.annotations.DocumentLink;
@@ -1502,6 +1503,113 @@ public class DataHandling {
 			}
 			return m + ")";
 		}
+
+	}
+
+	@api
+	@DocumentLink(0)
+	public static class include_dir extends AbstractFunction implements Optimizable {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public String getName() {
+			return "include_dir";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "nothing {directory, [recursive]} Works like include, but takes a directory, and includes all"
+					+ " files within the directory. Recursive defaults to false, but if true, recurses down into"
+					+ " all subdirectories as well. As an implementation note, this function is fully resolved"
+					+ " at compile time, thus the inputs must be hardcoded. The directories are scanned at compile"
+					+ " time, and replaced with individual includes for each .ms file found.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children,
+				FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() > 2) {
+				throw new ConfigCompileException("Unexpected arguments to " + getName(), t);
+			}
+			String dir = children.get(0).getData().val();
+			File file = Static.GetFileFromArgument(dir, env, t, null);
+			if(!file.isDirectory()) {
+				throw new ConfigCompileException("Path passed to " + getName()
+						+ " must be a directory which exists.", t);
+			}
+			boolean recurse = false;
+			if(children.size() > 1) {
+				recurse = ArgumentValidation.getBooleanObject(children.get(1).getData(), t);
+			}
+
+			ParseTree g = new ParseTree(new CFunction("g", t), fileOptions);
+			List<File> msFiles = new ArrayList<>();
+
+			if(recurse) {
+				try {
+					FileUtil.recursiveFind(file, ((f) -> {
+						if(f.isFile() && f.getAbsolutePath().endsWith(".ms")) {
+							msFiles.add(f);
+						}
+					}));
+				} catch (IOException ex) {
+					throw new ConfigCompileException(ex.getMessage(), t, ex);
+				}
+			} else {
+				for(File f : file.listFiles()) {
+					if(f.isFile() && f.getAbsolutePath().endsWith(".ms")) {
+						msFiles.add(f);
+					}
+				}
+			}
+
+			for(File f : msFiles) {
+				ParseTree include = new ParseTree(new CFunction("include", t), fileOptions);
+				include.addChild(new ParseTree(new CString(f.getAbsolutePath(), t), fileOptions));
+				g.addChild(include);
+			}
+
+			return g;
+		}
+
+
 
 	}
 

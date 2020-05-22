@@ -37,6 +37,5 @@
         <org-netbeans-modules-editor-indent.text.plain.CodeStyle.project.wrapArrayInit>WRAP_ALWAYS</org-netbeans-modules-editor-indent.text.plain.CodeStyle.project.wrapArrayInit>
         <org-netbeans-modules-editor-indent.text.plain.CodeStyle.project.wrapArrayInitItems>WRAP_ALWAYS</org-netbeans-modules-editor-indent.text.plain.CodeStyle.project.wrapArrayInitItems>
         <org-netbeans-modules-editor-indent.text.plain.CodeStyle.project.wrapObjects>WRAP_ALWAYS</org-netbeans-modules-editor-indent.text.plain.CodeStyle.project.wrapObjects>
-        <netbeans.hint.jdkPlatform>AdoptOpenJDK_1.8</netbeans.hint.jdkPlatform>
     </properties>
 </project-shared-configuration>
