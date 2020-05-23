@@ -309,4 +309,9 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		return Construct.typeof(this);
 	}
 
+	@Override
+	public boolean getBooleanValue(Target t) {
+		return true;
+	}
+
 }

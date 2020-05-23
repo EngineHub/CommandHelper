@@ -327,6 +327,10 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 				};
 			}
 
+			@Override
+			public boolean getBooleanValue(Target t) {
+				return true;
+			}
 
 		};
 	}
@@ -521,5 +525,10 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	 * @return
 	 */
 	protected abstract List<MEnumTypeValue> getValues();
+
+	@Override
+	public boolean getBooleanValue(Target t) {
+		return true;
+	}
 
 }

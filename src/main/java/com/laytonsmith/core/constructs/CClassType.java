@@ -616,4 +616,9 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		return nativeClass;
 	}
 
+	@Override
+	public boolean getBooleanValue(Target t) {
+		return true;
+	}
+
 }
