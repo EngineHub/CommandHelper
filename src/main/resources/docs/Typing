@@ -1,0 +1,346 @@
+
+MethodScript is an optionally strongly typed language. This means that variables and procedure/closure input and outputs
+declare the '''type''' that they are, and only values of that type are allowed to be assigned to that variable, or
+returned by the procedure/closure. It is optionally strongly typed, because - outside of strict mode - it is not
+required that you provide a type.
+
+<%NOTE|Currently, the implementation is in the runtime, meaning that you have to run the code before you'll see errors.
+Work is ongoing to make this part of the compiler itself, so the errors can be caught earlier in the process.%>
+
+== Variable Typing ==
+
+The simplest example is this:
+
+<%CODE|
+string @s = "string";
+%>
+
+We are actually doing two separate operations in this one line, we are ''declaring'' a new variable, <code>@s</code>,
+and stating that it is of type <code>string</code>. Secondly, we are assigning the string <code>"string"</code> to the
+variable. This seems a bit silly at first, since it seems like we're duplicating information, after all, we can clearly
+see that it's a string being assigned. However, consider later code that then uses @s, and perhaps tries to re-assign
+the value.
+
+<%CODE|
+@s = array();
+%>
+
+Now, we would get the error: "ms.lang.CastException: @s is of type ms.lang.string, but a value of type ms.lang.array
+was assigned to it."
+
+This can help prevent future errors in your code, by preventing use of a value that isn't intended. Sometimes this can
+help catch bugs that would otherwise be extremely difficult to catch otherwise. A clearer example of this will be shown
+later.
+
+== Procedure and Closure Typing ==
+
+Both the inputs and output of both procedures and closures can be typed.
+
+<%CODE|
+string proc _myProc(int @a) {
+	return(string(@a));
+}
+
+closure @c = int closure(string @in) {
+	return(integer(@in));
+};
+%>
+
+In both these cases, we have declared the type on the input and output. We have stated that the procedure _myProc must
+return a value of type string, and accept an input parameter of type int. Likewise, we have stated that the closure must
+return a value of type int, and takes an input of type string. (Incidentally, we have also defined the variable @c,
+which must be of type closure.)
+
+=== <code>void</code> Type ===
+
+Specifically for procedures and closures, it may be that they do not return a value at all. These are said to
+''return void'', meaning that they don't have a return type. You can explicitely declare this with the <code>void</code>
+type.
+
+<%CODE|
+void proc _myProc() {
+	msg('Hello World!');
+	return(); // This is optional, procs and closures that don't have a return are implied to return void.
+}
+%>
+
+== Putting it together ==
+
+This becomes much clearer when we start adding types everywhere. Consider the following example:
+
+<%CODE|
+string proc _getUsername() {
+	return(import('user'));
+}
+
+string @username = _getUsername();
+msg("Hello @username!");
+%>
+
+In this example, if the value exported to 'username' had been set as something other than a string, we would fail on
+line 2. Perhaps accidentally, we had stored an array to the value, in that case, the user would be messaged the whole
+array. This can prevent us from continuing with the code after we have gotten into an unexpected state. Once these type
+errors are moved into the compiler, it makes even more sense, because then we would be able to catch these errors even
+faster, and not require the code to ever be run before we found the error.
+
+== Subclasses ==
+
+Each defined type is actually a subclass of one or more ''parent types'', (known as ''superclasses'')
+with the exception of the root type, <code>mixed</code>, which has no superclasses. For any given type,
+it is always allowed to replace it with a subtype of that class with no error. Consider the following:
+
+<%CODE|
+int @i = 1;
+number @n = @i;
+%>
+
+This is valid because <code>int</code> is a subtype of <code>number</code>. We can discover the superclasses for a
+given type a number of ways, but we can use {{function|reflect_type}} to get this information.
+We can get the full superclass chain with the following code:
+
+<%CODE|
+
+ClassType @type = int; // We could use class_type('ms.lang.int') if we wanted to grab the type dynamically
+
+msg("Finding superclasses for @type");
+
+while(true) {
+	@super = reflect_type(@type)['superclasses'];
+	if(length(@super) == 0) {
+		break();
+	}
+	msg(@super);
+	@type = @super[0]; // Just grab the first one, there can be multiple though.
+}
+
+%>
+
+== <code>auto</code> Type and <code>mixed</code> Type ==
+
+There is a special type called <code>auto</code>, which essentially means "don't use the typing system on this value."
+In fact, values that are declared without a type are actually declared as type <code>auto</code>! These two declarations
+are exactly the same:
+
+<%CODE|
+@b = 'test';
+auto @c = 'test';
+%>
+
+We can prove this by using the {{function|always_trace}} function:
+
+<%CODE|
+always_trace(@b); // <<main code>>:Interpreter:1.1: auto (actual type ms.lang.string, length: 4) @b: test
+always_trace(@c); // <<main code>>:Interpreter:1.1: auto (actual type ms.lang.string, length: 4) @c: test
+%>
+
+Values that are of type auto bypass the compilation checks, though they may still cause errors at runtime.
+
+<%CODE|
+auto @s = 'string';
+array @a = @s; // Not a compile error but will be a runtime error.
+%>
+
+Initially, one might wonder the difference between using <code>auto</code> and <code>mixed</code>. Using mixed still
+follows the type system, and requires manual casting to convert values.
+
+<%CODE|
+mixed @m = 'string'; // Valid, string is a subtype of mixed
+string @s = @m; // Currently valid, but will become invalid with the compiler type system. (See caveats below.)
+string @r = string(@m); // Will always be valid.
+
+auto @a = 'string';
+string @t = @a; // Will always be valid.
+%>
+
+Effectively, <code>auto</code> types are assumed to be the correct type no matter how they're being used. Types stored
+in <code>mixed</code> must first be cast to the correct type. Both approaches have merit, and so it depends on what
+you're doing as to what mechanism you should use.
+
+== <code>null</code> ==
+
+Null is a special value which can be assigned to all types. Also, note that ''forward declarations'', that is, where
+you define a value but don't set it, default to null.
+
+<%CODE|
+string @a;
+msg(@a); // null
+
+string @b = null;
+msg(@b); // null
+%>
+
+== Helper Functions ==
+
+When dealing with types, it's useful to note some various helper functions.
+
+=== <code>instanceof</code> ===
+
+{{function|instanceof}} tells you if the ''concrete type'' of a value is of a certain type.
+This is a runtime operation, so it has nothing to do with the type that the variable was declared with, but the type
+that the value itself is right now.
+
+<%CODE|
+mixed @m = 'string';
+if(@m instanceof string) {
+	msg("It's a string");
+} else if(@m instanceof int) {
+	msg("It's an int");
+}
+%>
+
+=== <code>typeof</code> ===
+
+Similar to {{function|instanceof}} we can simply find out the current concrete type.
+
+<%CODE|
+mixed @m = 'string';
+msg(typeof(@m)); // ms.lang.string
+%>
+
+{{function|typeof}} returns the ClassType object, which we can then use to gather data about a particular type:
+
+<%CODE|
+mixed @m = 'string';
+msg(reflect_type(typeof(@m)));
+/*{
+	docs: A ClassType is a value that represents an object type. This includes primitives or other value types.,
+	fqcn: ms.lang.string,
+	interfaces: {ms.lang.Iterable},
+	isNative: true,
+	name: string,
+	package: ms.lang,
+	superclasses: {ms.lang.primitive}
+}*/
+
+// We can also get other information about it with always_trace:
+
+msg(always_trace(@m));
+// <<main code>>:Interpreter:1.26: ms.lang.mixed (actual type ms.lang.string, length: 6) @m: string
+%>
+
+== Caveats ==
+There are unfortunately a few loose ends that are caveats at this stage of implementation, which are planned to be
+implemented, but aren't complete yet.
+
+<%NOTE|Not all of the code listed below actually works, or is an example of bad code, and is for demonstration purposes
+only. Read the text carefully before applying any examples here.%>
+
+=== Casting ===
+
+Casting is the act of bypassing various compiler checks when dealing with subclasses. This bypasses some of the type
+safety, but is required in some cases. Consider the following code from one of the examples above.
+
+<%CODE|
+mixed @m = 'string'; // Valid, string is a subtype of mixed
+string @s = @m; // Currently valid, but will become invalid with the compiler type system.
+%>
+
+The reason this works is because currently, the type system is ''type hinting'', not strong typing. Since the type
+system is implemented at runtime, rather than at compile time, we don't look at the second line of code until after
+the first line is run. In this case, we see that @m is in fact a string, and so we allow it to be assigned to @s.
+
+Eventually, this will be corrected, and will be an error. However, @m actually does contain a string, so how would we
+make this work? Through an act called ''casting''. When we ''cast'' a value, we tell the compiler that we are positive
+that the current value is of the given type. We may have determined this through clever use of instanceof or simply
+hardcoded a particular value, but we're essentially telling the compiler to trust us, and don't cause an error.
+The syntax will be:
+
+<%CODE|
+mixed @m = 'string';
+string @s = @m as string;
+%>
+
+Casting upward is not allowed, because subclasses are always a valid instance of a superclass.
+
+<%CODE|
+string @s = 'string';
+mixed @m = @s; // No cast necessary, string is a mixed.
+%>
+
+Note that some casts will be invalid anyways. If there's simply no way for a value to be an instance of the particular
+type, that cast won't be allowed.
+
+<%CODE|
+string @s = 'string';
+array @a = @s as array; // Compile error, string cannot be cast to array, since string is not a subtype of array.
+%>
+
+=== Cross Casting ===
+
+Cross casting is a runtime conversion of values from one type to another. Currently, cross casting is implemented
+opaquely in primitive objects, but is not "exposed" to the end user in a formal way. Consider the following code:
+
+<%CODE|
+msg('1' == 1); // true
+%>
+
+In this case, we are comparing a string and an integer to each other, and find that they are in fact equal. Why is this?
+This is due to cross casting. We effectively convert the string value to an integer, then compare it. Formally speaking,
+this is due to ''cross casting''. Eventually, string will be formally declared as cross castable to integers, and vice
+versa. This means that when we try to cast, we will make a runtime conversion to the expected value.
+
+<%CODE|
+string @s = '1';
+int @i = @s as int; // Cross cast, since int does not decend from string, but string declares it can cross cast to int
+%>
+
+This casting is not automatic for typed variables, you must explicitely provide the cast to do the conversion. However,
+this is not true for values of type <code>auto</code>, whether explicitely typed as such or implicitely typed due to no
+type being provided. Consider the same code as above but with @s being auto:
+
+<%CODE|
+auto @s = '1';
+int @i = @s; // At runtime, we see that @s is a string, but we are expecting an int. Since @s is auto, we automatically
+			// cross cast it, making this effectively the same as the above example.
+%>
+
+However, this functionality is not yet implemented, meaning the code will cause an error, despite it intended to be
+valid code. We currently get <code>ms.lang.CastException: @i is of type ms.lang.int, but a value of
+type ms.lang.string was assigned to it.</code>
+
+In the meantime, to work around this, you must explicitely cast the value using one of the various manual cast methods
+that each primitive has. In this case, {{function|integer}}.
+
+<%CODE|
+auto @s = '1';
+int @i = integer(@s);
+%>
+
+This will continue to work even after this feature is implemented, so there is no code migration risk by doing it this
+way. It's also worth noting that literals in code will be considered auto for the purposes of cross casting, so things
+like this will also eventually work:
+
+<%CODE|
+int @i = '1';
+
+// This will work even further in the future, once effectively final calculations are implemented
+string @s = '1';
+int @i = @s; // We know that @s is equal to '1' at this point, because it hasn't been changed anywhere above here
+			// and the declaration, so we can treat it as if we had typed int @i = '1';
+%>
+
+If you would like to read more about how this feature is intended to work, see the design document
+[[Cross_Casting|here]].
+
+=== Declarations within Expressions ===
+
+Currently, the following is possible, but is officially considered "undefined behavior", meaning that it is subject to
+change or removal in future versions:
+
+<%CODE|
+int @a = 1 + (int @b = 3);
+msg(@a); // 4
+msg(@b); // 3
+%>
+
+Do not rely on this behavior, as assignments are intended to be separate statements. Instead, rewrite the code to the
+following:
+
+<%CODE|
+int @b = 3;
+int @a = 1 + @b;
+msg(@a); // 4
+msg(@b); // 3
+%>
+
+This is easier to read in the future anyways.

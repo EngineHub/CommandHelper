@@ -1,4 +1,6 @@
-Often times you may find yourself with a unique set of predefined constants, for instance, 
+{{unimplemented}}
+
+Often times you may find yourself with a unique set of predefined constants, for instance,
 compass directions NORTH, SOUTH, EAST, and WEST, or days of the week. Additionally, you may
 have a set of these enums, which can be represented as a bit mask. For these two situations,
 you should use the ''enum'' and ''mask'' types, respectively.
@@ -6,7 +8,7 @@ you should use the ''enum'' and ''mask'' types, respectively.
 == Enum Types ==
 An enum is a specially declared class, which follows certain extra rules, but otherwise behaves
 just like a normal class. It may have data members and methods, just like any other class. The
-exceptions are that the class is effectively final (it cannot be extended by other classes/enums), 
+exceptions are that the class is effectively final (it cannot be extended by other classes/enums),
 and the constructor, if provided, must be
 private. The default constructor for enum values are private as well. Essentially, there must be no
 way to instantiate the enum object outside of the context of the enum itself, and it can't be
@@ -77,9 +79,9 @@ getInfo() for each one would return different data.
 
 <%CODE|
 enum Compass {
-	NORTH('up'), 
-	SOUTH('down'), 
-	EAST('right'), 
+	NORTH('up'),
+	SOUTH('down'),
+	EAST('right'),
 	WEST('left');
 
 	private final string @info;
@@ -87,7 +89,7 @@ enum Compass {
     private Compass(string @info){
         @this->info = @info;
     }
-    
+
     public string getInfo(){
 		return(@info);
 	}

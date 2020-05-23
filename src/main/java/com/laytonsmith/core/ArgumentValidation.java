@@ -419,6 +419,21 @@ public final class ArgumentValidation {
 	}
 
 	/**
+	 * Returns a String object from the given construct. Note that unlike {@link #getString}, this strictly expects a
+	 * string object, and will throw a CRECastException if it is not a string.
+	 *
+	 * @param c
+	 * @param t
+	 * @return
+	 */
+	public static String getStringObject(Mixed c, Target t) {
+		if(!c.isInstanceOf(CString.class)) {
+			throw new CRECastException("Expected a string, but found " + c.typeof() + " instead.", t);
+		}
+		return c.val();
+	}
+
+	/**
 	 * Returns true if any of the constructs are a CDouble, false otherwise.
 	 *
 	 * @param c

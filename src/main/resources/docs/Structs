@@ -1,3 +1,4 @@
+{{unimplemented}}
 
 A Struct is a special type of class, which allows for more precise associative array definitions, while not quite allowing for the full
 power of objects. A struct may only be declared with public members, and no methods. Any associative array can be cross cast to a
@@ -45,7 +46,7 @@ in combination with objects, which is demonstrated below.
 
 A struct is defined in exactly the same way as a class, except it may ONLY have a members block, and is
 declared with the <code>struct</code> keyword. If we set the parameters with a value, that becomes their
-default, which itself defaults to null. 
+default, which itself defaults to null.
 
 <pre>
 struct A {
@@ -67,7 +68,7 @@ methods for each field, you can use a configuration struct to simplify the confi
 
 <pre>
 class Car {
-	
+
 	members {
 		private string @make;
 		private string @model;

@@ -1,14 +1,13 @@
-This page serves as a general guide for the features I intend on implementing. Note that I reserve the right to modify, 
-rearrange, add, remove, eat, or delete this list or any parts of it at any given time, with or without notice to you or 
-your lawyers. :D However, more than likely, if there is a feature on this list, I plan to add it at some point, but it 
-may get shuffled around some in the process. Items shown in '''bold''' are major tasks, and their completion would 
-likely bump the major or minor version number (and will take longer), while other features would probably only bump 
-the supplemental version number, unless several were released at once. Sub bullets must wait on their parent task being 
-completed before they could be done. Adding more raw functions to allow more hooks into the game itself or functions to 
-simplify common programming tasks are continually being added. Also note that these tasks are not in any particular 
+This page serves as a general guide for the features I intend on implementing. Note that I reserve the right to modify,
+rearrange, add, remove, eat, or delete this list or any parts of it at any given time, with or without notice to you or
+your lawyers. :D However, more than likely, if there is a feature on this list, I plan to add it at some point, but it
+may get shuffled around some in the process. Items shown in '''bold''' are major tasks, and their completion would
+likely bump the major or minor version number (and will take longer), while other features would probably only bump
+the supplemental version number, unless several were released at once. Sub bullets must wait on their parent task being
+completed before they could be done. Adding more raw functions to allow more hooks into the game itself or functions to
+simplify common programming tasks are continually being added. Also note that these tasks are not in any particular
 order, though the main bullet points are roughly in order.
 
-* [[IRC|IRC functionality]]
 * File system functionality (This will only happen after completion of a "virtual filesystem", to allow for strict \
 sandboxing of scripts)
 * '''Low Level Packet Handling'''
@@ -21,10 +20,9 @@ allowing the scripts to bypass compilation at startup. This would speed up start
 feature must be done right, too many other build systems get this wrong, and it causes more problems than it's worth \
 sometimes)
 * '''Mob Control'''
-* '''Localizations/Translation''' (possibly [https://developers.google.com/translate/ automatic] too)
 * '''Networking'''
 ** Raw sockets
-*** '''Full blown debugger''' (Netbeans plugin is the end goal, though cmdline tools (gdb style) will be implemented \
+*** '''Full blown debugger''' (VSC plugin is the end goal, though cmdline tools (gdb style) will be implemented \
 first, to secure the raw functionality. This depends on Networking, because the debugger must support remotes first, \
 which will also cover local debugging)
 * '''Javadoc for Procedures''' (Smart comments. There now exists a class in the pure utilities that is capable of \
@@ -37,32 +35,32 @@ parsing this into a usable format)
 
 '''Long Term'''
 
-Eventually, it is the hope that MethodScript be made into a generic framework that allows for any application to easily 
-implement it's own functions that can be applied to whatever domain is being used. Many of the functions are completely 
-independent of Minecraft, and could be included in a "core" that is distributed, and each application can define their 
-own API. With the built in documentation features, it would be easy to expand (and keep the documentation up-to-date and 
-useful). 
+Eventually, it is the hope that MethodScript be made into a generic framework that allows for any application to easily
+implement it's own functions that can be applied to whatever domain is being used. Many of the functions are completely
+independent of Minecraft, and could be included in a "core" that is distributed, and each application can define their
+own API. With the built in documentation features, it would be easy to expand (and keep the documentation up-to-date and
+useful).
 
 ''Why choose MethodScript over Javascript? Or PHP? Or AwesomeScript? Or ThatOtherScript?''
 
-This is a [http://xkcd.com/927/ valid question]. What does MethodScript offer that other scripting languages don't? 
-Simplicity. This has several benefits, and drawbacks that we must consider. In general, MethodScript is much easier to 
-learn than other languages. In essence, everything is a function, including common control structures. This makes many 
-concepts easier to learn, and makes for easily embeddable scripts. This is demonstrated by MethodScripts being embedded 
-in the aliases.msa file. Each script is run separately from each other, and is embedded inside a simpler format, which 
-facilitates easier integration into existing paradigms. Secondly, as a scripting language, it is easy to transmit in 
-plain text, which makes it perfect for simple configuration and customization. Finally, it has many built in features 
-that simplify development, such as the include() function. With everything, there are drawbacks though. Since it is not 
-strongly typed, this makes it easier to use, but harder to maintain. It is not possible to easily refactor dynamic 
-elements. Though it will be pseudo object oriented, it is somewhat added on top, it wasn't initially designed with this 
-in mind. Though the design of the object oriented features should be properly designed, they are being designed inside 
-the existing constraints of the non-object oriented features. 
+This is a [http://xkcd.com/927/ valid question]. What does MethodScript offer that other scripting languages don't?
+Simplicity. This has several benefits, and drawbacks that we must consider. In general, MethodScript is much easier to
+learn than other languages. In essence, everything is a function, including common control structures. This makes many
+concepts easier to learn, and makes for easily embeddable scripts. This is demonstrated by MethodScripts being embedded
+in the aliases.msa file. Each script is run separately from each other, and is embedded inside a simpler format, which
+facilitates easier integration into existing paradigms. Secondly, as a scripting language, it is easy to transmit in
+plain text, which makes it perfect for simple configuration and customization. Finally, it has many built in features
+that simplify development, such as the include() function. With everything, there are drawbacks though. Since it is not
+strongly typed, this makes it easier to use, but harder to maintain. It is not possible to easily refactor dynamic
+elements. Though it will be pseudo object oriented, it is somewhat added on top, it wasn't initially designed with this
+in mind. Though the design of the object oriented features should be properly designed, they are being designed inside
+the existing constraints of the non-object oriented features.
 
-In addition, MethodScript borrows strong points from other languages, which in addition to making it easier to learn for 
-people who have exposure to other languages, also helps it to stand on the shoulders of giants, and is able to "start 
-from scratch" and get rid of features that aren't desirable with other languages, while not having to worry about losing 
+In addition, MethodScript borrows strong points from other languages, which in addition to making it easier to learn for
+people who have exposure to other languages, also helps it to stand on the shoulders of giants, and is able to "start
+from scratch" and get rid of features that aren't desirable with other languages, while not having to worry about losing
 backwards compatibility.
 
-Finally, unlike JavaScript, MethodScript's documentation is a priority, and documentation is created from the 
-authoritative source. The website's goal is to provide comprehensive documentation and examples, which helps promote 
+Finally, unlike JavaScript, MethodScript's documentation is a priority, and documentation is created from the
+authoritative source. The website's goal is to provide comprehensive documentation and examples, which helps promote
 understanding.

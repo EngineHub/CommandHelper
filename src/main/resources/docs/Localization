@@ -1,4 +1,5 @@
-{{unimplemented}}
+<%NOTE|This is implemented, but hasn't been used yet, and so may still have missing features or bugs. Please get in
+touch if you're willing to help with the localization effort%>
 
 The MethodScript website supports localization efforts, to better serve communities that are primarily non-English
 speaking. While much of the application itself is necessarily written in English (function names, etc would be a
@@ -6,7 +7,7 @@ disaster to try to localize), the documentation for the application does not nec
 
 To this end, a Localization (or L10n) framework has been put in place to facilitate bilingual localizers to help
 translate the documentation into languages other than English! Much care has been put into ensuring the accuracy of
-the documentation, and the language of it is no exception. This document describes the l10n framework, 
+the documentation, and the language of it is no exception. This document describes the l10n framework,
 which is important to understand if you wish to contribute l10ns.
 
 == General Overview ==
@@ -42,7 +43,7 @@ important to have an overview of the core of the system. The primary database is
 
 There are three layers to the database. The summary file,
 the locale master file, and individual page files. Each translation file is an xml file. For each segment, there are
-at least 2 pieces of information that all segments have, the translation id, and the original English. 
+at least 2 pieces of information that all segments have, the translation id, and the original English.
 
 In the summary file, (summary.xml) we find information that relates to the segment across all locales, for instance,
 whether or not this segment should be eligible for machine translation. If the value is null, then this segment hasn't
@@ -123,7 +124,7 @@ localized, as function names may only be in English. You must use common sense w
 that you don't change things that must be there for site functionality or may confuse the reader. In some cases, the
 entire segment is correct without any translation, for instance segments that are just the name of a function. In this
 case, do not copy the english over, instead, switch to general mode and mark it as untranslatable. This will cause it
-to use the English in all locales, but also remove it from the list of "missing translations". Unfortunately, 
+to use the English in all locales, but also remove it from the list of "missing translations". Unfortunately,
 segments that contain strings that shouldn't be translated are not going to be eligible for automatic translation, and
 must be manually translated, ensuring that the untranslatable parts are left intact.
 
@@ -137,7 +138,7 @@ create a local deployment, follow the directions [[SiteDeployTool|here]], but yo
 a server that serves your local copy of the database. These directions can be modified if you wish, but the easiest
 method to do so is to do the following.
 
-Before running the site-deploy tool, in your site-deploy.ini file, set production-translations to 
+Before running the site-deploy tool, in your site-deploy.ini file, set production-translations to
 "http://localhost:7585". Run the site-deploy tool like normal, with the latest version of the codebase. You can
 either download the latest release, or build it yourself, but to avoid missing segments, it must be based on the latest
 release build.
@@ -152,7 +153,7 @@ up and running, then:
 * Open a new terminal, in addition to the terminal running the server for the main site.
 * Run <%PRE|npx http-server -c-1 -p 7585 --cors%>
 
-Now, when you save the localizations in the UI, you simply need to refresh the page to see the new translations. 
+Now, when you save the localizations in the UI, you simply need to refresh the page to see the new translations.
 
 <%TAKENOTE|Please proofread all your translations, to ensure they are correct, and have appeared on the local site
 correctly.%>

@@ -1,3 +1,5 @@
+{{unimplemented}}
+
 The Federation Protocol is the way that the client and server speak with each
 other. It is an object based streaming protocol. There are several steps required
 to set up a connection, but once the connection is established, making requests
@@ -57,7 +59,7 @@ server.
 Each slave server should regularly check that the master port is bound to, and if
 not, it should spin up a master server in addition to the slave server it is already
 running. This can be done in the heartbeat thread for the slave server. Each
-slave server is responsible for picking a random unused port (usually between 
+slave server is responsible for picking a random unused port (usually between
 %%CONST|com.laytonsmith.core.federation.Federation.DYNAMIC_PORT_MINIMUM%% and
 %%CONST|com.laytonsmith.core.federation.Federation.DYNAMIC_PORT_MAXIMUM%%), and
 then registering that information with the file system. In standard MethodScript
@@ -71,7 +73,7 @@ checking for the master server, should update this timestamp on a regular basis.
 A client request to the master server simply requests the port that the slave server
 is on. This is required, since the request may come in from an outside host, that
 wouldn't have access to the file system. The master server looks up the requested
-server in the registry, reports the port, and kills the socket. 
+server in the registry, reports the port, and kills the socket.
 
 If and only if the slave server only allows connections from localhost, may it
 not start up the master server. On the other hand, if a client is connecting
@@ -93,7 +95,7 @@ it will disconnect.
 
 Assuming the HELLO and version check are successful, the client will write the string
 "GET PORT", then another string, the server name it is requesting the port of. The
-server will respond with the string "OK", then the integer port number, if it found the server, 
+server will respond with the string "OK", then the integer port number, if it found the server,
 or the string "ERROR" and then another string, which is the error message, if it could not.
 Then the connection is closed.
 

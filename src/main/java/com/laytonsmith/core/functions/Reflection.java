@@ -8,6 +8,7 @@ import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
@@ -20,6 +21,7 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.compiler.KeywordList;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
@@ -38,6 +40,7 @@ import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -333,6 +336,60 @@ public class Reflection {
 		public MSVersion since() {
 			return MSVersion.V3_3_1;
 		}
+	}
+
+	@api
+	public static class reflect_type extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CClassType type = ArgumentValidation.getClassType(args[0], t);
+			CArray ret = new CArray(t);
+			ret.set("fqcn", type.getFQCN().getFQCN());
+			ret.set("name", type.getFQCN().getSimpleName());
+			ret.set("package", type.getPackage() == null ? CNull.NULL : type.getPackage(), t);
+			ret.set("docs", type.docs());
+			ret.set("isNative", CBoolean.get(type.getNativeType() != null), t);
+			ret.set("interfaces", new CArray(t, type.getInterfacesForType(environment)), t);
+			ret.set("superclasses", new CArray(t, type.getSuperclassesForType(environment)), t);
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "reflect_type";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return getBundledDocs();
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
 	}
 
 	@api
@@ -839,6 +896,57 @@ public class Reflection {
 		@Override
 		public Version since() {
 			return MSVersion.V3_3_3;
+		}
+
+	}
+
+	@api
+	public static class class_type extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CRENotFoundException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			String type = ArgumentValidation.getStringObject(args[0], t);
+			try {
+				return CClassType.get(FullyQualifiedClassName.forName(args[0].val(), t, environment));
+			} catch (CRECastException | ClassNotFoundException ex) {
+				throw new CRENotFoundException("Could not find type " + type, t);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "class_type";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "ClassType {string name} Returns a ClassType object for the given fully qualified class name."
+					+ " If the given class doesn't exist, a NotFoundException is thrown.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
 		}
 
 	}

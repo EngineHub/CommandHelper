@@ -665,6 +665,7 @@ public class DocGenTemplates {
 		}
 
 	};
+	public static final Generator TAKE_NOTE = NOTE;
 
 	public static final Generator MYSQL_CREATE_TABLE_QUERY = new Generator() {
 

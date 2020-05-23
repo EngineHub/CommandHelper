@@ -1,3 +1,5 @@
+{{unimplemented}}
+
 The Federation system allows for easy, and secure execution of code on remote systems.
 Usage consists of two steps for the client, and one step for the server.
 
@@ -7,16 +9,16 @@ Usage consists of two steps for the client, and one step for the server.
 All MethodScript processes support Federation, even cmdline programs, which allows
 for easy access to a MethodScript process from other sources. The Federation protocol is even
 straightforward enough that third party systems could be made to interface with
-a Federated server. 
+a Federated server.
 
 For the purposes of this article, the following definitions are used:
 
-* "MethodScript process" - refers to the process that is running a MethodScript 
+* "MethodScript process" - refers to the process that is running a MethodScript
 interpreter. This might be a server that is hosting the MethodScript process,
 a cmdline process, or some other system.
 * "Server" - refers to a Federated server, not the server that is running the
 MethodScript process.
-* "Client" - refers to a Federated client. All MethodScript processes can 
+* "Client" - refers to a Federated client. All MethodScript processes can
 simultaneously be both a server and a client.
 * "Federated System" - any system that is either a server or a client, and knows
 the Federation Protocol. Third party tools, so long as they properly implement
@@ -25,7 +27,7 @@ the Federation Protocol are considered a Federation System.
 All Federated Systems must use standard TCP Sockets, though they are allowed to
 fall back to other communication systems if the server and client can agree
 on the communication medium. For those interested in implementing the protocol,
-or generally learning more about the specifics of the protocol, see the 
+or generally learning more about the specifics of the protocol, see the
 %%DOCLINK|FederationProtocol|technical description%% of the protocol.
 
 == Server Setup ==

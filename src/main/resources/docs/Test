@@ -1,5 +1,0 @@
-
-
-<%SYNTAX|sql|
-<%MYSQL_CREATE_TABLE_QUERY%>
-%>

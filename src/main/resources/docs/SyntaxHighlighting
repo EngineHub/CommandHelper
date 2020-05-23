@@ -1,6 +1,6 @@
-The MethodScript jar comes packaged with a syntax highlighter generator for several different text editors. 
-The syntax files can be updated with data from your specific jar, so it is guaranteed to be up to date. 
-To run the tool, run 
+The MethodScript jar comes packaged with a syntax highlighter generator for several different text editors.
+The syntax files can be updated with data from your specific jar, so it is guaranteed to be up to date.
+To run the tool, run
 
 <code>java -jar CommandHelper.jar syntax</code>
 
@@ -15,3 +15,7 @@ This will print out the syntax file to the console. You can pipe the output to a
 This will save the file in the current directory. Follow the procedure for your specific text editor to update the
 syntax files using the freshly generated syntax file. (This varies depending on your text editor.)
 
+In general, it is recommended to simply use the MethodScriptVSC extension for Visual Studio Code, as that is the only
+officially supported syntax highlighter. These self-generated syntax highlighters are supported on a community basis.
+
+See the page about the [[Development_Environment|MethodScriptVSC]].

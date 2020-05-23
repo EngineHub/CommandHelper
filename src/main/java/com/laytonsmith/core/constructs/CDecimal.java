@@ -56,8 +56,8 @@ public class CDecimal extends CPrimitive implements Cloneable {
 				+ " automatically to a double, and instead you must manually cast it via double(@decimal). This will"
 				+ " fail in cases where the value cannot be represented in a double, but in places that readily"
 				+ " accept a decimal value, they will always work appropriately. A decimal can be created from another"
-				+ " value using the decimal() function, or, if directly in code, defined with a trailing m character,"
-				+ " such as 123456.1234m. In general, it is not useful to store integral values that would otherwise"
+				+ " value using the decimal() function, or, if directly in code, defined with a prefix 0m character,"
+				+ " such as 0m123456.1234. In general, it is not useful to store integral values that would otherwise"
 				+ " fit in an int datatype, as operations with them will be less efficient, but having an otherwise"
 				+ " double value does make sense for where precision needs to be exact, and java's floating point math"
 				+ " and rounding does not suffice.";

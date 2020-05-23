@@ -11,7 +11,7 @@ import java.util.Set;
  * Things that implement this can be accessed like an array, with array_get, or [].
  */
 @typeof("ms.lang.ArrayAccess")
-public interface ArrayAccess extends Mixed {
+public interface ArrayAccess extends Booleanish {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get(ArrayAccess.class);

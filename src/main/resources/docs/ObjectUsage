@@ -1,3 +1,5 @@
+{{unimplemented}}
+
 Creating an object and using an existing one are two different topics, and are thus given separate
 treatments. This article discusses the usage of objects, rather than how they are created, for that
 discussion, see [Classes].
@@ -94,7 +96,7 @@ ClassType<? extends MySuperclass> @i = MySubclass;
 In this example, @i could be any subclass of MySuperclass (or MySuperclass itself). Assuming MySuperclass defines
 a method named StaticMethod, then this becomes useful if MySubclass may or may not override that static method.
 
-<%TAKENOTE|Overriding static methods is beyond the scope of this article, see the article about [Classes] for 
+<%TAKENOTE|Overriding static methods is beyond the scope of this article, see the article about [Classes] for
 a further discussion.%>
 
 It is worth pointing out that ClassTypes are themselves instances, and have instance methods, thus the need for

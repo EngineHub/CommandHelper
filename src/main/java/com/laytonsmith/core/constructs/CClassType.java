@@ -44,6 +44,12 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE;
 	public static final CClassType AUTO;
+	/**
+	 * Used to differentiate between null and uninitialized.
+	 *
+	 * NOTE: This must come before the below static blocks are run.
+	 */
+	private static final Mixed[] UNINITIALIZED = new Mixed[0];
 
 	static {
 		try {
@@ -67,10 +73,6 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	private final boolean isTypeUnion;
 	private final FullyQualifiedClassName fqcn;
 
-	/**
-	 * Used to differentiate between null and uninitialized.
-	 */
-	private static final Mixed[] UNINITIALIZED = new Mixed[0];
 	/**
 	 * This is an invalid instance of the underlying type that can only be used for Documentation purposes or finding
 	 * out meta information about the class. Because these can be a type union, this is an array.
