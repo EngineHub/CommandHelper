@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.TokenStream;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
@@ -901,7 +902,9 @@ public class Script {
 		right.add(temp);
 		cright = new ArrayList<>();
 		for(List<Token> l : right) {
-			cright.add(MethodScriptCompiler.compile(new TokenStream(l, fileOptions), null, envs));
+			StaticAnalysis analysis = new StaticAnalysis(true);
+			analysis.setAutoIncludes(Static.getAliasCore().autoIncludes);
+			cright.add(MethodScriptCompiler.compile(new TokenStream(l, fileOptions), null, envs, analysis));
 		}
 	}
 
