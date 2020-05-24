@@ -170,6 +170,35 @@ public class StaticAnalysis {
 				}
 			}
 		}
+
+		// Generate compile error for duplicate procedure declarations.
+		for(Scope scope : this.scopes) {
+			for(Declaration decl : scope.getAllDeclarationsLocal(Namespace.PROCEDURE)) {
+				Set<Declaration> dupDecls = scope.getReachableDeclarations(Namespace.PROCEDURE, decl.getIdentifier());
+				if(dupDecls.size() > 1) {
+					dupDecls.remove(decl);
+					// TODO - Generate only one exception with all targets in them.
+					// TODO - Consider getting the earliest declaration only (instead of the last of each code path).
+					for(Declaration dupDecl : dupDecls) {
+						exceptions.add(new ConfigCompileException("Duplicate procedure declaration: Procedure "
+								+ decl.getIdentifier() + " is already declared at "
+								+ dupDecl.getTarget().toString(), decl.getTarget()));
+					}
+				}
+			}
+		}
+
+		// Resolve procedure references.
+		for(Scope scope : this.scopes) {
+			for(Reference ref : scope.getAllReferencesLocal(Namespace.PROCEDURE)) {
+				if(scope.getDeclarations(Namespace.PROCEDURE, ref.getIdentifier()).isEmpty()
+						&& (this.globalScope == null
+						|| this.globalScope.getDeclarations(Namespace.PROCEDURE, ref.getIdentifier()).isEmpty())) {
+					exceptions.add(new ConfigCompileException(
+							"Procedure cannot be resolved: " + ref.getIdentifier(), ref.getTarget()));
+				}
+			}
+		}
 	}
 
 	private void handleIncludeRefs(Environment env, Set<ConfigCompileException> exceptions) {
