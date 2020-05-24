@@ -2,6 +2,7 @@ package com.laytonsmith.core.compiler;
 
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CSlice;
@@ -52,15 +53,17 @@ public class OptimizationUtilities {
 	 * @param env
 	 * @param envs
 	 * @param source
+	 * @param doStaticAnalysis
 	 * @return
 	 * @throws ConfigCompileException
 	 * @throws com.laytonsmith.core.exceptions.ConfigCompileGroupException
 	 */
 	public static String optimize(String script, Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs,
-			File source) throws ConfigCompileException, ConfigCompileGroupException {
+			File source, boolean doStaticAnalysis) throws ConfigCompileException, ConfigCompileGroupException {
+		StaticAnalysis analysis = (doStaticAnalysis ? new StaticAnalysis(true) : null);
 		ParseTree tree = MethodScriptCompiler.compile(
-				MethodScriptCompiler.lex(script, env, source, true), null, envs, null);
+				MethodScriptCompiler.lex(script, env, source, true), null, envs, analysis);
 		StringBuilder b = new StringBuilder();
 		//The root always contains null.
 		for(ParseTree child : tree.getChildren()) {

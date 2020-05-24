@@ -1028,7 +1028,7 @@ public class Main {
 			env.getEnv(CompilerEnvironment.class).setLogCompilerWarnings(false);
 			try {
 				try {
-					optimized = OptimizationUtilities.optimize(plain, null, envs, source);
+					optimized = OptimizationUtilities.optimize(plain, null, envs, source, true);
 				} catch (ConfigCompileException ex) {
 					Set<ConfigCompileException> group = new HashSet<>();
 					group.add(ex);
