@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -724,9 +725,11 @@ public class AliasCore {
 			for(FileInfo fi : ms) {
 				boolean exception = false;
 				try {
+					StaticAnalysis analysis = new StaticAnalysis(true);
+					analysis.setAutoIncludes(this.autoIncludes);
 					MethodScriptCompiler.execute(MethodScriptCompiler.compile(
-							MethodScriptCompiler.lex(fi.contents, env, fi.file, true), env, env.getEnvClasses()),
-							env, null, null);
+							MethodScriptCompiler.lex(fi.contents, env, fi.file, true),
+							env, env.getEnvClasses(), analysis), env, null, null);
 				} catch (ConfigCompileGroupException e) {
 					exception = true;
 					ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath()
