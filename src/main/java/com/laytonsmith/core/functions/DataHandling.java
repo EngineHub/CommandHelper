@@ -1428,8 +1428,7 @@ public class DataHandling {
 			Scope paramScope = analysis.createNewScope();
 
 			// Insert @arguments parameter.
-			paramScope.addDeclaration(
-					new Declaration(Namespace.IVARIABLE, "@arguments", CArray.TYPE, ast.getTarget()));
+			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, ast.getTarget()));
 
 			// Handle procedure parameters from left to right.
 			Scope valScope = parentScope;
@@ -2269,7 +2268,7 @@ public class DataHandling {
 					? analysis.createNewScope(parentScope) : analysis.createNewScope());
 
 			// Insert @arguments parameter.
-			paramScope.addDeclaration(new Declaration(Namespace.IVARIABLE, "@arguments", CArray.TYPE, ast.getTarget()));
+			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, ast.getTarget()));
 
 			// Handle closure parameters from left to right.
 			Scope valScope = parentScope;
