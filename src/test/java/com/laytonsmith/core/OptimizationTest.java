@@ -25,7 +25,7 @@ public class OptimizationTest {
 	}
 
 	public String optimize(String script) throws Exception {
-		return OptimizationUtilities.optimize(script, null, envs, null);
+		return OptimizationUtilities.optimize(script, null, envs, null, false);
 	}
 
 	@Test
