@@ -33,6 +33,7 @@ import com.laytonsmith.core.compiler.analysis.Declaration;
 import com.laytonsmith.core.compiler.analysis.IVariableAssignDeclaration;
 import com.laytonsmith.core.compiler.analysis.IncludeReference;
 import com.laytonsmith.core.compiler.analysis.Namespace;
+import com.laytonsmith.core.compiler.analysis.ParamDeclaration;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.Auto;
@@ -404,8 +405,7 @@ public class DataHandling {
 
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
-					paramScope.addDeclaration(new Declaration(
-							Namespace.IVARIABLE, iVar.getVariableName(), type, ast.getTarget()));
+					paramScope.addDeclaration(new ParamDeclaration(iVar.getVariableName(), type, ast.getTarget()));
 				}
 
 				// Return the scope pair.
@@ -426,8 +426,8 @@ public class DataHandling {
 
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
-					paramScope.addDeclaration(new Declaration(
-							Namespace.IVARIABLE, iVar.getVariableName(), CClassType.AUTO, ast.getTarget()));
+					paramScope.addDeclaration(new ParamDeclaration(
+							iVar.getVariableName(), CClassType.AUTO, ast.getTarget()));
 				}
 
 				// Return the scope pair.

@@ -146,7 +146,10 @@ public class StaticAnalysis {
 		// Generate compile error for duplicate ivariable declarations.
 		for(Scope scope : this.scopes) {
 			for(Declaration decl : scope.getAllDeclarationsLocal(Namespace.IVARIABLE)) {
-//				System.out.println("[DEBUG] IVARIABLE decl: " + decl.getIdentifier()); // TODO - Remove debug.
+				if(decl instanceof ParamDeclaration) {
+					continue; // Allow parameter declarations to shadow previous declarations.
+				}
+//				System.out.println("[DEBUG] IVARIABLE decl: " + decl.getIdentifier() + " @ " + decl.getTarget()); // TODO - Remove debug.
 				Set<Declaration> dupDecls = scope.getReachableDeclarations(Namespace.IVARIABLE, decl.getIdentifier());
 //				System.out.println("[DEBUG] IVARIABLE numDecls: " + dupDecls.size()); // TODO - Remove debug.
 				if(dupDecls.size() > 1) {
