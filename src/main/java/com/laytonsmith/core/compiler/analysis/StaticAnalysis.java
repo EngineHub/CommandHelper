@@ -525,8 +525,8 @@ public class StaticAnalysis {
 		if(node instanceof IVariable) { // Normal parameter.
 			IVariable iVar = (IVariable) node;
 			Scope newParamScope = this.createNewScope(paramScope);
-			newParamScope.addDeclaration(new Declaration(
-					Namespace.IVARIABLE, iVar.getVariableName(), iVar.getDefinedType(), iVar.getTarget()));
+			newParamScope.addDeclaration(new ParamDeclaration(
+					iVar.getVariableName(), iVar.getDefinedType(), iVar.getTarget()));
 			return new Scope[] {newParamScope, valScope};
 		}
 
