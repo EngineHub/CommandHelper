@@ -637,8 +637,14 @@ public class StaticAnalysis {
 
 	private static Scope cloneScope(Scope scope, Map<Scope, Scope> cloneMapping) {
 
+		// Return clone from the cache if it has already been cloned.
+		Scope scopeClone = cloneMapping.get(scope);
+		if(scopeClone != null) {
+			return scopeClone;
+		}
+
 		// Create unlinked clone, updating the mapping from scopes to their clones.
-		Scope scopeClone = scope.shallowUnlinkedClone();
+		scopeClone = scope.shallowUnlinkedClone();
 		cloneMapping.put(scope, scopeClone);
 
 		// Clone the parents, using cached clones for already cloned parents.
