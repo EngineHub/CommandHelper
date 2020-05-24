@@ -216,7 +216,8 @@ public class Exceptions {
 				}
 				case 3: { // try(tryCode, exParam, catchCode).
 					ParseTree exParam = ast.getChildAt(1);
-					catchParentScope = analysis.linkParamScope(parentScope, exParam, env, exceptions);
+					Scope[] scopes = analysis.linkParamScope(parentScope, parentScope, exParam, env, exceptions);
+					catchParentScope = scopes[0]; // paramScope.
 				}
 				case 2: { // try(tryCode, [exParam], catchCode).
 					ParseTree catchCode = ast.getChildAt(numArgs == 2 ? 1 : 2);
@@ -549,7 +550,8 @@ public class Exceptions {
 				for(int i = 1; i < ast.numberOfChildren(); i += 2) {
 					ParseTree exParam = ast.getChildAt(i);
 					ParseTree catchCode = ast.getChildAt(i + 1);
-					Scope exParamScope = analysis.linkParamScope(parentScope, exParam, env, exceptions);
+					Scope[] scopes = analysis.linkParamScope(parentScope, parentScope, exParam, env, exceptions);
+					Scope exParamScope = scopes[0]; // paramScope.
 					analysis.linkScope(exParamScope, catchCode, env, exceptions);
 				}
 

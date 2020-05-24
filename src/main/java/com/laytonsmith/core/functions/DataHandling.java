@@ -374,6 +374,70 @@ public class DataHandling {
 			return super.linkScope(analysis, parentScope, ast, env, exceptions);
 		}
 
+		/**
+		 * Handles an {@code assign()} that is used as parameter in for example a procedure or closure.
+		 * This will declare the parameter in the paramScope scope, using the {@link Namespace#IVARIABLE} namespace.
+		 * The default parameter value (assigned value) will be handled in the valScope.
+		 * @param analysis
+		 * @param paramScope - The scope to which a new scope is linked in which the declaration will be placed.
+		 * @param valScope - The scope to which a new scope is linked in which the assigned value will be handled.
+		 * @param ast - The AST of the {@code assign()} function.
+		 * @param env
+		 * @param exceptions
+		 * @return The resulting scopes in format {paramScope, valScope}.
+		 */
+		public Scope[] linkParamScope(StaticAnalysis analysis, Scope paramScope, Scope valScope,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Typed parameter: assign(type, var, val).
+			if(ast.getChildren().size() == 3) {
+
+				// Handle the assigned value.
+				valScope = analysis.linkScope(valScope, ast.getChildAt(2), env, exceptions);
+
+				// Put the variable declaration in the param scope.
+				Mixed rawType = ast.getChildAt(0).getData();
+				Mixed rawIVar = ast.getChildAt(1).getData();
+				if(rawType instanceof CClassType && rawIVar instanceof IVariable) {
+					CClassType type = (CClassType) rawType;
+					IVariable iVar = (IVariable) rawIVar;
+
+					// Add the new variable declaration.
+					paramScope = analysis.createNewScope(paramScope);
+					paramScope.addDeclaration(new Declaration(
+							Namespace.IVARIABLE, iVar.getVariableName(), type, ast.getTarget()));
+				}
+
+				// Return the scope pair.
+				return new Scope[] {paramScope, valScope};
+
+			}
+
+			// Untyped parameter: assign(var, val).
+			if(ast.getChildren().size() == 2) {
+
+				// Handle the assigned value.
+				valScope = analysis.linkScope(valScope, ast.getChildAt(1), env, exceptions);
+
+				// Put the variable declaration in the param scope.
+				Mixed rawIVar = ast.getChildAt(0).getData();
+				if(rawIVar instanceof IVariable) {
+					IVariable iVar = (IVariable) rawIVar;
+
+					// Add the new variable declaration.
+					paramScope = analysis.createNewScope(paramScope);
+					paramScope.addDeclaration(new Declaration(
+							Namespace.IVARIABLE, iVar.getVariableName(), CClassType.AUTO, ast.getTarget()));
+				}
+
+				// Return the scope pair.
+				return new Scope[] {paramScope, valScope};
+			}
+
+			// Invalid parameter. Fall back to handling this function's arguments.
+			return new Scope[] {paramScope, super.linkScope(analysis, valScope, ast, env, exceptions)};
+		}
+
 		@Override
 		public String docs() {
 			return "ivariable {[type], ivar, mixed} Accepts an ivariable ivar as a parameter, and puts the specified value mixed in it."
@@ -1361,53 +1425,31 @@ public class DataHandling {
 			String procName = procNameNode.getData().val();
 
 			// Create parameter scope.
-			Scope outerParamScope = parentScope;
-			Scope innerParamScope = analysis.createNewScope();
+			Scope paramScope = analysis.createNewScope();
 
 			// Insert @arguments parameter.
-			innerParamScope.addDeclaration(
+			paramScope.addDeclaration(
 					new Declaration(Namespace.IVARIABLE, "@arguments", CArray.TYPE, ast.getTarget()));
 
-			// Handle custom parameters.
+			// Handle procedure parameters from left to right.
+			Scope valScope = parentScope;
 			while(ind < ast.numberOfChildren() - 1) {
 				ParseTree param = ast.getChildAt(ind++);
-
-				// Resolve parameters from left to right, starting in the outer scope.
-				Scope oldOuterParamScope = outerParamScope;
-				outerParamScope = analysis.linkParamScope(outerParamScope, param, env, exceptions);
-				if(outerParamScope != oldOuterParamScope) { // Ensure that we're no longer in the passed scope.
-
-					// Get the parameter declaration.
-					Set<Declaration> decls = outerParamScope.getAllDeclarationsLocal(Namespace.IVARIABLE);
-					decls.addAll(outerParamScope.getAllDeclarationsLocal(Namespace.IVARIABLE_ASSIGN));
-					if(decls.size() == 1) { // If this is not the case, the type checker should give a compile error.
-						Declaration decl = decls.iterator().next();
-
-						// Detect duplicate parameter names.
-						Set<Declaration> dupDecls = innerParamScope
-								.getDeclarations(Namespace.IVARIABLE, decl.getIdentifier());
-						for(Declaration dupDecl : dupDecls) {
-							exceptions.add(new ConfigCompileException("Duplicate parameter declaration: Parameter "
-									+ decl.getIdentifier() + " is already declared at "
-									+ dupDecl.getTarget().toString(), decl.getTarget()));
-						}
-
-						// Add the declaration to the proc param scope.
-						innerParamScope.addDeclaration(decl);
-					}
-				}
+				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions);
+				valScope = scopes[1];
+				paramScope = scopes[0];
 			}
 
-			// Handle code.
+			// Handle procedure code.
 			ParseTree code = ast.getChildAt(ast.numberOfChildren() - 1);
-			analysis.linkScope(innerParamScope, code, env, exceptions);
+			analysis.linkScope(paramScope, code, env, exceptions);
 
 			// Create proc declaration in a new scope.
 			// TODO - Include proc signature (argument types and number of arguments) in declaration.
 			Scope declScope = analysis.createNewScope(parentScope);
 			declScope.addDeclaration(new Declaration(Namespace.PROCEDURE, procName, retType, ast.getTarget()));
 
-			// Return the declaration scope. Parameters and their default values are not accessible after the closure.
+			// Return the declaration scope. Parameters and their default values are not accessible after the procedure.
 			return declScope;
 		}
 
@@ -2222,46 +2264,23 @@ public class DataHandling {
 			Scope retTypeScope = (ast.getChildAt(ind).getData().isInstanceOf(CClassType.TYPE)
 					? analysis.linkScope(parentScope, ast.getChildAt(ind++), env, exceptions) : parentScope);
 
-			// Create parameter scope.
-			Scope paramScope = analysis.createNewScope();
+			// Create parameter scope. Set parent scope if this closure type is allowed to resolve in the parent scope.
+			Scope paramScope = (codeInheritsParentScope
+					? analysis.createNewScope(parentScope) : analysis.createNewScope());
 
 			// Insert @arguments parameter.
 			paramScope.addDeclaration(new Declaration(Namespace.IVARIABLE, "@arguments", CArray.TYPE, ast.getTarget()));
 
-			// Handle custom parameters.
+			// Handle closure parameters from left to right.
+			Scope valScope = parentScope;
 			while(ind < ast.numberOfChildren() - 1) {
 				ParseTree param = ast.getChildAt(ind++);
-
-				// Resolve parameters in outer scope.
-				Scope paramDeclScope = analysis.linkParamScope(retTypeScope, param, env, exceptions);
-				if(paramDeclScope != retTypeScope) { // Ensure that we're no longer in the passed scope.
-
-					// Get the parameter declaration.
-					Set<Declaration> decls = paramDeclScope.getAllDeclarationsLocal(Namespace.IVARIABLE);
-					if(decls.size() == 1) { // If this is not the case, the type checker should give a compile error.
-						Declaration decl = decls.iterator().next();
-
-						// Detect duplicate parameter names.
-						Set<Declaration> dupDecls = paramScope
-								.getDeclarations(Namespace.IVARIABLE, decl.getIdentifier());
-						for(Declaration dupDecl : dupDecls) {
-							exceptions.add(new ConfigCompileException("Duplicate parameter declaration: Parameter "
-									+ decl.getIdentifier() + " is already declared at "
-									+ dupDecl.getTarget().toString(), decl.getTarget()));
-						}
-
-						// Add the declaration to the closure param scope.
-						paramScope.addDeclaration(decl);
-					}
-				}
+				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions);
+				valScope = scopes[1];
+				paramScope = scopes[0];
 			}
 
-			// Set a parent scope if this closure type should be allowed to resolve in the parent scope.
-			if(codeInheritsParentScope) {
-				paramScope.addParent(parentScope);
-			}
-
-			// Handle code.
+			// Handle closure code.
 			ParseTree code = ast.getChildAt(ast.numberOfChildren() - 1);
 			analysis.linkScope(paramScope, code, env, exceptions);
 

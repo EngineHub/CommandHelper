@@ -205,16 +205,19 @@ public class EventBinding {
 			Scope eventNameScope = analysis.linkScope(parentScope, eventName, env, exceptions);
 			Scope optionsScope = analysis.linkScope(eventNameScope, options, env, exceptions);
 			Scope prefilterScope = analysis.linkScope(optionsScope, prefilter, env, exceptions);
-			Scope eventObjScope = analysis.linkParamScope(prefilterScope, eventObj, env, exceptions);
-			Scope paramScope = eventObjScope;
+			Scope[] eventObjScopes = analysis.linkParamScope(prefilterScope, prefilterScope, eventObj, env, exceptions);
+			Scope paramScope = eventObjScopes[0];
+			Scope valScope = eventObjScopes[1];
 			for(int paramInd = 4; paramInd < ast.numberOfChildren() - 1; paramInd++) {
 				ParseTree param = ast.getChildAt(paramInd);
-				paramScope = analysis.linkParamScope(paramScope, param, env, exceptions);
+				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions);
+				paramScope = scopes[0];
+				valScope = scopes[1];
 			}
 			analysis.linkScope(paramScope, code, env, exceptions);
 
-			// Code after bind() can access its argument scopes, except the code scope.
-			return paramScope;
+			// Allow code after bind() to access declarations in assigned values, but not parameters themselves.
+			return valScope;
 		}
 
 		@Override

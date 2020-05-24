@@ -18,6 +18,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.CRE.CREException;
+import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
@@ -498,29 +499,54 @@ public class StaticAnalysis {
 	}
 
 	/**
-	 * Handles parameter AST nodes, namely {@link IVariable}s or functions that are supposed to return
-	 * an {@link IVariable}. If the given AST node is an {@link IVariable}, it is declared in a new scope that is
-	 * linked to the parent scope. Otherwise, the {@link #linkScope(Scope, ParseTree, Set)} method is called with
-	 * the same arguments as this method to eventually declare the parameter through the assign() function.
-	 * @param parentScope
+	 * Handles parameter AST nodes, namely {@link IVariable}s or the {@code assign()} function (for typed parameters or
+	 * parameters with a default value). The parameter is declared in a new scope that is chained to paramScope.
+	 * If the parameter is typed and/or has a default value assigned to it,
+	 * then that value will be handled in the valScope.
+	 * @param paramScope - The scope to which a new scope is linked in which the declaration will be placed.
+	 * @param valScope - The scope to which a new scope is linked in which the assigned value will be handled.
 	 * @param ast
 	 * @param env
 	 * @param exceptions
-	 * @return The new scope in which the parameter is declared. For an invalid script, it can happen that no parameter
-	 * was passed, meaning that {@link #linkScope(Scope, ParseTree, Set)} might return a scope without declaration.
+	 * @return The resulting scopes in format {paramScope, valScope}.
 	 */
-	// TODO - Does exactly the same as linkScope()?
-	public Scope linkParamScope(Scope parentScope,
+	/*
+	 *  TODO - Mark IVAR declarations as parameters, such that they can be shadowed and such that they can override
+	 *  variable declarations. Otherwise this will lead to false duplicate declarations.
+	 */
+	public Scope[] linkParamScope(Scope paramScope, Scope valScope,
 			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
-		if(ast.getData() instanceof IVariable) { // Normal parameter.
-			IVariable iVar = (IVariable) ast.getData();
-			Scope newScope = this.createNewScope(parentScope);
-			newScope.addDeclaration(new Declaration(
+		Mixed node = ast.getData();
+
+		// Handle normal untyped parameter.
+		if(node instanceof IVariable) { // Normal parameter.
+			IVariable iVar = (IVariable) node;
+			Scope newParamScope = this.createNewScope(paramScope);
+			newParamScope.addDeclaration(new Declaration(
 					Namespace.IVARIABLE, iVar.getVariableName(), iVar.getDefinedType(), iVar.getTarget()));
-			return newScope;
-		} else { // Typed parameter or assign.
-			return this.linkScope(parentScope, ast, env, exceptions);
+			return new Scope[] {newParamScope, valScope};
 		}
+
+		// Handle assign parameter (typed and/or with default value).
+		if(node instanceof CFunction) { // Typed parameter or assign.
+			CFunction cFunc = (CFunction) node;
+			if(cFunc.hasFunction()) {
+				try {
+					FunctionBase f = FunctionList.getFunction(cFunc, null);
+					if(f != null && f.getClass().equals(DataHandling.assign.class)) {
+						return ((DataHandling.assign) f).linkParamScope(
+								this, paramScope, valScope, ast, env, exceptions);
+					}
+				} catch (ConfigCompileException ex) {
+					// Ignore and handle as non-parameter parameter.
+				}
+			}
+		}
+
+		// Handle non-parameter parameter. Fall back to handling the function's arguments.
+		// TODO - Decide whether to generate this type of error here, or during typechecking (saves repeating code).
+//		exceptions.add(new ConfigCompileException("Invalid parameter", node.getTarget()));
+		return new Scope[] {paramScope, this.linkScope(valScope, ast, env, exceptions)};
 	}
 
 //	public Scope linkIsolatedParamScope(Scope parentOuterScope, Scope paramDeclScope,

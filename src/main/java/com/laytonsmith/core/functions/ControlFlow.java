@@ -1457,9 +1457,15 @@ public class ControlFlow {
 
 				// Order: array -> [key] -> val -> code?.
 				Scope arrayScope = analysis.linkScope(parentScope, array, env, exceptions);
-				Scope keyScope = (key == null ? arrayScope
-						: analysis.linkParamScope(arrayScope, key, env, exceptions));
-				Scope valScope = analysis.linkParamScope(keyScope, val, env, exceptions);
+				Scope keyParamScope = arrayScope;
+				Scope keyValScope = arrayScope;
+				if(key != null) {
+					Scope[] scopes = analysis.linkParamScope(keyParamScope, keyValScope, key, env, exceptions);
+					keyParamScope = scopes[0];
+					keyValScope = scopes[1];
+				}
+				Scope[] scopes = analysis.linkParamScope(keyParamScope, keyValScope, val, env, exceptions);
+				Scope valScope = scopes[0]; // paramScope.
 				analysis.linkScope(valScope, code, env, exceptions);
 			}
 			return parentScope;
@@ -1730,8 +1736,15 @@ public class ControlFlow {
 
 				// Order: array -> [key] -> val -> code? | array -> elseCode.
 				Scope arrayScope = analysis.linkScope(parentScope, array, env, exceptions);
-				Scope keyScope = (key == null ? arrayScope : analysis.linkParamScope(arrayScope, key, env, exceptions));
-				Scope valScope = analysis.linkParamScope(keyScope, val, env, exceptions);
+				Scope keyParamScope = arrayScope;
+				Scope keyValScope = arrayScope;
+				if(key != null) {
+					Scope[] scopes = analysis.linkParamScope(keyParamScope, keyValScope, key, env, exceptions);
+					keyParamScope = scopes[0];
+					keyValScope = scopes[1];
+				}
+				Scope[] scopes = analysis.linkParamScope(keyParamScope, keyValScope, val, env, exceptions);
+				Scope valScope = scopes[0]; // paramScope.
 				analysis.linkScope(valScope, code, env, exceptions);
 				analysis.linkScope(arrayScope, elseCode, env, exceptions);
 			}
