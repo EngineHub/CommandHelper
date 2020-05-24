@@ -84,7 +84,7 @@ public class StaticAnalysis {
 				// Attempt to find ivariable declaration or another yet unclassified ivariable assign (excluding this).
 				// TODO - Do this for every code path, since if any path doesn't have a declaration, this should be it.
 				boolean declarationFound = !scope.getDeclarations(Namespace.IVARIABLE, decl.getIdentifier()).isEmpty()
-						|| scope.getDeclarations(Namespace.IVARIABLE_ASSIGN, decl.getIdentifier()).size() > 1;
+						|| scope.getReachableDeclarations(Namespace.IVARIABLE_ASSIGN, decl.getIdentifier()).size() > 1;
 
 				// Create variable declaration or reference for this ivariable assign.
 				if(declarationFound) {
@@ -109,7 +109,7 @@ public class StaticAnalysis {
 					for(Declaration dupDecl : dupDecls) {
 						exceptions.add(new ConfigCompileException("Duplicate variable declaration: Variable "
 								+ decl.getIdentifier() + " is already declared at "
-								+ decl.getTarget().toString(), dupDecl.getTarget()));
+								+ dupDecl.getTarget().toString(), decl.getTarget()));
 					}
 				}
 			}
