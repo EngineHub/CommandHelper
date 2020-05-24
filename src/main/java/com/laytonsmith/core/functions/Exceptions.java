@@ -547,7 +547,7 @@ public class Exceptions {
 				analysis.linkScope(parentScope, tryCode, env, exceptions);
 
 				// Handle catch blocks with a catch variable.
-				for(int i = 1; i < ast.numberOfChildren(); i += 2) {
+				for(int i = 1; i < ast.numberOfChildren() - 1; i += 2) {
 					ParseTree exParam = ast.getChildAt(i);
 					ParseTree catchCode = ast.getChildAt(i + 1);
 					Scope[] scopes = analysis.linkParamScope(parentScope, parentScope, exParam, env, exceptions);
