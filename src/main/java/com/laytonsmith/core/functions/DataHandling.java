@@ -345,15 +345,6 @@ public class DataHandling {
 					CClassType type = (CClassType) rawType;
 					IVariable iVar = (IVariable) rawIVar;
 
-					// TODO - Move this check to the second pass (unresolved includes affect this).
-//					// Detect duplicate variable declarations (or declaration after assign).
-//					Declaration decl = valScope.getDeclaration(Namespace.IVARIABLE, iVar.getVariableName());
-//					if(decl != null) {
-//						exceptions.add(new ConfigCompileException("Duplicate variable declaration: Variable "
-//								+ iVar.getVariableName() + " is already declared at "
-//								+ decl.getTarget().toString(), iVar.getTarget()));
-//					}
-
 					// Add the new variable declaration.
 					declScope.addDeclaration(new Declaration(
 							Namespace.IVARIABLE, iVar.getVariableName(), type, ast.getTarget()));
@@ -375,16 +366,6 @@ public class DataHandling {
 
 					// Add ivariable assign declaration in a new scope.
 					newScope.addDeclaration(new IVariableAssignDeclaration(iVar.getVariableName(), iVar.getTarget()));
-
-					// TODO - Move this to the second pass (unresolved includes affect this).
-					// TODO - Do add a variable reference here, to be resolved later (might be a declaration).
-//					Declaration decl = parentScope.getDeclaration(Namespace.IVARIABLE, iVar.getVariableName());
-//					if(decl == null) {
-//
-//						// Add the new variable declaration.
-//						newScope.addDeclaration(new Declaration(
-//								Namespace.IVARIABLE, iVar.getVariableName(), CClassType.AUTO, ast.getTarget()));
-//					}
 				}
 
 				// Return the new scope.
