@@ -187,7 +187,7 @@ public class MethodScriptCompilerTest {
 
 	@Test
 	public void testExecute1() throws Exception {
-		String script = "proc(_hello, @hello0,"
+		String script = "proc('_hello', @hello0,"
 				+ "         msg(@hello0)"
 				+ "      )"
 				+ "      assign(@hello1, 'hello')"
@@ -200,7 +200,7 @@ public class MethodScriptCompilerTest {
 	@Test
 	public void testExecute2() throws Exception {
 		String script
-				= "proc(_hello,\n"
+				= "proc('_hello',\n"
 				+ "     assign(@hello, 'hello')\n"
 				+ "     return(@hello)\n"
 				+ ")\n"
@@ -238,7 +238,7 @@ public class MethodScriptCompilerTest {
 	@Test
 	public void testExecute4() throws Exception {
 		String script
-				= "proc(_hello,"
+				= "proc('_hello',"
 				+ "     return('hello')"
 				+ ")"
 				+ "msg(_hello())";
@@ -308,7 +308,7 @@ public class MethodScriptCompilerTest {
 	@Test
 	public void testExecute14() throws Exception {
 		String script
-				= "proc(_hello, assign(@i, 'world'),"
+				= "proc('_hello', assign(@i, 'world'),"
 				+ "     return(@i)"
 				+ ")"
 				+ "msg(_hello('hello'))"
@@ -323,7 +323,7 @@ public class MethodScriptCompilerTest {
 		String script
 				= "assign(@i, 0)\n"
 				+ "msg('@i is currently' @i)\n"
-				+ "proc(_out, @i,\n"
+				+ "proc('_out', @i,\n"
 				+ "     msg(trim('@i is currently' @i 'and @j is' @j))\n"
 				+ ")\n"
 				+ "_out('hello')\n"
@@ -338,7 +338,7 @@ public class MethodScriptCompilerTest {
 	@Test
 	public void testExecute16() throws Exception {
 		String script
-				= "proc(_myProc, @i, @j, @k, msg(trim(@i @j @k)))\n"
+				= "proc('_myProc', @i, @j, @k, msg(trim(@i @j @k)))\n"
 				+ "_myProc()\n"
 				+ "_myProc(1)\n"
 				+ "_myProc(1, 2)\n"
@@ -353,7 +353,7 @@ public class MethodScriptCompilerTest {
 	@Test
 	public void testExecute17() throws Exception {
 		String script
-				= "proc(_addition, @i, @j, msg(add(@i, @j)))\n"
+				= "proc('_addition', @i, @j, msg(add(@i, @j)))\n"
 				+ "_addition(1, 1)\n"
 				+ "_addition(2, 2)";
 		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, null, true), null, envs), env, null, null);
@@ -365,7 +365,7 @@ public class MethodScriptCompilerTest {
 	@Test
 	public void testExecute18() throws Exception {
 		String script
-				= "proc(_myProc, msg(@arguments))\n"
+				= "proc('_myProc', msg(@arguments))\n"
 				+ "_myProc()\n"
 				+ "_myProc(1)\n"
 				+ "_myProc(1, 2)";
@@ -385,7 +385,7 @@ public class MethodScriptCompilerTest {
 	public void testExecute19() throws Exception {
 		String script
 				= "assign(@j, 'world')\n"
-				+ "proc(_hello, assign(@i, @j),"
+				+ "proc('_hello', assign(@i, @j),"
 				+ "     return(@i)"
 				+ ")\n"
 				+ "assign(@j, 'goodbye')\n"
@@ -400,7 +400,7 @@ public class MethodScriptCompilerTest {
 	public void testExecute20() throws Exception {
 		final AtomicBoolean bool = new AtomicBoolean(false);
 		String script
-				= "msg('hello') world";
+				= "msg('hello') 'world'";
 		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, null, true), null, envs), env, new MethodScriptComplete() {
 
 			@Override
@@ -424,7 +424,7 @@ public class MethodScriptCompilerTest {
 
 	@Test
 	public void testExecute22() throws Exception {
-		SRun("msg('hi' (this is a thing))", fakePlayer);
+		SRun("msg('hi' ('this is a thing'))", fakePlayer);
 		verify(fakePlayer).sendMessage("hi this is a thing");
 	}
 
@@ -505,7 +505,7 @@ public class MethodScriptCompilerTest {
 	@Test
 	public void testCompile6() throws Exception {
 		String config = "/cmd = >>>\n"
-				+ "msg(trim(hello 'world \\\\ \\' \\n'))"
+				+ "msg(trim('hello' 'world \\\\ \\' \\n'))"
 				+ "<<<";
 		RunCommand(config, fakePlayer, "/cmd");
 		verify(fakePlayer).sendMessage("hello world \\ '");
@@ -514,7 +514,7 @@ public class MethodScriptCompilerTest {
 	@Test
 	public void testCompile7() throws Exception {
 		String config = "/cmd = >>>\n"
-				+ "msg(hello) \\ msg(world)"
+				+ "msg('hello') \\ msg('world')"
 				+ "<<<";
 		RunCommand(config, fakePlayer, "/cmd");
 		verify(fakePlayer).sendMessage("hello");

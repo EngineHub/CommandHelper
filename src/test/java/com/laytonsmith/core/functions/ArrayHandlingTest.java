@@ -208,15 +208,15 @@ public class ArrayHandlingTest {
 
 	@Test
 	public void testArraySliceAndNegativeIndexes() throws Exception {
-		assertEquals("{a, b}", SRun("array(a, b, c, d, e)[..1]", null));
-		assertEquals("e", SRun("array(a, e)[-1]", null));
-		assertEquals("{a, b, c, d, e}", SRun("array(a, b, c, d, e)[]", null));
-		assertEquals("{b, c}", SRun("array(a, b, c, d, e)[1..2]", null));
-		assertEquals("{b, c, d, e}", SRun("array(a, b, c, d, e)[1..-1]", null));
-		assertEquals("1", SRun("array(a, array(1, 2), c, d, e)[0..1][1][0]", null));
-		assertEquals("{c, d, e}", SRun("array(a, b, c, d, e)[2..]", null));
+		assertEquals("{a, b}", SRun("array('a', 'b', 'c', 'd', 'e')[..1]", null));
+		assertEquals("e", SRun("array('a', 'e')[-1]", null));
+		assertEquals("{a, b, c, d, e}", SRun("array('a', 'b', 'c', 'd', 'e')[]", null));
+		assertEquals("{b, c}", SRun("array('a', 'b', 'c', 'd', 'e')[1..2]", null));
+		assertEquals("{b, c, d, e}", SRun("array('a', 'b', 'c', 'd', 'e')[1..-1]", null));
+		assertEquals("1", SRun("array('a', array(1, 2), 'c', 'd', 'e')[0..1][1][0]", null));
+		assertEquals("{c, d, e}", SRun("array('a', 'b', 'c', 'd', 'e')[2..]", null));
 		assertEquals("{}", SRun("array(1, 2, 3, 4, 5)[3..0]", null));
-		assertEquals("{a, b}", SRun("array_get(array(a, b))", null));
+		assertEquals("{a, b}", SRun("array_get(array('a', 'b'))", null));
 		assertEquals("{2, 3}", SRun("array(1, 2, 3)[1..-1]", null));
 		assertEquals("{2}", SRun("array(1, 2)[1..-1]", null));
 		assertEquals("{}", SRun("array(1)[1..-1]", null));
@@ -229,14 +229,15 @@ public class ArrayHandlingTest {
 
 	@Test(timeout = 10000)
 	public void testArrayMergeAssociative() throws Exception {
-		assertEquals("{a: a, b: b, c: c, d: {1, 2}}", SRun("array_merge(array(a: a, b: b), array(c: c, d: array(1, 2)))", fakePlayer));
+		assertEquals("{a: a, b: b, c: c, d: {1, 2}}",
+				SRun("array_merge(array(a: 'a', b: 'b'), array(c: 'c', d: array(1, 2)))", fakePlayer));
 	}
 
 	@Test(timeout = 10000)
 	public void testArrayRemove() throws Exception {
 		SRun("assign(@a, array(1, 2, 3)) array_remove(@a, 1) msg(@a)", fakePlayer);
 		verify(fakePlayer).sendMessage("{1, 3}");
-		SRun("assign(@a, array(a: a, b: b, c: c)) array_remove(@a, 'b') msg(@a)", fakePlayer);
+		SRun("assign(@a, array(a: 'a', b: 'b', c: 'c')) array_remove(@a, 'b') msg(@a)", fakePlayer);
 		verify(fakePlayer).sendMessage("{a: a, c: c}");
 	}
 
@@ -290,7 +291,7 @@ public class ArrayHandlingTest {
 
 	@Test
 	public void testArraySort3() throws Exception {
-		Run("msg(array_sort(array('002', '1', '03'), STRING))", fakePlayer);
+		Run("msg(array_sort(array('002', '1', '03'), 'STRING'))", fakePlayer);
 		verify(fakePlayer).sendMessage("{002, 03, 1}");
 	}
 
@@ -506,21 +507,21 @@ public class ArrayHandlingTest {
 	public void testArrayIntersect() throws Exception {
 		assertThat(SRun("array_intersect(array(one: 1, two: 2), array(one: 1, three: 3))", fakePlayer), is("{one: 1}"));
 		try {
-			SRun("array_intersect(array(one: 1, two: 2), array(one: 1, three: 3), EQUALS)", fakePlayer);
+			SRun("array_intersect(array(one: 1, two: 2), array(one: 1, three: 3), 'EQUALS')", fakePlayer);
 			fail("Did not expect 3 arguments to pass");
 		} catch (CREIllegalArgumentException e) {
 			// Pass
 		}
 
 
-		assertThat(SRun("array_intersect(array(1, 2, 3), array(2, 3, 4), HASH)", fakePlayer), is("{2, 3}"));
-		assertThat(SRun("array_intersect(array(1, 2, 3), array(4, 5, 6), HASH)", fakePlayer), is("{}"));
+		assertThat(SRun("array_intersect(array(1, 2, 3), array(2, 3, 4), 'HASH')", fakePlayer), is("{2, 3}"));
+		assertThat(SRun("array_intersect(array(1, 2, 3), array(4, 5, 6), 'HASH')", fakePlayer), is("{}"));
 
-		assertThat(SRun("array_intersect(array(1, 2, 3), array(2, 3, 4), EQUALS)", fakePlayer), is("{2, 3}"));
-		assertThat(SRun("array_intersect(array(1, 2, 3), array(4, 5, 6), EQUALS)", fakePlayer), is("{}"));
+		assertThat(SRun("array_intersect(array(1, 2, 3), array(2, 3, 4), 'EQUALS')", fakePlayer), is("{2, 3}"));
+		assertThat(SRun("array_intersect(array(1, 2, 3), array(4, 5, 6), 'EQUALS')", fakePlayer), is("{}"));
 
-		assertThat(SRun("array_intersect(array('1', '2', '3'), array(1, 2, 3), STRICT_EQUALS)", fakePlayer), is("{}"));
-		assertThat(SRun("array_intersect(array('1', '2', '3'), array('1', 2, 3), STRICT_EQUALS)", fakePlayer), is("{1}"));
+		assertThat(SRun("array_intersect(array('1', '2', '3'), array(1, 2, 3), 'STRICT_EQUALS')", fakePlayer), is("{}"));
+		assertThat(SRun("array_intersect(array('1', '2', '3'), array('1', 2, 3), 'STRICT_EQUALS')", fakePlayer), is("{1}"));
 
 		assertThat(SRun("array_intersect(array(1, 2, 3), array(4, 5, 6), closure(@a, @b) { return(true); })", fakePlayer),
 				is("{1, 2, 3}"));
@@ -528,7 +529,7 @@ public class ArrayHandlingTest {
 				is("{}"));
 
 		assertThat(SRun("array_intersect(array(array(id: 1, qty: 2), array(id: 2, qty: 8)),"
-				+ " array(array(id: 1, qty: 19), array(id: 6, qty: 2)), closure(@a, @b){ return(@a[id] == @b[id]); })", fakePlayer),
+				+ " array(array(id: 1, qty: 19), array(id: 6, qty: 2)), closure(@a, @b){ return(@a['id'] == @b['id']); })", fakePlayer),
 				is("{{id: 1, qty: 2}}"));
 
 	}

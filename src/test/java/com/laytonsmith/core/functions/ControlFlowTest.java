@@ -84,15 +84,15 @@ public class ControlFlowTest {
 	@Test(timeout = 10000)
 	public void testSwitch() throws Exception {
 		assertEquals("correct", SRun("switch(3,"
-				+ "1, wrong,"
-				+ "2, wrong,"
-				+ "3, correct,"
-				+ "4, wrong)", null));
+				+ "1, 'wrong',"
+				+ "2, 'wrong',"
+				+ "3, 'correct',"
+				+ "4, 'wrong')", null));
 		assertEquals("correct", SRun("switch(4,"
-				+ "1, wrong,"
-				+ "2, wrong,"
-				+ "3, wrong,"
-				+ "correct)", null));
+				+ "1, 'wrong',"
+				+ "2, 'wrong',"
+				+ "3, 'wrong',"
+				+ "'correct')", null));
 	}
 
 	@Test
@@ -116,16 +116,16 @@ public class ControlFlowTest {
 	@Test(timeout = 10000)
 	public void testSwitchWithArray() throws Exception {
 		assertEquals("correct", SRun("switch(3,"
-				+ "array(1, 2), wrong,"
-				+ "array(3, 4), correct,"
-				+ "5, wrong)", null));
+				+ "array(1, 2), 'wrong',"
+				+ "array(3, 4), 'correct',"
+				+ "5, 'wrong')", null));
 	}
 
 	@Test(timeout = 10000)
 	public void testSwitchWithNestedArrayAsDefaultReturn() throws Exception {
 		assertEquals("{{correct}}", SRun("switch(5,"
-				+ "'case1', wrong,"
-				+ "'case2', also wrong,"
+				+ "'case1', 'wrong',"
+				+ "'case2', 'also wrong',"
 				+ " array(array('correct')))", null));
 	}
 

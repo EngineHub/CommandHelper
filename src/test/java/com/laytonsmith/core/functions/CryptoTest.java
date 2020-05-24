@@ -35,7 +35,7 @@ public class CryptoTest {
 
 	@Test(timeout = 10000)
 	public void testRot13() throws Exception {
-		assertEquals("hello world", SRun("rot13(uryyb jbeyq)", null));
+		assertEquals("hello world", SRun("rot13('uryyb jbeyq')", null));
 	}
 
 	@Test(timeout = 10000)

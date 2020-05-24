@@ -66,12 +66,12 @@ public class DataHandlingTest {
 	public void testCallProcIsProc() throws Exception {
 		when(fakePlayer.isOp()).thenReturn(true);
 		String config = "/for = >>>\n"
-				+ " msg(is_proc(_proc))\n"
-				+ " proc(_proc,"
+				+ " msg(is_proc('_proc'))\n"
+				+ " proc('_proc',"
 				+ "     msg('hello world')"
 				+ " )"
-				+ " msg(is_proc(_proc))"
-				+ " call_proc(_proc)"
+				+ " msg(is_proc('_proc'))"
+				+ " call_proc('_proc')"
 				+ "<<<\n";
 		RunCommand(config, fakePlayer, "/for");
 		verify(fakePlayer).sendMessage("false");
@@ -124,7 +124,7 @@ public class DataHandlingTest {
 
 	@Test
 	public void testExportImportWithProcs1() throws Exception {
-		SRun("proc(_derping,"
+		SRun("proc('_derping',"
 				+ "   msg(import('borked'))"
 				+ "   assign(@var, import('borked'))"
 				+ "   assign(@var, array('Am', 'I', 'borked?'))"
@@ -141,7 +141,7 @@ public class DataHandlingTest {
 	public void testExportImportWithProcs2() throws Exception {
 		SRun("assign(@array, array(1, 2))"
 				+ "export('myarray', @array)", fakePlayer);
-		SRun("proc(_get, return(import('myarray')))"
+		SRun("proc('_get', return(import('myarray')))"
 				+ "msg(_get())", fakePlayer);
 		verify(fakePlayer).sendMessage("{1, 2}");
 	}
@@ -272,7 +272,7 @@ public class DataHandlingTest {
 	@Test(timeout = 10000)
 	public void testClosure8() throws Exception {
 		when(fakePlayer.isOp()).thenReturn(true);
-		SRun("execute(Hello, World, closure(msg(@arguments)))", fakePlayer);
+		SRun("execute('Hello', 'World', closure(msg(@arguments)))", fakePlayer);
 		verify(fakePlayer).sendMessage("{Hello, World}");
 	}
 
@@ -349,13 +349,13 @@ public class DataHandlingTest {
 
 	@Test
 	public void testAssignmentTypes1() throws Exception {
-		SRun("string @ivar = 'value'", null);
+		SRun("string @ivar1 = 'value'", null);
 	}
 
 	@Test
 	public void testAssignmentTypes2() throws Exception {
 		try {
-			SRun("array @ivar = 'value'", null);
+			SRun("array @ivar2 = 'value'", null);
 			fail("Excepted a CastException because string is not array");
 		} catch (CRECastException ex) {
 			// Test passed.
@@ -365,7 +365,7 @@ public class DataHandlingTest {
 	@Test
 	public void testAssignmentTypes3() throws Exception {
 		try {
-			SRun("void @ivar = 'value'", null);
+			SRun("void @ivar3 = 'value'", null);
 			fail("Expected a compile exception because IVariable cannot be assigned to void");
 		} catch (ConfigCompileException ex) {
 			// Test passed.

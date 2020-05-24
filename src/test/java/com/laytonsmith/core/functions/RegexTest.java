@@ -47,9 +47,9 @@ public class RegexTest {
 		assertEquals("{}", SRun("reg_match('word', 'This is an airplane')", null));
 		assertEquals("{0: word, 1: word}", SRun("reg_match('(word)', 'This is a word')", null));
 		assertEquals("{0: This is a word, 1: word}", SRun("reg_match('This is a (word)', 'This is a word')", null));
-		assertEquals("{0: WORD}", SRun("reg_match(array(word, i), 'THIS IS A WORD')", null));
+		assertEquals("{0: WORD}", SRun("reg_match(array('word', 'i'), 'THIS IS A WORD')", null));
 		try {
-			SRun("reg_match(array(word, l), hi)", null);
+			SRun("reg_match(array('word', 'l'), 'hi')", null);
 			fail();
 		} catch (ConfigRuntimeException e) {
 			//Pass

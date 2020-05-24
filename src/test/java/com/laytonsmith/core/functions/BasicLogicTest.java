@@ -163,13 +163,13 @@ public class BasicLogicTest {
 
 	@Test(timeout = 10000)
 	public void testAnd1() throws Exception {
-		SRun("if(and(true, true, true), msg(pass))", fakePlayer);
-		SRun("if(and(true, true, false), '', msg(pass))", fakePlayer);
-		SRun("if(and(true, true), msg(pass))", fakePlayer);
-		SRun("if(and(true, false), '', msg(pass))", fakePlayer);
-		SRun("if(and(false, false), '', msg(pass))", fakePlayer);
-		SRun("if(and(true), msg(pass))", fakePlayer);
-		SRun("if(and(false), '', msg(pass))", fakePlayer);
+		SRun("if(and(true, true, true), msg('pass'))", fakePlayer);
+		SRun("if(and(true, true, false), '', msg('pass'))", fakePlayer);
+		SRun("if(and(true, true), msg('pass'))", fakePlayer);
+		SRun("if(and(true, false), '', msg('pass'))", fakePlayer);
+		SRun("if(and(false, false), '', msg('pass'))", fakePlayer);
+		SRun("if(and(true), msg('pass'))", fakePlayer);
+		SRun("if(and(false), '', msg('pass'))", fakePlayer);
 		verify(fakePlayer, times(7)).sendMessage("pass");
 	}
 
@@ -181,25 +181,25 @@ public class BasicLogicTest {
 	 */
 	@Test(timeout = 10000)
 	public void testAnd2() throws Exception {
-		SRun("and(false, msg(lol))", fakePlayer);
+		SRun("and(false, msg('lol'))", fakePlayer);
 		verify(fakePlayer, times(0)).sendMessage("lol");
 	}
 
 	@Test(timeout = 10000)
 	public void testOr1() throws Exception {
-		SRun("if(or(true, true, true), msg(pass))", fakePlayer);
-		SRun("if(or(true, true, false), msg(pass))", fakePlayer);
-		SRun("if(or(true, true), msg(pass))", fakePlayer);
-		SRun("if(or(true, false), msg(pass))", fakePlayer);
-		SRun("if(or(false, false), '', msg(pass))", fakePlayer);
-		SRun("if(or(true), msg(pass))", fakePlayer);
-		SRun("if(or(false), '', msg(pass))", fakePlayer);
+		SRun("if(or(true, true, true), msg('pass'))", fakePlayer);
+		SRun("if(or(true, true, false), msg('pass'))", fakePlayer);
+		SRun("if(or(true, true), msg('pass'))", fakePlayer);
+		SRun("if(or(true, false), msg('pass'))", fakePlayer);
+		SRun("if(or(false, false), '', msg('pass'))", fakePlayer);
+		SRun("if(or(true), msg('pass'))", fakePlayer);
+		SRun("if(or(false), '', msg('pass'))", fakePlayer);
 		verify(fakePlayer, times(7)).sendMessage("pass");
 	}
 
 	@Test(timeout = 10000)
 	public void testOr2() throws Exception {
-		SRun("or(true, msg(lol))", fakePlayer);
+		SRun("or(true, msg('lol'))", fakePlayer);
 		verify(fakePlayer, times(0)).sendMessage("lol");
 	}
 
