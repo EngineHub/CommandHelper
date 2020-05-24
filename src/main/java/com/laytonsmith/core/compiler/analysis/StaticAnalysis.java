@@ -36,8 +36,9 @@ public class StaticAnalysis {
 	private final boolean isMainAnalysis;
 	private Scope endScope = null;
 
-	private List<File> autoIncludes = null;
 	private Scope globalScope = null;
+
+	private static StaticAnalysis autoIncludesAnalysis = null;
 
 	public StaticAnalysis(boolean isMainAnalysis) {
 		this(null, isMainAnalysis);
@@ -57,10 +58,6 @@ public class StaticAnalysis {
 		this.isMainAnalysis = isMainAnalysis;
 	}
 
-	public void setAutoIncludes(List<File> autoIncludes) {
-		this.autoIncludes = autoIncludes;
-	}
-
 	public void analyze(ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 
 		// Clear scopes from previous analysis.
@@ -68,10 +65,15 @@ public class StaticAnalysis {
 		this.scopes.add(this.startScope);
 
 		// Handle auto includes if present.
-		Scope midScope = this.analyzeAutoIncludes(this.startScope, env, exceptions);
+		if(autoIncludesAnalysis != null) {
+			if(this.isMainAnalysis) {
+				this.startScope.addParent(autoIncludesAnalysis.endScope);
+			}
+			this.globalScope = autoIncludesAnalysis.globalScope;
+		}
 
 		// Pass the start scope to the root node, allowing it to adjust the scope graph.
-		this.endScope = linkScope(midScope, ast, env, exceptions);
+		this.endScope = linkScope(this.startScope, ast, env, exceptions);
 
 		// Handle include references and analyze the final scope graph if this is the main analysis.
 		if(this.isMainAnalysis) {
@@ -80,22 +82,21 @@ public class StaticAnalysis {
 		}
 	}
 
-	private Scope analyzeAutoIncludes(Scope parentScope, Environment env, Set<ConfigCompileException> exceptions) {
+	public static void setAndAnalyzeAutoIncludes(
+			List<File> autoIncludes, Environment env, Set<ConfigCompileException> exceptions) {
 
-		// Clear global scope and return if no auto includes are set.
-		if(this.autoIncludes == null || this.autoIncludes.size() == 0) {
-			this.globalScope = null;
-			return parentScope;
+		// Clear previous auto includes analysis and return since there are no auto includes.
+		if(autoIncludes == null || autoIncludes.size() == 0) {
+			autoIncludesAnalysis = null;
+			return;
 		}
 
 		// Create scope graph with an include for each auto include.
 		// This fakes the scope graph for a script with an include for each auto include file.
-		// The hidden scope and the analysis below are not added to 'scopes' to prevent re-analysis.
-		Scope hiddenStartScope = new Scope();
-		hiddenStartScope.addParent(parentScope);
-		StaticAnalysis analysis = new StaticAnalysis(hiddenStartScope, true);
-		Scope inScope = hiddenStartScope;
-		for(File autoInclude : this.autoIncludes) {
+		Scope startScope = new Scope();
+		StaticAnalysis analysis = new StaticAnalysis(startScope, true);
+		Scope inScope = startScope;
+		for(File autoInclude : autoIncludes) {
 			Scope outScope = analysis.createNewScope();
 			inScope.addReference(new IncludeReference(
 					autoInclude.getAbsolutePath(), inScope, outScope, Target.UNKNOWN));
@@ -108,11 +109,8 @@ public class StaticAnalysis {
 		analysis.handleIncludeRefs(env, exceptions);
 		analysis.analyzeFinalScopeGraph(exceptions);
 
-		// Set the global scope.
-		this.globalScope = analysis.endScope;
-
-		// Return the end scope of the auto includes analysis.
-		return analysis.endScope;
+		// Store the new analysis.
+		autoIncludesAnalysis = analysis;
 	}
 
 	private void analyzeFinalScopeGraph(Set<ConfigCompileException> exceptions) {

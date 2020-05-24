@@ -903,7 +903,6 @@ public class Script {
 		cright = new ArrayList<>();
 		for(List<Token> l : right) {
 			StaticAnalysis analysis = new StaticAnalysis(true);
-			analysis.setAutoIncludes(Static.getAliasCore().autoIncludes);
 			cright.add(MethodScriptCompiler.compile(new TokenStream(l, fileOptions), null, envs, analysis));
 		}
 	}

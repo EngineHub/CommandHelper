@@ -363,6 +363,15 @@ public class AliasCore {
 				autoIncludes = localPackages.getAutoIncludes();
 
 				ProfilePoint compilerMS = parent.profiler.start("Compilation of MS files in Local Packages", LogLevel.VERBOSE);
+
+				// Set and analyze auto includes for static analysis.
+				Set<ConfigCompileException> compileExceptions = new HashSet<>();
+				StaticAnalysis.setAndAnalyzeAutoIncludes(Static.getAliasCore().autoIncludes, env, compileExceptions);
+				for(ConfigCompileException ex : compileExceptions) {
+					ConfigRuntimeException.HandleUncaughtException(ex, "Compile error in script."
+							+ " Compilation will attempt to continue, however.", player);
+				}
+
 				try {
 					env.getEnv(CommandHelperEnvironment.class).SetCommandSender(Static.getServer().getConsole());
 					MethodScriptCompiler.registerAutoIncludes(env, null);
@@ -726,7 +735,6 @@ public class AliasCore {
 				boolean exception = false;
 				try {
 					StaticAnalysis analysis = new StaticAnalysis(true);
-					analysis.setAutoIncludes(this.autoIncludes);
 					MethodScriptCompiler.execute(MethodScriptCompiler.compile(
 							MethodScriptCompiler.lex(fi.contents, env, fi.file, true),
 							env, env.getEnvClasses(), analysis), env, null, null);
