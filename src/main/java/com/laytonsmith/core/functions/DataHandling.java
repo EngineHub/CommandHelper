@@ -290,7 +290,7 @@ public class DataHandling {
 						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR,
 								"The variable " + name + " is hiding another value of the"
 								+ " same name in the main scope.", t);
-					} else if(t == Target.UNKNOWN || t != list.get(name, t, true, env).getDefinedTarget()) {
+					} else if(t != list.get(name, t, true, env).getDefinedTarget()) {
 						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR, name + " was already defined at "
 								+ list.get(name, t, true, env).getDefinedTarget() + " but is being redefined.", t);
 					}
@@ -302,7 +302,11 @@ public class DataHandling {
 					throw new CRECastException(getName() + " with 2 arguments only accepts an ivariable as the first argument.", t);
 				}
 				name = ((IVariable) args[offset]).getVariableName();
-				type = list.get(name, t, true, env).getDefinedType();
+				IVariable listVar = list.get(name, t, true, env);
+				if(listVar.ival() != CNull.UNDEFINED) {
+					t = listVar.getDefinedTarget();
+				}
+				type = listVar.getDefinedType();
 			}
 			Mixed c = args[offset + 1];
 			while(c instanceof IVariable) {
