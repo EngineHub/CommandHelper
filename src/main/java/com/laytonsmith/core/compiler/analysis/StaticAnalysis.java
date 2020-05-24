@@ -147,9 +147,7 @@ public class StaticAnalysis {
 				if(decl instanceof ParamDeclaration) {
 					continue; // Allow parameter declarations to shadow previous declarations.
 				}
-//				System.out.println("[DEBUG] IVARIABLE decl: " + decl.getIdentifier() + " @ " + decl.getTarget()); // TODO - Remove debug.
 				Set<Declaration> dupDecls = scope.getReachableDeclarations(Namespace.IVARIABLE, decl.getIdentifier());
-//				System.out.println("[DEBUG] IVARIABLE numDecls: " + dupDecls.size()); // TODO - Remove debug.
 				if(dupDecls.size() > 1) {
 					dupDecls.remove(decl);
 					// TODO - Generate only one exception with all targets in them.
@@ -215,8 +213,8 @@ public class StaticAnalysis {
 		unhandledRefs.removeAll(linkedRefs);
 
 		// TODO - Remove assert and commented-out code when no longer needed. Scope linkage has moved elsewhere.
-		System.out.println("Handled refs size: " + handledRefs.size());
-		System.out.println("Linked refs size: " + linkedRefs.size());
+//		System.out.println("Handled refs size: " + handledRefs.size());
+//		System.out.println("Linked refs size: " + linkedRefs.size());
 		assert unhandledRefs.size() == 0 : "Unhandled references after compileIncludesLinkCycles() call.";
 
 //		// Link all unhandled references.
@@ -260,7 +258,6 @@ public class StaticAnalysis {
 	private boolean compileIncludesLinkCycles(Set<IncludeReference> handledRefs, Set<IncludeReference> linkedRefs,
 			Stack<IncludeReference> path, Environment env, Set<ConfigCompileException> exceptions) {
 		boolean containsCycle = false; // TODO - Remove cycle-awareness if no longer used.
-		System.out.println("[DEBUG] numIncludeRefs: " + this.getIncludeRefs().size()); // TODO - Remove debug.
 		for(IncludeReference includeRef : this.getIncludeRefs()) {
 
 			// Directly link scope graphs of cyclic includes.
@@ -316,17 +313,12 @@ public class StaticAnalysis {
 			StaticAnalysis includeAnalysis;
 			try {
 				File file = Static.GetFileFromArgument(includeRef.getIdentifier(), env, includeRef.getTarget(), null);
-				System.out.println("[DEBUG] Loading include: "
-						+ includeRef.getIdentifier() + " - " + includeRef.getTarget()); // TODO - Remove debug.
 				includeAnalysis = IncludeCache.getStaticAnalysis(file, includeRef.getTarget());
 				if(includeAnalysis == null) {
-					System.out.println("[DEBUG] Include analysis not cached, generating.");
 					includeAnalysis = new StaticAnalysis(false);
 					IncludeCache.get(file, env, includeAnalysis, includeRef.getTarget());
-					System.out.println("[DEBUG] Include analysis generated and cached.");
-					assert IncludeCache.getStaticAnalysis(file, includeRef.getTarget()) != null : "Failed to cache include analysis.";
-					assert IncludeCache.getStaticAnalysis(Static.GetFileFromArgument(includeRef.getIdentifier(), env, includeRef.getTarget(), null),
-							includeRef.getTarget()) != null : "Failed to cache include analysis (2).";
+					assert IncludeCache.getStaticAnalysis(file, includeRef.getTarget()) != null
+							: "Failed to cache include analysis.";
 				}
 			} catch (CREException e) {
 
@@ -335,7 +327,6 @@ public class StaticAnalysis {
 				exceptions.add(new ConfigCompileException(e.getMessage(), e.getTarget()));
 
 				// Link directly and continue as there's no StaticAnalysis to handle.
-				System.out.println("[DEBUG] Failed to compile include. Linking directly."); // TODO - Remove debug.
 				this.addDirectedEdge(includeRef.getOutScope(), includeRef.getInScope());
 				linkedRefs.add(includeRef);
 				continue;
@@ -550,32 +541,6 @@ public class StaticAnalysis {
 		return new Scope[] {paramScope, this.linkScope(valScope, ast, env, exceptions)};
 	}
 
-//	public Scope linkIsolatedParamScope(Scope parentOuterScope, Scope paramDeclScope,
-//			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
-//		Mixed node = ast.getData();
-//		if(node instanceof IVariable) { // Normal parameter.
-//			IVariable iVar = (IVariable) node;
-//			Scope newScope = this.createNewScope(parentOuterScope);
-//			newScope.addDeclaration(new Declaration(
-//					Namespace.IVARIABLE, iVar.getVariableName(), iVar.getDefinedType(), iVar.getTarget()));
-//			paramDeclScope.addDeclaration(new Declaration(
-//					Namespace.IVARIABLE, iVar.getVariableName(), iVar.getDefinedType(), iVar.getTarget()));
-//			return newScope;
-//		} else if(node instanceof CFunction && ((CFunction) node).hasFunction()) { // Typed parameter or assign.
-//			try {
-//				FunctionBase f = FunctionList.getFunction((CFunction) node, null);
-//				if(f instanceof DataHandling.assign) {
-//					Function func = (Function) f;
-//					return func.linkScope(this, parentScope, ast, env, exceptions);
-//				}
-//			} catch (ConfigCompileException ex) {
-//				// Ignore node. This should cause a compile error in a later stage.
-//			}
-//		}
-////			return this.linkScope(parentOuterScope, ast, env, exceptions);
-//		}
-//	}
-
 	public Scope createNewScope(Scope parent) {
 		Scope scope = this.createNewScope();
 		scope.addParent(parent);
@@ -589,16 +554,10 @@ public class StaticAnalysis {
 	}
 
 	public void addDirectedEdge(Scope child, Scope parent) {
-		// TODO - Remove asserts? This is valid when linking an include clone to an analysis we actually care about.
-//		assert this.scopes.contains(child);
-//		assert this.scopes.contains(parent);
 		child.addParent(parent);
 	}
 
 	public void removeDirectedEdge(Scope child, Scope parent) {
-		// TODO - Remove asserts? This is valid when linking an include clone to an analysis we actually care about.
-//		assert this.scopes.contains(child);
-//		assert this.scopes.contains(parent);
 		child.removeParent(parent);
 	}
 
