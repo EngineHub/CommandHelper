@@ -470,13 +470,6 @@ public class StaticAnalysis {
 				Scope refScope = this.createNewScope(parentScope);
 				refScope.addReference(new Reference(Namespace.IVARIABLE, cFunc.val(), cFunc.getTarget()));
 				return refScope;
-
-				// TODO - Move check to different place. Reference is already added.
-//				Set<Declaration> decls = parentScope.getDeclarations(Namespace.IVARIABLE, cFunc.val());
-//				if(decls.isEmpty()) {
-//					exceptions.add(new ConfigCompileException(
-//							"Variable cannot be resolved: " + cFunc.val(), cFunc.getTarget()));
-//				}
 			} else if(cFunc.hasProcedure()) { // The function is a procedure reference.
 
 				// Add procedure reference in a new scope.
@@ -500,20 +493,6 @@ public class StaticAnalysis {
 			Scope refScope = this.createNewScope(parentScope);
 			refScope.addReference(new Reference(Namespace.IVARIABLE, ivar.getVariableName(), ivar.getTarget()));
 			return refScope;
-
-			// TODO - Move check to different place. Reference is already added.
-//			Set<Declaration> decls = parentScope.getDeclarations(Namespace.IVARIABLE, ivar.getVariableName());
-//			if(decls.isEmpty()) {
-//				exceptions.add(new ConfigCompileException(
-//						"Variable cannot be resolved: " + ivar.getVariableName(), ivar.getTarget()));
-//			} else if(decls.size() == 1) {
-//				Declaration decl = decls.iterator().next();
-//
-//				// Set the declared type of the IVariable reference.
-//				ast.setData(new IVariable(decl.getType(), ivar.getVariableName(), ivar.ival(), decl.getTarget()));
-//			} else {
-//				// TODO - Add duplicate declaration error here? Or is this already handled elsewhere?
-//			}
 		}
 		return parentScope;
 	}
