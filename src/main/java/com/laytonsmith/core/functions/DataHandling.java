@@ -2376,7 +2376,7 @@ public class DataHandling {
 			if(args[0].val().equals(Static.getConsoleName())) {
 				sender = Static.getServer().getConsole();
 			} else if(args[0] instanceof CNull) {
-				sender = originalSender;
+				sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			} else {
 				sender = Static.GetPlayer(args[0].val(), t);
 			}
