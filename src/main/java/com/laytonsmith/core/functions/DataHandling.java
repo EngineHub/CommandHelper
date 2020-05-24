@@ -2375,7 +2375,7 @@ public class DataHandling {
 			MCCommandSender sender;
 			if(args[0].val().equals(Static.getConsoleName())) {
 				sender = Static.getServer().getConsole();
-			}else if(args[0] instanceof CNull) {
+			} else if(args[0] instanceof CNull) {
 				sender = originalSender;
 			} else {
 				sender = Static.GetPlayer(args[0].val(), t);
