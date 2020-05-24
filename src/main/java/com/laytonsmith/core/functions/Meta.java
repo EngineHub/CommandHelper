@@ -151,25 +151,21 @@ public class Meta {
 				Static.getServer().runasConsole(cmd);
 			} else {
 				MCPlayer m = Static.GetPlayer(args[0], t);
-				if(m != null && m.isOnline()) {
-					MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-					String name;
 
-					if(p != null) {
-						name = p.getName();
-					} else {
-						name = "Unknown player";
-					}
-
-					MSLog.GetLogger().Log(MSLog.Tags.META, LogLevel.INFO, "Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim(), t);
-					if(Prefs.DebugMode()) {
-						Static.getLogger().log(Level.INFO, "Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim());
-					}
-					//m.chat(cmd);
-					Static.getServer().dispatchCommand(m, cmd);
+				MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				String name;
+				if(p != null) {
+					name = p.getName();
 				} else {
-					throw new CREPlayerOfflineException("The player " + args[0].val() + " is not online", t);
+					name = "Unknown player";
 				}
+
+				MSLog.GetLogger().Log(MSLog.Tags.META, LogLevel.INFO, "Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim(), t);
+				if(Prefs.DebugMode()) {
+					Static.getLogger().log(Level.INFO, "Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim());
+				}
+
+				Static.getServer().dispatchCommand(m, cmd);
 			}
 			return CVoid.VOID;
 		}
@@ -621,7 +617,7 @@ public class Meta {
 
 		@Override
 		public String docs() {
-			return "void {player, [label], script} Runs the specified script in the context of a given player or "
+			return "void {sender, [label], script} Runs the specified script in the context of a given player or "
 					+ Static.getConsoleName() + ". A script that runs player(), for instance,"
 					+ " would return the specified player's name, not the player running the command."
 					+ " Setting the label allows you to dynamically set the label"
@@ -661,12 +657,7 @@ public class Meta {
 		@Override
 		public Mixed execs(Target t, Environment environment, Script parent, ParseTree... nodes) throws ConfigRuntimeException {
 			String senderName = parent.seval(nodes[0], environment).val();
-			MCCommandSender sender;
-			if(senderName.equals(Static.getConsoleName())) {
-				sender = Static.getServer().getConsole();
-			} else {
-				sender = Static.GetPlayer(senderName, t);
-			}
+			MCCommandSender sender = Static.GetCommandSender(senderName, t);
 			MCCommandSender originalSender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			int offset = 0;
 			String originalLabel = environment.getEnv(GlobalEnv.class).GetLabel();

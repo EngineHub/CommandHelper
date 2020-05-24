@@ -2324,7 +2324,7 @@ public class DataHandling {
 
 	@api
 	@seealso({com.laytonsmith.tools.docgen.templates.Closures.class})
-	public static class executeas extends AbstractFunction {
+	public static class executeas extends AbstractFunction implements Optimizable {
 
 		@Override
 		public String getName() {
@@ -2338,11 +2338,12 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "mixed {player, label, [values...], closure} Executes the given closure in the context of a given"
+			return "mixed {sender, label, [values...], closure} Executes the given closure in the context of a given"
 					+ " player or " + Static.getConsoleName() + ". A closure that runs player(), for instance,"
 					+ " would return the specified player's name."
+					+ " If null is given, it will execute with the current sender context instead of the closure's."
 					+ " The label argument sets the permission label that this closure will use. If null is given,"
-					+ " the current label will be used, like with execute().";
+					+ " the closure's label will be used, like with execute().";
 		}
 
 		@Override
@@ -2373,12 +2374,10 @@ public class DataHandling {
 
 			MCCommandSender originalSender = cEnv.GetCommandSender();
 			MCCommandSender sender;
-			if(args[0].val().equals(Static.getConsoleName())) {
-				sender = Static.getServer().getConsole();
-			} else if(args[0] instanceof CNull) {
+			if(args[0] instanceof CNull) {
 				sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			} else {
-				sender = Static.GetPlayer(args[0].val(), t);
+				sender = Static.GetCommandSender(args[0].val(), t);
 			}
 			cEnv.SetCommandSender(sender);
 
@@ -2398,6 +2397,21 @@ public class DataHandling {
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_2;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children,
+				FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() < 3) {
+				throw new ConfigCompileException(getName() + " must have 3 or more arguments", t);
+			}
+			return null;
 		}
 	}
 
