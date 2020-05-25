@@ -332,6 +332,19 @@ public class StaticAnalysis {
 				continue;
 			}
 
+			// Skip the file if the analysis does not contain a complete scope graph.
+			if(includeAnalysis.endScope == null) {
+
+				// This case might not always cause an exception to be printed, so inform about the failed include.
+				exceptions.add(new ConfigCompileException(
+						"An error occurred while analyzing included file", includeRef.getTarget()));
+
+				// Link directly and continue as there's no StaticAnalysis to handle.
+				this.addDirectedEdge(includeRef.getOutScope(), includeRef.getInScope());
+				linkedRefs.add(includeRef);
+				continue;
+			}
+
 			// Recurse on the include's analysis.
 			path.push(includeRef);
 			boolean childContainsCycle = includeAnalysis.compileIncludesLinkCycles(
