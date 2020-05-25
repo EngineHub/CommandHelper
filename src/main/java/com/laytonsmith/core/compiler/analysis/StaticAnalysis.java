@@ -58,7 +58,8 @@ public class StaticAnalysis {
 		this.isMainAnalysis = isMainAnalysis;
 	}
 
-	public void analyze(ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+	public void analyze(ParseTree ast, Environment env,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
 
 		// Clear scopes from previous analysis.
 		this.scopes.clear();
@@ -77,13 +78,13 @@ public class StaticAnalysis {
 
 		// Handle include references and analyze the final scope graph if this is the main analysis.
 		if(this.isMainAnalysis) {
-			this.handleIncludeRefs(env, exceptions);
+			this.handleIncludeRefs(env, envs, exceptions);
 			this.analyzeFinalScopeGraph(exceptions);
 		}
 	}
 
-	public static void setAndAnalyzeAutoIncludes(
-			List<File> autoIncludes, Environment env, Set<ConfigCompileException> exceptions) {
+	public static void setAndAnalyzeAutoIncludes(List<File> autoIncludes, Environment env,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
 
 		// Clear previous auto includes analysis and return since there are no auto includes.
 		if(autoIncludes == null || autoIncludes.size() == 0) {
@@ -106,7 +107,7 @@ public class StaticAnalysis {
 		analysis.globalScope = analysis.endScope;
 
 		// Perform static analysis on the created script.
-		analysis.handleIncludeRefs(env, exceptions);
+		analysis.handleIncludeRefs(env, envs, exceptions);
 		analysis.analyzeFinalScopeGraph(exceptions);
 
 		// Store the new analysis.
@@ -201,12 +202,13 @@ public class StaticAnalysis {
 		}
 	}
 
-	private void handleIncludeRefs(Environment env, Set<ConfigCompileException> exceptions) {
+	private void handleIncludeRefs(Environment env,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
 
 		// Compile and get all (in)direct includes.
 		Set<IncludeReference> handledRefs = new HashSet<>();
 		Set<IncludeReference> linkedRefs = new HashSet<>();
-		this.compileIncludesLinkCycles(handledRefs, linkedRefs, new Stack<>(), env, exceptions);
+		this.compileIncludesLinkCycles(handledRefs, linkedRefs, new Stack<>(), env, envs, exceptions);
 
 		// Create a set containing only unhandled references.
 		Set<IncludeReference> unhandledRefs = new HashSet<>(handledRefs);
@@ -252,11 +254,13 @@ public class StaticAnalysis {
 	 * (that are part of an already-linked cycle).
 	 * @param path - Supply an empty stack. Will be empty when this method returns.
 	 * @param env
+	 * @param envs
 	 * @param exceptions
 	 * @return {@code true} if this depth-first traversal included a cycle, {@code false} otherwise (used internally).
 	 */
 	private boolean compileIncludesLinkCycles(Set<IncludeReference> handledRefs, Set<IncludeReference> linkedRefs,
-			Stack<IncludeReference> path, Environment env, Set<ConfigCompileException> exceptions) {
+			Stack<IncludeReference> path, Environment env, Set<Class<? extends Environment.EnvironmentImpl>> envs,
+			Set<ConfigCompileException> exceptions) {
 		boolean containsCycle = false; // TODO - Remove cycle-awareness if no longer used.
 		for(IncludeReference includeRef : this.getIncludeRefs()) {
 
@@ -316,7 +320,7 @@ public class StaticAnalysis {
 				includeAnalysis = IncludeCache.getStaticAnalysis(file, includeRef.getTarget());
 				if(includeAnalysis == null) {
 					includeAnalysis = new StaticAnalysis(false);
-					IncludeCache.get(file, env, includeAnalysis, includeRef.getTarget());
+					IncludeCache.get(file, env, envs, includeAnalysis, includeRef.getTarget());
 					assert IncludeCache.getStaticAnalysis(file, includeRef.getTarget()) != null
 							: "Failed to cache include analysis.";
 				}
@@ -348,7 +352,7 @@ public class StaticAnalysis {
 			// Recurse on the include's analysis.
 			path.push(includeRef);
 			boolean childContainsCycle = includeAnalysis.compileIncludesLinkCycles(
-					handledRefs, linkedRefs, path, env, exceptions);
+					handledRefs, linkedRefs, path, env, envs, exceptions);
 			path.pop();
 
 			// Clone and link the include analysis if it has not yet been handled, and mark it as handled.
