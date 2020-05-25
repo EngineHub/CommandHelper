@@ -366,7 +366,7 @@ public class AliasCore {
 
 				// Set and analyze auto includes for static analysis.
 				Set<ConfigCompileException> compileExceptions = new HashSet<>();
-				StaticAnalysis.setAndAnalyzeAutoIncludes(Static.getAliasCore().autoIncludes, env, compileExceptions);
+				StaticAnalysis.setAndAnalyzeAutoIncludes(this.autoIncludes, env, compileExceptions);
 				for(ConfigCompileException ex : compileExceptions) {
 					ConfigRuntimeException.HandleUncaughtException(ex, "Compile error in script."
 							+ " Compilation will attempt to continue, however.", player);
