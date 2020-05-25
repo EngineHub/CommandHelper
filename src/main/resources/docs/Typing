@@ -203,13 +203,16 @@ msg(typeof(@m)); // ms.lang.string
 mixed @m = 'string';
 msg(reflect_type(typeof(@m)));
 /*{
-	docs: A ClassType is a value that represents an object type. This includes primitives or other value types.,
 	fqcn: ms.lang.string,
 	interfaces: {ms.lang.Iterable},
 	isNative: true,
 	name: string,
 	package: ms.lang,
-	superclasses: {ms.lang.primitive}
+	superclasses: {ms.lang.primitive},
+	typeDocs: {{
+		docs: A string is a value that contains character data. The character encoding is stored with the string as well.,
+		since: 3.0.1
+	}}
 }*/
 
 // We can also get other information about it with always_trace:

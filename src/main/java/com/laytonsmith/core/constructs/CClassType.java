@@ -8,6 +8,7 @@ import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.MEnumType;
@@ -432,7 +433,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * @param env
 	 * @return
 	 */
-	public CClassType[] getSuperclassesForType(Environment env) {
+	public CClassType[] getTypeSuperclasses(Environment env) {
 		instantiateInvalidType(env);
 		try {
 			return Stream.of(invalidType).flatMap(e -> Stream.of(e.getSuperclasses()))
@@ -449,7 +450,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * @param env
 	 * @return
 	 */
-	public CClassType[] getInterfacesForType(Environment env) {
+	public CClassType[] getTypeInterfaces(Environment env) {
 		instantiateInvalidType(env);
 		return Stream.of(invalidType).flatMap(e -> Stream.of(e.getInterfaces()))
 				.collect(Collectors.toSet()).toArray(CClassType.EMPTY_CLASS_ARRAY);
@@ -504,6 +505,29 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	@Override
 	public String docs() {
 		return "A ClassType is a value that represents an object type. This includes primitives or other value types.";
+	}
+
+	/**
+	 * Returns the type if this is not a class union, and throws a CRECastException if it's a type union.
+	 * @return
+	 */
+	private CClassType getOnlyTypeOrFail(Target t) {
+		if(types.size() == 1) {
+			return new TreeSet<>(getTypes()).first();
+		}
+		throw new CRECastException("This operation is not supported on a type union.", t);
+	}
+
+	public String getTypeDocs(Target t, Environment env) {
+		getOnlyTypeOrFail(t);
+		instantiateInvalidType(env);
+		return invalidType[0].docs();
+	}
+
+	public Version getTypeSince(Target t, Environment env) {
+		getOnlyTypeOrFail(t);
+		instantiateInvalidType(env);
+		return invalidType[0].since();
 	}
 
 	@Override

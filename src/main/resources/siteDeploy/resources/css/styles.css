@@ -56,7 +56,7 @@ table td p {
 }
 
 .bodyXSmall {
-    
+
 }
 
 .bodyXSmall .methodscript_code {
@@ -317,4 +317,42 @@ code {
 
 .sb-icon-search-normal {
 	margin: 9px;
+}
+
+.copyButton {
+	top: -12px;
+    float: right;
+    height: 27px;
+    width: 114px;
+    border: #A7D7F9 solid;
+    position: relative;
+    border-width: 0 1px 1px 1px;
+    padding: 5px 5px 25px 9px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+	cursor: pointer;
+}
+
+.copyButton:hover {
+	background-color: aliceblue;
+}
+
+.copyButton img {
+	height: 16px;
+	position: relative;
+	top: 3px;
+}
+
+.toastMessage {
+	position: fixed;
+    right: 0;
+    top: 0;
+    margin: 0px 0px 10px 25px;
+    background-color: rgba(0, 0, 0, 0.85);
+    padding: 5px 20px 10px 25px;
+    color: white;
+    border-bottom-left-radius: 20px;
+    z-index: 10000000;
+    border-color: white;
+    border-bottom: ridge;
 }

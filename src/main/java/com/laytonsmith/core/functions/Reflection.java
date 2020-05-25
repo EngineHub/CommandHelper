@@ -54,6 +54,7 @@ import com.laytonsmith.persistence.PersistenceNetwork;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -362,11 +363,20 @@ public class Reflection {
 			CArray ret = new CArray(t);
 			ret.set("fqcn", type.getFQCN().getFQCN());
 			ret.set("name", type.getFQCN().getSimpleName());
-			ret.set("package", type.getPackage() == null ? CNull.NULL : type.getPackage(), t);
-			ret.set("docs", type.docs());
-			ret.set("isNative", CBoolean.get(type.getNativeType() != null), t);
-			ret.set("interfaces", new CArray(t, type.getInterfacesForType(environment)), t);
-			ret.set("superclasses", new CArray(t, type.getSuperclassesForType(environment)), t);
+			ret.set("interfaces", new CArray(t, type.getTypeInterfaces(environment)), t);
+			ret.set("superclasses", new CArray(t, type.getTypeSuperclasses(environment)), t);
+
+			CArray typeDocs = new CArray(t);
+			// When type unions are a thing, this will need to be implemented slightly differently.
+			for(CClassType m : Arrays.asList(type)) {
+				CArray docs = CArray.GetAssociativeArray(t);
+				docs.set("package", type.getPackage() == null ? CNull.NULL : type.getPackage(), t);
+				docs.set("isNative", CBoolean.get(type.getNativeType() != null), t);
+				docs.set("docs", m.getTypeDocs(t, environment));
+				docs.set("since", m.getTypeSince(t, environment).toString());
+				typeDocs.push(docs, t);
+			}
+			ret.set("typeDocs", typeDocs, t);
 			return ret;
 		}
 
@@ -388,6 +398,14 @@ public class Reflection {
 		@Override
 		public Version since() {
 			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("With ClassType references", "reflect_type(string)"),
+				new ExampleScript("Via typeof()", "int @i = 1;\nmsg(reflect_type(typeof(@i)));")
+			};
 		}
 
 	}

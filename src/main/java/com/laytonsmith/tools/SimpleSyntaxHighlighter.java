@@ -276,7 +276,12 @@ public final class SimpleSyntaxHighlighter {
 						+ " border-color: #" + getRGB(classes.get(ElementTypes.BORDER_COLOR))
 						+ "; ")
 				+ " border-style: solid; border-width: 1px 0px 1px 0px; margin: 1em 2em;"
-				+ " padding: 12px 2px 1em 1em;\" class=\"methodscript_code\">" + out.toString() + "</div>";
+				+ " padding: 12px 2px 1em 1em;\" class=\"methodscript_code\">"
+				+ "<div class=\"rawCode\" style=\"display: none;\">"
+				+ DocGenTemplates.escapeWiki(code)
+				+ "</div><div class=\"copyButton\">"
+				+ "<img src=\"%%cacheBuster|images/clipboard.png%%\" alt=\"\"> Copy Code</div>"
+				+ out.toString() + "</div>";
 		return totalOutput;
 	}
 

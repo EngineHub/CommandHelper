@@ -26,6 +26,7 @@ import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.asm.LLVMFunction;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -1237,6 +1238,10 @@ public final class SiteDeploy {
 						-> o1.getCanonicalName().compareTo(o2.getCanonicalName()));
 				List<String> hiddenFunctions = new ArrayList<>();
 				for(Class<? extends Function> functionClass : functionClasses) {
+					if(LLVMFunction.class.isAssignableFrom(functionClass)) {
+						// Skip these for now.
+						continue;
+					}
 					try {
 						if(!data.containsKey(functionClass.getEnclosingClass())) {
 							data.put(functionClass.getEnclosingClass(), new ArrayList<>());

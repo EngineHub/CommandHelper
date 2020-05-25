@@ -3,12 +3,8 @@ array {type} Returns information about the given ClassType. ----
 The following information is returned:
 
 {|
-!-
 ! Entry
 ! Description
-|-
-| docs
-| The documentation for the type.
 |-
 | fqcn
 | The Fully Qualified Class Name, that is, the name that unambiguously identifies this class.
@@ -16,15 +12,24 @@ The following information is returned:
 | interfaces
 | An array of interfaces that this type implements, may be empty.
 |-
-| isNative
-| True if this is a class defined in native code.
-|-
 | name
 | The simple name of the class.
+|-
+| superclasses
+| An array of classes that this type inherits from. With the exception of the root mixed type, this will never be empty.
 |-
 | package
 | The package that the class lives in.
 |-
-| superclasses
-| An array of classes that this type inherits from. With the exception of the root mixed type, this will never be empty.
+| docs
+| The documentation for the type.
+|-
+| since
+| When the type was added.
+|-
+| isNative
+| True if this is a class defined in native code.
 |}
+
+Note that docs, package, since, and isNative are in an object in an array. If the given type represent a type union,
+there will be more than one object in this array. (Note that type unions aren't supported yet.)

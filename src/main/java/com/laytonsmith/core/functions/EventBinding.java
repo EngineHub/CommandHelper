@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
@@ -72,7 +73,9 @@ public class EventBinding {
 		public String docs() {
 			return "string {event_name, options, prefilter, event_obj, [custom_params], &lt;code&gt;} Binds some functionality to an event, so that"
 					+ " when said event occurs, the event handler will fire. Returns the id of this event, so it can be unregistered"
-					+ " later, if need be. See more on the page detailing [[Events]].";
+					+ " later, if need be. See more on the page detailing [[Events]]. The options array can contain"
+					+ " \"id\" and \"priority\", where priority is one of: "
+					+ StringUtils.Join(Priority.values(), ", ", ", or ") + ". The prefilters vary from event to event.";
 		}
 
 		@Override

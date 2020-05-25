@@ -302,3 +302,12 @@ dl dd span {
 .hljs-strong {
 	font-weight: bold;
 }
+
+.copyButton {
+    border: #5c8350 solid;
+	border-width: 0 1px 1px 1px;
+}
+
+.copyButton:hover {
+	background-color: black;
+}

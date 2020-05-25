@@ -573,7 +573,6 @@
 										add it to the dependecies list to fully integrate it. -->
 									<include>com.google.code.gson:gson:jar:*</include>
 									<include>com.google.guava:guava:jar:*</include>
-									<include>com.microsoft.azure:applicationinsights-core:jar:*</include>
 									<!-- Swagger dependencies -->
 									<include>com.squareup.okhttp:okhttp:jar:*</include>
 									<include>com.squareup.okio:okio:jar:*</include>
@@ -715,7 +714,7 @@
 									<pattern>io.gsonfire</pattern>
 									<shadedPattern>com.laytonsmith.libs.io.gsonfire</shadedPattern>
 								</relocation>
-							</relocations>							
+							</relocations>
 							<filters>
 								<filter>
 									<artifact>org.xerial:sqlite-jdbc:jar:*</artifact>
@@ -882,12 +881,6 @@
 										<exclude>META-INF/**</exclude>
 										<!-- Conflict with Spigot -->
 										<exlude>com/google/common/collect/**</exlude>
-									</excludes>
-								</filter>
-								<filter>
-									<artifact>com.microsoft.azure:applicationinsights-core:jar:*</artifact>
-									<excludes>
-										<exclude>META-INF/**</exclude>
 									</excludes>
 								</filter>
 								<filter>
@@ -1078,7 +1071,7 @@
                     </execution>
                 </executions>
             </plugin>-->
-			
+
 		</plugins>
 	</build>
 	<profiles>

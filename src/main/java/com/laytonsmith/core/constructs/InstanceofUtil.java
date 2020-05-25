@@ -41,10 +41,10 @@ public class InstanceofUtil {
 		}
 		blacklist.add(c);
 		try {
-			for(CClassType s : c.getSuperclassesForType(env)) {
+			for(CClassType s : c.getTypeSuperclasses(env)) {
 				blacklist.addAll(getAllCastableClassesWithBlacklist(s, blacklist, env));
 			}
-			for(CClassType iface : c.getInterfacesForType(env)) {
+			for(CClassType iface : c.getTypeInterfaces(env)) {
 				blacklist.addAll(getAllCastableClassesWithBlacklist(iface, blacklist, env));
 			}
 		} catch (UnsupportedOperationException ex) {

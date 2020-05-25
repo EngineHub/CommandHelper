@@ -49,7 +49,7 @@
 		<link rel="icon" href="%%cacheBuster|images/favicon.ico%%" type="image/x-icon">
 
 		<link rel="stylesheet" href="%%cacheBuster|css/highlight/default.css%%" />
-				
+
 		<script src="%%cacheBuster|js/highlight.pack.js%%" type="text/javascript"></script>
 		<!-- Theme CSS must come after all other css -->
 		<!-- Want to help build new themes? Drop a css file in the themes folder, and add a link to it here. -->
@@ -57,14 +57,48 @@
 		<link data-style-name="Nilleke Dark" rel="stylesheet" type="text/css" href="%%cacheBuster|css/themes/nilleke_dark.css%%" disabled="true"/>
 		<!-- End Theme CSS -->
 		<script type="text/javascript">
+			(function($){
+			   $.fn.innerText = function(msg) {
+					 if (msg) {
+						if (document.body.innerText) {
+						   for (var i in this) {
+							  this[i].innerText = msg;
+						   }
+						} else {
+						   for (var i in this) {
+							  this[i].innerHTML.replace(/&amp;lt;br&amp;gt;/gi,"n")
+									  .replace(/(&amp;lt;([^&amp;gt;]+)&amp;gt;)/gi, "");
+						   }
+						}
+						return this;
+					 } else {
+						if (document.body.innerText) {
+						   return this[0].innerText;
+						} else {
+						   return this[0].innerHTML.replace(/&amp;lt;br&amp;gt;/gi,"n")
+								   .replace(/(&amp;lt;([^&amp;gt;]+)&amp;gt;)/gi, "");
+						}
+					 }
+			   };
+			})(jQuery);
 			var theme = Cookies.get("site-theme");
 			function setTheme(theme) {
 				$('[data-style-name]').each(function(index, element) {
 					if(theme === $(element).attr('data-style-name')) {
-						element.disabled = false;	
+						element.disabled = false;
 					} else {
 						element.disabled = true;
 					}
+				});
+			}
+			function showMessage(message) {
+				var $toast = $('.toastMessage');
+				$toast.text(message);
+				$toast.show(function() {
+					setTimeout(function(){
+						$toast.hide(function(){});
+					// Make the length of time longer based on how long the message is
+					}, Math.min(3, message.split(" ").length + 1) * 1000);
 				});
 			}
 			setTheme(theme);
@@ -73,11 +107,33 @@
 					hljs.highlightBlock(block);
 				});
 				$('#loadingSpinner').hide();
+
+				// Make the code copy buttons work
+				$('.copyButton').on('click', function(event) {
+					function copyToClipboard(element) {
+						var $temp = $("<textarea>");
+						$("body").append($temp);
+						$temp.val($(element).innerText()).select();
+						document.execCommand("copy");
+						$temp.remove();
+					}
+					var $target = $(event.currentTarget);
+					if(!$target.hasClass('copyButton')) {
+						$target = $target.parents('.copyButton');
+					}
+					var $code = $target.parent().children('.rawCode');
+					console.log($code.innerText());
+					copyToClipboard($code);
+					showMessage("Code copied!");
+				});
 			});
 		</script>
 	</head>
 
 	<body>
+		<div class="toastMessage" style="display:none;">
+			Test Message!
+		</div>
 		<!-- Header -->
 		<header id="header">
 			<img src="%%cacheBuster|images/CommandHelper_Icon.png%%" alt="" class="header-icon"/>
@@ -190,7 +246,7 @@
 				});
 				var currentTheme = Cookies.get("site-theme");
 				if(themes.indexOf(currentTheme) !== -1) {
-					$("#theme-select").val(currentTheme);					
+					$("#theme-select").val(currentTheme);
 				}
 				$("#theme-select").on('change', function() {
 					Cookies.set("site-theme", this.value);
