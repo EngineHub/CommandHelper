@@ -9,6 +9,7 @@ import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREIncludeException;
@@ -21,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class IncludeCache {
 
@@ -43,13 +45,14 @@ public class IncludeCache {
 		return CACHE.containsKey(new FileTargetTuple(file, null));
 	}
 
-	public static ParseTree get(File file, com.laytonsmith.core.environments.Environment env, Target t) {
-		return get(file, env, new StaticAnalysis(false), t);
+	public static ParseTree get(File file, com.laytonsmith.core.environments.Environment env,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, Target t) {
+		return get(file, env, envs, new StaticAnalysis(false), t);
 	}
 
 //	@Deprecated // TODO - Remove StaticAnalysis argument if caching it here works.
-	public static ParseTree get(File file,
-			com.laytonsmith.core.environments.Environment env, StaticAnalysis staticAnalysis, Target t) {
+	public static ParseTree get(File file, com.laytonsmith.core.environments.Environment env,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, StaticAnalysis staticAnalysis, Target t) {
 		MSLog.GetLogger().Log(TAG, LogLevel.DEBUG, "Loading " + file, t);
 		FileTargetTuple key = new FileTargetTuple(file, t);
 		if(CACHE.containsKey(key)) {
@@ -70,7 +73,7 @@ public class IncludeCache {
 			ParseTree tree;
 			try {
 				tree = MethodScriptCompiler.compile(
-						MethodScriptCompiler.lex(s, env, file, true), env, env.getEnvClasses(), staticAnalysis);
+						MethodScriptCompiler.lex(s, env, file, true), env, envs, staticAnalysis);
 			} finally {
 				p.stop();
 			}

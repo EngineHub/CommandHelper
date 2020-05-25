@@ -1822,7 +1822,7 @@ public final class MethodScriptCompiler {
 		rewriteAutoconcats(tree, environment, envs, compilerErrors);
 		checkLinearComponents(tree, environment, compilerErrors);
 		if(staticAnalysis != null) {
-			staticAnalysis.analyze(tree, environment, compilerErrors);
+			staticAnalysis.analyze(tree, environment, envs, compilerErrors);
 		}
 		optimize(tree, environment, envs, procs, compilerErrors);
 		link(tree, compilerErrors, envs);
@@ -2790,9 +2790,11 @@ public final class MethodScriptCompiler {
 	public static void registerAutoIncludes(Environment env, Script s) {
 		for(File f : Static.getAliasCore().autoIncludes) {
 			try {
-				MethodScriptCompiler.execute(IncludeCache.get(f, env, new Target(0, f, 0)), env, null, s);
+				MethodScriptCompiler.execute(
+						IncludeCache.get(f, env, env.getEnvClasses(), new Target(0, f, 0)), env, null, s);
 			} catch (ProgramFlowManipulationException e) {
-				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException("Cannot break program flow in auto include files.", e.getTarget()), env);
+				ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException(
+						"Cannot break program flow in auto include files.", e.getTarget()), env);
 			} catch (ConfigRuntimeException e) {
 				e.setEnv(env);
 				ConfigRuntimeException.HandleUncaughtException(e, env);

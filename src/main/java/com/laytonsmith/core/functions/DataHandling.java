@@ -1589,7 +1589,7 @@ public class DataHandling {
 			String location = arg.val();
 			// TODO - Run static analysis from the outer file start scope if available.
 			File file = Static.GetFileFromArgument(location, env, t, null);
-			ParseTree include = IncludeCache.get(file, env, t);
+			ParseTree include = IncludeCache.get(file, env, env.getEnvClasses(), t);
 			if(include != null) {
 				// It could be an empty file
 				StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
