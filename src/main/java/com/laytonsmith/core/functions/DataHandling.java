@@ -1632,6 +1632,7 @@ public class DataHandling {
 					// Create static analysis to check the file as soon as it is loaded in runtime.
 					// TODO - Replace this by storage in IncludeCache?
 					this.dynamicStaticAnalysis = new StaticAnalysis(parentScope, false);
+					return parentScope;
 				}
 			} else {
 				System.out.println("[DEBUG] Faulty include detected."); // TODO - Remove debug.
