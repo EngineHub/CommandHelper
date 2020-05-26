@@ -2525,7 +2525,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			return new CInt((long) Static.getDouble(args[0], t), t);
+			return new CInt((long) ArgumentValidation.getNumber(args[0], t), t);
 		}
 
 		@Override
