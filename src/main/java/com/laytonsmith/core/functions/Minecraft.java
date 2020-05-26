@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.MCPluginManager;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
@@ -418,9 +419,12 @@ public class Minecraft {
 			return "void {locationArray, effect, [radius]} Plays the specified effect at the given location"
 					+ " for all players within the radius (or 64 by default). The effect can be one of the following: "
 					+ StringUtils.Join(MCEffect.values(), ", ", ", or ", " or ")
-					+ ". Additional data can be supplied with the syntax EFFECT:DATA. The STEP_SOUND effect takes an"
-					+ " int of a legacy block id, SMOKE takes an int as a direction (4 is upwards), and POTION_BREAK"
-					+ " takes an int as a color.";
+					+ ". ---- Additional data can be supplied with the syntax EFFECT:DATA."
+					+ "<br>The STEP_SOUND takes a block material name."
+					+ "<br>RECORD_PLAY takes a record material name."
+					+ "<br>SMOKE takes a facing, one of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ", " or ")
+					+ "<br>POTION_BREAK takes an int (represents color)."
+					+ "<br>VILLAGER_PLANT_GROW takes an int of the number of particles (requires a plant at location).";
 		}
 
 		@Override
@@ -447,35 +451,65 @@ public class Minecraft {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t);
-			MCEffect e;
-			String preEff = args[1].val();
+			MCEffect effect;
 			int data = 0;
+			String effectName = args[1].val();
+			String dataString = "";
 			int radius = 64;
-			int index = preEff.indexOf(':');
+			int index = effectName.indexOf(':');
 			if(index != -1) {
-				try {
-					data = Integer.parseInt(preEff.substring(index + 1));
-				} catch (NumberFormatException ex) {
-					throw new CRECastException("Effect data expected an integer", t);
-				}
-				preEff = preEff.substring(0, index);
+				dataString = effectName.substring(index + 1);
+				effectName = effectName.substring(0, index);
 			}
 			try {
-				e = MCEffect.valueOf(preEff.toUpperCase());
+				effect = MCEffect.valueOf(effectName.toUpperCase());
 			} catch (IllegalArgumentException ex) {
-				MSLog.GetLogger().e(MSLog.Tags.GENERAL, "The effect type " + args[1].val() + " is not valid", t);
+				MSLog.GetLogger().e(MSLog.Tags.GENERAL, "The effect type " + effectName + " is not valid", t);
 				return CVoid.VOID;
 			}
-			if(e.equals(MCEffect.STEP_SOUND)) {
-				MCMaterial mat = StaticLayer.GetMaterialFromLegacy(data, 0);
-				if(mat == null || !mat.isBlock()) {
-					throw new CREFormatException("This effect requires a valid BlockID", t);
+			if(args.length > 2) {
+				radius = Static.getInt32(args[args.length - 1], t);
+			}
+			if(!dataString.equals("")) {
+				switch(effect) {
+					case RECORD_PLAY:
+					case STEP_SOUND:
+						MCMaterial mat = StaticLayer.GetMaterial(dataString.toUpperCase());
+						if(mat != null) {
+							try {
+								l.getWorld().playEffect(l, effect, mat, radius);
+								return CVoid.VOID;
+							} catch (IllegalArgumentException ex) {
+								throw new CREIllegalArgumentException(ex.getMessage(), t);
+							}
+						}
+						// Fall back to integer
+						break;
+					case SMOKE:
+						try {
+							MCBlockFace facing = MCBlockFace.valueOf(dataString.toUpperCase());
+							try {
+								l.getWorld().playEffect(l, effect, facing, radius);
+								return CVoid.VOID;
+							} catch (IllegalArgumentException ex) {
+								throw new CREIllegalArgumentException(ex.getMessage(), t);
+							}
+						} catch (IllegalArgumentException ex) {
+							// Fall back to integer
+						}
+						break;
+				}
+				try {
+					data = Integer.parseInt(dataString);
+				} catch (NumberFormatException notInt) {
+					throw new CREFormatException("Could not get valid effect data from: \"" + dataString + "\"", t);
 				}
 			}
-			if(args.length == 3) {
-				radius = Static.getInt32(args[2], t);
+			try {
+				l.getWorld().playEffect(l, effect, data, radius);
+			} catch (IllegalArgumentException ex) {
+				throw new CREIllegalArgumentException(ex.getMessage(), t);
 			}
-			l.getWorld().playEffect(l, e, data, radius);
 			return CVoid.VOID;
 		}
 

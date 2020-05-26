@@ -5,6 +5,8 @@ import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFireworkEffect;
+import com.laytonsmith.abstraction.blocks.MCBlockFace;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.entities.MCItem;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.entities.MCLightningStrike;
@@ -336,6 +338,21 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	@Override
 	public void playEffect(MCLocation l, MCEffect mCEffect, int data, int radius) {
 		w.playEffect(((BukkitMCLocation) l).l, Effect.valueOf(mCEffect.name()), data, radius);
+	}
+
+	@Override
+	public void playEffect(MCLocation l, MCEffect mcEffect, Object data, int radius) {
+		Effect effect = Effect.valueOf(mcEffect.name());
+		switch(effect) {
+			case RECORD_PLAY:
+			case STEP_SOUND:
+				w.playEffect((Location) l.getHandle(), effect, ((MCMaterial) data).getHandle(), radius);
+				return;
+			case SMOKE:
+				w.playEffect((Location) l.getHandle(), effect, BlockFace.valueOf(((MCBlockFace) data).name()), radius);
+				return;
+		}
+		w.playEffect((Location) l.getHandle(), effect, data, radius);
 	}
 
 	@Override
