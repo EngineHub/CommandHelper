@@ -14,7 +14,9 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
@@ -331,10 +333,58 @@ public class StaticAnalysis {
 	 */
 	public static void requireType(CClassType type, CClassType expected,
 			Target t, Environment env, Set<ConfigCompileException> exceptions) {
-		if(type != CClassType.AUTO && !InstanceofUtil.isInstanceof(type, expected, env)) {
+
+		// Handle types that cause exceptions in the InstanceofUtil isInstanceof check.
+		if(type == CClassType.AUTO || type == CNull.TYPE) {
+			return;
+		}
+		if(type == CVoid.TYPE || expected == CVoid.TYPE || expected == CNull.TYPE) {
+			if(type != expected) {
+				exceptions.add(new ConfigCompileException("Expected type " + expected.getSimpleName()
+						+ ", but received type " + type.getSimpleName() + " instead.", t));
+			}
+			return;
+		}
+
+		// Handle 'normal' types.
+		if(!InstanceofUtil.isInstanceof(type, expected, env)) {
 			exceptions.add(new ConfigCompileException("Expected type " + expected.getSimpleName()
 				+ ", but received type " + type.getSimpleName() + " instead.", t));
 		}
+	}
+
+	/**
+	 * Checks whether the given AST node is an {@link IVariable}, adding a compile error to the passed
+	 * exceptions set if it isn't.
+	 * @param node - The AST node to check.
+	 * @param t
+	 * @param exceptions
+	 * @return The {@link IVariable} if it was one, or {@code null} if it wasn't.
+	 */
+	public static IVariable requireIVariable(Mixed node, Target t, Set<ConfigCompileException> exceptions) {
+		if(node instanceof IVariable) {
+			return (IVariable) node;
+		}
+		exceptions.add(new ConfigCompileException("Expected ivariable "
+				+ ", but received type " + node.getName() + " instead.", t));
+		return null;
+	}
+
+	/**
+	 * Checks whether the given AST node is an {@link CClassType}, adding a compile error to the passed
+	 * exceptions set if it isn't.
+	 * @param node - The AST node to check.
+	 * @param t
+	 * @param exceptions
+	 * @return The {@link CClasType} if it was one, or {@code null} if it wasn't.
+	 */
+	public static CClassType requireClassType(Mixed node, Target t, Set<ConfigCompileException> exceptions) {
+		if(node instanceof CClassType) {
+			return (CClassType) node;
+		}
+		exceptions.add(new ConfigCompileException(
+				"Expected classtype, but received type " + node.getName() + " instead.", t));
+		return null;
 	}
 
 	private void handleIncludeRefs(Environment env,
