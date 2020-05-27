@@ -634,10 +634,10 @@ public class ControlFlow {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env,
-				Set<Class<? extends Environment.EnvironmentImpl>> envs,
-				List<ParseTree> children, FileOptions fileOptions)
-				throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree postParseRewrite(ParseTree ast, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+			List<ParseTree> children = ast.getChildren();
+			Target t = ast.getTarget();
 			if(children.size() > 1 && children.get(1).getData() instanceof CFunction
 					&& new StringHandling.sconcat().getName().equals(children.get(1).getData().val())) {
 				//This is the brace/case/default usage of switch, probably. We need
@@ -662,8 +662,9 @@ public class ControlFlow {
 						if(c2 != null && c2.getData() instanceof CLabel) {
 							if(inDefault) {
 								//Default must come last
-								throw new ConfigCompileException(
-										"Unexpected case; the default case must come last.", t);
+								exceptions.add(new ConfigCompileException(
+										"Unexpected case; the default case must come last.", t));
+								return null;
 							}
 							if(lastCodeBlock.size() > 0) {
 								//Ok, need to push some stuff on to the new children
@@ -749,6 +750,14 @@ public class ControlFlow {
 				children.clear();
 				children.addAll(newChildren);
 			}
+			return null;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs,
+				List<ParseTree> children, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException {
 
 			//Loop through all the conditions and make sure each is unique. Also
 			//make sure that each value is not dynamic.
@@ -1271,7 +1280,7 @@ public class ControlFlow {
 	@api
 	@breakable
 	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class, ArrayIteration.class})
-	public static class foreach extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
+	public static class foreach extends AbstractFunction implements BranchStatement, VariableScope {
 
 		@Override
 		public String getName() {
@@ -1454,6 +1463,7 @@ public class ControlFlow {
 				ParseTree key = (ast.numberOfChildren() == 4 ? ast.getChildAt(ind++) : null);
 				ParseTree val = ast.getChildAt(ind++);
 				ParseTree code = ast.getChildAt(ind++);
+				System.out.println("[foreach] array: " + array + ", key: " + key + ", val: " + val + ", code: " + code);
 
 				// Order: array -> [key] -> val -> code?.
 				Scope arrayScope = analysis.linkScope(parentScope, array, env, exceptions);
@@ -1560,11 +1570,6 @@ public class ControlFlow {
 					+ ", <code>)";
 		}
 
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
 		private static final String CENTRY = new Compiler.centry().getName();
 		private static final String ASSIGN = new DataHandling.assign().getName();
 		private static final String SCONCAT = new StringHandling.sconcat().getName();
@@ -1579,18 +1584,19 @@ public class ControlFlow {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env,
-				Set<Class<? extends Environment.EnvironmentImpl>> envs,
-				List<ParseTree> children, FileOptions fileOptions)
-				throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree postParseRewrite(ParseTree ast, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+			List<ParseTree> children = ast.getChildren();
 			if(children.size() < 2) {
-				throw new ConfigCompileException("Invalid number of arguments passed to " + getName(), t);
+				exceptions.add(new ConfigCompileException(
+						"Invalid number of arguments passed to " + getName(), ast.getTarget()));
+				return null;
 			}
 			if(isFunction(children.get(0), CENTRY)) {
 				// This is what "@key: @value in @array" looks like initially.
 				// We'll refactor this so the next segment can take over properly.
 				ParseTree sconcat = new ParseTree(
-						new CFunction(new StringHandling.sconcat().getName(), t), fileOptions);
+						new CFunction(new StringHandling.sconcat().getName(), ast.getTarget()), ast.getFileOptions());
 				sconcat.addChild(children.get(0).getChildAt(0));
 				for(int i = 0; i < children.get(0).getChildAt(1).numberOfChildren(); i++) {
 					sconcat.addChild(children.get(0).getChildAt(1).getChildAt(i));
@@ -1633,14 +1639,16 @@ public class ControlFlow {
 					}
 				}
 				if(array == null) {
-					throw new ConfigCompileException("Invalid argument format passed to " + getName(), t);
+					exceptions.add(new ConfigCompileException(
+							"Invalid argument format passed to " + getName(), ast.getTarget()));
+					return null;
 				}
 				if(key != null && key.getData() instanceof CLabel) {
 					if(!(((CLabel) key.getData()).cVal() instanceof IVariable)
 							&& !(((CLabel) key.getData()).cVal() instanceof CFunction
 							&& ((CLabel) key.getData()).cVal().val().equals(ASSIGN))) {
-						throw new ConfigCompileException("Expected a variable for key, but \""
-								+ key.getData().val() + "\" was found", t);
+						exceptions.add(new ConfigCompileException("Expected a variable for key, but \""
+								+ key.getData().val() + "\" was found", ast.getTarget()));
 					}
 					key.setData(((CLabel) key.getData()).cVal());
 				}
@@ -1660,7 +1668,8 @@ public class ControlFlow {
 				// Change foreach(){ ... } else { ... } to a foreachelse.
 				if(children.get(children.size() - 1).getData() instanceof CFunction
 						&& children.get(children.size() - 1).getData().val().equals("else")) {
-					ParseTree foreachelse = new ParseTree(new CFunction(new foreachelse().getName(), t), fileOptions);
+					ParseTree foreachelse = new ParseTree(
+							new CFunction(new foreachelse().getName(), ast.getTarget()), ast.getFileOptions());
 					children.set(children.size() - 1, children.get(children.size() - 1).getChildAt(0));
 					foreachelse.setChildren(children);
 					return foreachelse;
