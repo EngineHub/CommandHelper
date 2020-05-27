@@ -262,7 +262,6 @@ public class StaticAnalysis {
 	 */
 	public CClassType typecheck(ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 		Mixed node = ast.getData();
-
 		if(node instanceof CFunction) {
 			CFunction cFunc = (CFunction) node;
 			if(cFunc.hasFunction()) {
@@ -603,7 +602,6 @@ public class StaticAnalysis {
 	public Scope linkScope(Scope parentScope, ParseTree ast,
 			Environment env, Set<ConfigCompileException> exceptions) {
 		Mixed node = ast.getData();
-//		System.out.println("[DEBUG] linkScope called on node: " + node.getClass().getSimpleName() + " - " + node);
 		if(node instanceof CFunction) {
 			CFunction cFunc = (CFunction) node;
 			if(cFunc.hasFunction()) {
@@ -801,11 +799,13 @@ public class StaticAnalysis {
 
 		// Clone the parents, using cached clones for already cloned parents.
 		for(Scope parent : scope.getParents()) {
-			Scope parentClone = cloneMapping.get(parent);
-			if(parentClone == null) {
-				parentClone = cloneScope(parent, cloneMapping);
+			scopeClone.addParent(cloneScope(parent, cloneMapping));
+		}
+		for(Entry<Namespace, Set<Scope>> entry : scope.getSpecificParents().entrySet()) {
+			Namespace namespace = entry.getKey();
+			for(Scope parent : entry.getValue()) {
+				scopeClone.addSpecificParent(cloneScope(parent, cloneMapping), namespace);
 			}
-			scopeClone.addParent(parentClone);
 		}
 		return scopeClone;
 	}
