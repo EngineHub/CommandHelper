@@ -8,7 +8,7 @@ import java.io.File;
  *
  *
  */
-public class Target {
+public class Target implements Comparable<Target> {
 
 	/**
 	 * For efficiency sake, since Targets are immutable, if you intend on using a blank target, that is to say, one that
@@ -78,5 +78,22 @@ public class Target {
 	@Override
 	public String toString() {
 		return (file != null ? file.getAbsolutePath() : "Unknown File") + ":" + line + "." + col;
+	}
+
+	/**
+	 * This implementation can be used to sort {@link Target}s first on file path, then on line and last on column.
+	 */
+	@Override
+	public int compareTo(Target t) {
+		int ret = (this.file == null ? (t.file == null ? 0 : -1)
+				: (t.file == null ? 1 : this.file.getAbsolutePath().compareTo(t.file.getAbsolutePath())));
+		if(ret != 0) {
+			return ret;
+		}
+		ret = Integer.compare(this.line, t.line);
+		if(ret != 0) {
+			return ret;
+		}
+		return Integer.compare(this.col, t.col);
 	}
 }
