@@ -125,6 +125,33 @@ public class DataHandling {
 		}
 
 		@Override
+		public CClassType typecheck(StaticAnalysis analysis,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			return typecheckArray(analysis, ast, env, exceptions);
+		}
+
+		protected static CClassType typecheckArray(StaticAnalysis analysis,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			for(ParseTree child : ast.getChildren()) {
+				Mixed elem = child.getData();
+
+				// If this is a centry(), ignore the first (CLabel) argument.
+				if(elem instanceof CFunction && CENTRY.equals(elem.val())) {
+					if(child.numberOfChildren() == 2) {
+						CClassType type = analysis.typecheck(child.getChildAt(1), env, exceptions);
+						StaticAnalysis.requireType(type, Mixed.TYPE, child.getChildAt(1).getTarget(), env, exceptions);
+					}
+				} else {
+
+					// This is normal value, so typecheck it.
+					CClassType type = analysis.typecheck(child, env, exceptions);
+					StaticAnalysis.requireType(type, Mixed.TYPE, child.getTarget(), env, exceptions);
+				}
+			}
+			return CArray.TYPE;
+		}
+
+		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{};
 		}
@@ -225,6 +252,12 @@ public class DataHandling {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray array = CArray.GetAssociativeArray(t, args);
 			return array;
+		}
+
+		@Override
+		public CClassType typecheck(StaticAnalysis analysis,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			return array.typecheckArray(analysis, ast, env, exceptions);
 		}
 
 		@Override

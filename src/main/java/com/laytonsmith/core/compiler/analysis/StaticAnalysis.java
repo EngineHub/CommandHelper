@@ -348,9 +348,11 @@ public class StaticAnalysis {
 		try {
 			return node.typeof();
 		} catch (Throwable t) {
-			// Ignore types like CLabels. TODO - Perhaps make sure that these are never traversed instead?
-//			exceptions.add(new ConfigCompileException("Unsupported AST node implementation in type checking: "
-//					+ node.getClass().getSimpleName(), node.getTarget()));
+			// Functions that might contain these unsupported objects should make sure that they don't type check them.
+			// In case an unsupported object causes an error here, it likely means that we have a syntax error.
+			// TODO - Eventually remove this exception if this indeed only triggers combined with another exception.
+			exceptions.add(new ConfigCompileException("Unsupported AST node implementation in type checking: "
+					+ node.getClass().getSimpleName(), node.getTarget()));
 			return CClassType.AUTO;
 		}
 	}
