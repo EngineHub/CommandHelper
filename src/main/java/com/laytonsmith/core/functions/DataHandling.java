@@ -1635,13 +1635,11 @@ public class DataHandling {
 		@Override
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
 				Environment env, Set<ConfigCompileException> exceptions) {
-			System.out.println("[DEBUG] Include linkScope called."); // TODO - Remove debug.
 
 			// Store references for static includes and a static analysis for dynamic includes.
 			if(ast.numberOfChildren() == 1) {
 				Mixed includePathNode = ast.getChildAt(0).getData();
 				if(includePathNode instanceof CString) {
-					System.out.println("[DEBUG] Static include detected."); // TODO - Remove debug.
 
 					// Create a new unlinked scope to leave a gap for the include scopes.
 					// Create a reference with these unlinked scopes to be able to perform linkage at a later stage.
@@ -1650,13 +1648,11 @@ public class DataHandling {
 							includePathNode.val(), parentScope, outScope, ast.getTarget()));
 					return outScope;
 				} else {
-					System.out.println("[DEBUG] Dynamic include detected."); // TODO - Remove debug.
 
 					// The include is dynamic, so it cannot be checked in compile time.
 					// Create static analysis to check the file as soon as it is loaded in runtime.
-					// TODO - Replace this by storage in IncludeCache?
 					this.dynamicStaticAnalysis = new StaticAnalysis(parentScope, false);
-					return parentScope;
+					return super.linkScope(analysis, parentScope, ast, env, exceptions);
 				}
 			} else {
 				System.out.println("[DEBUG] Faulty include detected."); // TODO - Remove debug.
