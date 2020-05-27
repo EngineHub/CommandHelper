@@ -1463,7 +1463,6 @@ public class ControlFlow {
 				ParseTree key = (ast.numberOfChildren() == 4 ? ast.getChildAt(ind++) : null);
 				ParseTree val = ast.getChildAt(ind++);
 				ParseTree code = ast.getChildAt(ind++);
-				System.out.println("[foreach] array: " + array + ", key: " + key + ", val: " + val + ", code: " + code);
 
 				// Order: array -> [key] -> val -> code?.
 				Scope arrayScope = analysis.linkScope(parentScope, array, env, exceptions);
