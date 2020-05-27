@@ -1,6 +1,7 @@
 package com.laytonsmith.core.compiler.analysis;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.Stack;
 public class Scope {
 
 	private final Set<Scope> parents;
+	private final Map<Namespace, Set<Scope>> specificParents;
 	private final Map<Namespace, Map<String, Declaration>> declarations;
 	private final Map<Namespace, List<Reference>> references;
 
@@ -34,23 +36,25 @@ public class Scope {
 		if(parent != null) {
 			this.parents.add(parent);
 		}
+		this.specificParents = new HashMap<>();
 		this.declarations = new HashMap<>();
 		this.references = new HashMap<>();
 	}
 
-	private Scope(Set<Scope> parents, Map<Namespace, Map<String, Declaration>> declarations,
-			Map<Namespace, List<Reference>> references) {
+	private Scope(Set<Scope> parents, Map<Namespace, Set<Scope>> specificParents,
+			Map<Namespace, Map<String, Declaration>> declarations, Map<Namespace, List<Reference>> references) {
 		this.parents = parents;
+		this.specificParents = specificParents;
 		this.declarations = declarations;
 		this.references = references;
 	}
 
-	public Set<Scope> getParents() {
-		return this.parents;
-	}
-
 	public void addParent(Scope parent) {
 		this.parents.add(parent);
+	}
+
+	public Set<Scope> getParents() {
+		return this.parents;
 	}
 
 	public void containsParent(Scope parent) {
@@ -59,6 +63,30 @@ public class Scope {
 
 	public void removeParent(Scope parent) {
 		this.parents.remove(parent);
+	}
+
+	/**
+	 * Adds a parent scope that can only be accessed through the given namespace.
+	 * @param parent - The parent scope.
+	 * @param namespace - The namespace for which to allow lookups.
+	 */
+	public void addSpecificParent(Scope parent, Namespace namespace) {
+		this.parents.add(parent);
+		Set<Scope> parents = this.specificParents.get(namespace);
+		if(parents == null) {
+			parents = new HashSet<>();
+			this.specificParents.put(namespace, parents);
+		}
+		parents.add(parent);
+	}
+
+	public Map<Namespace, Set<Scope>> getSpecificParents() {
+		return this.specificParents;
+	}
+
+	public Set<Scope> getSpecificParents(Namespace namespace) {
+		Set<Scope> parents = this.specificParents.get(namespace);
+		return (parents == null ? Collections.emptySet() : parents);
 	}
 
 	/**
@@ -125,6 +153,7 @@ public class Scope {
 				decls.add(decl);
 			} else {
 				scopeStack.addAll(scope.getParents());
+				scopeStack.addAll(scope.getSpecificParents(namespace));
 			}
 		} while(!scopeStack.empty());
 		return decls;
@@ -151,6 +180,7 @@ public class Scope {
 				decls.add(decl);
 			}
 			scopeStack.addAll(scope.getParents());
+			scopeStack.addAll(scope.getSpecificParents(namespace));
 		} while(!scopeStack.empty());
 		return decls;
 	}
@@ -203,6 +233,6 @@ public class Scope {
 	 * @return The clone.
 	 */
 	public Scope shallowUnlinkedClone() {
-		return new Scope(new HashSet<>(), this.declarations, this.references);
+		return new Scope(new HashSet<>(), new HashMap<>(), this.declarations, this.references);
 	}
 }
