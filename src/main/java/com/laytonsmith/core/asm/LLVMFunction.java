@@ -127,6 +127,12 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	}
 
 	@Override
+	public ParseTree postParseRewrite(ParseTree ast, Environment env,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+		return null;
+	}
+
+	@Override
 	public ExampleScript[] examples() throws ConfigCompileException {
 		try {
 			FunctionBase fb = getDefaultFunction();

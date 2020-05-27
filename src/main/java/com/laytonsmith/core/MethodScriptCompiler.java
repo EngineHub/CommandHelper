@@ -1821,6 +1821,7 @@ public final class MethodScriptCompiler {
 		processKeywords(tree, compilerErrors);
 		rewriteAutoconcats(tree, environment, envs, compilerErrors);
 		checkLinearComponents(tree, environment, compilerErrors);
+		tree = postParseRewrite(tree, environment, envs, compilerErrors);
 		if(staticAnalysis != null) {
 			staticAnalysis.analyze(tree, environment, envs, compilerErrors);
 		}
@@ -2130,11 +2131,12 @@ public final class MethodScriptCompiler {
 	 * When this method returns, any __autoconcat__ that did not contain compile errors has been rewritten.
 	 *
 	 * @param root
+	 * @param env
+	 * @param envs
 	 * @param compilerExceptions
 	 */
 	private static void rewriteAutoconcats(ParseTree root, Environment env,
-			Set<Class<? extends Environment.EnvironmentImpl>> envs,
-			Set<ConfigCompileException> compilerExceptions) {
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> compilerExceptions) {
 		for(ParseTree child : root.getChildren()) {
 			if(child.hasChildren()) {
 				rewriteAutoconcats(child, env, envs, compilerExceptions);
@@ -2154,6 +2156,48 @@ public final class MethodScriptCompiler {
 			// __autoconcat__'s AST rewrite can include new __autoconcat__'s, so handle them again.
 			rewriteAutoconcats(root, env, envs, compilerExceptions);
 		}
+	}
+
+	/**
+	 * Allows functions to perform a rewrite step to rewrite the AST as received from the parser to a valid
+	 * executable AST. Optimizations should not yet be performed in this rewrite step.
+	 * Traversal is pre-order depth-first.
+	 * @param ast - The abstract syntax tree representing this function.
+	 * @param env - The environment.
+	 * @param envs - The set of expected environment classes at runtime.
+	 * @param exceptions - A set to put compile errors in.
+	 * @return The rewritten AST node that should completely replace the AST node representing this function, or
+	 * {@code null} to not replace this AST node.
+	 */
+	private static ParseTree postParseRewrite(ParseTree ast, Environment env,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+		Mixed node = ast.getData();
+		if(node instanceof CFunction) {
+			CFunction cFunc = (CFunction) node;
+			if(cFunc.hasFunction()) {
+				try {
+					FunctionBase f = FunctionList.getFunction(cFunc, null);
+					if(f instanceof Function) {
+						Function func = (Function) f;
+						ParseTree newAst = func.postParseRewrite(ast, env, envs, exceptions);
+						if(newAst != null) {
+							ast = newAst;
+						}
+					}
+				} catch (ConfigCompileException ex) {
+					// Ignore node. This should cause a compile error in a later stage.
+				}
+			}
+		}
+		for(int i = 0; i < ast.numberOfChildren(); i++) {
+			ParseTree child = ast.getChildAt(i);
+			ParseTree newChild = postParseRewrite(child, env, envs, exceptions);
+			if(newChild != null && child != newChild) {
+				ast.getChildren().set(i, newChild);
+				i--; // Allow the new child to do a rewrite step as well.
+			}
+		}
+		return ast;
 	}
 
 	/**
