@@ -35,6 +35,7 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.EnumSet;
 import java.util.Iterator;
@@ -154,6 +155,9 @@ public class BasicLogic {
 		@Override
 		public CClassType getReturnType(Target t, List<CClassType> argTypes,
 				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			for(int i = 0; i < argTypes.size(); i++) {
+				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
+			}
 			return CBoolean.TYPE;
 		}
 
@@ -267,6 +271,9 @@ public class BasicLogic {
 		@Override
 		public CClassType getReturnType(Target t, List<CClassType> argTypes,
 				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			for(int i = 0; i < argTypes.size(); i++) {
+				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
+			}
 			return CBoolean.TYPE;
 		}
 
@@ -331,6 +338,9 @@ public class BasicLogic {
 		@Override
 		public CClassType getReturnType(Target t, List<CClassType> argTypes,
 				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			for(int i = 0; i < argTypes.size(); i++) {
+				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
+			}
 			return CBoolean.TYPE;
 		}
 
@@ -407,6 +417,9 @@ public class BasicLogic {
 		@Override
 		public CClassType getReturnType(Target t, List<CClassType> argTypes,
 				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			for(int i = 0; i < argTypes.size(); i++) {
+				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
+			}
 			return CBoolean.TYPE;
 		}
 
@@ -522,6 +535,9 @@ public class BasicLogic {
 		@Override
 		public CClassType getReturnType(Target t, List<CClassType> argTypes,
 				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			for(int i = 0; i < argTypes.size(); i++) {
+				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
+			}
 			return CBoolean.TYPE;
 		}
 
@@ -572,6 +588,9 @@ public class BasicLogic {
 		@Override
 		public CClassType getReturnType(Target t, List<CClassType> argTypes,
 				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			for(int i = 0; i < argTypes.size(); i++) {
+				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
+			}
 			return CBoolean.TYPE;
 		}
 
@@ -664,6 +683,9 @@ public class BasicLogic {
 		@Override
 		public CClassType getReturnType(Target t, List<CClassType> argTypes,
 				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			for(int i = 0; i < argTypes.size(); i++) {
+				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
+			}
 			return CBoolean.TYPE;
 		}
 
@@ -713,6 +735,9 @@ public class BasicLogic {
 		@Override
 		public CClassType getReturnType(Target t, List<CClassType> argTypes,
 				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			for(int i = 0; i < argTypes.size(); i++) {
+				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
+			}
 			return CBoolean.TYPE;
 		}
 
@@ -860,6 +885,16 @@ public class BasicLogic {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 2) {
+				StaticAnalysis.requireType(argTypes.get(0), CNumber.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(1), CNumber.TYPE, argTargets.get(1), env, exceptions);
+			}
+			return CBoolean.TYPE;
+		}
+
+		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class};
 		}
@@ -925,6 +960,16 @@ public class BasicLogic {
 			double arg1 = Static.getNumber(args[0], t);
 			double arg2 = Static.getNumber(args[1], t);
 			return CBoolean.get(arg1 <= arg2);
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 2) {
+				StaticAnalysis.requireType(argTypes.get(0), CNumber.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(1), CNumber.TYPE, argTargets.get(1), env, exceptions);
+			}
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -994,6 +1039,16 @@ public class BasicLogic {
 			double arg1 = Static.getNumber(args[0], t);
 			double arg2 = Static.getNumber(args[1], t);
 			return CBoolean.get(arg1 >= arg2);
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 2) {
+				StaticAnalysis.requireType(argTypes.get(0), CNumber.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(1), CNumber.TYPE, argTargets.get(1), env, exceptions);
+			}
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -1076,6 +1131,15 @@ public class BasicLogic {
 				}
 			}
 			return CBoolean.TRUE;
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			for(int i = 0; i < argTypes.size(); i++) {
+				StaticAnalysis.requireType(argTypes.get(i), Booleanish.TYPE, argTargets.get(i), env, exceptions);
+			}
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -1225,6 +1289,16 @@ public class BasicLogic {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			for(int i = 0; i < argTypes.size(); i++) {
+				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
+			}
+			// TODO - Return the most specific subtype among all arguments.
+			return CClassType.AUTO;
+		}
+
+		@Override
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 			return this.linkScopeLazy(analysis, parentScope, ast, env, exceptions);
@@ -1342,15 +1416,6 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			for(int i = 0; i < argTypes.size(); i++) {
-				StaticAnalysis.requireType(argTypes.get(i), CBoolean.TYPE, argTargets.get(i), env, exceptions);
-			}
-			return CBoolean.TYPE;
-		}
-
-		@Override
 		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for(ParseTree tree : nodes) {
 				Mixed c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
@@ -1359,6 +1424,15 @@ public class BasicLogic {
 				}
 			}
 			return CBoolean.FALSE;
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			for(int i = 0; i < argTypes.size(); i++) {
+				StaticAnalysis.requireType(argTypes.get(i), Booleanish.TYPE, argTargets.get(i), env, exceptions);
+			}
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -1511,6 +1585,16 @@ public class BasicLogic {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			for(int i = 0; i < argTypes.size(); i++) {
+				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
+			}
+			// TODO - Return the most specific subtype among all arguments.
+			return CClassType.AUTO;
+		}
+
+		@Override
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 			return this.linkScopeLazy(analysis, parentScope, ast, env, exceptions);
@@ -1583,6 +1667,15 @@ public class BasicLogic {
 				throw new CREFormatException(this.getName() + " expects 1 argument.", t);
 			}
 			return CBoolean.get(!ArgumentValidation.getBoolean(args[0], t));
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 1) {
+				StaticAnalysis.requireType(argTypes.get(0), Booleanish.TYPE, argTargets.get(0), env, exceptions);
+			}
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -1687,6 +1780,16 @@ public class BasicLogic {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 2) {
+				StaticAnalysis.requireType(argTypes.get(0), Booleanish.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(1), Booleanish.TYPE, argTargets.get(1), env, exceptions);
+			}
+			return CBoolean.TYPE;
+		}
+
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
@@ -1752,6 +1855,15 @@ public class BasicLogic {
 		@Override
 		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			return new and().execs(t, env, parent, nodes).not();
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			for(int i = 0; i < argTypes.size(); i++) {
+				StaticAnalysis.requireType(argTypes.get(i), Booleanish.TYPE, argTargets.get(i), env, exceptions);
+			}
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -1822,6 +1934,15 @@ public class BasicLogic {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			for(int i = 0; i < argTypes.size(); i++) {
+				StaticAnalysis.requireType(argTypes.get(i), Booleanish.TYPE, argTargets.get(i), env, exceptions);
+			}
+			return CBoolean.TYPE;
+		}
+
+		@Override
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 			return this.linkScopeLazy(analysis, parentScope, ast, env, exceptions);
@@ -1884,6 +2005,16 @@ public class BasicLogic {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
 			return new xor().exec(t, environment, args).not();
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 2) {
+				StaticAnalysis.requireType(argTypes.get(0), Booleanish.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(1), Booleanish.TYPE, argTargets.get(1), env, exceptions);
+			}
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -1953,6 +2084,15 @@ public class BasicLogic {
 				val = val & Static.getInt(args[i], t);
 			}
 			return new CInt(val, t);
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			for(int i = 0; i < argTypes.size(); i++) {
+				StaticAnalysis.requireType(argTypes.get(i), CInt.TYPE, argTargets.get(i), env, exceptions);
+			}
+			return CInt.TYPE;
 		}
 
 		@Override
@@ -2032,6 +2172,15 @@ public class BasicLogic {
 				val = val | Static.getInt(args[i], t);
 			}
 			return new CInt(val, t);
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			for(int i = 0; i < argTypes.size(); i++) {
+				StaticAnalysis.requireType(argTypes.get(i), CInt.TYPE, argTargets.get(i), env, exceptions);
+			}
+			return CInt.TYPE;
 		}
 
 		@Override
@@ -2116,6 +2265,15 @@ public class BasicLogic {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			for(int i = 0; i < argTypes.size(); i++) {
+				StaticAnalysis.requireType(argTypes.get(i), CInt.TYPE, argTargets.get(i), env, exceptions);
+			}
+			return CInt.TYPE;
+		}
+
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
@@ -2189,6 +2347,15 @@ public class BasicLogic {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 1) {
+				StaticAnalysis.requireType(argTypes.get(0), CInt.TYPE, argTargets.get(0), env, exceptions);
+			}
+			return CInt.TYPE;
+		}
+
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
@@ -2252,6 +2419,16 @@ public class BasicLogic {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 2) {
+				StaticAnalysis.requireType(argTypes.get(0), CInt.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(1), CInt.TYPE, argTargets.get(1), env, exceptions);
+			}
+			return CInt.TYPE;
+		}
+
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
@@ -2312,6 +2489,16 @@ public class BasicLogic {
 			long value = Static.getInt(args[0], t);
 			long toShift = Static.getInt(args[1], t);
 			return new CInt(value >> toShift, t);
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 2) {
+				StaticAnalysis.requireType(argTypes.get(0), CInt.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(1), CInt.TYPE, argTargets.get(1), env, exceptions);
+			}
+			return CInt.TYPE;
 		}
 
 		@Override
@@ -2380,6 +2567,16 @@ public class BasicLogic {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 2) {
+				StaticAnalysis.requireType(argTypes.get(0), CInt.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(1), CInt.TYPE, argTargets.get(1), env, exceptions);
+			}
+			return CInt.TYPE;
+		}
+
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
 					OptimizationOption.CONSTANT_OFFLINE,
@@ -2416,6 +2613,12 @@ public class BasicLogic {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CVoid.VOID;
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			return CVoid.TYPE;
 		}
 
 		@Override
@@ -2490,6 +2693,15 @@ public class BasicLogic {
 		@Override
 		public CInt exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return new CInt(args[0].hashCode(), t);
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 1) {
+				StaticAnalysis.requireType(argTypes.get(0), Mixed.TYPE, argTargets.get(0), env, exceptions);
+			}
+			return CInt.TYPE;
 		}
 
 		@Override
