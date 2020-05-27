@@ -1832,9 +1832,7 @@ public final class MethodScriptCompiler {
 		if(!compilerErrors.isEmpty()) {
 			if(compilerErrors.size() == 1) {
 				// Just throw the one CCE
-				for(ConfigCompileException e : compilerErrors) {
-					throw e;
-				}
+				throw compilerErrors.iterator().next();
 			} else {
 				throw new ConfigCompileGroupException(compilerErrors);
 			}
