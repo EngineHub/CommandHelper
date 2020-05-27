@@ -28,6 +28,10 @@ public class CEntry extends Construct {
 		return construct.val();
 	}
 
+	public Mixed ckey() {
+		return this.ckey;
+	}
+
 	public Mixed construct() {
 		return this.construct;
 	}
