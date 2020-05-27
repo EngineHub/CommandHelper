@@ -1472,6 +1472,9 @@ public class DataHandling {
 			Scope declScope = analysis.createNewScope(parentScope);
 			declScope.addDeclaration(new Declaration(Namespace.PROCEDURE, procName, retType, ast.getTarget()));
 
+			// Allow procedures to perform lookups in the decl scope.
+			paramScope.addSpecificParent(declScope, Namespace.PROCEDURE);
+
 			// Return the declaration scope. Parameters and their default values are not accessible after the procedure.
 			return declScope;
 		}
@@ -2285,8 +2288,13 @@ public class DataHandling {
 					? analysis.linkScope(parentScope, ast.getChildAt(ind++), env, exceptions) : parentScope);
 
 			// Create parameter scope. Set parent scope if this closure type is allowed to resolve in the parent scope.
-			Scope paramScope = (codeInheritsParentScope
-					? analysis.createNewScope(parentScope) : analysis.createNewScope());
+			// Procedures can always look up in the parent scope.
+			Scope paramScope = analysis.createNewScope();
+			if(codeInheritsParentScope) {
+				paramScope.addParent(parentScope);
+			} else {
+				paramScope.addSpecificParent(parentScope, Namespace.PROCEDURE);
+			}
 
 			// Insert @arguments parameter.
 			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, ast.getTarget()));
