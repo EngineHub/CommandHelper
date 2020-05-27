@@ -326,6 +326,59 @@ public class DataHandling {
 		}
 
 		@Override
+		@SuppressWarnings("checkstyle:FallThrough")
+		public CClassType typecheck(StaticAnalysis analysis,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			int ind = 0;
+			CClassType declaredType = null;
+			switch(ast.numberOfChildren()) {
+				case 3:
+					// Typecheck declaration type.
+					ParseTree typeNode = ast.getChildAt(ind++);
+					declaredType = StaticAnalysis.requireClassType(
+							typeNode.getData(), typeNode.getTarget(), exceptions);
+					// Intentional fallthrough.
+				case 2:
+					// Typecheck variable.
+					ParseTree varNode = ast.getChildAt(ind++);
+					IVariable ivar = StaticAnalysis.requireIVariable(
+							varNode.getData(), varNode.getTarget(), exceptions);
+
+					// Get assigned value.
+					ParseTree valNode = ast.getChildAt(ind);
+					CClassType valType = analysis.typecheck(valNode, env, exceptions);
+
+					// Attempt to get the declared type from this variable's declaration.
+					if(declaredType == null && ivar != null) {
+						Scope scope = analysis.getTermScope(varNode);
+						if(scope != null) {
+							Set<Declaration> decls = scope.getDeclarations(Namespace.IVARIABLE, ivar.getVariableName());
+							if(decls.size() > 0) {
+
+								// Type check assigned value for all found declaration types.
+								for(Declaration decl : decls) {
+									StaticAnalysis.requireType(
+											valType, decl.getType(), valNode.getTarget(), env, exceptions);
+								}
+								return valType;
+							} else {
+								declaredType = CClassType.AUTO;
+							}
+						}
+					}
+
+					// Type check assigned value.
+					StaticAnalysis.requireType(valType, declaredType, valNode.getTarget(), env, exceptions);
+
+					// Return the value type.
+					return valType;
+				default:
+					// Invalid number of arguments. Don't generate any further errors.
+					return CClassType.AUTO;
+			}
+		}
+
+		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class};
 		}
