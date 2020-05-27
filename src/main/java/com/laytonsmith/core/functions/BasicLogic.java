@@ -152,9 +152,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
-				throws ConfigCompileException {
-			return CBoolean.class;
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -265,9 +265,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
-				throws ConfigCompileException {
-			return CBoolean.class;
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -329,9 +329,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
-				throws ConfigCompileException {
-			return CBoolean.class;
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -405,9 +405,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
-				throws ConfigCompileException {
-			return CBoolean.class;
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -520,9 +520,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
-				throws ConfigCompileException {
-			return CBoolean.class;
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -570,9 +570,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
-				throws ConfigCompileException {
-			return CBoolean.class;
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -662,9 +662,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
-				throws ConfigCompileException {
-			return CBoolean.class;
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -711,9 +711,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
-				throws ConfigCompileException {
-			return CBoolean.class;
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -782,21 +782,13 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
-				throws ConfigCompileException {
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
 			if(argTypes.size() == 2) {
-				Class<? extends Mixed> t1 = argTypes.get(0);
-				Class<? extends Mixed> t2 = argTypes.get(1);
-				if(t1 != null && !CNumber.class.isAssignableFrom(t1)) {
-					throw new ConfigCompileException("Expected type " + CNumber.TYPE.getSimpleName()
-							+ ", but received type " + CClassType.get(t1).getSimpleName() + " instead.", t);
-				}
-				if(t2 != null && !CNumber.class.isAssignableFrom(t2)) {
-					throw new ConfigCompileException("Expected type " + CNumber.TYPE.getSimpleName()
-							+ ", but received type " + CClassType.get(t2).getSimpleName() + " instead.", t);
-				}
+				StaticAnalysis.requireType(argTypes.get(0), CNumber.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(1), CNumber.TYPE, argTargets.get(1), env, exceptions);
 			}
-			return CBoolean.class;
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -1350,15 +1342,12 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes)
-				throws ConfigCompileException {
-			for(Class<? extends Mixed> argType : argTypes) {
-				if(argType != null && !CBoolean.class.isAssignableFrom(argType)) {
-					throw new ConfigCompileException("Expected type " + CBoolean.TYPE.getSimpleName()
-							+ ", but received type " + CClassType.get(argType).getSimpleName() + " instead.", t);
-				}
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			for(int i = 0; i < argTypes.size(); i++) {
+				StaticAnalysis.requireType(argTypes.get(i), CBoolean.TYPE, argTargets.get(i), env, exceptions);
 			}
-			return CBoolean.class;
+			return CBoolean.TYPE;
 		}
 
 		@Override

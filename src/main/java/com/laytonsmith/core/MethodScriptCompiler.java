@@ -16,7 +16,6 @@ import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.compiler.keywords.ObjectDefinitionKeyword;
 import com.laytonsmith.core.constructs.CBareString;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDecimal;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
@@ -1830,7 +1829,6 @@ public final class MethodScriptCompiler {
 		checkFunctionsExist(tree, compilerErrors, envs);
 		checkLabels(tree, compilerErrors);
 		checkBreaks(tree, compilerErrors);
-		checkTypes(tree, compilerErrors);
 		if(!compilerErrors.isEmpty()) {
 			if(compilerErrors.size() == 1) {
 				// Just throw the one CCE
@@ -1966,47 +1964,6 @@ public final class MethodScriptCompiler {
 		}
 		for(ParseTree child : tree.getChildren()) {
 			checkBreaks0(child, currentLoops, lastUnbreakable, compilerErrors);
-		}
-	}
-
-	/**
-	 * Traverses the parse tree, type checking functions through their {@link Function#getReturnType(List)} methods.
-	 * @param tree - The parse tree.
-	 * @param compilerExceptions - Any compiler exceptions will be added to this set.
-	 * @return The return type of the parse tree.
-	 */
-	private static Class<? extends Mixed> checkTypes(ParseTree tree, Set<ConfigCompileException> compilerExceptions) {
-		Mixed node = tree.getData();
-
-		// Get and check the types of the node's arguments.
-		List<ParseTree> children = tree.getChildren();
-		List<Class<? extends Mixed>> argTypes = new ArrayList<>(children.size());
-		for(ParseTree child : children) {
-			argTypes.add(checkTypes(child, compilerExceptions));
-		}
-
-		// Handle ivariables.
-		if(node instanceof IVariable) {
-			CClassType type = ((IVariable) node).getDefinedType();
-			return (type == null || type == CClassType.AUTO ? null : type.getNativeType());
-		}
-
-		// Handle procedures.
-		if(node instanceof CFunction && ((CFunction) node).hasProcedure()) {
-			return null; // No type information known.
-		}
-
-		// Return the node type if it's not a function.
-		if(!(node instanceof CFunction) || !((CFunction) node).hasFunction()) {
-			return node.getClass();
-		}
-
-		// Get and return the return type of the function.
-		try {
-			return ((CFunction) node).getFunction().getReturnType(node.getTarget(), argTypes);
-		} catch (ConfigCompileException e) {
-			compilerExceptions.add(e);
-			return null; // No type information known.
 		}
 	}
 
