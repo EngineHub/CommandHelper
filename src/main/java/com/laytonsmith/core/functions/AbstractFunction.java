@@ -175,6 +175,12 @@ public abstract class AbstractFunction implements Function {
 		return this.getClass().getAnnotation(hide.class) == null;
 	}
 
+	@Override
+	public ParseTree postParseRewrite(ParseTree ast, Environment env,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+		return null;
+	}
+
 	/**
 	 * Just return null by default. Most functions won't get to this anyways, since canOptimize is returning false.
 	 *

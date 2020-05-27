@@ -524,12 +524,27 @@ public class DataHandling {
 					}
 				}
 			}
+			return null;
+		}
+
+		@Override
+		public ParseTree postParseRewrite(ParseTree ast, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+			List<ParseTree> children = ast.getChildren();
+
+			// Check for too few arguments.
+			if(children.size() < 2) {
+				return null;
+			}
+
+			// Convert "assign(@a[<ind>], val)" to "array_push(@a, val)" or "array_set(@a, ind, val)".
 			if(children.get(0).getData() instanceof CFunction && array_get.equals(children.get(0).getData().val())) {
 				if(children.get(0).getChildAt(1).getData() instanceof CSlice) {
 					CSlice cs = (CSlice) children.get(0).getChildAt(1).getData();
 					if(cs.getStart() == 0 && cs.getFinish() == -1) {
 						//Turn this into an array_push
-						ParseTree tree = new ParseTree(new CFunction(array_push, t), children.get(0).getFileOptions());
+						ParseTree tree = new ParseTree(new CFunction(
+								array_push, ast.getTarget()), children.get(0).getFileOptions());
 						tree.addChild(children.get(0).getChildAt(0));
 						tree.addChild(children.get(1));
 						return tree;
@@ -538,14 +553,14 @@ public class DataHandling {
 					//will be an error generated elsewhere
 				} else {
 					//Turn this into an array set instead
-					ParseTree tree = new ParseTree(new CFunction(array_set, t), children.get(0).getFileOptions());
+					ParseTree tree = new ParseTree(new CFunction(
+							array_set, ast.getTarget()), children.get(0).getFileOptions());
 					tree.addChild(children.get(0).getChildAt(0));
 					tree.addChild(children.get(0).getChildAt(1));
 					tree.addChild(children.get(1));
 					return tree;
 				}
 			}
-
 			return null;
 		}
 
