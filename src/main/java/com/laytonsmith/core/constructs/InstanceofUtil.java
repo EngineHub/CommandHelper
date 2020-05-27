@@ -72,7 +72,23 @@ public class InstanceofUtil {
 			// TODO: Need to put the return type here, so we can work with this, but for now, just always return false
 			return false;
 		}
-		for(CClassType c : getAllCastableClasses(value.typeof(), env)) {
+		return isInstanceof(value.typeof(), instanceofThis, env);
+	}
+
+	/**
+	 * Returns true whether or not a given MethodScript type is an instance of the specified MethodScript type.
+	 *
+	 * @param type The type to check for
+	 * @param instanceofThis The string type to check. This must be the fully qualified name.
+	 * @param env
+	 * @return
+	 */
+	public static boolean isInstanceof(CClassType type, FullyQualifiedClassName instanceofThis, Environment env) {
+		Static.AssertNonNull(instanceofThis, "instanceofThis may not be null");
+		if(instanceofThis.getFQCN().equals("auto")) {
+			return true;
+		}
+		for(CClassType c : getAllCastableClasses(type, env)) {
 			FullyQualifiedClassName typeof = c.getFQCN();
 			if(typeof != null && typeof.equals(instanceofThis)) {
 				return true;
@@ -103,6 +119,18 @@ public class InstanceofUtil {
 	 */
 	public static boolean isInstanceof(Mixed value, CClassType instanceofThis, Environment env) {
 		return isInstanceof(value, instanceofThis.getFQCN(), env);
+	}
+
+	/**
+	 * Returns whether or not a given MethodScript type is an instance of the specified MethodScript type.
+	 *
+	 * @param type The type to check for
+	 * @param instanceofThis The CClassType to check
+	 * @param env
+	 * @return
+	 */
+	public static boolean isInstanceof(CClassType type, CClassType instanceofThis, Environment env) {
+		return isInstanceof(type, instanceofThis.getFQCN(), env);
 	}
 
 	private static FullyQualifiedClassName typeof(Class<? extends Mixed> c) {
