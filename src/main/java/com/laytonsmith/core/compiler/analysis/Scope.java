@@ -71,7 +71,6 @@ public class Scope {
 	 * @param namespace - The namespace for which to allow lookups.
 	 */
 	public void addSpecificParent(Scope parent, Namespace namespace) {
-		this.parents.add(parent);
 		Set<Scope> parents = this.specificParents.get(namespace);
 		if(parents == null) {
 			parents = new HashSet<>();
