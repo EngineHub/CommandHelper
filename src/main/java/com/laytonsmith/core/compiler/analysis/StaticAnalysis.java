@@ -232,12 +232,44 @@ public class StaticAnalysis {
 			}
 		}
 
-		// Resolve procedure references.
+		// Resolve procedure references or add them as required-before-usage to the surrounding procedure.
+		Map<Scope, Set<Reference>> procReqRefMap = new HashMap<>();
 		for(Scope scope : this.scopes) {
 			for(Reference ref : scope.getAllReferencesLocal(Namespace.PROCEDURE)) {
-				if(scope.getDeclarations(Namespace.PROCEDURE, ref.getIdentifier()).isEmpty()
-						&& (this.globalScope == null
-						|| this.globalScope.getDeclarations(Namespace.PROCEDURE, ref.getIdentifier()).isEmpty())) {
+				Set<Declaration> decls = scope.getDeclarations(Namespace.PROCEDURE, ref.getIdentifier());
+				if(decls.isEmpty() && this.globalScope != null) {
+					decls = this.globalScope.getDeclarations(Namespace.PROCEDURE, ref.getIdentifier());
+				}
+				if(decls.isEmpty()) {
+
+					// Procedure not found. Add reference as requirement to surrounding proc if available.
+					Set<Declaration> rootDecls = scope.getDeclarations(
+							Namespace.PROCEDURE, ProcRootDeclaration.PROC_ROOT);
+					if(!rootDecls.isEmpty()) {
+						for(Declaration decl : rootDecls) {
+							((ProcRootDeclaration) decl).procDecl.addRequiredReference(ref);
+						}
+					} else {
+
+						// Procedure cannot be resolved and is not within another procedure.
+						exceptions.add(new ConfigCompileException(
+								"Procedure cannot be resolved: " + ref.getIdentifier(), ref.getTarget()));
+					}
+				} else {
+
+					// Store the (still empty) required references set.
+					Declaration decl = decls.iterator().next();
+					procReqRefMap.put(scope, ((ProcDeclaration) decl).getRequiredRefs());
+				}
+			}
+		}
+
+		// Resolve required procedure references from the place where the proc that requires them is called.
+		// There is no need to look up in the global scope here, as then the references would have resolved already.
+		for(Entry<Scope, Set<Reference>> entry : procReqRefMap.entrySet()) {
+			Scope scope = entry.getKey();
+			for(Reference ref : entry.getValue()) {
+				if(scope.getDeclarations(Namespace.PROCEDURE, ref.getIdentifier()).isEmpty()) {
 					exceptions.add(new ConfigCompileException(
 							"Procedure cannot be resolved: " + ref.getIdentifier(), ref.getTarget()));
 				}

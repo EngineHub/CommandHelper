@@ -34,6 +34,8 @@ import com.laytonsmith.core.compiler.analysis.IVariableAssignDeclaration;
 import com.laytonsmith.core.compiler.analysis.IncludeReference;
 import com.laytonsmith.core.compiler.analysis.Namespace;
 import com.laytonsmith.core.compiler.analysis.ParamDeclaration;
+import com.laytonsmith.core.compiler.analysis.ProcDeclaration;
+import com.laytonsmith.core.compiler.analysis.ProcRootDeclaration;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.Auto;
@@ -1523,7 +1525,11 @@ public class DataHandling {
 			// Create proc declaration in a new scope.
 			// TODO - Include proc signature (argument types and number of arguments) in declaration.
 			Scope declScope = analysis.createNewScope(parentScope);
-			declScope.addDeclaration(new Declaration(Namespace.PROCEDURE, procName, retType, ast.getTarget()));
+			ProcDeclaration procDecl = new ProcDeclaration(procName, retType, ast.getTarget());
+			declScope.addDeclaration(procDecl);
+
+			// Create proc root declaration in the inner root scope.
+			paramScope.addDeclaration(new ProcRootDeclaration(procDecl));
 
 			// Allow procedures to perform lookups in the decl scope.
 			paramScope.addSpecificParent(declScope, Namespace.PROCEDURE);
