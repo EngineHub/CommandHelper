@@ -96,17 +96,10 @@ import java.util.logging.Logger;
 @core
 public class DataHandling {
 
-	// Variable is more clear when named after the function it represents.
-	@SuppressWarnings("checkstyle:constantname")
-	private static final String array_get = new ArrayHandling.array_get().getName();
-
-	// Variable is more clear when named after the function it represents.
-	@SuppressWarnings("checkstyle:constantname")
-	private static final String array_set = new ArrayHandling.array_set().getName();
-
-	// Variable is more clear when named after the function it represents.
-	@SuppressWarnings("checkstyle:constantname")
-	private static final String array_push = new ArrayHandling.array_push().getName();
+	private static final String ARRAY_GET = new ArrayHandling.array_get().getName();
+	private static final String ARRAY_SET = new ArrayHandling.array_set().getName();
+	private static final String ARRAY_PUSH = new ArrayHandling.array_push().getName();
+	private static final String CENTRY = new Compiler.centry().getName();
 
 	public static String docs() {
 		return "This class provides various methods to control script data and program flow.";
@@ -179,7 +172,7 @@ public class DataHandling {
 			//statements, but doesn't make sense here.
 			//Also check for dynamic labels
 			for(ParseTree child : children) {
-				if(child.getData() instanceof CFunction && new Compiler.centry().getName().equals(child.getData().val())) {
+				if(child.getData() instanceof CFunction && CENTRY.equals(child.getData().val())) {
 					if(((CLabel) child.getChildAt(0).getData()).cVal() instanceof CSlice) {
 						throw new ConfigCompileException("Slices cannot be used as array indices", child.getChildAt(0).getTarget());
 					}
@@ -602,13 +595,13 @@ public class DataHandling {
 			}
 
 			// Convert "assign(@a[<ind>], val)" to "array_push(@a, val)" or "array_set(@a, ind, val)".
-			if(children.get(0).getData() instanceof CFunction && array_get.equals(children.get(0).getData().val())) {
+			if(children.get(0).getData() instanceof CFunction && ARRAY_GET.equals(children.get(0).getData().val())) {
 				if(children.get(0).getChildAt(1).getData() instanceof CSlice) {
 					CSlice cs = (CSlice) children.get(0).getChildAt(1).getData();
 					if(cs.getStart() == 0 && cs.getFinish() == -1) {
 						//Turn this into an array_push
 						ParseTree tree = new ParseTree(new CFunction(
-								array_push, ast.getTarget()), children.get(0).getFileOptions());
+								ARRAY_PUSH, ast.getTarget()), children.get(0).getFileOptions());
 						tree.addChild(children.get(0).getChildAt(0));
 						tree.addChild(children.get(1));
 						return tree;
@@ -618,7 +611,7 @@ public class DataHandling {
 				} else {
 					//Turn this into an array set instead
 					ParseTree tree = new ParseTree(new CFunction(
-							array_set, ast.getTarget()), children.get(0).getFileOptions());
+							ARRAY_SET, ast.getTarget()), children.get(0).getFileOptions());
 					tree.addChild(children.get(0).getChildAt(0));
 					tree.addChild(children.get(0).getChildAt(1));
 					tree.addChild(children.get(1));
