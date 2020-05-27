@@ -341,7 +341,8 @@ public class DataHandling {
 				// Create a new scope and put the variable declaration in that scope.
 				Scope declScope = analysis.createNewScope(valScope);
 				Mixed rawType = ast.getChildAt(0).getData();
-				Mixed rawIVar = ast.getChildAt(1).getData();
+				ParseTree ivarAst = ast.getChildAt(1);
+				Mixed rawIVar = ivarAst.getData();
 				if(rawType instanceof CClassType && rawIVar instanceof IVariable) {
 					CClassType type = (CClassType) rawType;
 					IVariable iVar = (IVariable) rawIVar;
@@ -349,6 +350,7 @@ public class DataHandling {
 					// Add the new variable declaration.
 					declScope.addDeclaration(new Declaration(
 							Namespace.IVARIABLE, iVar.getVariableName(), type, ast.getTarget()));
+					analysis.setTermScope(ivarAst, declScope);
 				}
 
 				// Return the declaration scope.
@@ -359,14 +361,17 @@ public class DataHandling {
 				// Handle the assigned value.
 				Scope valScope = analysis.linkScope(parentScope, ast.getChildAt(1), env, exceptions);
 
-				// Declare the variable as 'auto' if it it has not yet been declared. // TODO - Implement elsewhere.
+				// Create a new scope and put the variable assign declaration in that scope.
+				// This declaration will be converted to either a variable reference or declaration later.
 				Scope newScope = analysis.createNewScope(valScope);
-				Mixed rawIVar = ast.getChildAt(0).getData();
+				ParseTree ivarAst = ast.getChildAt(0);
+				Mixed rawIVar = ivarAst.getData();
 				if(rawIVar instanceof IVariable) {
 					IVariable iVar = (IVariable) rawIVar;
 
 					// Add ivariable assign declaration in a new scope.
 					newScope.addDeclaration(new IVariableAssignDeclaration(iVar.getVariableName(), iVar.getTarget()));
+					analysis.setTermScope(ivarAst, newScope);
 				}
 
 				// Return the new scope.
@@ -398,7 +403,8 @@ public class DataHandling {
 
 				// Put the variable declaration in the param scope.
 				Mixed rawType = ast.getChildAt(0).getData();
-				Mixed rawIVar = ast.getChildAt(1).getData();
+				ParseTree ivarAst = ast.getChildAt(1);
+				Mixed rawIVar = ivarAst.getData();
 				if(rawType instanceof CClassType && rawIVar instanceof IVariable) {
 					CClassType type = (CClassType) rawType;
 					IVariable iVar = (IVariable) rawIVar;
@@ -406,6 +412,7 @@ public class DataHandling {
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
 					paramScope.addDeclaration(new ParamDeclaration(iVar.getVariableName(), type, ast.getTarget()));
+					analysis.setTermScope(ivarAst, paramScope);
 				}
 
 				// Return the scope pair.
@@ -420,7 +427,8 @@ public class DataHandling {
 				valScope = analysis.linkScope(valScope, ast.getChildAt(1), env, exceptions);
 
 				// Put the variable declaration in the param scope.
-				Mixed rawIVar = ast.getChildAt(0).getData();
+				ParseTree ivarAst = ast.getChildAt(0);
+				Mixed rawIVar = ivarAst.getData();
 				if(rawIVar instanceof IVariable) {
 					IVariable iVar = (IVariable) rawIVar;
 
@@ -428,6 +436,7 @@ public class DataHandling {
 					paramScope = analysis.createNewScope(paramScope);
 					paramScope.addDeclaration(new ParamDeclaration(
 							iVar.getVariableName(), CClassType.AUTO, ast.getTarget()));
+					analysis.setTermScope(ivarAst, paramScope);
 				}
 
 				// Return the scope pair.

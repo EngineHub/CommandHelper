@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 
@@ -13,8 +14,11 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.CRE.CREException;
@@ -34,9 +38,33 @@ public class StaticAnalysis {
 	private final Scope startScope;
 	private final Set<Scope> scopes;
 	private final boolean isMainAnalysis;
+	private ParseTree astRootNode = null;
 	private Scope endScope = null;
 
 	private Scope globalScope = null;
+
+	/*
+	 * TODO - Link Scope to ParseTree (AST node).
+	 * 
+	 * Can store a Set<StaticAnalysis> per root node, such that we have all root nodes to start analysis on with all
+	 * their possible scope graphs. On StaticAnalysis clone, just add the clone to the set as well.
+	 * Within each File's StaticAnalysis, create a Map<ParseTree, Scope> for AST terms with a reference.
+	 *     Don't merge these on clone, since we analyze each file separately.
+	 * Then, typecheck each root node for each of its possible scope graphs.
+	 *     Get Scope per ParseTree that stored it.
+	 */
+
+	/**
+	 * Contains all StaticAnalysis objects that have been created for this analysis, including this analysis.
+	 * This is one analysis per file, which can be used to traverse each file again with a full scope graph.
+	 */
+	private Set<StaticAnalysis> staticAnalyses = new HashSet<>();
+
+	/**
+	 * Contains the Scope object belonging to each AST node.
+	 * Should only contain AST nodes within the file for which analysis was created (excluding includes).
+	 */
+	private Map<ParseTree, Scope> astScopeMap = new HashMap<>();
 
 	private static StaticAnalysis autoIncludesAnalysis = null;
 
@@ -49,13 +77,21 @@ public class StaticAnalysis {
 		this.scopes = new HashSet<>();
 		this.scopes.add(this.startScope);
 		this.isMainAnalysis = isMainAnalysis;
+		this.staticAnalyses.add(this);
 	}
 
-	private StaticAnalysis(Scope startScope, Scope endScope, Set<Scope> scopes, boolean isMainAnalysis) {
+	private StaticAnalysis(Scope startScope, Scope endScope, Set<Scope> scopes,
+			boolean isMainAnalysis, Scope globalScope, ParseTree astRootNode,
+			Set<StaticAnalysis> staticAnalyses, Map<ParseTree, Scope> astScopeMap) {
 		this.startScope = startScope;
 		this.endScope = endScope;
 		this.scopes = scopes;
 		this.isMainAnalysis = isMainAnalysis;
+		this.globalScope = globalScope;
+		this.astRootNode = astRootNode;
+		this.staticAnalyses = staticAnalyses;
+		this.staticAnalyses.add(this);
+		this.astScopeMap = astScopeMap;
 	}
 
 	public void analyze(ParseTree ast, Environment env,
@@ -65,10 +101,14 @@ public class StaticAnalysis {
 		this.scopes.clear();
 		this.scopes.add(this.startScope);
 
+		// Store new AST.
+		this.astRootNode = ast;
+
 		// Handle auto includes if present.
 		if(autoIncludesAnalysis != null) {
 			if(this.isMainAnalysis) {
 				this.startScope.addParent(autoIncludesAnalysis.endScope);
+				this.staticAnalyses.addAll(autoIncludesAnalysis.staticAnalyses);
 			}
 			this.globalScope = autoIncludesAnalysis.globalScope;
 		}
@@ -79,7 +119,7 @@ public class StaticAnalysis {
 		// Handle include references and analyze the final scope graph if this is the main analysis.
 		if(this.isMainAnalysis) {
 			this.handleIncludeRefs(env, envs, exceptions);
-			this.analyzeFinalScopeGraph(exceptions);
+			this.analyzeFinalScopeGraph(env, exceptions);
 		}
 	}
 
@@ -96,6 +136,7 @@ public class StaticAnalysis {
 		// This fakes the scope graph for a script with an include for each auto include file.
 		Scope startScope = new Scope();
 		StaticAnalysis analysis = new StaticAnalysis(startScope, true);
+		analysis.staticAnalyses.remove(analysis); // Remove itself from analyses, as it isn't actually a file analysis.
 		Scope inScope = startScope;
 		for(File autoInclude : autoIncludes) {
 			Scope outScope = analysis.createNewScope();
@@ -108,13 +149,13 @@ public class StaticAnalysis {
 
 		// Perform static analysis on the created script.
 		analysis.handleIncludeRefs(env, envs, exceptions);
-		analysis.analyzeFinalScopeGraph(exceptions);
+		analysis.analyzeFinalScopeGraph(env, exceptions);
 
 		// Store the new analysis.
 		autoIncludesAnalysis = analysis;
 	}
 
-	private void analyzeFinalScopeGraph(Set<ConfigCompileException> exceptions) {
+	private void analyzeFinalScopeGraph(Environment env, Set<ConfigCompileException> exceptions) {
 		/*
 		 *  TODO - Implement checks:
 		 *  - Duplicate variable declarations.
@@ -200,6 +241,101 @@ public class StaticAnalysis {
 				}
 			}
 		}
+
+		// Type check.
+		this.typecheck(env, exceptions);
+	}
+
+	private void typecheck(Environment env, Set<ConfigCompileException> exceptions) {
+		for(StaticAnalysis analysis : this.staticAnalyses) {
+			analysis.typecheck(analysis.astRootNode, env, exceptions);
+		}
+	}
+
+	// TODO - Rewrite documentation and adjust to fit this class.
+	/**
+	 * Traverses the parse tree, type checking functions through their {@link Function#getReturnType(List)} methods.
+	 * @param ast - The parse tree.
+	 * @param env - The {@link Environment}, used for instanceof checks on types.
+	 * @param exceptions - Any compiler exceptions will be added to this set.
+	 * @return The return type of the parse tree.
+	 */
+	public CClassType typecheck(ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+		Mixed node = ast.getData();
+
+		if(node instanceof CFunction) {
+			CFunction cFunc = (CFunction) node;
+			if(cFunc.hasFunction()) {
+				try {
+					FunctionBase f = FunctionList.getFunction(cFunc, null);
+					if(f instanceof Function) {
+						Function func = (Function) f;
+						return func.typecheck(this, ast, env, exceptions);
+					}
+				} catch (ConfigCompileException ex) {
+					// Ignore node. This should cause a compile error in a later stage.
+					// TODO - Or the compile error could be generated here, check what's more convenient.
+				}
+				return CClassType.AUTO; // Unknown return type.
+			} else if(cFunc.hasIVariable()) { // The function is a var reference to a closure: '@myClosure(<args>)'.
+				return CClassType.AUTO; // TODO - Get actual type (return type of closure, iclosure, rclosure?).
+			} else if(cFunc.hasProcedure()) { // The function is a procedure reference.
+				return CClassType.AUTO; // TODO - Get actual type.
+			} else {
+				throw new Error("Unsupported " + CFunction.class.getSimpleName()
+						+ " type in type checking for node with value: " + cFunc.val());
+			}
+		} else if(node instanceof IVariable) {
+			IVariable ivar = (IVariable) node;
+			Scope scope = this.getTermScope(ast);
+			if(scope != null) { // Scope can be null for variable and parameter declarations.
+				Set<Declaration> decls = scope.getDeclarations(
+						Namespace.IVARIABLE, ivar.getVariableName());
+				if(decls.isEmpty()) {
+					// TODO - Remove debug prefix.
+					exceptions.add(new ConfigCompileException(
+							"[DEBUG - TypeCheck] Variable cannot be resolved: " + ivar.getVariableName(), ivar.getTarget()));
+					return CClassType.AUTO;
+				} else {
+					// TODO - Get the most specific type when multiple declarations exist.
+					return decls.iterator().next().getType();
+				}
+			} else {
+				// TODO - Remove or change exception after testing. This triggers for assign() with wrong arguments.
+				exceptions.add(new ConfigCompileException(
+						"[DEBUG - TypeCheck] Variable cannot be resolved (missing scope): " + ivar.getVariableName(), ivar.getTarget()));
+				return CClassType.AUTO;
+			}
+		} else if(node instanceof Variable) {
+			return CString.TYPE; // $vars can only be strings.
+		}
+
+		// The node is some other Construct, so return its type.
+		// TODO - Replace this by anything that doesn't have to catch an Error from Mixed.typeof().
+		try {
+			return node.typeof();
+		} catch (Throwable t) {
+			// Ignore types like CLabels. TODO - Perhaps make sure that these are never traversed instead?
+//			exceptions.add(new ConfigCompileException("Unsupported AST node implementation in type checking: "
+//					+ node.getClass().getSimpleName(), node.getTarget()));
+			return CClassType.AUTO;
+		}
+	}
+
+	/**
+	 * Checks whether the given type is instance of the expected type, adding a compile error to the passed
+	 * exceptions set if it isn't. This never generates an error when the given type is {@link CClassType#AUTO}.
+	 * @param type - The type to check.
+	 * @param expected - The expected {@link CClassType}.
+	 * @param t
+	 * @param exceptions
+	 */
+	public static void requireType(CClassType type, CClassType expected,
+			Target t, Environment env, Set<ConfigCompileException> exceptions) {
+		if(type != CClassType.AUTO && !InstanceofUtil.isInstanceof(type, expected, env)) {
+			exceptions.add(new ConfigCompileException("Expected type " + expected.getSimpleName()
+				+ ", but received type " + type.getSimpleName() + " instead.", t));
+		}
 	}
 
 	private void handleIncludeRefs(Environment env,
@@ -282,14 +418,17 @@ public class StaticAnalysis {
 						if(includeAnalysis == null) {
 
 							// The include did not compile, so ignore the include entirely.
-							this.addDirectedEdge(includeRef.getOutScope(), includeRef.getInScope());
+							this.addDirectedEdge(pathRef.getOutScope(), pathRef.getInScope());
 						} else {
 							cycleAnalyses.add(includeAnalysis);
 							cycleScopes.addAll(includeAnalysis.scopes);
 
 							// Directly link this include reference.
-							this.addDirectedEdge(includeAnalysis.startScope, includeRef.getInScope());
-							this.addDirectedEdge(includeRef.getOutScope(), includeAnalysis.endScope);
+							this.addDirectedEdge(includeAnalysis.startScope, pathRef.getInScope());
+							this.addDirectedEdge(pathRef.getOutScope(), includeAnalysis.endScope);
+
+							// Store the include's analyses for later analysis.
+							this.staticAnalyses.addAll(includeAnalysis.staticAnalyses);
 						}
 					}
 
@@ -365,6 +504,9 @@ public class StaticAnalysis {
 				// Link the cloned include analysis scopes.
 				this.addDirectedEdge(includeAnalysisClone.startScope, includeRef.getInScope());
 				this.addDirectedEdge(includeRef.getOutScope(), includeAnalysisClone.endScope);
+
+				// Store the include's analyses for later analysis.
+				this.staticAnalyses.addAll(includeAnalysisClone.staticAnalyses);
 			}
 
 			// TODO - Remove commented-out code if no longer needed.
@@ -461,6 +603,7 @@ public class StaticAnalysis {
 	public Scope linkScope(Scope parentScope, ParseTree ast,
 			Environment env, Set<ConfigCompileException> exceptions) {
 		Mixed node = ast.getData();
+//		System.out.println("[DEBUG] linkScope called on node: " + node.getClass().getSimpleName() + " - " + node);
 		if(node instanceof CFunction) {
 			CFunction cFunc = (CFunction) node;
 			if(cFunc.hasFunction()) {
@@ -474,11 +617,13 @@ public class StaticAnalysis {
 					// Ignore node. This should cause a compile error in a later stage.
 					// TODO - Or the compile error could be generated here, check what's more convenient.
 				}
+				return parentScope;
 			} else if(cFunc.hasIVariable()) { // The function is a var reference to a closure: '@myClosure(<args>)'.
 
 				// Add variable reference in a new scope.
 				Scope refScope = this.createNewScope(parentScope);
 				refScope.addReference(new Reference(Namespace.IVARIABLE, cFunc.val(), cFunc.getTarget()));
+				this.setTermScope(ast, refScope);
 				return refScope;
 			} else if(cFunc.hasProcedure()) { // The function is a procedure reference.
 
@@ -502,6 +647,7 @@ public class StaticAnalysis {
 			// Add variable reference in a new scope.
 			Scope refScope = this.createNewScope(parentScope);
 			refScope.addReference(new Reference(Namespace.IVARIABLE, ivar.getVariableName(), ivar.getTarget()));
+			this.setTermScope(ast, refScope);
 			return refScope;
 		}
 		return parentScope;
@@ -533,6 +679,7 @@ public class StaticAnalysis {
 			Scope newParamScope = this.createNewScope(paramScope);
 			newParamScope.addDeclaration(new ParamDeclaration(
 					iVar.getVariableName(), iVar.getDefinedType(), iVar.getTarget()));
+			this.setTermScope(ast, newParamScope);
 			return new Scope[] {newParamScope, valScope};
 		}
 
@@ -553,8 +700,8 @@ public class StaticAnalysis {
 		}
 
 		// Handle non-parameter parameter. Fall back to handling the function's arguments.
-		// TODO - Decide whether to generate this type of error here, or during typechecking (saves repeating code).
-//		exceptions.add(new ConfigCompileException("Invalid parameter", node.getTarget()));
+		// TODO - Does this fallback make sense or should this term just be skipped?
+		exceptions.add(new ConfigCompileException("Invalid parameter", node.getTarget()));
 		return new Scope[] {paramScope, this.linkScope(valScope, ast, env, exceptions)};
 	}
 
@@ -588,6 +735,14 @@ public class StaticAnalysis {
 		return ret;
 	}
 
+	public void setTermScope(ParseTree term, Scope scope) {
+		this.astScopeMap.put(term, scope);
+	}
+
+	public Scope getTermScope(ParseTree term) {
+		return this.astScopeMap.get(term);
+	}
+
 	/**
 	 * Clones this {@link StaticAnalysis} including its scopes, but with shared declaration and reference links in
 	 * these scopes. This method should only be called after all references and declarations have been added to the
@@ -596,20 +751,43 @@ public class StaticAnalysis {
 	 */
 	@Override
 	public StaticAnalysis clone() {
-		Map<Scope, Scope> cloneMapping = new HashMap<>();
+		return this.clone(new HashMap<>(), true);
+	}
 
+	private StaticAnalysis clone(Map<Scope, Scope> cloneMapping, boolean cloneAnalyses) {
 		Scope startScope = cloneScope(this.startScope, cloneMapping);
 		Scope endScope = cloneScope(this.endScope, cloneMapping);
+		Scope globalScope = cloneScope(this.globalScope, cloneMapping);
 
 		Set<Scope> scopesClone = new HashSet<>();
 		for(Scope scope : this.scopes) {
 			scopesClone.add(cloneScope(scope, cloneMapping));
 		}
 
-		return new StaticAnalysis(startScope, endScope, scopesClone, this.isMainAnalysis);
+		Set<StaticAnalysis> analysesClone = new HashSet<>();
+		if(cloneAnalyses) {
+			for(StaticAnalysis analysis : this.staticAnalyses) {
+				if(analysis != this) {
+					analysesClone.add(analysis.clone(cloneMapping, false));
+				}
+			}
+		}
+
+		Map<ParseTree, Scope> astScopeMap = new HashMap<>();
+		for(Entry<ParseTree, Scope> entry : this.astScopeMap.entrySet()) {
+			astScopeMap.put(entry.getKey(), cloneScope(entry.getValue(), cloneMapping));
+		}
+
+		return new StaticAnalysis(startScope, endScope, scopesClone,
+				this.isMainAnalysis, globalScope, this.astRootNode, analysesClone, astScopeMap);
 	}
 
 	private static Scope cloneScope(Scope scope, Map<Scope, Scope> cloneMapping) {
+
+		// Handle null scopes.
+		if(scope == null) {
+			return null;
+		}
 
 		// Return clone from the cache if it has already been cloned.
 		Scope scopeClone = cloneMapping.get(scope);

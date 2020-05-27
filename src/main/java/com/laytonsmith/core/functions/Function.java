@@ -6,6 +6,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -81,11 +82,28 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * Gets the return type of this function, based on the types of the passed arguments.
 	 * @param t - The code target, used for setting the code target in thrown exceptions.
 	 * @param argTypes - The types of the passed arguments.
+	 * @param argTargets - The {@link Target}s belonging to the argTypes (in the same order).
+	 * @param env - The {@link Environment}, used for instanceof checks on types.
+	 * @param exceptions - A set to which all type errors will be added.
 	 * @return The return type of this function when invoked with the given argument types. If the return type
-	 * is unknown, null is returned, indicating that this value cannot be used for static type checking.
-	 * @throws ConfigCompileException If the given argument types are not valid for this function.
+	 * is unknown, {@link CClassType#AUTO} is returned, indicating that this value should be handled as dynamic
+	 * during static type checking.
 	 */
-	public Class<? extends Mixed> getReturnType(Target t, List<Class<? extends Mixed>> argTypes) throws ConfigCompileException;
+	public CClassType getReturnType(Target t, List<CClassType> argTypes,
+			List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions);
+
+	/**
+	 * Typechecks this function, generating compile errors when types or signatures don't match.
+	 * This method is responsible for type checking the function arguments (child nodes of the passed AST node),
+	 * which can be done by calling this method on those child nodes.
+	 * @param analysis - The {@link StaticAnalysis}, used to resolve variable/proc/... references.
+	 * @param ast - The parse tree.
+	 * @param env - The {@link Environment}, used for instanceof checks on types.
+	 * @param exceptions - Any compile exceptions will be added to this set.
+	 * @return The return type of this function.
+	 */
+	public CClassType typecheck(StaticAnalysis analysis,
+			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions);
 
 	/**
 	 * Gets whether or not this function has static side effects. Static side effects are defined as side effects that
