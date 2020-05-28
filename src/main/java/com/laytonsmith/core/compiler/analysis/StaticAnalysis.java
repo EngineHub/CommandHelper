@@ -218,6 +218,9 @@ public class StaticAnalysis {
 		// Generate compile error for duplicate procedure declarations.
 		for(Scope scope : this.scopes) {
 			for(Declaration decl : scope.getAllDeclarationsLocal(Namespace.PROCEDURE)) {
+				if(decl instanceof ProcRootDeclaration) {
+					continue; // These are not actual proc declarations, so skip them.
+				}
 				Set<Declaration> dupDecls = scope.getReachableDeclarations(Namespace.PROCEDURE, decl.getIdentifier());
 				if(dupDecls.size() > 1) {
 					dupDecls.remove(decl);
