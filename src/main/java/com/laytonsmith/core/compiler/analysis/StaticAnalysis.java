@@ -215,25 +215,26 @@ public class StaticAnalysis {
 			}
 		}
 
-		// Generate compile error for duplicate procedure declarations.
-		for(Scope scope : this.scopes) {
-			for(Declaration decl : scope.getAllDeclarationsLocal(Namespace.PROCEDURE)) {
-				if(decl instanceof ProcRootDeclaration) {
-					continue; // These are not actual proc declarations, so skip them.
-				}
-				Set<Declaration> dupDecls = scope.getReachableDeclarations(Namespace.PROCEDURE, decl.getIdentifier());
-				if(dupDecls.size() > 1) {
-					dupDecls.remove(decl);
-					// TODO - Generate only one exception with all targets in them.
-					// TODO - Consider getting the earliest declaration only (instead of the last of each code path).
-					for(Declaration dupDecl : dupDecls) {
-						exceptions.add(new ConfigCompileException("Duplicate procedure declaration: Procedure "
-								+ decl.getIdentifier() + " is already declared at "
-								+ dupDecl.getTarget().toString(), decl.getTarget()));
-					}
-				}
-			}
-		}
+		// TODO - Remove if not useful anymore. MS allows proc overrides.
+//		// Generate compile error for duplicate procedure declarations.
+//		for(Scope scope : this.scopes) {
+//			for(Declaration decl : scope.getAllDeclarationsLocal(Namespace.PROCEDURE)) {
+//				if(decl instanceof ProcRootDeclaration) {
+//					continue; // These are not actual proc declarations, so skip them.
+//				}
+//				Set<Declaration> dupDecls = scope.getReachableDeclarations(Namespace.PROCEDURE, decl.getIdentifier());
+//				if(dupDecls.size() > 1) {
+//					dupDecls.remove(decl);
+//					// TODO - Generate only one exception with all targets in them.
+//					// TODO - Consider getting the earliest declaration only (instead of the last of each code path).
+//					for(Declaration dupDecl : dupDecls) {
+//						exceptions.add(new ConfigCompileException("Duplicate procedure declaration: Procedure "
+//								+ decl.getIdentifier() + " is already declared at "
+//								+ dupDecl.getTarget().toString(), decl.getTarget()));
+//					}
+//				}
+//			}
+//		}
 
 		// Resolve procedure references or add them as required-before-usage to the surrounding procedure.
 		Map<Scope, Set<Reference>> procReqRefMap = new HashMap<>();
