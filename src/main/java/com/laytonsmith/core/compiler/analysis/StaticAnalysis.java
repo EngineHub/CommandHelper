@@ -26,8 +26,6 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.CRE.CREException;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
-import com.laytonsmith.core.functions.FunctionBase;
-import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
@@ -303,15 +301,9 @@ public class StaticAnalysis {
 		if(node instanceof CFunction) {
 			CFunction cFunc = (CFunction) node;
 			if(cFunc.hasFunction()) {
-				try {
-					FunctionBase f = FunctionList.getFunction(cFunc, null);
-					if(f instanceof Function) {
-						Function func = (Function) f;
-						return func.typecheck(this, ast, env, exceptions);
-					}
-				} catch (ConfigCompileException ex) {
-					// Ignore node. This should cause a compile error in a later stage.
-					// TODO - Or the compile error could be generated here, check what's more convenient.
+				Function func = cFunc.getCachedFunction();
+				if(func != null) {
+					return func.typecheck(this, ast, env, exceptions);
 				}
 				return CClassType.AUTO; // Unknown return type.
 			} else if(cFunc.hasIVariable()) { // The function is a var reference to a closure: '@myClosure(<args>)'.
@@ -693,15 +685,9 @@ public class StaticAnalysis {
 		if(node instanceof CFunction) {
 			CFunction cFunc = (CFunction) node;
 			if(cFunc.hasFunction()) {
-				try {
-					FunctionBase f = FunctionList.getFunction(cFunc, null);
-					if(f instanceof Function) {
-						Function func = (Function) f;
-						return func.linkScope(this, parentScope, ast, env, exceptions);
-					}
-				} catch (ConfigCompileException ex) {
-					// Ignore node. This should cause a compile error in a later stage.
-					// TODO - Or the compile error could be generated here, check what's more convenient.
+				Function func = cFunc.getCachedFunction();
+				if(func != null) {
+					return func.linkScope(this, parentScope, ast, env, exceptions);
 				}
 				return parentScope;
 			} else if(cFunc.hasIVariable()) { // The function is a var reference to a closure: '@myClosure(<args>)'.
@@ -771,17 +757,9 @@ public class StaticAnalysis {
 
 		// Handle assign parameter (typed and/or with default value).
 		if(node instanceof CFunction) { // Typed parameter or assign.
-			CFunction cFunc = (CFunction) node;
-			if(cFunc.hasFunction()) {
-				try {
-					FunctionBase f = FunctionList.getFunction(cFunc, null);
-					if(f != null && f.getClass().equals(DataHandling.assign.class)) {
-						return ((DataHandling.assign) f).linkParamScope(
-								this, paramScope, valScope, ast, env, exceptions);
-					}
-				} catch (ConfigCompileException ex) {
-					// Ignore and handle as non-parameter parameter.
-				}
+			Function func = ((CFunction) node).getCachedFunction();
+			if(func != null && func instanceof DataHandling.assign) {
+				return ((DataHandling.assign) func).linkParamScope(this, paramScope, valScope, ast, env, exceptions);
 			}
 		}
 
