@@ -107,6 +107,11 @@ public class StaticAnalysis {
 	public void analyze(ParseTree ast, Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
 
+		// Don't perform static analysis if it's disabled.
+		if(!enabled()) {
+			return;
+		}
+
 		// Clear scopes from previous analysis.
 		this.scopes.clear();
 		this.scopes.add(this.startScope);
@@ -145,6 +150,11 @@ public class StaticAnalysis {
 	 */
 	public static void setAndAnalyzeAutoIncludes(List<File> autoIncludes, Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+
+		// Don't perform static analysis if it's disabled.
+		if(!enabled()) {
+			return;
+		}
 
 		// Clear previous auto includes analysis and return since there are no auto includes.
 		if(autoIncludes == null || autoIncludes.size() == 0) {
@@ -885,5 +895,16 @@ public class StaticAnalysis {
 			}
 		}
 		return scopeClone;
+	}
+
+	/**
+	 * Returns whether static analysis is enabled or not.
+	 * @return
+	 * @deprecated This is a temporary method, it should be replaced with proper settings once static analysis is
+	 * ready for release.
+	 */
+	@Deprecated
+	public static boolean enabled() {
+		return "true".equals(System.getProperty("methodscript.dostaticanalysis"));
 	}
 }
