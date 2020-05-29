@@ -1825,7 +1825,7 @@ public final class MethodScriptCompiler {
 			staticAnalysis.analyze(tree, environment, envs, compilerErrors);
 		}
 		optimize(tree, environment, envs, procs, compilerErrors);
-		link(tree, compilerErrors, envs);
+		link(tree, compilerErrors);
 		checkFunctionsExist(tree, compilerErrors, envs);
 		checkLabels(tree, compilerErrors);
 		checkBreaks(tree, compilerErrors);
@@ -2116,13 +2116,16 @@ public final class MethodScriptCompiler {
 	/**
 	 * Allows functions to perform a rewrite step to rewrite the AST as received from the parser to a valid
 	 * executable AST. Optimizations should not yet be performed in this rewrite step.
+	 * Additionally, this step traverses all {@link CFunction} nodes and ensures that they either have their represented
+	 * function cached or are unknown by the compiler.
 	 * Traversal is pre-order depth-first.
 	 * @param ast - The abstract syntax tree representing this function.
 	 * @param env - The environment.
 	 * @param envs - The set of expected environment classes at runtime.
 	 * @param exceptions - A set to put compile errors in.
 	 * @return The rewritten AST node that should completely replace the AST node representing this function, or
-	 * {@code null} to not replace this AST node.
+	 * {@code null} to not replace this AST node. Note that the rewrite will be called on this newly returned AST node
+	 * if it is different from the passed node.
 	 */
 	private static ParseTree postParseRewrite(ParseTree ast, Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
@@ -2131,16 +2134,13 @@ public final class MethodScriptCompiler {
 			CFunction cFunc = (CFunction) node;
 			if(cFunc.hasFunction()) {
 				try {
-					FunctionBase f = FunctionList.getFunction(cFunc, null);
-					if(f instanceof Function) {
-						Function func = (Function) f;
-						ParseTree newAst = func.postParseRewrite(ast, env, envs, exceptions);
-						if(newAst != null) {
-							ast = newAst;
-						}
+					Function func = cFunc.getFunction();
+					ParseTree newAst = func.postParseRewrite(ast, env, envs, exceptions);
+					if(newAst != null) {
+						ast = newAst;
 					}
 				} catch (ConfigCompileException ex) {
-					// Ignore node. This should cause a compile error in a later stage.
+					// Unknown function. This will be handled later.
 				}
 			}
 		}
@@ -2181,24 +2181,27 @@ public final class MethodScriptCompiler {
 	 *     <li>Links functions</li>
 	 *     <li>Validates function argument size</li>
 	 * </ul>
-	 * This is a separate process from optimization, because optimization ignores any missing functions.
+	 * This should be called after {@link #optimize(ParseTree, Environment, Set, Stack, Set)} so that functions with
+	 * custom linkage only get linked when they are not removed during optimization.
+	 * 
 	 *
 	 * @param tree
+	 * @param compilerErrors
 	 */
-	private static void link(ParseTree tree, Set<ConfigCompileException> compilerErrors,
-			Set<Class<? extends Environment.EnvironmentImpl>> envs) {
+	private static void link(ParseTree tree, Set<ConfigCompileException> compilerErrors) {
 		FunctionBase treeFunction = null;
 		try {
 			treeFunction = FunctionList.getFunction((CFunction) tree.getData(), null);
 			if(treeFunction.getClass().getAnnotation(nolinking.class) != null) {
-				//Don't link children of a nolinking function.
+				// Don't link children of a nolinking function.
 				return;
 			}
 		} catch (ConfigCompileException | ClassCastException ex) {
-			//This can happen if the treeFunction isn't a function, is a proc, etc,
-			//but we don't care, we just want to continue.
+			// This can happen if the treeFunction isn't a function, is a proc, etc,
+			// but we don't care, we just want to continue.
 		}
-		// Check the argument count, and do any custom linking the function may have
+
+		// Check the argument count, and do any custom linking the function may have.
 		if(treeFunction != null) {
 			Integer[] numArgs = treeFunction.numArgs();
 			if(!Arrays.asList(numArgs).contains(Integer.MAX_VALUE)
@@ -2219,10 +2222,11 @@ public final class MethodScriptCompiler {
 				}
 			}
 		}
-		// Walk the children
+
+		// Walk the children.
 		for(ParseTree child : tree.getChildren()) {
 			if(child.getData() instanceof CFunction) {
-				link(child, compilerErrors, envs);
+				link(child, compilerErrors);
 			}
 		}
 	}
