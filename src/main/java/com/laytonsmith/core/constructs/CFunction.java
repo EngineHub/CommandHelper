@@ -16,7 +16,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 public class CFunction extends Construct {
 
 	public static final long serialVersionUID = 1L;
-	private transient Function function;
+	private transient Function function = null;
 
 	public CFunction(String name, Target t) {
 		super(name, ConstructType.FUNCTION, t);
@@ -65,16 +65,25 @@ public class CFunction extends Construct {
 	}
 
 	/**
-	 * Returns the underlying function for this construct.
+	 * Returns the underlying function for this construct and caches it if it exists.
 	 *
 	 * @return
-	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
+	 * @throws ConfigCompileException If the specified function doesn't exist.
 	 */
 	public Function getFunction() throws ConfigCompileException {
-		if(function == null) {
-			function = (Function) FunctionList.getFunction(val(), null, this.getTarget());
+		if(this.function == null) {
+			this.function = (Function) FunctionList.getFunction(val(), null, this.getTarget());
 		}
-		return function;
+		return this.function;
+	}
+
+	/**
+	 * Returns the underlying function for this construct from the cache (which occurs on calling
+	 * {@link #getFunction()} or {@link #setFunction(FunctionBase)}).
+	 * @return The cached {@link Function} or {@code null} when the function has not yet been cached or doesn't exist.
+	 */
+	public Function getCachedFunction() {
+		return this.function;
 	}
 
 	/**
@@ -83,7 +92,7 @@ public class CFunction extends Construct {
 	 * @param f
 	 */
 	public void setFunction(FunctionBase f) {
-		function = (Function) f;
+		this.function = (Function) f;
 	}
 
 	/**
