@@ -210,22 +210,6 @@ public class Scope {
 		return new HashSet<>(refList);
 	}
 
-	// TODO - Remove if not necessary. StaticAnalysis can just loop over its scopes itself to get all references.
-//	/**
-//	 * Gets all references present in this scope and its (in)direct children.
-//	 * @param namespace - The {@link Namespace} for which to find the references.
-//	 * @return The {@link Set} of references.
-//	 */
-//	public Set<Reference> getAllReferences(Namespace namespace) {
-//		// TODO - Implement this. Requires this scope to know about its children.
-//		throw new Error("Not implemented.");
-////		List<Reference> refList = this.references.get(namespace);
-////		if(refList == null) {
-////			return Collections.emptySet();
-////		}
-////		return new HashSet<>(refList);
-//	}
-
 	/**
 	 * Creates a shallow unlinked clone, containing the exact same declarations and references maps.
 	 * Parent and child links are not included.

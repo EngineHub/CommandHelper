@@ -43,35 +43,36 @@ public class StaticAnalysis {
 
 	private Scope globalScope = null;
 
-	/*
-	 * TODO - Link Scope to ParseTree (AST node).
-	 * 
-	 * Can store a Set<StaticAnalysis> per root node, such that we have all root nodes to start analysis on with all
-	 * their possible scope graphs. On StaticAnalysis clone, just add the clone to the set as well.
-	 * Within each File's StaticAnalysis, create a Map<ParseTree, Scope> for AST terms with a reference.
-	 *     Don't merge these on clone, since we analyze each file separately.
-	 * Then, typecheck each root node for each of its possible scope graphs.
-	 *     Get Scope per ParseTree that stored it.
-	 */
-
 	/**
-	 * Contains all StaticAnalysis objects that have been created for this analysis, including this analysis.
+	 * Contains all {@link StaticAnalysis} objects that have been created for this analysis, including this analysis.
 	 * This is one analysis per file, which can be used to traverse each file again with a full scope graph.
 	 */
 	private Set<StaticAnalysis> staticAnalyses = new HashSet<>();
 
 	/**
-	 * Contains the Scope object belonging to each AST node.
+	 * Contains the {@link Scope} object belonging to each AST node.
 	 * Should only contain AST nodes within the file for which analysis was created (excluding includes).
 	 */
 	private Map<ParseTree, Scope> astScopeMap = new HashMap<>();
 
 	private static StaticAnalysis autoIncludesAnalysis = null;
 
+	/**
+	 * Creates a new {@link StaticAnalysis}.
+	 * @param isMainAnalysis - If {@code true}, full analyses will be performed with auto includes if present.
+	 * If {@code false}, only the scope graph will be generated and a full analysis is expected to be done externally.
+	 */
 	public StaticAnalysis(boolean isMainAnalysis) {
 		this(null, isMainAnalysis);
 	}
 
+	/**
+	 * Creates a new {@link StaticAnalysis} with a custom {@link Scope} in which this file's start scope can perform
+	 * lookups.
+	 * @param parentScope - The {@link Scope} in which this file's start scope can perform lookups.
+	 * @param isMainAnalysis - If {@code true}, full analyses will be performed with auto includes if present.
+	 * If {@code false}, only the scope graph will be generated and a full analysis is expected to be done externally.
+	 */
 	public StaticAnalysis(Scope parentScope, boolean isMainAnalysis) {
 		this.startScope = (parentScope != null ? parentScope : new Scope());
 		this.scopes = new HashSet<>();
@@ -94,6 +95,15 @@ public class StaticAnalysis {
 		this.astScopeMap = astScopeMap;
 	}
 
+	/**
+	 * Starts analysis on the given AST. If this is a main analysis, full analysis is performed with auto includes if
+	 * available. Otherwise, only the scope graph will be generated and a full analysis is expected to be done
+	 * externally.
+	 * @param ast - The {@link ParseTree} to analze.
+	 * @param env - The {@link Environment}.
+	 * @param envs - The set of expected {@link EnvironmentImpl} classes to be available at runtime.
+	 * @param exceptions - Any compile exceptions will be added to this set.
+	 */
 	public void analyze(ParseTree ast, Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
 
@@ -123,6 +133,16 @@ public class StaticAnalysis {
 		}
 	}
 
+	/**
+	 * Sets and analyzes the given list of auto includes which will be used when performing main analyses.
+	 * This works by creating a scope graph that represents a file with an {@code include()} call for each auto include
+	 * in the provided order. Both this 'fake' file and future analyses will be able to lookup procedures in these
+	 * auto includes. Main analyses can also use variables that are available at the end of these auto includes.
+	 * @param autoIncludes - The list of auto include files.
+	 * @param env - The {@link Environment}.
+	 * @param envs - The set of expected {@link EnvironmentImpl} classes to be available at runtime.
+	 * @param exceptions - Any compile exceptions will be added to this set.
+	 */
 	public static void setAndAnalyzeAutoIncludes(List<File> autoIncludes, Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
 
@@ -156,13 +176,6 @@ public class StaticAnalysis {
 	}
 
 	private void analyzeFinalScopeGraph(Environment env, Set<ConfigCompileException> exceptions) {
-		/*
-		 *  TODO - Implement checks:
-		 *  - Duplicate variable declarations.
-		 *  - Duplicate proc declarations.
-		 *  - Missing proc declaration.
-		 *  Future: Add typechecking / set declared variable types for type checking.
-		 */
 
 		// Convert ivariable assign declarations into variable references or declarations.
 		for(Scope scope : this.scopes) {
@@ -312,9 +325,8 @@ public class StaticAnalysis {
 				Set<Declaration> decls = scope.getDeclarations(
 						Namespace.IVARIABLE, ivar.getVariableName());
 				if(decls.isEmpty()) {
-					// TODO - Remove debug prefix.
 					exceptions.add(new ConfigCompileException(
-							"[DEBUG - TypeCheck] Variable cannot be resolved: " + ivar.getVariableName(), ivar.getTarget()));
+							"Variable cannot be resolved: " + ivar.getVariableName(), ivar.getTarget()));
 					return CClassType.AUTO;
 				} else {
 					// TODO - Get the most specific type when multiple declarations exist.
@@ -331,13 +343,11 @@ public class StaticAnalysis {
 		}
 
 		// The node is some other Construct, so return its type.
-		// TODO - Replace this by anything that doesn't have to catch an Error from Mixed.typeof().
 		try {
 			return node.typeof();
 		} catch (Throwable t) {
 			// Functions that might contain these unsupported objects should make sure that they don't type check them.
 			// In case an unsupported object causes an error here, it likely means that we have a syntax error.
-			// TODO - Eventually remove this exception if this indeed only triggers combined with another exception.
 			exceptions.add(new ConfigCompileException("Unsupported AST node implementation in type checking: "
 					+ node.getClass().getSimpleName(), node.getTarget()));
 			return CClassType.AUTO;
@@ -614,19 +624,6 @@ public class StaticAnalysis {
 	 * @return All include references in this analysis.
 	 */
 	private Set<IncludeReference> getIncludeRefs() {
-		// TODO - Remove commented-out code when no longer needed.
-//		Set<IncludeReference> refs = new HashSet<>();
-//		Stack<Scope> scopeStack = new Stack<>();
-//		scopeStack.addAll(this.rootScopes); // TODO - Root scopes cannot look up in child scopes, so this won't work.
-//		while(!scopeStack.empty()) {
-//			for(Reference ref : scopeStack.pop().getAllReferences(Namespace.INCLUDE)) {
-//				IncludeReference includeRef = (IncludeReference) ref;
-//				refs.add(includeRef);
-//				scopeStack.push(includeRef.getOutScope());
-//			}
-//		}
-//		return refs;
-
 		Set<IncludeReference> refs = new HashSet<>();
 		for(Scope scope : this.scopes) {
 			for(Reference ref : scope.getAllReferencesLocal(Namespace.INCLUDE)) {
@@ -645,16 +642,6 @@ public class StaticAnalysis {
 		return this.endScope;
 	}
 
-	// TODO - Remove if no longer needed.
-//	/**
-//	 * Creates a new {@link StaticAnalysis} with the current end scope as its root scope. Used for performing static
-//	 * analysis on code that runs directly after the code analyzed by this {@link StaticAnalysis}.
-//	 * @return
-//	 */
-//	public StaticAnalysis createAnalysisFromEndScope() {
-//		return new StaticAnalysis(this.endScope, false); // TODO - Review whether it is okay to not set 'scopes' here.
-//	}
-
 	/**
 	 * If the given AST node is a {@link CFunction} containing a function:
 	 * Calls {@link Function#linkScope(Scope, ParseTree, Set)} on the given AST node.
@@ -666,7 +653,7 @@ public class StaticAnalysis {
 	 * @param parentScope
 	 * @param ast
 	 * @param env
-	 * @param exceptions
+	 * @param exceptions - Any compile exceptions will be added to this set.
 	 * @return The returned scope from {@link Function#linkScope(Scope, ParseTree, Set)} in the first case,
 	 * or the parent scope otherwise.
 	 */
