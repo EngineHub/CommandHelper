@@ -954,19 +954,28 @@ public class ControlFlow {
 				children.set(0, to_lower);
 			}
 			// Now loop through the children, looking for the case statements. Also ensure each is a string.
-			for(int i = 1; i < children.size(); i += 2) {
-				ParseTree cseArray = children.get(i);
-				CArray newData = new CArray(cseArray.getTarget());
-				for(Mixed cse : ((CArray) cseArray.getData()).asList()) {
-					if(cse instanceof CString) {
-						CString data = (CString) cse;
-						newData.push(new CString(data.val().toLowerCase(), data.getTarget()), data.getTarget());
-					} else {
-						throw new ConfigCompileException(getName() + " can only accept strings in case statements.",
-								cse.getTarget());
+			for(int i = 1; i < children.size() - 1; i += 2) {
+				ParseTree child = children.get(i);
+				Mixed caseData = child.getData();
+				if(caseData instanceof CArray) {
+					CArray newData = new CArray(child.getTarget());
+					for(Mixed cse : ((CArray) caseData).asList()) {
+						if(cse instanceof CString) {
+							CString data = (CString) cse;
+							newData.push(new CString(data.val().toLowerCase(), data.getTarget()), data.getTarget());
+						} else {
+							throw new ConfigCompileException(getName() + " can only accept strings in case statements.",
+									cse.getTarget());
+						}
 					}
+					child.setData(newData);
+				} else if(caseData instanceof CString) {
+					CString data = (CString) caseData;
+					child.setData(new CString(data.val().toLowerCase(), data.getTarget()));
+				} else {
+					throw new ConfigCompileException(getName() + " can only accept strings in case statements.",
+							caseData.getTarget());
 				}
-				cseArray.setData(newData);
 			}
 			return switchTree;
 		}
