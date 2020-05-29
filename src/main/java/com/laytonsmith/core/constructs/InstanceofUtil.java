@@ -6,7 +6,10 @@ import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -121,6 +124,8 @@ public class InstanceofUtil {
 		return isInstanceof(value, instanceofThis.getFQCN(), env);
 	}
 
+	private static final Map<CClassType, Set<CClassType>> ISINSTANCEOF_CACHE = new HashMap<>();
+
 	/**
 	 * Returns whether or not a given MethodScript type is an instance of the specified MethodScript type.
 	 *
@@ -130,7 +135,22 @@ public class InstanceofUtil {
 	 * @return
 	 */
 	public static boolean isInstanceof(CClassType type, CClassType instanceofThis, Environment env) {
-		return isInstanceof(type, instanceofThis.getFQCN(), env);
+		Static.AssertNonNull(instanceofThis, "instanceofThis may not be null");
+
+		// Return true for AUTO, as everything can be used as AUTO.
+		if(instanceofThis == CClassType.AUTO) {
+			return true;
+		}
+
+		// Get cached result or compute and cache result.
+		Set<CClassType> castableClasses = ISINSTANCEOF_CACHE.get(type);
+		if(castableClasses == null) {
+			castableClasses = getAllCastableClasses(type, env);
+			ISINSTANCEOF_CACHE.put(type, castableClasses);
+		}
+
+		// Return the result.
+		return castableClasses.contains(instanceofThis);
 	}
 
 	private static FullyQualifiedClassName typeof(Class<? extends Mixed> c) {
