@@ -366,14 +366,12 @@ public class StaticAnalysis {
 			Target t, Environment env, Set<ConfigCompileException> exceptions) {
 
 		// Handle types that cause exceptions in the InstanceofUtil isInstanceof check.
-		if(type == CClassType.AUTO || type == CNull.TYPE) {
+		if(type == expected || type == CClassType.AUTO || type == CNull.TYPE) {
 			return;
 		}
 		if(type == CVoid.TYPE || expected == CVoid.TYPE || expected == CNull.TYPE) {
-			if(type != expected) {
-				exceptions.add(new ConfigCompileException("Expected type " + expected.getSimpleName()
-						+ ", but received type " + type.getSimpleName() + " instead.", t));
-			}
+			exceptions.add(new ConfigCompileException("Expected type " + expected.getSimpleName()
+					+ ", but received type " + type.getSimpleName() + " instead.", t));
 			return;
 		}
 
@@ -381,6 +379,41 @@ public class StaticAnalysis {
 		if(!InstanceofUtil.isInstanceof(type, expected, env)) {
 			exceptions.add(new ConfigCompileException("Expected type " + expected.getSimpleName()
 				+ ", but received type " + type.getSimpleName() + " instead.", t));
+		}
+	}
+
+	/**
+	 * Checks whether the given type is instance of any of the expected types, adding a compile error to the passed
+	 * exceptions set if it isn't. This never generates an error when the given type is {@link CClassType#AUTO}.
+	 * @param type - The type to check.
+	 * @param expected - The expected {@link CClassType}s, which should always be of at least size 1.
+	 * @param t
+	 * @param exceptions
+	 */
+	public static void requireAnyType(CClassType type, CClassType[] expected,
+			Target t, Environment env, Set<ConfigCompileException> exceptions) {
+		assert expected.length > 0 : "You must at least provide one expected type to requireAnyType().";
+
+		// Return if the type is instanceof any expected type.
+		for(CClassType exp : expected) {
+			if(type == exp || type == CClassType.AUTO || type == CNull.TYPE
+					|| (type != CVoid.TYPE && exp != CVoid.TYPE && exp != CNull.TYPE)
+					|| InstanceofUtil.isInstanceof(type, exp, env)) {
+				return;
+			}
+		}
+
+		// Add an exception since the type was not compatible.
+		if(expected.length == 1) {
+			exceptions.add(new ConfigCompileException("Expected type " + expected[0].getSimpleName()
+					+ ", but received type " + type.getSimpleName() + " instead.", t));
+		} else {
+			String types = "";
+			for(CClassType exp : expected) {
+				types += (types.isEmpty() ? exp.getSimpleName() : ", " + exp.getSimpleName());
+			}
+			exceptions.add(new ConfigCompileException("Expected any of types {" + types
+					+ "}, but received type " + type.getSimpleName() + " instead.", t));
 		}
 	}
 
