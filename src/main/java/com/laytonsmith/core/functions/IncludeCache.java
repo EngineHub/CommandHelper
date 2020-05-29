@@ -27,22 +27,19 @@ import java.util.Set;
 public class IncludeCache {
 
 	private static final MSLog.Tags TAG = MSLog.Tags.INCLUDES;
-	private static final Map<FileTargetTuple, ParseTree> CACHE = new HashMap<>();
-	private static final Map<FileTargetTuple, StaticAnalysis> ANALYSIS_CACHE = new HashMap<>(); // TODO - Remove if unnecessary.
+	private static final Map<File, ParseTree> CACHE = new HashMap<>();
+	private static final Map<File, StaticAnalysis> ANALYSIS_CACHE = new HashMap<>(); // TODO - Remove if unnecessary.
 
 	static void add(File file, ParseTree tree) {
-		CACHE.put(new FileTargetTuple(file, null), tree);
+		CACHE.put(file, tree);
 	}
 
 	static void addAll(HashMap<File, ParseTree> files) {
-		for(Map.Entry<File, ParseTree> entry : files.entrySet()) {
-			CACHE.put(new FileTargetTuple(entry.getKey(), null), entry.getValue());
-		}
-//		CACHE.putAll(files);
+		CACHE.putAll(files);
 	}
 
 	static boolean has(File file) {
-		return CACHE.containsKey(new FileTargetTuple(file, null));
+		return CACHE.containsKey(file);
 	}
 
 	public static ParseTree get(File file, com.laytonsmith.core.environments.Environment env,
@@ -50,14 +47,12 @@ public class IncludeCache {
 		return get(file, env, envs, new StaticAnalysis(false), t);
 	}
 
-//	@Deprecated // TODO - Remove StaticAnalysis argument if caching it here works.
 	public static ParseTree get(File file, com.laytonsmith.core.environments.Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, StaticAnalysis staticAnalysis, Target t) {
 		MSLog.GetLogger().Log(TAG, LogLevel.DEBUG, "Loading " + file, t);
-		FileTargetTuple key = new FileTargetTuple(file, t);
-		if(CACHE.containsKey(key)) {
+		if(CACHE.containsKey(file)) {
 			MSLog.GetLogger().Log(TAG, LogLevel.INFO, "Returning " + file + " from cache", t);
-			return CACHE.get(key);
+			return CACHE.get(file);
 		}
 		MSLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Cache does not already contain file. Compiling and caching.", t);
 		//We have to pull the file from the FS, and compile it.
@@ -78,8 +73,8 @@ public class IncludeCache {
 				p.stop();
 			}
 			MSLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Compilation succeeded, adding to cache.", t);
-			CACHE.put(key, tree);
-			ANALYSIS_CACHE.put(key, staticAnalysis);
+			CACHE.put(file, tree);
+			ANALYSIS_CACHE.put(file, staticAnalysis);
 			return tree;
 		} catch (ConfigCompileException ex) {
 			throw new CREIncludeException("There was a compile error when trying to include the script at " + file
@@ -97,35 +92,13 @@ public class IncludeCache {
 		}
 	}
 
-	public static StaticAnalysis getStaticAnalysis(File file, Target t) {
-		return ANALYSIS_CACHE.get(new FileTargetTuple(file, t));
+	public static StaticAnalysis getStaticAnalysis(File file) {
+		return ANALYSIS_CACHE.get(file);
 	}
 
 	public static void clearCache() {
 		MSLog.GetLogger().Log(TAG, LogLevel.INFO, "Clearing include cache", Target.UNKNOWN);
 		CACHE.clear();
 		ANALYSIS_CACHE.clear();
-	}
-
-	private static class FileTargetTuple {
-		public final File file;
-		public final Target target;
-
-		public FileTargetTuple(File file, Target target) {
-			this.file = file;
-			this.target = target;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			return obj instanceof FileTargetTuple && this.file.equals(((FileTargetTuple) obj).file);
-//					&& this.target.equals(((FileTargetTuple) obj).target); // TODO - Target.equals() is not defined. Remove Target entirely if no longer needed.
-		}
-
-		@Override
-		public int hashCode() {
-			return this.file.getAbsolutePath().hashCode() * 31
-					+ (this.target == null ? 0 : this.target.toString().hashCode());
-		}
 	}
 }

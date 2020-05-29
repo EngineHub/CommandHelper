@@ -527,7 +527,7 @@ public class StaticAnalysis {
 						// Get the static analysis of the include.
 						File file = Static.GetFileFromArgument(
 								pathRef.getIdentifier(), env, pathRef.getTarget(), null);
-						StaticAnalysis includeAnalysis = IncludeCache.getStaticAnalysis(file, pathRef.getTarget());
+						StaticAnalysis includeAnalysis = IncludeCache.getStaticAnalysis(file);
 						if(includeAnalysis == null) {
 
 							// The include did not compile, so ignore the include entirely.
@@ -569,11 +569,11 @@ public class StaticAnalysis {
 			StaticAnalysis includeAnalysis;
 			try {
 				File file = Static.GetFileFromArgument(includeRef.getIdentifier(), env, includeRef.getTarget(), null);
-				includeAnalysis = IncludeCache.getStaticAnalysis(file, includeRef.getTarget());
+				includeAnalysis = IncludeCache.getStaticAnalysis(file);
 				if(includeAnalysis == null) {
 					includeAnalysis = new StaticAnalysis(false);
 					IncludeCache.get(file, env, envs, includeAnalysis, includeRef.getTarget());
-					assert IncludeCache.getStaticAnalysis(file, includeRef.getTarget()) != null
+					assert IncludeCache.getStaticAnalysis(file) != null
 							: "Failed to cache include analysis.";
 				}
 			} catch (CREException e) {
