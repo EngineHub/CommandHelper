@@ -17,8 +17,10 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CMutablePrimitive;
@@ -86,6 +88,15 @@ public class ArrayHandling {
 				return new CInt(((CArray) args[0]).size(), t);
 			}
 			throw new CRECastException("Argument 1 of array_size must be an array", t);
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 1) {
+				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
+			}
+			return CInt.TYPE;
 		}
 
 		@Override
@@ -269,6 +280,20 @@ public class ArrayHandling {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 2 || argTypes.size() == 3) {
+				StaticAnalysis.requireType(argTypes.get(0), ArrayAccess.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireAnyType(argTypes.get(1),
+						new CClassType[] {CInt.TYPE, CSlice.TYPE, CString.TYPE}, argTargets.get(1), env, exceptions);
+				if(argTypes.size() == 3) {
+					StaticAnalysis.requireType(argTypes.get(2), Mixed.TYPE, argTargets.get(2), env, exceptions);
+				}
+			}
+			return CClassType.AUTO;
+		}
+
+		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREIndexOverflowException.class};
 		}
@@ -393,6 +418,19 @@ public class ArrayHandling {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 3) {
+				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireAnyType(argTypes.get(1),
+						new CClassType[] {CInt.TYPE, CSlice.TYPE, CString.TYPE}, argTargets.get(1), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(2), Mixed.TYPE, argTargets.get(2), env, exceptions);
+				return argTypes.get(2);
+			}
+			return CClassType.AUTO;
+		}
+
+		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREIndexOverflowException.class};
 		}
@@ -469,6 +507,18 @@ public class ArrayHandling {
 				return CVoid.VOID;
 			}
 			throw new CRECastException("Argument 1 of array_push must be an array", t);
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() >= 2) {
+				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
+				for(int i = 1; i < argTypes.size(); i++) {
+					StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
+				}
+			}
+			return CVoid.TYPE;
 		}
 
 		@Override
@@ -568,6 +618,17 @@ public class ArrayHandling {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 3) {
+				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(1), CInt.TYPE, argTargets.get(1), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(2), Mixed.TYPE, argTargets.get(2), env, exceptions);
+			}
+			return CVoid.TYPE;
+		}
+
+		@Override
 		public String getName() {
 			return "array_insert";
 		}
@@ -630,6 +691,16 @@ public class ArrayHandling {
 				}
 			}
 			return CBoolean.FALSE;
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 2) {
+				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(1), Mixed.TYPE, argTargets.get(1), env, exceptions);
+			}
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -731,6 +802,16 @@ public class ArrayHandling {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 2) {
+				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(1), Mixed.TYPE, argTargets.get(1), env, exceptions);
+			}
+			return CBoolean.TYPE;
+		}
+
+		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'A')"),
@@ -770,6 +851,16 @@ public class ArrayHandling {
 				}
 			}
 			return CBoolean.FALSE;
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 2) {
+				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(1), Mixed.TYPE, argTargets.get(1), env, exceptions);
+			}
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -895,6 +986,18 @@ public class ArrayHandling {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() >= 1) {
+				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
+				for(int i = 1; i < argTypes.size(); i++) {
+					StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
+				}
+			}
+			return CBoolean.TYPE;
+		}
+
+		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children,
 				FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
@@ -985,6 +1088,19 @@ public class ArrayHandling {
 				throw new CRECastException("Argument 1 must be an array, and argument 2 must be an integer in array_resize", t);
 			}
 			return (CArray) args[0];
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 2 || argTypes.size() == 3) {
+				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(1), CInt.TYPE, argTargets.get(1), env, exceptions);
+				if(argTypes.size() == 3) {
+					StaticAnalysis.requireType(argTypes.get(2), Mixed.TYPE, argTargets.get(2), env, exceptions);
+				}
+			}
+			return CArray.TYPE;
 		}
 
 		@Override
