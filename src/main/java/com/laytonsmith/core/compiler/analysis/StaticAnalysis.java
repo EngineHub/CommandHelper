@@ -203,16 +203,6 @@ public class StaticAnalysis {
 			}
 		}
 
-		// Resolve variable references.
-		for(Scope scope : this.scopes) {
-			for(Reference ref : scope.getAllReferencesLocal(Namespace.IVARIABLE)) {
-				if(scope.getDeclarations(Namespace.IVARIABLE, ref.getIdentifier()).isEmpty()) {
-					exceptions.add(new ConfigCompileException(
-							"Variable cannot be resolved: " + ref.getIdentifier(), ref.getTarget()));
-				}
-			}
-		}
-
 		// TODO - Remove if not useful anymore. MS allows proc overrides.
 //		// Generate compile error for duplicate procedure declarations.
 //		for(Scope scope : this.scopes) {
@@ -288,12 +278,13 @@ public class StaticAnalysis {
 		}
 	}
 
-	// TODO - Rewrite documentation and adjust to fit this class.
 	/**
-	 * Traverses the parse tree, type checking functions through their {@link Function#getReturnType(List)} methods.
+	 * Traverses the parse tree, type checking functions through their
+	 * {@link Function#typecheck(StaticAnalysis, ParseTree, Environment, Set)} methods.
+	 * When {@link IVariable}s are traversed, a compile error is added when they do not resolve to a declaration.
 	 * @param ast - The parse tree.
 	 * @param env - The {@link Environment}, used for instanceof checks on types.
-	 * @param exceptions - Any compiler exceptions will be added to this set.
+	 * @param exceptions - Any compile exceptions will be added to this set.
 	 * @return The return type of the parse tree.
 	 */
 	public CClassType typecheck(ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
@@ -317,7 +308,7 @@ public class StaticAnalysis {
 		} else if(node instanceof IVariable) {
 			IVariable ivar = (IVariable) node;
 			Scope scope = this.getTermScope(ast);
-			if(scope != null) { // Scope can be null for variable and parameter declarations.
+			if(scope != null) {
 				Set<Declaration> decls = scope.getDeclarations(
 						Namespace.IVARIABLE, ivar.getVariableName());
 				if(decls.isEmpty()) {
@@ -330,9 +321,9 @@ public class StaticAnalysis {
 					return decls.iterator().next().getType();
 				}
 			} else {
-				// TODO - Remove or change exception after testing. This triggers for assign() with wrong arguments.
-				exceptions.add(new ConfigCompileException(
-						"[DEBUG - TypeCheck] Variable cannot be resolved (missing scope): " + ivar.getVariableName(), ivar.getTarget()));
+				// If this runs, then an IVariable reference was created without setting its Scope using setTermScope().
+				exceptions.add(new ConfigCompileException("Variable cannot be resolved (missing variable scope, this is"
+						+ " an internal error that should never happen): " + ivar.getVariableName(), ivar.getTarget()));
 				return CClassType.AUTO;
 			}
 		} else if(node instanceof Variable) {
