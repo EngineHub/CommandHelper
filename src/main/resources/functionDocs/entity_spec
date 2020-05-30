@@ -136,10 +136,6 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_HORSE_SADDLE%: An item pertaining to the saddle a horse has put on. Can be anything.
 * %KEY_HORSE_STYLE%: The horse's style (can be %HORSE_STYLE%).
 |-
-| HUSK
-|
-* %KEY_ZOMBIE_BABY%: Whether the husk is a baby.
-|-
 | IRON_GOLEM
 | 
 * %KEY_IRON_GOLEM_PLAYERCREATED%: Whether the iron golem was built by a player or not.
@@ -302,7 +298,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_WOLF_COLOR%: The collar color of the wolf (can be %DYE_COLOR%).
 * %KEY_GENERIC_SITTING%: If the wolf is sitting.
 |- 
-| ZOMBIE, HUSK, ZOMBIE_VILLAGER, DROWNED
+| ZOMBIE, HUSK, DROWNED
 | 
 * %KEY_ZOMBIE_BABY%: Whether the zombie is a baby.
 |-
