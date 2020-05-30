@@ -28,12 +28,23 @@ import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import java.io.IOException;
 
 /**
  * This class can be used to perform static analysis.
  * @author P.J.S. Kools
  */
 public class StaticAnalysis {
+
+	private static final StaticAnalysisConfiguration CONFIGURATION;
+
+	static {
+		try {
+			CONFIGURATION = StaticAnalysisConfiguration.GetConfiguration();
+		} catch (IOException ex) {
+			throw new RuntimeException(ex);
+		}
+	}
 
 	private final Scope startScope;
 	private final Set<Scope> scopes;
@@ -905,6 +916,6 @@ public class StaticAnalysis {
 	 */
 	@Deprecated
 	public static boolean enabled() {
-		return "true".equals(System.getProperty("methodscript.dostaticanalysis"));
+		return CONFIGURATION.globalEnable();
 	}
 }

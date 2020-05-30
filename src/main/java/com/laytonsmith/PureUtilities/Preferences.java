@@ -170,7 +170,11 @@ public class Preferences {
 			prefs.get(p.group).put(p.name, p);
 		}
 		if(!header.trim().isEmpty()) {
-			this.header = "#  " + header.replaceAll("\n", "\n#  ");
+			StringBuilder b = new StringBuilder();
+			for(String line2 : StringUtils.lineSplit(header, lineLength)) {
+				b.append("# ").append(line2).append(StringUtils.nl());
+			}
+			this.header = b.toString();
 		}
 	}
 
