@@ -769,10 +769,6 @@ public class StaticAnalysis {
 	 * @param exceptions
 	 * @return The resulting scopes in format {paramScope, valScope}.
 	 */
-	/*
-	 *  TODO - Mark IVAR declarations as parameters, such that they can be shadowed and such that they can override
-	 *  variable declarations. Otherwise this will lead to false duplicate declarations.
-	 */
 	public Scope[] linkParamScope(Scope paramScope, Scope valScope,
 			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 		Mixed node = ast.getData();
