@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 /**
  *
  */
-public class StaticAnalysisConfiguration {
+public final class StaticAnalysisConfiguration {
 
 	private static volatile StaticAnalysisConfiguration config = null;
 

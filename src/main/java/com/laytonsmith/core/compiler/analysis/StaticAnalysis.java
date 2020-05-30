@@ -36,12 +36,12 @@ import java.io.IOException;
  */
 public class StaticAnalysis {
 
-	private static final StaticAnalysisConfiguration configuration;
+	private static final StaticAnalysisConfiguration CONFIGURATION;
 
 	static {
 		try {
-			configuration = StaticAnalysisConfiguration.GetConfiguration();
-		} catch(IOException ex) {
+			CONFIGURATION = StaticAnalysisConfiguration.GetConfiguration();
+		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
@@ -916,6 +916,6 @@ public class StaticAnalysis {
 	 */
 	@Deprecated
 	public static boolean enabled() {
-		return configuration.globalEnable();
+		return CONFIGURATION.globalEnable();
 	}
 }
