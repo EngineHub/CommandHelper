@@ -1022,17 +1022,7 @@ public class ControlFlow {
 		@Override
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
-			if(ast.numberOfChildren() >= 4) {
-				ParseTree assign = ast.getChildAt(0);
-				ParseTree cond = ast.getChildAt(1);
-				ParseTree exp = ast.getChildAt(2);
-				ParseTree code = ast.getChildAt(3);
-
-				Scope assignScope = analysis.linkScope(parentScope, assign, env, exceptions);
-				Scope condScope = analysis.linkScope(assignScope, cond, env, exceptions);
-				Scope expScope = analysis.linkScope(condScope, exp, env, exceptions);
-				analysis.linkScope(expScope, code, env, exceptions);
-			}
+			super.linkScope(analysis, parentScope, ast, env, exceptions);
 			return parentScope;
 		}
 
@@ -1904,17 +1894,7 @@ public class ControlFlow {
 		@Override
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
-			if(ast.numberOfChildren() >= 1) {
-				ParseTree cond = ast.getChildAt(0);
-				ParseTree code = (ast.numberOfChildren() > 1 ? ast.getChildAt(1) : null);
-
-				// Order: cond -> (code -> cond)*.
-				Scope condScope = analysis.linkScope(parentScope, cond, env, exceptions);
-				if(code != null) {
-					analysis.linkScope(condScope, code, env, exceptions);
-				}
-			}
-
+			super.linkScope(analysis, parentScope, ast, env, exceptions);
 			return parentScope;
 		}
 
@@ -2035,14 +2015,7 @@ public class ControlFlow {
 		@Override
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
-			if(ast.numberOfChildren() >= 2) {
-				ParseTree code = ast.getChildAt(0);
-				ParseTree cond = ast.getChildAt(1);
-
-				// Order: (code -> cond)*.
-				Scope codeScope = analysis.linkScope(parentScope, code, env, exceptions);
-				analysis.linkScope(codeScope, cond, env, exceptions);
-			}
+			super.linkScope(analysis, parentScope, ast, env, exceptions);
 			return parentScope;
 		}
 
