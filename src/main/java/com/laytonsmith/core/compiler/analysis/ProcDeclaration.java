@@ -28,9 +28,10 @@ public class ProcDeclaration extends Declaration {
 	 * Adds a required reference to this procedure declaration. Required references have to be resolved before this
 	 * declaration may safely be used.
 	 * @param ref - The required reference.
+	 * @returns {@code true} if this set did not already contain the reference, {@code false} otherwise.
 	 */
-	public void addRequiredReference(Reference ref) {
-		this.requiredRefs.add(ref);
+	public boolean addRequiredReference(Reference ref) {
+		return this.requiredRefs.add(ref);
 	}
 
 	/**

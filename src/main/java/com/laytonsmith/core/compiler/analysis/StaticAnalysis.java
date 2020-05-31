@@ -273,7 +273,8 @@ public class StaticAnalysis {
 							Namespace.PROCEDURE, ProcRootDeclaration.PROC_ROOT);
 					if(!rootDecls.isEmpty()) {
 						for(Declaration decl : rootDecls) {
-							((ProcRootDeclaration) decl).procDecl.addRequiredReference(ref);
+							ProcRootDeclaration procRootDecl = (ProcRootDeclaration) decl;
+							procRootDecl.procDecl.addRequiredReference(ref);
 						}
 					} else {
 
@@ -284,23 +285,57 @@ public class StaticAnalysis {
 				} else {
 
 					// Store the (still empty) required references set.
-					Declaration decl = decls.iterator().next();
-					procReqRefMap.put(scope, ((ProcDeclaration) decl).getRequiredRefs());
+					for(Declaration decl : decls) {
+						procReqRefMap.put(scope, ((ProcDeclaration) decl).getRequiredRefs());
+					}
 				}
 			}
 		}
 
 		// Resolve required procedure references from the place where the proc that requires them is called.
 		// There is no need to look up in the global scope here, as then the references would have resolved already.
-		for(Entry<Scope, Set<Reference>> entry : procReqRefMap.entrySet()) {
-			Scope scope = entry.getKey();
-			for(Reference ref : entry.getValue()) {
-				if(scope.getDeclarations(Namespace.PROCEDURE, ref.getIdentifier()).isEmpty()) {
-					exceptions.add(new ConfigCompileException(
-							"Procedure cannot be resolved: " + ref.getIdentifier(), ref.getTarget()));
+		boolean changed;
+		Map<Scope, Set<Reference>> handledReferences = new HashMap<>();
+		do {
+			changed = false;
+			for(Entry<Scope, Set<Reference>> entry : procReqRefMap.entrySet()) {
+				Scope scope = entry.getKey();
+				for(Reference ref : entry.getValue()) {
+
+					// Skip handled references.
+					Set<Reference> handledRefSet = handledReferences.get(scope);
+					if(handledRefSet == null) {
+						handledRefSet = new HashSet<>();
+						handledReferences.put(scope, handledRefSet);
+					}
+					if(handledRefSet.contains(ref)) {
+						continue;
+					}
+
+					// Resolve reference, and handle references that cannot be resolved.
+					if(scope.getDeclarations(Namespace.PROCEDURE, ref.getIdentifier()).isEmpty()) {
+
+						// Mark reference as handled as it will either be moved or generate a compile exception.
+						handledRefSet.add(ref);
+
+						// Procedure not found. Add required references as requirement to surrounding proc if available.
+						Set<Declaration> rootDecls = scope.getDeclarations(
+								Namespace.PROCEDURE, ProcRootDeclaration.PROC_ROOT);
+						if(!rootDecls.isEmpty()) {
+							for(Declaration decl : rootDecls) {
+								ProcRootDeclaration procRootDecl = (ProcRootDeclaration) decl;
+								changed |= procRootDecl.procDecl.addRequiredReference(ref);
+							}
+						} else {
+
+							// Procedure cannot be resolved and is not within another procedure.
+							exceptions.add(new ConfigCompileException(
+									"Procedure cannot be resolved: " + ref.getIdentifier(), ref.getTarget()));
+						}
+					}
 				}
 			}
-		}
+		} while(changed);
 
 		// Type check.
 		this.typecheck(env, exceptions);
