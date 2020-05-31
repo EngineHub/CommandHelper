@@ -70,8 +70,9 @@ public class DataHandlingTest {
 				+ " proc('_proc',"
 				+ "     msg('hello world')"
 				+ " )"
-				+ " msg(is_proc('_proc'))"
-				+ " call_proc('_proc')"
+				+ "@name_proc = '_proc'"
+				+ " msg(is_proc(@name_proc))"
+				+ " call_proc(@name_proc)"
 				+ "<<<\n";
 		RunCommand(config, fakePlayer, "/for");
 		verify(fakePlayer).sendMessage("false");
@@ -116,8 +117,7 @@ public class DataHandlingTest {
 	public void testExportImportStringValue2() throws Exception {
 		when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
 		SRun("assign(@test, array(1, 2, 3))"
-				+ "export('myarray', @test)"
-				+ "msg(@newtest)", fakePlayer);
+				+ "export('myarray', @test)", fakePlayer);
 		SRun("assign(@newtest, import('myarray')) msg(@newtest)", fakePlayer);
 		verify(fakePlayer).sendMessage("{1, 2, 3}");
 	}

@@ -73,7 +73,10 @@ public class MetaTest {
 
 	@Test
 	public void testEval() throws Exception {
-		SRun("eval('msg(\\'Hello World!\\')')", fakePlayer);
+		String script
+				= "@script = 'msg(\\'Hello World!\\')'"
+				+ "eval(@script)";
+		SRun(script, fakePlayer);
 		verify(fakePlayer).sendMessage("Hello World!");
 	}
 

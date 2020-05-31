@@ -338,7 +338,7 @@ public class MethodScriptCompilerTest {
 	@Test
 	public void testExecute16() throws Exception {
 		String script
-				= "proc('_myProc', @i, @j, @k, msg(trim(@i @j @k)))\n"
+				= "proc('_myProc', @i, @j, @k, msg(trim(\"@i @j @k\")))\n"
 				+ "_myProc()\n"
 				+ "_myProc(1)\n"
 				+ "_myProc(1, 2)\n"
@@ -736,7 +736,7 @@ public class MethodScriptCompilerTest {
 	public void testLineNumberCorrectInException2() throws Exception {
 		String script
 				= "assign(@a, array(1, 2))\n" //Line 1
-				+ "\n" //Line 2
+				+ "@b = null\n" //Line 2
 				+ "assign(@d, @a[@b])\n"; //Line 3
 		try {
 			SRun(script, fakePlayer);
