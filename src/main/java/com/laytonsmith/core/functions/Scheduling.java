@@ -32,6 +32,7 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
+import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
@@ -442,7 +443,8 @@ public class Scheduling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CREInsufficientArgumentsException.class};
+			return new Class[]{CRECastException.class, CREInsufficientArgumentsException.class,
+				CRENullPointerException.class};
 		}
 
 		@Override
@@ -460,6 +462,10 @@ public class Scheduling {
 			if(args.length == 0 && environment.getEnv(GlobalEnv.class).GetCustom("timeout-id") != null) {
 				StaticLayer.ClearFutureRunnable((Integer) environment.getEnv(GlobalEnv.class).GetCustom("timeout-id"));
 			} else if(args.length == 1) {
+				if(args[0] instanceof CNull) {
+					throw new CRENullPointerException("Null value sent to " + getName()
+							+ "(). Did you mean " + getName() + "(0)?", t);
+				}
 				StaticLayer.ClearFutureRunnable(Static.getInt32(args[0], t));
 			} else {
 				throw new CREInsufficientArgumentsException("No id was passed to clear_task, and it's not running inside a task either.", t);
