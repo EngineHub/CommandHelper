@@ -70,9 +70,8 @@ public class DataHandlingTest {
 				+ " proc('_proc',"
 				+ "     msg('hello world')"
 				+ " )"
-				+ "@name_proc = '_proc'"
-				+ " msg(is_proc(@name_proc))"
-				+ " call_proc(@name_proc)"
+				+ " msg(is_proc('_proc'))"
+				+ " call_proc(dyn('_proc'))"
 				+ "<<<\n";
 		RunCommand(config, fakePlayer, "/for");
 		verify(fakePlayer).sendMessage("false");
