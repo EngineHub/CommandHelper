@@ -2369,8 +2369,9 @@ public class DataHandling {
 
 			// Handle optional return type argument.
 			int ind = 0;
-			Scope retTypeScope = (ast.getChildAt(ind).getData().isInstanceOf(CClassType.TYPE)
-					? analysis.linkScope(parentScope, ast.getChildAt(ind++), env, exceptions) : parentScope);
+			if(ast.getChildAt(ind).getData().isInstanceOf(CClassType.TYPE)) {
+				analysis.linkScope(parentScope, ast.getChildAt(ind++), env, exceptions);
+			}
 
 			// Create parameter scope. Set parent scope if this closure type is allowed to resolve in the parent scope.
 			// Procedures can always look up in the parent scope.
