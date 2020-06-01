@@ -48,7 +48,7 @@ public class StaticAnalysis {
 
 	private final Scope startScope;
 	private final Set<Scope> scopes;
-	private final boolean isMainAnalysis;
+	private boolean isMainAnalysis;
 	private ParseTree astRootNode = null;
 	private Scope endScope = null;
 
@@ -196,7 +196,7 @@ public class StaticAnalysis {
 		autoIncludesAnalysis = analysis;
 	}
 
-	private void analyzeFinalScopeGraph(Environment env, Set<ConfigCompileException> exceptions) {
+	public void analyzeFinalScopeGraph(Environment env, Set<ConfigCompileException> exceptions) {
 
 		// Convert ivariable assign declarations into variable references or declarations.
 		for(Scope scope : this.scopes) {
@@ -721,6 +721,23 @@ public class StaticAnalysis {
 			}
 		}
 		return refs;
+	}
+
+	/**
+	 * Set whether this is a main analysis or not.
+	 * @param isMainAnalysis - If {@code true}, full analyses will be performed with auto includes if present.
+	 * If {@code false}, only the scope graph will be generated and a full analysis is expected to be done externally.
+	 */
+	public void setMainAnalysis(boolean isMainAnalysis) {
+		this.isMainAnalysis = isMainAnalysis;
+	}
+
+	/**
+	 * Gets the scope at the start of the analyzed file.
+	 * @return The start scope.
+	 */
+	public Scope getStartScope() {
+		return this.startScope;
 	}
 
 	/**

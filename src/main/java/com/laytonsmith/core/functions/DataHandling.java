@@ -85,6 +85,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -1652,8 +1653,6 @@ public class DataHandling {
 	@DocumentLink(0)
 	public static class include extends AbstractFunction implements Optimizable, DocumentLinkProvider {
 
-		private StaticAnalysis dynamicStaticAnalysis = null;
-
 		@Override
 		public String getName() {
 			return "include";
@@ -1699,13 +1698,72 @@ public class DataHandling {
 			ParseTree tree = nodes[0];
 			Mixed arg = parent.seval(tree, env);
 			String location = arg.val();
-			// TODO - Run static analysis from the outer file start scope if available.
 			File file = Static.GetFileFromArgument(location, env, t, null);
-			ParseTree include = IncludeCache.get(file, env, env.getEnvClasses(), t);
+
+			// Create new static analysis for dynamic includes that have not yet been cached.
+			StaticAnalysis analysis;
+			boolean isFirstCompile = false;
+			Scope parentScope = IncludeCache.DYNAMIC_ANALYSIS_PARENT_SCOPE_CACHE.get(t);
+			if(parentScope != null) {
+				analysis = IncludeCache.getStaticAnalysis(file);
+				if(analysis == null) {
+					analysis = new StaticAnalysis(true);
+					analysis.getStartScope().addParent(parentScope);
+					isFirstCompile = true;
+				}
+			} else {
+				analysis = null; // It's a static include.
+			}
+
+			// Get or load the include.
+			ParseTree include = IncludeCache.get(file, env, env.getEnvClasses(), analysis, t);
+
+			// Perform static analysis for dynamic includes.
+			// This should not run if this is the first compile for this include, as IncludeCache.get() checks it then.
+			/*
+			 *  TODO - This analysis runs on an optimized AST.
+			 *  Cloning, caching and using the non-optimized AST would be nice.
+			 *  This solution is acceptable in the meantime, as the first analysis of a dynamic include runs
+			 *  on the non-optimized AST through IncludeCache.get(), and otherwise-runtime errors should still be
+			 *  caught when analyzing the optimized AST.
+			 */
+			if(isFirstCompile) {
+
+				// Remove this parent scope since it should not end up in the cached analysis.
+				analysis.getStartScope().removeParent(parentScope);
+			} else if(analysis != null) {
+
+				// Set up analysis. Cloning is required to not mess up the cached analysis.
+				analysis = analysis.clone();
+				analysis.getStartScope().addParent(parentScope);
+				Set<ConfigCompileException> exceptions = new HashSet<>();
+				analysis.analyzeFinalScopeGraph(env, exceptions);
+
+				// Handle compile exceptions.
+				if(exceptions.size() == 1) {
+					ConfigCompileException ex = exceptions.iterator().next();
+					String fileName = (ex.getFile() == null ? "Unknown Source" : file.getName());
+					throw new CREIncludeException(
+							"There was a compile error when trying to include the script at " + file
+							+ "\n" + ex.getMessage() + " :: " + fileName + ":" + ex.getLineNum(), t);
+				} else if(exceptions.size() > 1) {
+					StringBuilder b = new StringBuilder();
+					b.append("There were compile errors when trying to include the script at ")
+							.append(file).append("\n");
+					for(ConfigCompileException ex : exceptions) {
+						String fileName = (ex.getFile() == null ? "Unknown Source" : ex.getFile().getName());
+						b.append(ex.getMessage()).append(" :: ").append(fileName).append(":")
+								.append(ex.getLineNum()).append("\n");
+					}
+					throw new CREIncludeException(b.toString(), t);
+				}
+			}
+
 			if(include != null) {
 				// It could be an empty file
 				StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
-				stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<include " + arg.val() + ">>", t));
+				stManager.addStackTraceElement(
+						new ConfigRuntimeException.StackTraceElement("<<include " + arg.val() + ">>", t));
 				try {
 					parent.eval(include.getChildAt(0), env);
 				} catch (AbstractCREException e) {
@@ -1738,12 +1796,10 @@ public class DataHandling {
 				} else {
 
 					// The include is dynamic, so it cannot be checked in compile time.
-					// Create static analysis to check the file as soon as it is loaded in runtime.
-					this.dynamicStaticAnalysis = new StaticAnalysis(parentScope, false);
+					// Store the parent scope for static analysis to check the file as soon as it is loaded in runtime.
+					IncludeCache.DYNAMIC_ANALYSIS_PARENT_SCOPE_CACHE.put(ast.getTarget(), parentScope);
 					return super.linkScope(analysis, parentScope, ast, env, exceptions);
 				}
-			} else {
-				System.out.println("[DEBUG] Faulty include detected."); // TODO - Remove debug.
 			}
 
 			// Fall back to default behavior for invalid syntax.

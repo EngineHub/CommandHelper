@@ -7,6 +7,7 @@ import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -28,7 +29,8 @@ public class IncludeCache {
 
 	private static final MSLog.Tags TAG = MSLog.Tags.INCLUDES;
 	private static final Map<File, ParseTree> CACHE = new HashMap<>();
-	private static final Map<File, StaticAnalysis> ANALYSIS_CACHE = new HashMap<>(); // TODO - Remove if unnecessary.
+	private static final Map<File, StaticAnalysis> ANALYSIS_CACHE = new HashMap<>();
+	public static final Map<Target, Scope> DYNAMIC_ANALYSIS_PARENT_SCOPE_CACHE = new HashMap<>();
 
 	static void add(File file, ParseTree tree) {
 		CACHE.put(file, tree);
@@ -80,13 +82,13 @@ public class IncludeCache {
 			String fileName = (ex.getFile() == null ? "Unknown Source" : file.getName());
 			throw new CREIncludeException("There was a compile error when trying to include the script at " + file
 					+ "\n" + ex.getMessage() + " :: " + fileName + ":" + ex.getLineNum(), t);
-		} catch (ConfigCompileGroupException ex) {
+		} catch (ConfigCompileGroupException exs) {
 			StringBuilder b = new StringBuilder();
 			b.append("There were compile errors when trying to include the script at ").append(file).append("\n");
-			for(ConfigCompileException e : ex.getList()) {
-				String fileName = (e.getFile() == null ? "Unknown Source" : e.getFile().getName());
-				b.append(e.getMessage()).append(" :: ").append(fileName).append(":")
-						.append(e.getLineNum()).append("\n");
+			for(ConfigCompileException ex : exs.getList()) {
+				String fileName = (ex.getFile() == null ? "Unknown Source" : ex.getFile().getName());
+				b.append(ex.getMessage()).append(" :: ").append(fileName).append(":")
+						.append(ex.getLineNum()).append("\n");
 			}
 			throw new CREIncludeException(b.toString(), t);
 		} catch (IOException ex) {
@@ -102,5 +104,6 @@ public class IncludeCache {
 		MSLog.GetLogger().Log(TAG, LogLevel.INFO, "Clearing include cache", Target.UNKNOWN);
 		CACHE.clear();
 		ANALYSIS_CACHE.clear();
+		DYNAMIC_ANALYSIS_PARENT_SCOPE_CACHE.clear();
 	}
 }
