@@ -1767,7 +1767,7 @@ public final class MethodScriptCompiler {
 
 		}
 
-		assert t != null;
+		assert t != null || stream.size() == 0;
 
 		// Handle mismatching square brackets "[]".
 		assert arrayStack.size() != 0 : "The last element of arrayStack should be present, but it was popped.";
