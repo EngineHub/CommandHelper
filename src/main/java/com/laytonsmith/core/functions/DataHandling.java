@@ -100,6 +100,7 @@ public class DataHandling {
 	private static final String ARRAY_GET = new ArrayHandling.array_get().getName();
 	private static final String ARRAY_SET = new ArrayHandling.array_set().getName();
 	private static final String ARRAY_PUSH = new ArrayHandling.array_push().getName();
+	private static final String INCLUDE = new include().getName();
 	private static final String CENTRY = new Compiler.centry().getName();
 
 	public static String docs() {
@@ -1881,7 +1882,7 @@ public class DataHandling {
 
 	@api
 	@DocumentLink(0)
-	public static class include_dir extends AbstractFunction implements Optimizable {
+	public static class include_dir extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -1900,7 +1901,8 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			throw new UnsupportedOperationException("Not supported yet.");
+			// This function is rewritten to include() calls in compile time, so this doesn't exist in runtime.
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -1928,33 +1930,51 @@ public class DataHandling {
 		}
 
 		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
+		public ParseTree postParseRewrite(ParseTree ast, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+			Target t = ast.getTarget();
 
-		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env,
-				Set<Class<? extends Environment.EnvironmentImpl>> envs,
-				List<ParseTree> children,
-				FileOptions fileOptions)
-				throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() > 2) {
-				throw new ConfigCompileException("Unexpected arguments to " + getName(), t);
+			// Check arguments size.
+			if(ast.numberOfChildren() < 1 || ast.numberOfChildren() > 2) {
+				exceptions.add(new ConfigCompileException(
+						"Incorrect number of arguments passed to " + this.getName(), t));
+				return null;
 			}
-			String dir = children.get(0).getData().val();
+
+			// Require and get hard-coded arguments.
+			Mixed dirNode = ast.getChildAt(0).getData();
+			boolean recurse = false;
+			boolean exception = false;
+			if(!(dirNode instanceof CString)) {
+				exceptions.add(new ConfigCompileException(
+						"Directory argument passed to " + this.getName() + " must be a hard-coded string.", t));
+				exception = true;
+			}
+			if(ast.numberOfChildren() >= 2) {
+				Mixed recurseNode = ast.getChildAt(1).getData();
+				if(!(recurseNode instanceof CBoolean)) {
+					exceptions.add(new ConfigCompileException(
+							"Recurse argument passed to " + this.getName() + " must be a hard-coded boolean.", t));
+					exception = true;
+				} else {
+					recurse = ((CBoolean) recurseNode).getBoolean();
+				}
+			}
+			if(exception) {
+				return null;
+			}
+
+			// Require directory to resolve to an actual directory.
+			String dir = dirNode.val();
 			File file = Static.GetFileFromArgument(dir, env, t, null);
 			if(!file.isDirectory()) {
-				throw new ConfigCompileException("Path passed to " + getName()
-						+ " must be a directory which exists.", t);
-			}
-			boolean recurse = false;
-			if(children.size() > 1) {
-				recurse = ArgumentValidation.getBooleanObject(children.get(1).getData(), t);
+				exceptions.add(new ConfigCompileException(
+						"Directory path passed to " + this.getName() + " must be a directory which exists.", t));
+				return null;
 			}
 
-			ParseTree g = new ParseTree(new CFunction("g", t), fileOptions);
+			// Collect all .ms files that should be included.
 			List<File> msFiles = new ArrayList<>();
-
 			if(recurse) {
 				try {
 					FileUtil.recursiveFind(file, ((f) -> {
@@ -1963,7 +1983,8 @@ public class DataHandling {
 						}
 					}));
 				} catch (IOException ex) {
-					throw new ConfigCompileException(ex.getMessage(), t, ex);
+					exceptions.add(new ConfigCompileException(ex.getMessage(), t, ex));
+					exception = true;
 				}
 			} else {
 				for(File f : file.listFiles()) {
@@ -1972,18 +1993,19 @@ public class DataHandling {
 					}
 				}
 			}
-
-			for(File f : msFiles) {
-				ParseTree include = new ParseTree(new CFunction("include", t), fileOptions);
-				include.addChild(new ParseTree(new CString(f.getAbsolutePath(), t), fileOptions));
-				g.addChild(include);
+			if(exception) {
+				return null;
 			}
 
+			// Convert this function to g(include(...), include(...), ...).
+			ParseTree g = new ParseTree(new CFunction("g", t), ast.getFileOptions());
+			for(File f : msFiles) {
+				ParseTree include = new ParseTree(new CFunction(INCLUDE, t), ast.getFileOptions());
+				include.addChild(new ParseTree(new CString(f.getAbsolutePath(), t), ast.getFileOptions()));
+				g.addChild(include);
+			}
 			return g;
 		}
-
-
-
 	}
 
 	@api
