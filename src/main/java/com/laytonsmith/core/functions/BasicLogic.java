@@ -10,7 +10,6 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.compiler.analysis.Scope;
@@ -97,7 +96,7 @@ public class BasicLogic {
 			if(referenceMatch) {
 				return CBoolean.TRUE;
 			}
-			if(Static.anyNulls(args)) {
+			if(ArgumentValidation.anyNulls(args)) {
 				boolean equals = true;
 				for(Mixed c : args) {
 					if(!(c instanceof CNull)) {
@@ -106,7 +105,7 @@ public class BasicLogic {
 				}
 				return CBoolean.get(equals);
 			}
-			if(Static.anyBooleans(args)) {
+			if(ArgumentValidation.anyBooleans(args)) {
 				boolean equals = true;
 				for(int i = 1; i < args.length; i++) {
 					boolean arg1 = ArgumentValidation.getBoolean(args[i - 1], t);
@@ -140,8 +139,8 @@ public class BasicLogic {
 					if(!ArgumentValidation.isNumber(args[i])) {
 						return CBoolean.FALSE;
 					}
-					double arg1 = Static.getNumber(args[i - 1], t);
-					double arg2 = Static.getNumber(args[i], t);
+					double arg1 = ArgumentValidation.getNumber(args[i - 1], t);
+					double arg2 = ArgumentValidation.getNumber(args[i], t);
 					if(arg1 != arg2) {
 						return CBoolean.FALSE;
 					}
@@ -485,7 +484,7 @@ public class BasicLogic {
 			if(args.length <= 1) {
 				throw new CREInsufficientArgumentsException("At least two arguments must be passed to equals_ic", t);
 			}
-			if(Static.anyBooleans(args)) {
+			if(ArgumentValidation.anyBooleans(args)) {
 				boolean equals = true;
 				for(int i = 1; i < args.length; i++) {
 					boolean arg1 = ArgumentValidation.getBoolean(args[i - 1], t);
@@ -520,8 +519,8 @@ public class BasicLogic {
 					if(!ArgumentValidation.isNumber(args[i])) {
 						return CBoolean.FALSE;
 					}
-					double arg1 = Static.getNumber(args[i - 1], t);
-					double arg2 = Static.getNumber(args[i], t);
+					double arg1 = ArgumentValidation.getNumber(args[i - 1], t);
+					double arg2 = ArgumentValidation.getNumber(args[i], t);
 					if(arg1 != arg2) {
 						return CBoolean.FALSE;
 					}
@@ -801,8 +800,8 @@ public class BasicLogic {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			double arg1 = Static.getNumber(args[0], t);
-			double arg2 = Static.getNumber(args[1], t);
+			double arg1 = ArgumentValidation.getNumber(args[0], t);
+			double arg2 = ArgumentValidation.getNumber(args[1], t);
 			return CBoolean.get(arg1 < arg2);
 		}
 
@@ -879,8 +878,8 @@ public class BasicLogic {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			double arg1 = Static.getNumber(args[0], t);
-			double arg2 = Static.getNumber(args[1], t);
+			double arg1 = ArgumentValidation.getNumber(args[0], t);
+			double arg2 = ArgumentValidation.getNumber(args[1], t);
 			return CBoolean.get(arg1 > arg2);
 		}
 
@@ -957,8 +956,8 @@ public class BasicLogic {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			double arg1 = Static.getNumber(args[0], t);
-			double arg2 = Static.getNumber(args[1], t);
+			double arg1 = ArgumentValidation.getNumber(args[0], t);
+			double arg2 = ArgumentValidation.getNumber(args[1], t);
 			return CBoolean.get(arg1 <= arg2);
 		}
 
@@ -1036,8 +1035,8 @@ public class BasicLogic {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			double arg1 = Static.getNumber(args[0], t);
-			double arg2 = Static.getNumber(args[1], t);
+			double arg1 = ArgumentValidation.getNumber(args[0], t);
+			double arg2 = ArgumentValidation.getNumber(args[1], t);
 			return CBoolean.get(arg1 >= arg2);
 		}
 
@@ -2079,9 +2078,9 @@ public class BasicLogic {
 			if(args.length < 2) {
 				throw new CREFormatException(this.getName() + " expects at least 2 arguments.", t);
 			}
-			long val = Static.getInt(args[0], t);
+			long val = ArgumentValidation.getInt(args[0], t);
 			for(int i = 1; i < args.length; i++) {
-				val = val & Static.getInt(args[i], t);
+				val = val & ArgumentValidation.getInt(args[i], t);
 			}
 			return new CInt(val, t);
 		}
@@ -2167,9 +2166,9 @@ public class BasicLogic {
 			if(args.length < 2) {
 				throw new CREFormatException(this.getName() + " expects at least 2 arguments.", t);
 			}
-			long val = Static.getInt(args[0], t);
+			long val = ArgumentValidation.getInt(args[0], t);
 			for(int i = 1; i < args.length; i++) {
-				val = val | Static.getInt(args[i], t);
+				val = val | ArgumentValidation.getInt(args[i], t);
 			}
 			return new CInt(val, t);
 		}
@@ -2257,9 +2256,9 @@ public class BasicLogic {
 			if(args.length < 2) {
 				throw new CREFormatException(this.getName() + " expects at least 2 arguments.", t);
 			}
-			long val = Static.getInt(args[0], t);
+			long val = ArgumentValidation.getInt(args[0], t);
 			for(int i = 1; i < args.length; i++) {
-				val = val ^ Static.getInt(args[i], t);
+				val = val ^ ArgumentValidation.getInt(args[i], t);
 			}
 			return new CInt(val, t);
 		}
@@ -2343,7 +2342,7 @@ public class BasicLogic {
 			if(args.length != 1) {
 				throw new CREFormatException(this.getName() + " expects 1 argument.", t);
 			}
-			return new CInt(~Static.getInt(args[0], t), t);
+			return new CInt(~ArgumentValidation.getInt(args[0], t), t);
 		}
 
 		@Override
@@ -2413,8 +2412,8 @@ public class BasicLogic {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			long value = Static.getInt(args[0], t);
-			long toShift = Static.getInt(args[1], t);
+			long value = ArgumentValidation.getInt(args[0], t);
+			long toShift = ArgumentValidation.getInt(args[1], t);
 			return new CInt(value << toShift, t);
 		}
 
@@ -2486,8 +2485,8 @@ public class BasicLogic {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			long value = Static.getInt(args[0], t);
-			long toShift = Static.getInt(args[1], t);
+			long value = ArgumentValidation.getInt(args[0], t);
+			long toShift = ArgumentValidation.getInt(args[1], t);
 			return new CInt(value >> toShift, t);
 		}
 
@@ -2561,8 +2560,8 @@ public class BasicLogic {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			long value = Static.getInt(args[0], t);
-			long toShift = Static.getInt(args[1], t);
+			long value = ArgumentValidation.getInt(args[0], t);
+			long toShift = ArgumentValidation.getInt(args[1], t);
 			return new CInt(value >>> toShift, t);
 		}
 

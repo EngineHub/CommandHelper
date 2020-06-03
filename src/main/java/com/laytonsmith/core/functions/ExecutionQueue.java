@@ -2,8 +2,8 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CVoid;
@@ -424,7 +424,7 @@ public class ExecutionQueue {
 			if(args.length == 2) {
 				queue = Construct.nval(args[1]);
 			}
-			final long delay = Static.getInt(args[0], t);
+			final long delay = ArgumentValidation.getInt(args[0], t);
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(environment.getEnv(GlobalEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override
@@ -486,7 +486,7 @@ public class ExecutionQueue {
 			if(args.length == 2) {
 				queue = Construct.nval(args[1]);
 			}
-			final long delay = Static.getInt(args[0], t);
+			final long delay = ArgumentValidation.getInt(args[0], t);
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(environment.getEnv(GlobalEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override

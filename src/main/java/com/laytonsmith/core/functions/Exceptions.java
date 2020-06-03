@@ -12,6 +12,7 @@ import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
@@ -20,7 +21,6 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
@@ -331,7 +331,7 @@ public class Exceptions {
 				try {
 					// Exception type
 					// We need to reverse the excpetion into an object
-					throw ObjectGenerator.GetGenerator().exception(Static.getArray(args[0], t), t, env);
+					throw ObjectGenerator.GetGenerator().exception(ArgumentValidation.getArray(args[0], t), t, env);
 				} catch (ClassNotFoundException ex) {
 					throw new CRECastException(ex.getMessage(), t);
 				}
@@ -353,7 +353,7 @@ public class Exceptions {
 				arguments.add(t);
 				if(args.length == 3) {
 					classes.add(Throwable.class);
-					arguments.add(new CRECausedByWrapper(Static.getArray(args[2], t)));
+					arguments.add(new CRECausedByWrapper(ArgumentValidation.getArray(args[2], t)));
 				}
 				CREThrowable throwable = (CREThrowable) ReflectionUtils.newInstance(c, classes.toArray(new Class[classes.size()]), arguments.toArray());
 				throw throwable;

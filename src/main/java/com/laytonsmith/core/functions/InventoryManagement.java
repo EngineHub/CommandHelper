@@ -19,6 +19,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -134,7 +135,7 @@ public class InventoryManagement {
 				if(args[1] instanceof CNull) {
 					index = null;
 				} else {
-					index = Static.getInt32(args[1], t);
+					index = ArgumentValidation.getInt32(args[1], t);
 				}
 				all = false;
 				m = Static.GetPlayer(args[0], t);
@@ -493,7 +494,7 @@ public class InventoryManagement {
 				if(args[1] instanceof CNull) {
 					m.setItemInHand(is);
 				} else {
-					setInvSlot(m.getInventory(), Static.getInt32(args[1], t), is);
+					setInvSlot(m.getInventory(), ArgumentValidation.getInt32(args[1], t), is);
 				}
 				return CVoid.VOID;
 			} else if(args.length == 1) {
@@ -928,7 +929,7 @@ public class InventoryManagement {
 			if(args[itemOffset].isInstanceOf(CArray.TYPE)) {
 				is = ObjectGenerator.GetGenerator().item(args[itemOffset], t);
 			} else if(args.length > 1) {
-				is = Static.ParseItemNotation(null, args[itemOffset].val(), Static.getInt32(args[itemOffset + 1], t), t);
+				is = Static.ParseItemNotation(null, args[itemOffset].val(), ArgumentValidation.getInt32(args[itemOffset + 1], t), t);
 				if(args.length > itemOffset + 2) {
 					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[itemOffset + 2], is.getType(), t));
 				}
@@ -1040,7 +1041,7 @@ public class InventoryManagement {
 				ca = (CArray) args[itemOffset];
 				is = ObjectGenerator.GetGenerator().item(ca, t);
 			} else {
-				is = Static.ParseItemNotation(null, args[itemOffset].val(), Static.getInt32(args[itemOffset + 1], t), t);
+				is = Static.ParseItemNotation(null, args[itemOffset].val(), ArgumentValidation.getInt32(args[itemOffset + 1], t), t);
 			}
 
 			int total = is.getAmount();
@@ -1186,7 +1187,7 @@ public class InventoryManagement {
 			if(args[itemOffset].isInstanceOf(CArray.TYPE)) {
 				is = ObjectGenerator.GetGenerator().item(args[itemOffset], t);
 			} else {
-				is = Static.ParseItemNotation(null, args[itemOffset].val(), Static.getInt32(args[itemOffset + 1], t), t);
+				is = Static.ParseItemNotation(null, args[itemOffset].val(), ArgumentValidation.getInt32(args[itemOffset + 1], t), t);
 				if(args.length > itemOffset + 2) {
 					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[itemOffset + 2], is.getType(), t));
 				}
@@ -1295,7 +1296,7 @@ public class InventoryManagement {
 				ca = (CArray) args[itemOffset];
 				is = ObjectGenerator.GetGenerator().item(ca, t);
 			} else {
-				is = Static.ParseItemNotation(null, args[itemOffset].val(), Static.getInt32(args[itemOffset + 1], t), t);
+				is = Static.ParseItemNotation(null, args[itemOffset].val(), ArgumentValidation.getInt32(args[itemOffset + 1], t), t);
 			}
 
 			int total = is.getAmount();
@@ -1539,7 +1540,7 @@ public class InventoryManagement {
 				if(args[1] instanceof CNull) {
 					throw new CRERangeException("Slot index must be 0-26", t);
 				} else {
-					index = Static.getInt32(args[1], t);
+					index = ArgumentValidation.getInt32(args[1], t);
 				}
 
 				all = false;
@@ -1603,7 +1604,7 @@ public class InventoryManagement {
 			}
 
 			MCInventory inv = GetInventory(args[0], w, t);
-			int slot = Static.getInt32(args[1], t);
+			int slot = ArgumentValidation.getInt32(args[1], t);
 			try {
 				MCItemStack is = inv.getItem(slot);
 				return ObjectGenerator.GetGenerator().item(is, t);
@@ -1666,7 +1667,7 @@ public class InventoryManagement {
 			}
 
 			MCInventory inv = GetInventory(args[0], w, t);
-			int slot = Static.getInt32(args[1], t);
+			int slot = ArgumentValidation.getInt32(args[1], t);
 			MCItemStack is = ObjectGenerator.GetGenerator().item(args[2], t);
 			try {
 				inv.setItem(slot, is);
@@ -1974,7 +1975,7 @@ public class InventoryManagement {
 			Integer index = -1;
 
 			if(args.length == 2) {
-				index = Static.getInt32(args[1], t);
+				index = ArgumentValidation.getInt32(args[1], t);
 
 				if(index < 0 || index >= size) {
 					throw new CRERangeException("Slot index must be 0-" + (size - 1), t);
@@ -2120,7 +2121,7 @@ public class InventoryManagement {
 			if(args.length == 2) {
 				is = ObjectGenerator.GetGenerator().item(args[1], t);
 			} else {
-				is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
+				is = Static.ParseItemNotation(this.getName(), args[1].val(), ArgumentValidation.getInt32(args[2], t), t);
 				if(args.length == 4) {
 					is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(args[3], is.getType(), t));
 				}
@@ -2211,7 +2212,7 @@ public class InventoryManagement {
 				ca = (CArray) args[1];
 				is = ObjectGenerator.GetGenerator().item(ca, t);
 			} else {
-				is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
+				is = Static.ParseItemNotation(this.getName(), args[1].val(), ArgumentValidation.getInt32(args[2], t), t);
 			}
 
 			int total = is.getAmount();
@@ -2693,7 +2694,7 @@ public class InventoryManagement {
 			String title = null;
 			if(args.length > 1) {
 				if(args[1].isInstanceOf(CNumber.TYPE)) {
-					size = Static.getInt32(args[1], t);
+					size = ArgumentValidation.getInt32(args[1], t);
 					if(size < 9) {
 						size = 9; // minimum
 					} else {

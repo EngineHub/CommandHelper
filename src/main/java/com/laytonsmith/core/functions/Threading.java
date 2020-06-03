@@ -12,7 +12,6 @@ import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -226,7 +225,7 @@ public class Threading {
 
 		@Override
 		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
-			final CClosure closure = Static.getObject(args[0], t, CClosure.class);
+			final CClosure closure = ArgumentValidation.getObject(args[0], t, CClosure.class);
 			StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
 				@Override
@@ -289,7 +288,7 @@ public class Threading {
 
 		@Override
 		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
-			final CClosure closure = Static.getObject(args[0], t, CClosure.class);
+			final CClosure closure = ArgumentValidation.getObject(args[0], t, CClosure.class);
 			Object ret;
 			try {
 				ret = StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {

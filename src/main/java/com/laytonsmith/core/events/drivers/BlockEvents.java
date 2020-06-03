@@ -21,6 +21,7 @@ import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
 import com.laytonsmith.abstraction.events.MCNotePlayEvent;
 import com.laytonsmith.abstraction.events.MCSignChangeEvent;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -295,7 +296,7 @@ public class BlockEvents {
 				if(value.isInstanceOf(CArray.TYPE)) {
 					CArray arr = (CArray) value;
 					for(int i = 0; i < arr.size(); i++) {
-						CArray item = Static.getArray(arr.get(i, value.getTarget()), value.getTarget());
+						CArray item = ArgumentValidation.getArray(arr.get(i, value.getTarget()), value.getTarget());
 						MCItemStack stack = ObjectGenerator.GetGenerator().item(item, value.getTarget());
 						if(!stack.isEmpty()) {
 							drops.add(stack);

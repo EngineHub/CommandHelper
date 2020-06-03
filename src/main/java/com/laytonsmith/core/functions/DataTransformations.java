@@ -66,7 +66,7 @@ public class DataTransformations {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray ca = Static.getArray(args[0], t);
+			CArray ca = ArgumentValidation.getArray(args[0], t);
 			try {
 				return new CString(Construct.json_encode(ca, t), t);
 			} catch (MarshalException ex) {
@@ -181,7 +181,7 @@ public class DataTransformations {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray ca = Static.getArray(args[0], t);
+			CArray ca = ArgumentValidation.getArray(args[0], t);
 			boolean prettyPrint = false;
 			if(args.length == 2) {
 				prettyPrint = ArgumentValidation.getBoolean(args[1], t);
@@ -300,7 +300,7 @@ public class DataTransformations {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Properties props = new Properties();
-			CArray arr = Static.getArray(args[0], t);
+			CArray arr = ArgumentValidation.getArray(args[0], t);
 			String comment = null;
 			if(args.length == 2) {
 				comment = args[1].val();

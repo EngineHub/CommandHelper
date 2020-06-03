@@ -1255,7 +1255,7 @@ public class DataHandling {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			boolean b = true;
 			try {
-				Static.getNumber(args[0], t);
+				ArgumentValidation.getNumber(args[0], t);
 			} catch (ConfigRuntimeException e) {
 				b = false;
 			}
@@ -1329,7 +1329,7 @@ public class DataHandling {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			double d;
 			try {
-				d = Static.getDouble(args[0], t);
+				d = ArgumentValidation.getDouble(args[0], t);
 			} catch (ConfigRuntimeException e) {
 				return CBoolean.FALSE;
 			}
@@ -3033,7 +3033,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			return new CDouble(Static.getDouble(args[0], t), t);
+			return new CDouble(ArgumentValidation.getDouble(args[0], t), t);
 		}
 
 		@Override
@@ -3148,11 +3148,11 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			int radix = Static.getInt32(args[1], t);
+			int radix = ArgumentValidation.getInt32(args[1], t);
 			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
 				throw new CRERangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
 			}
-			return new CString(Long.toString(Static.getInt(args[0], t), radix), t);
+			return new CString(Long.toString(ArgumentValidation.getInt(args[0], t), radix), t);
 		}
 
 		@Override
@@ -3221,7 +3221,7 @@ public class DataHandling {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String value = args[0].val();
-			int radix = Static.getInt32(args[1], t);
+			int radix = ArgumentValidation.getInt32(args[1], t);
 			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
 				throw new CRERangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
 			}

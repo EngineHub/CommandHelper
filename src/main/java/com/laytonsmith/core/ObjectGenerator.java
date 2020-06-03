@@ -170,51 +170,51 @@ public class ObjectGenerator {
 		if(!array.inAssociativeMode()) {
 			if(array.size() == 3) {
 				//Just the xyz, with default yaw and pitch, and given world
-				x = Static.getNumber(array.get(0, t), t);
-				y = Static.getNumber(array.get(1, t), t);
-				z = Static.getNumber(array.get(2, t), t);
+				x = ArgumentValidation.getNumber(array.get(0, t), t);
+				y = ArgumentValidation.getNumber(array.get(1, t), t);
+				z = ArgumentValidation.getNumber(array.get(2, t), t);
 			} else if(array.size() == 4) {
 				//x, y, z, world
-				x = Static.getNumber(array.get(0, t), t);
-				y = Static.getNumber(array.get(1, t), t);
-				z = Static.getNumber(array.get(2, t), t);
+				x = ArgumentValidation.getNumber(array.get(0, t), t);
+				y = ArgumentValidation.getNumber(array.get(1, t), t);
+				z = ArgumentValidation.getNumber(array.get(2, t), t);
 				world = Static.getServer().getWorld(array.get(3, t).val());
 			} else if(array.size() == 5) {
 				//x, y, z, yaw, pitch, with given world
-				x = Static.getNumber(array.get(0, t), t);
-				y = Static.getNumber(array.get(1, t), t);
-				z = Static.getNumber(array.get(2, t), t);
-				yaw = (float) Static.getNumber(array.get(3, t), t);
-				pitch = (float) Static.getNumber(array.get(4, t), t);
+				x = ArgumentValidation.getNumber(array.get(0, t), t);
+				y = ArgumentValidation.getNumber(array.get(1, t), t);
+				z = ArgumentValidation.getNumber(array.get(2, t), t);
+				yaw = (float) ArgumentValidation.getNumber(array.get(3, t), t);
+				pitch = (float) ArgumentValidation.getNumber(array.get(4, t), t);
 			} else if(array.size() == 6) {
 				//All have been given
-				x = Static.getNumber(array.get(0, t), t);
-				y = Static.getNumber(array.get(1, t), t);
-				z = Static.getNumber(array.get(2, t), t);
+				x = ArgumentValidation.getNumber(array.get(0, t), t);
+				y = ArgumentValidation.getNumber(array.get(1, t), t);
+				z = ArgumentValidation.getNumber(array.get(2, t), t);
 				world = Static.getServer().getWorld(array.get(3, t).val());
-				yaw = (float) Static.getNumber(array.get(4, t), t);
-				pitch = (float) Static.getNumber(array.get(5, t), t);
+				yaw = (float) ArgumentValidation.getNumber(array.get(4, t), t);
+				pitch = (float) ArgumentValidation.getNumber(array.get(5, t), t);
 			} else {
 				throw new CREFormatException("Expecting a Location array, but the array did not meet the format specifications", t);
 			}
 		} else {
 			if(array.containsKey("x")) {
-				x = Static.getNumber(array.get("x", t), t);
+				x = ArgumentValidation.getNumber(array.get("x", t), t);
 			}
 			if(array.containsKey("y")) {
-				y = Static.getNumber(array.get("y", t), t);
+				y = ArgumentValidation.getNumber(array.get("y", t), t);
 			}
 			if(array.containsKey("z")) {
-				z = Static.getNumber(array.get("z", t), t);
+				z = ArgumentValidation.getNumber(array.get("z", t), t);
 			}
 			if(array.containsKey("world")) {
 				world = Static.getServer().getWorld(array.get("world", t).val());
 			}
 			if(array.containsKey("yaw")) {
-				yaw = (float) Static.getDouble(array.get("yaw", t), t);
+				yaw = (float) ArgumentValidation.getDouble(array.get("yaw", t), t);
 			}
 			if(array.containsKey("pitch")) {
-				pitch = (float) Static.getDouble(array.get("pitch", t), t);
+				pitch = (float) ArgumentValidation.getDouble(array.get("pitch", t), t);
 			}
 		}
 		//If world is still null at this point, it's an error
@@ -273,7 +273,7 @@ public class ObjectGenerator {
 		int qty = 1;
 
 		if(item.containsKey("qty")) {
-			qty = Static.getInt32(item.get("qty", t), t);
+			qty = ArgumentValidation.getInt32(item.get("qty", t), t);
 			if(qty <= 0) {
 				return EmptyItem();
 			}
@@ -284,7 +284,7 @@ public class ObjectGenerator {
 		if(legacy) {
 			// Do legacy item conversion
 			if(item.containsKey("data")) {
-				data = Static.getInt32(item.get("data", t), t);
+				data = ArgumentValidation.getInt32(item.get("data", t), t);
 			}
 			MCMaterial material;
 			if(item.containsKey("name")) {
@@ -310,7 +310,7 @@ public class ObjectGenerator {
 					}
 				}
 				mat = type.val();
-				int id = Static.getInt32(type, t);
+				int id = ArgumentValidation.getInt32(type, t);
 				if(id == 358 || id == 373) {
 					// special map handling, ignore data here
 					material = StaticLayer.GetMaterialFromLegacy(id, 0);
@@ -711,13 +711,13 @@ public class ObjectGenerator {
 				if(ma.containsKey("repair")) {
 					Mixed r = ma.get("repair", t);
 					if(!(r instanceof CNull)) {
-						meta.setRepairCost(Static.getInt32(r, t));
+						meta.setRepairCost(ArgumentValidation.getInt32(r, t));
 					}
 				}
 				if(ma.containsKey("model")) {
 					Mixed m = ma.get("model", t);
 					if(!(m instanceof CNull)) {
-						meta.setCustomModelData(Static.getInt32(m, t));
+						meta.setCustomModelData(ArgumentValidation.getInt32(m, t));
 					}
 				}
 				if(ma.containsKey("flags")) {
@@ -744,7 +744,7 @@ public class ObjectGenerator {
 						}
 						List<MCAttributeModifier> modifierList = new ArrayList<>();
 						for(String key : modifierArray.stringKeySet()) {
-							modifierList.add(attributeModifier(Static.getArray(modifierArray.get(key, t), t), t));
+							modifierList.add(attributeModifier(ArgumentValidation.getArray(modifierArray.get(key, t), t), t));
 						}
 						meta.setAttributeModifiers(modifierList);
 					} else {
@@ -755,7 +755,7 @@ public class ObjectGenerator {
 				// Damageable items only
 				if(mat.getMaxDurability() > 0) {
 					if(ma.containsKey("damage")) {
-						meta.setDamage(Static.getInt32(ma.get("damage", t), t));
+						meta.setDamage(ArgumentValidation.getInt32(ma.get("damage", t), t));
 					}
 					if(ma.containsKey("unbreakable")) {
 						meta.setUnbreakable(ArgumentValidation.getBoolean(ma.get("unbreakable", t), t));
@@ -839,7 +839,7 @@ public class ObjectGenerator {
 							mccs.setSpawnedType(type);
 						}
 						if(ma.containsKey("delay")) {
-							int delay = Static.getInt32(ma.get("delay", t), t);
+							int delay = ArgumentValidation.getInt32(ma.get("delay", t), t);
 							mccs.setDelay(delay);
 						}
 						bsm.setBlockState(bs);
@@ -921,7 +921,7 @@ public class ObjectGenerator {
 						if(construct.isInstanceOf(CArray.TYPE)) {
 							CArray firework = (CArray) construct;
 							if(firework.containsKey("strength")) {
-								fmeta.setStrength(Static.getInt32(firework.get("strength", t), t));
+								fmeta.setStrength(ArgumentValidation.getInt32(firework.get("strength", t), t));
 							}
 							if(firework.containsKey("effects")) {
 								// New style (supports multiple effects)
@@ -1063,7 +1063,7 @@ public class ObjectGenerator {
 					if(ma.containsKey("mapid")) {
 						Mixed cid = ma.get("mapid", t);
 						if(!(cid instanceof CNull)) {
-							((MCMapMeta) meta).setMapId(Static.getInt32(cid, t));
+							((MCMapMeta) meta).setMapId(ArgumentValidation.getInt32(cid, t));
 						}
 					}
 				} else if(meta instanceof MCTropicalFishBucketMeta) {
@@ -1093,7 +1093,7 @@ public class ObjectGenerator {
 						Mixed value = ma.get("projectiles", t);
 						if(!(value instanceof CNull)) {
 							List<MCItemStack> projectiles = new ArrayList<>();
-							for(Mixed m : Static.getArray(value, t).asList()) {
+							for(Mixed m : ArgumentValidation.getArray(value, t).asList()) {
 								projectiles.add(item(m, t));
 							}
 							((MCCrossbowMeta) meta).setChargedProjectiles(projectiles);
@@ -1146,25 +1146,25 @@ public class ObjectGenerator {
 		int green;
 		int blue;
 		if(color.containsKey("r")) {
-			red = Static.getInt32(color.get("r", t), t);
+			red = ArgumentValidation.getInt32(color.get("r", t), t);
 		} else if(color.containsKey("red")) {
-			red = Static.getInt32(color.get("red", t), t);
+			red = ArgumentValidation.getInt32(color.get("red", t), t);
 		} else {
-			red = Static.getInt32(color.get(0, t), t);
+			red = ArgumentValidation.getInt32(color.get(0, t), t);
 		}
 		if(color.containsKey("g")) {
-			green = Static.getInt32(color.get("g", t), t);
+			green = ArgumentValidation.getInt32(color.get("g", t), t);
 		} else if(color.containsKey("green")) {
-			green = Static.getInt32(color.get("green", t), t);
+			green = ArgumentValidation.getInt32(color.get("green", t), t);
 		} else {
-			green = Static.getInt32(color.get(1, t), t);
+			green = ArgumentValidation.getInt32(color.get(1, t), t);
 		}
 		if(color.containsKey("b")) {
-			blue = Static.getInt32(color.get("b", t), t);
+			blue = ArgumentValidation.getInt32(color.get("b", t), t);
 		} else if(color.containsKey("blue")) {
-			blue = Static.getInt32(color.get("blue", t), t);
+			blue = ArgumentValidation.getInt32(color.get("blue", t), t);
 		} else {
-			blue = Static.getInt32(color.get(2, t), t);
+			blue = ArgumentValidation.getInt32(color.get(2, t), t);
 		}
 		try {
 			return StaticLayer.GetConvertor().GetColor(red, green, blue);
@@ -1241,24 +1241,24 @@ public class ObjectGenerator {
 
 			if(!va.isAssociative()) {
 				if(va.size() == 3) { // 3rd dimension vector
-					x = Static.getNumber(va.get(0, t), t);
-					y = Static.getNumber(va.get(1, t), t);
-					z = Static.getNumber(va.get(2, t), t);
+					x = ArgumentValidation.getNumber(va.get(0, t), t);
+					y = ArgumentValidation.getNumber(va.get(1, t), t);
+					z = ArgumentValidation.getNumber(va.get(2, t), t);
 				} else if(va.size() == 2) { // 2nd dimension vector
-					x = Static.getNumber(va.get(0, t), t);
-					y = Static.getNumber(va.get(1, t), t);
+					x = ArgumentValidation.getNumber(va.get(0, t), t);
+					y = ArgumentValidation.getNumber(va.get(1, t), t);
 				} else if(va.size() == 1) {
-					x = Static.getNumber(va.get(0, t), t);
+					x = ArgumentValidation.getNumber(va.get(0, t), t);
 				}
 			} else {
 				if(va.containsKey("x")) {
-					x = Static.getNumber(va.get("x", t), t);
+					x = ArgumentValidation.getNumber(va.get("x", t), t);
 				}
 				if(va.containsKey("y")) {
-					y = Static.getNumber(va.get("y", t), t);
+					y = ArgumentValidation.getNumber(va.get("y", t), t);
 				}
 				if(va.containsKey("z")) {
-					z = Static.getNumber(va.get("z", t), t);
+					z = ArgumentValidation.getNumber(va.get("z", t), t);
 				}
 			}
 
@@ -1292,12 +1292,12 @@ public class ObjectGenerator {
 			if(enchantArray.isAssociative()) {
 				etype = StaticLayer.GetEnchantmentByName(key);
 				if(etype != null && value.isInstanceOf(CInt.TYPE)) {
-					ret.put(etype, Static.getInt32(value, t));
+					ret.put(etype, ArgumentValidation.getInt32(value, t));
 					continue;
 				}
 			}
 
-			CArray ea = Static.getArray(value, t);
+			CArray ea = ArgumentValidation.getArray(value, t);
 			if(etype == null) {
 				String setype = ea.get("etype", t).val();
 				etype = StaticLayer.GetEnchantmentByName(setype);
@@ -1310,7 +1310,7 @@ public class ObjectGenerator {
 					}
 				}
 			}
-			elevel = Static.getInt32(ea.get("elevel", t), t);
+			elevel = ArgumentValidation.getInt32(ea.get("elevel", t), t);
 			ret.put(etype, elevel);
 		}
 		return ret;
@@ -1357,7 +1357,7 @@ public class ObjectGenerator {
 			throw new CREFormatException("Invalid operation name: " + m.get("operation", t), t);
 		}
 
-		amount = Static.getDouble(m.get("amount", t), t);
+		amount = ArgumentValidation.getDouble(m.get("amount", t), t);
 
 		if(m.containsKey("name")) {
 			name = m.get("name", t).val();
@@ -1416,7 +1416,7 @@ public class ObjectGenerator {
 					if(ea.isAssociative()) {
 						type = MCPotionEffectType.valueOf(key.toUpperCase());
 					} else if(effect.containsKey("id")) {
-						type = MCPotionEffectType.getById(Static.getInt32(effect.get("id", t), t));
+						type = MCPotionEffectType.getById(ArgumentValidation.getInt32(effect.get("id", t), t));
 					} else {
 						throw new CREFormatException("No potion type was given.", t);
 					}
@@ -1425,10 +1425,10 @@ public class ObjectGenerator {
 				}
 
 				if(effect.containsKey("strength")) {
-					strength = Static.getInt32(effect.get("strength", t), t);
+					strength = ArgumentValidation.getInt32(effect.get("strength", t), t);
 				}
 				if(effect.containsKey("seconds")) {
-					seconds = Static.getDouble(effect.get("seconds", t), t);
+					seconds = ArgumentValidation.getDouble(effect.get("seconds", t), t);
 					if(seconds < 0.0) {
 						throw new CRERangeException("Seconds cannot be less than 0", t);
 					} else if(seconds * 20 > Integer.MAX_VALUE) {
@@ -1711,7 +1711,7 @@ public class ObjectGenerator {
 
 		switch(recipeType) {
 			case SHAPED:
-				CArray shaped = Static.getArray(recipe.get("shape", t), t);
+				CArray shaped = ArgumentValidation.getArray(recipe.get("shape", t), t);
 				String[] shape = new String[(int) shaped.size()];
 				if(shaped.size() < 1 || shaped.size() > 3 || shaped.inAssociativeMode()) {
 					throw new CREFormatException("Shape array is invalid.", t);
@@ -1727,7 +1727,7 @@ public class ObjectGenerator {
 				}
 				((MCShapedRecipe) ret).setShape(shape);
 
-				CArray shapedIngredients = Static.getArray(recipe.get("ingredients", t), t);
+				CArray shapedIngredients = ArgumentValidation.getArray(recipe.get("ingredients", t), t);
 				if(!shapedIngredients.inAssociativeMode()) {
 					throw new CREIllegalArgumentException("Ingredients array is invalid.", t);
 				}
@@ -1762,7 +1762,7 @@ public class ObjectGenerator {
 				return ret;
 
 			case SHAPELESS:
-				CArray ingredients = Static.getArray(recipe.get("ingredients", t), t);
+				CArray ingredients = ArgumentValidation.getArray(recipe.get("ingredients", t), t);
 				if(ingredients.inAssociativeMode()) {
 					throw new CREIllegalArgumentException("Ingredients array is invalid.", t);
 				}
@@ -1822,10 +1822,10 @@ public class ObjectGenerator {
 					((MCCookingRecipe) ret).setInput(mat);
 				}
 				if(recipe.containsKey("experience")) {
-					((MCCookingRecipe) ret).setExperience(Static.getDouble32(recipe.get("experience", t), t));
+					((MCCookingRecipe) ret).setExperience(ArgumentValidation.getDouble32(recipe.get("experience", t), t));
 				}
 				if(recipe.containsKey("cookingtime")) {
-					((MCCookingRecipe) ret).setCookingTime(Static.getInt32(recipe.get("cookingtime", t), t));
+					((MCCookingRecipe) ret).setCookingTime(ArgumentValidation.getInt32(recipe.get("cookingtime", t), t));
 				}
 				return ret;
 

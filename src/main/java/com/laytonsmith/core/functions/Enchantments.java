@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
@@ -193,7 +194,8 @@ public class Enchantments {
 			} else if(m == null) {
 				throw new CREPlayerOfflineException("Invalid sender!", t);
 			}
-			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull ? null : Static.getInt32(args[1 - offset], t));
+			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull
+					? null : ArgumentValidation.getInt32(args[1 - offset], t));
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[1 - offset], t);
 			}
@@ -299,7 +301,7 @@ public class Enchantments {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			}
-			MCItemStack is = p.getItemAt(args[offset] instanceof CNull ? null : Static.getInt32(args[offset], t));
+			MCItemStack is = p.getItemAt(args[offset] instanceof CNull ? null : ArgumentValidation.getInt32(args[offset], t));
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[offset], t);
 			}
@@ -374,7 +376,7 @@ public class Enchantments {
 				offset = 0;
 			}
 			Static.AssertPlayerNonNull(m, t);
-			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull ? null : Static.getInt32(args[1 - offset], t));
+			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull ? null : ArgumentValidation.getInt32(args[1 - offset], t));
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[1 - offset], t);
 			}
@@ -465,7 +467,7 @@ public class Enchantments {
 				Static.AssertPlayerNonNull(p, t);
 			}
 
-			MCItemStack is = p.getItemAt(args[offset] instanceof CNull ? null : Static.getInt32(args[offset], t));
+			MCItemStack is = p.getItemAt(args[offset] instanceof CNull ? null : ArgumentValidation.getInt32(args[offset], t));
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[offset], t);
 			}
@@ -541,7 +543,7 @@ public class Enchantments {
 					throw new CREPlayerOfflineException("Invalid sender!", t);
 				}
 			}
-			MCItemStack is = m.getItemAt(slot instanceof CNull ? null : Static.getInt32(slot, t));
+			MCItemStack is = m.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t));
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + slot, t);
 			}
@@ -625,7 +627,7 @@ public class Enchantments {
 				Static.AssertPlayerNonNull(p, t);
 				slot = args[0];
 			}
-			MCItemStack is = p.getItemAt(slot instanceof CNull ? null : Static.getInt32(slot, t));
+			MCItemStack is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t));
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + slot, t);
 			}

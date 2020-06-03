@@ -2,8 +2,8 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -66,8 +66,8 @@ public class Marquee {
 				marqueeName = null;
 			}
 			text = args[1 + offset].val();
-			stringWidth = Static.getInt32(args[2 + offset], t);
-			delayTime = Static.getInt32(args[3 + offset], t);
+			stringWidth = ArgumentValidation.getInt32(args[2 + offset], t);
+			delayTime = ArgumentValidation.getInt32(args[3 + offset], t);
 			if(args[4 + offset].isInstanceOf(CClosure.TYPE)) {
 				callback = ((CClosure) args[4 + offset]);
 			} else {

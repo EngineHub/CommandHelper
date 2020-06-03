@@ -76,9 +76,9 @@ public class Weather {
 				z = (int) java.lang.Math.floor(l.getZ());
 				w = l.getWorld();
 			} else {
-				x = (int) java.lang.Math.floor(Static.getNumber(args[0], t));
-				y = (int) java.lang.Math.floor(Static.getNumber(args[1], t));
-				z = (int) java.lang.Math.floor(Static.getNumber(args[2], t));
+				x = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[0], t));
+				y = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[1], t));
+				z = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[2], t));
 				safeIndex = 3;
 			}
 			if(args.length >= safeIndex + 1) {
@@ -144,14 +144,14 @@ public class Weather {
 				if(args[1].isInstanceOf(CString.TYPE)) {
 					w = Static.getServer().getWorld(args[1].val());
 				} else if(args[1].isInstanceOf(CInt.TYPE)) {
-					duration = Static.getInt32(args[1], t);
+					duration = ArgumentValidation.getInt32(args[1], t);
 				} else {
 					throw new CREFormatException("", t);
 				}
 			}
 			if(args.length == 3) {
 				w = Static.getServer().getWorld(args[1].val());
-				duration = Static.getInt32(args[2], t);
+				duration = ArgumentValidation.getInt32(args[2], t);
 			}
 			if(w == null) {
 				MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
@@ -238,7 +238,7 @@ public class Weather {
 				throw new CREInvalidWorldException("No existing world specified!", t);
 			}
 			if(args.length == 3) {
-				w.setThunderDuration(Static.getInt32(args[2], t));
+				w.setThunderDuration(ArgumentValidation.getInt32(args[2], t));
 			}
 			return CVoid.VOID;
 		}

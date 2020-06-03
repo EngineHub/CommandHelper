@@ -5,6 +5,7 @@ import com.laytonsmith.abstraction.MCPluginMeta;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.pluginmessages.MCMessenger;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -63,7 +64,7 @@ public class PluginMeta {
 				p = Static.GetPlayer(args[0], t);
 			}
 			String channel = args[offset].val();
-			CByteArray ba = Static.getByteArray(args[1 + offset], t);
+			CByteArray ba = ArgumentValidation.getByteArray(args[1 + offset], t);
 			Static.AssertPlayerNonNull(p, t);
 			try {
 				meta.fakeIncomingMessage(p, channel, ba.asByteArrayCopy());
@@ -126,7 +127,7 @@ public class PluginMeta {
 				p = Static.GetPlayer(args[0], t);
 			}
 			String channel = args[offset].val();
-			CByteArray ba = Static.getByteArray(args[1 + offset], t);
+			CByteArray ba = ArgumentValidation.getByteArray(args[1 + offset], t);
 			Static.AssertPlayerNonNull(p, t);
 			try {
 				p.sendPluginMessage(channel, ba.asByteArrayCopy());

@@ -15,7 +15,6 @@ import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -198,9 +197,9 @@ public class SQL {
 						}
 						try {
 							if(params[i].isInstanceOf(CInt.TYPE)) {
-								ps.setLong(i + 1, Static.getInt(params[i], t));
+								ps.setLong(i + 1, ArgumentValidation.getInt(params[i], t));
 							} else if(params[i].isInstanceOf(CDouble.TYPE)) {
-								ps.setDouble(i + 1, (Double) Static.getDouble(params[i], t));
+								ps.setDouble(i + 1, (Double) ArgumentValidation.getDouble(params[i], t));
 							} else if(params[i].isInstanceOf(CString.TYPE)) {
 								ps.setString(i + 1, (String) params[i].val());
 							} else if(params[i].isInstanceOf(CByteArray.TYPE)) {

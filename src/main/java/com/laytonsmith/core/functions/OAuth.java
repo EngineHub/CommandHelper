@@ -13,7 +13,6 @@ import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -139,7 +138,7 @@ public class OAuth {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args) throws ConfigRuntimeException {
 			// TODO: Make this part support profiles
-			CArray options = Static.getArray(args[0], t);
+			CArray options = ArgumentValidation.getArray(args[0], t);
 			String authorizationUrl = options.get("authorizationUrl", t).val();
 			String tokenUrl = options.get("tokenUrl", t).val();
 			String clientId = options.get("clientId", t).val();
@@ -148,7 +147,7 @@ public class OAuth {
 			String successText = Construct.nval(options.get("successText", t));
 			CArray extraHeaders1 = null;
 			if(options.containsKey("extraHeaders")) {
-				extraHeaders1 = Static.getArray(options.get("extraHeaders", t), t);
+				extraHeaders1 = ArgumentValidation.getArray(options.get("extraHeaders", t), t);
 			}
 			Map<String, String> extraHeaders = new HashMap<>();
 			if(extraHeaders1 != null) {
@@ -216,7 +215,7 @@ public class OAuth {
 									accessToken = tokenJson.get("access_token", t).val();
 									int expiresIn;
 									if(tokenJson.containsKey("expires_in")) {
-										expiresIn = Static.getInt32(tokenJson.get("expires_in", t), t) * 1000;
+										expiresIn = ArgumentValidation.getInt32(tokenJson.get("expires_in", t), t) * 1000;
 									} else {
 										expiresIn = Integer.MAX_VALUE;
 									}
@@ -250,7 +249,7 @@ public class OAuth {
 							HTTPResponse tokenResponse = WebUtility.GetPage(new URL(tokenUrl), settings);
 							CArray tokenJson = (CArray) new DataTransformations.json_decode().exec(t, env, new CString(tokenResponse.getContentAsString(), t));
 							accessToken = tokenJson.get("access_token", t).val();
-							storeAccessToken(env, clientId, new AccessToken(accessToken, Static.getInt32(tokenJson.get("expires_in", t), t) * 1000));
+							storeAccessToken(env, clientId, new AccessToken(accessToken, ArgumentValidation.getInt32(tokenJson.get("expires_in", t), t) * 1000));
 						}
 					} catch (InterruptedException ex) {
 						return CNull.NULL;

@@ -338,7 +338,7 @@ public class PlayerManagement {
 			double dist;
 
 			if(args.length == 1) {
-				dist = Static.getDouble(args[0], t);
+				dist = ArgumentValidation.getDouble(args[0], t);
 				Static.AssertPlayerNonNull(p, t);
 				loc = p.getLocation();
 			} else {
@@ -347,7 +347,7 @@ public class PlayerManagement {
 				}
 
 				loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
-				dist = Static.getDouble(args[1], t);
+				dist = ArgumentValidation.getDouble(args[1], t);
 			}
 
 			CArray sa = new CArray(t);
@@ -528,9 +528,9 @@ public class PlayerManagement {
 					Static.AssertPlayerNonNull(p, t);
 				}
 
-				double x = Static.getNumber(args[args.length - 3], t);
-				double y = Static.getNumber(args[args.length - 2], t);
-				double z = Static.getNumber(args[args.length - 1], t);
+				double x = ArgumentValidation.getNumber(args[args.length - 3], t);
+				double y = ArgumentValidation.getNumber(args[args.length - 2], t);
+				double z = ArgumentValidation.getNumber(args[args.length - 1], t);
 				float yaw = 0;
 				float pitch = 0;
 				MCLocation ploc = p.getLocation();
@@ -614,7 +614,7 @@ public class PlayerManagement {
 						continue;
 					}
 					try {
-						material = StaticLayer.GetMaterialFromLegacy(Static.getInt16(mat, t), 0);
+						material = StaticLayer.GetMaterialFromLegacy(ArgumentValidation.getInt16(mat, t), 0);
 						if(material != null) {
 							MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The id \"" + mat.val() + "\" is deprecated."
 									+ " Converted to \"" + material.getName() + "\"", t);
@@ -915,7 +915,7 @@ public class PlayerManagement {
 				index = -1;
 			} else {
 				player = args[0].val();
-				index = Static.getInt32(args[1], t);
+				index = ArgumentValidation.getInt32(args[1], t);
 			}
 			MCPlayer p = Static.GetPlayer(player, t);
 
@@ -1428,7 +1428,7 @@ public class PlayerManagement {
 					}
 					pitch = loc.getPitch();
 				}
-				int g = Static.getInt32(args[0], t);
+				int g = ArgumentValidation.getInt32(args[0], t);
 				if(g < 0 || g > 3) {
 					throw new CRERangeException("The F specifed must be from 0 to 3", t);
 				}
@@ -1437,8 +1437,8 @@ public class PlayerManagement {
 				//Either we are setting this MCPlayer's pitch and yaw, or we are setting the specified MCPlayer's F.
 				//Check to see if args[0] is a number
 				try {
-					yaw = (float) Static.getNumber(args[0], t);
-					pitch = (float) Static.getNumber(args[1], t);
+					yaw = (float) ArgumentValidation.getNumber(args[0], t);
+					pitch = (float) ArgumentValidation.getNumber(args[1], t);
 					//It's the yaw, pitch variation
 					if(p instanceof MCPlayer) {
 						toSet = (MCPlayer) p;
@@ -1447,7 +1447,7 @@ public class PlayerManagement {
 					//It's the MCPlayer, F variation
 					toSet = Static.GetPlayer(args[0], t);
 					pitch = toSet.getLocation().getPitch();
-					int g = Static.getInt32(args[1], t);
+					int g = ArgumentValidation.getInt32(args[1], t);
 					if(g < 0 || g > 3) {
 						throw new CRERangeException("The F specifed must be from 0 to 3", t);
 					}
@@ -1456,8 +1456,8 @@ public class PlayerManagement {
 			} else if(args.length == 3) {
 				//It's the MCPlayer, yaw, pitch variation
 				toSet = Static.GetPlayer(args[0], t);
-				yaw = (float) Static.getNumber(args[1], t);
-				pitch = (float) Static.getNumber(args[2], t);
+				yaw = (float) ArgumentValidation.getNumber(args[1], t);
+				pitch = (float) ArgumentValidation.getNumber(args[2], t);
 			}
 
 			//Error check our data
@@ -1716,9 +1716,9 @@ public class PlayerManagement {
 			}
 			if(args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				xp = Static.getInt32(args[1], t);
+				xp = ArgumentValidation.getInt32(args[1], t);
 			} else {
-				xp = Static.getInt32(args[0], t);
+				xp = ArgumentValidation.getInt32(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			if(xp < 0 || xp > 100) {
@@ -1777,9 +1777,9 @@ public class PlayerManagement {
 			}
 			if(args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				xp = Static.getInt32(args[1], t);
+				xp = ArgumentValidation.getInt32(args[1], t);
 			} else {
-				xp = Static.getInt32(args[0], t);
+				xp = ArgumentValidation.getInt32(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.giveExp(xp);
@@ -1889,9 +1889,9 @@ public class PlayerManagement {
 			}
 			if(args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				level = Static.getInt32(args[1], t);
+				level = ArgumentValidation.getInt32(args[1], t);
 			} else {
-				level = Static.getInt32(args[0], t);
+				level = ArgumentValidation.getInt32(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setLevel(level);
@@ -2001,9 +2001,9 @@ public class PlayerManagement {
 			}
 			if(args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				xp = Static.getInt32(args[1], t);
+				xp = ArgumentValidation.getInt32(args[1], t);
 			} else {
-				xp = Static.getInt32(args[0], t);
+				xp = ArgumentValidation.getInt32(args[0], t);
 			}
 			if(xp < 0) {
 				throw new CRERangeException("Experience can't be negative", t);
@@ -2119,9 +2119,9 @@ public class PlayerManagement {
 			}
 			if(args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				level = Static.getInt32(args[1], t);
+				level = ArgumentValidation.getInt32(args[1], t);
 			} else {
-				level = Static.getInt32(args[0], t);
+				level = ArgumentValidation.getInt32(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setFoodLevel(level);
@@ -2191,7 +2191,7 @@ public class PlayerManagement {
 			}
 			if(type == null) {
 				try {
-					type = MCPotionEffectType.getById(Static.getInt32(args[1], t));
+					type = MCPotionEffectType.getById(ArgumentValidation.getInt32(args[1], t));
 				} catch (CRECastException | IllegalArgumentException ex) {
 					throw new CREFormatException("Invalid potion effect type: " + args[1].val(), t);
 				}
@@ -2203,10 +2203,10 @@ public class PlayerManagement {
 			boolean particles = true;
 			boolean icon = true;
 			if(args.length >= 3) {
-				strength = Static.getInt32(args[2], t);
+				strength = ArgumentValidation.getInt32(args[2], t);
 
 				if(args.length >= 4) {
-					seconds = Static.getDouble(args[3], t);
+					seconds = ArgumentValidation.getDouble(args[3], t);
 					if(seconds < 0.0) {
 						throw new CRERangeException("Seconds cannot be less than 0.0", t);
 					} else if(seconds * 20 > Integer.MAX_VALUE) {
@@ -2506,9 +2506,9 @@ public class PlayerManagement {
 			double health;
 			if(args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				health = Static.getDouble(args[1], t);
+				health = ArgumentValidation.getDouble(args[1], t);
 			} else {
-				health = Static.getDouble(args[0], t);
+				health = ArgumentValidation.getDouble(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			if(health < 0 || health > m.getMaxHealth()) {
@@ -2865,9 +2865,9 @@ public class PlayerManagement {
 			}
 			if(args.length == 2) {
 				m = Static.GetPlayer(args[0], t);
-				speed = Static.getDouble(args[1], t);
+				speed = ArgumentValidation.getDouble(args[1], t);
 			} else {
-				speed = Static.getDouble(args[0], t);
+				speed = ArgumentValidation.getDouble(args[0], t);
 			}
 
 			if(speed < -1 || speed > 1) {
@@ -2987,9 +2987,9 @@ public class PlayerManagement {
 			}
 			if(args.length == 2) {
 				m = Static.GetPlayer(args[0], t);
-				speed = Static.getDouble(args[1], t);
+				speed = ArgumentValidation.getDouble(args[1], t);
 			} else {
-				speed = Static.getDouble(args[0], t);
+				speed = ArgumentValidation.getDouble(args[0], t);
 			}
 
 			if(speed < -1 || speed > 1) {
@@ -3322,7 +3322,7 @@ public class PlayerManagement {
 					tick = 20;
 				}
 			} else {
-				tick = Static.getInt32(ticks, t);
+				tick = ArgumentValidation.getInt32(ticks, t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			p.setRemainingFireTicks(tick);
@@ -3977,9 +3977,9 @@ public class PlayerManagement {
 						offset = 1;
 						p = Static.GetPlayer(args[0], t);
 					}
-					double x = Static.getDouble(args[offset], t);
-					double y = Static.getDouble(args[offset + 1], t);
-					double z = Static.getDouble(args[offset + 2], t);
+					double x = ArgumentValidation.getDouble(args[offset], t);
+					double y = ArgumentValidation.getDouble(args[offset + 1], t);
+					double z = ArgumentValidation.getDouble(args[offset + 2], t);
 					v = new Vector3D(x, y, z);
 					break;
 				}
@@ -4059,7 +4059,7 @@ public class PlayerManagement {
 
 			if(args.length == 2 || args.length == 3) {
 				//Lines are in an array
-				CArray lineArray = Static.getArray(args[1 + offset], t);
+				CArray lineArray = ArgumentValidation.getArray(args[1 + offset], t);
 				if(lineArray.size() != 4) {
 					throw new CRECastException("Line array must have 4 elements.", t);
 				}
@@ -4270,7 +4270,7 @@ public class PlayerManagement {
 				hungerIndex = 1;
 			}
 			Static.AssertPlayerNonNull(p, t);
-			int hunger = Static.getInt32(args[hungerIndex], t);
+			int hunger = ArgumentValidation.getInt32(args[hungerIndex], t);
 			p.setFoodLevel(hunger);
 			return CVoid.VOID;
 		}
@@ -4373,7 +4373,7 @@ public class PlayerManagement {
 				saturationIndex = 1;
 			}
 			Static.AssertPlayerNonNull(p, t);
-			saturation = (float) Static.getDouble(args[saturationIndex], t);
+			saturation = (float) ArgumentValidation.getDouble(args[saturationIndex], t);
 			p.setSaturation(saturation);
 			return CVoid.VOID;
 		}
@@ -4580,9 +4580,9 @@ public class PlayerManagement {
 					throw new CRENullPointerException(
 							"The given player has a null location (are you running from cmdline mode?)", t);
 				}
-				l.setX(Static.getNumber(args[locationIndex], t));
-				l.setY(Static.getNumber(args[locationIndex + 1], t) + 1);
-				l.setZ(Static.getNumber(args[locationIndex + 2], t));
+				l.setX(ArgumentValidation.getNumber(args[locationIndex], t));
+				l.setY(ArgumentValidation.getNumber(args[locationIndex + 1], t) + 1);
+				l.setZ(ArgumentValidation.getNumber(args[locationIndex + 2], t));
 			}
 
 			m.setBedSpawnLocation(l, forced);
@@ -5510,12 +5510,12 @@ public class PlayerManagement {
 			if(args.length == 3) {
 				p = Static.GetPlayer(args[0], t);
 				materialName = args[1].val();
-				cooldown = Static.getInt32(args[2], t);
+				cooldown = ArgumentValidation.getInt32(args[2], t);
 			} else {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 				materialName = args[0].val();
-				cooldown = Static.getInt32(args[1], t);
+				cooldown = ArgumentValidation.getInt32(args[1], t);
 			}
 
 			MCMaterial mat = StaticLayer.GetMaterial(materialName);
@@ -5995,10 +5995,10 @@ public class PlayerManagement {
 				offset = 1;
 				p = Static.GetPlayer(args[0], t);
 				if(args.length == 3) {
-					amount = Static.getInt32(args[2], t);
+					amount = ArgumentValidation.getInt32(args[2], t);
 				} else {
 					filter = args[2].val().toUpperCase();
-					amount = Static.getInt32(args[3], t);
+					amount = ArgumentValidation.getInt32(args[3], t);
 				}
 			}
 

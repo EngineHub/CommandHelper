@@ -4,7 +4,6 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.ObjectGenerator;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
@@ -174,8 +173,8 @@ public final class Prefilters {
 
 	private static void MathMatch(Mixed one, Mixed two) throws PrefilterNonMatchException {
 		try {
-			double dOne = Static.getNumber(one, Target.UNKNOWN);
-			double dTwo = Static.getNumber(two, Target.UNKNOWN);
+			double dOne = ArgumentValidation.getNumber(one, Target.UNKNOWN);
+			double dTwo = ArgumentValidation.getNumber(two, Target.UNKNOWN);
 			if(dOne != dTwo) {
 				throw new PrefilterNonMatchException();
 			}
@@ -205,13 +204,13 @@ public final class Prefilters {
 					new Class[]{String.class, String[].class}, new Object[]{exp, new String[]{key}});
 			double val = (double) ReflectionUtils.invokeMethod(eClazz, e, "evaluate",
 					new Class[]{double[].class},
-					new Object[]{new double[]{Static.getDouble(dvalue, Target.UNKNOWN)}});
+					new Object[]{new double[]{ArgumentValidation.getDouble(dvalue, Target.UNKNOWN)}});
 			if(inequalityMode) {
 				if(val == 0) {
 					throw new PrefilterNonMatchException();
 				}
 			} else {
-				if(val != Static.getDouble(dvalue, Target.UNKNOWN)) {
+				if(val != ArgumentValidation.getDouble(dvalue, Target.UNKNOWN)) {
 					throw new PrefilterNonMatchException();
 				}
 			}

@@ -339,7 +339,7 @@ public class Cmdline {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			int exit_code = 0;
 			if(args.length == 1) {
-				exit_code = Static.getInt32(args[0], t);
+				exit_code = ArgumentValidation.getInt32(args[0], t);
 			}
 			if(Static.InCmdLine(environment, true)) {
 				System.exit(exit_code);
@@ -989,7 +989,7 @@ public class Cmdline {
 				command = StringUtils.ArgParser(args[0].val()).toArray(new String[0]);
 			}
 			if(args.length > 1) {
-				CArray options = Static.getArray(args[1], t);
+				CArray options = ArgumentValidation.getArray(args[1], t);
 				if(options.containsKey("workingDir") && !(options.get("workingDir", t) instanceof CNull)) {
 					workingDir = new File(options.get("workingDir", t).val());
 					if(!workingDir.isAbsolute()) {
@@ -997,11 +997,11 @@ public class Cmdline {
 					}
 				}
 				stdout = (options.containsKey("stdout") && !(options.get("stdout", t) instanceof CNull)
-						? Static.getObject(options.get("stdout", t), t, CClosure.class) : null);
+						? ArgumentValidation.getObject(options.get("stdout", t), t, CClosure.class) : null);
 				stderr = (options.containsKey("stderr") && !(options.get("stderr", t) instanceof CNull)
-						? Static.getObject(options.get("stderr", t), t, CClosure.class) : null);
+						? ArgumentValidation.getObject(options.get("stderr", t), t, CClosure.class) : null);
 				exit = (options.containsKey("exit") && !(options.get("exit", t) instanceof CNull)
-						? Static.getObject(options.get("exit", t), t, CClosure.class) : null);
+						? ArgumentValidation.getObject(options.get("exit", t), t, CClosure.class) : null);
 				subshell = (options.containsKey("subshell")
 						? ArgumentValidation.getBoolean(options.get("subshell", t), t) : false);
 			} else {
@@ -1188,9 +1188,9 @@ public class Cmdline {
 				command = StringUtils.ArgParser(args[0].val()).toArray(new String[0]);
 			}
 			if(args.length > 1) {
-				CArray options = Static.getArray(args[1], t);
+				CArray options = ArgumentValidation.getArray(args[1], t);
 				if(options.containsKey("expectedExitCode")) {
-					expectedExitCode = Static.getInt32(options.get("expectedExitCode", t), t);
+					expectedExitCode = ArgumentValidation.getInt32(options.get("expectedExitCode", t), t);
 				}
 				if(options.containsKey("workingDir") && !(options.get("workingDir", t) instanceof CNull)) {
 					workingDir = new File(options.get("workingDir", t).val());

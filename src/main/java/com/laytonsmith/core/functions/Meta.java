@@ -430,11 +430,11 @@ public class Meta {
 			if(args.length == 2) {
 				sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 				commandString = args[0].val();
-				argList = Static.getArray(args[1], t).asList();
+				argList = ArgumentValidation.getArray(args[1], t).asList();
 			} else {
 				sender = Static.GetCommandSender(args[0].val(), t);
 				commandString = args[1].val();
-				argList = Static.getArray(args[2], t).asList();
+				argList = ArgumentValidation.getArray(args[2], t).asList();
 			}
 
 			if(commandString.length() < 1 || commandString.charAt(0) != '/') {

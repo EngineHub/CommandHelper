@@ -109,7 +109,7 @@ public class Web {
 			boolean update = false;
 			CArray aCookie = null;
 			for(Mixed ac : arrayJar.asList()) {
-				aCookie = Static.getArray(ac, t);
+				aCookie = ArgumentValidation.getArray(ac, t);
 				if(cookie.getName().equals(aCookie.get("name", t).val())
 						&& cookie.getDomain().equals(aCookie.get("domain", t).val())
 						&& cookie.getPath().equals(aCookie.get("path", t).val())) {
@@ -140,7 +140,7 @@ public class Web {
 	private static CookieJar getCookieJar(CArray cookieJar, Target t) {
 		CookieJar ret = new CookieJar();
 		for(String key : cookieJar.stringKeySet()) {
-			CArray cookie = Static.getArray(cookieJar.get(key, t), t);
+			CArray cookie = ArgumentValidation.getArray(cookieJar.get(key, t), t);
 			String name;
 			String value;
 			String domain;
@@ -159,7 +159,7 @@ public class Web {
 						+ " in all cookies.", t);
 			}
 			if(cookie.containsKey("expiration")) {
-				expiration = Static.getInt(cookie.get("expiration", t), t);
+				expiration = ArgumentValidation.getInt(cookie.get("expiration", t), t);
 			}
 			if(cookie.containsKey("httpOnly")) {
 				httpOnly = ArgumentValidation.getBoolean(cookie.get("httpOnly", t), t);
@@ -243,7 +243,7 @@ public class Web {
 				}
 				settings.setHeaders(headers);
 			} else {
-				CArray csettings = Static.getArray(args[1], t);
+				CArray csettings = ArgumentValidation.getArray(args[1], t);
 				if(csettings.containsKey("method")) {
 					try {
 						settings.setMethod(HTTPMethod.valueOf(csettings.get("method", t).val()));
@@ -255,7 +255,7 @@ public class Web {
 					useDefaultHeaders = ArgumentValidation.getBoolean(csettings.get("useDefaultHeaders", t), t);
 				}
 				if(csettings.containsKey("headers") && !(csettings.get("headers", t) instanceof CNull)) {
-					CArray headers = Static.getArray(csettings.get("headers", t), t);
+					CArray headers = ArgumentValidation.getArray(csettings.get("headers", t), t);
 					Map<String, List<String>> mheaders = new HashMap<String, List<String>>();
 					for(String key : headers.stringKeySet()) {
 						List<String> h = new ArrayList<String>();
@@ -288,7 +288,7 @@ public class Web {
 				}
 				if(csettings.containsKey("params") && !(csettings.get("params", t) instanceof CNull)) {
 					if(csettings.get("params", t).isInstanceOf(CArray.TYPE)) {
-						CArray params = Static.getArray(csettings.get("params", t), t);
+						CArray params = ArgumentValidation.getArray(csettings.get("params", t), t);
 						Map<String, List<String>> mparams = new HashMap<>();
 						for(String key : params.stringKeySet()) {
 							Mixed c = params.get(key, t);
@@ -317,7 +317,7 @@ public class Web {
 					}
 				}
 				if(csettings.containsKey("cookiejar") && !(csettings.get("cookiejar", t) instanceof CNull)) {
-					arrayJar = Static.getArray(csettings.get("cookiejar", t), t);
+					arrayJar = ArgumentValidation.getArray(csettings.get("cookiejar", t), t);
 					settings.setCookieJar(getCookieJar(arrayJar, t));
 				} else {
 					arrayJar = null;
@@ -345,7 +345,7 @@ public class Web {
 					error = null;
 				}
 				if(csettings.containsKey("timeout")) {
-					settings.setTimeout(Static.getInt32(csettings.get("timeout", t), t));
+					settings.setTimeout(ArgumentValidation.getInt32(csettings.get("timeout", t), t));
 				}
 				String username = null;
 				String password = null;
@@ -356,7 +356,7 @@ public class Web {
 					password = csettings.get("password", t).val();
 				}
 				if(csettings.containsKey("proxy")) {
-					CArray proxySettings = Static.getArray(csettings.get("proxy", t), t);
+					CArray proxySettings = ArgumentValidation.getArray(csettings.get("proxy", t), t);
 					Proxy.Type type;
 					String proxyURL;
 					int port;
@@ -366,7 +366,7 @@ public class Web {
 						throw new CREFormatException(e.getMessage(), t, e);
 					}
 					proxyURL = proxySettings.get("url", t).val();
-					port = Static.getInt32(proxySettings.get("port", t), t);
+					port = ArgumentValidation.getInt32(proxySettings.get("port", t), t);
 					SocketAddress addr = new InetSocketAddress(proxyURL, port);
 					Proxy proxy = new Proxy(type, addr);
 					settings.setProxy(proxy);
@@ -635,7 +635,7 @@ public class Web {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray array = Static.getArray(args[0], t);
+			CArray array = ArgumentValidation.getArray(args[0], t);
 			CookieJar jar = getCookieJar(array, t);
 			jar.clearSessionCookies();
 			return CVoid.VOID;

@@ -269,13 +269,13 @@ public class ConfigRuntimeException extends RuntimeException {
 				console.append(TermColors.CYAN).append("Caused by:\n");
 				player.append(MCChatColor.AQUA).append("Caused by:\n");
 				CArray exception = ((CRECausedByWrapper) ex).getException();
-				CArray stackTrace = Static.getArray(exception.get("stackTrace", t), t);
+				CArray stackTrace = ArgumentValidation.getArray(exception.get("stackTrace", t), t);
 				List<StackTraceElement> newSt = new ArrayList<>();
 				for(Mixed consElement : stackTrace.asList()) {
-					CArray element = Static.getArray(consElement, t);
-					int line = Static.getInt32(element.get("line", t), t);
+					CArray element = ArgumentValidation.getArray(consElement, t);
+					int line = ArgumentValidation.getInt32(element.get("line", t), t);
 					File file = new File(element.get("file", t).val());
-					int col = Static.getInt32(element.get("col", t), t);
+					int col = ArgumentValidation.getInt32(element.get("col", t), t);
 					Target stElementTarget = new Target(line, file, col);
 					newSt.add(new StackTraceElement(element.get("id", t).val(), stElementTarget));
 				}

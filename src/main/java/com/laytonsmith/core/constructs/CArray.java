@@ -7,7 +7,6 @@ import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
@@ -352,7 +351,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				setAssociative();
 			} else {
 				try {
-					int indx = Static.getInt32(index, t);
+					int indx = ArgumentValidation.getInt32(index, t);
 					if(indx > nextIndex || indx < 0) {
 						// Out of range
 						setAssociative();
@@ -397,7 +396,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	public Mixed get(Mixed index, Target t) {
 		if(!associativeMode) {
 			try {
-				return array.get(Static.getInt32(index, t));
+				return array.get(ArgumentValidation.getInt32(index, t));
 			} catch (IndexOutOfBoundsException e) {
 				throw new CREIndexOverflowException("The element at index \"" + index.val() + "\" does not exist", t, e);
 			}
@@ -937,8 +936,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			}
 
 			public int compareNumeric(Mixed o1, Mixed o2) {
-				double d1 = Static.getNumber(o1, o1.getTarget());
-				double d2 = Static.getNumber(o2, o2.getTarget());
+				double d1 = ArgumentValidation.getNumber(o1, o1.getTarget());
+				double d2 = ArgumentValidation.getNumber(o2, o2.getTarget());
 				return Double.compare(d1, d2);
 			}
 

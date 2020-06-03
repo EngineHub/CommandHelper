@@ -490,9 +490,9 @@ public class Environment {
 					}
 				}
 			} else {
-				x = (int) java.lang.Math.floor(Static.getNumber(args[0], t));
-				y = (int) java.lang.Math.floor(Static.getNumber(args[1], t));
-				z = (int) java.lang.Math.floor(Static.getNumber(args[2], t));
+				x = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[0], t));
+				y = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[1], t));
+				z = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[2], t));
 				if(args.length == 4) {
 					w = Static.getServer().getWorld(args[3].val());
 					if(w == null) {
@@ -598,9 +598,9 @@ public class Environment {
 				}
 
 			} else {
-				x = (int) java.lang.Math.floor(Static.getNumber(args[0], t));
-				y = (int) java.lang.Math.floor(Static.getNumber(args[1], t));
-				z = (int) java.lang.Math.floor(Static.getNumber(args[2], t));
+				x = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[0], t));
+				y = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[1], t));
+				z = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[2], t));
 				id = args[3].val();
 				if(args.length > 4) {
 					w = Static.getServer().getWorld(args[4].val());
@@ -1100,8 +1100,8 @@ public class Environment {
 				z = l.getBlockZ();
 				w = l.getWorld();
 			} else {
-				x = Static.getInt32(args[0], t);
-				z = Static.getInt32(args[1], t);
+				x = ArgumentValidation.getInt32(args[0], t);
+				z = ArgumentValidation.getInt32(args[1], t);
 				if(args.length != 3) {
 					w = Static.getServer().getWorld(args[2].val());
 				}
@@ -1206,8 +1206,8 @@ public class Environment {
 				z = l.getBlockZ();
 				w = l.getWorld();
 			} else {
-				x = Static.getInt32(args[0], t);
-				z = Static.getInt32(args[1], t);
+				x = ArgumentValidation.getInt32(args[0], t);
+				z = ArgumentValidation.getInt32(args[1], t);
 				if(args.length != 2) {
 					w = Static.getServer().getWorld(args[2].val());
 				}
@@ -1284,8 +1284,8 @@ public class Environment {
 					world = args[1].val();
 				}
 			} else if(args.length == 2 || args.length == 3) {
-				x = Static.getDouble(args[0], t);
-				z = Static.getDouble(args[1], t);
+				x = ArgumentValidation.getDouble(args[0], t);
+				z = ArgumentValidation.getDouble(args[1], t);
 				if(args.length == 3) {
 					world = args[2].val();
 				}
@@ -1362,7 +1362,7 @@ public class Environment {
 			}
 			if(args.length >= 2) {
 				if(!(args[1] instanceof CNull)) {
-					size = Static.getInt(args[1], t);
+					size = ArgumentValidation.getInt(args[1], t);
 				}
 			}
 
@@ -1460,7 +1460,7 @@ public class Environment {
 			}
 			MCTone tone = null;
 			if(args[noteOffset].isInstanceOf(CArray.TYPE)) {
-				int octave = Static.getInt32(((CArray) args[noteOffset]).get("octave", t), t);
+				int octave = ArgumentValidation.getInt32(((CArray) args[noteOffset]).get("octave", t), t);
 				if(octave < 0 || octave > 2) {
 					throw new CRERangeException("The octave must be 0, 1, or 2, but was " + octave, t);
 				}
@@ -1592,19 +1592,19 @@ public class Environment {
 				}
 
 				if(pa.containsKey("count")) {
-					count = Static.getInt32(pa.get("count", t), t);
+					count = ArgumentValidation.getInt32(pa.get("count", t), t);
 				}
 				if(pa.containsKey("xoffset")) {
-					offsetX = Static.getDouble(pa.get("xoffset", t), t) / 4.0D; // radius in approx. meters
+					offsetX = ArgumentValidation.getDouble(pa.get("xoffset", t), t) / 4.0D; // radius in approx. meters
 				}
 				if(pa.containsKey("yoffset")) {
-					offsetY = Static.getDouble(pa.get("yoffset", t), t) / 4.0D;
+					offsetY = ArgumentValidation.getDouble(pa.get("yoffset", t), t) / 4.0D;
 				}
 				if(pa.containsKey("zoffset")) {
-					offsetZ = Static.getDouble(pa.get("zoffset", t), t) / 4.0D;
+					offsetZ = ArgumentValidation.getDouble(pa.get("zoffset", t), t) / 4.0D;
 				}
 				if(pa.containsKey("speed")) {
-					speed = Static.getDouble(pa.get("speed", t), t);
+					speed = ArgumentValidation.getDouble(pa.get("speed", t), t);
 				}
 
 				if(pa.containsKey("block")) {
@@ -1730,11 +1730,11 @@ public class Environment {
 			}
 
 			if(sa.containsKey("volume")) {
-				volume = Static.getDouble32(sa.get("volume", t), t);
+				volume = ArgumentValidation.getDouble32(sa.get("volume", t), t);
 			}
 
 			if(sa.containsKey("pitch")) {
-				pitch = Static.getDouble32(sa.get("pitch", t), t);
+				pitch = ArgumentValidation.getDouble32(sa.get("pitch", t), t);
 			}
 
 			if(args.length == 3) {
@@ -1876,11 +1876,11 @@ public class Environment {
 			}
 
 			if(sa.containsKey("volume")) {
-				volume = Static.getDouble32(sa.get("volume", t), t);
+				volume = ArgumentValidation.getDouble32(sa.get("volume", t), t);
 			}
 
 			if(sa.containsKey("pitch")) {
-				pitch = Static.getDouble32(sa.get("pitch", t), t);
+				pitch = ArgumentValidation.getDouble32(sa.get("pitch", t), t);
 			}
 
 			if(args.length == 3) {

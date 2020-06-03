@@ -492,7 +492,7 @@ public class ControlFlow {
 						long rangeLeft = ((CSlice) evalStatement).getStart();
 						long rangeRight = ((CSlice) evalStatement).getFinish();
 						if(value.isInstanceOf(CInt.TYPE)) {
-							long v = Static.getInt(value, t);
+							long v = ArgumentValidation.getInt(value, t);
 							if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
 									|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
 									|| (rangeLeft == rangeRight && v == rangeLeft)) {
@@ -506,7 +506,7 @@ public class ControlFlow {
 								long rangeLeft = ((CSlice) inner).getStart();
 								long rangeRight = ((CSlice) inner).getFinish();
 								if(value.isInstanceOf(CInt.TYPE)) {
-									long v = Static.getInt(value, t);
+									long v = ArgumentValidation.getInt(value, t);
 									if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
 											|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
 											|| (rangeLeft == rangeRight && v == rangeLeft)) {
@@ -845,7 +845,7 @@ public class ControlFlow {
 							long rangeLeft = ((CSlice) value).getStart();
 							long rangeRight = ((CSlice) value).getFinish();
 							if(children.get(0).getData().isInstanceOf(CInt.TYPE)) {
-								long v = Static.getInt(children.get(0).getData(), t);
+								long v = ArgumentValidation.getInt(children.get(0).getData(), t);
 								if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
 										|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
 										|| (rangeLeft == rangeRight && v == rangeLeft)) {
@@ -2106,7 +2106,7 @@ public class ControlFlow {
 				throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if(args.length == 1) {
-				num = Static.getInt32(args[0], t);
+				num = ArgumentValidation.getInt32(args[0], t);
 			}
 			throw new LoopBreakException(num, t);
 		}
@@ -2202,7 +2202,7 @@ public class ControlFlow {
 				throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if(args.length == 1) {
-				num = Static.getInt32(args[0], t);
+				num = ArgumentValidation.getInt32(args[0], t);
 			}
 			throw new LoopContinueException(num, t);
 		}
@@ -2365,7 +2365,7 @@ public class ControlFlow {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray ca = Static.getArray(args[1], t);
+			CArray ca = ArgumentValidation.getArray(args[1], t);
 			if(ca.inAssociativeMode()) {
 				throw new CRECastException("Expected the array passed to " + getName() + " to be non-associative.", t);
 			}

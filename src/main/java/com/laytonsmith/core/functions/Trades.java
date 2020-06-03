@@ -99,7 +99,7 @@ public class Trades {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCMerchant merchant = GetMerchant(args[0], t);
-			CArray trades = Static.getArray(args[1], t);
+			CArray trades = ArgumentValidation.getArray(args[1], t);
 			List<MCMerchantRecipe> recipes = new ArrayList<>();
 			if(trades.isAssociative()) {
 				throw new CRECastException("Expected non-associative array for list of trade arrays.", t);
@@ -401,23 +401,23 @@ public class Trades {
 
 	private static MCMerchantRecipe trade(Mixed c, Target t) {
 
-		CArray recipe = Static.getArray(c, t);
+		CArray recipe = ArgumentValidation.getArray(c, t);
 
 		MCItemStack result = ObjectGenerator.GetGenerator().item(recipe.get("result", t), t);
 
 		MCMerchantRecipe mer = (MCMerchantRecipe) StaticLayer.GetNewRecipe(null, MCRecipeType.MERCHANT, result);
 
 		if(recipe.containsKey("maxuses")) {
-			mer.setMaxUses(Static.getInt32(recipe.get("maxuses", t), t));
+			mer.setMaxUses(ArgumentValidation.getInt32(recipe.get("maxuses", t), t));
 		}
 		if(recipe.containsKey("uses")) {
-			mer.setUses(Static.getInt32(recipe.get("uses", t), t));
+			mer.setUses(ArgumentValidation.getInt32(recipe.get("uses", t), t));
 		}
 		if(recipe.containsKey("hasxpreward")) {
 			mer.setHasExperienceReward(ArgumentValidation.getBoolean(recipe.get("hasxpreward", t), t));
 		}
 
-		CArray ingredients = Static.getArray(recipe.get("ingredients", t), t);
+		CArray ingredients = ArgumentValidation.getArray(recipe.get("ingredients", t), t);
 		if(ingredients.inAssociativeMode()) {
 			throw new CREFormatException("Ingredients array is invalid.", t);
 		}

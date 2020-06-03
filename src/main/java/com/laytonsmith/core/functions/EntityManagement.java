@@ -210,8 +210,8 @@ public class EntityManagement {
 						throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 					}
 					try {
-						int x = Static.getInt32(args[1], t);
-						int z = Static.getInt32(args[2], t);
+						int x = ArgumentValidation.getInt32(args[1], t);
+						int z = ArgumentValidation.getInt32(args[2], t);
 						c = w.getChunkAt(x, z);
 					} catch (ConfigRuntimeException cre) {
 						CArray l = CArray.GetAssociativeArray(t);
@@ -681,7 +681,7 @@ public class EntityManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			int age = Static.getInt32(args[1], t);
+			int age = ArgumentValidation.getInt32(args[1], t);
 			if(age < 1) {
 				throw new CRERangeException("Entity age can't be less than 1 server tick.", t);
 			}
@@ -761,7 +761,7 @@ public class EntityManagement {
 						}
 
 						if(args.length == 4) {
-							speed = Static.getDouble(args[3], t);
+							speed = ArgumentValidation.getDouble(args[3], t);
 						}
 					}
 				}
@@ -869,7 +869,7 @@ public class EntityManagement {
 			}
 
 			loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
-			dist = Static.getInt32(args[1], t);
+			dist = ArgumentValidation.getInt32(args[1], t);
 
 			if(dist < 0) {
 				throw new CRERangeException("Distance cannot be negative.", t);
@@ -978,7 +978,7 @@ public class EntityManagement {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
-			int seconds = Static.getInt32(args[1], t);
+			int seconds = ArgumentValidation.getInt32(args[1], t);
 			if(seconds < 0) {
 				throw new CRERangeException("Seconds cannot be less than 0", t);
 			} else if(seconds > Integer.MAX_VALUE / 20) {
@@ -1145,7 +1145,7 @@ public class EntityManagement {
 				}
 			}
 			if(args.length >= 2) {
-				qty = Static.getInt32(args[1], t);
+				qty = ArgumentValidation.getInt32(args[1], t);
 			}
 			try {
 				entType = MCEntityType.valueOf(args[0].val().toUpperCase());
@@ -1424,7 +1424,7 @@ public class EntityManagement {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
-			double speed = Static.getDouble(args[1], t);
+			double speed = ArgumentValidation.getDouble(args[1], t);
 			if(e instanceof MCMinecart) {
 				((MCMinecart) e).setMaxSpeed(speed);
 			} else {
@@ -2237,7 +2237,7 @@ public class EntityManagement {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEntity entity = Static.getEntity(args[0], t);
-			CArray specArray = Static.getArray(args[1], t);
+			CArray specArray = ArgumentValidation.getArray(args[1], t);
 
 			switch(entity.getType().getAbstracted()) {
 				case AREA_EFFECT_CLOUD:
@@ -2390,7 +2390,7 @@ public class EntityManagement {
 								arrow.setCritical(ArgumentValidation.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_ARROW_KNOCKBACK:
-								int k = Static.getInt32(specArray.get(index, t), t);
+								int k = ArgumentValidation.getInt32(specArray.get(index, t), t);
 								if(k < 0) {
 									throw new CRERangeException("Knockback can not be negative.", t);
 								} else {
@@ -2398,7 +2398,7 @@ public class EntityManagement {
 								}
 								break;
 							case entity_spec.KEY_ARROW_DAMAGE:
-								double d = Static.getDouble(specArray.get(index, t), t);
+								double d = ArgumentValidation.getDouble(specArray.get(index, t), t);
 								if(d < 0) {
 									throw new CRERangeException("Damage cannot be negative.", t);
 								}
@@ -2567,14 +2567,14 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_CREEPER_MAXFUSETICKS:
 								try {
-									creeper.setMaxFuseTicks(Static.getInt32(specArray.get(index, t), t));
+									creeper.setMaxFuseTicks(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								} catch (IllegalArgumentException ex) {
 									throw new CRERangeException("Ticks must not be negative.", t);
 								}
 								break;
 							case entity_spec.KEY_CREEPER_EXPLOSIONRADIUS:
 								try {
-									creeper.setExplosionRadius(Static.getInt32(specArray.get(index, t), t));
+									creeper.setExplosionRadius(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								} catch (IllegalArgumentException ex) {
 									throw new CRERangeException("Radius must not be negative.", t);
 								}
@@ -2594,20 +2594,20 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_HORSE_JUMP:
 								try {
-									chestedhorse.setJumpStrength(Static.getDouble(specArray.get(index, t), t));
+									chestedhorse.setJumpStrength(ArgumentValidation.getDouble(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
 									throw new CRERangeException("The jump strength must be between 0.0 and 2.0", t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_DOMESTICATION:
 								try {
-									chestedhorse.setDomestication(Static.getInt32(specArray.get(index, t), t));
+									chestedhorse.setDomestication(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
 									throw new CRERangeException("The domestication level can not be higher than the max domestication level.", t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_MAXDOMESTICATION:
-								chestedhorse.setMaxDomestication(Static.getInt32(specArray.get(index, t), t));
+								chestedhorse.setMaxDomestication(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_HORSE_SADDLE:
 								chestedhorse.setSaddle(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
@@ -2625,7 +2625,7 @@ public class EntityManagement {
 								item.setItemStack(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_DROPPED_ITEM_PICKUPDELAY:
-								item.setPickupDelay(Static.getInt32(specArray.get(index, t), t));
+								item.setPickupDelay(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -2685,7 +2685,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_ENDEREYE_DESPAWNTICKS:
-								endereye.setDespawnTicks(Static.getInt32(specArray.get(index, t), t));
+								endereye.setDespawnTicks(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_ENDEREYE_DROP:
 								endereye.setDropItem(ArgumentValidation.getBoolean(specArray.get(index, t), t));
@@ -2732,7 +2732,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_EXPERIENCE_ORB_AMOUNT:
-								orb.setExperience(Static.getInt32(specArray.get(index, t), t));
+								orb.setExperience(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -2774,11 +2774,11 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_FIREWORK_STRENGTH:
-								fm.setStrength(Static.getInt32(specArray.get(index, t), t));
+								fm.setStrength(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_FIREWORK_EFFECTS:
 								fm.clearEffects();
-								CArray effects = Static.getArray(specArray.get(index, t), t);
+								CArray effects = ArgumentValidation.getArray(specArray.get(index, t), t);
 								for(Mixed eff : effects.asList()) {
 									if(eff.isInstanceOf(CArray.TYPE)) {
 										fm.addEffect(ObjectGenerator.GetGenerator().fireworkEffect((CArray) eff, t));
@@ -2835,20 +2835,20 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_HORSE_JUMP:
 								try {
-									horse.setJumpStrength(Static.getDouble(specArray.get(index, t), t));
+									horse.setJumpStrength(ArgumentValidation.getDouble(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
 									throw new CRERangeException("The jump strength must be between 0.0 and 2.0", t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_DOMESTICATION:
 								try {
-									horse.setDomestication(Static.getInt32(specArray.get(index, t), t));
+									horse.setDomestication(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
 									throw new CRERangeException("The domestication level can not be higher than the max domestication level.", t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_MAXDOMESTICATION:
-								horse.setMaxDomestication(Static.getInt32(specArray.get(index, t), t));
+								horse.setMaxDomestication(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_HORSE_SADDLE:
 								horse.setSaddle(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
@@ -2913,13 +2913,13 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_HORSE_DOMESTICATION:
 								try {
-									llama.setDomestication(Static.getInt32(specArray.get(index, t), t));
+									llama.setDomestication(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
 									throw new CRERangeException("The domestication level can not be higher than the max domestication level.", t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_MAXDOMESTICATION:
-								llama.setMaxDomestication(Static.getInt32(specArray.get(index, t), t));
+								llama.setMaxDomestication(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_HORSE_SADDLE:
 								llama.setSaddle(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
@@ -2935,7 +2935,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_SLIME_SIZE:
-								cube.setSize(Static.getInt32(specArray.get(index, t), t));
+								cube.setSize(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -2951,7 +2951,7 @@ public class EntityManagement {
 								minecart.setDisplayBlock(mat.createBlockData());
 								break;
 							case entity_spec.KEY_MINECART_OFFSET:
-								minecart.setDisplayBlockOffset(Static.getInt32(specArray.get(index, t), t));
+								minecart.setDisplayBlockOffset(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -2981,7 +2981,7 @@ public class EntityManagement {
 								commandminecart.setDisplayBlock(mat.createBlockData());
 								break;
 							case entity_spec.KEY_MINECART_OFFSET:
-								commandminecart.setDisplayBlockOffset(Static.getInt32(specArray.get(index, t), t));
+								commandminecart.setDisplayBlockOffset(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -3120,7 +3120,7 @@ public class EntityManagement {
 								pigZombie.setAngry(ArgumentValidation.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_PIG_ZOMBIE_ANGER:
-								pigZombie.setAnger(Static.getInt32(specArray.get(index, t), t));
+								pigZombie.setAnger(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -3132,7 +3132,7 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_PRIMED_TNT_FUSETICKS:
-								tnt.setFuseTicks(Static.getInt32(specArray.get(index, t), t));
+								tnt.setFuseTicks(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -3214,20 +3214,20 @@ public class EntityManagement {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_HORSE_JUMP:
 								try {
-									undeadhorse.setJumpStrength(Static.getDouble(specArray.get(index, t), t));
+									undeadhorse.setJumpStrength(ArgumentValidation.getDouble(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
 									throw new CRERangeException("The jump strength must be between 0.0 and 2.0", t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_DOMESTICATION:
 								try {
-									undeadhorse.setDomestication(Static.getInt32(specArray.get(index, t), t));
+									undeadhorse.setDomestication(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
 									throw new CRERangeException("The domestication level can not be higher than the max domestication level.", t);
 								}
 								break;
 							case entity_spec.KEY_HORSE_MAXDOMESTICATION:
-								undeadhorse.setMaxDomestication(Static.getInt32(specArray.get(index, t), t));
+								undeadhorse.setMaxDomestication(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_HORSE_SADDLE:
 								undeadhorse.setSaddle(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
@@ -3257,7 +3257,7 @@ public class EntityManagement {
 								spectral.setCritical(ArgumentValidation.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_ARROW_KNOCKBACK:
-								int k = Static.getInt32(specArray.get(index, t), t);
+								int k = ArgumentValidation.getInt32(specArray.get(index, t), t);
 								if(k < 0) {
 									throw new CRERangeException("Knockback can not be negative.", t);
 								} else {
@@ -3265,14 +3265,14 @@ public class EntityManagement {
 								}
 								break;
 							case entity_spec.KEY_ARROW_DAMAGE:
-								double d = Static.getDouble(specArray.get(index, t), t);
+								double d = ArgumentValidation.getDouble(specArray.get(index, t), t);
 								if(d < 0) {
 									throw new CRERangeException("Damage cannot be negative.", t);
 								}
 								spectral.setDamage(d);
 								break;
 							case entity_spec.KEY_SPECTRAL_ARROW_GLOWING_TICKS:
-								spectral.setGlowingTicks(Static.getInt32(specArray.get(index, t), t));
+								spectral.setGlowingTicks(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -3305,7 +3305,7 @@ public class EntityManagement {
 								tippedarrow.setCritical(ArgumentValidation.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_ARROW_KNOCKBACK:
-								int k = Static.getInt32(specArray.get(index, t), t);
+								int k = ArgumentValidation.getInt32(specArray.get(index, t), t);
 								if(k < 0) {
 									throw new CRERangeException("Knockback can not be negative.", t);
 								} else {
@@ -3313,7 +3313,7 @@ public class EntityManagement {
 								}
 								break;
 							case entity_spec.KEY_ARROW_DAMAGE:
-								double d = Static.getDouble(specArray.get(index, t), t);
+								double d = ArgumentValidation.getDouble(specArray.get(index, t), t);
 								if(d < 0) {
 									throw new CRERangeException("Damage cannot be negative.", t);
 								}
@@ -3357,7 +3357,7 @@ public class EntityManagement {
 								trident.setCritical(ArgumentValidation.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_ARROW_KNOCKBACK:
-								int k = Static.getInt32(specArray.get(index, t), t);
+								int k = ArgumentValidation.getInt32(specArray.get(index, t), t);
 								if(k < 0) {
 									throw new CRERangeException("Knockback can not be negative.", t);
 								} else {
@@ -3365,7 +3365,7 @@ public class EntityManagement {
 								}
 								break;
 							case entity_spec.KEY_ARROW_DAMAGE:
-								double d = Static.getDouble(specArray.get(index, t), t);
+								double d = ArgumentValidation.getDouble(specArray.get(index, t), t);
 								if(d < 0) {
 									throw new CRERangeException("Damage cannot be negative.", t);
 								}
@@ -3431,7 +3431,7 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_VILLAGER_LEVEL:
 								try {
-									villager.setLevel(Static.getInt32(specArray.get(index, t), t));
+									villager.setLevel(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
 									throw new CRERangeException("Expected profession level to be 1-5, but got "
 											+ specArray.get(index, t).val(), t);
@@ -3439,7 +3439,7 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_VILLAGER_EXPERIENCE:
 								try {
-									villager.setExperience(Static.getInt32(specArray.get(index, t), t));
+									villager.setExperience(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								} catch (IllegalArgumentException exception) {
 									throw new CRERangeException("Expected experience to be a positive number, but got "
 											+ specArray.get(index, t).val(), t);
@@ -4116,14 +4116,14 @@ public class EntityManagement {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
 			CArray options;
 			if(args.length == 2) {
-				options = Static.getArray(args[1], t);
+				options = ArgumentValidation.getArray(args[1], t);
 			} else {
 				options = CArray.GetAssociativeArray(t);
 			}
 
 			int strength = 2;
 			if(options.containsKey("strength")) {
-				strength = Static.getInt32(options.get("strength", t), t);
+				strength = ArgumentValidation.getInt32(options.get("strength", t), t);
 				if(strength < 0 || strength > 128) {
 					throw new CRERangeException("Strength must be between 0 and 128", t);
 				}

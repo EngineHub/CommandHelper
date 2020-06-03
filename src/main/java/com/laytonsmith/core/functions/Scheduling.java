@@ -14,6 +14,7 @@ import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -214,7 +215,7 @@ public class Scheduling {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			Mixed x = args[0];
-			double time = Static.getNumber(x, t);
+			double time = ArgumentValidation.getNumber(x, t);
 			try {
 				Thread.sleep((int) (time * 1000));
 			} catch (InterruptedException ex) {
@@ -269,12 +270,12 @@ public class Scheduling {
 
 		@Override
 		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
-			long time = Static.getInt(args[0], t);
+			long time = ArgumentValidation.getInt(args[0], t);
 			int offset = 0;
 			long delay = time;
 			if(args.length == 3) {
 				offset = 1;
-				delay = Static.getInt(args[1], t);
+				delay = ArgumentValidation.getInt(args[1], t);
 			}
 			if(!(args[1 + offset].isInstanceOf(CClosure.TYPE))) {
 				throw new CRECastException(getName() + " expects a closure to be sent as the second argument", t);
@@ -361,7 +362,7 @@ public class Scheduling {
 		@Override
 		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			final TaskManager taskManager = environment.getEnv(GlobalEnv.class).GetTaskManager();
-			long time = Static.getInt(args[0], t);
+			long time = ArgumentValidation.getInt(args[0], t);
 			if(!(args[1].isInstanceOf(CClosure.TYPE))) {
 				throw new CRECastException(getName() + " expects a closure to be sent as the second argument", t);
 			}
@@ -466,7 +467,7 @@ public class Scheduling {
 					throw new CRENullPointerException("Null value sent to " + getName()
 							+ "(). Did you mean " + getName() + "(0)?", t);
 				}
-				StaticLayer.ClearFutureRunnable(Static.getInt32(args[0], t));
+				StaticLayer.ClearFutureRunnable(ArgumentValidation.getInt32(args[0], t));
 			} else {
 				throw new CREInsufficientArgumentsException("No id was passed to clear_task, and it's not running inside a task either.", t);
 			}
@@ -563,7 +564,7 @@ public class Scheduling {
 		public CString exec(Target t, Environment env, Mixed... args) {
 			Date now = new Date();
 			if(args.length >= 2 && !(args[1] instanceof CNull)) {
-				now = new Date(Static.getInt(args[1], t));
+				now = new Date(ArgumentValidation.getInt(args[1], t));
 			}
 			TimeZone timezone = TimeZone.getDefault();
 			if(args.length >= 3 && Construct.nval(args[2]) != null) {
@@ -1154,7 +1155,7 @@ public class Scheduling {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Integer id = (Integer) environment.getEnv(GlobalEnv.class).GetCustom("cron-task-id");
 			if(args.length == 1) {
-				id = (int) Static.getInt(args[0], t);
+				id = (int) ArgumentValidation.getInt(args[0], t);
 			}
 			if(id == null) {
 				throw new CRERangeException("No task ID provided, and not running from within a cron task.", t);

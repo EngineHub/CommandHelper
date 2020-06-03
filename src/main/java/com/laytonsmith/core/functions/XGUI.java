@@ -9,7 +9,6 @@ import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
@@ -89,10 +88,10 @@ public class XGUI {
 				title = args[0].val();
 			}
 			if(args.length > 1) {
-				width = Static.getInt32(args[1], t);
+				width = ArgumentValidation.getInt32(args[1], t);
 			}
 			if(args.length > 2) {
-				height = Static.getInt32(args[2], t);
+				height = ArgumentValidation.getInt32(args[2], t);
 			}
 			frame.setTitle(title);
 			frame.setSize(width, height);
@@ -150,7 +149,7 @@ public class XGUI {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			int id = Static.getInt32(args[0], t);
+			int id = ArgumentValidation.getInt32(args[0], t);
 			boolean show = true;
 			if(args.length > 1) {
 				show = ArgumentValidation.getBoolean(args[1], t);
@@ -204,12 +203,12 @@ public class XGUI {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			int windowID = Static.getInt32(args[0], t);
-			int x = Static.getInt32(args[1], t);
-			int y = Static.getInt32(args[2], t);
-			int red = Static.getInt32(args[3], t);
-			int green = Static.getInt32(args[4], t);
-			int blue = Static.getInt32(args[5], t);
+			int windowID = ArgumentValidation.getInt32(args[0], t);
+			int x = ArgumentValidation.getInt32(args[1], t);
+			int y = ArgumentValidation.getInt32(args[2], t);
+			int red = ArgumentValidation.getInt32(args[3], t);
+			int green = ArgumentValidation.getInt32(args[4], t);
+			int blue = ArgumentValidation.getInt32(args[5], t);
 			Window w = windows.get(windowID);
 			while(true) {
 				try {

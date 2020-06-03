@@ -3,9 +3,9 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.NonInheritImplements;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
@@ -98,7 +98,7 @@ public class CString extends CPrimitive implements Cloneable,
 
 	@Override
 	public final Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
-		int i = Static.getInt32(index, t);
+		int i = ArgumentValidation.getInt32(index, t);
 		return get(i, t);
 	}
 

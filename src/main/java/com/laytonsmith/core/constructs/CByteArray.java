@@ -3,8 +3,8 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.Sizes;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -507,7 +507,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 	@Override
 	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
-		int i = Static.getInt32(index, t);
+		int i = ArgumentValidation.getInt32(index, t);
 		byte b = getByte(i);
 		return new CInt(b, t);
 	}
@@ -565,7 +565,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 
 		@Override
 		public Mixed get(Mixed index, Target t) {
-			int i = Static.getInt32(index, t);
+			int i = ArgumentValidation.getInt32(index, t);
 			try {
 				return new CInt(backing[i], t);
 			} catch (ArrayIndexOutOfBoundsException e) {
