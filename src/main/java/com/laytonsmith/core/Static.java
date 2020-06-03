@@ -132,7 +132,9 @@ public final class Static {
 	 * @param construct
 	 * @param t
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getArray(Mixed, Target)} instead.
 	 */
+	@Deprecated
 	public static CArray getArray(Mixed construct, Target t) {
 		return ArgumentValidation.getArray(construct, t);
 	}
@@ -147,7 +149,9 @@ public final class Static {
 	 * @param t Code target
 	 * @param clazz The type expected.
 	 * @return The properly cast object.
+	 * @deprecated Use {@link ArgumentValidation#getArray(Mixed, Target)} instead.
 	 */
+	@Deprecated
 	public static <T extends Mixed> T getObject(Mixed construct, Target t, Class<T> clazz) {
 		return ArgumentValidation.getObject(construct, t, clazz);
 	}
@@ -172,7 +176,9 @@ public final class Static {
 	 *
 	 * @param c
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getNumber(Mixed, Target)} instead.
 	 */
+	@Deprecated
 	public static double getNumber(Mixed c, Target t) {
 		return ArgumentValidation.getNumber(c, t);
 	}
@@ -182,11 +188,21 @@ public final class Static {
 	 *
 	 * @param c
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getDouble(Mixed, Target)} instead.
 	 */
+	@Deprecated
 	public static double getDouble(Mixed c, Target t) {
 		return ArgumentValidation.getDouble(c, t);
 	}
 
+	/**
+	 * 
+	 * @param c
+	 * @param t
+	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getDouble32(Mixed, Target)} instead.
+	 */
+	@Deprecated
 	public static float getDouble32(Mixed c, Target t) {
 		return ArgumentValidation.getDouble32(c, t);
 	}
@@ -198,7 +214,9 @@ public final class Static {
 	 * @throws CRERangeException If the value would be truncated
 	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getInt(Mixed, Target)} instead.
 	 */
+	@Deprecated
 	public static long getInt(Mixed c, Target t) {
 		return ArgumentValidation.getInt(c, t);
 	}
@@ -213,7 +231,9 @@ public final class Static {
 	 * @throws CRERangeException If the value would be truncated
 	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getInt32(Mixed, Target)} instead.
 	 */
+	@Deprecated
 	public static int getInt32(Mixed c, Target t) {
 		return ArgumentValidation.getInt32(c, t);
 	}
@@ -228,7 +248,9 @@ public final class Static {
 	 * @throws CRERangeException If the value would be truncated
 	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getInt16(Mixed, Target)} instead.
 	 */
+	@Deprecated
 	public static short getInt16(Mixed c, Target t) {
 		return ArgumentValidation.getInt16(c, t);
 	}
@@ -243,7 +265,9 @@ public final class Static {
 	 * @throws CRERangeException If the value would be truncated
 	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getInt8(Mixed, Target)} instead.
 	 */
+	@Deprecated
 	public static byte getInt8(Mixed c, Target t) {
 		return ArgumentValidation.getInt8(c, t);
 	}
@@ -274,7 +298,9 @@ public final class Static {
 	 * @param c
 	 * @param t
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getObject(Mixed, Target, Class)} with {@link CPrimitive}.class instead.
 	 */
+	@Deprecated
 	public static CPrimitive getPrimitive(Mixed c, Target t) {
 		return ArgumentValidation.getObject(c, t, CPrimitive.class);
 	}
@@ -285,7 +311,9 @@ public final class Static {
 	 * @param c
 	 * @param t
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getByteArray(Mixed, Target)} instead.
 	 */
+	@Deprecated
 	public static CByteArray getByteArray(Mixed c, Target t) {
 		return ArgumentValidation.getByteArray(c, t);
 	}
@@ -295,7 +323,9 @@ public final class Static {
 	 *
 	 * @param c
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#anyDoubles(Mixed...)} instead.
 	 */
+	@Deprecated
 	public static boolean anyDoubles(Mixed... c) {
 		return ArgumentValidation.anyDoubles(c);
 	}
@@ -305,7 +335,9 @@ public final class Static {
 	 *
 	 * @param c
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#anyStrings(Mixed...)} instead.
 	 */
+	@Deprecated
 	public static boolean anyStrings(Mixed... c) {
 		return ArgumentValidation.anyStrings(c);
 	}
@@ -315,7 +347,9 @@ public final class Static {
 	 *
 	 * @param c
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#anyBooleans(Mixed...)} instead.
 	 */
+	@Deprecated
 	public static boolean anyBooleans(Mixed... c) {
 		return ArgumentValidation.anyBooleans(c);
 	}
@@ -325,7 +359,9 @@ public final class Static {
 	 *
 	 * @param c
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#anyNulls(Mixed...)} instead.
 	 */
+	@Deprecated
 	public static boolean anyNulls(Mixed... c) {
 		return ArgumentValidation.anyNulls(c);
 	}
