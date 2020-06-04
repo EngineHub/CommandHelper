@@ -106,18 +106,6 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions);
 
 	/**
-	 * Gets whether or not this function has static side effects. Static side effects are defined as side effects that
-	 * can occur in a statically type-safe program.
-	 * Examples:<br>
-	 * {@code @arr[0]} has side effects due to being able to throw an ArrayOutOfBoundsException.<br>
-	 * {@code @a[0] = 1} has side effects due to assigning a variable.<br>
-	 * {@code @a < @b} does not have static side effects, as static type safety prevents a CastException from
-	 * being thrown.
-	 * @return {@code true} if the function has static side effects, {@code false} otherwise.
-	 */
-	public boolean hasStaticSideEffects();
-
-	/**
 	 * If functions contain declarations or references, then these functions should create a new scope,
 	 * link it to the parent scope if it is allowed to perform lookups
 	 * in there, put the new declaration or reference in the new scope and return this new scope.

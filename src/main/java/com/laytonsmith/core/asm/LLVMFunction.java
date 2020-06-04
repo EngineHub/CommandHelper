@@ -128,15 +128,6 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 
 	/**
 	 * {@inheritDoc}
-	 * By default, {@code true} is returned.
-	 */
-	@Override
-	public boolean hasStaticSideEffects() {
-		return true; // Assuming that a function does 'something' is safe in terms of not optimizing it away.
-	}
-
-	/**
-	 * {@inheritDoc}
 	 * By default, the parent scope is passed to the first child, the result is passed to the second child, etc.
 	 * This method returns the scope as returned by the last child, or the parent scope if it does not have children.
 	 */
