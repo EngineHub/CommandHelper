@@ -14,6 +14,7 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
+import com.laytonsmith.core.compiler.analysis.Namespace;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
@@ -205,8 +206,10 @@ public class EventBinding {
 			Scope eventNameScope = analysis.linkScope(parentScope, eventName, env, exceptions);
 			Scope optionsScope = analysis.linkScope(eventNameScope, options, env, exceptions);
 			Scope prefilterScope = analysis.linkScope(optionsScope, prefilter, env, exceptions);
-			Scope[] eventObjScopes = analysis.linkParamScope(prefilterScope, prefilterScope, eventObj, env, exceptions);
-			Scope paramScope = eventObjScopes[0];
+			Scope paramScope = analysis.createNewScope();
+			paramScope.addSpecificParent(prefilterScope, Namespace.PROCEDURE);
+			Scope[] eventObjScopes = analysis.linkParamScope(paramScope, prefilterScope, eventObj, env, exceptions);
+			paramScope = eventObjScopes[0];
 			Scope valScope = eventObjScopes[1];
 			for(int paramInd = 4; paramInd < ast.numberOfChildren() - 1; paramInd++) {
 				ParseTree param = ast.getChildAt(paramInd);
