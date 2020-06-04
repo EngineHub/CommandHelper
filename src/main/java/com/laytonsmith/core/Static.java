@@ -1410,9 +1410,9 @@ public final class Static {
 		if(f.isAbsolute()) {
 			return f;
 		}
-		//Ok, it's not absolute, so we need to see if we're in cmdline mode or not.
-		//If so, we use the root directory, not the target.
-		if(env != null && InCmdLine(env, true)) {
+		// For relative paths, interpreter mode will use the root directory as base directory. The directory
+		// containing the target's file is used otherwise.
+		if(env != null && env.hasEnv(GlobalEnv.class) && env.getEnv(GlobalEnv.class).inInterpreterMode()) {
 			return new File(env.getEnv(GlobalEnv.class).GetRootFolder(), arg);
 		} else if(t.file() == null) {
 			throw new CREIOException("Unable to receive a non-absolute file with an unknown target", t);
