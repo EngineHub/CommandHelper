@@ -1303,13 +1303,17 @@ public final class Static {
 	/**
 	 * Generates a new environment, assuming that the jar has a folder next to it named CommandHelper, and that folder
 	 * is the root.
-	 *
+	 * @param install
+	 * @param inCmdlineMode - {@code true} to generate a cmdline environment, {@code false} otherwise.
+	 * @param inInterpreterMode - {@code true} to generate an intepreter environment, {@code false} otherwise.
 	 * @return
 	 * @throws IOException
 	 * @throws DataSourceException
 	 * @throws URISyntaxException
 	 */
-	public static Environment GenerateStandaloneEnvironment(boolean install) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+	public static Environment GenerateStandaloneEnvironment(
+			boolean install, boolean inCmdlineMode, boolean inInterpreterMode)
+			throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		File platformFolder = MethodScriptFileLocations.getDefault().getConfigDirectory();
 		if(install) {
 			Installer.Install(platformFolder);
@@ -1323,13 +1327,36 @@ public final class Static {
 		PersistenceNetwork persistenceNetwork = new PersistenceNetworkImpl(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 				new URI(URLEncoder.encode("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace('\\', '/'), "UTF-8")), options);
 		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"),
-				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork, platformFolder,
-				profiles, new TaskManagerImpl());
+				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork,
+				platformFolder, profiles, new TaskManagerImpl(), inCmdlineMode, inInterpreterMode);
 		gEnv.SetLabel(GLOBAL_PERMISSION);
 		return Environment.createEnvironment(gEnv, new CompilerEnvironment());
 	}
 
-	public static Environment GenerateStandaloneEnvironment() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+	/**
+	 * Generates a new environment, assuming that the jar has a folder next to it named CommandHelper, and that folder
+	 * is the root. This new environment is not in cmdline and interpreter mode.
+	 * @param install
+	 * @return
+	 * @throws IOException
+	 * @throws DataSourceException
+	 * @throws URISyntaxException
+	 */
+	public static Environment GenerateStandaloneEnvironment(boolean install)
+			throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+		return GenerateStandaloneEnvironment(install, false, false);
+	}
+
+	/**
+	 * Generates a new environment, assuming that the jar has a folder next to it named CommandHelper, and that folder
+	 * is the root. This new environment is not in cmdline and interpreter mode.
+	 * @return
+	 * @throws IOException
+	 * @throws DataSourceException
+	 * @throws URISyntaxException
+	 */
+	public static Environment GenerateStandaloneEnvironment()
+			throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		return GenerateStandaloneEnvironment(true);
 	}
 
@@ -1407,8 +1434,7 @@ public final class Static {
 		if(environment == null || !environment.hasEnv(GlobalEnv.class)) {
 			return defaultValue;
 		}
-		return environment.getEnv(GlobalEnv.class).GetCustom("cmdline") instanceof Boolean
-				&& (Boolean) environment.getEnv(GlobalEnv.class).GetCustom("cmdline");
+		return environment.getEnv(GlobalEnv.class).inCmdlineMode();
 	}
 
 	/**

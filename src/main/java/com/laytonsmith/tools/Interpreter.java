@@ -340,8 +340,7 @@ public final class Interpreter {
 		Installer.Install(MethodScriptFileLocations.getDefault().getConfigDirectory());
 		Installer.InstallCmdlineInterpreter();
 
-		env = Static.GenerateStandaloneEnvironment(false);
-		env.getEnv(GlobalEnv.class).SetCustom("cmdline", true);
+		env = Static.GenerateStandaloneEnvironment(false, true, false);
 		staticAnalysis = new StaticAnalysis(true);
 		if(Prefs.UseColors()) {
 			TermColors.EnableColors();

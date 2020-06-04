@@ -132,7 +132,7 @@ public class AliasCore {
 
 		GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
 				MethodScriptFileLocations.getDefault().getConfigDirectory(),
-				parent.profiles, new TaskManagerImpl());
+				parent.profiles, new TaskManagerImpl(), false, false);
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 		cEnv.SetCommandSender(sender);
 		cEnv.SetCommand(command);
@@ -263,7 +263,7 @@ public class AliasCore {
 			}
 			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
 					MethodScriptFileLocations.getDefault().getConfigDirectory(),
-					parent.profiles, new TaskManagerImpl());
+					parent.profiles, new TaskManagerImpl(), false, false);
 			gEnv.SetLabel(Static.GLOBAL_PERMISSION);
 			if(options.reloadExecutionQueue()) {
 				ProfilePoint stoppingExecutionQueue = parent.profiler.start("Stopping execution queues", LogLevel.VERBOSE);

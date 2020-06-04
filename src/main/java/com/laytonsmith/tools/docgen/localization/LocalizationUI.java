@@ -1354,7 +1354,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
 					pn,
 					MethodScriptFileLocations.getDefault().getTempDir(),
 					new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile()),
-					new TaskManagerImpl());
+					new TaskManagerImpl(), true, false);
 		} catch(URISyntaxException | IOException | DataSourceException | Profiles.InvalidProfileException ex) {
 			showError("Could not load Persistence Database! " + ex.getMessage());
 		}

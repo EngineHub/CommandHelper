@@ -90,7 +90,7 @@ public class Manager {
 		profiler = new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile());
 		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistenceNetwork,
 				CH_DIRECTORY, new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile()),
-				new TaskManagerImpl());
+				new TaskManagerImpl(), true, false);
 		cls();
 		pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
 

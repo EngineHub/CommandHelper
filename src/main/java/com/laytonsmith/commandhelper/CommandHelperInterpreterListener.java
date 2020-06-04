@@ -139,7 +139,7 @@ public class CommandHelperInterpreterListener implements Listener {
 		TokenStream stream = MethodScriptCompiler.lex(script, null, new File("Interpreter"), true);
 		GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler, plugin.persistenceNetwork,
 				CommandHelperFileLocations.getDefault().getConfigDirectory(),
-				plugin.profiles, new TaskManagerImpl());
+				plugin.profiles, new TaskManagerImpl(), false, true);
 		gEnv.SetDynamicScriptingMode(true);
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 		cEnv.SetPlayer(p);

@@ -1065,7 +1065,7 @@ public class Main {
 
 			String script = parsedArgs.getStringArgument();
 			File file = new File("Interpreter");
-			Environment env = Static.GenerateStandaloneEnvironment(true);
+			Environment env = Static.GenerateStandaloneEnvironment(true, true, true);
 			Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
 			MethodScriptCompiler.execute(script, file, true, env, envs, (s) -> {
 				System.out.println(s);
