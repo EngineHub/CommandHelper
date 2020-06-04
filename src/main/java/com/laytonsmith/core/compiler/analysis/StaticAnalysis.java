@@ -134,7 +134,6 @@ public class StaticAnalysis {
 		if(autoIncludesAnalysis != null) {
 			if(this.isMainAnalysis) {
 				this.startScope.addParent(autoIncludesAnalysis.endScope);
-				this.staticAnalyses.addAll(autoIncludesAnalysis.staticAnalyses);
 			}
 			this.globalScope = autoIncludesAnalysis.globalScope;
 		}
