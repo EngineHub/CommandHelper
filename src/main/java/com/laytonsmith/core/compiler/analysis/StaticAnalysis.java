@@ -245,27 +245,6 @@ public class StaticAnalysis {
 			}
 		}
 
-		// TODO - Remove if not useful anymore. MS allows proc overrides.
-//		// Generate compile error for duplicate procedure declarations.
-//		for(Scope scope : this.scopes) {
-//			for(Declaration decl : scope.getAllDeclarationsLocal(Namespace.PROCEDURE)) {
-//				if(decl instanceof ProcRootDeclaration) {
-//					continue; // These are not actual proc declarations, so skip them.
-//				}
-//				Set<Declaration> dupDecls = scope.getReachableDeclarations(Namespace.PROCEDURE, decl.getIdentifier());
-//				if(dupDecls.size() > 1) {
-//					dupDecls.remove(decl);
-//					// TODO - Generate only one exception with all targets in them.
-//					// TODO - Consider getting the earliest declaration only (instead of the last of each code path).
-//					for(Declaration dupDecl : dupDecls) {
-//						exceptions.add(new ConfigCompileException("Duplicate procedure declaration: Procedure "
-//								+ decl.getIdentifier() + " is already declared at "
-//								+ dupDecl.getTarget().toString(), decl.getTarget()));
-//					}
-//				}
-//			}
-//		}
-
 		// Resolve procedure references or add them as required-before-usage to the surrounding procedure.
 		Map<Scope, Set<Reference>> procReqRefMap = new HashMap<>();
 		for(Scope scope : this.scopes) {
@@ -517,69 +496,26 @@ public class StaticAnalysis {
 
 	private void handleIncludeRefs(Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
-
-		// Compile and get all (in)direct includes.
-		Set<IncludeReference> handledRefs = new HashSet<>();
-		Set<IncludeReference> linkedRefs = new HashSet<>();
-		this.compileIncludesLinkCycles(handledRefs, linkedRefs, new Stack<>(), env, envs, exceptions);
-
-		// Create a set containing only unhandled references.
-		Set<IncludeReference> unhandledRefs = new HashSet<>(handledRefs);
-		unhandledRefs.removeAll(linkedRefs);
-
-		// TODO - Remove assert and commented-out code when no longer needed. Scope linkage has moved elsewhere.
-//		System.out.println("Handled refs size: " + handledRefs.size());
-//		System.out.println("Linked refs size: " + linkedRefs.size());
-		assert unhandledRefs.size() == 0 : "Unhandled references after compileIncludesLinkCycles() call.";
-
-//		// Link all unhandled references.
-//		/*
-//		 * TODO - Should be done in order from children to parents.
-//		 * This allows for linking of 'leaves' (nodes for which all refs have been handled) before cloning things.
-//		 * When first cloning, include gaps are also cloned and still have to be handled.
-//		 */
-//		for(IncludeReference ref : unhandledRefs) {
-//
-//			// Get the static analysis of the include.
-//			File file = Static.GetFileFromArgument(ref.getIdentifier(), env, ref.getTarget(), null);
-//			StaticAnalysis includeAnalysis = IncludeCache.getStaticAnalysis(file, ref.getTarget());
-//			if(includeAnalysis == null) {
-//
-//				// The include did not compile, so ignore the include entirely.
-//				ref.getOutScope().setParent(ref.getInScope());
-//			} else {
-//
-//				// Link this include reference to a clone of the scope graph.
-//				// TODO - Make sure that this clone is linked first, as it otherwise remains unlinked.
-//				// TODO - Actually clone includeAnalysis (or at least its scopes).
-//				// TODO - Use addParent to allow multiple parents.
-//				includeAnalysis.startScope.setParent(ref.getInScope());
-//				ref.getOutScope().setParent(includeAnalysis.endScope);
-//			}
-//		}
+		this.compileIncludesLinkCycles(new HashSet<>(), new HashSet<>(), new Stack<>(), env, envs, exceptions);
 	}
 
 	/**
-	 * Compiles and caches all used includes. Links the scope graphs of cyclic includes, including their children,
-	 * but not their parents.
+	 * Compiles and caches all used includes. Directly links the scope graphs of cyclic includes, and links clones of
+	 * the scope graph of non-cyclic includes.
 	 * @param handledRefs - Supply an empty set. Will contain all handled references.
-	 * @param linkedRefs - Supply an empty set. Will contain all linked references
-	 * (that are part of an already-linked cycle).
+	 * @param linkedRefs - Supply an empty set. Will contain all linked references.
 	 * @param path - Supply an empty stack. Will be empty when this method returns.
 	 * @param env
 	 * @param envs
 	 * @param exceptions
-	 * @return {@code true} if this depth-first traversal included a cycle, {@code false} otherwise (used internally).
 	 */
-	private boolean compileIncludesLinkCycles(Set<IncludeReference> handledRefs, Set<IncludeReference> linkedRefs,
+	private void compileIncludesLinkCycles(Set<IncludeReference> handledRefs, Set<IncludeReference> linkedRefs,
 			Stack<IncludeReference> path, Environment env, Set<Class<? extends Environment.EnvironmentImpl>> envs,
 			Set<ConfigCompileException> exceptions) {
-		boolean containsCycle = false; // TODO - Remove cycle-awareness if no longer used.
 		for(IncludeReference includeRef : this.getIncludeRefs()) {
 
 			// Directly link scope graphs of cyclic includes.
 			if(path.contains(includeRef)) {
-				containsCycle = true;
 				Set<Scope> cycleScopes = new HashSet<>();
 				List<StaticAnalysis> cycleAnalyses = new ArrayList<>();
 				for(int i = path.size() - 1; i >= 0; i--) {
@@ -667,8 +603,7 @@ public class StaticAnalysis {
 
 			// Recurse on the include's analysis.
 			path.push(includeRef);
-			boolean childContainsCycle = includeAnalysis.compileIncludesLinkCycles(
-					handledRefs, linkedRefs, path, env, envs, exceptions);
+			includeAnalysis.compileIncludesLinkCycles(handledRefs, linkedRefs, path, env, envs, exceptions);
 			path.pop();
 
 			// Clone and link the include analysis if it has not yet been handled, and mark it as handled.
@@ -685,33 +620,7 @@ public class StaticAnalysis {
 				// Store the include's analyses for later analysis.
 				this.staticAnalyses.addAll(includeAnalysisClone.staticAnalyses);
 			}
-
-			// TODO - Remove commented-out code if no longer needed.
-//			// Directly link the include reference if it does not contain a cycle.
-//			// This links all includes from a cycle or non-cycle to non-cycle children.
-//			// Includes that have a cycle as child should clone the cycle, as the cycle shouldn't be able to perform
-//			// lookups in all parents.
-//			// TODO - There are cases where cloning is needed, even when there's no cycle. Always clone?
-//			if(childContainsCycle) {
-//				containsCycle = true;
-//
-//				// Link the include reference to a clone if it links to a cycle it is not part of.
-//				if(!linkedRefs.contains(includeRef)) {
-//					// TODO - Clone includeAnalysis (or at least its scopes).
-//					// TODO - Use addParent to allow multiple parents.
-//					includeAnalysis.startScope.setParent(includeRef.getInScope());
-//					includeRef.getOutScope().setParent(includeAnalysis.endScope);
-//				}
-//			} else {
-//
-//				// Directly link the include reference as it does not point to a cycle.
-//				linkedRefs.add(includeRef);
-//				// TODO - Use addParent to allow multiple parents.
-//				includeAnalysis.startScope.setParent(includeRef.getInScope());
-//				includeRef.getOutScope().setParent(includeAnalysis.endScope);
-//			}
 		}
-		return containsCycle; // TODO - Remove return value if unused.
 	}
 
 	/**
