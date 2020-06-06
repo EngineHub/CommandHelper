@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
+import java.util.TreeSet;
 
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
@@ -202,7 +203,6 @@ public class StaticAnalysis {
 			for(Declaration decl : scope.getAllDeclarationsLocal(Namespace.IVARIABLE_ASSIGN)) {
 
 				// Attempt to find ivariable declaration or another yet unclassified ivariable assign (excluding this).
-				// TODO - Do this for every code path, since if any path doesn't have a declaration, this should be it.
 				boolean declarationFound = !scope.getDeclarations(Namespace.IVARIABLE, decl.getIdentifier()).isEmpty()
 						|| scope.getReachableDeclarations(Namespace.IVARIABLE_ASSIGN, decl.getIdentifier()).size() > 1;
 
@@ -225,12 +225,21 @@ public class StaticAnalysis {
 				Set<Declaration> dupDecls = scope.getReachableDeclarations(Namespace.IVARIABLE, decl.getIdentifier());
 				if(dupDecls.size() > 1) {
 					dupDecls.remove(decl);
-					// TODO - Generate only one exception with all targets in them.
-					// TODO - Consider getting the earliest declaration only (instead of the last of each code path).
-					for(Declaration dupDecl : dupDecls) {
+					if(dupDecls.size() == 1) {
+						Declaration dupDecl = dupDecls.iterator().next();
 						exceptions.add(new ConfigCompileException("Duplicate variable declaration: Variable "
 								+ decl.getIdentifier() + " is already declared at "
 								+ dupDecl.getTarget().toString(), decl.getTarget()));
+					} else {
+						Set<Declaration> sortedDupDecls = new TreeSet<>(
+								(d1, d2) -> d1.getTarget().compareTo(d2.getTarget()));
+						sortedDupDecls.addAll(dupDecls);
+						String message = "Duplicate variable declaration: Variable " + decl.getIdentifier()
+								+ " is already defined at the following locations:";
+						for(Declaration dupDecl : sortedDupDecls) {
+							message += "\n" + dupDecl.getTarget().toString();
+						}
+						exceptions.add(new ConfigCompileException(message, decl.getTarget()));
 					}
 				}
 			}
