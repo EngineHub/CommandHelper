@@ -8,6 +8,9 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.compiler.analysis.Scope;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -20,7 +23,9 @@ import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.snapins.PackagePermission;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -32,8 +37,6 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	public LLVMFunction() {
 		shouldProfile = !this.getClass().isAnnotationPresent(noprofile.class);
 	}
-
-
 
 	@Override
 	public String docs() {
@@ -89,6 +92,59 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	@Override
 	public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 		throw new UnsupportedOperationException("Not supported.");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * By default, null is returned.
+	 */
+	@Override
+	public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+			Environment env, Set<ConfigCompileException> exceptions) {
+		return CClassType.AUTO; // No information is available about the return type.
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * By default, this calls {@link StaticAnalysis#typecheck(ParseTree, Set)} on the function's arguments and passes
+	 * them to {@link #getReturnType(Target, List, List, Set)} to get this function's return type.
+	 */
+	@Override
+	public CClassType typecheck(StaticAnalysis analysis,
+			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+
+		// Get and check the types of the function's arguments.
+		List<ParseTree> children = ast.getChildren();
+		List<CClassType> argTypes = new ArrayList<>(children.size());
+		List<Target> argTargets = new ArrayList<>(children.size());
+		for(ParseTree child : children) {
+			argTypes.add(analysis.typecheck(child, env, exceptions));
+			argTargets.add(child.getTarget());
+		}
+
+		// Return the return type of this function.
+		return this.getReturnType(ast.getTarget(), argTypes, argTargets, env, exceptions);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * By default, the parent scope is passed to the first child, the result is passed to the second child, etc.
+	 * This method returns the scope as returned by the last child, or the parent scope if it does not have children.
+	 */
+	@Override
+	public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
+			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+		Scope scope = parentScope;
+		for(ParseTree child : ast.getChildren()) {
+			scope = analysis.linkScope(scope, child, env, exceptions);
+		}
+		return scope;
+	}
+
+	@Override
+	public ParseTree postParseRewrite(ParseTree ast, Environment env,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+		return null;
 	}
 
 	@Override

@@ -28,6 +28,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
@@ -69,6 +70,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1028,7 +1030,7 @@ public class Main {
 			env.getEnv(CompilerEnvironment.class).setLogCompilerWarnings(false);
 			try {
 				try {
-					optimized = OptimizationUtilities.optimize(plain, null, envs, source);
+					optimized = OptimizationUtilities.optimize(plain, null, envs, source, true);
 				} catch (ConfigCompileException ex) {
 					Set<ConfigCompileException> group = new HashSet<>();
 					group.add(ex);
@@ -1065,7 +1067,8 @@ public class Main {
 
 			String script = parsedArgs.getStringArgument();
 			File file = new File("Interpreter");
-			Environment env = Static.GenerateStandaloneEnvironment(true);
+			Environment env = Static.GenerateStandaloneEnvironment(true,
+					EnumSet.of(RuntimeMode.CMDLINE, RuntimeMode.INTERPRETER));
 			Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
 			MethodScriptCompiler.execute(script, file, true, env, envs, (s) -> {
 				System.out.println(s);

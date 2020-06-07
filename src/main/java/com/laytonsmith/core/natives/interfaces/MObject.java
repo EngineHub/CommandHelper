@@ -2,7 +2,6 @@ package com.laytonsmith.core.natives.interfaces;
 
 import com.laytonsmith.annotations.nofield;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
@@ -107,13 +106,13 @@ public class MObject {
 					val = null;
 				} else {
 					if(fType == byte.class) {
-						val = Static.getInt8(value, t);
+						val = ArgumentValidation.getInt8(value, t);
 					} else if(fType == short.class) {
-						val = Static.getInt16(value, t);
+						val = ArgumentValidation.getInt16(value, t);
 					} else if(fType == int.class) {
-						val = Static.getInt32(value, t);
+						val = ArgumentValidation.getInt32(value, t);
 					} else if(fType == long.class) {
-						val = Static.getInt(value, t);
+						val = ArgumentValidation.getInt(value, t);
 					} else if(fType == char.class) {
 						if(value.val().length() == 0) {
 							val = null;
@@ -123,18 +122,18 @@ public class MObject {
 					} else if(fType == boolean.class) {
 						val = ArgumentValidation.getBoolean(value, t);
 					} else if(fType == float.class) {
-						val = Static.getDouble32(value, t);
+						val = ArgumentValidation.getDouble32(value, t);
 					} else if(fType == double.class) {
-						val = Static.getDouble(value, t);
+						val = ArgumentValidation.getDouble(value, t);
 					} else if(fType == MMap.class) {
-						CArray ca = Static.getArray(value, t);
+						CArray ca = ArgumentValidation.getArray(value, t);
 						MMap m = new MMap();
 						for(String key : ca.stringKeySet()) {
 							m.put(key, ca.get(key, t));
 						}
 						val = m;
 					} else if(fType == MList.class) {
-						CArray ca = Static.getArray(value, t);
+						CArray ca = ArgumentValidation.getArray(value, t);
 						MList m = new MList();
 						if(ca.inAssociativeMode()) {
 							throw new CRECastException("Expected non-associative array, but an associative array was found instead.", t);
@@ -146,7 +145,7 @@ public class MObject {
 					} else if(Construct.class.isAssignableFrom(fType)) {
 						val = value;
 					} else if(MObject.class.isAssignableFrom(fType)) {
-						CArray ca = Static.getArray(value, t);
+						CArray ca = ArgumentValidation.getArray(value, t);
 						val = MObject.Construct(fType, ca);
 					} else {
 						//Programming error.

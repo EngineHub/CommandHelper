@@ -4,6 +4,9 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.compiler.analysis.Scope;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -12,6 +15,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Note that to "activate" this class as a function, you must prefix the '@api' annotation to it.
@@ -73,6 +77,62 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * @throws CancelCommandException
 	 */
 	public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException;
+
+	/**
+	 * Gets the return type of this function, based on the types of the passed arguments.
+	 * @param t - The code target, used for setting the code target in thrown exceptions.
+	 * @param argTypes - The types of the passed arguments.
+	 * @param argTargets - The {@link Target}s belonging to the argTypes (in the same order).
+	 * @param env - The {@link Environment}, used for instanceof checks on types.
+	 * @param exceptions - A set to which all type errors will be added.
+	 * @return The return type of this function when invoked with the given argument types. If the return type
+	 * is unknown, {@link CClassType#AUTO} is returned, indicating that this value should be handled as dynamic
+	 * during static type checking.
+	 */
+	public CClassType getReturnType(Target t, List<CClassType> argTypes,
+			List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions);
+
+	/**
+	 * Typechecks this function, generating compile errors when types or signatures don't match.
+	 * This method is responsible for type checking the function arguments (child nodes of the passed AST node),
+	 * which can be done by calling this method on those child nodes.
+	 * @param analysis - The {@link StaticAnalysis}, used to resolve variable/proc/... references.
+	 * @param ast - The parse tree.
+	 * @param env - The {@link Environment}, used for instanceof checks on types.
+	 * @param exceptions - Any compile exceptions will be added to this set.
+	 * @return The return type of this function.
+	 */
+	public CClassType typecheck(StaticAnalysis analysis,
+			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions);
+
+	/**
+	 * If functions contain declarations or references, then these functions should create a new scope,
+	 * link it to the parent scope if it is allowed to perform lookups
+	 * in there, put the new declaration or reference in the new scope and return this new scope.
+	 * Functions are also responsible for calling this method on their children to further generate the scope graph.
+	 * @param analysis - The {@link StaticAnalysis}.
+	 * @param parentScope - The current scope.
+	 * @param ast - The abstract syntax tree representing this function.
+	 * @param env - The environment.
+	 * @param exceptions - A set to put compile errors in.
+	 * @return The new (linked) scope, or the parent scope if this function does not require a new scope.
+	 */
+	public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
+			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions);
+
+	/**
+	 * Allows functions to perform a rewrite step to rewrite the AST as received from the parser to a valid
+	 * executable AST. Optimizations should not yet be performed in this rewrite step.
+	 * Traversal is pre-order depth-first.
+	 * @param ast - The abstract syntax tree representing this function.
+	 * @param env - The environment.
+	 * @param envs - The set of expected environment classes at runtime.
+	 * @param exceptions - A set to put compile errors in.
+	 * @return The rewritten AST node that should completely replace the AST node representing this function, or
+	 * {@code null} to not replace this AST node.
+	 */
+	public ParseTree postParseRewrite(ParseTree ast, Environment env,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions);
 
 	/**
 	 * If a function needs a code tree instead of a resolved construct, it should return true here. Most functions will

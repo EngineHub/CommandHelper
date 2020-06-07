@@ -5,9 +5,9 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.FullyQualifiedClassName;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
@@ -139,11 +139,11 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		}
 		String message = exception.get("message", t).val();
 		List<StackTraceElement> st = new ArrayList<>();
-		for(Mixed consStElement : Static.getArray(exception.get("stackTrace", t), t).asList()) {
-			CArray stElement = Static.getArray(consStElement, t);
-			int line = Static.getInt32(stElement.get("line", t), t);
+		for(Mixed consStElement : ArgumentValidation.getArray(exception.get("stackTrace", t), t).asList()) {
+			CArray stElement = ArgumentValidation.getArray(consStElement, t);
+			int line = ArgumentValidation.getInt32(stElement.get("line", t), t);
 			File f = new File(stElement.get("file", t).val());
-			int col = Static.getInt32(stElement.get("col", t), t);
+			int col = ArgumentValidation.getInt32(stElement.get("col", t), t);
 			st.add(new StackTraceElement(stElement.get("id", t).val(), new Target(line, f, col)));
 		}
 		// Now we have parsed everything into POJOs

@@ -6,7 +6,10 @@ import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -72,7 +75,23 @@ public class InstanceofUtil {
 			// TODO: Need to put the return type here, so we can work with this, but for now, just always return false
 			return false;
 		}
-		for(CClassType c : getAllCastableClasses(value.typeof(), env)) {
+		return isInstanceof(value.typeof(), instanceofThis, env);
+	}
+
+	/**
+	 * Returns true whether or not a given MethodScript type is an instance of the specified MethodScript type.
+	 *
+	 * @param type The type to check for
+	 * @param instanceofThis The string type to check. This must be the fully qualified name.
+	 * @param env
+	 * @return
+	 */
+	public static boolean isInstanceof(CClassType type, FullyQualifiedClassName instanceofThis, Environment env) {
+		Static.AssertNonNull(instanceofThis, "instanceofThis may not be null");
+		if(instanceofThis.getFQCN().equals("auto")) {
+			return true;
+		}
+		for(CClassType c : getAllCastableClasses(type, env)) {
 			FullyQualifiedClassName typeof = c.getFQCN();
 			if(typeof != null && typeof.equals(instanceofThis)) {
 				return true;
@@ -103,6 +122,35 @@ public class InstanceofUtil {
 	 */
 	public static boolean isInstanceof(Mixed value, CClassType instanceofThis, Environment env) {
 		return isInstanceof(value, instanceofThis.getFQCN(), env);
+	}
+
+	private static final Map<CClassType, Set<CClassType>> ISINSTANCEOF_CACHE = new HashMap<>();
+
+	/**
+	 * Returns whether or not a given MethodScript type is an instance of the specified MethodScript type.
+	 *
+	 * @param type The type to check for
+	 * @param instanceofThis The CClassType to check
+	 * @param env
+	 * @return
+	 */
+	public static boolean isInstanceof(CClassType type, CClassType instanceofThis, Environment env) {
+		Static.AssertNonNull(instanceofThis, "instanceofThis may not be null");
+
+		// Return true for AUTO, as everything can be used as AUTO.
+		if(instanceofThis == CClassType.AUTO) {
+			return true;
+		}
+
+		// Get cached result or compute and cache result.
+		Set<CClassType> castableClasses = ISINSTANCEOF_CACHE.get(type);
+		if(castableClasses == null) {
+			castableClasses = getAllCastableClasses(type, env);
+			ISINSTANCEOF_CACHE.put(type, castableClasses);
+		}
+
+		// Return the result.
+		return castableClasses.contains(instanceofThis);
 	}
 
 	private static FullyQualifiedClassName typeof(Class<? extends Mixed> c) {

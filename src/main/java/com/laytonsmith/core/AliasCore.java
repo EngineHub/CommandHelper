@@ -10,10 +10,12 @@ import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -45,6 +47,7 @@ import java.io.Writer;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -131,7 +134,7 @@ public class AliasCore {
 
 		GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
 				MethodScriptFileLocations.getDefault().getConfigDirectory(),
-				parent.profiles, new TaskManagerImpl());
+				parent.profiles, new TaskManagerImpl(), EnumSet.of(RuntimeMode.EMBEDDED));
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 		cEnv.SetCommandSender(sender);
 		cEnv.SetCommand(command);
@@ -262,7 +265,7 @@ public class AliasCore {
 			}
 			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
 					MethodScriptFileLocations.getDefault().getConfigDirectory(),
-					parent.profiles, new TaskManagerImpl());
+					parent.profiles, new TaskManagerImpl(), EnumSet.of(RuntimeMode.EMBEDDED));
 			gEnv.SetLabel(Static.GLOBAL_PERMISSION);
 			if(options.reloadExecutionQueue()) {
 				ProfilePoint stoppingExecutionQueue = parent.profiler.start("Stopping execution queues", LogLevel.VERBOSE);
@@ -362,6 +365,16 @@ public class AliasCore {
 				autoIncludes = localPackages.getAutoIncludes();
 
 				ProfilePoint compilerMS = parent.profiler.start("Compilation of MS files in Local Packages", LogLevel.VERBOSE);
+
+				// Set and analyze auto includes for static analysis.
+				Set<ConfigCompileException> compileExceptions = new HashSet<>();
+				StaticAnalysis.setAndAnalyzeAutoIncludes(
+						this.autoIncludes, env, env.getEnvClasses(), compileExceptions);
+				for(ConfigCompileException ex : compileExceptions) {
+					ConfigRuntimeException.HandleUncaughtException(ex, "Compile error in script."
+							+ " Compilation will attempt to continue, however.", player);
+				}
+
 				try {
 					env.getEnv(CommandHelperEnvironment.class).SetCommandSender(Static.getServer().getConsole());
 					MethodScriptCompiler.registerAutoIncludes(env, null);
@@ -724,9 +737,10 @@ public class AliasCore {
 			for(FileInfo fi : ms) {
 				boolean exception = false;
 				try {
+					StaticAnalysis analysis = new StaticAnalysis(true);
 					MethodScriptCompiler.execute(MethodScriptCompiler.compile(
-							MethodScriptCompiler.lex(fi.contents, env, fi.file, true), env, env.getEnvClasses()),
-							env, null, null);
+							MethodScriptCompiler.lex(fi.contents, env, fi.file, true),
+							env, env.getEnvClasses(), analysis), env, null, null);
 				} catch (ConfigCompileGroupException e) {
 					exception = true;
 					ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath()

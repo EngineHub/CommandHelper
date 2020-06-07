@@ -14,8 +14,12 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.analysis.Scope;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.IVariable;
@@ -29,11 +33,13 @@ import com.laytonsmith.core.snapins.PackagePermission;
 import com.laytonsmith.tools.docgen.DocGenTemplates;
 import com.laytonsmith.tools.docgen.DocGenTemplates.Generator.GenerateException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 /**
  *
@@ -48,7 +54,7 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	/**
-	 * {@inheritDocs}
+	 * {@inheritDoc}
 	 * 
 	 * By default, we return CVoid.
 	 *
@@ -61,6 +67,106 @@ public abstract class AbstractFunction implements Function {
 	@Override
 	public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 		return CVoid.VOID;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * By default, {@link CClassType#AUTO} is returned.
+	 */
+	@Override
+	public CClassType getReturnType(Target t, List<CClassType> argTypes,
+			List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+		return CClassType.AUTO; // No information is available about the return type.
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * By default, this calls {@link StaticAnalysis#typecheck(ParseTree, Set)} on the function's arguments and passes
+	 * them to {@link #getReturnType(Target, List, List, Set)} to get this function's return type.
+	 */
+	@Override
+	public CClassType typecheck(StaticAnalysis analysis,
+			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+
+		// Get and check the types of the function's arguments.
+		List<ParseTree> children = ast.getChildren();
+		List<CClassType> argTypes = new ArrayList<>(children.size());
+		List<Target> argTargets = new ArrayList<>(children.size());
+		for(ParseTree child : children) {
+			argTypes.add(analysis.typecheck(child, env, exceptions));
+			argTargets.add(child.getTarget());
+		}
+
+		// Return the return type of this function.
+		return this.getReturnType(ast.getTarget(), argTypes, argTargets, env, exceptions);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * By default, the parent scope is passed to the first child, the result is passed to the second child, etc.
+	 * This method returns the scope as returned by the last child, or the parent scope if it does not have children.
+	 */
+	@Override
+	public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
+			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+		Scope scope = parentScope;
+		for(ParseTree child : ast.getChildren()) {
+			scope = analysis.linkScope(scope, child, env, exceptions);
+		}
+		return scope;
+	}
+
+	/**
+	 * Functions that use lazy evaluation where the first argument is always evaluated, and later arguments might not
+	 * be evaluated depending on the outcome of previous arguments.
+	 * @param analysis - The {@link StaticAnalysis}.
+	 * @param parentScope - The current scope.
+	 * @param ast - The abstract syntax tree representing this function.
+	 * @param env - The environment.
+	 * @param exceptions - A set to put compile errors in.
+	 * @return The new (linked) scope from the first argument, or the parent scope if no arguments are available or
+	 * if this function does not require a new scope.
+	 */
+	protected Scope linkScopeLazy(StaticAnalysis analysis, Scope parentScope,
+			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+		if(ast.numberOfChildren() >= 1) {
+
+			// Get this lazy function's name.
+			String funcName = ((CFunction) ast.getData()).val();
+
+			// Create a stack with the function's arguments.
+			Stack<ParseTree> argsStack = new Stack<>();
+			for(int i = ast.numberOfChildren() - 1; i >= 0; i--) {
+				argsStack.push(ast.getChildAt(i));
+			}
+
+			// Handle each argument, unfolding children that represent the same lazy function.
+			// This essentially mimics optimization and(and(a, b), c) -> and(a, b, c).
+			// Omitting this optimization causes 'c' not to be able to resolve in 'b' its scope.
+			Scope firstArgScope = null;
+			Scope lastArgScope = null;
+			while(!argsStack.empty()) {
+				ParseTree arg = argsStack.pop();
+
+				// Unfold children that represent the same lazy function.
+				if(arg.getData() instanceof CFunction && ((CFunction) arg.getData()).val().equals(funcName)) {
+					for(int i = arg.numberOfChildren() - 1; i >= 0; i--) {
+						argsStack.push(arg.getChildAt(i));
+					}
+					continue;
+				}
+
+				// Handle 'normal' argument. Order: arg1 -> ((arg2? -> arg3?) -> ...) (lazy evaluation).
+				if(firstArgScope == null) {
+					firstArgScope = analysis.linkScope(parentScope, arg, env, exceptions);
+					lastArgScope = firstArgScope;
+				} else {
+					lastArgScope = analysis.linkScope(lastArgScope, arg, env, exceptions);
+				}
+			}
+			return firstArgScope;
+		}
+		return parentScope;
 	}
 
 	/**
@@ -82,6 +188,12 @@ public abstract class AbstractFunction implements Function {
 	@Override
 	public final boolean appearInDocumentation() {
 		return this.getClass().getAnnotation(hide.class) == null;
+	}
+
+	@Override
+	public ParseTree postParseRewrite(ParseTree ast, Environment env,
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+		return null;
 	}
 
 	/**

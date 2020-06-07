@@ -44,26 +44,26 @@ public class TestStatic {
 
 	@Test
 	public void testGetNumber() {
-		assertEquals(1.0, Static.getNumber(C.String("1.0"), t), 0.0);
-		assertEquals(1.0, Static.getNumber(C.String("1"), t), 0.0);
-		assertEquals(1.0, Static.getNumber(C.Int(1), t), 0.0);
-		assertEquals(1.0, Static.getNumber(C.Double(1.0), t), 0.0);
+		assertEquals(1.0, ArgumentValidation.getNumber(C.String("1.0"), t), 0.0);
+		assertEquals(1.0, ArgumentValidation.getNumber(C.String("1"), t), 0.0);
+		assertEquals(1.0, ArgumentValidation.getNumber(C.Int(1), t), 0.0);
+		assertEquals(1.0, ArgumentValidation.getNumber(C.Double(1.0), t), 0.0);
 	}
 
 	@Test
 	public void testGetDouble() {
-		assertEquals(1.0, Static.getDouble(C.String("1.0"), t), 0.0);
-		assertEquals(1.0, Static.getDouble(C.String("1"), t), 0.0);
-		assertEquals(1.0, Static.getDouble(C.Int(1), t), 0.0);
-		assertEquals(1.0, Static.getDouble(C.Double(1.0), t), 0.0);
+		assertEquals(1.0, ArgumentValidation.getDouble(C.String("1.0"), t), 0.0);
+		assertEquals(1.0, ArgumentValidation.getDouble(C.String("1"), t), 0.0);
+		assertEquals(1.0, ArgumentValidation.getDouble(C.Int(1), t), 0.0);
+		assertEquals(1.0, ArgumentValidation.getDouble(C.Double(1.0), t), 0.0);
 	}
 
 	@Test
 	public void testGetInt() {
-		assertEquals(1, Static.getInt(C.Int(1), t));
-		assertEquals(1, Static.getInt(C.String("1"), t));
+		assertEquals(1, ArgumentValidation.getInt(C.Int(1), t));
+		assertEquals(1, ArgumentValidation.getInt(C.String("1"), t));
 		try {
-			Static.getInt(C.Double(1.0), t);
+			ArgumentValidation.getInt(C.Double(1.0), t);
 			fail("Should not have been able to parse 1.0 as an int");
 		} catch (ConfigRuntimeException e) {
 			// Test Passed.
@@ -81,20 +81,20 @@ public class TestStatic {
 
 	@Test
 	public void testAnyDoubles() {
-		assertTrue(Static.anyDoubles(C.Int(0), C.Int(1), C.Double(1)));
-		assertFalse(Static.anyDoubles(C.Int(1)));
+		assertTrue(ArgumentValidation.anyDoubles(C.Int(0), C.Int(1), C.Double(1)));
+		assertFalse(ArgumentValidation.anyDoubles(C.Int(1)));
 	}
 
 	@Test
 	public void testAnyStrings() {
-		assertTrue(Static.anyStrings(C.Int(0), C.Int(1), C.String("")));
-		assertFalse(Static.anyStrings(C.Int(1)));
+		assertTrue(ArgumentValidation.anyStrings(C.Int(0), C.Int(1), C.String("")));
+		assertFalse(ArgumentValidation.anyStrings(C.Int(1)));
 	}
 
 	@Test
 	public void testAnyBooleans() {
-		assertTrue(Static.anyBooleans(C.Int(0), C.Int(1), C.Boolean(true)));
-		assertFalse(Static.anyBooleans(C.Int(1)));
+		assertTrue(ArgumentValidation.anyBooleans(C.Int(0), C.Int(1), C.Boolean(true)));
+		assertFalse(ArgumentValidation.anyBooleans(C.Int(1)));
 	}
 
 	@Test

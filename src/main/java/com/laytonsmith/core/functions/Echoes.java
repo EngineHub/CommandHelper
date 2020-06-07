@@ -299,9 +299,9 @@ public class Echoes {
 			}
 
 			if(args.length > 3) {
-				fadein = Static.getInt32(args[2 + offset], t);
-				stay = Static.getInt32(args[3 + offset], t);
-				fadeout = Static.getInt32(args[4 + offset], t);
+				fadein = ArgumentValidation.getInt32(args[2 + offset], t);
+				stay = ArgumentValidation.getInt32(args[3 + offset], t);
+				fadeout = ArgumentValidation.getInt32(args[4 + offset], t);
 			}
 
 			player.sendTitle(Construct.nval(args[offset]), Construct.nval(args[1 + offset]), fadein, stay, fadeout);

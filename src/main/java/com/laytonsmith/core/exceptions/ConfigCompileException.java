@@ -8,7 +8,7 @@ import java.util.Objects;
  *
  *
  */
-public class ConfigCompileException extends Exception {
+public class ConfigCompileException extends Exception implements Comparable<ConfigCompileException> {
 
 	final String message;
 	final int lineNum;
@@ -114,6 +114,19 @@ public class ConfigCompileException extends Exception {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * This implementation can be used to sort {@link ConfigCompileException}s first on {@link Target} and then on
+	 * exception message.
+	 */
+	@Override
+	public int compareTo(ConfigCompileException cre) {
+		int ret = this.t.compareTo(cre.t);
+		if(ret != 0) {
+			return ret;
+		}
+		return this.message.compareTo(cre.message);
 	}
 
 }

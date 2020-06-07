@@ -4,10 +4,10 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.seealso;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CFunction;
@@ -418,7 +418,7 @@ public class Regex {
 			 */
 			int limit = Integer.MAX_VALUE - 1;
 			if(args.length >= 3) {
-				limit = Static.getInt32(args[2], t);
+				limit = ArgumentValidation.getInt32(args[2], t);
 			}
 			String[] rsplit = pattern.split(subject, limit + 1);
 			CArray ret = new CArray(t);

@@ -353,7 +353,7 @@ public class EntityEvents {
 			if(event instanceof MCEntityExplodeEvent) {
 				MCEntityExplodeEvent e = (MCEntityExplodeEvent) event;
 				if(key.equals("yield")) {
-					e.setYield(Static.getDouble32(value, value.getTarget()));
+					e.setYield(ArgumentValidation.getDouble32(value, value.getTarget()));
 					return true;
 				}
 				if(key.equals("blocks")) {
@@ -702,7 +702,7 @@ public class EntityEvents {
 			if(event instanceof MCEntityDeathEvent) {
 				MCEntityDeathEvent e = (MCEntityDeathEvent) event;
 				if(key.equals("xp")) {
-					e.setDroppedExp(Static.getInt32(value, value.getTarget()));
+					e.setDroppedExp(ArgumentValidation.getInt32(value, value.getTarget()));
 					return true;
 				}
 				if(key.equals("drops")) {
@@ -894,7 +894,7 @@ public class EntityEvents {
 				BindableEvent event) {
 			MCEntityDamageEvent e = (MCEntityDamageEvent) event;
 			if(key.equals("amount")) {
-				e.setDamage(Static.getDouble(value, value.getTarget()));
+				e.setDamage(ArgumentValidation.getDouble(value, value.getTarget()));
 				return true;
 			}
 			return false;
@@ -2070,7 +2070,7 @@ public class EntityEvents {
 			if(event instanceof MCEntityRegainHealthEvent) {
 				MCEntityRegainHealthEvent e = (MCEntityRegainHealthEvent) event;
 				if(key.equalsIgnoreCase("amount")) {
-					e.setAmount(Static.getDouble(value, value.getTarget()));
+					e.setAmount(ArgumentValidation.getDouble(value, value.getTarget()));
 					return true;
 				}
 			}
@@ -2169,13 +2169,13 @@ public class EntityEvents {
 				if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
 					if(key.equalsIgnoreCase("creationradius")) {
 						e.useTravelAgent(true);
-						e.getPortalTravelAgent().setCreationRadius(Static.getInt32(value, value.getTarget()));
+						e.getPortalTravelAgent().setCreationRadius(ArgumentValidation.getInt32(value, value.getTarget()));
 						return true;
 					}
 
 					if(key.equalsIgnoreCase("searchradius")) {
 						e.useTravelAgent(true);
-						e.getPortalTravelAgent().setSearchRadius(Static.getInt32(value, value.getTarget()));
+						e.getPortalTravelAgent().setSearchRadius(ArgumentValidation.getInt32(value, value.getTarget()));
 						return true;
 					}
 				}

@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.MathUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
@@ -12,6 +13,7 @@ import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
@@ -20,10 +22,11 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
+import com.laytonsmith.core.compiler.analysis.Scope;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
@@ -201,6 +204,37 @@ public class Exceptions {
 		}
 
 		@Override
+		@SuppressWarnings({"checkstyle:fallthrough", "checkstyle:defaultcomeslast"}) // Intended for control flow.
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			int numArgs = ast.numberOfChildren();
+			Scope catchParentScope = parentScope;
+			switch(numArgs) {
+				default: // Too many arguments, just analyze the first 4, this will cause a compile error later.
+				case 4: { // try(tryCode, exParam, catchCode, exTypes).
+					ParseTree exTypes = ast.getChildAt(3);
+					analysis.linkScope(parentScope, exTypes, env, exceptions);
+				}
+				case 3: { // try(tryCode, exParam, catchCode).
+					ParseTree exParam = ast.getChildAt(1);
+					Scope[] scopes = analysis.linkParamScope(parentScope, parentScope, exParam, env, exceptions);
+					catchParentScope = scopes[0]; // paramScope.
+				}
+				case 2: { // try(tryCode, [exParam], catchCode).
+					ParseTree catchCode = ast.getChildAt(numArgs == 2 ? 1 : 2);
+					analysis.linkScope(catchParentScope, catchCode, env, exceptions);
+				}
+				case 1: { // try(tryCode).
+					ParseTree tryCode = ast.getChildAt(0);
+					analysis.linkScope(parentScope, tryCode, env, exceptions);
+				}
+				case 0: {
+					return parentScope;
+				}
+			}
+		}
+
+		@Override
 		public boolean useSpecialExec() {
 			return true;
 		}
@@ -298,7 +332,7 @@ public class Exceptions {
 				try {
 					// Exception type
 					// We need to reverse the excpetion into an object
-					throw ObjectGenerator.GetGenerator().exception(Static.getArray(args[0], t), t, env);
+					throw ObjectGenerator.GetGenerator().exception(ArgumentValidation.getArray(args[0], t), t, env);
 				} catch (ClassNotFoundException ex) {
 					throw new CRECastException(ex.getMessage(), t);
 				}
@@ -320,7 +354,7 @@ public class Exceptions {
 				arguments.add(t);
 				if(args.length == 3) {
 					classes.add(Throwable.class);
-					arguments.add(new CRECausedByWrapper(Static.getArray(args[2], t)));
+					arguments.add(new CRECausedByWrapper(ArgumentValidation.getArray(args[2], t)));
 				}
 				CREThrowable throwable = (CREThrowable) ReflectionUtils.newInstance(c, classes.toArray(new Class[classes.size()]), arguments.toArray());
 				throw throwable;
@@ -502,6 +536,33 @@ public class Exceptions {
 			}
 
 			return CVoid.VOID;
+		}
+
+		@Override
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			if(ast.numberOfChildren() >= 1) {
+
+				// Handle try code.
+				ParseTree tryCode = ast.getChildAt(0);
+				analysis.linkScope(parentScope, tryCode, env, exceptions);
+
+				// Handle catch blocks with a catch variable.
+				for(int i = 1; i < ast.numberOfChildren() - 1; i += 2) {
+					ParseTree exParam = ast.getChildAt(i);
+					ParseTree catchCode = ast.getChildAt(i + 1);
+					Scope[] scopes = analysis.linkParamScope(parentScope, parentScope, exParam, env, exceptions);
+					Scope exParamScope = scopes[0]; // paramScope.
+					analysis.linkScope(exParamScope, catchCode, env, exceptions);
+				}
+
+				// Handle optional last catch block.
+				if(MathUtils.isEven(ast.numberOfChildren())) {
+					ParseTree catchCode = ast.getChildAt(ast.numberOfChildren() - 1);
+					analysis.linkScope(parentScope, catchCode, env, exceptions);
+				}
+			}
+			return parentScope;
 		}
 
 		@Override

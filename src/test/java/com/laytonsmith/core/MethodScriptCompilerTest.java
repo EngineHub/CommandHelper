@@ -329,7 +329,7 @@ public class MethodScriptCompilerTest {
 				+ "_out('hello')\n"
 				+ "assign(@j, 'goodbye')\n"
 				+ "_out('world')\n";
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, null, true), null, envs), env, null, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, null, true), null, envs, null), env, null, null);
 		verify(fakePlayer).sendMessage("@i is currently 0");
 		verify(fakePlayer).sendMessage("@i is currently hello and @j is null");
 		verify(fakePlayer).sendMessage("@i is currently world and @j is null");

@@ -6,8 +6,8 @@ import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
@@ -143,7 +143,8 @@ public class ResourceManager {
 					}, t);
 					break;
 				case RANDOM:
-					resource = new CResource<>(new Random(Static.getInt(data, t)), new CResource.ResourceToString() {
+					resource = new CResource<>(new Random(
+							ArgumentValidation.getInt(data, t)), new CResource.ResourceToString() {
 						@Override
 						public String getString(CResource res) {
 							return res.getResource().toString();

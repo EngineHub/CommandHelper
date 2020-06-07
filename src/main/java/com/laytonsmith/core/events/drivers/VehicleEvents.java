@@ -392,7 +392,7 @@ public class VehicleEvents {
 			int threshold = 1;
 			Map<String, Mixed> prefilters = event.getPrefilter();
 			if(prefilters.containsKey("threshold")) {
-				threshold = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
+				threshold = ArgumentValidation.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
 			}
 			THRESHOLD_LIST.add(threshold);
 		}
@@ -402,14 +402,14 @@ public class VehicleEvents {
 			int threshold = 1;
 			Map<String, Mixed> prefilters = event.getPrefilter();
 			if(prefilters.containsKey("threshold")) {
-				threshold = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
+				threshold = ArgumentValidation.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
 			}
 			for(BoundEvent b : EventUtils.GetEvents(event.getDriver())) {
 				if(b.getId().equals(event.getId())) {
 					continue;
 				}
 				if(b.getPrefilter().containsKey("threshold")) {
-					if(threshold == Static.getInt(b.getPrefilter().get("threshold"), Target.UNKNOWN)) {
+					if(threshold == ArgumentValidation.getInt(b.getPrefilter().get("threshold"), Target.UNKNOWN)) {
 						return;
 					}
 				}
@@ -440,7 +440,7 @@ public class VehicleEvents {
 			if(e instanceof MCVehicleMoveEvent) {
 				MCVehicleMoveEvent event = (MCVehicleMoveEvent) e;
 				if(prefilter.containsKey("threshold")) {
-					if(Static.getInt(prefilter.get("threshold"), Target.UNKNOWN) != event.getThreshold()) {
+					if(ArgumentValidation.getInt(prefilter.get("threshold"), Target.UNKNOWN) != event.getThreshold()) {
 						return false;
 					}
 				} else if(event.getThreshold() != 1) {

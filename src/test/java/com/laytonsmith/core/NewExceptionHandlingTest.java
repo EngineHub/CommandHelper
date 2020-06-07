@@ -35,7 +35,7 @@ public class NewExceptionHandlingTest {
 	}
 
 	public String optimize(String script) throws Exception {
-		return OptimizationUtilities.optimize(script, null, envs, null);
+		return OptimizationUtilities.optimize(script, null, envs, null, true);
 	}
 
 	MCPlayer fakePlayer;

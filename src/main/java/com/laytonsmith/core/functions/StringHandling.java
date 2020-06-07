@@ -838,10 +838,10 @@ public class StringHandling {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			try {
 				String s = args[0].val();
-				int begin = Static.getInt32(args[1], t);
+				int begin = ArgumentValidation.getInt32(args[1], t);
 				int end;
 				if(args.length == 3) {
-					end = Static.getInt32(args[2], t);
+					end = ArgumentValidation.getInt32(args[2], t);
 				} else {
 					end = s.length();
 				}
@@ -1315,7 +1315,7 @@ public class StringHandling {
 			String string = args[1].val();
 			int limit = Integer.MAX_VALUE;
 			if(args.length >= 3) {
-				limit = Static.getInt32(args[2], t);
+				limit = ArgumentValidation.getInt32(args[2], t);
 			}
 			int sp = 0;
 			if(split.length() == 0) {
@@ -1449,7 +1449,7 @@ public class StringHandling {
 			if(Conversion.isValid(c)) {
 				if(c == 't' || c == 'T') {
 					//Datetime, parse as long
-					o = Static.getInt(arg, t);
+					o = ArgumentValidation.getInt(arg, t);
 				} else if(Conversion.isCharacter(c)) {
 					//Character, parse as string, and verify it's of length 1
 					String s = arg.val();
@@ -1460,10 +1460,10 @@ public class StringHandling {
 					o = s.charAt(0);
 				} else if(Conversion.isFloat(c)) {
 					//Float, parse as double
-					o = Static.getDouble(arg, t);
+					o = ArgumentValidation.getDouble(arg, t);
 				} else if(Conversion.isInteger(c)) {
 					//Integer, parse as long
-					o = Static.getInt(arg, t);
+					o = ArgumentValidation.getInt(arg, t);
 				} else {
 					//Further processing is needed
 					if(c == Conversion.BOOLEAN || c == Conversion.BOOLEAN_UPPER) {
@@ -1974,7 +1974,7 @@ public class StringHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = Static.getByteArray(args[0], t);
+			CByteArray ba = ArgumentValidation.getByteArray(args[0], t);
 			String encoding = "UTF-8";
 			if(args.length == 2) {
 				encoding = args[1].val();
@@ -2119,7 +2119,7 @@ public class StringHandling {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			try {
-				return new CString(new String(Character.toChars(Static.getInt32(args[0], t))), t);
+				return new CString(new String(Character.toChars(ArgumentValidation.getInt32(args[0], t))), t);
 			} catch (IllegalArgumentException ex) {
 				throw new CRERangeException("Code point out of range: " + args[0].val(), t);
 			}
@@ -2305,7 +2305,7 @@ public class StringHandling {
 				return CNull.NULL;
 			}
 			String string = args[0].val();
-			int times = Static.getInt32(args[1], t);
+			int times = ArgumentValidation.getInt32(args[1], t);
 			if(times < 0) {
 				throw new CRERangeException("Expecting a value >= 0, but " + times + " was found.", t);
 			}
@@ -2420,7 +2420,7 @@ public class StringHandling {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args[0].isInstanceOf(CArray.TYPE)) {
-				CArray array = Static.getArray(args[0], t);
+				CArray array = ArgumentValidation.getArray(args[0], t);
 				return new CSecureString(array, t);
 			} else {
 				String s = args[0].val();

@@ -105,7 +105,7 @@ public class Compiler {
 	@api
 	@noprofile
 	@hide("This is only used internally by the compiler.")
-	public static class __autoconcat__ extends DummyFunction implements Optimizable {
+	public static class __autoconcat__ extends DummyFunction {
 
 		public static ParseTree getParseTree(List<ParseTree> children, FileOptions fo, Target t) {
 			CFunction ac = new CFunction(new __autoconcat__().getName(), t);
@@ -134,31 +134,20 @@ public class Compiler {
 					+ " may be undefined if it is used in code.";
 		}
 
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(
-					OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env,
-				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> list, FileOptions fileOptions) throws ConfigCompileException {
-			return optimizeSpecial(list, true, envs);
-		}
-
 		private static final String ASSIGN = new DataHandling.assign().getName();
 
 		/**
-		 * __autoconcat__ has special optimization techniques needed, since it's really a part of the compiler itself,
-		 * and not so much a function. It being a function is merely a convenience, so we can defer processing until
-		 * after parsing. While it is tightly coupled with the compiler, this is ok, since it's really a compiler
-		 * mechanism more than a function.
+		 * Rewrites this __autoconcat__ node to an executable AST node as part of compilation. This either results in
+		 * this __autoconcat__ node being replaced or in a compile error if the __autoconcat__ cannot be converted to
+		 * an executable AST node. This being a function is merely a convenient way to defer processing until after
+		 * parsing, meaning that it should ALWAYS be rewritten before executing the AST.
 		 *
 		 * @param list
 		 * @param returnSConcat
-		 * @return
+		 * @return The executable AST node, representing the code/tokens in this __autoconcat__.
+		 * @throws ConfigCompileException If this __autoconcat__ cannot be converted to an executable AST node.
 		 */
-		public ParseTree optimizeSpecial(List<ParseTree> list, boolean returnSConcat,
+		public ParseTree rewrite(List<ParseTree> list, boolean returnSConcat,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs) throws ConfigCompileException {
 			//If any of our nodes are CSymbols, we have different behavior
 			boolean inSymbolMode = false; //caching this can save Xn
@@ -291,7 +280,7 @@ public class Compiler {
 								list.remove(k);
 								break;
 							}
-							conversion.addChild(optimizeSpecial(ac, returnSConcat, envs));
+							conversion.addChild(rewrite(ac, returnSConcat, envs));
 						}
 					}
 
@@ -658,7 +647,7 @@ public class Compiler {
 	@api
 	@hide("This is more of a compiler feature, rather than a function, and so it is hidden from normal"
 			+ " documentation.")
-	public static class smart_string extends AbstractFunction implements Optimizable {
+	public static class smart_string extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -702,89 +691,91 @@ public class Compiler {
 		}
 
 		@Override
-		public Set<Optimizable.OptimizationOption> optimizationOptions() {
-			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env,
-				Set<Class<? extends Environment.EnvironmentImpl>> envs,
-				List<ParseTree> children, FileOptions fileOptions)
-				throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() != 1) {
-				throw new ConfigCompileException(getName() + " can only take one parameter", t);
-			}
-			if(!(children.get(0).getData().isInstanceOf(CString.TYPE))) {
-				throw new ConfigCompileException("Only hardcoded strings may be passed into " + getName(), t);
-			}
-			String value = children.get(0).getData().val();
-
-			StringBuilder b = new StringBuilder();
-			boolean inBrace = false;
-			boolean inSimpleVar = false;
-			ParseTree root = new ParseTree(new CFunction(new StringHandling.concat().getName(), t), fileOptions);
-			for(int i = 0; i < value.length(); i++) {
-				char c = value.charAt(i);
-				char c2 = (i + 1 < value.length() ? value.charAt(i + 1) : '\0');
-				if(c == '\\' && c2 == '@') {
-					b.append("@");
-					i++;
-					continue;
+		public ParseTree postParseRewrite(ParseTree ast, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+			List<ParseTree> children = ast.getChildren();
+			Target t = ast.getTarget();
+			FileOptions fileOptions = ast.getFileOptions();
+			try {
+				if(children.size() != 1) {
+					throw new ConfigCompileException(getName() + " can only take one parameter", t);
 				}
-				if(c == '@') {
-					if(c2 == '{') {
-						//Start of a complex variable
-						inBrace = true;
-						i++; // Don't include this
-					} else if(Character.isLetterOrDigit(c2) || c2 == '_') {
-						//Start of a simple variable
-						inSimpleVar = true;
-					} else {
-						// Loose @, this is a compile error
-						throw new ConfigCompileException("Unexpected \"@\" in string. If you want a literal at sign, escape it with \"\\@\".", t);
+				if(!(children.get(0).getData().isInstanceOf(CString.TYPE))) {
+					throw new ConfigCompileException("Only hardcoded strings may be passed into " + getName(), t);
+				}
+				String value = children.get(0).getData().val();
+
+				StringBuilder b = new StringBuilder();
+				boolean inBrace = false;
+				boolean inSimpleVar = false;
+				ParseTree root = new ParseTree(new CFunction(new StringHandling.concat().getName(), t), fileOptions);
+				for(int i = 0; i < value.length(); i++) {
+					char c = value.charAt(i);
+					char c2 = (i + 1 < value.length() ? value.charAt(i + 1) : '\0');
+					if(c == '\\' && c2 == '@') {
+						b.append("@");
+						i++;
+						continue;
 					}
-					if(b.length() > 0) {
-						root.addChild(new ParseTree(new CString(b.toString(), t), fileOptions));
+					if(c == '@') {
+						if(c2 == '{') {
+							//Start of a complex variable
+							inBrace = true;
+							i++; // Don't include this
+						} else if(Character.isLetterOrDigit(c2) || c2 == '_') {
+							//Start of a simple variable
+							inSimpleVar = true;
+						} else {
+							// Loose @, this is a compile error
+							throw new ConfigCompileException("Unexpected \"@\" in string."
+									+ " If you want a literal at sign, escape it with \"\\@\".", t);
+						}
+						if(b.length() > 0) {
+							root.addChild(new ParseTree(new CString(b.toString(), t), fileOptions));
+							b = new StringBuilder();
+						}
+						continue;
+					}
+					if(inSimpleVar && !(Character.isLetterOrDigit(c) || c == '_')) {
+						// End of simple var. The buffer is the variable name.
+						String vname = b.toString();
 						b = new StringBuilder();
+						root.addChild(new ParseTree(new IVariable("@" + vname, t), fileOptions));
+						inSimpleVar = false;
 					}
-					continue;
-				}
-				if(inSimpleVar && !(Character.isLetterOrDigit(c) || c == '_')) {
-					// End of simple var. The buffer is the variable name.
-					String vname = b.toString();
-					b = new StringBuilder();
-					root.addChild(new ParseTree(new IVariable("@" + vname, t), fileOptions));
-					inSimpleVar = false;
-				}
-				if(inBrace && c == '}') {
-					// End of complex var. Still more parsing to be done though.
-					String complex = b.toString().trim();
-					b = new StringBuilder();
-					inBrace = false;
-					if(complex.matches("[a-zA-Z0-9_]+")) {
-						//This is a simple variable name.
-						root.addChild(new ParseTree(new IVariable("@" + complex, t), fileOptions));
-						continue;
-					} else {
-						//Complex variable name, with arrays (or perhaps an error case)
-						continue;
+					if(inBrace && c == '}') {
+						// End of complex var. Still more parsing to be done though.
+						String complex = b.toString().trim();
+						b = new StringBuilder();
+						inBrace = false;
+						if(complex.matches("[a-zA-Z0-9_]+")) {
+							//This is a simple variable name.
+							root.addChild(new ParseTree(new IVariable("@" + complex, t), fileOptions));
+							continue;
+						} else {
+							//Complex variable name, with arrays (or perhaps an error case)
+							continue;
+						}
 					}
+					b.append(c);
 				}
-				b.append(c);
+				if(inBrace) {
+					throw new ConfigCompileException("Missing end brace (}) in double string", t);
+				}
+				if(inSimpleVar) {
+					root.addChild(new ParseTree(new IVariable("@" + b.toString(), t), fileOptions));
+				} else if(b.length() > 0) {
+					root.addChild(new ParseTree(new CString(b.toString(), t), fileOptions));
+				}
+				if(root.numberOfChildren() == 1) {
+					return root.getChildAt(0);
+				}
+				//throw new ConfigCompileException("Doubly quoted strings are not yet supported...", t);
+				return root;
+			} catch (ConfigCompileException e) {
+				exceptions.add(e);
+				return null;
 			}
-			if(inBrace) {
-				throw new ConfigCompileException("Missing end brace (}) in double string", t);
-			}
-			if(inSimpleVar) {
-				root.addChild(new ParseTree(new IVariable("@" + b.toString(), t), fileOptions));
-			} else if(b.length() > 0) {
-				root.addChild(new ParseTree(new CString(b.toString(), t), fileOptions));
-			}
-			if(root.numberOfChildren() == 1) {
-				return root.getChildAt(0);
-			}
-			//throw new ConfigCompileException("Doubly quoted strings are not yet supported...", t);
-			return root;
 		}
 
 	}

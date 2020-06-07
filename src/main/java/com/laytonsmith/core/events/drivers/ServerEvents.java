@@ -226,7 +226,7 @@ public class ServerEvents {
 						e.setMOTD(value.val());
 						return true;
 					case "maxplayers":
-						e.setMaxPlayers(Static.getInt32(value, value.getTarget()));
+						e.setMaxPlayers(ArgumentValidation.getInt32(value, value.getTarget()));
 						return true;
 					case "list":
 						// Modifies the player list. The new list will be the intersection of the original

@@ -10,6 +10,7 @@ import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.testing.StaticTest;
 import java.io.File;
@@ -50,7 +51,8 @@ public class ObjectDefinitionTableTest {
 		StaticTest.InstallFakeServerFrontend();
 		env = Environment.createEnvironment(new CompilerEnvironment(),
 			new GlobalEnv(GlobalEnv.NO_OP_EXECUTION_QUEUE, GlobalEnv.NO_OP_PROFILER, GlobalEnv.NO_OP_PN,
-					new File("."), GlobalEnv.NO_OP_PROFILES, GlobalEnv.NO_OP_TASK_MANAGER));
+					new File("."), GlobalEnv.NO_OP_PROFILES, GlobalEnv.NO_OP_TASK_MANAGER,
+					EnumSet.of(RuntimeMode.CMDLINE)));
 	}
 
 	@Test

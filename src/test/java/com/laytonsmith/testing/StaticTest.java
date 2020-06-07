@@ -60,6 +60,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.EventMixinInterface;
@@ -527,8 +528,10 @@ public class StaticTest {
 		if(env == null) {
 			env = StaticTest.env;
 		}
+		env.getEnv(GlobalEnv.class).GetVarList().clear();
 		env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
-		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, null, true), env, envs), env, done, null);
+		MethodScriptCompiler.execute(MethodScriptCompiler.compile(
+				MethodScriptCompiler.lex(script, env, null, true), env, envs, null), env, done, null);
 	}
 
 	public static void RunCommand(String combinedScript, MCCommandSender player, String command) throws Exception {

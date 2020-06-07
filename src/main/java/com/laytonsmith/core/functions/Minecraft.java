@@ -103,7 +103,7 @@ public class Minecraft {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(args[0].isInstanceOf(CInt.TYPE)) {
-				return new CInt(Static.getInt(args[0], t), t);
+				return new CInt(ArgumentValidation.getInt(args[0], t), t);
 			}
 			String c = args[0].val();
 			MCMaterial mat = StaticLayer.GetMaterial("LEGACY_" + c.toUpperCase());
@@ -236,7 +236,7 @@ public class Minecraft {
 			}
 			if(i == -1) {
 				try {
-					i = Static.getInt32(args[0], t);
+					i = ArgumentValidation.getInt32(args[0], t);
 				} catch (CRECastException ex) {
 					// possibly a material name
 					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(args[0].val(), 0);
@@ -300,7 +300,7 @@ public class Minecraft {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray item = Static.getArray(args[0], t);
+			CArray item = ArgumentValidation.getArray(args[0], t);
 			MCItemStack is = ObjectGenerator.GetGenerator().item(item, t, true);
 			return ObjectGenerator.GetGenerator().item(is, t);
 		}
@@ -468,7 +468,7 @@ public class Minecraft {
 				return CVoid.VOID;
 			}
 			if(args.length > 2) {
-				radius = Static.getInt32(args[args.length - 1], t);
+				radius = ArgumentValidation.getInt32(args[args.length - 1], t);
 			}
 			if(!dataString.equals("")) {
 				switch(effect) {
@@ -608,7 +608,7 @@ public class Minecraft {
 			if(args.length == 0) {
 				index = -1;
 			} else if(args.length == 1) {
-				index = Static.getInt32(args[0], t);
+				index = ArgumentValidation.getInt32(args[0], t);
 			}
 
 			if(index < -1 || index > 16) {
@@ -1121,7 +1121,7 @@ public class Minecraft {
 			MCMaterial mat = StaticLayer.GetMaterial(args[0].val());
 			if(mat == null) {
 				try {
-					mat = StaticLayer.GetMaterialFromLegacy(Static.getInt32(args[0], t), 0);
+					mat = StaticLayer.GetMaterialFromLegacy(ArgumentValidation.getInt32(args[0], t), 0);
 				} catch (CRECastException ex) {
 					throw new CREIllegalArgumentException("Unable to get the material from: " + args[0].val(), t);
 				}

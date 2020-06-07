@@ -1111,7 +1111,7 @@ public class Scoreboards {
 			if(args[1].val().length() > 40) {
 				throw new CRELengthException("Score name must be 40 characters or less.", t);
 			}
-			o.getScore(args[1].val()).setScore(Static.getInt32(args[2], t));
+			o.getScore(args[1].val()).setScore(ArgumentValidation.getInt32(args[2], t));
 			return CVoid.VOID;
 		}
 

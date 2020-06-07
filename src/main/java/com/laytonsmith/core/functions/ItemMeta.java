@@ -20,6 +20,7 @@ import com.laytonsmith.abstraction.enums.MCItemFlag;
 import com.laytonsmith.abstraction.enums.MCPatternShape;
 import com.laytonsmith.abstraction.enums.MCPotionType;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -84,7 +85,7 @@ public class ItemMeta {
 			if(slot instanceof CNull) {
 				is = p.getItemAt(null);
 			} else {
-				is = p.getItemAt(Static.getInt32(slot, t));
+				is = p.getItemAt(ArgumentValidation.getInt32(slot, t));
 			}
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + slot, t);
@@ -190,7 +191,7 @@ public class ItemMeta {
 			if(slot instanceof CNull) {
 				is = p.getItemAt(null);
 			} else {
-				is = p.getItemAt(Static.getInt32(slot, t));
+				is = p.getItemAt(ArgumentValidation.getInt32(slot, t));
 			}
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + slot, t);
@@ -285,9 +286,9 @@ public class ItemMeta {
 			int slot;
 			if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
-				slot = Static.getInt32(args[1], t);
+				slot = ArgumentValidation.getInt32(args[1], t);
 			} else {
-				slot = Static.getInt32(args[0], t);
+				slot = ArgumentValidation.getInt32(args[0], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			MCItemStack is = p.getItemAt(slot);
@@ -351,14 +352,14 @@ public class ItemMeta {
 			CArray color;
 			if(args.length == 3) {
 				p = Static.GetPlayer(args[0], t);
-				slot = Static.getInt32(args[1], t);
+				slot = ArgumentValidation.getInt32(args[1], t);
 				if(args[2].isInstanceOf(CArray.TYPE)) {
 					color = (CArray) args[2];
 				} else {
 					throw new CREFormatException("Expected an array but received " + args[2] + " instead.", t);
 				}
 			} else {
-				slot = Static.getInt32(args[0], t);
+				slot = ArgumentValidation.getInt32(args[0], t);
 				if(args[1].isInstanceOf(CArray.TYPE)) {
 					color = (CArray) args[1];
 				} else {
@@ -429,9 +430,9 @@ public class ItemMeta {
 			int slot;
 			if(args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
-				slot = Static.getInt32(args[1], t);
+				slot = ArgumentValidation.getInt32(args[1], t);
 			} else {
-				slot = Static.getInt32(args[0], t);
+				slot = ArgumentValidation.getInt32(args[0], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			return CBoolean.get(p.getItemAt(slot).getItemMeta() instanceof MCLeatherArmorMeta);

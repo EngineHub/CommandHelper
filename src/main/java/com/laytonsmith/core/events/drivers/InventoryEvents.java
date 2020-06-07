@@ -576,7 +576,7 @@ public class InventoryEvents {
 				MCEnchantItemEvent e = (MCEnchantItemEvent) event;
 
 				if(key.equalsIgnoreCase("levels")) {
-					e.setExpLevelCost(Static.getInt32(value, value.getTarget()));
+					e.setExpLevelCost(ArgumentValidation.getInt32(value, value.getTarget()));
 					return true;
 				}
 
@@ -694,7 +694,7 @@ public class InventoryEvents {
 							for(int i = 0; i <= 2; i++) {
 								MCEnchantmentOffer offer = offers[i];
 								Mixed cost = cExpCosts.get(i, t);
-								offer.setCost(Static.getInt32(cost, t));
+								offer.setCost(ArgumentValidation.getInt32(cost, t));
 							}
 						} else {
 							throw new CREFormatException("Expected a normal array!", t);
@@ -771,7 +771,7 @@ public class InventoryEvents {
 			if(event instanceof MCItemHeldEvent) {
 				MCItemHeldEvent e = (MCItemHeldEvent) event;
 				if("to".equals(key)) {
-					e.getPlayer().getInventory().setHeldItemSlot(Static.getInt32(value, value.getTarget()));
+					e.getPlayer().getInventory().setHeldItemSlot(ArgumentValidation.getInt32(value, value.getTarget()));
 					return true;
 				}
 			}

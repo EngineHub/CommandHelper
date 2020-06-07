@@ -15,14 +15,16 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CMutablePrimitive;
 import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CPrimitive;
 import com.laytonsmith.core.constructs.CSlice;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -86,6 +88,15 @@ public class ArrayHandling {
 				return new CInt(((CArray) args[0]).size(), t);
 			}
 			throw new CRECastException("Argument 1 of array_size must be an array", t);
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 1) {
+				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
+			}
+			return CInt.TYPE;
 		}
 
 		@Override
@@ -205,7 +216,7 @@ public class ArrayHandling {
 							if(index instanceof CNull) {
 								throw new CRECastException("Expected a number, but received null instead", t);
 							}
-							long iindex = Static.getInt(index, t);
+							long iindex = ArgumentValidation.getInt(index, t);
 							if(iindex < 0) {
 								//negative index, convert to positive index
 								iindex = ca.size() + iindex;
@@ -259,13 +270,27 @@ public class ArrayHandling {
 						throw new CRECastException("Ranges must be integer numbers, i.e., [0..5]", t);
 					}
 				} else if(index.isInstanceOf(CInt.TYPE)) {
-					return aa.get(Static.getInt32(index, t), t);
+					return aa.get(ArgumentValidation.getInt32(index, t), t);
 				} else {
 					return aa.get(index, t);
 				}
 			} else {
 				throw new CRECastException("Argument 1 of array_get must be an array", t);
 			}
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 2 || argTypes.size() == 3) {
+				StaticAnalysis.requireType(argTypes.get(0), ArrayAccess.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireAnyType(argTypes.get(1),
+						new CClassType[] {CInt.TYPE, CSlice.TYPE, CString.TYPE}, argTargets.get(1), env, exceptions);
+				if(argTypes.size() == 3) {
+					StaticAnalysis.requireType(argTypes.get(2), Mixed.TYPE, argTargets.get(2), env, exceptions);
+				}
+			}
+			return CClassType.AUTO;
 		}
 
 		@Override
@@ -393,6 +418,19 @@ public class ArrayHandling {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 3) {
+				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireAnyType(argTypes.get(1),
+						new CClassType[] {CInt.TYPE, CSlice.TYPE, CString.TYPE}, argTargets.get(1), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(2), Mixed.TYPE, argTargets.get(2), env, exceptions);
+				return argTypes.get(2);
+			}
+			return CClassType.AUTO;
+		}
+
+		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREIndexOverflowException.class};
 		}
@@ -472,6 +510,18 @@ public class ArrayHandling {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() >= 2) {
+				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
+				for(int i = 1; i < argTypes.size(); i++) {
+					StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
+				}
+			}
+			return CVoid.TYPE;
+		}
+
+		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class};
 		}
@@ -540,9 +590,9 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray array = Static.getArray(args[0], t);
+			CArray array = ArgumentValidation.getArray(args[0], t);
 			Mixed value = args[1];
-			int index = Static.getInt32(args[2], t);
+			int index = ArgumentValidation.getInt32(args[2], t);
 			try {
 				array.push(value, index, t);
 				//If the push succeeded (actually an insert) we need to check to see if we are currently iterating
@@ -565,6 +615,17 @@ public class ArrayHandling {
 				throw new CREIndexOverflowException(ex.getMessage(), t);
 			}
 			return CVoid.VOID;
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 3) {
+				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(1), Mixed.TYPE, argTargets.get(1), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(2), CInt.TYPE, argTargets.get(2), env, exceptions);
+			}
+			return CVoid.TYPE;
 		}
 
 		@Override
@@ -630,6 +691,16 @@ public class ArrayHandling {
 				}
 			}
 			return CBoolean.FALSE;
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 2) {
+				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(1), Mixed.TYPE, argTargets.get(1), env, exceptions);
+			}
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -731,6 +802,16 @@ public class ArrayHandling {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 2) {
+				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(1), Mixed.TYPE, argTargets.get(1), env, exceptions);
+			}
+			return CBoolean.TYPE;
+		}
+
+		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'A')"),
@@ -770,6 +851,16 @@ public class ArrayHandling {
 				}
 			}
 			return CBoolean.FALSE;
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 2) {
+				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(1), Mixed.TYPE, argTargets.get(1), env, exceptions);
+			}
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -873,7 +964,7 @@ public class ArrayHandling {
 					CArray ca = (CArray) m;
 					if(!ca.inAssociativeMode()) {
 						try {
-							int index = Static.getInt32(args[i], t);
+							int index = ArgumentValidation.getInt32(args[i], t);
 							if(index >= ca.size() || index < 0) {
 								return CBoolean.FALSE;
 							}
@@ -892,6 +983,18 @@ public class ArrayHandling {
 			} else {
 				throw new CRECastException("Expecting argument 1 to be an array", t);
 			}
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() >= 1) {
+				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
+				for(int i = 1; i < argTypes.size(); i++) {
+					StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
+				}
+			}
+			return CBoolean.TYPE;
 		}
 
 		@Override
@@ -988,6 +1091,19 @@ public class ArrayHandling {
 		}
 
 		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 2 || argTypes.size() == 3) {
+				StaticAnalysis.requireType(argTypes.get(0), CArray.TYPE, argTargets.get(0), env, exceptions);
+				StaticAnalysis.requireType(argTypes.get(1), CInt.TYPE, argTargets.get(1), env, exceptions);
+				if(argTypes.size() == 3) {
+					StaticAnalysis.requireType(argTypes.get(2), Mixed.TYPE, argTargets.get(2), env, exceptions);
+				}
+			}
+			return CArray.TYPE;
+		}
+
+		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Demonstrates basic usage",
@@ -1050,14 +1166,14 @@ public class ArrayHandling {
 			long finish = 0;
 			long increment = 1;
 			if(args.length == 1) {
-				finish = Static.getInt(args[0], t);
+				finish = ArgumentValidation.getInt(args[0], t);
 			} else if(args.length == 2) {
-				start = Static.getInt(args[0], t);
-				finish = Static.getInt(args[1], t);
+				start = ArgumentValidation.getInt(args[0], t);
+				finish = ArgumentValidation.getInt(args[1], t);
 			} else if(args.length == 3) {
-				start = Static.getInt(args[0], t);
-				finish = Static.getInt(args[1], t);
-				increment = Static.getInt(args[2], t);
+				start = ArgumentValidation.getInt(args[0], t);
+				finish = ArgumentValidation.getInt(args[1], t);
+				increment = ArgumentValidation.getInt(args[2], t);
 			}
 			if(start < finish && increment < 0 || start > finish && increment > 0 || increment == 0) {
 				return new CArray(t);
@@ -1195,7 +1311,7 @@ public class ArrayHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args[0].isInstanceOf(CArray.TYPE)) {
-				CArray ca = Static.getArray(args[0], t);
+				CArray ca = ArgumentValidation.getArray(args[0], t);
 				CArray ca2 = new CArray(t);
 				for(Mixed c : ca.keySet()) {
 					ca2.push(ca.get(c, t), t);
@@ -1348,11 +1464,11 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray array = Static.getArray(args[0], t);
+			CArray array = ArgumentValidation.getArray(args[0], t);
 			if(array.isAssociative()) {
 				return array.remove(args[1]);
 			} else {
-				int index = Static.getInt32(args[1], t);
+				int index = ArgumentValidation.getInt32(args[1], t);
 				Mixed removed = array.remove(args[1]);
 				//If the removed index is <= the current index, we need to decrement the counter.
 				for(Iterator iterator : environment.getEnv(GlobalEnv.class).GetArrayAccessIteratorsFor(array)) {
@@ -1419,7 +1535,7 @@ public class ArrayHandling {
 			ArrayAccess ca = (ArrayAccess) args[0];
 			String glue = " ";
 			if(args.length == 2) {
-				glue = Static.getPrimitive(args[1], t).val();
+				glue = ArgumentValidation.getObject(args[1], t, CPrimitive.class).val();
 			}
 			boolean first = true;
 			for(Mixed key : ca.keySet()) {
@@ -1563,7 +1679,7 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			return new CSlice(Static.getInt(args[0], t), Static.getInt(args[1], t), t);
+			return new CSlice(ArgumentValidation.getInt(args[0], t), ArgumentValidation.getInt(args[1], t), t);
 		}
 
 		@Override
@@ -1839,9 +1955,9 @@ public class ArrayHandling {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			startup();
-			final CArray array = Static.getArray(args[0], t);
+			final CArray array = ArgumentValidation.getArray(args[0], t);
 			final CString sortType = new CString(args.length > 2 ? args[1].val() : CArray.ArraySortType.REGULAR.name(), t);
-			final CClosure callback = Static.getObject((args.length == 2 ? args[1] : args[2]), t, CClosure.class);
+			final CClosure callback = ArgumentValidation.getObject((args.length == 2 ? args[1] : args[2]), t, CClosure.class);
 			queue.invokeLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
 
 				@Override
@@ -1898,7 +2014,7 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray array = Static.getArray(args[0], t);
+			CArray array = ArgumentValidation.getArray(args[0], t);
 			//This needs to be in terms of array_remove, to ensure that the iteration
 			//logic is followed. We will iterate backwards, however, to make the
 			//process more efficient, unless this is an associative array.
@@ -2209,13 +2325,13 @@ public class ArrayHandling {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			long number = 1;
 			boolean getKeys = true;
-			CArray array = Static.getArray(args[0], t);
+			CArray array = ArgumentValidation.getArray(args[0], t);
 			CArray newArray = new CArray(t);
 			if(array.isEmpty()) {
 				return newArray;
 			}
 			if(args.length > 1) {
-				number = Static.getInt(args[1], t);
+				number = ArgumentValidation.getInt(args[1], t);
 			}
 			if(number < 1) {
 				throw new CRERangeException("number may not be less than 1.", t);
@@ -2312,7 +2428,7 @@ public class ArrayHandling {
 
 		@Override
 		public CArray exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray array = Static.getArray(args[0], t);
+			CArray array = ArgumentValidation.getArray(args[0], t);
 			boolean compareTypes = true;
 			if(args.length == 2) {
 				compareTypes = ArgumentValidation.getBoolean(args[1], t);
@@ -2643,8 +2759,8 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray array = Static.getArray(args[0], t);
-			CClosure closure = Static.getObject(args[1], t, CClosure.class);
+			CArray array = ArgumentValidation.getArray(args[0], t);
+			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
 			for(Mixed key : array.keySet()) {
 				try {
 					closure.executeCallable(environment, t, key, array.get(key, t));
@@ -2716,8 +2832,8 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray array = Static.getArray(args[0], t);
-			CClosure closure = Static.getObject(args[1], t, CClosure.class);
+			CArray array = ArgumentValidation.getArray(args[0], t);
+			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
 			if(array.isEmpty()) {
 				return CNull.NULL;
 			}
@@ -2801,8 +2917,8 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray array = Static.getArray(args[0], t);
-			CClosure closure = Static.getObject(args[1], t, CClosure.class);
+			CArray array = ArgumentValidation.getArray(args[0], t);
+			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
 			if(array.isEmpty()) {
 				return CNull.NULL;
 			}
@@ -2886,8 +3002,8 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray array = Static.getArray(args[0], t);
-			CClosure closure = Static.getObject(args[1], t, CClosure.class);
+			CArray array = ArgumentValidation.getArray(args[0], t);
+			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
 			for(Mixed c : array.keySet()) {
 				Mixed fr = closure.executeCallable(environment, t, array.get(c, t));
 				boolean ret = ArgumentValidation.getBooleanish(fr, t);
@@ -2959,8 +3075,8 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray array = Static.getArray(args[0], t);
-			CClosure closure = Static.getObject(args[1], t, CClosure.class);
+			CArray array = ArgumentValidation.getArray(args[0], t);
+			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
 			for(Mixed c : array.keySet()) {
 				Mixed fr = closure.executeCallable(environment, t, array.get(c, t));
 				boolean ret = ArgumentValidation.getBooleanish(fr, t);
@@ -3032,8 +3148,8 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray array = Static.getArray(args[0], t);
-			CClosure closure = Static.getObject(args[1], t, CClosure.class);
+			CArray array = ArgumentValidation.getArray(args[0], t);
+			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
 			CArray newArray = (array.isAssociative() ? CArray.GetAssociativeArray(t) : new CArray(t, (int) array.size()));
 
 			for(Mixed c : array.keySet()) {
@@ -3127,8 +3243,8 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray one = Static.getArray(args[0], t);
-			CArray two = Static.getArray(args[1], t);
+			CArray one = ArgumentValidation.getArray(args[0], t);
+			CArray two = ArgumentValidation.getArray(args[1], t);
 			CClosure closure = null;
 			ArrayIntersectComparisonMode mode = ArrayIntersectComparisonMode.HASH;
 			boolean associativeMode = one.isAssociative() || two.isAssociative();
@@ -3138,7 +3254,7 @@ public class ArrayHandling {
 							+ " the comparison mode value is not used.", t);
 				}
 				if(args[2].isInstanceOf(CClosure.TYPE)) {
-					closure = Static.getObject(args[2], t, CClosure.class);
+					closure = ArgumentValidation.getObject(args[2], t, CClosure.class);
 				} else {
 					mode = ArgumentValidation.getEnum(args[2], ArrayIntersectComparisonMode.class, t);
 				}
@@ -3464,7 +3580,7 @@ public class ArrayHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray array = Static.getArray(args[0], t);
+			CArray array = ArgumentValidation.getArray(args[0], t);
 			if(array.isEmpty()) {
 				throw new CRELengthException("Array is empty", t);
 			}

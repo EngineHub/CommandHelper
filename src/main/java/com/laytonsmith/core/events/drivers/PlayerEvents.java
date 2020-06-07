@@ -163,7 +163,7 @@ public class PlayerEvents {
 				MCFoodLevelChangeEvent e = (MCFoodLevelChangeEvent) event;
 
 				if(key.equalsIgnoreCase("level")) {
-					e.setFoodLevel(Static.getInt32(value, Target.UNKNOWN));
+					e.setFoodLevel(ArgumentValidation.getInt32(value, Target.UNKNOWN));
 					return true;
 				}
 			}
@@ -549,13 +549,13 @@ public class PlayerEvents {
 				if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
 					if(key.equalsIgnoreCase("creationradius")) {
 						e.useTravelAgent(true);
-						e.getPortalTravelAgent().setCreationRadius(Static.getInt32(value, Target.UNKNOWN));
+						e.getPortalTravelAgent().setCreationRadius(ArgumentValidation.getInt32(value, Target.UNKNOWN));
 						return true;
 					}
 
 					if(key.equalsIgnoreCase("searchradius")) {
 						e.useTravelAgent(true);
-						e.getPortalTravelAgent().setSearchRadius(Static.getInt32(value, Target.UNKNOWN));
+						e.getPortalTravelAgent().setSearchRadius(ArgumentValidation.getInt32(value, Target.UNKNOWN));
 						return true;
 					}
 				}
@@ -1417,13 +1417,13 @@ public class PlayerEvents {
 						e.setKeepLevel(ArgumentValidation.getBoolean(value, Target.UNKNOWN));
 						return true;
 					case "new_exp":
-						e.setNewExp(Static.getInt32(value, Target.UNKNOWN));
+						e.setNewExp(ArgumentValidation.getInt32(value, Target.UNKNOWN));
 						return true;
 					case "new_level":
-						e.setNewLevel(Static.getInt32(value, Target.UNKNOWN));
+						e.setNewLevel(ArgumentValidation.getInt32(value, Target.UNKNOWN));
 						return true;
 					case "new_total_exp":
-						e.setNewTotalExp(Static.getInt32(value, Target.UNKNOWN));
+						e.setNewTotalExp(ArgumentValidation.getInt32(value, Target.UNKNOWN));
 						return true;
 					default:
 						return super.modifyEvent(key, value, event);
@@ -2012,7 +2012,7 @@ public class PlayerEvents {
 		public void bind(BoundEvent event) {
 			Map<String, Mixed> prefilters = event.getPrefilter();
 			int threshold = (prefilters.containsKey("threshold")
-					? Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN) : 1);
+					? ArgumentValidation.getInt32(prefilters.get("threshold"), Target.UNKNOWN) : 1);
 			Integer count = THRESHOLD_LIST.get(threshold);
 			THRESHOLD_LIST.put(threshold, (count != null ? count + 1 : 1));
 		}
@@ -2021,7 +2021,7 @@ public class PlayerEvents {
 		public void unbind(BoundEvent event) {
 			Map<String, Mixed> prefilters = event.getPrefilter();
 			int threshold = (prefilters.containsKey("threshold")
-					? Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN) : 1);
+					? ArgumentValidation.getInt32(prefilters.get("threshold"), Target.UNKNOWN) : 1);
 			Integer count = THRESHOLD_LIST.get(threshold);
 			if(count != null) {
 				if(count <= 1) {
@@ -2038,7 +2038,7 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerMoveEvent) {
 				MCPlayerMoveEvent event = (MCPlayerMoveEvent) e;
 				if(prefilter.containsKey("threshold")) {
-					if(Static.getInt(prefilter.get("threshold"), Target.UNKNOWN) != event.getThreshold()) {
+					if(ArgumentValidation.getInt(prefilter.get("threshold"), Target.UNKNOWN) != event.getThreshold()) {
 						return false;
 					}
 				} else if(event.getThreshold() != 1) {
@@ -2162,7 +2162,7 @@ public class PlayerEvents {
 			if(event instanceof MCPlayerFishEvent) {
 				MCPlayerFishEvent e = (MCPlayerFishEvent) event;
 				if(key.equals("xp")) {
-					e.setExpToDrop(Static.getInt32(value, value.getTarget()));
+					e.setExpToDrop(ArgumentValidation.getInt32(value, value.getTarget()));
 					return true;
 				}
 			}
@@ -2335,7 +2335,7 @@ public class PlayerEvents {
 			if(event instanceof MCExpChangeEvent) {
 				MCExpChangeEvent e = (MCExpChangeEvent) event;
 				if("amount".equals(key)) {
-					e.setAmount(Static.getInt32(value, value.getTarget()));
+					e.setAmount(ArgumentValidation.getInt32(value, value.getTarget()));
 					return true;
 				}
 			}
@@ -2469,7 +2469,7 @@ public class PlayerEvents {
 					e.setNewBookMeta(bookMeta);
 					return true;
 				} else if(key.equalsIgnoreCase("pages")) {
-					CArray pageArray = Static.getArray(value, value.getTarget());
+					CArray pageArray = ArgumentValidation.getArray(value, value.getTarget());
 					if(pageArray.inAssociativeMode()) {
 						throw new CRECastException("The page array must not be associative.", pageArray.getTarget());
 					} else {

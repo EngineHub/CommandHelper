@@ -46,6 +46,7 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -79,6 +80,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -132,7 +134,9 @@ public final class Static {
 	 * @param construct
 	 * @param t
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getArray(Mixed, Target)} instead.
 	 */
+	@Deprecated
 	public static CArray getArray(Mixed construct, Target t) {
 		return ArgumentValidation.getArray(construct, t);
 	}
@@ -147,7 +151,9 @@ public final class Static {
 	 * @param t Code target
 	 * @param clazz The type expected.
 	 * @return The properly cast object.
+	 * @deprecated Use {@link ArgumentValidation#getArray(Mixed, Target)} instead.
 	 */
+	@Deprecated
 	public static <T extends Mixed> T getObject(Mixed construct, Target t, Class<T> clazz) {
 		return ArgumentValidation.getObject(construct, t, clazz);
 	}
@@ -172,7 +178,9 @@ public final class Static {
 	 *
 	 * @param c
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getNumber(Mixed, Target)} instead.
 	 */
+	@Deprecated
 	public static double getNumber(Mixed c, Target t) {
 		return ArgumentValidation.getNumber(c, t);
 	}
@@ -182,11 +190,21 @@ public final class Static {
 	 *
 	 * @param c
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getDouble(Mixed, Target)} instead.
 	 */
+	@Deprecated
 	public static double getDouble(Mixed c, Target t) {
 		return ArgumentValidation.getDouble(c, t);
 	}
 
+	/**
+	 * 
+	 * @param c
+	 * @param t
+	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getDouble32(Mixed, Target)} instead.
+	 */
+	@Deprecated
 	public static float getDouble32(Mixed c, Target t) {
 		return ArgumentValidation.getDouble32(c, t);
 	}
@@ -198,7 +216,9 @@ public final class Static {
 	 * @throws CRERangeException If the value would be truncated
 	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getInt(Mixed, Target)} instead.
 	 */
+	@Deprecated
 	public static long getInt(Mixed c, Target t) {
 		return ArgumentValidation.getInt(c, t);
 	}
@@ -213,7 +233,9 @@ public final class Static {
 	 * @throws CRERangeException If the value would be truncated
 	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getInt32(Mixed, Target)} instead.
 	 */
+	@Deprecated
 	public static int getInt32(Mixed c, Target t) {
 		return ArgumentValidation.getInt32(c, t);
 	}
@@ -228,7 +250,9 @@ public final class Static {
 	 * @throws CRERangeException If the value would be truncated
 	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getInt16(Mixed, Target)} instead.
 	 */
+	@Deprecated
 	public static short getInt16(Mixed c, Target t) {
 		return ArgumentValidation.getInt16(c, t);
 	}
@@ -243,7 +267,9 @@ public final class Static {
 	 * @throws CRERangeException If the value would be truncated
 	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getInt8(Mixed, Target)} instead.
 	 */
+	@Deprecated
 	public static byte getInt8(Mixed c, Target t) {
 		return ArgumentValidation.getInt8(c, t);
 	}
@@ -274,7 +300,9 @@ public final class Static {
 	 * @param c
 	 * @param t
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getObject(Mixed, Target, Class)} with {@link CPrimitive}.class instead.
 	 */
+	@Deprecated
 	public static CPrimitive getPrimitive(Mixed c, Target t) {
 		return ArgumentValidation.getObject(c, t, CPrimitive.class);
 	}
@@ -285,7 +313,9 @@ public final class Static {
 	 * @param c
 	 * @param t
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#getByteArray(Mixed, Target)} instead.
 	 */
+	@Deprecated
 	public static CByteArray getByteArray(Mixed c, Target t) {
 		return ArgumentValidation.getByteArray(c, t);
 	}
@@ -295,7 +325,9 @@ public final class Static {
 	 *
 	 * @param c
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#anyDoubles(Mixed...)} instead.
 	 */
+	@Deprecated
 	public static boolean anyDoubles(Mixed... c) {
 		return ArgumentValidation.anyDoubles(c);
 	}
@@ -305,7 +337,9 @@ public final class Static {
 	 *
 	 * @param c
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#anyStrings(Mixed...)} instead.
 	 */
+	@Deprecated
 	public static boolean anyStrings(Mixed... c) {
 		return ArgumentValidation.anyStrings(c);
 	}
@@ -315,7 +349,9 @@ public final class Static {
 	 *
 	 * @param c
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#anyBooleans(Mixed...)} instead.
 	 */
+	@Deprecated
 	public static boolean anyBooleans(Mixed... c) {
 		return ArgumentValidation.anyBooleans(c);
 	}
@@ -325,7 +361,9 @@ public final class Static {
 	 *
 	 * @param c
 	 * @return
+	 * @deprecated Use {@link ArgumentValidation#anyNulls(Mixed...)} instead.
 	 */
+	@Deprecated
 	public static boolean anyNulls(Mixed... c) {
 		return ArgumentValidation.anyNulls(c);
 	}
@@ -1267,13 +1305,16 @@ public final class Static {
 	/**
 	 * Generates a new environment, assuming that the jar has a folder next to it named CommandHelper, and that folder
 	 * is the root.
-	 *
+	 * @param install
+	 * @param runtimeModes The {@link RuntimeMode}s for this environment.
 	 * @return
 	 * @throws IOException
 	 * @throws DataSourceException
 	 * @throws URISyntaxException
 	 */
-	public static Environment GenerateStandaloneEnvironment(boolean install) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+	public static Environment GenerateStandaloneEnvironment(
+			boolean install, EnumSet<RuntimeMode> runtimeModes)
+			throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		File platformFolder = MethodScriptFileLocations.getDefault().getConfigDirectory();
 		if(install) {
 			Installer.Install(platformFolder);
@@ -1287,13 +1328,36 @@ public final class Static {
 		PersistenceNetwork persistenceNetwork = new PersistenceNetworkImpl(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 				new URI(URLEncoder.encode("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace('\\', '/'), "UTF-8")), options);
 		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"),
-				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork, platformFolder,
-				profiles, new TaskManagerImpl());
+				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork,
+				platformFolder, profiles, new TaskManagerImpl(), runtimeModes);
 		gEnv.SetLabel(GLOBAL_PERMISSION);
 		return Environment.createEnvironment(gEnv, new CompilerEnvironment());
 	}
 
-	public static Environment GenerateStandaloneEnvironment() throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+	/**
+	 * Generates a new environment, assuming that the jar has a folder next to it named CommandHelper, and that folder
+	 * is the root. This new environment is in embedded mode (and not in cmdline and interpreter mode).
+	 * @param install
+	 * @return
+	 * @throws IOException
+	 * @throws DataSourceException
+	 * @throws URISyntaxException
+	 */
+	public static Environment GenerateStandaloneEnvironment(boolean install)
+			throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+		return GenerateStandaloneEnvironment(install, EnumSet.of(RuntimeMode.EMBEDDED));
+	}
+
+	/**
+	 * Generates a new environment, assuming that the jar has a folder next to it named CommandHelper, and that folder
+	 * is the root. This new environment is in embedded mode (and not in cmdline and interpreter mode).
+	 * @return
+	 * @throws IOException
+	 * @throws DataSourceException
+	 * @throws URISyntaxException
+	 */
+	public static Environment GenerateStandaloneEnvironment()
+			throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		return GenerateStandaloneEnvironment(true);
 	}
 
@@ -1347,9 +1411,9 @@ public final class Static {
 		if(f.isAbsolute()) {
 			return f;
 		}
-		//Ok, it's not absolute, so we need to see if we're in cmdline mode or not.
-		//If so, we use the root directory, not the target.
-		if(env != null && InCmdLine(env, true)) {
+		// For relative paths, interpreter mode will use the root directory as base directory. The directory
+		// containing the target's file is used otherwise.
+		if(env != null && env.hasEnv(GlobalEnv.class) && env.getEnv(GlobalEnv.class).inInterpreterMode()) {
 			return new File(env.getEnv(GlobalEnv.class).GetRootFolder(), arg);
 		} else if(t.file() == null) {
 			throw new CREIOException("Unable to receive a non-absolute file with an unknown target", t);
@@ -1371,8 +1435,7 @@ public final class Static {
 		if(environment == null || !environment.hasEnv(GlobalEnv.class)) {
 			return defaultValue;
 		}
-		return environment.getEnv(GlobalEnv.class).GetCustom("cmdline") instanceof Boolean
-				&& (Boolean) environment.getEnv(GlobalEnv.class).GetCustom("cmdline");
+		return environment.getEnv(GlobalEnv.class).inCmdlineMode();
 	}
 
 	/**

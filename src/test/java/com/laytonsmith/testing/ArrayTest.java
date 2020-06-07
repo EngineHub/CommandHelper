@@ -1,7 +1,7 @@
 package com.laytonsmith.testing;
 
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
+import com.laytonsmith.core.exceptions.CRE.CREException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import static org.junit.Assert.assertEquals;
@@ -319,7 +319,8 @@ public class ArrayTest {
 
 	@Test
 	public void testArrayAssign5() throws Exception {
-		SRun("assign(@array['outer']['middle']['inner'], 'value')\n"
+		SRun("assign(@array, array())\n"
+				+ "assign(@array['outer']['middle']['inner'], 'value')\n"
 				+ "msg(@array)\n"
 				+ "msg(@array['outer']['middle']['inner'])", fakePlayer);
 		verify(fakePlayer).sendMessage("{outer: {middle: {inner: value}}}");
@@ -401,7 +402,7 @@ public class ArrayTest {
 		verify(fakePlayer).sendMessage("blarg");
 	}
 
-	@Test(expected = CREIndexOverflowException.class)
+	@Test(expected = CREException.class)
 	public void testArrayUsageBeforeDefined() throws Exception {
 		SRun("@a[1]", fakePlayer);
 	}

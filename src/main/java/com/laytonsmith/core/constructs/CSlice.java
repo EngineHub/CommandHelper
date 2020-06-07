@@ -2,8 +2,8 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -121,7 +121,7 @@ public class CSlice extends CArray {
 
 	@Override
 	public Mixed get(Mixed index, Target t) {
-		long i = Static.getInt(index, t);
+		long i = ArgumentValidation.getInt(index, t);
 		if(i > max) {
 			throw new CRERangeException("Index out of bounds. Index: " + i + " Size: " + max, t);
 		}
@@ -173,7 +173,7 @@ public class CSlice extends CArray {
 	@Override
 	public boolean contains(Mixed c) {
 		try {
-			long i = Static.getInt(c, Target.UNKNOWN);
+			long i = ArgumentValidation.getInt(c, Target.UNKNOWN);
 			if(start < finish) {
 				return start <= i && i <= finish;
 			} else {

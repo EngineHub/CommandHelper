@@ -165,14 +165,14 @@ public class World {
 				y = l.getBlockY();
 				z = l.getBlockZ();
 			} else if(args.length == 3) {
-				x = Static.getInt32(args[0], t);
-				y = Static.getInt32(args[1], t);
-				z = Static.getInt32(args[2], t);
+				x = ArgumentValidation.getInt32(args[0], t);
+				y = ArgumentValidation.getInt32(args[1], t);
+				z = ArgumentValidation.getInt32(args[2], t);
 			} else if(args.length == 4) {
 				w = Static.getServer().getWorld(args[0].val());
-				x = Static.getInt32(args[1], t);
-				y = Static.getInt32(args[2], t);
-				z = Static.getInt32(args[3], t);
+				x = ArgumentValidation.getInt32(args[1], t);
+				y = ArgumentValidation.getInt32(args[2], t);
+				z = ArgumentValidation.getInt32(args[3], t);
 			}
 			if(w == null) {
 				throw new CREInvalidWorldException("Invalid world given.", t);
@@ -268,8 +268,8 @@ public class World {
 						throw new CREInvalidWorldException("No world specified", t);
 					}
 					world = m.getWorld();
-					x = Static.getInt32(args[0], t);
-					z = Static.getInt32(args[1], t);
+					x = ArgumentValidation.getInt32(args[0], t);
+					z = ArgumentValidation.getInt32(args[1], t);
 				}
 			} else {
 				//world, x and z provided
@@ -277,8 +277,8 @@ public class World {
 				if(world == null) {
 					throw new CREInvalidWorldException("World " + args[0].val() + " does not exist.", t);
 				}
-				x = Static.getInt32(args[1], t);
-				z = Static.getInt32(args[2], t);
+				x = ArgumentValidation.getInt32(args[1], t);
+				z = ArgumentValidation.getInt32(args[2], t);
 			}
 			world.refreshChunk(x, z);
 			return CVoid.VOID;
@@ -330,8 +330,8 @@ public class World {
 						throw new CREInvalidWorldException("No world specified", t);
 					}
 					world = m.getWorld();
-					x = Static.getInt32(args[0], t);
-					z = Static.getInt32(args[1], t);
+					x = ArgumentValidation.getInt32(args[0], t);
+					z = ArgumentValidation.getInt32(args[1], t);
 				}
 			} else {
 				//world, x and z provided
@@ -339,8 +339,8 @@ public class World {
 				if(world == null) {
 					throw new CREInvalidWorldException("The given world (" + args[0].val() + ") does not exist.", t);
 				}
-				x = Static.getInt32(args[1], t);
-				z = Static.getInt32(args[2], t);
+				x = ArgumentValidation.getInt32(args[1], t);
+				z = ArgumentValidation.getInt32(args[2], t);
 			}
 			world.loadChunk(x, z);
 			return CVoid.VOID;
@@ -410,14 +410,14 @@ public class World {
 						throw new CREInvalidWorldException("No world specified", t);
 					}
 					world = m.getWorld();
-					x = Static.getInt32(args[0], t);
-					z = Static.getInt32(args[1], t);
+					x = ArgumentValidation.getInt32(args[0], t);
+					z = ArgumentValidation.getInt32(args[1], t);
 				}
 			} else {
 				//world, x and z provided
 				world = Static.getServer().getWorld(args[0].val());
-				x = Static.getInt32(args[1], t);
-				z = Static.getInt32(args[2], t);
+				x = ArgumentValidation.getInt32(args[1], t);
+				z = ArgumentValidation.getInt32(args[2], t);
 			}
 			if(world == null) { // Happens when m is a fake console or null command sender.
 				throw new CREInvalidWorldException("No world specified", t);
@@ -595,13 +595,13 @@ public class World {
 					}
 
 					world = m.getWorld();
-					x = Static.getInt32(args[0], t);
-					z = Static.getInt32(args[1], t);
+					x = ArgumentValidation.getInt32(args[0], t);
+					z = ArgumentValidation.getInt32(args[1], t);
 				}
 			} else {
 				//world, x and z provided
-				x = Static.getInt32(args[0], t);
-				z = Static.getInt32(args[1], t);
+				x = ArgumentValidation.getInt32(args[0], t);
+				z = ArgumentValidation.getInt32(args[1], t);
 				world = Static.getServer().getWorld(args[2].val());
 				if(world == null) {
 					throw new CREInvalidWorldException("World " + args[2].val() + " does not exist.", t);
@@ -684,13 +684,13 @@ public class World {
 						throw new CREInvalidWorldException("No world specified", t);
 					}
 					world = m.getWorld();
-					x = Static.getInt32(args[0], t);
-					z = Static.getInt32(args[1], t);
+					x = ArgumentValidation.getInt32(args[0], t);
+					z = ArgumentValidation.getInt32(args[1], t);
 				}
 			} else {
 				//world, x and z provided
-				x = Static.getInt32(args[0], t);
-				z = Static.getInt32(args[1], t);
+				x = ArgumentValidation.getInt32(args[0], t);
+				z = ArgumentValidation.getInt32(args[1], t);
 				world = Static.getServer().getWorld(args[2].val());
 				if(world == null) {
 					throw new CREInvalidWorldException("The given world (" + args[2].val() + ") does not exist.", t);
@@ -920,7 +920,7 @@ public class World {
 			}
 			if((args.length >= 4) && !(args[3] instanceof CNull)) {
 				if(args[3].isInstanceOf(CInt.TYPE)) {
-					creator.seed(Static.getInt(args[3], t));
+					creator.seed(ArgumentValidation.getInt(args[3], t));
 				} else {
 					creator.seed(args[3].val().hashCode());
 				}
@@ -1618,7 +1618,7 @@ public class World {
 			boolean success = false;
 			if(args.length == 2) {
 				gameRule = ArgumentValidation.getEnum(args[0], MCGameRule.class, t);
-				String value = Static.getObject(args[1], t, gameRule.getRuleType()).val();
+				String value = ArgumentValidation.getObject(args[1], t, gameRule.getRuleType()).val();
 				for(MCWorld world : Static.getServer().getWorlds()) {
 					success = world.setGameRuleValue(gameRule, value);
 				}
@@ -1628,7 +1628,7 @@ public class World {
 				if(world == null) {
 					throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 				}
-				success = world.setGameRuleValue(gameRule, Static.getObject(args[2], t, gameRule.getRuleType()).val());
+				success = world.setGameRuleValue(gameRule, ArgumentValidation.getObject(args[2], t, gameRule.getRuleType()).val());
 			}
 			return CBoolean.get(success);
 		}
@@ -1731,7 +1731,7 @@ public class World {
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
 			double distance = 1;
 			if(args.length == 3) {
-				distance = Static.getNumber(args[2], t);
+				distance = ArgumentValidation.getNumber(args[2], t);
 			}
 			Vector3D vector;
 			if(args[1].isInstanceOf(CArray.TYPE)) {
@@ -1934,7 +1934,7 @@ public class World {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			Vector3D v = ObjectGenerator.GetGenerator().location(args[0], p == null ? null : p.getWorld(), t).getDirection();
 			if(args.length == 2) {
-				v = v.multiply(Static.getDouble(args[1], t));
+				v = v.multiply(ArgumentValidation.getDouble(args[1], t));
 			}
 			return ObjectGenerator.GetGenerator().vector(v);
 		}

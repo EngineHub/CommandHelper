@@ -18,6 +18,7 @@ import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.ProfilesImpl;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.functions.OAuth;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.core.taskmanager.TaskManagerImpl;
@@ -44,6 +45,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1354,7 +1356,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
 					pn,
 					MethodScriptFileLocations.getDefault().getTempDir(),
 					new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile()),
-					new TaskManagerImpl());
+					new TaskManagerImpl(), EnumSet.of(RuntimeMode.CMDLINE));
 		} catch(URISyntaxException | IOException | DataSourceException | Profiles.InvalidProfileException ex) {
 			showError("Could not load Persistence Database! " + ex.getMessage());
 		}

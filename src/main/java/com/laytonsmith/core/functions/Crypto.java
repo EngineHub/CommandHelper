@@ -5,9 +5,9 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CSecureString;
@@ -444,7 +444,7 @@ public class Crypto {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			int log_rounds = 5;
 			if(args.length == 2) {
-				log_rounds = Static.getInt32(args[1], t);
+				log_rounds = ArgumentValidation.getInt32(args[1], t);
 			}
 			try {
 				String val;
@@ -579,7 +579,7 @@ public class Crypto {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = Static.getByteArray(args[0], t);
+			CByteArray ba = ArgumentValidation.getByteArray(args[0], t);
 			byte[] data = ba.asByteArrayCopy();
 			data = Base64.encodeBase64(data);
 			return CByteArray.wrap(data, t);
@@ -634,7 +634,7 @@ public class Crypto {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = Static.getByteArray(args[0], t);
+			CByteArray ba = ArgumentValidation.getByteArray(args[0], t);
 			byte[] data = ba.asByteArrayCopy();
 			data = Base64.decodeBase64(data);
 			return CByteArray.wrap(data, t);

@@ -29,6 +29,15 @@ import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
+import com.laytonsmith.core.compiler.analysis.Declaration;
+import com.laytonsmith.core.compiler.analysis.IVariableAssignDeclaration;
+import com.laytonsmith.core.compiler.analysis.IncludeReference;
+import com.laytonsmith.core.compiler.analysis.Namespace;
+import com.laytonsmith.core.compiler.analysis.ParamDeclaration;
+import com.laytonsmith.core.compiler.analysis.ProcDeclaration;
+import com.laytonsmith.core.compiler.analysis.ProcRootDeclaration;
+import com.laytonsmith.core.compiler.analysis.Scope;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -76,6 +85,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -87,17 +97,11 @@ import java.util.logging.Logger;
 @core
 public class DataHandling {
 
-	// Variable is more clear when named after the function it represents.
-	@SuppressWarnings("checkstyle:constantname")
-	private static final String array_get = new ArrayHandling.array_get().getName();
-
-	// Variable is more clear when named after the function it represents.
-	@SuppressWarnings("checkstyle:constantname")
-	private static final String array_set = new ArrayHandling.array_set().getName();
-
-	// Variable is more clear when named after the function it represents.
-	@SuppressWarnings("checkstyle:constantname")
-	private static final String array_push = new ArrayHandling.array_push().getName();
+	private static final String ARRAY_GET = new ArrayHandling.array_get().getName();
+	private static final String ARRAY_SET = new ArrayHandling.array_set().getName();
+	private static final String ARRAY_PUSH = new ArrayHandling.array_push().getName();
+	private static final String INCLUDE = new include().getName();
+	private static final String CENTRY = new Compiler.centry().getName();
 
 	public static String docs() {
 		return "This class provides various methods to control script data and program flow.";
@@ -120,6 +124,33 @@ public class DataHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CArray(t, args);
+		}
+
+		@Override
+		public CClassType typecheck(StaticAnalysis analysis,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			return typecheckArray(analysis, ast, env, exceptions);
+		}
+
+		protected static CClassType typecheckArray(StaticAnalysis analysis,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			for(ParseTree child : ast.getChildren()) {
+				Mixed elem = child.getData();
+
+				// If this is a centry(), ignore the first (CLabel) argument.
+				if(elem instanceof CFunction && CENTRY.equals(elem.val())) {
+					if(child.numberOfChildren() == 2) {
+						CClassType type = analysis.typecheck(child.getChildAt(1), env, exceptions);
+						StaticAnalysis.requireType(type, Mixed.TYPE, child.getChildAt(1).getTarget(), env, exceptions);
+					}
+				} else {
+
+					// This is normal value, so typecheck it.
+					CClassType type = analysis.typecheck(child, env, exceptions);
+					StaticAnalysis.requireType(type, Mixed.TYPE, child.getTarget(), env, exceptions);
+				}
+			}
+			return CArray.TYPE;
 		}
 
 		@Override
@@ -170,7 +201,7 @@ public class DataHandling {
 			//statements, but doesn't make sense here.
 			//Also check for dynamic labels
 			for(ParseTree child : children) {
-				if(child.getData() instanceof CFunction && new Compiler.centry().getName().equals(child.getData().val())) {
+				if(child.getData() instanceof CFunction && CENTRY.equals(child.getData().val())) {
 					if(((CLabel) child.getChildAt(0).getData()).cVal() instanceof CSlice) {
 						throw new ConfigCompileException("Slices cannot be used as array indices", child.getChildAt(0).getTarget());
 					}
@@ -223,6 +254,12 @@ public class DataHandling {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CArray array = CArray.GetAssociativeArray(t, args);
 			return array;
+		}
+
+		@Override
+		public CClassType typecheck(StaticAnalysis analysis,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			return array.typecheckArray(analysis, ast, env, exceptions);
 		}
 
 		@Override
@@ -319,8 +356,178 @@ public class DataHandling {
 		}
 
 		@Override
+		@SuppressWarnings("checkstyle:FallThrough")
+		public CClassType typecheck(StaticAnalysis analysis,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+			int ind = 0;
+			CClassType declaredType = null;
+			switch(ast.numberOfChildren()) {
+				case 3:
+					// Typecheck declaration type.
+					ParseTree typeNode = ast.getChildAt(ind++);
+					declaredType = StaticAnalysis.requireClassType(
+							typeNode.getData(), typeNode.getTarget(), exceptions);
+					// Intentional fallthrough.
+				case 2:
+					// Typecheck variable.
+					ParseTree varNode = ast.getChildAt(ind++);
+					IVariable ivar = StaticAnalysis.requireIVariable(
+							varNode.getData(), varNode.getTarget(), exceptions);
+
+					// Get assigned value.
+					ParseTree valNode = ast.getChildAt(ind);
+					CClassType valType = analysis.typecheck(valNode, env, exceptions);
+
+					// Attempt to get the declared type from this variable's declaration.
+					if(declaredType == null && ivar != null) {
+						Scope scope = analysis.getTermScope(varNode);
+						if(scope != null) {
+							Set<Declaration> decls = scope.getDeclarations(Namespace.IVARIABLE, ivar.getVariableName());
+							if(decls.size() > 0) {
+
+								// Type check assigned value for all found declaration types.
+								for(Declaration decl : decls) {
+									StaticAnalysis.requireType(
+											valType, decl.getType(), valNode.getTarget(), env, exceptions);
+								}
+								return valType;
+							} else {
+								declaredType = CClassType.AUTO;
+							}
+						}
+					}
+
+					// Type check assigned value.
+					StaticAnalysis.requireType(valType, declaredType, valNode.getTarget(), env, exceptions);
+
+					// Return the value type.
+					return valType;
+				default:
+					// Invalid number of arguments. Don't generate any further errors.
+					return CClassType.AUTO;
+			}
+		}
+
+		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			if(ast.getChildren().size() == 3) { // Variable declaration + assign: assign(type, var, val).
+
+				// Handle the assigned value.
+				Scope valScope = analysis.linkScope(parentScope, ast.getChildAt(2), env, exceptions);
+
+				// Create a new scope and put the variable declaration in that scope.
+				Scope declScope = analysis.createNewScope(valScope);
+				Mixed rawType = ast.getChildAt(0).getData();
+				ParseTree ivarAst = ast.getChildAt(1);
+				Mixed rawIVar = ivarAst.getData();
+				if(rawType instanceof CClassType && rawIVar instanceof IVariable) {
+					CClassType type = (CClassType) rawType;
+					IVariable iVar = (IVariable) rawIVar;
+
+					// Add the new variable declaration.
+					declScope.addDeclaration(new Declaration(
+							Namespace.IVARIABLE, iVar.getVariableName(), type, ast.getTarget()));
+					analysis.setTermScope(ivarAst, declScope);
+				}
+
+				// Return the declaration scope.
+				return declScope;
+
+			} else if(ast.getChildren().size() == 2) { // Variable assign: assign(var, val).
+
+				// Handle the assigned value.
+				Scope valScope = analysis.linkScope(parentScope, ast.getChildAt(1), env, exceptions);
+
+				// Create a new scope and put the variable assign declaration in that scope.
+				// This declaration will be converted to either a variable reference or declaration later.
+				Scope newScope = analysis.createNewScope(valScope);
+				ParseTree ivarAst = ast.getChildAt(0);
+				Mixed rawIVar = ivarAst.getData();
+				if(rawIVar instanceof IVariable) {
+					IVariable iVar = (IVariable) rawIVar;
+
+					// Add ivariable assign declaration in a new scope.
+					newScope.addDeclaration(new IVariableAssignDeclaration(iVar.getVariableName(), iVar.getTarget()));
+					analysis.setTermScope(ivarAst, newScope);
+				}
+
+				// Return the new scope.
+				return newScope;
+			}
+			return super.linkScope(analysis, parentScope, ast, env, exceptions);
+		}
+
+		/**
+		 * Handles an {@code assign()} that is used as parameter in for example a procedure or closure.
+		 * This will declare the parameter in the paramScope scope, using the {@link Namespace#IVARIABLE} namespace.
+		 * The default parameter value (assigned value) will be handled in the valScope.
+		 * @param analysis
+		 * @param paramScope - The scope to which a new scope is linked in which the declaration will be placed.
+		 * @param valScope - The scope to which a new scope is linked in which the assigned value will be handled.
+		 * @param ast - The AST of the {@code assign()} function.
+		 * @param env
+		 * @param exceptions
+		 * @return The resulting scopes in format {paramScope, valScope}.
+		 */
+		public Scope[] linkParamScope(StaticAnalysis analysis, Scope paramScope, Scope valScope,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Typed parameter: assign(type, var, val).
+			if(ast.getChildren().size() == 3) {
+
+				// Handle the assigned value.
+				valScope = analysis.linkScope(valScope, ast.getChildAt(2), env, exceptions);
+
+				// Put the variable declaration in the param scope.
+				Mixed rawType = ast.getChildAt(0).getData();
+				ParseTree ivarAst = ast.getChildAt(1);
+				Mixed rawIVar = ivarAst.getData();
+				if(rawType instanceof CClassType && rawIVar instanceof IVariable) {
+					CClassType type = (CClassType) rawType;
+					IVariable iVar = (IVariable) rawIVar;
+
+					// Add the new variable declaration.
+					paramScope = analysis.createNewScope(paramScope);
+					paramScope.addDeclaration(new ParamDeclaration(iVar.getVariableName(), type, ast.getTarget()));
+					analysis.setTermScope(ivarAst, paramScope);
+				}
+
+				// Return the scope pair.
+				return new Scope[] {paramScope, valScope};
+
+			}
+
+			// Untyped parameter: assign(var, val).
+			if(ast.getChildren().size() == 2) {
+
+				// Handle the assigned value.
+				valScope = analysis.linkScope(valScope, ast.getChildAt(1), env, exceptions);
+
+				// Put the variable declaration in the param scope.
+				ParseTree ivarAst = ast.getChildAt(0);
+				Mixed rawIVar = ivarAst.getData();
+				if(rawIVar instanceof IVariable) {
+					IVariable iVar = (IVariable) rawIVar;
+
+					// Add the new variable declaration.
+					paramScope = analysis.createNewScope(paramScope);
+					paramScope.addDeclaration(new ParamDeclaration(
+							iVar.getVariableName(), CClassType.AUTO, ast.getTarget()));
+					analysis.setTermScope(ivarAst, paramScope);
+				}
+
+				// Return the scope pair.
+				return new Scope[] {paramScope, valScope};
+			}
+
+			// Invalid parameter. Fall back to handling this function's arguments.
+			return new Scope[] {paramScope, super.linkScope(analysis, valScope, ast, env, exceptions)};
 		}
 
 		@Override
@@ -409,12 +616,27 @@ public class DataHandling {
 					}
 				}
 			}
-			if(children.get(0).getData() instanceof CFunction && array_get.equals(children.get(0).getData().val())) {
+			return null;
+		}
+
+		@Override
+		public ParseTree postParseRewrite(ParseTree ast, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+			List<ParseTree> children = ast.getChildren();
+
+			// Check for too few arguments.
+			if(children.size() < 2) {
+				return null;
+			}
+
+			// Convert "assign(@a[<ind>], val)" to "array_push(@a, val)" or "array_set(@a, ind, val)".
+			if(children.get(0).getData() instanceof CFunction && ARRAY_GET.equals(children.get(0).getData().val())) {
 				if(children.get(0).getChildAt(1).getData() instanceof CSlice) {
 					CSlice cs = (CSlice) children.get(0).getChildAt(1).getData();
 					if(cs.getStart() == 0 && cs.getFinish() == -1) {
 						//Turn this into an array_push
-						ParseTree tree = new ParseTree(new CFunction(array_push, t), children.get(0).getFileOptions());
+						ParseTree tree = new ParseTree(new CFunction(
+								ARRAY_PUSH, ast.getTarget()), children.get(0).getFileOptions());
 						tree.addChild(children.get(0).getChildAt(0));
 						tree.addChild(children.get(1));
 						return tree;
@@ -423,14 +645,14 @@ public class DataHandling {
 					//will be an error generated elsewhere
 				} else {
 					//Turn this into an array set instead
-					ParseTree tree = new ParseTree(new CFunction(array_set, t), children.get(0).getFileOptions());
+					ParseTree tree = new ParseTree(new CFunction(
+							ARRAY_SET, ast.getTarget()), children.get(0).getFileOptions());
 					tree.addChild(children.get(0).getChildAt(0));
 					tree.addChild(children.get(0).getChildAt(1));
 					tree.addChild(children.get(1));
 					return tree;
 				}
 			}
-
 			return null;
 		}
 
@@ -1033,7 +1255,7 @@ public class DataHandling {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			boolean b = true;
 			try {
-				Static.getNumber(args[0], t);
+				ArgumentValidation.getNumber(args[0], t);
 			} catch (ConfigRuntimeException e) {
 				b = false;
 			}
@@ -1107,7 +1329,7 @@ public class DataHandling {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			double d;
 			try {
-				d = Static.getDouble(args[0], t);
+				d = ArgumentValidation.getDouble(args[0], t);
 			} catch (ConfigRuntimeException e) {
 				return CBoolean.FALSE;
 			}
@@ -1285,6 +1507,66 @@ public class DataHandling {
 		}
 
 		@Override
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
+				Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Handle not enough arguments.
+			if(ast.numberOfChildren() < 2) {
+				return parentScope;
+			}
+
+			// Handle optional return type argument (CClassType or CVoid, default to AUTO).
+			int ind = 0;
+			CClassType retType;
+			if(ast.getChildAt(ind).getData() instanceof CClassType) {
+				retType = (CClassType) ast.getChildAt(ind++).getData();
+			} else if(ast.getChildAt(ind).getData().equals(CVoid.VOID)) {
+				ind++;
+				retType = CVoid.TYPE;
+			} else {
+				retType = CClassType.AUTO;
+			}
+
+			// Get proc name.
+			ParseTree procNameNode = ast.getChildAt(ind++);
+			String procName = procNameNode.getData().val();
+
+			// Create parameter scope.
+			Scope paramScope = analysis.createNewScope();
+
+			// Insert @arguments parameter.
+			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, ast.getTarget()));
+
+			// Handle procedure parameters from left to right.
+			Scope valScope = parentScope;
+			while(ind < ast.numberOfChildren() - 1) {
+				ParseTree param = ast.getChildAt(ind++);
+				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions);
+				valScope = scopes[1];
+				paramScope = scopes[0];
+			}
+
+			// Handle procedure code.
+			ParseTree code = ast.getChildAt(ast.numberOfChildren() - 1);
+			analysis.linkScope(paramScope, code, env, exceptions);
+
+			// Create proc declaration in a new scope.
+			// TODO - Include proc signature (argument types and number of arguments) in declaration.
+			Scope declScope = analysis.createNewScope(parentScope);
+			ProcDeclaration procDecl = new ProcDeclaration(procName, retType, ast.getTarget());
+			declScope.addDeclaration(procDecl);
+
+			// Create proc root declaration in the inner root scope.
+			paramScope.addDeclaration(new ProcRootDeclaration(procDecl));
+
+			// Allow procedures to perform lookups in the decl scope.
+			paramScope.addSpecificParent(declScope, Namespace.PROCEDURE);
+
+			// Return the declaration scope. Parameters and their default values are not accessible after the procedure.
+			return declScope;
+		}
+
+		@Override
 		public boolean useSpecialExec() {
 			return true;
 		}
@@ -1418,11 +1700,71 @@ public class DataHandling {
 			Mixed arg = parent.seval(tree, env);
 			String location = arg.val();
 			File file = Static.GetFileFromArgument(location, env, t, null);
-			ParseTree include = IncludeCache.get(file, env, t);
+
+			// Create new static analysis for dynamic includes that have not yet been cached.
+			StaticAnalysis analysis;
+			boolean isFirstCompile = false;
+			Scope parentScope = IncludeCache.DYNAMIC_ANALYSIS_PARENT_SCOPE_CACHE.get(t);
+			if(parentScope != null) {
+				analysis = IncludeCache.getStaticAnalysis(file);
+				if(analysis == null) {
+					analysis = new StaticAnalysis(true);
+					analysis.getStartScope().addParent(parentScope);
+					isFirstCompile = true;
+				}
+			} else {
+				analysis = null; // It's a static include.
+			}
+
+			// Get or load the include.
+			ParseTree include = IncludeCache.get(file, env, env.getEnvClasses(), analysis, t);
+
+			// Perform static analysis for dynamic includes.
+			// This should not run if this is the first compile for this include, as IncludeCache.get() checks it then.
+			/*
+			 *  TODO - This analysis runs on an optimized AST.
+			 *  Cloning, caching and using the non-optimized AST would be nice.
+			 *  This solution is acceptable in the meantime, as the first analysis of a dynamic include runs
+			 *  on the non-optimized AST through IncludeCache.get(), and otherwise-runtime errors should still be
+			 *  caught when analyzing the optimized AST.
+			 */
+			if(isFirstCompile) {
+
+				// Remove this parent scope since it should not end up in the cached analysis.
+				analysis.getStartScope().removeParent(parentScope);
+			} else if(analysis != null) {
+
+				// Set up analysis. Cloning is required to not mess up the cached analysis.
+				analysis = analysis.clone();
+				analysis.getStartScope().addParent(parentScope);
+				Set<ConfigCompileException> exceptions = new HashSet<>();
+				analysis.analyzeFinalScopeGraph(env, exceptions);
+
+				// Handle compile exceptions.
+				if(exceptions.size() == 1) {
+					ConfigCompileException ex = exceptions.iterator().next();
+					String fileName = (ex.getFile() == null ? "Unknown Source" : file.getName());
+					throw new CREIncludeException(
+							"There was a compile error when trying to include the script at " + file
+							+ "\n" + ex.getMessage() + " :: " + fileName + ":" + ex.getLineNum(), t);
+				} else if(exceptions.size() > 1) {
+					StringBuilder b = new StringBuilder();
+					b.append("There were compile errors when trying to include the script at ")
+							.append(file).append("\n");
+					for(ConfigCompileException ex : exceptions) {
+						String fileName = (ex.getFile() == null ? "Unknown Source" : ex.getFile().getName());
+						b.append(ex.getMessage()).append(" :: ").append(fileName).append(":")
+								.append(ex.getLineNum()).append("\n");
+					}
+					throw new CREIncludeException(b.toString(), t);
+				}
+			}
+
 			if(include != null) {
 				// It could be an empty file
 				StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
-				stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("<<include " + arg.val() + ">>", t));
+				stManager.addStackTraceElement(
+						new ConfigRuntimeException.StackTraceElement("<<include " + arg.val() + ">>", t));
 				try {
 					parent.eval(include.getChildAt(0), env);
 				} catch (AbstractCREException e) {
@@ -1435,6 +1777,34 @@ public class DataHandling {
 				}
 			}
 			return CVoid.VOID;
+		}
+
+		@Override
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
+				Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Store references for static includes and a static analysis for dynamic includes.
+			if(ast.numberOfChildren() == 1) {
+				Mixed includePathNode = ast.getChildAt(0).getData();
+				if(includePathNode instanceof CString) {
+
+					// Create a new unlinked scope to leave a gap for the include scopes.
+					// Create a reference with these unlinked scopes to be able to perform linkage at a later stage.
+					Scope outScope = analysis.createNewScope();
+					parentScope.addReference(new IncludeReference(
+							includePathNode.val(), parentScope, outScope, ast.getTarget()));
+					return outScope;
+				} else {
+
+					// The include is dynamic, so it cannot be checked in compile time.
+					// Store the parent scope for static analysis to check the file as soon as it is loaded in runtime.
+					IncludeCache.DYNAMIC_ANALYSIS_PARENT_SCOPE_CACHE.put(ast.getTarget(), parentScope);
+					return super.linkScope(analysis, parentScope, ast, env, exceptions);
+				}
+			}
+
+			// Fall back to default behavior for invalid syntax.
+			return super.linkScope(analysis, parentScope, ast, env, exceptions);
 		}
 
 		@Override
@@ -1512,7 +1882,7 @@ public class DataHandling {
 
 	@api
 	@DocumentLink(0)
-	public static class include_dir extends AbstractFunction implements Optimizable {
+	public static class include_dir extends AbstractFunction {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -1531,7 +1901,8 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			throw new UnsupportedOperationException("Not supported yet.");
+			// This function is rewritten to include() calls in compile time, so this doesn't exist in runtime.
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -1559,33 +1930,51 @@ public class DataHandling {
 		}
 
 		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
+		public ParseTree postParseRewrite(ParseTree ast, Environment env,
+				Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
+			Target t = ast.getTarget();
 
-		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env,
-				Set<Class<? extends Environment.EnvironmentImpl>> envs,
-				List<ParseTree> children,
-				FileOptions fileOptions)
-				throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() > 2) {
-				throw new ConfigCompileException("Unexpected arguments to " + getName(), t);
+			// Check arguments size.
+			if(ast.numberOfChildren() < 1 || ast.numberOfChildren() > 2) {
+				exceptions.add(new ConfigCompileException(
+						"Incorrect number of arguments passed to " + this.getName(), t));
+				return null;
 			}
-			String dir = children.get(0).getData().val();
+
+			// Require and get hard-coded arguments.
+			Mixed dirNode = ast.getChildAt(0).getData();
+			boolean recurse = false;
+			boolean exception = false;
+			if(!(dirNode instanceof CString)) {
+				exceptions.add(new ConfigCompileException(
+						"Directory argument passed to " + this.getName() + " must be a hard-coded string.", t));
+				exception = true;
+			}
+			if(ast.numberOfChildren() >= 2) {
+				Mixed recurseNode = ast.getChildAt(1).getData();
+				if(!(recurseNode instanceof CBoolean)) {
+					exceptions.add(new ConfigCompileException(
+							"Recurse argument passed to " + this.getName() + " must be a hard-coded boolean.", t));
+					exception = true;
+				} else {
+					recurse = ((CBoolean) recurseNode).getBoolean();
+				}
+			}
+			if(exception) {
+				return null;
+			}
+
+			// Require directory to resolve to an actual directory.
+			String dir = dirNode.val();
 			File file = Static.GetFileFromArgument(dir, env, t, null);
 			if(!file.isDirectory()) {
-				throw new ConfigCompileException("Path passed to " + getName()
-						+ " must be a directory which exists.", t);
-			}
-			boolean recurse = false;
-			if(children.size() > 1) {
-				recurse = ArgumentValidation.getBooleanObject(children.get(1).getData(), t);
+				exceptions.add(new ConfigCompileException(
+						"Directory path passed to " + this.getName() + " must be a directory which exists.", t));
+				return null;
 			}
 
-			ParseTree g = new ParseTree(new CFunction("g", t), fileOptions);
+			// Collect all .ms files that should be included.
 			List<File> msFiles = new ArrayList<>();
-
 			if(recurse) {
 				try {
 					FileUtil.recursiveFind(file, ((f) -> {
@@ -1594,7 +1983,8 @@ public class DataHandling {
 						}
 					}));
 				} catch (IOException ex) {
-					throw new ConfigCompileException(ex.getMessage(), t, ex);
+					exceptions.add(new ConfigCompileException(ex.getMessage(), t, ex));
+					exception = true;
 				}
 			} else {
 				for(File f : file.listFiles()) {
@@ -1603,18 +1993,19 @@ public class DataHandling {
 					}
 				}
 			}
-
-			for(File f : msFiles) {
-				ParseTree include = new ParseTree(new CFunction("include", t), fileOptions);
-				include.addChild(new ParseTree(new CString(f.getAbsolutePath(), t), fileOptions));
-				g.addChild(include);
+			if(exception) {
+				return null;
 			}
 
+			// Convert this function to g(include(...), include(...), ...).
+			ParseTree g = new ParseTree(new CFunction("g", t), ast.getFileOptions());
+			for(File f : msFiles) {
+				ParseTree include = new ParseTree(new CFunction(INCLUDE, t), ast.getFileOptions());
+				include.addChild(new ParseTree(new CString(f.getAbsolutePath(), t), ast.getFileOptions()));
+				g.addChild(include);
+			}
 			return g;
 		}
-
-
-
 	}
 
 	@api
@@ -2041,6 +2432,55 @@ public class DataHandling {
 		}
 
 		@Override
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			return this.linkScope(analysis, parentScope, ast, env, exceptions, true);
+		}
+
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
+				Environment env, Set<ConfigCompileException> exceptions, boolean codeInheritsParentScope) {
+
+			// Handle empty closure.
+			if(ast.numberOfChildren() == 0) {
+				return parentScope;
+			}
+
+			// Handle optional return type argument.
+			int ind = 0;
+			if(ast.getChildAt(ind).getData().isInstanceOf(CClassType.TYPE)) {
+				analysis.linkScope(parentScope, ast.getChildAt(ind++), env, exceptions);
+			}
+
+			// Create parameter scope. Set parent scope if this closure type is allowed to resolve in the parent scope.
+			// Procedures can always look up in the parent scope.
+			Scope paramScope = analysis.createNewScope();
+			if(codeInheritsParentScope) {
+				paramScope.addParent(parentScope);
+			} else {
+				paramScope.addSpecificParent(parentScope, Namespace.PROCEDURE);
+			}
+
+			// Insert @arguments parameter.
+			paramScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, ast.getTarget()));
+
+			// Handle closure parameters from left to right.
+			Scope valScope = parentScope;
+			while(ind < ast.numberOfChildren() - 1) {
+				ParseTree param = ast.getChildAt(ind++);
+				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions);
+				valScope = scopes[1];
+				paramScope = scopes[0];
+			}
+
+			// Handle closure code.
+			ParseTree code = ast.getChildAt(ast.numberOfChildren() - 1);
+			analysis.linkScope(paramScope, code, env, exceptions);
+
+			// Return the parent scope, as parameters and their default values are not accessible after the closure.
+			return parentScope;
+		}
+
+		@Override
 		public Version since() {
 			return MSVersion.V3_3_0;
 		}
@@ -2163,6 +2603,12 @@ public class DataHandling {
 			// This ensures it's not unintentionally retaining values in memory cloned from the original scope.
 			myEnv.getEnv(GlobalEnv.class).SetVarList(null);
 			return new CIClosure(nodes[nodes.length - 1], myEnv, returnType, names, defaults, types, t);
+		}
+
+		@Override
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope, ParseTree ast,
+				Environment env, Set<ConfigCompileException> exceptions) {
+			return this.linkScope(analysis, parentScope, ast, env, exceptions, false);
 		}
 
 		@Override
@@ -2587,7 +3033,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			return new CDouble(Static.getDouble(args[0], t), t);
+			return new CDouble(ArgumentValidation.getDouble(args[0], t), t);
 		}
 
 		@Override
@@ -2702,11 +3148,11 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			int radix = Static.getInt32(args[1], t);
+			int radix = ArgumentValidation.getInt32(args[1], t);
 			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
 				throw new CRERangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
 			}
-			return new CString(Long.toString(Static.getInt(args[0], t), radix), t);
+			return new CString(Long.toString(ArgumentValidation.getInt(args[0], t), radix), t);
 		}
 
 		@Override
@@ -2775,7 +3221,7 @@ public class DataHandling {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String value = args[0].val();
-			int radix = Static.getInt32(args[1], t);
+			int radix = ArgumentValidation.getInt32(args[1], t);
 			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
 				throw new CRERangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
 			}

@@ -62,6 +62,7 @@ import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.TokenStream;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
@@ -74,6 +75,7 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.InvalidEnvironmentException;
+import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.drivers.CmdlineEvents;
@@ -105,6 +107,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -149,6 +152,7 @@ public final class Interpreter {
 	private boolean inShellMode = false;
 	private String script = "";
 	private Environment env;
+	private StaticAnalysis staticAnalysis;
 	private Thread scriptThread = null;
 
 	private volatile boolean isExecuting = false;
@@ -338,8 +342,8 @@ public final class Interpreter {
 		Installer.Install(MethodScriptFileLocations.getDefault().getConfigDirectory());
 		Installer.InstallCmdlineInterpreter();
 
-		env = Static.GenerateStandaloneEnvironment(false);
-		env.getEnv(GlobalEnv.class).SetCustom("cmdline", true);
+		env = Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE, RuntimeMode.INTERPRETER));
+		staticAnalysis = new StaticAnalysis(true);
 		if(Prefs.UseColors()) {
 			TermColors.EnableColors();
 		} else {
@@ -774,7 +778,8 @@ public final class Interpreter {
 		final ParseTree tree;
 		try {
 			TokenStream stream = MethodScriptCompiler.lex(script, env, fromFile, true);
-			tree = MethodScriptCompiler.compile(stream, env, env.getEnvClasses());
+			tree = MethodScriptCompiler.compile(stream, env, env.getEnvClasses(), staticAnalysis);
+			staticAnalysis = new StaticAnalysis(staticAnalysis.getEndScope(), true); // Continue analysis in end scope.
 		} finally {
 			compile.stop();
 		}

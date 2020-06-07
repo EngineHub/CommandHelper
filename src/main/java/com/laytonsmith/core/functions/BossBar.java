@@ -156,7 +156,7 @@ public class BossBar {
 				}
 				if(ca.containsKey("percent")) {
 					try {
-						percent = Static.getDouble(ca.get("percent", t), t);
+						percent = ArgumentValidation.getDouble(ca.get("percent", t), t);
 					} catch (IllegalArgumentException ex) {
 						throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 					}
@@ -211,7 +211,7 @@ public class BossBar {
 				bar.setTitle(args[1].val());
 			} else if(args[1].isInstanceOf(CDouble.TYPE)) {
 				try {
-					bar.setProgress(Static.getDouble(args[1], t));
+					bar.setProgress(ArgumentValidation.getDouble(args[1], t));
 				} catch (IllegalArgumentException ex) {
 					throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 				}
@@ -239,7 +239,7 @@ public class BossBar {
 				}
 				if(ca.containsKey("percent")) {
 					try {
-						bar.setProgress(Static.getDouble(ca.get("percent", t), t));
+						bar.setProgress(ArgumentValidation.getDouble(ca.get("percent", t), t));
 					} catch (IllegalArgumentException ex) {
 						throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 					}

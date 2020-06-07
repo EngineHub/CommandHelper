@@ -14,6 +14,9 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
+import com.laytonsmith.core.compiler.analysis.Namespace;
+import com.laytonsmith.core.compiler.analysis.Scope;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CNull;
@@ -182,6 +185,42 @@ public class EventBinding {
 				}
 			}
 			return id;
+		}
+
+		@Override
+		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Fully ignore the bind() if it will generate an exception later anyways.
+			if(ast.numberOfChildren() < 5) {
+				return parentScope;
+			}
+
+			ParseTree eventName = ast.getChildAt(0);
+			ParseTree options = ast.getChildAt(1);
+			ParseTree prefilter = ast.getChildAt(2);
+			ParseTree eventObj = ast.getChildAt(3);
+			ParseTree code = ast.getChildAt(ast.numberOfChildren() - 1);
+
+			// Order: eventName -> options -> prefilter -> eventObj -> (params)* -> code.
+			Scope eventNameScope = analysis.linkScope(parentScope, eventName, env, exceptions);
+			Scope optionsScope = analysis.linkScope(eventNameScope, options, env, exceptions);
+			Scope prefilterScope = analysis.linkScope(optionsScope, prefilter, env, exceptions);
+			Scope paramScope = analysis.createNewScope();
+			paramScope.addSpecificParent(prefilterScope, Namespace.PROCEDURE);
+			Scope[] eventObjScopes = analysis.linkParamScope(paramScope, prefilterScope, eventObj, env, exceptions);
+			paramScope = eventObjScopes[0];
+			Scope valScope = eventObjScopes[1];
+			for(int paramInd = 4; paramInd < ast.numberOfChildren() - 1; paramInd++) {
+				ParseTree param = ast.getChildAt(paramInd);
+				Scope[] scopes = analysis.linkParamScope(paramScope, valScope, param, env, exceptions);
+				paramScope = scopes[0];
+				valScope = scopes[1];
+			}
+			analysis.linkScope(paramScope, code, env, exceptions);
+
+			// Allow code after bind() to access declarations in assigned values, but not parameters themselves.
+			return valScope;
 		}
 
 		@Override

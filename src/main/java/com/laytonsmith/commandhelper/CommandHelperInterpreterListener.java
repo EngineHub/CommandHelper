@@ -12,6 +12,7 @@ import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
@@ -26,6 +27,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -139,7 +141,7 @@ public class CommandHelperInterpreterListener implements Listener {
 		TokenStream stream = MethodScriptCompiler.lex(script, null, new File("Interpreter"), true);
 		GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler, plugin.persistenceNetwork,
 				CommandHelperFileLocations.getDefault().getConfigDirectory(),
-				plugin.profiles, new TaskManagerImpl());
+				plugin.profiles, new TaskManagerImpl(), EnumSet.of(RuntimeMode.EMBEDDED, RuntimeMode.INTERPRETER));
 		gEnv.SetDynamicScriptingMode(true);
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 		cEnv.SetPlayer(p);
