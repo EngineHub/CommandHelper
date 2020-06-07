@@ -46,6 +46,7 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.exceptions.CRE.CREBadEntityException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -79,6 +80,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -1304,15 +1306,14 @@ public final class Static {
 	 * Generates a new environment, assuming that the jar has a folder next to it named CommandHelper, and that folder
 	 * is the root.
 	 * @param install
-	 * @param inCmdlineMode - {@code true} to generate a cmdline environment, {@code false} otherwise.
-	 * @param inInterpreterMode - {@code true} to generate an intepreter environment, {@code false} otherwise.
+	 * @param runtimeModes The {@link RuntimeMode}s for this environment.
 	 * @return
 	 * @throws IOException
 	 * @throws DataSourceException
 	 * @throws URISyntaxException
 	 */
 	public static Environment GenerateStandaloneEnvironment(
-			boolean install, boolean inCmdlineMode, boolean inInterpreterMode)
+			boolean install, EnumSet<RuntimeMode> runtimeModes)
 			throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		File platformFolder = MethodScriptFileLocations.getDefault().getConfigDirectory();
 		if(install) {
@@ -1328,14 +1329,14 @@ public final class Static {
 				new URI(URLEncoder.encode("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace('\\', '/'), "UTF-8")), options);
 		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"),
 				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()), persistenceNetwork,
-				platformFolder, profiles, new TaskManagerImpl(), inCmdlineMode, inInterpreterMode);
+				platformFolder, profiles, new TaskManagerImpl(), runtimeModes);
 		gEnv.SetLabel(GLOBAL_PERMISSION);
 		return Environment.createEnvironment(gEnv, new CompilerEnvironment());
 	}
 
 	/**
 	 * Generates a new environment, assuming that the jar has a folder next to it named CommandHelper, and that folder
-	 * is the root. This new environment is not in cmdline and interpreter mode.
+	 * is the root. This new environment is in embedded mode (and not in cmdline and interpreter mode).
 	 * @param install
 	 * @return
 	 * @throws IOException
@@ -1344,12 +1345,12 @@ public final class Static {
 	 */
 	public static Environment GenerateStandaloneEnvironment(boolean install)
 			throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
-		return GenerateStandaloneEnvironment(install, false, false);
+		return GenerateStandaloneEnvironment(install, EnumSet.of(RuntimeMode.EMBEDDED));
 	}
 
 	/**
 	 * Generates a new environment, assuming that the jar has a folder next to it named CommandHelper, and that folder
-	 * is the root. This new environment is not in cmdline and interpreter mode.
+	 * is the root. This new environment is in embedded mode (and not in cmdline and interpreter mode).
 	 * @return
 	 * @throws IOException
 	 * @throws DataSourceException

@@ -75,6 +75,7 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.InvalidEnvironmentException;
+import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.drivers.CmdlineEvents;
@@ -106,6 +107,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -340,7 +342,7 @@ public final class Interpreter {
 		Installer.Install(MethodScriptFileLocations.getDefault().getConfigDirectory());
 		Installer.InstallCmdlineInterpreter();
 
-		env = Static.GenerateStandaloneEnvironment(false, true, false);
+		env = Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE, RuntimeMode.INTERPRETER));
 		staticAnalysis = new StaticAnalysis(true);
 		if(Prefs.UseColors()) {
 			TermColors.EnableColors();

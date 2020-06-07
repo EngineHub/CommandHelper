@@ -36,6 +36,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -54,6 +55,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -90,7 +92,7 @@ public class Manager {
 		profiler = new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile());
 		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistenceNetwork,
 				CH_DIRECTORY, new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile()),
-				new TaskManagerImpl(), true, false);
+				new TaskManagerImpl(), EnumSet.of(RuntimeMode.CMDLINE));
 		cls();
 		pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
 

@@ -32,6 +32,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,8 +64,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private Map<String, Procedure> procs = null;
 	private IVariableList iVariableList = null;
 	private String label = null;
-	private boolean inCmdlineMode = false;
-	private boolean inInterpreterMode = false;
+	private final EnumSet<RuntimeMode> runtimeModes;
 	private final DaemonManager daemonManager = new DaemonManager();
 	private boolean dynamicScriptingMode = false;
 	private final Profiles profiles;
@@ -86,16 +86,16 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * @param root The root working directory to use
 	 * @param profiles The Profiles object to use
 	 * @param taskManager The TaskManager object to use
-	 * @param inCmdlineMode {@code true} if running in cmdline mode, {@code false} otherwise.
-	 * @param inInterpreterMode {@code true} if running in interpreter mode, {@code false} otherwise.
+	 * @param runtimeModes The {@link RuntimeMode}s for this environment.
 	 */
 	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistenceNetwork network,
-			File root, Profiles profiles, TaskManager taskManager, boolean inCmdlineMode, boolean inInterpreterMode) {
+			File root, Profiles profiles, TaskManager taskManager, EnumSet<RuntimeMode> runtimeModes) {
 		Static.AssertNonNull(queue, "ExecutionQueue cannot be null");
 		Static.AssertNonNull(profiler, "Profiler cannot be null");
 		Static.AssertNonNull(network, "PersistenceNetwork cannot be null");
 		Static.AssertNonNull(root, "Root file cannot be null");
 		Static.AssertNonNull(taskManager, "TaskManager cannot be null");
+		RuntimeMode.validate(runtimeModes);
 		this.executionQueue = queue;
 		this.profiler = profiler;
 		this.persistenceNetwork = network;
@@ -105,8 +105,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		}
 		this.profiles = profiles;
 		this.taskManager.setObject(taskManager);
-		this.inCmdlineMode = inCmdlineMode;
-		this.inInterpreterMode = inInterpreterMode;
+		this.runtimeModes = runtimeModes;
 	}
 
 	/**
@@ -366,11 +365,11 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	}
 
 	public boolean inCmdlineMode() {
-		return this.inCmdlineMode;
+		return this.runtimeModes.contains(RuntimeMode.CMDLINE);
 	}
 
 	public boolean inInterpreterMode() {
-		return this.inInterpreterMode;
+		return this.runtimeModes.contains(RuntimeMode.INTERPRETER);
 	}
 
 	public DaemonManager GetDaemonManager() {

@@ -15,6 +15,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -46,6 +47,7 @@ import java.io.Writer;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -132,7 +134,7 @@ public class AliasCore {
 
 		GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
 				MethodScriptFileLocations.getDefault().getConfigDirectory(),
-				parent.profiles, new TaskManagerImpl(), false, false);
+				parent.profiles, new TaskManagerImpl(), EnumSet.of(RuntimeMode.EMBEDDED));
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 		cEnv.SetCommandSender(sender);
 		cEnv.SetCommand(command);
@@ -263,7 +265,7 @@ public class AliasCore {
 			}
 			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
 					MethodScriptFileLocations.getDefault().getConfigDirectory(),
-					parent.profiles, new TaskManagerImpl(), false, false);
+					parent.profiles, new TaskManagerImpl(), EnumSet.of(RuntimeMode.EMBEDDED));
 			gEnv.SetLabel(Static.GLOBAL_PERMISSION);
 			if(options.reloadExecutionQueue()) {
 				ProfilePoint stoppingExecutionQueue = parent.profiler.start("Stopping execution queues", LogLevel.VERBOSE);
