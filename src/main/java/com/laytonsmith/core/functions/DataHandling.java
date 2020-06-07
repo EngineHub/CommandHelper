@@ -391,10 +391,13 @@ public class DataHandling {
 											valType, decl.getType(), valNode.getTarget(), env, exceptions);
 								}
 								return valType;
-							} else {
-								declaredType = CClassType.AUTO;
 							}
 						}
+					}
+
+					// If a variable is declared as AUTO or unknown, then its value should actually be any mixed.
+					if(declaredType == null || declaredType == CClassType.AUTO) {
+						declaredType = Mixed.TYPE;
 					}
 
 					// Type check assigned value.
