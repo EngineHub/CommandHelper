@@ -38,9 +38,10 @@ public final class StaticAnalysisConfiguration {
 
 	private StaticAnalysisConfiguration() {
 		List<Preferences.Preference> defaults = new ArrayList<>(Arrays.asList(
-			new Preference("global-enable", "on", Type.BOOLEAN, "This globally enables static analysis. If this is off,"
-					+ " the static analysis module will not be run, though existing compile errors will still"
-					+ " be enabled regardless.", 0)
+			// TODO - Replace "off" with "on" as soon as static analysis should be enabled by default.
+			new Preference("global-enable", "off", Type.BOOLEAN, "This globally enables static analysis."
+					+ " If this is off, the static analysis module will not be run, though existing compile errors will"
+					+ " still be enabled regardless.", 0)
 //			new Preference("name", "default", Type.BOOLEAN, "desc"),
 		));
 		prefs = new Preferences(Implementation.GetServerType().getBranding(),
