@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.MathUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
@@ -556,7 +557,7 @@ public class Exceptions {
 				}
 
 				// Handle optional last catch block.
-				if((ast.numberOfChildren() & 0x01) == 0x00) { // (size % 2) == 0.
+				if(MathUtils.isEven(ast.numberOfChildren())) {
 					ParseTree catchCode = ast.getChildAt(ast.numberOfChildren() - 1);
 					analysis.linkScope(parentScope, catchCode, env, exceptions);
 				}
