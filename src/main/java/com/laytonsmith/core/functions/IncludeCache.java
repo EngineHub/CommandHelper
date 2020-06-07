@@ -79,7 +79,7 @@ public class IncludeCache {
 			ANALYSIS_CACHE.put(file, staticAnalysis);
 			return tree;
 		} catch (ConfigCompileException ex) {
-			String fileName = (ex.getFile() == null ? "Unknown Source" : file.getName());
+			String fileName = (ex.getFile() == null ? "Unknown Source" : ex.getFile().getName());
 			throw new CREIncludeException("There was a compile error when trying to include the script at " + file
 					+ "\n" + ex.getMessage() + " :: " + fileName + ":" + ex.getLineNum(), t);
 		} catch (ConfigCompileGroupException exs) {
