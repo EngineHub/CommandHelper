@@ -26,6 +26,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandException;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.command.PluginIdentifiableCommand;
 import org.bukkit.plugin.Plugin;
 
 public class BukkitMCCommand implements MCCommand {
@@ -144,14 +145,10 @@ public class BukkitMCCommand implements MCCommand {
 
 	@Override
 	public MCPlugin getPlugin() {
-		if(!(cmd instanceof PluginCommand)) {
+		if(!(cmd instanceof PluginIdentifiableCommand)) {
 			return null;
 		}
-		Plugin plugin = ((PluginCommand) cmd).getPlugin();
-		if(plugin == null) {
-			return null;
-		}
-		return new BukkitMCPlugin(plugin);
+		return new BukkitMCPlugin(((PluginIdentifiableCommand) cmd).getPlugin());
 	}
 
 	@Override
@@ -210,7 +207,6 @@ public class BukkitMCCommand implements MCCommand {
 		return cmd.toString();
 	}
 
-	// I may be able to move these to c.l.c.f.Commands.java
 	@Override
 	public List<String> handleTabComplete(MCCommandSender sender, String alias, String[] args) {
 		if(Commands.onTabComplete.containsKey(cmd.getName().toLowerCase())) {

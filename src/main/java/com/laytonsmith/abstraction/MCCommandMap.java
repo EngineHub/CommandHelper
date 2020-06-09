@@ -35,4 +35,6 @@ public interface MCCommandMap extends AbstractionObject {
 	boolean register(String label, String fallback, MCCommand cmd);
 
 	boolean unregister(MCCommand cmd);
+
+	boolean unregister(String label);
 }

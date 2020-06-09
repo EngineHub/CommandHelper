@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.MCCommandMap;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -41,10 +43,11 @@ public class Commands {
 		return "A series of functions for creating and managing custom commands.";
 	}
 
-	public static Map<String, CClosure> onCommand = new HashMap<String, CClosure>();
-	public static Map<String, CClosure> onTabComplete = new HashMap<String, CClosure>();
+	public static Map<String, CClosure> onCommand = new HashMap<>();
+	public static Map<String, CClosure> onTabComplete = new HashMap<>();
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({register_command.class})
 	public static class set_tabcompleter extends AbstractFunction {
 
 		@Override
@@ -85,9 +88,8 @@ public class Commands {
 		 * @param cmd
 		 * @param arg
 		 */
-		public static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
+		static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
 			if(arg.isInstanceOf(CClosure.TYPE)) {
-				onTabComplete.remove(cmd.getName());
 				onTabComplete.put(cmd.getName(), (CClosure) arg);
 			} else {
 				throw new CREFormatException("At this time, only closures are accepted as tabcompleters", t);
@@ -130,9 +132,9 @@ public class Commands {
 							+ "\t} else if(array_size(@args) == 2) {\n"
 							+ "\t\t@completions = array('apple', 'orange', 'banana');\n"
 							+ "\t}\n"
-							+ "\treturn(array_filter(@completions, closure(@index, @string) {\n"
-							+ "\t\treturn(length(@input) <= length(@string) \n"
-							+ "\t\t\t\t&& equals_ic(@input, substr(@string, 0, length(@input))));\n"
+							+ "\treturn(array_filter(@completions, closure(@key, @value) {\n"
+							+ "\t\treturn(length(@input) <= length(@value) \n"
+							+ "\t\t\t\t&& equals_ic(@input, substr(@value, 0, length(@input))));\n"
 							+ "\t}));\n"
 							+ "});",
 					"Will only suggest 'orange' if given 'o' for the second argument for /cmd.")
@@ -141,6 +143,7 @@ public class Commands {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({register_command.class})
 	public static class unregister_command extends AbstractFunction {
 
 		@Override
@@ -164,11 +167,17 @@ public class Commands {
 			if(map == null) {
 				throw new CRENotFoundException(this.getName() + " is not supported in this mode (CommandMap not found).", t);
 			}
-			MCCommand cmd = map.getCommand(args[0].val());
+			String name = args[0].val();
+			MCCommand cmd = map.getCommand(name);
 			if(cmd == null) {
 				throw new CRENotFoundException("Command not found, did you forget to register it?", t);
 			}
-			return CBoolean.get(map.unregister(cmd));
+			boolean success = map.unregister(cmd);
+			if(success) {
+				onCommand.remove(name);
+				onTabComplete.remove(name);
+			}
+			return CBoolean.get(success);
 		}
 
 		@Override
@@ -183,7 +192,8 @@ public class Commands {
 
 		@Override
 		public String docs() {
-			return "boolean {commandname} unregisters a command from the server's command list";
+			return "boolean {commandname} Unregisters a command from the server's command list."
+					+ " Commands from other plugins can be unregistered using this function.";
 		}
 
 		@Override
@@ -193,6 +203,7 @@ public class Commands {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({set_tabcompleter.class, set_executor.class, unregister_command.class})
 	public static class register_command extends AbstractFunction {
 
 		@Override
@@ -218,9 +229,10 @@ public class Commands {
 				throw new CRENotFoundException(this.getName() + " is not supported in this mode (CommandMap not found).", t);
 			}
 			MCCommand cmd = map.getCommand(args[0].val().toLowerCase());
-			boolean isnew = false;
+			String prefix = Implementation.GetServerType().getBranding().toLowerCase(Locale.ENGLISH);
+			boolean register = false;
 			if(cmd == null) {
-				isnew = true;
+				register = true;
 				cmd = StaticLayer.GetConvertor().getNewCommand(args[0].val().toLowerCase());
 			}
 			if(args[1].isInstanceOf(CArray.TYPE)) {
@@ -237,14 +249,26 @@ public class Commands {
 				if(ops.containsKey("noPermMsg")) {
 					cmd.setPermissionMessage(ops.get("noPermMsg", t).val());
 				}
+				List<String> oldAliases = new ArrayList<>(cmd.getAliases());
 				if(ops.containsKey("aliases")) {
 					if(ops.get("aliases", t).isInstanceOf(CArray.TYPE)) {
 						List<Mixed> ca = ((CArray) ops.get("aliases", t)).asList();
-						List<String> aliases = new ArrayList<String>();
+						List<String> aliases = new ArrayList<>();
 						for(Mixed c : ca) {
-							aliases.add(c.val().toLowerCase());
+							String alias = c.val().toLowerCase().trim();
+							if(!oldAliases.remove(alias)) {
+								register = true;
+							}
+							aliases.add(alias);
 						}
 						cmd.setAliases(aliases);
+					}
+				}
+				if(oldAliases.size() > 0) {
+					// we need to remove these
+					for(String alias : oldAliases) {
+						map.unregister(prefix + ":" + alias);
+						map.unregister(alias);
 					}
 				}
 				if(ops.containsKey("executor")) {
@@ -254,8 +278,9 @@ public class Commands {
 					set_tabcompleter.customExec(t, environment, cmd, ops.get("tabcompleter", t));
 				}
 				boolean success = true;
-				if(isnew) {
-					success = map.register(Implementation.GetServerType().getBranding(), cmd);
+				if(register) {
+					cmd.unregister(map);
+					success = map.register(prefix, cmd);
 				}
 				return CBoolean.get(success);
 			} else {
@@ -277,12 +302,11 @@ public class Commands {
 		public String docs() {
 			return "boolean {commandname, optionsArray} Registers a command to the server's command list,"
 					+ " or updates an existing one. Options is an associative array that can have the following keys:"
-					+ " description, usage, permission, noPermMsg, aliases, tabcompleter, and/or executor. Everything"
-					+ " is optional and can be modified later, except for 'aliases' which can only be changed by first"
-					+ " unregistering the command. 'noPermMsg' is the message displayed when the user doesn't"
-					+ " have the permission specified in 'permission'. 'Usage' is the message shown when the"
-					+ " 'executor' returns false. 'Executor' is the closure run when the command is executed,"
-					+ " and can return true or false (by default is treated as true). 'tabcompleter' is the closure"
+					+ " description, usage, permission, noPermMsg, aliases, tabcompleter, and/or executor."
+					+ " The 'noPermMsg' argument is the message displayed when the user doesn't have the permission"
+					+ " specified in 'permission'. The 'usage' is the message shown when the 'executor' returns false."
+					+ " The 'executor' is the closure run when the command is executed,"
+					+ " and can return true or false (by default is treated as true). The 'tabcompleter' is the closure"
 					+ " run when a user hits tab while the command is entered and ready for args."
 					+ " It is meant to return an array of completions, but if not the tab_complete_command event"
 					+ " will be fired, and the completions of that event will be sent to the user. Both executor"
@@ -304,25 +328,30 @@ public class Commands {
 				+ "\t'usage': '/hug <player>',\n"
 				+ "\t'permission': 'perms.hugs',\n"
 				+ "\t'noPermMsg': 'You do not have permission to give hugs to players (Sorry :o).',\n"
-				+ "\t'tabcompleter': closure(@alias, @sender, @args) {\n"
-				+ "\t\t@input = @args[-1];\n"
-				+ "\t\treturn(array_filter(all_players(), closure(@index, @player) {\n"
-				+ "\t\t\treturn(length(@input) <= length(@string)\n"
-				+ "\t\t\t\t\t&& equals_ic(@input, substr(@player, 0, length(@input))));\n"
+				+ "\t'tabcompleter':\n"
+				+ "\t\tclosure(@alias, @sender, @args) {\n"
+				+ "\t\t\t// This replicates the default tabcompleter for registered commands."
+				+ "\t\t\t// If no tabcompleter is set, this behavior is used."
+				+ "\t\t\t@input = @args[-1];\n"
+				+ "\t\t\treturn(array_filter(all_players(), closure(@key, @value) {\n"
+				+ "\t\t\t\treturn(length(@input) <= length(@value)\n"
+				+ "\t\t\t\t\t\t&& equals_ic(@input, substr(@value, 0, length(@input))));\n"
 				+ "\t\t\t}));\n"
 				+ "\t\t},\n"
-				+ "\t'aliases':array('hugg', 'hugs'),\n"
-				+ "\t'executor': closure(@alias, @sender, @args) {\n"
-				+ "\t\tif(array_size(@args) == 1) {\n"
-				+ "\t\t\tif(ponline(@args[0])) {\n"
-				+ "\t\t\t\tbroadcast(colorize('&4'.@sender.' &6hugs &4'.@args[0]));\n"
-				+ "\t\t\t} else {\n"
-				+ "\t\t\t\ttmsg(@sender, colorize('&cThe given player is not online.'));\n"
+				+ "\t'aliases': array('hugg', 'hugs'),\n"
+				+ "\t'executor':\n"
+				+ "\t\tclosure(@alias, @sender, @args) {\n"
+				+ "\t\t\tif(array_size(@args) == 1) {\n"
+				+ "\t\t\t\t@target = @args[0];"
+				+ "\t\t\t\tif(ponline(@target)) {\n"
+				+ "\t\t\t\t\tbroadcast(colorize('&4'.@sender.' &6hugs &4'.@target));\n"
+				+ "\t\t\t\t} else {\n"
+				+ "\t\t\t\t\tmsg(colorize('&cThe given player is not online.'));\n"
+				+ "\t\t\t\t}\n"
+				+ "\t\t\t\treturn(true);\n"
 				+ "\t\t\t}\n"
-				+ "\t\t\treturn(true);\n"
+				+ "\t\t\treturn(false); // prints usage\n"
 				+ "\t\t}\n"
-				+ "\t\treturn(false);\n"
-				+ "\t}\n"
 				+ "));",
 				"Registers the /hug command.")
 			};
@@ -330,6 +359,7 @@ public class Commands {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	@seealso({register_command.class})
 	public static class set_executor extends AbstractFunction {
 
 		@Override
@@ -369,9 +399,8 @@ public class Commands {
 		 * @param cmd
 		 * @param arg
 		 */
-		public static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
+		static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
 			if(arg.isInstanceOf(CClosure.TYPE)) {
-				onCommand.remove(cmd.getName());
 				onCommand.put(cmd.getName(), (CClosure) arg);
 			} else {
 				throw new CREFormatException("At this time, only closures are accepted as command executors.", t);
@@ -463,8 +492,10 @@ public class Commands {
 
 		@Override
 		public String docs() {
-			return "array {} Returns an array of command arrays in the format register_command expects or null if no commands could be found."
-					+ " This does not include " + Implementation.GetServerType().getBranding() + " aliases, as they are not registered commands.";
+			return "array {} Returns an array of command arrays in the format register_command expects or null if no"
+					+ " commands could be found. The command arrays will not include executors or tabcompleters."
+					+ " This does not include " + Implementation.GetServerType().getBranding()
+					+ " aliases, as they are not registered commands.";
 		}
 
 		@Override
