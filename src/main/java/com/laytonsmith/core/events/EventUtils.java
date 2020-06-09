@@ -46,7 +46,7 @@ public final class EventUtils {
 	 * @throws EventException
 	 */
 	public static void RegisterEvent(BoundEvent b) throws EventException {
-		Event event = EventList.getEvent(b.getEventName());
+		Event event = b.getEventDriver();
 		if(event == null) {
 			throw new EventException("The event type \"" + b.getEventName() + "\" could not be found.");
 		}
@@ -309,7 +309,7 @@ public final class EventUtils {
 				} catch (FunctionReturnException ex) {
 					//We also know how to deal with this
 				} catch (EventException ex) {
-					throw new CREEventException(ex.getMessage(), Target.UNKNOWN, ex);
+					throw new CREEventException(ex.getMessage(), b.getTarget(), ex);
 				} catch (ConfigRuntimeException ex) {
 					//An exception has bubbled all the way up
 					ConfigRuntimeException.HandleUncaughtException(ex, b.getEnvironment());

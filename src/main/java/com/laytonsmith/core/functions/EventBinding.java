@@ -31,7 +31,6 @@ import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.BoundEvent.Priority;
 import com.laytonsmith.core.events.Event;
-import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -161,7 +160,7 @@ public class EventBinding {
 						((IVariable) event_obj).getVariableName(), newEnv, tree, t);
 				EventUtils.RegisterEvent(be);
 				id = new CString(be.getId(), t);
-				event = EventList.getEvent(be.getEventName());
+				event = be.getEventDriver();
 			} catch (EventException ex) {
 				throw new CREBindException(ex.getMessage(), t);
 			}
@@ -171,13 +170,9 @@ public class EventBinding {
 				synchronized(BIND_COUNTER) {
 					if(BIND_COUNTER.get() == 0) {
 						env.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
-						StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
-
-							@Override
-							public void run() {
-								synchronized(BIND_COUNTER) {
-									BIND_COUNTER.set(0);
-								}
+						StaticLayer.GetConvertor().addShutdownHook(() -> {
+							synchronized(BIND_COUNTER) {
+								BIND_COUNTER.set(0);
 							}
 						});
 					}
@@ -365,18 +360,20 @@ public class EventBinding {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			String id = null;
+			String id;
+			BoundEvent be;
 			if(args.length == 1) {
 				//We are cancelling an arbitrary event
 				id = args[0].val();
+				be = EventUtils.GetEventById(id);
 			} else {
 				//We are cancelling this event. If we are not in an event, throw an exception
 				if(environment.getEnv(GlobalEnv.class).GetEvent() == null) {
 					throw new CREBindException("No event ID specified, and not running inside an event", t);
 				}
-				id = environment.getEnv(GlobalEnv.class).GetEvent().getBoundEvent().getId();
+				be = environment.getEnv(GlobalEnv.class).GetEvent().getBoundEvent();
+				id = be.getId();
 			}
-			BoundEvent be = EventUtils.GetEventById(id);
 			Event event = null;
 			if(be != null) {
 				event = be.getEventDriver();

@@ -155,20 +155,21 @@ public class BoundEvent implements Comparable<BoundEvent> {
 			this.priority = Priority.NORMAL;
 		}
 
-		this.prefilter = new HashMap<String, Mixed>();
+		this.prefilter = new HashMap<>();
 		if(prefilter != null) {
 			for(String key : prefilter.stringKeySet()) {
-				this.prefilter.put(key, prefilter.get(key, Target.UNKNOWN));
+				this.prefilter.put(key, prefilter.get(key, prefilter.getTarget()));
 			}
 		}
 
 		this.originalEnv = env;
 		this.tree = tree;
 
-		if(EventList.getEvent(this.eventName) == null) {
+		Event ev = EventList.getEvent(this.eventName);
+		if(ev == null) {
 			throw new EventException("No event named \"" + this.eventName + "\" is registered!");
 		}
-		this.driver = EventList.getEvent(this.eventName).driver();
+		this.driver = ev.driver();
 		this.eventObjName = eventObjName;
 
 		this.target = t;
@@ -244,11 +245,12 @@ public class BoundEvent implements Comparable<BoundEvent> {
 			//        GenericTree<Construct> root = new GenericTree<Construct>();
 			//        root.setRoot(tree);
 			Environment env = originalEnv.clone();
-			CArray ca = CArray.GetAssociativeArray(Target.UNKNOWN);
+			Target t = activeEvent.getBoundEvent().getTarget();
+			CArray ca = CArray.GetAssociativeArray(t);
 			for(Map.Entry<String, Mixed> entry : activeEvent.parsedEvent.entrySet()) {
-				ca.set(new CString(entry.getKey(), Target.UNKNOWN), entry.getValue(), Target.UNKNOWN);
+				ca.set(new CString(entry.getKey(), t), entry.getValue(), t);
 			}
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, ca, Target.UNKNOWN));
+			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, eventObjName, ca, t));
 			env.getEnv(GlobalEnv.class).SetEvent(activeEvent);
 			activeEvent.addHistory("Triggering bound event: " + this);
 			try {
