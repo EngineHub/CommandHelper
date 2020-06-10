@@ -267,32 +267,39 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * at least no way this will throw a ClassCastException, so given that, we are able to supress that exception here.
 	 */
 	private void instantiateInvalidType(Environment env) {
-		if(invalidType != UNINITIALIZED) {
+		if(this.invalidType != UNINITIALIZED) {
 			return;
 		}
-		@SuppressWarnings("LocalVariableHidesMemberVariable")
-		String fqcn = this.fqcn.getFQCN();
-		try {
-			if("auto".equals(fqcn)) {
-				invalidType = null;
-			} else if("ms.lang.ClassType".equals(fqcn)) {
-				invalidType = new Mixed[]{this};
-			} else {
-				invalidType = new Mixed[types.size()];
-				for(int i = 0; i < invalidType.length; i++) {
-					// TODO: For now, we must use this mechanism, since we don't populate the ODT with
-					// all the native classes. But once we do, we should remove this check entirely here.
-					if(NativeTypeList.getNativeTypeList().contains(this.fqcn)) {
-						invalidType[i] = NativeTypeList.getInvalidInstanceForUse(this.fqcn);
-					} else {
-						ObjectDefinitionTable odt = env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
-						ObjectDefinition od = odt.get(this.fqcn);
-						invalidType[i] = new UserObject(Target.UNKNOWN, null, env, od, null);
+		synchronized(this) {
+			if(this.invalidType != UNINITIALIZED) {
+				return;
+			}
+			@SuppressWarnings("LocalVariableHidesMemberVariable")
+			String fqcn = this.fqcn.getFQCN();
+			try {
+				Mixed[] invalidType;
+				if("auto".equals(fqcn)) {
+					invalidType = null;
+				} else if("ms.lang.ClassType".equals(fqcn)) {
+					invalidType = new Mixed[]{this};
+				} else {
+					invalidType = new Mixed[this.types.size()];
+					for(int i = 0; i < invalidType.length; i++) {
+						// TODO: For now, we must use this mechanism, since we don't populate the ODT with
+						// all the native classes. But once we do, we should remove this check entirely here.
+						if(NativeTypeList.getNativeTypeList().contains(this.fqcn)) {
+							invalidType[i] = NativeTypeList.getInvalidInstanceForUse(this.fqcn);
+						} else {
+							ObjectDefinitionTable odt = env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
+							ObjectDefinition od = odt.get(this.fqcn);
+							invalidType[i] = new UserObject(Target.UNKNOWN, null, env, od, null);
+						}
 					}
 				}
+				this.invalidType = invalidType;
+			} catch (ClassNotFoundException | ObjectDefinitionNotFoundException ex) {
+				throw new Error(ex);
 			}
-		} catch (ClassNotFoundException | ObjectDefinitionNotFoundException ex) {
-			throw new Error(ex);
 		}
 	}
 
@@ -435,14 +442,8 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 */
 	public CClassType[] getTypeSuperclasses(Environment env) {
 		instantiateInvalidType(env);
-		try {
-			return Stream.of(invalidType).flatMap(e -> Stream.of(e.getSuperclasses()))
-					.collect(Collectors.toSet()).toArray(CClassType.EMPTY_CLASS_ARRAY);
-		} catch (NullPointerException ex) {
-			// There is apparently some case where this can throw an NPE. It's completely unclear
-			// why or how this happens, so just catch it, log details about this class, and rethrow.
-			throw new RuntimeException("NPE while calling getSuperclassesForType for type " + getFQCN(), ex);
-		}
+		return Stream.of(invalidType).flatMap(e -> Stream.of(e.getSuperclasses()))
+				.collect(Collectors.toSet()).toArray(CClassType.EMPTY_CLASS_ARRAY);
 	}
 
 	/**

@@ -27,6 +27,7 @@ import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -54,6 +55,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -643,7 +645,10 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				}
 				Environment env;
 				try {
-					env = Static.GenerateStandaloneEnvironment(false);
+					// Cmdline mode disables things like security checks and whatnot.
+					// These may be present in the runtime environment,
+					// but it's not possible for us to tell that at this point.
+					env = Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE));
 					// Make this configurable at some point. For now, however, we need this so we can get
 					// correct handling on minecraft functions.
 					env = env.cloneAndAdd(new CommandHelperEnvironment());
@@ -654,10 +659,6 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				compilerEnv.setLogCompilerWarnings(false); // No one would see them
 				GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
 
-				// This disables things like security checks and whatnot.
-				// These may be present in the runtime environment,
-				// but it's not possible for us to tell that at this point.
-				gEnv.SetCustom("cmdline", true);
 				URI uuri = new URI(uri);
 				File f;
 				if("untitled".equals(uuri.getScheme())) {
