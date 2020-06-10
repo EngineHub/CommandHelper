@@ -2189,35 +2189,32 @@ public final class MethodScriptCompiler {
 	 * @param compilerErrors
 	 */
 	private static void link(ParseTree tree, Set<ConfigCompileException> compilerErrors) {
-		FunctionBase treeFunction = null;
-		try {
-			treeFunction = FunctionList.getFunction((CFunction) tree.getData(), null);
-			if(treeFunction.getClass().getAnnotation(nolinking.class) != null) {
-				// Don't link children of a nolinking function.
-				return;
-			}
-		} catch (ConfigCompileException | ClassCastException ex) {
-			// This can happen if the treeFunction isn't a function, is a proc, etc,
-			// but we don't care, we just want to continue.
-		}
+		if(tree.getData() instanceof CFunction) {
+			Function function = ((CFunction) tree.getData()).getCachedFunction();
 
-		// Check the argument count, and do any custom linking the function may have.
-		if(treeFunction != null) {
-			Integer[] numArgs = treeFunction.numArgs();
-			if(!Arrays.asList(numArgs).contains(Integer.MAX_VALUE)
-					&& !Arrays.asList(numArgs).contains(tree.getChildren().size())) {
-				compilerErrors.add(new ConfigCompileException("Incorrect number of arguments passed to "
-						+ tree.getData().val(), tree.getData().getTarget()));
-			}
-			if(treeFunction instanceof Optimizable) {
-				Optimizable op = (Optimizable) treeFunction;
-				if(op.optimizationOptions().contains(OptimizationOption.CUSTOM_LINK)) {
-					try {
-						op.link(tree.getData().getTarget(), tree.getChildren());
-					} catch (ConfigRuntimeException ex) {
-						compilerErrors.add(new ConfigCompileException(ex));
-					} catch (ConfigCompileException ex) {
-						compilerErrors.add(ex);
+			// Check the argument count, and do any custom linking the function may have.
+			if(function != null) {
+				if(function.getClass().getAnnotation(nolinking.class) != null) {
+					// Don't link children of a nolinking function.
+					return;
+				}
+
+				Integer[] numArgs = function.numArgs();
+				if(!Arrays.asList(numArgs).contains(Integer.MAX_VALUE)
+						&& !Arrays.asList(numArgs).contains(tree.getChildren().size())) {
+					compilerErrors.add(new ConfigCompileException("Incorrect number of arguments passed to "
+							+ tree.getData().val(), tree.getData().getTarget()));
+				}
+				if(function instanceof Optimizable) {
+					Optimizable op = (Optimizable) function;
+					if(op.optimizationOptions().contains(OptimizationOption.CUSTOM_LINK)) {
+						try {
+							op.link(tree.getData().getTarget(), tree.getChildren());
+						} catch (ConfigRuntimeException ex) {
+							compilerErrors.add(new ConfigCompileException(ex));
+						} catch (ConfigCompileException ex) {
+							compilerErrors.add(ex);
+						}
 					}
 				}
 			}
@@ -2247,13 +2244,21 @@ public final class MethodScriptCompiler {
 			// Check current node, returning if it is a 'nolinking' function.
 			CFunction cFunc = (CFunction) tree.getData();
 			if(cFunc.hasFunction()) {
-				try {
-					FunctionBase func = FunctionList.getFunction(cFunc, envs);
+				FunctionBase func = cFunc.getCachedFunction(envs);
+				lookup: {
+					if(func == null) {
+
+						// Technically, we could be dealing with a FunctionBase that isn't cached. So do another lookup.
+						try {
+							func = FunctionList.getFunction(cFunc, envs);
+						} catch (ConfigCompileException ex) {
+							compilerErrors.add(ex);
+							break lookup;
+						}
+					}
 					if(func.getClass().getAnnotation(nolinking.class) != null) {
 						return; // Don't check children of 'nolinking' functions.
 					}
-				} catch (ConfigCompileException ex) {
-					compilerErrors.add(ex);
 				}
 			}
 
@@ -2298,12 +2303,7 @@ public final class MethodScriptCompiler {
 			procs.push(new ArrayList<>());
 		}
 		CFunction cFunction = (CFunction) tree.getData();
-		Function func;
-		try {
-			func = (Function) FunctionList.getFunction(cFunction, envs);
-		} catch (ConfigCompileException e) {
-			func = null;
-		}
+		Function func = cFunction.getCachedFunction(envs);
 		if(func != null) {
 			if(func.getClass().getAnnotation(nolinking.class) != null) {
 				//It's an unlinking function, so we need to stop at this point
@@ -2588,10 +2588,8 @@ public final class MethodScriptCompiler {
 		//is a branch (branches always use execs, though using execs doesn't strictly
 		//mean you are a branch type function).
 		if(tree.getData() instanceof CFunction && ((CFunction) tree.getData()).hasFunction()) {
-			Function f;
-			try {
-				f = (Function) FunctionList.getFunction(((CFunction) tree.getData()), envs);
-			} catch (ConfigCompileException | ClassCastException ex) {
+			Function f = ((CFunction) tree.getData()).getCachedFunction(envs);
+			if(f == null) {
 				return false;
 			}
 			List<ParseTree> children = tree.getChildren();
@@ -2637,10 +2635,8 @@ public final class MethodScriptCompiler {
 					if(!((CFunction) child.getData()).hasFunction()) {
 						continue;
 					}
-					Function c;
-					try {
-						c = (Function) FunctionList.getFunction(((CFunction) child.getData()), envs);
-					} catch (ConfigCompileException | ClassCastException ex) {
+					Function c = ((CFunction) child.getData()).getCachedFunction(envs);
+					if(c == null) {
 						continue;
 					}
 					Set<OptimizationOption> options = NO_OPTIMIZATIONS;
