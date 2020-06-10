@@ -471,9 +471,20 @@ public class StaticAnalysis {
 	public static IVariable requireIVariable(Mixed node, Target t, Set<ConfigCompileException> exceptions) {
 		if(node instanceof IVariable) {
 			return (IVariable) node;
+		} else if(node instanceof Variable) {
+			exceptions.add(new ConfigCompileException("Expected ivariable, but received variable instead.", t));
+			return null;
 		}
-		exceptions.add(new ConfigCompileException("Expected ivariable "
-				+ ", but received type " + node.getName() + " instead.", t));
+
+		// The node can be anything. If it has a type, get that. If it doesn't, use the node's class name.
+		// TODO - Remove this try catch when syntax errors are caught by the parser and terminate compilation there.
+		try {
+			exceptions.add(new ConfigCompileException(
+					"Expected ivariable, but received type " + node.getName() + " instead.", t));
+		} catch (NullPointerException e) {
+			exceptions.add(new ConfigCompileException(
+					"Expected ivariable, but received " + node.getClass().getSimpleName() + " instead.", t));
+		}
 		return null;
 	}
 
@@ -489,8 +500,16 @@ public class StaticAnalysis {
 		if(node instanceof CClassType) {
 			return (CClassType) node;
 		}
-		exceptions.add(new ConfigCompileException(
-				"Expected classtype, but received type " + node.getName() + " instead.", t));
+
+		// The node can be anything. If it has a type, get that. If it doesn't, use the node's class name.
+		// TODO - Remove this try catch when syntax errors are caught by the parser and terminate compilation there.
+		try {
+			exceptions.add(new ConfigCompileException(
+					"Expected classtype, but received type " + node.getName() + " instead.", t));
+		} catch (NullPointerException e) {
+			exceptions.add(new ConfigCompileException(
+					"Expected classtype, but received " + node.getClass().getSimpleName() + " instead.", t));
+		}
 		return null;
 	}
 
