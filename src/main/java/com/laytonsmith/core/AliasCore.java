@@ -385,7 +385,7 @@ public class AliasCore {
 				}
 				ProfilePoint compilerMSA = parent.profiler.start("Compilation of MSA files in Local Packages", LogLevel.VERBOSE);
 				try {
-					localPackages.compileMSA(scripts, player, env.getEnvClasses());
+					localPackages.compileMSA(scripts, player, env, env.getEnvClasses());
 				} finally {
 					compilerMSA.stop();
 				}
@@ -671,7 +671,7 @@ public class AliasCore {
 		}
 
 		public void compileMSA(List<Script> scripts, MCPlayer player,
-				Set<Class<? extends Environment.EnvironmentImpl>> envs) {
+				Environment env, Set<Class<? extends Environment.EnvironmentImpl>> envs) {
 			for(FileInfo fi : msa) {
 				List<Script> tempScripts;
 				try {
@@ -685,7 +685,7 @@ public class AliasCore {
 					for(Script s : tempScripts) {
 						try {
 							try {
-								s.compile();
+								s.compile(env);
 								s.checkAmbiguous(scripts);
 								scripts.add(s);
 							} catch (ConfigCompileException e) {

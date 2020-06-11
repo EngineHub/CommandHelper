@@ -672,11 +672,11 @@ public class Script {
 		return vars;
 	}
 
-	public Script compile() throws ConfigCompileException, ConfigCompileGroupException {
+	public Script compile(Environment env) throws ConfigCompileException, ConfigCompileGroupException {
 		try {
 			verifyLeft();
 			compileLeft();
-			compileRight();
+			compileRight(env);
 		} catch (ConfigCompileException e) {
 			compilerError = true;
 			throw e;
@@ -885,7 +885,7 @@ public class Script {
 		return true;
 	}
 
-	public void compileRight() throws ConfigCompileException, ConfigCompileGroupException {
+	public void compileRight(Environment env) throws ConfigCompileException, ConfigCompileGroupException {
 		List<Token> temp = new ArrayList<>();
 		right = new ArrayList<>();
 		for(Token t : fullRight) {
@@ -903,7 +903,7 @@ public class Script {
 		cright = new ArrayList<>();
 		for(List<Token> l : right) {
 			StaticAnalysis analysis = new StaticAnalysis(true);
-			cright.add(MethodScriptCompiler.compile(new TokenStream(l, fileOptions), null, envs, analysis));
+			cright.add(MethodScriptCompiler.compile(new TokenStream(l, fileOptions), env, envs, analysis));
 		}
 	}
 

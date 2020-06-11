@@ -592,8 +592,7 @@ public class StaticAnalysis {
 				if(includeAnalysis == null) {
 					includeAnalysis = new StaticAnalysis(false);
 					IncludeCache.get(file, env, envs, includeAnalysis, includeRef.getTarget());
-					assert IncludeCache.getStaticAnalysis(file) != null
-							: "Failed to cache include analysis.";
+					assert IncludeCache.getStaticAnalysis(file) != null : "Failed to cache include analysis.";
 				}
 			} catch (CREException e) {
 
