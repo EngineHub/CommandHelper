@@ -198,7 +198,7 @@ public final class Static {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param c
 	 * @param t
 	 * @return
@@ -877,8 +877,8 @@ public final class Static {
 	 */
 	public static MCCommandSender GetCommandSender(String player, Target t) throws ConfigRuntimeException {
 		MCCommandSender m = null;
-		if(INJECTED_PLAYERS.containsKey(player)) {
-			m = INJECTED_PLAYERS.get(player);
+		if(INJECTED_PLAYERS.containsKey(player.toLowerCase())) {
+			m = INJECTED_PLAYERS.get(player.toLowerCase());
 		} else if(CONSOLE_NAME.equals(player)) {
 			m = Static.getServer().getConsole();
 		} else {
@@ -890,7 +890,8 @@ public final class Static {
 				//throw a CRE instead.
 			}
 		}
-		if(m == null || (m instanceof MCPlayer && (!((MCPlayer) m).isOnline() && !INJECTED_PLAYERS.containsKey(player)))) {
+		if(m == null || (m instanceof MCPlayer && (!((MCPlayer) m).isOnline()
+				&& !INJECTED_PLAYERS.containsKey(player.toLowerCase())))) {
 			throw new CREPlayerOfflineException("The specified player (" + player + ") is not online", t);
 		}
 		return m;
@@ -1232,7 +1233,7 @@ public final class Static {
 	}
 
 	public static MCCommandSender GetInjectedPlayer(String name) {
-		return INJECTED_PLAYERS.get(name);
+		return INJECTED_PLAYERS.get(name.toLowerCase());
 	}
 
 	public static void InjectPlayer(MCCommandSender player) {
@@ -1240,7 +1241,7 @@ public final class Static {
 		if("CONSOLE".equals(name)) {
 			name = "~console";
 		}
-		INJECTED_PLAYERS.put(name, player);
+		INJECTED_PLAYERS.put(name.toLowerCase(), player);
 	}
 
 	/**
@@ -1254,7 +1255,7 @@ public final class Static {
 		if("CONSOLE".equals(name)) {
 			name = "~console";
 		}
-		return INJECTED_PLAYERS.remove(name);
+		return INJECTED_PLAYERS.remove(name.toLowerCase());
 	}
 
 	public static void InjectEntity(MCEntity entity) {
