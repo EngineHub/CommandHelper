@@ -16,6 +16,7 @@ import org.bukkit.util.EulerAngle;
 
 import java.util.EnumMap;
 import java.util.Map;
+import org.bukkit.inventory.EquipmentSlot;
 
 public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorStand {
 
@@ -483,6 +484,52 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 		@Override
 		public void setBootsDropChance(float v) {
 
+		}
+
+		@Override
+		public void setItem(EquipmentSlot es, ItemStack is) {
+			switch(es) {
+				case HEAD:
+					setHelmet(is);
+					return;
+				case CHEST:
+					setChestplate(is);
+					return;
+				case LEGS:
+					setLeggings(is);
+					return;
+				case FEET:
+					setBoots(is);
+					return;
+				case HAND:
+					setItemInMainHand(is);
+					return;
+				case OFF_HAND:
+					setItemInOffHand(is);
+					return;
+				default:
+					throw new UnsupportedOperationException("Missing case in ArmorStandEquipmentProxy.setItem!");
+			}
+		}
+
+		@Override
+		public ItemStack getItem(EquipmentSlot es) {
+			switch(es) {
+				case HEAD:
+					return getHelmet();
+				case CHEST:
+					return getChestplate();
+				case LEGS:
+					return getLeggings();
+				case FEET:
+					return getBoots();
+				case HAND:
+					return getItemInMainHand();
+				case OFF_HAND:
+					return getItemInOffHand();
+				default:
+					throw new UnsupportedOperationException("Missing case in ArmorStandEquipmentProxy.getItem!");
+			}
 		}
 	}
 }
