@@ -1657,8 +1657,12 @@ public class Environment {
 			try {
 				if(args.length == 3) {
 					MCPlayer player;
-					if(args[2].isInstanceOf(CArray.TYPE)) {
-						for(Mixed playerName : ((CArray) args[2]).asList()) {
+					if(args[2] instanceof CArray) {
+						CArray players = (CArray) args[2];
+						if(players.isAssociative()) {
+							throw new CREIllegalArgumentException("Players argument must be a normal array.", t);
+						}
+						for(Mixed playerName : players.asList()) {
 							player = Static.GetPlayer(playerName, t);
 							player.spawnParticle(l, p, count, offsetX, offsetY, offsetZ, speed, data);
 						}
