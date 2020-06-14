@@ -88,7 +88,7 @@ public class FileHandling {
 					throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 				}
 				String s = file_get_contents(location.getAbsolutePath());
-				s = s.replaceAll("\n|\r\n", "\n");
+				s = s.replace("\r\n", "\n");
 				return new CString(s, t);
 			} catch (Exception ex) {
 				MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.INFO, "Could not read in file while attempting to find "
