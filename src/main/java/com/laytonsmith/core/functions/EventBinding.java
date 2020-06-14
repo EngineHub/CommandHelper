@@ -27,6 +27,7 @@ import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.BoundEvent.Priority;
@@ -169,7 +170,7 @@ public class EventBinding {
 			if(event.addCounter()) {
 				synchronized(BIND_COUNTER) {
 					if(BIND_COUNTER.get() == 0) {
-						env.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
+						env.getEnv(StaticRuntimeEnv.class).GetDaemonManager().activateThread(null);
 						StaticLayer.GetConvertor().addShutdownHook(() -> {
 							synchronized(BIND_COUNTER) {
 								BIND_COUNTER.set(0);
@@ -384,7 +385,7 @@ public class EventBinding {
 				synchronized(BIND_COUNTER) {
 					BIND_COUNTER.decrementAndGet();
 					if(BIND_COUNTER.get() == 0) {
-						environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
+						environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager().deactivateThread(null);
 					}
 				}
 			}

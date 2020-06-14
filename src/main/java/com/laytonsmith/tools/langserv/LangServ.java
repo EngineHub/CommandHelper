@@ -680,9 +680,10 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 					if(f.getName().endsWith(".msa")) {
 						tokens = MethodScriptCompiler.lex(code, env, f, false);
 						fTree = new ParseTree(null);
+						final Environment finalEnv = env;
 						MethodScriptCompiler.preprocess(tokens, envs).forEach((script) -> {
 							try {
-								script.compile();
+								script.compile(finalEnv);
 							} catch (ConfigCompileException ex) {
 								exceptions.add(ex);
 							} catch (ConfigCompileGroupException ex) {

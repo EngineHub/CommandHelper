@@ -38,6 +38,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
@@ -447,7 +448,7 @@ public class Web {
 
 			List<ConfigRuntimeException.StackTraceElement> st
 					= environment.getEnv(GlobalEnv.class).GetStackTraceManager().getCurrentStackTrace();
-			environment.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
+			environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager().activateThread(null);
 			Runnable task = new Runnable() {
 
 				@Override
@@ -482,7 +483,8 @@ public class Web {
 						if(arrayJar != null) {
 							getCookieJar(arrayJar, settings.getCookieJar(), t);
 						}
-						StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
+						StaticLayer.GetConvertor().runOnMainThreadLater(
+								environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
 
 							@Override
 							public void run() {
@@ -494,7 +496,8 @@ public class Web {
 							+ e.getMessage(), t);
 						ex.setStackTraceElements(st);
 						if(error != null) {
-							StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
+							StaticLayer.GetConvertor().runOnMainThreadLater(
+									environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
 								@Override
 								public void run() {
 									executeFinish(error, ObjectGenerator.GetGenerator().exception(ex, environment, t), t, environment);
@@ -506,7 +509,7 @@ public class Web {
 					} catch (Exception e) {
 						e.printStackTrace();
 					} finally {
-						environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
+						environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager().deactivateThread(null);
 					}
 				}
 			};
@@ -809,7 +812,7 @@ public class Web {
 				options = CArray.GetAssociativeArray(t);
 				Profiles.Profile p;
 				try {
-					p = environment.getEnv(GlobalEnv.class).getProfiles().getProfileById(profileName);
+					p = environment.getEnv(StaticRuntimeEnv.class).getProfiles().getProfileById(profileName);
 				} catch (Profiles.InvalidProfileException ex) {
 					throw new CREFormatException(ex.getMessage(), t, ex);
 				}

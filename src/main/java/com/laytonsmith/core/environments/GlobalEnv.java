@@ -1,13 +1,11 @@
 package com.laytonsmith.core.environments;
 
 import com.laytonsmith.PureUtilities.Common.MutableObject;
-import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.Procedure;
-import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
@@ -23,13 +21,7 @@ import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Iterator;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import com.laytonsmith.core.profiler.Profiler;
-import com.laytonsmith.core.taskmanager.TaskManager;
-import com.laytonsmith.persistence.PersistenceNetwork;
-
 import java.io.File;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -53,9 +45,6 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	//that field. Note that lists, maps, and other reference based objects don't
 	//need to use MutableObjects, as they are inherently Mutable themselves.
 	private ExecutionQueue executionQueue = null;
-	private Profiler profiler = null;
-	//This is changed reflectively in a test, please don't rename.
-	private PersistenceNetwork persistenceNetwork = null;
 	private final Map<String, Boolean> flags = new HashMap<>();
 	private final Map<String, Object> custom = new HashMap<>();
 	private Script script = null;
@@ -65,13 +54,10 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private IVariableList iVariableList = null;
 	private String label = null;
 	private final EnumSet<RuntimeMode> runtimeModes;
-	private final DaemonManager daemonManager = new DaemonManager();
 	private boolean dynamicScriptingMode = false;
-	private final Profiles profiles;
 	private BoundEvent.ActiveEvent event = null;
 	private boolean interrupt = false;
 	private final List<Iterator> arrayAccessList = Collections.synchronizedList(new ArrayList<>());
-	private final MutableObject<TaskManager> taskManager = new MutableObject<>();
 	private final WeakHashMap<Thread, StackTraceManager> stackTraceManagers = new WeakHashMap<>();
 	private final MutableObject<Map<String, Mixed>> runtimeSettings
 			= new MutableObject<>(new ConcurrentHashMap<>());
@@ -81,112 +67,23 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * Creates a new GlobalEnvironment. All fields in the constructor are required, and cannot be null.
 	 *
 	 * @param queue The ExecutionQueue object to use
-	 * @param profiler The Profiler to use
-	 * @param network The pre-configured PersistenceNetwork object to use
 	 * @param root The root working directory to use
-	 * @param profiles The Profiles object to use
-	 * @param taskManager The TaskManager object to use
 	 * @param runtimeModes The {@link RuntimeMode}s for this environment.
 	 */
-	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistenceNetwork network,
-			File root, Profiles profiles, TaskManager taskManager, EnumSet<RuntimeMode> runtimeModes) {
+	public GlobalEnv(ExecutionQueue queue, File root, EnumSet<RuntimeMode> runtimeModes) {
 		Static.AssertNonNull(queue, "ExecutionQueue cannot be null");
-		Static.AssertNonNull(profiler, "Profiler cannot be null");
-		Static.AssertNonNull(network, "PersistenceNetwork cannot be null");
 		Static.AssertNonNull(root, "Root file cannot be null");
-		Static.AssertNonNull(taskManager, "TaskManager cannot be null");
 		RuntimeMode.validate(runtimeModes);
 		this.executionQueue = queue;
-		this.profiler = profiler;
-		this.persistenceNetwork = network;
 		this.root = new MutableObject(root);
 		if(this.executionQueue instanceof MethodScriptExecutionQueue) {
 			((MethodScriptExecutionQueue) executionQueue).setEnvironment(this);
 		}
-		this.profiles = profiles;
-		this.taskManager.setObject(taskManager);
 		this.runtimeModes = runtimeModes;
-	}
-
-	/**
-	 * Thrown if one of the no-op classes is used.
-	 */
-	public static class GlobalEnvNoOpException extends RuntimeException {
-		public GlobalEnvNoOpException(String message) {
-			super(message);
-		}
-	}
-
-	/**
-	 * When constructing a GlobalEnv in meta circumstances, it may be helpful to provide
-	 * a no-op execution queue. This value is set up for that purpose. However, it's
-	 * not truly no-op, as an exception is thrown if any method in the interface are
-	 * used, as this points to a situation where something is being called that isn't
-	 * compatible with a no op execution.
-	 */
-	public static final ExecutionQueue NO_OP_EXECUTION_QUEUE
-			= GetErrorNoOp(ExecutionQueue.class, "NO_OP_EXECUTION_QUEUE");
-
-	/**
-	 * When constructing a GlobalEnv in meta circumstances, it may be helpful to provide
-	 * a no-op profiler. This value is set up for that purpose. It is
-	 * truly no-op, and no exception is thrown if a method in the interface is
-	 * used.
-	 */
-	public static final Profiler NO_OP_PROFILER = Profiler.FakeProfiler();
-
-	/**
-	 * When constructing a GlobalEnv in meta circumstances, it may be helpful to provide
-	 * a no-op persistence network. This value is set up for that purpose. However, it's
-	 * not truly no-op, as an exception is thrown if any method in the interface are
-	 * used, as this points to a situation where something is being called that isn't
-	 * compatible with a no op execution.
-	 */
-	public static final PersistenceNetwork NO_OP_PN = GetErrorNoOp(PersistenceNetwork.class, "NO_OP_PN");
-
-	/**
-	 * When constructing a GlobalEnv in meta circumstances, it may be helpful to provide
-	 * a no-op Profiles object. This value is set up for that purpose. However, it's
-	 * not truly no-op, as an exception is thrown if any method in the interface are
-	 * used, as this points to a situation where something is being called that isn't
-	 * compatible with a no op execution.
-	 */
-	public static final Profiles NO_OP_PROFILES = GetErrorNoOp(Profiles.class, "NO_OP_PROFILES");
-
-	/**
-	 * When constructing a GlobalEnv in meta circumstances, it may be helpful to provide
-	 * a no-op profiler. This value is set up for that purpose. It is
-	 * truly no-op, and no exception is thrown if a method in the interface is
-	 * used.
-	 */
-	public static final TaskManager NO_OP_TASK_MANAGER = GetNoOp(TaskManager.class);
-
-	private static <T> T GetErrorNoOp(Class<T> iface, String identifier) {
-		return (T) Proxy.newProxyInstance(GlobalEnv.class.getClassLoader(),
-				new Class[]{iface}, (Object proxy, Method method, Object[] args) -> {
-					throw new GlobalEnvNoOpException(identifier);
-				});
-	}
-
-	private static <T> T GetNoOp(Class<T> iface) {
-		return (T) Proxy.newProxyInstance(GlobalEnv.class.getClassLoader(),
-				new Class[]{iface}, (Object proxy, Method method, Object[] args) -> null);
 	}
 
 	public ExecutionQueue GetExecutionQueue() {
 		return executionQueue;
-	}
-
-	public Profiler GetProfiler() {
-		return profiler;
-	}
-
-	public PersistenceNetwork GetPersistenceNetwork() {
-		return persistenceNetwork;
-	}
-
-	public TaskManager GetTaskManager() {
-		return taskManager.getObject();
 	}
 
 	/**
@@ -372,10 +269,6 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		return this.runtimeModes.contains(RuntimeMode.INTERPRETER);
 	}
 
-	public DaemonManager GetDaemonManager() {
-		return daemonManager;
-	}
-
 	/**
 	 * Turns dynamic scripting mode on or off. If this is true, that means that the script came from a dynamic source,
 	 * such as eval, or other sources other than the file system.
@@ -394,10 +287,6 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 */
 	public boolean GetDynamicScriptingMode() {
 		return this.dynamicScriptingMode;
-	}
-
-	public Profiles getProfiles() {
-		return this.profiles;
 	}
 
 	public void SetEvent(BoundEvent.ActiveEvent e) {

@@ -28,7 +28,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CRESecurityException;
@@ -82,13 +82,13 @@ public class FileHandling {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			try {
-				//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
-				//Cmdline mode doesn't currently have this restriction.
+				// Verify this file is not above the craftbukkit directory (or whatever directory the user specified).
+				// Cmdline mode doesn't currently have this restriction.
 				if(!Static.InCmdLine(env, true) && !Security.CheckSecurity(location)) {
 					throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 				}
 				String s = file_get_contents(location.getAbsolutePath());
-				s = s.replaceAll("\n|\r\n", "\n");
+				s = s.replace("\r\n", "\n");
 				return new CString(s, t);
 			} catch (Exception ex) {
 				MSLog.GetLogger().Log(MSLog.Tags.GENERAL, LogLevel.INFO, "Could not read in file while attempting to find "
@@ -267,7 +267,7 @@ public class FileHandling {
 					throw new CREIOException(ex.getMessage(), t, ex);
 				}
 			}
-			queue.invokeLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
+			queue.invokeLater(environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
 
 				@Override
 				public void run() {
@@ -302,7 +302,8 @@ public class FileHandling {
 					} else {
 						cex = ObjectGenerator.GetGenerator().exception(exception, environment, t);
 					}
-					StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
+					StaticLayer.GetConvertor().runOnMainThreadLater(
+							environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
 
 						@Override
 						public void run() {

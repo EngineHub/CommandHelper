@@ -21,7 +21,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInterruptedException;
@@ -85,7 +85,7 @@ public class Threading {
 
 				@Override
 				public void run() {
-					DaemonManager dm = environment.getEnv(GlobalEnv.class).GetDaemonManager();
+					DaemonManager dm = environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
 					dm.activateThread(Thread.currentThread());
 					try {
 						closure.executeCallable();
@@ -226,7 +226,8 @@ public class Threading {
 		@Override
 		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
 			final CClosure closure = ArgumentValidation.getObject(args[0], t, CClosure.class);
-			StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
+			StaticLayer.GetConvertor().runOnMainThreadLater(
+					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
 
 				@Override
 				public void run() {

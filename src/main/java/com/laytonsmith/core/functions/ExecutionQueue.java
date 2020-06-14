@@ -11,6 +11,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -65,7 +66,8 @@ public class ExecutionQueue {
 				queue = Construct.nval(args[1]);
 			}
 
-			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(environment.getEnv(GlobalEnv.class).GetDaemonManager(), queue, new Runnable() {
+			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(
+					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override
 				public void run() {
@@ -147,7 +149,8 @@ public class ExecutionQueue {
 				queue = Construct.nval(args[1]);
 			}
 
-			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(environment.getEnv(GlobalEnv.class).GetDaemonManager(), queue, new Runnable() {
+			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(
+					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override
 				public void run() {
@@ -425,7 +428,8 @@ public class ExecutionQueue {
 				queue = Construct.nval(args[1]);
 			}
 			final long delay = ArgumentValidation.getInt(args[0], t);
-			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(environment.getEnv(GlobalEnv.class).GetDaemonManager(), queue, new Runnable() {
+			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(
+					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override
 				public void run() {
@@ -487,7 +491,8 @@ public class ExecutionQueue {
 				queue = Construct.nval(args[1]);
 			}
 			final long delay = ArgumentValidation.getInt(args[0], t);
-			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(environment.getEnv(GlobalEnv.class).GetDaemonManager(), queue, new Runnable() {
+			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(
+					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override
 				public void run() {

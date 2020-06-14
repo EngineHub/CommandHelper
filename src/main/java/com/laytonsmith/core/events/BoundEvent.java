@@ -12,6 +12,7 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -254,7 +255,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
 			env.getEnv(GlobalEnv.class).SetEvent(activeEvent);
 			activeEvent.addHistory("Triggering bound event: " + this);
 			try {
-				ProfilePoint p = env.getEnv(GlobalEnv.class).GetProfiler().start("Executing event handler for "
+				ProfilePoint p = env.getEnv(StaticRuntimeEnv.class).GetProfiler().start("Executing event handler for "
 						+ this.getEventName() + " defined at " + this.getTarget(), LogLevel.ERROR);
 				try {
 					this.execute(env, activeEvent);

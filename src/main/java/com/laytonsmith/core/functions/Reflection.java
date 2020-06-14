@@ -33,6 +33,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -756,7 +757,7 @@ public class Reflection {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			PersistenceNetwork pn = environment.getEnv(GlobalEnv.class).GetPersistenceNetwork();
+			PersistenceNetwork pn = environment.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
 			return new CString(pn.getKeySource(args[0].val().split("\\.")).toString(), t);
 		}
 

@@ -32,7 +32,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
@@ -46,6 +46,7 @@ import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import org.bukkit.entity.Player;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -326,14 +327,21 @@ public class RandomTests {
 	@Test
 	public void testGetValues() throws Exception {
 		try {
+
+			// Generate the environment.
 			Environment env = Static.GenerateStandaloneEnvironment();
 			env = env.cloneAndAdd(new CommandHelperEnvironment());
-			GlobalEnv g = env.getEnv(GlobalEnv.class);
+
+			// Override the persistence network in the static runtime environment.
 			ConnectionMixinFactory.ConnectionMixinOptions options;
 			options = new ConnectionMixinFactory.ConnectionMixinOptions();
 			options.setWorkingDirectory(new File("."));
-			PersistenceNetworkImpl network = new PersistenceNetworkImpl("**=json://persistence.json", new URI("default"), options);
-			ReflectionUtils.set(GlobalEnv.class, g, "persistenceNetwork", network);
+			PersistenceNetworkImpl network = new PersistenceNetworkImpl(
+					"**=json://persistence.json", new URI("default"), options);
+			StaticRuntimeEnv staticRuntimeEnvSpy = Mockito.spy(env.getEnv(StaticRuntimeEnv.class));
+			when(staticRuntimeEnvSpy.GetPersistenceNetwork()).thenReturn(network);
+
+			// Run the test code.
 			Run("store_value('t.test1', 'test')\n"
 					+ "store_value('t.test2', 'test')\n"
 					+ "store_value('t.test3.third', 'test')\n"

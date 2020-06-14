@@ -11,7 +11,7 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -51,7 +51,7 @@ public class TaskHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			TaskManager tm = environment.getEnv(GlobalEnv.class).GetTaskManager();
+			TaskManager tm = environment.getEnv(StaticRuntimeEnv.class).GetTaskManager();
 			CArray ret = new CArray(t);
 			for(TaskHandler task : tm.getTasks()) {
 				CArray tt = CArray.GetAssociativeArray(t);
@@ -137,7 +137,7 @@ public class TaskHandling {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			String type = args[0].val();
 			int id = ArgumentValidation.getInt32(args[1], t);
-			TaskManager tm = environment.getEnv(GlobalEnv.class).GetTaskManager();
+			TaskManager tm = environment.getEnv(StaticRuntimeEnv.class).GetTaskManager();
 			tm.killTask(type, id);
 			return CVoid.VOID;
 		}

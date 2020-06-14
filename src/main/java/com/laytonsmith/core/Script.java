@@ -26,6 +26,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.InvalidEnvironmentException;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientPermissionException;
@@ -307,7 +308,7 @@ public class Script {
 				if(p == null) {
 					throw new CREInvalidProcedureException("Unknown procedure \"" + m.val() + "\"", m.getTarget());
 				}
-				ProfilePoint pp = env.getEnv(GlobalEnv.class).GetProfiler().start(m.val() + " execution", LogLevel.INFO);
+				ProfilePoint pp = env.getEnv(StaticRuntimeEnv.class).GetProfiler().start(m.val() + " execution", LogLevel.INFO);
 				Mixed ret;
 				try {
 					if(debugOutput) {
@@ -355,9 +356,10 @@ public class Script {
 				}
 				if(f.useSpecialExec()) {
 					ProfilePoint p = null;
-					if(f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null
-							&& env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())) {
-						p = env.getEnv(GlobalEnv.class).GetProfiler().start(f.profileMessageS(c.getChildren()), f.profileAt());
+					if(f.shouldProfile() && env.getEnv(StaticRuntimeEnv.class).GetProfiler() != null
+							&& env.getEnv(StaticRuntimeEnv.class).GetProfiler().isLoggable(f.profileAt())) {
+						p = env.getEnv(StaticRuntimeEnv.class)
+								.GetProfiler().start(f.profileMessageS(c.getChildren()), f.profileAt());
 					}
 					Mixed ret;
 					try {
@@ -399,9 +401,9 @@ public class Script {
 					//It takes a moment to generate the toString of some things, so lets not do it
 					//if we actually aren't going to profile
 					ProfilePoint p = null;
-					if(f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null
-							&& env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())) {
-						p = env.getEnv(GlobalEnv.class).GetProfiler().start(f.profileMessage(ca), f.profileAt());
+					if(f.shouldProfile() && env.getEnv(StaticRuntimeEnv.class).GetProfiler() != null
+							&& env.getEnv(StaticRuntimeEnv.class).GetProfiler().isLoggable(f.profileAt())) {
+						p = env.getEnv(StaticRuntimeEnv.class).GetProfiler().start(f.profileMessage(ca), f.profileAt());
 					}
 					Mixed ret;
 					try {
@@ -672,11 +674,11 @@ public class Script {
 		return vars;
 	}
 
-	public Script compile() throws ConfigCompileException, ConfigCompileGroupException {
+	public Script compile(Environment env) throws ConfigCompileException, ConfigCompileGroupException {
 		try {
 			verifyLeft();
 			compileLeft();
-			compileRight();
+			compileRight(env);
 		} catch (ConfigCompileException e) {
 			compilerError = true;
 			throw e;
@@ -885,7 +887,7 @@ public class Script {
 		return true;
 	}
 
-	public void compileRight() throws ConfigCompileException, ConfigCompileGroupException {
+	public void compileRight(Environment env) throws ConfigCompileException, ConfigCompileGroupException {
 		List<Token> temp = new ArrayList<>();
 		right = new ArrayList<>();
 		for(Token t : fullRight) {
@@ -903,7 +905,7 @@ public class Script {
 		cright = new ArrayList<>();
 		for(List<Token> l : right) {
 			StaticAnalysis analysis = new StaticAnalysis(true);
-			cright.add(MethodScriptCompiler.compile(new TokenStream(l, fileOptions), null, envs, analysis));
+			cright.add(MethodScriptCompiler.compile(new TokenStream(l, fileOptions), env, envs, analysis));
 		}
 	}
 
