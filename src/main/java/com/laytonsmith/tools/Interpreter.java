@@ -76,6 +76,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.InvalidEnvironmentException;
 import com.laytonsmith.core.environments.RuntimeMode;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.drivers.CmdlineEvents;
@@ -369,7 +370,7 @@ public final class Interpreter {
 					if(scriptThread != null) {
 						scriptThread.interrupt();
 					}
-					for(Thread t : env.getEnv(GlobalEnv.class).GetDaemonManager().getActiveThreads()) {
+					for(Thread t : env.getEnv(StaticRuntimeEnv.class).GetDaemonManager().getActiveThreads()) {
 						t.interrupt();
 					}
 				} else {
@@ -774,7 +775,7 @@ public final class Interpreter {
 					+ ");";
 		}
 		isExecuting = true;
-		ProfilePoint compile = env.getEnv(GlobalEnv.class).GetProfiler().start("Compilation", LogLevel.VERBOSE);
+		ProfilePoint compile = env.getEnv(StaticRuntimeEnv.class).GetProfiler().start("Compilation", LogLevel.VERBOSE);
 		final ParseTree tree;
 		try {
 			TokenStream stream = MethodScriptCompiler.lex(script, env, fromFile, true);
@@ -819,7 +820,8 @@ public final class Interpreter {
 					Target.UNKNOWN));
 		}
 		try {
-			ProfilePoint p = this.env.getEnv(GlobalEnv.class).GetProfiler().start("Interpreter Script", LogLevel.ERROR);
+			ProfilePoint p = this.env.getEnv(StaticRuntimeEnv.class)
+					.GetProfiler().start("Interpreter Script", LogLevel.ERROR);
 			try {
 				final MutableObject<Throwable> wasThrown = new MutableObject<>();
 				scriptThread = new Thread(new Runnable() {
@@ -835,13 +837,13 @@ public final class Interpreter {
 									}
 								}
 							}, null, vars);
-							env.getEnv(GlobalEnv.class).GetDaemonManager().waitForThreads();
+							env.getEnv(StaticRuntimeEnv.class).GetDaemonManager().waitForThreads();
 						} catch (CancelCommandException | InterruptedException e) {
 							// Nothing, though we could have been Ctrl+C cancelled, so we need to reset
 							// the interrupt flag. But we do that unconditionally below, in the finally,
 							// in the other thread.
 							// However, interrupt all the underlying threads
-							for(Thread t : env.getEnv(GlobalEnv.class).GetDaemonManager().getActiveThreads()) {
+							for(Thread t : env.getEnv(StaticRuntimeEnv.class).GetDaemonManager().getActiveThreads()) {
 								t.interrupt();
 							}
 						} catch (ConfigRuntimeException e) {

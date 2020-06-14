@@ -35,6 +35,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
@@ -1065,7 +1066,7 @@ public class Cmdline {
 			}
 
 			Runnable run = () -> {
-				environment.getEnv(GlobalEnv.class).GetDaemonManager().activateThread(null);
+				environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager().activateThread(null);
 				try {
 					final int exitCode = cmd.waitFor();
 					try {
@@ -1097,7 +1098,7 @@ public class Cmdline {
 				} catch (InterruptedException ex) {
 					throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
 				} finally {
-					environment.getEnv(GlobalEnv.class).GetDaemonManager().deactivateThread(null);
+					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager().deactivateThread(null);
 				}
 			};
 			if(subshell) {

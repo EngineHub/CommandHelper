@@ -22,6 +22,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREOAuthException;
@@ -301,19 +302,19 @@ public class OAuth {
 		}
 
 		private static boolean hasRefreshToken(Environment env, String clientId) throws DataSourceException {
-			PersistenceNetwork pn = env.getEnv(GlobalEnv.class).GetPersistenceNetwork();
+			PersistenceNetwork pn = env.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
 			return pn.hasKey(new String[]{"oauth", getFormattedClientId(clientId), "refreshToken"});
 		}
 
 		private static void storeRefreshToken(Environment env, String clientId, String refreshToken) throws DataSourceException, ReadOnlyException, IOException {
-			PersistenceNetwork pn = env.getEnv(GlobalEnv.class).GetPersistenceNetwork();
-			DaemonManager dm = env.getEnv(GlobalEnv.class).GetDaemonManager();
+			PersistenceNetwork pn = env.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
+			DaemonManager dm = env.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
 			pn.set(dm, new String[]{"oauth", getFormattedClientId(clientId), "refreshToken"}, formatValue(refreshToken));
 		}
 
 		private static void storeAccessToken(Environment env, String clientId, AccessToken token) throws DataSourceException, ReadOnlyException, IOException {
-			PersistenceNetwork pn = env.getEnv(GlobalEnv.class).GetPersistenceNetwork();
-			DaemonManager dm = env.getEnv(GlobalEnv.class).GetDaemonManager();
+			PersistenceNetwork pn = env.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
+			DaemonManager dm = env.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
 			pn.set(dm, new String[]{"oauth", getFormattedClientId(clientId), "accessToken"},
 					formatValue(token.getExpiry().getTime() + "," + token.getAccessToken()));
 		}
@@ -325,7 +326,7 @@ public class OAuth {
 		 * @return
 		 */
 		private String getAccessToken(Environment env, String clientId) throws DataSourceException {
-			PersistenceNetwork pn = env.getEnv(GlobalEnv.class).GetPersistenceNetwork();
+			PersistenceNetwork pn = env.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
 			AccessToken aT = null;
 			String aTS = pn.get(new String[]{"oauth", getFormattedClientId(clientId), "accessToken"});
 			if(aTS != null) {
@@ -346,7 +347,7 @@ public class OAuth {
 		}
 
 		private static String getRefreshToken(Environment env, String clientId) throws DataSourceException {
-			PersistenceNetwork pn = env.getEnv(GlobalEnv.class).GetPersistenceNetwork();
+			PersistenceNetwork pn = env.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
 			String v = pn.get(new String[]{"oauth", getFormattedClientId(clientId), "refreshToken"});
 			if(v == null) {
 				return v;
@@ -522,12 +523,12 @@ public class OAuth {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			PersistenceNetwork pn = environment.getEnv(GlobalEnv.class).GetPersistenceNetwork();
+			PersistenceNetwork pn = environment.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
 			String namespace = "oauth";
 			if(args.length >= 1) {
 				namespace += "." + x_get_oauth_token.getFormattedClientId(args[0].val());
 			}
-			DaemonManager dm = environment.getEnv(GlobalEnv.class).GetDaemonManager();
+			DaemonManager dm = environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
 			try {
 				Map<String[], String> list = pn.getNamespace(namespace.split("\\."));
 				for(String[] key : list.keySet()) {

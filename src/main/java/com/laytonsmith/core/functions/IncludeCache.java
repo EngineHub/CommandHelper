@@ -11,7 +11,7 @@ import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREIncludeException;
 import com.laytonsmith.core.exceptions.CRE.CRESecurityException;
@@ -59,7 +59,7 @@ public class IncludeCache {
 		MSLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Cache does not already contain file. Compiling and caching.", t);
 		//We have to pull the file from the FS, and compile it.
 		MSLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Security check passed", t);
-		Profiler profiler = env.getEnv(GlobalEnv.class).GetProfiler();
+		Profiler profiler = env.getEnv(StaticRuntimeEnv.class).GetProfiler();
 		try {
 			if(!Static.InCmdLine(env, true) && !Security.CheckSecurity(file)) {
 				throw new CRESecurityException("The script cannot access " + file

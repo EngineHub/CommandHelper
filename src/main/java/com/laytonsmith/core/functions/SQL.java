@@ -29,7 +29,7 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.Profiles;
@@ -158,7 +158,7 @@ public class SQL {
 					}
 					profile = ProfilesImpl.getProfile(data);
 				} else {
-					Profiles profiles = environment.getEnv(GlobalEnv.class).getProfiles();
+					Profiles profiles = environment.getEnv(StaticRuntimeEnv.class).getProfiles();
 					profile = profiles.getProfileById(args[0].val());
 				}
 				if(!(profile instanceof SQLProfile)) {
@@ -491,7 +491,7 @@ public class SQL {
 			final Mixed[] newArgs = new Mixed[args.length - 1];
 			//Make a new array minus the closure
 			System.arraycopy(args, 0, newArgs, 0, newArgs.length);
-			queue.invokeLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
+			queue.invokeLater(environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
 
 				@Override
 				public void run() {
@@ -504,7 +504,8 @@ public class SQL {
 					}
 					final Mixed cret = returnValue;
 					final Mixed cex = exception;
-					StaticLayer.GetConvertor().runOnMainThreadLater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), new Runnable() {
+					StaticLayer.GetConvertor().runOnMainThreadLater(
+							environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), new Runnable() {
 
 						@Override
 						public void run() {

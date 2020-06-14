@@ -16,6 +16,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.RuntimeMode;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -132,16 +133,17 @@ public class AliasCore {
 			Static.getLogger().log(Level.INFO, "Running alias on " + sender.getName() + " ---> " + command);
 		}
 
-		GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
-				MethodScriptFileLocations.getDefault().getConfigDirectory(),
-				parent.profiles, new TaskManagerImpl(), EnumSet.of(RuntimeMode.EMBEDDED));
+		GlobalEnv gEnv = new GlobalEnv(parent.executionQueue,
+				MethodScriptFileLocations.getDefault().getConfigDirectory(), EnumSet.of(RuntimeMode.EMBEDDED));
+		StaticRuntimeEnv staticRuntimeEnv = new StaticRuntimeEnv(parent.profiler,
+				parent.persistenceNetwork, parent.profiles, new TaskManagerImpl());
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 		cEnv.SetCommandSender(sender);
 		cEnv.SetCommand(command);
-		Environment env = Environment.createEnvironment(gEnv, cEnv, compilerEnv);
+		Environment env = Environment.createEnvironment(gEnv, staticRuntimeEnv, cEnv, compilerEnv);
 
 		this.addPlayerReference(sender);
-		ProfilePoint alias = gEnv.GetProfiler().start("Alias - \"" + command + "\"", LogLevel.ERROR);
+		ProfilePoint alias = staticRuntimeEnv.GetProfiler().start("Alias - \"" + command + "\"", LogLevel.ERROR);
 		try {
 			script.run(script.getVariables(command), env, output -> {
 				// If this is a macro, we need to run the output as a command
@@ -263,9 +265,10 @@ public class AliasCore {
 				MSLog.GetLogger().e(MSLog.Tags.GENERAL, ex.getMessage(), Target.UNKNOWN);
 				return;
 			}
-			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistenceNetwork,
-					MethodScriptFileLocations.getDefault().getConfigDirectory(),
-					parent.profiles, new TaskManagerImpl(), EnumSet.of(RuntimeMode.EMBEDDED));
+			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue,
+					MethodScriptFileLocations.getDefault().getConfigDirectory(), EnumSet.of(RuntimeMode.EMBEDDED));
+			StaticRuntimeEnv staticRuntimeEnv = new StaticRuntimeEnv(parent.profiler,
+					parent.persistenceNetwork, parent.profiles, new TaskManagerImpl());
 			gEnv.SetLabel(Static.GLOBAL_PERMISSION);
 			if(options.reloadExecutionQueue()) {
 				ProfilePoint stoppingExecutionQueue = parent.profiler.start("Stopping execution queues", LogLevel.VERBOSE);
@@ -276,7 +279,7 @@ public class AliasCore {
 				}
 			}
 			CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
-			Environment env = Environment.createEnvironment(gEnv, cEnv, compilerEnv);
+			Environment env = Environment.createEnvironment(gEnv, staticRuntimeEnv, cEnv, compilerEnv);
 			if(options.reloadGlobals()) {
 				ProfilePoint clearingGlobals = parent.profiler.start("Clearing globals", LogLevel.VERBOSE);
 				try {

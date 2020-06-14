@@ -30,6 +30,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
@@ -283,10 +284,10 @@ public class Scheduling {
 			final CClosure c = (CClosure) args[1 + offset];
 			final AtomicInteger ret = new AtomicInteger(-1);
 
-			ret.set(StaticLayer.SetFutureRepeater(environment.getEnv(GlobalEnv.class).GetDaemonManager(), time, delay, () -> {
+			ret.set(StaticLayer.SetFutureRepeater(environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), time, delay, () -> {
 				c.getEnv().getEnv(GlobalEnv.class).SetCustom("timeout-id", ret.get());
 				try {
-					ProfilePoint p = environment.getEnv(GlobalEnv.class).GetProfiler().start("Executing timeout"
+					ProfilePoint p = environment.getEnv(StaticRuntimeEnv.class).GetProfiler().start("Executing timeout"
 							+ " with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
 					try {
 						c.executeCallable();
@@ -361,7 +362,7 @@ public class Scheduling {
 
 		@Override
 		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
-			final TaskManager taskManager = environment.getEnv(GlobalEnv.class).GetTaskManager();
+			final TaskManager taskManager = environment.getEnv(StaticRuntimeEnv.class).GetTaskManager();
 			long time = ArgumentValidation.getInt(args[0], t);
 			if(!(args[1].isInstanceOf(CClosure.TYPE))) {
 				throw new CRECastException(getName() + " expects a closure to be sent as the second argument", t);
@@ -369,12 +370,13 @@ public class Scheduling {
 			final CClosure c = (CClosure) args[1];
 			final AtomicInteger ret = new AtomicInteger(-1);
 			final AtomicBoolean isRunning = new AtomicBoolean(false);
-			ret.set(StaticLayer.SetFutureRunnable(environment.getEnv(GlobalEnv.class).GetDaemonManager(), time, () -> {
+			ret.set(StaticLayer.SetFutureRunnable(
+					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), time, () -> {
 				isRunning.set(true);
 				c.getEnv().getEnv(GlobalEnv.class).SetCustom("timeout-id", ret.get());
 				taskManager.getTask(CoreTaskType.TIMEOUT, ret.get()).changeState(TaskState.RUNNING);
 				try {
-					ProfilePoint p = environment.getEnv(GlobalEnv.class).GetProfiler().start("Executing timeout"
+					ProfilePoint p = environment.getEnv(StaticRuntimeEnv.class).GetProfiler().start("Executing timeout"
 							+ " with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
 					try {
 						c.executeCallable();
@@ -814,7 +816,7 @@ public class Scheduling {
 			//then register this job, as well as inform clear_task of this id.
 			synchronized(CRON_THREAD_LOCK) {
 				if(cronThread == null) {
-					final DaemonManager dm = environment.getEnv(GlobalEnv.class).GetDaemonManager();
+					final DaemonManager dm = environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
 					final MutableObject<Boolean> stopCron = new MutableObject<>(false);
 					StaticLayer.GetConvertor().addShutdownHook(() -> {
 						cronThread = null;

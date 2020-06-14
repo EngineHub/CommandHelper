@@ -19,6 +19,7 @@ import com.laytonsmith.core.ProfilesImpl;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.RuntimeMode;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.functions.OAuth;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.core.taskmanager.TaskManagerImpl;
@@ -76,6 +77,7 @@ public final class LocalizationUI extends javax.swing.JFrame {
 	private String storedLocation = null;
 	private final DaemonManager dm = new DaemonManager();
 	private GlobalEnv gEnv;
+	private StaticRuntimeEnv staticRuntimeEnv;
 
 	private List<TranslationMemory> currentSegments;
 	private TranslationMemory currentMemory;
@@ -1346,17 +1348,16 @@ public final class LocalizationUI extends javax.swing.JFrame {
 
 		try {
 			Static.GenerateStandaloneEnvironment(true);
-			pn = getPersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig());
-			if(pn != null) {
-				storedLocation = pn.get(new String[]{"l10n", "lastLoadedDb"});
-				azureKey = pn.get(new String[]{"l10n", "azureKey"});
+			this.pn = getPersistenceNetwork(MethodScriptFileLocations.getDefault().getPersistenceConfig());
+			if(this.pn != null) {
+				storedLocation = this.pn.get(new String[]{"l10n", "lastLoadedDb"});
+				azureKey = this.pn.get(new String[]{"l10n", "azureKey"});
 			}
-			gEnv = new GlobalEnv(new MethodScriptExecutionQueue("L10N-UI", "default"),
-					new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile()),
-					pn,
-					MethodScriptFileLocations.getDefault().getTempDir(),
-					new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile()),
-					new TaskManagerImpl(), EnumSet.of(RuntimeMode.CMDLINE));
+			this.gEnv = new GlobalEnv(new MethodScriptExecutionQueue("L10N-UI", "default"),
+					MethodScriptFileLocations.getDefault().getTempDir(), EnumSet.of(RuntimeMode.CMDLINE));
+			this.staticRuntimeEnv = new StaticRuntimeEnv(
+					new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile()), this.pn,
+					new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile()), new TaskManagerImpl());
 		} catch(URISyntaxException | IOException | DataSourceException | Profiles.InvalidProfileException ex) {
 			showError("Could not load Persistence Database! " + ex.getMessage());
 		}

@@ -13,6 +13,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.RuntimeMode;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
@@ -139,15 +140,17 @@ public class CommandHelperInterpreterListener implements Listener {
 	 */
 	public void execute(String script, final MCPlayer p) throws ConfigCompileException, ConfigCompileGroupException {
 		TokenStream stream = MethodScriptCompiler.lex(script, null, new File("Interpreter"), true);
-		GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler, plugin.persistenceNetwork,
+		GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue,
 				CommandHelperFileLocations.getDefault().getConfigDirectory(),
-				plugin.profiles, new TaskManagerImpl(), EnumSet.of(RuntimeMode.EMBEDDED, RuntimeMode.INTERPRETER));
+				EnumSet.of(RuntimeMode.EMBEDDED, RuntimeMode.INTERPRETER));
+		StaticRuntimeEnv staticRuntimeEnv = new StaticRuntimeEnv(plugin.profiler,
+				plugin.persistenceNetwork, plugin.profiles, new TaskManagerImpl());
 		gEnv.SetDynamicScriptingMode(true);
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 		cEnv.SetPlayer(p);
 		CompilerEnvironment compilerEnv = new CompilerEnvironment();
 		compilerEnv.setLogCompilerWarnings(false);
-		Environment env = Environment.createEnvironment(gEnv, cEnv, compilerEnv);
+		Environment env = Environment.createEnvironment(gEnv, staticRuntimeEnv, cEnv, compilerEnv);
 		ParseTree tree = MethodScriptCompiler.compile(stream, env, env.getEnvClasses());
 		final boolean isInterpeterMode = interpreterMode.remove(p.getName());
 		try {

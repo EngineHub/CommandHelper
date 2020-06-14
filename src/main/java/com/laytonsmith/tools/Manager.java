@@ -37,6 +37,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.RuntimeMode;
+import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -70,6 +71,7 @@ public class Manager {
 
 	private static Profiler profiler;
 	private static GlobalEnv gEnv;
+	private static StaticRuntimeEnv staticRuntimeEnv;
 	private static final File JAR_LOCATION =
 			new File(Interpreter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
 	private static final File CH_DIRECTORY = new File(JAR_LOCATION, "CommandHelper");
@@ -90,15 +92,16 @@ public class Manager {
 		Installer.Install(CH_DIRECTORY);
 		MSLog.initialize(CH_DIRECTORY);
 		profiler = new Profiler(CommandHelperFileLocations.getDefault().getProfilerConfigFile());
-		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistenceNetwork,
-				CH_DIRECTORY, new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile()),
-				new TaskManagerImpl(), EnumSet.of(RuntimeMode.CMDLINE));
+		gEnv = new GlobalEnv(
+				new MethodScriptExecutionQueue("Manager", "default"), CH_DIRECTORY, EnumSet.of(RuntimeMode.CMDLINE));
+		staticRuntimeEnv = new StaticRuntimeEnv(profiler, persistenceNetwork,
+				new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile()), new TaskManagerImpl());
 		cls();
 		pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
 
 		pl("Starting the Data Manager...");
 		try {
-			Environment env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
+			Environment env = Environment.createEnvironment(gEnv, staticRuntimeEnv, new CommandHelperEnvironment());
 			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("msg()", env, null, true),
 					env, null), env, null, null);
 		} catch (ConfigCompileException | ConfigCompileGroupException ex) {
@@ -454,7 +457,7 @@ public class Manager {
 
 	public static boolean doAddEdit(String key, String valueScript) {
 		try {
-			Environment env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
+			Environment env = Environment.createEnvironment(gEnv, staticRuntimeEnv, new CommandHelperEnvironment());
 			Mixed c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(
 					MethodScriptCompiler.lex(valueScript, env, null, true), env, null), env, null, null);
 			String value = Construct.json_encode(c, Target.UNKNOWN);
