@@ -22,8 +22,6 @@ import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Iterator;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.File;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -82,39 +80,6 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 			((MethodScriptExecutionQueue) executionQueue).setEnvironment(this);
 		}
 		this.runtimeModes = runtimeModes;
-	}
-
-	/**
-	 * Thrown if one of the no-op classes is used.
-	 */
-	public static class GlobalEnvNoOpException extends RuntimeException {
-		public GlobalEnvNoOpException(String message) {
-			super(message);
-		}
-	}
-
-	/**
-	 * When constructing a GlobalEnv in meta circumstances, it may be helpful to provide
-	 * a no-op execution queue. This value is set up for that purpose. However, it's
-	 * not truly no-op, as an exception is thrown if any method in the interface are
-	 * used, as this points to a situation where something is being called that isn't
-	 * compatible with a no op execution.
-	 */
-	public static final ExecutionQueue NO_OP_EXECUTION_QUEUE
-			= GetErrorNoOp(ExecutionQueue.class, "NO_OP_EXECUTION_QUEUE");
-
-	@SuppressWarnings("unchecked")
-	private static <T> T GetErrorNoOp(Class<T> iface, String identifier) {
-		return (T) Proxy.newProxyInstance(GlobalEnv.class.getClassLoader(),
-				new Class[]{iface}, (Object proxy, Method method, Object[] args) -> {
-					throw new GlobalEnvNoOpException(identifier);
-				});
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <T> T GetNoOp(Class<T> iface) {
-		return (T) Proxy.newProxyInstance(GlobalEnv.class.getClassLoader(),
-				new Class[]{iface}, (Object proxy, Method method, Object[] args) -> null);
 	}
 
 	public ExecutionQueue GetExecutionQueue() {

@@ -1,7 +1,9 @@
 package com.laytonsmith.core.objects;
 
+import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CPrimitive;
@@ -13,6 +15,9 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.profiler.Profiler;
+import com.laytonsmith.core.taskmanager.TaskManager;
+import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.testing.StaticTest;
 import java.io.File;
 import java.util.ArrayList;
@@ -21,6 +26,8 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.Test;
+import org.mockito.Mockito;
+
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -50,10 +57,21 @@ public class ObjectDefinitionTableTest {
 	@Before
 	public void Before() {
 		StaticTest.InstallFakeServerFrontend();
+
+		ExecutionQueue executionQueue = Mockito.mock(ExecutionQueue.class, (invocation) -> {
+			throw new AssertionError("Interaction with the execution queue is not supported in this test.");
+		});
+		PersistenceNetwork persistenceNetwork = Mockito.mock(PersistenceNetwork.class, (invocation) -> {
+			throw new AssertionError("Interaction with the persistence network is not supported in this test.");
+		});
+		Profiles profiles = Mockito.mock(Profiles.class, (invocation) -> {
+			throw new AssertionError("Interaction with profiles is not supported in this test.");
+		});
+		TaskManager taskManager = Mockito.mock(TaskManager.class);
+
 		env = Environment.createEnvironment(new CompilerEnvironment(),
-			new GlobalEnv(GlobalEnv.NO_OP_EXECUTION_QUEUE, new File("."), EnumSet.of(RuntimeMode.CMDLINE)),
-			new StaticRuntimeEnv(StaticRuntimeEnv.NO_OP_PROFILER,
-					StaticRuntimeEnv.NO_OP_PN, StaticRuntimeEnv.NO_OP_PROFILES, StaticRuntimeEnv.NO_OP_TASK_MANAGER));
+			new GlobalEnv(executionQueue, new File("."), EnumSet.of(RuntimeMode.CMDLINE)),
+			new StaticRuntimeEnv(Profiler.FakeProfiler(), persistenceNetwork, profiles, taskManager));
 	}
 
 	@Test
