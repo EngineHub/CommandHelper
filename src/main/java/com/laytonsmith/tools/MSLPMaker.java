@@ -75,7 +75,7 @@ public class MSLPMaker {
 				}
 				for(Script s : tempScripts) {
 					try {
-						s.compile(env);
+						s.compile(env.clone());
 						s.checkAmbiguous(allScripts);
 						allScripts.add(s);
 					} catch (ConfigCompileException e) {
@@ -84,6 +84,8 @@ public class MSLPMaker {
 					} catch (ConfigCompileGroupException e) {
 						error = true;
 						ConfigRuntimeException.HandleUncaughtException(e, "Compile errors in script. Compilation will attempt to continue, however.", null);
+					} catch (CloneNotSupportedException e) {
+						throw new Error("Environment wasn't clonable, while it should be.", e);
 					}
 				}
 			} catch (ConfigCompileException e) {

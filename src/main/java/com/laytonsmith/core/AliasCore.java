@@ -688,7 +688,7 @@ public class AliasCore {
 					for(Script s : tempScripts) {
 						try {
 							try {
-								s.compile(env);
+								s.compile(env.clone());
 								s.checkAmbiguous(scripts);
 								scripts.add(s);
 							} catch (ConfigCompileException e) {
@@ -699,6 +699,8 @@ public class AliasCore {
 									ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script."
 											+ " Compilation will attempt to continue, however.", player);
 								}
+							} catch (CloneNotSupportedException e) {
+								throw new Error("Environment wasn't clonable, while it should be.", e);
 							}
 						} catch (RuntimeException ee) {
 							throw new RuntimeException("While processing a script, "
