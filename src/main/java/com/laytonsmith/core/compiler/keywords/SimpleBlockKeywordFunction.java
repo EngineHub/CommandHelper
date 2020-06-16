@@ -17,7 +17,7 @@ public abstract class SimpleBlockKeywordFunction extends Keyword {
 	 * This is the standalone version of the {@link #process(java.util.List, int)} function. All values must be passed
 	 * in.
 	 *
-	 * @param keywordName The keyword name
+	 * @param keyword The keyword
 	 * @param functionArgumentCount The function clause argument count
 	 * @param isStandaloneFunction Whether or not this is a standalone function (that is, it can be used without a block
 	 * following it)
@@ -26,7 +26,7 @@ public abstract class SimpleBlockKeywordFunction extends Keyword {
 	 * @return
 	 * @throws ConfigCompileException
 	 */
-	public static int doProcess(String keywordName, Integer[] functionArgumentCount, boolean isStandaloneFunction, List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
+	public static int doProcess(Keyword keyword, Integer[] functionArgumentCount, boolean isStandaloneFunction, List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
 
 		Target t = list.get(keywordPosition).getTarget();
 		if(list.size() > keywordPosition + 1) {
@@ -43,10 +43,10 @@ public abstract class SimpleBlockKeywordFunction extends Keyword {
 					int firstClauseArgumentCount = list.get(keywordPosition).getChildren().size();
 					if(validArgs.length == 1) {
 						if(firstClauseArgumentCount != validArgs[0]) {
-							throw new ConfigCompileException("\"" + keywordName + "\" blocks "
+							throw new ConfigCompileException("\"" + keyword.getKeywordName() + "\" blocks "
 									+ (firstClauseArgumentCount > validArgs[0] ? "may only" : "must") + " have " + validArgs[0]
 									+ " argument" + (validArgs[0] == 1 ? "" : "s") + " passed to the"
-									+ " " + keywordName + " condition, " + firstClauseArgumentCount + " found.", t);
+									+ " " + keyword.getKeywordName() + " condition, " + firstClauseArgumentCount + " found.", t);
 						}
 					} else {
 						boolean error = true;
@@ -57,9 +57,9 @@ public abstract class SimpleBlockKeywordFunction extends Keyword {
 							}
 						}
 						if(error) {
-							throw new ConfigCompileException("\"" + keywordName + "\" blocks may not have " + firstClauseArgumentCount
-									+ " argument" + (firstClauseArgumentCount == 1 ? "" : "s") + " passed to the "
-									+ keywordName + " condition", t);
+							throw new ConfigCompileException("\"" + keyword.getKeywordName() + "\" blocks may not have "
+									+ firstClauseArgumentCount + " argument" + (firstClauseArgumentCount == 1 ? "" : "s")
+									+ " passed to the " + keyword.getKeywordName() + " condition", t);
 						}
 					}
 				}
@@ -68,7 +68,7 @@ public abstract class SimpleBlockKeywordFunction extends Keyword {
 			}
 		} else {
 			if(!isStandaloneFunction) {
-				throw new ConfigCompileException("Missing code block, following \"" + keywordName + "\"", t);
+				throw new ConfigCompileException("Missing code block, following \"" + keyword.getKeywordName() + "\"", t);
 			}
 		}
 		return keywordPosition;
@@ -76,7 +76,7 @@ public abstract class SimpleBlockKeywordFunction extends Keyword {
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
-		return doProcess(getKeywordName(), getFunctionArgumentCount(), isStandaloneFunction(), list, keywordPosition);
+		return doProcess(this, getFunctionArgumentCount(), isStandaloneFunction(), list, keywordPosition);
 	}
 
 	/**

@@ -21,7 +21,7 @@ public class IClosureKeyword extends Keyword {
 		try {
 			if(list.get(keywordPosition).getData() instanceof CFunction) {
 				// It's a function, so do the old processing
-				SimpleBlockKeywordFunction.doProcess(this.getKeywordName(), null, true, list, keywordPosition);
+				SimpleBlockKeywordFunction.doProcess(this, null, true, list, keywordPosition);
 				// However, if we are proceeded by a ClassType, this is the return type of the closure, and it is
 				// easiest if we do the conversion here.
 				try {
