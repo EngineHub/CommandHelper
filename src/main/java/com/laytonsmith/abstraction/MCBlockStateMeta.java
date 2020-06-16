@@ -6,6 +6,8 @@ public interface MCBlockStateMeta extends MCItemMeta {
 
 	MCBlockState getBlockState();
 
+	MCBlockState getBlockState(boolean copy);
+
 	void setBlockState(MCBlockState state);
 
 }

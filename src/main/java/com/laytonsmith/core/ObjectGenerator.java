@@ -463,7 +463,7 @@ public class ObjectGenerator {
 
 			// Specific ItemMeta
 			if(meta instanceof MCBlockStateMeta) {
-				MCBlockState bs = ((MCBlockStateMeta) meta).getBlockState();
+				MCBlockState bs = ((MCBlockStateMeta) meta).getBlockState(true);
 				if(bs instanceof MCContainer || bs instanceof MCDispenser || bs instanceof MCDropper) {
 					// Handle InventoryHolders with inventory slots that do not have a special meaning.
 					MCInventory inv = ((MCInventoryHolder) bs).getInventory();
