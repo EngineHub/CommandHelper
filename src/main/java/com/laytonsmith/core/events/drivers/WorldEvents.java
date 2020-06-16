@@ -208,8 +208,13 @@ public final class WorldEvents {
 		public String docs() {
 			return "{world: <macro> | player: <macro> | type: <macro> | bonemeal: <boolean match>}"
 					+ "Fires when a tree grows."
-					+ "{world: The world where the tree grown. | type: The tree type, can be one of " + StringUtils.Join(MCTreeType.values(), ", ", ", or ", " or ")
-					+ " | bonemeal: If the tree grown due to a bonemeal or not. | player: The player who used the bonemeal, or null.}"
+					+ "{world: The world in which the tree has grown."
+					+ " | type: The tree type, can be one of "
+					+ StringUtils.Join(MCTreeType.values(), ", ", ", or ", " or ")
+					+ " | blocks: An array containing all locations of grown blocks."
+					+ " | location: The location of the sapling."
+					+ " | bonemeal: If the tree has grown due to a bonemeal or not."
+					+ " | player: The player who used the bonemeal, or null if no bonemeal was used.}"
 					+ "{}"
 					+ "{}";
 		}
