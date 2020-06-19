@@ -171,6 +171,7 @@ public class Preferences {
 		}
 		if(!header.trim().isEmpty()) {
 			StringBuilder b = new StringBuilder();
+			header = header.replace("\n", "\n# ");
 			for(String line2 : StringUtils.lineSplit(header, lineLength)) {
 				b.append("# ").append(line2).append(StringUtils.nl());
 			}

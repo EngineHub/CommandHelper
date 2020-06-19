@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -52,7 +53,9 @@ public class TelemetryUtil {
 		Envelope env = new Envelope();
 		env.setVer(1);
 		env.setName("Microsoft.ApplicationInsights." + iKeyDashless + ".Event");
-		env.setTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(new Date()));
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+		env.setTime(sdf.format(new Date()));
 		env.setSampleRate(100);
 		env.setIKey(instrumentationKey);
 		Map<String, String> tags = generateStandardTags();
