@@ -29,6 +29,8 @@ import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.telemetry.DefaultTelemetry;
+import com.laytonsmith.core.telemetry.Telemetry;
 import java.io.IOException;
 
 /**
@@ -42,6 +44,9 @@ public class StaticAnalysis {
 	static {
 		try {
 			CONFIGURATION = StaticAnalysisConfiguration.GetConfiguration();
+			if(CONFIGURATION.globalEnable()) {
+				Telemetry.GetDefault().metric(DefaultTelemetry.StaticAnalysisOnMetric.class);
+			}
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}

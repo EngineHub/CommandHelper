@@ -19,4 +19,10 @@ public class DefaultTelemetry {
 					+ " this is a different mode than running it as a plugin.")
 	public static class StartupModeMetric implements LogTelemetryValue {}
 
+	@TelemetryCategory(name = "methodscript.saOn",
+			group = TelemetryCategoryGroup.STATIC_ANALYSIS,
+			type = TelemetryType.METRIC,
+			purpose = "This category logs whether or not static analysis is globally enabled.")
+	public static class StaticAnalysisOnMetric implements MetricTelemetryValue {}
+
 }
