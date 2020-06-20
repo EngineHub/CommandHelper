@@ -1,10 +1,9 @@
 package com.laytonsmith.core.compiler.analysis;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -18,7 +17,7 @@ public class Scope {
 	private final Set<Scope> parents;
 	private final Map<Namespace, Set<Scope>> specificParents;
 	private final Map<Namespace, Map<String, Declaration>> declarations;
-	private final Map<Namespace, List<Reference>> references;
+	private final Map<Namespace, Set<Reference>> references;
 
 	/**
 	 * Creates a new scope without parent.
@@ -42,7 +41,7 @@ public class Scope {
 	}
 
 	private Scope(Set<Scope> parents, Map<Namespace, Set<Scope>> specificParents,
-			Map<Namespace, Map<String, Declaration>> declarations, Map<Namespace, List<Reference>> references) {
+			Map<Namespace, Map<String, Declaration>> declarations, Map<Namespace, Set<Reference>> references) {
 		this.parents = parents;
 		this.specificParents = specificParents;
 		this.declarations = declarations;
@@ -107,12 +106,12 @@ public class Scope {
 	 * @param ref - The reference to add.
 	 */
 	public void addReference(Reference ref) {
-		List<Reference> refList = this.references.get(ref.getNamespace());
-		if(refList == null) {
-			refList = new ArrayList<>();
-			this.references.put(ref.getNamespace(), refList);
+		Set<Reference> refSet = this.references.get(ref.getNamespace());
+		if(refSet == null) {
+			refSet = new HashSet<>();
+			this.references.put(ref.getNamespace(), refSet);
 		}
-		refList.add(ref);
+		refSet.add(ref);
 	}
 
 	/**
@@ -135,7 +134,7 @@ public class Scope {
 	 * considered. If multiple matches are found through different parents, then these are all returned.
 	 * @param namespace
 	 * @param identifier
-	 * @return The {@link Declaration} or an empty set if no such declaration exists.
+	 * @return The {@link Set} of {@link Declaration}s or an empty set if no such declaration exists.
 	 */
 	public Set<Declaration> getDeclarations(Namespace namespace, String identifier) {
 		Set<Scope> handledScopes = new HashSet<>();
@@ -162,7 +161,7 @@ public class Scope {
 	 * Gets all declarations matching the identifier and namespace from this scope and its (in)direct parents.
 	 * @param namespace
 	 * @param identifier
-	 * @return The {@link Declaration} or an empty set if no such declaration exists.
+	 * @return The {@link Set} of {@link Declaration}s or an empty collection if no such declaration exists.
 	 */
 	public Set<Declaration> getReachableDeclarations(Namespace namespace, String identifier) {
 		Set<Scope> handledScopes = new HashSet<>();
@@ -187,14 +186,14 @@ public class Scope {
 	/**
 	 * Gets all declarations present in this scope.
 	 * @param namespace - The {@link Namespace} for which to find the declarations.
-	 * @return The {@link Set} of declarations.
+	 * @return The {@link Collection} of declarations.
 	 */
-	public Set<Declaration> getAllDeclarationsLocal(Namespace namespace) {
+	public Collection<Declaration> getAllDeclarationsLocal(Namespace namespace) {
 		Map<String, Declaration> declIdMap = this.declarations.get(namespace);
 		if(declIdMap == null) {
-			return new HashSet<>();
+			return Collections.emptySet();
 		}
-		return new HashSet<>(declIdMap.values());
+		return Collections.unmodifiableCollection(declIdMap.values());
 	}
 
 	/**
@@ -203,11 +202,11 @@ public class Scope {
 	 * @return The {@link Set} of references.
 	 */
 	public Set<Reference> getAllReferencesLocal(Namespace namespace) {
-		List<Reference> refList = this.references.get(namespace);
-		if(refList == null) {
-			return new HashSet<>();
+		Set<Reference> refSet = this.references.get(namespace);
+		if(refSet == null) {
+			return Collections.emptySet();
 		}
-		return new HashSet<>(refList);
+		return Collections.unmodifiableSet(refSet);
 	}
 
 	/**
