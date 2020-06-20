@@ -144,6 +144,62 @@ on the PostgreSQL website: http://www.postgresql.org/
 | Optional
 |}
 
+=== MSSQL (SQL Server) ===
+
+MSSQL requires a separate SQL Server to be running, either remotely or locally.
+For more information about setting up SQL Server, look for more information
+on the Microsoft website: https://www.microsoft.com/en-us/sql-server/sql-server-2019
+
+The SQL Server must be configured to allow TCP/IP connections, which is disabled by default. The JDBC driver
+cannot connect using Shared Memory, which is the only transport enabled by default. To enable TCP/IP connections,
+open the "SQL Server Configuration Manager" which is installed along with SQL Server. Expand the "SQL Server
+Network Configuration" tab on the left, and select the SQL Server instance you're trying to connect. Enable
+the "TCP/IP" protocol. You need to then restart the SQL Server. Click on the "SQL Server Services" tab, and then right
+click and restart on the server.
+
+{| width="100%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
+|-
+! scope="col" width="20%" | Tag
+! scope="col" width="60%" | Description
+! scope="col" width="20%" | Status
+|-
+| database
+| The name of the database you are connecting to
+| Required
+|-
+| username
+| The username you are connecting with.
+| Optional
+|-
+| password
+| The password you are connecting with.
+| Optional
+|-
+| host
+| The host you are connecting to. If not specified, "localhost" is assumed. If the database is in Azure, you \
+may instead use "azureHost", and simply provide the host name (.database.windows.net will be appended for you).
+| Optional
+|-
+| instance
+| The instance of SQL Server on the host. By default, empty.
+| Optional
+|-
+| port
+| The port you are connecting to. If not specified, 1433 is assumed.
+| Optional
+|}
+
+In addition to these specially handled parameters, any of the valid parameters listed
+[https://docs.microsoft.com/en-us/sql/connect/jdbc/setting-the-connection-properties?view=sql-server-ver15 here] can
+also be added, and they are simply passed on as is.
+
+Username and password are optional in on premise SQL Server on Windows (as opposed to databases in Azure,
+where it is mandatory). Windows Authentication can be used instead, however, it requires extra server setup. To do so,
+simply run the <code>install-mssql-auth</code> from the command line.
+
+Then, to use this authentication, simply add <code>"integratedSecurity": true</code> to your code, or
+<code>&lt;integratedSecurity&gt;true&lt;/integratedSecurity&gt;</code> to your profile.
+
 == Making a query ==
 
 All queries use a standardized form of SQL provided by Java, though vendor specific
@@ -216,18 +272,18 @@ This statement is used for inserting rows into your table. You can use this in t
 The returned result would be the first rownumber that was added (with auto increment) or null.
 
 %%CODE|
-@result = query('profileName', 
+@result = query('profileName',
     'INSERT INTO `table` '
     .'VALUES(?, ?, ?), (?, ?, ?)',
     'CommandHelper', 'descCH', 9001,
     'WorldEdit', 'descWE', 8999
 )
 
-@result = query('profileName', 
+@result = query('profileName',
     'INSERT INTO `table`(?, ?) '
     .'VALUES(?, ?), (?, ?)',
-    'Plugin', 'Description', 
-    'WorldGuard', 'descWG', 
+    'Plugin', 'Description',
+    'WorldGuard', 'descWG',
     'Craftbook', 'descCB'
 )
 
@@ -239,7 +295,7 @@ The returned result would be the first rownumber that was added (with auto incre
  * Going by this the first query is can be changed by this one.
  */
 
-@result = query('profileName', 
+@result = query('profileName',
     'INSERT INTO `table`(?, ?, ?)'
     .'VALUES(?, ?, ?), (?, ?, ?)',
     'Plugin', 'Description', 'Downloads',
@@ -280,7 +336,7 @@ This statement is used for updating existing rows in your table. For example,
 we may want to add 250 downloads to each plugin.
 
 %%CODE|
-@result = query('profileName', 
+@result = query('profileName',
     'UPDATE `table`'
     .' SET Downloads=Downloads+250'
 )
@@ -289,7 +345,7 @@ we may want to add 250 downloads to each plugin.
  * The UPDATE statement also allows for using conditions, as shown below.
  */
 
-@result = query('profileName', 
+@result = query('profileName',
     'UPDATE `table`'
     .' SET Downloads=Downloads+250'
     .' WHERE Plugin=?', 'CommandHelper'

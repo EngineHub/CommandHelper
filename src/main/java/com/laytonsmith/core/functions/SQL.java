@@ -201,7 +201,11 @@ public class SQL {
 							} else if(params[i].isInstanceOf(CDouble.TYPE)) {
 								ps.setDouble(i + 1, (Double) ArgumentValidation.getDouble(params[i], t));
 							} else if(params[i].isInstanceOf(CString.TYPE)) {
-								ps.setString(i + 1, (String) params[i].val());
+								if(type == Types.NCHAR || type == Types.NVARCHAR || type == Types.LONGNVARCHAR) {
+									ps.setNString(i + 1, (String) params[i].val());
+								} else {
+									ps.setString(i + 1, (String) params[i].val());
+								}
 							} else if(params[i].isInstanceOf(CByteArray.TYPE)) {
 								ps.setBytes(i + 1, ((CByteArray) params[i]).asByteArrayCopy());
 							} else if(params[i].isInstanceOf(CBoolean.TYPE)) {
@@ -241,6 +245,11 @@ public class SQL {
 									case Types.NUMERIC:
 										value = new CDouble(rs.getDouble(i), t);
 										break;
+									case Types.NCHAR:
+									case Types.NVARCHAR:
+									case Types.LONGNVARCHAR:
+										value = new CString(rs.getNString(i), t);
+										break;
 									case Types.VARCHAR:
 									case Types.CHAR:
 									case Types.LONGVARCHAR:
@@ -252,6 +261,7 @@ public class SQL {
 									case Types.LONGVARBINARY:
 										value = CByteArray.wrap(rs.getBytes(i), t);
 										break;
+
 									case Types.DATE:
 									case Types.TIME:
 									case Types.TIMESTAMP:

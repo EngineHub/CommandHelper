@@ -128,6 +128,16 @@ public class StreamUtils {
 	}
 
 	/**
+	 * Returns an InputStream for a given byte array (ByteArrayInputStream).
+	 *
+	 * @param bytes The bytes to wrap in an InputStream
+	 * @return An InputStream wrapping the bytes
+	 */
+	public static InputStream GetInputStream(byte[] bytes) {
+		return new ByteArrayInputStream(bytes);
+	}
+
+	/**
 	 * Returns System.out, but wrapped in a UTF-8 capable output stream. This is required, because higher order
 	 * characters cannot print by default in Java.
 	 *

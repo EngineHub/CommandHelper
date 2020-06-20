@@ -257,6 +257,17 @@
 			<version>9.1-901-1.jdbc4</version>
 		</dependency>
 
+		<!-- MSSQL -->
+		<dependency>
+			<!-- MIT -->
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>mssql-jdbc</artifactId>
+			<!-- NOTE: If you change this version, you also have to change the install-mssql-auth command to
+			 download the corresponding version of the mssql-auth dll. This will also require users to re-install
+			 it, so an upgrade routine will need to be released as well. -->
+			<version>8.2.2.jre8</version>
+		</dependency>
+
 		<!-- Yaml parsing -->
 		<dependency>
 			<!-- Apache 2.0 -->
@@ -579,6 +590,7 @@
 									<include>org.threeten:threetenbp:jar:*</include>
 									<include>io.gsonfire:gson-fire:jar:*</include>
 									<include>com.squareup.okhttp:logging-interceptor:jar:*</include>
+									<include>com.microsoft.sqlserver:mssql-jdbc:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -693,10 +705,6 @@
 										<!-- Conflict with Spigot -->
 										<exclude>com.google.common.collect.*</exclude>
 									</excludes>
-								</relocation>
-								<relocation>
-									<pattern>com.microsoft</pattern>
-									<shadedPattern>com.laytonsmith.libs.com.microsoft</shadedPattern>
 								</relocation>
 								<relocation>
 									<pattern>com.squareup.okhttp</pattern>
@@ -921,6 +929,15 @@
 								</filter>
 								<filter>
 									<artifact>com.squareup.okhttp:logging-interceptor:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>com.microsoft.sqlserver:mssql-jdbc:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
