@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.FileLocations;
 import com.laytonsmith.abstraction.Implementation;
@@ -216,5 +217,36 @@ public class MethodScriptFileLocations extends FileLocations {
 	 */
 	public File getTelemetryConfigFile() {
 		return new File(getPreferencesDirectory(), "telemetry.ini");
+	}
+
+	/**
+	 * Gets the native executable folder for a Windows install. Note that if the user has
+	 * not run install-cmdline, this will not necessarily exist.
+	 * @return
+	 */
+	public File getWindowsNativeDirectory() {
+		return new File("C:\\Program Files\\MethodScript");
+	}
+
+	/**
+	 * Gets the native executable folder for a Linux install. Note that in general, binaries are at the root of this
+	 * folder, and no other files exist. Configuration files and the like live in /etc or something, so this
+	 * method is provided for completeness, but is probably not particularly useful.
+	 * @return
+	 */
+	public File getLinuxNativeDirectory() {
+		return new File("/usr/local/bin/");
+	}
+
+	/**
+	 * Returns the native directory (where the native binary wrappers live).
+	 * @return
+	 */
+	public File getNativeDirectory() {
+		if(OSUtils.GetOS() == OSUtils.OS.WINDOWS) {
+			return getWindowsNativeDirectory();
+		} else {
+			return getLinuxNativeDirectory();
+		}
 	}
 }

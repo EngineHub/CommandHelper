@@ -129,7 +129,7 @@ public class OSUtils {
 	 */
 	@SuppressWarnings("checkstyle:localvariablename")
 	public static long GetMyPid() throws UnsupportedOperationException {
-		if(JavaVersion.getMajorVersion() >= 9) {
+		if(JavaVersion.GetMajorVersion() >= 9) {
 			try {
 				// Since we compile against Java 8, we can't directly use the class, and have to use reflection.
 				// If Java 8 support is dropped, this can be uncommented and simplified.

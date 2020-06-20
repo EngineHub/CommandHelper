@@ -192,7 +192,8 @@ public class Preferences {
 		}
 
 		/**
-		 * Sets the sort order. If the sort order is the same, it is alphabetical.
+		 * Sets the sort order. If the sort order is the same, it is alphabetical. Note that the default
+		 * sort order is 100.
 		 * @param sort
 		 * @return
 		 */

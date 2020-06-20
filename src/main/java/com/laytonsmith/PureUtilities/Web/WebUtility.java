@@ -141,6 +141,9 @@ public final class WebUtility {
 	public static HTTPResponse GetPage(URL url, RequestSettings settings) throws SocketTimeoutException, IOException {
 		// If SAFE_WRITE is set, there's no reason to do the download given we know it will fail later, so let's fail
 		// fast, and do the check here
+		if(settings == null) {
+			settings = new RequestSettings();
+		}
 		if(settings.getDownloadTo() != null && settings.getDownloadStrategy() == FileWriteMode.SAFE_WRITE) {
 			if(settings.getDownloadTo().exists()) {
 				throw new IOException("Refusing to download file, destination path already exists ["

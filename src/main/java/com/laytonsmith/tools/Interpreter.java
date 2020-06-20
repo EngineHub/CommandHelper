@@ -1050,7 +1050,8 @@ public final class Interpreter {
 							.getResource("/interpreter-helpers/windows/mscript.exe").openStream());
 
 					//= Static.GetStringResource("/interpreter-helpers/windows/mscript.cmd");
-					FileUtil.write(exe, new File("C:/Program Files/MethodScript/mscript.exe"),
+					FileUtil.write(exe,
+							new File(MethodScriptFileLocations.getDefault().getWindowsNativeDirectory(), "mscript.exe"),
 							FileWriteMode.OVERWRITE, true);
 
 					// 6. Add C:\Program Files\MethodScript to the PATH, checking first if it's already
@@ -1060,7 +1061,7 @@ public final class Interpreter {
 						String path = System.getenv("Path");
 						if(path != null) {
 							WinRegistry.writeStringValue(WinRegistry.HKEY_LOCAL_MACHINE, pathKey, "Path", path + ";"
-								+ "C:\\Program Files\\MethodScript");
+								+ MethodScriptFileLocations.getDefault().getWindowsNativeDirectory());
 						}
 						CommandExecutor.Execute("powershell -command \"& {$md=\\\"[DllImport(`\\\"user32.dll\\\"\\\",SetLastError=true,CharSet=CharSet.Auto)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd,uint Msg,UIntPtr wParam,string lParam,uint fuFlags,uint uTimeout,out UIntPtr lpdwResult);\\\"; $sm=Add-Type -MemberDefinition $md -Name NativeMethods -Namespace Win32 -PassThru;$result=[uintptr]::zero;$sm::SendMessageTimeout(0xffff,0x001A,[uintptr]::Zero,\\\"Environment\\\",2,5000,[ref]$result)}\"");
 					}

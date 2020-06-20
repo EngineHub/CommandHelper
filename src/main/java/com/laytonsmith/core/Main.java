@@ -17,6 +17,7 @@ import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.JavaVersion;
 import com.laytonsmith.PureUtilities.MapBuilder;
 import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.PureUtilities.Web.WebUtility;
 import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -62,6 +63,7 @@ import com.laytonsmith.tools.pnviewer.PNViewer;
 import java.awt.HeadlessException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -166,7 +168,8 @@ public class Main {
 		NewMode.class,
 		NewTypeMode.class,
 		JavaVersionMode.class,
-		EditPrefsMode.class
+		EditPrefsMode.class,
+		InstallMSSQLAuthMode.class
 	};
 
 	/**
@@ -744,7 +747,7 @@ public class Main {
 		@Override
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
 			String args = "";
-			if(JavaVersion.getMajorVersion() > 8) {
+			if(JavaVersion.GetMajorVersion() > 8) {
 				// Need to add the --add-opens values. The values live in interpreter-helper/modules
 				String modules = Static.GetStringResource("/interpreter-helpers/modules");
 				modules = modules.replaceAll("(.*)\n", "--add-opens $1=ALL-UNNAMED ");
@@ -1703,7 +1706,7 @@ public class Main {
 
 		@Override
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
-			System.out.println(JavaVersion.getMajorVersion());
+			System.out.println(JavaVersion.GetMajorVersion());
 			System.exit(0);
 		}
 
@@ -1827,6 +1830,78 @@ public class Main {
 			} catch (CancelCommandException ex) {
 				//
 			}
+		}
+
+	}
+
+	@tool(value = "install-mssql-auth")
+	public static class InstallMSSQLAuthMode extends AbstractCommandLineTool {
+
+		@Override
+		public boolean startupExtensionManager() {
+			return false;
+		}
+
+		@Override
+		public ArgumentParser getArgumentParser() {
+			return ArgumentParser.GetParser().addDescription("Downloads the correct MSSQL JDBC Auth dll and places it"
+					+ " in the C:\\Program Files\\MethodScript folder. It is required that MethodScript be generally"
+					+ " installed first. This command is only useable on Windows.");
+		}
+
+		@Override
+		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			if(OSUtils.GetOS() != OSUtils.OS.WINDOWS) {
+				System.err.println("Can only run this command on Windows.");
+				System.exit(1);
+			}
+			if(!MethodScriptFileLocations.getDefault().getWindowsNativeDirectory().exists()) {
+				System.err.println("MethodScript must be installed using install-cmdline before running this command.");
+				System.exit(1);
+			}
+			try {
+				switch(JavaVersion.GetJVMBitDepth()) {
+					case 32:
+						doDownload(32);
+						return;
+					case 64:
+						doDownload(64);
+						return;
+				}
+			} catch (UnsupportedOperationException ex) {
+				//
+			}
+			System.err.println("Could not determine JVM bit depth. Please manually download the MSSQL JDBC Auth dll,"
+					+ " and place it on your system path.");
+			System.exit(1);
+		}
+
+		private void doDownload(int bitdepth) throws IOException {
+			String url;
+			String fname;
+			switch(bitdepth) {
+				case 32:
+					url = "https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc_auth/8.2.2.x86/mssql-jdbc_auth-8.2.2.x86.dll";
+					fname = "mssql-jdbc_auth-8.2.2.x86.dll";
+					break;
+				case 64:
+					url = "https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc_auth/8.2.2.x64/mssql-jdbc_auth-8.2.2.x64.dll";
+					fname = "mssql-jdbc_auth-8.2.2.x64.dll";
+					break;
+				default:
+					throw new Error();
+			}
+			byte[] dll = WebUtility.GetPageContentsBinary(url);
+			File to = new File(new File("C:\\Program Files\\MethodScript").getAbsoluteFile(), fname).getAbsoluteFile();
+			try {
+				FileUtil.write(dll, to, com.laytonsmith.PureUtilities.Common.FileWriteMode.OVERWRITE, false);
+			} catch (FileNotFoundException ex) {
+				System.err.println("Could not write file to " + to.getAbsolutePath()
+						+ ". Did you run this as Administrator?");
+				System.exit(1);
+			}
+			System.out.println(url + " downloaded to " + to);
+			System.exit(0);
 		}
 
 	}
