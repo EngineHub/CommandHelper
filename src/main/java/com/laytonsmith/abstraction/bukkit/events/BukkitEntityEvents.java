@@ -13,13 +13,11 @@ import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.entities.MCProjectile;
-import com.laytonsmith.abstraction.MCTravelAgent;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
-import com.laytonsmith.abstraction.bukkit.BukkitMCTravelAgent;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEntity;
@@ -37,6 +35,7 @@ import com.laytonsmith.abstraction.enums.MCRegainReason;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDamageCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRegainReason;
@@ -66,6 +65,7 @@ import com.laytonsmith.abstraction.events.MCPotionSplashEvent;
 import com.laytonsmith.abstraction.events.MCProjectileHitEvent;
 import com.laytonsmith.abstraction.events.MCProjectileLaunchEvent;
 import com.laytonsmith.annotations.abstraction;
+import com.laytonsmith.core.Static;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -100,6 +100,7 @@ import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
@@ -915,6 +916,10 @@ public class BukkitEntityEvents {
 			World w = (World) newloc.getWorld().getHandle();
 			Location loc = new Location(w, newloc.getX(), newloc.getY(), newloc.getZ());
 			epe.setTo(loc);
+			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
+				// Use travel agent if setting location
+				useTravelAgent();
+			}
 		}
 
 		@Override
@@ -940,16 +945,46 @@ public class BukkitEntityEvents {
 			return epe.isCancelled();
 		}
 
-		@Override
-		public void useTravelAgent(boolean useTravelAgent) {
-			ReflectionUtils.invokeMethod(EntityPortalEvent.class, epe, "useTravelAgent",
-					new Class[]{boolean.class}, new Object[]{useTravelAgent});
+		// 1.13.2 support
+		private Object getTravelAgent() {
+			return ReflectionUtils.invokeMethod(PlayerPortalEvent.class, epe, "getPortalTravelAgent");
+		}
+
+		// 1.13.2 support
+		private void useTravelAgent() {
+			ReflectionUtils.set(PlayerPortalEvent.class, epe, "useTravelAgent", true);
 		}
 
 		@Override
-		public MCTravelAgent getPortalTravelAgent() {
-			return new BukkitMCTravelAgent(ReflectionUtils.invokeMethod(EntityPortalEvent.class, epe,
-					"getPortalTravelAgent"));
+		public int getSearchRadius() {
+			try {
+				return epe.getSearchRadius();
+			} catch (NoSuchMethodError ex) {
+				// prior to 1.15.1
+			}
+			try {
+				Object ta = getTravelAgent();
+				return (int) ReflectionUtils.invokeMethod(ta, "getSearchRadius");
+			} catch (ReflectionUtils.ReflectionException ex) {
+				// after 1.13.2
+			}
+			return 128; // default, though this can be modified on some servers
+		}
+
+		@Override
+		public void setSearchRadius(int radius) {
+			try {
+				epe.setSearchRadius(radius);
+			} catch (NoSuchMethodError ex) {
+				// prior to 1.15.1
+			}
+			try {
+				useTravelAgent();
+				Object ta = getTravelAgent();
+				ReflectionUtils.set(ta.getClass(), ta, "searchRadius", radius);
+			} catch (ReflectionUtils.ReflectionException ex) {
+				// after 1.13.2
+			}
 		}
 	}
 }

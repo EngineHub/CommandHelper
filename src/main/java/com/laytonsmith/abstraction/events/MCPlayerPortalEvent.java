@@ -1,14 +1,16 @@
 package com.laytonsmith.abstraction.events;
 
-import com.laytonsmith.abstraction.MCTravelAgent;
-
 public interface MCPlayerPortalEvent extends MCPlayerTeleportEvent {
 
-	void useTravelAgent(boolean useTravelAgent);
+	int getSearchRadius();
 
-	boolean useTravelAgent();
+	void setSearchRadius(int radius);
 
-	MCTravelAgent getPortalTravelAgent();
+	int getCreationRadius();
 
-	void setPortalTravelAgent(MCTravelAgent travelAgent);
+	void setCreationRadius(int radius);
+
+	boolean canCreatePortal();
+
+	void setCanCreatePortal(boolean canCreate);
 }

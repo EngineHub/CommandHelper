@@ -7,7 +7,6 @@ import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MCTravelAgent;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
@@ -21,7 +20,6 @@ import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCResourcePackStatus;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
-import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.events.MCExpChangeEvent;
 import com.laytonsmith.abstraction.events.MCFoodLevelChangeEvent;
 import com.laytonsmith.abstraction.events.MCGamemodeChangeEvent;
@@ -465,10 +463,10 @@ public class PlayerEvents {
 					+ " | to: The location the player is coming to. Returns null when using nether portal and"
 					+ " \"allow-nether\" in server.properties is set to false or when using end portal and"
 					+ " \"allow-end\" in bukkit.yml is set to false."
-					+ " | type: the type of portal occurring | creationradius: Gets the maximum radius from the given"
-					+ " location to create a portal. (1.13 only) | searchradius: Gets the search radius value for"
-					+ " finding an available portal. (1.13 only)}"
-					+ "{to|creationradius|searchradius}"
+					+ " | type: the type of portal occurring | creationallowed: If a new portal can be created."
+					+ " | creationradius: Gets the maximum radius from the given location to create a portal."
+					+ " | searchradius: Gets the search radius for finding an available portal.}"
+					+ "{to | creationradius | searchradius | creationallowed}"
 					+ "{}";
 		}
 
@@ -506,8 +504,6 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerPortalEvent) {
 				MCPlayerPortalEvent event = (MCPlayerPortalEvent) e;
 				Map<String, Mixed> map = evaluate_helper(e);
-
-				//Fill in the event parameters
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 				map.put("from", ObjectGenerator.GetGenerator().location(event.getFrom()));
 				if(event.getTo() == null) {
@@ -516,11 +512,9 @@ public class PlayerEvents {
 					map.put("to", ObjectGenerator.GetGenerator().location(event.getTo()));
 				}
 				map.put("type", new CString(event.getCause().toString(), Target.UNKNOWN));
-				if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
-					MCTravelAgent ta = event.getPortalTravelAgent();
-					map.put("creationradius", new CInt(ta.getCreationRadius(), Target.UNKNOWN));
-					map.put("searchradius", new CInt(ta.getSearchRadius(), Target.UNKNOWN));
-				}
+				map.put("creationallowed", CBoolean.get(event.canCreatePortal()));
+				map.put("creationradius", new CInt(event.getCreationRadius(), Target.UNKNOWN));
+				map.put("searchradius", new CInt(event.getSearchRadius(), Target.UNKNOWN));
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to MCPlayerPortalEvent");
@@ -538,26 +532,24 @@ public class PlayerEvents {
 				MCPlayerPortalEvent e = (MCPlayerPortalEvent) event;
 
 				if(key.equalsIgnoreCase("to")) {
-					if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
-						e.useTravelAgent(true);
-					}
-					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, Target.UNKNOWN);
+					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, value.getTarget());
 					e.setTo(loc);
 					return true;
 				}
 
-				if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
-					if(key.equalsIgnoreCase("creationradius")) {
-						e.useTravelAgent(true);
-						e.getPortalTravelAgent().setCreationRadius(ArgumentValidation.getInt32(value, Target.UNKNOWN));
-						return true;
-					}
+				if(key.equalsIgnoreCase("creationallowed")) {
+					e.setCanCreatePortal(ArgumentValidation.getBooleanObject(value, value.getTarget()));
+					return true;
+				}
 
-					if(key.equalsIgnoreCase("searchradius")) {
-						e.useTravelAgent(true);
-						e.getPortalTravelAgent().setSearchRadius(ArgumentValidation.getInt32(value, Target.UNKNOWN));
-						return true;
-					}
+				if(key.equalsIgnoreCase("creationradius")) {
+					e.setCreationRadius(ArgumentValidation.getInt32(value, value.getTarget()));
+					return true;
+				}
+
+				if(key.equalsIgnoreCase("searchradius")) {
+					e.setSearchRadius(ArgumentValidation.getInt32(value, value.getTarget()));
+					return true;
 				}
 			}
 

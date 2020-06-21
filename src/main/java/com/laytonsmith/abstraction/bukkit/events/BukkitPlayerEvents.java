@@ -8,7 +8,6 @@ import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MCTravelAgent;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
@@ -16,7 +15,6 @@ import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCBookMeta;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
-import com.laytonsmith.abstraction.bukkit.BukkitMCTravelAgent;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFishHook;
@@ -31,6 +29,7 @@ import com.laytonsmith.abstraction.enums.MCFishingState;
 import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.enums.MCResourcePackStatus;
 import com.laytonsmith.abstraction.enums.MCTeleportCause;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAction;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEnterBedResult;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCFishingState;
@@ -64,6 +63,7 @@ import com.laytonsmith.abstraction.events.MCPlayerToggleSneakEvent;
 import com.laytonsmith.abstraction.events.MCPlayerToggleSprintEvent;
 import com.laytonsmith.abstraction.events.MCWorldChangedEvent;
 import com.laytonsmith.annotations.abstraction;
+import com.laytonsmith.core.Static;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -335,26 +335,14 @@ public class BukkitPlayerEvents {
 			p = event;
 		}
 
-		@Override
-		public void useTravelAgent(boolean useTravelAgent) {
-			ReflectionUtils.invokeMethod(PlayerPortalEvent.class, p, "useTravelAgent",
-					new Class[]{boolean.class}, new Object[]{useTravelAgent});
+		// 1.13.2 support
+		private Object getTravelAgent() {
+			return ReflectionUtils.invokeMethod(PlayerPortalEvent.class, p, "getPortalTravelAgent");
 		}
 
-		@Override
-		public boolean useTravelAgent() {
-			return (boolean) ReflectionUtils.invokeMethod(PlayerPortalEvent.class, p, "useTravelAgent");
-		}
-
-		@Override
-		public MCTravelAgent getPortalTravelAgent() {
-			return new BukkitMCTravelAgent(ReflectionUtils.invokeMethod(PlayerPortalEvent.class, p,
-					"getPortalTravelAgent"));
-		}
-
-		@Override
-		public void setPortalTravelAgent(MCTravelAgent travelAgent) {
-			ReflectionUtils.invokeMethod(p, "setPortalTravelAgent", travelAgent);
+		// 1.13.2 support
+		private void useTravelAgent() {
+			ReflectionUtils.set(PlayerPortalEvent.class, p, "useTravelAgent", true);
 		}
 
 		@Override
@@ -363,6 +351,116 @@ public class BukkitPlayerEvents {
 				return null;
 			}
 			return new BukkitMCLocation(e.getTo());
+		}
+
+		@Override
+		public void setTo(MCLocation newloc) {
+			super.setTo(newloc);
+			if(Static.getServer().getMinecraftVersion().lt(MCVersion.MC1_14)) {
+				// Use travel agent if setting location
+				useTravelAgent();
+			}
+		}
+
+		@Override
+		public int getSearchRadius() {
+			try {
+				return p.getSearchRadius();
+			} catch (NoSuchMethodError ex) {
+				// prior to 1.15.1
+			}
+			try {
+				Object ta = getTravelAgent();
+				return (int) ReflectionUtils.invokeMethod(ta, "getSearchRadius");
+			} catch (ReflectionUtils.ReflectionException ex) {
+				// after 1.13.2
+			}
+			return 128; // default, though this can be modified on some servers
+		}
+
+		@Override
+		public void setSearchRadius(int radius) {
+			try {
+				p.setSearchRadius(radius);
+			} catch (NoSuchMethodError ex) {
+				// prior to 1.15.1
+			}
+			try {
+				useTravelAgent();
+				Object ta = getTravelAgent();
+				ReflectionUtils.set(ta.getClass(), ta, "searchRadius", radius);
+			} catch (ReflectionUtils.ReflectionException ex) {
+				// after 1.13.2
+			}
+		}
+
+		@Override
+		public int getCreationRadius() {
+			try {
+				return p.getCreationRadius();
+			} catch (NoSuchMethodError ex) {
+				// prior to 1.15.1
+			}
+			try {
+				Object ta = getTravelAgent();
+				return (int) ReflectionUtils.invokeMethod(ta, "getCreationRadius");
+			} catch (ReflectionUtils.ReflectionException ex) {
+				// after 1.13.2
+			}
+			return 16; // default
+		}
+
+		@Override
+		public void setCreationRadius(int radius) {
+			try {
+				p.setCreationRadius(radius);
+			} catch (NoSuchMethodError ex) {
+				// prior to 1.15.1
+			}
+			try {
+				useTravelAgent();
+				Object ta = getTravelAgent();
+				ReflectionUtils.set(ta.getClass(), ta, "creationRadius", radius);
+			} catch (ReflectionUtils.ReflectionException ex) {
+				// after 1.13.2
+			}
+		}
+
+		@Override
+		public boolean canCreatePortal() {
+			try {
+				return p.getCanCreatePortal();
+			} catch (NoSuchMethodError ex) {
+				// prior to 1.15.1
+			}
+			try {
+				boolean useTravelAgent = (boolean) ReflectionUtils.invokeMethod(PlayerPortalEvent.class, p,
+						"useTravelAgent", new Class[]{}, new Object[]{});
+				if(!useTravelAgent) {
+					return false;
+				}
+				Object ta = getTravelAgent();
+				return (boolean) ReflectionUtils.invokeMethod(ta, "getCanCreatePortal");
+			} catch (ReflectionUtils.ReflectionException ex) {
+				// after 1.13.2
+			}
+			return true;
+		}
+
+		@Override
+		public void setCanCreatePortal(boolean canCreate) {
+			try {
+				p.setCanCreatePortal(canCreate);
+			} catch (NoSuchMethodError ex) {
+				// prior to 1.15.1
+			}
+			try {
+				useTravelAgent();
+				Object ta = getTravelAgent();
+				ReflectionUtils.set(ta.getClass(), ta, "canCreatePortal", canCreate);
+			} catch (ReflectionUtils.ReflectionException ex) {
+				// after 1.13.2
+			}
 		}
 	}
 

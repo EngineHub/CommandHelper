@@ -2,7 +2,6 @@ package com.laytonsmith.abstraction.events;
 
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCTravelAgent;
 import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCEntityPortalEvent extends BindableEvent {
@@ -19,7 +18,7 @@ public interface MCEntityPortalEvent extends BindableEvent {
 
 	boolean isCancelled();
 
-	void useTravelAgent(boolean useTravelAgent);
+	int getSearchRadius();
 
-	MCTravelAgent getPortalTravelAgent();
+	void setSearchRadius(int radius);
 }
