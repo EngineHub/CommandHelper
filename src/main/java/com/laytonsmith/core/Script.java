@@ -74,7 +74,6 @@ public class Script {
 	public static boolean debugOutput = false;
 
 	private List<Token> left;
-	private List<List<Token>> right;
 	private List<Token> fullRight;
 	private List<Construct> cleft;
 	private List<ParseTree> cright;
@@ -889,7 +888,7 @@ public class Script {
 
 	public void compileRight(Environment env) throws ConfigCompileException, ConfigCompileGroupException {
 		List<Token> temp = new ArrayList<>();
-		right = new ArrayList<>();
+		List<List<Token>> right = new ArrayList<>();
 		for(Token t : fullRight) {
 			if(t.type == TType.SEPERATOR) {
 				right.add(temp);
