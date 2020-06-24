@@ -427,8 +427,13 @@ public class Echoes {
 
 		@Override
 		public String docs() {
+			MCChatColor[] values = MCChatColor.values();
+			String[] colors = new String[values.length];
+			for(int i = 0; i < colors.length; i++) {
+				colors[i] = values[i].name();
+			}
 			return "string {name} Returns the color modifier given a color name. If the given color name isn't valid,"
-					+ " white is used instead. The list of valid colors is: " + StringUtils.Join(MCChatColor.values(), ", ", ", or ")
+					+ " white is used instead. The list of valid colors is: " + StringUtils.Join(colors, ", ", ", or ")
 					+ ", in addition the integers 0-15 will work, or the hex numbers from 0-F, and k, l, m, n, o, and r,"
 					+ " which represent styles. Unlike manually putting in the color symbol, using this function will"
 					+ " return the platform's color code, so if you are wanting to keep your scripts platform independent,"
