@@ -175,10 +175,7 @@ public class BukkitEntityEvents {
 
 		@Override
 		public MCEntity getEntity() {
-			if(e.getEntity() != null) {
-				return BukkitConvertor.BukkitGetCorrectEntity(e.getEntity());
-			}
-			return null;
+			return BukkitConvertor.BukkitGetCorrectEntity(e.getEntity());
 		}
 
 		@Override

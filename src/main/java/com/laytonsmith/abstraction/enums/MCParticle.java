@@ -135,6 +135,16 @@ public abstract class MCParticle<Concrete> extends DynamicEnum<MCParticle.MCVani
 		FALLING_HONEY(MCVersion.MC1_15),
 		FALLING_NECTAR(MCVersion.MC1_15),
 		LANDING_HONEY(MCVersion.MC1_15),
+		SOUL_FIRE_FLAME(MCVersion.MC1_16),
+		ASH(MCVersion.MC1_16),
+		CRIMSON_SPORE(MCVersion.MC1_16),
+		WARPED_SPORE(MCVersion.MC1_16),
+		SOUL(MCVersion.MC1_16),
+		DRIPPING_OBSIDIAN_TEAR(MCVersion.MC1_16),
+		FALLING_OBSIDIAN_TEAR(MCVersion.MC1_16),
+		LANDING_OBSIDIAN_TEAR(MCVersion.MC1_16),
+		REVERSE_PORTAL(MCVersion.MC1_16),
+		WHITE_ASH(MCVersion.MC1_16),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

@@ -647,8 +647,7 @@ public class InventoryEvents {
 				CArray expCostsCArray = new CArray(t);
 
 				MCEnchantmentOffer[] offers = e.getOffers();
-				for(int i = 0; i < offers.length; i++) {
-					MCEnchantmentOffer offer = offers[i];
+				for(MCEnchantmentOffer offer : offers) {
 					expCostsCArray.push(new CInt(offer.getCost(), t), t);
 				}
 

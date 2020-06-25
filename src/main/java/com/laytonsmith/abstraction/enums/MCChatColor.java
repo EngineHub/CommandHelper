@@ -135,7 +135,7 @@ public enum MCChatColor {
 			return null;
 		}
 
-		return input.replaceAll("(?i)\u00A7[0-9A-Fklmnor]", "");
+		return input.replaceAll("(?i)\u00A7[0-9A-Fklmnorx]", "");
 	}
 
 	static {

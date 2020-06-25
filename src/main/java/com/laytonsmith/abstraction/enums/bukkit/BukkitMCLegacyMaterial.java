@@ -487,12 +487,14 @@ public class BukkitMCLegacyMaterial {
 	}
 
 	public enum LegacyMaterialName {
-		// these were removed in 1.14
+		// Changed in 1.14
 		CACTUS_GREEN(Material.GREEN_DYE),
 		DANDELION_YELLOW(Material.YELLOW_DYE),
 		ROSE_RED(Material.RED_DYE),
 		SIGN(Material.OAK_SIGN),
-		WALL_SIGN(Material.OAK_WALL_SIGN);
+		WALL_SIGN(Material.OAK_WALL_SIGN),
+		// Changed in 1.16
+		ZOMBIE_PIGMAN_SPAWN_EGG(Material.ZOMBIFIED_PIGLIN_SPAWN_EGG);
 
 		private final Material mat;
 

@@ -204,12 +204,6 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_PIG_SADDLED%: If the pig has a saddle.
 |- 
-| PIG_ZOMBIE
-| 
-* %KEY_PIG_ZOMBIE_ANGER%: The pig zombie's anger level.
-* %KEY_PIG_ZOMBIE_ANGRY%: Whether the zombie is angry.
-* %KEY_ZOMBIE_BABY%: Whether the pig zombie is a baby.
-|- 
 | PRIMED_TNT
 | 
 * %KEY_PRIMED_TNT_FUSETICKS%: The number of ticks until the explosion.
@@ -306,4 +300,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |
 * %KEY_ZOMBIE_BABY%: Whether the zombie is a baby.
 * %KEY_VILLAGER_PROFESSION%: The profession of the villager (can be %PROFESSION%).
+|- 
+| ZOMBIFIED_PIGLIN (formerly PIG_ZOMBIE)
+| 
+* %KEY_ZOMBIFIED_PIGLIN_ANGER%: The piglin zombie's anger level.
+* %KEY_ZOMBIFIED_PIGLIN_ANGRY%: Whether the piglin zombie is angry.
+* %KEY_ZOMBIE_BABY%: Whether the pig zombie is a baby.
 |}

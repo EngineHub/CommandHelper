@@ -61,6 +61,11 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 							"LINGERING_POTION entity type was removed in 1.14. Converted to SPLASH_POTION.",
 							Target.UNKNOWN);
 					return MAP.get("SPLASH_POTION");
+				case "PIG_ZOMBIE":
+					MSLog.GetLogger().e(MSLog.Tags.GENERAL,
+							"PIG_ZOMBIE entity type was renamed in 1.16. Converted to ZOMBIFIED_PIGLIN.",
+							Target.UNKNOWN);
+					return MAP.get("ZOMBIFIED_PIGLIN");
 			}
 			throw new IllegalArgumentException("Unknown entity type: " + test);
 		}
@@ -162,6 +167,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		GHAST,
 		GIANT,
 		GUARDIAN,
+		HOGLIN(true, false, MCVersion.MC1_16),
 		HORSE,
 		HUSK,
 		ILLUSIONER,
@@ -188,7 +194,8 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		PARROT,
 		PHANTOM,
 		PIG,
-		PIG_ZOMBIE,
+		PIG_ZOMBIE(true, false, MCVersion.MC1_0, MCVersion.MC1_15_X),
+		PIGLIN(true, false, MCVersion.MC1_16),
 		PILLAGER(true, false, MCVersion.MC1_14),
 		PLAYER(false),
 		POLAR_BEAR,
@@ -212,6 +219,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		SPIDER,
 		SPLASH_POTION,
 		STRAY,
+		STRIDER(true, false, MCVersion.MC1_16),
 		THROWN_EXP_BOTTLE,
 		TIPPED_ARROW(true, true, MCVersion.MC1_9, MCVersion.MC1_13_X),
 		TRADER_LLAMA(true, false, MCVersion.MC1_14),
@@ -227,9 +235,11 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		WITHER_SKELETON,
 		WITHER_SKULL,
 		WOLF,
+		ZOGLIN(true, false, MCVersion.MC1_16),
 		ZOMBIE,
 		ZOMBIE_HORSE,
 		ZOMBIE_VILLAGER,
+		ZOMBIFIED_PIGLIN(true, false, MCVersion.MC1_16),
 		/**
 		 * An unknown entity without an Entity Class
 		 */

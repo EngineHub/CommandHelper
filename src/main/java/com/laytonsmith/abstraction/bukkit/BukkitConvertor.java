@@ -137,6 +137,7 @@ import org.bukkit.inventory.MerchantRecipe;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.SmithingRecipe;
 import org.bukkit.inventory.SmokingRecipe;
 import org.bukkit.inventory.StonecuttingRecipe;
 import org.bukkit.inventory.meta.BannerMeta;
@@ -694,6 +695,7 @@ public class BukkitConvertor extends AbstractConvertor {
 					return new BukkitMCCookingRecipe(new SmokingRecipe(nskey, is, Material.AIR, 0.0F, 200), type);
 				case STONECUTTING:
 					return new BukkitMCStonecuttingRecipe(new StonecuttingRecipe(nskey, is, Material.AIR));
+				case SMITHING:
 				case COMPLEX:
 					throw new IllegalArgumentException("Unable to generate recipe type: " + type.name());
 			}
@@ -711,7 +713,8 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	public static MCRecipe BukkitGetRecipe(Recipe r) {
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
+		MCVersion version = Static.getServer().getMinecraftVersion();
+		if(version.gte(MCVersion.MC1_14)) {
 			if(r instanceof BlastingRecipe) {
 				return new BukkitMCCookingRecipe(r, MCRecipeType.BLASTING);
 			} else if(r instanceof CampfireRecipe) {
@@ -720,8 +723,12 @@ public class BukkitConvertor extends AbstractConvertor {
 				return new BukkitMCCookingRecipe(r, MCRecipeType.SMOKING);
 			} else if(r instanceof StonecuttingRecipe) {
 				return new BukkitMCStonecuttingRecipe((StonecuttingRecipe) r);
-			} else if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_15) && r instanceof ComplexRecipe) {
-				return new BukkitMCComplexRecipe(r);
+			} else if(version.gte(MCVersion.MC1_15)) {
+				if(r instanceof ComplexRecipe) {
+					return new BukkitMCComplexRecipe(r);
+				} else if(version.gte(MCVersion.MC1_16) && r instanceof SmithingRecipe) {
+					return new BukkitMCSmithingRecipe((SmithingRecipe) r);
+				}
 			}
 		}
 		if(r instanceof ShapelessRecipe) {

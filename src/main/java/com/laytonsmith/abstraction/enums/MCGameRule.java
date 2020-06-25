@@ -26,6 +26,7 @@ public enum MCGameRule {
 	DROWNINGDAMAGE("drowningDamage"),
 	FALLDAMAGE("fallDamage"),
 	FIREDAMAGE("fireDamage"),
+	FORGIVEDEADPLAYERS("forgiveDeadPlayers"),
 	KEEPINVENTORY("keepInventory"),
 	LOGADMINCOMMANDS("logAdminCommands"),
 	MAXCOMMANDCHAINLENGTH("maxCommandChainLength", CInt.class),
@@ -37,7 +38,8 @@ public enum MCGameRule {
 	SENDCOMMANDFEEDBACK("sendCommandFeedback"),
 	SHOWDEATHMESSAGES("showDeathMessages"),
 	SPAWNRADIUS("spawnRadius", CInt.class),
-	SPECTATORSGENERATECHUNKS("spectatorsGenerateChunks");
+	SPECTATORSGENERATECHUNKS("spectatorsGenerateChunks"),
+	UNIVERSALANGER("universalAnger");
 
 	private final String gameRule;
 	private final Class<? extends Mixed> ruleType;

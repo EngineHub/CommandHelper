@@ -1017,7 +1017,7 @@ public class EntityManagement {
 			try {
 				mee = MCEntityEffect.valueOf(args[1].val().toUpperCase());
 			} catch (IllegalArgumentException iae) {
-				throw new CREFormatException("Unknown effect at arg 2.", t);
+				throw new CREFormatException("Unknown entity effect: " + args[1].val(), t);
 			}
 			ent.playEffect(mee);
 			return CVoid.VOID;
@@ -1976,12 +1976,6 @@ public class EntityManagement {
 					MCPig pig = (MCPig) entity;
 					specArray.set(entity_spec.KEY_PIG_SADDLED, CBoolean.get(pig.isSaddled()), t);
 					break;
-				case PIG_ZOMBIE:
-					MCPigZombie pigZombie = (MCPigZombie) entity;
-					specArray.set(entity_spec.KEY_PIG_ZOMBIE_ANGRY, CBoolean.get(pigZombie.isAngry()), t);
-					specArray.set(entity_spec.KEY_PIG_ZOMBIE_ANGER, new CInt(pigZombie.getAnger(), t), t);
-					specArray.set(entity_spec.KEY_ZOMBIE_BABY, CBoolean.get(pigZombie.isBaby()), t);
-					break;
 				case PRIMED_TNT:
 					MCTNT tnt = (MCTNT) entity;
 					specArray.set(entity_spec.KEY_PRIMED_TNT_FUSETICKS, new CInt(tnt.getFuseTicks(), t), t);
@@ -2093,6 +2087,13 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_ZOMBIE_BABY, CBoolean.get(zombievillager.isBaby()), t);
 					specArray.set(entity_spec.KEY_VILLAGER_PROFESSION, new CString(zombievillager.getProfession().name(), t), t);
 					break;
+				case ZOMBIFIED_PIGLIN:
+				case PIG_ZOMBIE:
+					MCPigZombie pigZombie = (MCPigZombie) entity;
+					specArray.set(entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGRY, CBoolean.get(pigZombie.isAngry()), t);
+					specArray.set(entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGER, new CInt(pigZombie.getAnger(), t), t);
+					specArray.set(entity_spec.KEY_ZOMBIE_BABY, CBoolean.get(pigZombie.isBaby()), t);
+					break;
 			}
 			return specArray;
 		}
@@ -2179,8 +2180,8 @@ public class EntityManagement {
 		private static final String KEY_PARROT_TYPE = "type";
 		private static final String KEY_PHANTOM_SIZE = "size";
 		private static final String KEY_PIG_SADDLED = "saddled";
-		private static final String KEY_PIG_ZOMBIE_ANGRY = "angry";
-		private static final String KEY_PIG_ZOMBIE_ANGER = "anger";
+		private static final String KEY_ZOMBIFIED_PIGLIN_ANGRY = "angry";
+		private static final String KEY_ZOMBIFIED_PIGLIN_ANGER = "anger";
 		private static final String KEY_RABBIT_TYPE = "type";
 		private static final String KEY_PRIMED_TNT_FUSETICKS = "fuseticks";
 		private static final String KEY_PRIMED_TNT_SOURCE = "source";
@@ -3109,24 +3110,6 @@ public class EntityManagement {
 						}
 					}
 					break;
-				case PIG_ZOMBIE:
-					MCPigZombie pigZombie = (MCPigZombie) entity;
-					for(String index : specArray.stringKeySet()) {
-						switch(index.toLowerCase()) {
-							case entity_spec.KEY_ZOMBIE_BABY:
-								pigZombie.setBaby(ArgumentValidation.getBoolean(specArray.get(index, t), t));
-								break;
-							case entity_spec.KEY_PIG_ZOMBIE_ANGRY:
-								pigZombie.setAngry(ArgumentValidation.getBoolean(specArray.get(index, t), t));
-								break;
-							case entity_spec.KEY_PIG_ZOMBIE_ANGER:
-								pigZombie.setAnger(ArgumentValidation.getInt32(specArray.get(index, t), t));
-								break;
-							default:
-								throwException(index, t);
-						}
-					}
-					break;
 				case PRIMED_TNT:
 					MCTNT tnt = (MCTNT) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -3514,6 +3497,25 @@ public class EntityManagement {
 								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid profession: " + specArray.get(index, t).val(), t);
 								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case ZOMBIFIED_PIGLIN:
+				case PIG_ZOMBIE:
+					MCPigZombie pigZombie = (MCPigZombie) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_ZOMBIE_BABY:
+								pigZombie.setBaby(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGRY:
+								pigZombie.setAngry(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGER:
+								pigZombie.setAnger(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);

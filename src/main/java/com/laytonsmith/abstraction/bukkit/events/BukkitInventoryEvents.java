@@ -59,7 +59,6 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -277,20 +276,12 @@ public class BukkitInventoryEvents {
 
 		@Override
 		public Set<Integer> getRawSlots() {
-			Set<Integer> ret = new HashSet<>();
-			for(Integer rs : id.getRawSlots()) {
-				ret.add(rs);
-			}
-			return ret;
+			return id.getRawSlots();
 		}
 
 		@Override
 		public Set<Integer> getInventorySlots() {
-			Set<Integer> ret = new HashSet<>();
-			for(Integer is : id.getInventorySlots()) {
-				ret.add(is);
-			}
-			return ret;
+			return id.getInventorySlots();
 		}
 
 		@Override

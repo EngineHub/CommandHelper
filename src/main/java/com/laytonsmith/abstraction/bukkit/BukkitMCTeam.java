@@ -11,7 +11,6 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCOptionStatus;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.scoreboard.Team.OptionStatus;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class BukkitMCTeam implements MCTeam {
@@ -55,9 +54,7 @@ public class BukkitMCTeam implements MCTeam {
 
 	@Override
 	public Set<String> getEntries() {
-		Set<String> ret = new HashSet<>();
-		ret.addAll(t.getEntries());
-		return ret;
+		return t.getEntries();
 	}
 
 	@Override

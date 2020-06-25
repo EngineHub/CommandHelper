@@ -2,7 +2,8 @@ package com.laytonsmith.abstraction.enums;
 
 import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
 import com.laytonsmith.annotations.MDynamicEnum;
-import com.laytonsmith.core.Static;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.constructs.Target;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +27,12 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 	public static MCBiomeType valueOf(String test) throws IllegalArgumentException {
 		MCBiomeType ret = MAP.get(test);
 		if(ret == null) {
+			switch(test) {
+				case "NETHER":
+					MSLog.GetLogger().e(MSLog.Tags.GENERAL,
+							"NETHER biome type was renamed in 1.16. Converted to NETHER_WASTES.", Target.UNKNOWN);
+					return MAP.get("NETHER_WASTES");
+			}
 			throw new IllegalArgumentException("Unknown biome type: " + test);
 		}
 		return ret;
@@ -38,7 +45,9 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 		if(NULL == null) { // docs mode
 			Set<String> dummy = new HashSet<>();
 			for(final MCVanillaBiomeType t : MCVanillaBiomeType.values()) {
-				dummy.add(t.name());
+				if(t.existsIn(MCVersion.CURRENT)) {
+					dummy.add(t.name());
+				}
 			}
 			return dummy;
 		}
@@ -52,6 +61,9 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 		if(NULL == null) { // docs mode
 			ArrayList<MCBiomeType> dummy = new ArrayList<>();
 			for(final MCVanillaBiomeType t : MCVanillaBiomeType.values()) {
+				if(!t.existsIn(MCVersion.CURRENT)) {
+					continue;
+				}
 				dummy.add(new MCBiomeType<Object>(t, null) {
 					@Override
 					public String name() {
@@ -78,7 +90,7 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 		TAIGA,
 		SWAMP,
 		RIVER,
-		NETHER,
+		NETHER(MCVersion.MC1_0, MCVersion.MC1_15_X), // renamed to NETHER_WASTES
 		THE_END,
 		FROZEN_OCEAN,
 		FROZEN_RIVER,
@@ -145,20 +157,31 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 		DEEP_FROZEN_OCEAN,
 		BAMBOO_JUNGLE(MCVersion.MC1_14),
 		BAMBOO_JUNGLE_HILLS(MCVersion.MC1_14),
+		NETHER_WASTES(MCVersion.MC1_16),
+		SOUL_SAND_VALLEY(MCVersion.MC1_16),
+		CRIMSON_FOREST(MCVersion.MC1_16),
+		WARPED_FOREST(MCVersion.MC1_16),
+		BASALT_DELTAS(MCVersion.MC1_16),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;
+		private final MCVersion until;
 
 		MCVanillaBiomeType() {
 			this(MCVersion.MC1_0);
 		}
 
 		MCVanillaBiomeType(MCVersion since) {
-			this.since = since;
+			this(since, MCVersion.FUTURE);
 		}
 
-		public boolean existsInCurrent() {
-			return Static.getServer().getMinecraftVersion().gte(since);
+		MCVanillaBiomeType(MCVersion since, MCVersion until) {
+			this.since = since;
+			this.until = until;
+		}
+
+		public boolean existsIn(MCVersion version) {
+			return version.gte(since) && version.lte(until);
 		}
 	}
 }

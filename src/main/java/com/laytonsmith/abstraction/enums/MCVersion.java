@@ -51,6 +51,8 @@ public enum MCVersion implements Version {
 	MC1_14_X,
 	MC1_15,
 	MC1_15_X,
+	MC1_16,
+	MC1_16_X,
 	MC1_X,
 	MC2_X,
 	MCX_X,
@@ -101,7 +103,7 @@ public enum MCVersion implements Version {
 		if("X".equals(form)) {
 			return -1;
 		}
-		return Integer.valueOf(form);
+		return Integer.parseInt(form);
 	}
 
 	@Override
@@ -110,7 +112,7 @@ public enum MCVersion implements Version {
 		if("X".equals(form)) {
 			return -1;
 		}
-		return Integer.valueOf(form);
+		return Integer.parseInt(form);
 	}
 
 	@Override
@@ -120,12 +122,12 @@ public enum MCVersion implements Version {
 			if("X".equals(parts[2])) {
 				return -1;
 			}
-			return Integer.valueOf(parts[2]);
+			return Integer.parseInt(parts[2]);
 		}
 		if(getMinor() == -1) {
 			return -1;
 		}
-		return Integer.valueOf(parts[2]);
+		return Integer.parseInt(parts[2]);
 	}
 
 	@Override

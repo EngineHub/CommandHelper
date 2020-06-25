@@ -39,9 +39,6 @@ public class BukkitVehicleEvents {
 
 		@Override
 		public MCEntity getEntity() {
-			if(vec.getEntity() == null) {
-				return null;
-			}
 			return BukkitConvertor.BukkitGetCorrectEntity(vec.getEntity());
 		}
 
@@ -105,9 +102,6 @@ public class BukkitVehicleEvents {
 
 		@Override
 		public MCEntity getEntity() {
-			if(vee.getEntered() == null) {
-				return null;
-			}
 			return BukkitConvertor.BukkitGetCorrectEntity(vee.getEntered());
 		}
 	}
@@ -124,9 +118,6 @@ public class BukkitVehicleEvents {
 
 		@Override
 		public MCEntity getEntity() {
-			if(vee.getExited() == null) {
-				return null;
-			}
 			return BukkitConvertor.BukkitGetCorrectEntity(vee.getExited());
 		}
 	}
@@ -202,10 +193,7 @@ public class BukkitVehicleEvents {
 
 		@Override
 		public MCEntity getVehicle() {
-			if(ve.getVehicle() instanceof org.bukkit.entity.Vehicle) {
-				return BukkitConvertor.BukkitGetCorrectEntity(ve.getVehicle());
-			}
-			return null;
+			return BukkitConvertor.BukkitGetCorrectEntity(ve.getVehicle());
 		}
 
 		@Override

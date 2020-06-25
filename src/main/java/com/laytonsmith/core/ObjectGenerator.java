@@ -35,6 +35,7 @@ import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCShapedRecipe;
 import com.laytonsmith.abstraction.MCShapelessRecipe;
 import com.laytonsmith.abstraction.MCSkullMeta;
+import com.laytonsmith.abstraction.MCSmithingRecipe;
 import com.laytonsmith.abstraction.MCStonecuttingRecipe;
 import com.laytonsmith.abstraction.MCTropicalFishBucketMeta;
 import com.laytonsmith.abstraction.MCWorld;
@@ -1019,7 +1020,6 @@ public class ObjectGenerator {
 					if(ma.containsKey("base")) {
 						Mixed potiondata = ma.get("base", t);
 						if(potiondata.isInstanceOf(CArray.TYPE)) {
-							CArray pd = (CArray) potiondata;
 							((MCPotionMeta) meta).setBasePotionData(potionData((CArray) potiondata, t));
 						}
 					}
@@ -1550,7 +1550,7 @@ public class ObjectGenerator {
 					}
 				}
 			} else if(colors.isInstanceOf(CString.TYPE)) {
-				String split[] = colors.val().split("\\|");
+				String[] split = colors.val().split("\\|");
 				if(split.length == 0) {
 					builder.addColor(MCColor.WHITE);
 				} else {
@@ -1586,7 +1586,7 @@ public class ObjectGenerator {
 					builder.addFadeColor(mccolor);
 				}
 			} else if(colors.isInstanceOf(CString.TYPE)) {
-				String split[] = colors.val().split("\\|");
+				String[] split = colors.val().split("\\|");
 				for(String s : split) {
 					builder.addFadeColor(StaticLayer.GetConvertor().GetColor(s, t));
 				}
@@ -1672,10 +1672,32 @@ public class ObjectGenerator {
 				ret.set("input", new CString(list[0].getName(), t), t);
 			} else {
 				CArray mats = new CArray(t);
-				for(MCMaterial mat : recipe.getInput()) {
+				for(MCMaterial mat : list) {
 					mats.push(new CString(mat.getName(), t), t);
 				}
 				ret.set("input", mats, t);
+			}
+		} else if(r instanceof MCSmithingRecipe) {
+			MCSmithingRecipe recipe = (MCSmithingRecipe) r;
+			MCMaterial[] base = recipe.getBase();
+			if(base.length == 1) {
+				ret.set("base", new CString(base[0].getName(), t), t);
+			} else {
+				CArray mats = new CArray(t);
+				for(MCMaterial mat : base) {
+					mats.push(new CString(mat.getName(), t), t);
+				}
+				ret.set("base", mats, t);
+			}
+			MCMaterial[] additions = recipe.getAddition();
+			if(additions.length == 1) {
+				ret.set("addition", new CString(additions[0].getName(), t), t);
+			} else {
+				CArray mats = new CArray(t);
+				for(MCMaterial mat : additions) {
+					mats.push(new CString(mat.getName(), t), t);
+				}
+				ret.set("addition", mats, t);
 			}
 		}
 		return ret;

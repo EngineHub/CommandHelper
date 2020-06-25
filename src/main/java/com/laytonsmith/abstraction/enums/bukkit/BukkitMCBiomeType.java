@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.block.Biome;
 
@@ -42,7 +43,7 @@ public class BukkitMCBiomeType extends MCBiomeType<Biome> {
 	public static void build() {
 		NULL = new BukkitMCBiomeType(MCVanillaBiomeType.UNKNOWN, null);
 		for(MCVanillaBiomeType v : MCVanillaBiomeType.values()) {
-			if(v.existsInCurrent()) {
+			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
 				Biome type;
 				try {
 					type = getBukkitType(v);

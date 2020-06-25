@@ -906,8 +906,10 @@ public class World {
 				try {
 					type = MCWorldType.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException e) {
-					throw new CREFormatException(args[1].val() + " is not a valid world type. Must be one of: "
-							+ StringUtils.Join(MCWorldType.values(), ", "), t);
+					throw new CREFormatException(args[1].val() + " is not a valid world type.", t);
+				}
+				if(!type.canCreate()) {
+					throw new CREFormatException("The world type " + args[1].val() + " cannot be created", t);
 				}
 				MCWorldEnvironment environment;
 				try {
@@ -1218,7 +1220,8 @@ public class World {
 		@Override
 		public String docs() {
 			return "array {world} Returns an associative array of all the info needed to duplicate the world."
-					+ " The keys are name, seed, environment, generator, worldtype, sealevel and maxheight.";
+					+ " The keys are name, seed, environment, generator, worldtype, sealevel and maxheight."
+					+ " ---- The worldtype is deprecated in 1.16 and is only applicable when creating a world.";
 		}
 
 		@Override

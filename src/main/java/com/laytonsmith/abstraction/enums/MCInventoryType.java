@@ -10,7 +10,7 @@ public enum MCInventoryType {
 	CREATIVE(false),
 	DISPENSER,
 	DROPPER,
-	ENCHANTING(false), // non-functional
+	ENCHANTING(false), // non-functional when virtualized
 	ENDER_CHEST,
 	FURNACE,
 	HOPPER,
@@ -18,6 +18,7 @@ public enum MCInventoryType {
 	PLAYER,
 	WORKBENCH,
 	ANVIL,
+	SMITHING,
 	BEACON(false),
 	SHULKER_BOX,
 	BARREL,
