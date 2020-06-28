@@ -492,9 +492,7 @@ public class BukkitMCLegacyMaterial {
 		DANDELION_YELLOW(Material.YELLOW_DYE),
 		ROSE_RED(Material.RED_DYE),
 		SIGN(Material.OAK_SIGN),
-		WALL_SIGN(Material.OAK_WALL_SIGN),
-		// Changed in 1.16
-		ZOMBIE_PIGMAN_SPAWN_EGG(Material.ZOMBIFIED_PIGLIN_SPAWN_EGG);
+		WALL_SIGN(Material.OAK_WALL_SIGN);
 
 		private final Material mat;
 
@@ -517,6 +515,9 @@ public class BukkitMCLegacyMaterial {
 		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
 			for(LegacyMaterialName mat : LegacyMaterialName.values()) {
 				BY_NAME.put(mat.name(), mat.getNewMaterial());
+			}
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_16)) {
+				BY_NAME.put("ZOMBIE_PIGMAN_SPAWN_EGG", Material.ZOMBIFIED_PIGLIN_SPAWN_EGG);
 			}
 		}
 	}
