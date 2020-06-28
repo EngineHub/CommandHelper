@@ -61,6 +61,7 @@ import com.laytonsmith.abstraction.entities.MCPanda;
 import com.laytonsmith.abstraction.entities.MCParrot;
 import com.laytonsmith.abstraction.entities.MCPhantom;
 import com.laytonsmith.abstraction.entities.MCPig;
+import com.laytonsmith.abstraction.entities.MCPiglin;
 import com.laytonsmith.abstraction.entities.MCPigZombie;
 import com.laytonsmith.abstraction.entities.MCProjectile;
 import com.laytonsmith.abstraction.entities.MCRabbit;
@@ -79,6 +80,7 @@ import com.laytonsmith.abstraction.entities.MCVex;
 import com.laytonsmith.abstraction.entities.MCVillager;
 import com.laytonsmith.abstraction.entities.MCWitherSkull;
 import com.laytonsmith.abstraction.entities.MCWolf;
+import com.laytonsmith.abstraction.entities.MCZoglin;
 import com.laytonsmith.abstraction.entities.MCZombie;
 import com.laytonsmith.abstraction.entities.MCZombieVillager;
 import com.laytonsmith.abstraction.enums.MCArt;
@@ -1976,6 +1978,10 @@ public class EntityManagement {
 					MCPig pig = (MCPig) entity;
 					specArray.set(entity_spec.KEY_PIG_SADDLED, CBoolean.get(pig.isSaddled()), t);
 					break;
+				case PIGLIN:
+					MCPiglin piglin = (MCPiglin) entity;
+					specArray.set(entity_spec.KEY_GENERIC_BABY, CBoolean.get(piglin.isBaby()), t);
+					break;
 				case PRIMED_TNT:
 					MCTNT tnt = (MCTNT) entity;
 					specArray.set(entity_spec.KEY_PRIMED_TNT_FUSETICKS, new CInt(tnt.getFuseTicks(), t), t);
@@ -2076,15 +2082,19 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_WOLF_COLOR, new CString(wolf.getCollarColor().name(), t), t);
 					specArray.set(entity_spec.KEY_GENERIC_SITTING, CBoolean.get(wolf.isSitting()), t);
 					break;
+				case ZOGLIN:
+					MCZoglin zoglin = (MCZoglin) entity;
+					specArray.set(entity_spec.KEY_GENERIC_BABY, CBoolean.get(zoglin.isBaby()), t);
+					break;
 				case ZOMBIE:
 				case DROWNED:
 				case HUSK:
 					MCZombie zombie = (MCZombie) entity;
-					specArray.set(entity_spec.KEY_ZOMBIE_BABY, CBoolean.get(zombie.isBaby()), t);
+					specArray.set(entity_spec.KEY_GENERIC_BABY, CBoolean.get(zombie.isBaby()), t);
 					break;
 				case ZOMBIE_VILLAGER:
 					MCZombieVillager zombievillager = (MCZombieVillager) entity;
-					specArray.set(entity_spec.KEY_ZOMBIE_BABY, CBoolean.get(zombievillager.isBaby()), t);
+					specArray.set(entity_spec.KEY_GENERIC_BABY, CBoolean.get(zombievillager.isBaby()), t);
 					specArray.set(entity_spec.KEY_VILLAGER_PROFESSION, new CString(zombievillager.getProfession().name(), t), t);
 					break;
 				case ZOMBIFIED_PIGLIN:
@@ -2092,7 +2102,7 @@ public class EntityManagement {
 					MCPigZombie pigZombie = (MCPigZombie) entity;
 					specArray.set(entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGRY, CBoolean.get(pigZombie.isAngry()), t);
 					specArray.set(entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGER, new CInt(pigZombie.getAnger(), t), t);
-					specArray.set(entity_spec.KEY_ZOMBIE_BABY, CBoolean.get(pigZombie.isBaby()), t);
+					specArray.set(entity_spec.KEY_GENERIC_BABY, CBoolean.get(pigZombie.isBaby()), t);
 					break;
 			}
 			return specArray;
@@ -2105,6 +2115,7 @@ public class EntityManagement {
 
 		//used to ensure that the indexes are the same in entity_spec(), set_entity_spec(), and in the documentation.
 		private static final String KEY_GENERIC_SITTING = "sitting";
+		private static final String KEY_GENERIC_BABY = "baby";
 		private static final String KEY_AREAEFFECTCLOUD_COLOR = "color";
 		private static final String KEY_AREAEFFECTCLOUD_DURATION = "duration";
 		private static final String KEY_AREAEFFECTCLOUD_DURATIONONUSE = "durationonuse";
@@ -2204,7 +2215,6 @@ public class EntityManagement {
 		private static final String KEY_WITHER_SKULL_CHARGED = "charged";
 		private static final String KEY_WOLF_ANGRY = "angry";
 		private static final String KEY_WOLF_COLOR = "color";
-		private static final String KEY_ZOMBIE_BABY = "baby";
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -3110,6 +3120,18 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case PIGLIN:
+					MCPiglin piglin = (MCPiglin) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_GENERIC_BABY:
+								piglin.setBaby(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case PRIMED_TNT:
 					MCTNT tnt = (MCTNT) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -3470,13 +3492,25 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case ZOGLIN:
+					MCZoglin zoglin = (MCZoglin) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_GENERIC_BABY:
+								zoglin.setBaby(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case ZOMBIE:
 				case DROWNED:
 				case HUSK:
 					MCZombie zombie = (MCZombie) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
-							case entity_spec.KEY_ZOMBIE_BABY:
+							case entity_spec.KEY_GENERIC_BABY:
 								zombie.setBaby(ArgumentValidation.getBoolean(specArray.get(index, t), t));
 								break;
 							default:
@@ -3488,7 +3522,7 @@ public class EntityManagement {
 					MCZombieVillager zombievillager = (MCZombieVillager) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
-							case entity_spec.KEY_ZOMBIE_BABY:
+							case entity_spec.KEY_GENERIC_BABY:
 								zombievillager.setBaby(ArgumentValidation.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_VILLAGER_PROFESSION:
@@ -3508,7 +3542,7 @@ public class EntityManagement {
 					MCPigZombie pigZombie = (MCPigZombie) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
-							case entity_spec.KEY_ZOMBIE_BABY:
+							case entity_spec.KEY_GENERIC_BABY:
 								pigZombie.setBaby(ArgumentValidation.getBoolean(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_ZOMBIFIED_PIGLIN_ANGRY:

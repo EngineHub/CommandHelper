@@ -292,18 +292,18 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_WOLF_COLOR%: The collar color of the wolf (can be %DYE_COLOR%).
 * %KEY_GENERIC_SITTING%: If the wolf is sitting.
 |- 
-| ZOMBIE, HUSK, DROWNED
+| ZOMBIE, HUSK, DROWNED, ZOGLIN, PIGLIN
 | 
-* %KEY_ZOMBIE_BABY%: Whether the zombie is a baby.
+* %KEY_GENERIC_BABY%: Whether the zombie is a baby.
 |-
 | ZOMBIE_VILLAGER
 |
-* %KEY_ZOMBIE_BABY%: Whether the zombie is a baby.
+* %KEY_GENERIC_BABY%: Whether the zombie is a baby.
 * %KEY_VILLAGER_PROFESSION%: The profession of the villager (can be %PROFESSION%).
 |- 
 | ZOMBIFIED_PIGLIN (formerly PIG_ZOMBIE)
 | 
 * %KEY_ZOMBIFIED_PIGLIN_ANGER%: The piglin zombie's anger level.
 * %KEY_ZOMBIFIED_PIGLIN_ANGRY%: Whether the piglin zombie is angry.
-* %KEY_ZOMBIE_BABY%: Whether the pig zombie is a baby.
+* %KEY_GENERIC_BABY%: Whether the pig zombie is a baby.
 |}

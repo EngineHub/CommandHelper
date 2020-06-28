@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHopperMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCItem;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLightningStrike;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLlama;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPigZombie;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCStorageMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCTNT;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCThrownPotion;
@@ -144,6 +145,9 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 				break;
 			case TRADER_LLAMA:
 				wrapperClass = BukkitMCLlama.class;
+				break;
+			case ZOMBIFIED_PIGLIN:
+				wrapperClass = BukkitMCPigZombie.class;
 				break;
 			case UNKNOWN:
 				wrapperClass = null;
