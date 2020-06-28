@@ -178,7 +178,7 @@ public class EntityEvents {
 		@Override
 		public String docs() {
 			return "{itemname: <string match> the type of item that spawned}"
-					+ " Fires when an item entity comes into existance."
+					+ " Fires when an item entity comes into existence."
 					+ " {location: where the item spawns | id: the item's entityID | item}"
 					+ " {item: the itemstack of the entity}"
 					+ " {}";
@@ -277,14 +277,13 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{id: <macro> The entityID. If null is used here, it will match events that lack a specific entity,"
-					+ " such as using the explosion function. | type: <macro> The type of entity exploding. Can be null,"
-					+ " as id.} Fires when an explosion occurs."
-					+ " The entity itself may not exist if triggered by a plugin. Cancelling this event only protects blocks,"
-					+ " entities are handled in damage events. {id: entityID, or null if no entity"
-					+ " | type: entitytype, or null if no entity | location: where the explosion occurs | blocks | yield}"
-					+ " {blocks: An array of blocks destroyed by the explosion. | yield: Percent of the blocks destroyed"
-					+ " that should drop items. A value greater than 100 will cause more drops than the original blocks.}"
+			return "{id: <macro> The entity UUID | type: <macro> The type of entity exploding}"
+					+ " Fires when an explosion occurs. Cancelling this event only protects blocks."
+					+ " Entities are handled in damage events."
+					+ " {id | type | location: Where the explosion occurs | blocks | yield}"
+					+ " {blocks: An array of blocks destroyed by the explosion."
+					+ " | yield: Percent of the blocks destroyed that should drop items."
+					+ " A value greater than 100 will cause more drops than the original blocks.}"
 					+ " {}";
 		}
 
@@ -293,15 +292,9 @@ public class EntityEvents {
 			if(event instanceof MCEntityExplodeEvent) {
 				MCEntityExplodeEvent e = (MCEntityExplodeEvent) event;
 				if(prefilter.containsKey("id")) {
-					if(e.getEntity() == null) {
-						return prefilter.get("id") instanceof CNull;
-					}
 					Prefilters.match(prefilter, "id", e.getEntity().getUniqueId().toString(), PrefilterType.MACRO);
 				}
 				if(prefilter.containsKey("type")) {
-					if(e.getEntity() == null) {
-						return prefilter.get("type") instanceof CNull;
-					}
 					Prefilters.match(prefilter, "type", e.getEntity().getType().name(), PrefilterType.MACRO);
 				}
 				return true;
@@ -325,14 +318,9 @@ public class EntityEvents {
 					blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation()), t);
 				}
 				ret.put("blocks", blocks);
-				Mixed entity = CNull.NULL;
-				Mixed entitytype = CNull.NULL;
-				if(e.getEntity() != null) {
-					entity = new CString(e.getEntity().getUniqueId().toString(), t);
-					entitytype = new CString(e.getEntity().getType().name(), t);
-				}
-				ret.put("id", entity);
-				ret.put("type", entitytype);
+				MCEntity ent = e.getEntity();
+				ret.put("id", new CString(ent.getUniqueId().toString(), t));
+				ret.put("type", new CString(ent.getType().name(), t));
 				ret.put("location", ObjectGenerator.GetGenerator().location(e.getLocation()));
 				ret.put("yield", new CDouble(e.getYield(), t));
 				return ret;
@@ -357,7 +345,7 @@ public class EntityEvents {
 				if(key.equals("blocks")) {
 					if(value.isInstanceOf(CArray.TYPE)) {
 						CArray ba = (CArray) value;
-						List<MCBlock> blocks = new ArrayList<MCBlock>();
+						List<MCBlock> blocks = new ArrayList<>();
 						for(String b : ba.stringKeySet()) {
 							MCWorld w = e.getLocation().getWorld();
 							MCLocation loc = ObjectGenerator.GetGenerator().location(ba.get(b, value.getTarget()), w, value.getTarget());
@@ -513,7 +501,8 @@ public class EntityEvents {
 					+ " | shootertype: <macro> The entity type of the shooter, or 'block', or 'null'}"
 					+ " This event is called when a projectile is launched."
 					+ " Cancelling the event will only cancel the launching of the projectile."
-					+ " For instance when a player shoots an arrow with a bow, if the event is cancelled the bow will still take damage from use."
+					+ " For instance when a player shoots an arrow with a bow, if the event is cancelled the bow will"
+					+ " still take damage from use."
 					+ " {id: The entityID of the projectile | type: The entity type of the projectile |"
 					+ " shooter: The entityID of the shooter (null if the projectile is launched by a dispenser) |"
 					+ " shootertype: The entity type of the shooter (null if the projectile is launched by a dispenser) |"
@@ -677,8 +666,7 @@ public class EntityEvents {
 				map.put("drops", drops);
 				map.put("xp", new CInt(e.getDroppedExp(), t));
 				CArray cod = CArray.GetAssociativeArray(t);
-				Map<String, Mixed> ldc = parseEntityDamageEvent(dead.getLastDamageCause(),
-						new HashMap<String, Mixed>());
+				Map<String, Mixed> ldc = parseEntityDamageEvent(dead.getLastDamageCause(), new HashMap<>());
 				for(Map.Entry<String, Mixed> entry : ldc.entrySet()) {
 					cod.set(entry.getKey(), entry.getValue(), t);
 				}
@@ -1469,8 +1457,8 @@ public class EntityEvents {
 
 		@Override
 		public BindableEvent convert(CArray manual, Target t) {
-			MCEntityTargetEvent e = EventBuilder.instantiate(MCEntityTargetEvent.class, Static.GetPlayer(manual.get("player", Target.UNKNOWN).val(), Target.UNKNOWN));
-			return e;
+			return EventBuilder.instantiate(MCEntityTargetEvent.class,
+					Static.GetPlayer(manual.get("player", Target.UNKNOWN).val(), Target.UNKNOWN));
 		}
 
 	}
@@ -1876,7 +1864,8 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <macro> The entity type of the entity | id: <macro> The entity id of the entity | player: <macro> The player triggering the event}"
+			return "{type: <macro> The entity type of the entity | id: <macro> The entity id of the entity"
+					+ " | player: <macro> The player triggering the event}"
 					+ " This event is called when an entity toggles it's gliding state (Using Elytra)."
 					+ " {id: The entityID of the entity | type: The entity type of the entity |"
 					+ " gliding: true if the entity is entering gliding mode, false if the entity is leaving it |"
