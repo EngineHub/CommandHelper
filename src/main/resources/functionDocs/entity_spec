@@ -95,7 +95,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |-
 | ENDERMAN
 | 
-* %KEY_ENDERMAN_CARRIED%: The block that the Enderman is carring.
+* %KEY_ENDERMAN_CARRIED%: The block that the Enderman is carrying.
 |-
 | EVOKER_FANGS
 |
@@ -142,8 +142,10 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |-
 | ITEM_FRAME
 | 
+* %KEY_ITEM_FRAME_FIXED%: If true, the item frame cannot be manipulated. (destroyed, rotated, removed, etc) (default false)
 * %KEY_ITEM_FRAME_ITEM%: The item in the frame.
 * %KEY_ITEM_FRAME_ROTATION%: The rotation of the frame's item (can be %ROTATION%).
+* %KEY_ITEM_FRAME_VISIBLE%: If the frame is visible. (default true)
 |-
 | LLAMA, TRADER_LLAMA
 |
@@ -200,9 +202,9 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | 
 * %KEY_PHANTOM_SIZE%: The size of the phantom. Clamped to 0 - 64 (default: 0). Phantoms deal (6 + size) damage.
 |- 
-| PIG
+| PIG, STRIDER
 | 
-* %KEY_PIG_SADDLED%: If the pig has a saddle.
+* %KEY_STEERABLE_SADDLED%: If the steerable mob has a saddle.
 |- 
 | PRIMED_TNT
 | 
@@ -301,7 +303,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_GENERIC_BABY%: Whether the zombie is a baby.
 * %KEY_VILLAGER_PROFESSION%: The profession of the villager (can be %PROFESSION%).
 |- 
-| ZOMBIFIED_PIGLIN (formerly PIG_ZOMBIE)
+| ZOMBIFIED_PIGLIN (PIG_ZOMBIE before 1.16)
 | 
 * %KEY_ZOMBIFIED_PIGLIN_ANGER%: The piglin zombie's anger level.
 * %KEY_ZOMBIFIED_PIGLIN_ANGRY%: Whether the piglin zombie is angry.

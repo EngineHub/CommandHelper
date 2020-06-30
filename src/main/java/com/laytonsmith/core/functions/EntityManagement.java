@@ -71,6 +71,7 @@ import com.laytonsmith.abstraction.entities.MCShulkerBullet;
 import com.laytonsmith.abstraction.entities.MCSlime;
 import com.laytonsmith.abstraction.entities.MCSnowman;
 import com.laytonsmith.abstraction.entities.MCSpectralArrow;
+import com.laytonsmith.abstraction.entities.MCStrider;
 import com.laytonsmith.abstraction.entities.MCTNT;
 import com.laytonsmith.abstraction.entities.MCThrownPotion;
 import com.laytonsmith.abstraction.entities.MCTippedArrow;
@@ -1901,13 +1902,10 @@ public class EntityManagement {
 					break;
 				case ITEM_FRAME:
 					MCItemFrame frame = (MCItemFrame) entity;
-					MCItemStack itemstack = frame.getItem();
-					if(itemstack != null) {
-						specArray.set(entity_spec.KEY_ITEM_FRAME_ITEM, ObjectGenerator.GetGenerator().item(frame.getItem(), t), t);
-					} else {
-						specArray.set(entity_spec.KEY_ITEM_FRAME_ITEM, CNull.NULL, t);
-					}
+					specArray.set(entity_spec.KEY_ITEM_FRAME_FIXED, CBoolean.get(frame.isFixed()), t);
+					specArray.set(entity_spec.KEY_ITEM_FRAME_ITEM, ObjectGenerator.GetGenerator().item(frame.getItem(), t), t);
 					specArray.set(entity_spec.KEY_ITEM_FRAME_ROTATION, new CString(frame.getRotation().name(), t), t);
+					specArray.set(entity_spec.KEY_ITEM_FRAME_VISIBLE, CBoolean.get(frame.isVisible()), t);
 					break;
 				case LIGHTNING:
 					MCLightningStrike lightning = (MCLightningStrike) entity;
@@ -1976,7 +1974,7 @@ public class EntityManagement {
 					break;
 				case PIG:
 					MCPig pig = (MCPig) entity;
-					specArray.set(entity_spec.KEY_PIG_SADDLED, CBoolean.get(pig.isSaddled()), t);
+					specArray.set(entity_spec.KEY_STEERABLE_SADDLED, CBoolean.get(pig.isSaddled()), t);
 					break;
 				case PIGLIN:
 					MCPiglin piglin = (MCPiglin) entity;
@@ -2037,6 +2035,10 @@ public class EntityManagement {
 				case LINGERING_POTION: // 1.13 only
 					MCThrownPotion potion = (MCThrownPotion) entity;
 					specArray.set(entity_spec.KEY_SPLASH_POTION_ITEM, ObjectGenerator.GetGenerator().item(potion.getItem(), t), t);
+					break;
+				case STRIDER:
+					MCStrider strider = (MCStrider) entity;
+					specArray.set(entity_spec.KEY_STEERABLE_SADDLED, CBoolean.get(strider.isSaddled()), t);
 					break;
 				case TIPPED_ARROW: // 1.13 only
 					MCTippedArrow tippedarrow = (MCTippedArrow) entity;
@@ -2176,8 +2178,10 @@ public class EntityManagement {
 		private static final String KEY_HORSE_ARMOR = "armor";
 		private static final String KEY_HORSE_SADDLE = "saddle";
 		private static final String KEY_IRON_GOLEM_PLAYERCREATED = "playercreated";
+		private static final String KEY_ITEM_FRAME_FIXED = "fixed";
 		private static final String KEY_ITEM_FRAME_ITEM = "item";
 		private static final String KEY_ITEM_FRAME_ROTATION = "rotation";
+		private static final String KEY_ITEM_FRAME_VISIBLE = "visible";
 		private static final String KEY_LIGHTNING_EFFECT = "effect";
 		private static final String KEY_MINECART_BLOCK = "block";
 		private static final String KEY_MINECART_OFFSET = "offset";
@@ -2190,7 +2194,6 @@ public class EntityManagement {
 		private static final String KEY_PANDA_HIDDENGENE = "hiddengene";
 		private static final String KEY_PARROT_TYPE = "type";
 		private static final String KEY_PHANTOM_SIZE = "size";
-		private static final String KEY_PIG_SADDLED = "saddled";
 		private static final String KEY_ZOMBIFIED_PIGLIN_ANGRY = "angry";
 		private static final String KEY_ZOMBIFIED_PIGLIN_ANGER = "anger";
 		private static final String KEY_RABBIT_TYPE = "type";
@@ -2204,6 +2207,7 @@ public class EntityManagement {
 		private static final String KEY_SNOWMAN_DERP = "derp";
 		private static final String KEY_SPECTRAL_ARROW_GLOWING_TICKS = "glowingticks";
 		private static final String KEY_SPLASH_POTION_ITEM = "item";
+		private static final String KEY_STEERABLE_SADDLED = "saddled";
 		private static final String KEY_TIPPEDARROW_POTIONMETA = "potionmeta";
 		private static final String KEY_TROPICALFISH_COLOR = "color";
 		private static final String KEY_TROPICALFISH_PATTERN = "pattern";
@@ -2888,13 +2892,11 @@ public class EntityManagement {
 					MCItemFrame frame = (MCItemFrame) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
+							case entity_spec.KEY_ITEM_FRAME_FIXED:
+								frame.setFixed(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								break;
 							case entity_spec.KEY_ITEM_FRAME_ITEM:
 								frame.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
-								if(specArray.get(index, t) instanceof CNull) {
-									frame.setItem(null);
-								} else {
-									frame.setItem(ObjectGenerator.GetGenerator().item(specArray.get(index, t), t));
-								}
 								break;
 							case entity_spec.KEY_ITEM_FRAME_ROTATION:
 								try {
@@ -2902,6 +2904,9 @@ public class EntityManagement {
 								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid rotation type: " + specArray.get(index, t).val(), t);
 								}
+								break;
+							case entity_spec.KEY_ITEM_FRAME_VISIBLE:
+								frame.setVisible(ArgumentValidation.getBoolean(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
@@ -3112,7 +3117,7 @@ public class EntityManagement {
 					MCPig pig = (MCPig) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
-							case entity_spec.KEY_PIG_SADDLED:
+							case entity_spec.KEY_STEERABLE_SADDLED:
 								pig.setSaddled(ArgumentValidation.getBoolean(specArray.get(index, t), t));
 								break;
 							default:
@@ -3296,6 +3301,18 @@ public class EntityManagement {
 								} catch (IllegalArgumentException ex) {
 									throw new CREFormatException("Invalid potion type: " + potionItem.getType().getName(), t);
 								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case STRIDER:
+					MCStrider strider = (MCStrider) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_STEERABLE_SADDLED:
+								strider.setSaddled(ArgumentValidation.getBoolean(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);

@@ -12,4 +12,12 @@ public interface MCItemFrame extends MCHanging {
 	MCRotation getRotation();
 
 	void setRotation(MCRotation rotation);
+
+	boolean isVisible();
+
+	void setVisible(boolean visible);
+
+	boolean isFixed();
+
+	void setFixed(boolean fixed);
 }

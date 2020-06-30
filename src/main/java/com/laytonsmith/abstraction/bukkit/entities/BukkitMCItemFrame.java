@@ -27,12 +27,7 @@ public class BukkitMCItemFrame extends BukkitMCHanging implements MCItemFrame {
 
 	@Override
 	public MCItemStack getItem() {
-		ItemStack item = getHandle().getItem();
-		if(item != null) {
-			return new BukkitMCItemStack(getHandle().getItem());
-		} else {
-			return null;
-		}
+		return new BukkitMCItemStack(getHandle().getItem());
 	}
 
 	@Override
@@ -52,5 +47,43 @@ public class BukkitMCItemFrame extends BukkitMCHanging implements MCItemFrame {
 	@Override
 	public void setRotation(MCRotation rotation) {
 		getHandle().setRotation(BukkitMCRotation.getConvertor().getConcreteEnum(rotation));
+	}
+
+	@Override
+	public boolean isVisible() {
+		try {
+			return getHandle().isVisible();
+		} catch (NoSuchMethodError ex) {
+			// prior to 1.16
+		}
+		return true;
+	}
+
+	@Override
+	public void setVisible(boolean visible) {
+		try {
+			getHandle().setVisible(visible);
+		} catch (NoSuchMethodError ex) {
+			// prior to 1.16
+		}
+	}
+
+	@Override
+	public boolean isFixed() {
+		try {
+			return getHandle().isFixed();
+		} catch (NoSuchMethodError ex) {
+			// prior to 1.16
+		}
+		return false;
+	}
+
+	@Override
+	public void setFixed(boolean fixed) {
+		try {
+			getHandle().setFixed(fixed);
+		} catch (NoSuchMethodError ex) {
+			// prior to 1.16
+		}
 	}
 }
