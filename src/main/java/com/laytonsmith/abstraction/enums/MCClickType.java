@@ -53,6 +53,11 @@ public enum MCClickType {
 	 */
 	CREATIVE,
 	/**
+	 * The "swap item with offhand" key (defaults to F).
+	 * Added in 1.16
+	 */
+	SWAP_OFFHAND,
+	/**
 	 * A type of inventory manipulation not yet recognized by Bukkit. This is only for transitional purposes on a new
 	 * Minecraft update, and should never be relied upon.
 	 * <p>
