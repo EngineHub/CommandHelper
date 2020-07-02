@@ -593,7 +593,7 @@ public class Threading {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[0];
+			return null;
 		}
 
 		@Override
