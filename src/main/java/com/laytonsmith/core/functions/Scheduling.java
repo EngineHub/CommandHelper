@@ -32,11 +32,12 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
-import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
-import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
-import com.laytonsmith.core.exceptions.CRE.CRERangeException;
+import com.laytonsmith.core.exceptions.CRE.CREInterruptedException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -179,6 +180,7 @@ public class Scheduling {
 	@api
 	@hide("Only meant for cmdline/testing")
 	@noboilerplate
+	@seealso({Threading.x_interrupt.class})
 	public static class sleep extends AbstractFunction {
 
 		@Override
@@ -195,12 +197,13 @@ public class Scheduling {
 		public String docs() {
 			return "void {seconds} Sleeps the script for the specified number of seconds, up to the maximum time limit defined in the preferences file."
 					+ " Seconds may be a double value, so 0.5 would be half a second."
+					+ " If the \"interrupted status\" is true then throw InterruptedException"
 					+ " PLEASE NOTE: Sleep times are NOT very accurate, and should not be relied on for preciseness.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class};
+			return new Class[]{CRECastException.class, CREInterruptedException.class};
 		}
 
 		@Override
@@ -220,6 +223,7 @@ public class Scheduling {
 			try {
 				Thread.sleep((int) (time * 1000));
 			} catch (InterruptedException ex) {
+				throw new CREInterruptedException(ex, t);
 			}
 			return CVoid.VOID;
 		}

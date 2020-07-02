@@ -23,7 +23,6 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
-import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
 import com.laytonsmith.core.exceptions.CRE.CREInterruptedException;
 import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -33,9 +32,12 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.WeakHashMap;
@@ -52,7 +54,7 @@ public class Threading {
 				+ " be yet heavily relied on in normal development.";
 	}
 
-	private static final Map<String, Thread> THREAD_ID_MAP = new WeakHashMap<>();
+	public static final Map<String, Thread> THREAD_ID_MAP = Collections.synchronizedMap(new WeakHashMap<>());
 
 	@api
 	@noboilerplate
@@ -529,7 +531,7 @@ public class Threading {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREIllegalArgumentException.class, CREInterruptedException.class};
+			return new Class[]{CREInterruptedException.class};
 		}
 
 		@Override
@@ -547,7 +549,7 @@ public class Threading {
 			String id = args[0].val();
 			Thread th = THREAD_ID_MAP.get(id);
 			if(th == null) {
-				throw new CREIllegalArgumentException("Unknown thread id", t);
+				return CVoid.VOID;
 			}
 			int wait = 0;
 			if(args.length > 1) {
@@ -575,8 +577,8 @@ public class Threading {
 		public String docs() {
 			return "void {string id, int maxWait} Waits for the thread with the given id to exit. By default, we wait"
 					+ " potentially forever, but if maxWait is specified, we will only wait that many milliseconds."
-					+ " (Sending 0 for this value causes an infinite wait.) If the timeout occurs, an"
-					+ " InterruptedException is thrown. If the id is unknown, an IllegalArgumentException is thrown.";
+					+ " (Sending 0 for this value causes an infinite wait.) If the timeout occurs or thread interrupted, an"
+					+ " InterruptedException is thrown.";
 		}
 
 		@Override
@@ -586,4 +588,186 @@ public class Threading {
 
 	}
 
+	@api
+	public static class x_thread_is_alive extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[0];
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			String id = args[0].val();
+			Thread th = THREAD_ID_MAP.get(id);
+			if(th == null) {
+				return CBoolean.FALSE;
+			}
+			return CBoolean.get(th.isAlive());
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public String getName() {
+			return "x_thread_is_alive";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "bool {mixed thread} Tests if this thread is alive. A thread is alive if it has been started and has not yet died.";
+		}
+	}
+
+	@api
+	@seealso({x_is_interrupted.class})
+	public static class x_interrupt extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[0];
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			String id = args[0].val();
+			Thread th = THREAD_ID_MAP.get(id);
+			if(th != null) {
+				th.interrupt();
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public String getName() {
+			return "x_interrupt";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "void {mixed thread} Interrupts this thread. In other words \"interrupted status\" set true."
+					+ " The \"interrupted status\" can be checked using the method: " + x_is_interrupted.class.getSimpleName() + "()"
+					+ " If this thread is blocked in an invocation of the " + Scheduling.sleep.class.getSimpleName() + "(), " + x_thread_join.class.getSimpleName() + "() methods"
+					+ " then its \"interrupt status\" will be cleared and it will receive an InterruptedException.";
+		}
+	}
+
+	@api
+	@seealso({x_interrupt.class})
+	public static class x_is_interrupted extends AbstractFunction {
+
+		private static java.lang.reflect.Method interrupt;
+		static {
+			try {
+				interrupt = Thread.class.getDeclaredMethod("isInterrupted", boolean.class);
+				interrupt.setAccessible(true);
+			} catch (Exception e) {
+				//never happened
+				throw new CancelCommandException(e.getMessage(), Target.UNKNOWN);
+			}
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[0];
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			Thread th;
+			boolean clearFlag = true;
+			if(args.length == 2) {
+				th = THREAD_ID_MAP.get(ArgumentValidation.getString(args[0], t));
+				clearFlag = ArgumentValidation.getBooleanish(args[1], t);
+			} else if(args.length == 1) {
+				if(args[0] instanceof CBoolean) {
+					th = Thread.currentThread();
+					clearFlag = ((CBoolean) args[0]).getBooleanValue(t);
+				} else {
+					th = THREAD_ID_MAP.get(ArgumentValidation.getString(args[0], t));
+				}
+			} else {
+				th = Thread.currentThread();
+			}
+			if(th != null) {
+				try {
+					return CBoolean.get((Boolean) interrupt.invoke(th, clearFlag));
+				} catch (IllegalAccessException | InvocationTargetException e) {
+					//never happened
+					throw new CancelCommandException(e.getMessage(), t);
+				}
+			} else {
+				return CBoolean.TRUE;
+			}
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public String getName() {
+			return "x_is_interrupted";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "bool {mixed thread=current, bool clearFlag=true} Tests whether this thread has been interrupted."
+					+ " The \"interrupted status\" of the thread is cleared if @clearFlag is true, else \"interrupted status\" unaffected.";
+		}
+	}
 }
