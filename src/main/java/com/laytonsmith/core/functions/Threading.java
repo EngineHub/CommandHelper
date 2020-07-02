@@ -578,7 +578,7 @@ public class Threading {
 			return "void {string id, int maxWait} Waits for the thread with the given id to exit. By default, we wait"
 					+ " potentially forever, but if maxWait is specified, we will only wait that many milliseconds."
 					+ " (Sending 0 for this value causes an infinite wait.) If the timeout occurs or thread interrupted, an"
-					+ " InterruptedException is thrown.";
+					+ " InterruptedException is thrown. If the id is unknown, this function will directly return";
 		}
 
 		@Override
@@ -633,7 +633,7 @@ public class Threading {
 
 		@Override
 		public String docs() {
-			return "bool {mixed thread} Tests if this thread is alive. A thread is alive if it has been started and has not yet died.";
+			return "boolean {string id} Tests if this thread with the given id is alive. A thread is alive if it has been started and has not yet died.";
 		}
 	}
 
@@ -643,7 +643,7 @@ public class Threading {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[0];
+			return null;
 		}
 
 		@Override
@@ -658,8 +658,13 @@ public class Threading {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			String id = args[0].val();
-			Thread th = THREAD_ID_MAP.get(id);
+			Thread th;
+			if(args.length == 1) {
+				String id = args[0].val();
+				th = THREAD_ID_MAP.get(id);
+			} else {
+				th = Thread.currentThread();
+			}
 			if(th != null) {
 				th.interrupt();
 			}
@@ -678,14 +683,14 @@ public class Threading {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{0, 1};
 		}
 
 		@Override
 		public String docs() {
-			return "void {mixed thread} Interrupts this thread. In other words \"interrupted status\" set true."
-					+ " The \"interrupted status\" can be checked using the method: " + x_is_interrupted.class.getSimpleName() + "()"
-					+ " If this thread is blocked in an invocation of the " + Scheduling.sleep.class.getSimpleName() + "(), " + x_thread_join.class.getSimpleName() + "() methods"
+			return "void {string [id]} Interrupts thread with the given id. In other words \"interrupt status\" set true. If id not passed, it is be current thread."
+					+ " The \"interrupt status\" can be checked using the method: " + new x_is_interrupted().getName() + "()"
+					+ " If this thread is blocked in an invocation of the " + new Scheduling.sleep().getName() + "(), " + new x_thread_join().getName() + "() methods"
 					+ " then its \"interrupt status\" will be cleared and it will receive an InterruptedException.";
 		}
 	}
@@ -707,7 +712,7 @@ public class Threading {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[0];
+			return null;
 		}
 
 		@Override
@@ -723,7 +728,7 @@ public class Threading {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Thread th;
-			boolean clearFlag = true;
+			boolean clearFlag = false;
 			if(args.length == 2) {
 				th = THREAD_ID_MAP.get(ArgumentValidation.getString(args[0], t));
 				clearFlag = ArgumentValidation.getBooleanish(args[1], t);
@@ -766,8 +771,9 @@ public class Threading {
 
 		@Override
 		public String docs() {
-			return "bool {mixed thread=current, bool clearFlag=true} Tests whether this thread has been interrupted."
-					+ " The \"interrupted status\" of the thread is cleared if @clearFlag is true, else \"interrupted status\" unaffected.";
+			return "boolean {string [id], boolean [clearFlag]} Tests whether this thread has been interrupted."
+					+ " The \"interrupt status\" of the thread is cleared if clearFlag is true, else \"interrupt status\" unaffected."
+					+ "  If id not passed, it is be current thread, clearFlag defaults to false.";
 		}
 	}
 }
