@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.MCBlockStateMeta;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCBrewerInventory;
 import com.laytonsmith.abstraction.MCColor;
+import com.laytonsmith.abstraction.MCCompassMeta;
 import com.laytonsmith.abstraction.MCCreatureSpawner;
 import com.laytonsmith.abstraction.MCCrossbowMeta;
 import com.laytonsmith.abstraction.MCEnchantment;
@@ -656,6 +657,14 @@ public class ObjectGenerator {
 				} else {
 					ma.set("projectiles", CNull.NULL, t);
 				}
+			} else if(meta instanceof MCCompassMeta) {
+				MCCompassMeta cm = (MCCompassMeta) meta;
+				if(cm.getTargetLocation() == null) {
+					ma.set("target", CNull.NULL, t);
+				} else {
+					ma.set("target", location(cm.getTargetLocation(), false), t);
+				}
+				ma.set("lodestone", CBoolean.get(cm.isLodestoneTracked()), t);
 			}
 			return ma;
 		}
@@ -1098,6 +1107,17 @@ public class ObjectGenerator {
 							}
 							((MCCrossbowMeta) meta).setChargedProjectiles(projectiles);
 						}
+					}
+				} else if(meta instanceof MCCompassMeta) {
+					if(ma.containsKey("target")) {
+						Mixed loc = ma.get("target", t);
+						if(!(loc instanceof CNull)) {
+							((MCCompassMeta) meta).setTargetLocation(location(loc, null, t));
+						}
+					}
+					if(ma.containsKey("lodestone")) {
+						((MCCompassMeta) meta).setLodestoneTracked(
+								ArgumentValidation.getBooleanObject(ma.get("lodestone", t), t));
 					}
 				}
 			} catch (Exception ex) {

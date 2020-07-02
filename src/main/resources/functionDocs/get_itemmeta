@@ -101,4 +101,9 @@ Below are the available fields in the item meta array. Fields can be null when t
 | Beehive
 |
 * '''flowerlocation''' : (array) The location of a flower for bees to target, or null if there is none.
+|-
+| Compass
+|
+* '''target''' : (array) The location this compass will point to, or null to use normal compass target.
+* '''lodestone''' : (boolean) If the target location is a tracked lodestone. If true, compass spins if no lodestone exists there.
 |}
