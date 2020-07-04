@@ -744,7 +744,7 @@ public class Threading {
 		public String docs() {
 			return "boolean {string [id]} Tests whether this thread with the given id has been interrupted."
 					+ " If id not passed, it is be current thread."
-					+ " The \"interrupted status\" of the thread is unaffected by this method."
+					+ " The \"interrupt status\" of the thread is unaffected by this method."
 					+ " In case if the thread does not exist or is not alive, return false";
 		}
 	}
@@ -791,8 +791,8 @@ public class Threading {
 		@Override
 		public String docs() {
 			return "boolean {} Tests whether this thread with the given id has been interrupted."
-					+ " The \"interrupted status\" of the thread is cleared by this method. In other words, if this method were to be called twice in succession, the second call would return false"
-					+ " (unless the current thread were interrupted again, after the first call had cleared its \"interrupted status\" and before the second call had examined it).";
+					+ " The \"interrupt status\" of the thread is cleared by this method. In other words, if this method were to be called twice in succession, the second call would return false"
+					+ " (unless the current thread were interrupted again, after the first call had cleared its \"interrupt status\" and before the second call had examined it).";
 		}
 	}
 }

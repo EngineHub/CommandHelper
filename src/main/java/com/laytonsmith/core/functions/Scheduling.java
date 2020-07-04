@@ -197,7 +197,7 @@ public class Scheduling {
 		public String docs() {
 			return "void {seconds} Sleeps the script for the specified number of seconds, up to the maximum time limit defined in the preferences file."
 					+ " Seconds may be a double value, so 0.5 would be half a second."
-					+ " If the \"interrupted status\" is true then throw InterruptedException"
+					+ " If the \"interrupt status\" is true then throw InterruptedException"
 					+ " PLEASE NOTE: Sleep times are NOT very accurate, and should not be relied on for preciseness.";
 		}
 
