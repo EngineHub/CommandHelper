@@ -33,7 +33,6 @@ import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
@@ -608,8 +607,7 @@ public class Threading {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			String id = args[0].val();
-			Thread th = THREAD_ID_MAP.get(id);
+			Thread th = THREAD_ID_MAP.get(args[0].val());
 			if(th == null) {
 				return CBoolean.FALSE;
 			}
@@ -638,7 +636,7 @@ public class Threading {
 	}
 
 	@api
-	@seealso({x_is_interrupted.class})
+	@seealso({x_is_interrupted.class, x_clear_interrupt.class})
 	public static class x_interrupt extends AbstractFunction {
 
 		@Override
@@ -660,13 +658,12 @@ public class Threading {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Thread th;
 			if(args.length == 1) {
-				String id = args[0].val();
-				th = THREAD_ID_MAP.get(id);
+				th = THREAD_ID_MAP.get(args[0].val());
+				if(th != null) {
+					th.interrupt();
+				}
 			} else {
-				th = Thread.currentThread();
-			}
-			if(th != null) {
-				th.interrupt();
+				Thread.currentThread().interrupt();
 			}
 			return CVoid.VOID;
 		}
@@ -689,26 +686,15 @@ public class Threading {
 		@Override
 		public String docs() {
 			return "void {string [id]} Interrupts thread with the given id. In other words \"interrupt status\" set true. If id not passed, it is be current thread."
-					+ " The \"interrupt status\" can be checked using the method: " + new x_is_interrupted().getName() + "()"
-					+ " If this thread is blocked in an invocation of the " + new Scheduling.sleep().getName() + "(), " + new x_thread_join().getName() + "() methods"
+					+ " The \"interrupt status\" can be checked using the method: " + new x_is_interrupted().getName() + "(string [id]), " + new x_clear_interrupt().getName() + "()."
+					+ " If this thread is blocked in an invocation of the " + new Scheduling.sleep().getName() + "(seconds), " + new x_thread_join().getName() + "(string id, int maxWait) methods"
 					+ " then its \"interrupt status\" will be cleared and it will receive an InterruptedException.";
 		}
 	}
 
 	@api
-	@seealso({x_interrupt.class})
+	@seealso({x_interrupt.class, x_clear_interrupt.class})
 	public static class x_is_interrupted extends AbstractFunction {
-
-		private static java.lang.reflect.Method interrupt;
-		static {
-			try {
-				interrupt = Thread.class.getDeclaredMethod("isInterrupted", boolean.class);
-				interrupt.setAccessible(true);
-			} catch (Exception e) {
-				//never happened
-				throw new CancelCommandException(e.getMessage(), Target.UNKNOWN);
-			}
-		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -727,30 +713,15 @@ public class Threading {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			Thread th;
-			boolean clearFlag = false;
-			if(args.length == 2) {
-				th = THREAD_ID_MAP.get(ArgumentValidation.getString(args[0], t));
-				clearFlag = ArgumentValidation.getBooleanish(args[1], t);
-			} else if(args.length == 1) {
-				if(args[0] instanceof CBoolean) {
-					th = Thread.currentThread();
-					clearFlag = ((CBoolean) args[0]).getBooleanValue(t);
+			if(args.length == 1) {
+				Thread th = THREAD_ID_MAP.get(args[0].val());
+				if(th != null) {
+					return CBoolean.get(th.isInterrupted());
 				} else {
-					th = THREAD_ID_MAP.get(ArgumentValidation.getString(args[0], t));
+					return CBoolean.FALSE;
 				}
 			} else {
-				th = Thread.currentThread();
-			}
-			if(th != null) {
-				try {
-					return CBoolean.get((Boolean) interrupt.invoke(th, clearFlag));
-				} catch (IllegalAccessException | InvocationTargetException e) {
-					//never happened
-					throw new CancelCommandException(e.getMessage(), t);
-				}
-			} else {
-				return CBoolean.TRUE;
+				return CBoolean.get(Thread.currentThread().isInterrupted());
 			}
 		}
 
@@ -766,14 +737,62 @@ public class Threading {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{0, 1, 2};
+			return new Integer[]{0, 1};
 		}
 
 		@Override
 		public String docs() {
-			return "boolean {string [id], boolean [clearFlag]} Tests whether this thread has been interrupted."
-					+ " The \"interrupt status\" of the thread is cleared if clearFlag is true, else \"interrupt status\" unaffected."
-					+ "  If id not passed, it is be current thread, clearFlag defaults to false.";
+			return "boolean {string [id]} Tests whether this thread with the given id has been interrupted."
+					+ " If id not passed, it is be current thread."
+					+ " The \"interrupted status\" of the thread is unaffected by this method."
+					+ " In case if the thread does not exist or is not alive, return false";
+		}
+	}
+
+	@api
+	@seealso({x_interrupt.class, x_is_interrupted.class})
+	public static class x_clear_interrupt extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(Thread.interrupted());
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public String getName() {
+			return "x_clear_interrupt";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {} Tests whether this thread with the given id has been interrupted."
+					+ " The \"interrupted status\" of the thread is cleared by this method. In other words, if this method were to be called twice in succession, the second call would return false"
+					+ " (unless the current thread were interrupted again, after the first call had cleared its \"interrupted status\" and before the second call had examined it).";
 		}
 	}
 }
