@@ -9,4 +9,6 @@ public interface MCPlayerRespawnEvent extends MCPlayerEvent {
 	MCLocation getRespawnLocation();
 
 	Boolean isBedSpawn();
+
+	boolean isAnchorSpawn();
 }

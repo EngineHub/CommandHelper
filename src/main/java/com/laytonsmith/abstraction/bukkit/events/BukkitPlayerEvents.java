@@ -699,6 +699,16 @@ public class BukkitPlayerEvents {
 		public Boolean isBedSpawn() {
 			return pre.isBedSpawn();
 		}
+
+		@Override
+		public boolean isAnchorSpawn() {
+			try {
+				return pre.isAnchorSpawn();
+			} catch (NoSuchMethodError ex) {
+				// probably before 1.16.1
+				return false;
+			}
+		}
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)

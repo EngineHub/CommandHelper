@@ -1205,18 +1205,17 @@ public class PlayerEvents {
 		@Override
 		public String docs() {
 			return "{x: <expression>| y: <expression>| z: <expression>| world: <string match>| player: <macro>}"
-					+ "Fires when a player respawns. Technically during this time, the player is not considered to be"
+					+ "Fires when a player respawns. Technically during this time, the player may not be considered"
 					+ " 'online'. This can cause problems if you try to run an external command with run() or"
-					+ " something."
-					+ " CommandHelper takes into account the fact that the player is offline, and works around this, so"
-					+ " all CH functions should respond correctly, as if the player was online, however other plugins"
-					+ " or"
-					+ " plain text commands that are run may not."
+					+ " something. CommandHelper takes into account the fact that the player is offline, and works"
+					+ " around this, so all functions should respond correctly as if the player was online,"
+					+ " however other plugins or plain text commands that are run may not."
 					+ "{player: The player that is respawning | "
 					+ "location: The location they are going to respawn at | "
-					+ "bed_spawn: True if the respawn location is the player's bed}"
+					+ "bed_spawn: True if the respawn location is the player's bed"
+					+ "anchor_spawn: True if the respawn location is the player's respawn anchor}"
 					+ "{location}"
-					+ "{player|location|bed_spawn}";
+					+ "{}";
 		}
 
 		@Override
@@ -1253,6 +1252,7 @@ public class PlayerEvents {
 				CArray location = ObjectGenerator.GetGenerator().location(event.getRespawnLocation());
 				map.put("location", location);
 				map.put("bed_spawn", CBoolean.get(event.isBedSpawn()));
+				map.put("anchor_spawn", CBoolean.get(event.isAnchorSpawn()));
 				return map;
 			} else {
 				throw new EventException("Cannot convert e to PlayerRespawnEvent");
