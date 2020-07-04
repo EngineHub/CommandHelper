@@ -685,10 +685,10 @@ public class Threading {
 
 		@Override
 		public String docs() {
-			return "void {string [id]} Interrupts thread with the given id. In other words \"interrupt status\" set true. If id not passed, it is be current thread."
-					+ " The \"interrupt status\" can be checked using the method: " + new x_is_interrupted().getName() + "(string [id]), " + new x_clear_interrupt().getName() + "()."
-					+ " If this thread is blocked in an invocation of the " + new Scheduling.sleep().getName() + "(seconds), " + new x_thread_join().getName() + "(string id, int maxWait) methods"
-					+ " then its \"interrupt status\" will be cleared and it will receive an InterruptedException.";
+			return "void {[string id]} Interrupts the thread with the given id, or the current thread if no id is given."
+					+ " When a thread is interrupted, its interrupt status is set to true."
+					+ " This status can be checked using the " + new x_is_interrupted().getName() + " and " + new x_clear_interrupt().getName() + " function."
+					+ " Note that some blocking functions will throw an InterruptedException when the thread on which they are executed is interrupted.";
 		}
 	}
 
@@ -742,7 +742,7 @@ public class Threading {
 
 		@Override
 		public String docs() {
-			return "boolean {string [id]} Tests whether this thread with the given id has been interrupted."
+			return "boolean {[string id]} Tests whether this thread with the given id has been interrupted."
 					+ " If id not passed, it is be current thread."
 					+ " The \"interrupt status\" of the thread is unaffected by this method."
 					+ " In case if the thread does not exist or is not alive, return false";
@@ -790,7 +790,7 @@ public class Threading {
 
 		@Override
 		public String docs() {
-			return "boolean {} Tests whether this thread with the given id has been interrupted."
+			return "boolean {} Tests whether this thread has been interrupted."
 					+ " The \"interrupt status\" of the thread is cleared by this method. In other words, if this method were to be called twice in succession, the second call would return false"
 					+ " (unless the current thread were interrupted again, after the first call had cleared its \"interrupt status\" and before the second call had examined it).";
 		}
