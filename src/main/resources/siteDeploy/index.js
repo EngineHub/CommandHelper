@@ -369,7 +369,7 @@
 			key = key.replace(/ /g, "\\s+");
 			// We only want to replace strings where the whole thing is within a border. For instance, if one segment
 			// is A, and another is ABC, we don't want to replace the A in ABC, because then the match for ABC won't
-			// work. Instead, we need to ensure that we're only replacing entire segments, which means essentially 
+			// work. Instead, we need to ensure that we're only replacing entire segments, which means essentially
 			// reversing the segmentation logic that was originally used.
 			let spacer = "(\\s*(?:==+|\n\n|\n\*|\n#)\\s*)";
 			key = spacer + key + spacer;
@@ -397,7 +397,7 @@
 		}
 		if (productionTranslations !== "" && lang !== null && lang !== "en") {
 			// We need to download and parse the locale data first
-			let pageTranslations = productionTranslations + "/" + lang + "/"
+			let pageTranslations = productionTranslations + "/" + lang
 					+ window.location.pathname.replace(/\.html$/, ".tmem.xml");
 			$.get(pageTranslations, function (data) {
 				$data = $($.parseXML(data));

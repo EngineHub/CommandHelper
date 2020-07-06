@@ -21,7 +21,6 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIOException;
@@ -116,8 +115,7 @@ public class OAuth {
 			}
 		}
 
-		public static String execute(GlobalEnv gEnv, OAuthOptions options) {
-			Environment env = Environment.createEnvironment(gEnv);
+		public static String execute(Environment env, OAuthOptions options) {
 			return new x_get_oauth_token().exec(Target.UNKNOWN, env, options.toOptionsArray()).val();
 		}
 
@@ -497,12 +495,11 @@ public class OAuth {
 		 * @param gEnv
 		 * @param clientId If set, clears just the one client id, if null, clears all tokens.
 		 */
-		public static void execute(GlobalEnv gEnv, String clientId) {
+		public static void execute(Environment env, String clientId) {
 			Mixed[] args = new Mixed[0];
 			if(clientId != null) {
 				args = new Mixed[]{new CString(clientId, Target.UNKNOWN)};
 			}
-			Environment env = Environment.createEnvironment(gEnv);
 			new clear_oauth_tokens().exec(Target.UNKNOWN, env, args);
 		}
 

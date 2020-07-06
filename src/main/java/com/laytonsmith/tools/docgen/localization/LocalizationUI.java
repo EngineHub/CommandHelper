@@ -17,6 +17,7 @@ import com.laytonsmith.core.MethodScriptFileLocations;
 import com.laytonsmith.core.Profiles;
 import com.laytonsmith.core.ProfilesImpl;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.RuntimeMode;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
@@ -1811,11 +1812,12 @@ public final class LocalizationUI extends javax.swing.JFrame {
 				= new OAuth.x_get_oauth_token.OAuthOptions(authorizationUrl, clientId, clientSecret, scope, tokenUrl);
 		new Thread(() -> {
 			try {
+				Environment env = Environment.createEnvironment(gEnv, staticRuntimeEnv);
 				if(clearFirst) {
-					OAuth.clear_oauth_tokens.execute(gEnv, clientId);
+					OAuth.clear_oauth_tokens.execute(env, clientId);
 				}
 				options.forcePort = 5346;
-				String githubOAuthToken = OAuth.x_get_oauth_token.execute(gEnv, options);
+				String githubOAuthToken = OAuth.x_get_oauth_token.execute(env, options);
 				success.token(githubOAuthToken);
 			} catch (Exception ex) {
 				showError(ex.getMessage());
