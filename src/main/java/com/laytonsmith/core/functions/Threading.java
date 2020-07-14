@@ -574,7 +574,7 @@ public class Threading {
 
 		@Override
 		public String docs() {
-			return "void {string id, int maxWait} Waits for the thread with the given id to exit. By default, we wait"
+			return "void {string id, [int maxWait]} Waits for the thread with the given id to exit. By default, we wait"
 					+ " potentially forever, but if maxWait is specified, we will only wait that many milliseconds."
 					+ " (Sending 0 for this value causes an infinite wait.) If the timeout occurs or thread interrupted, an"
 					+ " InterruptedException is thrown. If the id is unknown, this function will directly return";
@@ -742,10 +742,8 @@ public class Threading {
 
 		@Override
 		public String docs() {
-			return "boolean {[string id]} Tests whether this thread with the given id has been interrupted."
-					+ " If id not passed, it is be current thread."
-					+ " The \"interrupt status\" of the thread is unaffected by this method."
-					+ " In case if the thread does not exist or is not alive, return false";
+			return "boolean {[string id]} Tests whether the thread with the given id (or the current thread if none is provided)"
+					+ " is interrupted via " + new x_interrupt().getName() + ". If the thread doesn't exist, or is not alive, false is returned.";
 		}
 	}
 
@@ -790,9 +788,8 @@ public class Threading {
 
 		@Override
 		public String docs() {
-			return "boolean {} Tests whether this thread has been interrupted."
-					+ " The \"interrupt status\" of the thread is cleared by this method. In other words, if this method were to be called twice in succession, the second call would return false"
-					+ " (unless the current thread were interrupted again, after the first call had cleared its \"interrupt status\" and before the second call had examined it).";
+			return "boolean {} Clears the interrupt status of the current thread. If this call actually cleared the interrupt status,"
+					+ " true is returned, if the thread was already not interrupted, false is returned.";
 		}
 	}
 }
