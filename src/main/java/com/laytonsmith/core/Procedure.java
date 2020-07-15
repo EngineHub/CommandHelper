@@ -188,24 +188,22 @@ public class Procedure implements Cloneable {
 		}
 		oldEnv.getEnv(GlobalEnv.class).setCloneVars(prev);
 
-		//This is what will become our @arguments var
-		CArray arguments = new CArray(Target.UNKNOWN);
-		for(IVariable var : this.varIndex) {
-			String varName = var.getVariableName();
-			Mixed c = this.originals.get(varName);
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, varName, c, c.getTarget()));
-			arguments.push(c, t);
-		}
 		Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel()); // new Script(null, null);
-		for(int i = 0; i < args.size(); i++) {
-			Mixed c = args.get(i);
-			arguments.set(i, c, t);
-			if(varIndex.size() > i) {
-				IVariable var = varIndex.get(i);
+
+		// Create container for the @arguments variable.
+		CArray arguments = new CArray(Target.UNKNOWN, this.varIndex.size());
+
+		// Handle passed procedure arguments.
+		int varInd;
+		for(varInd = 0; varInd < args.size(); varInd++) {
+			Mixed c = args.get(varInd);
+			arguments.push(c, t);
+			if(this.varIndex.size() > varInd) {
+				IVariable var = this.varIndex.get(varInd);
 				if(c instanceof CVoid
 						&& !(var.getDefinedType().equals(Auto.TYPE) || var.getDefinedType().equals(CVoid.TYPE))) {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
-							+ var.getDefinedType().val() + " in argument " + (i + 1) + ", but"
+							+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
 							+ " a void value was found instead.", c.getTarget());
 				} else if(!(c instanceof CVoid) && c instanceof CNull || var.getDefinedType().equals(Auto.TYPE)
 						|| InstanceofUtil.isInstanceof(c, var.getDefinedType(), env)) {
@@ -213,11 +211,20 @@ public class Procedure implements Cloneable {
 							var.getVariableName(), c, c.getTarget()));
 				} else {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
-							+ var.getDefinedType().val() + " in argument " + (i + 1) + ", but"
+							+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
 							+ " a value of type " + c.typeof() + " was found instead.", c.getTarget());
 				}
 			}
 		}
+
+		// Assign default values to remaining proc arguments.
+		while(varInd < this.varIndex.size()) {
+			String varName = this.varIndex.get(varInd++).getVariableName();
+			Mixed defVal = this.originals.get(varName);
+			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, varName, defVal, defVal.getTarget()));
+			arguments.push(defVal, t);
+		}
+
 		env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, t));
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
