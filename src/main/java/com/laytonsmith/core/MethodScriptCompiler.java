@@ -1287,8 +1287,9 @@ public final class MethodScriptCompiler {
 		// Get the file options.
 		final FileOptions fileOptions = stream.getFileOptions();
 
-		ParseTree tree = new ParseTree(fileOptions);
-		tree.setData(CNull.NULL);
+		final ParseTree rootNode = new ParseTree(fileOptions);
+		rootNode.setData(CNull.NULL);
+		ParseTree tree = rootNode;
 		Stack<ParseTree> parents = new Stack<>();
 		/**
 		 * constructCount is used to determine if we need to use autoconcat when reaching a FUNC_END. The previous
@@ -1815,12 +1816,20 @@ public final class MethodScriptCompiler {
 			throw new ConfigCompileException("Mismatched curly braces", target);
 		}
 
+		// Assert that the parents stack does not have unexpected unhandled elements remaining.
+		assert parents.size() == 2 : "Expected exactly the root and autoconcat nodes on parents stack.";
+		assert parents.pop() == tree : "Mismatching stack element.";
+		assert parents.pop() == rootNode : "Expected the last element of the stack to be the root node.";
+		assert rootNode.getChildAt(0) == tree : "Expected tree to be the first child of the root node.";
+
+		// Process the AST.
 		Stack<List<Procedure>> procs = new Stack<>();
 		procs.add(new ArrayList<>());
 		processKeywords(tree, compilerErrors);
 		rewriteAutoconcats(tree, environment, envs, compilerErrors);
 		checkLinearComponents(tree, environment, compilerErrors);
-		tree = postParseRewrite(tree, environment, envs, compilerErrors);
+		postParseRewrite(rootNode, environment, envs, compilerErrors); // Pass rootNode since this might rewrite 'tree'.
+		tree = rootNode.getChildAt(0);
 		if(staticAnalysis != null) {
 			staticAnalysis.analyze(tree, environment, envs, compilerErrors);
 		}
@@ -1838,9 +1847,7 @@ public final class MethodScriptCompiler {
 			}
 		}
 		eliminateDeadCode(tree, environment, envs);
-		parents.pop();
-		tree = parents.pop();
-		return tree;
+		return rootNode;
 	}
 
 	private static void checkLinearComponents(ParseTree tree, Environment env,
