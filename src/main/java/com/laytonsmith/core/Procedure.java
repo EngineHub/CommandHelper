@@ -190,9 +190,10 @@ public class Procedure implements Cloneable {
 
 		//This is what will become our @arguments var
 		CArray arguments = new CArray(Target.UNKNOWN);
-		for(String key : originals.keySet()) {
-			Mixed c = originals.get(key);
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, key, c, c.getTarget()));
+		for(IVariable var : this.varIndex) {
+			String varName = var.getVariableName();
+			Mixed c = this.originals.get(varName);
+			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, varName, c, c.getTarget()));
 			arguments.push(c, t);
 		}
 		Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel()); // new Script(null, null);
