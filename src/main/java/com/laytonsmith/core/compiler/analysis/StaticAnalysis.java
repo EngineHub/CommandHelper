@@ -335,7 +335,9 @@ public class StaticAnalysis {
 
 	private void typecheck(Environment env, Set<ConfigCompileException> exceptions) {
 		for(StaticAnalysis analysis : this.staticAnalyses) {
-			analysis.typecheck(analysis.astRootNode, env, exceptions);
+			if(analysis.astRootNode != null) { // This is null for empty files, since those are not analyzed.
+				analysis.typecheck(analysis.astRootNode, env, exceptions);
+			}
 		}
 	}
 
