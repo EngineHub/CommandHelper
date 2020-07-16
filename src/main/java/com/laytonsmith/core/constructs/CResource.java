@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * slightly more complicated. Therefore, this is a stopgap measure that WILL be removed at some point, once Objects are
  * created.
  */
-@typeof("ms.lang.resource")
+@typeof("ms.lang.Resource")
 public class CResource<T> extends Construct {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
@@ -42,7 +42,7 @@ public class CResource<T> extends Construct {
 				if(!original.equals(id.getResource().toString())) {
 					addendum = original + ":";
 				}
-				return "resource@" + id.getId() + ":"
+				return "Resource@" + id.getId() + ":"
 						+ addendum
 						+ id.getResource().toString();
 			}
