@@ -8,6 +8,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.objects.ObjectDefinitionTable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,6 +54,13 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl {
 	private final ObjectDefinitionTable objectDefinitionTable = ObjectDefinitionTable.GetBlankInstance();
 
 	private final List<CompilerWarning> compilerWarnings = new ArrayList<>();
+
+	/**
+	 * When keyword processing causes a compile error, it is stored by Target in this map. If the keyword is still
+	 * present after parsing is fully completed, we know that the keyword is not part of some other syntax and the
+	 * exception from this map can be thrown after all.
+	 */
+	public final Map<Target, ConfigCompileException> potentialKeywordCompileErrors = new HashMap<>();
 
 	private boolean logCompilerWarnings = true;
 

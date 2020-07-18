@@ -13,6 +13,7 @@ import java.util.TreeSet;
 
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
@@ -393,7 +394,12 @@ public class StaticAnalysis {
 		} else if(node instanceof Variable) {
 			return CString.TYPE; // $vars can only be strings.
 		} else if(node instanceof CKeyword) {
-			exceptions.add(new ConfigCompileException("Unexpected keyword: " + node.val(), node.getTarget()));
+
+			// Use the more specific compile error caused during keyword processing if available.
+			ConfigCompileException ex =
+					env.getEnv(CompilerEnvironment.class).potentialKeywordCompileErrors.get(node.getTarget());
+			exceptions.add(ex != null ? ex
+					: new ConfigCompileException("Unexpected keyword: " + node.val(), node.getTarget()));
 			return CClassType.AUTO;
 		} else if(node instanceof CLabel) {
 			exceptions.add(new ConfigCompileException(
