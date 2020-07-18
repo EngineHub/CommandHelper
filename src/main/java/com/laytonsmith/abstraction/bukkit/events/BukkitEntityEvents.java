@@ -53,6 +53,7 @@ import com.laytonsmith.abstraction.events.MCEntityPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityRegainHealthEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
+import com.laytonsmith.abstraction.events.MCEntityUnleashEvent;
 import com.laytonsmith.abstraction.events.MCFireworkExplodeEvent;
 import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
 import com.laytonsmith.abstraction.events.MCItemDespawnEvent;
@@ -109,6 +110,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.bukkit.event.entity.EntityUnleashEvent;
 
 public class BukkitEntityEvents {
 
@@ -982,6 +984,20 @@ public class BukkitEntityEvents {
 			} catch (ReflectionUtils.ReflectionException ex) {
 				// after 1.13.2
 			}
+		}
+	}
+	
+	public static class BukkitMCEntityUnleashEvent implements MCEntityUnleashEvent {
+		
+		EntityUnleashEvent ide;
+
+		public BukkitMCEntityUnleashEvent(Event event) {
+			ide = (EntityUnleashEvent) event;
+		}
+
+		@Override
+		public Object _GetObject() {
+			return ide;
 		}
 	}
 }

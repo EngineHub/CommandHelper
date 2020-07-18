@@ -13,6 +13,7 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEnti
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityPortalEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityRegainHealthEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityToggleGlideEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityUnleashEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCFireworkExplodeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCHangingBreakEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCItemDespawnEvent;
@@ -45,6 +46,7 @@ import org.bukkit.event.entity.EntityPortalEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
+import org.bukkit.event.entity.EntityUnleashEvent;
 import org.bukkit.event.entity.FireworkExplodeEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
@@ -205,5 +207,11 @@ public class BukkitEntityListener implements Listener {
 	public void onPortalTravel(EntityPortalEvent event) {
 		BukkitMCEntityPortalEvent epe = new BukkitMCEntityPortalEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_PORTAL_TRAVEL, "entity_portal_travel", epe);
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onEntityUnleash(EntityUnleashEvent event) {
+		BukkitMCEntityUnleashEvent epe = new BukkitMCEntityUnleashEvent(event);
+		EventUtils.TriggerListener(Driver.ENTITY_UNLEASH, "entity_unleash", epe);
 	}
 }
