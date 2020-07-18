@@ -15,6 +15,8 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CKeyword;
+import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -390,6 +392,13 @@ public class StaticAnalysis {
 			}
 		} else if(node instanceof Variable) {
 			return CString.TYPE; // $vars can only be strings.
+		} else if(node instanceof CKeyword) {
+			exceptions.add(new ConfigCompileException("Unexpected keyword: " + node.val(), node.getTarget()));
+			return CClassType.AUTO;
+		} else if(node instanceof CLabel) {
+			exceptions.add(new ConfigCompileException(
+					"Unexpected label: " + ((CLabel) node).cVal().val(), node.getTarget()));
+			return CClassType.AUTO;
 		}
 
 		// The node is some other Construct, so return its type.
