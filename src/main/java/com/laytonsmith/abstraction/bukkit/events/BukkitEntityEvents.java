@@ -35,12 +35,14 @@ import com.laytonsmith.abstraction.enums.MCRegainReason;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
+import com.laytonsmith.abstraction.enums.MCUnleashReason;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDamageCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRegainReason;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRemoveCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCUnleashReason;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
@@ -998,6 +1000,16 @@ public class BukkitEntityEvents {
 		@Override
 		public Object _GetObject() {
 			return ide;
+		}
+
+		@Override
+		public MCEntity getEntity() {
+			return new BukkitMCEntity(ide.getEntity());
+		}
+		
+		@Override
+		public MCUnleashReason getReason() {
+			return BukkitMCUnleashReason.getConvertor().getAbstractedEnum(ide.getReason());
 		}
 	}
 }

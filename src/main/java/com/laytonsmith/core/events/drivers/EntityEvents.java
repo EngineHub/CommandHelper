@@ -24,6 +24,7 @@ import com.laytonsmith.abstraction.enums.MCRegainReason;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
+import com.laytonsmith.abstraction.enums.MCUnleashReason;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
@@ -36,6 +37,7 @@ import com.laytonsmith.abstraction.events.MCEntityPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityRegainHealthEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
+import com.laytonsmith.abstraction.events.MCEntityUnleashEvent;
 import com.laytonsmith.abstraction.events.MCFireworkExplodeEvent;
 import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
 import com.laytonsmith.abstraction.events.MCItemDespawnEvent;
@@ -2164,12 +2166,26 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "";
+			return "{type: <macro>}"
+					+ " Fired when an entity is no longer leashed."
+					+ " {id: The UUID of entity"
+					+ " | type: the type of entity that was on the leash"
+					+ " | reason: Why the entity was unleashed, can be one of " + StringUtils.Join(MCUnleashReason.values(), "}");
 		}
 
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+			if(e instanceof MCEntityUnleashEvent) {
+				MCEntityUnleashEvent event = (MCEntityUnleashEvent) e;
+				Prefilters.match(prefilter, "reason", event.getReason().name(), PrefilterType.MACRO);
+				return true;
+			}
+			if(e instanceof MCEntityUnleashEvent) {
+				MCEntityUnleashEvent event = (MCEntityUnleashEvent) e;
+				Prefilters.match(prefilter, "type", event.getEntity().getType().name(), PrefilterType.MACRO);
+				return true;
+			}
+			return false;
 		}
 
 		@Override
@@ -2179,7 +2195,16 @@ public class EntityEvents {
 
 		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
-			throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+			if(e instanceof MCEntityUnleashEvent) {
+				MCEntityUnleashEvent event = (MCEntityUnleashEvent) e;
+
+				Map<String, Mixed> ret = evaluate_helper(e);
+				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), Target.UNKNOWN));
+				ret.put("reason", new CString(event.getReason().name(), Target.UNKNOWN));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCEntityRegainHealthEvent");
+			}
 		}
 
 		@Override
@@ -2189,7 +2214,7 @@ public class EntityEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
-			throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+			return false;
 		}
 
 		@Override
