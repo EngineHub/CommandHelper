@@ -35,12 +35,14 @@ import com.laytonsmith.abstraction.enums.MCRegainReason;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
+import com.laytonsmith.abstraction.enums.MCUnleashReason;
 import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDamageCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCEntityType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRegainReason;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRemoveCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCUnleashReason;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
@@ -53,6 +55,7 @@ import com.laytonsmith.abstraction.events.MCEntityPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityRegainHealthEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
+import com.laytonsmith.abstraction.events.MCEntityUnleashEvent;
 import com.laytonsmith.abstraction.events.MCFireworkExplodeEvent;
 import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
 import com.laytonsmith.abstraction.events.MCItemDespawnEvent;
@@ -110,6 +113,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.bukkit.event.entity.EntityUnleashEvent;
 
 public class BukkitEntityEvents {
 
@@ -983,6 +987,30 @@ public class BukkitEntityEvents {
 			} catch (ReflectionUtils.ReflectionException ex) {
 				// after 1.13.2
 			}
+		}
+	}
+
+	public static class BukkitMCEntityUnleashEvent implements MCEntityUnleashEvent {
+
+		EntityUnleashEvent ide;
+
+		public BukkitMCEntityUnleashEvent(Event event) {
+			ide = (EntityUnleashEvent) event;
+		}
+
+		@Override
+		public Object _GetObject() {
+			return ide;
+		}
+
+		@Override
+		public MCEntity getEntity() {
+			return new BukkitMCEntity(ide.getEntity());
+		}
+
+		@Override
+		public MCUnleashReason getReason() {
+			return BukkitMCUnleashReason.getConvertor().getAbstractedEnum(ide.getReason());
 		}
 	}
 }

@@ -24,6 +24,7 @@ import com.laytonsmith.abstraction.enums.MCRegainReason;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
+import com.laytonsmith.abstraction.enums.MCUnleashReason;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
@@ -36,6 +37,7 @@ import com.laytonsmith.abstraction.events.MCEntityPortalEvent;
 import com.laytonsmith.abstraction.events.MCEntityRegainHealthEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
+import com.laytonsmith.abstraction.events.MCEntityUnleashEvent;
 import com.laytonsmith.abstraction.events.MCFireworkExplodeEvent;
 import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
 import com.laytonsmith.abstraction.events.MCItemDespawnEvent;
@@ -2151,6 +2153,71 @@ public class EntityEvents {
 				}
 			}
 			return false;
+		}
+	}
+
+	@api
+	public static class entity_unleash extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "entity_unleash";
+		}
+
+		@Override
+		public String docs() {
+			return "{type: <macro> | reason: <macro>}"
+					+ " This event is called when a leash is broken."
+					+ " {id: The entityID of the entity | type: The entity type of the entity"
+					+ " reason: The reason the leash broke. Can be one of "
+					+ StringUtils.Join(MCUnleashReason.values(), ", ", ", or ", " or ") + "}"
+					+ " {}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if(e instanceof MCEntityUnleashEvent) {
+				MCEntityUnleashEvent event = (MCEntityUnleashEvent) e;
+				Prefilters.match(prefilter, "reason", event.getReason().name(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "type", event.getEntity().getType().name(), PrefilterType.MACRO);
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+			if(e instanceof MCEntityUnleashEvent) {
+				MCEntityUnleashEvent event = (MCEntityUnleashEvent) e;
+
+				Map<String, Mixed> ret = evaluate_helper(e);
+				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), Target.UNKNOWN));
+				ret.put("reason", new CString(event.getReason().name(), Target.UNKNOWN));
+				ret.put("type", new CString(event.getEntity().getType().name(), Target.UNKNOWN));
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCEntityUnleashEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.ENTITY_UNLEASH;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
 		}
 	}
 }
