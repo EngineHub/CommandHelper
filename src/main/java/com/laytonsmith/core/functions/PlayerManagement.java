@@ -4130,20 +4130,25 @@ public class PlayerManagement {
 			}
 			Static.AssertPlayerNonNull(p, t);
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
+			Mixed cdata = args[1 + offset];
 			MCBlockData data;
-			try {
-				data = StaticLayer.GetServer().createBlockData(args[1 + offset].val().toLowerCase());
-			} catch (IllegalArgumentException ex) {
-				String value = args[1 + offset].val();
-				if(value.contains(":") && value.length() <= 6) {
-					data = Static.ParseItemNotation(getName(), args[1 + offset].val(), 1, t).getType().createBlockData();
-				} else {
-					throw new CREFormatException("Invalid block format: " + value, t);
+			if(cdata instanceof CNull) {
+				data = loc.getBlock().getBlockData();
+			} else {
+				try {
+					data = StaticLayer.GetServer().createBlockData(cdata.val().toLowerCase());
+				} catch (IllegalArgumentException ex) {
+					String value = cdata.val();
+					if(value.contains(":") && value.length() <= 6) {
+						data = Static.ParseItemNotation(getName(), cdata.val(), 1, t).getType().createBlockData();
+					} else {
+						throw new CREFormatException("Invalid block format: " + value, t);
+					}
 				}
-			}
-			if(!data.getMaterial().isBlock()) {
-				throw new CREIllegalArgumentException("The value \"" + args[1 + offset].val()
-						+ "\" is not a valid block material.", t);
+				if(!data.getMaterial().isBlock()) {
+					throw new CREIllegalArgumentException("The value \"" + cdata.val()
+							+ "\" is not a valid block material.", t);
+				}
 			}
 			p.sendBlockChange(loc, data);
 			return CVoid.VOID;
@@ -4164,6 +4169,7 @@ public class PlayerManagement {
 			return "void {[player], locationArray, block} Changes a block temporarily for the specified player."
 					+ " This can be used to \"fake\" blocks for a player. These illusory blocks will disappear when"
 					+ " the client updates them, most often by clicking on them or reloading the chunks."
+					+ " Sending null will reset the block to its existing state in the world."
 					+ " A block type or blockdata format is supported. (see set_blockdata_string())";
 		}
 
