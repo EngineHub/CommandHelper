@@ -39,7 +39,6 @@ public class IfKeyword extends Keyword {
 						// It is, convert this into an ifelse
 						ParseTree newNode = new ParseTree(new CFunction(IFELSE, t), node.getFileOptions());
 						newNode.setChildren(node.getChildren());
-						list.set(keywordPosition, newNode);
 						node = newNode;
 					}
 				} catch (IndexOutOfBoundsException ex) {
@@ -94,6 +93,10 @@ public class IfKeyword extends Keyword {
 				}
 			}
 		}
+
+		// Set the new node, which might have changed to 'ifelse()'.
+		list.set(keywordPosition, node);
+
 		return keywordPosition;
 	}
 

@@ -5,8 +5,7 @@ import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
+import com.laytonsmith.core.exceptions.AbstractCompileException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.BeforeClass;
@@ -174,7 +173,7 @@ public class NewExceptionHandlingTest {
 		verify(log).Log(eq(MSLog.Tags.RUNTIME), eq(LogLevel.WARNING), anyString(), any(Target.class));
 	}
 
-	@Test(expected = ConfigCompileException.class)
+	@Test(expected = AbstractCompileException.class)
 	public void testDuplicateExceptionTypeThrowsException() throws Exception {
 		SRun("try { } catch (CastException @e){ } catch (CastException @e){ }", fakePlayer);
 	}
@@ -200,37 +199,37 @@ public class NewExceptionHandlingTest {
 		verify(fakePlayer).sendMessage("run");
 	}
 
-	@Test(expected = ConfigCompileGroupException.class)
+	@Test(expected = AbstractCompileException.class)
 	public void testFinallyMustBeLast() throws Exception {
 		SRun("try { } finally { } catch (Exception @e){ }", fakePlayer);
 	}
 
-	@Test(expected = ConfigCompileGroupException.class)
+	@Test(expected = AbstractCompileException.class)
 	public void testFinallyErrors() throws Exception {
 		SRun("finally { }", fakePlayer);
 	}
 
-	@Test(expected = ConfigCompileGroupException.class)
+	@Test(expected = AbstractCompileException.class)
 	public void testCatchErrors() throws Exception {
 		SRun("catch (Exception @e) { }", fakePlayer);
 	}
 
-	@Test(expected = ConfigCompileGroupException.class)
+	@Test(expected = AbstractCompileException.class)
 	public void testCatchErrors2() throws Exception {
 		SRun("catch { }", fakePlayer);
 	}
 
-	@Test(expected = ConfigCompileGroupException.class)
+	@Test(expected = AbstractCompileException.class)
 	public void testCatchOnlyAllows1Parameter1() throws Exception {
 		SRun("try { } catch (Exception @e, IOException @b) { }", fakePlayer);
 	}
 
-	@Test(expected = ConfigCompileGroupException.class)
+	@Test(expected = AbstractCompileException.class)
 	public void testCatchOnlyAllows1Parameter2() throws Exception {
 		SRun("catch (){ }", fakePlayer);
 	}
 
-	@Test(expected = ConfigCompileException.class)
+	@Test(expected = AbstractCompileException.class)
 	public void testTryAloneFails() throws Exception {
 		SRun("try { }", fakePlayer);
 	}
@@ -292,7 +291,7 @@ public class NewExceptionHandlingTest {
 				+ "}");
 	}
 
-	@Test(expected = ConfigCompileException.class)
+	@Test(expected = AbstractCompileException.class)
 	public void testUnknownExceptionType() throws Exception {
 		SRun("try { } catch (NoTaReAlExCePtIoNtYpE @e){ }", fakePlayer);
 	}

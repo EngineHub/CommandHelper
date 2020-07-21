@@ -5,10 +5,10 @@ import java.io.File;
 import java.util.Objects;
 
 /**
- *
- *
+ * This {@link Exception} can be thrown when a problem occurs during compilation.
  */
-public class ConfigCompileException extends Exception implements Comparable<ConfigCompileException> {
+@SuppressWarnings("serial")
+public class ConfigCompileException extends AbstractCompileException implements Comparable<ConfigCompileException> {
 
 	final String message;
 	final int lineNum;
@@ -40,28 +40,28 @@ public class ConfigCompileException extends Exception implements Comparable<Conf
 
 	@Override
 	public String getMessage() {
-		return message;
+		return this.message;
 	}
 
 	public String getLineNum() {
-		return Integer.toString(lineNum);
+		return Integer.toString(this.lineNum);
 	}
 
 	public int getColumn() {
-		return col;
+		return this.col;
 	}
 
 	public Target getTarget() {
-		return t;
+		return this.t;
 	}
 
 	@Override
 	public String toString() {
-		if(lineNum != 0) {
-			return "Configuration Compile Exception: " + message + " near line " + lineNum + ". Please "
+		if(this.lineNum != 0) {
+			return "Configuration Compile Exception: " + this.message + " near line " + lineNum + ". Please "
 					+ "check your code and try again. " + (file != null ? "(" + file.getAbsolutePath() + ")" : "");
 		} else {
-			return "Configuration Compile Exception: " + message + ". Please check your code and try again. "
+			return "Configuration Compile Exception: " + this.message + ". Please check your code and try again. "
 					+ (file != null ? "(" + file.getAbsolutePath() + ")" : "");
 		}
 	}

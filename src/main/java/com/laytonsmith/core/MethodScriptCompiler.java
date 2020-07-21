@@ -1825,7 +1825,7 @@ public final class MethodScriptCompiler {
 		// Process the AST.
 		Stack<List<Procedure>> procs = new Stack<>();
 		procs.add(new ArrayList<>());
-		processKeywords(tree, compilerErrors);
+		processKeywords(tree, environment, compilerErrors);
 		rewriteAutoconcats(tree, environment, envs, compilerErrors);
 		checkLinearComponents(tree, environment, compilerErrors);
 		postParseRewrite(rootNode, environment, envs, compilerErrors); // Pass rootNode since this might rewrite 'tree'.
@@ -1838,6 +1838,9 @@ public final class MethodScriptCompiler {
 		checkFunctionsExist(tree, compilerErrors, envs);
 		checkLabels(tree, compilerErrors);
 		checkBreaks(tree, compilerErrors);
+		if(staticAnalysis == null) {
+			checkUnhandledCompilerConstructs(tree, environment, compilerErrors);
+		}
 		if(!compilerErrors.isEmpty()) {
 			if(compilerErrors.size() == 1) {
 				// Just throw the one CCE
@@ -2670,32 +2673,61 @@ public final class MethodScriptCompiler {
 	 *
 	 * @param tree
 	 */
-	private static void processKeywords(ParseTree tree, Set<ConfigCompileException> compileErrors) {
+	private static void processKeywords(ParseTree tree, Environment env, Set<ConfigCompileException> compileErrors) {
 		// Keyword processing
 		List<ParseTree> children = tree.getChildren();
 		for(int i = 0; i < children.size(); i++) {
 			ParseTree node = children.get(i);
 			// Keywords can be standalone, or a function can double as a keyword. So we have to check for both
 			// conditions.
-			processKeywords(node, compileErrors);
-			if(node.getData() instanceof CKeyword
-					|| (node.getData() instanceof CLabel && ((CLabel) node.getData()).cVal() instanceof CKeyword)
-					|| (node.getData() instanceof CFunction && KeywordList.getKeywordByName(node.getData().val()) != null)) {
+			processKeywords(node, env, compileErrors);
+			Mixed m = node.getData();
+			if(m instanceof CKeyword
+					|| (m instanceof CLabel && ((CLabel) m).cVal() instanceof CKeyword)
+					|| (m instanceof CFunction && KeywordList.getKeywordByName(m.val()) != null)) {
 				// This looks a bit confusing, but is fairly straightforward. We want to process the child elements of all
 				// remaining nodes, so that subchildren that need processing will be finished, and our current tree level will
 				// be able to independently process it. We don't want to process THIS level though, just the children of this level.
 				for(int j = i + 1; j < children.size(); j++) {
-					processKeywords(children.get(j), compileErrors);
+					processKeywords(children.get(j), env, compileErrors);
 				}
 				// Now that all the children of the rest of the chain are processed, we can do the processing of this level.
 				try {
-					i = KeywordList.getKeywordByName(node.getData().val()).process(children, i);
+					i = KeywordList.getKeywordByName(m.val()).process(children, i);
 				} catch (ConfigCompileException ex) {
-					compileErrors.add(ex);
+					// Keyword processing failed, but the keyword might be part of some other syntax where it's valid.
+					// Store the compile error so that it can be thrown after all if the keyword won't be handled.
+					env.getEnv(CompilerEnvironment.class).potentialKeywordCompileErrors.put(m.getTarget(), ex);
 				}
 			}
 		}
 
+	}
+
+	/**
+	 * Generates compile errors for unhandled compiler constructs that should not be present in the final AST,
+	 * such as {@link CKeyword}.
+	 * This is purely validation and should be called on the final AST.
+	 * @param tree - The final abstract syntax tree.
+	 * @param env - The environment.
+	 * @param compilerErrors - A set to put compile errors in.
+	 * @deprecated This is handled in {@link StaticAnalysis} and will no longer be useful when static analysis is
+	 * permanently enabled.
+	 */
+	@Deprecated
+	private static void checkUnhandledCompilerConstructs(ParseTree tree,
+			Environment env, Set<ConfigCompileException> compilerErrors) {
+		for(ParseTree node : tree.getAllNodes()) {
+			Mixed m = node.getData();
+
+			// Create compile error for unexpected keywords.
+			if(m instanceof CKeyword) {
+				ConfigCompileException ex =
+						env.getEnv(CompilerEnvironment.class).potentialKeywordCompileErrors.get(m.getTarget());
+				compilerErrors.add(ex != null ? ex
+						: new ConfigCompileException("Unexpected keyword: " + m.val(), m.getTarget()));
+			}
+		}
 	}
 
 	/**
