@@ -33,13 +33,11 @@ import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 
 /**
@@ -53,7 +51,7 @@ public class Threading {
 				+ " be yet heavily relied on in normal development.";
 	}
 
-	public static final Map<String, Thread> THREAD_ID_MAP = Collections.synchronizedMap(new WeakHashMap<>());
+	public static final Map<String, Thread> THREAD_ID_MAP = new HashMap<>();
 
 	@api
 	@noboilerplate
@@ -77,13 +75,12 @@ public class Threading {
 
 		@Override
 		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
-			String id = args[0].val();
+			final String threadId = args[0].val();
 			if(!(args[1].isInstanceOf(CClosure.TYPE))) {
 				throw new CRECastException("Expected closure for arg 2", t);
 			}
 			final CClosure closure = (CClosure) args[1];
-			Thread th = new Thread(new Runnable() {
-
+			Thread th = new Thread("(" + Implementation.GetServerType().getBranding() + ") " + threadId) {
 				@Override
 				public void run() {
 					DaemonManager dm = environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
@@ -101,11 +98,18 @@ public class Threading {
 						}
 					} finally {
 						dm.deactivateThread(Thread.currentThread());
+						synchronized(THREAD_ID_MAP) {
+							if(THREAD_ID_MAP.get(threadId) == this) {
+								THREAD_ID_MAP.remove(threadId);
+							}
+						}
 					}
 				}
-			}, "(" + Implementation.GetServerType().getBranding() + ") " + id);
+			};
 			th.start();
-			THREAD_ID_MAP.put(id, th);
+			synchronized(THREAD_ID_MAP) {
+				THREAD_ID_MAP.put(threadId, th);
+			}
 			return CVoid.VOID;
 		}
 
@@ -545,8 +549,11 @@ public class Threading {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			String id = args[0].val();
-			Thread th = THREAD_ID_MAP.get(id);
+			String threadId = args[0].val();
+			Thread th;
+			synchronized(THREAD_ID_MAP) {
+				th = THREAD_ID_MAP.get(threadId);
+			}
 			if(th == null) {
 				return CVoid.VOID;
 			}
@@ -607,7 +614,11 @@ public class Threading {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			Thread th = THREAD_ID_MAP.get(args[0].val());
+			String threadId = args[0].val();
+			Thread th;
+			synchronized(THREAD_ID_MAP) {
+				th = THREAD_ID_MAP.get(threadId);
+			}
 			if(th == null) {
 				return CBoolean.FALSE;
 			}
@@ -658,7 +669,10 @@ public class Threading {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			Thread th;
 			if(args.length == 1) {
-				th = THREAD_ID_MAP.get(args[0].val());
+				String threadId = args[0].val();
+				synchronized(THREAD_ID_MAP) {
+					th = THREAD_ID_MAP.get(threadId);
+				}
 				if(th != null) {
 					th.interrupt();
 				}
@@ -714,7 +728,11 @@ public class Threading {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 1) {
-				Thread th = THREAD_ID_MAP.get(args[0].val());
+				String threadId = args[0].val();
+				Thread th;
+				synchronized(THREAD_ID_MAP) {
+					th = THREAD_ID_MAP.get(threadId);
+				}
 				if(th != null) {
 					return CBoolean.get(th.isInterrupted());
 				} else {
