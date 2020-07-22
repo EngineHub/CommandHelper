@@ -2119,9 +2119,13 @@ public final class MethodScriptCompiler {
 			}
 		}
 		if(root.getData() instanceof CFunction && root.getData().val().equals(__autoconcat__.NAME)) {
+
+			// In non-strict mode, let __autoconcat__ glue arguments together with sconcat.
+			boolean returnSConcat = !root.getFileOptions().isStrict();
+
 			try {
 				ParseTree ret = ((Compiler.__autoconcat__) ((CFunction) root.getData()).getFunction())
-						.rewrite(root.getChildren(), true, envs);
+						.rewrite(root.getChildren(), returnSConcat, envs);
 				root.setData(ret.getData());
 				root.setChildren(ret.getChildren());
 			} catch (ConfigCompileException ex) {

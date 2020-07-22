@@ -45,6 +45,7 @@ import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.functions.BasicLogic.and;
+import com.laytonsmith.core.functions.Compiler.__statements__;
 import com.laytonsmith.core.functions.Compiler.centry;
 import com.laytonsmith.core.functions.DataHandling.assign;
 import com.laytonsmith.core.functions.Math.dec;
@@ -647,7 +648,8 @@ public class ControlFlow {
 			List<ParseTree> children = ast.getChildren();
 			Target t = ast.getTarget();
 			if(children.size() > 1 && children.get(1).getData() instanceof CFunction
-					&& new StringHandling.sconcat().getName().equals(children.get(1).getData().val())) {
+					&& (sconcat.NAME.equals(children.get(1).getData().val())
+							|| __statements__.NAME.equals(children.get(1).getData().val()))) {
 				//This is the brace/case/default usage of switch, probably. We need
 				//to refactor the data into the old switch format.
 				List<ParseTree> newChildren = new ArrayList<>();
@@ -745,7 +747,7 @@ public class ControlFlow {
 					newChildren.add(new ParseTree(conditions, children.get(0).getFileOptions()));
 				}
 				if(lastCodeBlock.size() > 0) {
-					ParseTree codeBlock = new ParseTree(new CFunction(new StringHandling.sconcat().getName(), t),
+					ParseTree codeBlock = new ParseTree(new CFunction(sconcat.NAME, t),
 							lastCodeBlock.get(0).getFileOptions());
 					for(ParseTree line : lastCodeBlock) {
 						codeBlock.addChild(line);

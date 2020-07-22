@@ -152,9 +152,10 @@ public class Compiler {
 		 * this __autoconcat__ node being replaced or in a compile error if the __autoconcat__ cannot be converted to
 		 * an executable AST node. This being a function is merely a convenient way to defer processing until after
 		 * parsing, meaning that it should ALWAYS be rewritten before executing the AST.
-		 *
-		 * @param list
-		 * @param returnSConcat
+		 * @param list - A list containing all {@link ParseTree} children of this __autoconcat__.
+		 * @param returnSConcat - If parsing results in only one child function, then this argument is ignored.
+		 * If {@code true}, the resulting parsed functions will be wrapped into {@link sconcat}.
+		 * If {@code false}, the resulting parsed functions will be wrapped into {@link __statements__}.
 		 * @return The executable AST node, representing the code/tokens in this __autoconcat__.
 		 * @throws ConfigCompileException If this __autoconcat__ cannot be converted to an executable AST node.
 		 */
@@ -547,11 +548,45 @@ public class Compiler {
 				if(returnSConcat) {
 					tree = new ParseTree(new CFunction(sconcat.NAME, t), options);
 				} else {
-					tree = new ParseTree(new CFunction(concat.NAME, t), options);
+					tree = new ParseTree(new CFunction(__statements__.NAME, t), options);
 				}
 				tree.setChildren(list);
 				return tree;
 			}
+		}
+	}
+
+	@api
+	@noprofile
+	@hide("This is only used internally by the compiler.")
+	public static class __statements__ extends DummyFunction {
+
+		public static final String NAME = "__statements__";
+
+		@Override
+		public String getName() {
+			return NAME;
+		}
+
+		@Override
+		public String docs() {
+			return "void {[...]} Used internally by the compiler. You shouldn't use it.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CVoid.VOID;
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			return CVoid.TYPE;
+		}
+
+		@Override
+		public boolean preResolveVariables() {
+			return false;
 		}
 	}
 

@@ -45,7 +45,11 @@ class OptimizerObject {
 				= (com.laytonsmith.core.functions.Compiler.__autoconcat__)
 				FunctionList.getFunction("__autoconcat__", null, Target.UNKNOWN);
 		if(tree.getData() instanceof CFunction && tree.getData().val().equals("__autoconcat__")) {
-			ParseTree tempNode = autoconcat.rewrite(tree.getChildren(), true, null);
+
+			// In non-strict mode, let __autoconcat__ glue arguments together with sconcat.
+			boolean returnSConcat = !tree.getFileOptions().isStrict();
+
+			ParseTree tempNode = autoconcat.rewrite(tree.getChildren(), returnSConcat, null);
 			tree.setData(tempNode.getData());
 			tree.setChildren(tempNode.getChildren());
 		}
