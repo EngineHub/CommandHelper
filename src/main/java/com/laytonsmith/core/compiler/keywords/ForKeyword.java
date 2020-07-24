@@ -1,5 +1,7 @@
 package com.laytonsmith.core.compiler.keywords;
 
+import java.util.List;
+
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
@@ -8,16 +10,13 @@ import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.ControlFlow;
-import java.util.List;
+import com.laytonsmith.core.functions.Function;
 
 /**
  *
  */
 @Keyword.keyword("for")
 public class ForKeyword extends Keyword {
-
-	private static final String FORELSE = new ControlFlow.forelse().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
@@ -44,7 +43,7 @@ public class ForKeyword extends Keyword {
 					forTree.addChild(getArgumentOrNull(codeBlock));
 				}
 				// We also have to refactor this into a foreachelse, instead of a foreach.
-				list.get(keywordPosition).setData(new CFunction(FORELSE, t));
+				list.get(keywordPosition).setData(new CFunction(Function.FORELSE, t));
 				list.remove(keywordPosition + 1);
 			}
 		}

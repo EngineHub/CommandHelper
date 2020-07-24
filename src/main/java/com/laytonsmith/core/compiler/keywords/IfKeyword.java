@@ -1,5 +1,7 @@
 package com.laytonsmith.core.compiler.keywords;
 
+import java.util.List;
+
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
@@ -8,16 +10,13 @@ import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.ControlFlow;
-import java.util.List;
+import com.laytonsmith.core.functions.Function;
 
 /**
  *
  */
 @Keyword.keyword("if")
 public class IfKeyword extends Keyword {
-
-	private static final String IFELSE = new ControlFlow.ifelse().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
@@ -37,7 +36,7 @@ public class IfKeyword extends Keyword {
 					if(nodeIsElseKeyword(list.get(keywordPosition + 2))
 							&& nodeIsIfFunction(list.get(keywordPosition + 3))) {
 						// It is, convert this into an ifelse
-						ParseTree newNode = new ParseTree(new CFunction(IFELSE, t), node.getFileOptions());
+						ParseTree newNode = new ParseTree(new CFunction(Function.IFELSE, t), node.getFileOptions());
 						newNode.setChildren(node.getChildren());
 						node = newNode;
 					}

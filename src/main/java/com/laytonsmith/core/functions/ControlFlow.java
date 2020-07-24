@@ -23,7 +23,6 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
-import com.laytonsmith.core.compiler.keywords.InKeyword;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CIdentifier;
@@ -176,9 +175,6 @@ public class ControlFlow {
 			);
 		}
 
-		@SuppressWarnings("checkstyle:constantname")
-		private static final String and = new BasicLogic.and().getName();
-
 		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
@@ -186,10 +182,10 @@ public class ControlFlow {
 				throws ConfigCompileException {
 			//Check for too many/few arguments
 			if(args.size() < 2) {
-				throw new ConfigCompileException("Too few arguments passed to if()", t);
+				throw new ConfigCompileException("Too few arguments passed to " + this.getName() + "()", t);
 			}
 			if(args.size() > 3) {
-				throw new ConfigCompileException("if() can only have 3 parameters", t);
+				throw new ConfigCompileException(this.getName() + "() can only have 3 parameters", t);
 			}
 			if(args.get(0).isConst()) {
 				// We can optimize this one way or the other, since the condition is const
@@ -215,16 +211,16 @@ public class ControlFlow {
 			// or there are other nodes inside the statement, or we have an else clause
 			// we cannot do this optimization, as it then has side effects.
 			if(args.get(1).getData() instanceof CFunction
-					&& args.get(1).getData().val().equals("if") && args.size() == 2) {
+					&& args.get(1).getData().val().equals(IF) && args.size() == 2) {
 				ParseTree _if = args.get(1);
 				if(_if.getChildren().size() == 2) {
 					// All the conditions are met, move this up
 					ParseTree myCondition = args.get(0);
 					ParseTree theirCondition = _if.getChildAt(0);
 					ParseTree theirCode = _if.getChildAt(1);
-					ParseTree andClause = new ParseTree(new CFunction(and, t), fileOptions);
+					ParseTree andClause = new ParseTree(new CFunction(AND, t), fileOptions);
 					// If it's already an and(), just tack the other condition on
-					if(myCondition.getData() instanceof CFunction && myCondition.getData().val().equals(and)) {
+					if(myCondition.getData() instanceof CFunction && myCondition.getData().val().equals(AND)) {
 						andClause = myCondition;
 						andClause.addChild(theirCondition);
 					} else {
@@ -1086,11 +1082,11 @@ public class ControlFlow {
 			boolean isInc;
 			try {
 				if(children.get(2).getData() instanceof CFunction
-						&& ((isInc = children.get(2).getData().val().equals("postinc"))
-						|| children.get(2).getData().val().equals("postdec"))
+						&& ((isInc = children.get(2).getData().val().equals(POSTINC))
+						|| children.get(2).getData().val().equals(POSTDEC))
 						&& children.get(2).getChildAt(0).getData() instanceof IVariable) {
 					ParseTree pre = new ParseTree(
-							new CFunction(isInc ? "inc" : "dec", t), children.get(2).getFileOptions());
+							new CFunction(isInc ? INC : DEC, t), children.get(2).getFileOptions());
 					pre.addChild(children.get(2).getChildAt(0));
 					children.set(2, pre);
 				}
@@ -1568,11 +1564,6 @@ public class ControlFlow {
 					+ ", <code>)";
 		}
 
-		private static final String CENTRY = new Compiler.centry().getName();
-		private static final String ASSIGN = new DataHandling.assign().getName();
-		private static final String SCONCAT = new StringHandling.sconcat().getName();
-		private static final String IN = new InKeyword().getKeywordName();
-
 		private boolean isFunction(ParseTree node, String function) {
 			return node.getData() instanceof CFunction && node.getData().val().equals(function);
 		}
@@ -1594,7 +1585,7 @@ public class ControlFlow {
 				// This is what "@key: @value in @array" looks like initially.
 				// We'll refactor this so the next segment can take over properly.
 				ParseTree sconcat = new ParseTree(
-						new CFunction(new StringHandling.sconcat().getName(), ast.getTarget()), ast.getFileOptions());
+						new CFunction(SCONCAT, ast.getTarget()), ast.getFileOptions());
 				sconcat.addChild(children.get(0).getChildAt(0));
 				for(int i = 0; i < children.get(0).getChildAt(1).numberOfChildren(); i++) {
 					sconcat.addChild(children.get(0).getChildAt(1).getChildAt(i));
@@ -1602,7 +1593,7 @@ public class ControlFlow {
 				children.set(0, sconcat);
 			}
 			if(children.get(0).getData() instanceof CFunction
-					&& children.get(0).getData().val().equals(new StringHandling.sconcat().getName())) {
+					&& children.get(0).getData().val().equals(SCONCAT)) {
 				// We may be looking at a "@value in @array" or "@array as @value" type
 				// structure, so we need to re-arrange this into the standard format.
 				ParseTree array = null;
@@ -1667,7 +1658,7 @@ public class ControlFlow {
 				if(children.get(children.size() - 1).getData() instanceof CFunction
 						&& children.get(children.size() - 1).getData().val().equals("else")) {
 					ParseTree foreachelse = new ParseTree(
-							new CFunction(new foreachelse().getName(), ast.getTarget()), ast.getFileOptions());
+							new CFunction(FOREACHELSE, ast.getTarget()), ast.getFileOptions());
 					children.set(children.size() - 1, children.get(children.size() - 1).getChildAt(0));
 					foreachelse.setChildren(children);
 					return foreachelse;

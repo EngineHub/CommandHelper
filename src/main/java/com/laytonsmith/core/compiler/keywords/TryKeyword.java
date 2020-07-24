@@ -7,7 +7,8 @@ import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.functions.Function;
+
 import java.util.List;
 
 /**
@@ -15,8 +16,6 @@ import java.util.List;
  */
 @Keyword.keyword("try")
 public class TryKeyword extends Keyword {
-
-	private static final String COMPLEX_TRY = new Exceptions.complex_try().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
@@ -40,13 +39,15 @@ public class TryKeyword extends Keyword {
 		 */
 
 		// If it's the old version, and a function
-		if(list.get(keywordPosition).getData() instanceof CFunction && list.get(keywordPosition).getData().val().equals("try")) {
+		if(list.get(keywordPosition).getData() instanceof CFunction
+				&& list.get(keywordPosition).getData().val().equals(Function.TRY)) {
 			return keywordPosition;
 		}
 		// Otherwise it's not, and we can continue on, assuming keyword usage.
 		this.validateCodeBlock(list.get(keywordPosition + 1), "Expecting braces after try keyword");
 
-		ParseTree complexTry = new ParseTree(new CFunction(COMPLEX_TRY, list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
+		ParseTree complexTry = new ParseTree(new CFunction(Function.COMPLEX_TRY,
+				list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
 		complexTry.addChild(getArgumentOrNull(list.get(keywordPosition + 1)));
 
 		// For now, we won't allow try {}, so this must be followed by a catch keyword. This restriction is somewhat artificial, and

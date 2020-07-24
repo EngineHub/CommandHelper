@@ -332,7 +332,7 @@ public class SQL {
 			Mixed queryData = children.get(1).getData();
 			if(queryData instanceof CFunction) {
 				//If it's a concat or sconcat, warn them that this is bad
-				if(doWarn && ("sconcat".equals(queryData.val()) || "concat".equals(queryData.val()))) {
+				if(doWarn && (SCONCAT.equals(queryData.val()) || CONCAT.equals(queryData.val()))) {
 					String msg = "Use of concatenated query detected! This"
 							+ " is very bad practice, and could lead to SQL injection vulnerabilities"
 							+ " in your code. It is highly recommended that you use prepared queries,"

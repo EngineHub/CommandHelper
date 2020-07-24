@@ -97,12 +97,6 @@ import java.util.logging.Logger;
 @core
 public class DataHandling {
 
-	private static final String ARRAY_GET = new ArrayHandling.array_get().getName();
-	private static final String ARRAY_SET = new ArrayHandling.array_set().getName();
-	private static final String ARRAY_PUSH = new ArrayHandling.array_push().getName();
-	private static final String INCLUDE = new include().getName();
-	private static final String CENTRY = new Compiler.centry().getName();
-
 	public static String docs() {
 		return "This class provides various methods to control script data and program flow.";
 	}
@@ -1447,13 +1441,13 @@ public class DataHandling {
 				} else {
 					boolean thisNodeIsAssign = false;
 					if(nodes[i].getData() instanceof CFunction) {
-						if((nodes[i].getData()).val().equals("assign")) {
+						if((nodes[i].getData()).val().equals(ASSIGN)) {
 							thisNodeIsAssign = true;
 							if((nodes[i].getChildren().size() == 3 && Construct.IsDynamicHelper(nodes[i].getChildAt(0).getData()))
 									|| Construct.IsDynamicHelper(nodes[i].getChildAt(1).getData())) {
 								usesAssign = true;
 							}
-						} else if((nodes[i].getData()).val().equals("__autoconcat__")) {
+						} else if((nodes[i].getData()).val().equals(__AUTOCONCAT__)) {
 							throw new CREInvalidProcedureException("Invalid arguments defined for procedure", t);
 						}
 					}
@@ -1592,7 +1586,7 @@ public class DataHandling {
 					if(!children.isEmpty()) {
 						options = children.get(0).getFileOptions();
 					}
-					ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), options);
+					ParseTree root = new ParseTree(new CFunction(__AUTOCONCAT__, Target.UNKNOWN), options);
 					Script fakeScript = Script.GenerateScript(root, Static.GLOBAL_PERMISSION);
 					Environment env = Static.GenerateStandaloneEnvironment();
 					env.getEnv(GlobalEnv.class).SetScript(fakeScript);
@@ -2001,7 +1995,7 @@ public class DataHandling {
 			}
 
 			// Convert this function to g(include(...), include(...), ...).
-			ParseTree g = new ParseTree(new CFunction("g", t), ast.getFileOptions());
+			ParseTree g = new ParseTree(new CFunction(G, t), ast.getFileOptions());
 			for(File f : msFiles) {
 				ParseTree include = new ParseTree(new CFunction(INCLUDE, t), ast.getFileOptions());
 				include.addChild(new ParseTree(new CString(f.getAbsolutePath(), t), ast.getFileOptions()));
@@ -2411,7 +2405,7 @@ public class DataHandling {
 			}
 			for(int i = 0; i < nodes.length - 1; i++) {
 				ParseTree node = nodes[i];
-				ParseTree newNode = new ParseTree(new CFunction("g", t), node.getFileOptions());
+				ParseTree newNode = new ParseTree(new CFunction(G, t), node.getFileOptions());
 				List<ParseTree> children = new ArrayList<>();
 				children.add(node);
 				newNode.setChildren(children);
@@ -2583,7 +2577,7 @@ public class DataHandling {
 			}
 			for(int i = 0; i < nodes.length - 1; i++) {
 				ParseTree node = nodes[i];
-				ParseTree newNode = new ParseTree(new CFunction("g", t), node.getFileOptions());
+				ParseTree newNode = new ParseTree(new CFunction(G, t), node.getFileOptions());
 				List<ParseTree> children = new ArrayList<>();
 				children.add(node);
 				newNode.setChildren(children);

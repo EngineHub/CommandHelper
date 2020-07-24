@@ -78,6 +78,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.EventBinding.modify_event;
+import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.StringHandling;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
@@ -1623,7 +1624,7 @@ public class PlayerEvents {
 				if("format".equals(key)) {
 					String format = Construct.nval(value);
 					if(format == null) {
-						throw new CRENullPointerException("The \"format\" key in " + new modify_event().getName()
+						throw new CRENullPointerException("The \"format\" key in " + Function.MODIFY_EVENT
 								+ " for the " + this.getName()
 								+ " event may not be null.", value.getTarget());
 					}

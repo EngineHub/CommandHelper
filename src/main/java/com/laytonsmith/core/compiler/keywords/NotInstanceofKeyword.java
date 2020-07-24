@@ -1,23 +1,20 @@
 package com.laytonsmith.core.compiler.keywords;
 
+import java.util.List;
+
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.BasicLogic;
-import com.laytonsmith.core.functions.DataHandling;
-import java.util.List;
+import com.laytonsmith.core.functions.Function;
 
 /**
  *
  */
 @Keyword.keyword("notinstanceof")
 public class NotInstanceofKeyword extends Keyword {
-
-	private static final String INSTANCEOF = new DataHandling._instanceof().getName();
-	private static final String NOT = new BasicLogic.not().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
@@ -27,10 +24,12 @@ public class NotInstanceofKeyword extends Keyword {
 		if(list.size() <= keywordPosition + 1) {
 			throw new ConfigCompileException("Expected type to follow \"notinstanceof\" keyword, but no type was found.", list.get(keywordPosition).getTarget());
 		}
-		ParseTree node = new ParseTree(new CFunction(INSTANCEOF, list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
+		ParseTree node = new ParseTree(new CFunction(Function.INSTANCEOF,
+				list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
 		node.addChild(list.get(keywordPosition - 1));
 		node.addChild(list.get(keywordPosition + 1));
-		ParseTree not = new ParseTree(new CFunction(NOT, list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
+		ParseTree not = new ParseTree(new CFunction(Function.NOT,
+				list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
 		not.addChild(node);
 		list.set(keywordPosition - 1, not); // Overwrite the LHS
 		list.remove(keywordPosition); // Remove the keyword

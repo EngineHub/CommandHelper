@@ -45,7 +45,6 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.extensions.ExtensionTracker;
-import com.laytonsmith.core.functions.ArrayHandling;
 import com.laytonsmith.core.functions.Compiler;
 import com.laytonsmith.core.functions.ControlFlow;
 import com.laytonsmith.core.functions.DataHandling;
@@ -1299,7 +1298,7 @@ public final class MethodScriptCompiler {
 		constructCount.push(new AtomicInteger(0));
 		parents.push(tree);
 
-		tree.addChild(new ParseTree(new CFunction(__autoconcat__, unknown), fileOptions));
+		tree.addChild(new ParseTree(new CFunction(Function.__AUTOCONCAT__, unknown), fileOptions));
 		parents.push(tree.getChildAt(0));
 		tree = tree.getChildAt(0);
 		constructCount.push(new AtomicInteger(0));
@@ -1332,7 +1331,7 @@ public final class MethodScriptCompiler {
 			// Brace handling
 			if(t.type == TType.LCURLY_BRACKET) {
 				inObjectDefinition = false;
-				ParseTree b = new ParseTree(new CFunction(__cbrace__, t.getTarget()), fileOptions);
+				ParseTree b = new ParseTree(new CFunction(Function.__CBRACE__, t.getTarget()), fileOptions);
 				tree.addChild(b);
 				tree = b;
 				parents.push(b);
@@ -1350,7 +1349,7 @@ public final class MethodScriptCompiler {
 					//We need to autoconcat some stuff
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
-					ParseTree c = new ParseTree(new CFunction(__autoconcat__, tree.getTarget()), fileOptions);
+					ParseTree c = new ParseTree(new CFunction(Function.__AUTOCONCAT__, tree.getTarget()), fileOptions);
 					List<ParseTree> subChildren = new ArrayList<>();
 					for(int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
@@ -1427,7 +1426,7 @@ public final class MethodScriptCompiler {
 				ParseTree myArray = tree.getChildAt(array);
 				ParseTree myIndex;
 				if(!emptyArray) {
-					myIndex = new ParseTree(new CFunction(__autoconcat__, myArray.getTarget()), fileOptions);
+					myIndex = new ParseTree(new CFunction(Function.__AUTOCONCAT__, myArray.getTarget()), fileOptions);
 
 					for(int j = index; j < tree.numberOfChildren(); j++) {
 						myIndex.addChild(tree.getChildAt(j));
@@ -1436,14 +1435,14 @@ public final class MethodScriptCompiler {
 					myIndex = new ParseTree(new CSlice("0..-1", t.target), fileOptions);
 				}
 				tree.setChildren(tree.getChildren().subList(0, array));
-				ParseTree arrayGet = new ParseTree(new CFunction(array_get, t.target), fileOptions);
+				ParseTree arrayGet = new ParseTree(new CFunction(Function.ARRAY_GET, t.target), fileOptions);
 				arrayGet.addChild(myArray);
 				arrayGet.addChild(myIndex);
 
 				// Check if the @var[...] had a negating "-" in front. If so, add a neg().
 				if(!minusArrayStack.isEmpty() && arrayStack.size() + 1 == minusArrayStack.peek().get()) {
 					if(!next1.type.equals(TType.LSQUARE_BRACKET)) { // Wait if there are more array_get's comming.
-						ParseTree negTree = new ParseTree(new CFunction("neg", unknown), fileOptions);
+						ParseTree negTree = new ParseTree(new CFunction(Function.NEG, unknown), fileOptions);
 						negTree.addChild(arrayGet);
 						tree.addChild(negTree);
 						minusArrayStack.pop();
@@ -1462,7 +1461,7 @@ public final class MethodScriptCompiler {
 			if(t.type == TType.SMART_STRING) {
 				if(t.val().contains("@")) {
 					ParseTree function = new ParseTree(fileOptions);
-					function.setData(new CFunction(new Compiler.smart_string().getName(), t.target));
+					function.setData(new CFunction(Function.SMART_STRING, t.target));
 					ParseTree string = new ParseTree(fileOptions);
 					string.setData(new CString(t.value, t.target));
 					function.addChild(string);
@@ -1519,7 +1518,7 @@ public final class MethodScriptCompiler {
 					//We need to autoconcat some stuff
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
-					ParseTree c = new ParseTree(new CFunction("__autoconcat__", tree.getTarget()), fileOptions);
+					ParseTree c = new ParseTree(new CFunction(Function.__AUTOCONCAT__, tree.getTarget()), fileOptions);
 					List<ParseTree> subChildren = new ArrayList<>();
 					for(int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
@@ -1555,7 +1554,7 @@ public final class MethodScriptCompiler {
 						minusArrayStack.push(new AtomicInteger(arrayStack.size() + 1)); // +1 because the bracket isn't counted yet.
 					} else {
 						// Negate this function.
-						ParseTree negTree = new ParseTree(new CFunction("neg", unknown), fileOptions);
+						ParseTree negTree = new ParseTree(new CFunction(Function.NEG, unknown), fileOptions);
 						negTree.addChild(tree.getChildAt(tree.numberOfChildren() - 1));
 						tree.removeChildAt(tree.numberOfChildren() - 1);
 						tree.addChildAt(tree.numberOfChildren(), negTree);
@@ -1573,7 +1572,7 @@ public final class MethodScriptCompiler {
 				if(constructCount.peek().get() > 1) {
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
-					ParseTree c = new ParseTree(new CFunction("__autoconcat__", unknown), fileOptions);
+					ParseTree c = new ParseTree(new CFunction(Function.__AUTOCONCAT__, unknown), fileOptions);
 					List<ParseTree> subChildren = new ArrayList<>();
 					for(int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
@@ -1733,7 +1732,7 @@ public final class MethodScriptCompiler {
 					} else if(next1.type.equals(TType.FUNC_NAME)) {
 						minusFuncStack.push(new AtomicInteger(parens + 1)); // +1 because the function isn't counted yet.
 					} else {
-						ParseTree negTree = new ParseTree(new CFunction("neg", unknown), fileOptions);
+						ParseTree negTree = new ParseTree(new CFunction(Function.NEG, unknown), fileOptions);
 						negTree.addChild(new ParseTree(new IVariable(next1.value, next1.target), fileOptions));
 						tree.addChild(negTree);
 						constructCount.peek().incrementAndGet();
@@ -2107,7 +2106,7 @@ public final class MethodScriptCompiler {
 				rewriteAutoconcats(child, env, envs, compilerExceptions);
 			}
 		}
-		if(root.getData() instanceof CFunction && root.getData().val().equals(__autoconcat__)) {
+		if(root.getData() instanceof CFunction && root.getData().val().equals(Function.__AUTOCONCAT__)) {
 			try {
 				ParseTree ret = ((Compiler.__autoconcat__) ((CFunction) root.getData()).getFunction())
 						.rewrite(root.getChildren(), true, envs);
@@ -2279,14 +2278,6 @@ public final class MethodScriptCompiler {
 		}
 	}
 
-	// Variable is more clear when named after the function it represents.
-	@SuppressWarnings("checkstyle:constantname")
-	private static final String __autoconcat__ = new Compiler.__autoconcat__().getName();
-	@SuppressWarnings("checkstyle:constantname")
-	private static final String array_get = new ArrayHandling.array_get().getName();
-	@SuppressWarnings("checkstyle:constantname")
-	private static final String __cbrace__ = new Compiler.__cbrace__().getName();
-
 	/**
 	 * Recurses down into the tree, attempting to optimize where possible. A few things have strong coupling, for
 	 * information on these items, see the documentation included in the source.
@@ -2412,7 +2403,8 @@ public final class MethodScriptCompiler {
 			//However, as a special function, we *might* be able to get a const proc out of this
 			//Let's see.
 			try {
-				ParseTree root = new ParseTree(new CFunction(__autoconcat__, Target.UNKNOWN), tree.getFileOptions());
+				ParseTree root = new ParseTree(
+						new CFunction(Function.__AUTOCONCAT__, Target.UNKNOWN), tree.getFileOptions());
 				Script fakeScript = Script.GenerateScript(root, "*");
 //				Environment env = null;
 //				try {
@@ -2472,7 +2464,7 @@ public final class MethodScriptCompiler {
 					}
 				}
 				if(tempNode == Optimizable.REMOVE_ME) {
-					tree.setData(new CFunction("p", Target.UNKNOWN));
+					tree.setData(new CFunction(Function.P, Target.UNKNOWN));
 					tree.removeChildren();
 				} else if(tempNode != null) {
 					tree.setData(tempNode.getData());

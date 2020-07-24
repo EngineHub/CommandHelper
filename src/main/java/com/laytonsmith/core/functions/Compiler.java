@@ -108,14 +108,14 @@ public class Compiler {
 	public static class __autoconcat__ extends DummyFunction {
 
 		public static ParseTree getParseTree(List<ParseTree> children, FileOptions fo, Target t) {
-			CFunction ac = new CFunction(new __autoconcat__().getName(), t);
+			CFunction ac = new CFunction(__AUTOCONCAT__, t);
 			ParseTree tree = new ParseTree(ac, fo);
 			tree.setChildren(children);
 			return tree;
 		}
 
 		public static ParseTree getParseTree(ParseTree child, FileOptions fo, Target t) {
-			CFunction ac = new CFunction(new __autoconcat__().getName(), t);
+			CFunction ac = new CFunction(__AUTOCONCAT__, t);
 			ParseTree tree = new ParseTree(ac, fo);
 			List<ParseTree> children = new ArrayList<>();
 			children.add(child);
@@ -125,7 +125,7 @@ public class Compiler {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			throw new Error("Should not have gotten here, __autoconcat__ was not removed before runtime.");
+			throw new Error("Should not have gotten here, " + __AUTOCONCAT__ + " was not removed before runtime.");
 		}
 
 		@Override
@@ -133,8 +133,6 @@ public class Compiler {
 			return "string {var1, [var2...]} This function should only be used by the compiler, behavior"
 					+ " may be undefined if it is used in code.";
 		}
-
-		private static final String ASSIGN = new DataHandling.assign().getName();
 
 		/**
 		 * Rewrites this __autoconcat__ node to an executable AST node as part of compilation. This either results in
@@ -162,11 +160,12 @@ public class Compiler {
 				ParseTree node = list.get(i + 1);
 				if(node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isAssignment()) {
 					ParseTree lhs = list.get(i);
-					ParseTree assign = new ParseTree(new CFunction("assign", node.getTarget()), node.getFileOptions());
+					ParseTree assign = new ParseTree(new CFunction(ASSIGN, node.getTarget()), node.getFileOptions());
 					ParseTree rhs;
 					if(i < list.size() - 3) {
 						//Need to autoconcat
-						ParseTree ac = new ParseTree(new CFunction("__autoconcat__", node.getTarget()), lhs.getFileOptions());
+						ParseTree ac = new ParseTree(
+								new CFunction(__AUTOCONCAT__, node.getTarget()), lhs.getFileOptions());
 						int index = i + 2;
 						// add all preceding symbols
 						while(list.size() > index + 1 && list.get(index).getData() instanceof CSymbol) {
@@ -229,9 +228,9 @@ public class Compiler {
 						CSymbol sy = (CSymbol) node.getData();
 						ParseTree conversion;
 						if(sy.val().equals("++")) {
-							conversion = new ParseTree(new CFunction("postinc", node.getTarget()), node.getFileOptions());
+							conversion = new ParseTree(new CFunction(POSTINC, node.getTarget()), node.getFileOptions());
 						} else {
-							conversion = new ParseTree(new CFunction("postdec", node.getTarget()), node.getFileOptions());
+							conversion = new ParseTree(new CFunction(POSTDEC, node.getTarget()), node.getFileOptions());
 						}
 						conversion.addChild(list.get(i - 1));
 						list.set(i - 1, conversion);
@@ -254,9 +253,9 @@ public class Compiler {
 										&& !(list.get(i + 1).getData() instanceof CSymbol)) {
 									if(node.getData().val().equals("-")) {
 										//We have to negate it
-										conversion = new ParseTree(new CFunction("neg", node.getTarget()), node.getFileOptions());
+										conversion = new ParseTree(new CFunction(NEG, node.getTarget()), node.getFileOptions());
 									} else {
-										conversion = new ParseTree(new CFunction("p", node.getTarget()), node.getFileOptions());
+										conversion = new ParseTree(new CFunction(P, node.getTarget()), node.getFileOptions());
 									}
 								} else {
 									continue;
@@ -436,7 +435,7 @@ public class Compiler {
 							case "assign":
 							case "proc":
 								// Typed assign/closure
-								if(list.get(k + 1).getData().val().equals("assign")
+								if(list.get(k + 1).getData().val().equals(ASSIGN)
 										&& list.get(k).getData().equals(CVoid.VOID)) {
 									throw new ConfigCompileException("Variables may not be of type void",
 											list.get(k).getTarget());
@@ -475,11 +474,11 @@ public class Compiler {
 			if(list.size() >= 1) {
 				ParseTree node = list.get(0);
 				if(node.getData() instanceof CLabel) {
-					ParseTree value = new ParseTree(new CFunction("__autoconcat__", node.getTarget()), node.getFileOptions());
+					ParseTree value = new ParseTree(new CFunction(__AUTOCONCAT__, node.getTarget()), node.getFileOptions());
 					for(int i = 1; i < list.size(); i++) {
 						value.addChild(list.get(i));
 					}
-					ParseTree ce = new ParseTree(new CFunction("centry", node.getTarget()), node.getFileOptions());
+					ParseTree ce = new ParseTree(new CFunction(CENTRY, node.getTarget()), node.getFileOptions());
 					ce.addChild(node);
 					ce.addChild(value);
 					return ce;
@@ -501,7 +500,7 @@ public class Compiler {
 							list.remove(0);
 							ParseTree child = list.get(0);
 							if(list.size() > 1) {
-								child = new ParseTree(new CFunction("sconcat", child.getTarget()), child.getFileOptions());
+								child = new ParseTree(new CFunction(SCONCAT, child.getTarget()), child.getFileOptions());
 								child.setChildren(list);
 							}
 							try {
@@ -526,9 +525,9 @@ public class Compiler {
 					t = list.get(0).getTarget();
 				}
 				if(returnSConcat) {
-					tree = new ParseTree(new CFunction("sconcat", t), options);
+					tree = new ParseTree(new CFunction(SCONCAT, t), options);
 				} else {
-					tree = new ParseTree(new CFunction("concat", t), options);
+					tree = new ParseTree(new CFunction(CONCAT, t), options);
 				}
 				tree.setChildren(list);
 				return tree;
@@ -708,7 +707,7 @@ public class Compiler {
 				StringBuilder b = new StringBuilder();
 				boolean inBrace = false;
 				boolean inSimpleVar = false;
-				ParseTree root = new ParseTree(new CFunction(new StringHandling.concat().getName(), t), fileOptions);
+				ParseTree root = new ParseTree(new CFunction(CONCAT, t), fileOptions);
 				for(int i = 0; i < value.length(); i++) {
 					char c = value.charAt(i);
 					char c2 = (i + 1 < value.length() ? value.charAt(i + 1) : '\0');

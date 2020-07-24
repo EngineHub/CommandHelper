@@ -321,7 +321,7 @@ public class Regex {
 				if(isLiteralRegex(pattern)) {
 					//We want to replace this with replace()
 					//Note the alternative order of arguments
-					ParseTree replace = new ParseTree(new CFunction("replace", t), data.getFileOptions());
+					ParseTree replace = new ParseTree(new CFunction(REPLACE, t), data.getFileOptions());
 					replace.addChildAt(0, children.get(2)); //subject -> main
 					replace.addChildAt(1, new ParseTree(new CString(getLiteralRegex(pattern), t), replace.getFileOptions())); //pattern -> what
 					replace.addChildAt(2, children.get(1)); //replacement -> that
@@ -362,10 +362,6 @@ public class Regex {
 	@api
 	@seealso({StringHandling.split.class, ArrayHandling.array_implode.class})
 	public static class reg_split extends AbstractFunction implements Optimizable {
-
-		// Variable is more clear when named after the function it represents.
-		@SuppressWarnings("checkstyle:constantname")
-		private static final String split = new StringHandling.split().getName();
 
 		@Override
 		public String getName() {
@@ -438,7 +434,7 @@ public class Regex {
 				String pattern = data.getData().val();
 				if(isLiteralRegex(pattern)) {
 					//We want to replace this with split()
-					ParseTree splitNode = new ParseTree(new CFunction(split, t), data.getFileOptions());
+					ParseTree splitNode = new ParseTree(new CFunction(SPLIT, t), data.getFileOptions());
 					splitNode.addChildAt(0, new ParseTree(new CString(getLiteralRegex(pattern), t), splitNode.getFileOptions()));
 					splitNode.addChildAt(1, children.get(1));
 					return splitNode;

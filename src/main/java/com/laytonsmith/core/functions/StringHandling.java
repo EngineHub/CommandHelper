@@ -151,14 +151,6 @@ public class StringHandling {
 	@noprofile
 	public static class sconcat extends AbstractFunction implements Optimizable {
 
-		// Variable is more clear when named after the function it represents.
-		@SuppressWarnings("checkstyle:constantname")
-		private static final String g = new DataHandling.g().getName();
-
-		// Variable is more clear when named after the function it represents.
-		@SuppressWarnings("checkstyle:constantname")
-		private static final String p = new Compiler.p().getName();
-
 		@Override
 		public String getName() {
 			return "sconcat";
@@ -206,8 +198,6 @@ public class StringHandling {
 			return null;
 		}
 
-		public static final String STRING = new DataHandling._string().getName();
-
 		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
@@ -224,8 +214,8 @@ public class StringHandling {
 			while(it.hasNext()) {
 				ParseTree n = it.next();
 				if(n.getData() instanceof CFunction
-						&& (g.equals(n.getData().val())
-						|| p.equals(n.getData().val()))
+						&& (G.equals(n.getData().val())
+						|| P.equals(n.getData().val()))
 						&& !n.hasChildren()) {
 					it.remove();
 				}
@@ -1454,8 +1444,8 @@ public class StringHandling {
 					//Character, parse as string, and verify it's of length 1
 					String s = arg.val();
 					if(s.length() > 1) {
-						throw new CREFormatException("Expecting a string of length one in argument " + (i + 1) + " in " + getName()
-								+ "but \"" + s + "\" was found instead.", t);
+						throw new CREFormatException("Expecting a string of length one in argument " + (i + 1)
+								+ " in " + this.getName() + "but \"" + s + "\" was found instead.", t);
 					}
 					o = s.charAt(0);
 				} else if(Conversion.isFloat(c)) {
@@ -1610,7 +1600,8 @@ public class StringHandling {
 				ParseTree me = new ParseTree(new CFunction(getName(), t), children.get(1).getFileOptions());
 				me.setChildren(children);
 				me.setOptimized(true); //After this run, we will be, anyways.
-				if(children.size() == 3 && children.get(2).getData() instanceof CFunction && ((CFunction) children.get(2).getData()).getFunction().getName().equals(new DataHandling.array().getName())) {
+				if(children.size() == 3 && children.get(2).getData() instanceof CFunction
+						&& ((CFunction) children.get(2).getData()).getFunction().getName().equals(ARRAY)) {
 					//Normally we can't do anything with a hardcoded array, it's considered dynamic. But in this case, we can at least pull up the arguments,
 					//because the array's size is constant, even if the arguments in it aren't.
 					ParseTree array = children.get(2);
