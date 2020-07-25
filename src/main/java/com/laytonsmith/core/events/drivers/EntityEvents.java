@@ -2199,7 +2199,7 @@ public class EntityEvents {
 				ret.put("type", new CString(event.getEntity().getType().name(), Target.UNKNOWN));
 				return ret;
 			} else {
-				throw new EventException("Could not convert to MCEntityRegainHealthEvent");
+				throw new EventException("Could not convert to MCEntityUnleashEvent");
 			}
 		}
 
