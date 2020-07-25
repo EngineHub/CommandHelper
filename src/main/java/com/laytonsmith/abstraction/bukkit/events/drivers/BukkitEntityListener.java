@@ -208,7 +208,7 @@ public class BukkitEntityListener implements Listener {
 		BukkitMCEntityPortalEvent epe = new BukkitMCEntityPortalEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_PORTAL_TRAVEL, "entity_portal_travel", epe);
 	}
-	
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onEntityUnleash(EntityUnleashEvent event) {
 		BukkitMCEntityUnleashEvent epe = new BukkitMCEntityUnleashEvent(event);

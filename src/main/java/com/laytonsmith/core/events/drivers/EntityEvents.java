@@ -2155,7 +2155,7 @@ public class EntityEvents {
 			return false;
 		}
 	}
-	
+
 	@api
 	public static class entity_unleash extends AbstractEvent {
 
@@ -2178,10 +2178,6 @@ public class EntityEvents {
 			if(e instanceof MCEntityUnleashEvent) {
 				MCEntityUnleashEvent event = (MCEntityUnleashEvent) e;
 				Prefilters.match(prefilter, "reason", event.getReason().name(), PrefilterType.MACRO);
-				return true;
-			}
-			if(e instanceof MCEntityUnleashEvent) {
-				MCEntityUnleashEvent event = (MCEntityUnleashEvent) e;
 				Prefilters.match(prefilter, "type", event.getEntity().getType().name(), PrefilterType.MACRO);
 				return true;
 			}

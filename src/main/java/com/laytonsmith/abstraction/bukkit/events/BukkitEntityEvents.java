@@ -988,9 +988,9 @@ public class BukkitEntityEvents {
 			}
 		}
 	}
-	
+
 	public static class BukkitMCEntityUnleashEvent implements MCEntityUnleashEvent {
-		
+
 		EntityUnleashEvent ide;
 
 		public BukkitMCEntityUnleashEvent(Event event) {
@@ -1006,7 +1006,7 @@ public class BukkitEntityEvents {
 		public MCEntity getEntity() {
 			return new BukkitMCEntity(ide.getEntity());
 		}
-		
+
 		@Override
 		public MCUnleashReason getReason() {
 			return BukkitMCUnleashReason.getConvertor().getAbstractedEnum(ide.getReason());
