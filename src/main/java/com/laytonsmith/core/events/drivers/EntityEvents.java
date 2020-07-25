@@ -2166,11 +2166,10 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <macro>}"
-					+ " Fired when an entity is no longer leashed."
-					+ " {id: The UUID of entity"
-					+ " | type: the type of entity that was on the leash"
-					+ " | reason: Why the entity was unleashed, can be one of " + StringUtils.Join(MCUnleashReason.values(), "}");
+			return "{type: <macro> The type of entity | id: <macro> The UUID of entity}"
+					+ " This event is called when a leash is broken."
+					+ " {id: The entityID of the entity | type: The entity type of the entity}"
+					+ " {}";
 		}
 
 		@Override
@@ -2197,6 +2196,7 @@ public class EntityEvents {
 				Map<String, Mixed> ret = evaluate_helper(e);
 				ret.put("id", new CString(event.getEntity().getUniqueId().toString(), Target.UNKNOWN));
 				ret.put("reason", new CString(event.getReason().name(), Target.UNKNOWN));
+				ret.put("type", new CString(event.getEntity().getType().name(), Target.UNKNOWN));
 				return ret;
 			} else {
 				throw new EventException("Could not convert to MCEntityRegainHealthEvent");
