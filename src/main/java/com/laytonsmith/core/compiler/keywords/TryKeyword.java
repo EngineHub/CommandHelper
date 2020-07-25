@@ -7,7 +7,9 @@ import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.functions.Exceptions._try;
+import com.laytonsmith.core.functions.Exceptions.complex_try;
+
 import java.util.List;
 
 /**
@@ -15,8 +17,6 @@ import java.util.List;
  */
 @Keyword.keyword("try")
 public class TryKeyword extends Keyword {
-
-	private static final String COMPLEX_TRY = new Exceptions.complex_try().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
@@ -40,28 +40,30 @@ public class TryKeyword extends Keyword {
 		 */
 
 		// If it's the old version, and a function
-		if(list.get(keywordPosition).getData() instanceof CFunction && list.get(keywordPosition).getData().val().equals("try")) {
+		if(list.get(keywordPosition).getData() instanceof CFunction
+				&& list.get(keywordPosition).getData().val().equals(_try.NAME)) {
 			return keywordPosition;
 		}
 		// Otherwise it's not, and we can continue on, assuming keyword usage.
 		this.validateCodeBlock(list.get(keywordPosition + 1), "Expecting braces after try keyword");
 
-		ParseTree complexTry = new ParseTree(new CFunction(COMPLEX_TRY, list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
+		ParseTree complexTry = new ParseTree(new CFunction(complex_try.NAME,
+				list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
 		complexTry.addChild(getArgumentOrNull(list.get(keywordPosition + 1)));
-		// Remove the keyword and the try block
-		list.remove(keywordPosition);
-		list.remove(keywordPosition);
 
 		// For now, we won't allow try {}, so this must be followed by a catch keyword. This restriction is somewhat artificial, and
 		// if we want to remove it in the future, we can do so by removing this code block.
 		{
-			if(!(list.size() > keywordPosition && (nodeIsCatchKeyword(list.get(keywordPosition)) || nodeIsFinallyKeyword(list.get(keywordPosition))))) {
-				throw new ConfigCompileException("Expecting \"catch\" or \"finally\" keyword to follow try, but none found", complexTry.getTarget());
+			if(!(list.size() > keywordPosition + 2 && (nodeIsCatchKeyword(list.get(keywordPosition + 2))
+					|| nodeIsFinallyKeyword(list.get(keywordPosition + 2))))) {
+				throw new ConfigCompileException("Expecting \"catch\" or \"finally\" keyword to follow try,"
+						+ " but none found", complexTry.getTarget());
 			}
 		}
 
 		// We can have any number of catch statements after the try, so we loop through until we run out.
-		for(int i = keywordPosition; i < list.size(); i++) {
+		int numHandledChildren = 2; // The "try" keyword and try code block have already been handled.
+		for(int i = keywordPosition + 2; i < list.size(); i += 2) {
 			if(!nodeIsCatchKeyword(list.get(i)) && !nodeIsFinallyKeyword(list.get(i))) {
 				// End of the chain, stop processing.
 				break;
@@ -92,14 +94,16 @@ public class TryKeyword extends Keyword {
 				// Passed the inspection.
 				complexTry.addChild(getArgumentOrNull(list.get(i + 1)));
 			}
-			// remove the catch keyword and the code block
-			list.remove(i);
-			list.remove(i);
-			--i;
+
+			// Mark catch keyword and code block as handled.
+			numHandledChildren += 2;
 		}
 
-		// Set the new function into place
-		list.add(keywordPosition, complexTry);
+		// Replace the "try" keyword, try block and all other handled blocks with the new function.
+		for(int i = 0; i < numHandledChildren - 1; i++) {
+			list.remove(keywordPosition);
+		}
+		list.set(keywordPosition, complexTry);
 
 		return keywordPosition;
 	}

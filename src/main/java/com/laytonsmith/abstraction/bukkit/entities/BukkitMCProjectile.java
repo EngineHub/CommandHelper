@@ -13,53 +13,55 @@ import org.bukkit.projectiles.ProjectileSource;
 
 public class BukkitMCProjectile extends BukkitMCEntity implements MCProjectile {
 
-	Projectile proj;
-
 	public BukkitMCProjectile(Entity e) {
 		super(e);
-		this.proj = (Projectile) e;
 	}
 
 	@Override
 	public boolean doesBounce() {
-		return proj.doesBounce();
+		// Some entities (like fireworks prior to 1.16) may not be treated as projectiles on this server implementation
+		if(getHandle() instanceof Projectile) {
+			return ((Projectile) getHandle()).doesBounce();
+		}
+		return false;
 	}
 
 	@Override
 	public MCProjectileSource getShooter() {
-		ProjectileSource source = proj.getShooter();
+		if(getHandle() instanceof Projectile) {
+			ProjectileSource source = ((Projectile) getHandle()).getShooter();
 
-		if(source instanceof BlockProjectileSource) {
-			return new BukkitMCBlockProjectileSource((BlockProjectileSource) source);
-		}
+			if(source instanceof BlockProjectileSource) {
+				return new BukkitMCBlockProjectileSource((BlockProjectileSource) source);
+			}
 
-		if(source instanceof Entity) {
-			MCEntity e = BukkitConvertor.BukkitGetCorrectEntity((Entity) source);
-			if(e instanceof MCProjectileSource) {
-				return (MCProjectileSource) e;
+			if(source instanceof Entity) {
+				MCEntity e = BukkitConvertor.BukkitGetCorrectEntity((Entity) source);
+				if(e instanceof MCProjectileSource) {
+					return (MCProjectileSource) e;
+				}
 			}
 		}
-
 		return null;
 	}
 
 	@Override
 	public void setBounce(boolean doesBounce) {
-		proj.setBounce(doesBounce);
+		if(getHandle() instanceof Projectile) {
+			((Projectile) getHandle()).setBounce(doesBounce);
+		}
 	}
 
 	@Override
 	public void setShooter(MCProjectileSource shooter) {
-		if(shooter == null) {
-			proj.setShooter(null);
-		} else if(shooter instanceof MCBlockProjectileSource) {
-			proj.setShooter((BlockProjectileSource) shooter.getHandle());
-		} else {
-			proj.setShooter((ProjectileSource) shooter.getHandle());
+		if(getHandle() instanceof Projectile) {
+			if(shooter == null) {
+				((Projectile) getHandle()).setShooter(null);
+			} else if(shooter instanceof MCBlockProjectileSource) {
+				((Projectile) getHandle()).setShooter((BlockProjectileSource) shooter.getHandle());
+			} else {
+				((Projectile) getHandle()).setShooter((ProjectileSource) shooter.getHandle());
+			}
 		}
-	}
-
-	public Projectile asProjectile() {
-		return proj;
 	}
 }

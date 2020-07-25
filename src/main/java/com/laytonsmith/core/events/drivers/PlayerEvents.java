@@ -1623,7 +1623,7 @@ public class PlayerEvents {
 				if("format".equals(key)) {
 					String format = Construct.nval(value);
 					if(format == null) {
-						throw new CRENullPointerException("The \"format\" key in " + new modify_event().getName()
+						throw new CRENullPointerException("The \"format\" key in " + modify_event.NAME
 								+ " for the " + this.getName()
 								+ " event may not be null.", value.getTarget());
 					}

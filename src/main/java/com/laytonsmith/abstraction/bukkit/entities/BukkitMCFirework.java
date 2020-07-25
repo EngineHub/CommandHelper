@@ -6,7 +6,7 @@ import com.laytonsmith.abstraction.entities.MCFirework;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Firework;
 
-public class BukkitMCFirework extends BukkitMCEntity implements MCFirework {
+public class BukkitMCFirework extends BukkitMCProjectile implements MCFirework {
 
 	Firework f;
 

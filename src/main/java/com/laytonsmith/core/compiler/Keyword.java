@@ -6,6 +6,8 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.functions.Compiler.__cbrace__;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -22,11 +24,7 @@ import java.util.List;
  */
 public abstract class Keyword implements Documentation {
 
-	@SuppressWarnings("checkstyle:constantname") // Variable is more clear when named after the function it represents.
-	private static final String __CBRACE__ = new com.laytonsmith.core.functions.Compiler.__cbrace__().getName();
-
 	protected Keyword() {
-		//
 	}
 
 	/**
@@ -94,7 +92,7 @@ public abstract class Keyword implements Documentation {
 	 * @return
 	 */
 	protected static boolean isCodeBlock(ParseTree node) {
-		return node.getData() instanceof CFunction && node.getData().val().equals(__CBRACE__);
+		return node.getData() instanceof CFunction && node.getData().val().equals(__cbrace__.NAME);
 	}
 
 	/**

@@ -40,6 +40,10 @@ import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.functions.Compiler.p;
+import com.laytonsmith.core.functions.DataHandling._string;
+import com.laytonsmith.core.functions.DataHandling.array;
+import com.laytonsmith.core.functions.DataHandling.g;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -73,9 +77,11 @@ public class StringHandling {
 	@OperatorPreferred(".")
 	public static class concat extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "concat";
+
 		@Override
 		public String getName() {
-			return "concat";
+			return NAME;
 		}
 
 		@Override
@@ -151,17 +157,11 @@ public class StringHandling {
 	@noprofile
 	public static class sconcat extends AbstractFunction implements Optimizable {
 
-		// Variable is more clear when named after the function it represents.
-		@SuppressWarnings("checkstyle:constantname")
-		private static final String g = new DataHandling.g().getName();
-
-		// Variable is more clear when named after the function it represents.
-		@SuppressWarnings("checkstyle:constantname")
-		private static final String p = new Compiler.p().getName();
+		public static final String NAME = "sconcat";
 
 		@Override
 		public String getName() {
-			return "sconcat";
+			return NAME;
 		}
 
 		@Override
@@ -206,8 +206,6 @@ public class StringHandling {
 			return null;
 		}
 
-		public static final String STRING = new DataHandling._string().getName();
-
 		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
@@ -224,8 +222,8 @@ public class StringHandling {
 			while(it.hasNext()) {
 				ParseTree n = it.next();
 				if(n.getData() instanceof CFunction
-						&& (g.equals(n.getData().val())
-						|| p.equals(n.getData().val()))
+						&& (g.NAME.equals(n.getData().val())
+						|| p.NAME.equals(n.getData().val()))
 						&& !n.hasChildren()) {
 					it.remove();
 				}
@@ -262,7 +260,7 @@ public class StringHandling {
 					} catch (IllegalArgumentException ex) {
 						// Ignored, we'll just toString it, because it's an unknown type.
 					}
-					ParseTree node = new ParseTree(new CFunction(STRING, t), fileOptions);
+					ParseTree node = new ParseTree(new CFunction(_string.NAME, t), fileOptions);
 					node.addChild(child);
 					return node;
 				}
@@ -288,9 +286,11 @@ public class StringHandling {
 	@api
 	public static class replace extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "replace";
+
 		@Override
 		public String getName() {
-			return "replace";
+			return NAME;
 		}
 
 		@Override
@@ -1266,9 +1266,11 @@ public class StringHandling {
 	@seealso({ArrayHandling.array_implode.class})
 	public static class split extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "split";
+
 		@Override
 		public String getName() {
-			return "split";
+			return NAME;
 		}
 
 		@Override
@@ -1454,8 +1456,8 @@ public class StringHandling {
 					//Character, parse as string, and verify it's of length 1
 					String s = arg.val();
 					if(s.length() > 1) {
-						throw new CREFormatException("Expecting a string of length one in argument " + (i + 1) + " in " + getName()
-								+ "but \"" + s + "\" was found instead.", t);
+						throw new CREFormatException("Expecting a string of length one in argument " + (i + 1)
+								+ " in " + this.getName() + "but \"" + s + "\" was found instead.", t);
 					}
 					o = s.charAt(0);
 				} else if(Conversion.isFloat(c)) {
@@ -1610,7 +1612,8 @@ public class StringHandling {
 				ParseTree me = new ParseTree(new CFunction(getName(), t), children.get(1).getFileOptions());
 				me.setChildren(children);
 				me.setOptimized(true); //After this run, we will be, anyways.
-				if(children.size() == 3 && children.get(2).getData() instanceof CFunction && ((CFunction) children.get(2).getData()).getFunction().getName().equals(new DataHandling.array().getName())) {
+				if(children.size() == 3 && children.get(2).getData() instanceof CFunction
+						&& ((CFunction) children.get(2).getData()).getFunction().getName().equals(array.NAME)) {
 					//Normally we can't do anything with a hardcoded array, it's considered dynamic. But in this case, we can at least pull up the arguments,
 					//because the array's size is constant, even if the arguments in it aren't.
 					ParseTree array = children.get(2);

@@ -45,14 +45,19 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.extensions.ExtensionTracker;
-import com.laytonsmith.core.functions.ArrayHandling;
 import com.laytonsmith.core.functions.Compiler;
+import com.laytonsmith.core.functions.Compiler.__autoconcat__;
+import com.laytonsmith.core.functions.Compiler.__cbrace__;
+import com.laytonsmith.core.functions.Compiler.p;
+import com.laytonsmith.core.functions.Compiler.smart_string;
+import com.laytonsmith.core.functions.Math.neg;
 import com.laytonsmith.core.functions.ControlFlow;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.IncludeCache;
+import com.laytonsmith.core.functions.ArrayHandling.array_get;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistence.DataSourceException;
 import java.io.File;
@@ -1299,7 +1304,7 @@ public final class MethodScriptCompiler {
 		constructCount.push(new AtomicInteger(0));
 		parents.push(tree);
 
-		tree.addChild(new ParseTree(new CFunction(__autoconcat__, unknown), fileOptions));
+		tree.addChild(new ParseTree(new CFunction(__autoconcat__.NAME, unknown), fileOptions));
 		parents.push(tree.getChildAt(0));
 		tree = tree.getChildAt(0);
 		constructCount.push(new AtomicInteger(0));
@@ -1332,7 +1337,7 @@ public final class MethodScriptCompiler {
 			// Brace handling
 			if(t.type == TType.LCURLY_BRACKET) {
 				inObjectDefinition = false;
-				ParseTree b = new ParseTree(new CFunction(__cbrace__, t.getTarget()), fileOptions);
+				ParseTree b = new ParseTree(new CFunction(__cbrace__.NAME, t.getTarget()), fileOptions);
 				tree.addChild(b);
 				tree = b;
 				parents.push(b);
@@ -1350,7 +1355,7 @@ public final class MethodScriptCompiler {
 					//We need to autoconcat some stuff
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
-					ParseTree c = new ParseTree(new CFunction(__autoconcat__, tree.getTarget()), fileOptions);
+					ParseTree c = new ParseTree(new CFunction(__autoconcat__.NAME, tree.getTarget()), fileOptions);
 					List<ParseTree> subChildren = new ArrayList<>();
 					for(int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
@@ -1427,7 +1432,7 @@ public final class MethodScriptCompiler {
 				ParseTree myArray = tree.getChildAt(array);
 				ParseTree myIndex;
 				if(!emptyArray) {
-					myIndex = new ParseTree(new CFunction(__autoconcat__, myArray.getTarget()), fileOptions);
+					myIndex = new ParseTree(new CFunction(__autoconcat__.NAME, myArray.getTarget()), fileOptions);
 
 					for(int j = index; j < tree.numberOfChildren(); j++) {
 						myIndex.addChild(tree.getChildAt(j));
@@ -1436,14 +1441,14 @@ public final class MethodScriptCompiler {
 					myIndex = new ParseTree(new CSlice("0..-1", t.target), fileOptions);
 				}
 				tree.setChildren(tree.getChildren().subList(0, array));
-				ParseTree arrayGet = new ParseTree(new CFunction(array_get, t.target), fileOptions);
+				ParseTree arrayGet = new ParseTree(new CFunction(array_get.NAME, t.target), fileOptions);
 				arrayGet.addChild(myArray);
 				arrayGet.addChild(myIndex);
 
 				// Check if the @var[...] had a negating "-" in front. If so, add a neg().
 				if(!minusArrayStack.isEmpty() && arrayStack.size() + 1 == minusArrayStack.peek().get()) {
 					if(!next1.type.equals(TType.LSQUARE_BRACKET)) { // Wait if there are more array_get's comming.
-						ParseTree negTree = new ParseTree(new CFunction("neg", unknown), fileOptions);
+						ParseTree negTree = new ParseTree(new CFunction(neg.NAME, unknown), fileOptions);
 						negTree.addChild(arrayGet);
 						tree.addChild(negTree);
 						minusArrayStack.pop();
@@ -1462,7 +1467,7 @@ public final class MethodScriptCompiler {
 			if(t.type == TType.SMART_STRING) {
 				if(t.val().contains("@")) {
 					ParseTree function = new ParseTree(fileOptions);
-					function.setData(new CFunction(new Compiler.smart_string().getName(), t.target));
+					function.setData(new CFunction(smart_string.NAME, t.target));
 					ParseTree string = new ParseTree(fileOptions);
 					string.setData(new CString(t.value, t.target));
 					function.addChild(string);
@@ -1519,7 +1524,7 @@ public final class MethodScriptCompiler {
 					//We need to autoconcat some stuff
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
-					ParseTree c = new ParseTree(new CFunction("__autoconcat__", tree.getTarget()), fileOptions);
+					ParseTree c = new ParseTree(new CFunction(__autoconcat__.NAME, tree.getTarget()), fileOptions);
 					List<ParseTree> subChildren = new ArrayList<>();
 					for(int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
@@ -1555,7 +1560,7 @@ public final class MethodScriptCompiler {
 						minusArrayStack.push(new AtomicInteger(arrayStack.size() + 1)); // +1 because the bracket isn't counted yet.
 					} else {
 						// Negate this function.
-						ParseTree negTree = new ParseTree(new CFunction("neg", unknown), fileOptions);
+						ParseTree negTree = new ParseTree(new CFunction(neg.NAME, unknown), fileOptions);
 						negTree.addChild(tree.getChildAt(tree.numberOfChildren() - 1));
 						tree.removeChildAt(tree.numberOfChildren() - 1);
 						tree.addChildAt(tree.numberOfChildren(), negTree);
@@ -1573,7 +1578,7 @@ public final class MethodScriptCompiler {
 				if(constructCount.peek().get() > 1) {
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
-					ParseTree c = new ParseTree(new CFunction("__autoconcat__", unknown), fileOptions);
+					ParseTree c = new ParseTree(new CFunction(__autoconcat__.NAME, unknown), fileOptions);
 					List<ParseTree> subChildren = new ArrayList<>();
 					for(int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
@@ -1733,7 +1738,7 @@ public final class MethodScriptCompiler {
 					} else if(next1.type.equals(TType.FUNC_NAME)) {
 						minusFuncStack.push(new AtomicInteger(parens + 1)); // +1 because the function isn't counted yet.
 					} else {
-						ParseTree negTree = new ParseTree(new CFunction("neg", unknown), fileOptions);
+						ParseTree negTree = new ParseTree(new CFunction(neg.NAME, unknown), fileOptions);
 						negTree.addChild(new ParseTree(new IVariable(next1.value, next1.target), fileOptions));
 						tree.addChild(negTree);
 						constructCount.peek().incrementAndGet();
@@ -1825,7 +1830,7 @@ public final class MethodScriptCompiler {
 		// Process the AST.
 		Stack<List<Procedure>> procs = new Stack<>();
 		procs.add(new ArrayList<>());
-		processKeywords(tree, compilerErrors);
+		processKeywords(tree, environment, compilerErrors);
 		rewriteAutoconcats(tree, environment, envs, compilerErrors);
 		checkLinearComponents(tree, environment, compilerErrors);
 		postParseRewrite(rootNode, environment, envs, compilerErrors); // Pass rootNode since this might rewrite 'tree'.
@@ -1838,6 +1843,9 @@ public final class MethodScriptCompiler {
 		checkFunctionsExist(tree, compilerErrors, envs);
 		checkLabels(tree, compilerErrors);
 		checkBreaks(tree, compilerErrors);
+		if(staticAnalysis == null) {
+			checkUnhandledCompilerConstructs(tree, environment, compilerErrors);
+		}
 		if(!compilerErrors.isEmpty()) {
 			if(compilerErrors.size() == 1) {
 				// Just throw the one CCE
@@ -2104,7 +2112,7 @@ public final class MethodScriptCompiler {
 				rewriteAutoconcats(child, env, envs, compilerExceptions);
 			}
 		}
-		if(root.getData() instanceof CFunction && root.getData().val().equals(__autoconcat__)) {
+		if(root.getData() instanceof CFunction && root.getData().val().equals(__autoconcat__.NAME)) {
 			try {
 				ParseTree ret = ((Compiler.__autoconcat__) ((CFunction) root.getData()).getFunction())
 						.rewrite(root.getChildren(), true, envs);
@@ -2276,14 +2284,6 @@ public final class MethodScriptCompiler {
 		}
 	}
 
-	// Variable is more clear when named after the function it represents.
-	@SuppressWarnings("checkstyle:constantname")
-	private static final String __autoconcat__ = new Compiler.__autoconcat__().getName();
-	@SuppressWarnings("checkstyle:constantname")
-	private static final String array_get = new ArrayHandling.array_get().getName();
-	@SuppressWarnings("checkstyle:constantname")
-	private static final String __cbrace__ = new Compiler.__cbrace__().getName();
-
 	/**
 	 * Recurses down into the tree, attempting to optimize where possible. A few things have strong coupling, for
 	 * information on these items, see the documentation included in the source.
@@ -2409,7 +2409,8 @@ public final class MethodScriptCompiler {
 			//However, as a special function, we *might* be able to get a const proc out of this
 			//Let's see.
 			try {
-				ParseTree root = new ParseTree(new CFunction(__autoconcat__, Target.UNKNOWN), tree.getFileOptions());
+				ParseTree root = new ParseTree(
+						new CFunction(__autoconcat__.NAME, Target.UNKNOWN), tree.getFileOptions());
 				Script fakeScript = Script.GenerateScript(root, "*");
 //				Environment env = null;
 //				try {
@@ -2469,7 +2470,7 @@ public final class MethodScriptCompiler {
 					}
 				}
 				if(tempNode == Optimizable.REMOVE_ME) {
-					tree.setData(new CFunction("p", Target.UNKNOWN));
+					tree.setData(new CFunction(p.NAME, Target.UNKNOWN));
 					tree.removeChildren();
 				} else if(tempNode != null) {
 					tree.setData(tempNode.getData());
@@ -2670,32 +2671,61 @@ public final class MethodScriptCompiler {
 	 *
 	 * @param tree
 	 */
-	private static void processKeywords(ParseTree tree, Set<ConfigCompileException> compileErrors) {
+	private static void processKeywords(ParseTree tree, Environment env, Set<ConfigCompileException> compileErrors) {
 		// Keyword processing
 		List<ParseTree> children = tree.getChildren();
 		for(int i = 0; i < children.size(); i++) {
 			ParseTree node = children.get(i);
 			// Keywords can be standalone, or a function can double as a keyword. So we have to check for both
 			// conditions.
-			processKeywords(node, compileErrors);
-			if(node.getData() instanceof CKeyword
-					|| (node.getData() instanceof CLabel && ((CLabel) node.getData()).cVal() instanceof CKeyword)
-					|| (node.getData() instanceof CFunction && KeywordList.getKeywordByName(node.getData().val()) != null)) {
+			processKeywords(node, env, compileErrors);
+			Mixed m = node.getData();
+			if(m instanceof CKeyword
+					|| (m instanceof CLabel && ((CLabel) m).cVal() instanceof CKeyword)
+					|| (m instanceof CFunction && KeywordList.getKeywordByName(m.val()) != null)) {
 				// This looks a bit confusing, but is fairly straightforward. We want to process the child elements of all
 				// remaining nodes, so that subchildren that need processing will be finished, and our current tree level will
 				// be able to independently process it. We don't want to process THIS level though, just the children of this level.
 				for(int j = i + 1; j < children.size(); j++) {
-					processKeywords(children.get(j), compileErrors);
+					processKeywords(children.get(j), env, compileErrors);
 				}
 				// Now that all the children of the rest of the chain are processed, we can do the processing of this level.
 				try {
-					i = KeywordList.getKeywordByName(node.getData().val()).process(children, i);
+					i = KeywordList.getKeywordByName(m.val()).process(children, i);
 				} catch (ConfigCompileException ex) {
-					compileErrors.add(ex);
+					// Keyword processing failed, but the keyword might be part of some other syntax where it's valid.
+					// Store the compile error so that it can be thrown after all if the keyword won't be handled.
+					env.getEnv(CompilerEnvironment.class).potentialKeywordCompileErrors.put(m.getTarget(), ex);
 				}
 			}
 		}
 
+	}
+
+	/**
+	 * Generates compile errors for unhandled compiler constructs that should not be present in the final AST,
+	 * such as {@link CKeyword}.
+	 * This is purely validation and should be called on the final AST.
+	 * @param tree - The final abstract syntax tree.
+	 * @param env - The environment.
+	 * @param compilerErrors - A set to put compile errors in.
+	 * @deprecated This is handled in {@link StaticAnalysis} and will no longer be useful when static analysis is
+	 * permanently enabled.
+	 */
+	@Deprecated
+	private static void checkUnhandledCompilerConstructs(ParseTree tree,
+			Environment env, Set<ConfigCompileException> compilerErrors) {
+		for(ParseTree node : tree.getAllNodes()) {
+			Mixed m = node.getData();
+
+			// Create compile error for unexpected keywords.
+			if(m instanceof CKeyword) {
+				ConfigCompileException ex =
+						env.getEnv(CompilerEnvironment.class).potentialKeywordCompileErrors.get(m.getTarget());
+				compilerErrors.add(ex != null ? ex
+						: new ConfigCompileException("Unexpected keyword: " + m.val(), m.getTarget()));
+			}
+		}
 	}
 
 	/**

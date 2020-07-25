@@ -8,6 +8,7 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.exceptions.AbstractCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -272,7 +273,7 @@ public class MethodScriptCompilerTest {
 		verify(fakePlayer).sendMessage("hello");
 	}
 
-	@Test(expected = ConfigCompileException.class)
+	@Test(expected = AbstractCompileException.class)
 	public void testExecute10() throws Exception {
 		String script
 				= "msg('hello') /* This is a comment too invalid()'\"'' function\n"
@@ -280,7 +281,7 @@ public class MethodScriptCompilerTest {
 		MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, null, true), null, envs), env, null, null);
 	}
 
-	@Test(expected = ConfigCompileException.class)
+	@Test(expected = AbstractCompileException.class)
 	public void testExecute11() throws Exception {
 		String script
 				= "msg('hello') 'unended string";
@@ -714,7 +715,7 @@ public class MethodScriptCompilerTest {
 		assertEquals("2 + 2 is 4", SRun("'2 + 2 is' (2 + 2)", fakePlayer));
 	}
 
-	@Test(expected = ConfigCompileException.class)
+	@Test(expected = AbstractCompileException.class)
 	public void testCompileErrorOfStaticConstructOptimization() throws Exception {
 		MethodScriptCompiler.compile(MethodScriptCompiler.lex("2 / 0", null, null, true), null, envs);
 	}
@@ -773,7 +774,7 @@ public class MethodScriptCompilerTest {
 		}
 	}
 
-	@Test(expected = ConfigCompileException.class)
+	@Test(expected = AbstractCompileException.class)
 	public void testSpuriousSymbols() throws Exception {
 		SRun("2 +", fakePlayer);
 	}
@@ -811,12 +812,12 @@ public class MethodScriptCompilerTest {
 		verify(fakePlayer).sendMessage("success!");
 	}
 
-	@Test(expected = ConfigCompileException.class)
+	@Test(expected = AbstractCompileException.class)
 	public void testFailureOfBraces() throws Exception {
 		SRun("and(1){ 1 }", fakePlayer);
 	}
 
-	@Test(expected = ConfigCompileException.class)
+	@Test(expected = AbstractCompileException.class)
 	public void testInnerElseInElseIf() throws Exception {
 		SRun("if(true){"
 				+ "msg('fail')"

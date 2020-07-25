@@ -23,7 +23,6 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
-import com.laytonsmith.core.compiler.keywords.InKeyword;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CIdentifier;
@@ -45,6 +44,14 @@ import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.functions.BasicLogic.and;
+import com.laytonsmith.core.functions.Compiler.centry;
+import com.laytonsmith.core.functions.DataHandling.assign;
+import com.laytonsmith.core.functions.Math.dec;
+import com.laytonsmith.core.functions.Math.inc;
+import com.laytonsmith.core.functions.Math.postdec;
+import com.laytonsmith.core.functions.Math.postinc;
+import com.laytonsmith.core.functions.StringHandling.sconcat;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -74,9 +81,11 @@ public class ControlFlow {
 	@api
 	public static class _if extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
 
+		public static final String NAME = "if";
+
 		@Override
 		public String getName() {
-			return "if";
+			return NAME;
 		}
 
 		@Override
@@ -176,9 +185,6 @@ public class ControlFlow {
 			);
 		}
 
-		@SuppressWarnings("checkstyle:constantname")
-		private static final String and = new BasicLogic.and().getName();
-
 		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
@@ -186,10 +192,10 @@ public class ControlFlow {
 				throws ConfigCompileException {
 			//Check for too many/few arguments
 			if(args.size() < 2) {
-				throw new ConfigCompileException("Too few arguments passed to if()", t);
+				throw new ConfigCompileException("Too few arguments passed to " + this.getName() + "()", t);
 			}
 			if(args.size() > 3) {
-				throw new ConfigCompileException("if() can only have 3 parameters", t);
+				throw new ConfigCompileException(this.getName() + "() can only have 3 parameters", t);
 			}
 			if(args.get(0).isConst()) {
 				// We can optimize this one way or the other, since the condition is const
@@ -215,16 +221,16 @@ public class ControlFlow {
 			// or there are other nodes inside the statement, or we have an else clause
 			// we cannot do this optimization, as it then has side effects.
 			if(args.get(1).getData() instanceof CFunction
-					&& args.get(1).getData().val().equals("if") && args.size() == 2) {
-				ParseTree _if = args.get(1);
-				if(_if.getChildren().size() == 2) {
+					&& args.get(1).getData().val().equals(_if.NAME) && args.size() == 2) {
+				ParseTree _ifNode = args.get(1);
+				if(_ifNode.getChildren().size() == 2) {
 					// All the conditions are met, move this up
 					ParseTree myCondition = args.get(0);
-					ParseTree theirCondition = _if.getChildAt(0);
-					ParseTree theirCode = _if.getChildAt(1);
-					ParseTree andClause = new ParseTree(new CFunction(and, t), fileOptions);
+					ParseTree theirCondition = _ifNode.getChildAt(0);
+					ParseTree theirCode = _ifNode.getChildAt(1);
+					ParseTree andClause = new ParseTree(new CFunction(and.NAME, t), fileOptions);
 					// If it's already an and(), just tack the other condition on
-					if(myCondition.getData() instanceof CFunction && myCondition.getData().val().equals(and)) {
+					if(myCondition.getData() instanceof CFunction && myCondition.getData().val().equals(and.NAME)) {
 						andClause = myCondition;
 						andClause.addChild(theirCondition);
 					} else {
@@ -269,9 +275,11 @@ public class ControlFlow {
 	@api(environments = {GlobalEnv.class})
 	public static class ifelse extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
 
+		public static final String NAME = "ifelse";
+
 		@Override
 		public String getName() {
-			return "ifelse";
+			return NAME;
 		}
 
 		@Override
@@ -1086,11 +1094,11 @@ public class ControlFlow {
 			boolean isInc;
 			try {
 				if(children.get(2).getData() instanceof CFunction
-						&& ((isInc = children.get(2).getData().val().equals("postinc"))
-						|| children.get(2).getData().val().equals("postdec"))
+						&& ((isInc = children.get(2).getData().val().equals(postinc.NAME))
+						|| children.get(2).getData().val().equals(postdec.NAME))
 						&& children.get(2).getChildAt(0).getData() instanceof IVariable) {
 					ParseTree pre = new ParseTree(
-							new CFunction(isInc ? "inc" : "dec", t), children.get(2).getFileOptions());
+							new CFunction(isInc ? inc.NAME : dec.NAME, t), children.get(2).getFileOptions());
 					pre.addChild(children.get(2).getChildAt(0));
 					children.set(2, pre);
 				}
@@ -1134,6 +1142,8 @@ public class ControlFlow {
 	@breakable
 	public static class forelse extends AbstractFunction implements BranchStatement, VariableScope {
 
+		public static final String NAME = "forelse";
+
 		public forelse() {
 		}
 
@@ -1141,6 +1151,11 @@ public class ControlFlow {
 
 		forelse(boolean runAsFor) {
 			this.runAsFor = runAsFor;
+		}
+
+		@Override
+		public String getName() {
+			return NAME;
 		}
 
 		@Override
@@ -1238,11 +1253,6 @@ public class ControlFlow {
 				}
 			}
 			return parentScope;
-		}
-
-		@Override
-		public String getName() {
-			return "forelse";
 		}
 
 		@Override
@@ -1568,11 +1578,6 @@ public class ControlFlow {
 					+ ", <code>)";
 		}
 
-		private static final String CENTRY = new Compiler.centry().getName();
-		private static final String ASSIGN = new DataHandling.assign().getName();
-		private static final String SCONCAT = new StringHandling.sconcat().getName();
-		private static final String IN = new InKeyword().getKeywordName();
-
 		private boolean isFunction(ParseTree node, String function) {
 			return node.getData() instanceof CFunction && node.getData().val().equals(function);
 		}
@@ -1590,19 +1595,19 @@ public class ControlFlow {
 						"Invalid number of arguments passed to " + getName(), ast.getTarget()));
 				return null;
 			}
-			if(isFunction(children.get(0), CENTRY)) {
+			if(isFunction(children.get(0), centry.NAME)) {
 				// This is what "@key: @value in @array" looks like initially.
 				// We'll refactor this so the next segment can take over properly.
-				ParseTree sconcat = new ParseTree(
-						new CFunction(new StringHandling.sconcat().getName(), ast.getTarget()), ast.getFileOptions());
-				sconcat.addChild(children.get(0).getChildAt(0));
+				ParseTree sconcatNode = new ParseTree(
+						new CFunction(sconcat.NAME, ast.getTarget()), ast.getFileOptions());
+				sconcatNode.addChild(children.get(0).getChildAt(0));
 				for(int i = 0; i < children.get(0).getChildAt(1).numberOfChildren(); i++) {
-					sconcat.addChild(children.get(0).getChildAt(1).getChildAt(i));
+					sconcatNode.addChild(children.get(0).getChildAt(1).getChildAt(i));
 				}
-				children.set(0, sconcat);
+				children.set(0, sconcatNode);
 			}
 			if(children.get(0).getData() instanceof CFunction
-					&& children.get(0).getData().val().equals(new StringHandling.sconcat().getName())) {
+					&& children.get(0).getData().val().equals(sconcat.NAME)) {
 				// We may be looking at a "@value in @array" or "@array as @value" type
 				// structure, so we need to re-arrange this into the standard format.
 				ParseTree array = null;
@@ -1644,7 +1649,7 @@ public class ControlFlow {
 				if(key != null && key.getData() instanceof CLabel) {
 					if(!(((CLabel) key.getData()).cVal() instanceof IVariable)
 							&& !(((CLabel) key.getData()).cVal() instanceof CFunction
-							&& ((CLabel) key.getData()).cVal().val().equals(ASSIGN))) {
+							&& ((CLabel) key.getData()).cVal().val().equals(assign.NAME))) {
 						exceptions.add(new ConfigCompileException("Expected a variable for key, but \""
 								+ key.getData().val() + "\" was found", ast.getTarget()));
 					}
@@ -1666,11 +1671,11 @@ public class ControlFlow {
 				// Change foreach(){ ... } else { ... } to a foreachelse.
 				if(children.get(children.size() - 1).getData() instanceof CFunction
 						&& children.get(children.size() - 1).getData().val().equals("else")) {
-					ParseTree foreachelse = new ParseTree(
-							new CFunction(new foreachelse().getName(), ast.getTarget()), ast.getFileOptions());
+					ParseTree foreachelseNode = new ParseTree(
+							new CFunction(foreachelse.NAME, ast.getTarget()), ast.getFileOptions());
 					children.set(children.size() - 1, children.get(children.size() - 1).getChildAt(0));
-					foreachelse.setChildren(children);
-					return foreachelse;
+					foreachelseNode.setChildren(children);
+					return foreachelseNode;
 				}
 			}
 			return null;
@@ -1705,6 +1710,13 @@ public class ControlFlow {
 	@breakable
 	@seealso({foreach.class, Loops.class, ArrayIteration.class})
 	public static class foreachelse extends foreach {
+
+		public static final String NAME = "foreachelse";
+
+		@Override
+		public String getName() {
+			return NAME;
+		}
 
 		@Override
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
@@ -1756,11 +1768,6 @@ public class ControlFlow {
 				analysis.linkScope(arrayScope, elseCode, env, exceptions);
 			}
 			return parentScope;
-		}
-
-		@Override
-		public String getName() {
-			return "foreachelse";
 		}
 
 		@Override
@@ -1822,9 +1829,11 @@ public class ControlFlow {
 	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class})
 	public static class _while extends AbstractFunction implements BranchStatement, VariableScope {
 
+		public static final String NAME = "while";
+
 		@Override
 		public String getName() {
-			return "while";
+			return NAME;
 		}
 
 		@Override
@@ -1944,6 +1953,13 @@ public class ControlFlow {
 	@seealso({com.laytonsmith.tools.docgen.templates.Loops.class})
 	public static class _dowhile extends AbstractFunction implements BranchStatement, VariableScope {
 
+		public static final String NAME = "dowhile";
+
+		@Override
+		public String getName() {
+			return NAME;
+		}
+
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return null;
@@ -1962,11 +1978,6 @@ public class ControlFlow {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CNull.NULL;
-		}
-
-		@Override
-		public String getName() {
-			return "dowhile";
 		}
 
 		@Override

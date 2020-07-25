@@ -78,6 +78,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
@@ -255,7 +256,7 @@ public class BukkitEntityEvents {
 
 		public static BukkitMCProjectileHitEvent _instantiate(MCProjectile p) {
 			return new BukkitMCProjectileHitEvent(
-					new ProjectileHitEvent(((BukkitMCProjectile) p).asProjectile()));
+					new ProjectileHitEvent(((Projectile) p.getHandle())));
 		}
 
 	}

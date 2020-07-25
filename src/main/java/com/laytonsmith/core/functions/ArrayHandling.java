@@ -88,7 +88,7 @@ public class ArrayHandling {
 			if(args[0].isInstanceOf(CArray.TYPE) && !(args[0] instanceof CMutablePrimitive)) {
 				return new CInt(((CArray) args[0]).size(), t);
 			}
-			throw new CRECastException("Argument 1 of array_size must be an array", t);
+			throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
 		}
 
 		@Override
@@ -142,9 +142,11 @@ public class ArrayHandling {
 	@seealso({array_set.class, array.class, com.laytonsmith.tools.docgen.templates.Arrays.class})
 	public static class array_get extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "array_get";
+
 		@Override
 		public String getName() {
-			return "array_get";
+			return NAME;
 		}
 
 		@Override
@@ -276,7 +278,7 @@ public class ArrayHandling {
 					return aa.get(index, t);
 				}
 			} else {
-				throw new CRECastException("Argument 1 of array_get must be an array", t);
+				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
 			}
 		}
 
@@ -330,7 +332,7 @@ public class ArrayHandling {
 		@Override
 		public Mixed optimize(Target t, Environment env, Mixed... args) throws ConfigCompileException {
 			if(args.length == 0) {
-				throw new CRECastException("Argument 1 of array_get must be an array", t);
+				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
 			}
 			if(args[0].isInstanceOf(ArrayAccess.TYPE)) {
 				ArrayAccess aa = (ArrayAccess) args[0];
@@ -372,9 +374,11 @@ public class ArrayHandling {
 	@OperatorPreferred("@array[@key] = @value")
 	public static class array_set extends AbstractFunction {
 
+		public static final String NAME = "array_set";
+
 		@Override
 		public String getName() {
-			return "array_set";
+			return NAME;
 		}
 
 		@Override
@@ -395,7 +399,7 @@ public class ArrayHandling {
 			Mixed index = parent.seval(nodes[1], env);
 			Mixed value = parent.seval(nodes[2], env);
 			if(!(array.isInstanceOf(CArray.TYPE))) {
-				throw new CRECastException("Argument 1 of array_set must be an array", t);
+				throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
 			}
 			try {
 				((CArray) array).set(index, value, t);
@@ -415,7 +419,7 @@ public class ArrayHandling {
 				}
 				return args[2];
 			}
-			throw new CRECastException("Argument 1 of array_set must be an array", t);
+			throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
 		}
 
 		@Override
@@ -478,9 +482,11 @@ public class ArrayHandling {
 	@OperatorPreferred("@array[] = @value")
 	public static class array_push extends AbstractFunction {
 
+		public static final String NAME = "array_push";
+
 		@Override
 		public String getName() {
-			return "array_push";
+			return NAME;
 		}
 
 		@Override
@@ -491,7 +497,8 @@ public class ArrayHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
-				throw new CREInsufficientArgumentsException("At least 2 arguments must be provided to array_push", t);
+				throw new CREInsufficientArgumentsException(
+						"At least 2 arguments must be provided to " + this.getName(), t);
 			}
 			if(args[0].isInstanceOf(CArray.TYPE)) {
 				CArray array = (CArray) args[0];
@@ -507,7 +514,7 @@ public class ArrayHandling {
 				}
 				return CVoid.VOID;
 			}
-			throw new CRECastException("Argument 1 of array_push must be an array", t);
+			throw new CRECastException("Argument 1 of " + this.getName() + " must be an array", t);
 		}
 
 		@Override
@@ -670,9 +677,11 @@ public class ArrayHandling {
 	@seealso({array_index_exists.class, array_scontains.class})
 	public static class array_contains extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "array_contains";
+
 		@Override
 		public String getName() {
-			return "array_contains";
+			return NAME;
 		}
 
 		@Override
@@ -764,7 +773,8 @@ public class ArrayHandling {
 
 		@Override
 		public String docs() {
-			return "boolean {array, testValue} Works like array_contains, except the comparison ignores case.";
+			return "boolean {array, testValue} Works like " + array_contains.NAME
+					+ ", except the comparison ignores case.";
 		}
 
 		@Override
@@ -1086,7 +1096,8 @@ public class ArrayHandling {
 					original.push(fill, t);
 				}
 			} else {
-				throw new CRECastException("Argument 1 must be an array, and argument 2 must be an integer in array_resize", t);
+				throw new CRECastException(
+						"Argument 1 must be an array, and argument 2 must be an integer in " + this.getName(), t);
 			}
 			return (CArray) args[0];
 		}

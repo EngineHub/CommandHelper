@@ -20,6 +20,8 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.functions.StringHandling.replace;
+import com.laytonsmith.core.functions.StringHandling.split;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -321,11 +323,11 @@ public class Regex {
 				if(isLiteralRegex(pattern)) {
 					//We want to replace this with replace()
 					//Note the alternative order of arguments
-					ParseTree replace = new ParseTree(new CFunction("replace", t), data.getFileOptions());
-					replace.addChildAt(0, children.get(2)); //subject -> main
-					replace.addChildAt(1, new ParseTree(new CString(getLiteralRegex(pattern), t), replace.getFileOptions())); //pattern -> what
-					replace.addChildAt(2, children.get(1)); //replacement -> that
-					return replace;
+					ParseTree replaceNode = new ParseTree(new CFunction(replace.NAME, t), data.getFileOptions());
+					replaceNode.addChildAt(0, children.get(2)); //subject -> main
+					replaceNode.addChildAt(1, new ParseTree(new CString(getLiteralRegex(pattern), t), replaceNode.getFileOptions())); //pattern -> what
+					replaceNode.addChildAt(2, children.get(1)); //replacement -> that
+					return replaceNode;
 				} else {
 					getPattern(data.getData(), t);
 				}
@@ -362,10 +364,6 @@ public class Regex {
 	@api
 	@seealso({StringHandling.split.class, ArrayHandling.array_implode.class})
 	public static class reg_split extends AbstractFunction implements Optimizable {
-
-		// Variable is more clear when named after the function it represents.
-		@SuppressWarnings("checkstyle:constantname")
-		private static final String split = new StringHandling.split().getName();
 
 		@Override
 		public String getName() {
@@ -438,7 +436,7 @@ public class Regex {
 				String pattern = data.getData().val();
 				if(isLiteralRegex(pattern)) {
 					//We want to replace this with split()
-					ParseTree splitNode = new ParseTree(new CFunction(split, t), data.getFileOptions());
+					ParseTree splitNode = new ParseTree(new CFunction(split.NAME, t), data.getFileOptions());
 					splitNode.addChildAt(0, new ParseTree(new CString(getLiteralRegex(pattern), t), splitNode.getFileOptions()));
 					splitNode.addChildAt(1, children.get(1));
 					return splitNode;

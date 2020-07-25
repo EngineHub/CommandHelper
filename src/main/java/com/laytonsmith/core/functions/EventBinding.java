@@ -576,9 +576,11 @@ public class EventBinding {
 	@api
 	public static class modify_event extends AbstractFunction {
 
+		public static final String NAME = "modify_event";
+
 		@Override
 		public String getName() {
-			return "modify_event";
+			return NAME;
 		}
 
 		@Override

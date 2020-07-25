@@ -1,21 +1,20 @@
 package com.laytonsmith.core.compiler.keywords;
 
+import java.util.List;
+
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.DataHandling;
-import java.util.List;
+import com.laytonsmith.core.functions.DataHandling._instanceof;
 
 /**
  *
  */
 @Keyword.keyword("instanceof")
 public class InstanceofKeyword extends Keyword {
-
-	private static final String INSTANCEOF = new DataHandling._instanceof().getName();
 
 	@Override
 	public int process(List<ParseTree> list, int keywordPosition) throws ConfigCompileException {
@@ -29,7 +28,8 @@ public class InstanceofKeyword extends Keyword {
 		if(list.size() <= keywordPosition + 1) {
 			throw new ConfigCompileException("Expected type to follow \"instanceof\" keyword, but no type was found.", list.get(keywordPosition).getTarget());
 		}
-		ParseTree node = new ParseTree(new CFunction(INSTANCEOF, list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
+		ParseTree node = new ParseTree(new CFunction(
+				_instanceof.NAME, list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
 		node.addChild(list.get(keywordPosition - 1));
 		node.addChild(list.get(keywordPosition + 1));
 		list.set(keywordPosition - 1, node); // Overwrite the LHS

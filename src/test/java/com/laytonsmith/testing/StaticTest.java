@@ -203,6 +203,16 @@ public class StaticTest {
 				}
 			}
 		}
+		for(Field field : f.getClass().getDeclaredFields()) {
+			if(field.getName().equals("NAME")) {
+				Object fieldName = field.get(null);
+				if(!f.getName().equals(fieldName)) {
+					fail(f.getName() + " contains a NAME field with value"
+							+ " '" + fieldName + "', which differs from what getName() returns.");
+				}
+				break;
+			}
+		}
 
 		//now the only function left to test is exec. This cannot be abstracted, unfortunately.
 	}
