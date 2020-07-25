@@ -1098,9 +1098,11 @@ public class BasicLogic {
 	@OperatorPreferred("&&")
 	public static class and extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "and";
+
 		@Override
 		public String getName() {
-			return "and";
+			return NAME;
 		}
 
 		@Override
@@ -1650,9 +1652,11 @@ public class BasicLogic {
 	@OperatorPreferred("!")
 	public static class not extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "not";
+
 		@Override
 		public String getName() {
-			return "not";
+			return NAME;
 		}
 
 		@Override

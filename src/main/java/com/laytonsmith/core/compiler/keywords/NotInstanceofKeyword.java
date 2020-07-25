@@ -8,7 +8,8 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.BasicLogic.not;
+import com.laytonsmith.core.functions.DataHandling._instanceof;
 
 /**
  *
@@ -24,14 +25,14 @@ public class NotInstanceofKeyword extends Keyword {
 		if(list.size() <= keywordPosition + 1) {
 			throw new ConfigCompileException("Expected type to follow \"notinstanceof\" keyword, but no type was found.", list.get(keywordPosition).getTarget());
 		}
-		ParseTree node = new ParseTree(new CFunction(Function.INSTANCEOF,
+		ParseTree node = new ParseTree(new CFunction(_instanceof.NAME,
 				list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
 		node.addChild(list.get(keywordPosition - 1));
 		node.addChild(list.get(keywordPosition + 1));
-		ParseTree not = new ParseTree(new CFunction(Function.NOT,
+		ParseTree notNode = new ParseTree(new CFunction(not.NAME,
 				list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
-		not.addChild(node);
-		list.set(keywordPosition - 1, not); // Overwrite the LHS
+		notNode.addChild(node);
+		list.set(keywordPosition - 1, notNode); // Overwrite the LHS
 		list.remove(keywordPosition); // Remove the keyword
 		list.remove(keywordPosition); // Remove the RHS
 		return keywordPosition;

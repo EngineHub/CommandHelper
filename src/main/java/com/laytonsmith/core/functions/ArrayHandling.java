@@ -142,9 +142,11 @@ public class ArrayHandling {
 	@seealso({array_set.class, array.class, com.laytonsmith.tools.docgen.templates.Arrays.class})
 	public static class array_get extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "array_get";
+
 		@Override
 		public String getName() {
-			return "array_get";
+			return NAME;
 		}
 
 		@Override
@@ -372,9 +374,11 @@ public class ArrayHandling {
 	@OperatorPreferred("@array[@key] = @value")
 	public static class array_set extends AbstractFunction {
 
+		public static final String NAME = "array_set";
+
 		@Override
 		public String getName() {
-			return "array_set";
+			return NAME;
 		}
 
 		@Override
@@ -478,9 +482,11 @@ public class ArrayHandling {
 	@OperatorPreferred("@array[] = @value")
 	public static class array_push extends AbstractFunction {
 
+		public static final String NAME = "array_push";
+
 		@Override
 		public String getName() {
-			return "array_push";
+			return NAME;
 		}
 
 		@Override
@@ -671,9 +677,11 @@ public class ArrayHandling {
 	@seealso({array_index_exists.class, array_scontains.class})
 	public static class array_contains extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "array_contains";
+
 		@Override
 		public String getName() {
-			return "array_contains";
+			return NAME;
 		}
 
 		@Override
@@ -765,7 +773,8 @@ public class ArrayHandling {
 
 		@Override
 		public String docs() {
-			return "boolean {array, testValue} Works like " + ARRAY_CONTAINS + ", except the comparison ignores case.";
+			return "boolean {array, testValue} Works like " + array_contains.NAME
+					+ ", except the comparison ignores case.";
 		}
 
 		@Override

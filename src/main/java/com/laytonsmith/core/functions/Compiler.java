@@ -25,6 +25,12 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.functions.DataHandling.assign;
+import com.laytonsmith.core.functions.Math.neg;
+import com.laytonsmith.core.functions.Math.postdec;
+import com.laytonsmith.core.functions.Math.postinc;
+import com.laytonsmith.core.functions.StringHandling.concat;
+import com.laytonsmith.core.functions.StringHandling.sconcat;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -52,9 +58,11 @@ public class Compiler {
 	@hide("This is only used internally by the compiler.")
 	public static class p extends DummyFunction {
 
+		public static final String NAME = "p";
+
 		@Override
 		public String getName() {
-			return "p";
+			return NAME;
 		}
 
 		@Override
@@ -90,6 +98,8 @@ public class Compiler {
 	@hide("This is only used internally by the compiler.")
 	public static class centry extends DummyFunction {
 
+		public static final String NAME = "centry";
+
 		@Override
 		public String docs() {
 			return "CEntry {label, content} Dynamically creates a CEntry. This is used internally by the "
@@ -107,15 +117,17 @@ public class Compiler {
 	@hide("This is only used internally by the compiler.")
 	public static class __autoconcat__ extends DummyFunction {
 
+		public static final String NAME = "__autoconcat__";
+
 		public static ParseTree getParseTree(List<ParseTree> children, FileOptions fo, Target t) {
-			CFunction ac = new CFunction(__AUTOCONCAT__, t);
+			CFunction ac = new CFunction(__autoconcat__.NAME, t);
 			ParseTree tree = new ParseTree(ac, fo);
 			tree.setChildren(children);
 			return tree;
 		}
 
 		public static ParseTree getParseTree(ParseTree child, FileOptions fo, Target t) {
-			CFunction ac = new CFunction(__AUTOCONCAT__, t);
+			CFunction ac = new CFunction(__autoconcat__.NAME, t);
 			ParseTree tree = new ParseTree(ac, fo);
 			List<ParseTree> children = new ArrayList<>();
 			children.add(child);
@@ -125,7 +137,7 @@ public class Compiler {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			throw new Error("Should not have gotten here, " + __AUTOCONCAT__ + " was not removed before runtime.");
+			throw new Error("Should not have gotten here, " + __autoconcat__.NAME + " was not removed before runtime.");
 		}
 
 		@Override
@@ -160,12 +172,13 @@ public class Compiler {
 				ParseTree node = list.get(i + 1);
 				if(node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isAssignment()) {
 					ParseTree lhs = list.get(i);
-					ParseTree assign = new ParseTree(new CFunction(ASSIGN, node.getTarget()), node.getFileOptions());
+					ParseTree assignNode = new ParseTree(
+							new CFunction(assign.NAME, node.getTarget()), node.getFileOptions());
 					ParseTree rhs;
 					if(i < list.size() - 3) {
 						//Need to autoconcat
 						ParseTree ac = new ParseTree(
-								new CFunction(__AUTOCONCAT__, node.getTarget()), lhs.getFileOptions());
+								new CFunction(__autoconcat__.NAME, node.getTarget()), lhs.getFileOptions());
 						int index = i + 2;
 						// add all preceding symbols
 						while(list.size() > index + 1 && list.get(index).getData() instanceof CSymbol) {
@@ -210,9 +223,9 @@ public class Compiler {
 					}
 
 					rhs = list.get(i + 2);
-					assign.addChild(lhs);
-					assign.addChild(rhs);
-					list.set(i, assign);
+					assignNode.addChild(lhs);
+					assignNode.addChild(rhs);
+					list.set(i, assignNode);
 					list.remove(i + 1);
 					list.remove(i + 1);
 				}
@@ -228,9 +241,11 @@ public class Compiler {
 						CSymbol sy = (CSymbol) node.getData();
 						ParseTree conversion;
 						if(sy.val().equals("++")) {
-							conversion = new ParseTree(new CFunction(POSTINC, node.getTarget()), node.getFileOptions());
+							conversion = new ParseTree(
+									new CFunction(postinc.NAME, node.getTarget()), node.getFileOptions());
 						} else {
-							conversion = new ParseTree(new CFunction(POSTDEC, node.getTarget()), node.getFileOptions());
+							conversion = new ParseTree(
+									new CFunction(postdec.NAME, node.getTarget()), node.getFileOptions());
 						}
 						conversion.addChild(list.get(i - 1));
 						list.set(i - 1, conversion);
@@ -253,9 +268,11 @@ public class Compiler {
 										&& !(list.get(i + 1).getData() instanceof CSymbol)) {
 									if(node.getData().val().equals("-")) {
 										//We have to negate it
-										conversion = new ParseTree(new CFunction(NEG, node.getTarget()), node.getFileOptions());
+										conversion = new ParseTree(
+												new CFunction(neg.NAME, node.getTarget()), node.getFileOptions());
 									} else {
-										conversion = new ParseTree(new CFunction(P, node.getTarget()), node.getFileOptions());
+										conversion = new ParseTree(
+												new CFunction(p.NAME, node.getTarget()), node.getFileOptions());
 									}
 								} else {
 									continue;
@@ -435,7 +452,7 @@ public class Compiler {
 							case "assign":
 							case "proc":
 								// Typed assign/closure
-								if(list.get(k + 1).getData().val().equals(ASSIGN)
+								if(list.get(k + 1).getData().val().equals(assign.NAME)
 										&& list.get(k).getData().equals(CVoid.VOID)) {
 									throw new ConfigCompileException("Variables may not be of type void",
 											list.get(k).getTarget());
@@ -450,14 +467,14 @@ public class Compiler {
 						}
 					} else if(list.get(k + 1).getData() instanceof IVariable) {
 						// Not an assignment, a random variable declaration though.
-						ParseTree node = new ParseTree(new CFunction(ASSIGN, list.get(k).getTarget()), list.get(k).getFileOptions());
+						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k).getTarget()), list.get(k).getFileOptions());
 						node.addChild(list.get(k));
 						node.addChild(list.get(k + 1));
 						node.addChild(new ParseTree(CNull.UNDEFINED, list.get(k).getFileOptions()));
 						list.set(k, node);
 						list.remove(k + 1);
 					} else if(list.get(k + 1).getData() instanceof CLabel) {
-						ParseTree node = new ParseTree(new CFunction(ASSIGN, list.get(k).getTarget()), list.get(k).getFileOptions());
+						ParseTree node = new ParseTree(new CFunction(assign.NAME, list.get(k).getTarget()), list.get(k).getFileOptions());
 						ParseTree labelNode = new ParseTree(new CLabel(node.getData()), list.get(k).getFileOptions());
 						labelNode.addChild(list.get(k));
 						labelNode.addChild(new ParseTree(((CLabel) list.get(k + 1).getData()).cVal(), list.get(k).getFileOptions()));
@@ -474,11 +491,11 @@ public class Compiler {
 			if(list.size() >= 1) {
 				ParseTree node = list.get(0);
 				if(node.getData() instanceof CLabel) {
-					ParseTree value = new ParseTree(new CFunction(__AUTOCONCAT__, node.getTarget()), node.getFileOptions());
+					ParseTree value = new ParseTree(new CFunction(__autoconcat__.NAME, node.getTarget()), node.getFileOptions());
 					for(int i = 1; i < list.size(); i++) {
 						value.addChild(list.get(i));
 					}
-					ParseTree ce = new ParseTree(new CFunction(CENTRY, node.getTarget()), node.getFileOptions());
+					ParseTree ce = new ParseTree(new CFunction(centry.NAME, node.getTarget()), node.getFileOptions());
 					ce.addChild(node);
 					ce.addChild(value);
 					return ce;
@@ -500,12 +517,14 @@ public class Compiler {
 							list.remove(0);
 							ParseTree child = list.get(0);
 							if(list.size() > 1) {
-								child = new ParseTree(new CFunction(SCONCAT, child.getTarget()), child.getFileOptions());
+								child = new ParseTree(
+										new CFunction(sconcat.NAME, child.getTarget()), child.getFileOptions());
 								child.setChildren(list);
 							}
 							try {
 								Function f = (Function) FunctionList.getFunction(identifier, envs);
-								ParseTree node = new ParseTree(f.execs(identifier.getTarget(), null, null, child), child.getFileOptions());
+								ParseTree node = new ParseTree(
+										f.execs(identifier.getTarget(), null, null, child), child.getFileOptions());
 								return node;
 							} catch (Exception e) {
 								throw new Error("Unknown function " + identifier.val() + "?");
@@ -525,9 +544,9 @@ public class Compiler {
 					t = list.get(0).getTarget();
 				}
 				if(returnSConcat) {
-					tree = new ParseTree(new CFunction(SCONCAT, t), options);
+					tree = new ParseTree(new CFunction(sconcat.NAME, t), options);
 				} else {
-					tree = new ParseTree(new CFunction(CONCAT, t), options);
+					tree = new ParseTree(new CFunction(concat.NAME, t), options);
 				}
 				tree.setChildren(list);
 				return tree;
@@ -623,6 +642,8 @@ public class Compiler {
 	@hide("This is only used internally by the compiler, and will be removed at some point.")
 	public static class __cbrace__ extends DummyFunction implements Optimizable {
 
+		public static final String NAME = "__cbrace__";
+
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
@@ -648,6 +669,13 @@ public class Compiler {
 			+ " documentation.")
 	public static class smart_string extends AbstractFunction {
 
+		public static final String NAME = "smart_string";
+
+		@Override
+		public String getName() {
+			return NAME;
+		}
+
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return null;
@@ -667,11 +695,6 @@ public class Compiler {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException(getName() + " should have been compiled out. If you are reaching"
 					+ " this, an error has occurred in the parser. Please report this error to the developers.");
-		}
-
-		@Override
-		public String getName() {
-			return "smart_string";
 		}
 
 		@Override
@@ -707,7 +730,7 @@ public class Compiler {
 				StringBuilder b = new StringBuilder();
 				boolean inBrace = false;
 				boolean inSimpleVar = false;
-				ParseTree root = new ParseTree(new CFunction(CONCAT, t), fileOptions);
+				ParseTree root = new ParseTree(new CFunction(concat.NAME, t), fileOptions);
 				for(int i = 0; i < value.length(); i++) {
 					char c = value.charAt(i);
 					char c2 = (i + 1 < value.length() ? value.charAt(i + 1) : '\0');

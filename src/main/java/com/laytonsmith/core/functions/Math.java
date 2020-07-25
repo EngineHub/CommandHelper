@@ -63,9 +63,11 @@ public class Math {
 	@OperatorPreferred("+")
 	public static class add extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "add";
+
 		@Override
 		public String getName() {
-			return "add";
+			return NAME;
 		}
 
 		@Override
@@ -149,9 +151,11 @@ public class Math {
 	@OperatorPreferred("-")
 	public static class subtract extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "subtract";
+
 		@Override
 		public String getName() {
-			return "subtract";
+			return NAME;
 		}
 
 		@Override
@@ -223,9 +227,11 @@ public class Math {
 	@OperatorPreferred("*")
 	public static class multiply extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "multiply";
+
 		@Override
 		public String getName() {
-			return "multiply";
+			return NAME;
 		}
 
 		@Override
@@ -307,9 +313,11 @@ public class Math {
 	@OperatorPreferred("/")
 	public static class divide extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "divide";
+
 		@Override
 		public String getName() {
-			return "divide";
+			return NAME;
 		}
 
 		@Override
@@ -595,9 +603,11 @@ public class Math {
 	@OperatorPreferred("++")
 	public static class inc extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "inc";
+
 		@Override
 		public String getName() {
-			return "inc";
+			return NAME;
 		}
 
 		@Override
@@ -713,9 +723,11 @@ public class Math {
 	@OperatorPreferred("++")
 	public static class postinc extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "postinc";
+
 		@Override
 		public String getName() {
-			return "postinc";
+			return NAME;
 		}
 
 		@Override
@@ -841,9 +853,11 @@ public class Math {
 	@OperatorPreferred("--")
 	public static class dec extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "dec";
+
 		@Override
 		public String getName() {
-			return "dec";
+			return NAME;
 		}
 
 		@Override
@@ -959,9 +973,11 @@ public class Math {
 	@OperatorPreferred("--")
 	public static class postdec extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "postdec";
+
 		@Override
 		public String getName() {
-			return "postdec";
+			return NAME;
 		}
 
 		@Override
@@ -2448,9 +2464,11 @@ public class Math {
 	@api
 	public static class neg extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "neg";
+
 		@Override
 		public String getName() {
-			return "neg";
+			return NAME;
 		}
 
 		@Override

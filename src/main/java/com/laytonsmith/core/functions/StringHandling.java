@@ -40,6 +40,10 @@ import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.functions.Compiler.p;
+import com.laytonsmith.core.functions.DataHandling._string;
+import com.laytonsmith.core.functions.DataHandling.array;
+import com.laytonsmith.core.functions.DataHandling.g;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -73,9 +77,11 @@ public class StringHandling {
 	@OperatorPreferred(".")
 	public static class concat extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "concat";
+
 		@Override
 		public String getName() {
-			return "concat";
+			return NAME;
 		}
 
 		@Override
@@ -151,9 +157,11 @@ public class StringHandling {
 	@noprofile
 	public static class sconcat extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "sconcat";
+
 		@Override
 		public String getName() {
-			return "sconcat";
+			return NAME;
 		}
 
 		@Override
@@ -214,8 +222,8 @@ public class StringHandling {
 			while(it.hasNext()) {
 				ParseTree n = it.next();
 				if(n.getData() instanceof CFunction
-						&& (G.equals(n.getData().val())
-						|| P.equals(n.getData().val()))
+						&& (g.NAME.equals(n.getData().val())
+						|| p.NAME.equals(n.getData().val()))
 						&& !n.hasChildren()) {
 					it.remove();
 				}
@@ -252,7 +260,7 @@ public class StringHandling {
 					} catch (IllegalArgumentException ex) {
 						// Ignored, we'll just toString it, because it's an unknown type.
 					}
-					ParseTree node = new ParseTree(new CFunction(STRING, t), fileOptions);
+					ParseTree node = new ParseTree(new CFunction(_string.NAME, t), fileOptions);
 					node.addChild(child);
 					return node;
 				}
@@ -278,9 +286,11 @@ public class StringHandling {
 	@api
 	public static class replace extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "replace";
+
 		@Override
 		public String getName() {
-			return "replace";
+			return NAME;
 		}
 
 		@Override
@@ -1256,9 +1266,11 @@ public class StringHandling {
 	@seealso({ArrayHandling.array_implode.class})
 	public static class split extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "split";
+
 		@Override
 		public String getName() {
-			return "split";
+			return NAME;
 		}
 
 		@Override
@@ -1601,7 +1613,7 @@ public class StringHandling {
 				me.setChildren(children);
 				me.setOptimized(true); //After this run, we will be, anyways.
 				if(children.size() == 3 && children.get(2).getData() instanceof CFunction
-						&& ((CFunction) children.get(2).getData()).getFunction().getName().equals(ARRAY)) {
+						&& ((CFunction) children.get(2).getData()).getFunction().getName().equals(array.NAME)) {
 					//Normally we can't do anything with a hardcoded array, it's considered dynamic. But in this case, we can at least pull up the arguments,
 					//because the array's size is constant, even if the arguments in it aren't.
 					ParseTree array = children.get(2);

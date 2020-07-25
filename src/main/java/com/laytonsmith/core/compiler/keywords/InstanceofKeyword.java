@@ -8,7 +8,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.DataHandling._instanceof;
 
 /**
  *
@@ -28,7 +28,8 @@ public class InstanceofKeyword extends Keyword {
 		if(list.size() <= keywordPosition + 1) {
 			throw new ConfigCompileException("Expected type to follow \"instanceof\" keyword, but no type was found.", list.get(keywordPosition).getTarget());
 		}
-		ParseTree node = new ParseTree(new CFunction(Function.INSTANCEOF, list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
+		ParseTree node = new ParseTree(new CFunction(
+				_instanceof.NAME, list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
 		node.addChild(list.get(keywordPosition - 1));
 		node.addChild(list.get(keywordPosition + 1));
 		list.set(keywordPosition - 1, node); // Overwrite the LHS

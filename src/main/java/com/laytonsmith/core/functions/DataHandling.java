@@ -73,6 +73,11 @@ import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.functions.ArrayHandling.array_get;
+import com.laytonsmith.core.functions.ArrayHandling.array_push;
+import com.laytonsmith.core.functions.ArrayHandling.array_set;
+import com.laytonsmith.core.functions.Compiler.__autoconcat__;
+import com.laytonsmith.core.functions.Compiler.centry;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
@@ -105,9 +110,11 @@ public class DataHandling {
 	@seealso({com.laytonsmith.tools.docgen.templates.Arrays.class, ArrayIteration.class})
 	public static class array extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "array";
+
 		@Override
 		public String getName() {
-			return "array";
+			return NAME;
 		}
 
 		@Override
@@ -132,7 +139,7 @@ public class DataHandling {
 				Mixed elem = child.getData();
 
 				// If this is a centry(), ignore the first (CLabel) argument.
-				if(elem instanceof CFunction && CENTRY.equals(elem.val())) {
+				if(elem instanceof CFunction && centry.NAME.equals(elem.val())) {
 					if(child.numberOfChildren() == 2) {
 						CClassType type = analysis.typecheck(child.getChildAt(1), env, exceptions);
 						StaticAnalysis.requireType(type, Mixed.TYPE, child.getChildAt(1).getTarget(), env, exceptions);
@@ -195,7 +202,7 @@ public class DataHandling {
 			//statements, but doesn't make sense here.
 			//Also check for dynamic labels
 			for(ParseTree child : children) {
-				if(child.getData() instanceof CFunction && CENTRY.equals(child.getData().val())) {
+				if(child.getData() instanceof CFunction && centry.NAME.equals(child.getData().val())) {
 					if(((CLabel) child.getChildAt(0).getData()).cVal() instanceof CSlice) {
 						throw new ConfigCompileException("Slices cannot be used as array indices", child.getChildAt(0).getTarget());
 					}
@@ -294,9 +301,11 @@ public class DataHandling {
 	@OperatorPreferred("=")
 	public static class assign extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "assign";
+
 		@Override
 		public String getName() {
-			return "assign";
+			return NAME;
 		}
 
 		@Override
@@ -627,13 +636,13 @@ public class DataHandling {
 			}
 
 			// Convert "assign(@a[<ind>], val)" to "array_push(@a, val)" or "array_set(@a, ind, val)".
-			if(children.get(0).getData() instanceof CFunction && ARRAY_GET.equals(children.get(0).getData().val())) {
+			if(children.get(0).getData() instanceof CFunction && array_get.NAME.equals(children.get(0).getData().val())) {
 				if(children.get(0).getChildAt(1).getData() instanceof CSlice) {
 					CSlice cs = (CSlice) children.get(0).getChildAt(1).getData();
 					if(cs.getStart() == 0 && cs.getFinish() == -1) {
 						//Turn this into an array_push
 						ParseTree tree = new ParseTree(new CFunction(
-								ARRAY_PUSH, ast.getTarget()), children.get(0).getFileOptions());
+								array_push.NAME, ast.getTarget()), children.get(0).getFileOptions());
 						tree.addChild(children.get(0).getChildAt(0));
 						tree.addChild(children.get(1));
 						return tree;
@@ -643,7 +652,7 @@ public class DataHandling {
 				} else {
 					//Turn this into an array set instead
 					ParseTree tree = new ParseTree(new CFunction(
-							ARRAY_SET, ast.getTarget()), children.get(0).getFileOptions());
+							array_set.NAME, ast.getTarget()), children.get(0).getFileOptions());
 					tree.addChild(children.get(0).getChildAt(0));
 					tree.addChild(children.get(0).getChildAt(1));
 					tree.addChild(children.get(1));
@@ -1362,9 +1371,11 @@ public class DataHandling {
 	@unbreakable
 	public static class proc extends AbstractFunction implements BranchStatement, VariableScope {
 
+		public static final String NAME = "proc";
+
 		@Override
 		public String getName() {
-			return "proc";
+			return NAME;
 		}
 
 		@Override
@@ -1441,13 +1452,13 @@ public class DataHandling {
 				} else {
 					boolean thisNodeIsAssign = false;
 					if(nodes[i].getData() instanceof CFunction) {
-						if((nodes[i].getData()).val().equals(ASSIGN)) {
+						if((nodes[i].getData()).val().equals(assign.NAME)) {
 							thisNodeIsAssign = true;
 							if((nodes[i].getChildren().size() == 3 && Construct.IsDynamicHelper(nodes[i].getChildAt(0).getData()))
 									|| Construct.IsDynamicHelper(nodes[i].getChildAt(1).getData())) {
 								usesAssign = true;
 							}
-						} else if((nodes[i].getData()).val().equals(__AUTOCONCAT__)) {
+						} else if((nodes[i].getData()).val().equals(__autoconcat__.NAME)) {
 							throw new CREInvalidProcedureException("Invalid arguments defined for procedure", t);
 						}
 					}
@@ -1586,7 +1597,7 @@ public class DataHandling {
 					if(!children.isEmpty()) {
 						options = children.get(0).getFileOptions();
 					}
-					ParseTree root = new ParseTree(new CFunction(__AUTOCONCAT__, Target.UNKNOWN), options);
+					ParseTree root = new ParseTree(new CFunction(__autoconcat__.NAME, Target.UNKNOWN), options);
 					Script fakeScript = Script.GenerateScript(root, Static.GLOBAL_PERMISSION);
 					Environment env = Static.GenerateStandaloneEnvironment();
 					env.getEnv(GlobalEnv.class).SetScript(fakeScript);
@@ -1651,9 +1662,11 @@ public class DataHandling {
 	@DocumentLink(0)
 	public static class include extends AbstractFunction implements Optimizable, DocumentLinkProvider {
 
+		public static final String NAME = "include";
+
 		@Override
 		public String getName() {
-			return "include";
+			return NAME;
 		}
 
 		@Override
@@ -1995,13 +2008,13 @@ public class DataHandling {
 			}
 
 			// Convert this function to g(include(...), include(...), ...).
-			ParseTree g = new ParseTree(new CFunction(G, t), ast.getFileOptions());
+			ParseTree gNode = new ParseTree(new CFunction(g.NAME, t), ast.getFileOptions());
 			for(File f : msFiles) {
-				ParseTree include = new ParseTree(new CFunction(INCLUDE, t), ast.getFileOptions());
-				include.addChild(new ParseTree(new CString(f.getAbsolutePath(), t), ast.getFileOptions()));
-				g.addChild(include);
+				ParseTree includeNode = new ParseTree(new CFunction(include.NAME, t), ast.getFileOptions());
+				includeNode.addChild(new ParseTree(new CString(f.getAbsolutePath(), t), ast.getFileOptions()));
+				gNode.addChild(includeNode);
 			}
-			return g;
+			return gNode;
 		}
 	}
 
@@ -2405,7 +2418,7 @@ public class DataHandling {
 			}
 			for(int i = 0; i < nodes.length - 1; i++) {
 				ParseTree node = nodes[i];
-				ParseTree newNode = new ParseTree(new CFunction(G, t), node.getFileOptions());
+				ParseTree newNode = new ParseTree(new CFunction(g.NAME, t), node.getFileOptions());
 				List<ParseTree> children = new ArrayList<>();
 				children.add(node);
 				newNode.setChildren(children);
@@ -2577,7 +2590,7 @@ public class DataHandling {
 			}
 			for(int i = 0; i < nodes.length - 1; i++) {
 				ParseTree node = nodes[i];
-				ParseTree newNode = new ParseTree(new CFunction(G, t), node.getFileOptions());
+				ParseTree newNode = new ParseTree(new CFunction(g.NAME, t), node.getFileOptions());
 				List<ParseTree> children = new ArrayList<>();
 				children.add(node);
 				newNode.setChildren(children);
@@ -3057,9 +3070,11 @@ public class DataHandling {
 	@api
 	public static class _string extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "string";
+
 		@Override
 		public String getName() {
-			return "string";
+			return NAME;
 		}
 
 		@Override
@@ -3469,9 +3484,11 @@ public class DataHandling {
 	@hide("This will eventually be replaced by ; statements.")
 	public static class g extends AbstractFunction {
 
+		public static final String NAME = "g";
+
 		@Override
 		public String getName() {
-			return "g";
+			return NAME;
 		}
 
 		@Override
@@ -3620,6 +3637,13 @@ public class DataHandling {
 	@api
 	public static class _instanceof extends AbstractFunction implements Optimizable {
 
+		public static final String NAME = "instanceof";
+
+		@Override
+		public String getName() {
+			return NAME;
+		}
+
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{};
@@ -3649,11 +3673,6 @@ public class DataHandling {
 			}
 			boolean b = InstanceofUtil.isInstanceof(args[0], type, environment);
 			return CBoolean.get(b);
-		}
-
-		@Override
-		public String getName() {
-			return "instanceof";
 		}
 
 		@Override

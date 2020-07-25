@@ -7,7 +7,8 @@ import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.ControlFlow._dowhile;
+import com.laytonsmith.core.functions.ControlFlow._while;
 
 import java.util.List;
 
@@ -26,13 +27,14 @@ public class DoKeyword extends Keyword {
 			ParseTree codeTree = list.get(keywordPosition + 1);
 			ParseTree whileTree = list.get(keywordPosition + 2);
 			this.validateCodeBlock(codeTree, "Missing brace following \"do\" keyword");
-			if(!(whileTree.getData() instanceof CFunction) || !whileTree.getData().val().equals(Function.WHILE)) {
+			if(!(whileTree.getData() instanceof CFunction) || !whileTree.getData().val().equals(_while.NAME)) {
 				throw new ConfigCompileException("Missing while clause following \"do\" keyword", t);
 			}
 			if(whileTree.getChildren().isEmpty()) {
 				throw new ConfigCompileException("Missing argument to while clause", whileTree.getTarget());
 			}
-			ParseTree dowhile = new ParseTree(new CFunction(Function.DOWHILE, t), list.get(keywordPosition).getFileOptions());
+			ParseTree dowhile = new ParseTree(
+					new CFunction(_dowhile.NAME, t), list.get(keywordPosition).getFileOptions());
 			dowhile.addChild(Keyword.getArgumentOrNull(codeTree));
 			dowhile.addChild(whileTree.getChildAt(0));
 			list.set(keywordPosition, dowhile);

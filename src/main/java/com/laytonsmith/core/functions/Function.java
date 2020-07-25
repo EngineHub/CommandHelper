@@ -22,52 +22,7 @@ import java.util.Set;
  */
 //This will be re-added at some point, so get ready!
 //@MustUseOverride
-@SuppressWarnings("checkstyle:ConstantName") // Static final function name fields should match their actual name.
 public interface Function extends FunctionBase, Documentation, Comparable<Function> {
-
-	/*
-	 * Whenever a function is referenced by a hard-coded name, one of these static final fields should be used.
-	 */
-	public static final String ARRAY_GET = new ArrayHandling.array_get().getName();
-	public static final String ARRAY_SET = new ArrayHandling.array_set().getName();
-	public static final String ARRAY_PUSH = new ArrayHandling.array_push().getName();
-	public static final String ARRAY_CONTAINS = new ArrayHandling.array_contains().getName();
-	public static final String AND = new BasicLogic.and().getName();
-	public static final String NOT = new BasicLogic.not().getName();
-	public static final String __AUTOCONCAT__ = new Compiler.__autoconcat__().getName();
-	public static final String __CBRACE__ = new Compiler.__cbrace__().getName();
-	public static final String CENTRY = new Compiler.centry().getName();
-	public static final String P = new Compiler.p().getName();
-	public static final String SMART_STRING = new Compiler.smart_string().getName();
-	public static final String IF = new ControlFlow._if().getName();
-	public static final String IFELSE = new ControlFlow.ifelse().getName();
-	public static final String WHILE = new ControlFlow._while().getName();
-	public static final String DOWHILE = new ControlFlow._dowhile().getName();
-	public static final String FORELSE = new ControlFlow.forelse().getName();
-	public static final String FOREACHELSE = new ControlFlow.foreachelse().getName();
-	public static final String ARRAY = new DataHandling.array().getName();
-	public static final String ASSIGN = new DataHandling.assign().getName();
-	public static final String G = new DataHandling.g().getName();
-	public static final String INCLUDE = new DataHandling.include().getName();
-	public static final String INSTANCEOF = new DataHandling._instanceof().getName();
-	public static final String PROC = new DataHandling.proc().getName();
-	public static final String STRING = new DataHandling._string().getName();
-	public static final String MODIFY_EVENT = new EventBinding.modify_event().getName();
-	public static final String COMPLEX_TRY = new Exceptions.complex_try().getName();
-	public static final String TRY = new Exceptions._try().getName();
-	public static final String CONCAT = new StringHandling.concat().getName();
-	public static final String SCONCAT = new StringHandling.sconcat().getName();
-	public static final String SPLIT = new StringHandling.split().getName();
-	public static final String REPLACE = new StringHandling.replace().getName();
-	public static final String NEG = new Math.neg().getName();
-	public static final String INC = new Math.inc().getName();
-	public static final String DEC = new Math.dec().getName();
-	public static final String POSTINC = new Math.postinc().getName();
-	public static final String POSTDEC = new Math.postdec().getName();
-	public static final String ADD = new Math.add().getName();
-	public static final String SUBTRACT = new Math.subtract().getName();
-	public static final String MULTIPLY = new Math.multiply().getName();
-	public static final String DIVIDE = new Math.divide().getName();
 
 	/**
 	 * Returns the types of catchable exceptions this function can throw. (Uncatchable exceptions need not be listed)

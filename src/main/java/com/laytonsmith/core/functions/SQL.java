@@ -39,6 +39,8 @@ import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRESQLException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.functions.StringHandling.concat;
+import com.laytonsmith.core.functions.StringHandling.sconcat;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.database.SQLProfile;
 import java.sql.Connection;
@@ -332,7 +334,7 @@ public class SQL {
 			Mixed queryData = children.get(1).getData();
 			if(queryData instanceof CFunction) {
 				//If it's a concat or sconcat, warn them that this is bad
-				if(doWarn && (SCONCAT.equals(queryData.val()) || CONCAT.equals(queryData.val()))) {
+				if(doWarn && (sconcat.NAME.equals(queryData.val()) || concat.NAME.equals(queryData.val()))) {
 					String msg = "Use of concatenated query detected! This"
 							+ " is very bad practice, and could lead to SQL injection vulnerabilities"
 							+ " in your code. It is highly recommended that you use prepared queries,"

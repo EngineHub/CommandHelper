@@ -7,7 +7,8 @@ import com.laytonsmith.core.compiler.Keyword;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.Exceptions._try;
+import com.laytonsmith.core.functions.Exceptions.complex_try;
 
 import java.util.List;
 
@@ -40,13 +41,13 @@ public class TryKeyword extends Keyword {
 
 		// If it's the old version, and a function
 		if(list.get(keywordPosition).getData() instanceof CFunction
-				&& list.get(keywordPosition).getData().val().equals(Function.TRY)) {
+				&& list.get(keywordPosition).getData().val().equals(_try.NAME)) {
 			return keywordPosition;
 		}
 		// Otherwise it's not, and we can continue on, assuming keyword usage.
 		this.validateCodeBlock(list.get(keywordPosition + 1), "Expecting braces after try keyword");
 
-		ParseTree complexTry = new ParseTree(new CFunction(Function.COMPLEX_TRY,
+		ParseTree complexTry = new ParseTree(new CFunction(complex_try.NAME,
 				list.get(keywordPosition).getTarget()), list.get(keywordPosition).getFileOptions());
 		complexTry.addChild(getArgumentOrNull(list.get(keywordPosition + 1)));
 

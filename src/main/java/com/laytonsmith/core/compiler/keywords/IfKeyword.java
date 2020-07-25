@@ -10,7 +10,7 @@ import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.ControlFlow.ifelse;
 
 /**
  *
@@ -36,7 +36,7 @@ public class IfKeyword extends Keyword {
 					if(nodeIsElseKeyword(list.get(keywordPosition + 2))
 							&& nodeIsIfFunction(list.get(keywordPosition + 3))) {
 						// It is, convert this into an ifelse
-						ParseTree newNode = new ParseTree(new CFunction(Function.IFELSE, t), node.getFileOptions());
+						ParseTree newNode = new ParseTree(new CFunction(ifelse.NAME, t), node.getFileOptions());
 						newNode.setChildren(node.getChildren());
 						node = newNode;
 					}

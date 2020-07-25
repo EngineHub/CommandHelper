@@ -10,7 +10,7 @@ import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.ControlFlow.forelse;
 
 /**
  *
@@ -43,7 +43,7 @@ public class ForKeyword extends Keyword {
 					forTree.addChild(getArgumentOrNull(codeBlock));
 				}
 				// We also have to refactor this into a foreachelse, instead of a foreach.
-				list.get(keywordPosition).setData(new CFunction(Function.FORELSE, t));
+				list.get(keywordPosition).setData(new CFunction(forelse.NAME, t));
 				list.remove(keywordPosition + 1);
 			}
 		}
