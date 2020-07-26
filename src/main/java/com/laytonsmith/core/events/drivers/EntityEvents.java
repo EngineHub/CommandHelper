@@ -24,6 +24,7 @@ import com.laytonsmith.abstraction.enums.MCRegainReason;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
+import com.laytonsmith.abstraction.enums.MCUnleashReason;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
@@ -2165,9 +2166,11 @@ public class EntityEvents {
 
 		@Override
 		public String docs() {
-			return "{type: <macro> The type of entity | id: <macro> The UUID of entity}"
+			return "{type: <macro> | reason: <macro>}"
 					+ " This event is called when a leash is broken."
-					+ " {id: The entityID of the entity | type: The entity type of the entity}"
+					+ " {id: The entityID of the entity | type: The entity type of the entity"
+					+ " reason: The reason the leash broke. Can be one of "
+					+ StringUtils.Join(MCUnleashReason.values(), ", ", ", or ", " or ") + "}"
 					+ " {}";
 		}
 
