@@ -667,9 +667,9 @@ public class Compiler {
 	@api
 	@hide("This is more of a compiler feature, rather than a function, and so it is hidden from normal"
 			+ " documentation.")
-	public static class smart_string extends AbstractFunction {
+	public static class __smart_string__ extends AbstractFunction {
 
-		public static final String NAME = "smart_string";
+		public static final String NAME = "__smart_string__";
 
 		@Override
 		public String getName() {
@@ -734,11 +734,21 @@ public class Compiler {
 				for(int i = 0; i < value.length(); i++) {
 					char c = value.charAt(i);
 					char c2 = (i + 1 < value.length() ? value.charAt(i + 1) : '\0');
-					if(c == '\\' && c2 == '@') {
-						b.append("@");
+
+					// The parser passes '\' as '\\' and literal '@' as '\@' for disambiguation in parsing here.
+					if(c == '\\') {
+						if(c2 == '@') {
+							b.append('@');
+						} else if(c2 == '\\') {
+							b.append('\\');
+						} else {
+							throw new ConfigCompileException(
+									"Invalid unhandled escape sequence passed to " + this.getName() + ": \\" + c2, t);
+						}
 						i++;
 						continue;
 					}
+
 					if(c == '@') {
 						if(c2 == '{') {
 							//Start of a complex variable
