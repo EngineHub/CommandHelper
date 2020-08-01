@@ -49,7 +49,7 @@ import com.laytonsmith.core.functions.Compiler;
 import com.laytonsmith.core.functions.Compiler.__autoconcat__;
 import com.laytonsmith.core.functions.Compiler.__cbrace__;
 import com.laytonsmith.core.functions.Compiler.p;
-import com.laytonsmith.core.functions.Compiler.smart_string;
+import com.laytonsmith.core.functions.Compiler.__smart_string__;
 import com.laytonsmith.core.functions.Math.neg;
 import com.laytonsmith.core.functions.ControlFlow;
 import com.laytonsmith.core.functions.DataHandling;
@@ -708,6 +708,12 @@ public final class MethodScriptCompiler {
 					// Handle an escape sign in a quote.
 					switch(c2) {
 						case '\\':
+							if(inSmartQuote) {
+								// Escaping of '@' and '\' is handled within __smart_string__.
+								buf.append('\\');
+							}
+							buf.append('\\');
+							break;
 						case '\'':
 						case '"':
 							buf.append(c2);
@@ -1467,7 +1473,7 @@ public final class MethodScriptCompiler {
 			if(t.type == TType.SMART_STRING) {
 				if(t.val().contains("@")) {
 					ParseTree function = new ParseTree(fileOptions);
-					function.setData(new CFunction(smart_string.NAME, t.target));
+					function.setData(new CFunction(__smart_string__.NAME, t.target));
 					ParseTree string = new ParseTree(fileOptions);
 					string.setData(new CString(t.value, t.target));
 					function.addChild(string);
