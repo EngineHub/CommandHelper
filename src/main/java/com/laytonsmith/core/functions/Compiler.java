@@ -25,6 +25,7 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.functions.DataHandling._string;
 import com.laytonsmith.core.functions.DataHandling.assign;
 import com.laytonsmith.core.functions.Math.neg;
 import com.laytonsmith.core.functions.Math.postdec;
@@ -727,10 +728,16 @@ public class Compiler {
 				}
 				String value = children.get(0).getData().val();
 
+				// Rewrite empty smart strings to empty normal strings.
+				if(value.isEmpty()) {
+					return new ParseTree(new CString("", t), fileOptions);
+				}
+
+				// Parse the given string into string and ivariable parts, and add them as children to a new ParseTree.
 				StringBuilder b = new StringBuilder();
 				boolean inBrace = false;
 				boolean inSimpleVar = false;
-				ParseTree root = new ParseTree(new CFunction(concat.NAME, t), fileOptions);
+				ParseTree root = new ParseTree(null, fileOptions);
 				for(int i = 0; i < value.length(); i++) {
 					char c = value.charAt(i);
 					char c2 = (i + 1 < value.length() ? value.charAt(i + 1) : '\0');
@@ -759,7 +766,7 @@ public class Compiler {
 							inSimpleVar = true;
 						} else {
 							// Loose @, this is a compile error
-							throw new ConfigCompileException("Unexpected \"@\" in string."
+							throw new ConfigCompileException("Unexpected \"@\" in smart string."
 									+ " If you want a literal at sign, escape it with \"\\@\".", t);
 						}
 						if(b.length() > 0) {
@@ -792,23 +799,30 @@ public class Compiler {
 					b.append(c);
 				}
 				if(inBrace) {
-					throw new ConfigCompileException("Missing end brace (}) in double string", t);
+					throw new ConfigCompileException("Missing end brace (}) in smart string", t);
 				}
 				if(inSimpleVar) {
 					root.addChild(new ParseTree(new IVariable("@" + b.toString(), t), fileOptions));
 				} else if(b.length() > 0) {
 					root.addChild(new ParseTree(new CString(b.toString(), t), fileOptions));
 				}
+
+				// Concat multiple terms, or cast single term to string if a non-string term was found.
+				assert root.numberOfChildren() != 0 : "Empty strings should have already been handled.";
 				if(root.numberOfChildren() == 1) {
-					return root.getChildAt(0);
+					ParseTree child = root.getChildAt(0);
+					if(child.getData() instanceof CString) {
+						return child; // A single normal string was found, so a cast is not required.
+					}
+					root.setData(new CFunction(_string.NAME, t));
+				} else {
+					root.setData(new CFunction(concat.NAME, t));
 				}
-				//throw new ConfigCompileException("Doubly quoted strings are not yet supported...", t);
 				return root;
 			} catch (ConfigCompileException e) {
 				exceptions.add(e);
 				return null;
 			}
 		}
-
 	}
 }
