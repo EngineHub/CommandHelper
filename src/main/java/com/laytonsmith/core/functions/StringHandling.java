@@ -2315,55 +2315,44 @@ public class StringHandling {
 			if(times == 0 || string.isEmpty()) {
 				return new CString("", t);
 			}
+			if(string.length() * times < 0) {
+				throw new CRERangeException("Maximum string size for return value exceeded. Max size: 2147483647,"
+						+ " required size: " + (times * (long) string.length()) + ".", t);
+			}
 			String s = repeat(string, times);
 			return new CString(s, t);
 		}
 
 		// Code taken from Apache Commons, and modified.
-		private static final int PAD_LIMIT = 8192;
-
 		private static String repeat(String str, int repeat) {
 			int inputLength = str.length();
 			if(repeat == 1 || inputLength == 0) {
 				return str;
 			}
-			if(inputLength == 1 && repeat <= PAD_LIMIT) {
-				return padding(repeat, str.charAt(0));
+			if(inputLength == 1) {
+				char ch = str.charAt(0);
+				final char[] buf = new char[repeat];
+				for(int i = 0; i < repeat; i++) {
+					buf[i] = ch;
+				}
+				return new String(buf);
 			}
-
 			int outputLength = inputLength * repeat;
-			switch(inputLength) {
-				case 1:
-					char ch = str.charAt(0);
-					char[] output1 = new char[outputLength];
-					for(int i = repeat - 1; i >= 0; i--) {
-						output1[i] = ch;
-					}
-					return new String(output1);
-				case 2:
-					char ch0 = str.charAt(0);
-					char ch1 = str.charAt(1);
-					char[] output2 = new char[outputLength];
-					for(int i = repeat * 2 - 2; i >= 0; i--, i--) {
-						output2[i] = ch0;
-						output2[i + 1] = ch1;
-					}
-					return new String(output2);
-				default:
-					StringBuilder buf = new StringBuilder(outputLength);
-					for(int i = 0; i < repeat; i++) {
-						buf.append(str);
-					}
-					return buf.toString();
+			if(inputLength == 2) {
+				char ch0 = str.charAt(0);
+				char ch1 = str.charAt(1);
+				char[] output2 = new char[outputLength];
+				for(int i = repeat * 2 - 2; i >= 0; i--, i--) {
+					output2[i] = ch0;
+					output2[i + 1] = ch1;
+				}
+				return new String(output2);
 			}
-		}
-
-		private static String padding(int repeat, char padChar) throws IndexOutOfBoundsException {
-			final char[] buf = new char[repeat];
-			for(int i = 0; i < buf.length; i++) {
-				buf[i] = padChar;
+			StringBuilder buf = new StringBuilder(outputLength);
+			for(int i = 0; i < repeat; i++) {
+				buf.append(str);
 			}
-			return new String(buf);
+			return buf.toString();
 		}
 
 		@Override
@@ -2382,8 +2371,10 @@ public class StringHandling {
 					+ " For instance, string_multiply('a', 3) returns 'aaa'. If the string"
 					+ " is empty, an empty string is returned. If the string is null, null"
 					+ " is returned. If times is 0, an empty string is returned."
-					+ " All other string values are multiplied accordingly. Providing"
-					+ " a value less than 0 for times results in a RangeException.";
+					+ " All other string values are multiplied accordingly."
+					+ " Providing a value less than 0 for times results in a RangeException."
+					+ " When the maximum string size of 2147483647 characters would be exceeded,"
+					+ " a RangeException is thrown.";
 		}
 
 		@Override
