@@ -1323,10 +1323,9 @@ public final class Static {
 		}
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(platformFolder);
-		Profiles profiles = null;
-		if(MethodScriptFileLocations.getDefault().getProfilesFile().exists()) {
-			profiles = new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile());
-		}
+		Profiles profiles = (MethodScriptFileLocations.getDefault().getProfilesFile().exists()
+				? new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile())
+				: new ProfilesImpl());
 		PersistenceNetwork persistenceNetwork = new PersistenceNetworkImpl(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
 				new URI(URLEncoder.encode("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace('\\', '/'), "UTF-8")), options);
 		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"),
