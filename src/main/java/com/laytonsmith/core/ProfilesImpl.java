@@ -25,7 +25,14 @@ public class ProfilesImpl implements Profiles {
 	private static Map<String, Class<? extends Profile>> profileTypes = null;
 
 	/**
-	 *
+	 * Creates a new empty {@link Profiles}.
+	 */
+	public ProfilesImpl() {
+		this.document = null;
+	}
+
+	/**
+	 * Creates a new {@link Profiles}, initialized with profiles present in the given xml string.
 	 * @param xml
 	 * @throws InvalidProfileException
 	 */
@@ -39,7 +46,7 @@ public class ProfilesImpl implements Profiles {
 	}
 
 	/**
-	 *
+	 * Creates a new {@link Profiles}, initialized with profiles present in the given xml file.
 	 * @param profileFile
 	 * @throws IOException
 	 * @throws InvalidProfileException
@@ -49,7 +56,7 @@ public class ProfilesImpl implements Profiles {
 	}
 
 	/**
-	 *
+	 * Creates a new {@link Profiles}, initialized with profiles present in the given xml stream.
 	 * @param profileData
 	 * @throws IOException
 	 * @throws InvalidProfileException
