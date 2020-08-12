@@ -2169,7 +2169,7 @@ public class EntityEvents {
 			return "{type: <macro> | reason: <macro>}"
 					+ " This event is called when a leash is broken."
 					+ " {id: The entityID of the entity | type: The entity type of the entity"
-					+ " reason: The reason the leash broke. Can be one of "
+					+ " | reason: The reason the leash broke. Can be one of "
 					+ StringUtils.Join(MCUnleashReason.values(), ", ", ", or ", " or ") + "}"
 					+ " {}";
 		}
