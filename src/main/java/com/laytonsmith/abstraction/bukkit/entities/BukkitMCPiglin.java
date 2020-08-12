@@ -7,8 +7,8 @@ import org.bukkit.entity.Piglin;
 
 public class BukkitMCPiglin extends BukkitMCLivingEntity implements MCPiglin {
 
-	public BukkitMCPiglin(Entity zombie) {
-		super(zombie);
+	public BukkitMCPiglin(Entity ent) {
+		super(ent);
 	}
 
 	public BukkitMCPiglin(AbstractionObject ao) {

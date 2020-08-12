@@ -196,6 +196,7 @@ public abstract class MCEntityType<Concrete> extends DynamicEnum<MCEntityType.MC
 		PIG,
 		PIG_ZOMBIE(true, false, MCVersion.MC1_0, MCVersion.MC1_15_X),
 		PIGLIN(true, false, MCVersion.MC1_16),
+		PIGLIN_BRUTE(true, false, MCVersion.MC1_16_X),
 		PILLAGER(true, false, MCVersion.MC1_14),
 		PLAYER(false),
 		POLAR_BEAR,
