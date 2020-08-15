@@ -969,13 +969,9 @@ public final class Interpreter {
 	}
 
 	public static void install(String commandName) {
-		if(null == OSUtils.GetOS()) {
-			StreamUtils.GetSystemErr().println("Cmdline MethodScript is only supported on Unix and Windows");
-			return;
-		}
 		switch(OSUtils.GetOS()) {
 			case LINUX:
-			case MAC:
+			case MAC: {
 				try {
 					URL jar = Interpreter.class.getProtectionDomain().getCodeSource().getLocation();
 					File exe = new File(UNIX_INTERPRETER_INSTALLATION_LOCATION + commandName);
@@ -1008,7 +1004,8 @@ public final class Interpreter {
 					return;
 				}
 				break;
-			case WINDOWS:
+			}
+			case WINDOWS: {
 				Path tmp = null;
 				try {
 					// C# installer, not really uninstallable, so temporarily removing this, so the other installer
@@ -1071,6 +1068,11 @@ public final class Interpreter {
 					System.exit(1);
 				}
 				break;
+			}
+			default: {
+				StreamUtils.GetSystemErr().println("Cmdline MethodScript is only supported on Unix and Windows");
+				return;
+			}
 		}
 		StreamUtils.GetSystemOut().println("MethodScript has successfully been installed on your system. Note that you may need to rerun the install command"
 				+ " if you change locations of the jar, or rename it. Be sure to put \"#!" + UNIX_INTERPRETER_INSTALLATION_LOCATION + commandName + "\" at the top of all your scripts,"
