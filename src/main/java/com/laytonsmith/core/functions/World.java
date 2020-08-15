@@ -880,6 +880,66 @@ public class World {
 		}
 	}
 
+	@api(environments = CommandHelperEnvironment.class)
+	public static class set_world_day extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_world_day";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[world], day} Set the current day number of a given world";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCWorld w = null;
+			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+				w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+			}
+			if(args.length == 2) {
+				w = Static.getServer().getWorld(args[0].val());
+			}
+			if(w == null) {
+				throw new CREInvalidWorldException("No world specified", t);
+			}
+
+			int day = ArgumentValidation.getInt32((args.length == 1 ? args[0] : args[1]), t);
+			if(day < 0) {
+				throw new CRERangeException("Day cannot be negative.", t);
+			}
+
+			w.setFullTime((day * 24000) + w.getTime());
+			return CVoid.VOID;
+		}
+	}
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class create_world extends AbstractFunction {
 

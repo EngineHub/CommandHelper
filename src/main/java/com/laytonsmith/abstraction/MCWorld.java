@@ -134,6 +134,8 @@ public interface MCWorld extends MCMetadatable {
 
 	long getTime();
 
+	void setFullTime(long time);
+
 	CArray spawnMob(MCMobs name, String subClass, int qty, MCLocation location, Target t);
 
 	MCFallingBlock spawnFallingBlock(MCLocation loc, MCBlockData data);

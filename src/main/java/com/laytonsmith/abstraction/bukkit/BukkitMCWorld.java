@@ -475,6 +475,11 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
+	public void setFullTime(long time) {
+		w.setFullTime(time);
+	}
+
+	@Override
 	public MCBiomeType getBiome(int x, int z) {
 		return BukkitMCBiomeType.valueOfConcrete(w.getBiome(x, z));
 	}
