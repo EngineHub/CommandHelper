@@ -940,6 +940,61 @@ public class World {
 			return CVoid.VOID;
 		}
 	}
+
+	@api(environments = CommandHelperEnvironment.class)
+	public static class get_world_day extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "get_world_day";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "int {[world]} Returns the current day number of the specified world";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCWorld w = null;
+			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+				w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+			}
+			if(args.length == 1) {
+				w = Static.getServer().getWorld(args[0].val());
+			}
+			if(w == null) {
+				throw new CREInvalidWorldException("No world specified", t);
+			}
+			return new CInt((long) java.lang.Math.floor(w.getFullTime() / 24000), t);
+		}
+	}
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class create_world extends AbstractFunction {
 
