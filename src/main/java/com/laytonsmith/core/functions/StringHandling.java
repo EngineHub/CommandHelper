@@ -1328,7 +1328,7 @@ public class StringHandling {
 				return array;
 			}
 			int splitsFound = 0;
-			for(int i = 0; i < string.length() - split.length() && splitsFound < limit; i++) {
+			for(int i = 0; i <= string.length() - split.length() && splitsFound < limit; i++) {
 				if(string.substring(i, i + split.length()).equals(split)) {
 					//Split point found
 					splitsFound++;
