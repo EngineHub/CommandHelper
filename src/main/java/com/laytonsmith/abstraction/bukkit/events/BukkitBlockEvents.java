@@ -26,6 +26,7 @@ import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
 import com.laytonsmith.abstraction.events.MCBlockBurnEvent;
 import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
 import com.laytonsmith.abstraction.events.MCBlockEvent;
+import com.laytonsmith.abstraction.events.MCBlockExplodeEvent;
 import com.laytonsmith.abstraction.events.MCBlockFadeEvent;
 import com.laytonsmith.abstraction.events.MCBlockFromToEvent;
 import com.laytonsmith.abstraction.events.MCBlockGrowEvent;
@@ -46,6 +47,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockGrowEvent;
@@ -559,6 +561,53 @@ public class BukkitBlockEvents {
 		@Override
 		public Object _GetObject() {
 			return bfe;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCBlockExplodeEvent implements MCBlockExplodeEvent {
+
+		BlockExplodeEvent event;
+
+		public BukkitMCBlockExplodeEvent(BlockExplodeEvent event) {
+			this.event = event;
+		}
+
+		@Override
+		public List<MCBlock> getBlocks() {
+			List<MCBlock> ret = new ArrayList<>();
+			for(Block b : event.blockList()) {
+				ret.add(new BukkitMCBlock(b));
+			}
+			return ret;
+		}
+
+		@Override
+		public void setBlocks(List<MCBlock> blocks) {
+			event.blockList().clear();
+			for(MCBlock b : blocks) {
+				event.blockList().add((Block) b.getHandle());
+			}
+		}
+
+		@Override
+		public float getYield() {
+			return event.getYield();
+		}
+
+		@Override
+		public void setYield(float power) {
+			event.setYield(power);
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(event.getBlock());
+		}
+
+		@Override
+		public Object _GetObject() {
+			return event;
 		}
 	}
 }

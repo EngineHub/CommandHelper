@@ -17,6 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockGrowEvent;
@@ -139,5 +140,11 @@ public class BukkitBlockListener implements Listener {
 	public void onBlockFade(BlockFadeEvent e) {
 		BukkitBlockEvents.BukkitMCBlockFadeEvent bfe = new BukkitBlockEvents.BukkitMCBlockFadeEvent(e);
 		EventUtils.TriggerListener(Driver.BLOCK_FADE, "block_fade", bfe);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onBlockExplode(BlockExplodeEvent e) {
+		BukkitBlockEvents.BukkitMCBlockExplodeEvent bee = new BukkitBlockEvents.BukkitMCBlockExplodeEvent(e);
+		EventUtils.TriggerListener(Driver.BLOCK_EXPLODE, "block_explode", bee);
 	}
 }

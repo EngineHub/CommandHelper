@@ -3,6 +3,7 @@ package com.laytonsmith.core.events.drivers;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
@@ -11,6 +12,7 @@ import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.events.MCBlockBreakEvent;
 import com.laytonsmith.abstraction.events.MCBlockBurnEvent;
 import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
+import com.laytonsmith.abstraction.events.MCBlockExplodeEvent;
 import com.laytonsmith.abstraction.events.MCBlockFadeEvent;
 import com.laytonsmith.abstraction.events.MCBlockFromToEvent;
 import com.laytonsmith.abstraction.events.MCBlockGrowEvent;
@@ -1430,6 +1432,90 @@ public class BlockEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+			return false;
+		}
+	}
+
+	@api
+	public static class block_explode extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "block_explode";
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.BLOCK_EXPLODE;
+		}
+
+		@Override
+		public String docs() {
+			return "{}"
+					+ "Called when a block explodes (like beds in the nether) or a plugin creates an explosion."
+					+ "{location: The location of the explosion."
+					+ " | blocks: An array of block locations that will be destroyed by this explosion."
+					+ " | yield: Decimal percentage of blocks destroyed that will drop items.}"
+					+ "{blocks | yield}"
+					+ "{}";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			return e instanceof MCBlockExplodeEvent;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+			if(!(e instanceof MCBlockExplodeEvent)) {
+				throw new EventException("Cannot convert event to BlockExplodeEvent");
+			}
+			MCBlockExplodeEvent event = (MCBlockExplodeEvent) e;
+			Target t = Target.UNKNOWN;
+			Map<String, Mixed> ret = evaluate_helper(event);
+
+			MCBlock blk = event.getBlock();
+			ret.put("location", ObjectGenerator.GetGenerator().location(blk.getLocation(), false));
+			CArray blocks = new CArray(t);
+			for(MCBlock b : event.getBlocks()) {
+				blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation(), false), t);
+			}
+			ret.put("blocks", blocks);
+			ret.put("yield", new CDouble(event.getYield(), t));
+			return ret;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+			if(event instanceof MCBlockExplodeEvent) {
+				MCBlockExplodeEvent e = (MCBlockExplodeEvent) event;
+				if(key.equals("yield")) {
+					e.setYield((float) ArgumentValidation.getDouble(value, value.getTarget()));
+					return true;
+				}
+				if(key.equals("blocks")) {
+					if(value.isInstanceOf(CArray.TYPE)) {
+						CArray ba = (CArray) value;
+						List<MCBlock> blocks = new ArrayList<>();
+						for(Mixed m : ba.asList()) {
+							MCLocation loc = ObjectGenerator.GetGenerator().location(m, null, value.getTarget());
+							blocks.add(loc.getBlock());
+						}
+						e.setBlocks(blocks);
+						return true;
+					}
+				}
+			}
 			return false;
 		}
 	}
