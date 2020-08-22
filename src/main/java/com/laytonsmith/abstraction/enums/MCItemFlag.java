@@ -30,5 +30,9 @@ public enum MCItemFlag {
 	/**
 	 * Setting to show/hide potion effects on this ItemStack
 	 */
-	HIDE_POTION_EFFECTS;
+	HIDE_POTION_EFFECTS,
+	/**
+	 * Setting to show/hide dyes from coloured leather armour
+	 */
+	HIDE_DYE;
 }
