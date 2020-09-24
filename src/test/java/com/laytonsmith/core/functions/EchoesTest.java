@@ -121,11 +121,11 @@ public class EchoesTest {
 	@Test
 	public void testRGBColor() throws Exception {
 		String encodedColor = String.format("\u00A7%s\u00A7%s\u00A7%s\u00A7%s\u00A7%s\u00A7%s\u00A7%s", "x", "f", "f", "1", "1", "a", "a");
-		String encodedWhite = String.format("\u00A7%s\u00A7%s\u00A7%s\u00A7%s\u00A7%s\u00A7%s\u00A7%s", "x", "f", "f", "f", "f", "f", "f");
+		String encodedWhite = "\u00A7f";
 		assertEquals(encodedColor, SRun("color('#ff11aa')", fakePlayer)); // Translates
 		assertEquals(encodedColor, SRun("color('#ff11aabbccddee')", fakePlayer)); // Truncates
-		assertEquals(encodedColor, SRun("color('#ff11zz')", fakePlayer)); // Defaults to white if invalid hex
-		assertEquals(encodedColor, SRun("color('#55')", fakePlayer)); // Defaults to white if invalid hex
+		assertEquals(encodedWhite, SRun("color('#ff11zz')", fakePlayer)); // Defaults to white if invalid hex
+		assertEquals(encodedWhite, SRun("color('#55')", fakePlayer)); // Defaults to white if invalid hex
 	}
 
 	private static final String LOWERCASE_A =

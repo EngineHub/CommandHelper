@@ -125,16 +125,14 @@ public enum MCChatColor {
 	}
 
 	public static String fromRGBValue(String hexString) {
-		if(hexString.startsWith("#")) {
-			hexString = hexString.substring(1, hexString.length());
+		if(hexString.length() > 7) {
+			hexString = hexString.substring(0, 7);
 		}
-		if(hexString.length() > 6) {
-			hexString = hexString.substring(0, 6);
+		if(!hexString.matches("(?i)^#[0-9A-F]{6}$")) {
+			return null;
 		}
-		if(!hexString.matches("(?i)^[0-9A-F]{6}$")) {
-			hexString = "ffffff";
-		}
-		return "\u00A7x\u00A7" + String.join("\u00A7", hexString.split(""));
+
+		return "\u00A7x\u00A7" + String.join("\u00A7", hexString.substring(1).split(""));
 	}
 
 	/**
