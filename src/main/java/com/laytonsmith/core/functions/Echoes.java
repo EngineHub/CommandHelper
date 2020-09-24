@@ -842,6 +842,19 @@ public class Echoes {
 							b.append(color.exec(t, environment, new CString(c, t)));
 							i += sl;
 						} else {
+							if (c.equals('#')) {
+								try {
+									String subsequence2 = stext.substring(i + sl, i + sl + 7);
+									if (subsequence2.matches("(?i)^#[0-9A-F]{6}$")) {
+										b.append(color.exec(t, environment, new CString(subsequence2, t)));
+										i += sl + 6;
+										continue;
+									}
+								} catch (IndexOutOfBoundsException e) {
+									// Not enough characters left for a full hex code
+								}
+							}
+
 							b.append(subsequence1);
 							i += sl - 1;
 						}

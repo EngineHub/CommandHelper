@@ -160,4 +160,15 @@ public class EchoesTest {
 	public void testColorize6() throws Exception {
 		assertEquals("&&" + LOWERCASE_A + "Hi", SRun("colorize('&&&&&&aHi', '&&')", fakePlayer));
 	}
+
+	@Test
+	public void testColorizeRGB() throws Exception {
+		String expectedColor = new color().exec(Target.UNKNOWN, null, new CString("#ff11aa", Target.UNKNOWN)).val();
+		assertEquals(expectedColor + "Hi", SRun("colorize('&#ff11aaHi', '&')", fakePlayer));
+	}
+
+	@Test
+	public void testColorizeInvalidRGB() throws Exception {
+		assertEquals("&#ff Hi", SRun("colorize('&#ff Hi', '&')", fakePlayer));
+	}
 }
