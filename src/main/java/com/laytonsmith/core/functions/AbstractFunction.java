@@ -16,6 +16,7 @@ import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
@@ -70,13 +71,26 @@ public abstract class AbstractFunction implements Function {
 		return CVoid.VOID;
 	}
 
+	@Override
+	public FunctionSignatures getSignatures() {
+		return null;
+	}
+
 	/**
 	 * {@inheritDoc} By default, {@link CClassType#AUTO} is returned.
 	 */
 	@Override
 	public CClassType getReturnType(Target t, List<CClassType> argTypes,
 			List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-		return CClassType.AUTO; // No information is available about the return type.
+
+		// Match arguments to function signatures if available.
+		FunctionSignatures signatures = this.getSignatures();
+		if(signatures != null) {
+			return signatures.getReturnType(t, argTypes, argTargets, env, exceptions);
+		}
+
+		// No information is available about the return type.
+		return CClassType.AUTO;
 	}
 
 	/**

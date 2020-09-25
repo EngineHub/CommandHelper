@@ -10,6 +10,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Target;
@@ -92,6 +93,11 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	@Override
 	public final Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 		throw new UnsupportedOperationException("Not supported.");
+	}
+
+	@Override
+	public FunctionSignatures getSignatures() {
+		return null;
 	}
 
 	/**
