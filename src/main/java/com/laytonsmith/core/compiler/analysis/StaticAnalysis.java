@@ -11,9 +11,12 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
 
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.signature.FunctionSignature;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CKeyword;
@@ -519,6 +522,58 @@ public class StaticAnalysis {
 					"Expected classtype, but received " + node.getClass().getSimpleName() + " instead.", t));
 		}
 		return null;
+	}
+
+	/**
+	 * Gets the return {@link CClassType} based on the given {@link FunctionSignatures}.
+	 * If none of the signatures match, a compile error is generated.
+	 * If multiple signatures match, then the most specific shared type is returned.
+	 * @param signatures - The function signatures.
+	 * @param t - The code target, used for setting the code target in thrown exceptions.
+	 * @param argTypes - The types of the passed arguments.
+	 * @param argTargets - The {@link Target}s belonging to the argTypes (in the same order).
+	 * @param env - The {@link Environment}, used for instanceof checks on types.
+	 * @param exceptions - A set to which all type errors will be added.
+	 * @return The return type.
+	 */
+	public static CClassType getReturnType(FunctionSignatures signatures, Target t, List<CClassType> argTypes,
+			List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+
+		// List all matching signatures.
+		List<FunctionSignature> matches = new ArrayList<>();
+		for(FunctionSignature signature : signatures.getSignatures()) {
+			if(signature.matches(argTypes, env, false)) {
+				matches.add(signature);
+			}
+		}
+
+		// Select the return type based on the matches.
+		switch(matches.size()) {
+			case 0: {
+				// No matches. Generate a compile error and return AUTO to prevent further typechecking errors.
+				String argTypesStr = "(" + StringUtils.Join(
+						argTypes, ", ", null, null, null, (CClassType type) -> type.getSimpleName()) + ")";
+				exceptions.add(new ConfigCompileException("Arguments " + argTypesStr
+						+ " do not match required " + signatures.getSignaturesParamTypesString() + ".", t));
+				return CClassType.AUTO;
+			}
+			case 1: {
+				// Exactly one signature matches, so return the return type.
+				return matches.get(0).getReturnType().getType();
+			}
+			default: {
+				// TODO - Ideally, we'd either return a multi-type or the most specific super type of the signatures.
+
+				// Return the return type of all matching signatures if they are the same.
+				CClassType type = matches.get(0).getReturnType().getType();
+				for(FunctionSignature match : matches) {
+					if(!match.getReturnType().getType().equals(type)) {
+						return CClassType.AUTO;
+					}
+				}
+				return type;
+			}
+		}
 	}
 
 	private void handleIncludeRefs(Environment env,
