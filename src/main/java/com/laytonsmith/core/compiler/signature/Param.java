@@ -12,22 +12,27 @@ public class Param {
 	private final String name;
 	private final String genericIdentifier;
 	private final boolean isVarParam;
+	private final boolean isOptional;
 
 	/**
 	 * Creates a new {@link Param} with the given properties.
 	 * If geneticIdentifier is non-null, then the parameter type is 'geneticIdentifier extends type'.
+	 * Parameters cannot be variable and optional at the same time, as varparams already imply optionality.
 	 * @param genericIdentifier - The generic identifier, which can be used to link generic types.
 	 * @param type - The (parent) type of the parameter.
 	 * @param name - The name of the parameter.
 	 * @param isVarParam - {@code true} if the parameter is a varparam, meaning that it matches zero or more arguments
 	 * of the given type, or one argument of type {@code array<type>}. {@code false} otherwise.
 	 * Note that a varparam is only usable as type {@code array<type>}.
+	 * @param isOptional - {@code true} if the parameter is optional, {@code false} otherwise.
 	 */
-	public Param(String genericIdentifier, CClassType type, String name, boolean isVarParam) {
+	public Param(String genericIdentifier, CClassType type, String name, boolean isVarParam, boolean isOptional) {
+		assert !isVarParam || !isOptional : "A parameter cannot be variable and optional at the same time.";
 		this.genericIdentifier = genericIdentifier;
 		this.type = type;
 		this.name = name;
 		this.isVarParam = isVarParam;
+		this.isOptional = isOptional;
 	}
 
 	/**
@@ -36,7 +41,7 @@ public class Param {
 	 * @param name - The name of the parameter.
 	 */
 	public Param(CClassType type, String name) {
-		this(null, type, name, false);
+		this(null, type, name, false, false);
 	}
 
 	/**
@@ -73,5 +78,13 @@ public class Param {
 	 */
 	public boolean isVarParam() {
 		return this.isVarParam;
+	}
+
+	/**
+	 * Gets whether the parameter is optional or not.
+	 * @return {@code true} if this parameter is optional, {@code false} otherwise.
+	 */
+	public boolean isOptional() {
+		return this.isOptional;
 	}
 }
