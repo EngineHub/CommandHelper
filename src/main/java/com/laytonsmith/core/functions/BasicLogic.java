@@ -14,9 +14,10 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
@@ -152,12 +153,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			for(int i = 0; i < argTypes.size(); i++) {
-				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(Mixed.TYPE, "obj1").param(Mixed.TYPE, "obj2").varParam(Mixed.TYPE, "objs").build();
 		}
 
 		@Override
@@ -268,12 +266,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			for(int i = 0; i < argTypes.size(); i++) {
-				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(Mixed.TYPE, "obj1").param(Mixed.TYPE, "obj2").varParam(Mixed.TYPE, "objs").build();
 		}
 
 		@Override
@@ -335,12 +330,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			for(int i = 0; i < argTypes.size(); i++) {
-				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(Mixed.TYPE, "obj1").param(Mixed.TYPE, "obj2").varParam(Mixed.TYPE, "objs").build();
 		}
 
 		@Override
@@ -414,12 +406,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			for(int i = 0; i < argTypes.size(); i++) {
-				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(Mixed.TYPE, "obj1").param(Mixed.TYPE, "obj2").varParam(Mixed.TYPE, "objs").build();
 		}
 
 		@Override
@@ -532,12 +521,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			for(int i = 0; i < argTypes.size(); i++) {
-				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(Mixed.TYPE, "obj1").param(Mixed.TYPE, "obj2").varParam(Mixed.TYPE, "objs").build();
 		}
 
 		@Override
@@ -585,12 +571,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			for(int i = 0; i < argTypes.size(); i++) {
-				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(Mixed.TYPE, "obj1").param(Mixed.TYPE, "obj2").varParam(Mixed.TYPE, "objs").build();
 		}
 
 		@Override
@@ -680,12 +663,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			for(int i = 0; i < argTypes.size(); i++) {
-				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(Mixed.TYPE, "obj1").param(Mixed.TYPE, "obj2").varParam(Mixed.TYPE, "objs").build();
 		}
 
 		@Override
@@ -732,12 +712,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			for(int i = 0; i < argTypes.size(); i++) {
-				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE)
+					.param(Mixed.TYPE, "obj1").param(Mixed.TYPE, "obj2").varParam(Mixed.TYPE, "objs").build();
 		}
 
 		@Override
@@ -806,13 +783,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2) {
-				StaticAnalysis.requireType(argTypes.get(0), CNumber.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), CNumber.TYPE, argTargets.get(1), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE).param(CNumber.TYPE, "val1").param(CNumber.TYPE, "val2").build();
 		}
 
 		@Override
@@ -884,13 +856,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2) {
-				StaticAnalysis.requireType(argTypes.get(0), CNumber.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), CNumber.TYPE, argTargets.get(1), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE).param(CNumber.TYPE, "val1").param(CNumber.TYPE, "val2").build();
 		}
 
 		@Override
@@ -962,13 +929,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2) {
-				StaticAnalysis.requireType(argTypes.get(0), CNumber.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), CNumber.TYPE, argTargets.get(1), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE).param(CNumber.TYPE, "val1").param(CNumber.TYPE, "val2").build();
 		}
 
 		@Override
@@ -1041,13 +1003,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2) {
-				StaticAnalysis.requireType(argTypes.get(0), CNumber.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), CNumber.TYPE, argTargets.get(1), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE).param(CNumber.TYPE, "val1").param(CNumber.TYPE, "val2").build();
 		}
 
 		@Override
@@ -1135,12 +1092,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			for(int i = 0; i < argTypes.size(); i++) {
-				StaticAnalysis.requireType(argTypes.get(i), Booleanish.TYPE, argTargets.get(i), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE).param(Booleanish.TYPE, "val1")
+					.param(Booleanish.TYPE, "val2").varParam(Booleanish.TYPE, "vals").build();
 		}
 
 		@Override
@@ -1290,13 +1244,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			for(int i = 0; i < argTypes.size(); i++) {
-				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
-			}
-			// TODO - Return the most specific subtype among all arguments.
-			return CClassType.AUTO;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder("T", Mixed.TYPE).genericVarParam("T", Mixed.TYPE, "vals").build();
 		}
 
 		@Override
@@ -1428,12 +1377,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			for(int i = 0; i < argTypes.size(); i++) {
-				StaticAnalysis.requireType(argTypes.get(i), Booleanish.TYPE, argTargets.get(i), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE).param(Booleanish.TYPE, "val1")
+					.param(Booleanish.TYPE, "val2").varParam(Booleanish.TYPE, "vals").build();
 		}
 
 		@Override
@@ -1586,13 +1532,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			for(int i = 0; i < argTypes.size(); i++) {
-				StaticAnalysis.requireType(argTypes.get(i), Mixed.TYPE, argTargets.get(i), env, exceptions);
-			}
-			// TODO - Return the most specific subtype among all arguments.
-			return CClassType.AUTO;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder("T", Mixed.TYPE).genericVarParam("T", Mixed.TYPE, "vals").build();
 		}
 
 		@Override
@@ -1673,12 +1614,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 1) {
-				StaticAnalysis.requireType(argTypes.get(0), Booleanish.TYPE, argTargets.get(0), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE).param(Booleanish.TYPE, "val").build();
 		}
 
 		@Override
@@ -1783,13 +1720,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2) {
-				StaticAnalysis.requireType(argTypes.get(0), Booleanish.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), Booleanish.TYPE, argTargets.get(1), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE).param(Booleanish.TYPE, "val1")
+					.param(Booleanish.TYPE, "val2").build();
 		}
 
 		@Override
@@ -1861,12 +1794,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			for(int i = 0; i < argTypes.size(); i++) {
-				StaticAnalysis.requireType(argTypes.get(i), Booleanish.TYPE, argTargets.get(i), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE).param(Booleanish.TYPE, "val1")
+					.param(Booleanish.TYPE, "val2").varParam(Booleanish.TYPE, "vals").build();
 		}
 
 		@Override
@@ -1937,12 +1867,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			for(int i = 0; i < argTypes.size(); i++) {
-				StaticAnalysis.requireType(argTypes.get(i), Booleanish.TYPE, argTargets.get(i), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE).param(Booleanish.TYPE, "val1")
+					.param(Booleanish.TYPE, "val2").varParam(Booleanish.TYPE, "vals").build();
 		}
 
 		@Override
@@ -2011,13 +1938,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets,
-				Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2) {
-				StaticAnalysis.requireType(argTypes.get(0), Booleanish.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), Booleanish.TYPE, argTargets.get(1), env, exceptions);
-			}
-			return CBoolean.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CBoolean.TYPE).param(Booleanish.TYPE, "val1")
+					.param(Booleanish.TYPE, "val2").build();
 		}
 
 		@Override
@@ -2090,12 +2013,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			for(int i = 0; i < argTypes.size(); i++) {
-				StaticAnalysis.requireType(argTypes.get(i), CInt.TYPE, argTargets.get(i), env, exceptions);
-			}
-			return CInt.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CInt.TYPE).param(CInt.TYPE, "val1").param(CInt.TYPE, "val2")
+					.varParam(CInt.TYPE, "vals").build();
 		}
 
 		@Override
@@ -2178,12 +2098,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			for(int i = 0; i < argTypes.size(); i++) {
-				StaticAnalysis.requireType(argTypes.get(i), CInt.TYPE, argTargets.get(i), env, exceptions);
-			}
-			return CInt.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CInt.TYPE).param(CInt.TYPE, "val1").param(CInt.TYPE, "val2")
+					.varParam(CInt.TYPE, "vals").build();
 		}
 
 		@Override
@@ -2268,12 +2185,9 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			for(int i = 0; i < argTypes.size(); i++) {
-				StaticAnalysis.requireType(argTypes.get(i), CInt.TYPE, argTargets.get(i), env, exceptions);
-			}
-			return CInt.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CInt.TYPE).param(CInt.TYPE, "val1").param(CInt.TYPE, "val2")
+					.varParam(CInt.TYPE, "vals").build();
 		}
 
 		@Override
@@ -2350,12 +2264,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 1) {
-				StaticAnalysis.requireType(argTypes.get(0), CInt.TYPE, argTargets.get(0), env, exceptions);
-			}
-			return CInt.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CInt.TYPE).param(CInt.TYPE, "val").build();
 		}
 
 		@Override
@@ -2422,13 +2332,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2) {
-				StaticAnalysis.requireType(argTypes.get(0), CInt.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), CInt.TYPE, argTargets.get(1), env, exceptions);
-			}
-			return CInt.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CInt.TYPE).param(CInt.TYPE, "val1").param(CInt.TYPE, "val2").build();
 		}
 
 		@Override
@@ -2495,13 +2400,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2) {
-				StaticAnalysis.requireType(argTypes.get(0), CInt.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), CInt.TYPE, argTargets.get(1), env, exceptions);
-			}
-			return CInt.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CInt.TYPE).param(CInt.TYPE, "val1").param(CInt.TYPE, "val2").build();
 		}
 
 		@Override
@@ -2570,13 +2470,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 2) {
-				StaticAnalysis.requireType(argTypes.get(0), CInt.TYPE, argTargets.get(0), env, exceptions);
-				StaticAnalysis.requireType(argTypes.get(1), CInt.TYPE, argTargets.get(1), env, exceptions);
-			}
-			return CInt.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CInt.TYPE).param(CInt.TYPE, "val1").param(CInt.TYPE, "val2").build();
 		}
 
 		@Override
@@ -2619,9 +2514,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			return CVoid.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE).param(CString.TYPE, "message").build();
 		}
 
 		@Override
@@ -2699,12 +2593,8 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CClassType getReturnType(Target t, List<CClassType> argTypes,
-				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
-			if(argTypes.size() == 1) {
-				StaticAnalysis.requireType(argTypes.get(0), Mixed.TYPE, argTargets.get(0), env, exceptions);
-			}
-			return CInt.TYPE;
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CInt.TYPE).param(Mixed.TYPE, "val").build();
 		}
 
 		@Override
