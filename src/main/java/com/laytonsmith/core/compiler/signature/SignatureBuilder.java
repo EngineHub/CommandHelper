@@ -36,11 +36,22 @@ public class SignatureBuilder {
 	 * Adds a normal function parameter. Parameters should be added from left to right.
 	 * @param paramType - The {@link CClassType} of the parameter.
 	 * @param paramName - The name of the parameter.
+	 * @param isOptional - Whether the parameter is optional or not.
+	 * @return This {@link SignatureBuilder}, for chaining builder methods.
+	 */
+	public SignatureBuilder param(CClassType paramType, String paramName, boolean isOptional) {
+		this.signature.addParam(new Param(null, paramType, paramName, false, isOptional));
+		return this;
+	}
+
+	/**
+	 * Adds a normal non-optional function parameter. Parameters should be added from left to right.
+	 * @param paramType - The {@link CClassType} of the parameter.
+	 * @param paramName - The name of the parameter.
 	 * @return This {@link SignatureBuilder}, for chaining builder methods.
 	 */
 	public SignatureBuilder param(CClassType paramType, String paramName) {
-		this.signature.addParam(new Param(paramType, paramName));
-		return this;
+		return this.param(paramType, paramName, false);
 	}
 
 	/**
@@ -50,7 +61,7 @@ public class SignatureBuilder {
 	 * @return This {@link SignatureBuilder}, for chaining builder methods.
 	 */
 	public SignatureBuilder varParam(CClassType paramType, String paramName) {
-		this.signature.addParam(new Param(null, paramType, paramName, true));
+		this.signature.addParam(new Param(null, paramType, paramName, true, false));
 		return this;
 	}
 
@@ -61,15 +72,31 @@ public class SignatureBuilder {
 	 * @param genericTypeParent - The parent {@link CClassType} of the parameter.
 	 * This should be {@link Mixed} if the 'genericTypeName paramName' format is provided.
 	 * @param paramName - The name of the parameter.
+	 * @param isOptional - Whether the parameter is optional or not.
 	 * @return This {@link SignatureBuilder}, for chaining builder methods.
 	 */
-	public SignatureBuilder genericParam(String genericTypeName, CClassType genericTypeParent, String paramName) {
-		this.signature.addParam(new Param(genericTypeName, genericTypeParent, paramName, false));
+	public SignatureBuilder genericParam(
+			String genericTypeName, CClassType genericTypeParent, String paramName, boolean isOptional) {
+		this.signature.addParam(new Param(genericTypeName, genericTypeParent, paramName, false, isOptional));
 		return this;
 	}
 
 	/**
-	 * Adds a generic variable function parameter (in format 'genericTypeName extends genericTypeParent paramName...').
+	 * Adds a generic non-optional function parameter (in format 'genericTypeName extends genericTypeParent paramName').
+	 * Parameters should be added from left to right.
+	 * @param genericTypeName - The generic type name, used for matching with other generic types in the same signature.
+	 * @param genericTypeParent - The parent {@link CClassType} of the parameter.
+	 * This should be {@link Mixed} if the 'genericTypeName paramName' format is provided.
+	 * @param paramName - The name of the parameter.
+	 * @return This {@link SignatureBuilder}, for chaining builder methods.
+	 */
+	public SignatureBuilder genericParam(String genericTypeName, CClassType genericTypeParent, String paramName) {
+		return this.genericParam(genericTypeName, genericTypeParent, paramName, false);
+	}
+
+	/**
+	 * Adds a non-optional generic variable function parameter
+	 * (in format 'genericTypeName extends genericTypeParent paramName...').
 	 * Parameters should be added from left to right.
 	 * @param genericTypeName - The generic type name, used for matching with other generic types in the same signature.
 	 * @param genericTypeParent - The parent {@link CClassType} of the parameter.
@@ -77,8 +104,9 @@ public class SignatureBuilder {
 	 * @param paramName - The name of the parameter.
 	 * @return This {@link SignatureBuilder}, for chaining builder methods.
 	 */
-	public SignatureBuilder genericVarParam(String genericTypeName, CClassType genericTypeParent, String paramName) {
-		this.signature.addParam(new Param(genericTypeName, genericTypeParent, paramName, true));
+	public SignatureBuilder genericVarParam(
+			String genericTypeName, CClassType genericTypeParent, String paramName) {
+		this.signature.addParam(new Param(genericTypeName, genericTypeParent, paramName, true, false));
 		return this;
 	}
 
