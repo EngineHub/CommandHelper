@@ -1229,7 +1229,8 @@ public final class Static {
 				.replaceAll("§m", TermColors.STRIKE)
 				.replaceAll("§n", TermColors.UNDERLINE)
 				.replaceAll("§o", TermColors.ITALIC)
-				.replaceAll("§r", TermColors.RESET);
+				.replaceAll("§r", TermColors.RESET)
+				.replaceAll("(?i)§x(§[a-f0-9]){6}", "");
 
 	}
 
