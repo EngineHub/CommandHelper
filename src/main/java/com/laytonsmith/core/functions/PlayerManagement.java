@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
@@ -5556,6 +5557,54 @@ public class PlayerManagement {
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_2;
+		}
+
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class pattack_cooldown extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[] { CREPlayerOfflineException.class };
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCHumanEntity he = (args.length == 0)
+					? env.getEnv(CommandHelperEnvironment.class).GetPlayer() : Static.GetPlayer(args[0], t);
+			return new CDouble(he.getAttackCooldown(), t);
+		}
+
+		@Override
+		public String getName() {
+			return "pattack_cooldown";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		@Override
+		public String docs() {
+			return "double {[player]} Gets the charge value of the player's attack cooldown. This is a "
+					+ " double with range 0.0-1.0 inclusive. 1.0 is fully charged, while 0.0 is no charge.";
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
 		}
 
 	}

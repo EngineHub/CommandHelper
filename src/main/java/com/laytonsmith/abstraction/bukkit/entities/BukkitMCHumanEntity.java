@@ -94,6 +94,11 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 	}
 
 	@Override
+	public float getAttackCooldown() {
+		return he.getAttackCooldown();
+	}
+
+	@Override
 	public MCInventoryView openInventory(MCInventory inventory) {
 		return new BukkitMCInventoryView(he.openInventory((Inventory) inventory.getHandle()));
 	}
