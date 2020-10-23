@@ -5566,7 +5566,7 @@ public class PlayerManagement {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[] { CREPlayerOfflineException.class };
+			return new Class[] { CREPlayerOfflineException.class, CRELengthException.class };
 		}
 
 		@Override
@@ -5581,8 +5581,12 @@ public class PlayerManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			MCHumanEntity he = (args.length == 0)
-					? env.getEnv(CommandHelperEnvironment.class).GetPlayer() : Static.GetPlayer(args[0], t);
+			MCHumanEntity he;
+			if(args.length == 0) {
+				he = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			} else {
+				he = Static.GetPlayer(args[0], t);
+			}
 			return new CDouble(he.getAttackCooldown(), t);
 		}
 
