@@ -42,4 +42,6 @@ public interface MCHumanEntity extends MCInventoryHolder, MCLivingEntity, MCAnim
 
 	void setCooldown(MCMaterial material, int ticks);
 	//boolean setWindowProperty(MCInventoryView.Property prop, int value);
+
+	float getAttackCooldown();
 }
