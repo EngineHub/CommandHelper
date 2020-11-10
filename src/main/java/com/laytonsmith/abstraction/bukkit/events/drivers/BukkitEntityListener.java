@@ -16,6 +16,7 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEnti
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCEntityUnleashEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCFireworkExplodeEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCHangingBreakEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCHangingPlaceEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCItemDespawnEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCItemSpawnEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCPlayerDropItemEvent;
@@ -54,6 +55,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
+import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -183,6 +185,12 @@ public class BukkitEntityListener implements Listener {
 	public void onHangingBreak(HangingBreakEvent event) {
 		BukkitMCHangingBreakEvent hbe = new BukkitMCHangingBreakEvent(event);
 		EventUtils.TriggerListener(Driver.HANGING_BREAK, "hanging_break", hbe);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onHangingPlace(HangingPlaceEvent event) {
+		BukkitMCHangingPlaceEvent hpe = new BukkitMCHangingPlaceEvent(event);
+		EventUtils.TriggerListener(Driver.HANGING_PLACE, "hanging_place", hpe);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)

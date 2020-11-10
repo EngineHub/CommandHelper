@@ -40,6 +40,7 @@ import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
 import com.laytonsmith.abstraction.events.MCEntityUnleashEvent;
 import com.laytonsmith.abstraction.events.MCFireworkExplodeEvent;
 import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
+import com.laytonsmith.abstraction.events.MCHangingPlaceEvent;
 import com.laytonsmith.abstraction.events.MCItemDespawnEvent;
 import com.laytonsmith.abstraction.events.MCItemSpawnEvent;
 import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
@@ -1854,6 +1855,80 @@ public class EntityEvents {
 		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
 			return false;
 		}
+	}
+
+	@api
+	public static class hanging_place extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "hanging_place";
+		}
+
+		@Override
+		public String docs() {
+			return "{type: <macro> The entity type of the entity | player: <macro> The player triggering the event"
+					+ " | world: <macro> The world the entity is in}"
+					+ " This event is called when a player attempts to place an item frame, painting, or leash."
+					+ " {id: The entity ID of the entity. | type: The type of the hanging entity; can be ITEM_FRAME,"
+					+ " PAINTING, or LEASE_HITCH | location: Where the entity was placed. |"
+					+ " player: The name of the player which placed this entity. }"
+					+ " {}"
+					+ " {}";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if(event instanceof MCHangingPlaceEvent) {
+				MCHangingPlaceEvent hangingPlaceEvent = (MCHangingPlaceEvent) event;
+				MCHanging hanging = hangingPlaceEvent.getEntity();
+				Prefilters.match(prefilter, "type", hanging.getType().name(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "player", hangingPlaceEvent.getPlayer().getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "world",
+						hangingPlaceEvent.getEntity().getLocation().getWorld().getName(), PrefilterType.MACRO);
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+			if(event instanceof MCHangingPlaceEvent) {
+				MCHangingPlaceEvent hangingPlaceEvent = (MCHangingPlaceEvent) event;
+				Map<String, Mixed> ret = evaluate_helper(event);
+				MCHanging hanging = hangingPlaceEvent.getEntity();
+
+				ret.put("type", new CString(hanging.getType().name(), Target.UNKNOWN));
+				ret.put("id", new CString(hanging.getUniqueId().toString(), Target.UNKNOWN));
+				ret.put("player", new CString(hangingPlaceEvent.getPlayer().getName(), Target.UNKNOWN));
+				ret.put("location", ObjectGenerator.GetGenerator().location(hanging.getLocation()));
+				return ret;
+			} else {
+				throw new EventException("Cannot convert event to HangingPlaceEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.HANGING_PLACE;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+			return false;
+		}
+
 	}
 
 	@api

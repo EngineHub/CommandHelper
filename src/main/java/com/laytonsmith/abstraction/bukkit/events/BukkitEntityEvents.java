@@ -58,6 +58,7 @@ import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
 import com.laytonsmith.abstraction.events.MCEntityUnleashEvent;
 import com.laytonsmith.abstraction.events.MCFireworkExplodeEvent;
 import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
+import com.laytonsmith.abstraction.events.MCHangingPlaceEvent;
 import com.laytonsmith.abstraction.events.MCItemDespawnEvent;
 import com.laytonsmith.abstraction.events.MCItemSpawnEvent;
 import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
@@ -101,6 +102,7 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
+import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -807,6 +809,31 @@ public class BukkitEntityEvents {
 			} else {
 				return null;
 			}
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCHangingPlaceEvent implements MCHangingPlaceEvent {
+
+		HangingPlaceEvent hpe;
+
+		public BukkitMCHangingPlaceEvent(Event event) {
+			hpe = (HangingPlaceEvent) event;
+		}
+
+		@Override
+		public Object _GetObject() {
+			return hpe;
+		}
+
+		@Override
+		public MCHanging getEntity() {
+			return new BukkitMCHanging(hpe.getEntity());
+		}
+
+		@Override
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(hpe.getPlayer());
 		}
 	}
 
