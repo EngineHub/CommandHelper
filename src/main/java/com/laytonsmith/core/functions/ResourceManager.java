@@ -176,7 +176,11 @@ public class ResourceManager {
 					+ " to res_create_resource should be paired with a res_free_resource, being careful"
 					+ " to catch any exceptions and still calling res_free_resource anyways. Each resource"
 					+ " has its own data to create the resource. Type may be one of: "
-					+ StringUtils.Join(ResourceTypes.values(), ", ", ", or ");
+					+ StringUtils.Join(ResourceTypes.values(), ", ", ", or ")
+					+ " It's worth noting that this function (and any function that relies on it) is a stopgap"
+					+ " measure, and will eventually be deprecated and removed. For certain types of operations,"
+					+ " it's completely unweildy to implement them in a procedural manner, so this is a temporary"
+					+ " alternative to proper object support.";
 		}
 
 		@Override
