@@ -1600,16 +1600,17 @@ public class ControlFlow {
 			if(isFunction(children.get(0), centry.NAME)) {
 				// This is what "@key: @value in @array" looks like initially.
 				// We'll refactor this so the next segment can take over properly.
-				ParseTree sconcatNode = new ParseTree(
-						new CFunction(sconcat.NAME, ast.getTarget()), ast.getFileOptions());
-				sconcatNode.addChild(children.get(0).getChildAt(0));
+				ParseTree statementsNode = new ParseTree(
+						new CFunction(__statements__.NAME, ast.getTarget()), ast.getFileOptions());
+				statementsNode.addChild(children.get(0).getChildAt(0));
 				for(int i = 0; i < children.get(0).getChildAt(1).numberOfChildren(); i++) {
-					sconcatNode.addChild(children.get(0).getChildAt(1).getChildAt(i));
+					statementsNode.addChild(children.get(0).getChildAt(1).getChildAt(i));
 				}
-				children.set(0, sconcatNode);
+				children.set(0, statementsNode);
 			}
 			if(children.get(0).getData() instanceof CFunction
-					&& children.get(0).getData().val().equals(sconcat.NAME)) {
+					&& (children.get(0).getData().val().equals(sconcat.NAME)
+							|| children.get(0).getData().val().equals(__statements__.NAME))) {
 				// We may be looking at a "@value in @array" or "@array as @value" type
 				// structure, so we need to re-arrange this into the standard format.
 				ParseTree array = null;
