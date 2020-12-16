@@ -23,6 +23,7 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCPlay
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCPlayerInteractAtEntityEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCPlayerInteractEntityEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCPlayerPickupItemEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCPotionSplashEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCProjectileHitEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCProjectileLaunchEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCTargetEvent;
@@ -52,6 +53,7 @@ import org.bukkit.event.entity.FireworkExplodeEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
@@ -221,5 +223,11 @@ public class BukkitEntityListener implements Listener {
 	public void onEntityUnleash(EntityUnleashEvent event) {
 		BukkitMCEntityUnleashEvent epe = new BukkitMCEntityUnleashEvent(event);
 		EventUtils.TriggerListener(Driver.ENTITY_UNLEASH, "entity_unleash", epe);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPotionSplash(PotionSplashEvent event) {
+		BukkitMCPotionSplashEvent pse = new BukkitMCPotionSplashEvent(event);
+		EventUtils.TriggerListener(Driver.POTION_SPLASH, "potion_splash", pse);
 	}
 }

@@ -55,19 +55,4 @@ public class BukkitMCEntityProjectileSource extends BukkitMCEntity implements MC
 			return null;
 		}
 	}
-
-	@Override
-	public String toString() {
-		return eps.toString();
-	}
-
-	@Override
-	public int hashCode() {
-		return eps.hashCode();
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return eps.equals(obj);
-	}
 }

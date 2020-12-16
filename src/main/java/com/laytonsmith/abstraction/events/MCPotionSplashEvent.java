@@ -1,13 +1,16 @@
 package com.laytonsmith.abstraction.events;
 
+import com.laytonsmith.abstraction.entities.MCThrownPotion;
 import com.laytonsmith.abstraction.MCLivingEntity;
-import java.util.Set;
+import com.laytonsmith.core.events.BindableEvent;
 
-public interface MCPotionSplashEvent extends MCProjectileHitEvent {
+import java.util.Map;
 
-	Set<MCLivingEntity> getAffectedEntities();
+public interface MCPotionSplashEvent extends BindableEvent {
 
-	double getIntensity(MCLivingEntity le);
+	MCThrownPotion getEntity();
+
+	Map<MCLivingEntity, Double> getAffectedEntities();
 
 	void setIntensity(MCLivingEntity le, double intensity);
 }

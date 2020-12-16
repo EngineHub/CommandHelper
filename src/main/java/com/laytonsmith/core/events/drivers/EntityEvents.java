@@ -17,6 +17,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockProjectileSource;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.entities.MCFirework;
+import com.laytonsmith.abstraction.entities.MCThrownPotion;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
@@ -47,6 +48,7 @@ import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
 import com.laytonsmith.abstraction.events.MCPlayerInteractAtEntityEvent;
 import com.laytonsmith.abstraction.events.MCPlayerInteractEntityEvent;
 import com.laytonsmith.abstraction.events.MCPlayerPickupItemEvent;
+import com.laytonsmith.abstraction.events.MCPotionSplashEvent;
 import com.laytonsmith.abstraction.events.MCProjectileHitEvent;
 import com.laytonsmith.abstraction.events.MCProjectileLaunchEvent;
 import com.laytonsmith.annotations.api;
@@ -2287,6 +2289,90 @@ public class EntityEvents {
 
 		@Override
 		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+			return false;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api
+	public static class potion_splash extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "potion_splash";
+		}
+
+		@Override
+		public String docs() {
+			return "{id: <string match> The splash potion entity uuid.}"
+					+ " Called when a splash potion lands."
+					+ " {id | entities: An associative array of living entities affected by the splash, where the key"
+					+ " is a UUID and the value is a double with a range of 0.0 - 1.0 for the intensity of the effect.}"
+					+ " {entities: Set an entity's intensity to 0 to make them unaffected.}";
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+			if(event instanceof MCPotionSplashEvent) {
+				MCPotionSplashEvent e = (MCPotionSplashEvent) event;
+				Prefilters.match(prefilter, "id", e.getEntity().getUniqueId().toString(), PrefilterType.STRING_MATCH);
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+			if(e instanceof MCPotionSplashEvent) {
+				MCPotionSplashEvent event = (MCPotionSplashEvent) e;
+				Target t = Target.UNKNOWN;
+				Map<String, Mixed> ret = evaluate_helper(e);
+				MCThrownPotion pot = event.getEntity();
+
+				ret.put("id", new CString(pot.getUniqueId().toString(), t));
+				CArray affected = CArray.GetAssociativeArray(t);
+				for(Map.Entry<MCLivingEntity, Double> entry : event.getAffectedEntities().entrySet()) {
+					affected.set(entry.getKey().getUniqueId().toString(), new CDouble(entry.getValue(), t), t);
+				}
+				ret.put("entities", affected);
+				return ret;
+			} else {
+				throw new EventException("Could not convert to MCPotionSplashEvent");
+			}
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.POTION_SPLASH;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+			if(event instanceof MCPotionSplashEvent) {
+				MCPotionSplashEvent splashEvent = (MCPotionSplashEvent) event;
+				Target t = value.getTarget();
+
+				if(key.equalsIgnoreCase("entities")) {
+					CArray array = ArgumentValidation.getArray(value, t);
+					if(!array.isAssociative()) {
+						throw new CRECastException("Expected array to be associative.", t);
+					}
+					for(String id : array.stringKeySet()) {
+						MCLivingEntity entity = Static.getLivingByUUID(Static.GetUUID(id, t), t);
+						splashEvent.setIntensity(entity, ArgumentValidation.getDouble(array.get(id, t), t));
+					}
+					return true;
+				}
+			}
 			return false;
 		}
 

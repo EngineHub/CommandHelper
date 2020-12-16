@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.blocks.MCBlockData;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockData;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCThrownPotion;
 import com.laytonsmith.abstraction.entities.MCHanging;
 import com.laytonsmith.abstraction.entities.MCItem;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -28,6 +29,7 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCProjectile;
 import com.laytonsmith.abstraction.entities.MCFirework;
+import com.laytonsmith.abstraction.entities.MCThrownPotion;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
@@ -112,9 +114,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+
 import org.bukkit.event.entity.EntityUnleashEvent;
 
 public class BukkitEntityEvents {
@@ -289,13 +292,11 @@ public class BukkitEntityEvents {
 	}
 
 	@abstraction(type = Implementation.Type.BUKKIT)
-	public static class BukkitMCPotionSplashEvent extends BukkitMCProjectileHitEvent
-			implements MCPotionSplashEvent {
+	public static class BukkitMCPotionSplashEvent implements MCPotionSplashEvent {
 
 		PotionSplashEvent pse;
 
 		public BukkitMCPotionSplashEvent(Event event) {
-			super(event);
 			pse = (PotionSplashEvent) event;
 		}
 
@@ -305,17 +306,17 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public Set<MCLivingEntity> getAffectedEntities() {
-			Set<MCLivingEntity> ret = new HashSet<>();
-			for(LivingEntity le : pse.getAffectedEntities()) {
-				ret.add((MCLivingEntity) BukkitConvertor.BukkitGetCorrectEntity(le));
-			}
-			return ret;
+		public MCThrownPotion getEntity() {
+			return new BukkitMCThrownPotion(pse.getEntity());
 		}
 
 		@Override
-		public double getIntensity(MCLivingEntity le) {
-			return pse.getIntensity(((BukkitMCLivingEntity) le).asLivingEntity());
+		public Map<MCLivingEntity, Double> getAffectedEntities() {
+			Map<MCLivingEntity, Double> ret = new HashMap<>();
+			for(LivingEntity le : pse.getAffectedEntities()) {
+				ret.put(new BukkitMCLivingEntity(le), pse.getIntensity(le));
+			}
+			return ret;
 		}
 
 		@Override

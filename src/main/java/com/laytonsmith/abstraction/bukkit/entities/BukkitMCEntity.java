@@ -322,4 +322,18 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 		return e.removeScoreboardTag(tag);
 	}
 
+	@Override
+	public String toString() {
+		return e.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof BukkitMCEntity && e.equals(((BukkitMCEntity) obj).getHandle());
+	}
+
+	@Override
+	public int hashCode() {
+		return e.hashCode();
+	}
 }
