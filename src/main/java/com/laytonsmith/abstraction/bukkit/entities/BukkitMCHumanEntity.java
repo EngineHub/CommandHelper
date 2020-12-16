@@ -95,7 +95,12 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 
 	@Override
 	public float getAttackCooldown() {
-		return he.getAttackCooldown();
+		try {
+			return he.getAttackCooldown();
+		} catch (NoSuchMethodError ex) {
+			// probably before 1.15.2
+			return 1.0f;
+		}
 	}
 
 	@Override

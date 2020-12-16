@@ -5603,7 +5603,8 @@ public class PlayerManagement {
 		@Override
 		public String docs() {
 			return "double {[player]} Gets the charge value of the player's attack cooldown. This is a "
-					+ " double with range 0.0-1.0 inclusive. 1.0 is fully charged, while 0.0 is no charge.";
+					+ " double with range 0.0-1.0 inclusive. 1.0 is fully charged, while 0.0 is no charge."
+					+ " (Spigot versions prior to 1.15.2 will always return 1.0)";
 		}
 
 		@Override
