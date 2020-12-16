@@ -9,6 +9,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import java.util.HashMap;
 import java.util.Map;
 import org.hamcrest.core.Is;
+import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertArrayEquals;
@@ -197,7 +198,7 @@ public class JSONUtilTest {
 		d.s.b = true;
 		d.s.i = 5;
 		String s = jd.serialize(d);
-		Assert.assertThat(s, Is.is("{\"s\":{\"b\":true,\"i\":5},\"m\":\"string\"}"));
+		MatcherAssert.assertThat(s, Is.is("{\"s\":{\"b\":true,\"i\":5},\"m\":\"string\"}"));
 	}
 
 	@Test
@@ -207,7 +208,7 @@ public class JSONUtilTest {
 		a.I = new Integer[]{};
 		a.s = new String[]{"s", "t", "r"};
 		String s = jd.serialize(a);
-		Assert.assertThat(s, Is.is("{\"s\":[\"s\",\"t\",\"r\"],\"i\":[1,2,3],\"I\":[]}"));
+		MatcherAssert.assertThat(s, Is.is("{\"s\":[\"s\",\"t\",\"r\"],\"i\":[1,2,3],\"I\":[]}"));
 	}
 
 	static enum EnumTest {
@@ -232,7 +233,7 @@ public class JSONUtilTest {
 		c.id = 45;
 		c.enumValue = EnumTest.ONE;
 		String s = jd.serialize(c);
-		Assert.assertThat(s, Is.is("{\"enumValue\":1,\"id\":45}"));
+		MatcherAssert.assertThat(s, Is.is("{\"enumValue\":1,\"id\":45}"));
 	}
 
 	static enum EnumTest2 implements JSONUtil.CustomLongEnum<EnumTest2> {
@@ -280,7 +281,7 @@ public class JSONUtilTest {
 		c.id = 45;
 		c.et = EnumTest2.FIRST;
 		String s = jd.serialize(c);
-		Assert.assertThat(s, Is.is("{\"id\":45,\"et\":100}"));
+		MatcherAssert.assertThat(s, Is.is("{\"id\":45,\"et\":100}"));
 	}
 
 	static class MapContainer {
@@ -295,14 +296,14 @@ public class JSONUtilTest {
 		mc.map.put("one", "one");
 		mc.map.put("two", "two");
 		String s = jd.serialize(mc);
-		Assert.assertThat(s, Is.is("{\"map\":{\"two\":\"two\",\"one\":\"one\"}}"));
+		MatcherAssert.assertThat(s, Is.is("{\"map\":{\"two\":\"two\",\"one\":\"one\"}}"));
 	}
 
 	@Test
 	public void testMapDeserialization() throws Exception {
 		MapContainer mc = jd.deserialize("{\"map\":{\"two\":\"two\",\"one\":\"one\"}}", MapContainer.class);
 		Assert.assertNotNull(mc.map);
-		Assert.assertThat(mc.map.get("one"), Is.is("one"));
-		Assert.assertThat(mc.map.get("two"), Is.is("two"));
+		MatcherAssert.assertThat(mc.map.get("one"), Is.is("one"));
+		MatcherAssert.assertThat(mc.map.get("two"), Is.is("two"));
 	}
 }

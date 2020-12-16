@@ -19,6 +19,7 @@ import static com.laytonsmith.testing.StaticTest.SRun;
 import static com.laytonsmith.testing.StaticTest.TestClassDocs;
 import static com.laytonsmith.testing.StaticTest.assertCEquals;
 import static com.laytonsmith.testing.StaticTest.assertReturn;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +28,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.hamcrest.core.Is.*;
-import static org.junit.Assert.*;
 
 /**
  *

@@ -72,11 +72,11 @@ public class TestStatic {
 
 	@Test
 	public void testGetBoolean() {
-		assertEquals(true, ArgumentValidation.getBoolean(C.Boolean(true), Target.UNKNOWN));
-		assertEquals(true, ArgumentValidation.getBoolean(C.String("non-empty string"), Target.UNKNOWN));
-		assertEquals(false, ArgumentValidation.getBoolean(C.String(""), Target.UNKNOWN));
-		assertEquals(true, ArgumentValidation.getBoolean(C.Int(1), Target.UNKNOWN));
-		assertEquals(false, ArgumentValidation.getBoolean(C.Int(0), Target.UNKNOWN));
+		assertTrue(ArgumentValidation.getBooleanish(C.Boolean(true), Target.UNKNOWN));
+		assertTrue(ArgumentValidation.getBooleanish(C.String("non-empty string"), Target.UNKNOWN));
+		assertFalse(ArgumentValidation.getBooleanish(C.String(""), Target.UNKNOWN));
+		assertTrue(ArgumentValidation.getBooleanish(C.Int(1), Target.UNKNOWN));
+		assertFalse(ArgumentValidation.getBooleanish(C.Int(0), Target.UNKNOWN));
 	}
 
 	@Test
