@@ -2959,6 +2959,10 @@ public class EntityManagement {
 					}
 					break;
 				case MINECART:
+				case MINECART_FURNACE:
+				case MINECART_HOPPER:
+				case MINECART_MOB_SPAWNER:
+				case MINECART_TNT:
 					MCMinecart minecart = (MCMinecart) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
