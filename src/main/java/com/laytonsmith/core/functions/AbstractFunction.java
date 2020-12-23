@@ -86,7 +86,7 @@ public abstract class AbstractFunction implements Function {
 		// Match arguments to function signatures if available.
 		FunctionSignatures signatures = this.getSignatures();
 		if(signatures != null) {
-			return StaticAnalysis.getReturnType(signatures, t, argTypes, argTargets, env, exceptions);
+			return signatures.getReturnType(t, argTypes, argTargets, env, exceptions);
 		}
 
 		// No information is available about the return type.
