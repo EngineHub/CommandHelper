@@ -18,8 +18,10 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 public final class FunctionSignatures {
 
 	private final List<FunctionSignature> signatures = new ArrayList<>();
+	private MatchType matchType;
 
-	protected FunctionSignatures() {
+	protected FunctionSignatures(MatchType matchType) {
+		this.matchType = matchType;
 	}
 
 	protected void addSignature(FunctionSignature signature) {
@@ -57,10 +59,13 @@ public final class FunctionSignatures {
 	public CClassType getReturnType(Target t, List<CClassType> argTypes,
 			List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
 
-		// List all matching signatures.
+		// List all matching signatures, or return the return type of the first match when MatchType MATCH_FIRST is set.
 		List<FunctionSignature> matches = new ArrayList<>();
 		for(FunctionSignature signature : this.getSignatures()) {
 			if(signature.matches(argTypes, env, false)) {
+				if(this.matchType == MatchType.MATCH_FIRST) {
+					return signature.getReturnType().getType();
+				}
 				matches.add(signature);
 			}
 		}
@@ -92,5 +97,24 @@ public final class FunctionSignatures {
 				return type;
 			}
 		}
+	}
+
+	/**
+	 * Represents how {@link FunctionSignature}s within {@link FunctionSignatures} should be matched with given
+	 * argument types.
+	 * @author P.J.S. Kools
+	 */
+	public static enum MatchType {
+
+		/**
+		 * Indicates that all signatures within a {@link FunctionSignatures} should be matched when possible.
+		 */
+		MATCH_ALL,
+
+		/**
+		 * Indicates that signatures within a {@link FunctionSignatures} should be matched from first to last,
+		 * terminating as soon as a match is found.
+		 */
+		MATCH_FIRST;
 	}
 }

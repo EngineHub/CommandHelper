@@ -1,5 +1,6 @@
 package com.laytonsmith.core.compiler.signature;
 
+import com.laytonsmith.core.compiler.signature.FunctionSignatures.MatchType;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 
@@ -9,14 +10,25 @@ import com.laytonsmith.core.exceptions.CRE.CREThrowable;
  */
 public class SignatureBuilder {
 
-	private final FunctionSignatures signatures = new FunctionSignatures();
+	private final FunctionSignatures signatures;
 	private FunctionSignature signature;
 
 	/**
 	 * Creates a new {@link SignatureBuilder}, initialized with a {@link FunctionSignature} with the given return type.
+	 * When determining the return type for given argument types, all matching signatures will be used.
 	 * @param returnType - The return type for the first {@link FunctionSignature}.
 	 */
 	public SignatureBuilder(CClassType returnType) {
+		this(returnType, MatchType.MATCH_ALL);
+	}
+
+	/**
+	 * Creates a new {@link SignatureBuilder}, initialized with a {@link FunctionSignature} with the given return type.
+	 * @param returnType - The return type for the first {@link FunctionSignature}.
+	 * @param matchType - The {@link MatchType} used for determining the return type for given argument types.
+	 */
+	public SignatureBuilder(CClassType returnType, MatchType matchType) {
+		this.signatures = new FunctionSignatures(matchType);
 		this.signature = new FunctionSignature(new ReturnType(returnType));
 	}
 
@@ -25,10 +37,26 @@ public class SignatureBuilder {
 	 * generic return type.
 	 * Generic return types are in format 'genericIdentifier extends returnType' or 'genericIdentifier', where the
 	 * latter implies 'genericIdentifier extends mixed'.
+	 * When determining the return type for given argument types, all matching signatures will be used.
 	 * @param genericTypeName - The generic type name, used for matching with other generic types in the same signature.
 	 * @param returnType - The parent {@link CClassType} of the return type for the first {@link FunctionSignature}.
 	 */
 	public SignatureBuilder(String genericTypeName, CClassType returnType) {
+		this(genericTypeName, returnType, MatchType.MATCH_ALL);
+		this.signature = new FunctionSignature(new ReturnType(genericTypeName, returnType));
+	}
+
+	/**
+	 * Creates a new {@link SignatureBuilder}, initialized with a {@link FunctionSignature} with the given
+	 * generic return type.
+	 * Generic return types are in format 'genericIdentifier extends returnType' or 'genericIdentifier', where the
+	 * latter implies 'genericIdentifier extends mixed'.
+	 * @param genericTypeName - The generic type name, used for matching with other generic types in the same signature.
+	 * @param matchType - The {@link MatchType} used for determining the return type for given argument types.
+	 * @param returnType - The parent {@link CClassType} of the return type for the first {@link FunctionSignature}.
+	 */
+	public SignatureBuilder(String genericTypeName, CClassType returnType, MatchType matchType) {
+		this.signatures = new FunctionSignatures(matchType);
 		this.signature = new FunctionSignature(new ReturnType(genericTypeName, returnType));
 	}
 
