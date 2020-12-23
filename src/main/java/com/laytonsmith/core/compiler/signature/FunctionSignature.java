@@ -156,7 +156,7 @@ public class FunctionSignature {
 	 */
 	public String getParamTypesString() {
 		return "(" + StringUtils.Join(this.params, ", ", null, null, null, (Param param) -> {
-			String ret = param.getType().getSimpleName();
+			String ret = (param.getType() == null ? "any" : param.getType().getSimpleName());
 			if(param.getGenericIdentifier() != null) {
 				ret = param.getGenericIdentifier();
 				if(param.getType() != Mixed.TYPE) {
