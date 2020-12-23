@@ -23,6 +23,10 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures;
+import com.laytonsmith.core.compiler.signature.FunctionSignatures.MatchType;
+import com.laytonsmith.core.compiler.signature.SignatureBuilder;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
@@ -58,6 +62,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopBreakException;
 import com.laytonsmith.core.exceptions.LoopContinueException;
+import com.laytonsmith.core.natives.interfaces.Booleanish;
 import com.laytonsmith.core.natives.interfaces.Iterator;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.tools.docgen.templates.ArrayIteration;
@@ -111,6 +116,14 @@ public class ControlFlow {
 		public Mixed exec(Target t, Environment env, Mixed... args)
 				throws CancelCommandException, ConfigRuntimeException {
 			return CVoid.VOID;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder("T", Mixed.TYPE, MatchType.MATCH_FIRST).param(Booleanish.TYPE, "cond")
+					.genericParam("T", Mixed.TYPE, "ifValue").genericParam("T", Mixed.TYPE, "elseValue", true)
+					.newSignature(CVoid.TYPE).param(Booleanish.TYPE, "cond")
+					.param(null, "ifCode").param(null, "elseCode", true).build();
 		}
 
 		@Override
@@ -336,6 +349,15 @@ public class ControlFlow {
 		}
 
 		@Override
+		public FunctionSignatures getSignatures() {
+			/*
+			 * TODO - Implement a way to define [cond, code]* using signatures, and use it here.
+			 * Also check switch() and switch_ic(), as they need the same feature.
+			 */
+			return super.getSignatures();
+		}
+
+		@Override
 		public boolean useSpecialExec() {
 			return true;
 		}
@@ -524,6 +546,15 @@ public class ControlFlow {
 				}
 			}
 			return CVoid.VOID;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			/*
+			 * TODO - Implement a way to define [case, code]* using signatures, and use it here.
+			 * Also check ifelse() and switch_ic(), as they need the same feature.
+			 */
+			return super.getSignatures();
 		}
 
 		@Override
@@ -1007,6 +1038,12 @@ public class ControlFlow {
 		}
 
 		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE).param(Mixed.TYPE, "assign").param(Booleanish.TYPE, "condition")
+					.param(Mixed.TYPE, "loopExpr").param(null, "loopCode").build();
+		}
+
+		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class};
 		}
@@ -1020,10 +1057,10 @@ public class ControlFlow {
 
 		@Override
 		public String docs() {
-			return "void {assign, condition, expression1, expression2} Acts as a typical for loop. The assignment is"
+			return "void {assign, condition, loopExpr, loopCode} Acts as a typical for loop. The assignment is"
 					+ " first run. Then, a condition is checked. If that condition is checked and returns true,"
-					+ " expression2 is run. After that, expression1 is run. In java syntax, this would be:"
-					+ " for(assign; condition; expression1){expression2}. assign must be an ivariable, either a "
+					+ " loopCode is run. After that, loopExpr is run. In java syntax, this would be:"
+					+ " for(assign; condition; loopExpr){loopCode}. assign must be an ivariable, either a "
 					+ "pre defined one, or the results of the assign() function. condition must be a boolean.";
 		}
 
@@ -1218,6 +1255,12 @@ public class ControlFlow {
 		}
 
 		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE).param(Mixed.TYPE, "assign").param(Booleanish.TYPE, "condition")
+					.param(Mixed.TYPE, "loopExpr").param(null, "loopCode").param(null, "elseCode").build();
+		}
+
+		@Override
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 			if(ast.numberOfChildren() >= (this.runAsFor ? 3 : 4)) {
@@ -1246,7 +1289,7 @@ public class ControlFlow {
 
 		@Override
 		public String docs() {
-			return "void {assign, condition, expression1, expression2, else} Works like a normal for loop, but if upon"
+			return "void {assign, condition, loopExpr, loopCode, elseCode} Works like a normal for loop, but if upon"
 					+ " checking the condition the first time, it is determined that it is false (that is, NO code"
 					+ " loops are going to be run) the else code is run instead. If the loop runs, even once, it will"
 					+ " NOT run the else branch. In general, brace syntax and use of for(){ } else { } syntax is"
@@ -1440,6 +1483,12 @@ public class ControlFlow {
 				}
 			}
 			return CVoid.VOID;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE).param(com.laytonsmith.core.natives.interfaces.Iterable.TYPE, "data")
+					.param(null, "key", true).param(null, "value").param(null, "code").build();
 		}
 
 		@Override
@@ -1728,6 +1777,12 @@ public class ControlFlow {
 		}
 
 		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE).param(com.laytonsmith.core.natives.interfaces.Iterable.TYPE, "data")
+					.param(null, "key", true).param(null, "value").param(null, "code").param(null, "elseCode").build();
+		}
+
+		@Override
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 			if(ast.numberOfChildren() >= 4) {
@@ -1876,6 +1931,11 @@ public class ControlFlow {
 		}
 
 		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE).param(Booleanish.TYPE, "cond").param(null, "code", true).build();
+		}
+
+		@Override
 		public boolean useSpecialExec() {
 			return true;
 		}
@@ -1963,6 +2023,11 @@ public class ControlFlow {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			return CNull.NULL;
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(CVoid.TYPE).param(null, "code").param(Booleanish.TYPE, "cond").build();
 		}
 
 		@Override
@@ -2108,6 +2173,11 @@ public class ControlFlow {
 		}
 
 		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(null).param(CInt.TYPE, "loopAmount", true).build();
+		}
+
+		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "for(assign(@i, 0), @i < 1000, @i++,\n"
@@ -2204,6 +2274,11 @@ public class ControlFlow {
 		}
 
 		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(null).param(CInt.TYPE, "loopAmount", true).build();
+		}
+
+		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "for(assign(@i, 0), @i < 5, @i++){\n"
@@ -2272,6 +2347,12 @@ public class ControlFlow {
 			Mixed ret = (args.length == 1 ? args[0] : CVoid.VOID);
 			throw new FunctionReturnException(ret, t);
 		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(null).param(Mixed.TYPE, "value", true)
+					.newSignature(null).param(CVoid.TYPE, "value").build();
+		}
 	}
 
 	@api
@@ -2329,6 +2410,12 @@ public class ControlFlow {
 				return proc.execute(vars, env, t);
 			}
 			throw new CREInvalidProcedureException("Unknown procedure \"" + args[0].val() + "\"", t);
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			// TODO - Overwrite getReturnType() to return the return type of the proc when available.
+			return new SignatureBuilder(Auto.TYPE).param(CString.TYPE, "procName").varParam(Mixed.TYPE, "args").build();
 		}
 
 		@Override
@@ -2444,6 +2531,11 @@ public class ControlFlow {
 			} finally {
 				throw new CancelCommandException("", t);
 			}
+		}
+
+		@Override
+		public FunctionSignatures getSignatures() {
+			return new SignatureBuilder(null).varParam(Mixed.TYPE, "values").build();
 		}
 
 		@Override
