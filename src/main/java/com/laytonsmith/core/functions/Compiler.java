@@ -581,6 +581,11 @@ public class Compiler {
 		@Override
 		public CClassType getReturnType(Target t, List<CClassType> argTypes,
 				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			for(CClassType argType : argTypes) {
+				if(argType == null) {
+					return null; // An argument alters control flow, so this function will never return.
+				}
+			}
 			return CVoid.TYPE;
 		}
 
