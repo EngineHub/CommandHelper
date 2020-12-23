@@ -28,6 +28,7 @@ import com.laytonsmith.core.compiler.signature.FunctionSignatures.MatchType;
 import com.laytonsmith.core.compiler.signature.SignatureBuilder;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CKeyword;
@@ -38,6 +39,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -121,9 +123,47 @@ public class ControlFlow {
 		@Override
 		public FunctionSignatures getSignatures() {
 			return new SignatureBuilder("T", Mixed.TYPE, MatchType.MATCH_FIRST).param(Booleanish.TYPE, "cond")
-					.genericParam("T", Mixed.TYPE, "ifValue").genericParam("T", Mixed.TYPE, "elseValue", true)
+					.genericParam("T", Mixed.TYPE, "ifValue").genericParam("T", Mixed.TYPE, "elseValue")
 					.newSignature(CVoid.TYPE).param(Booleanish.TYPE, "cond")
 					.param(null, "ifCode").param(null, "elseCode", true).build();
+		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes,
+				List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Get return type based on the function signatures. This generates all necessary compile errors.
+			CClassType retType = super.getReturnType(t, argTypes, argTargets, env, exceptions);
+
+			// When void is returned, ternary usage could still be possible when a branch is terminating.
+			// It is also possible that both branches are terminating, in which case this should return null as well.
+			if(retType == CVoid.TYPE && argTypes.size() == 3) {
+
+				// Return the type of the other branch if one branch is terminating (ternary, terminating or void).
+				if(argTypes.get(1) == null) {
+					return argTypes.get(2);
+				}
+				if(argTypes.get(2) == null) {
+					return argTypes.get(1);
+				}
+			}
+
+			// Perform partial type inference since there is no way to set the generic type yet.
+			/*
+			 * TODO - This currently returns the lowest type if one extends the other.
+			 * Make this return a multitype instead as soon as all typechecking code supports multitypes.
+			 */
+			if(retType == Mixed.TYPE && argTypes.size() == 3) {
+				if(InstanceofUtil.isInstanceof(argTypes.get(1), argTypes.get(2), env)) {
+					return argTypes.get(2);
+				}
+				if(InstanceofUtil.isInstanceof(argTypes.get(2), argTypes.get(1), env)) {
+					return argTypes.get(1);
+				}
+			}
+
+			// Return the super result.
+			return retType;
 		}
 
 		@Override
