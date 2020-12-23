@@ -74,8 +74,8 @@ public final class FunctionSignatures {
 		switch(matches.size()) {
 			case 0: {
 				// No matches. Generate a compile error and return AUTO to prevent further typechecking errors.
-				String argTypesStr = "(" + StringUtils.Join(
-						argTypes, ", ", null, null, null, (CClassType type) -> type.getSimpleName()) + ")";
+				String argTypesStr = "(" + StringUtils.Join(argTypes, ", ", null, null, null,
+						(CClassType type) -> (type == null ? "none" : type.getSimpleName())) + ")";
 				exceptions.add(new ConfigCompileException("Arguments " + argTypesStr
 						+ " do not match required " + this.getSignaturesParamTypesString() + ".", t));
 				return CClassType.AUTO;
@@ -89,8 +89,9 @@ public final class FunctionSignatures {
 
 				// Return the return type of all matching signatures if they are the same.
 				CClassType type = matches.get(0).getReturnType().getType();
-				for(FunctionSignature match : matches) {
-					if(!match.getReturnType().getType().equals(type)) {
+				for(int i = 1; i < matches.size(); i++) {
+					CClassType retType = matches.get(i).getReturnType().getType();
+					if((retType == null ? retType != type : !retType.equals(type))) {
 						return CClassType.AUTO;
 					}
 				}
