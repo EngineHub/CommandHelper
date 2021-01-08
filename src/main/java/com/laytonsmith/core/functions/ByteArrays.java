@@ -161,8 +161,8 @@ public class ByteArrays {
 
 		@Override
 		public String docs() {
-			return "int {byte_array, [pos]} Returns an int, read in as an 8 bit byte, from the given position, or wherever the"
-					+ " marker is currently at by default.";
+			return "int {byte_array, [pos]} Returns an int, read in as an 8 bit signed byte, from the given position,"
+					+ " or wherever the marker is currently at by default.";
 		}
 
 		@Override
@@ -225,8 +225,8 @@ public class ByteArrays {
 
 		@Override
 		public String docs() {
-			return "int {byte_array, [pos]} Returns an int, read in as a 16 bit short, from the given position, or wherever the"
-					+ " marker is currently at by default.";
+			return "int {byte_array, [pos]} Returns an int, read in as a 16 bit signed short,"
+					+ " from the given position, or wherever the marker is currently at by default.";
 		}
 
 		@Override
@@ -256,8 +256,8 @@ public class ByteArrays {
 
 		@Override
 		public String docs() {
-			return "int {byte_array, [pos]} Returns an int, read in as a 32 bit int, from the given position, or wherever the"
-					+ " marker is currently at by default.";
+			return "int {byte_array, [pos]} Returns an int, read in as a 32 bit signed int, from the given position,"
+					+ " or wherever the marker is currently at by default.";
 		}
 
 		@Override
@@ -288,8 +288,8 @@ public class ByteArrays {
 
 		@Override
 		public String docs() {
-			return "int {byte_array, [pos]} Returns an int, read in as a 64 bit long, from the given position, or wherever the"
-					+ " marker is currently at by default.";
+			return "int {byte_array, [pos]} Returns an int, read in as a 64 bit signed long, from the given position,"
+					+ " or wherever the marker is currently at by default.";
 		}
 
 		@Override
@@ -464,8 +464,8 @@ public class ByteArrays {
 
 		@Override
 		public String docs() {
-			return "void {byte_array, int, [pos]} Writes an int, interpreted as an 8 bit byte, starting from the given position, or wherever the"
-					+ " marker is currently at by default.";
+			return "void {byte_array, int, [pos]} Writes an int, interpreted as an 8 bit signed byte,"
+					+ " starting from the given position, or wherever the marker is currently at by default.";
 		}
 
 		@Override
@@ -528,8 +528,8 @@ public class ByteArrays {
 
 		@Override
 		public String docs() {
-			return "void {byte_array, int, [pos]} Writes an int, interpreted as an 16 bit short, starting from the given position, or wherever the"
-					+ " marker is currently at by default.";
+			return "void {byte_array, int, [pos]} Writes an int, interpreted as an 16 bit signed short,"
+					+ " starting from the given position, or wherever the marker is currently at by default.";
 		}
 
 		@Override
@@ -558,8 +558,8 @@ public class ByteArrays {
 
 		@Override
 		public String docs() {
-			return "void {byte_array, int, [pos]} Writes an int, interpreted as a 32 bit int, starting from the given position, or wherever the"
-					+ " marker is currently at by default.";
+			return "void {byte_array, int, [pos]} Writes an int, interpreted as a 32 bit signed int,"
+					+ " starting from the given position, or wherever the marker is currently at by default.";
 		}
 
 		@Override
@@ -587,8 +587,8 @@ public class ByteArrays {
 
 		@Override
 		public String docs() {
-			return "void {byte_array, int, [pos]} Writes an int, interpreted as a 64 bit, starting from the given position, or wherever the"
-					+ " marker is currently at by default.";
+			return "void {byte_array, int, [pos]} Writes an int, interpreted as a 64 bit signed long,"
+					+ " starting from the given position, or wherever the marker is currently at by default.";
 		}
 
 		@Override
