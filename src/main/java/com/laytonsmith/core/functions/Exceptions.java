@@ -596,28 +596,38 @@ public class Exceptions {
 				throws ConfigCompileException, ConfigRuntimeException {
 			List<CClassType> types = new ArrayList<>();
 			for(int i = 1; i < children.size() - 1; i += 2) {
-				// TODO: Eh.. should probably move this check into the keyword, since techincally
-				// catch (Exception @e = null) { } would work.
 				ParseTree assign = children.get(i);
-				if(assign.getChildAt(0).getData().isInstanceOf(CString.TYPE)) {
-					// This is an unknown exception type, because otherwise it would have been cast to a CClassType
+
+				// Check for a container function with a string as first argument, being an unknown type.
+				if(assign.numberOfChildren() > 0 && assign.getChildAt(0).getData().isInstanceOf(CString.TYPE)) {
 					throw new ConfigCompileException("Unknown class type: " + assign.getChildAt(0).getData().val(), t);
 				}
-				types.add((CClassType) assign.getChildAt(0).getData());
-				if(CFunction.IsFunction(assign, DataHandling.assign.class)) {
-					// assign() will validate params 0 and 1
-					CClassType type = ((CClassType) assign.getChildAt(0).getData());
-					if(!type.unsafeDoesExtend(CREThrowable.TYPE)) {
-						throw new ConfigCompileException("The type defined in a catch clause must extend the"
-								+ " Throwable class.", t);
-					}
-					if(!(assign.getChildAt(2).getData() instanceof CNull)) {
-						throw new ConfigCompileException("Assignments are not allowed in catch clauses", t);
-					}
-					continue;
-				}
-				throw new ConfigCompileException("Expecting a variable declaration, but instead "
+
+				// Validate that the node is an assign with 3 arguments.
+				if(!CFunction.IsFunction(assign, DataHandling.assign.class) || assign.numberOfChildren() != 3) {
+					throw new ConfigCompileException("Expecting a variable declaration, but instead "
 						+ assign.getData().val() + " was found", t);
+				}
+
+				// Validate that the first argument of the assign is a valid type.
+				if(!(assign.getChildAt(0).getData() instanceof CClassType)) {
+					throw new ConfigCompileException("Unknown class type: " + assign.getChildAt(0).getData().val(), t);
+				}
+				CClassType type = ((CClassType) assign.getChildAt(0).getData());
+				types.add(type);
+
+				// Validate that the exception type extends throwable.
+				if(!type.unsafeDoesExtend(CREThrowable.TYPE)) {
+					throw new ConfigCompileException("The type defined in a catch clause must extend the"
+							+ " Throwable class.", t);
+				}
+
+				// Validate that the assigned value is the by default added null.
+				// TODO - This check should probably be moved into the keyword,
+				// since technically catch (Exception @e = null) { } would work.
+				if(!(assign.getChildAt(2).getData() instanceof CNull)) {
+					throw new ConfigCompileException("Assignments are not allowed in catch clauses", t);
+				}
 			}
 			for(int i = 0; i < types.size(); i++) {
 				CClassType t1 = types.get(i);
