@@ -422,6 +422,7 @@ public class Main {
 
 		@Override
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			Prefs.init(MethodScriptFileLocations.getDefault().getPreferencesFile());
 			Telemetry.GetDefault().doNag();
 			String commandName = parsedArgs.getStringArgument("command");
 			Interpreter.install(commandName);
@@ -459,6 +460,7 @@ public class Main {
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
 			// TODO: This should eventually be changed to use an independent
 			// versioning scheme for CH and MS.
+			Prefs.init(MethodScriptFileLocations.getDefault().getPreferencesFile());
 			Telemetry.GetDefault().doNag();
 			StreamUtils.GetSystemOut().println("You are running "
 					+ Implementation.GetServerType().getBranding() + " version " + Static.loadSelfVersion());
@@ -537,6 +539,7 @@ public class Main {
 		@Override
 		@SuppressWarnings("ResultOfObjectAllocationIgnored")
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			Prefs.init(MethodScriptFileLocations.getDefault().getPreferencesFile());
 			Telemetry.GetDefault().doNag();
 			new Interpreter(parsedArgs.getStringListArgument(), parsedArgs.getStringArgument("location-----"));
 		}
@@ -1668,6 +1671,7 @@ public class Main {
 
 		@Override
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
+			Prefs.init(MethodScriptFileLocations.getDefault().getPreferencesFile());
 			Telemetry.GetDefault().doNag();
 			Map<String, String> topics = new HashMap<>();
 			for(ExtensionTracker t : ExtensionManager.getTrackers().values()) {
