@@ -525,4 +525,50 @@ public class DataTransformations {
 		}
 
 	}
+
+	@api
+	public static class parse_text_table extends CompositeFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+
+		@Override
+		public String getName() {
+			return "parse_text_table";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		@Override
+		public String docs() {
+			return getBundledDocs();
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		protected String script() {
+			return getBundledCode();
+		}
+
+	}
 }

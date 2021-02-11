@@ -1,8 +1,10 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.analysis.ParamDeclaration;
 import com.laytonsmith.core.compiler.analysis.Scope;
@@ -19,6 +21,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import java.io.File;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,13 +43,17 @@ public abstract class CompositeFunction extends AbstractFunction {
 		ParseTree tree;
 		// TODO: Ultimately, this is not scalable. We need to compile and cache these scripts at Java compile time,
 		// not at runtime the first time a function is used. This is an easier first step though.
+		File debugFile = null;
+		if(Prefs.DebugMode()) {
+			debugFile = new File("/NATIVE-MSCRIPT/" + getName());
+		}
 		if(!CACHED_SCRIPTS.containsKey(this.getClass())) {
 			try {
 
 				String script = script();
 				Scope rootScope = new Scope();
 				rootScope.addDeclaration(new ParamDeclaration("@arguments", CArray.TYPE, Target.UNKNOWN));
-				tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, null, true),
+				tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, debugFile, true),
 						env, env.getEnvClasses(), new StaticAnalysis(rootScope, true))
 						// the root of the tree is null, so go ahead and pull it up
 						.getChildAt(0);
@@ -77,6 +84,10 @@ public abstract class CompositeFunction extends AbstractFunction {
 		} catch (FunctionReturnException ex) {
 			ret = ex.getReturn();
 		} catch (ConfigRuntimeException ex) {
+			if(Prefs.DebugMode()) {
+				MSLog.GetLogger().e(MSLog.Tags.GENERAL, "Possibly false stacktrace, could be internal error",
+						ex.getTarget());
+			}
 			if(gEnv.GetStackTraceManager().getCurrentStackTrace().isEmpty()) {
 				ex.setTarget(t);
 				ConfigRuntimeException.StackTraceElement ste = new ConfigRuntimeException

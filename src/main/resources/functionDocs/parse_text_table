@@ -1,0 +1,70 @@
+array {string table, [array options]} Parses tabular data into an array ----
+
+Given a string such as:
+
+<%PRE|
+column1         column2             column3
+-------         -------             -------
+data a1         data a2             data a3
+data b1         data b2             data b3
+%>
+
+this function will parse the data into an associative array:
+
+<%CODE|
+array('column1': array('data a1', 'data b1'), 'column2': array('data a2', 'data b2'), 'column3': array('data a3', 'data b3'))
+%>
+
+The second parameter is an array of options, which can allow for more flexible input, though is optional, and has
+default values for all parameters.
+
+{|
+|-
+! scope="col" width="6%" | Setting
+! scope="col" width="10%" | Type
+! scope="col" width="6%" | Default
+! scope="col" width="78%" | Description
+|-
+| columns
+| array
+| null
+| If the string doesn't have column headings in the first line, these can be provided as an array here. Note that if you
+provide this parameter, columnWidth is a required parameter as well.
+|-
+| columnWidth
+| array
+| null
+| For data that isn't consistently formatted, you may need to provide your own values for the column widths. Normally,
+this is calculated automatically based on the first and second lines, but if those don't match the data, or aren't
+provided, you need to provide this manually. This should be an array of the same size or one less of the columns option,
+and should contain the width of each column, optionally skipping the last.
+For instance, in the example table shown above, the width should be array(16, 20) or array(16, 20, 7). If the last value
+is skipped, this means "the rest of the line".
+|-
+| tabWidth
+| int
+| 4
+| Before converting the data, all tabs are normalized to spaces based on the tab width of the line. For instance, if the
+line of data is <pre>"a\tb\tc"</pre> then this will be converted to <pre>"a   b   c"</pre>, and then the column width
+data is used. In cases where data is separated using exclusively spaces this setting won't matter, as the column width
+and data should line up in any case. However, if tabs are used, it may misformat depending on the tab width assumptions
+that the data originated from. If you can control the data, it is more reliable to output data using spaces rather than
+tabs, or use a tab width of 4.
+|-
+| skipEmptyLines
+| boolean
+| true
+| If true, empty lines are totally skipped. If false, blank lines will add zero width strings in all the columns in their place.
+|}
+
+When using the automatic column width detection, it isn't required to have any particular character used as the header separator
+in the second line. Nor is it required to fill the line. It's merely required to have one or more space between each
+column, and then the column width is measured between the start of each character sequence. For instance, the following table
+would be properly parsed as well:
+
+<%PRE|
+column1    column2    column3
+---------- -------    -
+a          b          c
+d          e          f
+%>
