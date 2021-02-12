@@ -219,17 +219,31 @@ public class ZipReader {
 		}
 	}
 
+
 	/**
-	 * If the file is a simple text file, this function is your best option. It returns the contents of the file as a
-	 * string.
+	 * If the file is a simple text file, this function is your best option.It returns the contents of the file as a
+ UTF-8 string.
 	 *
 	 * @return
 	 * @throws FileNotFoundException If the file is not found
 	 * @throws IOException If you specify a file that isn't a zip file as if it were a folder
 	 */
 	public String getFileContents() throws FileNotFoundException, IOException {
+		return getFileContents("UTF-8");
+	}
+
+	/**
+	 * If the file is a simple text file, this function is your best option.It returns the contents of the file as a
+ string.
+	 *
+	 * @param charset
+	 * @return
+	 * @throws FileNotFoundException If the file is not found
+	 * @throws IOException If you specify a file that isn't a zip file as if it were a folder
+	 */
+	public String getFileContents(String charset) throws FileNotFoundException, IOException {
 		if(!isZipped) {
-			return FileUtil.read(file);
+			return FileUtil.read(file, charset);
 		} else {
 			return StreamUtils.GetString(getInputStream());
 		}

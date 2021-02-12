@@ -11,6 +11,7 @@ import com.laytonsmith.annotations.DocumentLink;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
+import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
@@ -64,8 +65,8 @@ public class FileHandling {
 	@DocumentLink(0)
 	public static class read extends AbstractFunction implements DocumentLinkProvider {
 
-		public static String file_get_contents(String fileLocation) throws Exception {
-			return new ZipReader(new File(fileLocation)).getFileContents();
+		public static String file_get_contents(String fileLocation, String charset) throws Exception {
+			return new ZipReader(new File(fileLocation)).getFileContents(charset);
 		}
 
 		@Override
@@ -75,19 +76,23 @@ public class FileHandling {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1, 2};
 		}
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
+			String charset = "UTF-8";
+			if(args.length > 1) {
+				charset = ArgumentValidation.getString(args[1], t);
+			}
 			try {
 				// Verify this file is not above the craftbukkit directory (or whatever directory the user specified).
 				// Cmdline mode doesn't currently have this restriction.
 				if(!Static.InCmdLine(env, true) && !Security.CheckSecurity(location)) {
 					throw new CRESecurityException("You do not have permission to access the file '" + location + "'", t);
 				}
-				String s = file_get_contents(location.getAbsolutePath());
+				String s = file_get_contents(location.getAbsolutePath(), charset);
 				s = s.replace("\r\n", "\n");
 				return new CString(s, t);
 			} catch (Exception ex) {
@@ -100,10 +105,11 @@ public class FileHandling {
 
 		@Override
 		public String docs() {
-			return "string {file} Reads in a file from the file system at location var1 and returns it as a string. The path is relative to"
+			return "string {file, [encoding]} Reads in a file from the file system at location var1 and returns it as a string. The path is relative to"
 					+ " the file that is being run, not CommandHelper. If the file is not found, or otherwise can't be read in, an IOException is thrown."
 					+ " If the file specified is not within base-dir (as specified in the preferences file), a SecurityException is thrown."
-					+ " The line endings for the string returned will always be \\n, even if they originally were \\r\\n.";
+					+ " The line endings for the string returned will always be \\n, even if they originally were \\r\\n. Encoding defaults"
+					+ " to UTF-8 if not specified.";
 		}
 
 		@Override
@@ -165,15 +171,16 @@ public class FileHandling {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1, 2};
 		}
 
 		@Override
 		public String docs() {
-			return "string {path} Returns the value of a file at compile time only. Unlike read, this runs and is fully resolved"
+			return "string {path, [encoding]} Returns the value of a file at compile time only. Unlike read, this runs and is fully resolved"
 					+ " at compile time. This is useful for optimization reasons, if you have a file that is unchanging, this can be"
 					+ " used instead of read(), to prevent a runtime hit each time the code is executed. Otherwise, this method is"
-					+ " equivalent to read(). The path must be fully resolved at compile time.";
+					+ " equivalent to read(). The path must be fully resolved at compile time. Encoding is optional, and"
+					+ " defaults to UTF-8.";
 		}
 
 		@Override
@@ -195,7 +202,13 @@ public class FileHandling {
 				throw new ConfigCompileException(getName() + " can only accept hardcoded paths.", t);
 			}
 
-			String ret = new read().exec(t, env, children.get(0).getData()).val();
+			String ret;
+			if(children.size() == 1) {
+				ret = new read().exec(t, env, children.get(0).getData()).val();
+			} else {
+				ret = new read().exec(t, env, children.get(0).getData(),
+						children.get(1).getData()).val();
+			}
 			ParseTree tree = new ParseTree(new CString(ret, t), fileOptions);
 			return tree;
 		}
@@ -253,8 +266,16 @@ public class FileHandling {
 			startup();
 			final String file = args[0].val();
 			final CClosure callback;
-			if(!(args[1].isInstanceOf(CClosure.TYPE))) {
-				throw new CRECastException("Expected parameter 2 of " + getName() + " to be a closure!", t);
+			int callbackIndex = 0;
+			String _encoding = "UTF-8";
+			if(args.length == 3) {
+				_encoding = ArgumentValidation.getString(args[1], t);
+				callbackIndex = 1;
+			}
+			final String encoding = _encoding;
+
+			if(!(args[1 + callbackIndex].isInstanceOf(CClosure.TYPE))) {
+				throw new CRECastException("Expected parameter " + (2 + callbackIndex) + " of " + getName() + " to be a closure!", t);
 			} else {
 				callback = ((CClosure) args[1]);
 			}
@@ -285,7 +306,7 @@ public class FileHandling {
 						try {
 							//It's a local file read
 							File _file = Static.GetFileFromArgument(file, environment, t, null);
-							returnString = FileUtil.read(_file);
+							returnString = FileUtil.read(_file, encoding);
 						} catch (IOException ex) {
 							exception = new CREIOException(ex.getMessage(), t, ex);
 						}
@@ -322,12 +343,12 @@ public class FileHandling {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{2, 3};
 		}
 
 		@Override
 		public String docs() {
-			return "void {file, callback} Asyncronously reads in a file. ---- "
+			return "void {file, [encoding], callback} Asyncronously reads in a file. ---- "
 					+ " This may be a remote file accessed with an SCP style path. (See the [[SCP|wiki article]]"
 					+ " about SCP credentials for more information.) If the file is not found, or otherwise can't be read in, an IOException is thrown."
 					+ " If the file specified is not within base-dir (as specified in the preferences file), a SecurityException is thrown."
