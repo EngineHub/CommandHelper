@@ -222,7 +222,7 @@ public class ZipReader {
 
 	/**
 	 * If the file is a simple text file, this function is your best option.It returns the contents of the file as a
- UTF-8 string.
+	 * UTF-8 string.
 	 *
 	 * @return
 	 * @throws FileNotFoundException If the file is not found
@@ -234,7 +234,7 @@ public class ZipReader {
 
 	/**
 	 * If the file is a simple text file, this function is your best option.It returns the contents of the file as a
- string.
+	 * string.
 	 *
 	 * @param charset
 	 * @return
