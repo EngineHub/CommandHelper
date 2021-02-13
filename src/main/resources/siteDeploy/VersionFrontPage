@@ -50,8 +50,8 @@ On Unix systems, you'll need to run the command with sudo. The installer will in
 a file will run that file, and using ''mscript -- '' followed by a verb (such as help) will run the cmdline utilities.
 
 ==== Windows ====
-The manual installation instructions are still valid if you wish to customize your install, but for Windows, you can
-use the pre-packaged standalone installer, found [https://github.com/EngineHub/CommandHelper/releases/download/win-installer-v1.0.0/MethodScriptInstaller.exe here]
+{{TakeNote|text=The manual installation instructions are still valid if you wish to customize your install, but for Windows, you can
+use the pre-packaged standalone installer, found [https://github.com/EngineHub/CommandHelper/releases/download/win-installer-v.1.0.1/MethodScriptInstaller.exe here].}}
 
 On Windows systems, you'll need to have launched your command prompt as Administrator. (To install on Windows
 Subsystem for Linux, follow the same instructions as for Unix.) A program ''mscript'' will be installed on your
