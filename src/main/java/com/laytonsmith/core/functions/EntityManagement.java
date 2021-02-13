@@ -50,6 +50,7 @@ import com.laytonsmith.abstraction.entities.MCHorse.MCHorsePattern;
 import com.laytonsmith.abstraction.entities.MCIronGolem;
 import com.laytonsmith.abstraction.entities.MCItem;
 import com.laytonsmith.abstraction.entities.MCItemFrame;
+import com.laytonsmith.abstraction.entities.MCItemProjectile;
 import com.laytonsmith.abstraction.entities.MCLightningStrike;
 import com.laytonsmith.abstraction.entities.MCLlama;
 import com.laytonsmith.abstraction.entities.MCLlama.MCLlamaColor;
@@ -3729,6 +3730,69 @@ public class EntityManagement {
 		@Override
 		public MSVersion since() {
 			return MSVersion.V3_3_1;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_projectile_item extends EntityGetterFunction {
+
+		@Override
+		public String getName() {
+			return "get_projectile_item";
+		}
+
+		@Override
+		public String docs() {
+			return "array {entityUUID} Returns the displayed item for some projectiles."
+					+ " This can be used on throwable projectiles (snowballs, eggs, exp bottles, enderpearls)"
+					+ " as well as large and small fireballs.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			if(entity instanceof MCItemProjectile) {
+				return ObjectGenerator.GetGenerator().item(((MCItemProjectile) entity).getItem(), t);
+			} else {
+				throw new CREBadEntityException("The given entity does not have a display item.", t);
+			}
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_projectile_item extends EntitySetterFunction {
+
+		@Override
+		public String getName() {
+			return "set_projectile_item";
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID, itemArray} Sets the displayed item for some projectiles."
+					+ " This can be used on throwable projectiles (snowballs, eggs, exp bottles, enderpearls)"
+					+ " as well as large and small fireballs.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			if(entity instanceof MCItemProjectile) {
+				((MCItemProjectile) entity).setItem(ObjectGenerator.GetGenerator().item(args[1], t));
+			} else {
+				throw new CREBadEntityException("The given entity does not have a display item.", t);
+			}
+			return CVoid.VOID;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_4;
 		}
 	}
 

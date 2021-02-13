@@ -3,16 +3,19 @@ package com.laytonsmith.abstraction.enums.bukkit;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCEnderSignal;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFireball;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCFishHook;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCHopperMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCItem;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLightningStrike;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLlama;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPigZombie;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCSizedFireball;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCStorageMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCTNT;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCThrownPotion;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
@@ -120,6 +123,13 @@ public class BukkitMCEntityType extends MCEntityType<EntityType> {
 				break;
 			case ENDER_EYE:
 				wrapperClass = BukkitMCEnderSignal.class;
+				break;
+			case FIREBALL:
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_15_X)) {
+					wrapperClass = BukkitMCSizedFireball.class;
+				} else {
+					wrapperClass = BukkitMCFireball.class;
+				}
 				break;
 			case FISHING_HOOK:
 				wrapperClass = BukkitMCFishHook.class;

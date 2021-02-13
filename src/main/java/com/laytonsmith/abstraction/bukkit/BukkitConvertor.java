@@ -53,7 +53,9 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCMinecart;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCProjectile;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCSizedFireball;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCTameable;
+import com.laytonsmith.abstraction.bukkit.entities.BukkitMCItemProjectile;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCVehicle;
 import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
 import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitBlockListener;
@@ -124,7 +126,9 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.entity.SizedFireball;
 import org.bukkit.entity.Tameable;
+import org.bukkit.entity.ThrowableProjectile;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.inventory.BlastingRecipe;
@@ -407,10 +411,22 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCMinecart(be);
 		}
 
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_15_X) && be instanceof SizedFireball) {
+			// Must come before Fireball
+			type.setWrapperClass(BukkitMCSizedFireball.class);
+			return new BukkitMCSizedFireball(be);
+		}
+
 		if(be instanceof Fireball) {
 			// Must come before Projectile
 			type.setWrapperClass(BukkitMCFireball.class);
 			return new BukkitMCFireball(be);
+		}
+
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_15_X) && be instanceof ThrowableProjectile) {
+			// Must come before Projectile
+			type.setWrapperClass(BukkitMCItemProjectile.class);
+			return new BukkitMCItemProjectile(be);
 		}
 
 		if(be instanceof Projectile) {
