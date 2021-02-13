@@ -531,7 +531,7 @@ public class DataTransformations {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class};
+			return new Class[]{CREFormatException.class, CRECastException.class};
 		}
 
 		@Override
