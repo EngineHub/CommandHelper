@@ -18,6 +18,10 @@ contexts:
     - include: content
 
   content:
+    # Handle strings and comments first, to prevent them being recognized as something else.
+    - include: quotedstring
+    - include: comments
+
     - include: keywords
 
     # Highlight Operators
@@ -41,8 +45,6 @@ contexts:
         1: entity.name.function.mscript
 
     - include: variables
-    - include: quotedstring
-    - include: comments
 
   comments:
     # Single line comment
