@@ -21,7 +21,6 @@ contexts:
     # Handle strings and comments first, to prevent them being recognized as something else.
     - include: quotedstring
     - include: comments
-
     - include: keywords
 
     # Highlight Operators
@@ -35,10 +34,6 @@ contexts:
     # Highlight Numerics
     - match: '[0-9]'
       scope: constant.numeric.mscript
-
-    # Keywords
-    - match: (\b(%%pipe:keywords%%)\b)(?=[^A-Za-z0-9])
-      scope: constant.language.mscript
 
     - match: ([\w]+)(\s*\()
       captures:
@@ -71,9 +66,10 @@ contexts:
     - meta_scope: comment.block.mscript
 
   keywords:
-    # Keyword control
-    # These are not up to date but do find for most code.
-    - match: (?<![a-zA-Z0-9_])(auto|notinstanceof|for|do|while|switch|foreach|default|bind|else|catch|closure|if|case|proc|in|finally|false|instanceof|as|iclosure|null|true|try)(?![a-zA-Z0-9_])
+    # Keywords
+    # Export via CH, to get current list of keywords. If you are too lazy, below is a (probably outdated) list.
+    # %%pipe:keywords%% resolves to implements|synchronized|internal|auto|private|notinstanceof|for|do|while|switch|foreach|default|bind|protected|public|native|else|catch|closure|class|if|case|proc|package|static|in|finally|false|switch_ic|abstract|instanceof|as|immutable|iclosure|null|final|true|try
+    - match: (?<![a-zA-Z0-9_])(%%pipe:keywords%%)(?![a-zA-Z0-9_])
       scope: keyword.control.mscript
 
   variables:
