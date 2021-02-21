@@ -1405,16 +1405,22 @@ public class ObjectGenerator {
 		return StaticLayer.GetConvertor().GetAttributeModifier(attribute, uuid, name, amount, operation, slot);
 	}
 
+	public CArray potion(MCLivingEntity.MCEffect eff, Target t) {
+		CArray effect = CArray.GetAssociativeArray(t);
+		effect.set("id", new CInt(eff.getPotionEffectType().getId(), t), t);
+		effect.set("strength", new CInt(eff.getStrength(), t), t);
+		effect.set("seconds", new CDouble(eff.getTicksRemaining() / 20.0, t), t);
+		effect.set("ambient", CBoolean.get(eff.isAmbient()), t);
+		effect.set("particles", CBoolean.get(eff.hasParticles()), t);
+		effect.set("icon", CBoolean.get(eff.showIcon()), t);
+
+		return effect;
+	}
+
 	public CArray potions(List<MCLivingEntity.MCEffect> effectList, Target t) {
 		CArray ea = CArray.GetAssociativeArray(t);
 		for(MCLivingEntity.MCEffect eff : effectList) {
-			CArray effect = CArray.GetAssociativeArray(t);
-			effect.set("id", new CInt(eff.getPotionEffectType().getId(), t), t);
-			effect.set("strength", new CInt(eff.getStrength(), t), t);
-			effect.set("seconds", new CDouble(eff.getTicksRemaining() / 20.0, t), t);
-			effect.set("ambient", CBoolean.get(eff.isAmbient()), t);
-			effect.set("particles", CBoolean.get(eff.hasParticles()), t);
-			effect.set("icon", CBoolean.get(eff.showIcon()), t);
+			CArray effect = potion(eff, t);
 			ea.set(eff.getPotionEffectType().name().toLowerCase(), effect, t);
 		}
 		return ea;

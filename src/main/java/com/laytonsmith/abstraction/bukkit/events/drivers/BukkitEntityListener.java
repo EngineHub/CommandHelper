@@ -27,6 +27,7 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCPoti
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCProjectileHitEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCProjectileLaunchEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitMCTargetEvent;
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents.BukkitEntityPotionEffectEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
@@ -49,6 +50,7 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.entity.EntityUnleashEvent;
+import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.FireworkExplodeEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
@@ -229,5 +231,11 @@ public class BukkitEntityListener implements Listener {
 	public void onPotionSplash(PotionSplashEvent event) {
 		BukkitMCPotionSplashEvent pse = new BukkitMCPotionSplashEvent(event);
 		EventUtils.TriggerListener(Driver.POTION_SPLASH, "potion_splash", pse);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onEntityPotionEffectEvent(EntityPotionEffectEvent event) {
+		BukkitEntityPotionEffectEvent potion = new BukkitEntityPotionEffectEvent(event);
+		EventUtils.TriggerListener(Driver.ENTITY_POTION_EFFECT, "entity_potion", potion);
 	}
 }

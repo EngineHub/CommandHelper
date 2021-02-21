@@ -45,6 +45,7 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRegainReason;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRemoveCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCUnleashReason;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
@@ -58,6 +59,7 @@ import com.laytonsmith.abstraction.events.MCEntityRegainHealthEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCEntityToggleGlideEvent;
 import com.laytonsmith.abstraction.events.MCEntityUnleashEvent;
+import com.laytonsmith.abstraction.events.MCEntityPotionEffectEvent;
 import com.laytonsmith.abstraction.events.MCFireworkExplodeEvent;
 import com.laytonsmith.abstraction.events.MCHangingBreakEvent;
 import com.laytonsmith.abstraction.events.MCHangingPlaceEvent;
@@ -96,6 +98,7 @@ import org.bukkit.event.entity.EntityPortalEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
+import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.FireworkExplodeEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
@@ -111,12 +114,14 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.bukkit.event.entity.EntityUnleashEvent;
 
@@ -1039,6 +1044,58 @@ public class BukkitEntityEvents {
 		@Override
 		public MCUnleashReason getReason() {
 			return BukkitMCUnleashReason.getConvertor().getAbstractedEnum(ide.getReason());
+		}
+	}
+
+	public static class BukkitEntityPotionEffectEvent implements MCEntityPotionEffectEvent {
+
+		EntityPotionEffectEvent e;
+
+		public BukkitEntityPotionEffectEvent(Event e) {
+			this.e = (EntityPotionEffectEvent) e;
+		}
+
+		@Override
+		public MCLivingEntity getEntity() {
+			return new BukkitMCLivingEntity(e.getEntity());
+		}
+
+		@Override
+		public EntityPotionEffectEvent.Action getAction() {
+			return e.getAction();
+		}
+
+		@Override
+		public EntityPotionEffectEvent.Cause getCause() {
+			return e.getCause();
+		}
+
+		@Override
+		public Optional<MCLivingEntity.MCEffect> getNewEffect() {
+			PotionEffect pe = e.getNewEffect();
+			return getEffect(pe);
+		}
+
+		@Override
+		public Optional<MCLivingEntity.MCEffect> getOldEffect() {
+			PotionEffect pe = e.getOldEffect();
+			return getEffect(pe);
+		}
+
+		private Optional<MCLivingEntity.MCEffect> getEffect(PotionEffect pe) {
+			return pe == null
+					? Optional.empty()
+					: Optional.of(
+					new MCLivingEntity.MCEffect(
+							BukkitMCPotionEffectType.valueOfConcrete(
+									pe.getType()
+							), pe.getAmplifier(), pe.getDuration(), pe.isAmbient(), pe.hasParticles(), pe.hasIcon()
+					));
+		}
+
+		@Override
+		public Object _GetObject() {
+			return e;
 		}
 	}
 }
