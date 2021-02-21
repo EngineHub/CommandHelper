@@ -33,6 +33,8 @@ import com.laytonsmith.abstraction.entities.MCThrownPotion;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+import com.laytonsmith.abstraction.enums.MCPotionAction;
+import com.laytonsmith.abstraction.enums.MCPotionCause;
 import com.laytonsmith.abstraction.enums.MCRegainReason;
 import com.laytonsmith.abstraction.enums.MCRemoveCause;
 import com.laytonsmith.abstraction.enums.MCSpawnReason;
@@ -45,6 +47,8 @@ import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRegainReason;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCRemoveCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCUnleashReason;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionAction;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionCause;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPotionEffectType;
 import com.laytonsmith.abstraction.events.MCCreatureSpawnEvent;
 import com.laytonsmith.abstraction.events.MCEntityChangeBlockEvent;
@@ -1061,13 +1065,13 @@ public class BukkitEntityEvents {
 		}
 
 		@Override
-		public EntityPotionEffectEvent.Action getAction() {
-			return e.getAction();
+		public MCPotionAction getAction() {
+			return BukkitMCPotionAction.getConvertor().getAbstractedEnum(e.getAction());
 		}
 
 		@Override
-		public EntityPotionEffectEvent.Cause getCause() {
-			return e.getCause();
+		public MCPotionCause getCause() {
+			return BukkitMCPotionCause.getConvertor().getAbstractedEnum(e.getCause());
 		}
 
 		@Override

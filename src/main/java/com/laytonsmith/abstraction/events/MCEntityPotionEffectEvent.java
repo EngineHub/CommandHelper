@@ -1,8 +1,9 @@
 package com.laytonsmith.abstraction.events;
 
 import com.laytonsmith.abstraction.MCLivingEntity;
+import com.laytonsmith.abstraction.enums.MCPotionAction;
+import com.laytonsmith.abstraction.enums.MCPotionCause;
 import com.laytonsmith.core.events.BindableEvent;
-import org.bukkit.event.entity.EntityPotionEffectEvent;
 
 import java.util.Optional;
 
@@ -14,7 +15,7 @@ public interface MCEntityPotionEffectEvent extends BindableEvent {
 
 	Optional<MCLivingEntity.MCEffect> getOldEffect();
 
-	EntityPotionEffectEvent.Action getAction();
+	MCPotionAction getAction();
 
-	EntityPotionEffectEvent.Cause getCause();
+	MCPotionCause getCause();
 }
