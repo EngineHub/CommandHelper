@@ -1530,8 +1530,7 @@ public class BlockEvents {
 
 		@Override
 		public String docs() {
-			return "{block: <string match> Type of old block state"
-					+ " | newblock: <string match> Type of new block state}"
+			return "{newblock: <string match> Type of new block state}"
 					+ "Called when a block is formed or spreads based on world conditions."
 					+ " Cancelling this event block will not be formed."
 					+ "{location: The location the block formed "
@@ -1543,7 +1542,7 @@ public class BlockEvents {
 
 		@Override
 		public Driver driver() {
-			return Driver.EXTENSION;
+			return Driver.BLOCK_FORM;
 		}
 
 		@Override
@@ -1562,10 +1561,8 @@ public class BlockEvents {
 				MCBlockFadeEvent event = (MCBlockFadeEvent) e;
 
 				String newBlock = event.getNewState().getType().getName();
-				String block = event.getBlock().getType().getName();
 
 				Prefilters.match(prefilter, "newblock", newBlock, Prefilters.PrefilterType.STRING_MATCH);
-				Prefilters.match(prefilter, "block", block, Prefilters.PrefilterType.STRING_MATCH);
 
 				return true;
 			}
