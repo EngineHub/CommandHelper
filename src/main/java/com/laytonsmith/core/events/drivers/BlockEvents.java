@@ -15,6 +15,7 @@ import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
 import com.laytonsmith.abstraction.events.MCBlockExplodeEvent;
 import com.laytonsmith.abstraction.events.MCBlockFadeEvent;
 import com.laytonsmith.abstraction.events.MCBlockFromToEvent;
+import com.laytonsmith.abstraction.events.MCBlockFormEvent;
 import com.laytonsmith.abstraction.events.MCBlockGrowEvent;
 import com.laytonsmith.abstraction.events.MCBlockIgniteEvent;
 import com.laytonsmith.abstraction.events.MCBlockPistonEvent;
@@ -1532,8 +1533,8 @@ public class BlockEvents {
 		public String docs() {
 			return "{newblock: <string match> Type of new block state}"
 					+ "Called when a block is formed or spreads based on world conditions."
-					+ " Cancelling this event block will not be formed."
-					+ "{location: The location the block formed "
+					+ " Cancelling this event will cause the block to not be formed."
+					+ "{location: The location of the formed block "
 					+ " | block: Type of old block state"
 					+ " | newblock: Type of new block state}"
 					+ "{} "
@@ -1557,8 +1558,8 @@ public class BlockEvents {
 
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCBlockFadeEvent) {
-				MCBlockFadeEvent event = (MCBlockFadeEvent) e;
+			if(e instanceof MCBlockFormEvent) {
+				MCBlockFormEvent event = (MCBlockFormEvent) e;
 
 				String newBlock = event.getNewState().getType().getName();
 
@@ -1572,10 +1573,10 @@ public class BlockEvents {
 
 		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
-			if(!(e instanceof MCBlockFadeEvent)) {
-				throw new EventException("Cannot convert event to MCBlockFadeEvent");
+			if(!(e instanceof MCBlockFormEvent)) {
+				throw new EventException("Cannot convert event to MCBlockFormEvent");
 			} else {
-				MCBlockFadeEvent event = (MCBlockFadeEvent) e;
+				MCBlockFormEvent event = (MCBlockFormEvent) e;
 				Target t = Target.UNKNOWN;
 				Map<String, Mixed> mapEvent = this.evaluate_helper(e);
 				mapEvent.put("block", new CString(event.getBlock().getType().getName(), t));
