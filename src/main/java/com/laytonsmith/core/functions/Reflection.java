@@ -776,7 +776,9 @@ public class Reflection {
 			return "string {persistenceKey} Returns the source file that this key will store a value to in the Persistence Network."
 					+ " For instance, in your persistence.ini file, if you have the entry \"storage.test.**=json:///path/to/file.json\","
 					+ " then reflect_value_source('storage.test.testing') would return 'json:///path/to/file.json'. This is useful for"
-					+ " debugging, as it will definitively trace back the source/destination of a value.";
+					+ " debugging, as it will definitively trace back the source/destination of a value. Note that unlike get and"
+					+ " store_value, the \"storage\" prefix is required, if you're searching for values that are stored using"
+					+ " these functions.";
 		}
 
 		@Override
