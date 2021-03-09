@@ -359,7 +359,7 @@ public class Commands {
 		}
 	}
 
-	@api//(environments = {CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	@seealso(register_command.class)
 	public static class get_tabcomplete_prototype extends CompositeFunction {
 
