@@ -439,7 +439,7 @@ public class Commands {
 						+ " group \"a\". Also, assume that the procedure _get_user_groups() returns a list of groups the"
 						+ " player is already in, and _get_groups() returns a list of all groups.",
 						"get_tabcomplete_prototype(array('add', 'remove'), 'Player', array(\n"
-								+ "\t'<<add': closure(@alias, @sender, @args) { return(array_subtract(_get_groups(), _get_user_groups(@sender))); }\n"
+								+ "\t'<<add': closure(@alias, @sender, @args) { return(array_subtract(_get_groups(), _get_user_groups(@sender))); },\n"
 								+ "\t'<<remove': closure(@alias, @sender, @args) { return(_get_user_groups(@sender)); }\n"
 								+ "));",
 						"Provides a tabcomplete for the described scenario. Since the player is already in group \"a\","
