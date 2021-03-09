@@ -19,6 +19,7 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -354,6 +355,96 @@ public class Commands {
 				+ "\t\t}\n"
 				+ "));",
 				"Registers the /hug command.")
+			};
+		}
+	}
+
+	@api//(environments = {CommandHelperEnvironment.class})
+	@seealso(register_command.class)
+	public static class get_tabcomplete_prototype extends CompositeFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		protected String script() {
+			return getBundledCode();
+		}
+
+		@Override
+		public String getName() {
+			return "get_tabcomplete_prototype";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{Integer.MAX_VALUE};
+		}
+
+		@Override
+		public String docs() {
+			return getBundledDocs();
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Simple example, using only pre-baked classes. Assume our command looks like"
+						+ " this: \"/cmd $player\". Note that here we're using register_command, which is the most"
+						+ " likely use of this function, but in the remaining examples, this is not shown.",
+						"register_command('cmd', array(\n"
+								+ "\t'tabcompleter': get_tabcomplete_prototype('Player'),\n"
+								+ "\t'executor': closure(@alias, @sender, @args){ /* ... */}"
+								+ "));",
+						"Provides a tabcomplete for the described scenario."),
+				new ExampleScript("Using both player names and an array of completions. Assume our command looks like"
+						+ "\"/cmd $enum $player\" where $enum can be one of \"add\" or \"remove\"",
+						"get_tabcomplete_prototype(array('add', 'remove'), 'Player')",
+						"Provides a tabcomplete for the described scenario."),
+				new ExampleScript("Using a built in enum type. Assume the command is \"/cmd $WorldEnvironment\" and we"
+						+ " expect this to be completed with one of the com.commandhelper.WorldEnvironment enum values.",
+						"get_tabcomplete_prototype(WorldEnvironment)",
+						"Provides a tabcomplete for the described scenario."),
+				new ExampleScript("Using a closure to return dynamic input based on the current user",
+						"¨get_tabcomplete_prototype(closure(@alias, @sender, @args) {\n"
+								+ "\tif(_is_admin(@sender)) {\n"
+								+ "\t\t/* Admin gets extra options */\n"
+								+ "\t\treturn(array(1, 2, 3));\n"
+								+ "\t} else { \n"
+								+ "\t\treturn(array(1, 2));\n"
+								+ "\t}\n"
+								+ "});",
+						"Provides a tabcomplete for the described scenario."),
+				new ExampleScript("Using the associative array value. Using this method, we can change the autocomplete"
+						+ " of later arguments based on what the user has typed so far. Assume that the command looks"
+						+ " like \"/cmd $action $Player $group\". The actions are \"add\" and \"remove\", and the"
+						+ " total list of groups is array(\"a\", \"b\", \"c\"), of which the player is already in"
+						+ " group \"a\". Also, assume that the procedure _get_user_groups() returns a list of groups the"
+						+ " player is already in, and _get_groups() returns a list of all groups.",
+						"get_tabcomplete_prototype(array('add', 'remove'), 'Player', array(\n"
+								+ "\t'<<add': closure(@alias, @sender, @args) { return(array_subtract(_get_groups(), _get_user_groups(@sender))); }\n"
+								+ "\t'<<remove': closure(@alias, @sender, @args) { return(_get_user_groups(@sender)); }\n"
+								+ "));",
+						"Provides a tabcomplete for the described scenario. Since the player is already in group \"a\","
+								+ " if the command typed so far were \"/cmd add MyPlayer\" then only \"b\" and \"c\""
+								+ " would be provided for the next completion.")
 			};
 		}
 	}

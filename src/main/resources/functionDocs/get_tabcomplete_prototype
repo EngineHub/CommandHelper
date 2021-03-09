@@ -1,0 +1,37 @@
+closure {prototypes...} Returns a closure which can be provided to tabcompleters or run manually,
+which provides an easy to use syntax for simple to moderately complex tab completion scenarios. Note that
+this cannot be used in all cases, particularly where there are variable length arguments. In these cases,
+it's best to write the closure yourself.
+----
+In general, the prototypes can be one of five values, a string, a ClassType of an enum type, an array, a closure,
+or an associative array. Strings represent "prebaked" classes, and are listed below:
+
+- Player - Online players ({function|all_players} equivalent, but more efficient)
+- OfflinePlayer - All known players ({function|get_offline_players} equivalent)
+- Boolean - Equivalent to array("true", "false")
+- None - Returns an empty array, disabling tab complete for this value. This is useful for open fields, such as \
+random strings, or a number.
+
+ClassTypes must be enum values, and will autocomplete with the list of values in that enum.
+
+Arrays are simply returned as is.
+
+Closures are passed in the same values as the tabcompleter, and are expected to return an array. This is useful when
+the completion logic varies based on the arguments passed in, such as the current player executing the tabcompleter.
+
+Associative arrays are used when you need to provide dynamic functionality based on previous arguments. Only enum or
+array values are supported as "previous" arguments.
+The keys of the array are used to determine which value is selected, and the values of
+the array are one of the above completion types. The keys follow the general format of "<enumValue" where "<" means that
+we're comparing to the previous value, and "enumValue" is the selector that was entered by the user. "<" can also point
+to more than one previous value, so for instance "<<enumValue" would also work, meaning compare to the argument provided
+two prior. If you have multiple selectors that have the same handler, they can be combined into one pipe separated
+string, for instance "<enumValue1|<enumValue2". Given that you can mix multiple argument selector types, it's possible
+you have a conflict, in this case, the behavior is undefined, so it's recommended that you don't mix argument depth
+indicators (don't use < and << in the same group). Using "<" as a key is the default value, and is what is used if
+nothing else matches. In case no keys match, then no completions will be provided.
+
+In all cases, once the list of completions has been determined, it is compared against the existing input so far
+of the user, and only matches that start with the current input are returned.
+
+Calling get_tabcomplete_prototype with no arguments disables tab completion (always returns an empty array).

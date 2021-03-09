@@ -3218,25 +3218,26 @@ public class ArrayHandling {
 
 	}
 
+	@MEnum("ms.lang.ArrayValueComparisonMode")
+	public static enum ArrayValueComparisonMode {
+		EQUALS(new equals()),
+		STRICT_EQUALS(new sequals()),
+		HASH(null);
+
+		private final Function comparisonFunction;
+		private ArrayValueComparisonMode(Function f) {
+			this.comparisonFunction = f;
+		}
+
+		public Function getComparisonFunction() {
+			return comparisonFunction;
+		}
+	}
+
 	@api
-	@seealso({array_merge.class})
+	@seealso({array_merge.class, array_subtract.class})
 	public static class array_intersect extends AbstractFunction {
 
-		@MEnum("ms.lang.ArrayIntersectComparisonMode")
-		public static enum ArrayIntersectComparisonMode {
-			EQUALS(new equals()),
-			STRICT_EQUALS(new sequals()),
-			HASH(null);
-
-			private final Function comparisonFunction;
-			private ArrayIntersectComparisonMode(Function f) {
-				this.comparisonFunction = f;
-			}
-
-			public Function getComparisonFunction() {
-				return comparisonFunction;
-			}
-		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
@@ -3258,7 +3259,7 @@ public class ArrayHandling {
 			CArray one = ArgumentValidation.getArray(args[0], t);
 			CArray two = ArgumentValidation.getArray(args[1], t);
 			CClosure closure = null;
-			ArrayIntersectComparisonMode mode = ArrayIntersectComparisonMode.HASH;
+			ArrayValueComparisonMode mode = ArrayValueComparisonMode.HASH;
 			boolean associativeMode = one.isAssociative() || two.isAssociative();
 			if(args.length > 2) {
 				if(associativeMode) {
@@ -3268,12 +3269,12 @@ public class ArrayHandling {
 				if(args[2].isInstanceOf(CClosure.TYPE)) {
 					closure = ArgumentValidation.getObject(args[2], t, CClosure.class);
 				} else {
-					mode = ArgumentValidation.getEnum(args[2], ArrayIntersectComparisonMode.class, t);
+					mode = ArgumentValidation.getEnum(args[2], ArrayValueComparisonMode.class, t);
 				}
 			}
 			CArray ret = new CArray(t);
 
-			if(!associativeMode && closure == null && mode == ArrayIntersectComparisonMode.HASH) {
+			if(!associativeMode && closure == null && mode == ArrayValueComparisonMode.HASH) {
 				// Optimize for O(n log n) method
 				Set<Integer> a2Set = new TreeSet<>();
 				for(Mixed c : two) {
@@ -3624,5 +3625,138 @@ public class ArrayHandling {
 							"array_get_rand(array(one: 1, two: 2, three: 3, four: 4, five: 5))"),
 			};
 		}
+	}
+
+	@api
+	@seealso(array_intersect.class)
+	public static class array_subtract extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CArray one = ArgumentValidation.getArray(args[0], t);
+			CArray two = ArgumentValidation.getArray(args[1], t);
+			CClosure closure = null;
+			ArrayValueComparisonMode mode = ArrayValueComparisonMode.HASH;
+			boolean associativeMode = one.isAssociative() || two.isAssociative();
+			if(args.length > 2) {
+				if(associativeMode) {
+					throw new CREIllegalArgumentException("For associative arrays, only 2 parameters may be provided,"
+							+ " the comparison mode value is not used.", t);
+				}
+				if(args[2].isInstanceOf(CClosure.TYPE)) {
+					closure = ArgumentValidation.getObject(args[2], t, CClosure.class);
+				} else {
+					mode = ArgumentValidation.getEnum(args[2], ArrayValueComparisonMode.class, t);
+				}
+			}
+			CArray ret = new CArray(t);
+
+			if(!associativeMode && closure == null && mode == ArrayValueComparisonMode.HASH) {
+				// Optimize for O(n log n) method
+				Set<Integer> a2Set = new TreeSet<>();
+				for(Mixed c : two) {
+					a2Set.add(c.hashCode());
+				}
+
+				// Iterate one, and check if the hash of each value is in the set. If not, add it.
+				for(Mixed c : one) {
+					if(!a2Set.contains(c.hashCode())) {
+						ret.push(c, t);
+					}
+				}
+			} else {
+				Mixed[] k1 = new Mixed[(int) one.size()];
+				Mixed[] k2 = new Mixed[(int) two.size()];
+				one.keySet().toArray(k1);
+				two.keySet().toArray(k2);
+				equals equals = new equals();
+				Function comparisonFunction = mode.getComparisonFunction();
+				for(int i = 0; i < k1.length; i++) {
+					boolean addValue = true;
+					for(int j = 0; j < k2.length; j++) {
+						if(associativeMode) {
+							if(equals.exec(t, environment, k1[i], k2[j]).getBoolean()) {
+								addValue = false;
+								break;
+							}
+						} else {
+							if(closure == null) {
+								if(comparisonFunction != null) {
+									if(ArgumentValidation.getBoolean(comparisonFunction.exec(t, environment,
+											one.get(k1[i], t), two.get(k2[j], t)
+									), t)) {
+										addValue = false;
+										break;
+									}
+								} else {
+									throw new Error();
+								}
+							} else {
+								Mixed fre = closure.executeCallable(environment, t, one.get(k1[i], t), two.get(k2[j], t));
+								boolean res = ArgumentValidation.getBoolean(fre, fre.getTarget());
+								if(res) {
+									addValue = false;
+									break;
+								}
+							}
+						}
+					}
+					if(addValue) {
+						if(associativeMode) {
+							ret.set(k1[i], one.get(k1[i], t), t);
+						} else {
+							ret.push(one.get(k1[i], t), t);
+						}
+					}
+				}
+			}
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "array_subtract";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "array {array1, array2, [comparisonMode]} Returns a new array, which contains all the values in the"
+					+ " left array, which"
+					+ " are not present in the right array. comparisonMode defaults to HASH, but may also be EQUALS or"
+					+ " STRICT_EQUALS. A closure may be sent"
+					+ " instead, which should return true if the two values are considered equals or not. Using the HASH"
+					+ " mode is fastest, as this puts the function in an optimizing mode, and it can run at O(n log n)."
+					+ " Otherwise, the runtime is O(n**2). The results between HASH and STRICT_EQUALS should almost never"
+					+ " be different, and so in that case using STRICT_EQUALS has a lower performance for no gain,"
+					+ " but there may be some cases where using"
+					+ " the hash code is not desirable. EQUALS is necessary if you wish to disregard typing, so that"
+					+ " array(1, 2, 3) and array('1', '2', '3') are considered equal.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
 	}
 }
