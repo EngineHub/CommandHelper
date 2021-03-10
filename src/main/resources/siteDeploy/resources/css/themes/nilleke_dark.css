@@ -78,16 +78,6 @@ table div[style*="background-color: green; font-weight: bold; text-align: center
 	background-color: #82c341 !important;
 }
 
-/* Logo header */
-#header h1 {
-	left: 3.5em;
-}
-
-.header-icon {
-	margin-bottom: -1em;
-	margin-left: .5em;
-}
-
 /* Replace loadingSpinner */
 #loadingSpinner {
 	display: block;
