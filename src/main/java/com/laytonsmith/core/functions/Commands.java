@@ -204,7 +204,7 @@ public class Commands {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	@seealso({set_tabcompleter.class, set_executor.class, unregister_command.class})
+	@seealso({set_tabcompleter.class, set_executor.class, unregister_command.class, get_tabcomplete_prototype.class})
 	public static class register_command extends AbstractFunction {
 
 		@Override
@@ -303,7 +303,7 @@ public class Commands {
 		public String docs() {
 			return "boolean {commandname, optionsArray} Registers a command to the server's command list,"
 					+ " or updates an existing one. Options is an associative array that can have the following keys:"
-					+ " description, usage, permission, noPermMsg, aliases, tabcompleter, and/or executor."
+					+ " description, usage, permission, noPermMsg, aliases, tabcompleter, and/or executor. ---- "
 					+ " The 'noPermMsg' argument is the message displayed when the user doesn't have the permission"
 					+ " specified in 'permission'. The 'usage' is the message shown when the 'executor' returns false."
 					+ " The 'executor' is the closure run when the command is executed,"
@@ -312,7 +312,10 @@ public class Commands {
 					+ " It is meant to return an array of completions, but if not the tab_complete_command event"
 					+ " will be fired, and the completions of that event will be sent to the user. Both executor"
 					+ " and tabcompleter closures are passed the following information in this order:"
-					+ " alias used, name of the sender, array of arguments used, array of command info.";
+					+ " alias used, name of the sender, array of arguments used, array of command info.\n\n"
+					+ "In most simple cases, the tabcompleter can be easily created using the"
+					+ " {{function|get_tabcompleter_prototype}} function, though for complex completion scenarios,"
+					+ " you may prefer writing a custom closure anyways.";
 		}
 
 		@Override
@@ -411,19 +414,21 @@ public class Commands {
 						+ " likely use of this function, but in the remaining examples, this is not shown.",
 						"register_command('cmd', array(\n"
 								+ "\t'tabcompleter': get_tabcomplete_prototype('Player'),\n"
-								+ "\t'executor': closure(@alias, @sender, @args){ /* ... */}"
+								+ "\t'executor': closure(@alias, @sender, @args){\n\t\t/* ... */}"
 								+ "));",
 						"Provides a tabcomplete for the described scenario."),
 				new ExampleScript("Using both player names and an array of completions. Assume our command looks like"
-						+ "\"/cmd $enum $player\" where $enum can be one of \"add\" or \"remove\"",
+						+ "\"/cmd $action $player\" where $action can be one of \"add\" or \"remove\"",
 						"get_tabcomplete_prototype(array('add', 'remove'), 'Player')",
 						"Provides a tabcomplete for the described scenario."),
 				new ExampleScript("Using a built in enum type. Assume the command is \"/cmd $WorldEnvironment\" and we"
 						+ " expect this to be completed with one of the com.commandhelper.WorldEnvironment enum values.",
 						"get_tabcomplete_prototype(WorldEnvironment)",
 						"Provides a tabcomplete for the described scenario."),
-				new ExampleScript("Using a closure to return dynamic input based on the current user",
-						"¨get_tabcomplete_prototype(closure(@alias, @sender, @args) {\n"
+				new ExampleScript("Using a closure to return dynamic input based on the current user. This could"
+						+ " be based on the parameters passed in the closure, but could just as easily be any other"
+						+ " dynamic input.",
+						"get_tabcomplete_prototype(closure(@alias, @sender, @args) {\n"
 								+ "\tif(_is_admin(@sender)) {\n"
 								+ "\t\t/* Admin gets extra options */\n"
 								+ "\t\treturn(array(1, 2, 3));\n"
@@ -437,10 +442,18 @@ public class Commands {
 						+ " like \"/cmd $action $Player $group\". The actions are \"add\" and \"remove\", and the"
 						+ " total list of groups is array(\"a\", \"b\", \"c\"), of which the player is already in"
 						+ " group \"a\". Also, assume that the procedure _get_user_groups() returns a list of groups the"
-						+ " player is already in, and _get_groups() returns a list of all groups.",
-						"get_tabcomplete_prototype(array('add', 'remove'), 'Player', array(\n"
-								+ "\t'<<add': closure(@alias, @sender, @args) { return(array_subtract(_get_groups(), _get_user_groups(@sender))); },\n"
-								+ "\t'<<remove': closure(@alias, @sender, @args) { return(_get_user_groups(@sender)); }\n"
+						+ " player is already in, and _get_groups() returns a list of all groups. Note that in this case, ",
+						"get_tabcomplete_prototype(\n"
+								+ "\tarray('add', 'remove'), // first argument\n"
+								+ "\t'Player', // second argument\n"
+								+ "\tarray( // third argument\n"
+								+ "\t\t// Note that the << symbols mean \"look at the value of the user input two arguments prior\"\n"
+								+ "\t\t// so in this case, we will look at the value already provided by the user in the first argument.\n"
+								+ "\t\t// If they provided \"add\", then we will run the first closure, \"remove\" will run the second closure,\n"
+								+ "\t\t// and if they typed something else, no tab completion will occur. We could also provide a default\n"
+								+ "\t\t// set of completions by using the key \"<\", which is specially defined.\n"
+								+ "\t\t'<<add': closure(@alias, @sender, @args) { return(array_subtract(_get_groups(), _get_user_groups(@sender))); },\n"
+								+ "\t\t'<<remove': closure(@alias, @sender, @args) { return(_get_user_groups(@sender)); }\n"
 								+ "));",
 						"Provides a tabcomplete for the described scenario. Since the player is already in group \"a\","
 								+ " if the command typed so far were \"/cmd add MyPlayer\" then only \"b\" and \"c\""
