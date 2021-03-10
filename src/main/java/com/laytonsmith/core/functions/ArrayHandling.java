@@ -3741,16 +3741,17 @@ public class ArrayHandling {
 		@Override
 		public String docs() {
 			return "array {array1, array2, [comparisonMode]} Returns a new array, which contains all the values in the"
-					+ " left array, which"
-					+ " are not present in the right array. comparisonMode defaults to HASH, but may also be EQUALS or"
-					+ " STRICT_EQUALS. A closure may be sent"
-					+ " instead, which should return true if the two values are considered equals or not. Using the HASH"
-					+ " mode is fastest, as this puts the function in an optimizing mode, and it can run at O(n log n)."
-					+ " Otherwise, the runtime is O(n**2). The results between HASH and STRICT_EQUALS should almost never"
-					+ " be different, and so in that case using STRICT_EQUALS has a lower performance for no gain,"
-					+ " but there may be some cases where using"
-					+ " the hash code is not desirable. EQUALS is necessary if you wish to disregard typing, so that"
-					+ " array(1, 2, 3) and array('1', '2', '3') are considered equal.";
+					+ " left array, which are not present in the right array.\n"
+					+ " comparisonMode defaults to HASH, but may also be EQUALS or STRICT_EQUALS. A closure may be"
+					+ " sent instead, which should return true if the two values are considered equals or not."
+					+ " ----\n"
+					+ " The results between HASH and STRICT_EQUALS should almost never be different. Using the HASH"
+					+ " mode is fastest, which is why it is the default. EQUALS will disregard typing.\n"
+					+ "* HASH puts the function in an optimizing mode, and it can run at O(n log n). Otherwise, the"
+					+ " runtime is O(n**2) for STRICT_EQUALS. Using STRICT_EQUALS has a lower performance for no gain,"
+					+ " but there may be some cases where using the hash code is not desirable.\n"
+					+ "* EQUALS is necessary if you wish to disregard typing, so that"
+					+ " array(1, 2, 3) and array('1', '2', '3') are considered equal.\n";
 		}
 
 		@Override
