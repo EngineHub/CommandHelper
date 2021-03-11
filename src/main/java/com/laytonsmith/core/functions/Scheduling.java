@@ -419,7 +419,7 @@ public class Scheduling {
 			return new ExampleScript[]{
 				new ExampleScript("Basic usage", "set_timeout(10000, closure(){\n"
 				+ "\tmsg('Hello World!');\n"
-				+ "});", "<Would wait 5 seconds, then message the user \"Hello World!\">")
+				+ "});", "<Would wait 10 seconds, then message the user \"Hello World!\">")
 			};
 		}
 
