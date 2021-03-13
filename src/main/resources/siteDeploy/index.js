@@ -449,14 +449,14 @@
 		bodyEscaped = bodyEscaped.replace(/\\\n/g, '');
 		// Url param beats cookie, cookie beats accept-language.
 		var lang = url.searchParams.get("lang") || Cookies.get("site-lang");
-		if (lang !== null) {
+		if (lang) {
 			checkTranslations(lang);
 		} else {
 			// Workaround due to the fact that the language isn't available in a cross platform way EXCEPT through
 			// the Accept-Language header that the browser sends. But that isn't available through client side
 			// scripting for some unknown reason.
 			$.ajax({
-				url: "//ajaxhttpheaders.appspot.com",
+				url: "//ajaxhttpheaders2.appspot.com",
 				dataType: 'jsonp',
 				success: function (headers) {
 					language = headers['Accept-Language'];
