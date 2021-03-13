@@ -177,10 +177,11 @@ public class Meta {
 
 		@Override
 		public String docs() {
-			return "void {player, command} Runs a command as a particular user. The special user '" + Static.getConsoleName() + "' can be used to run it as a console"
-					+ " user. Using '~op' is deprecated, and will be removed after the next release, use sudo() instead."
-					+ " Commands cannot be run as an offline player. If the first argument is an array of usernames, the command"
-					+ " will be run in the context of each user in the array.";
+			return "void {player, command} Runs a command as a particular online player. The special name '"
+					+ Static.getConsoleName() + "' can be used to run it as console."
+					+ " If you want to run the command as if the player was op, use {{function|sudo}} instead."
+					+ " If the first argument is an array of usernames,"
+					+ " the command will be run in the context of each user in the array.";
 		}
 
 		@Override
