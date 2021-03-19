@@ -478,16 +478,21 @@ public class ObjectGenerator {
 					}
 					ma.set("inventory", box, t);
 				} else if(bs instanceof MCBanner) {
-					MCBanner banner = (MCBanner) bs;
-					ma.set("basecolor", banner.getBaseColor().name(), t);
-					CArray patterns = new CArray(t, banner.numberOfPatterns());
-					for(MCPattern p : banner.getPatterns()) {
-						CArray pattern = CArray.GetAssociativeArray(t);
-						pattern.set("shape", new CString(p.getShape().toString(), t), t);
-						pattern.set("color", new CString(p.getColor().toString(), t), t);
-						patterns.push(pattern, t);
+					// This is a shield that may or may not have a banner attached, but if get get the BlockState when
+					// no banner exists, it gives us a default one. By first checking hasBlockState(),
+					// we can ensure we don't populate this meta array with the default banner data.
+					if(((MCBlockStateMeta) meta).hasBlockState()) {
+						MCBanner banner = (MCBanner) bs;
+						ma.set("basecolor", banner.getBaseColor().name(), t);
+						CArray patterns = new CArray(t, banner.numberOfPatterns());
+						for(MCPattern p : banner.getPatterns()) {
+							CArray pattern = CArray.GetAssociativeArray(t);
+							pattern.set("shape", new CString(p.getShape().toString(), t), t);
+							pattern.set("color", new CString(p.getColor().toString(), t), t);
+							patterns.push(pattern, t);
+						}
+						ma.set("patterns", patterns, t);
 					}
-					ma.set("patterns", patterns, t);
 				} else if(bs instanceof MCCreatureSpawner) {
 					MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
 					ma.set("spawntype", mccs.getSpawnedType().name());
@@ -809,8 +814,7 @@ public class ObjectGenerator {
 						if(ma.containsKey("basecolor")) {
 							String baseString = ma.get("basecolor", t).val().toUpperCase();
 							try {
-								MCDyeColor base = MCDyeColor.valueOf(baseString);
-								banner.setBaseColor(base);
+								banner.setBaseColor(MCDyeColor.valueOf(baseString));
 							} catch (IllegalArgumentException ex) {
 								if(baseString.equals("SILVER")) {
 									// convert old DyeColor
@@ -819,29 +823,27 @@ public class ObjectGenerator {
 									throw ex;
 								}
 							}
-						} else {
-							banner.setBaseColor(MCDyeColor.WHITE);
-						}
-						if(ma.containsKey("patterns")) {
-							CArray array = ArgumentValidation.getArray(ma.get("patterns", t), t);
-							for(String key : array.stringKeySet()) {
-								CArray pattern = ArgumentValidation.getArray(array.get(key, t), t);
-								MCPatternShape shape = MCPatternShape.valueOf(pattern.get("shape", t).val().toUpperCase());
-								String color = pattern.get("color", t).val().toUpperCase();
-								try {
-									MCDyeColor dyecolor = MCDyeColor.valueOf(color);
-									banner.addPattern(StaticLayer.GetConvertor().GetPattern(dyecolor, shape));
-								} catch (IllegalArgumentException ex) {
-									if(color.equals("SILVER")) {
-										// convert old DyeColor
-										banner.addPattern(StaticLayer.GetConvertor().GetPattern(MCDyeColor.LIGHT_GRAY, shape));
-									} else {
-										throw ex;
+							if(ma.containsKey("patterns")) {
+								CArray array = ArgumentValidation.getArray(ma.get("patterns", t), t);
+								for(String key : array.stringKeySet()) {
+									CArray pattern = ArgumentValidation.getArray(array.get(key, t), t);
+									MCPatternShape shape = MCPatternShape.valueOf(pattern.get("shape", t).val().toUpperCase());
+									String color = pattern.get("color", t).val().toUpperCase();
+									try {
+										MCDyeColor dyecolor = MCDyeColor.valueOf(color);
+										banner.addPattern(StaticLayer.GetConvertor().GetPattern(dyecolor, shape));
+									} catch (IllegalArgumentException ex) {
+										if(color.equals("SILVER")) {
+											// convert old DyeColor
+											banner.addPattern(StaticLayer.GetConvertor().GetPattern(MCDyeColor.LIGHT_GRAY, shape));
+										} else {
+											throw ex;
+										}
 									}
 								}
 							}
+							bsm.setBlockState(banner);
 						}
-						bsm.setBlockState(banner);
 					} else if(bs instanceof MCCreatureSpawner) {
 						MCCreatureSpawner mccs = (MCCreatureSpawner) bs;
 						if(ma.containsKey("spawntype")) {
