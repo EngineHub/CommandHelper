@@ -739,13 +739,30 @@ public class AliasCore {
 		}
 
 		public void compileMS(MCPlayer player, Environment env) {
+			@SuppressWarnings("deprecation") // Remove as soon as static analysis is enforced.
+			boolean staticAnalysisEnabled = StaticAnalysis.enabled();
 			for(FileInfo fi : ms) {
 				boolean exception = false;
+
+				// Clone base environment for this ms file to potentially make changes to.
+				Environment msFileEnv;
+				if(staticAnalysisEnabled) {
+					try {
+						msFileEnv = env.clone();
+					} catch (CloneNotSupportedException e) {
+						throw new Error("Environment wasn't clonable, while it should be.", e);
+					}
+				} else {
+					// Compatibility behavior to not silently change code behavior. Static analysis does catch code
+					// that relies on this behavior, so when static analysis is enforced, this case should be removed.
+					msFileEnv = env;
+				}
+
 				try {
 					StaticAnalysis analysis = new StaticAnalysis(true);
 					MethodScriptCompiler.execute(MethodScriptCompiler.compile(
-							MethodScriptCompiler.lex(fi.contents, env, fi.file, true),
-							env, env.getEnvClasses(), analysis), env, null, null);
+							MethodScriptCompiler.lex(fi.contents, msFileEnv, fi.file, true),
+							msFileEnv, msFileEnv.getEnvClasses(), analysis), msFileEnv, null, null);
 				} catch (ConfigCompileGroupException e) {
 					exception = true;
 					ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath()
@@ -756,7 +773,7 @@ public class AliasCore {
 							+ " could not be compiled, due to a compile error.", player);
 				} catch (ConfigRuntimeException e) {
 					exception = true;
-					ConfigRuntimeException.HandleUncaughtException(e, env);
+					ConfigRuntimeException.HandleUncaughtException(e, msFileEnv);
 				} catch (CancelCommandException e) {
 					if(e.getMessage() != null && !"".equals(e.getMessage().trim())) {
 						Static.getLogger().log(Level.INFO, e.getMessage());
@@ -764,7 +781,7 @@ public class AliasCore {
 				} catch (ProgramFlowManipulationException e) {
 					exception = true;
 					ConfigRuntimeException.HandleUncaughtException(ConfigRuntimeException.CreateUncatchableException(
-							"Cannot break program flow in main files.", e.getTarget()), env);
+							"Cannot break program flow in main files.", e.getTarget()), msFileEnv);
 				}
 				if(exception) {
 					if(Prefs.HaltOnFailure()) {
