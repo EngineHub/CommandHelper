@@ -27,6 +27,7 @@ import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.NotePlayEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 
@@ -146,5 +147,11 @@ public class BukkitBlockListener implements Listener {
 	public void onBlockExplode(BlockExplodeEvent e) {
 		BukkitBlockEvents.BukkitMCBlockExplodeEvent bee = new BukkitBlockEvents.BukkitMCBlockExplodeEvent(e);
 		EventUtils.TriggerListener(Driver.BLOCK_EXPLODE, "block_explode", bee);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onBlockForm(BlockFormEvent event) {
+		BukkitBlockEvents.BukkitBlockFormEventEvent form = new BukkitBlockEvents.BukkitBlockFormEventEvent(event);
+		EventUtils.TriggerListener(Driver.BLOCK_FORM, "block_form", form);
 	}
 }

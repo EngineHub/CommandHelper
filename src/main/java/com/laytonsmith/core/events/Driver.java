@@ -27,6 +27,7 @@ public enum Driver {
 	REDSTONE_CHANGED,
 	NOTE_PLAY,
 	BLOCK_FADE,
+	BLOCK_FORM,
 	/**
 	 * Entity events
 	 */

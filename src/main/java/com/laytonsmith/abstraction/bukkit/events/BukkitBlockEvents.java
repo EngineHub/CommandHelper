@@ -37,6 +37,7 @@ import com.laytonsmith.abstraction.events.MCBlockPistonRetractEvent;
 import com.laytonsmith.abstraction.events.MCBlockPlaceEvent;
 import com.laytonsmith.abstraction.events.MCNotePlayEvent;
 import com.laytonsmith.abstraction.events.MCSignChangeEvent;
+import com.laytonsmith.abstraction.events.MCBlockFormEvent;
 import com.laytonsmith.annotations.abstraction;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
@@ -58,6 +59,7 @@ import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.NotePlayEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -603,6 +605,30 @@ public class BukkitBlockEvents {
 		@Override
 		public MCBlock getBlock() {
 			return new BukkitMCBlock(event.getBlock());
+		}
+
+		@Override
+		public Object _GetObject() {
+			return event;
+		}
+	}
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitBlockFormEventEvent implements MCBlockFormEvent {
+		BlockFormEvent event;
+
+		public BukkitBlockFormEventEvent(BlockFormEvent event) {
+			this.event = event;
+		}
+
+		@Override
+		public MCBlock getBlock() {
+			return new BukkitMCBlock(event.getBlock());
+		}
+
+		@Override
+		public MCBlockState getNewState() {
+			return new BukkitMCBlockState(event.getNewState());
 		}
 
 		@Override
