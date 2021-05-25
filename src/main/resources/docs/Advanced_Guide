@@ -1,13 +1,13 @@
 
-If you are wanting to do more dynamic things other than variables, CommandHelper allows you to do this through the 
-use of Turing complete language, MethodScript. If you aren't familiar with any type of programming, you may wish to 
-find resources on languages like Java and PHP. The language mirrors both languages in certain ways, as well as 
+If you are wanting to do more dynamic things other than variables, CommandHelper allows you to do this through the
+use of Turing complete language, MethodScript. If you aren't familiar with any type of programming, you may wish to
+find resources on languages like Java and PHP. The language mirrors both languages in certain ways, as well as
 introducing its own methodologies.
 
 
 ===Functions===
 
-Functions allow for very dynamic scripts to be run. There are many defined functions, including functions that provide 
+Functions allow for very dynamic scripts to be run. There are many defined functions, including functions that provide
 control flow functionality. For the full list of functions, see the [[API]]. A function is identified
 by a literal string, followed by parenthesis. So in <code>func()</code>, "func" is the name of the function, and "("
 and ")" begin and end the function argument list (in this case, there are no arguments being passed in.) Functions
@@ -35,8 +35,8 @@ hashbang for cmdline code.
 Block comments start with <code>/*</code> and end with <code>*/</code> This causes the compiler to ignore everything
 within the comment block, including newlines.
 
-Smart comments are like block comments, but start with <code>/**</code> (two asterisks) instead. They are currently
-unused, but are reserved for future use. They are used for documentation generation functionality.
+Smart comments are like block comments, but start with <code>/**</code> (two asterisks) instead. See the article
+on [[SmartComments]] for more details about the format in general, and below for information specific to aliases.
 
 %%CODE|
 code(); # line comment
@@ -57,43 +57,43 @@ code();
 %%
 
 ===Data Types===
-In a script, there are several types of data. The language is currently loosely typed however, so the string '2' is 
-equivalent to the integer 2, is equivalent to the double 2.0, is equivalent to the boolean true. Values are cast just 
-before they are used. Note that sometimes data cannot be cast, for instance the string 'string' cannot be cast to a 
-number, so a runtime exception will be thrown if a function expects a number, and is given that. Also, arrays are not 
+In a script, there are several types of data. The language is currently loosely typed however, so the string '2' is
+equivalent to the integer 2, is equivalent to the double 2.0, is equivalent to the boolean true. Values are cast just
+before they are used. Note that sometimes data cannot be cast, for instance the string 'string' cannot be cast to a
+number, so a runtime exception will be thrown if a function expects a number, and is given that. Also, arrays are not
 able to be cast into other data types, but can contain values of any data type.
 
 * boolean - Created with the "true" or "false" keywords: true
 * int - Any number that doesn't have a decimal point: 2
 * double - Any number that has a decimal point: 2.0
-* string - Any set of characters surrounded by single quotes or double quotes: 'string', "also a string". 
-\u0000 inside a string will allow for arbitrary unicode characters to be inserted into a string, and \n is a newline. 
+* string - Any set of characters surrounded by single quotes or double quotes: 'string', "also a string".
+\u0000 inside a string will allow for arbitrary unicode characters to be inserted into a string, and \n is a newline.
 \\ (double slash) inserts a literal slash, and \' will insert a literal quote.
 * array - An array of any other datatypes, including other arrays. Created by using the function <code>array</code>
 * null - Created with the "null" keyword: null
-* void - Some functions return void, which is actually a datatype. When viewed as a string, it is equivalent to an 
+* void - Some functions return void, which is actually a datatype. When viewed as a string, it is equivalent to an
 empty string. Cannot be created directly.
-* ivariable - An ivariable (or simply a variable) is a variable that can be defined and used from within the script. 
-Constant variables ($var), are assigned by the user at command runtime, and are technically constants as far as the 
-rest of the script is concerned. IVariables can be defined by the script writer and assigned various values that can 
-change throughout the script running. To define and use an ivariable, use the assign() function, or the = operator. 
-If an ivariable is used without first being defined, the value of the variable will be 0, 0.0, %%NOWIKI|''%%, 
-false, or null, depending on how it is used. Most functions use the value in the ivariable without caring that it is 
-an ivariable, but it is possible that a function requires that a certain argument be an ivariable, such as the for() 
+* ivariable - An ivariable (or simply a variable) is a variable that can be defined and used from within the script.
+Constant variables ($var), are assigned by the user at command runtime, and are technically constants as far as the
+rest of the script is concerned. IVariables can be defined by the script writer and assigned various values that can
+change throughout the script running. To define and use an ivariable, use the assign() function, or the = operator.
+If an ivariable is used without first being defined, the value of the variable will be 0, 0.0, %%NOWIKI|''%%,
+false, or null, depending on how it is used. Most functions use the value in the ivariable without caring that it is
+an ivariable, but it is possible that a function requires that a certain argument be an ivariable, such as the for()
 function.
 
 ===Exception Handling===
-Sometimes a script may sometimes cause an error that could be anticipated. Instead of just having the script die, it is 
-possible to catch these errors, and perform alternate functionality. MethodScript mirrors the functionality of languages 
-like PHP and Java with exception handling. For more information about exception handling in MScript, see 
-[[Exceptions|this page]]. For a more general discussion on exception handling, see 
+Sometimes a script may sometimes cause an error that could be anticipated. Instead of just having the script die, it is
+possible to catch these errors, and perform alternate functionality. MethodScript mirrors the functionality of languages
+like PHP and Java with exception handling. For more information about exception handling in MScript, see
+[[Exceptions|this page]]. For a more general discussion on exception handling, see
 [http://en.wikipedia.org/wiki/Exception_handling this page] on Wikipedia.
 
 === main.ms, auto_include.ms, and aliases.msa ===
-Each of these files serve a separate purpose. main.ms is run at server startup, only once. Typically, you use this to 
-register bound events, using the bind() function, or anything else you want to run only once. Keep in mind, this is 
-re-run when you /reloadaliases, but bound events and intervals and such are stopped, so you won't have multiples of 
-anything. main.ms uses '''pure MethodScript''', that is, it has a slightly different syntax than aliases.msa. In aliases.msa, 
+Each of these files serve a separate purpose. main.ms is run at server startup, only once. Typically, you use this to
+register bound events, using the bind() function, or anything else you want to run only once. Keep in mind, this is
+re-run when you /reloadaliases, but bound events and intervals and such are stopped, so you won't have multiples of
+anything. main.ms uses '''pure MethodScript''', that is, it has a slightly different syntax than aliases.msa. In aliases.msa,
 each alias is defined, along with a snippet of MethodScript. For instance, in the alias,
 
 %%ALIAS|
@@ -102,21 +102,21 @@ each alias is defined, along with a snippet of MethodScript. For instance, in th
 <<<
 %%
 
-the <code>/test [$command=%%NOWIKI|''%%] = &gt;&gt;&gt; &lt;&lt;&lt;</code> part is the alias markup, and is not actual MethodScript, 
-that is, the symbols and characters follow different meanings than inside the alias definition. In this example, 
+the <code>/test [$command=%%NOWIKI|''%%] = &gt;&gt;&gt; &lt;&lt;&lt;</code> part is the alias markup, and is not actual MethodScript,
+that is, the symbols and characters follow different meanings than inside the alias definition. In this example,
 <code>console($command);</code> is pure MethodScript.
 
-aliases.msa is where your aliases go, and each alias is a fully separate '''compilation unit''', in fact, even a compile 
+aliases.msa is where your aliases go, and each alias is a fully separate '''compilation unit''', in fact, even a compile
 error in one alias will not usually interfere with the other aliases.
 
-The auto_include.ms file is also a pure MethodScript file, and it is as if in each '''execution unit''', it is 
-automatically {{function|include}}ed for you. There are a few different ways to make an execution unit. The first way is 
-to create a new alias. Each alias is it's own execution unit, and uniquely to the aliases, each alias is also it's own 
-compilation unit. A bound event handler is another execution unit, and the entirety of main.ms is an execution unit. 
+The auto_include.ms file is also a pure MethodScript file, and it is as if in each '''execution unit''', it is
+automatically {{function|include}}ed for you. There are a few different ways to make an execution unit. The first way is
+to create a new alias. Each alias is it's own execution unit, and uniquely to the aliases, each alias is also it's own
+compilation unit. A bound event handler is another execution unit, and the entirety of main.ms is an execution unit.
 set_interval and set_timeout are also separate execution unit, as well as execution queue elements, and others.
 
-So, what is an execution unit? It is a unit of code that gets run, from top to bottom. You can think of it as an 
-'''insertion point''' to your code, or places that will start up your code. An execution unit is often times made up of 
+So, what is an execution unit? It is a unit of code that gets run, from top to bottom. You can think of it as an
+'''insertion point''' to your code, or places that will start up your code. An execution unit is often times made up of
 several parts, so let's create a multifile example, which demonstrates a few execution units.
 
 In auto_include.ms:
@@ -143,10 +143,10 @@ In aliases.msa:
 <<<
 %%
 
-Here, we have created 3 separate execution units. main.ms and aliases are implicitly created, simply by their existence, 
-but here we have also created an event handler, which will get run when some_event is triggered. main.ms is triggered 
-upon server startup (and /reloadaliases) and aliases are triggered when a command is run. When this script is compiled, 
-you can essentially visualize the execution units as ending up like this: (with some code removed to make things more 
+Here, we have created 3 separate execution units. main.ms and aliases are implicitly created, simply by their existence,
+but here we have also created an event handler, which will get run when some_event is triggered. main.ms is triggered
+upon server startup (and /reloadaliases) and aliases are triggered when a command is run. When this script is compiled,
+you can essentially visualize the execution units as ending up like this: (with some code removed to make things more
 readable)
 
 First execution unit, main.ms:
@@ -170,17 +170,17 @@ _my_proc();
 console('In some_event');
 %%
 
-In this simple example, you can think of each execution path as a line through your code (in reality, it's a tree, but 
-if that doesn't make sense to you, ignore that for now). That line follows very specific rules based on code structure, 
+In this simple example, you can think of each execution path as a line through your code (in reality, it's a tree, but
+if that doesn't make sense to you, ignore that for now). That line follows very specific rules based on code structure,
 so how you lay out your code is important to be able to visualize.
 
 === recompile ===
 
-The built in <code>/recompile</code> command is used to reload just CommandHelper, though <code>/reload</code> will 
-also reload CommandHelper. However, using the recompile command can allow for finer grained control of what all gets 
+The built in <code>/recompile</code> command is used to reload just CommandHelper, though <code>/reload</code> will
+also reload CommandHelper. However, using the recompile command can allow for finer grained control of what all gets
 reloaded. By default, the command reloads the following things about CommandHelper:
 
-* <u>S</u>cripts - Any changes that you have made to any scripts will be reloaded and applied. Main files are re-run, 
+* <u>S</u>cripts - Any changes that you have made to any scripts will be reloaded and applied. Main files are re-run,
 and any new commands are re-registered.
 * <u>G</u>lobals - Global values, set with {{function|export}} are cleared out.
 * <u>T</u>asks - Any tasks set with {{function|set_interval}} or {{function|set_timeout}} are cleared.
@@ -189,21 +189,21 @@ and any new commands are re-registered.
 * Pro<u>f</u>iler - The profiler.config file is reloaded
 * E<u>x</u>tensions - Extensions are reloaded
 
-You can actually reload these sub-modules individually if you want, by passing parameters to the command. There are two 
-modes, whitelist, or by default, blacklist. In blacklist mode, all modules get reloaded except the modules that are 
-blacklisted, which aren't reloaded. In whitelist mode, only the specified modules are reloaded. You use the underlined 
-letter to refer to that specific module. For instance, if you want to reload everything but leave the exported variables 
+You can actually reload these sub-modules individually if you want, by passing parameters to the command. There are two
+modes, whitelist, or by default, blacklist. In blacklist mode, all modules get reloaded except the modules that are
+blacklisted, which aren't reloaded. In whitelist mode, only the specified modules are reloaded. You use the underlined
+letter to refer to that specific module. For instance, if you want to reload everything but leave the exported variables
 and execution queue alone, you can run <code>/recompile -ge</code>. If you ONLY want to reload tasks, you can
 run <code>/recompile --whitelist -t</code>. Note that reloading individual modules isn't normally encouraged,
-because it can put your server in an inconsistent and unreproducible state if you aren't careful. Running 
-<code>/recompile</code> by itself (which reloads everything) is recommended. You can also run 
+because it can put your server in an inconsistent and unreproducible state if you aren't careful. Running
+<code>/recompile</code> by itself (which reloads everything) is recommended. You can also run
 <code>/recompile -h</code> for the usage instructions and long options list.
 
 <code>/reloadaliases</code> is an alias to <code>/recompile</code>
 
 ===Scripting Examples===
 
-Here are a few more complex examples to get you started on how to use the advanced features of CommandHelper. Because of 
+Here are a few more complex examples to get you started on how to use the advanced features of CommandHelper. Because of
 the Turing completeness of the plugin, it is possible to do far more advanced things.
 
 %%ALIAS|
@@ -277,7 +277,7 @@ the Turing completeness of the plugin, it is possible to do far more advanced th
 
 ===Symbol Table===
 
-In your scripts, there are a few special symbols that are not treated as literals. In the event of a compiler error, 
+In your scripts, there are a few special symbols that are not treated as literals. In the event of a compiler error,
 it may be helpful to know what each symbol is called. These are as follows:
 
 {| class="wikitable" border="1"
@@ -292,7 +292,7 @@ it may be helpful to know what each symbol is called. These are as follows:
 |-
 | /* ... */
 | block comment
-| Everything inside this (newlines included) is a comment. The only thing you can't have inside a block comment is a */ 
+| Everything inside this (newlines included) is a comment. The only thing you can't have inside a block comment is a */
 (because that ends the comment)
 |-
 | =
@@ -301,8 +301,8 @@ it may be helpful to know what each symbol is called. These are as follows:
 |-
 | [ and ]
 | lsquare_bracket and rsquare_bracket
-| Denotes that this variable is optional, if included on the left side of an alias, or accesses an element in an array 
-if used on the right. 
+| Denotes that this variable is optional, if included on the left side of an alias, or accesses an element in an array
+if used on the right.
 |-
 | ,
 | comma
@@ -316,7 +316,7 @@ if used on the right.
 | newline
 | An 'enter' in the file
 |-
-| &gt;&gt;&gt; and &lt;&lt;&lt; 
+| &gt;&gt;&gt; and &lt;&lt;&lt;
 | multiline_start and multiline_end
 | Starts and stops a multiline construct
 |-
@@ -350,9 +350,9 @@ In general, autoconcatenation should not be relied on. It is better to use the <
 things together.
 %%
 
-Note that a lit and string are treated the same, however special characters must be put in a string to be treated as 
-literal character. Technically all other special characters are treated as literals, but to make your script compatible 
-with future versions, you must put any non-word character inside a string. 
+Note that a lit and string are treated the same, however special characters must be put in a string to be treated as
+literal character. Technically all other special characters are treated as literals, but to make your script compatible
+with future versions, you must put any non-word character inside a string.
 
 Note that string concatenation happens automatically (known as autoconcatenation). Let's take the following example:
 %%CODE|
@@ -364,14 +364,156 @@ if(@i == 0){
 }
 %%
 
-In the first run function, we see that '/run', 'this', and 'command' are all technically separate arguments, but because 
+In the first run function, we see that '/run', 'this', and 'command' are all technically separate arguments, but because
 they are not separated by commas, operators, or other symbols, they are automatically concatenated together, using the
-{{function|sconcat}} function, essentially yeilding: '/run this command', as you would expect. This is also the 
-behavior exhibited by a simple alias that uses non-strict formatting: <code>/cmd = /real command</code>. 
+{{function|sconcat}} function, essentially yeilding: '/run this command', as you would expect. This is also the
+behavior exhibited by a simple alias that uses non-strict formatting: <code>/cmd = /real command</code>.
 '/real' and 'command' are automatically sconcatenated together, and then run.
 
+=== Smart Comments and Aliases ===
+
+A smart comment applied to an alias can be used both by the alias engine, and by your scripts. In general, you can
+obtain the information in the currently running alias with the {{function|get_alias_comment}} function, and you can
+use this however you like, but there are additional annotations, which the alias engine uses to provide additional
+functionality.
+
+@command - When this annotation is present, this alias is instead treated as a command. This registers the alias as
+if you had used the {{function|register_command}} function. This comes with one drawback, which is that the name of the
+command, that is, for instance "/cmd" must be unique within other @commands defined in CommandHelper. Additional
+aliases can still provide additional functionality, but will not be used as part of the command system. One drawback
+of using commands is that commands registered in this way cannot be fully removed from the server without a server
+reboot, though functionality can generally be changed with a simple recompile anyways.
+
+When an alias is part of the command system, there are a few things that are done automatically, and a few things that
+can be further unlocked with additional annotations. First of all, the command is registered as part of the overall
+command system. This means that it will appear in default /help and autocomplete lists. Secondly, the command help text
+is automatically generated as part of the command, using the body of the smart comment. The usage parameter of the
+command is simply the left hand side of the alias, though additional usage can be provided in another annotation.
+
+Commands may have additional annotations, which correspond to the values in register_command:
+
+@usage - Overrides the default usage example
+@permission - The permission the user must have to run this command. Note that this permission is in *addition* to the
+normal alias permission system, and so it's recommended to continue using the * label on the alias itself.
+@noPermMsg - Overrides the no permission error message
+@alias - Alias for this command. A command can have multiple aliases, and you can repeat this annotation to provide
+more.
+
+@tabcompleter - Provides the name of a proc that is called, which should return the tab complete closure for this
+command. If the annotation is provided with no proc name, there are a set of default completions that will be provided
+on a best-effort basis, first based on variable names in the alias and superceded by information provided in the @param
+annotations in this comment. Variable names with "player" in them will autocomplete player names. Other variables will
+simply disable autocompletion. (The automatic tab completion is not yet implemented.)
+
+@param - This documents the variables in the alias, and generally follows the format
+"@param $variableName type description". Description is optional, and is only used as a code comment. The $variableName
+should match the parameter in the alias, and the type can be any valid MethodScript type, or a few special types,
+"$Player" and "$OfflinePlayer", or an ad-hoc enum, which is a comma separated list contained within square brackets.
+Depending on the MethodScript type, there will be different default autocomplete result, with special handling for
+enums, which autocomplete to the list of enums, boolean, which autocompletes to the strings "true" and "false". All
+other types disable auto completes for this variable.
+
+Note that these annotations will not be used if placed on an alias that isn't also a @command.
+The executor of the command is simply the code in the alias itself. Actually, it's worth noting that nothing
+about this changes the execution, it still uses the normal alias engine in the same way as every other alias,
+it simply provides additional integrations on top of the alias system.
+
+A full complex example, which provides a custom tabcompleter and overrides some existing parameters, might look
+like this:
+
+auto_include.ms:
+<%CODE|
+// Simulate some DB of users
+export('list', associative_array());
+
+proc _usersInList() {
+	return(import('list'));
+}
+
+proc _addUser(@user, @msg) {
+	import('list')[@user] = @msg; // push on the new user
+}
+
+proc _removeUser(@user) {
+	array_remove(import('list'), @user);
+}
+
+// NOTE! The procedure should take no arguments, and should return a closure. The closure may accept the
+// @alias, @sender, @args arguments, just as in the tabcompleter value for register_command.
+proc _myCommandTabComplete() {
+	return(get_tabcomplete_prototype(
+		array('add', 'remove'),
+		array(
+			'<add': closure(@alias, @sender, @args) { return(array_subtract(all_players(), array_keys(_usersInList()))); },
+			'<remove': closure(@alias, @sender, @args) { return(_usersInList()); },
+		),
+		'None'
+	));
+}
+%>
+
+commands.msa:
+<%CODE|
+/**
+ * This command adds or removes a user from a list, with a given message.
+ * @command
+ * @usage /myCommand add player [message], /myCommand remove player
+ * @tabcompleter _myCommandTabComplete
+ * @permission ch.testing
+ * @noPermMsg You don't have access to this command.
+ */
+*:/myCommand $enum $player [$] = >>>
+	// Error checking. Note that permission handling is already managed with the annotations. HOWEVER,
+	// it may be prudent to check again anyways, in case this code is used in older versions of CommandHelper.
+	if(!has_permission('ch.testing'), die());
+
+	if(!array_contains(array('add', 'remove'), $enum)) {
+		die(color('RED').'Enum must be add or remove. See /help /myCommand');
+	}
+	if($enum == 'remove' && $ != null) {
+		die(color('RED').'No message should be provided when removing a player');
+	}
+	if(!array_contains(all_players(), $player)) {
+		die(color('RED').'Player offline or unknown. See /help /myCommand');
+	}
+
+	switch($enum) {
+		case 'add':
+			_addUser($player, $);
+		case 'remove':
+			_removeUser($player);
+	}
+
+	msg(color('GREEN').'Action completed.');
+<<<
+%>
+
+We can make a slightly less accurate version of this code, which uses the defaults, which, while less correct,
+provides a decent compromise between functionality and code terseness.
+
+<%CODE|
+/**
+ * This command does things.
+ * @command
+ * @tabcompleter
+ * @param $enum [add, remove]
+ * @param $player $Player
+ * @param $ string
+ */
+*:/myCommand $enum $player [$] = ...
+%>
+
+This example will still provide tab completions for the enum and player arguments, but the list of players will not
+be filtered based on the value of the enum. The usage example will be less meaningful as well, but may be good enough
+in most cases.
+
+<%NOTE|Note the drawbacks of using the @command system: Using /recompile is not good enough to change all the settings,
+and requires a server reboot. It is recommended that during development, you use plain aliases, and then add the command
+system on top once you have a stable API. Code changes to the aliases can be done easily, but changing the documentation
+and permissions cannot.%>
+
 === Source File Encoding ===
-MethodScript files, both ms and msa files should have UTF-8 encoding. A byte order mark (BOM) may or may not be present. 
+MethodScript files, both ms and msa files should have UTF-8 encoding. A byte order mark (BOM) may or may not be present.
 While other encodings may work, particularly ASCII and others, the source files will be parsed using UTF-8. In the future,
 other encodings may be supported, but there is currently no plans to add this support in the near term.
 

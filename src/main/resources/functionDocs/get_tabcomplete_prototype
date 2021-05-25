@@ -6,10 +6,10 @@ it's best to write the closure yourself.
 In general, the prototypes can be one of five values, a string, a ClassType of an enum type, an array, a closure,
 or an associative array. Strings represent "prebaked" classes, and are listed below:
 
-- Player - Online players ({function|all_players} equivalent, but more efficient)
-- OfflinePlayer - All known players ({function|get_offline_players} equivalent)
-- Boolean - Equivalent to array("true", "false")
-- None - Returns an empty array, disabling tab complete for this value. This is useful for open fields, such as \
+* Player - Online players ({{function|all_players}} equivalent, but more efficient)
+* OfflinePlayer - All known players ({function|get_offline_players} equivalent)
+* Boolean - Equivalent to array("true", "false")
+* None - Returns an empty array, disabling tab complete for this value. This is useful for open fields, such as \
 random strings, or a number.
 
 ClassTypes must be enum values, and will autocomplete with the list of values in that enum.

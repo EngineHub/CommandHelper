@@ -2,7 +2,11 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ArgumentParser.ArgumentBuilder;
+import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.MCCommand;
+import com.laytonsmith.abstraction.MCCommandMap;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -11,6 +15,7 @@ import com.laytonsmith.commandhelper.CommandHelperFileLocations;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -24,8 +29,10 @@ import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.extensions.ExtensionManager;
+import com.laytonsmith.core.functions.Commands;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.Scheduling;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.core.taskmanager.TaskManagerImpl;
@@ -52,6 +59,7 @@ import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -75,6 +83,7 @@ public class AliasCore {
 	private CompilerEnvironment compilerEnv;
 	public List<File> autoIncludes;
 	public static CommandHelperPlugin parent;
+	public List<String> registeredCommands = new ArrayList<>();
 
 	/**
 	 * This constructor accepts the configuration settings for the plugin, and ensures that the manager uses these
@@ -346,6 +355,14 @@ public class AliasCore {
 				// Close all channel messenger channels registered by CH.
 				Static.getServer().getMessenger().closeAllChannels();
 
+				// Unregister previously registered commands
+				{
+					MCCommandMap map = Static.getServer().getCommandMap();
+					for(String command : registeredCommands) {
+						map.getCommand(command).unregister(map);
+					}
+					registeredCommands = new ArrayList<>();
+				}
 				scripts = new ArrayList<>();
 
 				LocalPackage localPackages = new LocalPackage();
@@ -389,8 +406,31 @@ public class AliasCore {
 				ProfilePoint compilerMSA = parent.profiler.start("Compilation of MSA files in Local Packages", LogLevel.VERBOSE);
 				try {
 					localPackages.compileMSA(scripts, player, env, env.getEnvClasses());
+					// Check for uniqueness among commands.
+					for(int i = 0; i < scripts.size(); i++) {
+						Script s1 = scripts.get(i);
+						if(!s1.getSmartComment().getAnnotations("@command").isEmpty()) {
+							for(int j = i + 1; j < scripts.size(); j++) {
+								Script s2 = scripts.get(j);
+								if(!s2.getSmartComment().getAnnotations("@command").isEmpty()) {
+									if(s1.getCommandName().equalsIgnoreCase(s2.getCommandName())) {
+										ConfigRuntimeException.HandleUncaughtException(
+												new ConfigCompileException("Duplicate command defined. (First occurance found at "
+												+ s1.getTarget() + ")", s2.getTarget()), "Duplicate command.", player);
+									}
+								}
+							}
+						}
+					}
 				} finally {
 					compilerMSA.stop();
+				}
+			}
+			// Register commands, and set up tabcompleters and things
+			for(int i = 0; i < scripts.size(); i++) {
+				Script s1 = scripts.get(i);
+				if(!s1.getSmartComment().getAnnotations("@command").isEmpty()) {
+					registerCommand(s1, env);
 				}
 			}
 		} catch (IOException ex) {
@@ -407,6 +447,70 @@ public class AliasCore {
 			postReloadAliases.stop();
 		}
 	}
+
+	private void registerCommand(Script script, Environment env) {
+		// This is only called on scripts that are commands
+		MCCommand cmd = StaticLayer.GetConvertor().getNewCommand(script.getCommandName().toLowerCase());
+		SmartComment comment = script.getSmartComment();
+		String description = comment.getBody();
+		cmd.setDescription(description);
+		String usage = script.getSignatureWithoutLabel();
+		if(!comment.getAnnotations("@usage").isEmpty()) {
+			if(comment.getAnnotations("@usage").size() > 1) {
+				MSLog.GetLogger().w(MSLog.Tags.COMPILER, "Duplicate usage annotation found. Will only use the first.",
+						script.getTarget());
+			}
+			usage = comment.getAnnotations("@usage").get(0);
+		}
+		cmd.setUsage(usage);
+		if(!comment.getAnnotations("@permission").isEmpty()) {
+			if(comment.getAnnotations("@permission").size() > 1) {
+				MSLog.GetLogger().e(MSLog.Tags.COMPILER, "Duplicate permissions annotations, only one is allowed."
+						+ " Only the first is being used, but this is almost certainly not what you want, check your"
+						+ " code immediately.",
+						script.getTarget());
+			}
+			cmd.setPermission(comment.getAnnotations("@permission").get(0));
+		}
+		if(!comment.getAnnotations("@noPermMsg").isEmpty()) {
+			if(comment.getAnnotations("@noPermMsg").size() > 1) {
+				MSLog.GetLogger().w(MSLog.Tags.COMPILER, "Duplicate noPermMsg annotation found. Will only use the first.",
+						script.getTarget());
+			}
+			cmd.setPermissionMessage(comment.getAnnotations("@noPermMsg").get(0));
+		}
+		cmd.setAliases(comment.getAnnotations("@alias"));
+
+		// Tab completer is more complicated
+		if(!comment.getAnnotations("@tabcompleter").isEmpty()) {
+			if(comment.getAnnotations("@tabcompleter").size() > 1) {
+				MSLog.GetLogger().w(MSLog.Tags.COMPILER, "Duplicate tabcompleter annotation found. Will only use the first.",
+						script.getTarget());
+			}
+			String proc = comment.getAnnotations("@tabcompleter").get(0).trim();
+			if("".equals(proc)) {
+				// Default implementation
+				// TODO: Need to fake closure instantiation.
+				MSLog.GetLogger().i(MSLog.Tags.COMPILER, "Automatically generated tab completes aren't implemented yet.",
+						script.getTarget());
+			} else {
+				Procedure p = env.getEnv(GlobalEnv.class).GetProcs().get(proc);
+				Mixed m = p.execute(new ArrayList<>(), env, script.getTarget());
+				if(!(m instanceof CClosure)) {
+					MSLog.GetLogger().e(MSLog.Tags.COMPILER, "Procedure " + proc + " returns a value other than"
+							+ " a closure. It must unconditionally return a closure.",
+						p.getTarget());
+				} else {
+					Commands.set_tabcompleter.customExec(script.getTarget(), env, cmd, m);
+				}
+			}
+		}
+		MCCommandMap map = Static.getServer().getCommandMap();
+		String prefix = Implementation.GetServerType().getBranding().toLowerCase(Locale.ENGLISH);
+		map.register(prefix + ":" + script.getCommandName().toLowerCase(), cmd);
+	}
+
+
 
 	/**
 	 * Holder for recompile command options

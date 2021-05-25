@@ -2,6 +2,7 @@ package com.laytonsmith.core.environments;
 
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
+import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
@@ -53,6 +54,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private Map<String, Procedure> procs = null;
 	private IVariableList iVariableList = null;
 	private String label = null;
+	private SmartComment aliasComment = null;
 	private final EnumSet<RuntimeMode> runtimeModes;
 	private boolean dynamicScriptingMode = false;
 	private BoundEvent.ActiveEvent event = null;
@@ -259,6 +261,14 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 
 	public void SetLabel(String label) {
 		this.label = label;
+	}
+
+	public SmartComment GetAliasComment() {
+		return aliasComment;
+	}
+
+	public void SetAliasComment(SmartComment comment) {
+		this.aliasComment = comment;
 	}
 
 	public boolean inCmdlineMode() {

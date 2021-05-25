@@ -2,6 +2,7 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.annotations.OperatorPreferred;
 import com.laytonsmith.annotations.breakable;
 import com.laytonsmith.annotations.nolinking;
@@ -1135,8 +1136,7 @@ public final class MethodScriptCompiler {
 				}
 
 				// Remove comments.
-				case COMMENT:
-				case SMART_COMMENT: {
+				case COMMENT: {
 					it.remove(); // Remove comment.
 					continue;
 				}
@@ -1168,9 +1168,18 @@ public final class MethodScriptCompiler {
 		List<Token> left = new ArrayList<>();
 		List<Token> right = new ArrayList<>();
 		List<Script> scripts = new ArrayList<>();
+		SmartComment comment = null;
 		tokenLoop:
 		for(it = tokenStream.listIterator(0); it.hasNext();) {
 			Token t = it.next();
+
+			if(t.type == TType.SMART_COMMENT) {
+				if(comment != null) {
+					// TODO: Double smart comment, this should be an error case
+				}
+				comment = new SmartComment(t.val());
+				t = it.next();
+			}
 
 			// Add all tokens until ALIAS_END (=) or end of stream.
 			while(t.type != TType.ALIAS_END) {
@@ -1202,12 +1211,13 @@ public final class MethodScriptCompiler {
 				}
 
 				// Create a new script from the command descriptor (left) and code (right) and add it to the list.
-				Script s = new Script(left, right, null, envs, tokenStream.getFileOptions());
+				Script s = new Script(left, right, null, envs, tokenStream.getFileOptions(), comment);
 				scripts.add(s);
 
 				// Create new left and right array for the next script.
 				left = new ArrayList<>();
 				right = new ArrayList<>();
+				comment = null;
 			}
 		}
 
@@ -2208,7 +2218,7 @@ public final class MethodScriptCompiler {
 	 * </ul>
 	 * This should be called after {@link #optimize(ParseTree, Environment, Set, Stack, Set)} so that functions with
 	 * custom linkage only get linked when they are not removed during optimization.
-	 * 
+	 *
 	 *
 	 * @param tree
 	 * @param compilerErrors
@@ -2421,7 +2431,7 @@ public final class MethodScriptCompiler {
 			try {
 				ParseTree root = new ParseTree(
 						new CFunction(__autoconcat__.NAME, Target.UNKNOWN), tree.getFileOptions());
-				Script fakeScript = Script.GenerateScript(root, "*");
+				Script fakeScript = Script.GenerateScript(root, "*", null);
 //				Environment env = null;
 //				try {
 //					if(Implementation.GetServerType().equals(Implementation.Type.BUKKIT)) {
@@ -2793,7 +2803,7 @@ public final class MethodScriptCompiler {
 		}
 		if(script == null) {
 			script = new Script(null, null, env.getEnv(GlobalEnv.class).GetLabel(), env.getEnvClasses(),
-					new FileOptions(new HashMap<>()));
+					new FileOptions(new HashMap<>()), null);
 		}
 		if(vars != null) {
 			Map<String, Variable> varMap = new HashMap<>();
