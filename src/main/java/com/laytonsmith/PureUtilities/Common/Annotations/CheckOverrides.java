@@ -38,7 +38,7 @@ import javax.tools.Diagnostic;
  *
  */
 @SupportedAnnotationTypes({"java.lang.Override", "com.laytonsmith.annotations.MustUseOverride"})
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
+@SupportedSourceVersion(SourceVersion.RELEASE_11)
 public class CheckOverrides extends AbstractProcessor {
 
 	@Target({ElementType.METHOD, ElementType.TYPE})

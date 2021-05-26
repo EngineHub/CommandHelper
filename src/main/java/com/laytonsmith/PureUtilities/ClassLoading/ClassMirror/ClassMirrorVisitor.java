@@ -19,7 +19,6 @@ import org.objectweb.asm.Type;
 
 import static org.objectweb.asm.Opcodes.ACC_ENUM;
 import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
-import static org.objectweb.asm.Opcodes.ASM5;
 import static org.objectweb.asm.Opcodes.ACC_VARARGS;
 import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
 
@@ -28,7 +27,7 @@ public class ClassMirrorVisitor extends ClassVisitor {
 	private final ClassMirror.ClassInfo<Object> classInfo;
 
 	ClassMirrorVisitor(ClassMirror.ClassInfo<Object> info) {
-		super(Opcodes.ASM5);
+		super(Opcodes.ASM7);
 		this.classInfo = info;
 	}
 
@@ -127,7 +126,7 @@ public class ClassMirrorVisitor extends ClassVisitor {
 				value,
 				signature
 		);
-		return new FieldVisitor(ASM5, super.visitField(access, name, desc, signature, value)) {
+		return new FieldVisitor(Opcodes.ASM7, super.visitField(access, name, desc, signature, value)) {
 			@Override
 			public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
 				final AnnotationMirror annotationMirror = new AnnotationMirror(new ClassReferenceMirror(desc), visible);
@@ -189,7 +188,7 @@ public class ClassMirrorVisitor extends ClassVisitor {
 			);
 		}
 
-		return new MethodVisitor(ASM5, super.visitMethod(access, name, desc, signature, exceptions)) {
+		return new MethodVisitor(Opcodes.ASM7, super.visitMethod(access, name, desc, signature, exceptions)) {
 			@Override
 			public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
 				final AnnotationMirror annotationMirror = new AnnotationMirror(new ClassReferenceMirror<>(desc), visible);
@@ -232,7 +231,7 @@ public class ClassMirrorVisitor extends ClassVisitor {
 		private final AnnotationMirror mirror;
 
 		public AnnotationMirrorVisitor(AnnotationVisitor next, AnnotationMirror mirror) {
-			super(ASM5, next);
+			super(Opcodes.ASM7, next);
 			this.mirror = mirror;
 		}
 
@@ -259,7 +258,7 @@ public class ClassMirrorVisitor extends ClassVisitor {
 		private Class<?> type;
 
 		public ArrayAnnotationVisitor(String name, AnnotationMirror mirror) {
-			super(ASM5);
+			super(Opcodes.ASM7);
 			this.name = name;
 			this.mirror = mirror;
 		}
