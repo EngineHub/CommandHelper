@@ -430,16 +430,6 @@
 			<version>${threetenbp-version}</version>
 		</dependency>
 	</dependencies>
-	<distributionManagement>
-		<repository>
-			<id>maven.enginehub.org</id>
-			<url>https://maven.enginehub.org/artifactory/libs-release-local</url>
-		</repository>
-		<snapshotRepository>
-			<id>maven.enginehub.org-snapshot</id>
-			<url>https://maven.enginehub.org/artifactory/libs-snapshot-local</url>
-		</snapshotRepository>
-	</distributionManagement>
 	<build>
 		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
 
