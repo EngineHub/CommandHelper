@@ -2,7 +2,7 @@ CommandHelper
 =============
 | Service | Badge |
 |--------|---------:|
-| TeamCity | [![TC Build Status](http://ci.enginehub.org/app/rest/builds/buildType:bt12,branch:master/statusIcon.svg)](http://ci.enginehub.org/viewType.html?buildTypeId=bt12&guest=1) |
+| Github Packages | [![Maven Package](https://github.com/EngineHub/CommandHelper/actions/workflows/maven-publish.yml/badge.svg)](https://github.com/EngineHub/CommandHelper/actions/workflows/maven-publish.yml) |
 | Azure | [![Azure Build Status](https://dev.azure.com/MethodScript/CommandHelper/_apis/build/status/EngineHub.CommandHelper)](https://dev.azure.com/MethodScript/CommandHelper/_build/latest?definitionId=1) |
 | Snyk.io | [![Known Vulnerabilities](https://snyk.io/test/github/EngineHub/CommandHelper/badge.svg)](https://snyk.io/test/github/EngineHub/CommandHelper) |
 | Discord | [![Discord](https://img.shields.io/discord/446057847428481044.svg)](https://img.shields.io/discord/446057847428481044.svg) |
@@ -58,20 +58,27 @@ This project uses BrowserStack (https://www.browserstack.com) for testing the we
 Installing
 ----------
 
+To install on Windows, you can follow the directions below (which are cross platform) or simply download the
+Windows installer, found [here](https://github.com/EngineHub/CommandHelper/releases/tag/win-installer-v.1.0.1).
+
 There are two modes of installation, both first require obtaining the MethodScript jar.
-You can build it yourself, or download the official builds from
-[here](http://builds.enginehub.org/job/commandhelper?branch=master).
+You can build it yourself, or download the official builds from Github.
+
+For other platforms or manual installation on Windows, grab the jar from
+[here](https://github.com/EngineHub/CommandHelper/packages/).
 
 Minecraft: Installation in Minecraft is simple. Simply drop the jar in the plugins
 folder.
 
 Standalone Programming: MethodScript is a fledgling general purpose programming language,
 and can be used from the command line, much like python, node, or other programming
-languages. To install, place the jar file in whatever location you like, (noting that
+languages.
+
+For all platforms, place the jar file in whatever location you like, (noting that
 it will create a folder at the same level which contains the configuration files, so
 it's probably easiest to put this in your user directory),
 then run `java -jar MethodScript.jar install-cmdline` as root/Administrator.
-This will install the `mscript` program and add it to your path, 
+This will install the `mscript` program and add it to your path,
 which can be used to start a REPL shell for quick tasks, execute a script file, or
 easily run the commandline tools. On Windows, this also installs a PowerShell module,
 which can be used with `Import-Module -Name MethodScript` and `Invoke-MethodScript`. On Windows,
