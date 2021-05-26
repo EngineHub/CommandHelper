@@ -430,6 +430,13 @@
 			<version>${threetenbp-version}</version>
 		</dependency>
 	</dependencies>
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub EngineHub Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/EngineHub/CommandHelper</url>
+		</repository>
+	</distributionManagement>
 	<build>
 		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
 
