@@ -79,7 +79,7 @@ public abstract class CompositeFunction extends AbstractFunction {
 				gEnv.GetScript().eval(tree, env);
 			} else {
 				// This can happen when the environment is not fully setup during tests, in addition to optimization
-				Script.GenerateScript(null, null).eval(tree, env);
+				Script.GenerateScript(null, null, null).eval(tree, env);
 			}
 		} catch (FunctionReturnException ex) {
 			ret = ex.getReturn();

@@ -205,7 +205,7 @@ public class ExampleScript {
 		if(output != null) {
 			return output;
 		}
-		Script s = Script.GenerateScript(script, Static.GLOBAL_PERMISSION);
+		Script s = Script.GenerateScript(script, Static.GLOBAL_PERMISSION, null);
 		Environment env;
 		try {
 			env = Static.GenerateStandaloneEnvironment();

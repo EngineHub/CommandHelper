@@ -89,7 +89,7 @@ public class Commands {
 		 * @param cmd
 		 * @param arg
 		 */
-		static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
+		public static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
 			if(arg.isInstanceOf(CClosure.TYPE)) {
 				onTabComplete.put(cmd.getName(), (CClosure) arg);
 			} else {

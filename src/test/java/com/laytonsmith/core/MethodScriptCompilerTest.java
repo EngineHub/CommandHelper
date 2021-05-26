@@ -1247,4 +1247,27 @@ public class MethodScriptCompilerTest {
 		assertEquals("null", StaticTest.SRun("ArraySortType @s = null;", null));
 		assertEquals("null", StaticTest.SRun("ms.lang.ArraySortType @s = null;", null));
 	}
+
+	@Test
+	public void testSmartCommentsAreProperlyAddedToAliases() throws Exception {
+		String config = "/**\n"
+				+ " * Smart comment!\n"
+				+ " * @annotation test_annotation"
+				+ " */\n"
+				+ "/test = /cmd\n";
+		Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null, null, false), envs).get(0);
+		assertEquals("Smart comment!", s.getSmartComment().getBody());
+		assertEquals("test_annotation", s.getSmartComment().getAnnotations("annotation").get(0));
+	}
+
+	@Test
+	public void testSmartCommentsCanBeRetrieved() throws Exception {
+		String config = "/**\n"
+				+ " * Smart comment!\n"
+				+ " * @annotation test_annotation"
+				+ " */\n"
+				+ "/test = msg(get_alias_comment())\n";
+		RunCommand(config, fakePlayer, "/test");
+		verify(fakePlayer).sendMessage("{annotations: {@annotation: {test_annotation}}, body: Smart comment!}");
+	}
 }

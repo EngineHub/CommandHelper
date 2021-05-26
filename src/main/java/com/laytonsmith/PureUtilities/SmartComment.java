@@ -127,7 +127,7 @@ public class SmartComment {
 	}
 
 	/**
-	 * Gets the body of the comment block.
+	 * Gets the body of the comment block. This will never be null.
 	 *
 	 * @return
 	 */
@@ -136,7 +136,8 @@ public class SmartComment {
 	}
 
 	/**
-	 * Gets a list of annotation values for the comment block.
+	 * Gets a list of annotation values for the comment block. If the annotation doesn't exist, an empty list
+	 * is returned.
 	 *
 	 * @param annotation
 	 * @return
@@ -145,7 +146,27 @@ public class SmartComment {
 		if(!annotation.startsWith("@")) {
 			annotation = "@" + annotation;
 		}
-		return new ArrayList<>(annotations.get(annotation));
+		List<String> ann = annotations.get(annotation);
+		if(ann == null) {
+			return new ArrayList<>();
+		}
+		return new ArrayList<>(ann);
+	}
+
+	/**
+	 * Returns a complete set of annotations in this comment. Note that this doesn't include
+	 * embedded annotations, only the standalone ones. Further, note that the keys in the map
+	 * will start with the at symbol, a fact which is optional to consider when using the
+	 * {@link #getAnnotations(java.lang.String)} method, so consider using that if you aren't
+	 * iterating through the list dynamically.
+	 * @return
+	 */
+	public Map<String, List<String>> getAnnotations() {
+		Map<String, List<String>> ret = new HashMap<>();
+		for(String key : annotations.keySet()) {
+			ret.put(key, getAnnotations(key));
+		}
+		return ret;
 	}
 
 	public static interface Replacement {

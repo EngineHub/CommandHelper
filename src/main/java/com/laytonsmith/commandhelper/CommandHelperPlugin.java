@@ -575,6 +575,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 			ac.reload(player, args, false);
 			return true;
 		} else if(cmdName.equalsIgnoreCase("commandhelper")) {
+			// Despite looking useless, this isn't. It's used for the server events and other
+			// places. Look for "commandhelper null" in the codebase.
 			return args.length >= 1 && args[0].equalsIgnoreCase("null");
 		} else if(cmdName.equals("runalias")) {
 			//Hardcoded alias rebroadcast

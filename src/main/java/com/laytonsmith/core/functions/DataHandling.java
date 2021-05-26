@@ -1598,7 +1598,7 @@ public class DataHandling {
 						options = children.get(0).getFileOptions();
 					}
 					ParseTree root = new ParseTree(new CFunction(__autoconcat__.NAME, Target.UNKNOWN), options);
-					Script fakeScript = Script.GenerateScript(root, Static.GLOBAL_PERMISSION);
+					Script fakeScript = Script.GenerateScript(root, Static.GLOBAL_PERMISSION, null);
 					Environment env = Static.GenerateStandaloneEnvironment();
 					env.getEnv(GlobalEnv.class).SetScript(fakeScript);
 					Mixed c = myProc.cexecute(children, env, t);
@@ -2422,7 +2422,7 @@ public class DataHandling {
 				List<ParseTree> children = new ArrayList<>();
 				children.add(node);
 				newNode.setChildren(children);
-				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel());
+				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel(), null);
 				myEnv.getEnv(GlobalEnv.class).SetFlag("closure-warn-overwrite", true);
 				Mixed ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
 				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
@@ -2594,7 +2594,7 @@ public class DataHandling {
 				List<ParseTree> children = new ArrayList<>();
 				children.add(node);
 				newNode.setChildren(children);
-				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel());
+				Script fakeScript = Script.GenerateScript(newNode, myEnv.getEnv(GlobalEnv.class).GetLabel(), null);
 				myEnv.getEnv(GlobalEnv.class).SetFlag("closure-warn-overwrite", true);
 				Mixed ret = MethodScriptCompiler.execute(newNode, myEnv, null, fakeScript);
 				myEnv.getEnv(GlobalEnv.class).ClearFlag("closure-warn-overwrite");
