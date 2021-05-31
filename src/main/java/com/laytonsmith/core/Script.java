@@ -3,6 +3,7 @@ package com.laytonsmith.core;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.SimpleVersion;
+import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -87,6 +88,7 @@ public class Script {
 	private Environment currentEnv;
 	private Set<Class<? extends Environment.EnvironmentImpl>> envs;
 	private FileOptions fileOptions;
+	private SmartComment smartComment;
 
 	private static final SimpleVersion GARBAGE_VERSION = new SimpleVersion(0, 0, 0, "version-error");
 
@@ -126,8 +128,52 @@ public class Script {
 		return b.toString();
 	}
 
+	/**
+	 * This is a useful overload for showing the usage.
+	 * @return
+	 */
+	public String getSignatureWithoutLabel() {
+		StringBuilder b = new StringBuilder();
+		for(Token t : left) {
+			b.append(t.val()).append(" ");
+		}
+		return b.toString();
+	}
+
+	/**
+	 * Returns the name of the command, i.e. in "/run $cmd", "run" is the name of the command.
+	 * In general, this is only used for command parsing, when dealing directly with the aliases,
+	 * they shouldn't be compared using this, use {@link #getSignature()} instead.
+	 * @return
+	 */
+	public String getCommandName() {
+		return left.get(0).val().substring(1);
+	}
+
+	/**
+	 * Returns the smart comment attached to this alias. To prevent null pointer exceptions, this
+	 * will never be null, it will be an empty smart comment.
+	 * @return
+	 */
+	public SmartComment getSmartComment() {
+		if(smartComment == null) {
+			return new SmartComment("");
+		}
+		return smartComment;
+	}
+
+	/**
+	 * Returns the target where this script is defined. Since scripts span multiple lines and columns, this is simply
+	 * the code target of the first token in the left side, not including the label.
+	 * @return
+	 */
+	public Target getTarget() {
+		return left.get(0).getTarget();
+	}
+
 	public Script(List<Token> left, List<Token> right, String label,
-			Set<Class<? extends Environment.EnvironmentImpl>> envs, FileOptions fileOptions) {
+			Set<Class<? extends Environment.EnvironmentImpl>> envs, FileOptions fileOptions,
+			SmartComment smartComment) {
 		this.left = left;
 		this.fullRight = right;
 		this.leftVars = new HashMap<>();
@@ -135,6 +181,7 @@ public class Script {
 		this.envs = envs;
 		compileTime = System.currentTimeMillis();
 		this.fileOptions = fileOptions;
+		this.smartComment = smartComment;
 	}
 
 	private Script() {
@@ -145,7 +192,11 @@ public class Script {
 		return compileTime;
 	}
 
-	public static Script GenerateScript(ParseTree tree, String label) {
+	public FileOptions getScriptFileOptions() {
+		return fileOptions;
+	}
+
+	public static Script GenerateScript(ParseTree tree, String label, SmartComment comment) {
 		Script s = new Script();
 
 		s.hasBeenCompiled = true;
@@ -153,6 +204,7 @@ public class Script {
 		s.cright = new ArrayList<>();
 		s.cright.add(tree);
 		s.label = label;
+		s.smartComment = comment;
 
 		return s;
 	}
@@ -165,6 +217,7 @@ public class Script {
 		//Some things, such as the label are determined at compile time
 		this.currentEnv = myEnv;
 		this.currentEnv.getEnv(GlobalEnv.class).SetLabel(this.label);
+		this.currentEnv.getEnv(GlobalEnv.class).SetAliasComment(this.smartComment);
 		MCCommandSender p = myEnv.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 		if(!hasBeenCompiled || compilerError) {
 			Target target = Target.UNKNOWN;

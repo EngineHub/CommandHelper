@@ -432,13 +432,10 @@
 	</dependencies>
 	<distributionManagement>
 		<repository>
-			<id>maven.enginehub.org</id>
-			<url>https://maven.enginehub.org/artifactory/libs-release-local</url>
+			<id>github</id>
+			<name>GitHub EngineHub Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/EngineHub/CommandHelper</url>
 		</repository>
-		<snapshotRepository>
-			<id>maven.enginehub.org-snapshot</id>
-			<url>https://maven.enginehub.org/artifactory/libs-snapshot-local</url>
-		</snapshotRepository>
 	</distributionManagement>
 	<build>
 		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>

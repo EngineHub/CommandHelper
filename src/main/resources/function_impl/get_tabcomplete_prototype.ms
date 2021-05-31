@@ -16,23 +16,9 @@ return(closure(@alias, @sender, @args) {
 		return(false);
 	}
 	@p = @prototype[array_size(@args) - 1];
-	// There are 5 types, string, enum ClassType, array, closure, and associative array.
-	if(@p instanceof string) {
-		// These can just be written as transforms
-		switch_ic(@p) {
-			case 'Player':
-				@p = all_players();
-			case 'OfflinePlayer':
-				@p = get_offline_players();
-			case 'Boolean':
-				@p = array('true', 'false');
-			case 'None':
-				@p = array();
-		}
-	}
 
 	if(is_array(@p) && is_associative(@p)) {
-		// As above, these can just be rewritten as transforms, however, we have to first
+		// These can just be rewritten as transforms, however, we have to first
 		// figure out which key to use, based on previous arguments.
 		@transform = null;
 		foreach(@keys in array_keys(@p)) {
@@ -67,7 +53,26 @@ return(closure(@alias, @sender, @args) {
 				}
 			}
 		}
-		@p = @transform;
+		if(@transform == null) {
+			@p = "None";
+		} else {
+			@p = @transform;
+		}
+	}
+
+	// There are 5 types, string, enum ClassType, array, closure, and associative array.
+	if(@p instanceof string) {
+		// These can just be written as transforms
+		switch_ic(@p) {
+			case 'Player':
+				@p = all_players();
+			case 'OfflinePlayer':
+				@p = get_offline_players();
+			case 'Boolean':
+				@p = array('true', 'false');
+			case 'None':
+				@p = array();
+		}
 	}
 
 	@set = null;
@@ -75,9 +80,18 @@ return(closure(@alias, @sender, @args) {
 	if(@p instanceof ClassType) {
 		@set = array_map(reflect_pull('enum', string(@p)), closure(@v) { return(string(@v)); });
 	} else if(instanceof(@p, closure)) {
-		@set = execute(@alias, @sender, @args, @p);
-	} else if(!is_associative(@p)) {
+		try {
+			@set = execute(@alias, @sender, @args, @p);
+		} catch(CastException @ex) {
+			throw(CastException, 'The closure sent as argument ' . (array_size(@args) - 1) . ' returned void.');
+		}
+	} else if(is_array(@p) && !is_associative(@p)) {
 		@set = @p;
+	}
+
+	if(@set notinstanceof Iterable) {
+		throw(FormatException, 'The value returned in argument ' . (array_size(@args) - 1)
+		. ' must be an array, or otherwise resolve to an array, but was ' . typeof(@set) . '.');
 	}
 
 	// @set now contains the list of possible completions. Match this against @args, and see if there are any values that simply can't match.

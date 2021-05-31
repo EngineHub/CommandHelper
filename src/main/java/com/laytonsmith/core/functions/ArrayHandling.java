@@ -3633,7 +3633,7 @@ public class ArrayHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{};
+			return new Class[]{CRECastException.class, CREIllegalArgumentException.class};
 		}
 
 		@Override

@@ -1,15 +1,17 @@
 name: CommandHelper
 main: com.laytonsmith.commandhelper.CommandHelperPlugin
-api-version: 1.13
+api-version: 1.16
 version: "${project.version}"
 commands:
     reloadaliases:
         description: Reloads aliases
         usage: /<command>
         aliases: [reloadalias, recompile]
+        permission: [commandhelper.reloadaliases, ch.reloadaliases]
     interpreter:
         description: Puts your chat into interpreter mode
         usage: /<command>
+        permission: commandhelper.interpreter
     commandhelper:
         description: Used to gain meta information about CommandHelper
         usage: /<command> <arguments>
@@ -19,3 +21,4 @@ commands:
     interpreter-on:
         description: Turns on the interpreter for however long is specified in the preferences option "interpreter-timeout". This only does something if run from console.
         usage: /<command>
+        permission: this.command.can.only.be.run.from.console

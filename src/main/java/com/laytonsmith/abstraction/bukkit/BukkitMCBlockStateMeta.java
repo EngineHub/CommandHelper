@@ -18,6 +18,11 @@ public class BukkitMCBlockStateMeta extends BukkitMCItemMeta implements MCBlockS
 	}
 
 	@Override
+	public boolean hasBlockState() {
+		return bsm.hasBlockState();
+	}
+
+	@Override
 	public MCBlockState getBlockState() {
 		return getBlockState(false);
 	}

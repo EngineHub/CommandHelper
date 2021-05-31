@@ -14,6 +14,10 @@ public enum MCSpawnReason {
 	 */
 	CHUNK_GEN,
 	/**
+	 * Spawned by vanilla /summon command
+	 */
+	COMMAND,
+	/**
 	 * Spawned by plugins
 	 */
 	CUSTOM,
@@ -29,6 +33,7 @@ public enum MCSpawnReason {
 	LIGHTNING,
 	NATURAL,
 	PATROL,
+	PIGLIN_ZOMBIFIED,
 	RAID,
 	REINFORCEMENTS,
 	SHOULDER_ENTITY,

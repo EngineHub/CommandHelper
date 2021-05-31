@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCBlockCommandSender;
@@ -61,6 +62,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.jar.JarFile;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.zip.ZipEntry;
@@ -177,10 +179,11 @@ public class Meta {
 
 		@Override
 		public String docs() {
-			return "void {player, command} Runs a command as a particular user. The special user '" + Static.getConsoleName() + "' can be used to run it as a console"
-					+ " user. Using '~op' is deprecated, and will be removed after the next release, use sudo() instead."
-					+ " Commands cannot be run as an offline player. If the first argument is an array of usernames, the command"
-					+ " will be run in the context of each user in the array.";
+			return "void {player, command} Runs a command as a particular online player. The special name '"
+					+ Static.getConsoleName() + "' can be used to run it as console."
+					+ " If you want to run the command as if the player was op, use {{function|sudo}} instead."
+					+ " If the first argument is an array of usernames,"
+					+ " the command will be run in the context of each user in the array.";
 		}
 
 		@Override
@@ -1633,6 +1636,66 @@ public class Meta {
 		@Override
 		public Version since() {
 			return MSVersion.V3_3_4;
+		}
+
+	}
+
+	@api
+	public static class get_alias_comment extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			SmartComment comment = environment.getEnv(GlobalEnv.class).GetAliasComment();
+			CArray ret = CArray.GetAssociativeArray(t);
+			ret.set("body", comment.getBody());
+			CArray annotations = CArray.GetAssociativeArray(t);
+			ret.set("annotations", annotations, t);
+			for(Map.Entry<String, List<String>> entry : comment.getAnnotations().entrySet()) {
+				CArray list = new CArray(t, entry.getValue().size());
+				for(String s : entry.getValue()) {
+					list.push(new CString(s, t), t);
+				}
+				annotations.set(entry.getKey(), list, t);
+			}
+			return ret;
+		}
+
+		@Override
+		public String getName() {
+			return "get_alias_comment";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		@Override
+		public String docs() {
+			return "array {} Returns the smart comment on the currently running alias. The array returned will contain"
+					+ " the comment body in the 'body' element, and the annotations in the 'annotations' element as"
+					+ " an associative array. Each key in the annotation will contain an at symbol, so for instance"
+					+ " '@annotation' and the value is an array of all occurances. ";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V0_0_0;
 		}
 
 	}

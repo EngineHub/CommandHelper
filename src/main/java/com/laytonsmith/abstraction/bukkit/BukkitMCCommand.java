@@ -216,6 +216,7 @@ public class BukkitMCCommand implements MCCommand {
 				cargs.push(new CString(arg, t), t);
 			}
 			CClosure closure = Commands.onTabComplete.get(cmd.getName().toLowerCase());
+			closure.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(sender);
 			try {
 				Mixed fret = closure.executeCallable(null, t, new CString(alias, t), new CString(sender.getName(), t), cargs,
 						new CArray(t) // reserved for an obgen style command array

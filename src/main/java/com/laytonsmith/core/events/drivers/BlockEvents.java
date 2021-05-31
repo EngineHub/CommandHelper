@@ -15,6 +15,7 @@ import com.laytonsmith.abstraction.events.MCBlockDispenseEvent;
 import com.laytonsmith.abstraction.events.MCBlockExplodeEvent;
 import com.laytonsmith.abstraction.events.MCBlockFadeEvent;
 import com.laytonsmith.abstraction.events.MCBlockFromToEvent;
+import com.laytonsmith.abstraction.events.MCBlockFormEvent;
 import com.laytonsmith.abstraction.events.MCBlockGrowEvent;
 import com.laytonsmith.abstraction.events.MCBlockIgniteEvent;
 import com.laytonsmith.abstraction.events.MCBlockPistonEvent;
@@ -1516,6 +1517,77 @@ public class BlockEvents {
 					}
 				}
 			}
+			return false;
+		}
+	}
+
+	@api
+	public static class block_form extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "block_form";
+		}
+
+		@Override
+		public String docs() {
+			return "{newblock: <string match> Type of new block state}"
+					+ "Called when a block is formed or spreads based on world conditions."
+					+ " Cancelling this event will cause the block to not be formed."
+					+ "{location: The location of the formed block "
+					+ " | block: Type of old block state"
+					+ " | newblock: Type of new block state}"
+					+ "{} "
+					+ "{}";
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.BLOCK_FORM;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_4;
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if(e instanceof MCBlockFormEvent) {
+				MCBlockFormEvent event = (MCBlockFormEvent) e;
+
+				String newBlock = event.getNewState().getType().getName();
+
+				Prefilters.match(prefilter, "newblock", newBlock, Prefilters.PrefilterType.STRING_MATCH);
+
+				return true;
+			}
+
+			return false;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+			if(!(e instanceof MCBlockFormEvent)) {
+				throw new EventException("Cannot convert event to MCBlockFormEvent");
+			} else {
+				MCBlockFormEvent event = (MCBlockFormEvent) e;
+				Target t = Target.UNKNOWN;
+				Map<String, Mixed> mapEvent = this.evaluate_helper(e);
+				mapEvent.put("block", new CString(event.getBlock().getType().getName(), t));
+				mapEvent.put("newblock", new CString(event.getNewState().getType().getName(), t));
+				mapEvent.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
+				return mapEvent;
+			}
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
 			return false;
 		}
 	}

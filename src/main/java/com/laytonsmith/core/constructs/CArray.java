@@ -269,7 +269,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			if(index != null) {
 				throw new IllegalArgumentException("Cannot insert into an associative array");
 			}
-			int max = 0;
+			int max = -1;
 			for(String key : associativeArray.keySet()) {
 				try {
 					int i = Integer.parseInt(key);
