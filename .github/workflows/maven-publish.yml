@@ -34,4 +34,4 @@ jobs:
         source_dir: target
         container_name: builds
         connection_string: ${{ secrets.BlobStoreConnectionString }}
-        extra_args: "--pattern 'commandhelper*-full.jar' --destination-path 'build-${{ github.RUN_NUMBER }}'"
+        extra_args: --pattern commandhelper*-full.jar --destination-path build-${{ github.RUN_NUMBER }}
