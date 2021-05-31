@@ -24,13 +24,13 @@ jobs:
         distribution: 'adopt'
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
-
-    #- name: Delete previous snapshot
-    #  uses: actions/delete-package-versions@v1
-    #  with:
-    #    package-name: com.sk89q.commandhelper
-
-    - name: Publish to GitHub Packages Apache Maven
-      run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
+    - name: Package Build
+      run: mvn package -s $GITHUB_WORKSPACE/settings.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
+    - name: Upload to Blob Store
+      uses: bacongobbler/azure-blob-storage-upload@v1.1.1
+      with:
+        source_dir: target
+        container_name: builds
+        connection_string: ${{ secrets.BlobStoreConnectionString }}
