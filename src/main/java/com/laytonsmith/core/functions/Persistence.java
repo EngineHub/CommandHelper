@@ -45,12 +45,12 @@ import java.util.logging.Logger;
 public class Persistence {
 
 	public static String docs() {
-		return "Allows scripts to store data from execution to execution. See the guide on [[Persistence|persistence]] for more information."
-				+ " In all the functions, you may send multiple arguments for the key, which will automatically"
-				+ " be concatenated with a period (the namespace separator). No magic happens here, you can"
-				+ " put periods yourself, or combine manually namespaced values or automatically namespaced values"
-				+ " with no side effects. All the functions in the Persistence API are threadsafe (though not necessarily"
-				+ " process safe).";
+		return "Allows scripts to store data from execution to execution. See the guide on"
+				+ " [[Persistence_Network|persistence]] for more information. In all the functions, you may send"
+				+ " multiple arguments for the key, which will automatically be concatenated with a period (the"
+				+ " namespace separator). No magic happens here, you can put periods yourself, or combine manually"
+				+ " namespaced values or automatically namespaced values with no side effects. All the functions in the"
+				+ " Persistence API are threadsafe (though not necessarily process safe).";
 	}
 
 	@api(environments = {GlobalEnv.class})
