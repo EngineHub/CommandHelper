@@ -28,7 +28,7 @@ jobs:
     - name: Delete previous snapshot
       uses: actions/delete-package-versions@v1
       with:
-        package-version-ids: 3.3.4-SNAPSHOT
+        package-name: com.sk89q.commandhelper
 
     - name: Publish to GitHub Packages Apache Maven
       run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
