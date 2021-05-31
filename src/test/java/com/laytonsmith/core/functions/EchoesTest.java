@@ -118,6 +118,16 @@ public class EchoesTest {
 		assertEquals(String.format("\u00A7%s", "a"), SRun("color('a')", fakePlayer));
 	}
 
+	@Test
+	public void testRGBColor() throws Exception {
+		String encodedColor = String.format("\u00A7%s\u00A7%s\u00A7%s\u00A7%s\u00A7%s\u00A7%s\u00A7%s", "x", "f", "f", "1", "1", "a", "a");
+		String encodedWhite = "\u00A7f";
+		assertEquals(encodedColor, SRun("color('#ff11aa')", fakePlayer)); // Translates
+		assertEquals(encodedColor, SRun("color('#ff11aabbccddee')", fakePlayer)); // Truncates
+		assertEquals(encodedWhite, SRun("color('#ff11zz')", fakePlayer)); // Defaults to white if invalid hex
+		assertEquals(encodedWhite, SRun("color('#55')", fakePlayer)); // Defaults to white if invalid hex
+	}
+
 	private static final String LOWERCASE_A =
 			new color().exec(Target.UNKNOWN, null, new CString("a", Target.UNKNOWN)).val();
 
@@ -149,5 +159,16 @@ public class EchoesTest {
 	@Test
 	public void testColorize6() throws Exception {
 		assertEquals("&&" + LOWERCASE_A + "Hi", SRun("colorize('&&&&&&aHi', '&&')", fakePlayer));
+	}
+
+	@Test
+	public void testColorizeRGB() throws Exception {
+		String expectedColor = new color().exec(Target.UNKNOWN, null, new CString("#ff11aa", Target.UNKNOWN)).val();
+		assertEquals(expectedColor + "Hi", SRun("colorize('&#ff11aaHi', '&')", fakePlayer));
+	}
+
+	@Test
+	public void testColorizeInvalidRGB() throws Exception {
+		assertEquals("&#ff Hi", SRun("colorize('&#ff Hi', '&')", fakePlayer));
 	}
 }
