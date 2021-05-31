@@ -484,7 +484,7 @@ public class Compiler {
 						list.set(k, labelNode);
 						list.remove(k + 1);
 					} else {
-						throw new ConfigCompileException("Unexpected ClassType", list.get(k).getTarget());
+						throw new ConfigCompileException("Unexpected data after ClassType", list.get(k + 1).getTarget());
 					}
 				}
 			}
