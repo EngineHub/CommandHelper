@@ -35,3 +35,4 @@ jobs:
         container_name: builds
         connection_string: ${{ secrets.BlobStoreConnectionString }}
         extra_args: --pattern commandhelper*-full.jar --destination-path build-${{ github.RUN_NUMBER }}
+        sync: false
