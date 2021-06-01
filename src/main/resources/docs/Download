@@ -1,0 +1,22 @@
+
+<style type="text/css">
+#downloadList {
+	border: 1px solid black;
+    padding: 1em;
+}
+
+</style>
+<script src="%%cacheBuster|js/download.js%%" type="text/javascript"></script>
+
+On this page, you can view the downloads. In general, you should download the latest version, as the
+time between versioned releases is very long. Only the latest version is currently supported. <!--You
+can use <code>mscript -- update-check</code> to see if a newer version is available, and
+<code>mscript -- update</code> to automatically update to the latest version.-->
+
+<div id="downloadList">
+	<div class="loadingSection">
+		<img src="%%cacheBuster|images/CommandHelper_IconAnimated.gif%%" style="width: 100px;">
+		<br>
+		Loading version information
+	</div>
+</div>
