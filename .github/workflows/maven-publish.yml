@@ -32,7 +32,7 @@ jobs:
       uses: bacongobbler/azure-blob-storage-upload@v1.2.0
       with:
         source_dir: target
-        container_name: CommandHelperJar
+        container_name: commandhelperjar
         connection_string: ${{ secrets.BlobStoreConnectionString }}
         extra_args: --pattern commandhelper*-full.jar --destination-path build-${{ github.RUN_NUMBER }}
         sync: false
