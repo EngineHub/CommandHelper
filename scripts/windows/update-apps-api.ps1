@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 
 # This is the checkout which we build against for the swagger-codegen project. This can be a tag or a commit (or technically a branch)
 # but is meant to be relatively stable, and regardless only intentionally updated, so that builds are generally speaking reproducable.
-$CheckoutId = "a68e47087060c6f246c35a213f8e47709a4f8ab2"
+$CheckoutId = "ddca76e4f8402630e78f1cd1378c894100092111"
 
 [bool] $SkipBuild = $false;
 [bool] $SkipUpdate = $false;
@@ -35,7 +35,7 @@ function New-Software($Name, $Exe, $Instructions) {
 function Test-Software {
 	$softwares = (New-Software -Name "Java" -Exe "java.exe" -Instructions "https://adoptopenjdk.net/"), `
 		(New-Software -Name "Git" -Exe "git.exe" -Instructions "https://git-scm.com/download/win"), `
-		(New-Software -Name "Maven" -Exe "mvn.exe" -Instructions "https://maven.apache.org/guides/getting-started/windows-prerequisites.html")
+		(New-Software -Name "Maven" -Exe "mvn.cmd" -Instructions "https://maven.apache.org/guides/getting-started/windows-prerequisites.html")
 
 
 	$notFound = @()
@@ -138,7 +138,7 @@ function Start-Main([string] $SwaggerGenerator,
 	Status "Using $InputSpec as the input spec"
 
 	Status "Generating Java Client"
-	java -jar $GeneratorJar generate -i $InputSpec -l java -o $JavaRepo "--template-dir" "$MethodScriptDirectory/mustacheTemplates"
+	java --illegal-access=permit -jar $GeneratorJar generate -i $InputSpec -l java -o $JavaRepo -DhideGenerationTimestamp=true "--template-dir" "$MethodScriptDirectory/mustacheTemplates"
 
 	# Copy in src/main/java
 	Status "Moving API files into MethodScript"
