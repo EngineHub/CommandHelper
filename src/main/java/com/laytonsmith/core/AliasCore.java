@@ -105,7 +105,7 @@ public class AliasCore {
 			new Thread(() -> {
 				try {
 					Thread.sleep(15000);
-				} catch(InterruptedException ex) {
+				} catch (InterruptedException ex) {
 					//
 				}
 				if(true == Updater.isUpdateAvailable()) {

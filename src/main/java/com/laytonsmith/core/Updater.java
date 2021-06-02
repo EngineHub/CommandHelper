@@ -24,7 +24,7 @@ import java.util.Date;
 public class Updater {
 
 	private static final String DEFAULT_UPDATE_CHANNEL = "commandhelperjar";
-	private static final BuildsApi api = new BuildsApi();
+	private static final BuildsApi API = new BuildsApi();
 
 	public static Date getDateFromString(String date) throws ParseException {
 		date = date.replaceAll("Z$", "+0000");
@@ -33,7 +33,7 @@ public class Updater {
 
 	public static JsonObject getLatestVersionInfo() throws ApiException, ParseException {
 		Date maxVersion = new Date(0);
-		String jsonResponse = api.buildsArtifactGet(DEFAULT_UPDATE_CHANNEL);
+		String jsonResponse = API.buildsArtifactGet(DEFAULT_UPDATE_CHANNEL);
 		JsonArray versions = new JsonParser().parse(jsonResponse).getAsJsonArray();
 		JsonObject maxVersionObject = null;
 		for(int i = 0; i < versions.size(); i++) {
@@ -54,7 +54,7 @@ public class Updater {
 			return null;
 		}
 		@SuppressWarnings("null")
-		long iBuildDate = ((CInt)buildDate).getInt();
+		long iBuildDate = ((CInt) buildDate).getInt();
 		Date time = new Date(iBuildDate);
 		try {
 			JsonObject latestVersion = getLatestVersionInfo();
@@ -75,7 +75,7 @@ public class Updater {
 				return time.before(versionDate);
 			}
 			return null;
-		} catch(ApiException | JsonSyntaxException | IllegalStateException | ParseException ex) {
+		} catch (ApiException | JsonSyntaxException | IllegalStateException | ParseException ex) {
 			return null;
 		}
 	}
@@ -106,9 +106,9 @@ public class Updater {
 			}
 			if(updateAvailable) {
 				System.out.println("An update is available! Check https://methodscript.com/docs/"
-						+ MSVersion.LATEST.getVersionString() +  "/Download.html");// or run the update command.");
+						+ MSVersion.LATEST.getVersionString() +  "/Download.html"); // or run the update command.");
 			} else {
-				System.out.println("No update is available.");// You can force a download of the latest version anyways"
+				System.out.println("No update is available."); // You can force a download of the latest version anyways"
 						//+ " by running the update command.");
 			}
 		}
