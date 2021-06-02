@@ -16,6 +16,14 @@ package com.laytonsmith.core;
 public enum LogLevel {
 
 	/**
+	 * This is a special log level, which indicates that this message should always be logged, regardless of the
+	 * setting, including if it's OFF. This should be used extremely sparingly, and ONLY in cases where there is
+	 * some other form of indication from the user that this particular message should be logged, such as some other
+	 * setting that should be considered to override the log configuration, security warnings, or other exceptional
+	 * reason for making this message unsuppressable.
+	 */
+	ALWAYS(-1),
+	/**
 	 * No logging will occur. This is typically not used by the code itself, but is set as a configuration by the user.
 	 * Corresponds to an integer 0.
 	 */

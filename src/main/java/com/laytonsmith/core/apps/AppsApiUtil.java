@@ -11,11 +11,13 @@ import io.swagger.client.Configuration;
  */
 public class AppsApiUtil {
 
-	private static final String APPS_SERVER_PROPERTY = "methodscript.apps.server";
-	private static final String APPS_DEBUG = "methodscript.apps.debug";
+	public static final String OFFICIAL_API_LOCATION = "https://apps.methodscript.com/";
+	public static final String APPS_SERVER_PROPERTY = "methodscript.apps.server";
+	public static final String APPS_DEBUG = "methodscript.apps.debug";
+	
 	private static final int TIMEOUT = 30000;
 
-	private String baseApiUrl = "https://apps.methodscript.com/";
+	private String baseApiUrl = OFFICIAL_API_LOCATION;
 	private boolean debug = false;
 
 
