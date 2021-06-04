@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.sk89q</groupId>
 	<artifactId>commandhelper</artifactId>
-	<version>3.3.4-SNAPSHOT</version>
+	<version>3.3.5-SNAPSHOT</version>
 	<name>CommandHelper</name>
 	<description>CommandHelper is a full blown scripting language built right into Minecraft</description>
 	<inceptionYear>2010</inceptionYear>
@@ -191,16 +191,6 @@
 			<version>1.0</version>
 		</dependency>
 
-		<!-- Used for IRC hooks -->
-		<!-- NOT READY YET
-		<dependency>
-			<groupId>org.jibble</groupId>
-			<artifactId>pircbot</artifactId>
-			<version>1.5.0</version>
-			<scope>compile</scope>
-		</dependency>
-		-->
-
 		<!-- Profiling library -->
 		<dependency>
 			<!-- Apache 2.0 -->
@@ -210,15 +200,7 @@
 			<scope>compile</scope>
 			<type>jar</type>
 		</dependency>
-		<!--
-		<dependency>
-			Apache 2.0
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>2.13.0</version>
-			<scope>compile</scope>
-		</dependency>
-		-->
+
 		<!-- Database -->
 		<!-- SQLite -->
 		<dependency>
@@ -338,7 +320,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>5.0-SNAPSHOT</version>
+			<version>4.13.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -561,7 +543,7 @@
 									<include>mysql:mysql-connector-java:jar:*</include>
 									<include>commons-codec:commons-codec:jar:*</include>
 									<!--<include>org.apache.bcel:bcel:jar:*</include>-->
-									<include>org.ow2.asm:asm-all:jar:*</include>
+									<include>org.ow2.asm:asm:jar:*</include>
 									<include>jline:jline:jar:*</include>
 									<include>javax.mail:mail:jar:*</include>
 									<include>javax.activation:activation:jar:*</include>
@@ -778,7 +760,7 @@
 										</includes>
 								</filter>-->
 								<filter>
-									<artifact>org.ow2.asm:asm-all:jar:*</artifact>
+									<artifact>org.ow2.asm:asm:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>

@@ -36,6 +36,13 @@ If you're using bukkit, throw the jar file in the plugins directory, and start y
 directory structure with placeholder files will be created, which you can then edit. The configuration directory will
 be called CommandHelper, and will be in the same directory as the jar.
 
+For Java versions > 9, you may see errors such as "An illegal reflective access operation has occurred." While currently
+no versions of java absolutely block these operations, it can still be desirable to get rid of these warnings. You can
+simply add --illegal-access=permit to the JVM options, but for more granular control, you can instead add the output
+of <code>java -jar commandhelper-%%CURRENT_VERSION%%-SNAPSHOT-full.jar cmdline-args to your java startup arguments,
+or alternatively, dynamically call this command so that future updates will automatically conform to the necessary
+arguments.
+
 === Cmdline ===
 If you're using the cmdline version, run "java -jar commandhelper-%%CURRENT_VERSION%%-SNAPSHOT-full.jar help" for a
 listing of the possible commands, and "java -jar commandhelper-%%CURRENT_VERSION%%-SNAPSHOT-full.jar install-cmdline"
@@ -43,6 +50,9 @@ to install.
 The configuration directory will be called MethodScript, and will be in the same directory as the jar. If the name or
 path of the jar file changes, you'll need to re-install, so it may be prudent to name the jar with a neutral name that
 does not include the version number.
+
+Installation isn't strictly required, you can run MethodScript directly using the java -jar command, however, using the
+mscript wrapper provides some additional functionality, such as setting up the appropriate options to the JVM.
 
 ==== Linux/MacOS ====
 On Unix systems, you'll need to run the command with sudo. The installer will install an mscript bash file in
