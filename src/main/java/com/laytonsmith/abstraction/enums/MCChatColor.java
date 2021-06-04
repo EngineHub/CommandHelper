@@ -124,6 +124,17 @@ public enum MCChatColor {
 		return CHAR_COLORS.get(code);
 	}
 
+	public static String fromRGBValue(String hexString) {
+		if(hexString.length() > 7) {
+			hexString = hexString.substring(0, 7);
+		}
+		if(!hexString.matches("(?i)^#[0-9A-F]{6}$")) {
+			return null;
+		}
+
+		return "\u00A7x\u00A7" + String.join("\u00A7", hexString.substring(1).split(""));
+	}
+
 	/**
 	 * Strips the given message of all color codes
 	 *

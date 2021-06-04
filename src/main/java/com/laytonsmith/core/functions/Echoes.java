@@ -401,6 +401,11 @@ public class Echoes {
 				//If the value is empty string, set the color to white.
 				color = MCChatColor.WHITE.toString();
 			}
+
+			if(a.startsWith("#")) {
+				color = MCChatColor.fromRGBValue(a);
+			}
+
 			if(color == null) {
 				try {
 					Character p = String.valueOf(a).charAt(0);
@@ -435,7 +440,8 @@ public class Echoes {
 			return "string {name} Returns the color modifier given a color name. If the given color name isn't valid,"
 					+ " white is used instead. The list of valid colors is: " + StringUtils.Join(colors, ", ", ", or ")
 					+ ", in addition the integers 0-15 will work, or the hex numbers from 0-F, and k, l, m, n, o, and r,"
-					+ " which represent styles. Unlike manually putting in the color symbol, using this function will"
+					+ " which represent styles. Additionally, any RGB colour can be used in the hex format '#rrggbb'."
+					+ " Unlike manually putting in the color symbol, using this function will"
 					+ " return the platform's color code, so if you are wanting to keep your scripts platform independent,"
 					+ " it is a much better idea to use this function as opposed to hard coding your own color codes.";
 		}
@@ -836,6 +842,20 @@ public class Echoes {
 							b.append(color.exec(t, environment, new CString(c, t)));
 							i += sl;
 						} else {
+							if(c.equals('#')) {
+								try {
+									String subsequence2 = stext.substring(i + sl, i + sl + 7);
+									String rgbColor = MCChatColor.fromRGBValue(subsequence2);
+									if(rgbColor != null) {
+										b.append(rgbColor);
+										i += sl + 6;
+										continue;
+									}
+								} catch (IndexOutOfBoundsException e) {
+									// Not enough characters left for a full hex code
+								}
+							}
+
 							b.append(subsequence1);
 							i += sl - 1;
 						}

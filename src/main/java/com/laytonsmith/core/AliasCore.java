@@ -101,6 +101,18 @@ public class AliasCore {
 		this.prefFile = prefFile;
 		AliasCore.parent = parent;
 		this.mainFile = mainFile;
+		if(Prefs.CheckForUpdates()) {
+			new Thread(() -> {
+				try {
+					Thread.sleep(15000);
+				} catch (InterruptedException ex) {
+					//
+				}
+				if(true == Updater.isUpdateAvailable()) {
+					MSLog.GetLogger().always(MSLog.Tags.GENERAL, "An update is available!", Target.UNKNOWN);
+				}
+			}, Implementation.GetServerType().getBranding() + "-update-check").start();
+		}
 	}
 
 	public List<Script> getScripts() {

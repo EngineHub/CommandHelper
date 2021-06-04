@@ -14,6 +14,10 @@ public enum MCSpawnReason {
 	 */
 	CHUNK_GEN,
 	/**
+	 * Spawned by vanilla /summon command
+	 */
+	COMMAND,
+	/**
 	 * Spawned by plugins
 	 */
 	CUSTOM,

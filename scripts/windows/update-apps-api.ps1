@@ -35,7 +35,7 @@ function New-Software($Name, $Exe, $Instructions) {
 function Test-Software {
 	$softwares = (New-Software -Name "Java" -Exe "java.exe" -Instructions "https://adoptopenjdk.net/"), `
 		(New-Software -Name "Git" -Exe "git.exe" -Instructions "https://git-scm.com/download/win"), `
-		(New-Software -Name "Maven" -Exe "mvn.exe" -Instructions "https://maven.apache.org/guides/getting-started/windows-prerequisites.html")
+		(New-Software -Name "Maven" -Exe "mvn.cmd" -Instructions "https://maven.apache.org/guides/getting-started/windows-prerequisites.html")
 
 
 	$notFound = @()

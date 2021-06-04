@@ -81,7 +81,8 @@ public final class Prefs {
 		STRICT_MODE("strict-mode", Preferences.Type.BOOLEAN),
 		TELEMETRY_ON("telemetry-on", Preferences.Type.STRING),
 		TELEMETRY_PREF_DEFAULT_COLLECT("telemetry-pref-default-collect", Preferences.Type.BOOLEAN),
-		TELEMETRY_AUDIT("telemetry-audit", Preferences.Type.BOOLEAN);
+		TELEMETRY_AUDIT("telemetry-audit", Preferences.Type.BOOLEAN),
+		CHECK_FOR_UPDATES("check-for-updates", Preferences.Type.BOOLEAN);
 		private final String name;
 		private final Preferences.Type type;
 
@@ -116,6 +117,7 @@ public final class Prefs {
 	private static final GroupData TELEMETRY_GROUP = new GroupData("Telemetry")
 			.setDescription("Help make MethodScript better! These settings control the telemetry mechanism."
 					+ " Your privacy is extremely important, see the telemetry.ini config file for more information.");
+	private static final GroupData UPDATE_GROUP = new GroupData("Update settings");
 	/**
 	 * Initializes the global Prefs to this file.
 	 *
@@ -232,6 +234,11 @@ public final class Prefs {
 				+ " instead of sending Telemetry data to the server, it prints to screen. This allows you to validate"
 				+ " that no more data than you expect is being sent as part of the telemetry data set.",
 				TELEMETRY_GROUP));
+		a.add(new Preference(PNames.CHECK_FOR_UPDATES.config(), "on", PNames.CHECK_FOR_UPDATES.type(),
+				"Checks for updates on the build server. Note that this won't always run, depending on the script"
+				+ " execution context, so in all cases, you can check for updates manually with the check-update"
+				+ " command.",
+				UPDATE_GROUP));
 		prefs = new Preferences("CommandHelper", Static.getLogger(), a);
 		prefs.init(f);
 	}
@@ -365,5 +372,9 @@ public final class Prefs {
 
 	public static Boolean TelemetryAudit() {
 		return prefB(Prefs.PNames.TELEMETRY_AUDIT);
+	}
+
+	public static Boolean CheckForUpdates() {
+		return prefB(Prefs.PNames.CHECK_FOR_UPDATES);
 	}
 }

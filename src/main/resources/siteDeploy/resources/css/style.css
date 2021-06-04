@@ -675,6 +675,11 @@ table th {
     text-align: left;
 }
 
+table.sticky th {
+	top: 0;
+	position: sticky;
+}
+
 table thead {
     border-bottom: solid 2px rgba(144, 144, 144, 0.25);
 }

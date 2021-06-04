@@ -169,7 +169,8 @@ public class Main {
 		NewTypeMode.class,
 		JavaVersionMode.class,
 		EditPrefsMode.class,
-		InstallMSSQLAuthMode.class
+		InstallMSSQLAuthMode.class,
+		Updater.CheckUpdate.class
 	};
 
 	/**
@@ -218,6 +219,7 @@ public class Main {
 	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public static void main(String[] args) throws Exception {
 		Implementation.setServerType(Implementation.Type.SHELL);
+		AppsApiUtil.ConfigureDefaults();
 		if(args.length > 0) {
 			for(Class c : FAST_STARTUP) {
 				String tool = ((tool) c.getAnnotation(tool.class)).value();
@@ -246,7 +248,6 @@ public class Main {
 			}
 		}
 
-		AppsApiUtil.ConfigureDefaults();
 
 		ClassDiscovery cd = ClassDiscovery.getDefaultInstance();
 		cd.addThisJar();

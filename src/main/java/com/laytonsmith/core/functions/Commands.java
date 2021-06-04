@@ -409,18 +409,19 @@ public class Commands {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Simple example, using only pre-baked classes. Assume our command looks like"
-						+ " this: \"/cmd $player\". Note that here we're using register_command, which is the most"
-						+ " likely use of this function, but in the remaining examples, this is not shown.",
+				new ExampleScript("Simple example, using only pre-baked classes (documentation above under 'Strings')."
+						+ " Assume our command looks like this: \"/cmd $player\". Note that here we're using"
+						+ " register_command, which is the most likely use of this function, but in the remaining"
+						+ " examples this is not shown.",
 						"register_command('cmd', array(\n"
 								+ "\t'tabcompleter': get_tabcomplete_prototype('Player'),\n"
 								+ "\t'executor': closure(@alias, @sender, @args){\n\t\t/* ... */}"
 								+ "));",
-						"Provides a tabcomplete for the described scenario."),
+						"Provides a tabcomplete for the described scenario. Once the player types \"/cmd \" they will be presented with a list of currently online players to tabcomplete from."),
 				new ExampleScript("Using both player names and an array of completions. Assume our command looks like"
-						+ "\"/cmd $action $player\" where $action can be one of \"add\" or \"remove\"",
-						"get_tabcomplete_prototype(array('add', 'remove'), 'Player')",
-						"Provides a tabcomplete for the described scenario."),
+						+ "\"/cmd $action $player\" where $action can be one of \"add\" or \"remove\".",
+						"get_tabcomplete_prototype(array('add', 'remove'), 'OfflinePlayer')",
+						"Provides a tabcomplete for the described scenario. The first parameter will tabcomplete as either add/remove, and the second parameter will tabcomplete with a list of all known players - both online and offline."),
 				new ExampleScript("Using a built in enum type. Assume the command is \"/cmd $WorldEnvironment\" and we"
 						+ " expect this to be completed with one of the com.commandhelper.WorldEnvironment enum values.",
 						"get_tabcomplete_prototype(WorldEnvironment)",
@@ -438,11 +439,13 @@ public class Commands {
 								+ "});",
 						"Provides a tabcomplete for the described scenario."),
 				new ExampleScript("Using the associative array value. Using this method, we can change the autocomplete"
-						+ " of later arguments based on what the user has typed so far. Assume that the command looks"
+						+ " of later arguments based on what the user has typed so far.\n"
+						+ "\n"
+						+ "Assume that the command looks"
 						+ " like \"/cmd $action $Player $group\". The actions are \"add\" and \"remove\", and the"
 						+ " total list of groups is array(\"a\", \"b\", \"c\"), of which the player is already in"
 						+ " group \"a\". Also, assume that the procedure _get_user_groups() returns a list of groups the"
-						+ " player is already in, and _get_groups() returns a list of all groups. Note that in this case, ",
+						+ " player is already in, and _get_groups() returns a list of all groups.",
 						"get_tabcomplete_prototype(\n"
 								+ "\tarray('add', 'remove'), // first argument\n"
 								+ "\t'Player', // second argument\n"

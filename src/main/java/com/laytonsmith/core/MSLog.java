@@ -249,6 +249,9 @@ public class MSLog {
 	 * @return
 	 */
 	public boolean WillLog(Tag tag, LogLevel l) {
+		if(l == LogLevel.ALWAYS) {
+			return true;
+		}
 		LogLevel level = GetLevel(tag);
 		if(level == LogLevel.OFF) {
 			return false;
@@ -345,10 +348,11 @@ public class MSLog {
 	 */
 	public void Log(Tag modules, LogLevel level, StringProvider message, Target t, boolean printScreen) {
 		LogLevel moduleLevel = GetLevel(modules);
-		if(moduleLevel == LogLevel.OFF && !Prefs.ScreamErrors()) {
+		if(level != LogLevel.ALWAYS && moduleLevel == LogLevel.OFF && !Prefs.ScreamErrors()) {
 			return; //Bail as quick as we can!
 		}
-		if(moduleLevel.level >= level.level || (moduleLevel == LogLevel.ERROR && Prefs.ScreamErrors())) {
+		if(level == LogLevel.ALWAYS || moduleLevel.level >= level.level
+				|| (moduleLevel == LogLevel.ERROR && Prefs.ScreamErrors())) {
 			//We want to do the log
 			try {
 				Static.LogDebug(root, "[" + level.name() + "][" + modules.getName() + "] " + message.getString()
@@ -362,6 +366,28 @@ public class MSLog {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Logs the given exception at the ALWAYS level.
+	 *
+	 * @param modules
+	 * @param throwable
+	 * @param t
+	 */
+	public void always(Tag modules, Throwable throwable, Target t) {
+		Log(modules, LogLevel.ALWAYS, StackTraceUtils.GetStacktrace(throwable), t, true);
+	}
+
+	/**
+	 * Logs the given message at the ALWAYS level.
+	 *
+	 * @param modules
+	 * @param message
+	 * @param t
+	 */
+	public void always(Tag modules, String message, Target t) {
+		Log(modules, LogLevel.ALWAYS, message, t, true);
 	}
 
 	/**

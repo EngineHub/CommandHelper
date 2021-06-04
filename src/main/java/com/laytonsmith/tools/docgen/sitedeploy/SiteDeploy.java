@@ -1328,7 +1328,7 @@ public final class SiteDeploy {
 						b.append("== ").append(clazz.getSimpleName()).append(" ==\n");
 						String docs = (String) ReflectionUtils.invokeMethod(clazz, null, "docs");
 						b.append("<div>").append(docs).append("</div>\n\n");
-						b.append("{|\n|-\n");
+						b.append("{| class=\"sticky\"\n|-\n");
 						b.append("! scope=\"col\" width=\"8%\" | Function Name\n"
 								+ "! scope=\"col\" width=\"4%\" | Returns\n"
 								+ "! scope=\"col\" width=\"16%\" | Arguments\n"
@@ -1609,7 +1609,7 @@ public final class SiteDeploy {
 						b.append("== ").append(clazz.getSimpleName()).append(" ==\n");
 						String docs = (String) ReflectionUtils.invokeMethod(clazz, null, "docs");
 						b.append("<div>").append(docs).append("</div>\n\n");
-						b.append("{|\n|-\n");
+						b.append("{| class=\"sticky\"\n|-\n");
 						b.append("! scope=\"col\" width=\"7%\" | Event Name\n"
 								+ "! scope=\"col\" width=\"30%\" | Description\n"
 								+ "! scope=\"col\" width=\"20%\" | Prefilters\n"

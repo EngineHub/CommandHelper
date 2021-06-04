@@ -51,7 +51,7 @@ No permissions are required to use these.
 === Restricted Functions ===
 These often tie into game functionality and have some potential for abuse.
 
-''Example:'' '''spawn_mob()''' can be used to spawn a large number of creepers.
+''Example:'' '''spawn_entity()''' can be used to spawn a large number of creepers.
 
 Permission is required to use these. The next section describes how to give access to these functions.
 

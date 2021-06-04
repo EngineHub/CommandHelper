@@ -1,5 +1,5 @@
 
-# This is the openapi spec for apps.methodscript.com. If you make changes to this file, you must 
+# This is the openapi spec for apps.methodscript.com. If you make changes to this file, you must
 # regenerate the API code using the update-apps-api.cmd script at the root of the project (cross platform script).
 # To keep diffs to a minimum, changes to this file MUST be contained to its own pull request.
 # The OpenAPI 3.0.3 reference can be found here https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md
@@ -107,6 +107,9 @@ paths:
       responses:
         '200':
           description: If the payload was successfully forwarded.
+        '400':
+          description: >-
+            If the payload is malformed.
         '403':
           description: >-
             If the key was rejected. This can happen for a number of reasons,
@@ -117,9 +120,71 @@ paths:
           description: >-
             If the submission was successful, but Application Insights rejected
             or otherwise unsuccessfully processed the request.
-            
-          
-      
+  /builds:
+    description: Provides a list of artifact types available for download
+    get:
+      tags:
+        - builds
+      summary: Provides a list of artifact types available for download
+      responses:
+        '200':
+          description: >-
+            Returns a list of builds available.
+          content:
+            application/json:
+              schema:
+                type: string
+  /builds/{artifact}:
+    description: Provides a list of builds of the specified artifact available for download
+    get:
+      tags:
+        - builds
+      summary: Provides a list of builds of the specified artifact available for download
+      responses:
+        '200':
+          description: >-
+            Returns a list of builds available.
+          content:
+            application/json:
+              schema:
+                type: string
+      parameters:
+        - name: artifact
+          in: path
+          schema:
+            type: string
+          required: true
+          description: The artifact type to list builds for
+  /builds/{artifact}/{id}:
+    description: Downloads a specific build of the specified artifact type
+    get:
+      tags:
+        - builds
+      summary: Downloads a specific build
+      responses:
+        '200':
+          description: >-
+            If the specific build exists.
+          content:
+            application/java-archive:
+              schema:
+                format: binary
+                type: string
+        '404':
+          description: If the specific build does not exist.
+      parameters:
+        - name: artifact
+          in: path
+          schema:
+            type: string
+          required: true
+          description: The artifact type to download
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: The previously obtained id of the build you wish to download
 externalDocs:
   description: Find out more about MethodScript
   url: 'https://methodscript.com'
