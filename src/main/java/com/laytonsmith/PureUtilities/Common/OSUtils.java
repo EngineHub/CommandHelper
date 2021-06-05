@@ -1,9 +1,7 @@
 package com.laytonsmith.PureUtilities.Common;
 
 import com.laytonsmith.PureUtilities.CommandExecutor;
-import com.laytonsmith.PureUtilities.JavaVersion;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -129,29 +127,7 @@ public class OSUtils {
 	 */
 	@SuppressWarnings("checkstyle:localvariablename")
 	public static long GetMyPid() throws UnsupportedOperationException {
-		if(JavaVersion.GetMajorVersion() >= 9) {
-			try {
-				// Since we compile against Java 8, we can't directly use the class, and have to use reflection.
-				// If Java 8 support is dropped, this can be uncommented and simplified.
-				// return ProcessHandle.current().pid();
-				Class ProcessHandle = Class.forName("java.lang.ProcessHandle");
-				Object current = ReflectionUtils.invokeMethod(ProcessHandle, null, "current");
-				Object pid = ReflectionUtils.invokeMethod(ProcessHandle, current, "pid");
-				return (Long) pid;
-			} catch (ClassNotFoundException ex) {
-				throw new UnsupportedOperationException(ex);
-			}
-		} else {
-			final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
-			final int index = jvmName.indexOf('@');
-
-			try {
-				return Long.parseLong(jvmName.substring(0, index));
-			} catch (NumberFormatException e) {
-				//
-			}
-			throw new UnsupportedOperationException("Cannot find pid");
-		}
+		return ProcessHandle.current().pid();
 	}
 
 	public static class ProcessInfo {
