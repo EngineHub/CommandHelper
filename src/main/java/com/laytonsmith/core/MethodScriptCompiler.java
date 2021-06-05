@@ -2252,6 +2252,37 @@ public final class MethodScriptCompiler {
 						}
 					}
 				}
+				// In strict mode throw compile errors when encountering child statements in function arguments where
+				// statements are not acceptable because void would be an invalid argument type. This would otherwise be
+				// a runtime error in strict mode where auto-concat is not allowed and statements are used instead.
+				// This can be removed once a more comprehensive void return type check is implemented.
+				if(tree.getFileOptions().isStrict()) {
+					if(function instanceof BranchStatement) {
+						// Only check the arguments where void is unexpected in BranchStatement functions.
+						List<ParseTree> children = tree.getChildren();
+						List<Boolean> branches = ((BranchStatement) function).isBranch(children);
+						for(int arg = 0; arg < children.size(); arg++) {
+							// void/statements are okay in branches
+							if(branches.get(arg)) {
+								continue;
+							}
+							Mixed data = children.get(arg).getData();
+							if(data instanceof CFunction && data.val().equals(Compiler.__statements__.NAME)) {
+								compilerErrors.add(new ConfigCompileException("Invalid use of auto concat in "
+										+ function.getName() + "() ", data.getTarget()));
+							}
+						}
+					} else if(!function.getName().equals(Compiler.__statements__.NAME)) {
+						// All other functions besides BranchStatements and statements do not accept void/statements.
+						for(ParseTree child : tree.getChildren()) {
+							Mixed data = child.getData();
+							if(data instanceof CFunction && data.val().equals(Compiler.__statements__.NAME)) {
+								compilerErrors.add(new ConfigCompileException("Invalid use of auto concat in "
+										+ function.getName() + "() ", tree.getData().getTarget()));
+							}
+						}
+					}
+				}
 			}
 		}
 

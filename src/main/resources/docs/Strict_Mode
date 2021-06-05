@@ -40,8 +40,6 @@ mode, bare strings are not allowed, you must quote all strings.
 
 == Auto Concatenation ==
 
-(not yet implemented)
-
 Auto concatenation is when two objects with no operator between them are taken to be concatenated, with a space added
 between.
 
@@ -70,9 +68,11 @@ foreach(int @i : 1..10) {
 } // No semicolon required
 %>
 
-While this seems arbitrary, separating statements is required in two cases. Using the ++ or -- operators, it is
-ambiguous whether the operator is meant to apply to the previous value (postfix) or following value (prefix). In the
-future, direct closure execution will be allowed with parenthesis:
+While this seems arbitrary, separating statements is required in rare cases. For example, when using the
+++ or -- operators, it is ambiguous whether the operator is meant to apply to the previous value (postfix) or
+following value (prefix).
+
+Direct closure execution is allowed with parenthesis:
 
 <%CODE|
 closure @c = closure(string @value){};
@@ -119,8 +119,6 @@ auto @x = 'string';
 Please see the page on [[Cross_Casting|cross casting]] for a further discussion on the auto keyword.
 
 == Compiler Warnings ==
-
-(not yet implemented)
 
 Compiler warnings, such as deprecations and others are normally warned about, but compilation continues. In strict mode,
 these warnings instead trigger a compile error, and must be fixed immediately. However, in combination with the 
