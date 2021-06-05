@@ -61,19 +61,13 @@ Var JDK
 Var JRE
 Var UseJRE
 Var Use64Bit
+Var SkipJava
 
 Function CheckJava
 
-	Call _FindJava
-	${If} $JavaInstallationPath != ""
-		StrCpy $InstallJava "false"
-		Abort
-	${EndIf}
-
 	StrCpy $InstallJava "true"
-	!insertmacro MUI_HEADER_TEXT "Java Installation" "Select the Java version you wish to install. \
-	If you wish to install another version, exit the installer, manually install Java, then run it again. \
-	Only LTS versions are available through this installer."
+	!insertmacro MUI_HEADER_TEXT "Java Installation" "Select the Java version to install. \
+	To install another version, exit the installer, manually install Java, then run it again."
 	nsDialogs::Create 1018
 	Pop $Dialog
 
@@ -97,8 +91,10 @@ Function CheckJava
 
 		${NSD_CreateDropList} 10% 87u 80% 80u "Version"
 		Pop $JavaVersion
-			${NSD_CB_AddString} $JavaVersion "8 (recommended)"
-			${NSD_CB_AddString} $JavaVersion "11"
+			${NSD_CB_AddString} $JavaVersion "16"
+
+	${NSD_CreateCheckBox} 10% 95u 80% 80u "Skip Java Installation (MethodScript won't run without Java)"
+	Pop $SkipJava
 
 	nsDialogs::Show
 FunctionEnd
@@ -106,31 +102,39 @@ FunctionEnd
 Function LeaveJava
 	${NSD_GetState} $JRE $R0
 	${NSD_GetState} $JDK $R1
+	${NSD_GetState} $SkipJava $R2
 
-	${If} $R0 == 1
-		StrCpy $UseJRE "true"
-	${ElseIf} $R1 == 1
-		StrCpy $UseJRE "false"
-	${Else}
-		MessageBox MB_ICONEXCLAMATION "Please select either the JDK or JRE"
-		Abort
+	${If} $R2 == "1"
+		StrCpy $InstallJava "false"
+		StrCpy $R0 "16"
 	${EndIf}
 
-	${NSD_GetText} $JavaVersion $R0
+	${If} $R2 == "0"
+		${If} $R0 == 1
+			StrCpy $UseJRE "true"
+		${ElseIf} $R1 == 1
+			StrCpy $UseJRE "false"
+		${Else}
+			MessageBox MB_ICONEXCLAMATION "Please select either the JDK or JRE"
+			Abort
+		${EndIf}
 
-	${If} $R0 == ""
-		MessageBox MB_ICONEXCLAMATION "Please select the Java version you wish to install"
-		Abort
-	${ElseIf} $R0 == "8 (recommended)"
-		StrCpy $JavaVersion "8"
-	${Else}
-		StrCpy $JavaVersion $R0
-	${EndIf}
+		${NSD_GetText} $JavaVersion $R0
 
-	${If} ${RunningX64}
-		StrCpy $Use64Bit "true"
-	${Else}
-		StrCpy $Use64Bit "false"
+		${If} $R0 == ""
+			MessageBox MB_ICONEXCLAMATION "Please select the Java version you wish to install"
+			Abort
+		${ElseIf} $R0 == "16"
+			StrCpy $JavaVersion "16"
+		${Else}
+			StrCpy $JavaVersion $R0
+		${EndIf}
+
+		${If} ${RunningX64}
+			StrCpy $Use64Bit "true"
+		${Else}
+			StrCpy $Use64Bit "false"
+		${EndIf}
 	${EndIf}
 FunctionEnd
 
@@ -151,32 +155,18 @@ Section DoJavaInstall
 		goto DoJavaInstallEnd
 	${EndIf}
 	${If} $InstallJava == "true"
-		${If} $JavaVersion == "8"
+		${If} $JavaVersion == "16"
 			${If} $UseJRE == "true"
 				${If} $Use64Bit == "true"
-					StrCpy $JavaDownload "https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u282-b08/OpenJDK8U-jre_x64_windows_hotspot_8u282b08.msi"
+					StrCpy $JavaDownload "https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16.0.1%2B9/OpenJDK16U-jre_x64_windows_hotspot_16.0.1_9.msi"
 				${Else}
-					StrCpy $JavaDownload "https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u282-b08/OpenJDK8U-jre_x86-32_windows_hotspot_8u282b08.msi"
+					StrCpy $JavaDownload "https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16.0.1%2B9/OpenJDK16U-jre_x86-32_windows_hotspot_16.0.1_9.msi"
 				${EndIf}
 			${Else}
 				${If} $Use64Bit == "true"
-					StrCpy $JavaDownload "https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u282-b08/OpenJDK8U-jdk_x64_windows_hotspot_8u282b08.msi"
+					StrCpy $JavaDownload "https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16.0.1%2B9/OpenJDK16U-jdk_x64_windows_hotspot_16.0.1_9.msi"
 				${Else}
-					StrCpy $JavaDownload "https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u282-b08/OpenJDK8U-jdk_x86-32_windows_hotspot_8u282b08.msi"
-				${EndIf}
-			${EndIf}
-		${ElseIf} $JavaVersion == "11"
-			${If} $UseJRE == "true"
-				${If} $Use64Bit == "true"
-					StrCpy $JavaDownload "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jre_x64_windows_hotspot_11.0.10_9.msi"
-				${Else}
-					StrCpy $JavaDownload "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jre_x86-32_windows_hotspot_11.0.10_9.msi"
-				${EndIf}
-			${Else}
-				${If} $Use64Bit == "true"
-					StrCpy $JavaDownload "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jdk_x64_windows_hotspot_11.0.10_9.msi"
-				${Else}
-					StrCpy $JavaDownload "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.10%2B9/OpenJDK11U-jdk_x86-32_windows_hotspot_11.0.10_9.msi"
+					StrCpy $JavaDownload "https://github.com/AdoptOpenJDK/openjdk16-binaries/releases/download/jdk-16.0.1%2B9/OpenJDK16U-jdk_x86-32_windows_hotspot_16.0.1_9.msi"
 				${EndIf}
 			${EndIf}
 		${Else}

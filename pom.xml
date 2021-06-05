@@ -473,7 +473,7 @@
 				<version>3.8.1</version>
 				<configuration>
 					<showDeprecation>true</showDeprecation>
-					<release>11</release>
+					<release>16</release>
 					<compilerArgs>
 						<arg>-XDignore.symbol.file</arg>
 						<arg>-parameters</arg>
@@ -509,7 +509,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.2.4</version>
+				<version>3.3.0-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<id>ShadedBundle</id>
@@ -990,7 +990,7 @@
 						<!-- Include custom, none specific classes -->
 						<include>**/RandomTests.java</include>
 					</includes>
-					<argLine>${argLine}</argLine>
+					<argLine>-Dfile.encoding=UTF-8 --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED</argLine>
 				</configuration>
 			</plugin>
 
@@ -1138,6 +1138,10 @@
 		<pluginRepository>
 			<id>maven-central</id>
 			<url>https://repo.maven.apache.org/maven2/</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>apache-snapshots</id>
+			<url>https://repository.apache.org/content/repositories/snapshots/</url>
 		</pluginRepository>
 	</pluginRepositories>
 	<reporting>
