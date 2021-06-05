@@ -616,7 +616,7 @@
             <include>**/*TestCase.java</include>
             <include>**/RandomTests.java</include>
           </includes>
-          <argLine>--add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED</argLine>
+          <argLine>-Dfile.encoding=UTF-8 --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED</argLine>
         </configuration>
       </plugin>
       <plugin>
