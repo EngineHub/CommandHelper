@@ -45,10 +45,18 @@ public enum MSVersion implements Version {
 		this.version = new SemVer2(version);
 	}
 
+	/**
+	 * Returns the version string such as "3.3.4"
+	 * @return
+	 */
 	public String getVersionString() {
 		return this.version.toString();
 	}
 
+	/**
+	 * Returns the version string such as "3.3.4"
+	 * @return
+	 */
 	@Override
 	public String toString() {
 		return this.version.toString();
@@ -62,25 +70,45 @@ public enum MSVersion implements Version {
 		}
 	}
 
+	/**
+	 * Returns for instance 1 in the version number 1.2.3
+	 * @return
+	 */
 	@Override
 	public int getMajor() {
 		return this.version.getMajor();
 	}
 
+	/**
+	 * Returns for instance 2 in the version number 1.2.3
+	 * @return
+	 */
 	@Override
 	public int getMinor() {
 		return this.version.getMinor();
 	}
 
+	/**
+	 * Returns for instance 3 in the version number 1.2.3
+	 * @return
+	 */
 	@Override
 	public int getSupplemental() {
 		return this.version.getSupplemental();
 	}
 
+	/**
+	 * Returns for instance 3 in the version number 1.2.3
+	 * @return
+	 */
 	public int getPatch() {
 		return this.version.getPatch();
 	}
 
+	/**
+	 * Returns the prerelease tag
+	 * @return
+	 */
 	public String getPrerelease() {
 		return this.version.getPrerelease();
 	}

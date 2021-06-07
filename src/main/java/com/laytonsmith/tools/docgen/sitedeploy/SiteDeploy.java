@@ -1195,6 +1195,16 @@ public final class SiteDeploy {
 			}
 		});
 		totalGenerateTasks.addAndGet(1);
+		generateQueue.submit(() -> {
+			try {
+				writeFromString("{\"currentVersion\":\"" + MSVersion.LATEST.getVersionString() + "\"}",
+						"../../currentVersion.json");
+				currentGenerateTask.addAndGet(1);
+			} catch (Throwable t) {
+				writeLog("Failure!", t);
+			}
+		});
+		totalGenerateTasks.addAndGet(1);
 	}
 
 	/**

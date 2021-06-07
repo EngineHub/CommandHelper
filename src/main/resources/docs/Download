@@ -1,10 +1,18 @@
 
 <style type="text/css">
-#downloadList {
+.downloadList {
 	border: 1px solid black;
     padding: 1em;
+	max-height: 10em;
+    overflow: auto;
 }
-
+#jars {
+	border: 2px solid black;
+	padding: 2em;
+}
+#jars.legend {
+	padding: 0 1em;
+}
 </style>
 <script src="%%cacheBuster|js/download.js%%" type="text/javascript"></script>
 
@@ -13,7 +21,32 @@ time between versioned releases is very long. Only the latest version is current
 can use <code>mscript -- update-check</code> to see if a newer version is available, and
 <code>mscript -- update</code> to automatically update to the latest version.-->
 
-<div id="downloadList">
+<fieldset id="jars">
+	<legend>Jars</legend>
+	<p>This is the normal dev build pipeline, and the recommended build here is what you should get unless you
+	specifically need something else.</p>
+	<div class="downloadList" id="commandhelperjar">
+		<div class="loadingSection">
+			<img src="%%cacheBuster|images/CommandHelper_IconAnimated.gif%%" style="width: 100px;">
+			<br>
+			Loading version information
+		</div>
+	</div>
+	<p>If you need a specific build, these are the manually "pinned" builds of various milestone builds. You should
+	only download from this list if there is something specific that you need.</p>
+	<div class="downloadList" id="commandhelperpinned">
+		<div class="loadingSection">
+			<img src="%%cacheBuster|images/CommandHelper_IconAnimated.gif%%" style="width: 100px;">
+			<br>
+			Loading version information
+		</div>
+	</div>
+</fieldset>
+<p>
+This is the Windows Cmdline installer. This is the preferred (though not only) way of installing the cmdline version
+on Windows.
+</p>
+<div class="downloadList" id="commandhelperwindowsinstaller">
 	<div class="loadingSection">
 		<img src="%%cacheBuster|images/CommandHelper_IconAnimated.gif%%" style="width: 100px;">
 		<br>
