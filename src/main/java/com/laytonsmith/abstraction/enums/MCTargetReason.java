@@ -17,5 +17,7 @@ public enum MCTargetReason {
 	FOLLOW_LEADER,
 	TEMPT,
 	CUSTOM,
+	TARGET_OTHER_LEVEL, // Paper
+	TARGET_INVALID, // Paper
 	UNKNOWN
 }

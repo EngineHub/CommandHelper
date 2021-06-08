@@ -10,5 +10,6 @@ public enum MCIgniteCause {
 	LIGHTNING,
 	FIREBALL,
 	ENDER_CRYSTAL,
-	EXPLOSION
+	EXPLOSION,
+	ARROW
 }
