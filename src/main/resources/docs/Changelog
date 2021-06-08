@@ -1,5 +1,42 @@
+==3.3.3==
+This release reflects the enormous changes in Minecraft 1.13, and drops support for past Minecraft versions.
+As a result it has many breaking changes in regards to Minecraft data, functions and events. Please refer to the
+[[Upgrade Guide|upgrade guide]] to help you walk through what you need to change.
+
+=== New Feature Overview ===
+* Minecraft 1.13 support
+* Manage villager trades and virtual merchants
+
+=== Function API Changes ===
+
+MethodScript Additions: {{function|set_debug_output}}, {{function|array_intersect}}, {{function|hash}},
+{{function|array_subset_of}}, {{function|uuid}}.
+
+Minecraft Additions: {{function|get_block}} (replaces get_block_at), {{function|set_block}} (replaces set_block_at),
+{{function|get_blockdata_string}}, {{function|set_blockdata_string}}, {{function|convert_legacy_item}},
+{{function|get_mob_target}}, {{function|set_mob_target}}, {{function|create_trade}}, {{function|delete_trade}},
+{{function|get_trades}}, {{function|get_merchant_trades}}, {{function|set_merchant_trades}},
+{{function|get_virtual_merchants}}, {{function|create_virtual_merchant}}, {{function|delete_virtual_merchant}},
+{{function|popen_trading}}, {{function|merchant_trading}}, {{function|get_entity_riders}}.
+
+Modified: (not including item array changes) {{function|can_enchant_target}}, {{function|get_enchants}},
+{{function|entity_spec}} and {{function|set_entity_spec}} for enderman and minecart blocks, {{function|phas_item}},
+{{function|pitem_slot}}, {{function|pgive_item}}, {{function|ptake_item}}, {{function|pgive_enderchest_item}},
+{{function|ptake_enderchest_item}}, {{function|add_to_inventory}}, {{function|take_from_inventory}},
+{{function|max_stack_size}}, {{function|material_info}}, {{function|entity_line_of_sight}} and {{function|pcursor}} with
+the transparent block array, {{function|pinfo}}, {{function|psend_block_change}}, {{function|spawn_falling_block}}.
+
+=== Event API Changes ===
+
+Modified events: piston_retract, piston_extend, block_break, block_place, block_burn, block_ignite, block_from_to,
+block_dispense, block_grow, note_play (no more mutable data), block_fade, item_despawn, item_spawn, item_drop,
+item_pickup, entity_change_block, entity_interact, inventory_click, inventory_drag, item_swap, player_interact,
+vehicle_collide.
+
+Removed event: player_prelogin, tab_complete_chat.
+
 ==3.3.2==
-Developed over two and a half years, CommandHelper 3.3.2 compatibility stretches from Minecraft 1.7.10 to 1.12.2, and offers many new features, fixes, and optimizations.
+CommandHelper 3.3.2 supports Minecraft 1.7.10 to 1.12.2.
 
 === New Feature Overview ===
 * New "synchronized" keyword and functionality
@@ -25,8 +62,8 @@ MethodScript Additions:
 
 {{function|dand}}, {{function|dor}}, {{function|get_clipboard}}, {{function|set_clipboard}}, {{function|shell_on_adv}},
 {{function|shell_on}}, {{function|get_os}}, {{function|in_cmdline_mode}}, {{function|sha512}}, {{function|sinh}},
-{{function|cosh}}, {{function|tanh}}, {{function|round15}}, {{function|clamp}}, {{function|x_get_oath_token}},
-{{function|clear_oath_tokens}}, {{function|srand}}, {{function|x_recompile_includes}}, {{function|get_system_timezones}},
+{{function|cosh}}, {{function|tanh}}, {{function|round15}}, {{function|clamp}}, {{function|x_get_oauth_token}},
+{{function|clear_oauth_tokens}}, {{function|srand}}, {{function|x_recompile_includes}}, {{function|get_system_timezones}},
 {{function|string_starts_with}}, {{function|string_ends_with}}, {{function|char_is_uppercase}},
 {{function|string_contains}}, {{function|string_multiply}}, {{function|secure_string}},
 {{function|decrypt_secure_string}}, {{function|synchronized}}, and {{function|x_launch_browser}}
@@ -388,7 +425,7 @@ Note that permissions take priority from left to right. So, say that a user is i
 <pre>
 /cmd = if(boolean, /run this command, /else run this command)
 </pre>
-In previous versions, you had to group the "if" and "else" portions seperately, in this case, you would likely have used sconcat() though g() would have worked. Now, the commas separate the arguments, with tokens between commas automatically being sconcatenated together. 
+In previous versions, you had to group the "if" and "else" portions separately, in this case, you would likely have used sconcat() though g() would have worked. Now, the commas separate the arguments, with tokens between commas automatically being sconcatenated together.
 *The compiler for the scripting language has been broken out of the CommandHelper core. The language itself is now called MScript, and CommandHelper simply hooks into MScript to generate commands to run. This allows me to more easily add other events in the future. Also, in future versions, I will make it so that other plugin authors can hook into MScript to allow their plugins to run MScripts, so that plugin authors can give users more control over the plugin, when applicable. Let's look at the structure of an alias again:
 <pre>
 /alias command name and $variables = MScript \ MScript \ MScript

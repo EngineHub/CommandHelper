@@ -1,0 +1,159 @@
+Updating to new versions of CommandHelper or Minecraft can sometimes require updates to your scripts and/or extensions.
+Below is a reverse chronological guide to help you with some of these changes to quickly update your code.
+
+----
+
+== Minecraft 1.16.1 ==
+The following breaking changes exist:
+
+* PIG_ZOMBIE entity type was changed to ZOMBIFIED_PIGLIN. This matches the material change from ZOMBIE_PIGMAN_SPAWN_EGG to ZOMBIFIED_PIGLIN_SPAWN_EGG.
+* NETHER biome type was changed to NETHER_WASTES.
+
+The above changes will automatically convert (and warn) when setting (eg. spawn_entity('PIG_ZOMBIE')), but will break
+when reading in a comparison. (eg. entity_type() == 'PIG_ZOMBIE')
+
+----
+
+== Minecraft 1.14.4 ==
+The following breaking changes exist:
+
+* Villager professions have completely changed.
+* Ocelots can no longer be tamed or sit.
+* The following materials are removed but will be converted in legacy item arrays or when using set_block(): CACTUS_GREEN, DANDELION_YELLOW, ROSE_RED, SIGN, WALL_SIGN.
+* TIPPED_ARROW and LINGERING_POTION entity types no longer exist and will be converted to ARROW and SPLASH_POTION respectively.
+
+----
+
+== Minecraft 1.13.2 / CommandHelper 3.3.3 ==
+Updating to 1.13 is a major overhaul, and there was no easy way around this. Fallback behavior was created where
+reasonably possible to make the transition somewhat smoother, but this will still be a large undertaking.
+
+Block/item numeric ids are no longer guaranteed to be accurate and many material names are changed, though these will be
+temporarily supported as inputs to functions for some time. This has several consequences that you'll need to address in
+your scripts.
+
+=== Item Array Format Changes ===
+While you can still input old item arrays, the output of item functions and events has been changed to reflect changes
+in Minecraft.
+
+Where previously you might get an item array object in this format:
+
+<pre>
+{name: BOW, type: 262, data: 81, qty: 1, enchants: {{elevel: 1, etype: DURABLITY}},
+meta: {display: null, lore: null, enchants: {{elevel: 1, etype: DURABILITY}},
+unbreakable: false, flags: {}, repair: 1}}
+</pre>
+
+Now it will return an array object in this format:
+
+<pre>
+{name: BOW, qty: 1, meta: {damage: 81, display: null, lore: null, unbreakable: false,
+enchants: {unbreaking: {elevel: 1, etype: DURABILITY}}, flags: {}, repair: 1}}
+</pre>
+
+Note that the keys "type", "data" and "enchants" were removed from the parent array. The old "type" numeric id has been
+replaced by "name". The "data" value is only relevant for item durability now, so this was moved into the meta array
+under the key "damage", and is only present if the item is damageable. (ie. if max durability is above 0) The "enchants"
+key was redundant to the one in the meta array, and its format has been modified to reflect how you can't have more than
+one enchantment of the same type. It now uses minecraft names for enchantment keys too, to be easier to use. (old names
+and format are still accepted)
+
+Some specific item meta keys have changed as well. For banners, "basecolor" has been removed as it's defined by the
+banner item name. (eg. "RED_BANNER") Similarly, spawn eggs no longer have the "spawntype" key because that's defined by
+the material name too. (eg. "BAT_SPAWN_EGG") The map "data" key has been replaced with a meta key "mapid".
+
+Many material names under the key "name" have been changed, but will always be converted as long as they don't have a
+name conflict. Most critically, you should probably address any item array with the "data" key, as these best indicate
+possible conversion problems. For any hard-coded item arrays, delete the "type" and "data" keys (their presence
+indicates a legacy item array and will be attempted to be converted) and rename the "name" key to the new material name.
+The new materials names should be the same as in the Minecraft wiki and in-game. You can move the damage value into the
+meta array if needed. A convenience function convert_legacy_item() will take an old item array and output a new item array.
+This is useful for updating items that might be stored in a persistence database. The function data_name() now accepts
+old material names, ids and string formats and converts them to modern material names. This is useful for conversion of
+databases or maybe user input.
+
+=== Biome Names Changed ===
+These now better reflect their minecraft names. If you use get|set_biome() functions, you can look up these new enums
+with reflect_pull('enum', 'BiomeType') or in the documentation.
+
+=== Painting Names Changed ===
+Two paintings just had a space added to them: BURNING_SKULL and DONKEY_KONG.
+
+=== Item/Block String Format Deprecated ===
+The "0:0" format is no longer guaranteed to be accurate, so it's deprecated wherever it's used. In most cases you will
+be warned on compile time if you use these anywhere. If not, you will be warned in the log at runtime, but the
+item/block will be attempted to be converted. Notably, get|set_block_at() has been deprecated for get|set_block(). If
+you need to read or write block data, the get|set_blockdata_string() functions are available until further functionality
+is added. These use the same format as vanilla block commands.
+
+=== Changed DyeColor "SILVER" to "LIGHT_GRAY" ===
+This now matches vanilla and material names to be easier to use. SILVER is still accepted and will be converted, but is
+discouraged.
+
+=== Recipe Keys Required ===
+Recipes now require a key to be added, where previously it was optional and randomly generated. This should just be a
+unique name describing the recipe you're adding. (eg. 'key': 'ice_to_packed_ice') Recipe ingredients, of course, should
+use item arrays instead of the string formats.
+
+=== CommandBlock Changes ===
+In addition the vanilla changes to commands, they no longer automatically process vanilla selectors for plugin commands.
+You will have to implement selectors yourself if you need this behavior.
+
+=== Event Removals ===
+The event tab_complete_chat is removed because clients no longer send these to the server. The event
+player_prelogin_event is removed because it was deprecated in Spigot due to syncing issues, and it's mostly redundant to
+player_login.
+
+=== Sound Changes ===
+Pre-1.9 sound names are all removed and some post 1.9 sounds have been updated to reflect 1.13. However, these will no
+longer cause play_sound() to throw an exception. Instead, it will warn in the log and continue running.
+play_named_sound() always behaved like this, but did so silently. play_sound() will now simply warn you if the sound
+didn't play because the name is incorrect. You can refer the Minecraft wiki or the Spigot documentation for the complete
+list. You can also use reflect_pull('enum', 'Sound') to get the list in a script.
+
+=== Event Data Changes ===
+The following events' prefilters, event data, and/or mutable data were updated: piston_retract, piston_extend,
+block_break, block_place, block_burn, block_ignite, block_from_to, block_dispense, block_grow, note_play, block_fade,
+item_despawn, item_spawn, item_drop, item_pickup, entity_change_block, entity_interact, inventory_click, inventory_drag,
+item_swap, player_interact, and vehicle_collide.
+
+While some of these are obvious or may not affect you, please refer to the event documentation to update your prefilters
+and which keys you're reading from. A common theme is "item" prefilters are changed to "itemname", and like "block" keys
+and prefilters, now use the material name instead of the item/block string format. (eg. "0:0") In a special case in
+player_interact, if you want to check if they didn't click a block, check where "block" equals null. These are sensible
+but extensive changes, so I may add a list here later. Searching for "data" in general or "item" in prefilters will help
+fix a lot of them.
+
+=== Other Changes ===
+There are a number of other changes, but less critical to this guide. If you focus on the above changes, everything else
+will be easier.
+
+----
+
+== Minecraft 1.12.1 ==
+CommandBlocks now call aliases without needing /runalias. So if you have an alias for a vanilla command and there are
+CommandBlocks that use the vanilla command, it may break. A manual fix is to add the "minecraft:" prefix to those
+commands in the affected CommandBlocks. (eg. /fill to /minecraft:fill) To be clear, this does NOT affect CommandBlocks
+that already use /runalias or vanilla commands that do not have aliases.
+
+----
+
+== Minecraft 1.11.2 ==
+You can no longer set_exp() above 100. In 1.11.2, setting exp to exactly 100 will now give that player a new level and
+reset exp to 0%. Set to 99 to avoid this.
+
+----
+
+== Minecraft 1.11 ==
+Minecraft changed entity subtypes to be their own entity type. You may need to search for instances of "guardian",
+"skeleton", "zombie", and "horse". Changing an entity's subtype using set_entity_spec() is no longer supported. Also if
+you're checking for an entity type in an event bind, you'll need to update that to include a list of all subtypes.
+(Example: instead of "HORSE" you'll need to check for "HORSE", "MULE", "DONKEY", "ZOMBIE_HORSE", "SKELETON_HORSE",
+and/or "LLAMA".)
+
+----
+
+== Minecraft 1.9 ==
+One or two player_interact events will fire now with the addition of the off_hand. If two, it's one for each hand. If
+one, it might be the main_hand or off_hand. Some scripts need to be considered for double event firing. Any script that
+looks at the item array will need to be updated for off hand support.
