@@ -1,7 +1,7 @@
 ==3.3.3==
 This release reflects the enormous changes in Minecraft 1.13, and drops support for past Minecraft versions.
 As a result it has many breaking changes in regards to Minecraft data, functions and events. Please refer to the
-[[Upgrade Guide|upgrade guide]] to help you walk through what you need to change.
+[[Upgrade_Guide|upgrade guide]] to help you walk through what you need to change.
 
 === New Feature Overview ===
 * Minecraft 1.13 support
@@ -14,10 +14,9 @@ MethodScript Additions: {{function|set_debug_output}}, {{function|array_intersec
 
 Minecraft Additions: {{function|get_block}} (replaces get_block_at), {{function|set_block}} (replaces set_block_at),
 {{function|get_blockdata_string}}, {{function|set_blockdata_string}}, {{function|convert_legacy_item}},
-{{function|get_mob_target}}, {{function|set_mob_target}}, {{function|create_trade}}, {{function|delete_trade}},
-{{function|get_trades}}, {{function|get_merchant_trades}}, {{function|set_merchant_trades}},
+{{function|get_mob_target}}, {{function|set_mob_target}}, {{function|get_merchant_trades}}, {{function|set_merchant_trades}},
 {{function|get_virtual_merchants}}, {{function|create_virtual_merchant}}, {{function|delete_virtual_merchant}},
-{{function|popen_trading}}, {{function|merchant_trading}}, {{function|get_entity_riders}}.
+{{function|popen_trading}}, {{function|merchant_trader}}, {{function|get_entity_riders}}.
 
 Modified: (not including item array changes) {{function|can_enchant_target}}, {{function|get_enchants}},
 {{function|entity_spec}} and {{function|set_entity_spec}} for enderman and minecart blocks, {{function|phas_item}},
@@ -238,22 +237,22 @@ player_toggle_sprint, item_spawn, hanging_break, book_edited, and plugin_message
 
 ===Update Breakages===
 * include/read now require paths that are relative to the location of the current file. This should be an easy fix.
-* Your persistance database is in the wrong format. Unlike previous versions, you do not need to delete the database, you simply need to upgrade it. (Unless you're upgrading from before 3.2.0, in which case you still do need to delete the persistance.ser file, and then you're set.) If you have not used user aliases or persistance in the past, this step is unnecessary. Rename/copy/symlink your bukkit jar to bukkit.jar for this to work. From a command prompt, change to the plugins directory and run <code>java -jar CommandHelper.jar --manager</code>. This will launch the Data Manager, at which point you can run the upgrade command. Once this is complete, your data is now converted to the new format! Do not run the data manager while your server is up. In lieu of this, you may also simply delete your persistance.ser file, in which case all data will be lost, but it will re-create the db in the correct format in the future, without any interaction from you. Be sure to check out the other features in the data manager while you're there!
+* Your persistance database is in the wrong format. Unlike previous versions, you do not need to delete the database, you simply need to upgrade it. (Unless you're upgrading from before 3.2.0, in which case you still do need to delete the persistence.ser file, and then you're set.) If you have not used user aliases or persistence in the past, this step is unnecessary. Rename/copy/symlink your bukkit jar to bukkit.jar for this to work. From a command prompt, change to the plugins directory and run <code>java -jar CommandHelper.jar --manager</code>. This will launch the Data Manager, at which point you can run the upgrade command. Once this is complete, your data is now converted to the new format! Do not run the data manager while your server is up. In lieu of this, you may also simply delete your persistance.ser file, in which case all data will be lost, but it will re-create the db in the correct format in the future, without any interaction from you. Be sure to check out the other features in the data manager while you're there!
 * is_* ({{function|is_null}}, {{function|is_integer}}, etc) functions are slightly altered. Most people weren't using these functions, but if you were, you will want to check the API for information on the changes to this function.
 * {{function|pinv}} and {{function|set_pinv}} take different formatted arguments. Check the API for the new usage.
 * play-dirty mode is currently broken due to the new event system implementation. This will be fixed at a later date, but you may not need it any more, since plugins have all been updated now.
 
 ===New Feature Overview===
 * Colors work in the terminal now. The exception is if you're on a windows machine, in which case, no colors for you :( sorry. Also, CH has a cool new splash screen (you can disable it in the preferences).
-* Data Manager - You can now view the persistance data much easier, thanks to the data manager. Be sure to explore all the options. Read up on it at the [[Data Manager|page on the data manager]].
+* Data Manager - You can now view the persistence data much easier, thanks to the data manager. Be sure to explore all the options. Read up on it at the [[Data_Manager|page on the data manager]].
 * Abstraction layer - While you won't see this directly, know that it's much easier to move CH from server type to server type, should bukkit or whatever other server mod become obsolete. This means that CH should live on past server mods, with your scripts safe from the changes!
-* Namespaces in persistance, and improved performance in persistance - Persistance is now much more efficient. In addition, namespace support has been implemented. If you namespace your data using periods, you can much more easily manipulate the data that has been stored. Be sure to re-read the API in the Persistance section, as all the functions have new features now.
-* Events added - Events are now here! Read up on the [[Events|Events overview]] for basic information relating to all events, and check out the [[Event API|Event API]] for details on specific events, as well as what events are available. This list will continue to grow as more events are added!
+* Namespaces in persistence, and improved performance in persistence - Persistence is now much more efficient. In addition, namespace support has been implemented. If you namespace your data using periods, you can much more easily manipulate the data that has been stored. Be sure to re-read the API in the Persistance section, as all the functions have new features now.
+* Events added - Events are now here! Read up on the [[Events|Events overview]] for basic information relating to all events, and check out the [[Event_API|Event API]] for details on specific events, as well as what events are available. This list will continue to grow as more events are added!
 * ifelse and switch - Now it is much easier to chain if statements. Check out the [[Logic#ifelse()|wiki page on logic]] for more information.
 * Arrays are associative - Now you can store a value in an array not only with a numeric index, but you can also use strings! Many functions now use this feature, since it's much easier to read and use, but you need to be familiar with the changes for them to make sense. Check out the additional section in the wiki page [[Arrays|on arrays]]
 * bitwise operations - binary operations! Check the API page for details.
 * Basic crypto functions - If you need to hash things, this is now possible.
-* import/export - Import and export work like the persistance functions, except they are in-memory only, and won't survive past server restarts (or /reloadaliases, for that matter). There are two modes of operation, so read the API carefully if you use these functions.
+* import/export - Import and export work like the persistence functions, except they are in-memory only, and won't survive past server restarts (or /reloadaliases, for that matter). There are two modes of operation, so read the API carefully if you use these functions.
 * More defined data types, in addition to casting and converting functions - Data types were loosely defined before. Now the definition is well defined, and there are functions to help you manipulate this data.
 * Enchantment api - You can now control enchantments in a player's inventory
 * Sign api - Change the text of signs with functions! This function allows you to colorize the text on the sign as well, when used in combination with the color() function.
@@ -373,31 +372,28 @@ Here's a full list of all the new functions. Check out the API for details on ea
 
 
 ==3.2.0==
-*Player's pitch and yaw (the way they're facing) is preserved when using set_ploc
-*Fixed a bug when dealing with offline players in pinfo (as well as a few other functions)
-*substr() now works properly if the last argument is left off
-*When using an ivar as the second parameter in assign(), it works properly now.
-*Added [[Interpreter Mode|interpreter mode]]!
-*Added user defined procedures
-*read() and include() are subject to the base-dir restriction now
-*%%NOWIKI|#%% comments work even if they aren't the first character on the line. C style block comments are also available. %%NOWIKI|/* */%%
-*Commands can be run from the console. If the command doesn't make sense to run without a player, the command should fail gracefully.
-*Added include and procedures. See [[Procedures|this page]] for more details.
-*Potion Effects can now be accessed with set_peffect. See [http://www.minecraftwiki.net/wiki/Potion_effects the guide] on the minecraft wiki for ID numbers and other information
-*Added case-sensitive option to make it possible to toggle command matching being case sensitive or not
-*[[Arrays|Arrays]] are much more flexible now
-*The \u escape sequence is implemented in the lexer. This allows insertion of arbitrary unicode characters into scripts.
-*The WG/WE series of functions are implemented now
-*Added functions: sqrt, include, proc, return, pinv, set_pinv, min, max, is_proc, call_proc, pexp/set_pexp (experimental), ptexp/set_ptexp (experimental), plevel/set_plevel (experimental), pmode/set_pmode, set_peffect (requires CraftBukkit), array_resize, range, Economy Functions, call_alias, item_drop, set_phealth, equals_ic, sk_all_regions, sk_pos1, sk_pos2, sk_region_info, sk_region_overlaps
+* Player's pitch and yaw (the way they're facing) is preserved when using set_ploc
+* Fixed a bug when dealing with offline players in pinfo (as well as a few other functions)
+* substr() now works properly if the last argument is left off
+* When using an ivar as the second parameter in assign(), it works properly now.
+* Added [[Interpreter_Mode|interpreter mode]]!
+* Added user defined procedures
+* read() and include() are subject to the base-dir restriction now
+* %%NOWIKI|#%% comments work even if they aren't the first character on the line. C style block comments are also available. %%NOWIKI|/* */%%
+* Commands can be run from the console. If the command doesn't make sense to run without a player, the command should fail gracefully.
+* Added include and procedures. See [[Procedures|this page]] for more details.
+* Potion Effects can now be accessed with set_peffect. See [http://www.minecraftwiki.net/wiki/Potion_effects the guide] on the minecraft wiki for ID numbers and other information
+* Added case-sensitive option to make it possible to toggle command matching being case sensitive or not
+* [[Arrays|Arrays]] are much more flexible now
+* The \u escape sequence is implemented in the lexer. This allows insertion of arbitrary unicode characters into scripts.
+* The WG/WE series of functions are implemented now
+* Added functions: sqrt, include, proc, return, pinv, set_pinv, min, max, is_proc, call_proc, pexp/set_pexp (experimental), ptexp/set_ptexp (experimental), plevel/set_plevel (experimental), pmode/set_pmode, set_peffect (requires CraftBukkit), array_resize, range, Economy Functions, call_alias, item_drop, set_phealth, equals_ic, sk_all_regions, sk_pos1, sk_pos2, sk_region_info, sk_region_overlaps
 
 ==3.1.2==
-* Added exception handling, and fixed more bugs with command matching and 
-optional variables. Also added more advanced permission syntax for commands.
-* Added functions: set_display_name, reset_display_name, try, array_index_exists,
-is_array, is_boolean, is_double, is_integer, is_null, is_string, substr, to_lower,
-to_upper, length, throw
-*msg() and all other applicable Echoes functions now handle newlines and linebreaks properly. Besides being able to use a \n character to mean a newline character, word wrapping now occurs at word boundaries instead of arbitrarily. Thanks to Reil for the code to do that! Also, if a file is read in with read(), and it has newlines in it, newline characters are passed through to the other functions properly.
-*Permissions handling just got easier. In addition to being able to label a command, and giving that group/user permission to commandhelper.alias.label, you can give groups permissions to certain commands by doing:
+* Added exception handling, and fixed more bugs with command matching and optional variables. Also added more advanced permission syntax for commands.
+* Added functions: set_display_name, reset_display_name, try, array_index_exists, is_array, is_boolean, is_double, is_integer, is_null, is_string, substr, to_lower,to_upper, length, throw
+* msg() and all other applicable Echoes functions now handle newlines and linebreaks properly. Besides being able to use a \n character to mean a newline character, word wrapping now occurs at word boundaries instead of arbitrarily. Thanks to Reil for the code to do that! Also, if a file is read in with read(), and it has newlines in it, newline characters are passed through to the other functions properly.
+* Permissions handling just got easier. In addition to being able to label a command, and giving that group/user permission to commandhelper.alias.label, you can give groups permissions to certain commands by doing:
 <pre>
 ~admin:/adminOnlyCommand = msg('This is an admin only command')
 </pre>
@@ -414,39 +410,39 @@ Further, you can ''revoke'' permissions by putting a dash in front, like so:
 
 Note that permissions take priority from left to right. So, say that a user is in the 'mods' and 'builder' groups. If the setup were in this order: ~mods/-builder, then the user would have permission, but if it were ~-builder/mods, they would not. If the user is not in one of the listed groups, that group name is ignored.
 
-*Checking that you are passing the correct number of arguments to a function is now done at compile time. This will potentially help reduce the numbers of errors in a script.
+* Checking that you are passing the correct number of arguments to a function is now done at compile time. This will potentially help reduce the numbers of errors in a script.
 
 ==3.1.1==
 *Fixed a bug where no argument functions in the root of the command would give a compile error.
 
 ==3.1.0==
-*Added several new functions, including eval, set_ploc, time, nano_time, break, continue, get_worlds, pworld, pinfo, and kick. Also, reorganized the source code, and made it so that if one command would cause a compiler error, the entire script won't be affected, but just the one command. Also, concatenation automatically happens now, the g() function is no longer necessary. Debug mode now outputs what real command is being run, if debug mode is on. It is now possible to define the location of your config file, in the preferences.txt file. See the [[Upgrade Notices|upgrade notices]] for information about upgrading your scripts from 3.0.2 to 3.1.0.
-*Compiler re-organized and modified. The g() function is no longer necessary, but is still defined, so scripts will remain backwards compatible. Also, scripts with compiler errors will most likely only break the individual command that has the error, the entire script will no longer fail. Of course if the compiler can't determine where the end of the command is (for instance a missing multiline end symbol) more of the script will fail. The sconcat() function is no longer necessary. Let's look at the following code:
+* Added several new functions, including eval, set_ploc, time, nano_time, break, continue, get_worlds, pworld, pinfo, and kick. Also, reorganized the source code, and made it so that if one command would cause a compiler error, the entire script won't be affected, but just the one command. Also, concatenation automatically happens now, the g() function is no longer necessary. Debug mode now outputs what real command is being run, if debug mode is on. It is now possible to define the location of your config file, in the preferences.txt file. See the [[Upgrade Notices|upgrade notices]] for information about upgrading your scripts from 3.0.2 to 3.1.0.
+* Compiler re-organized and modified. The g() function is no longer necessary, but is still defined, so scripts will remain backwards compatible. Also, scripts with compiler errors will most likely only break the individual command that has the error, the entire script will no longer fail. Of course if the compiler can't determine where the end of the command is (for instance a missing multiline end symbol) more of the script will fail. The sconcat() function is no longer necessary. Let's look at the following code:
 <pre>
 /cmd = if(boolean, /run this command, /else run this command)
 </pre>
 In previous versions, you had to group the "if" and "else" portions separately, in this case, you would likely have used sconcat() though g() would have worked. Now, the commas separate the arguments, with tokens between commas automatically being sconcatenated together.
-*The compiler for the scripting language has been broken out of the CommandHelper core. The language itself is now called MScript, and CommandHelper simply hooks into MScript to generate commands to run. This allows me to more easily add other events in the future. Also, in future versions, I will make it so that other plugin authors can hook into MScript to allow their plugins to run MScripts, so that plugin authors can give users more control over the plugin, when applicable. Let's look at the structure of an alias again:
+* The compiler for the scripting language has been broken out of the CommandHelper core. The language itself is now called MScript, and CommandHelper simply hooks into MScript to generate commands to run. This allows me to more easily add other events in the future. Also, in future versions, I will make it so that other plugin authors can hook into MScript to allow their plugins to run MScripts, so that plugin authors can give users more control over the plugin, when applicable. Let's look at the structure of an alias again:
 <pre>
 /alias command name and $variables = MScript \ MScript \ MScript
 </pre>
 The portions of an alias that are actually part of the MScript language are shown. All other parts are simply identifiers for CommandHelper specifically. While there is still a great deal of integration with the alias engine, the MScript portions can now be used standalone in future applications.
-*eval() functions are now available. As implied, eval() allows arbitrary MScript to be executed.
-*Debug mode now outputs what real command is being run, if debug mode is set to true
-*You can now define the name/location of your config file. In the preferences.txt file, the script-name property defines this value.
+* eval() functions are now available. As implied, eval() allows arbitrary MScript to be executed.
+* Debug mode now outputs what real command is being run, if debug mode is set to true
+* You can now define the name/location of your config file. In the preferences.txt file, the script-name property defines this value.
 
 
 ==3.0.2==
-*Added new functions to allow scripts to interact with the environment around the player. 
+* Added new functions to allow scripts to interact with the environment around the player.
 
 ==3.0.1==
-*Added several new functions, including a foreach loop, and the g function. See the [[Upgrade Notices|upgrade notices]] for information about upgrading your scripts from 3.0.0 to 3.0.1. 
+* Added several new functions, including a foreach loop, and the g function. See the [[Upgrade_Notices|upgrade notices]] for information about upgrading your scripts from 3.0.0 to 3.0.1.
 
 ==3.0.0==
-*Completly reworked the engine. Essentially a new plugin. 
+* Completely reworked the engine. Essentially a new plugin.
 
 ==2.0.1==
-*Updated to work again. 
+* Updated to work again.
 
 ==2.0==
-*Updated for Bukkit.
+* Updated for Bukkit.
