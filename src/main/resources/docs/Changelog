@@ -10,13 +10,16 @@ As a result it has many breaking changes in regards to Minecraft data, functions
 === Function API Changes ===
 
 MethodScript Additions: {{function|set_debug_output}}, {{function|array_intersect}}, {{function|hash}},
-{{function|array_subset_of}}, {{function|uuid}}.
+{{function|array_subset_of}}, {{function|uuid}}, {{function|get_classes}}.
 
 Minecraft Additions: {{function|get_block}} (replaces get_block_at), {{function|set_block}} (replaces set_block_at),
 {{function|get_blockdata_string}}, {{function|set_blockdata_string}}, {{function|convert_legacy_item}},
 {{function|get_mob_target}}, {{function|set_mob_target}}, {{function|get_merchant_trades}}, {{function|set_merchant_trades}},
 {{function|get_virtual_merchants}}, {{function|create_virtual_merchant}}, {{function|delete_virtual_merchant}},
-{{function|popen_trading}}, {{function|merchant_trader}}, {{function|get_entity_riders}}.
+{{function|popen_trading}}, {{function|merchant_trader}}, {{function|get_entity_riders}}, {{function|enchant_item}}
+(replaces enchant_inv), {{function|remove_item_enchant}} (replaces enchant_rm_inv), {{function|get_item_enchants}}
+(replaces get_enchant_inv), {{function|can_enchant_item}} (replaces can_enchant_target), {{function|spawn_particle}},
+{{function|is_mob_collidable}}, {{function|set_mob_collidable}}.
 
 Modified: (not including item array changes) {{function|can_enchant_target}}, {{function|get_enchants}},
 {{function|entity_spec}} and {{function|set_entity_spec}} for enderman and minecart blocks, {{function|phas_item}},
@@ -145,8 +148,8 @@ Extensions that worked previously can now only work with the latest builds. All 
 {{function|create_team}}, {{function|create_world}}, {{function|cslice}}, {{function|damage_entity}}, {{function|dowhile}}, 
 {{function|dump_threads}}, {{function|email}}, {{function|enchantment_list}}, {{function|engine_build_date}}, {{function|entities_in_radius}}, 
 {{function|entity_air}}, {{function|entity_can_see}}, {{function|entity_exists}}, {{function|entity_fall_distance}}, {{function|entity_grounded}}, 
-{{function|entity_id}}, {{function|entity_line_of_sight}}, {{function|entity_loc}}, {{function|entity_max_air}}, {{function|entity_onfire}}, 
-{{function|entity_remove}}, {{function|entity_spec}}, {{function|entity_type}}, {{function|entity_uuid}}, {{function|entity_velocity}}, 
+entity_id, {{function|entity_line_of_sight}}, {{function|entity_loc}}, {{function|entity_max_air}}, {{function|entity_onfire}},
+{{function|entity_remove}}, {{function|entity_spec}}, {{function|entity_type}}, entity_uuid, {{function|entity_velocity}},
 {{function|event_exists}}, {{function|execute}}, {{function|exit}}, {{function|explosion}}, {{function|extension_exists}}, 
 {{function|extension_info}}, {{function|fake_incoming_plugin_message}}, {{function|file_resolve}}, {{function|file_size}}, 
 {{function|foreachelse}}, {{function|forelse}}, {{function|function_exists}}, {{function|generate_tree}}, {{function|get_aliases}}, 
@@ -161,8 +164,8 @@ Extensions that worked previously can now only work with the latest builds. All 
 {{function|get_loaded_chunks}}, {{function|get_locales}}, {{function|get_max_health}}, {{function|get_metadata}}, {{function|get_mob_age}}, 
 {{function|get_mob_effects}}, {{function|get_mob_equipment}}, {{function|get_mob_name}}, {{function|get_name_visible}}, 
 {{function|get_objectives}}, {{function|get_offline_players}}, {{function|get_peffect}}, {{function|get_pflyspeed}}, {{function|get_pitch}}, 
-{{function|get_player_from_entity_id}}, {{function|get_procedures}}, {{function|get_projectile_bounce}}, {{function|get_projectile_shooter}}, 
-{{function|get_pscoreboard}}, {{function|get_pscore}}, {{function|get_pvp}}, {{function|get_pwalkspeed}}, {{function|get_recipe_for}}, 
+get_player_from_entity_id, {{function|get_procedures}}, {{function|get_projectile_bounce}}, {{function|get_projectile_shooter}},
+{{function|get_pscoreboard}}, {{function|get_pscore}}, {{function|get_pvp}}, {{function|get_pwalkspeed}}, get_recipe_for,
 {{function|get_registered_channels}}, {{function|get_scoreboards}}, {{function|get_script_environment}}, {{function|get_server_info}}, 
 {{function|get_spawner_type}}, {{function|get_teams}}, {{function|get_temperature}}, {{function|get_terminal_width}}, 
 {{function|get_whitelisted_players}}, {{function|get_worlds}}, {{function|get_yaw}}, {{function|has_bind}}, {{function|has_metadata}}, 
@@ -189,7 +192,7 @@ Extensions that worked previously can now only work with the latest builds. All 
 {{function|register_command}}, {{function|remove_metadata}}, {{function|remove_objective}}, {{function|remove_scoreboard}}, 
 {{function|remove_team}}, {{function|res_create_resource}}, {{function|res_free_resource}}, {{function|reset_all_pscores}}, 
 {{function|reset_recipes}}, {{function|run_cmd}}, {{function|save_players}}, {{function|save_world}}, {{function|send_plugin_message}}, 
-{{function|send_resourcepack}}, {{function|send_texturepack}}, {{function|sequals_ic}}, {{function|set_armor_color}}, {{function|set_art_at}}, 
+{{function|send_resourcepack}}, send_texturepack, {{function|sequals_ic}}, {{function|set_armor_color}}, {{function|set_art_at}},
 {{function|set_biome}}, {{function|set_block_command}}, {{function|set_can_pickup_items}}, {{function|set_cmdline_prompt}}, 
 {{function|set_command_block_name}}, {{function|set_cron}}, {{function|set_difficulty}}, {{function|set_entity_age}}, {{function|set_entity_air}}, 
 {{function|set_entity_breedable}}, {{function|set_entity_fall_distance}}, {{function|set_entity_loc}}, {{function|set_entity_max_air}}, 
