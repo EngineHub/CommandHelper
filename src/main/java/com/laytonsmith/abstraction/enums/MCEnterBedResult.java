@@ -9,5 +9,6 @@ public enum MCEnterBedResult {
 	NOT_SAFE,
 	OK,
 	OTHER_PROBLEM,
-	TOO_FAR_AWAY
+	TOO_FAR_AWAY,
+	OBSTRUCTED // Paper
 }

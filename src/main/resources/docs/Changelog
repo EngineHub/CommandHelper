@@ -1,8 +1,111 @@
-==3.3.3==
+==3.3.4==
+CommandHelper 3.3.4 supports Minecraft 1.13.2 - 1.16.5. All extensions must be updated when upgrading from previous versions.
 
+=== New Feature Overview ===
+* New Visual Studio Code extension with syntax highlighting, function/event peeking, and linting for compile errors and warnings
+* Adds Static Analysis framework, including type and scope checks for variables and procedures
+* Adds telemetry (disabled by default)
+* Adds cmdline support for Windows
+* Adds 'requiredExtensions' and 'compileroptions' to [[File_Options|File Options]]
+* Adds 'CodeUpgradeNotices' to suppressWarnings in File Options
+* Adds '.msfileoption' files for directory level File Options
+* Adds support for multiple semi-colon separated paths for 'base-dir' in Preferences
+* Adds support for Brotli encoding in {{function|http_request}}
+* Adds 'json-api', 'cmdline-args', 'build-extension', 'help-topic', 'edit-prefs', 'install-mssql-auth' tools to [[CommandLineTools|Cmdline tools]]
+* Adds MSSQL support for query() and in [[Persistence_Network|Persistence Network]]
+* Adds documentation localization tools 'validate-l10n' and 'l10n-ui'
+* Adds 'help' command to Interpreter to lookup functions
+* array_index_exists now supports multi-dimensional arrays and negative indices
+* Adds reflect_pull('dir')
+* Adds support for Minecraft 1.14 through 1.16.5
+* Adds smart comments to aliases and implements `@command` structure
+* Adds attribute modifiers and custom model data tag to item arrays
+* Adds support for hex color codes in color() and colorize()
+* Expands Minecraft recipe support
+
+=== Other Changes ===
+* Bare strings are no longer allowed
+* Auto concatenation is no longer allowed in Strict Mode
+* Minecraft events now ignore fake players
+* Faster startup times and other performance improvements
+* Hundreds of others fixes
+
+=== Function API Additions ===
+77 new functions have been added.
+
+MethodScript additions: {{function|map_implode}}, {{function|array_push_all}}, {{function|array_get_rand}},
+{{function|array_subtract}}, {{function|x_find}}, {{function|switch_ic}}, {{function|include_dir}},
+{{function|execute_array}}, {{function|parse_text_table}}, {{function|always_trace}}, {{function|hypot}},
+{{function|get_compiler_options}}, {{function|get_compiler_warnings}}, {{function|set_runtime_setting}},
+{{function|remove_runtime_setting}}, {{function|has_runtime_setting}}, {{function|nameof}},
+{{function|engine_location}}, {{function|define_object}}, {{function|new_object}}, {{function|get_pid}},
+{{function|reflect_type}}, {{function|class_type}}, {{function|x_write}}, {{function|average}}, {{function|sum}},
+{{function|median}}, {{function|mode}}, {{function|percentile}}, {{function|string_contains_ic}},
+{{function|x_thread_join}}, {{function|x_thread_is_alive}}, {{function|x_interrupt}}, {{function|x_is_interrupted}},
+{{function|x_clear_interrupt}}.
+
+Minecraft additions: {{function|get_tabcomplete_prototype}}, {{function|tell_raw}}, {{function|get_projectile_item}},
+{{function|set_projectile_item}}, {{function|get_blockdata}}, {{function|set_blockdata}}, {{function|set_skull_owner}},
+{{function|get_skull_owner}}, {{function|get_sky_light_at}}, {{function|get_block_light_at}},
+{{function|is_block_lockable}}, {{function|is_block_locked}}, {{function|get_block_lock}}, {{function|set_block_lock}},
+{{function|get_cmd_completions}}, {{function|all_materials}}, {{function|entity_attribute_value}},
+{{function|entity_attribute_base}}, {{function|entity_attribute_default}}, {{function|entity_attribute_modifiers}},
+{{function|set_entity_attribute_base}}, {{function|reset_entity_attribute_base}},
+{{function|add_entity_attribute_modifier}}, {{function|remove_entity_attribute_modifier}},
+{{function|get_entity_immunity_ticks}}, {{function|set_entity_immunity_ticks}}, {{function|is_entity_sleeping}},
+{{function|pflying}}, {{function|pattack_cooldown}}, {{function|get_plist_header}}, {{function|set_plist_header}},
+{{function|get_plist_footer}}, {{function|set_plist_footer}}, {{function|ptellraw}}, {{function|pstatistic}},
+{{function|set_pstatistic}}, {{function|pblocking}}, {{function|psprinting}}, {{function|remove_recipe}},
+{{function|set_world_day}}, {{function|get_world_day}}, {{function|set_keep_spawn_loaded}}.
+
+=== Event API Additions ===
+7 new events have been added.
+
+block_explode, block_form, hanging_place, entity_unleash, potion_splash, entity_potion, resource_pack_status
+
+==3.3.3==
+This release reflects the enormous changes in Minecraft 1.13, and drops support for past Minecraft versions.
+As a result it has many breaking changes in regards to Minecraft data, functions and events. Please refer to the
+[[Upgrade_Guide|upgrade guide]] to help you walk through what you need to change.
+
+=== New Feature Overview ===
+* Minecraft 1.13 support
+* Manage villager trades and virtual merchants
+
+=== Function API Changes ===
+28 new functions have been added. 19 functions have been modified.
+
+MethodScript Additions: {{function|set_debug_output}}, {{function|array_intersect}}, {{function|hash}},
+{{function|array_subset_of}}, {{function|uuid}}, {{function|get_classes}}.
+
+Minecraft Additions: {{function|get_block}} (replaces get_block_at), {{function|set_block}} (replaces set_block_at),
+{{function|get_blockdata_string}}, {{function|set_blockdata_string}}, {{function|convert_legacy_item}},
+{{function|get_mob_target}}, {{function|set_mob_target}}, {{function|get_merchant_trades}}, {{function|set_merchant_trades}},
+{{function|get_virtual_merchants}}, {{function|create_virtual_merchant}}, {{function|delete_virtual_merchant}},
+{{function|popen_trading}}, {{function|merchant_trader}}, {{function|get_entity_riders}}, {{function|enchant_item}}
+(replaces enchant_inv), {{function|remove_item_enchant}} (replaces enchant_rm_inv), {{function|get_item_enchants}}
+(replaces get_enchant_inv), {{function|can_enchant_item}} (replaces can_enchant_target), {{function|spawn_particle}},
+{{function|is_mob_collidable}}, {{function|set_mob_collidable}}.
+
+Modified: (not including item array changes) {{function|can_enchant_target}}, {{function|get_enchants}},
+{{function|entity_spec}} and {{function|set_entity_spec}} for enderman and minecart blocks, {{function|phas_item}},
+{{function|pitem_slot}}, {{function|pgive_item}}, {{function|ptake_item}}, {{function|pgive_enderchest_item}},
+{{function|ptake_enderchest_item}}, {{function|add_to_inventory}}, {{function|take_from_inventory}},
+{{function|max_stack_size}}, {{function|material_info}}, {{function|entity_line_of_sight}} and {{function|pcursor}} with
+the transparent block array, {{function|pinfo}}, {{function|psend_block_change}}, {{function|spawn_falling_block}}.
+
+=== Event API Changes ===
+22 events have been modified. 2 events have been removed.
+
+Modified events: piston_retract, piston_extend, block_break, block_place, block_burn, block_ignite, block_from_to,
+block_dispense, block_grow, note_play (no more mutable data), block_fade, item_despawn, item_spawn, item_drop,
+item_pickup, entity_change_block, entity_interact, inventory_click, inventory_drag, item_swap, player_interact,
+vehicle_collide.
+
+Removed events: player_prelogin, tab_complete_chat.
 
 ==3.3.2==
-Developed over two and a half years, CommandHelper 3.3.2 compatibility stretches from Minecraft 1.7.10 to 1.12.2, and offers many new features, fixes, and optimizations.
+CommandHelper 3.3.2 supports Minecraft 1.7.10 to 1.12.2.
 
 === New Feature Overview ===
 * New "synchronized" keyword and functionality
@@ -28,8 +131,8 @@ MethodScript Additions:
 
 {{function|dand}}, {{function|dor}}, {{function|get_clipboard}}, {{function|set_clipboard}}, {{function|shell_on_adv}},
 {{function|shell_on}}, {{function|get_os}}, {{function|in_cmdline_mode}}, {{function|sha512}}, {{function|sinh}},
-{{function|cosh}}, {{function|tanh}}, {{function|round15}}, {{function|clamp}}, {{function|x_get_oath_token}},
-{{function|clear_oath_tokens}}, {{function|srand}}, {{function|x_recompile_includes}}, {{function|get_system_timezones}},
+{{function|cosh}}, {{function|tanh}}, {{function|round15}}, {{function|clamp}}, {{function|x_get_oauth_token}},
+{{function|clear_oauth_tokens}}, {{function|srand}}, {{function|x_recompile_includes}}, {{function|get_system_timezones}},
 {{function|string_starts_with}}, {{function|string_ends_with}}, {{function|char_is_uppercase}},
 {{function|string_contains}}, {{function|string_multiply}}, {{function|secure_string}},
 {{function|decrypt_secure_string}}, {{function|synchronized}}, and {{function|x_launch_browser}}
@@ -95,6 +198,7 @@ Extensions that worked previously can now only work with the latest builds. All 
 === API Additions ===
 407 new functions have been added:
 
+<<<<<<< HEAD
 {{function|add_recipe}}, {{function|add_to_inventory}}, {{function|all_entities}}, {{function|array_deep_clone}}, {{function|array_every}},
 {{function|array_filter}}, {{function|array_indexes}}, {{function|array_index}}, {{function|array_insert}}, {{function|array_iterate}},
 {{function|array_last_index}}, {{function|array_map}}, {{function|array_rand}}, {{function|array_reduce_right}}, {{function|array_reduce}},
@@ -181,6 +285,94 @@ Extensions that worked previously can now only work with the latest builds. All 
 {{function|unload_world}}, {{function|unregister_channel}}, {{function|unregister_command}}, {{function|unsafe_query}},
 {{function|url_decode}}, {{function|url_encode}}, {{function|user}}, {{function|while}}, {{function|world_info}},
 {{function|x_get_current_thread}}, {{function|x_new_thread}}, {{function|x_run_on_main_thread_later}}, {{function|x_run_on_main_thread_now}},
+=======
+{{function|add_recipe}}, {{function|add_to_inventory}}, {{function|all_entities}}, {{function|array_deep_clone}}, {{function|array_every}},
+{{function|array_filter}}, {{function|array_indexes}}, {{function|array_index}}, {{function|array_insert}}, {{function|array_iterate}},
+{{function|array_last_index}}, {{function|array_map}}, {{function|array_rand}}, {{function|array_reduce_right}}, {{function|array_reduce}},
+{{function|array_remove_values}}, {{function|array_reverse}}, {{function|array_shallow_clone}}, {{function|array_some}},
+{{function|array_sort_async}}, {{function|array_sort}}, {{function|array_unique}}, {{function|associative_array}}, {{function|async_read}},
+{{function|ba_as_array}}, {{function|ba_get_bytes}}, {{function|ba_get_byte}}, {{function|ba_get_char}}, {{function|ba_get_double}},
+{{function|ba_get_float}}, {{function|ba_get_int}}, {{function|ba_get_long}}, {{function|ba_get_short}}, {{function|ba_get_string}},
+{{function|ba_is_little_endian}}, {{function|ba_put_bytes}}, {{function|ba_put_byte}}, {{function|ba_put_char}}, {{function|ba_put_double}},
+{{function|ba_put_float}}, {{function|ba_put_int}}, {{function|ba_put_long}}, {{function|ba_put_short}}, {{function|ba_put_string}},
+{{function|ba_rewind}}, {{function|ba_set_little_endian}}, {{function|base64_decode}}, {{function|base64_encode}}, {{function|bcrypt}},
+{{function|bit_xor}}, {{function|build_date}}, {{function|byte_array}}, {{function|call_proc_array}}, {{function|can_pickup_items}},
+{{function|capture_runas}}, {{function|cd}}, {{function|char_from_unicode}}, {{function|check_bcrypt}}, {{function|clear_commands}},
+{{function|clear_cron}}, {{function|clear_recipes}}, {{function|clear_screen}}, {{function|clear_task}}, {{function|close_pinv}},
+{{function|colorize}}, {{function|comp_read}}, {{function|compile_error}}, {{function|create_objective}}, {{function|create_scoreboard}},
+{{function|create_team}}, {{function|create_world}}, {{function|cslice}}, {{function|damage_entity}}, {{function|dowhile}},
+{{function|dump_threads}}, {{function|email}}, {{function|enchantment_list}}, {{function|engine_build_date}}, {{function|entities_in_radius}},
+{{function|entity_air}}, {{function|entity_can_see}}, {{function|entity_exists}}, {{function|entity_fall_distance}}, {{function|entity_grounded}},
+entity_id, {{function|entity_line_of_sight}}, {{function|entity_loc}}, {{function|entity_max_air}}, {{function|entity_onfire}},
+{{function|entity_remove}}, {{function|entity_spec}}, {{function|entity_type}}, entity_uuid, {{function|entity_velocity}},
+{{function|event_exists}}, {{function|execute}}, {{function|exit}}, {{function|explosion}}, {{function|extension_exists}},
+{{function|extension_info}}, {{function|fake_incoming_plugin_message}}, {{function|file_resolve}}, {{function|file_size}},
+{{function|foreachelse}}, {{function|forelse}}, {{function|function_exists}}, {{function|generate_tree}}, {{function|get_aliases}},
+{{function|get_all_recipes}}, {{function|get_armor_color}}, {{function|get_art_at}}, {{function|get_banned_players}}, {{function|get_biome}},
+{{function|get_block_command}}, {{function|get_block_info}}, {{function|get_block_power}}, {{function|get_chunk_loc}},
+{{function|get_command_block_name}}, {{function|get_command_block}}, {{function|get_commands}}, {{function|get_difficulty}},
+{{function|get_entity_age}}, {{function|get_entity_breedable}}, {{function|get_entity_max_speed}}, {{function|get_entity_persistence}},
+{{function|get_entity_rider}}, {{function|get_entity_vehicle}}, {{function|get_env}}, {{function|get_equipment_droprates}},
+{{function|get_events}}, {{function|get_functions}}, {{function|get_gamerule}}, {{function|get_highest_block_at}},
+{{function|get_inventory_item}}, {{function|get_inventory_size}}, {{function|get_inventory_type}}, {{function|get_inventory}},
+{{function|get_ip_bans}}, {{function|get_itemmeta}}, {{function|get_leashholder}}, {{function|get_light_at}}, {{function|get_list_name}},
+{{function|get_loaded_chunks}}, {{function|get_locales}}, {{function|get_max_health}}, {{function|get_metadata}}, {{function|get_mob_age}},
+{{function|get_mob_effects}}, {{function|get_mob_equipment}}, {{function|get_mob_name}}, {{function|get_name_visible}},
+{{function|get_objectives}}, {{function|get_offline_players}}, {{function|get_peffect}}, {{function|get_pflyspeed}}, {{function|get_pitch}},
+get_player_from_entity_id, {{function|get_procedures}}, {{function|get_projectile_bounce}}, {{function|get_projectile_shooter}},
+{{function|get_pscoreboard}}, {{function|get_pscore}}, {{function|get_pvp}}, {{function|get_pwalkspeed}}, get_recipe_for,
+{{function|get_registered_channels}}, {{function|get_scoreboards}}, {{function|get_script_environment}}, {{function|get_server_info}},
+{{function|get_spawner_type}}, {{function|get_teams}}, {{function|get_temperature}}, {{function|get_terminal_width}},
+{{function|get_whitelisted_players}}, {{function|get_worlds}}, {{function|get_yaw}}, {{function|has_bind}}, {{function|has_metadata}},
+{{function|has_storm}}, {{function|has_thunder}}, {{function|heap_dump}}, {{function|hmac_md5}}, {{function|hmac_sha1}},
+{{function|hmac_sha256}}, {{function|http_clear_session_cookies}}, {{function|http_request}}, {{function|iclosure}}, {{function|ini_decode}},
+{{function|ini_encode}}, {{function|instanceof}}, {{function|is_alias}}, {{function|is_block_powered}}, {{function|is_bytearray}},
+{{function|is_channel_registered}}, {{function|is_closure}}, {{function|is_entity_living}}, {{function|is_leather_armor}}, {{function|is_number}},
+{{function|is_slime_chunk}}, {{function|is_stringable}}, {{function|is_string}}, {{function|json_decode}}, {{function|json_encode}},
+{{function|launch_firework}}, {{function|levenshtein}}, {{function|load_chunk}}, {{function|location_shift}}, {{function|logarithm}},
+{{function|lsprintf}}, {{function|ls}}, {{function|marquee_stop}}, {{function|marquee}}, {{function|material_info}}, {{function|math_const}},
+{{function|monitor_redstone}}, {{function|neg}}, {{function|noop}}, {{function|parse_date}},
+{{function|parse_int}}, {{function|pbed_location}}, {{function|penchanting}}, {{function|penderchest}}, {{function|pfirst_played}},
+{{function|pget_time}}, {{function|pgive_enderchest_item}}, {{function|phas_flight}}, {{function|phas_played}}, {{function|phas_storm}},
+{{function|pheld_slot}}, {{function|phunger}}, {{function|pinv_open}}, {{function|plast_played}}, {{function|play_entity_effect}},
+{{function|play_named_sound}}, {{function|play_note}}, {{function|play_sound}}, {{function|players_in_radius}}, {{function|postdec}},
+{{function|postinc}}, {{function|preset_time}}, {{function|print_err}}, {{function|print_out}}, {{function|prompt_char}},
+{{function|prompt_line}}, {{function|prompt_pass}}, {{function|psaturation}}, {{function|psend_block_change}}, {{function|psend_sign_text}},
+{{function|psetop}}, {{function|pspectator_target}}, {{function|ptake_enderchest_item}}, {{function|ptarget_space}}, {{function|puuid}},
+{{function|pvehicle_leave}}, {{function|pvehicle}}, {{function|pwd}}, {{function|pworkbench}}, {{function|query_async}}, {{function|query}},
+{{function|queue_clear}}, {{function|queue_delay_front}}, {{function|queue_delay}}, {{function|queue_push_front}}, {{function|queue_push}},
+{{function|queue_remove_front}}, {{function|queue_remove}}, {{function|queue_running}}, {{function|read_binary}},
+{{function|read_gzip_binary}}, {{function|read_pipe_input}}, {{function|ref_equals}}, {{function|reflect_docs}}, {{function|reflect_pull}},
+{{function|reflect_value_source}}, {{function|reg_escape}}, {{function|regen_chunk}}, {{function|register_channel}},
+{{function|register_command}}, {{function|remove_metadata}}, {{function|remove_objective}}, {{function|remove_scoreboard}},
+{{function|remove_team}}, {{function|res_create_resource}}, {{function|res_free_resource}}, {{function|reset_all_pscores}},
+{{function|reset_recipes}}, {{function|run_cmd}}, {{function|save_players}}, {{function|save_world}}, {{function|send_plugin_message}},
+{{function|send_resourcepack}}, send_texturepack, {{function|sequals_ic}}, {{function|set_armor_color}}, {{function|set_art_at}},
+{{function|set_biome}}, {{function|set_block_command}}, {{function|set_can_pickup_items}}, {{function|set_cmdline_prompt}},
+{{function|set_command_block_name}}, {{function|set_cron}}, {{function|set_difficulty}}, {{function|set_entity_age}}, {{function|set_entity_air}},
+{{function|set_entity_breedable}}, {{function|set_entity_fall_distance}}, {{function|set_entity_loc}}, {{function|set_entity_max_air}},
+{{function|set_entity_max_speed}}, {{function|set_entity_onfire}}, {{function|set_entity_persistence}}, {{function|set_entity_rider}},
+{{function|set_entity_spec}}, {{function|set_entity_velocity}}, {{function|set_env}}, {{function|set_equipment_droprates}},
+{{function|set_executor}}, {{function|set_gamerule}}, {{function|set_interval}}, {{function|set_inventory_item}}, {{function|set_inventory}},
+{{function|set_ip_banned}}, {{function|set_itemmeta}}, {{function|set_leashholder}}, {{function|set_list_name}}, {{function|set_max_health}},
+{{function|set_metadata}}, {{function|set_mob_age}}, {{function|set_mob_effect}}, {{function|set_mob_equipment}}, {{function|set_mob_name}},
+{{function|set_name_visible}}, {{function|set_objective_display}}, {{function|set_pbed_location}}, {{function|set_penderchest}},
+{{function|set_pflight}}, {{function|set_pflying}}, {{function|set_pflyspeed}}, {{function|set_pheld_slot}}, {{function|set_phunger}},
+{{function|set_projectile_bounce}}, {{function|set_projectile_shooter}}, {{function|set_psaturation}}, {{function|set_pscoreboard}},
+{{function|set_pscore}}, {{function|set_pspectator_target}}, {{function|set_pstorm}}, {{function|set_ptime}}, {{function|set_pvelocity}},
+{{function|set_pvp}}, {{function|set_pwalkspeed}}, {{function|set_spawner_type}}, {{function|set_spawn}}, {{function|set_tabcompleter}},
+{{function|set_team_display}}, {{function|set_team_options}}, {{function|set_thunder}}, {{function|set_timeout}},
+{{function|set_uncaught_exception_handler}}, {{function|sha256}}, {{function|shell_adv}}, {{function|shell}}, {{function|shoot_projectile}},
+{{function|show_enderchest}}, {{function|shutdown_server}}, {{function|simple_date}}, {{function|snequals}},
+{{function|spawn_entity}}, {{function|spawn_falling_block}}, {{function|split}}, {{function|sprintf}}, {{function|string_append}},
+{{function|string_from_bytes}}, {{function|string_get_bytes}}, {{function|string_position}}, {{function|sudo}}, {{function|sys_beep}},
+{{function|sys_err}}, {{function|sys_out}}, {{function|sys_properties}}, {{function|take_from_inventory}}, {{function|team_add_player}},
+{{function|team_remove_player}}, {{function|to_radix}}, {{function|trace}},
+{{function|triml}}, {{function|trimr}}, {{function|typeof}}, {{function|unicode_from_char}}, {{function|unload_chunk}},
+{{function|unload_world}}, {{function|unregister_channel}}, {{function|unregister_command}}, {{function|unsafe_query}},
+{{function|url_decode}}, {{function|url_encode}}, {{function|user}}, {{function|while}}, {{function|world_info}},
+{{function|x_get_current_thread}}, {{function|x_new_thread}}, {{function|x_run_on_main_thread_later}}, {{function|x_run_on_main_thread_now}},
+>>>>>>> master
 {{function|xml_read}}, {{function|yml_decode}}, and {{function|yml_encode}}
 
 ===Event API additions===
@@ -204,22 +396,22 @@ player_toggle_sprint, item_spawn, hanging_break, book_edited, and plugin_message
 
 ===Update Breakages===
 * include/read now require paths that are relative to the location of the current file. This should be an easy fix.
-* Your persistance database is in the wrong format. Unlike previous versions, you do not need to delete the database, you simply need to upgrade it. (Unless you're upgrading from before 3.2.0, in which case you still do need to delete the persistance.ser file, and then you're set.) If you have not used user aliases or persistance in the past, this step is unnecessary. Rename/copy/symlink your bukkit jar to bukkit.jar for this to work. From a command prompt, change to the plugins directory and run <code>java -jar CommandHelper.jar --manager</code>. This will launch the Data Manager, at which point you can run the upgrade command. Once this is complete, your data is now converted to the new format! Do not run the data manager while your server is up. In lieu of this, you may also simply delete your persistance.ser file, in which case all data will be lost, but it will re-create the db in the correct format in the future, without any interaction from you. Be sure to check out the other features in the data manager while you're there!
+* Your persistance database is in the wrong format. Unlike previous versions, you do not need to delete the database, you simply need to upgrade it. (Unless you're upgrading from before 3.2.0, in which case you still do need to delete the persistence.ser file, and then you're set.) If you have not used user aliases or persistence in the past, this step is unnecessary. Rename/copy/symlink your bukkit jar to bukkit.jar for this to work. From a command prompt, change to the plugins directory and run <code>java -jar CommandHelper.jar --manager</code>. This will launch the Data Manager, at which point you can run the upgrade command. Once this is complete, your data is now converted to the new format! Do not run the data manager while your server is up. In lieu of this, you may also simply delete your persistance.ser file, in which case all data will be lost, but it will re-create the db in the correct format in the future, without any interaction from you. Be sure to check out the other features in the data manager while you're there!
 * is_* ({{function|is_null}}, {{function|is_integer}}, etc) functions are slightly altered. Most people weren't using these functions, but if you were, you will want to check the API for information on the changes to this function.
 * {{function|pinv}} and {{function|set_pinv}} take different formatted arguments. Check the API for the new usage.
 * play-dirty mode is currently broken due to the new event system implementation. This will be fixed at a later date, but you may not need it any more, since plugins have all been updated now.
 
 ===New Feature Overview===
 * Colors work in the terminal now. The exception is if you're on a windows machine, in which case, no colors for you :( sorry. Also, CH has a cool new splash screen (you can disable it in the preferences).
-* Data Manager - You can now view the persistance data much easier, thanks to the data manager. Be sure to explore all the options. Read up on it at the [[Data Manager|page on the data manager]].
+* Data Manager - You can now view the persistence data much easier, thanks to the data manager. Be sure to explore all the options. Read up on it at the [[Data_Manager|page on the data manager]].
 * Abstraction layer - While you won't see this directly, know that it's much easier to move CH from server type to server type, should bukkit or whatever other server mod become obsolete. This means that CH should live on past server mods, with your scripts safe from the changes!
-* Namespaces in persistance, and improved performance in persistance - Persistance is now much more efficient. In addition, namespace support has been implemented. If you namespace your data using periods, you can much more easily manipulate the data that has been stored. Be sure to re-read the API in the Persistance section, as all the functions have new features now.
-* Events added - Events are now here! Read up on the [[Events|Events overview]] for basic information relating to all events, and check out the [[Event API|Event API]] for details on specific events, as well as what events are available. This list will continue to grow as more events are added!
+* Namespaces in persistence, and improved performance in persistence - Persistence is now much more efficient. In addition, namespace support has been implemented. If you namespace your data using periods, you can much more easily manipulate the data that has been stored. Be sure to re-read the API in the Persistance section, as all the functions have new features now.
+* Events added - Events are now here! Read up on the [[Events|Events overview]] for basic information relating to all events, and check out the [[Event_API|Event API]] for details on specific events, as well as what events are available. This list will continue to grow as more events are added!
 * ifelse and switch - Now it is much easier to chain if statements. Check out the [[Logic#ifelse()|wiki page on logic]] for more information.
 * Arrays are associative - Now you can store a value in an array not only with a numeric index, but you can also use strings! Many functions now use this feature, since it's much easier to read and use, but you need to be familiar with the changes for them to make sense. Check out the additional section in the wiki page [[Arrays|on arrays]]
 * bitwise operations - binary operations! Check the API page for details.
 * Basic crypto functions - If you need to hash things, this is now possible.
-* import/export - Import and export work like the persistance functions, except they are in-memory only, and won't survive past server restarts (or /reloadaliases, for that matter). There are two modes of operation, so read the API carefully if you use these functions.
+* import/export - Import and export work like the persistence functions, except they are in-memory only, and won't survive past server restarts (or /reloadaliases, for that matter). There are two modes of operation, so read the API carefully if you use these functions.
 * More defined data types, in addition to casting and converting functions - Data types were loosely defined before. Now the definition is well defined, and there are functions to help you manipulate this data.
 * Enchantment api - You can now control enchantments in a player's inventory
 * Sign api - Change the text of signs with functions! This function allows you to colorize the text on the sign as well, when used in combination with the color() function.
@@ -339,24 +531,25 @@ Here's a full list of all the new functions. Check out the API for details on ea
 
 
 ==3.2.0==
-*Player's pitch and yaw (the way they're facing) is preserved when using set_ploc
-*Fixed a bug when dealing with offline players in pinfo (as well as a few other functions)
-*substr() now works properly if the last argument is left off
-*When using an ivar as the second parameter in assign(), it works properly now.
-*Added [[Interpreter Mode|interpreter mode]]!
-*Added user defined procedures
-*read() and include() are subject to the base-dir restriction now
-*%%NOWIKI|#%% comments work even if they aren't the first character on the line. C style block comments are also available. %%NOWIKI|/* */%%
-*Commands can be run from the console. If the command doesn't make sense to run without a player, the command should fail gracefully.
-*Added include and procedures. See [[Procedures|this page]] for more details.
-*Potion Effects can now be accessed with set_peffect. See [http://www.minecraftwiki.net/wiki/Potion_effects the guide] on the minecraft wiki for ID numbers and other information
-*Added case-sensitive option to make it possible to toggle command matching being case sensitive or not
-*[[Arrays|Arrays]] are much more flexible now
-*The \u escape sequence is implemented in the lexer. This allows insertion of arbitrary unicode characters into scripts.
-*The WG/WE series of functions are implemented now
-*Added functions: sqrt, include, proc, return, pinv, set_pinv, min, max, is_proc, call_proc, pexp/set_pexp (experimental), ptexp/set_ptexp (experimental), plevel/set_plevel (experimental), pmode/set_pmode, set_peffect (requires CraftBukkit), array_resize, range, Economy Functions, call_alias, item_drop, set_phealth, equals_ic, sk_all_regions, sk_pos1, sk_pos2, sk_region_info, sk_region_overlaps
+* Player's pitch and yaw (the way they're facing) is preserved when using set_ploc
+* Fixed a bug when dealing with offline players in pinfo (as well as a few other functions)
+* substr() now works properly if the last argument is left off
+* When using an ivar as the second parameter in assign(), it works properly now.
+* Added [[Interpreter_Mode|interpreter mode]]!
+* Added user defined procedures
+* read() and include() are subject to the base-dir restriction now
+* %%NOWIKI|#%% comments work even if they aren't the first character on the line. C style block comments are also available. %%NOWIKI|/* */%%
+* Commands can be run from the console. If the command doesn't make sense to run without a player, the command should fail gracefully.
+* Added include and procedures. See [[Procedures|this page]] for more details.
+* Potion Effects can now be accessed with set_peffect. See [http://www.minecraftwiki.net/wiki/Potion_effects the guide] on the minecraft wiki for ID numbers and other information
+* Added case-sensitive option to make it possible to toggle command matching being case sensitive or not
+* [[Arrays|Arrays]] are much more flexible now
+* The \u escape sequence is implemented in the lexer. This allows insertion of arbitrary unicode characters into scripts.
+* The WG/WE series of functions are implemented now
+* Added functions: sqrt, include, proc, return, pinv, set_pinv, min, max, is_proc, call_proc, pexp/set_pexp (experimental), ptexp/set_ptexp (experimental), plevel/set_plevel (experimental), pmode/set_pmode, set_peffect (requires CraftBukkit), array_resize, range, Economy Functions, call_alias, item_drop, set_phealth, equals_ic, sk_all_regions, sk_pos1, sk_pos2, sk_region_info, sk_region_overlaps
 
 ==3.1.2==
+<<<<<<< HEAD
 * Added exception handling, and fixed more bugs with command matching and
 optional variables. Also added more advanced permission syntax for commands.
 * Added functions: set_display_name, reset_display_name, try, array_index_exists,
@@ -364,6 +557,12 @@ is_array, is_boolean, is_double, is_integer, is_null, is_string, substr, to_lowe
 to_upper, length, throw
 *msg() and all other applicable Echoes functions now handle newlines and linebreaks properly. Besides being able to use a \n character to mean a newline character, word wrapping now occurs at word boundaries instead of arbitrarily. Thanks to Reil for the code to do that! Also, if a file is read in with read(), and it has newlines in it, newline characters are passed through to the other functions properly.
 *Permissions handling just got easier. In addition to being able to label a command, and giving that group/user permission to commandhelper.alias.label, you can give groups permissions to certain commands by doing:
+=======
+* Added exception handling, and fixed more bugs with command matching and optional variables. Also added more advanced permission syntax for commands.
+* Added functions: set_display_name, reset_display_name, try, array_index_exists, is_array, is_boolean, is_double, is_integer, is_null, is_string, substr, to_lower,to_upper, length, throw
+* msg() and all other applicable Echoes functions now handle newlines and linebreaks properly. Besides being able to use a \n character to mean a newline character, word wrapping now occurs at word boundaries instead of arbitrarily. Thanks to Reil for the code to do that! Also, if a file is read in with read(), and it has newlines in it, newline characters are passed through to the other functions properly.
+* Permissions handling just got easier. In addition to being able to label a command, and giving that group/user permission to commandhelper.alias.label, you can give groups permissions to certain commands by doing:
+>>>>>>> master
 <pre>
 ~admin:/adminOnlyCommand = msg('This is an admin only command')
 </pre>
@@ -380,29 +579,35 @@ Further, you can ''revoke'' permissions by putting a dash in front, like so:
 
 Note that permissions take priority from left to right. So, say that a user is in the 'mods' and 'builder' groups. If the setup were in this order: ~mods/-builder, then the user would have permission, but if it were ~-builder/mods, they would not. If the user is not in one of the listed groups, that group name is ignored.
 
-*Checking that you are passing the correct number of arguments to a function is now done at compile time. This will potentially help reduce the numbers of errors in a script.
+* Checking that you are passing the correct number of arguments to a function is now done at compile time. This will potentially help reduce the numbers of errors in a script.
 
 ==3.1.1==
 *Fixed a bug where no argument functions in the root of the command would give a compile error.
 
 ==3.1.0==
-*Added several new functions, including eval, set_ploc, time, nano_time, break, continue, get_worlds, pworld, pinfo, and kick. Also, reorganized the source code, and made it so that if one command would cause a compiler error, the entire script won't be affected, but just the one command. Also, concatenation automatically happens now, the g() function is no longer necessary. Debug mode now outputs what real command is being run, if debug mode is on. It is now possible to define the location of your config file, in the preferences.txt file. See the [[Upgrade Notices|upgrade notices]] for information about upgrading your scripts from 3.0.2 to 3.1.0.
-*Compiler re-organized and modified. The g() function is no longer necessary, but is still defined, so scripts will remain backwards compatible. Also, scripts with compiler errors will most likely only break the individual command that has the error, the entire script will no longer fail. Of course if the compiler can't determine where the end of the command is (for instance a missing multiline end symbol) more of the script will fail. The sconcat() function is no longer necessary. Let's look at the following code:
+* Added several new functions, including eval, set_ploc, time, nano_time, break, continue, get_worlds, pworld, pinfo, and kick. Also, reorganized the source code, and made it so that if one command would cause a compiler error, the entire script won't be affected, but just the one command. Also, concatenation automatically happens now, the g() function is no longer necessary. Debug mode now outputs what real command is being run, if debug mode is on. It is now possible to define the location of your config file, in the preferences.txt file. See the [[Upgrade Notices|upgrade notices]] for information about upgrading your scripts from 3.0.2 to 3.1.0.
+* Compiler re-organized and modified. The g() function is no longer necessary, but is still defined, so scripts will remain backwards compatible. Also, scripts with compiler errors will most likely only break the individual command that has the error, the entire script will no longer fail. Of course if the compiler can't determine where the end of the command is (for instance a missing multiline end symbol) more of the script will fail. The sconcat() function is no longer necessary. Let's look at the following code:
 <pre>
 /cmd = if(boolean, /run this command, /else run this command)
 </pre>
+<<<<<<< HEAD
 In previous versions, you had to group the "if" and "else" portions seperately, in this case, you would likely have used sconcat() though g() would have worked. Now, the commas separate the arguments, with tokens between commas automatically being sconcatenated together.
 *The compiler for the scripting language has been broken out of the CommandHelper core. The language itself is now called MScript, and CommandHelper simply hooks into MScript to generate commands to run. This allows me to more easily add other events in the future. Also, in future versions, I will make it so that other plugin authors can hook into MScript to allow their plugins to run MScripts, so that plugin authors can give users more control over the plugin, when applicable. Let's look at the structure of an alias again:
+=======
+In previous versions, you had to group the "if" and "else" portions separately, in this case, you would likely have used sconcat() though g() would have worked. Now, the commas separate the arguments, with tokens between commas automatically being sconcatenated together.
+* The compiler for the scripting language has been broken out of the CommandHelper core. The language itself is now called MScript, and CommandHelper simply hooks into MScript to generate commands to run. This allows me to more easily add other events in the future. Also, in future versions, I will make it so that other plugin authors can hook into MScript to allow their plugins to run MScripts, so that plugin authors can give users more control over the plugin, when applicable. Let's look at the structure of an alias again:
+>>>>>>> master
 <pre>
 /alias command name and $variables = MScript \ MScript \ MScript
 </pre>
 The portions of an alias that are actually part of the MScript language are shown. All other parts are simply identifiers for CommandHelper specifically. While there is still a great deal of integration with the alias engine, the MScript portions can now be used standalone in future applications.
-*eval() functions are now available. As implied, eval() allows arbitrary MScript to be executed.
-*Debug mode now outputs what real command is being run, if debug mode is set to true
-*You can now define the name/location of your config file. In the preferences.txt file, the script-name property defines this value.
+* eval() functions are now available. As implied, eval() allows arbitrary MScript to be executed.
+* Debug mode now outputs what real command is being run, if debug mode is set to true
+* You can now define the name/location of your config file. In the preferences.txt file, the script-name property defines this value.
 
 
 ==3.0.2==
+<<<<<<< HEAD
 *Added new functions to allow scripts to interact with the environment around the player.
 
 ==3.0.1==
@@ -413,6 +618,18 @@ The portions of an alias that are actually part of the MScript language are show
 
 ==2.0.1==
 *Updated to work again.
+=======
+* Added new functions to allow scripts to interact with the environment around the player.
+
+==3.0.1==
+* Added several new functions, including a foreach loop, and the g function. See the [[Upgrade_Notices|upgrade notices]] for information about upgrading your scripts from 3.0.0 to 3.0.1.
+
+==3.0.0==
+* Completely reworked the engine. Essentially a new plugin.
+
+==2.0.1==
+* Updated to work again.
+>>>>>>> master
 
 ==2.0==
-*Updated for Bukkit.
+* Updated for Bukkit.

@@ -6,5 +6,6 @@ import com.laytonsmith.annotations.MEnum;
 public enum MCWorldEnvironment {
 	NORMAL,
 	NETHER,
-	THE_END
+	THE_END,
+	CUSTOM
 }

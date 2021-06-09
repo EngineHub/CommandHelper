@@ -481,4 +481,15 @@
 	skel.on("-xsmall", renderNoXSmall);
 	skel.on("+xsmall", renderXSmall);
 	search.load(docsBase, skel);
+	$.getJSON("/currentVersion.json", function(data){
+		var latestVersion = data.currentVersion;
+		var currentVersion = window.location.href.match(".*/docs/(.*?)/.*")[1];
+		if(latestVersion !== null && latestVersion != currentVersion) {
+			pageRender.then(function() {
+				$("#latestVersionWarning").show();
+				$("#latestVersionLink").attr("href", window.location.href.replace(currentVersion, latestVersion));
+				$("#latestVersionRoot").attr("href", "/docs/" + currentVersion);
+			});
+		}
+	});
 })(jQuery, skel, wiky, bodyEscaped, showLearningTrail, pageRender, search);

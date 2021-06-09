@@ -128,7 +128,8 @@
 		<connection>scm:git:git://github.com/sk89q/commandhelper.git</connection>
 		<url>https://github.com/sk89q/commandhelper</url>
 		<developerConnection>scm:git:git@github.com:sk89q/commandhelper.git</developerConnection>
-	</scm>
+	  <tag>HEAD</tag>
+  </scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.test.failure.ignore>true</maven.test.failure.ignore>
@@ -991,6 +992,17 @@
 						<include>**/RandomTests.java</include>
 					</includes>
 					<argLine>-Dfile.encoding=UTF-8 --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED</argLine>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>3.0.0-M4</version>
+				<configuration>
+					<pushChanges>false</pushChanges>
+					<localCheckout>true</localCheckout>
+					<allowTimestampedSnapshots>true</allowTimestampedSnapshots>
 				</configuration>
 			</plugin>
 

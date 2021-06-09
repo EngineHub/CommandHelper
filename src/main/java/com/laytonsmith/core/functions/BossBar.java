@@ -110,7 +110,9 @@ public class BossBar {
 					+ " Style can be one of " + StringUtils.Join(MCBarStyle.values(), ", ", ", or ", " or ") + "."
 					+ " Visible is a boolean for whether the bar is visible or not."
 					+ " Percent is a double from 0.0 to 1.0 representing the how much the bar is filled from left to right."
-					+ " Defaults to an empty title with a WHITE, SOLID, visible, full bar.";
+					+ " Defaults to an empty title with a WHITE, SOLID, visible, full bar.\n\n"
+					+ "Once the bar is created, it can be shown to specified players with {{function|bar_add_player}}"
+					+ " and the display can be modified with {{function|update_bar}}";
 		}
 
 		@Override
