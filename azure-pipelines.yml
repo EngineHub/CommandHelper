@@ -16,7 +16,7 @@ steps:
     versionSpec: '16' 
     jdkArchitectureOption: x64
     jdkSourceOption: 'LocalDirectory'
-    jdkFile: 'C:\hotspot'
+    jdkFile: 'C:\hotspot\hotspot.tar.gz'
     jdkDestinationDirectory: 'C:\jdk'
     cleanDestinationDirectory: true
 - task: Maven@3
