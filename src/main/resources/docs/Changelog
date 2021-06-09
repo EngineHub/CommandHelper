@@ -198,107 +198,196 @@ Extensions that worked previously can now only work with the latest builds. All 
 === API Additions ===
 407 new functions have been added:
 
-{{function|add_recipe}}, {{function|add_to_inventory}}, {{function|all_entities}}, {{function|array_deep_clone}}, {{function|array_every}}, 
-{{function|array_filter}}, {{function|array_indexes}}, {{function|array_index}}, {{function|array_insert}}, {{function|array_iterate}}, 
-{{function|array_last_index}}, {{function|array_map}}, {{function|array_rand}}, {{function|array_reduce_right}}, {{function|array_reduce}}, 
-{{function|array_remove_values}}, {{function|array_reverse}}, {{function|array_shallow_clone}}, {{function|array_some}}, 
-{{function|array_sort_async}}, {{function|array_sort}}, {{function|array_unique}}, {{function|associative_array}}, {{function|async_read}}, 
-{{function|ba_as_array}}, {{function|ba_get_bytes}}, {{function|ba_get_byte}}, {{function|ba_get_char}}, {{function|ba_get_double}}, 
-{{function|ba_get_float}}, {{function|ba_get_int}}, {{function|ba_get_long}}, {{function|ba_get_short}}, {{function|ba_get_string}}, 
-{{function|ba_is_little_endian}}, {{function|ba_put_bytes}}, {{function|ba_put_byte}}, {{function|ba_put_char}}, {{function|ba_put_double}}, 
-{{function|ba_put_float}}, {{function|ba_put_int}}, {{function|ba_put_long}}, {{function|ba_put_short}}, {{function|ba_put_string}}, 
-{{function|ba_rewind}}, {{function|ba_set_little_endian}}, {{function|base64_decode}}, {{function|base64_encode}}, {{function|bcrypt}}, 
-{{function|bit_xor}}, {{function|build_date}}, {{function|byte_array}}, {{function|call_proc_array}}, {{function|can_pickup_items}}, 
-{{function|capture_runas}}, {{function|cd}}, {{function|char_from_unicode}}, {{function|check_bcrypt}}, {{function|clear_commands}}, 
-{{function|clear_cron}}, {{function|clear_recipes}}, {{function|clear_screen}}, {{function|clear_task}}, {{function|close_pinv}}, 
-{{function|colorize}}, {{function|comp_read}}, {{function|compile_error}}, {{function|create_objective}}, {{function|create_scoreboard}}, 
-{{function|create_team}}, {{function|create_world}}, {{function|cslice}}, {{function|damage_entity}}, {{function|dowhile}}, 
-{{function|dump_threads}}, {{function|email}}, {{function|enchantment_list}}, {{function|engine_build_date}}, {{function|entities_in_radius}}, 
-{{function|entity_air}}, {{function|entity_can_see}}, {{function|entity_exists}}, {{function|entity_fall_distance}}, {{function|entity_grounded}}, 
+<<<<<<< HEAD
+{{function|add_recipe}}, {{function|add_to_inventory}}, {{function|all_entities}}, {{function|array_deep_clone}}, {{function|array_every}},
+{{function|array_filter}}, {{function|array_indexes}}, {{function|array_index}}, {{function|array_insert}}, {{function|array_iterate}},
+{{function|array_last_index}}, {{function|array_map}}, {{function|array_rand}}, {{function|array_reduce_right}}, {{function|array_reduce}},
+{{function|array_remove_values}}, {{function|array_reverse}}, {{function|array_shallow_clone}}, {{function|array_some}},
+{{function|array_sort_async}}, {{function|array_sort}}, {{function|array_unique}}, {{function|associative_array}}, {{function|async_read}},
+{{function|ba_as_array}}, {{function|ba_get_bytes}}, {{function|ba_get_byte}}, {{function|ba_get_char}}, {{function|ba_get_double}},
+{{function|ba_get_float}}, {{function|ba_get_int}}, {{function|ba_get_long}}, {{function|ba_get_short}}, {{function|ba_get_string}},
+{{function|ba_is_little_endian}}, {{function|ba_put_bytes}}, {{function|ba_put_byte}}, {{function|ba_put_char}}, {{function|ba_put_double}},
+{{function|ba_put_float}}, {{function|ba_put_int}}, {{function|ba_put_long}}, {{function|ba_put_short}}, {{function|ba_put_string}},
+{{function|ba_rewind}}, {{function|ba_set_little_endian}}, {{function|base64_decode}}, {{function|base64_encode}}, {{function|bcrypt}},
+{{function|bit_xor}}, {{function|build_date}}, {{function|byte_array}}, {{function|call_proc_array}}, {{function|can_pickup_items}},
+{{function|capture_runas}}, {{function|cd}}, {{function|char_from_unicode}}, {{function|check_bcrypt}}, {{function|clear_commands}},
+{{function|clear_cron}}, {{function|clear_recipes}}, {{function|clear_screen}}, {{function|clear_task}}, {{function|close_pinv}},
+{{function|colorize}}, {{function|comp_read}}, {{function|compile_error}}, {{function|create_objective}}, {{function|create_scoreboard}},
+{{function|create_team}}, {{function|create_world}}, {{function|cslice}}, {{function|damage_entity}}, {{function|dowhile}},
+{{function|dump_threads}}, {{function|email}}, {{function|enchantment_list}}, {{function|engine_build_date}}, {{function|entities_in_radius}},
+{{function|entity_air}}, {{function|entity_can_see}}, {{function|entity_exists}}, {{function|entity_fall_distance}}, {{function|entity_grounded}},
+{{function|entity_id}}, {{function|entity_line_of_sight}}, {{function|entity_loc}}, {{function|entity_max_air}}, {{function|entity_onfire}},
+{{function|entity_remove}}, {{function|entity_spec}}, {{function|entity_type}}, {{function|entity_uuid}}, {{function|entity_velocity}},
+{{function|event_exists}}, {{function|execute}}, {{function|exit}}, {{function|explosion}}, {{function|extension_exists}},
+{{function|extension_info}}, {{function|fake_incoming_plugin_message}}, {{function|file_resolve}}, {{function|file_size}},
+{{function|foreachelse}}, {{function|forelse}}, {{function|function_exists}}, {{function|generate_tree}}, {{function|get_aliases}},
+{{function|get_all_recipes}}, {{function|get_armor_color}}, {{function|get_art_at}}, {{function|get_banned_players}}, {{function|get_biome}},
+{{function|get_block_command}}, {{function|get_block_info}}, {{function|get_block_power}}, {{function|get_chunk_loc}},
+{{function|get_command_block_name}}, {{function|get_command_block}}, {{function|get_commands}}, {{function|get_difficulty}},
+{{function|get_entity_age}}, {{function|get_entity_breedable}}, {{function|get_entity_max_speed}}, {{function|get_entity_persistence}},
+{{function|get_entity_rider}}, {{function|get_entity_vehicle}}, {{function|get_env}}, {{function|get_equipment_droprates}},
+{{function|get_events}}, {{function|get_functions}}, {{function|get_gamerule}}, {{function|get_highest_block_at}},
+{{function|get_inventory_item}}, {{function|get_inventory_size}}, {{function|get_inventory_type}}, {{function|get_inventory}},
+{{function|get_ip_bans}}, {{function|get_itemmeta}}, {{function|get_leashholder}}, {{function|get_light_at}}, {{function|get_list_name}},
+{{function|get_loaded_chunks}}, {{function|get_locales}}, {{function|get_max_health}}, {{function|get_metadata}}, {{function|get_mob_age}},
+{{function|get_mob_effects}}, {{function|get_mob_equipment}}, {{function|get_mob_name}}, {{function|get_name_visible}},
+{{function|get_objectives}}, {{function|get_offline_players}}, {{function|get_peffect}}, {{function|get_pflyspeed}}, {{function|get_pitch}},
+{{function|get_player_from_entity_id}}, {{function|get_procedures}}, {{function|get_projectile_bounce}}, {{function|get_projectile_shooter}},
+{{function|get_pscoreboard}}, {{function|get_pscore}}, {{function|get_pvp}}, {{function|get_pwalkspeed}}, {{function|get_recipe_for}},
+{{function|get_registered_channels}}, {{function|get_scoreboards}}, {{function|get_script_environment}}, {{function|get_server_info}},
+{{function|get_spawner_type}}, {{function|get_teams}}, {{function|get_temperature}}, {{function|get_terminal_width}},
+{{function|get_whitelisted_players}}, {{function|get_worlds}}, {{function|get_yaw}}, {{function|has_bind}}, {{function|has_metadata}},
+{{function|has_storm}}, {{function|has_thunder}}, {{function|heap_dump}}, {{function|hmac_md5}}, {{function|hmac_sha1}},
+{{function|hmac_sha256}}, {{function|http_clear_session_cookies}}, {{function|http_request}}, {{function|iclosure}}, {{function|ini_decode}},
+{{function|ini_encode}}, {{function|instanceof}}, {{function|is_alias}}, {{function|is_block_powered}}, {{function|is_bytearray}},
+{{function|is_channel_registered}}, {{function|is_closure}}, {{function|is_entity_living}}, {{function|is_leather_armor}}, {{function|is_number}},
+{{function|is_slime_chunk}}, {{function|is_stringable}}, {{function|is_string}}, {{function|json_decode}}, {{function|json_encode}},
+{{function|launch_firework}}, {{function|levenshtein}}, {{function|load_chunk}}, {{function|location_shift}}, {{function|logarithm}},
+{{function|lsprintf}}, {{function|ls}}, {{function|marquee_stop}}, {{function|marquee}}, {{function|material_info}}, {{function|math_const}},
+{{function|monitor_redstone}}, {{function|neg}}, {{function|noop}}, {{function|parse_date}},
+{{function|parse_int}}, {{function|pbed_location}}, {{function|penchanting}}, {{function|penderchest}}, {{function|pfirst_played}},
+{{function|pget_time}}, {{function|pgive_enderchest_item}}, {{function|phas_flight}}, {{function|phas_played}}, {{function|phas_storm}},
+{{function|pheld_slot}}, {{function|phunger}}, {{function|pinv_open}}, {{function|plast_played}}, {{function|play_entity_effect}},
+{{function|play_named_sound}}, {{function|play_note}}, {{function|play_sound}}, {{function|players_in_radius}}, {{function|postdec}},
+{{function|postinc}}, {{function|preset_time}}, {{function|print_err}}, {{function|print_out}}, {{function|prompt_char}},
+{{function|prompt_line}}, {{function|prompt_pass}}, {{function|psaturation}}, {{function|psend_block_change}}, {{function|psend_sign_text}},
+{{function|psetop}}, {{function|pspectator_target}}, {{function|ptake_enderchest_item}}, {{function|ptarget_space}}, {{function|puuid}},
+{{function|pvehicle_leave}}, {{function|pvehicle}}, {{function|pwd}}, {{function|pworkbench}}, {{function|query_async}}, {{function|query}},
+{{function|queue_clear}}, {{function|queue_delay_front}}, {{function|queue_delay}}, {{function|queue_push_front}}, {{function|queue_push}},
+{{function|queue_remove_front}}, {{function|queue_remove}}, {{function|queue_running}}, {{function|read_binary}},
+{{function|read_gzip_binary}}, {{function|read_pipe_input}}, {{function|ref_equals}}, {{function|reflect_docs}}, {{function|reflect_pull}},
+{{function|reflect_value_source}}, {{function|reg_escape}}, {{function|regen_chunk}}, {{function|register_channel}},
+{{function|register_command}}, {{function|remove_metadata}}, {{function|remove_objective}}, {{function|remove_scoreboard}},
+{{function|remove_team}}, {{function|res_create_resource}}, {{function|res_free_resource}}, {{function|reset_all_pscores}},
+{{function|reset_recipes}}, {{function|run_cmd}}, {{function|save_players}}, {{function|save_world}}, {{function|send_plugin_message}},
+{{function|send_resourcepack}}, {{function|send_texturepack}}, {{function|sequals_ic}}, {{function|set_armor_color}}, {{function|set_art_at}},
+{{function|set_biome}}, {{function|set_block_command}}, {{function|set_can_pickup_items}}, {{function|set_cmdline_prompt}},
+{{function|set_command_block_name}}, {{function|set_cron}}, {{function|set_difficulty}}, {{function|set_entity_age}}, {{function|set_entity_air}},
+{{function|set_entity_breedable}}, {{function|set_entity_fall_distance}}, {{function|set_entity_loc}}, {{function|set_entity_max_air}},
+{{function|set_entity_max_speed}}, {{function|set_entity_onfire}}, {{function|set_entity_persistence}}, {{function|set_entity_rider}},
+{{function|set_entity_spec}}, {{function|set_entity_velocity}}, {{function|set_env}}, {{function|set_equipment_droprates}},
+{{function|set_executor}}, {{function|set_gamerule}}, {{function|set_interval}}, {{function|set_inventory_item}}, {{function|set_inventory}},
+{{function|set_ip_banned}}, {{function|set_itemmeta}}, {{function|set_leashholder}}, {{function|set_list_name}}, {{function|set_max_health}},
+{{function|set_metadata}}, {{function|set_mob_age}}, {{function|set_mob_effect}}, {{function|set_mob_equipment}}, {{function|set_mob_name}},
+{{function|set_name_visible}}, {{function|set_objective_display}}, {{function|set_pbed_location}}, {{function|set_penderchest}},
+{{function|set_pflight}}, {{function|set_pflying}}, {{function|set_pflyspeed}}, {{function|set_pheld_slot}}, {{function|set_phunger}},
+{{function|set_projectile_bounce}}, {{function|set_projectile_shooter}}, {{function|set_psaturation}}, {{function|set_pscoreboard}},
+{{function|set_pscore}}, {{function|set_pspectator_target}}, {{function|set_pstorm}}, {{function|set_ptime}}, {{function|set_pvelocity}},
+{{function|set_pvp}}, {{function|set_pwalkspeed}}, {{function|set_spawner_type}}, {{function|set_spawn}}, {{function|set_tabcompleter}},
+{{function|set_team_display}}, {{function|set_team_options}}, {{function|set_thunder}}, {{function|set_timeout}},
+{{function|set_uncaught_exception_handler}}, {{function|sha256}}, {{function|shell_adv}}, {{function|shell}}, {{function|shoot_projectile}},
+{{function|show_enderchest}}, {{function|shutdown_server}}, {{function|simple_date}}, {{function|snequals}},
+{{function|spawn_entity}}, {{function|spawn_falling_block}}, {{function|split}}, {{function|sprintf}}, {{function|string_append}},
+{{function|string_from_bytes}}, {{function|string_get_bytes}}, {{function|string_position}}, {{function|sudo}}, {{function|sys_beep}},
+{{function|sys_err}}, {{function|sys_out}}, {{function|sys_properties}}, {{function|take_from_inventory}}, {{function|team_add_player}},
+{{function|team_remove_player}}, {{function|to_radix}}, {{function|trace}},
+{{function|triml}}, {{function|trimr}}, {{function|typeof}}, {{function|unicode_from_char}}, {{function|unload_chunk}},
+{{function|unload_world}}, {{function|unregister_channel}}, {{function|unregister_command}}, {{function|unsafe_query}},
+{{function|url_decode}}, {{function|url_encode}}, {{function|user}}, {{function|while}}, {{function|world_info}},
+{{function|x_get_current_thread}}, {{function|x_new_thread}}, {{function|x_run_on_main_thread_later}}, {{function|x_run_on_main_thread_now}},
+=======
+{{function|add_recipe}}, {{function|add_to_inventory}}, {{function|all_entities}}, {{function|array_deep_clone}}, {{function|array_every}},
+{{function|array_filter}}, {{function|array_indexes}}, {{function|array_index}}, {{function|array_insert}}, {{function|array_iterate}},
+{{function|array_last_index}}, {{function|array_map}}, {{function|array_rand}}, {{function|array_reduce_right}}, {{function|array_reduce}},
+{{function|array_remove_values}}, {{function|array_reverse}}, {{function|array_shallow_clone}}, {{function|array_some}},
+{{function|array_sort_async}}, {{function|array_sort}}, {{function|array_unique}}, {{function|associative_array}}, {{function|async_read}},
+{{function|ba_as_array}}, {{function|ba_get_bytes}}, {{function|ba_get_byte}}, {{function|ba_get_char}}, {{function|ba_get_double}},
+{{function|ba_get_float}}, {{function|ba_get_int}}, {{function|ba_get_long}}, {{function|ba_get_short}}, {{function|ba_get_string}},
+{{function|ba_is_little_endian}}, {{function|ba_put_bytes}}, {{function|ba_put_byte}}, {{function|ba_put_char}}, {{function|ba_put_double}},
+{{function|ba_put_float}}, {{function|ba_put_int}}, {{function|ba_put_long}}, {{function|ba_put_short}}, {{function|ba_put_string}},
+{{function|ba_rewind}}, {{function|ba_set_little_endian}}, {{function|base64_decode}}, {{function|base64_encode}}, {{function|bcrypt}},
+{{function|bit_xor}}, {{function|build_date}}, {{function|byte_array}}, {{function|call_proc_array}}, {{function|can_pickup_items}},
+{{function|capture_runas}}, {{function|cd}}, {{function|char_from_unicode}}, {{function|check_bcrypt}}, {{function|clear_commands}},
+{{function|clear_cron}}, {{function|clear_recipes}}, {{function|clear_screen}}, {{function|clear_task}}, {{function|close_pinv}},
+{{function|colorize}}, {{function|comp_read}}, {{function|compile_error}}, {{function|create_objective}}, {{function|create_scoreboard}},
+{{function|create_team}}, {{function|create_world}}, {{function|cslice}}, {{function|damage_entity}}, {{function|dowhile}},
+{{function|dump_threads}}, {{function|email}}, {{function|enchantment_list}}, {{function|engine_build_date}}, {{function|entities_in_radius}},
+{{function|entity_air}}, {{function|entity_can_see}}, {{function|entity_exists}}, {{function|entity_fall_distance}}, {{function|entity_grounded}},
 entity_id, {{function|entity_line_of_sight}}, {{function|entity_loc}}, {{function|entity_max_air}}, {{function|entity_onfire}},
 {{function|entity_remove}}, {{function|entity_spec}}, {{function|entity_type}}, entity_uuid, {{function|entity_velocity}},
-{{function|event_exists}}, {{function|execute}}, {{function|exit}}, {{function|explosion}}, {{function|extension_exists}}, 
-{{function|extension_info}}, {{function|fake_incoming_plugin_message}}, {{function|file_resolve}}, {{function|file_size}}, 
-{{function|foreachelse}}, {{function|forelse}}, {{function|function_exists}}, {{function|generate_tree}}, {{function|get_aliases}}, 
-{{function|get_all_recipes}}, {{function|get_armor_color}}, {{function|get_art_at}}, {{function|get_banned_players}}, {{function|get_biome}}, 
-{{function|get_block_command}}, {{function|get_block_info}}, {{function|get_block_power}}, {{function|get_chunk_loc}}, 
-{{function|get_command_block_name}}, {{function|get_command_block}}, {{function|get_commands}}, {{function|get_difficulty}}, 
-{{function|get_entity_age}}, {{function|get_entity_breedable}}, {{function|get_entity_max_speed}}, {{function|get_entity_persistence}}, 
-{{function|get_entity_rider}}, {{function|get_entity_vehicle}}, {{function|get_env}}, {{function|get_equipment_droprates}}, 
-{{function|get_events}}, {{function|get_functions}}, {{function|get_gamerule}}, {{function|get_highest_block_at}}, 
-{{function|get_inventory_item}}, {{function|get_inventory_size}}, {{function|get_inventory_type}}, {{function|get_inventory}}, 
-{{function|get_ip_bans}}, {{function|get_itemmeta}}, {{function|get_leashholder}}, {{function|get_light_at}}, {{function|get_list_name}}, 
-{{function|get_loaded_chunks}}, {{function|get_locales}}, {{function|get_max_health}}, {{function|get_metadata}}, {{function|get_mob_age}}, 
-{{function|get_mob_effects}}, {{function|get_mob_equipment}}, {{function|get_mob_name}}, {{function|get_name_visible}}, 
-{{function|get_objectives}}, {{function|get_offline_players}}, {{function|get_peffect}}, {{function|get_pflyspeed}}, {{function|get_pitch}}, 
+{{function|event_exists}}, {{function|execute}}, {{function|exit}}, {{function|explosion}}, {{function|extension_exists}},
+{{function|extension_info}}, {{function|fake_incoming_plugin_message}}, {{function|file_resolve}}, {{function|file_size}},
+{{function|foreachelse}}, {{function|forelse}}, {{function|function_exists}}, {{function|generate_tree}}, {{function|get_aliases}},
+{{function|get_all_recipes}}, {{function|get_armor_color}}, {{function|get_art_at}}, {{function|get_banned_players}}, {{function|get_biome}},
+{{function|get_block_command}}, {{function|get_block_info}}, {{function|get_block_power}}, {{function|get_chunk_loc}},
+{{function|get_command_block_name}}, {{function|get_command_block}}, {{function|get_commands}}, {{function|get_difficulty}},
+{{function|get_entity_age}}, {{function|get_entity_breedable}}, {{function|get_entity_max_speed}}, {{function|get_entity_persistence}},
+{{function|get_entity_rider}}, {{function|get_entity_vehicle}}, {{function|get_env}}, {{function|get_equipment_droprates}},
+{{function|get_events}}, {{function|get_functions}}, {{function|get_gamerule}}, {{function|get_highest_block_at}},
+{{function|get_inventory_item}}, {{function|get_inventory_size}}, {{function|get_inventory_type}}, {{function|get_inventory}},
+{{function|get_ip_bans}}, {{function|get_itemmeta}}, {{function|get_leashholder}}, {{function|get_light_at}}, {{function|get_list_name}},
+{{function|get_loaded_chunks}}, {{function|get_locales}}, {{function|get_max_health}}, {{function|get_metadata}}, {{function|get_mob_age}},
+{{function|get_mob_effects}}, {{function|get_mob_equipment}}, {{function|get_mob_name}}, {{function|get_name_visible}},
+{{function|get_objectives}}, {{function|get_offline_players}}, {{function|get_peffect}}, {{function|get_pflyspeed}}, {{function|get_pitch}},
 get_player_from_entity_id, {{function|get_procedures}}, {{function|get_projectile_bounce}}, {{function|get_projectile_shooter}},
 {{function|get_pscoreboard}}, {{function|get_pscore}}, {{function|get_pvp}}, {{function|get_pwalkspeed}}, get_recipe_for,
-{{function|get_registered_channels}}, {{function|get_scoreboards}}, {{function|get_script_environment}}, {{function|get_server_info}}, 
-{{function|get_spawner_type}}, {{function|get_teams}}, {{function|get_temperature}}, {{function|get_terminal_width}}, 
-{{function|get_whitelisted_players}}, {{function|get_worlds}}, {{function|get_yaw}}, {{function|has_bind}}, {{function|has_metadata}}, 
-{{function|has_storm}}, {{function|has_thunder}}, {{function|heap_dump}}, {{function|hmac_md5}}, {{function|hmac_sha1}}, 
-{{function|hmac_sha256}}, {{function|http_clear_session_cookies}}, {{function|http_request}}, {{function|iclosure}}, {{function|ini_decode}}, 
-{{function|ini_encode}}, {{function|instanceof}}, {{function|is_alias}}, {{function|is_block_powered}}, {{function|is_bytearray}}, 
-{{function|is_channel_registered}}, {{function|is_closure}}, {{function|is_entity_living}}, {{function|is_leather_armor}}, {{function|is_number}}, 
-{{function|is_slime_chunk}}, {{function|is_stringable}}, {{function|is_string}}, {{function|json_decode}}, {{function|json_encode}}, 
-{{function|launch_firework}}, {{function|levenshtein}}, {{function|load_chunk}}, {{function|location_shift}}, {{function|logarithm}}, 
-{{function|lsprintf}}, {{function|ls}}, {{function|marquee_stop}}, {{function|marquee}}, {{function|material_info}}, {{function|math_const}}, 
-{{function|monitor_redstone}}, {{function|neg}}, {{function|noop}}, {{function|parse_date}}, 
-{{function|parse_int}}, {{function|pbed_location}}, {{function|penchanting}}, {{function|penderchest}}, {{function|pfirst_played}}, 
-{{function|pget_time}}, {{function|pgive_enderchest_item}}, {{function|phas_flight}}, {{function|phas_played}}, {{function|phas_storm}}, 
-{{function|pheld_slot}}, {{function|phunger}}, {{function|pinv_open}}, {{function|plast_played}}, {{function|play_entity_effect}}, 
-{{function|play_named_sound}}, {{function|play_note}}, {{function|play_sound}}, {{function|players_in_radius}}, {{function|postdec}}, 
-{{function|postinc}}, {{function|preset_time}}, {{function|print_err}}, {{function|print_out}}, {{function|prompt_char}}, 
-{{function|prompt_line}}, {{function|prompt_pass}}, {{function|psaturation}}, {{function|psend_block_change}}, {{function|psend_sign_text}}, 
-{{function|psetop}}, {{function|pspectator_target}}, {{function|ptake_enderchest_item}}, {{function|ptarget_space}}, {{function|puuid}}, 
-{{function|pvehicle_leave}}, {{function|pvehicle}}, {{function|pwd}}, {{function|pworkbench}}, {{function|query_async}}, {{function|query}}, 
-{{function|queue_clear}}, {{function|queue_delay_front}}, {{function|queue_delay}}, {{function|queue_push_front}}, {{function|queue_push}}, 
-{{function|queue_remove_front}}, {{function|queue_remove}}, {{function|queue_running}}, {{function|read_binary}}, 
-{{function|read_gzip_binary}}, {{function|read_pipe_input}}, {{function|ref_equals}}, {{function|reflect_docs}}, {{function|reflect_pull}}, 
-{{function|reflect_value_source}}, {{function|reg_escape}}, {{function|regen_chunk}}, {{function|register_channel}}, 
-{{function|register_command}}, {{function|remove_metadata}}, {{function|remove_objective}}, {{function|remove_scoreboard}}, 
-{{function|remove_team}}, {{function|res_create_resource}}, {{function|res_free_resource}}, {{function|reset_all_pscores}}, 
-{{function|reset_recipes}}, {{function|run_cmd}}, {{function|save_players}}, {{function|save_world}}, {{function|send_plugin_message}}, 
+{{function|get_registered_channels}}, {{function|get_scoreboards}}, {{function|get_script_environment}}, {{function|get_server_info}},
+{{function|get_spawner_type}}, {{function|get_teams}}, {{function|get_temperature}}, {{function|get_terminal_width}},
+{{function|get_whitelisted_players}}, {{function|get_worlds}}, {{function|get_yaw}}, {{function|has_bind}}, {{function|has_metadata}},
+{{function|has_storm}}, {{function|has_thunder}}, {{function|heap_dump}}, {{function|hmac_md5}}, {{function|hmac_sha1}},
+{{function|hmac_sha256}}, {{function|http_clear_session_cookies}}, {{function|http_request}}, {{function|iclosure}}, {{function|ini_decode}},
+{{function|ini_encode}}, {{function|instanceof}}, {{function|is_alias}}, {{function|is_block_powered}}, {{function|is_bytearray}},
+{{function|is_channel_registered}}, {{function|is_closure}}, {{function|is_entity_living}}, {{function|is_leather_armor}}, {{function|is_number}},
+{{function|is_slime_chunk}}, {{function|is_stringable}}, {{function|is_string}}, {{function|json_decode}}, {{function|json_encode}},
+{{function|launch_firework}}, {{function|levenshtein}}, {{function|load_chunk}}, {{function|location_shift}}, {{function|logarithm}},
+{{function|lsprintf}}, {{function|ls}}, {{function|marquee_stop}}, {{function|marquee}}, {{function|material_info}}, {{function|math_const}},
+{{function|monitor_redstone}}, {{function|neg}}, {{function|noop}}, {{function|parse_date}},
+{{function|parse_int}}, {{function|pbed_location}}, {{function|penchanting}}, {{function|penderchest}}, {{function|pfirst_played}},
+{{function|pget_time}}, {{function|pgive_enderchest_item}}, {{function|phas_flight}}, {{function|phas_played}}, {{function|phas_storm}},
+{{function|pheld_slot}}, {{function|phunger}}, {{function|pinv_open}}, {{function|plast_played}}, {{function|play_entity_effect}},
+{{function|play_named_sound}}, {{function|play_note}}, {{function|play_sound}}, {{function|players_in_radius}}, {{function|postdec}},
+{{function|postinc}}, {{function|preset_time}}, {{function|print_err}}, {{function|print_out}}, {{function|prompt_char}},
+{{function|prompt_line}}, {{function|prompt_pass}}, {{function|psaturation}}, {{function|psend_block_change}}, {{function|psend_sign_text}},
+{{function|psetop}}, {{function|pspectator_target}}, {{function|ptake_enderchest_item}}, {{function|ptarget_space}}, {{function|puuid}},
+{{function|pvehicle_leave}}, {{function|pvehicle}}, {{function|pwd}}, {{function|pworkbench}}, {{function|query_async}}, {{function|query}},
+{{function|queue_clear}}, {{function|queue_delay_front}}, {{function|queue_delay}}, {{function|queue_push_front}}, {{function|queue_push}},
+{{function|queue_remove_front}}, {{function|queue_remove}}, {{function|queue_running}}, {{function|read_binary}},
+{{function|read_gzip_binary}}, {{function|read_pipe_input}}, {{function|ref_equals}}, {{function|reflect_docs}}, {{function|reflect_pull}},
+{{function|reflect_value_source}}, {{function|reg_escape}}, {{function|regen_chunk}}, {{function|register_channel}},
+{{function|register_command}}, {{function|remove_metadata}}, {{function|remove_objective}}, {{function|remove_scoreboard}},
+{{function|remove_team}}, {{function|res_create_resource}}, {{function|res_free_resource}}, {{function|reset_all_pscores}},
+{{function|reset_recipes}}, {{function|run_cmd}}, {{function|save_players}}, {{function|save_world}}, {{function|send_plugin_message}},
 {{function|send_resourcepack}}, send_texturepack, {{function|sequals_ic}}, {{function|set_armor_color}}, {{function|set_art_at}},
-{{function|set_biome}}, {{function|set_block_command}}, {{function|set_can_pickup_items}}, {{function|set_cmdline_prompt}}, 
-{{function|set_command_block_name}}, {{function|set_cron}}, {{function|set_difficulty}}, {{function|set_entity_age}}, {{function|set_entity_air}}, 
-{{function|set_entity_breedable}}, {{function|set_entity_fall_distance}}, {{function|set_entity_loc}}, {{function|set_entity_max_air}}, 
-{{function|set_entity_max_speed}}, {{function|set_entity_onfire}}, {{function|set_entity_persistence}}, {{function|set_entity_rider}}, 
-{{function|set_entity_spec}}, {{function|set_entity_velocity}}, {{function|set_env}}, {{function|set_equipment_droprates}}, 
-{{function|set_executor}}, {{function|set_gamerule}}, {{function|set_interval}}, {{function|set_inventory_item}}, {{function|set_inventory}}, 
-{{function|set_ip_banned}}, {{function|set_itemmeta}}, {{function|set_leashholder}}, {{function|set_list_name}}, {{function|set_max_health}}, 
-{{function|set_metadata}}, {{function|set_mob_age}}, {{function|set_mob_effect}}, {{function|set_mob_equipment}}, {{function|set_mob_name}}, 
-{{function|set_name_visible}}, {{function|set_objective_display}}, {{function|set_pbed_location}}, {{function|set_penderchest}}, 
-{{function|set_pflight}}, {{function|set_pflying}}, {{function|set_pflyspeed}}, {{function|set_pheld_slot}}, {{function|set_phunger}}, 
-{{function|set_projectile_bounce}}, {{function|set_projectile_shooter}}, {{function|set_psaturation}}, {{function|set_pscoreboard}}, 
-{{function|set_pscore}}, {{function|set_pspectator_target}}, {{function|set_pstorm}}, {{function|set_ptime}}, {{function|set_pvelocity}}, 
-{{function|set_pvp}}, {{function|set_pwalkspeed}}, {{function|set_spawner_type}}, {{function|set_spawn}}, {{function|set_tabcompleter}}, 
-{{function|set_team_display}}, {{function|set_team_options}}, {{function|set_thunder}}, {{function|set_timeout}}, 
-{{function|set_uncaught_exception_handler}}, {{function|sha256}}, {{function|shell_adv}}, {{function|shell}}, {{function|shoot_projectile}}, 
-{{function|show_enderchest}}, {{function|shutdown_server}}, {{function|simple_date}}, {{function|snequals}}, 
-{{function|spawn_entity}}, {{function|spawn_falling_block}}, {{function|split}}, {{function|sprintf}}, {{function|string_append}}, 
-{{function|string_from_bytes}}, {{function|string_get_bytes}}, {{function|string_position}}, {{function|sudo}}, {{function|sys_beep}}, 
-{{function|sys_err}}, {{function|sys_out}}, {{function|sys_properties}}, {{function|take_from_inventory}}, {{function|team_add_player}}, 
-{{function|team_remove_player}}, {{function|to_radix}}, {{function|trace}}, 
-{{function|triml}}, {{function|trimr}}, {{function|typeof}}, {{function|unicode_from_char}}, {{function|unload_chunk}}, 
-{{function|unload_world}}, {{function|unregister_channel}}, {{function|unregister_command}}, {{function|unsafe_query}}, 
-{{function|url_decode}}, {{function|url_encode}}, {{function|user}}, {{function|while}}, {{function|world_info}}, 
-{{function|x_get_current_thread}}, {{function|x_new_thread}}, {{function|x_run_on_main_thread_later}}, {{function|x_run_on_main_thread_now}}, 
+{{function|set_biome}}, {{function|set_block_command}}, {{function|set_can_pickup_items}}, {{function|set_cmdline_prompt}},
+{{function|set_command_block_name}}, {{function|set_cron}}, {{function|set_difficulty}}, {{function|set_entity_age}}, {{function|set_entity_air}},
+{{function|set_entity_breedable}}, {{function|set_entity_fall_distance}}, {{function|set_entity_loc}}, {{function|set_entity_max_air}},
+{{function|set_entity_max_speed}}, {{function|set_entity_onfire}}, {{function|set_entity_persistence}}, {{function|set_entity_rider}},
+{{function|set_entity_spec}}, {{function|set_entity_velocity}}, {{function|set_env}}, {{function|set_equipment_droprates}},
+{{function|set_executor}}, {{function|set_gamerule}}, {{function|set_interval}}, {{function|set_inventory_item}}, {{function|set_inventory}},
+{{function|set_ip_banned}}, {{function|set_itemmeta}}, {{function|set_leashholder}}, {{function|set_list_name}}, {{function|set_max_health}},
+{{function|set_metadata}}, {{function|set_mob_age}}, {{function|set_mob_effect}}, {{function|set_mob_equipment}}, {{function|set_mob_name}},
+{{function|set_name_visible}}, {{function|set_objective_display}}, {{function|set_pbed_location}}, {{function|set_penderchest}},
+{{function|set_pflight}}, {{function|set_pflying}}, {{function|set_pflyspeed}}, {{function|set_pheld_slot}}, {{function|set_phunger}},
+{{function|set_projectile_bounce}}, {{function|set_projectile_shooter}}, {{function|set_psaturation}}, {{function|set_pscoreboard}},
+{{function|set_pscore}}, {{function|set_pspectator_target}}, {{function|set_pstorm}}, {{function|set_ptime}}, {{function|set_pvelocity}},
+{{function|set_pvp}}, {{function|set_pwalkspeed}}, {{function|set_spawner_type}}, {{function|set_spawn}}, {{function|set_tabcompleter}},
+{{function|set_team_display}}, {{function|set_team_options}}, {{function|set_thunder}}, {{function|set_timeout}},
+{{function|set_uncaught_exception_handler}}, {{function|sha256}}, {{function|shell_adv}}, {{function|shell}}, {{function|shoot_projectile}},
+{{function|show_enderchest}}, {{function|shutdown_server}}, {{function|simple_date}}, {{function|snequals}},
+{{function|spawn_entity}}, {{function|spawn_falling_block}}, {{function|split}}, {{function|sprintf}}, {{function|string_append}},
+{{function|string_from_bytes}}, {{function|string_get_bytes}}, {{function|string_position}}, {{function|sudo}}, {{function|sys_beep}},
+{{function|sys_err}}, {{function|sys_out}}, {{function|sys_properties}}, {{function|take_from_inventory}}, {{function|team_add_player}},
+{{function|team_remove_player}}, {{function|to_radix}}, {{function|trace}},
+{{function|triml}}, {{function|trimr}}, {{function|typeof}}, {{function|unicode_from_char}}, {{function|unload_chunk}},
+{{function|unload_world}}, {{function|unregister_channel}}, {{function|unregister_command}}, {{function|unsafe_query}},
+{{function|url_decode}}, {{function|url_encode}}, {{function|user}}, {{function|while}}, {{function|world_info}},
+{{function|x_get_current_thread}}, {{function|x_new_thread}}, {{function|x_run_on_main_thread_later}}, {{function|x_run_on_main_thread_now}},
+>>>>>>> master
 {{function|xml_read}}, {{function|yml_decode}}, and {{function|yml_encode}}
 
 ===Event API additions===
 
 76 events were added.
 
-creature_spawn, block_grow, food_level_changed, world_save, entity_interact, block_dispense, entity_change_block, item_despawn, 
-inventory_click, vehicle_move, block_break, exp_change, note_play, shutdown, cmdline_prompt_input, player_interact_at_entity, 
-player_leave_bed, block_ignite, world_load, item_pre_enchant, entity_death, item_enchant, world_unload, projectile_hit, item_held, 
-player_quit, player_move, item_drop, tree_grow, weather_change, entity_damage_player, entity_damage, block_place, world_changed, 
-player_toggle_sneak, projectile_launch, player_fish, server_ping, entity_explode, player_prelogin, inventory_close, lightning_strike, 
-player_teleport, redstone_changed, inventory_drag, target_player, player_enter_bed, item_pickup, player_interact_entity, block_burn, 
-vehicle_leave, vehicle_collide, thunder_change, gamemode_change, async_player_chat, item_pre_craft, piston_retract, 
-player_toggle_flight, tab_complete_chat, pressure_plate_activated, inventory_open, player_login, vehicle_enter, player_command, 
-player_consume, player_kick, tab_complete_command, sign_changed, piston_extend, entity_enter_portal, player_portal_travel, 
+creature_spawn, block_grow, food_level_changed, world_save, entity_interact, block_dispense, entity_change_block, item_despawn,
+inventory_click, vehicle_move, block_break, exp_change, note_play, shutdown, cmdline_prompt_input, player_interact_at_entity,
+player_leave_bed, block_ignite, world_load, item_pre_enchant, entity_death, item_enchant, world_unload, projectile_hit, item_held,
+player_quit, player_move, item_drop, tree_grow, weather_change, entity_damage_player, entity_damage, block_place, world_changed,
+player_toggle_sneak, projectile_launch, player_fish, server_ping, entity_explode, player_prelogin, inventory_close, lightning_strike,
+player_teleport, redstone_changed, inventory_drag, target_player, player_enter_bed, item_pickup, player_interact_entity, block_burn,
+vehicle_leave, vehicle_collide, thunder_change, gamemode_change, async_player_chat, item_pre_craft, piston_retract,
+player_toggle_flight, tab_complete_chat, pressure_plate_activated, inventory_open, player_login, vehicle_enter, player_command,
+player_consume, player_kick, tab_complete_command, sign_changed, piston_extend, entity_enter_portal, player_portal_travel,
 player_toggle_sprint, item_spawn, hanging_break, book_edited, and plugin_message_received
 
 ==3.3.0==
@@ -335,7 +424,7 @@ player_toggle_sprint, item_spawn, hanging_break, book_edited, and plugin_message
 
 
 ===API additions===
-Here's a full list of all the new functions. Check out the API for details on each: 
+Here's a full list of all the new functions. Check out the API for details on each:
 
 * {{function|array_contains_ic}}
 * {{function|array_implode}}
@@ -460,10 +549,20 @@ Here's a full list of all the new functions. Check out the API for details on ea
 * Added functions: sqrt, include, proc, return, pinv, set_pinv, min, max, is_proc, call_proc, pexp/set_pexp (experimental), ptexp/set_ptexp (experimental), plevel/set_plevel (experimental), pmode/set_pmode, set_peffect (requires CraftBukkit), array_resize, range, Economy Functions, call_alias, item_drop, set_phealth, equals_ic, sk_all_regions, sk_pos1, sk_pos2, sk_region_info, sk_region_overlaps
 
 ==3.1.2==
+<<<<<<< HEAD
+* Added exception handling, and fixed more bugs with command matching and
+optional variables. Also added more advanced permission syntax for commands.
+* Added functions: set_display_name, reset_display_name, try, array_index_exists,
+is_array, is_boolean, is_double, is_integer, is_null, is_string, substr, to_lower,
+to_upper, length, throw
+*msg() and all other applicable Echoes functions now handle newlines and linebreaks properly. Besides being able to use a \n character to mean a newline character, word wrapping now occurs at word boundaries instead of arbitrarily. Thanks to Reil for the code to do that! Also, if a file is read in with read(), and it has newlines in it, newline characters are passed through to the other functions properly.
+*Permissions handling just got easier. In addition to being able to label a command, and giving that group/user permission to commandhelper.alias.label, you can give groups permissions to certain commands by doing:
+=======
 * Added exception handling, and fixed more bugs with command matching and optional variables. Also added more advanced permission syntax for commands.
 * Added functions: set_display_name, reset_display_name, try, array_index_exists, is_array, is_boolean, is_double, is_integer, is_null, is_string, substr, to_lower,to_upper, length, throw
 * msg() and all other applicable Echoes functions now handle newlines and linebreaks properly. Besides being able to use a \n character to mean a newline character, word wrapping now occurs at word boundaries instead of arbitrarily. Thanks to Reil for the code to do that! Also, if a file is read in with read(), and it has newlines in it, newline characters are passed through to the other functions properly.
 * Permissions handling just got easier. In addition to being able to label a command, and giving that group/user permission to commandhelper.alias.label, you can give groups permissions to certain commands by doing:
+>>>>>>> master
 <pre>
 ~admin:/adminOnlyCommand = msg('This is an admin only command')
 </pre>
@@ -491,8 +590,13 @@ Note that permissions take priority from left to right. So, say that a user is i
 <pre>
 /cmd = if(boolean, /run this command, /else run this command)
 </pre>
+<<<<<<< HEAD
+In previous versions, you had to group the "if" and "else" portions seperately, in this case, you would likely have used sconcat() though g() would have worked. Now, the commas separate the arguments, with tokens between commas automatically being sconcatenated together.
+*The compiler for the scripting language has been broken out of the CommandHelper core. The language itself is now called MScript, and CommandHelper simply hooks into MScript to generate commands to run. This allows me to more easily add other events in the future. Also, in future versions, I will make it so that other plugin authors can hook into MScript to allow their plugins to run MScripts, so that plugin authors can give users more control over the plugin, when applicable. Let's look at the structure of an alias again:
+=======
 In previous versions, you had to group the "if" and "else" portions separately, in this case, you would likely have used sconcat() though g() would have worked. Now, the commas separate the arguments, with tokens between commas automatically being sconcatenated together.
 * The compiler for the scripting language has been broken out of the CommandHelper core. The language itself is now called MScript, and CommandHelper simply hooks into MScript to generate commands to run. This allows me to more easily add other events in the future. Also, in future versions, I will make it so that other plugin authors can hook into MScript to allow their plugins to run MScripts, so that plugin authors can give users more control over the plugin, when applicable. Let's look at the structure of an alias again:
+>>>>>>> master
 <pre>
 /alias command name and $variables = MScript \ MScript \ MScript
 </pre>
@@ -503,6 +607,18 @@ The portions of an alias that are actually part of the MScript language are show
 
 
 ==3.0.2==
+<<<<<<< HEAD
+*Added new functions to allow scripts to interact with the environment around the player.
+
+==3.0.1==
+*Added several new functions, including a foreach loop, and the g function. See the [[Upgrade Notices|upgrade notices]] for information about upgrading your scripts from 3.0.0 to 3.0.1.
+
+==3.0.0==
+*Completly reworked the engine. Essentially a new plugin.
+
+==2.0.1==
+*Updated to work again.
+=======
 * Added new functions to allow scripts to interact with the environment around the player.
 
 ==3.0.1==
@@ -513,6 +629,7 @@ The portions of an alias that are actually part of the MScript language are show
 
 ==2.0.1==
 * Updated to work again.
+>>>>>>> master
 
 ==2.0==
 * Updated for Bukkit.

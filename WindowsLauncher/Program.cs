@@ -73,6 +73,11 @@ namespace mscript {
 						modulesArgs.Add(module + "=ALL-UNNAMED");
 					}
 				}
+				if(javaVersion < 16)
+				{
+					Console.WriteLine("MethodScript requires Java version 16 or greater to be installed.");
+					Environment.Exit(1);
+				}
 			}
 
 			List<string> command = new List<string>();

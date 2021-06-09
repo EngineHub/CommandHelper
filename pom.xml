@@ -192,16 +192,6 @@
 			<version>1.0</version>
 		</dependency>
 
-		<!-- Used for IRC hooks -->
-		<!-- NOT READY YET
-		<dependency>
-			<groupId>org.jibble</groupId>
-			<artifactId>pircbot</artifactId>
-			<version>1.5.0</version>
-			<scope>compile</scope>
-		</dependency>
-		-->
-
 		<!-- Profiling library -->
 		<dependency>
 			<!-- Apache 2.0 -->
@@ -211,15 +201,7 @@
 			<scope>compile</scope>
 			<type>jar</type>
 		</dependency>
-		<!--
-		<dependency>
-			Apache 2.0
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>2.13.0</version>
-			<scope>compile</scope>
-		</dependency>
-		-->
+
 		<!-- Database -->
 		<!-- SQLite -->
 		<dependency>
@@ -264,8 +246,8 @@
 			<groupId>com.microsoft.sqlserver</groupId>
 			<artifactId>mssql-jdbc</artifactId>
 			<!-- NOTE: If you change this version, you also have to change the install-mssql-auth command to
-			 download the corresponding version of the mssql-auth dll. This will also require users to re-install
-			 it, so an upgrade routine will need to be released as well. -->
+			download the corresponding version of the mssql-auth dll. This will also require users to re-install
+			it, so an upgrade routine will need to be released as well. -->
 			<version>8.2.2.jre8</version>
 		</dependency>
 
@@ -339,13 +321,13 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.13.1</version>
+			<version>4.13.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>2.15.0</version>
+			<version>3.10.0</version>
 			<scope>test</scope>
 		</dependency>
 		<!--<dependency>
@@ -375,8 +357,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
-			<artifactId>asm-all</artifactId>
-			<version>6.0_BETA</version>
+			<artifactId>asm</artifactId>
+			<version>9.1</version>
 		</dependency>
 		<dependency>
 			<groupId>jline</groupId>
@@ -489,11 +471,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
+				<version>3.8.1</version>
 				<configuration>
 					<showDeprecation>true</showDeprecation>
-					<source>1.8</source>
-					<target>1.8</target>
+					<release>16</release>
 					<compilerArgs>
 						<arg>-XDignore.symbol.file</arg>
 						<arg>-parameters</arg>
@@ -507,7 +488,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.3.1</version>
+				<version>3.2.0</version>
 				<configuration>
 					<archive>
 						<addMavenDescriptor>true</addMavenDescriptor>
@@ -529,7 +510,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.3.0-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<id>ShadedBundle</id>
@@ -563,7 +544,7 @@
 									<include>mysql:mysql-connector-java:jar:*</include>
 									<include>commons-codec:commons-codec:jar:*</include>
 									<!--<include>org.apache.bcel:bcel:jar:*</include>-->
-									<include>org.ow2.asm:asm-all:jar:*</include>
+									<include>org.ow2.asm:asm:jar:*</include>
 									<include>jline:jline:jar:*</include>
 									<include>javax.mail:mail:jar:*</include>
 									<include>javax.activation:activation:jar:*</include>
@@ -577,9 +558,9 @@
 									<include>org.eclipse.xtend:org.eclipse.xtend.lib.macro:jar:*</include>
 									<include>org.eclipse.xtext:org.eclipse.xtext.xbase.lib:jar:*</include>
 									<!-- We don't currently actually depend on these 2, but lsp4j does, so we
-										need to shade it in. In the future, we may rip out org.json:json,
-										and replace it with this, however, in which case we only need to
-										add it to the dependecies list to fully integrate it. -->
+									need to shade it in. In the future, we may rip out org.json:json,
+									and replace it with this, however, in which case we only need to
+									add it to the dependecies list to fully integrate it. -->
 									<include>com.google.code.gson:gson:jar:*</include>
 									<include>com.google.guava:guava:jar:*</include>
 									<!-- Swagger dependencies -->
@@ -780,7 +761,7 @@
 										</includes>
 								</filter>-->
 								<filter>
-									<artifact>org.ow2.asm:asm-all:jar:*</artifact>
+									<artifact>org.ow2.asm:asm:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
@@ -951,7 +932,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.2.1</version>
+				<version>3.0.0</version>
 				<executions>
 					<execution>
 						<id>cache-annotations</id>
@@ -972,7 +953,7 @@
 			<plugin>
 				<groupId>org.bsc.maven</groupId>
 				<artifactId>maven-processor-plugin</artifactId>
-				<version>2.2.4</version>
+				<version>5.0-jdk8-rc1</version>
 				<executions>
 					<execution>
 						<id>process</id>
@@ -983,6 +964,9 @@
 					</execution>
 				</executions>
 				<configuration>
+					<argLine>
+						--illegal-access=permit
+					</argLine>
 					<outputDirectory>src/main/generated</outputDirectory>
 					<processors>
 						<processor>com.laytonsmith.PureUtilities.Common.Annotations.CheckOverrides</processor>
@@ -990,6 +974,24 @@
 						<processor>com.laytonsmith.core.MObjectAnnotationProcessor</processor>
 					</processors>
 					<outputDiagnostics>true</outputDiagnostics>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M5</version>
+				<configuration>
+					<includes>
+						<!-- Include the default test cases, since we're overwriting them -->
+						<include>**/*Test.java</include>
+						<include>**/Test*.java</include>
+						<include>**/*Tests.java</include>
+						<include>**/*TestCase.java</include>
+
+						<!-- Include custom, none specific classes -->
+						<include>**/RandomTests.java</include>
+					</includes>
+					<argLine>-Dfile.encoding=UTF-8 --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED</argLine>
 				</configuration>
 			</plugin>
 
@@ -1008,47 +1010,49 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.4</version>
+				<version>3.3.0</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
-				<version>2.6</version>
+				<version>3.0.0-M1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>3.0.1</version>
+				<version>3.2.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.9</version>
-				<configuration>
-					<includes>
-						<!-- Include the default test cases, since we're overwriting them -->
-						<include>**/*Test.java</include>
-						<include>**/Test*.java</include>
-						<include>**/*Tests.java</include>
-						<include>**/*TestCase.java</include>
-
-						<!-- Include custom, none specific classes -->
-						<include>**/RandomTests.java</include>
-					</includes>
-					<argLine>${argLine}</argLine>
-				</configuration>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.1.0</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>3.0.0-M1</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.2.0</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.9.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>2.4</version>
+				<version>2.7</version>
 			</plugin>
 
 			<!-- Checkstyle plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.1.2</version>
 				<executions>
 					<execution>
 						<id>checkstyle</id>
@@ -1077,27 +1081,26 @@
 					</dependency>
 				</dependencies>
 			</plugin>
-			<!--<plugin>
-                <groupId>io.github.phillipuniverse</groupId>
-                <artifactId>githook-maven-plugin</artifactId>
-                <version>1.0.4</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>install</goal>
-                        </goals>
-                        <configuration>
-                            <hooks>
-                                <pre-push>
-                                    #echo running validation build
-                                    #exec mvn clean package -Pfail-on-test-failures
-                                </pre-push>
-                            </hooks>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>-->
-
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>3.0.0-M3</version>
+				<executions>
+					<execution>
+						<id>enforce-maven</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireMavenVersion>
+									<version>3.5.2</version>
+								</requireMavenVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 	<profiles>
@@ -1116,7 +1119,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-checkstyle-plugin</artifactId>
-						<version>3.0.0</version>
+						<version>3.1.2</version>
 						<configuration>
 							<skip>true</skip>
 						</configuration>
@@ -1124,7 +1127,7 @@
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>0.8.2</version>
+						<version>0.8.7</version>
 						<configuration>
 							<skip>true</skip>
 						</configuration>
@@ -1148,13 +1151,17 @@
 			<id>maven-central</id>
 			<url>https://repo.maven.apache.org/maven2/</url>
 		</pluginRepository>
+		<pluginRepository>
+			<id>apache-snapshots</id>
+			<url>https://repository.apache.org/content/repositories/snapshots/</url>
+		</pluginRepository>
 	</pluginRepositories>
 	<reporting>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>2.5</version>
+				<version>3.1.2</version>
 				<reportSets>
 					<reportSet>
 						<reports>

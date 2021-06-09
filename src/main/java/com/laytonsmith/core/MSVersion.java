@@ -20,13 +20,15 @@ public enum MSVersion implements Version {
 	V3_3_1("3.3.1"),
 	V3_3_2("3.3.2"),
 	V3_3_3("3.3.3"),
-	V3_3_4("3.3.4");
+	V3_3_4("3.3.4"),
+	V3_3_5("3.3.5");
+
 	final SemVer2 version;
 
 	/**
 	 * This points to the latest version in the series. This should normally only be used for things that report the
 	 * <i>current</i> version, not things that are versioned. This is not an actual enum within the class, this is a
-	 * static member of the class which points to the an actual enum.
+	 * static member of the class which points to an actual enum.
 	 */
 	public static final MSVersion LATEST;
 

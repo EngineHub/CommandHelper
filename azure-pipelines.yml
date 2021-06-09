@@ -12,7 +12,7 @@ steps:
     mavenPomFile: 'pom.xml'
     mavenOptions: '-Xmx3072m'
     javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.8'
+    jdkVersionOption: '1.16'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: true
     testResultsFiles: '**/TEST-*.xml'
@@ -20,7 +20,7 @@ steps:
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
-    script: '[xml]$pomXml = Get-Content "pom.xml"; $version = $pomXml.project.version; Write-Host "##vso[task.setvariable variable=version]$version"'    
+    script: '[xml]$pomXml = Get-Content "pom.xml"; $version = $pomXml.project.version; Write-Host "##vso[task.setvariable variable=version]$version"'
 - task: PublishPipelineArtifact@0
   inputs:
     targetPath: 'target/commandhelper-$(version)-full.jar'

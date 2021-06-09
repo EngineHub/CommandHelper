@@ -35,6 +35,7 @@ import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREError;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
@@ -61,6 +62,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import com.laytonsmith.core.natives.interfaces.Sizeable;
+import java.lang.reflect.InaccessibleObjectException;
 import java.util.UUID;
 
 /**
@@ -1408,7 +1410,11 @@ public class StringHandling {
 			String formatString = args[1].val();
 			List<FormatString> parsed;
 			try {
-				parsed = parse(formatString, t);
+				try {
+					parsed = parse(formatString, t);
+				} catch (InaccessibleObjectException ex) {
+					throw new CREError(ADD_OPENS_MESSAGE, t);
+				}
 			} catch (IllegalFormatException e) {
 				throw new CREFormatException(e.getMessage(), t);
 			}
@@ -1594,6 +1600,10 @@ public class StringHandling {
 			}
 		}
 
+		private static final String ADD_OPENS_MESSAGE = "An error occured when running this script, due to misconfigured"
+				+ " Java startup parameters. Please add the output of the 'cmdline-args' to your java startup command"
+				+ " to enable full functionality. Please see the installation guide for more details.";
+
 		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
@@ -1632,7 +1642,12 @@ public class StringHandling {
 				}
 				//We can check the format string and make sure it doesn't throw an IllegalFormatException.
 				try {
-					List<FormatString> parsed = parse(children.get(1).getData().val(), t);
+					List<FormatString> parsed;
+					try {
+						parsed = parse(children.get(1).getData().val(), t);
+					} catch (InaccessibleObjectException ex) {
+						throw new CREError(ADD_OPENS_MESSAGE, t);
+					}
 					if(requiredArgs(parsed) != children.size() - 2) {
 						throw new CREInsufficientArgumentsException("The specified format string: \"" + children.get(1).getData().val() + "\""
 								+ " expects " + requiredArgs(parsed) + " argument(s), but " + (children.size() - 2) + " were provided.", t);
