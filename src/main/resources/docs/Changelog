@@ -1,3 +1,68 @@
+==3.3.4==
+CommandHelper 3.3.4 supports Minecraft 1.13.2 - 1.16.5. All extensions must be updated when upgrading from previous versions.
+
+=== New Feature Overview ===
+* New Visual Studio Code extension with syntax highlighting, function/event peeking, and linting for compile errors and warnings
+* Adds Static Analysis framework, including type and scope checks for variables and procedures
+* Adds telemetry (disabled by default)
+* Adds cmdline support for Windows
+* Adds 'requiredExtensions' and 'compileroptions' to [[File_Options|File Options]]
+* Adds 'CodeUpgradeNotices' to suppressWarnings in File Options
+* Adds '.msfileoption' files for directory level File Options
+* Adds support for multiple semi-colon separated paths for 'base-dir' in Preferences
+* Adds support for Brotli encoding in {{function|http_request}}
+* Adds 'json-api', 'cmdline-args', 'build-extension', 'help-topic', 'edit-prefs', 'install-mssql-auth' tools to [[CommandLineTools|Cmdline tools]]
+* Adds MSSQL support for query() and in [[Persistence_Network|Persistence Network]]
+* Adds documentation localization tools 'validate-l10n' and 'l10n-ui'
+* Adds 'help' command to Interpreter to lookup functions
+* array_index_exists now supports multi-dimensional arrays and negative indices
+* Adds reflect_pull('dir')
+* Adds support for Minecraft 1.14 through 1.16.5
+* Adds smart comments to aliases and implements `@command` structure
+* Adds attribute modifiers and custom model data tag to item arrays
+* Adds support for hex color codes in color() and colorize()
+* Expands Minecraft recipe support
+
+=== Other Changes ===
+* Bare strings are no longer allowed
+* Auto concatenation is no longer allowed in Strict Mode
+* Minecraft events now ignore fake players
+* Faster startup times and other performance improvements
+* Hundreds of others fixes
+
+=== Function API Additions ===
+77 new functions have been added.
+
+MethodScript additions: {{function|map_implode}}, {{function|array_push_all}}, {{function|array_get_rand}},
+{{function|array_subtract}}, {{function|x_find}}, {{function|switch_ic}}, {{function|include_dir}},
+{{function|execute_array}}, {{function|parse_text_table}}, {{function|always_trace}}, {{function|hypot}},
+{{function|get_compiler_options}}, {{function|get_compiler_warnings}}, {{function|set_runtime_setting}},
+{{function|remove_runtime_setting}}, {{function|has_runtime_setting}}, {{function|nameof}},
+{{function|engine_location}}, {{function|define_object}}, {{function|new_object}}, {{function|get_pid}},
+{{function|reflect_type}}, {{function|class_type}}, {{function|x_write}}, {{function|average}}, {{function|sum}},
+{{function|median}}, {{function|mode}}, {{function|percentile}}, {{function|string_contains_ic}},
+{{function|x_thread_join}}, {{function|x_thread_is_alive}}, {{function|x_interrupt}}, {{function|x_is_interrupted}},
+{{function|x_clear_interrupt}}.
+
+Minecraft additions: {{function|get_tabcomplete_prototype}}, {{function|tell_raw}}, {{function|get_projectile_item}},
+{{function|set_projectile_item}}, {{function|get_blockdata}}, {{function|set_blockdata}}, {{function|set_skull_owner}},
+{{function|get_skull_owner}}, {{function|get_sky_light_at}}, {{function|get_block_light_at}},
+{{function|is_block_lockable}}, {{function|is_block_locked}}, {{function|get_block_lock}}, {{function|set_block_lock}},
+{{function|get_cmd_completions}}, {{function|all_materials}}, {{function|entity_attribute_value}},
+{{function|entity_attribute_base}}, {{function|entity_attribute_default}}, {{function|entity_attribute_modifiers}},
+{{function|set_entity_attribute_base}}, {{function|reset_entity_attribute_base}},
+{{function|add_entity_attribute_modifier}}, {{function|remove_entity_attribute_modifier}},
+{{function|get_entity_immunity_ticks}}, {{function|set_entity_immunity_ticks}}, {{function|is_entity_sleeping}},
+{{function|pflying}}, {{function|pattack_cooldown}}, {{function|get_plist_header}}, {{function|set_plist_header}},
+{{function|get_plist_footer}}, {{function|set_plist_footer}}, {{function|ptellraw}}, {{function|pstatistic}},
+{{function|set_pstatistic}}, {{function|pblocking}}, {{function|psprinting}}, {{function|remove_recipe}},
+{{function|set_world_day}}, {{function|get_world_day}}, {{function|set_keep_spawn_loaded}}.
+
+=== Event API Additions ===
+7 new events have been added.
+
+block_explode, block_form, hanging_place, entity_unleash, potion_splash, entity_potion, resource_pack_status
+
 ==3.3.3==
 This release reflects the enormous changes in Minecraft 1.13, and drops support for past Minecraft versions.
 As a result it has many breaking changes in regards to Minecraft data, functions and events. Please refer to the
@@ -8,6 +73,7 @@ As a result it has many breaking changes in regards to Minecraft data, functions
 * Manage villager trades and virtual merchants
 
 === Function API Changes ===
+28 new functions have been added. 19 functions have been modified.
 
 MethodScript Additions: {{function|set_debug_output}}, {{function|array_intersect}}, {{function|hash}},
 {{function|array_subset_of}}, {{function|uuid}}, {{function|get_classes}}.
@@ -29,13 +95,14 @@ Modified: (not including item array changes) {{function|can_enchant_target}}, {{
 the transparent block array, {{function|pinfo}}, {{function|psend_block_change}}, {{function|spawn_falling_block}}.
 
 === Event API Changes ===
+22 events have been modified. 2 events have been removed.
 
 Modified events: piston_retract, piston_extend, block_break, block_place, block_burn, block_ignite, block_from_to,
 block_dispense, block_grow, note_play (no more mutable data), block_fade, item_despawn, item_spawn, item_drop,
 item_pickup, entity_change_block, entity_interact, inventory_click, inventory_drag, item_swap, player_interact,
 vehicle_collide.
 
-Removed event: player_prelogin, tab_complete_chat.
+Removed events: player_prelogin, tab_complete_chat.
 
 ==3.3.2==
 CommandHelper 3.3.2 supports Minecraft 1.7.10 to 1.12.2.
