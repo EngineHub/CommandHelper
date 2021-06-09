@@ -4,7 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
 pool:
-  vmImage: 'vs2017-win2016'
+  vmImage: 'windows-2019'
 
 steps:
 - task: JavaToolInstaller@0
