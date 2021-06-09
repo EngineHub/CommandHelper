@@ -2,26 +2,26 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.sk89q</groupId>
 	<artifactId>commandhelper</artifactId>
-	<version>3.3.1-SNAPSHOT</version>
+	<version>3.3.4-SNAPSHOT</version>
 	<name>CommandHelper</name>
 	<description>CommandHelper is a full blown scripting language built right into Minecraft</description>
 	<inceptionYear>2010</inceptionYear>
 	<organization>
 		<name>MethodScript Team</name>
-		<url>http://wiki.sk89q.com/CommandHelper</url>
+		<url>https://methodscript.com</url>
 	</organization>
 	<developers>
 		<developer>
 			<id>ladycailin</id>
 			<name>LadyCailin</name>
 			<email>gmail: savannahcailin</email>
-			<url>http://www.laytonsmith.com#donations</url>
+			<url>https://methodscript.com</url>
 			<roles>
 				<role>project manager</role>
 				<role>developer</role>
 				<role>tester</role>
 			</roles>
-			<timezone>-6</timezone>
+			<timezone>+1</timezone>
 		</developer>
 		<developer>
 			<id>sk89q</id>
@@ -73,6 +73,12 @@
 			</roles>
 		</contributor>
 		<contributor>
+			<name>Lildirt</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
+		<contributor>
 			<name>jb_aero</name>
 			<roles>
 				<role>contributor</role>
@@ -92,6 +98,12 @@
 		</contributor>
 		<contributor>
 			<name>PseudoKnight</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>Pieter12345/Woesh0007</name>
 			<roles>
 				<role>contributor</role>
 			</roles>
@@ -120,12 +132,16 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.test.failure.ignore>true</maven.test.failure.ignore>
+		<swagger-core-version>2.0.0</swagger-core-version>
+		<okhttp-version>2.7.5</okhttp-version>
+		<gson-version>2.8.1</gson-version>
+		<gson-fire-version>1.8.3</gson-fire-version>
+		<threetenbp-version>1.3.5</threetenbp-version>
 	</properties>
 	<repositories>
-		<!-- Repository for other dependencies of SK's -->
 		<repository>
-			<id>sk89q-mvn2</id>
-			<url>http://mvn2.sk89q.com/repo</url>
+			<id>enginehub-maven</id>
+			<url>https://maven.enginehub.org/repo/</url>
 		</repository>
 
 		<!-- Repository for Bukkit -->
@@ -137,41 +153,31 @@
 		<!-- Other repositories -->
 		<repository>
 			<id>maven-central</id>
-			<url>http://repo1.maven.org/maven2/</url>
+			<url>https://repo.maven.apache.org/maven2/</url>
 		</repository>
-		<!--repository>
-			<id>zml2008</id>
-			<url>http://files.zachsthings.com/repo/</url>
-		</repository-->
 
-		<!-- mcstats repo (this appears to no longer be working)
-		<repository>
-			<id>Plugin Metrics</id>
-			<url>http://repo.mcstats.org/content/repositories/public</url>
-		</repository>-->
-
-		<!-- Java Mail -->
-		<repository>
-			<id>Java.Net</id>
-			<url>http://download.java.net/maven/2/</url>
-		</repository>
 	</repositories>
 	<dependencies>
 		<!-- Please update the Compatibility docs page whenever
 			these dependencies are updated, or important dependencies are added.
 			You can check to see if all dependencies are up to date or not by
 			running: mvn versions:display-dependency-updates
+
+			IMPORTANT: When adding a new non-test dependency, add the license that it uses in a comment
+			within the dependency
 		-->
 
 		<!-- Bukkit -->
 		<dependency>
+			<!-- GPL -->
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.8.8-R0.1-SNAPSHOT</version>
+			<version>1.16.2-R0.1-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Used for storing and retreiving Constructs in a storage transparent medium: JSONs -->
 		<dependency>
+			<!-- Apache 2.0 -->
 			<groupId>com.googlecode.json-simple</groupId>
 			<artifactId>json-simple</artifactId>
 			<version>1.1.1</version>
@@ -179,85 +185,100 @@
 
 		<!-- BCrypt -->
 		<dependency>
+			<!-- MIT -->
 			<groupId>org.mindrot</groupId>
 			<artifactId>jBCrypt</artifactId>
 			<version>1.0</version>
 		</dependency>
 
-		<!-- Used for potion effects
-		<dependency>
-		 <groupId>org.bukkit</groupId>
-		 <artifactId>minecraft-server</artifactId>
-		 <version>1.8.1</version>
-		 <type>jar</type>
-		</dependency> -->
-
 		<!-- Used for IRC hooks -->
-		<!--<dependency> NOT READY YET
-		 <groupId>org.jibble</groupId>
-		 <artifactId>pircbot</artifactId>
-		 <version>1.5.0</version>
-		 <scope>compile</scope>
-		</dependency>-->
+		<!-- NOT READY YET
+		<dependency>
+			<groupId>org.jibble</groupId>
+			<artifactId>pircbot</artifactId>
+			<version>1.5.0</version>
+			<scope>compile</scope>
+		</dependency>
+		-->
 
 		<!-- Profiling library -->
 		<dependency>
+			<!-- Apache 2.0 -->
 			<groupId>org.perf4j</groupId>
 			<artifactId>perf4j</artifactId>
 			<version>0.9.16</version>
 			<scope>compile</scope>
 			<type>jar</type>
 		</dependency>
+		<!--
 		<dependency>
+			Apache 2.0
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>1.2.17</version>
+			<version>2.13.0</version>
 			<scope>compile</scope>
 		</dependency>
-
+		-->
 		<!-- Database -->
 		<!-- SQLite -->
 		<dependency>
+			<!-- Apache 2.0 -->
 			<groupId>org.xerial</groupId>
 			<artifactId>sqlite-jdbc</artifactId>
-			<version>3.7.15-M1</version>
+			<version>3.21.0.1</version>
 			<scope>compile</scope>
 		</dependency>
 
 		<!-- Redis -->
 		<dependency>
+			<!-- MIT -->
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
-			<version>2.5.1</version>
+			<version>2.9.0</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
 
 		<!-- MySQL -->
 		<dependency>
+			<!-- GPL -->
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.30</version>
+			<version>8.0.18</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
 
 		<!-- PostgreSQL -->
 		<dependency>
+			<!-- BSD -->
 			<groupId>postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>9.1-901-1.jdbc4</version>
 		</dependency>
 
+		<!-- MSSQL -->
+		<dependency>
+			<!-- MIT -->
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>mssql-jdbc</artifactId>
+			<!-- NOTE: If you change this version, you also have to change the install-mssql-auth command to
+			 download the corresponding version of the mssql-auth dll. This will also require users to re-install
+			 it, so an upgrade routine will need to be released as well. -->
+			<version>8.2.2.jre8</version>
+		</dependency>
+
 		<!-- Yaml parsing -->
 		<dependency>
+			<!-- Apache 2.0 -->
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
-			<version>1.13</version>
+			<version>1.26</version>
 		</dependency>
 
 		<!-- Apache commons IO -->
 		<dependency>
+			<!-- Apache 2.0 -->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.4</version>
@@ -265,32 +286,46 @@
 
 		<!-- Evil-y things (currently not used) -->
 		<!--<dependency>
-		 <groupId>cglib</groupId>
-		 <artifactId>cglib</artifactId>
-		 <version>2.2.2</version>
-		 <scope>compile</scope>
-		 <type>jar</type>
+		<groupId>cglib</groupId>
+		<artifactId>cglib</artifactId>
+		<version>2.2.2</version>
+		<scope>compile</scope>
+		<type>jar</type>
 		</dependency>
 		<dependency>
-		 <groupId>org.javassist</groupId>
-		 <artifactId>javassist</artifactId>
-		 <version>3.15.0-GA</version>
-		 <type>jar</type>
+		<groupId>org.javassist</groupId>
+		<artifactId>javassist</artifactId>
+		<version>3.15.0-GA</version>
+		<type>jar</type>
 		</dependency>-->
 		<!-- Embedded SSH Client -->
 		<dependency>
+			<!-- BSD -->
 			<groupId>com.jcraft</groupId>
 			<artifactId>jsch</artifactId>
-			<version>0.1.51</version>
+			<version>0.1.54</version>
 		</dependency>
 
 		<!-- Charset detection library -->
 		<dependency>
+			<!-- Mozilla Public License 1.1 -->
 			<groupId>net.sourceforge.jchardet</groupId>
 			<artifactId>jchardet</artifactId>
 			<version>1.0</version>
 		</dependency>
-
+		<!-- https://mvnrepository.com/artifact/org.apache.oltu.oauth2/org.apache.oltu.oauth2.client -->
+		<dependency>
+			<!-- Apache License 2.0 -->
+			<groupId>org.apache.oltu.oauth2</groupId>
+			<artifactId>org.apache.oltu.oauth2.client</artifactId>
+			<version>1.0.2</version>
+		</dependency>
+		<dependency>
+			<!-- MIT -->
+			<groupId>org.brotli</groupId>
+			<artifactId>dec</artifactId>
+			<version>0.1.2</version>
+		</dependency>
 		<!-- Test libraries -->
 		<!-- Hamcrest must come before powermock -->
 		<dependency>
@@ -303,13 +338,13 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.11</version>
+			<version>4.13.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>1.9.5</version>
+			<version>2.15.0</version>
 			<scope>test</scope>
 		</dependency>
 		<!--<dependency>
@@ -332,37 +367,20 @@
 			<scope>test</scope>
 		</dependency>-->
 		<dependency>
-			<groupId>org.java.net.substance</groupId>
-			<artifactId>substance</artifactId>
-			<version>6.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>asm</groupId>
-					<artifactId>asm-all</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<!-- MCStats (this appears to no longer be working)
-		<dependency>
-			<groupId>org.mcstats</groupId>
-			<artifactId>metrics</artifactId>
-			<version>1.2-SNAPSHOT</version>
-		</dependency> -->
-		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 			<type>jar</type>
-			<version>1.9</version>
+			<version>1.13</version>
 		</dependency>
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm-all</artifactId>
-			<version>5.0.4</version>
+			<version>6.0_BETA</version>
 		</dependency>
 		<dependency>
 			<groupId>jline</groupId>
 			<artifactId>jline</artifactId>
-			<version>2.11</version>
+			<version>2.14.5</version>
 		</dependency>
 		<!-- Java Mail -->
 		<dependency>
@@ -375,31 +393,52 @@
 			<artifactId>activation</artifactId>
 			<version>1.1.1</version>
 		</dependency>
+		<!-- Eclipse Public License, Version 2.0 -->
+		<dependency>
+			<groupId>org.eclipse.lsp4j</groupId>
+			<artifactId>org.eclipse.lsp4j</artifactId>
+			<version>0.8.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-annotations</artifactId>
+			<version>${swagger-core-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>${okhttp-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp</groupId>
+			<artifactId>logging-interceptor</artifactId>
+			<version>${okhttp-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>${gson-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.gsonfire</groupId>
+			<artifactId>gson-fire</artifactId>
+			<version>${gson-fire-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.threeten</groupId>
+			<artifactId>threetenbp</artifactId>
+			<version>${threetenbp-version}</version>
+		</dependency>
 	</dependencies>
 	<distributionManagement>
-		<site>
-			<id>sk89q-docs-upload</id>
-			<url>ftp://sk89q-maven-deploy/commandhelper/</url>
-		</site>
 		<repository>
-			<id>maven.sk89q.com</id>
-			<url>http://maven.sk89q.com/artifactory/libs-release-local</url>
+			<id>github</id>
+			<name>GitHub EngineHub Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/EngineHub/CommandHelper</url>
 		</repository>
-		<snapshotRepository>
-			<id>maven.sk89q.com-snapshot</id>
-			<url>http://maven.sk89q.com/artifactory/libs-snapshot-local</url>
-		</snapshotRepository>
 	</distributionManagement>
 	<build>
 		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
-
-		<extensions>
-			<extension>
-				<groupId>org.apache.maven.wagon</groupId>
-				<artifactId>wagon-ftp</artifactId>
-				<version>1.0-beta-6</version>
-			</extension>
-		</extensions>
 
 		<!-- Resources -->
 		<resources>
@@ -419,6 +458,22 @@
 					<exclude>plugin.yml</exclude>
 				</excludes>
 			</resource>
+			<resource>
+				<targetPath>./nativeSource</targetPath>
+				<filtering>false</filtering>
+				<directory>${basedir}/src/main/methodscript/</directory>
+				<excludes>
+					<exclude>workspace.code-workspace</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<targetPath>./nativeSource</targetPath>
+				<filtering>false</filtering>
+				<directory>${basedir}/src/main/ms-resources/</directory>
+				<includes>
+					<include>**</include>
+				</includes>
+			</resource>
 		</resources>
 		<testResources>
 			<testResource>
@@ -433,12 +488,17 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>3.7.0</version>
 				<configuration>
 					<showDeprecation>true</showDeprecation>
-					<source>1.7</source>
-					<target>1.7</target>
-					<compilerArgument>-XDignore.symbol.file</compilerArgument>
+					<source>1.8</source>
+					<target>1.8</target>
+					<compilerArgs>
+						<arg>-XDignore.symbol.file</arg>
+						<arg>-parameters</arg>
+					</compilerArgs>
+					<fork>true</fork>
+					<optimize>true</optimize>
 				</configuration>
 			</plugin>
 
@@ -450,7 +510,7 @@
 				<configuration>
 					<archive>
 						<addMavenDescriptor>true</addMavenDescriptor>
-						<pomPropertiesFile>true</pomPropertiesFile>
+						<pomPropertiesFile>pom.properties</pomPropertiesFile>
 						<manifest>
 							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
@@ -468,7 +528,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>1.4</version>
+				<version>3.1.0</version>
 				<executions>
 					<execution>
 						<id>ShadedBundle</id>
@@ -477,8 +537,8 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
-							<shadedArtifactAttached>false</shadedArtifactAttached>
-							<shadedClassifierName>Bundle</shadedClassifierName>
+							<shadedArtifactAttached>true</shadedArtifactAttached>
+							<shadedClassifierName>full</shadedClassifierName>
 							<minimizeJar>false</minimizeJar>
 							<!-- To add a new shaded dependency, there are three steps.
 								1. Add a reference to the artifact set
@@ -490,14 +550,13 @@
 							<artifactSet>
 								<includes>
 									<include>org.perf4j:perf4j:jar:*</include>
-									<include>log4j:log4j:jar:*</include>
+									<!--<include>log4j:log4j:jar:*</include>-->
 									<include>org.yaml:snakeyaml:jar:*</include>
 									<include>com.googlecode.json-simple:json-simple:jar:*</include>
 									<include>org.mindrot:jBCrypt:jar:*</include>
 									<include>com.jcraft:jsch:jar:*</include>
 									<include>org.apache.commons:commons-io:jar:*</include>
 									<include>org.xerial:sqlite-jdbc:jar:*</include>
-									<include>org.mcstats:metrics:jar:*</include>
 									<include>net.sourceforge.jchardet:jchardet:jar:*</include>
 									<include>redis.clients:jedis:jar:*</include>
 									<include>mysql:mysql-connector-java:jar:*</include>
@@ -508,6 +567,27 @@
 									<include>javax.mail:mail:jar:*</include>
 									<include>javax.activation:activation:jar:*</include>
 									<include>postgresql:postgresql:jar:*</include>
+									<include>org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:jar:*</include>
+									<include>org.brotli:dec:jar:*</include>
+									<include>org.eclipse.lsp4j:org.eclipse.lsp4j:jar:*</include>
+									<include>org.eclipse.lsp4j:org.eclipse.lsp4j.generator:jar:*</include>
+									<include>org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc:jar:*</include>
+									<include>org.eclipse.xtend:org.eclipse.xtend.lib:jar:*</include>
+									<include>org.eclipse.xtend:org.eclipse.xtend.lib.macro:jar:*</include>
+									<include>org.eclipse.xtext:org.eclipse.xtext.xbase.lib:jar:*</include>
+									<!-- We don't currently actually depend on these 2, but lsp4j does, so we
+										need to shade it in. In the future, we may rip out org.json:json,
+										and replace it with this, however, in which case we only need to
+										add it to the dependecies list to fully integrate it. -->
+									<include>com.google.code.gson:gson:jar:*</include>
+									<include>com.google.guava:guava:jar:*</include>
+									<!-- Swagger dependencies -->
+									<include>com.squareup.okhttp:okhttp:jar:*</include>
+									<include>com.squareup.okio:okio:jar:*</include>
+									<include>org.threeten:threetenbp:jar:*</include>
+									<include>io.gsonfire:gson-fire:jar:*</include>
+									<include>com.squareup.okhttp:logging-interceptor:jar:*</include>
+									<include>com.microsoft.sqlserver:mssql-jdbc:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -515,10 +595,10 @@
 									<pattern>org.perf4j</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.perf4j</shadedPattern>
 								</relocation>
-								<relocation>
+								<!--<relocation>
 									<pattern>org.apache.log4j</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.apache.log4j</shadedPattern>
-								</relocation>
+								</relocation>-->
 								<relocation>
 									<pattern>org.yaml.snakeyaml</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.yaml.snakeyaml</shadedPattern>
@@ -541,14 +621,10 @@
 								</relocation>
 								<!-- This doesn't work due to native libs or something. Will revist later.
 								<relocation>
-									<pattern>org.sqlite</pattern>
-									<shadedPattern>com.laytonsmith.libs.org.sqlite</shadedPattern>
+										<pattern>org.sqlite</pattern>
+										<shadedPattern>com.laytonsmith.libs.org.sqlite</shadedPattern>
 								</relocation>
 								-->
-								<relocation>
-									<pattern>org.mcstats</pattern>
-									<shadedPattern>com.laytonsmith.libs.org.mcstats</shadedPattern>
-								</relocation>
 								<relocation>
 									<pattern>org.mozilla.intl.chardet</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.mozilla.intl.chardet</shadedPattern>
@@ -558,8 +634,8 @@
 									<shadedPattern>com.laytonsmith.libs.redis.clients</shadedPattern>
 								</relocation>
 								<relocation>
-									<pattern>com.mysql.jdbc</pattern>
-									<shadedPattern>com.laytonsmith.libs.com.mysql.jdbc</shadedPattern>
+									<pattern>com.mysql.cj</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.mysql.cj</shadedPattern>
 								</relocation>
 								<relocation> <!-- part of the mysql lib -->
 									<pattern>org.gjt.mm.mysql</pattern>
@@ -570,8 +646,8 @@
 									<shadedPattern>com.laytonsmith.libs.org.apache.commons.codec</shadedPattern>
 								</relocation>
 								<!--<relocation>
-									<pattern>org.apache.bcel</pattern>
-									<shadedPattern>com.laytonsmith.libs.org.apache.bcel</shadedPattern>
+										<pattern>org.apache.bcel</pattern>
+										<shadedPattern>com.laytonsmith.libs.org.apache.bcel</shadedPattern>
 								</relocation>-->
 								<relocation>
 									<pattern>org.objectweb.asm</pattern>
@@ -583,8 +659,8 @@
 								</relocation>
 								<!-- Apparently this can't be relocated -->
 								<!--<relocation>
-									<pattern>org.fusesource</pattern>
-									<shadedPattern>com.laytonsmith.libs.org.fusesource</shadedPattern>
+										<pattern>org.fusesource</pattern>
+										<shadedPattern>com.laytonsmith.libs.org.fusesource</shadedPattern>
 								</relocation>-->
 								<relocation>
 									<pattern>jaxax.mail</pattern>
@@ -592,20 +668,56 @@
 								</relocation>
 								<!-- Cannot relocate this due to a Class.forName in the JavaMail API.
 								<relocation>
-									<pattern>com.sun.mail</pattern>
-									<shadedPattern>com.laytonsmith.libs.com.sun.mail</shadedPattern>
+										<pattern>com.sun.mail</pattern>
+										<shadedPattern>com.laytonsmith.libs.com.sun.mail</shadedPattern>
 								</relocation>
 								<relocation>
-									<pattern>jaxax.activation</pattern>
-									<shadedPattern>com.laytonsmith.libs.javax.activation</shadedPattern>
+										<pattern>jaxax.activation</pattern>
+										<shadedPattern>com.laytonsmith.libs.javax.activation</shadedPattern>
 								</relocation>
 								<relocation>
-									<pattern>com.sun.activation</pattern>
-									<shadedPattern>com.laytonsmith.libs.com.sun.activation</shadedPattern>
+										<pattern>com.sun.activation</pattern>
+										<shadedPattern>com.laytonsmith.libs.com.sun.activation</shadedPattern>
 								</relocation>-->
 								<relocation>
 									<pattern>org.postgresql</pattern>
 									<shadedPattern>com.laytonsmith.libs.org.postgresql</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.apache.oltu.oauth2</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.apache.oltu.oauth2</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.brotli</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.brotli</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.eclipse</pattern>
+									<shadedPattern>com.laytonsmith.libs.org.eclipse</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>com.google</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.google</shadedPattern>
+									<excludes>
+										<!-- Conflict with Spigot -->
+										<exclude>com.google.common.collect.*</exclude>
+									</excludes>
+								</relocation>
+								<relocation>
+									<pattern>com.squareup.okhttp</pattern>
+									<shadedPattern>com.laytonsmith.libs.com.squareup.okhttp</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>okio</pattern>
+									<shadedPattern>com.laytonsmith.libs.okio</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.threeten</pattern>
+									<shadedPattern>com.laytonsmith.libs.threeten</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>io.gsonfire</pattern>
+									<shadedPattern>com.laytonsmith.libs.io.gsonfire</shadedPattern>
 								</relocation>
 							</relocations>
 							<filters>
@@ -630,18 +742,12 @@
 										<include>**</include>
 									</includes>
 								</filter>
-								<filter>
+								<!--<filter>
 									<artifact>log4j:log4j:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
-								</filter>
-								<filter>
-									<artifact>org.mcstats:metrics:jar:*</artifact>
-									<includes>
-										<include>**</include>
-									</includes>
-								</filter>
+								</filter>-->
 								<filter>
 									<artifact>net.sourceforge.jchardet:jchardet:jar:*</artifact>
 									<includes>
@@ -667,10 +773,10 @@
 									</includes>
 								</filter>
 								<!--<filter>
-									<artifact>org.apache.bcel:bcel:jar:*</artifact>
-									<includes>
-										<include>**</include>
-									</includes>
+										<artifact>org.apache.bcel:bcel:jar:*</artifact>
+										<includes>
+												<include>**</include>
+										</includes>
 								</filter>-->
 								<filter>
 									<artifact>org.ow2.asm:asm-all:jar:*</artifact>
@@ -701,6 +807,140 @@
 									<includes>
 										<include>**</include>
 									</includes>
+								</filter>
+								<filter>
+									<artifact>org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>org.eclipse.lsp4j:org.eclipse.lsp4j:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>org.eclipse.lsp4j:org.eclipse.lsp4j.generator:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>org.eclipse.xtend:org.eclipse.xtend.lib:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>org.eclipse.xtend:org.eclipse.xtend.lib.macro:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>org.eclipse.xtext:org.eclipse.xtext.xbase.lib:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>com.google.code.gson:gson:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>com.google.guava:guava:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+										<!-- Conflict with Spigot -->
+										<exlude>com/google/common/collect/**</exlude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>com.squareup.okhttp:okhttp:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>com.squareup.okio:okio:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>org.threeten:threetenbp:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>io.gsonfire:gson-fire:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>com.squareup.okhttp:logging-interceptor:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>com.microsoft.sqlserver:mssql-jdbc:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+									<excludes>
+										<exclude>META-INF/**</exclude>
+									</excludes>
 								</filter>
 							</filters>
 						</configuration>
@@ -748,6 +988,18 @@
 						<processor>com.laytonsmith.core.extensions.ExtensionAnnotationProcessor</processor>
 						<processor>com.laytonsmith.core.MObjectAnnotationProcessor</processor>
 					</processors>
+					<outputDiagnostics>true</outputDiagnostics>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>3.0.0-M4</version>
+				<configuration>
+					<pushChanges>false</pushChanges>
+					<localCheckout>true</localCheckout>
+					<allowTimestampedSnapshots>true</allowTimestampedSnapshots>
 				</configuration>
 			</plugin>
 
@@ -765,7 +1017,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>2.1.2</version>
+				<version>3.0.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -776,11 +1028,13 @@
 						<!-- Include the default test cases, since we're overwriting them -->
 						<include>**/*Test.java</include>
 						<include>**/Test*.java</include>
+						<include>**/*Tests.java</include>
 						<include>**/*TestCase.java</include>
 
 						<!-- Include custom, none specific classes -->
 						<include>**/RandomTests.java</include>
 					</includes>
+					<argLine>${argLine}</argLine>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -789,89 +1043,60 @@
 				<version>2.4</version>
 			</plugin>
 
-			<!-- Site / report generation -->
+			<!-- Checkstyle plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<version>3.1</version>
-				<configuration>
-					<reportPlugins>
-						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-project-info-reports-plugin</artifactId>
-							<version>2.5</version>
-							<reportSets>
-								<reportSet>
-									<reports>
-										<report>license</report>
-										<report>index</report>
-									</reports>
-								</reportSet>
-							</reportSets>
-						</plugin>
-						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-javadoc-plugin</artifactId>
-							<version>2.8.1</version>
-						</plugin>
-						<plugin>
-							<groupId>org.codehaus.mojo</groupId>
-							<artifactId>cobertura-maven-plugin</artifactId>
-							<version>2.4</version>
-						</plugin>
-					</reportPlugins>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.1.201405082137</version>
-				<configuration>
-					<excludes>
-						<!-- Application starter -->
-						<exclude>ac/simons/biking2/Application.class</exclude>
-						<!-- Configuration -->
-						<exclude>ac/simons/biking2/config/*</exclude>
-					</excludes>
-				</configuration>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>3.1.0</version>
 				<executions>
 					<execution>
-						<id>pre-unit-test</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>post-unit-test</id>
+						<id>checkstyle</id>
 						<phase>test</phase>
+						<configuration>
+							<sourceDirectories>${project.compileSourceRoots}</sourceDirectories>
+							<testSourceDirectories>${project.testCompileSourceRoots}</testSourceDirectories>
+							<includeTestSourceDirectory>true</includeTestSourceDirectory>
+							<configLocation>${basedir}/checkstyle.xml</configLocation>
+							<propertyExpansion>config_loc=${basedir}</propertyExpansion>
+							<encoding>UTF-8</encoding>
+							<consoleOutput>true</consoleOutput>
+							<failsOnError>true</failsOnError>
+							<linkXRef>false</linkXRef>
+						</configuration>
 						<goals>
-							<goal>report</goal>
 							<goal>check</goal>
 						</goals>
-						<configuration>
-							<rules>
-								<!--  implmentation is needed only for Maven 2  -->
-								<rule implementation="org.jacoco.maven.RuleConfiguration">
-									<element>BUNDLE</element>
-									<limits>
-										<limit implementation="org.jacoco.report.check.Limit">
-											<counter>INSTRUCTION</counter>
-											<value>COVEREDRATIO</value>
-											<minimum>0.01</minimum>
-										</limit>
-										<!--  implmentation is needed only for Maven 2  -->
-										<limit implementation="org.jacoco.report.check.Limit">
-											<counter>COMPLEXITY</counter>
-											<value>COVEREDRATIO</value>
-											<minimum>0.01</minimum>
-										</limit>
-									</limits>
-								</rule>
-							</rules>
-						</configuration>
 					</execution>
 				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>com.puppycrawl.tools</groupId>
+						<artifactId>checkstyle</artifactId>
+						<version>8.29</version>
+					</dependency>
+				</dependencies>
 			</plugin>
+			<!--<plugin>
+                <groupId>io.github.phillipuniverse</groupId>
+                <artifactId>githook-maven-plugin</artifactId>
+                <version>1.0.4</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>install</goal>
+                        </goals>
+                        <configuration>
+                            <hooks>
+                                <pre-push>
+                                    #echo running validation build
+                                    #exec mvn clean package -Pfail-on-test-failures
+                                </pre-push>
+                            </hooks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>-->
+
 		</plugins>
 	</build>
 	<profiles>
@@ -887,6 +1112,22 @@
 							<skipTests>true</skipTests>
 						</configuration>
 					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-checkstyle-plugin</artifactId>
+						<version>3.0.0</version>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>0.8.2</version>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -900,7 +1141,38 @@
 	<pluginRepositories>
 		<pluginRepository>
 			<id>maven-annotation-plugin</id>
-			<url>http://maven-annotation-plugin.googlecode.com/svn/trunk/mavenrepo</url>
+			<url>https://maven-annotation-plugin.googlecode.com/svn/trunk/mavenrepo</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>maven-central</id>
+			<url>https://repo.maven.apache.org/maven2/</url>
 		</pluginRepository>
 	</pluginRepositories>
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.5</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>license</report>
+							<report>index</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.8.1</version>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<version>2.1</version>
+			</plugin>
+		</plugins>
+	</reporting>
 </project>
