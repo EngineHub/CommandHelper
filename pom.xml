@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.sk89q</groupId>
 	<artifactId>commandhelper</artifactId>
-	<version>3.3.4-final</version>
+	<version>3.3.5-SNAPSHOT</version>
 	<name>CommandHelper</name>
 	<description>CommandHelper is a full blown scripting language built right into Minecraft</description>
 	<inceptionYear>2010</inceptionYear>
@@ -128,7 +128,7 @@
 		<connection>scm:git:git://github.com/sk89q/commandhelper.git</connection>
 		<url>https://github.com/sk89q/commandhelper</url>
 		<developerConnection>scm:git:git@github.com:sk89q/commandhelper.git</developerConnection>
-	  <tag>commandhelper-3.3.4-final</tag>
+	  <tag>HEAD</tag>
   </scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
