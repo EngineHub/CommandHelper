@@ -110,6 +110,10 @@ public enum MCDamageCause {
 	 */
 	DRYOUT,
 	/**
+	 * Damage caused from freezing.
+	 */
+	FREEZE,
+	/**
 	 * Custom damage.
 	 */
 	CUSTOM

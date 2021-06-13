@@ -48,7 +48,7 @@
 	Also note that the command is labelled with "creative". If you are running a creative server, and the users should
 	be able to give themselves items, then you can give them the "ch.alias.creative" permission to run this alias.
 */
-creative:/i $itemname [$amount=1] = pgive_item(player(), array('name': $itemname, 'qty': $amount))
+creative:/i $itemname [$amount=1] = pgive_item(player(), array('name': to_upper($itemname), 'qty': $amount))
 
 # Creates a simple way to control the weather
 # The equals comparison here evaluates to true if the $value argument is "true". All other words would be false.

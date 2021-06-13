@@ -486,22 +486,32 @@ public class BukkitMCLegacyMaterial {
 		}
 	}
 
+	/**
+	 * All material name changes after 1.13, as they are absent in Spigot's legacy material lookup.
+	 */
 	public enum LegacyMaterialName {
-		// Changed in 1.14
-		CACTUS_GREEN(Material.GREEN_DYE),
-		DANDELION_YELLOW(Material.YELLOW_DYE),
-		ROSE_RED(Material.RED_DYE),
-		SIGN(Material.OAK_SIGN),
-		WALL_SIGN(Material.OAK_WALL_SIGN);
+		CACTUS_GREEN(Material.GREEN_DYE, MCVersion.MC1_14),
+		DANDELION_YELLOW(Material.YELLOW_DYE, MCVersion.MC1_14),
+		ROSE_RED(Material.RED_DYE, MCVersion.MC1_14),
+		SIGN(Material.OAK_SIGN, MCVersion.MC1_14),
+		WALL_SIGN(Material.OAK_WALL_SIGN, MCVersion.MC1_14),
+		ZOMBIE_PIGMAN_SPAWN_EGG(Material.ZOMBIFIED_PIGLIN_SPAWN_EGG, MCVersion.MC1_16),
+		GRASS_PATH(Material.DIRT_PATH, MCVersion.MC1_17);
 
 		private final Material mat;
+		private final MCVersion version;
 
-		LegacyMaterialName(Material mat) {
+		LegacyMaterialName(Material mat, MCVersion changed) {
 			this.mat = mat;
+			this.version = changed;
 		}
 
 		public Material getNewMaterial() {
 			return mat;
+		}
+
+		public MCVersion getVersion() {
+			return version;
 		}
 	}
 
@@ -512,12 +522,10 @@ public class BukkitMCLegacyMaterial {
 		for(LegacyMaterialId mat : LegacyMaterialId.values()) {
 			BY_ID.put(mat.getId(), mat);
 		}
-		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_14)) {
-			for(LegacyMaterialName mat : LegacyMaterialName.values()) {
+		MCVersion thisVersion = Static.getServer().getMinecraftVersion();
+		for(LegacyMaterialName mat : LegacyMaterialName.values()) {
+			if(thisVersion.gte(mat.getVersion())) {
 				BY_NAME.put(mat.name(), mat.getNewMaterial());
-			}
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_16)) {
-				BY_NAME.put("ZOMBIE_PIGMAN_SPAWN_EGG", Material.ZOMBIFIED_PIGLIN_SPAWN_EGG);
 			}
 		}
 	}

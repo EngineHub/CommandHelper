@@ -18,6 +18,7 @@ public enum MCPlayerStatistic {
 	DROP(Type.ITEM),
 	PICKUP(Type.ITEM),
 	PLAY_ONE_MINUTE,
+	TOTAL_WORLD_TIME,
 	WALK_ONE_CM,
 	WALK_ON_WATER_ONE_CM,
 	FALL_ONE_CM,

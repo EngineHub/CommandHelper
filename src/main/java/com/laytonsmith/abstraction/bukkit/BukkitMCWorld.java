@@ -71,6 +71,7 @@ import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.Vibration;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -359,7 +360,7 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	public void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data) {
 		Particle type = (Particle) pa.getConcrete();
 		Location loc = (Location) l.getHandle();
-		switch(type) {
+		switch((MCParticle.MCVanillaParticle) pa.getAbstracted()) {
 			case BLOCK_DUST:
 			case BLOCK_CRACK:
 			case FALLING_DUST:
@@ -388,6 +389,29 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 					color =  new Particle.DustOptions(Color.RED, 1.0F);
 				}
 				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, color);
+				return;
+			case DUST_COLOR_TRANSITION:
+				Particle.DustTransition dust;
+				if(data instanceof MCColor[]) {
+					MCColor[] c = (MCColor[]) data;
+					dust = new Particle.DustTransition(BukkitMCColor.GetColor(c[0]), BukkitMCColor.GetColor(c[1]), 1.0F);
+				} else {
+					dust = new Particle.DustTransition(Color.TEAL, Color.RED, 1.0F);
+				}
+				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, dust);
+				return;
+			case VIBRATION:
+				Vibration vibe;
+				if(data instanceof MCLocation) {
+					Location to = (Location) ((MCLocation) data).getHandle();
+					vibe = new Vibration(loc, new Vibration.Destination.BlockDestination(to), 5);
+				} else if(data instanceof MCEntity) {
+					Entity ent = (Entity) ((MCEntity) data).getHandle();
+					vibe = new Vibration(loc, new Vibration.Destination.EntityDestination(ent), 5);
+				} else {
+					vibe = new Vibration(loc, new Vibration.Destination.BlockDestination(loc), 5);
+				}
+				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, vibe);
 				return;
 		}
 		w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity);

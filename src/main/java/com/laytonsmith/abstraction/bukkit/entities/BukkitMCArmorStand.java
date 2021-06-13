@@ -328,6 +328,11 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 		}
 
 		@Override
+		public void setItemInMainHand(ItemStack itemStack, boolean silent) {
+			setItemInHand(itemStack);
+		}
+
+		@Override
 		public ItemStack getItemInOffHand() {
 			return holder.getEquipment().getItemInOffHand();
 		}
@@ -335,6 +340,11 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 		@Override
 		public void setItemInOffHand(ItemStack itemStack) {
 			holder.getEquipment().setItemInOffHand(itemStack);
+		}
+
+		@Override
+		public void setItemInOffHand(ItemStack itemStack, boolean silent) {
+			setItemInOffHand(itemStack);
 		}
 
 		@Override
@@ -348,6 +358,11 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 		}
 
 		@Override
+		public void setHelmet(ItemStack itemStack, boolean silent) {
+			setHelmet(itemStack);
+		}
+
+		@Override
 		public ItemStack getChestplate() {
 			return holder.getChestplate();
 		}
@@ -355,6 +370,11 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 		@Override
 		public void setChestplate(ItemStack itemStack) {
 			holder.setChestplate(itemStack);
+		}
+
+		@Override
+		public void setChestplate(ItemStack itemStack, boolean silent) {
+			setChestplate(itemStack);
 		}
 
 		@Override
@@ -368,6 +388,11 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 		}
 
 		@Override
+		public void setLeggings(ItemStack itemStack, boolean silent) {
+			setLeggings(itemStack);
+		}
+
+		@Override
 		public ItemStack getBoots() {
 			return holder.getBoots();
 		}
@@ -375,6 +400,11 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 		@Override
 		public void setBoots(ItemStack itemStack) {
 			holder.setBoots(itemStack);
+		}
+
+		@Override
+		public void setBoots(ItemStack itemStack, boolean silent) {
+			setBoots(itemStack);
 		}
 
 		@Override
@@ -510,6 +540,11 @@ public class BukkitMCArmorStand extends BukkitMCLivingEntity implements MCArmorS
 				default:
 					throw new UnsupportedOperationException("Missing case in ArmorStandEquipmentProxy.setItem!");
 			}
+		}
+
+		@Override
+		public void setItem(EquipmentSlot equipmentSlot, ItemStack itemStack, boolean b) {
+			setItem(equipmentSlot, itemStack);
 		}
 
 		@Override

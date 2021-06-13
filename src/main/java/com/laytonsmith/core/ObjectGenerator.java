@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.MCBannerMeta;
 import com.laytonsmith.abstraction.MCBlockStateMeta;
 import com.laytonsmith.abstraction.MCBookMeta;
 import com.laytonsmith.abstraction.MCBrewerInventory;
+import com.laytonsmith.abstraction.MCBundleMeta;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCompassMeta;
 import com.laytonsmith.abstraction.MCCreatureSpawner;
@@ -670,6 +671,14 @@ public class ObjectGenerator {
 					ma.set("target", location(cm.getTargetLocation(), false), t);
 				}
 				ma.set("lodestone", CBoolean.get(cm.isLodestoneTracked()), t);
+			} else if(meta instanceof MCBundleMeta) {
+				MCBundleMeta bm = (MCBundleMeta) meta;
+				List<MCItemStack> items = bm.getItems();
+				CArray arrayItems = new CArray(t);
+				for(MCItemStack item : items) {
+					arrayItems.push(ObjectGenerator.GetGenerator().item(item, t), t);
+				}
+				ma.set("items", arrayItems, t);
 			}
 			return ma;
 		}
@@ -1120,6 +1129,22 @@ public class ObjectGenerator {
 					if(ma.containsKey("lodestone")) {
 						((MCCompassMeta) meta).setLodestoneTracked(
 								ArgumentValidation.getBooleanObject(ma.get("lodestone", t), t));
+					}
+				} else if(meta instanceof MCBundleMeta) {
+					if(ma.containsKey("items")) {
+						Mixed value = ma.get("items", t);
+						if(value instanceof CArray) {
+							MCBundleMeta bm = (MCBundleMeta) meta;
+							CArray items = (CArray) value;
+							for(String key : items.stringKeySet()) {
+								Mixed entry = items.get(key, t);
+								if(!(entry instanceof CNull)) {
+									bm.addItem(ObjectGenerator.GetGenerator().item(entry, t));
+								}
+							}
+						} else if(!(value instanceof CNull)) {
+							throw new CREFormatException("Items was expected to be an array or null.", t);
+						}
 					}
 				}
 			} catch (Exception ex) {

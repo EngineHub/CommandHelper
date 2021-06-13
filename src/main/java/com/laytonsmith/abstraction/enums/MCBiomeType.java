@@ -163,6 +163,8 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 		WARPED_FOREST(MCVersion.MC1_16),
 		BASALT_DELTAS(MCVersion.MC1_16),
 		CUSTOM(MCVersion.MC1_16_X),
+		DRIPSTONE_CAVES(MCVersion.MC1_17),
+		LUSH_CAVES(MCVersion.MC1_17),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;

@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNote;
@@ -864,6 +865,118 @@ public class Environment {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	public static class is_sign_text_glowing extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "is_sign_text_glowing";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public String docs() {
+			return "boolean {locationArray} Returns true if the sign at this location has glowing text.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CREInvalidWorldException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCWorld w = null;
+			if(sender instanceof MCPlayer) {
+				w = ((MCPlayer) sender).getWorld();
+			}
+			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			if(l.getBlock().isSign()) {
+				MCSign s = l.getBlock().getSign();
+				return CBoolean.get(s.isGlowingText());
+			} else {
+				throw new CRERangeException("The block at the specified location is not a sign", t);
+			}
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_sign_text_glowing extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "set_sign_text_glowing";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "void {locationArray, isGlowing} Sets the text on a sign to be glowing or not.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRERangeException.class, CREFormatException.class, CREInvalidWorldException.class,
+					CRECastException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCWorld w = null;
+			if(sender instanceof MCPlayer) {
+				w = ((MCPlayer) sender).getWorld();
+			}
+			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			if(l.getBlock().isSign()) {
+				MCSign s = l.getBlock().getSign();
+				s.setGlowingText(ArgumentValidation.getBooleanObject(args[1], t));
+				return CVoid.VOID;
+			} else {
+				throw new CRERangeException("The block at the specified location is not a sign", t);
+			}
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_skull_owner extends AbstractFunction {
 
 		@Override
@@ -1552,7 +1665,9 @@ public class Environment {
 					+ " under the key \"block\" (default: STONE).\n"
 					+ " ITEM_CRACK particles can take an item array or name under the key \"item\" (default: STONE).\n"
 					+ " REDSTONE particles take an RGB color array (each 0 - 255) or name under the key \"color\""
-					+ " (default: RED).";
+					+ " (default: RED)."
+					+ " DUST_COLOR_TRANSITION particles take a \"tocolor\" in addition \"color\"."
+					+ " VIBRATION particles take a \"destination\" location array or entity UUID.";
 		}
 
 		@Override
@@ -1639,10 +1754,32 @@ public class Environment {
 
 				} else if(pa.containsKey("color")) {
 					Mixed c = pa.get("color", t);
+					MCColor color;
 					if(c.isInstanceOf(CArray.TYPE)) {
-						data = ObjectGenerator.GetGenerator().color((CArray) c, t);
+						color = ObjectGenerator.GetGenerator().color((CArray) c, t);
 					} else {
-						data = StaticLayer.GetConvertor().GetColor(c.val(), t);
+						color = StaticLayer.GetConvertor().GetColor(c.val(), t);
+					}
+					if(pa.containsKey("tocolor")) {
+						Mixed sc = pa.get("tocolor", t);
+						MCColor[] colors = new MCColor[2];
+						colors[0] = color;
+						if(sc.isInstanceOf(CArray.TYPE)) {
+							colors[1] = ObjectGenerator.GetGenerator().color((CArray) sc, t);
+						} else {
+							colors[1] = StaticLayer.GetConvertor().GetColor(sc.val(), t);
+						}
+						data = colors;
+					} else {
+						data = color;
+					}
+
+				} else if(pa.containsKey("destination")) {
+					Mixed d = pa.get("destination", t);
+					if(d.isInstanceOf(CArray.TYPE)) {
+						data = ObjectGenerator.GetGenerator().location(d, l.getWorld(), t);
+					} else {
+						data = Static.getEntity(d, t);
 					}
 				}
 

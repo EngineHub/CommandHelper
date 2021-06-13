@@ -4,6 +4,7 @@ public enum MCPotionCause {
 	AREA_EFFECT_CLOUD,
 	ARROW,
 	ATTACK,
+	AXOLOTL,
 	BEACON,
 	COMMAND,
 	CONDUIT,

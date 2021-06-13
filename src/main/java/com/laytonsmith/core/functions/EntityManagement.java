@@ -28,6 +28,7 @@ import com.laytonsmith.abstraction.entities.MCAbstractHorse;
 import com.laytonsmith.abstraction.entities.MCAreaEffectCloud;
 import com.laytonsmith.abstraction.entities.MCArmorStand;
 import com.laytonsmith.abstraction.entities.MCArrow;
+import com.laytonsmith.abstraction.entities.MCAxolotl;
 import com.laytonsmith.abstraction.entities.MCBee;
 import com.laytonsmith.abstraction.entities.MCBoat;
 import com.laytonsmith.abstraction.entities.MCCat;
@@ -44,6 +45,7 @@ import com.laytonsmith.abstraction.entities.MCFallingBlock;
 import com.laytonsmith.abstraction.entities.MCFireball;
 import com.laytonsmith.abstraction.entities.MCFirework;
 import com.laytonsmith.abstraction.entities.MCFox;
+import com.laytonsmith.abstraction.entities.MCGoat;
 import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorseColor;
 import com.laytonsmith.abstraction.entities.MCHorse.MCHorsePattern;
@@ -86,6 +88,7 @@ import com.laytonsmith.abstraction.entities.MCZoglin;
 import com.laytonsmith.abstraction.entities.MCZombie;
 import com.laytonsmith.abstraction.entities.MCZombieVillager;
 import com.laytonsmith.abstraction.enums.MCArt;
+import com.laytonsmith.abstraction.enums.MCAxolotlType;
 import com.laytonsmith.abstraction.enums.MCBodyPart;
 import com.laytonsmith.abstraction.enums.MCCatType;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
@@ -1698,6 +1701,7 @@ public class EntityManagement {
 			docs = docs.replace("%FOX_TYPE%", StringUtils.Join(MCFoxType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%MUSHROOM_COW_TYPE%", StringUtils.Join(MCMushroomCowType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%PANDA_GENE%", StringUtils.Join(MCPanda.Gene.values(), ", ", ", or ", " or "));
+			docs = docs.replace("AXOLOTL_TYPE%", StringUtils.Join(MCAxolotlType.values(), ", ", ", or ", " or "));
 			for(Field field : entity_spec.class.getDeclaredFields()) {
 				try {
 					String name = field.getName();
@@ -1771,6 +1775,10 @@ public class EntityManagement {
 						poses.set("pose" + key.name(), ObjectGenerator.GetGenerator().vector(poseMap.get(key), t), t);
 					}
 					specArray.set(entity_spec.KEY_ARMORSTAND_POSES, poses, t);
+					break;
+				case AXOLOTL:
+					MCAxolotl axolotl = (MCAxolotl) entity;
+					specArray.set(entity_spec.KEY_AXOLOTL_TYPE, new CString(axolotl.getAxolotlType().name(), t), t);
 					break;
 				case BEE:
 					MCBee bee = (MCBee) entity;
@@ -1887,6 +1895,10 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_FOX_CROUCHING, CBoolean.get(fox.isCrouching()), t);
 					specArray.set(entity_spec.KEY_FOX_TYPE, fox.getVariant().name(), t);
 					break;
+				case GOAT:
+					MCGoat goat = (MCGoat) entity;
+					specArray.set(entity_spec.KEY_GOAT_SCREAMING, CBoolean.get(goat.isScreaming()), t);
+					break;
 				case HORSE:
 					MCHorse horse = (MCHorse) entity;
 					specArray.set(entity_spec.KEY_HORSE_COLOR, new CString(horse.getColor().name(), t), t);
@@ -1902,6 +1914,7 @@ public class EntityManagement {
 					specArray.set(entity_spec.KEY_IRON_GOLEM_PLAYERCREATED, CBoolean.get(golem.isPlayerCreated()), t);
 					break;
 				case ITEM_FRAME:
+				case GLOW_ITEM_FRAME:
 					MCItemFrame frame = (MCItemFrame) entity;
 					specArray.set(entity_spec.KEY_ITEM_FRAME_FIXED, CBoolean.get(frame.isFixed()), t);
 					specArray.set(entity_spec.KEY_ITEM_FRAME_ITEM, ObjectGenerator.GetGenerator().item(frame.getItem(), t), t);
@@ -2140,6 +2153,7 @@ public class EntityManagement {
 		private static final String KEY_ARMORSTAND_POSES = "poses";
 		private static final String KEY_ARMORSTAND_SMALLSIZE = "small";
 		private static final String KEY_ARMORSTAND_VISIBLE = "visible";
+		private static final String KEY_AXOLOTL_TYPE = "type";
 		private static final String KEY_BEE_HIVE_LOCATION = "hivelocation";
 		private static final String KEY_BEE_FLOWER_LOCATION = "flowerlocation";
 		private static final String KEY_BEE_NECTAR = "nector";
@@ -2170,6 +2184,7 @@ public class EntityManagement {
 		private static final String KEY_FIREWORK_EFFECTS = "effects";
 		private static final String KEY_FOX_CROUCHING = "crouching";
 		private static final String KEY_FOX_TYPE = "type";
+		private static final String KEY_GOAT_SCREAMING = "screaming";
 		private static final String KEY_HORSE_COLOR = "color";
 		private static final String KEY_HORSE_STYLE = "style";
 		private static final String KEY_HORSE_CHEST = "chest";
@@ -2495,6 +2510,24 @@ public class EntityManagement {
 								}
 								stand.setAllPoses(poseMap);
 								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case AXOLOTL:
+					MCAxolotl axolotl = (MCAxolotl) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_AXOLOTL_TYPE:
+								try {
+									axolotl.setAxolotlType(MCAxolotlType.valueOf(specArray.get(index, t).val().toUpperCase()));
+								} catch (IllegalArgumentException exception) {
+									throw new CREFormatException("Invalid axolotl type: " + specArray.get(index, t).val(), t);
+								}
+								break;
+							default:
+								throwException(index, t);
 						}
 					}
 					break;
@@ -2831,6 +2864,18 @@ public class EntityManagement {
 						}
 					}
 					break;
+				case GOAT:
+					MCGoat goat = (MCGoat) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_GOAT_SCREAMING:
+								goat.setScreaming(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
 				case HORSE:
 					MCHorse horse = (MCHorse) entity;
 					for(String index : specArray.stringKeySet()) {
@@ -2890,6 +2935,7 @@ public class EntityManagement {
 					}
 					break;
 				case ITEM_FRAME:
+				case GLOW_ITEM_FRAME:
 					MCItemFrame frame = (MCItemFrame) entity;
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {

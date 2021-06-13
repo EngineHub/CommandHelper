@@ -28,4 +28,15 @@ public class BukkitMCSign extends BukkitMCBlockState implements MCSign {
 		return s.getLine(i);
 	}
 
+	@Override
+	public boolean isGlowingText() {
+		return s.isGlowingText();
+	}
+
+	@Override
+	public void setGlowingText(boolean glowing) {
+		s.setGlowingText(glowing);
+		s.update();
+	}
+
 }

@@ -147,6 +147,7 @@ import org.bukkit.inventory.StonecuttingRecipe;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.BundleMeta;
 import org.bukkit.inventory.meta.CompassMeta;
 import org.bukkit.inventory.meta.CrossbowMeta;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
@@ -591,6 +592,9 @@ public class BukkitConvertor extends AbstractConvertor {
 			}
 			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_16) && im instanceof CompassMeta) {
 				return new BukkitMCCompassMeta((CompassMeta) im);
+			}
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17) && im instanceof BundleMeta) {
+				return new BukkitMCBundleMeta((BundleMeta) im);
 			}
 		}
 		return new BukkitMCItemMeta(im);

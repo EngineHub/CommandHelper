@@ -27,6 +27,7 @@ import com.laytonsmith.abstraction.enums.MCPlayerStatistic;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
+import com.laytonsmith.abstraction.enums.MCVersion;
 import com.laytonsmith.abstraction.enums.MCWeather;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCPlayerStatistic;
@@ -42,6 +43,7 @@ import org.bukkit.Material;
 import org.bukkit.Note;
 import org.bukkit.Particle;
 import org.bukkit.Server;
+import org.bukkit.Vibration;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -414,14 +416,28 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 			throw new IllegalStateException("Running server isn't CraftBukkit");
 		}
 
-		Class nmsMinecraftServerClass = Class.forName("net.minecraft.server." + version + ".MinecraftServer");
+		// Get some version specific strings
+		String nms;
+		String playersPackage;
+		String ops;
+		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17)) {
+			nms = "net.minecraft.server";
+			playersPackage = nms + ".players";
+			ops = "n";
+		} else { // 1.16.5 and prior
+			nms = "net.minecraft.server." + version;
+			playersPackage = nms;
+			ops = "operators";
+		}
+
+		Class nmsMinecraftServerClass = Class.forName(nms + ".MinecraftServer");
 		/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
 		/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
-		/*n.m.s.OpList*/ Object opSet = ReflectionUtils.get(Class.forName("net.minecraft.server." + version + ".PlayerList"), nmsPlayerList, "operators");
+		/*n.m.s.OpList*/ Object opSet = ReflectionUtils.get(Class.forName(playersPackage + ".PlayerList"), nmsPlayerList, ops);
 		//opSet.getClass().getSuperclass() == n.m.s.JsonList
 		Map/*<String, n.m.s.OpListEntry>*/ d = (Map) ReflectionUtils.get(opSet.getClass().getSuperclass(), opSet, "d");
 		if(value) {
-			/*n.m.s.OpListEntry*/ Class nmsOpListEntry = Class.forName("net.minecraft.server." + version + ".OpListEntry");
+			/*n.m.s.OpListEntry*/ Class nmsOpListEntry = Class.forName(playersPackage + ".OpListEntry");
 			/*com.mojang.authlib.GameProfile*/ Class nmsGameProfile = Class.forName("com.mojang.authlib.GameProfile");
 			Object gameProfile = ReflectionUtils.invokeMethod(p, "getProfile");
 			Object opListEntry = ReflectionUtils.newInstance(nmsOpListEntry, new Class[]{nmsGameProfile, int.class, boolean.class}, new Object[]{gameProfile, 4, false});
@@ -556,7 +572,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void spawnParticle(MCLocation l, MCParticle pa, int count, double offsetX, double offsetY, double offsetZ, double velocity, Object data) {
 		Particle type = (Particle) pa.getConcrete();
 		Location loc = (Location) l.getHandle();
-		switch(type) {
+		switch((MCParticle.MCVanillaParticle) pa.getAbstracted()) {
 			case BLOCK_DUST:
 			case BLOCK_CRACK:
 			case FALLING_DUST:
@@ -585,6 +601,29 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 					color =  new Particle.DustOptions(Color.RED, 1.0F);
 				}
 				p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, color);
+				return;
+			case DUST_COLOR_TRANSITION:
+				Particle.DustTransition dust;
+				if(data instanceof MCColor[]) {
+					MCColor[] c = (MCColor[]) data;
+					dust = new Particle.DustTransition(BukkitMCColor.GetColor(c[0]), BukkitMCColor.GetColor(c[1]), 1.0F);
+				} else {
+					dust = new Particle.DustTransition(Color.TEAL, Color.RED, 1.0F);
+				}
+				p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, dust);
+				return;
+			case VIBRATION:
+				Vibration vibe;
+				if(data instanceof MCLocation) {
+					Location to = (Location) ((MCLocation) data).getHandle();
+					vibe = new Vibration(loc, new Vibration.Destination.BlockDestination(to), 5);
+				} else if(data instanceof MCEntity) {
+					Entity ent = (Entity) ((MCEntity) data).getHandle();
+					vibe = new Vibration(loc, new Vibration.Destination.EntityDestination(ent), 5);
+				} else {
+					vibe = new Vibration(loc, new Vibration.Destination.BlockDestination(loc), 5);
+				}
+				p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, vibe);
 				return;
 		}
 		p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity);
