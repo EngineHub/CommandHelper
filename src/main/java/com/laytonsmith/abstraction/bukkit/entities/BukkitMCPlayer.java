@@ -20,6 +20,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayerInventory;
 import com.laytonsmith.abstraction.bukkit.BukkitMCScoreboard;
+import com.laytonsmith.abstraction.bukkit.BukkitMCVibration;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCParticle;
@@ -43,7 +44,6 @@ import org.bukkit.Material;
 import org.bukkit.Note;
 import org.bukkit.Particle;
 import org.bukkit.Server;
-import org.bukkit.Vibration;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -613,17 +613,15 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 				p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, dust);
 				return;
 			case VIBRATION:
-				Vibration vibe;
+				BukkitMCVibration vibe;
 				if(data instanceof MCLocation) {
-					Location to = (Location) ((MCLocation) data).getHandle();
-					vibe = new Vibration(loc, new Vibration.Destination.BlockDestination(to), 5);
+					vibe = new BukkitMCVibration(l, (MCLocation) data, 5);
 				} else if(data instanceof MCEntity) {
-					Entity ent = (Entity) ((MCEntity) data).getHandle();
-					vibe = new Vibration(loc, new Vibration.Destination.EntityDestination(ent), 5);
+					vibe = new BukkitMCVibration(l, (MCEntity) data, 5);
 				} else {
-					vibe = new Vibration(loc, new Vibration.Destination.BlockDestination(loc), 5);
+					vibe = new BukkitMCVibration(l, l, 5);
 				}
-				p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, vibe);
+				p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, vibe.getHandle());
 				return;
 		}
 		p.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity);

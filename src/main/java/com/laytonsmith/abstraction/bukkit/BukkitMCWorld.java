@@ -71,7 +71,6 @@ import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.Vibration;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -401,17 +400,15 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, dust);
 				return;
 			case VIBRATION:
-				Vibration vibe;
+				BukkitMCVibration vibe;
 				if(data instanceof MCLocation) {
-					Location to = (Location) ((MCLocation) data).getHandle();
-					vibe = new Vibration(loc, new Vibration.Destination.BlockDestination(to), 5);
+					vibe = new BukkitMCVibration(l, (MCLocation) data, 5);
 				} else if(data instanceof MCEntity) {
-					Entity ent = (Entity) ((MCEntity) data).getHandle();
-					vibe = new Vibration(loc, new Vibration.Destination.EntityDestination(ent), 5);
+					vibe = new BukkitMCVibration(l, (MCEntity) data, 5);
 				} else {
-					vibe = new Vibration(loc, new Vibration.Destination.BlockDestination(loc), 5);
+					vibe = new BukkitMCVibration(l, l, 5);
 				}
-				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, vibe);
+				w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity, vibe.getHandle());
 				return;
 		}
 		w.spawnParticle(type, loc, count, offsetX, offsetY, offsetZ, velocity);
