@@ -1,5 +1,14 @@
 Updating to new versions of CommandHelper or Minecraft can sometimes require updates to your scripts and/or extensions.
-Below is a reverse chronological guide to help you with some of these changes to quickly update your code.
+Below is a reverse chronological guide to help you with the most notable of these changes to quickly update your code.
+
+----
+
+== Minecraft 1.17 ==
+
+* GRASS_PATH changed to DIRT_PATH (converted automatically where possible)
+* Cauldrons are split into 4 materials: CAULDRON, WATER_CAULDRON, LAVA_CAULDRON, POWDERED_SNOW_CAULDRON
+* GLOW_ITEM_FRAME is a separate entity type that behaves exactly as item frames
+* All ores now have a deepslate variant (eg. DEEPSLATE_COAL_ORE)
 
 ----
 

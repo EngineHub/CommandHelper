@@ -1,17 +1,37 @@
-This page lists compatibility of various milestone versions of CommandHelper. Note that this chart was created starting with build 1498, so earlier builds may not be accurate. In general, the compatibility requirements, if not listed, are the same as the previous milestone build. The minimum requirements for the current builds are:
+This page lists compatibility of various milestone versions of CommandHelper. Note that this chart was created starting
+with build 1498, so earlier builds may not be accurate. In general, the compatibility requirements, if not listed, are
+the same as the previous milestone build. The minimum requirements for the current builds are:
 
-* Java 8
-* Bukkit/Spigot version as specified below (when used as a plugin)
+* Java 16
+* Spigot version as specified below (when used as a plugin)
 
-Also note that CommandHelper may still be backwards and forward compatible to a large degree, many of the advanced features that normally have hard dependencies on certain versions of external dependencies have been configured to "soft" fail, that is, individual components may not work, but in general the plugin should continue to function. Regardless, only the most current dev builds are officially supported.
+Also note that CommandHelper may still be backwards and forward compatible to a large degree, many of the advanced
+features that normally have hard dependencies on certain versions of external dependencies have been configured to
+"soft" fail, that is, individual components may not work, but in general the plugin should continue to function.
+Regardless, only the most current dev builds are officially supported.
 
 <!-- Note that in this table builds are newest to oldest -->
 {| width="100%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
 |-
-! scope="col" width="5%" | Build #
+! scope="col" width="5%" | Build
 ! scope="col" width="5%" | Source
 ! scope="col" width="40%" | Milestone
 ! scope="col" width="50%" | Compatibility
+|-
+| build-48
+| [https://github.com/EngineHub/CommandHelper/commit/c6db71e383eb3e65f36d8557c7e45dc006c2c37a c6db71e]
+| Updated for Spigot 1.17
+| Spigot 1.16.5 - 1.17
+|-
+| build-38
+| [https://github.com/EngineHub/CommandHelper/commit/02fa3b8eca89504b8f380eddf524d3aa169de5c1 02fa3b8]
+| Updated to Java 16
+| Spigot 1.16.5 / Java 16
+|-
+| 3.3.4-final
+| [https://github.com/EngineHub/CommandHelper/commit/37ef777678f85ee2e21b3e090c35fb25f21bc11d 37ef777]
+| CommandHelper 3.3.4 Release
+| Spigot 1.13.2 - 1.16.5 / Java 8
 |-
 |
 | [https://github.com/EngineHub/CommandHelper/commit/0fe660dbf2f72dfcdfaab1938ff697939bdaa009 0fe660d]
