@@ -18,10 +18,6 @@ steps:
     azureCommonVirtualFile: 'OpenJDK16U-jdk_x86-32_windows_hotspot_16.0.1_9.zip'
     jdkDestinationDirectory: '$(agent.toolsDirectory)/jdk16'
     cleanDestinationDirectory: true
-- task: PowerShell@2
-  inputs:
-    targetType: 'inline'
-    script: 'choco install maven -y -f'
 - task: Maven@3
   inputs:
     mavenPomFile: 'pom.xml'
