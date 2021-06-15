@@ -11,22 +11,20 @@ steps:
   inputs:
     versionSpec: '11' 
     jdkArchitectureOption: x64
-    jdkSourceOption: PreInstalled
-    #jdkSourceOption: 'AzureStorage'
-    #azureResourceManagerEndpoint: Azure Resource Manager
-    #azureStorageAccountName: methodscriptjdkbuilds
-    #azureContainerName: jdks
-    #azureCommonVirtualFile: 'OpenJDK16U-jdk_x86-32_windows_hotspot_16.0.1_9.zip'
-    #jdkDestinationDirectory: '$(agent.toolsDirectory)/jdk16'
-    #cleanDestinationDirectory: true
-#- task: PowerShell@2
-#  inputs:
-#    targetType: 'inline'
-#    script: 'choco install maven -y -f'
+    jdkSourceOption: 'AzureStorage'
+    azureResourceManagerEndpoint: Azure Resource Manager
+    azureStorageAccountName: methodscriptjdkbuilds
+    azureContainerName: jdks
+    azureCommonVirtualFile: 'OpenJDK16U-jdk_x86-32_windows_hotspot_16.0.1_9.zip'
+    jdkDestinationDirectory: '$(agent.toolsDirectory)/jdk16'
+    cleanDestinationDirectory: true
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: 'choco install maven -y -f'
 - task: Maven@3
   inputs:
     mavenPomFile: 'pom.xml'
-    mavenOptions: '-Xmx2072m'
     javaHomeOption: 'JDKVersion'
     jdkVersionOption: '1.11'
     jdkArchitectureOption: 'x64'
