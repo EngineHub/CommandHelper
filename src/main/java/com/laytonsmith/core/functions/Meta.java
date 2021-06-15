@@ -25,6 +25,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.constructs.CArray;
@@ -606,7 +607,7 @@ public class Meta {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
-	public static class scriptas extends AbstractFunction implements VariableScope {
+	public static class scriptas extends AbstractFunction implements VariableScope, BranchStatement {
 
 		@Override
 		public String getName() {
@@ -690,6 +691,16 @@ public class Meta {
 			List<Boolean> ret = new ArrayList<>(children.size());
 			ret.add(false);
 			if(children.size() == 3) {
+				ret.add(false);
+			}
+			ret.add(true);
+			return ret;
+		}
+
+		@Override
+		public List<Boolean> isBranch(List<ParseTree> children) {
+			List<Boolean> ret = new ArrayList<>(children.size());
+			for(int i = 0; i < children.size() - 1; i++) {
 				ret.add(false);
 			}
 			ret.add(true);
