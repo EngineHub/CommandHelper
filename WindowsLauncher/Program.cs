@@ -38,11 +38,18 @@ namespace mscript {
 				Environment.Exit(1);
 			}
 
+			// To ease transition in java versions, make the java path configurable by registry key. By default, just "java.exe".
+			string javaPath = "java.exe";
+			string javaPathRegistry = Registry.CurrentUser.OpenSubKey("Software\\MethodScript")?.GetValue("JavaPath")?.ToString();
+			if(javaPathRegistry != null) {
+				javaPath = javaPathRegistry;
+			}
+
 			List<string> modulesArgs = new List<string>();
 			// Pull out the modules and add them here if java > 8
 			{
 				ProcessStartInfo start = new ProcessStartInfo();
-				start.FileName = "java.exe";
+				start.FileName = javaPath;
 				start.RedirectStandardOutput = true;
 				start.UseShellExecute = false;
 				List<string> a = new List<string>();
@@ -123,7 +130,7 @@ namespace mscript {
 #if DEBUG
 				Console.WriteLine("Command is: " + start.Arguments);
 #endif
-				start.FileName = "java.exe";
+				start.FileName = javaPath;
 				start.UseShellExecute = false;
 
 				//Console.WriteLine(start.Arguments);
