@@ -1701,7 +1701,7 @@ public class EntityManagement {
 			docs = docs.replace("%FOX_TYPE%", StringUtils.Join(MCFoxType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%MUSHROOM_COW_TYPE%", StringUtils.Join(MCMushroomCowType.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%PANDA_GENE%", StringUtils.Join(MCPanda.Gene.values(), ", ", ", or ", " or "));
-			docs = docs.replace("AXOLOTL_TYPE%", StringUtils.Join(MCAxolotlType.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%AXOLOTL_TYPE%", StringUtils.Join(MCAxolotlType.values(), ", ", ", or ", " or "));
 			for(Field field : entity_spec.class.getDeclaredFields()) {
 				try {
 					String name = field.getName();
