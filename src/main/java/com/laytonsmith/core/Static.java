@@ -14,7 +14,6 @@ import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
-import com.laytonsmith.abstraction.MCMetadatable;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlugin;
@@ -1023,31 +1022,6 @@ public final class Static {
 
 	public static MCPlugin getPlugin(Mixed name, Target t) {
 		return getPlugin(name.val(), t);
-	}
-
-	/**
-	 * Returns the metadatable object designated by the given construct. If the construct is invalid or if the object
-	 * does not exist, a ConfigRuntimeException is thrown.
-	 *
-	 * @param construct
-	 * @param t
-	 * @return
-	 */
-	public static MCMetadatable getMetadatable(Mixed construct, Target t) {
-		if(construct.isInstanceOf(CArray.TYPE)) {
-			return ObjectGenerator.GetGenerator().location(construct, null, t).getBlock();
-		} else if(construct instanceof CString) {
-			switch(construct.val().length()) {
-				case 32:
-				case 36:
-					return Static.getEntity(construct, t);
-				default:
-					return Static.getWorld(construct, t);
-			}
-		} else {
-			throw new CRECastException("An array or a string was expected, but " + construct.val()
-					+ " was found.", t);
-		}
 	}
 
 	public static String strJoin(Collection c, String inner) {

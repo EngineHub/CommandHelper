@@ -13,6 +13,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -38,7 +39,7 @@ import java.util.List;
 public class BukkitMetadata {
 
 	public static String docs() {
-		return "This class allows manipulation of entity metadata.";
+		return "This class allows manipulation of bukkit metadata.";
 	}
 
 	public abstract static class MetadataFunction extends AbstractFunction {
@@ -83,8 +84,8 @@ public class BukkitMetadata {
 					+ " the metadata with the given key, and the array values the registered metadata values. If the plugin argument is given"
 					+ " (a string that represent the plugin name), the function simply returns the value of the metadata registered"
 					+ " by the plugin with this key, or null if no metadata is found. ---"
-					+ " The Bukkit metadata allow to attach informations to entities, blocks and worlds, and allow plugins"
-					+ " to exchange these informations between them without requiring one to be dependant on each other."
+					+ " The Bukkit metadata allow to attach information to entities, blocks and worlds, and allow plugins"
+					+ " to exchange these information between them without requiring one to be dependant on each other."
 					+ " The metadata are persistent across server reloads, but not across server restarts. The metadata attached"
 					+ " to a player are also persistent between logins.";
 		}
@@ -111,7 +112,7 @@ public class BukkitMetadata {
 			if(args.length == 1) {
 				metadata = Static.getPlayer(environment, t).getMetadata(args[0].val());
 			} else {
-				metadata = Static.getMetadatable(args[0], t).getMetadata(args[1].val());
+				metadata = GetMetadatable(args[0], t).getMetadata(args[1].val());
 			}
 			if(args.length == 3) {
 				MCPlugin plugin = Static.getPlugin(args[2], t);
@@ -151,7 +152,7 @@ public class BukkitMetadata {
 					+ " object can be a location array (it will designate a block), an entityID (it will designate an entity)"
 					+ " or a string (it will designate a world). If only the key is given, the object is the current player."
 					+ " If the plugin is given, the function returns if the plugin have registered a metadata in the object with the given key."
-					+ " See get_metadata() for more informations about Bukkit metadata.";
+					+ " See get_metadata() for more information about Bukkit metadata.";
 		}
 
 		@Override
@@ -162,7 +163,7 @@ public class BukkitMetadata {
 				metadatable = Static.getPlayer(environment, t);
 				key = args[0].val();
 			} else {
-				metadatable = Static.getMetadatable(args[0], t);
+				metadatable = GetMetadatable(args[0], t);
 				key = args[1].val();
 			}
 			if(metadatable.hasMetadata(key)) {
@@ -208,7 +209,7 @@ public class BukkitMetadata {
 					+ " given key. object can be a location array (it will designate a block), an entityID (it will designate an entity)"
 					+ " or a string (it will designate a world). If only the key and the value are given, the object is the current player."
 					+ " You can specify the plugin that will own the metadata, '" + StaticLayer.GetPluginName() + "' by default. See get_metadata() for more"
-					+ " informations about Bukkit metadata.";
+					+ " information about Bukkit metadata.";
 		}
 
 		@Override
@@ -223,7 +224,7 @@ public class BukkitMetadata {
 				value = args[1];
 				plugin = StaticLayer.GetPlugin();
 			} else {
-				metadatable = Static.getMetadatable(args[0], t);
+				metadatable = GetMetadatable(args[0], t);
 				key = args[1].val();
 				value = args[2];
 				plugin = (args.length == 4) ? Static.getPlugin(args[3], t) : StaticLayer.GetPlugin();
@@ -253,7 +254,7 @@ public class BukkitMetadata {
 					+ " object can be a location array (it will designate a block), an entityID (it will designate an entity)"
 					+ " or a string (it will designate a world). If only the key is given, the object is the current player."
 					+ " If no plugin is given, the function removes all metadata at the given key, otherwise only the value"
-					+ " set by the given plugin. See get_metadata() for more informations about Bukkit metadata.";
+					+ " set by the given plugin. See get_metadata() for more information about Bukkit metadata.";
 		}
 
 		@Override
@@ -264,7 +265,7 @@ public class BukkitMetadata {
 				metadatable = Static.getPlayer(environment, t);
 				key = args[0].val();
 			} else {
-				metadatable = Static.getMetadatable(args[0], t);
+				metadatable = GetMetadatable(args[0], t);
 				key = args[1].val();
 			}
 			if(args.length == 3) {
@@ -280,6 +281,31 @@ public class BukkitMetadata {
 		@Override
 		public Version since() {
 			return MSVersion.V3_3_1;
+		}
+	}
+
+	/**
+	 * Returns the metadatable object designated by the given construct. If the construct is invalid or if the object
+	 * does not exist, a ConfigRuntimeException is thrown.
+	 *
+	 * @param construct
+	 * @param t
+	 * @return
+	 */
+	private static MCMetadatable GetMetadatable(Mixed construct, Target t) {
+		if(construct.isInstanceOf(CArray.TYPE)) {
+			return ObjectGenerator.GetGenerator().location(construct, null, t).getBlock();
+		} else if(construct instanceof CString) {
+			switch(construct.val().length()) {
+				case 32:
+				case 36:
+					return Static.getEntity(construct, t);
+				default:
+					return Static.getWorld(construct, t);
+			}
+		} else {
+			throw new CRECastException("An array or a string was expected, but " + construct.val()
+					+ " was found.", t);
 		}
 	}
 }
