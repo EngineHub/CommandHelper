@@ -9,36 +9,20 @@ import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
-import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.entities.MCAgeable;
-import com.laytonsmith.abstraction.entities.MCHorse;
 import com.laytonsmith.abstraction.entities.MCTameable;
 import com.laytonsmith.abstraction.enums.MCAttribute;
-import com.laytonsmith.abstraction.enums.MCCreeperType;
-import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
-import com.laytonsmith.abstraction.enums.MCMobs;
-import com.laytonsmith.abstraction.enums.MCOcelotType;
-import com.laytonsmith.abstraction.enums.MCPigType;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
-import com.laytonsmith.abstraction.enums.MCProfession;
-import com.laytonsmith.abstraction.enums.MCWolfType;
-import com.laytonsmith.abstraction.enums.MCZombieType;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ObjectGenerator;
-import com.laytonsmith.core.Optimizable;
-import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.compiler.CompilerEnvironment;
-import com.laytonsmith.core.compiler.CompilerWarning;
-import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -54,24 +38,18 @@ import com.laytonsmith.core.exceptions.CRE.CREBadEntityTypeException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
-import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
-import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
-import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.CRE.CREUnageableMobException;
 import com.laytonsmith.core.exceptions.CRE.CREUntameableMobException;
-import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 public class MobManagement {
@@ -79,219 +57,6 @@ public class MobManagement {
 	public static String docs() {
 		return "These functions manage specifically living entities. If the entity specified is not living, a"
 				+ " BadEntityTypeException will be thrown.";
-	}
-
-	@api(environments = {CommandHelperEnvironment.class})
-	@hide("Deprecated for spawn_entity().")
-	public static class spawn_mob extends AbstractFunction implements Optimizable {
-
-		// The max amount of mobs that can be spawned at once by this function.
-		private static final int SPAWN_LIMIT = 10000;
-
-		@Override
-		public String getName() {
-			return "spawn_mob";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1, 2, 3};
-		}
-
-		@Override
-		public String docs() {
-			return "array {mobType, [qty], [location]} Spawns qty mob of one of the following types at location."
-					+ " qty defaults to 1, and location defaults to the location of the player."
-					+ " An array of the entity UUIDs spawned is returned. (deprecated for {{function|spawn_entity}})"
-					+ " ---- mobType can be one of: " + StringUtils.Join(MCMobs.values(), ", ", ", or ", " or ") + "."
-					+ " Further, subtypes can be applied by specifying MOBTYPE:SUBTYPE,"
-					+ " for example the sheep subtype can be any of the dye colors: "
-					+ StringUtils.Join(MCDyeColor.values(), ", ", ", or ", " or ") + "."
-					+ " COLOR defaults to white if not specified."
-					+ " For mobs with multiple subtypes, separate each type with a \"-\"."
-					+ " Zombies can be any non-conflicting two of: " + StringUtils.Join(MCZombieType.values(), ", ", ", or ", " or ") + "."
-					+ " Ocelots may be one of: " + StringUtils.Join(MCOcelotType.values(), ", ", ", or ", " or ") + "."
-					+ " Villagers can have a profession as a subtype: " + StringUtils.Join(MCProfession.values(), ", ", ", or ", " or ")
-					+ ", defaulting to farmer if not specified. PigZombies' subtype represents their anger,"
-					+ " and accepts an integer, where 0 is neutral and 400 is the normal response to being attacked."
-					+ " Defaults to 0. Similarly, Slime and MagmaCube size can be set by integer,"
-					+ " otherwise will be a random natural size. If a material is specified as the subtype for Endermen,"
-					+ " they will hold that material, otherwise they will hold nothing."
-					+ " Creepers can be set to " + StringUtils.Join(MCCreeperType.values(), ", ", ", or ", " or ") + "."
-					+ " Wolves can be " + StringUtils.Join(MCWolfType.values(), ", ", ", or ", " or ") + "."
-					+ " Pigs can be " + StringUtils.Join(MCPigType.values(), ", ", ", or ", " or ") + "."
-					+ " Horses can have a color: " + StringUtils.Join(MCHorse.MCHorseColor.values(), ", ", ", or ", " or ") + ","
-					+ " and a pattern: " + StringUtils.Join(MCHorse.MCHorsePattern.values(), ", ", ", or ", " or ") + "."
-					+ " If qty is larger than " + spawn_mob.SPAWN_LIMIT + ", a RangeException will be thrown.";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CRECastException.class, CRERangeException.class, CREFormatException.class,
-				CREPlayerOfflineException.class, CREInvalidWorldException.class, CRENotFoundException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public MSVersion since() {
-			return MSVersion.V3_1_2;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			String mob = args[0].val();
-			String secondary = "";
-			if(mob.contains(":")) {
-				secondary = mob.substring(mob.indexOf(':') + 1);
-				mob = mob.substring(0, mob.indexOf(':'));
-			}
-			int qty = 1;
-			if(args.length > 1) {
-				qty = ArgumentValidation.getInt32(args[1], t);
-				if(qty > spawn_mob.SPAWN_LIMIT) {
-					throw new CRERangeException("You can not spawn more than " + spawn_mob.SPAWN_LIMIT
-							+ " mobs at once using the " + this.getName() + " function.", t);
-				}
-			}
-			MCLocation l;
-			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(args.length == 3) {
-				l = ObjectGenerator.GetGenerator().location(args[2], (p != null ? p.getWorld() : null), t);
-			} else if(p != null) {
-				l = p.getLocation();
-			} else {
-				throw new CREPlayerOfflineException("Invalid sender!", t);
-			}
-
-			if(l == null) { // Happends when executed by a fake player.
-				throw new CRENotFoundException(
-						"Could not find the location of the player (are you running in cmdline mode?)", t);
-			}
-
-			try {
-				return l.getWorld().spawnMob(MCMobs.valueOf(mob.toUpperCase().replaceAll("[ _]", "")), secondary, qty, l, t);
-			} catch (IllegalArgumentException e) {
-				throw new CREFormatException("Invalid mob name: " + mob, t);
-			}
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env,
-				Set<Class<? extends Environment.EnvironmentImpl>> envs,
-				List<ParseTree> children, FileOptions fileOptions)
-				throws ConfigCompileException, ConfigRuntimeException {
-			env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
-					new CompilerWarning(getName() + " is deprecated for spawn_entity().", t, null));
-			return null;
-		}
-
-		@Override
-		public Set<Optimizable.OptimizationOption> optimizationOptions() {
-			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-	}
-
-	@api(environments = {CommandHelperEnvironment.class})
-	@hide("Deprecated")
-	public static class tame_mob extends AbstractFunction implements Optimizable {
-
-		@Override
-		public String getName() {
-			return "tame_mob";
-		}
-
-		@Override
-		public Integer[] numArgs() {
-			return new Integer[]{1, 2};
-		}
-
-		@Override
-		public String docs() {
-			return "void {[player], entityUUID} Tames any tameable mob to the specified player."
-					+ " (deprecated for {{function|set_mob_owner}}) ----"
-					+ " Offline players are supported, but this means that partial matches are NOT supported."
-					+ " You must type the players name exactly. Setting the player to null will untame the mob."
-					+ " If the entity doesn't exist, nothing happens.";
-		}
-
-		@Override
-		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREUntameableMobException.class, CRELengthException.class,
-				CREBadEntityException.class};
-		}
-
-		@Override
-		public boolean isRestricted() {
-			return true;
-		}
-
-		@Override
-		public MSVersion since() {
-			return MSVersion.V3_3_0;
-		}
-
-		@Override
-		public Boolean runAsync() {
-			return false;
-		}
-
-		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			String player = null;
-			MCPlayer mcPlayer = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(mcPlayer != null) {
-				player = mcPlayer.getName();
-			}
-			Mixed entityID = null;
-			if(args.length == 2) {
-				if(args[0] instanceof CNull) {
-					player = null;
-				} else {
-					player = args[0].val();
-				}
-				entityID = args[1];
-			} else {
-				entityID = args[0];
-			}
-			MCLivingEntity e = Static.getLivingEntity(entityID, t);
-			if(e == null) {
-				return CVoid.VOID;
-			} else if(e.isTameable()) {
-				MCTameable mct = ((MCTameable) e);
-				if(player != null) {
-					mct.setOwner(Static.getServer().getOfflinePlayer(player));
-				} else {
-					mct.setOwner(null);
-				}
-				return CVoid.VOID;
-			} else {
-				throw new CREUntameableMobException("The specified entity is not tameable", t);
-			}
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env,
-				Set<Class<? extends Environment.EnvironmentImpl>> envs,
-				List<ParseTree> children, FileOptions fileOptions)
-				throws ConfigCompileException, ConfigRuntimeException {
-			env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
-					new CompilerWarning(getName() + " is deprecated for set_mob_owner().", t, null));
-			return null;
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})

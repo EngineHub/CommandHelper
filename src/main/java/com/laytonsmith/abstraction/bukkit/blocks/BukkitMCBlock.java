@@ -11,14 +11,12 @@ import com.laytonsmith.abstraction.blocks.MCCommandBlock;
 import com.laytonsmith.abstraction.blocks.MCDispenser;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCLegacyMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCMetadatable;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBlockFace;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.CommandBlock;
@@ -55,19 +53,6 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	}
 
 	@Override
-	public int getTypeId() {
-		if(b == null) {
-			return 0;
-		}
-		return Bukkit.getUnsafe().toLegacy(b.getType()).getId();
-	}
-
-	@Override
-	public byte getData() {
-		return b.getData();
-	}
-
-	@Override
 	public void setType(MCMaterial mat) {
 		b.setType((Material) mat.getHandle());
 	}
@@ -75,11 +60,6 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	@Override
 	public void setType(MCMaterial mat, boolean physics) {
 		b.setType((Material) mat.getHandle(), physics);
-	}
-
-	@Override
-	public void setTypeAndData(int type, byte data, boolean physics) {
-		b.setBlockData(BukkitMCLegacyMaterial.getBlockData(type, data), physics);
 	}
 
 	@Override

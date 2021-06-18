@@ -11,16 +11,13 @@ import com.laytonsmith.abstraction.enums.MCDifficulty;
 import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCGameRule;
-import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.abstraction.enums.MCSound;
 import com.laytonsmith.abstraction.enums.MCSoundCategory;
 import com.laytonsmith.abstraction.enums.MCTreeType;
 import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
-import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClosure;
-import com.laytonsmith.core.constructs.Target;
 
 import java.util.List;
 
@@ -137,8 +134,6 @@ public interface MCWorld extends MCMetadatable {
 	void setFullTime(long time);
 
 	long getFullTime();
-
-	CArray spawnMob(MCMobs name, String subClass, int qty, MCLocation location, Target t);
 
 	MCFallingBlock spawnFallingBlock(MCLocation loc, MCBlockData data);
 

@@ -6,7 +6,6 @@ import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
@@ -34,14 +33,6 @@ public class BukkitMCItemStack implements MCItemStack {
 	@Override
 	public Object getHandle() {
 		return is;
-	}
-
-	@Override
-	public int getTypeId() {
-		if(is == null) {
-			return 0;
-		}
-		return Bukkit.getUnsafe().toLegacy(is.getType()).getId();
 	}
 
 	@Override

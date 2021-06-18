@@ -4,11 +4,6 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import java.util.Map;
 
 public interface MCItemStack extends AbstractionObject {
-	/**
-	 * @deprecated Magic value
-	 */
-	@Deprecated
-	int getTypeId();
 
 	void addEnchantment(MCEnchantment e, int level);
 
