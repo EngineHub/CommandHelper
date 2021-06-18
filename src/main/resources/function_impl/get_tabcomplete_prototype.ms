@@ -1,7 +1,7 @@
 @prototype = @arguments;
 
 if(array_size(@prototype) == 0) {
-	return(closure() { return(array()); });
+	return(iclosure() { return(array()); });
 }
 
 // Fail fast, validate the basic stuff about each of the prototypes
@@ -22,11 +22,7 @@ return(closure(@alias, @sender, @args) {
 		// figure out which key to use, based on previous arguments.
 		@transform = null;
 		foreach(@keys in array_keys(@p)) {
-			if(string_contains(@keys, '|')) {
-				@keys = split(@keys, '|');
-			} else {
-				@keys = array(@keys);
-			}
+			@keys = split(@keys, '|');
 			foreach(@key in @keys) {
 				if(@key == "<" && @transform == null) {
 					@transform = @p[@key];
@@ -54,7 +50,7 @@ return(closure(@alias, @sender, @args) {
 			}
 		}
 		if(@transform == null) {
-			@p = "None";
+			return(array());
 		} else {
 			@p = @transform;
 		}
@@ -71,14 +67,14 @@ return(closure(@alias, @sender, @args) {
 			case 'Boolean':
 				@p = array('true', 'false');
 			case 'None':
-				@p = array();
+				return(array());
 		}
 	}
 
 	@set = null;
 
 	if(@p instanceof ClassType) {
-		@set = array_map(reflect_pull('enum', string(@p)), closure(@v) { return(string(@v)); });
+		@set = reflect_pull('enum', @p);
 	} else if(instanceof(@p, closure)) {
 		try {
 			@set = execute(@alias, @sender, @args, @p);
@@ -96,10 +92,10 @@ return(closure(@alias, @sender, @args) {
 
 	// @set now contains the list of possible completions. Match this against @args, and see if there are any values that simply can't match.
 	@ret = array();
-	@currentArg = @args[-1];
+	@currentArg = to_lower(@args[-1]);
 	foreach(@value in @set) {
 		@value = string(@value);
-		if(string_starts_with(to_lower(@value), to_lower(@currentArg))) {
+		if(string_starts_with(to_lower(@value), @currentArg)) {
 			@ret[] = @value;
 		}
 	}
