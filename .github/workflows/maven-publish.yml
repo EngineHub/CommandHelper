@@ -29,8 +29,8 @@ jobs:
       uses: jacobtomlinson/gha-find-replace@master
       with:
         include: src/main/resources/plugin.yml
-        find: 'version: "(.*?)"'
-        replace: 'version: "$1-${{ github.RUN_NUMBER }}"'
+        find: 'version: "${project.version}"'
+        replace: 'version: "${project.version}-${{ github.RUN_NUMBER }}"'
     - name: Package Build
       run: mvn package -s $GITHUB_WORKSPACE/settings.xml
       env:
