@@ -32,7 +32,7 @@ jobs:
         find: 'version: "${project.version}"'
         replace: 'version: "${project.version}-${{ github.RUN_NUMBER }}"'
     - name: Package Build
-      run: mvn package -s $GITHUB_WORKSPACE/settings.xml
+      run: mvn package
       env:
         GITHUB_TOKEN: ${{ github.token }}
     - name: Upload to Blob Store
