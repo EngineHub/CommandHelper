@@ -24,6 +24,13 @@ jobs:
         distribution: 'adopt'
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
+    - uses: actions/checkout@v2
+    - name: Find and Replace
+      uses: jacobtomlinson/gha-find-replace@master
+      with:
+        include: src/main/resources/plugin.yml
+        find: 'version: "(.*?)"'
+        replace: 'version: "$1-${{ github.RUN_NUMBER }}"'
     - name: Package Build
       run: mvn package -s $GITHUB_WORKSPACE/settings.xml
       env:
