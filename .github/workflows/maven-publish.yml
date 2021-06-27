@@ -28,7 +28,8 @@ jobs:
     - name: Find and Replace
       uses: jacobtomlinson/gha-find-replace@master
       with:
-        find: 'version: "${project.version}"'
+        input: "plugin.yml"
+        find: 'version: "\${project\.version}"'
         replace: 'version: "${project.version}-${{ github.RUN_NUMBER }}"'
     - name: Package Build
       run: mvn package
