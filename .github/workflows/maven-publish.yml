@@ -28,7 +28,7 @@ jobs:
     - name: Find and Replace
       uses: jacobtomlinson/gha-find-replace@master
       with:
-        include: $GITHUB_WORKSPACE/src/main/resources/plugin.yml
+        include: ${{ github.WORKSPACE }}/src/main/resources/plugin.yml
         find: 'version: "${project.version}"'
         replace: 'version: "${project.version}-${{ github.RUN_NUMBER }}"'
     - name: Package Build
