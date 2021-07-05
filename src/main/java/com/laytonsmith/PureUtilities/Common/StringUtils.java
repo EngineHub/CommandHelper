@@ -346,7 +346,7 @@ public final class StringUtils {
 	 * which is useful for lists that are being read by a human, to have a proper conjunction at the end.
 	 * @param list The list to concatenate
 	 * @param glue The glue to use
-	 * @param lastGlue The glue for the last two elements
+	 * @param lastGlue The glue for the last two elements. If it is null, then glue is used instead.
 	 * @param glueForTwoItems If only two items are in the list, then this glue is used instead. If it is null, then
 	 * lastGlue is used instead.
 	 * @param empty If the list is completely empty, this string is simply returned. If null, an empty string is used.
