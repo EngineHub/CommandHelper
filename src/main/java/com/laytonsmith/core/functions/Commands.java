@@ -227,14 +227,20 @@ public class Commands {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map == null) {
-				throw new CRENotFoundException(this.getName() + " is not supported in this mode (CommandMap not found).", t);
+				throw new CRENotFoundException(
+						this.getName() + " is not supported in this mode (CommandMap not found).", t);
 			}
-			MCCommand cmd = map.getCommand(args[0].val().toLowerCase());
+			String cmdStr = args[0].val().toLowerCase();
+			if(cmdStr.indexOf(' ') != -1) {
+				throw new CREFormatException("Command passed to " + this.getName() + " must not contain whitespaces."
+						+ " Received: \"" + cmdStr + "\".", t);
+			}
+			MCCommand cmd = map.getCommand(cmdStr);
 			String prefix = Implementation.GetServerType().getBranding().toLowerCase(Locale.ENGLISH);
 			boolean register = false;
 			if(cmd == null) {
 				register = true;
-				cmd = StaticLayer.GetConvertor().getNewCommand(args[0].val().toLowerCase());
+				cmd = StaticLayer.GetConvertor().getNewCommand(cmdStr);
 			}
 			if(args[1].isInstanceOf(CArray.TYPE)) {
 				CArray ops = (CArray) args[1];
@@ -285,7 +291,8 @@ public class Commands {
 				}
 				return CBoolean.get(success);
 			} else {
-				throw new CREFormatException("Arg 2 was expected to be an array.", t);
+				throw new CREFormatException(
+						"The second argument passed to " + this.getName() + " was expected to be an array.", t);
 			}
 		}
 
@@ -312,7 +319,9 @@ public class Commands {
 					+ " It is meant to return an array of completions, but if not the tab_complete_command event"
 					+ " will be fired, and the completions of that event will be sent to the user. Both executor"
 					+ " and tabcompleter closures are passed the following information in this order:"
-					+ " alias used, name of the sender, array of arguments used, array of command info.\n\n"
+					+ " alias used, name of the sender, array of arguments used, array of command info.\n"
+					+ "When this function is not supported on the used platform, a NotFoundException is thrown."
+					+ " When the command name contains whitespaces, a FormatException is thrown.\n\n"
 					+ "In most simple cases, the tabcompleter can be easily created using the"
 					+ " {{function|get_tabcompleter_prototype}} function, though for complex completion scenarios,"
 					+ " you may prefer writing a custom closure anyways.";
