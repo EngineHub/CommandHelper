@@ -1050,7 +1050,7 @@ public final class SiteDeploy {
 	private void createTranslationMemory(String title, String toLocation, ResultType type,
 			String inputString) throws IOException {
 		toLocation = StringUtils.replaceLast(toLocation, "\\.html", ".tmem.xml");
-		String location = "%s/docs/" + MSVersion.V3_3_4 + "/" + toLocation;
+		String location = "%s/docs/" + MSVersion.LATEST + "/" + toLocation;
 		writeStatus("Creating memory file for " + location);
 		masterMemories.createTranslationMemory(title, location, type, inputString);
 	}
