@@ -6,6 +6,7 @@ import com.laytonsmith.annotations.MEnum;
 public enum MCInventoryType {
 	BREWING,
 	CHEST,
+	COMPOSTER(false), // no inventory view
 	CRAFTING(false),
 	CREATIVE(false),
 	DISPENSER,

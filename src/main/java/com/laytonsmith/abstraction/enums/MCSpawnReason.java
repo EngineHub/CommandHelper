@@ -53,5 +53,6 @@ public enum MCSpawnReason {
 	ENDER_PEARL,
 	DROWNED,
 	SHEARED,
-	EXPLOSION
+	EXPLOSION,
+	FROZEN
 }
