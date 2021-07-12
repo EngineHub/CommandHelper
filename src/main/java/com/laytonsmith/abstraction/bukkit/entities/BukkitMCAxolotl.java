@@ -5,7 +5,7 @@ import com.laytonsmith.abstraction.enums.MCAxolotlType;
 import org.bukkit.entity.Axolotl;
 import org.bukkit.entity.Entity;
 
-public class BukkitMCAxolotl extends BukkitMCTameable implements MCAxolotl {
+public class BukkitMCAxolotl extends BukkitMCLivingEntity implements MCAxolotl {
 
 	Axolotl a;
 
