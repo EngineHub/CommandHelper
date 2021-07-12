@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.MCLeatherArmorMeta;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.entities.MCTropicalFish;
 import com.laytonsmith.abstraction.enums.MCAttribute;
+import com.laytonsmith.abstraction.enums.MCAxolotlType;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
@@ -122,6 +123,7 @@ public class ItemMeta {
 			docs = docs.replace("%ATTRIBUTES%", StringUtils.Join(MCAttribute.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%OPERATIONS%", StringUtils.Join(MCAttributeModifier.Operation.values(), ", ", ", or ", " or "));
 			docs = docs.replace("%SLOTS%", StringUtils.Join(MCEquipmentSlot.values(), ", ", ", or ", " or "));
+			docs = docs.replace("%AXOLOTL_TYPES%", StringUtils.Join(MCAxolotlType.values(), ", ", ", or ", " or "));
 			return docs;
 		}
 

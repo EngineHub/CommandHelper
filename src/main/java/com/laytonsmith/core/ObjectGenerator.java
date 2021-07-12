@@ -2,6 +2,7 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Vector3D;
 import com.laytonsmith.abstraction.MCAttributeModifier;
+import com.laytonsmith.abstraction.MCAxolotlBucketMeta;
 import com.laytonsmith.abstraction.MCBannerMeta;
 import com.laytonsmith.abstraction.MCBlockStateMeta;
 import com.laytonsmith.abstraction.MCBookMeta;
@@ -54,6 +55,7 @@ import com.laytonsmith.abstraction.blocks.MCDropper;
 import com.laytonsmith.abstraction.blocks.MCFurnace;
 import com.laytonsmith.abstraction.entities.MCTropicalFish;
 import com.laytonsmith.abstraction.enums.MCAttribute;
+import com.laytonsmith.abstraction.enums.MCAxolotlType;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
@@ -679,6 +681,8 @@ public class ObjectGenerator {
 					arrayItems.push(ObjectGenerator.GetGenerator().item(item, t), t);
 				}
 				ma.set("items", arrayItems, t);
+			} else if(meta instanceof MCAxolotlBucketMeta) {
+				ma.set("variant", ((MCAxolotlBucketMeta) meta).getAxolotlType().name());
 			}
 			return ma;
 		}
@@ -1144,6 +1148,13 @@ public class ObjectGenerator {
 							}
 						} else if(!(value instanceof CNull)) {
 							throw new CREFormatException("Items was expected to be an array or null.", t);
+						}
+					}
+				} else if(meta instanceof MCAxolotlBucketMeta) {
+					if(ma.containsKey("variant")) {
+						Mixed value = ma.get("variant", t);
+						if(!(value instanceof CNull)) {
+							((MCAxolotlBucketMeta) meta).setAxolotlType(MCAxolotlType.valueOf(value.val().toUpperCase()));
 						}
 					}
 				}

@@ -144,6 +144,7 @@ import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.SmithingRecipe;
 import org.bukkit.inventory.SmokingRecipe;
 import org.bukkit.inventory.StonecuttingRecipe;
+import org.bukkit.inventory.meta.AxolotlBucketMeta;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.BookMeta;
@@ -590,11 +591,18 @@ public class BukkitConvertor extends AbstractConvertor {
 			if(im instanceof CrossbowMeta) {
 				return new BukkitMCCrossbowMeta((CrossbowMeta) im);
 			}
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_16) && im instanceof CompassMeta) {
-				return new BukkitMCCompassMeta((CompassMeta) im);
-			}
-			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17) && im instanceof BundleMeta) {
-				return new BukkitMCBundleMeta((BundleMeta) im);
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_16)) {
+				if(im instanceof CompassMeta) {
+					return new BukkitMCCompassMeta((CompassMeta) im);
+				}
+				if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17)) {
+					if(im instanceof BundleMeta) {
+						return new BukkitMCBundleMeta((BundleMeta) im);
+					}
+					if(im instanceof AxolotlBucketMeta) {
+						return new BukkitMCAxolotlBucketMeta((AxolotlBucketMeta) im);
+					}
+				}
 			}
 		}
 		return new BukkitMCItemMeta(im);

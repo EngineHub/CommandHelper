@@ -110,4 +110,8 @@ Below are the available fields in the item meta array. Fields can be null when t
 | Bundle
 |
 * '''items''' : (array) An array of item arrays that exist in this bundle.
+|-
+| AxolotlBucket
+|
+* '''variant''' : (string) The type of axolotl, one of ''%AXOLOTL_TYPES%''.
 |}
