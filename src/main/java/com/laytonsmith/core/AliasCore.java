@@ -108,7 +108,8 @@ public class AliasCore {
 				} catch (InterruptedException ex) {
 					//
 				}
-				if(true == Updater.isUpdateAvailable()) {
+				Boolean updateAvailable = Updater.isUpdateAvailable();
+				if(updateAvailable != null && updateAvailable) {
 					MSLog.GetLogger().always(MSLog.Tags.GENERAL, "An update is available!", Target.UNKNOWN);
 				}
 			}, Implementation.GetServerType().getBranding() + "-update-check").start();
