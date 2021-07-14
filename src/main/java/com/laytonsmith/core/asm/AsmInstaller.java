@@ -143,7 +143,7 @@ public class AsmInstaller {
 				return false;
 			}
 			return true;
-		} catch(InterruptedException | IOException ex) {
+		} catch (InterruptedException | IOException ex) {
 			return false;
 		}
 	}
