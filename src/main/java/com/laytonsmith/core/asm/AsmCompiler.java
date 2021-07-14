@@ -21,7 +21,10 @@ import com.laytonsmith.persistence.DataSourceException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -38,10 +41,12 @@ public class AsmCompiler {
 
 	private final File llc;
 	private final File lld;
+	private final LLVMEnvironment llvmenv;
 
 	public AsmCompiler(File llc, File lld) {
 		this.llc = llc;
 		this.lld = lld;
+		llvmenv = new LLVMEnvironment();
 	}
 
 	/**
@@ -58,30 +63,48 @@ public class AsmCompiler {
 		}
 		this.llc = llc;
 		this.lld = lld;
+		llvmenv = new LLVMEnvironment();
+		// TODO remove this later
+		llvmenv.setOutputIRCodeTargetLogging(true);
+	}
+
+	/**
+	 * Returns the current environment, which can be modified with various compiler options that have i.e. been passed
+	 * in from cmdline.
+	 * @return
+	 */
+	public LLVMEnvironment getEnvironment() {
+		return llvmenv;
 	}
 
 	public void compileEntryPoint(File file, File outputDirectory, String exeName)
 			throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException,
 			ConfigCompileException, ConfigCompileGroupException, InterruptedException {
+		if(!AsmInstaller.validateToolchain()) {
+			return;
+		}
+		StringBuilder program = new StringBuilder();
+		compileFile(file, program);
 		StringBuilder ir = new StringBuilder();
 		StringBuilder strings = new StringBuilder();
-
-		strings.append("\n");
-		String irTop = "@exit = global i64 0\n"
-				+ "declare i32 @puts(i8* nocapture) nounwind\n"
-				+ "define i64* @main() {\n";
-		String irBottom = "exit:\n"
-				+ "ret i64* @exit\n"
-				+ "}\n"
-				+ "define i32* @mainCRTStartup() {\n"
-				+ "%ret = call i64* @main()\n"
-				+ "%ret32 = bitcast i64* @exit to i32*\n"
-				+ "ret i32* %ret32\n"
-				+ "}";
+		String nl = OSUtils.GetLineEnding();
+		strings.append(nl);
+		for(Map.Entry<String, String> entry : llvmenv.getStrings().entrySet()) {
+			String string = entry.getKey();
+			String id = entry.getValue();
+			strings.append("$").append(id).append(" = comdat any").append(nl);
+			strings.append("@").append(id).append(" = linkonce_odr dso_local unnamed_addr constant [")
+					.append(string.length() + 1).append(" x i8] c\"").append(string)
+					.append("\\00\", comdat, align 1").append(nl);
+		}
+		String irTop = /*"source_filename = \"" + file.getName() + "\"" + nl
+				+*/ "define dso_local i32 @main() {" + nl;
+		String irBottom = "\tret i32 0" + nl + "}" + nl;
 		ir.append(strings.toString());
 		ir.append(irTop);
-		compileFile(file, ir);
+		ir.append(program.toString());
 		ir.append(irBottom);
+		ir.append(llvmenv.getGlobalDeclarations());
 		File ll = new File(outputDirectory, exeName + ".ll");
 		File obj = new File(outputDirectory, exeName + ".obj");
 		FileUtil.write(ir.toString(), ll);
@@ -93,17 +116,34 @@ public class AsmCompiler {
 				ll.getAbsolutePath()
 			};
 			CommandExecutor ex = new CommandExecutor(args);
-//			StringWrit
-//			ex.setSystemOut();
-			String error = "Not yet implemented!"; //CommandExecutor.Execute(outputDirectory, );
-			if(!"".equals(error)) {
-				throw new InternalException("Assembly failed:\n" + error);
+			ex.setWorkingDir(outputDirectory);
+			ex.setSystemInputsAndOutputs();
+			ex.start();
+			int exitCode = ex.waitFor();
+			if(exitCode != 0) {
+				throw new InternalException("Assembly failed.");
 			}
 		}
 		{
-			String error = CommandExecutor.Execute(outputDirectory, lld.getAbsolutePath(), obj.getAbsolutePath());
-			if(!"".equals(error)) {
-				throw new InternalException("Linking failed:\n" + error);
+			List<String> args = new ArrayList<>();
+			args.add(lld.getAbsolutePath());
+			if(OSUtils.GetOS().isWindows()) {
+				String sdkBase = "C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.19041.0\\";
+				String sdkDepth = (OSUtils.GetOSBitDepth() == OSUtils.BitDepth.B64 ? "x64" : "x86");
+				args.add("/out:\"" + exeName + ".exe\"");
+				args.add("/entry:main");
+				args.add("/defaultlib:" + sdkBase + "ucrt\\" + sdkDepth + "\\ucrt.lib");
+			} else {
+				throw new UnsupportedOperationException("OS not yet supported");
+			}
+			args.add(obj.getAbsolutePath());
+			CommandExecutor ex = new CommandExecutor(args.toArray(new String[args.size()]));
+			ex.setWorkingDir(outputDirectory);
+			ex.setSystemInputsAndOutputs();
+			ex.start();
+			int exitCode = ex.waitFor();
+			if(exitCode != 0) {
+				throw new InternalException("Linking failed.");
 			}
 		}
 	}
@@ -113,10 +153,14 @@ public class AsmCompiler {
 				ConfigCompileException, URISyntaxException, ConfigCompileGroupException {
 		String script = FileUtil.read(file);
 		Environment env = Static.GenerateStandaloneEnvironment(true);
-		env = env.cloneAndAdd(new LLVMEnvironment());
+		env = env.cloneAndAdd(llvmenv);
 		ParseTree tree
 				= MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, file, true), env, ENVS);
-		ir.append(getIR(tree.getChildAt(0), env));
+		if(tree != null) {
+			ir.append(getIR(tree.getChildAt(0), env));
+		} else {
+			ir.append("\tunreachable").append(OSUtils.GetLineEnding());
+		}
 	}
 
 	private String getIR(ParseTree node, Environment env) throws ConfigCompileException {

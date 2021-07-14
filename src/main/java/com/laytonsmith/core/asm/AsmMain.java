@@ -4,9 +4,14 @@ import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ArgumentParser.ArgumentBuilder;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.core.AbstractCommandLineTool;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.tool;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -31,7 +36,9 @@ public class AsmMain {
 						.setDescription("Installs the LLVM compiler toolchain. This is not necessary if your"
 								+ " system is already set up with the toolchain, but this will automatically install"
 								+ " the proper toolchain for you. Run as root/Administrator. Ignores other options,"
-								+ " and exits once installation is complete.")
+								+ " and exits once installation is complete. Installation is indempotent, you may"
+								+ " run this unconditionally, and if everything is installed correctly, nothing will"
+								+ " happen. New updates to MethodScript may require reinstallation of the toolchain.")
 						.asFlag()
 						.setName("install-toolchain"))
 					.addArgument(new ArgumentBuilder()
@@ -58,7 +65,11 @@ public class AsmMain {
 						.setUsageName("executable name")
 						.setOptional()
 						.setName("executable-name")
-						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING));
+						.setArgType(ArgumentBuilder.BuilderTypeNonFlag.STRING))
+					.addArgument(new ArgumentBuilder()
+						.setDescription("Disables outputting of code target information in the LLVM IR file.")
+						.asFlag()
+						.setName("no-target-logging"));
 		}
 
 		@Override
@@ -83,10 +94,24 @@ public class AsmMain {
 			}
 			String exeName = input.isDirectory() ? input.getName() : input.getName().replaceAll("\\..*?$", "");
 
-			if(input.isDirectory()) {
-				LogErrorAndQuit("Currently only single files are supported.", 1);
-			} else {
-				new AsmCompiler().compileEntryPoint(input, output, exeName);
+			try {
+				try {
+					if(input.isDirectory()) {
+						LogErrorAndQuit("Currently only single files are supported.", 1);
+					} else {
+						AsmCompiler compiler = new AsmCompiler();
+						if(parsedArgs.isFlagSet("no-target-logging")) {
+							compiler.getEnvironment().setOutputIRCodeTargetLogging(false);
+						}
+						compiler.compileEntryPoint(input, output, exeName);
+					}
+				} catch (ConfigCompileException ex) {
+					Set<ConfigCompileException> exs = new HashSet<>();
+					exs.add(ex);
+					throw new ConfigCompileGroupException(exs);
+				}
+			} catch (ConfigCompileGroupException ex) {
+				ConfigRuntimeException.HandleUncaughtException(ex, "One or more compile errors occured during compilation.", null);
 			}
 		}
 

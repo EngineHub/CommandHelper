@@ -1,5 +1,6 @@
 package com.laytonsmith.core.compiler;
 
+import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.ParseTree;
@@ -63,6 +64,11 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl {
 	public final Map<Target, ConfigCompileException> potentialKeywordCompileErrors = new HashMap<>();
 
 	private boolean logCompilerWarnings = true;
+
+	/**
+	 * The OS that this code should be compiled against. By default, the current OS.
+	 */
+	private OSUtils.OS targetOS = OSUtils.GetOS();
 
 	//TODO: Need to figure out how to do known procs.
 	public void setConstant(String name, Construct value) {
@@ -182,4 +188,21 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl {
 		return new ArrayList<>(compilerWarnings);
 	}
 
+	/**
+	 * Returns the OS that the compilation process should target. For interpreted runtimes, this value
+	 * probably doesn't matter. Default is the currently running OS.
+	 * @return
+	 */
+	public OSUtils.OS getTargetOS() {
+		return this.targetOS;
+	}
+
+	private boolean targetOSAlreadySet = false;
+	public void setTargetOS(OSUtils.OS targetOS) {
+		if(targetOSAlreadySet) {
+			MSLog.GetLogger().w(MSLog.Tags.COMPILER, "Setting compiler target twice!", Target.UNKNOWN);
+		}
+		this.targetOS = targetOS;
+		targetOSAlreadySet = true;
+	}
 }

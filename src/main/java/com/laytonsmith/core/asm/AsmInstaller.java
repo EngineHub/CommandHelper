@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.ProgressIterator;
+import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Web.RequestSettings;
 import com.laytonsmith.PureUtilities.Web.WebUtility;
 import java.io.File;
@@ -29,7 +30,7 @@ public class AsmInstaller {
 		this.progress = progress;
 	}
 
-	private void log(String output) {
+	private static void log(String output) {
 		StreamUtils.GetSystemOut().println(output);
 	}
 
@@ -38,15 +39,17 @@ public class AsmInstaller {
 		if(OSUtils.GetOS().isWindows()) {
 			installWindows();
 		} else {
-			throw new UnsupportedOperationException("Toolchain installation not supported on this platform,"
-					+ " though manual installation may still be possible. Note that the currently supported"
-					+ " toolchain is version " + LLVM_VERSION);
+			throw new UnsupportedOperationException("Toolchain installation not supported on this platform");
 		}
 	}
 
 	private void installWindows() throws IOException, InterruptedException {
+		// NOTE: Installation MUST be idempotent, please ensure it stays that way.
 		String installerUrl;
 		String destFilename;
+		String redistUrl = "https://raw.githubusercontent.com"
+				+ "/LadyCailin/MethodScriptExtra/master/installers/winsdk/10.0.19041.0/winsdksetup.exe";
+		String redistFileName = "winsdksetup.exe";
 		if(OSUtils.GetOSBitDepth() == OSUtils.BitDepth.B64) {
 			log("Detected 64 bit Windows");
 			installerUrl
@@ -59,23 +62,40 @@ public class AsmInstaller {
 			destFilename = "LLVM-10.0.0-win32.exe";
 		}
 
-		File exe = download(installerUrl, destFilename);
+		File lld = new File("C:\\Program Files\\LLVM\\bin\\lld-link.exe");
+		File llc = new File("C:\\Program Files\\LLVM\\bin\\llc.exe");
+		File winSDK = new File("C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.19041.0");
 		log("Installing...");
-		log("Please note, when installing, either add the toolchain to PATH, or install in the standard location,"
-				+ " \"C:\\Program Files\\LLVM\" to avoid having to specify the toolchain location on every invocation."
-				+ " In general, you really should just leave that as default, unless you're absolutely positive you"
-				+ " know what you're doing.");
-		CommandExecutor.Execute(exe.getAbsolutePath());
-		log("Downloading llc.exe");
-		String llcUrl
-				= "https://raw.githubusercontent.com"
-				+ "/LadyCailin/MethodScriptExtra/master/installers/llvm/10.0.0/llc/llc.exe";
-		File llcExe = download(llcUrl, "llc.exe");
-		File llcDest = new File("C:\\Program Files\\LLVM\\bin\\llc.exe");
-		log("Moving llc.exe into " + llcDest + ". If this is incorrect, please manually move it to the"
-				+ " correct location.");
-		FileUtil.move(llcExe, llcDest);
+		if(!lld.exists() || !CommandExecutor.Execute(lld.getAbsolutePath(), "--version").contains("LLD 10.0.0")) {
+			File exe = download(installerUrl, destFilename);
+			log(TermColors.YELLOW + "Please note, when installing LLVM, install in the standard location,"
+					+ " \"C:\\Program Files\\LLVM\", otherwise the toolchain will not work." + TermColors.reset());
+			CommandExecutor.Execute(exe.getAbsolutePath());
+		}
+		if(!llc.exists()
+				|| !CommandExecutor.Execute(llc.getAbsolutePath(), "--version").contains("LLVM version 10.0.0")) {
+			log("Downloading llc.exe");
+			String llcUrl
+					= "https://raw.githubusercontent.com"
+					+ "/LadyCailin/MethodScriptExtra/master/installers/llvm/10.0.0/llc/llc.exe";
+			File llcExe = download(llcUrl, "llc.exe");
+			File llcDest = new File("C:\\Program Files\\LLVM\\bin\\llc.exe");
+			log("Moving llc.exe into " + llcDest + ". If this is incorrect, please manually move it to the"
+					+ " correct location.");
+			try {
+				llcExe.delete();
+				FileUtil.move(llcExe, llcDest);
+			} catch (IOException ex) {
+				log(TermColors.RED + ex.getMessage() + TermColors.reset());
+			}
+		}
+		if(!winSDK.exists()) {
+			File redist = download(redistUrl, redistFileName);
+			log("Installing Windows 10 SDK");
+			CommandExecutor.Execute(redist.getAbsolutePath());
+		}
 		log("Done.");
+
 	}
 
 	private File download(String installerUrl, String destFilename) throws IOException, InterruptedException {
@@ -88,5 +108,43 @@ public class AsmInstaller {
 		rs.setDownloadTo(dest);
 		WebUtility.GetPage(new URL(installerUrl), rs);
 		return dest;
+	}
+
+	/**
+	 * Validates the currently installed toolchain, to see if there is an update needed. If so, the user is prompted
+	 * to run the --install-toolchain command before trying again.
+	 * @return
+	 */
+	public static boolean validateToolchain() {
+		if(OSUtils.GetOS().isWindows()) {
+			return validateWindowsToolchain();
+		} else {
+			log("Toolchain installation not supported on this platform");
+			return false;
+		}
+	}
+
+	public static boolean validateWindowsToolchain() {
+		try {
+			File lld = new File("C:\\Program Files\\LLVM\\bin\\lld-link.exe");
+			File llc = new File("C:\\Program Files\\LLVM\\bin\\llc.exe");
+			File winSDK = new File("C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.19041.0");
+			if(!lld.exists() || !CommandExecutor.Execute(lld.getAbsolutePath(), "--version").contains("LLD 10.0.0")) {
+				log("Missing correct version of lld tool, please re-install the toolchain.");
+				return false;
+			}
+			if(!llc.exists()
+				|| !CommandExecutor.Execute(llc.getAbsolutePath(), "--version").contains("LLVM version 10.0.0")) {
+				log("Missing correct version of llc tool, please re-install the toolchain.");
+				return false;
+			}
+			if(!winSDK.exists()) {
+				log("Missing correct version of Windows SDK, please re-install the toolchain.");
+				return false;
+			}
+			return true;
+		} catch(InterruptedException | IOException ex) {
+			return false;
+		}
 	}
 }

@@ -209,8 +209,9 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	 * @param parent
 	 * @param nodes
 	 * @return
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException If there is a compilation error.
 	 */
-	public abstract String getIR(Target t, Environment env, Script parent, ParseTree... nodes);
+	public abstract String getIR(Target t, Environment env, Script parent, ParseTree... nodes) throws ConfigCompileException;
 
 	@Override
 	public boolean useSpecialExec() {

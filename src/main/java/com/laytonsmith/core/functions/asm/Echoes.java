@@ -10,6 +10,7 @@ import com.laytonsmith.core.asm.LLVMEnvironment;
 import com.laytonsmith.core.asm.LLVMFunction;
 import com.laytonsmith.core.asm.LLVMVersion;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
@@ -18,45 +19,43 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 /**
  *
  */
-public class Cmdline {
-
+public class Echoes {
 	@api(environments = LLVMEnvironment.class, platform = api.Platforms.COMPILER_LLVM)
-	public static class exit extends LLVMFunction {
+	public static class console extends LLVMFunction {
 
 		@Override
 		public String getIR(Target t, Environment env, Script parent, ParseTree... nodes) throws ConfigCompileException {
 			OSUtils.OS os = env.getEnv(CompilerEnvironment.class).getTargetOS();
-			String syscallNumber;
-			LLVMEnvironment llvmenv = env.getEnv(LLVMEnvironment.class);
-			if(os.isWindows()) {
-				llvmenv.addGlobalDeclaration("declare dso_local void @_exit(i32)");
-				return AsmUtil.emitIR(t, env,
-						"%1 = alloca i32, align 4",
-						"store i32 0, i32* %1, align 4",
-						"call void @_exit(i32 0)",
-						"unreachable"
-				);
-			} else if(os.isMac()) {
-				syscallNumber = "0x2000001";
-			} else if(os.isLinux()) {
-				syscallNumber = "60";
-			} else {
-				throw new ConfigCompileException("Unsupported target OS for system call \"exit\"", t);
+			String hardcodedOutput = null;
+			if(nodes[0].getData() instanceof CString) {
+				hardcodedOutput = nodes[0].getData().val();
 			}
-			return AsmUtil.emitIR(t, env,
-					"%rax = add i64 " + syscallNumber + ", 0",
-					"call i64 asm sideeffect \"syscall\", \"=r,{rax},{rdi},{rsi},{rdx}\" (i64 %raxArg, i64 %rdiArg, i64 %rsiArg, i64 %rdxArg)"
-			);
+			LLVMEnvironment llvmenv = env.getEnv(LLVMEnvironment.class);
+			if(hardcodedOutput != null) {
+				String id = llvmenv.getOrPutStringConstant(hardcodedOutput);
+				if(os.isWindows()) {
+					llvmenv.addGlobalDeclaration("declare dso_local i32 @puts(i8*)");
+					int strSize = hardcodedOutput.length() + 1;
+					return AsmUtil.emitIR(t, env,
+							"call i32 @puts(i8* getelementptr inbounds"
+									+ " ([" + strSize + " x i8], [" + strSize + " x i8]* @" + id + ", i64 0, i64 0))"
+					);
+				} else {
+					throw new ConfigCompileException("Unsupported target OS for system call \"puts\"", t);
+				}
+			} else {
+				throw new ConfigCompileException("Only hardcoded strings are supported at this time.", t);
+			}
 		}
 
 		@Override
 		public String getName() {
-			return "exit";
+			return "console";
 		}
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{0};
+			return new Integer[]{1};
 		}
 
 		@Override
