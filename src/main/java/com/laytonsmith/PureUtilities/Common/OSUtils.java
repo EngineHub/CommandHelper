@@ -189,7 +189,7 @@ public class OSUtils {
 
 			return arch != null && arch.endsWith("64")
 				|| wow64Arch != null && wow64Arch.endsWith("64")
-					? BitDepth.B64 : BitDepth.B64;
+					? BitDepth.B64 : BitDepth.B32;
 		} else {
 			return System.getProperty("os.arch").endsWith("64") ? BitDepth.B64 : BitDepth.B32;
 		}
