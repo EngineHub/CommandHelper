@@ -129,7 +129,7 @@ public class ObjectGenerator {
 		Construct x = new CDouble(l.getX(), Target.UNKNOWN);
 		Construct y = new CDouble(l.getY(), Target.UNKNOWN);
 		Construct z = new CDouble(l.getZ(), Target.UNKNOWN);
-		Construct world = new CString(l.getWorld().getName(), Target.UNKNOWN);
+		Construct world = (l.getWorld() != null ? new CString(l.getWorld().getName(), Target.UNKNOWN) : CNull.NULL);
 		ca.set("0", x, Target.UNKNOWN);
 		ca.set("1", y, Target.UNKNOWN);
 		ca.set("2", z, Target.UNKNOWN);
