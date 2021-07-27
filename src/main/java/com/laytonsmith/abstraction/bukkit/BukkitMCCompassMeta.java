@@ -17,7 +17,7 @@ public class BukkitMCCompassMeta extends BukkitMCItemMeta implements MCCompassMe
 	@Override
 	public MCLocation getTargetLocation() {
 		Location l = cm.getLodestone();
-		if(l == null) {
+		if(l == null || l.getWorld() == null) {
 			return null;
 		}
 		return new BukkitMCLocation(l);
