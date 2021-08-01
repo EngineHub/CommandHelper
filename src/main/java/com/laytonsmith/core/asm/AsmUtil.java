@@ -12,7 +12,7 @@ import java.util.List;
  */
 public final class AsmUtil {
 
-	private AsmUtil(){}
+	private AsmUtil() {}
 
 	/**
 	 * Given a set of lines of code, outputs them in the proper format.In almost all cases, this should be used

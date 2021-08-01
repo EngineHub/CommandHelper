@@ -27,6 +27,7 @@ import java.lang.reflect.Proxy;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface NonInheritImplements {
+
 	/**
 	 * The interface that this class implements
 	 * @return
@@ -39,14 +40,13 @@ public @interface NonInheritImplements {
 	 */
 	Class[] parameterTypes() default {};
 
-
 	/**
 	 * Provides helper methods for operations on a {@link NonInheritImplements} ecosystem.
 	 */
 	public static class Helper {
 
 		// No constructing allowed!
-		private Helper(){}
+		private Helper() {}
 
 		/**
 		 * Casts a given object to the given type, assuming it actually is truly castable to the specified type. (Either

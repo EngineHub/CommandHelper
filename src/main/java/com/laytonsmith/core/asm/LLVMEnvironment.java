@@ -75,11 +75,6 @@ public class LLVMEnvironment implements Environment.EnvironmentImpl {
 		this.outputIRCodeTargetLogging = enabled;
 	}
 
-	public void addGlobalDeclaration(String global) {
-		// TODO: Deduplicate includes
-		globalDeclarations.add(global);
-	}
-
 	/**
 	 * Adds a standard C library header file. If this file has already been included, it won't be re-included, but
 	 * insertion order is otherwise maintained. Each header file will be compiled with Clang, and the resultant LLVM IR
@@ -115,6 +110,11 @@ public class LLVMEnvironment implements Environment.EnvironmentImpl {
 	 */
 	public LinkedHashSet<Header> getAdditionalHeaders() {
 		return new LinkedHashSet<>(additionalHeaders);
+	}
+
+	public void addGlobalDeclaration(String global) {
+		// TODO: Deduplicate includes
+		globalDeclarations.add(global);
 	}
 
 	/**

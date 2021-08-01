@@ -1,7 +1,5 @@
 package com.laytonsmith.core.asm.metadata;
 
-import com.laytonsmith.core.asm.metadata.IRMetadataDIFile;
-import com.laytonsmith.core.asm.metadata.IRMetadata;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CVoid;

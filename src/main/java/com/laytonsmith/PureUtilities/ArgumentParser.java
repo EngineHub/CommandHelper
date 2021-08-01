@@ -51,7 +51,7 @@ public final class ArgumentParser {
 		}
 
 		public class ArgumentBuilderRequired2 {
-			ArgumentBuilderRequired2(){}
+			ArgumentBuilderRequired2() {}
 
 			/**
 			 * Sets the usage name for this argument. Typically, this is just the name
@@ -93,7 +93,7 @@ public final class ArgumentParser {
 		}
 
 		public class ArgumentBuilderRequired3 {
-			ArgumentBuilderRequired3(){}
+			ArgumentBuilderRequired3() {}
 
 			/**
 			 * Configures this as a required argument. If the argument is missing, then a {@link ValidationException}
@@ -367,7 +367,7 @@ public final class ArgumentParser {
 		 * build the Argument directly, this is used internally.
 		 */
 		public abstract class ArgumentBuilderFinal {
-			private ArgumentBuilderFinal(){}
+			private ArgumentBuilderFinal() {}
 
 			/**
 			 * After building, this Argument should be in a consistent state.
@@ -377,7 +377,7 @@ public final class ArgumentParser {
 		}
 
 		public final class ArgumentBuilderFlag extends ArgumentBuilderFinal {
-			private ArgumentBuilderFlag(){}
+			private ArgumentBuilderFlag() {}
 
 			@Override
 			Argument build() {
@@ -386,7 +386,7 @@ public final class ArgumentParser {
 		}
 
 		public final class OptionalArgumentBuilderOptional extends ArgumentBuilderFinal {
-			OptionalArgumentBuilderOptional(){}
+			OptionalArgumentBuilderOptional() {}
 
 			/**
 			 * Sets the argument type. By default, ARRAY_OF_STRINGS is assumed.
@@ -424,7 +424,7 @@ public final class ArgumentParser {
 		}
 
 		public final class RequiredArgumentBuilderOptional extends ArgumentBuilderFinal {
-			RequiredArgumentBuilderOptional(){}
+			RequiredArgumentBuilderOptional() {}
 
 			/**
 			 * Sets the argument type. By default, ARRAY_OF_STRINGS is assumed.

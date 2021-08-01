@@ -62,7 +62,7 @@ public class IRMetadata {
 	 * @param values
 	 * @return
 	 */
-	public static IRMetadata AsTuple(Environment env, String ... values) {
+	public static IRMetadata AsTuple(Environment env, String... values) {
 		return new IRMetadata(env, Arrays.asList(values), false);
 	}
 
@@ -76,7 +76,7 @@ public class IRMetadata {
 	 * @param values
 	 * @return
 	 */
-	public static IRMetadata AsAnonymousTuple(Environment env, String ... values) {
+	public static IRMetadata AsAnonymousTuple(Environment env, String... values) {
 		return new IRMetadata(env, Arrays.asList(values), true);
 	}
 
