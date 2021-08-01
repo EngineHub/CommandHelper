@@ -205,7 +205,7 @@ Section DoDownloadMethodScript
 	CreateDirectory $LOCALAPPDATA\MethodScript
 	DetailPrint "Downloading latest MethodScript jar to $LOCALAPPDATA\MethodScript\MethodScript.jar"
 	inetc::get "https://methodscript.com/MethodScript.jar" $LOCALAPPDATA\MethodScript\MethodScript.jar
-	ExecWait "java -jar $LOCALAPPDATA\MethodScript\MethodScript.jar install-cmdline"
+	ExecWait "java --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.prefs/java.util.prefs=ALL-UNNAMED -Xrs -jar $LOCALAPPDATA\MethodScript\MethodScript.jar install-cmdline"
 	ExecWait "java -jar $LOCALAPPDATA\MethodScript\MethodScript.jar eval $\"exit()$\""
 	SetOutPath $LOCALAPPDATA\MethodScript
 	File /oname=icon.ico "..\..\main\resources\siteDeploy\resources\images\commandhelper_icon.ico"
