@@ -80,7 +80,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	}
 
 	@Override
-	public boolean preResolveVariables() {
+	public final boolean preResolveVariables() {
 		return true;
 	}
 
@@ -90,7 +90,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	}
 
 	@Override
-	public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+	public final Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 		throw new UnsupportedOperationException("Not supported.");
 	}
 
@@ -203,24 +203,24 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	}
 
 	/**
-	 * Returns the IR code for this function.
-	 * @param t
-	 * @param env
-	 * @param parent
-	 * @param nodes
-	 * @return
+	 * Appends the IR code for this function.
+	 * @param builder The ongoing builder. Functions should append to this as needed.
+	 * @param t The code target this node comes from.
+	 * @param env The Environment
+	 * @param nodes The children passed to this function, could be empty array.
+	 * @return Information on the returned value, including things like type (if known) and how to reference the
+	 * output value.
 	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException If there is a compilation error.
 	 */
-	public abstract String getIR(Target t, Environment env, Script parent, ParseTree... nodes) throws ConfigCompileException;
+	public abstract IRData buildIR(IRBuilder builder, Target t, Environment env, ParseTree... nodes) throws ConfigCompileException;
 
 	@Override
-	public boolean useSpecialExec() {
+	public final boolean useSpecialExec() {
 		throw new UnsupportedOperationException("Not supported.");
 	}
 
 	@Override
-	public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+	public final Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 		throw new UnsupportedOperationException("Not supported.");
 	}
-
 }

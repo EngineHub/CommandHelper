@@ -1,9 +1,6 @@
 package com.laytonsmith.annotations;
 
-import com.laytonsmith.core.PlatformResolver;
-import com.laytonsmith.core.asm.LLVMPlatformResolver;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.functions.bash.BashPlatformResolver;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -22,28 +19,16 @@ import java.util.List;
 public @interface api {
 
 	public enum Platforms {
-		INTERPRETER_JAVA(null, "Java Interpreter"),
-		COMPILER_BASH(new BashPlatformResolver(), "Bash Compiler"),
-		COMPILER_LLVM(new LLVMPlatformResolver(), "LLVM Compiler");
-		private final PlatformResolver resolver;
+		INTERPRETER_JAVA("Java Interpreter"),
+		COMPILER_BASH("Bash Compiler"),
+		COMPILER_LLVM("LLVM Compiler");
 		private final String platformName;
-
-		/**
-		 * Returns the platform specific resolver, which is able to override base functionality, which will be adjusted
-		 * as needed. If the resolver is null, one does not exist, implying that the default is fine.
-		 *
-		 * @return
-		 */
-		public PlatformResolver getResolver() {
-			return this.resolver;
-		}
 
 		public String platformName() {
 			return this.platformName;
 		}
 
-		private Platforms(PlatformResolver resolver, String platformName) {
-			this.resolver = resolver;
+		private Platforms(String platformName) {
 			this.platformName = platformName;
 		}
 	}

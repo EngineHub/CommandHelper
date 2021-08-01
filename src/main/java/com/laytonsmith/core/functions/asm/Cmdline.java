@@ -4,8 +4,11 @@ import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Script;
-import com.laytonsmith.core.asm.AsmUtil;
+import com.laytonsmith.core.asm.AsmCommonLibTemplates;
+import com.laytonsmith.core.asm.IRBuilder;
+import com.laytonsmith.core.asm.IRData;
+import com.laytonsmith.core.asm.IRDataBuilder;
+import com.laytonsmith.core.asm.LLVMArgumentValidation;
 import com.laytonsmith.core.asm.LLVMEnvironment;
 import com.laytonsmith.core.asm.LLVMFunction;
 import com.laytonsmith.core.asm.LLVMVersion;
@@ -14,6 +17,8 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -24,29 +29,24 @@ public class Cmdline {
 	public static class exit extends LLVMFunction {
 
 		@Override
-		public String getIR(Target t, Environment env, Script parent, ParseTree... nodes) throws ConfigCompileException {
+		public IRData buildIR(IRBuilder builder, Target t, Environment env, ParseTree... nodes) throws ConfigCompileException {
 			OSUtils.OS os = env.getEnv(CompilerEnvironment.class).getTargetOS();
-			String syscallNumber;
 			LLVMEnvironment llvmenv = env.getEnv(LLVMEnvironment.class);
-			if(os.isWindows()) {
-				llvmenv.addGlobalDeclaration("declare dso_local void @_exit(i32)");
-				return AsmUtil.emitIR(t, env,
-						"%1 = alloca i32, align 4",
-						"store i32 0, i32* %1, align 4",
-						"call void @_exit(i32 0)",
-						"unreachable"
-				);
-			} else if(os.isMac()) {
-				syscallNumber = "0x2000001";
-			} else if(os.isLinux()) {
-				syscallNumber = "60";
-			} else {
-				throw new ConfigCompileException("Unsupported target OS for system call \"exit\"", t);
+			String code = "i32 0";
+			List<String> lines = new ArrayList<>();
+			if(nodes.length > 0) {
+				IRData data = LLVMArgumentValidation.getInt32(builder, env, nodes[0], t);
+				code = data.getReference();
 			}
-			return AsmUtil.emitIR(t, env,
-					"%rax = add i64 " + syscallNumber + ", 0",
-					"call i64 asm sideeffect \"syscall\", \"=r,{rax},{rdi},{rsi},{rdx}\" (i64 %raxArg, i64 %rdiArg, i64 %rsiArg, i64 %rdxArg)"
-			);
+			if(os.isWindows()) {
+				llvmenv.addGlobalDeclaration(AsmCommonLibTemplates.EXIT, env);
+				lines.add("call void @exit(" + code + ")");
+			} else {
+				throw new ConfigCompileException("[WIP] Unsupported target OS for system call \"exit\"", t);
+			}
+			lines.add("unreachable");
+			builder.appendLines(t, lines);
+			return IRDataBuilder.asUnreachable();
 		}
 
 		@Override
@@ -56,7 +56,7 @@ public class Cmdline {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{0};
+			return new Integer[]{0, 1};
 		}
 
 		@Override

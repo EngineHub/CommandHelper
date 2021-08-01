@@ -1,6 +1,5 @@
 package com.laytonsmith.core.asm;
 
-import com.laytonsmith.core.PlatformResolver;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.environments.Environment;
@@ -9,16 +8,21 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 /**
  *
  */
-public class LLVMPlatformResolver implements PlatformResolver {
+public final class LLVMPlatformResolver {
 
-	@Override
-	public String outputConstant(Mixed c, Environment env) {
-		if(c instanceof CInt) {
-			return c.val();
+	private LLVMPlatformResolver(){}
+
+
+	public static IRData outputConstant(Mixed c, Environment env) {
+		if(c == null) {
+			throw new NullPointerException("Unexpected null value");
+		}
+		if(c instanceof CInt ci) {
+			return IRDataBuilder.asConstant(IRType.INTEGER64, Long.toString(ci.getInt()));
 		} else if(c instanceof CString) {
 			LLVMEnvironment e = env.getEnv(LLVMEnvironment.class);
 			String output = e.getOrPutStringConstant(c.val());
-			return "i8* @" + output;
+			return IRDataBuilder.asConstant(IRType.INTEGER8POINTER, "@" + output);
 		}
 		throw new UnsupportedOperationException("Unsupported data type " + c.typeof().getName());
 	}

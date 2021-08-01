@@ -636,6 +636,8 @@ public class DocGenTemplates {
 
 	/**
 	 * Creates a syntax highlighting block. The first argument is the type, and the second argument is the code itself.
+	 * Supported languages can be found in the highlight.pack.js file in siteDeploy/resources/js. Search for
+	 * "registerLanguage".
 	 */
 	public static final Generator SYNTAX = new Generator() {
 		@Override

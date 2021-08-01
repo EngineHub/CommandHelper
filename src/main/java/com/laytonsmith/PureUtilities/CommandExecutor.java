@@ -12,7 +12,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.input.CloseShieldInputStream;
@@ -116,9 +118,27 @@ public class CommandExecutor {
 	private Thread errThread;
 	private Thread inThread;
 	private boolean inheritStandards = false;
+	private Map<String, String> env = new HashMap<>();
 
 	public CommandExecutor(String... command) {
 		args = command;
+	}
+
+	/**
+	 * Sets an environment variable which is used by the subprocess.
+	 * @param name
+	 * @param value
+	 */
+	public void setEnvironmentVariable(String name, String value) {
+		this.env.put(name, value);
+	}
+
+	/**
+	 * Sets several environment variables, which are used by the subprocess.
+	 * @param env
+	 */
+	public void setEnvironmentVariables(Map<String, String> env) {
+		this.env.putAll(env);
 	}
 
 	/**
@@ -134,6 +154,7 @@ public class CommandExecutor {
 			builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
 			builder.redirectInput(ProcessBuilder.Redirect.INHERIT);
 		}
+		builder.environment().putAll(env);
 		builder.directory(workingDir);
 		process = builder.start();
 		outThread = new Thread(() -> {

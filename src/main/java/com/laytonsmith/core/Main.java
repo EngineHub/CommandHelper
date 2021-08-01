@@ -71,7 +71,6 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1434,7 +1433,7 @@ public class Main {
 
 		@Override
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
-			List<String> core = new ArrayList<>();
+			SortedSet<String> core = new TreeSet<>();
 			for(api.Platforms platform : api.Platforms.values()) {
 				for(FunctionBase f : FunctionList.getFunctionList(platform, null)) {
 					if(f.isCore()) {
@@ -1442,7 +1441,6 @@ public class Main {
 					}
 				}
 			}
-			Collections.sort(core);
 			StreamUtils.GetSystemOut().println(StringUtils.Join(core, ", "));
 			System.exit(0);
 		}
