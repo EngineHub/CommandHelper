@@ -9,7 +9,5 @@ import com.laytonsmith.core.environments.Environment;
 public final class AsmCommonLib {
 
 	public void includeLib(String libName, Environment env) {
-		
 	}
-
 }

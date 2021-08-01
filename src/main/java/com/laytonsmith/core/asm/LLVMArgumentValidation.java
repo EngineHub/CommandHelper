@@ -14,7 +14,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
  *
  */
 public final class LLVMArgumentValidation {
-	private LLVMArgumentValidation(){}
+	private LLVMArgumentValidation() {}
 
 	private static IRData handleFunction(Target t, IRType expectedType, IRBuilder builder, Environment env, ParseTree c) throws ConfigCompileException {
 		IRData data = AsmCompiler.getIR(builder, c, env);

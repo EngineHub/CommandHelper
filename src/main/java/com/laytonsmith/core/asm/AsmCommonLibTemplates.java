@@ -24,28 +24,28 @@ public class AsmCommonLibTemplates {
 	/**
 	 * C Standard
 	 */
-	public static Generator PUTS = (env) -> {
+	public static final Generator PUTS = (env) -> {
 		register("declare dso_local i32 @puts(i8*)", env);
 	};
 
 	/**
 	 * C Standard (requires stdio.h on Windows)
 	 */
-	public static Generator SPRINTF = (env) -> {
+	public static final Generator SPRINTF = (env) -> {
 		register("declare dso_local i32 @sprintf(i8*, i8*, ...)", env);
 	};
 
 	/**
 	 * C Standard
 	 */
-	public static Generator EXIT = (env) -> {
+	public static final Generator EXIT = (env) -> {
 		register("declare dso_local void @exit(i32)", env);
 	};
 
 	/**
 	 * C Standard
 	 */
-	public static Generator RAND = (env) -> {
+	public static final Generator RAND = (env) -> {
 		register("declare dso_local i32 @rand()", env);
 	};
 }

@@ -36,10 +36,8 @@ public class IRMetadataDIFile extends IRMetadata {
 			digest.update(val);
 			String hash = StringUtils.toHex(digest.digest()).toLowerCase();
 			this.putAttribute("checksum", hash);
-		} catch(NoSuchAlgorithmException ex) {
+		} catch (NoSuchAlgorithmException ex) {
 			throw new RuntimeException(ex);
 		}
-
-
 	}
 }

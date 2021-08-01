@@ -365,16 +365,16 @@ public class AsmCompiler {
 				String targetDepth = (OSUtils.GetOSBitDepth() == OSUtils.BitDepth.B64 ? "x64" : "x86"); // TODO make this selectable
 				args.add("/out:\"" + exeName + ".exe\"");
 				args.add("/entry:main");
-				String MSVCBase = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.29.30037\\lib\\" + targetDepth + "\\";
+				String msvcBase = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.29.30037\\lib\\" + targetDepth + "\\";
 				String[] libs = new String[]{
 					"msvcrt.lib", "libcmt.lib"
 				};
 				args.addAll(Arrays.asList(libs));
-				subprocessEnv.put("LIB", MSVCBase + ";"
+				subprocessEnv.put("LIB", msvcBase + ";"
 						+ libBase + "ucrt\\" + targetDepth + ";"
 						+ libBase + "um\\" + targetDepth + ";"
 						+ System.getenv("LIB"));
-				subprocessEnv.put("LIBPATH", MSVCBase + ";"
+				subprocessEnv.put("LIBPATH", msvcBase + ";"
 						+ System.getenv("LIBPATH"));
 				args.add("/libpath:" + sdkBase + "um\\" + targetDepth);
 //				args.add("/MT");

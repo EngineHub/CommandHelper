@@ -10,7 +10,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
  */
 public final class LLVMPlatformResolver {
 
-	private LLVMPlatformResolver(){}
+	private LLVMPlatformResolver() {}
 
 
 	public static IRData outputConstant(Mixed c, Environment env) {
