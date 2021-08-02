@@ -70,4 +70,47 @@ public class Cmdline {
 		}
 
 	}
+
+	@api(environments = LLVMEnvironment.class, platform = api.Platforms.COMPILER_LLVM)
+	public static class sys_out extends LLVMFunction {
+
+		@Override
+		public IRData buildIR(IRBuilder builder, Target t, Environment env, ParseTree... nodes) throws ConfigCompileException {
+			OSUtils.OS os = env.getEnv(CompilerEnvironment.class).getTargetOS();
+			LLVMEnvironment llvmenv = env.getEnv(LLVMEnvironment.class);
+			List<String> lines = new ArrayList<>();
+			IRData string = LLVMArgumentValidation.getString(builder, env, nodes[0], t);
+			if(os.isWindows()) {
+				llvmenv.addGlobalDeclaration(AsmCommonLibTemplates.PUTS, env);
+				int ret = llvmenv.getNewLocalVariableReference(); // returned value
+				lines.add("%" + ret + " = call i32 @puts(" + string.getReference() + ")");
+				builder.appendLines(t, lines);
+				// TODO: Use the return value, puts doesn't actually return void.
+				return IRDataBuilder.asVoid();
+			} else {
+				throw new ConfigCompileException("Unsupported target OS for system call \"puts\"", t);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "sys_out";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return null;
+		}
+
+		@Override
+		public Version since() {
+			return LLVMVersion.V0_0_1;
+		}
+
+	}
 }

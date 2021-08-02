@@ -44,7 +44,8 @@ can use <code>mscript -- update-check</code> to see if a newer version is availa
 </fieldset>
 <p>
 This is the Windows Cmdline installer. This is the preferred (though not only) way of installing the cmdline version
-on Windows.
+on Windows. Unfortunately, we do not have a code signing certificate, so the Windows SmartScreen scan will initally
+block installation. Please click "More Info", then "Run anyway" to bypass this.
 </p>
 <div class="downloadList" id="commandhelperwindowsinstaller">
 	<div class="loadingSection">
