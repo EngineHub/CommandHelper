@@ -47,6 +47,6 @@ jobs:
       with:
         table_name: BuildInfo
         partition_key: builds
-        row_key: build_${{ github.RUN_NUMBER }}
+        row_key: build-${{ github.RUN_NUMBER }}
         data: "SHA=${{ github.SHA }}"
         connection_string: ${{ secrets.BlobStoreConnectionString }}
