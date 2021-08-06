@@ -46,7 +46,7 @@ jobs:
     - uses: LadyCailin/azure-table-storage-upload@v1.0.0
       with:
         table_name: BuildInfo
-        partition_key: builds
+        partition_key: commandhelperjar
         row_key: build-${{ github.RUN_NUMBER }}
         data: "SHA=${{ github.SHA }}"
         connection_string: ${{ secrets.BlobStoreConnectionString }}
