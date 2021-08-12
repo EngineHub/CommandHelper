@@ -6,12 +6,7 @@ import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.InternalException;
-import com.laytonsmith.core.MSVersion;
-import com.laytonsmith.core.MethodScriptCompiler;
-import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Profiles;
-import com.laytonsmith.core.Static;
+import com.laytonsmith.core.*;
 import com.laytonsmith.core.asm.metadata.IRMetadata;
 import com.laytonsmith.core.asm.metadata.IRMetadataDICompileUnit;
 import com.laytonsmith.core.asm.metadata.IRMetadataDIFile;
@@ -97,24 +92,40 @@ public class AsmCompiler {
 						.setName("noopt"))
 					.addArgument(new ArgumentParser.ArgumentBuilder()
 						.setDescription("Does more aggressive optimizations. This can be done for release binaries,"
-								+ " but increases compile time, but in theory may make programs faster.")
+								+ " and generally increases compile time, but in theory may make programs faster.")
 						.asFlag()
 						.setName("extraopt"))
 					.addArgument(new ArgumentParser.ArgumentBuilder()
 						.setDescription("Compiles the files to IR without including the headers or running llvm-link,"
 								+ " then quits. Useful for debugging the compiler, but results in potentially"
-								+ " incomplete (and thus uncompilable) IR.")
+								+ " incomplete (and thus uncompilable) IR. No binary is generated with this option"
+								+ " specified.")
 						.asFlag()
 						.setName("no-llvm-link"))
 					.addArgument(new ArgumentParser.ArgumentBuilder()
 						.setDescription("Sets the build version. Can be release or debug. Debug builds tend to contain"
 								+ " more detailed information, but note that some debug information is set in all"
 								+ " builds. Defaults to \"release\", but may be \"debug\" instead.")
-						.setUsageName("<debug/release>")
+						.setUsageName("debug/release")
 						.setOptional()
 						.setName("build-mode")
 						.setDefaultVal("release")
-						.setArgType(ArgumentParser.ArgumentBuilder.BuilderTypeNonFlag.STRING));
+						.setArgType(ArgumentParser.ArgumentBuilder.BuilderTypeNonFlag.STRING))
+					.addArgument(new ArgumentParser.ArgumentBuilder()
+						.setDescription("Overrides the default build target. By default, compilation occurs for the"
+								+ " host currently running the build, but cross compilation is possible by setting"
+								+ " this value. Specify the target in this option. You must first have"
+								+ " installed the toolchain for this target, if this options is used in combination"
+								+ " with the --install-toolchain option, it will install the toolchain for this target"
+								+ " instead. The value should follow the format: \"<arch>[<sub>]-<vendor>-<sys>[-<abi>]\"."
+								+ " Please see the associated documentation for full information on valid options.")
+						.setUsageName("build-target")
+						.setOptional()
+						.setName("build-target"))
+					.addArgument(new ArgumentParser.ArgumentBuilder()
+						.setDescription("Outputs verbose information during the build process.")
+						.asFlag()
+						.setName('v', "verbose"));
 	}
 
 	private static final Set<Class<? extends Environment.EnvironmentImpl>> ENVS = new HashSet<>();
@@ -137,15 +148,20 @@ public class AsmCompiler {
 	 */
 	public AsmCompiler(ArgumentParser.ArgumentParserResults asmOptions) {
 		this.asmOptions = asmOptions;
-		File llc;
-		File lld;
-		File clang;
-		File llvmlink;
+		final File llc;
+		final File lld;
+		final File clang;
+		final File llvmlink;
 		if(OSUtils.GetOS().isWindows()) {
 			llc = new File("C:\\Program Files\\LLVM\\bin\\llc.exe");
 			lld = new File("C:\\Program Files\\LLVM\\bin\\lld-link.exe");
 			clang = new File("C:\\Program Files\\LLVM\\bin\\clang.exe");
 			llvmlink = new File("C:\\Program Files\\LLVM\\bin\\llvm-link.exe");
+		} else if(OSUtils.GetOS().isLinux()) {
+			llc = new File("/usr/bin/llc-12");
+			lld = new File("/usr/bin/ld.lld-12");
+			clang = new File("/usr/bin/clang");
+			llvmlink = new File("/usr/bin/llvm-link-12");
 		} else {
 			throw new UnsupportedOperationException("OS not yet supported");
 		}
@@ -154,7 +170,6 @@ public class AsmCompiler {
 		this.clang = clang;
 		this.llvmlink = llvmlink;
 		llvmenv = new LLVMEnvironment();
-		// TODO remove this later
 		llvmenv.setOutputIRCodeTargetLogging(true);
 		if(asmOptions.isFlagSet("no-target-logging")) {
 			llvmenv.setOutputIRCodeTargetLogging(false);
@@ -164,6 +179,16 @@ public class AsmCompiler {
 		}
 		if(asmOptions.isFlagSet("noopt")) {
 			llvmenv.setOptimizationLevel(LLVMEnvironment.OptimizationLevel.NONE);
+		}
+	}
+
+	/**
+	 * Logs a message if verbose was set.
+	 * @param message
+	 */
+	private void log(String message) {
+		if(asmOptions.isFlagSet("verbose")) {
+			System.out.println(message);
 		}
 	}
 
@@ -182,6 +207,7 @@ public class AsmCompiler {
 		Environment env = Static.GenerateStandaloneEnvironment(true);
 		File ll;
 		File obj;
+		boolean verbose = asmOptions.isFlagSet("verbose");
 		if(!file.getAbsolutePath().endsWith(".ll")) {
 			if(!AsmInstaller.validateToolchain()) {
 				return;
@@ -195,7 +221,7 @@ public class AsmCompiler {
 
 			env = env.cloneAndAdd(llvmenv);
 			Target t = new Target(0, file, 0);
-			String versionString = "MethodScript version " + MSVersion.LATEST.toString();
+			String versionString = "MethodScript ASM compiler version " + MSVersion.LATEST.toString();
 			IRMetadataDIFile diFile = new IRMetadataDIFile(env, file, "release".equals(asmOptions.getStringArgument("build-mode")));
 			LLVMMetadataRegistry mdRegistry = llvmenv.getMetadataRegistry();
 			IRMetadata enums = mdRegistry.getEmptyTuple(env);
@@ -215,10 +241,17 @@ public class AsmCompiler {
 					newModuleFlagsMetadata(env, ModuleFlagMode.MAX, "Debug Info Version", "i32 3").getReference()
 			);
 			subprogram.setIsDistinct(true);
+			if(verbose) {
+				MSLog.GetLogger().always(MSLog.Tags.COMPILER, "", Target.UNKNOWN);
+			}
+			log("Compiling " + file.getAbsolutePath());
 			IRBuilder builder = compileFile(file, env);
 			// If the last line is a terminal statement, we can simplify
-			String lastLine = builder.lines.get(builder.lines.size() - 1);
-			if(!"unreachable".equals(lastLine)) {
+			String lastLine = null;
+			if(builder.lines.size() >= 1) {
+				lastLine = builder.lines.get(builder.lines.size() - 1);
+			}
+			if (!"unreachable".equals(lastLine)) {
 				builder.appendLine(new Target(0, new File("synth"), 0), "ret i32 0");
 			}
 			program.append(builder.renderIR(env));
@@ -263,6 +296,9 @@ public class AsmCompiler {
 			String irHeader = "source_filename = \"" + file.getName() + "\"" + nl
 					+ "target datalayout = \"" + StringUtils.Join(datalayout, "-") + "\"" + nl
 					+ "target triple = \"" + targetTriple + "\"" + nl;
+			log("datalayout: " + Arrays.asList(datalayout));
+			log("targetTriple: " + targetTriple);
+
 			if(env.getEnv(CompilerEnvironment.class).getTargetOS().isWindows()) {
 				irHeader += "@_fltused = constant i32 0" + nl;
 				irHeader += "@__fltused = constant i32 0" + nl;
@@ -324,6 +360,7 @@ public class AsmCompiler {
 				for(File h : headersLL) {
 					args.add(h.getAbsolutePath());
 				}
+				log(args.toString());
 				CommandExecutor ex = new CommandExecutor(args.toArray(new String[args.size()]));
 				ex.setWorkingDir(ll.getParentFile());
 				ex.setSystemInputsAndOutputs();
@@ -339,13 +376,14 @@ public class AsmCompiler {
 			String[] args = new String[]{
 				llc.getAbsolutePath(),
 				"--filetype=obj",
-				"-o=\"" + obj.getAbsolutePath() + "\"",
+				"-o=" + obj.getCanonicalPath(),
 				"--preserve-as-comments",
 				llvmenv.getOptimizationLevel().getArg(),
-				ll.getAbsolutePath()
+				ll.getCanonicalPath()
 			};
+			log(Arrays.asList(args).toString());
 			CommandExecutor ex = new CommandExecutor(args);
-			ex.setWorkingDir(ll.getParentFile());
+			ex.setWorkingDir(ll.getParentFile().getCanonicalFile());
 			ex.setSystemInputsAndOutputs();
 			ex.start();
 			int exitCode = ex.waitFor();
@@ -367,7 +405,7 @@ public class AsmCompiler {
 				args.add("/entry:main");
 				String msvcBase = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.29.30037\\lib\\" + targetDepth + "\\";
 				String[] libs = new String[]{
-					"msvcrt.lib", "libcmt.lib"
+						"msvcrt.lib", "libcmt.lib"
 				};
 				args.addAll(Arrays.asList(libs));
 				subprocessEnv.put("LIB", msvcBase + ";"
@@ -377,16 +415,40 @@ public class AsmCompiler {
 				subprocessEnv.put("LIBPATH", msvcBase + ";"
 						+ System.getenv("LIBPATH"));
 				args.add("/libpath:" + sdkBase + "um\\" + targetDepth);
-//				args.add("/MT");
-//				args.add("/MD");
-//				args.add("/defaultlib:" + MSVCBase + "libcmt.lib");
 				args.add("/defaultlib:" + libBase + "ucrt\\" + targetDepth + "\\ucrt.lib");
-//				args.add("/defaultlib:" + libBase + "ucrt\\" + sdkDepth + "\\libucrt.lib");
 				args.add("/subsystem:console");
+			} else if(OSUtils.GetOS().isLinux()) {
+				args.add("--fatal-warnings"); // Might remove this later, but for now it makes sense to address all warnings.
+				args.add("-z"); args.add("relro"); // https://www.redhat.com/en/blog/hardening-elf-binaries-using-relocation-read-only-relro
+				args.add("--hash-style=gnu");
+				args.add("--build-id=uuid");
+				args.add("--eh-frame-hdr");
+				args.add("-m"); args.add("elf_x86_64"); // Emulate the elf_x86_64 linker, regardless of system configuration
+				args.add("-dynamic-linker"); args.add("/lib64/ld-linux-x86-64.so.2");
+				args.add("-o"); args.add(exeName);
+				args.add("/usr/lib/x86_64-linux-gnu/crt1.o");
+				args.add("/usr/lib/x86_64-linux-gnu/crti.o");
+				args.add("/usr/lib/x86_64-linux-gnu/crtn.o");
+				args.add("/usr/lib/gcc/x86_64-linux-gnu/9/crtbegin.o");
+				args.add("/usr/lib/gcc/x86_64-linux-gnu/9/crtend.o");
+				// library paths
+				args.add("--library-path=/usr/lib/x86_64-linux-gnu"); //libc.a
+				args.add("--library-path=/usr/lib");
+				args.add("--library-path=/usr/lib64");
+				args.add("--library-path=/lib/x86_64-linux-gnu");
+				args.add("--library-path=/lib");
+				args.add("--library-path=/lib64");
+				args.add("--library-path=/usr/lib/llvm-12/lib");
+				args.add("--library-path=/usr/lib/gcc/x86_64-linux-gnu/9");
+
+				args.add("-lc"); // libc
+				args.add("-lgcc");
+				args.add("--as-needed"); args.add("-lgcc_s"); args.add("--no-as-needed");
 			} else {
 				throw new UnsupportedOperationException("OS not yet supported");
 			}
 			args.add(obj.getAbsolutePath());
+			log(args.toString());
 			CommandExecutor ex = new CommandExecutor(args.toArray(new String[args.size()]));
 			ex.setEnvironmentVariables(subprocessEnv);
 			ex.setWorkingDir(obj.getParentFile());

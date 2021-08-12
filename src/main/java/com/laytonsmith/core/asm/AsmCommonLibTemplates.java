@@ -39,7 +39,7 @@ public class AsmCommonLibTemplates {
 	 * C Standard
 	 */
 	public static final Generator EXIT = (env) -> {
-		register("declare dso_local void @exit(i32)", env);
+		register("declare dso_local void @exit(i32) noreturn nounwind", env);
 	};
 
 	/**

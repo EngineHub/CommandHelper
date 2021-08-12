@@ -91,8 +91,7 @@ namespace mscript {
 			if(System.Environment.GetEnvironmentVariable("DEBUG_MSCRIPT") != null && System.Environment.GetEnvironmentVariable("DEBUG_MSCRIPT") == "1") {
 				// java debug mode
 				command.Add("-Xrs");
-				command.Add("-Xdebug");
-				command.Add("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=9001");
+				command.Add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:9001");
 			}
 			command.AddRange(modulesArgs);
 			if(args.Length == 0) {

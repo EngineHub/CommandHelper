@@ -38,12 +38,8 @@ public class Cmdline {
 				IRData data = LLVMArgumentValidation.getInt32(builder, env, nodes[0], t);
 				code = data.getReference();
 			}
-			if(os.isWindows()) {
-				llvmenv.addGlobalDeclaration(AsmCommonLibTemplates.EXIT, env);
-				lines.add("call void @exit(" + code + ")");
-			} else {
-				throw new ConfigCompileException("[WIP] Unsupported target OS for system call \"exit\"", t);
-			}
+			llvmenv.addGlobalDeclaration(AsmCommonLibTemplates.EXIT, env);
+			lines.add("call void @exit(" + code + ") noreturn nounwind");
 			lines.add("unreachable");
 			builder.appendLines(t, lines);
 			return IRDataBuilder.asUnreachable();
@@ -80,16 +76,12 @@ public class Cmdline {
 			LLVMEnvironment llvmenv = env.getEnv(LLVMEnvironment.class);
 			List<String> lines = new ArrayList<>();
 			IRData string = LLVMArgumentValidation.getString(builder, env, nodes[0], t);
-			if(os.isWindows()) {
-				llvmenv.addGlobalDeclaration(AsmCommonLibTemplates.PUTS, env);
-				int ret = llvmenv.getNewLocalVariableReference(); // returned value
-				lines.add("%" + ret + " = call i32 @puts(" + string.getReference() + ")");
-				builder.appendLines(t, lines);
-				// TODO: Use the return value, puts doesn't actually return void.
-				return IRDataBuilder.asVoid();
-			} else {
-				throw new ConfigCompileException("Unsupported target OS for system call \"puts\"", t);
-			}
+			llvmenv.addGlobalDeclaration(AsmCommonLibTemplates.PUTS, env);
+			int ret = llvmenv.getNewLocalVariableReference(); // returned value
+			lines.add("%" + ret + " = call i32 @puts(" + string.getReference() + ")");
+			builder.appendLines(t, lines);
+			// TODO: Use the return value, puts doesn't actually return void.
+			return IRDataBuilder.asVoid();
 		}
 
 		@Override

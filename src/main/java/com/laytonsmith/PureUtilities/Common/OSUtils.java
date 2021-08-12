@@ -1,9 +1,15 @@
 package com.laytonsmith.PureUtilities.Common;
 
 import com.laytonsmith.PureUtilities.CommandExecutor;
+import com.laytonsmith.core.constructs.Command;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * This class contains utilities that help with OS specific tasks.
@@ -236,6 +242,35 @@ public class OSUtils {
 		return list;
 	}
 
+	private static Properties GetLsbRelease() throws IOException {
+		if(!GetOS().isLinux()) {
+			throw new UnsupportedOperationException("Only Linux distributions are supported in this method.");
+		}
+		File lsb_release = new File("/etc/lsb-release");
+		if(!lsb_release.exists()) {
+			return null;
+		}
+		Properties props = new Properties();
+		props.load(new FileInputStream(lsb_release));
+		return props;
+	}
 
+	/**
+	 * Does a best effort to get the linux distro currently running. Null is returned if this can't be determined.
+	 * If {@link #GetOS()} would not return LINUX, then this throws an UnsupportedOperationException.
+	 * @return
+	 */
+	public static String GetLinuxDistro() throws IOException {
+		return GetLsbRelease().getProperty("DISTRIB_ID");
+	}
+
+	/**
+	 * Does a best effort to get the linux version currently running. Null is returned if this can't be determined.
+	 * If {@link #GetOS()} would not return LINUX, then this throws an UnsupportedOperationException.
+	 * @return
+	 */
+	public static String GetLinuxVersion() throws IOException {
+		return GetLsbRelease().getProperty("DISTRIB_RELEASE");
+	}
 
 }

@@ -47,7 +47,7 @@ function Invoke-MethodScript {
     }
 
     if($ENV:DEBUG_MSCRIPT) {
-        $debug = "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=9001"
+        $debug = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:9001"
     } else {
         $debug = ""
     }

@@ -35,7 +35,7 @@ Thus, it's important to eventually understand various concepts within LLVM in or
 the native compiler. In theory, LLVM should be able to be swapped out for any given assembly language, by simply
 creating a new platform resolver, however, it's unlikely that for native binaries LLVM would ever be swapped out.
 Nonetheless, the fact that LLVM is used should never be exposed to the end user, as this is not a guarantee from
-a user code or tooling perspective.
+a user code or tooling perspective, hence why, for instance, the command to compile to native is "asm", not "llvm".
 
 == Architecture ==
 
@@ -87,7 +87,8 @@ TODO: Linking is more complex than this, go into more detail. "lld" converts the
 == Toolchain ==
 "llc" and "lld" are the core tools that are used when compiling code, however, additional tools are installed by default
 when using the MethodScript toolchain installer. llvm-as, llvm-dis, and opt are included. These tools are useful for
-developers, and
+developers, and may be used as part of the core process if certain flags (such as debug flags) are set by the user, in
+the future.
 
 == Testing and Debugging ==
 When adding additional functions, it's important to make sure that everything works as intended. Unfortunately, since
@@ -131,12 +132,74 @@ contributors. It also gives us more flexibility in generating the IR, which make
 It may be that eventually, we find a good reason to switch to bitcode, but for now, the pros of using the IR seem to
 outweigh the cons.
 
+== Development Environment ==
+
+Due to the inherently complex nature of the task, setting up a dev environment is also somewhat complicated. To a
+large degree, most features can be done on whatever computer you're currently using, but it's possible that you
+may need additional OSes to test on. In all cases, OSes are available for test purposes as virtual machines, using
+any virtualization software you want, but in general, VirtualBox is the preferred solution.
+
+In all cases, setting up the VMs is free, though for non-free OSes, there are limitations that make them unusable
+for daily use, however, for our purposes, they are good enough. For Windows installations in particular, the VMs can
+be rather annoying, so it is recommended to use an actual copy of Windows, rather than the development VMs.
+
+If you aren't willing to install other development environments when adding new features, don't assume that new features
+that you're adding will work on other OSes. If you have reason to believe they will (for instance, doesn't do any OS
+specific actions, or only uses the C standard library) then it's fine to make this assumption, but it's better to
+add a compile error when used in an untested system than it is to assume your feature will work. PRs that do OS specific
+tasks will not be accepted without proof of testing on all OSes that are supported in the code.
+
+=== Installation ===
+
+First, download the latest version of VirtualBox. https://www.virtualbox.org/ We will then download and configure
+each guest OS one by one. On Windows hosts, for installing the MacOS guest, you additionally need to download Cygwin,
+from https://cygwin.com/install.html, see the MacOS instructions for more details and installation options.
+
+==== Windows Guest ====
+Download a Windows 10 or higher VM from here: https://developer.microsoft.com/en-us/microsoft-edge/tools/vms/
+Select VirtualBox for the VM platform. Unzip the file, and place the .vdi file in a reasonable location. Open
+VirtualBox, and select File->Import Appliance. Select the .vdi file, and follow the prompts.
+
+IMPORTANT! *BEFORE* booting the VM for the first time, it's important to take a snapshot that can be reset easily once
+the Windows trial expires. Select the additional options button in the right side of the VM entry, and select Snapshots.
+Click "Take" in the top, and name the snapshot something reasonable, like "Pristine". You can then boot the VM like
+normal, and once the trial expires, or for whatever reason if you want to return to a brand new OS state, restore the
+snapshot.
+
+==== Linux Guest ====
+
+Download Ubuntu 20.04 LTS from here https://ubuntu.com/download/desktop. This is the ISO file, which is like a disk
+image, and will need to be manually installed and imported. Go to Machine -> New, and follow the prompts. Select the
+disk drive, and insert the ISO file into the drive, and follow the normal Ubuntu installation procedures. Like the
+Windows installation, you may wish to create a pristine snapshot, but Ubuntu is free, so will not require resets due to
+expired trials.
+
+==== Mac OS Guest ====
+
+These instructions use https://github.com/myspaghetti/macos-virtualbox to download a MacOS guest. For Windows hosts,
+this requires Cygwin from https://cygwin.com/install.html. When installing Cygwin, install the latest versions
+of the following packages which are not included in the default installation, but are required for this script:
+* wget
+* unzip
+* xxd
+
+Download the script, and run it:
+<%SYNTAX|bash|
+curl https://raw.githubusercontent.com/myspaghetti/macos-virtualbox/master/macos-guest-virtualbox.sh > macos-guest-virtualbox.sh
+sh macos-guest-virtualbox.sh
+%>
+
+This will run for a while, and requires a bit of interaction, but the instructions are obvious and easy to follow.
+
+Once Catalina is installed, you can use Software Update to install Big Sur.
+
+
 == Key Concepts ==
 
 It's important to understand a few key concepts about native code, which may not be immediately obvious to a Java
 developer.
 
-Intermediate files have different extensions on different platforms:
+Intermediate files have different typical extensions on different platforms:
 <%PRE|
 UNIX    Mac OS X  Windows
 *.o     *.obj     *.obj    object file
@@ -147,6 +210,22 @@ UNIX    Mac OS X  Windows
 
 Largely, each type has similar functionality though. TODO: Discuss static vs dynamic linking, and what object files
 contain.
+
+== Research Scenarios ==
+
+While developing, you may need to research various scenarios.
+
+=== Find symbols defined in a binary ===
+
+For Windows, you can use dumpbin.exe to find details about an object file, such as a dll or lib file. This must
+be run from a visual studio developer prompt.
+
+* dumpbin.exe /headers "C:\Program Files (x86)\Windows Kits\10\Lib\10.0.19041.0\ucrt\x64\ucrt.lib"
+
+For linux/mac, you can use nm or objdump
+
+* nm /usr/lib/x86_64-linux-gnu/libc.a
+* objdump -x /usr/lib/x86_64-linux-gnu/libc.a
 
 == Common Errors ==
 

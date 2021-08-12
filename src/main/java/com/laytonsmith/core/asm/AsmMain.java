@@ -2,7 +2,9 @@ package com.laytonsmith.core.asm;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.core.AbstractCommandLineTool;
+import com.laytonsmith.core.InternalException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -18,7 +20,7 @@ import java.util.Set;
 public class AsmMain {
 
 	private static void LogErrorAndQuit(String error, int code) {
-		StreamUtils.GetSystemErr().println(error);
+		StreamUtils.GetSystemErr().println(TermColors.RED + error + TermColors.RESET);
 		System.exit(code);
 	}
 
@@ -64,6 +66,11 @@ public class AsmMain {
 							compiler.compileEntryPoint(input, output, exeName);
 						} catch (IOException ex) {
 							LogErrorAndQuit(ex.getMessage(), 1);
+						} catch (InternalException ex) {
+							LogErrorAndQuit(ex.getMessage() + "\nAn internal exception occurred, which is not caused by your code. "
+									+ (parsedArgs.isFlagSet("verbose") ?
+									"Please report this with all the above information."
+									: "Please re-run with the --verbose switch." ), 2);
 						}
 					}
 				} catch (ConfigCompileException ex) {
@@ -72,7 +79,7 @@ public class AsmMain {
 					throw new ConfigCompileGroupException(exs);
 				}
 			} catch (ConfigCompileGroupException ex) {
-				ConfigRuntimeException.HandleUncaughtException(ex, "One or more compile errors occured during compilation.", null);
+				ConfigRuntimeException.HandleUncaughtException(ex, "One or more compile errors occurred during compilation.", null);
 			}
 		}
 

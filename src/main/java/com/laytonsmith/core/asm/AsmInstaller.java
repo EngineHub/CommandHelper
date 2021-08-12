@@ -4,10 +4,10 @@ import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.PureUtilities.ProgressIterator;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Web.RequestSettings;
 import com.laytonsmith.PureUtilities.Web.WebUtility;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -20,16 +20,8 @@ import java.util.Map;
  *
  */
 public class AsmInstaller {
-	private static final ProgressIterator NOOP = (current, total) -> {};
-	private final ProgressIterator progress;
-	public static final String LLVM_VERSION = "10.0.0";
 
 	public AsmInstaller() {
-		this.progress = NOOP;
-	}
-
-	public AsmInstaller(ProgressIterator progress) {
-		this.progress = progress;
 	}
 
 	private static void log(String output) {
@@ -46,6 +38,8 @@ public class AsmInstaller {
 		}
 		if(OSUtils.GetOS().isWindows()) {
 			installWindows();
+		} else if(OSUtils.GetOS().isLinux()) {
+			installLinux();
 		} else {
 			throw new UnsupportedOperationException("Toolchain installation not supported on this platform");
 		}
@@ -138,6 +132,43 @@ public class AsmInstaller {
 
 	}
 
+	private void installLinux() throws IOException, InterruptedException {
+		String distro = OSUtils.GetLinuxDistro().toLowerCase();
+		if(distro.contains("debian") || distro.contains("ubuntu")) {
+			installDebianBased();
+		} else {
+			throw new UnsupportedOperationException("Your linux distribution is not supported yet. It may be a simple" +
+					" matter to add support, however, please file an issue (or PR!) if you're interested in adding" +
+					" support for " + OSUtils.GetLinuxDistro());
+		}
+	}
+
+	private void installDebianBased() throws IOException, InterruptedException {
+
+		boolean isUbuntu = CommandExecutor.Execute("lsb_release", "-a").contains("buntu");
+		if(!isUbuntu) {
+			log(TermColors.RED + "Only Ubuntu flavors are officially supported. You may run into installation failures.");
+		}
+		if(OSUtils.GetOSBitDepth() == OSUtils.BitDepth.B64) {
+			log(TermColors.GREEN + "Detected 64 bit Linux" + TermColors.RESET);
+			log(TermColors.GREEN + "Updating apt db" + TermColors.RESET);
+			new CommandExecutor("apt", "update")
+					.setSystemInputsAndOutputs()
+					.start()
+					.waitFor();
+			log(TermColors.GREEN + "Installing llvm-12" + TermColors.RESET);
+			new CommandExecutor("apt", "install", "llvm-12")
+					.setSystemInputsAndOutputs()
+					.start()
+					.waitFor();
+			log(TermColors.GREEN + "Installing lld-12" + TermColors.RESET);
+			new CommandExecutor("apt", "install", "lld-12")
+					.setSystemInputsAndOutputs()
+					.start()
+					.waitFor();
+		}
+	}
+
 	private File download(String installerUrl, String destFilename) throws IOException, InterruptedException {
 		log("Downloading installer from " + installerUrl);
 		Path tmp = Files.createTempDirectory("llvm-installer");
@@ -158,6 +189,8 @@ public class AsmInstaller {
 	public static boolean validateToolchain() {
 		if(OSUtils.GetOS().isWindows()) {
 			return validateWindowsToolchain();
+		} else if(OSUtils.GetOS().isLinux()) {
+			return validateLinuxToolchain();
 		} else {
 			log("Toolchain installation not supported on this platform");
 			return false;
@@ -188,6 +221,22 @@ public class AsmInstaller {
 			}
 			return true;
 		} catch (InterruptedException | IOException ex) {
+			return false;
+		}
+	}
+
+	public static boolean validateLinuxToolchain() {
+		String[] which = new String[]{
+				"llc-12", "ld.lld-12"
+		};
+		try {
+			for(String bin : which) {
+				if(CommandExecutor.Execute("which", bin).isBlank()) {
+					return false;
+				}
+			}
+			return true;
+		} catch (InterruptedException | IOException e) {
 			return false;
 		}
 	}

@@ -12,8 +12,10 @@ import com.laytonsmith.core.asm.LLVMArgumentValidation;
 import com.laytonsmith.core.asm.LLVMEnvironment;
 import com.laytonsmith.core.asm.LLVMFunction;
 import com.laytonsmith.core.asm.LLVMVersion;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 
@@ -27,6 +29,7 @@ public class Math {
 		@Override
 		public IRData buildIR(IRBuilder builder, Target t, Environment env, ParseTree... nodes) throws ConfigCompileException {
 			LLVMEnvironment llvmenv = env.getEnv(LLVMEnvironment.class);
+			CompilerEnvironment cEnv = env.getEnv(CompilerEnvironment.class);
 			llvmenv.addGlobalDeclaration(AsmCommonLibTemplates.RAND, env);
 			// First, generate our random number, scaled to 0-1
 			int allocaI = llvmenv.getNewLocalVariableReference();
@@ -59,7 +62,14 @@ public class Math {
 			builder.appendLine(t, "br label %" + lastJump);
 
 			builder.appendLine(t, secondJump + ":");
-			builder.appendLine(t, "%" + sdiv + " = sdiv i32 %" + rand + ", 32767"); // 32767 == RAND_MAX
+			// TODO: There has to be a better way to get this, but it seems like this is only defined in a C header
+			// file, which is not particularly ideal to use. However, given that it is a header file, it should be
+			// in plaintext on the system, and can be pretty straightforwardly parsed out.
+			String RAND_MAX = "32767"; // Windows
+			if(cEnv.getTargetOS().isLinux()) {
+				RAND_MAX = "2147483647";
+			}
+			builder.appendLine(t, "%" + sdiv + " = sdiv i32 %" + rand + ", " + RAND_MAX);
 			builder.appendLine(t, "%" + sitofp + " = sitofp i32 %" + sdiv + " to double");
 			builder.appendLine(t, "store double %" + sitofp + ", double* %" + allocaR);
 			builder.appendLine(t, "br label %" + lastJump);
