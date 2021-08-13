@@ -7,7 +7,6 @@ import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Web.RequestSettings;
 import com.laytonsmith.PureUtilities.Web.WebUtility;
-import com.laytonsmith.core.constructs.Command;
 
 import java.io.File;
 import java.io.IOException;

@@ -106,11 +106,11 @@ public class IRBuilder {
 		}
 	}
 
-	public util util() {
-		return this.new util();
+	public Gen generator() {
+		return this.new Gen();
 	}
 
-	public class util {
+	public class Gen {
 
 		public void alloca(int id, IRType type, Target t) {
 			// TODO: Look into the alignment

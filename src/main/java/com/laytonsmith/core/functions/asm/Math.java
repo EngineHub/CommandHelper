@@ -18,9 +18,6 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  *
  */
@@ -64,7 +61,7 @@ public class Math {
 			int sitofp = llvmenv.getNewLocalVariableReference();
 			int fdiv = llvmenv.getNewLocalVariableReference(); // returned value
 
-			builder.util().alloca(allocaD, IRType.DOUBLE, t);
+			builder.generator().alloca(allocaD, IRType.DOUBLE, t);
 			builder.appendLine(t, "%" + callRand + " = call i32 @rand()");
 			builder.appendLine(t, "%" + sitofp + " = sitofp i32 %" + callRand + " to double");
 			builder.appendLine(t, "%" + fdiv + " = fdiv double %" + sitofp + ", " + RAND_MAX + ".0");
