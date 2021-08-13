@@ -155,6 +155,16 @@ First, download the latest version of VirtualBox. https://www.virtualbox.org/ We
 each guest OS one by one. On Windows hosts, for installing the MacOS guest, you additionally need to download Cygwin,
 from https://cygwin.com/install.html, see the MacOS instructions for more details and installation options.
 
+Once the guest OS is installed, it is useful to set up a shared folder, from where you install MethodScript, allowing
+you to continue development on your standard computer, yet also not have to constantly copy files over. For Windows and
+Linux guests, this is straightforward. Add the target/ folder of the build output as a shared folder in VirtualBox.
+Open the Settings for the VM, go to Shared Folders, select the target/ folder in the host, and set it to auto mount,
+then start the VM. From inside the VM, this should show up as a shared network folder. This requires the VirtualBox
+guest additions to be installed in the guest.
+
+For MacOS Big Sur, Guest Additions doesn't currently work. Once it works, the above instructions should be relevant, but
+in the meantime, a decent enough workaround is discussed below in the MacOS instructions.
+
 ==== Windows Guest ====
 Download a Windows 10 or higher VM from here: https://developer.microsoft.com/en-us/microsoft-edge/tools/vms/
 Select VirtualBox for the VM platform. Unzip the file, and place the .vdi file in a reasonable location. Open
@@ -193,6 +203,34 @@ This will run for a while, and requires a bit of interaction, but the instructio
 
 Once Catalina is installed, you can use Software Update to install Big Sur.
 
+You will also need to allow unsigned code to run. From a terminal, run `sudo spctl --master-disable` to allow any
+software to run.
+
+Since Guest Additions don't currently work, in order to use shared file systems with the host, this requires a different
+approach. Follow the directions below on how to set up the host only adapter in the "Debugging the compiler on a VM"
+section first. Once the host only adapter is configured, use your host OS's standard mechanism for creating a shared
+folder. From the Mac guest, open Finder, Go, Connect to Server, and configure the shared folder through the IP address.
+
+Once successfully mounting the shared folder, it should show up in /Volumes/target or whatever you named the shared
+folder, and can be used as normal from there. On reboot, you may need to reconnect to the share.
+
+=== Debugging the compiler on a VM ===
+
+In general, the mscript wrapper supports debugging the JVM out of the box. Simply set the environment variable
+"DEBUG_MSCRIPT" to 1, (bash: <code>export DEBUG_MSCRIPT=1</code>, cmd.exe: <code>set DEBUG_MSCRIPT=1</code>, powershell:
+<code>$env:DEBUG_MSCRIPT = 1</code>) and run the mscript command. This will start the java process with the debugger
+enabled, listening on all addresses, on port 9001. However, to access the network on the guest, you need to first
+configure a new network adapter on both the host and the guest.
+
+Shut down the guest, and open the VM's settings in VirtualBox, and go to the Network tab. Go to adapter 2,
+and enable it, and change the attached to: to Host-only Adapter. This also requires properly configuring the host
+system. Go to File -> Host Network Manager. Make sure that the Adapter is configured automatically, and the DHCP Server
+is enabled. (For brand new installations of VirtualBox, this is the default.) In your host, open the network connections
+and find the network adapter labeled something like "VirtualBox Host-Only Ethernet Adapter". Run ipconfig/ifconfig from
+the host, and note the IP address of this adapter. This is the IP address that you can access the host from the guest.
+Vice versa, run ipconfig/ifconfig from the guest, and note the IP address of the second ethernet adapter. This is the
+IP you can connect to the guest from the host. In your host system's IDE, start a remote debugging session, and enter
+the IP from the guest, and port 9001 here to connect.
 
 == Key Concepts ==
 

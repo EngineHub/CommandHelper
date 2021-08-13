@@ -7,6 +7,7 @@ import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Web.RequestSettings;
 import com.laytonsmith.PureUtilities.Web.WebUtility;
+import com.laytonsmith.core.constructs.Command;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,6 +41,8 @@ public class AsmInstaller {
 			installWindows();
 		} else if(OSUtils.GetOS().isLinux()) {
 			installLinux();
+		} else if(OSUtils.GetOS().isMac()) {
+			installMac();
 		} else {
 			throw new UnsupportedOperationException("Toolchain installation not supported on this platform");
 		}
@@ -149,24 +152,46 @@ public class AsmInstaller {
 		if(!isUbuntu) {
 			log(TermColors.RED + "Only Ubuntu flavors are officially supported. You may run into installation failures.");
 		}
-		if(OSUtils.GetOSBitDepth() == OSUtils.BitDepth.B64) {
-			log(TermColors.GREEN + "Detected 64 bit Linux" + TermColors.RESET);
-			log(TermColors.GREEN + "Updating apt db" + TermColors.RESET);
-			new CommandExecutor("apt", "update")
-					.setSystemInputsAndOutputs()
-					.start()
-					.waitFor();
-			log(TermColors.GREEN + "Installing llvm-12" + TermColors.RESET);
-			new CommandExecutor("apt", "install", "llvm-12")
-					.setSystemInputsAndOutputs()
-					.start()
-					.waitFor();
-			log(TermColors.GREEN + "Installing lld-12" + TermColors.RESET);
-			new CommandExecutor("apt", "install", "lld-12")
-					.setSystemInputsAndOutputs()
-					.start()
-					.waitFor();
+		if(OSUtils.GetOSBitDepth() != OSUtils.BitDepth.B64) {
+			log(TermColors.RED + "Only 64 bit systems are supported.");
+			return;
 		}
+		log(TermColors.GREEN + "Detected 64 bit Linux" + TermColors.RESET);
+		log(TermColors.GREEN + "Updating apt db" + TermColors.RESET);
+		new CommandExecutor("apt", "update")
+				.setSystemInputsAndOutputs()
+				.start()
+				.waitFor();
+		log(TermColors.GREEN + "Installing llvm-12" + TermColors.RESET);
+		new CommandExecutor("apt", "install", "llvm-12")
+				.setSystemInputsAndOutputs()
+				.start()
+				.waitFor();
+		log(TermColors.GREEN + "Installing lld-12" + TermColors.RESET);
+		new CommandExecutor("apt", "install", "lld-12")
+				.setSystemInputsAndOutputs()
+				.start()
+				.waitFor();
+	}
+
+	private void installMac() throws IOException, InterruptedException {
+		String brewLocation = CommandExecutor.Execute("which", "brew");
+		if(!"/usr/local/bin/brew\n".equals(brewLocation)) {
+			log(TermColors.RED + "Homebrew is required for installation. Please install homebrew with "
+					+ TermColors.RESET
+					+ "/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"");
+			return;
+		}
+		log(TermColors.GREEN + "Updating brew formulae" + TermColors.RESET);
+		new CommandExecutor("brew", "update")
+				.setSystemInputsAndOutputs()
+				.start()
+				.waitFor();
+		log(TermColors.GREEN + "Installing llvm@12" + TermColors.RESET);
+		new CommandExecutor("brew", "install", "llvm@12")
+				.setSystemInputsAndOutputs()
+				.start()
+				.waitFor();
 	}
 
 	private File download(String installerUrl, String destFilename) throws IOException, InterruptedException {
@@ -191,6 +216,8 @@ public class AsmInstaller {
 			return validateWindowsToolchain();
 		} else if(OSUtils.GetOS().isLinux()) {
 			return validateLinuxToolchain();
+		} else if(OSUtils.GetOS().isMac()) {
+			return validateMacToolchain();
 		} else {
 			log("Toolchain installation not supported on this platform");
 			return false;
@@ -232,6 +259,7 @@ public class AsmInstaller {
 		try {
 			for(String bin : which) {
 				if(CommandExecutor.Execute("which", bin).isBlank()) {
+					log("Missing one or more toolchain file, please re-install the toolchain.");
 					return false;
 				}
 			}
@@ -239,5 +267,13 @@ public class AsmInstaller {
 		} catch (InterruptedException | IOException e) {
 			return false;
 		}
+	}
+
+	public static boolean validateMacToolchain() {
+		if(!new File("/usr/local/opt/llvm@12/bin/clang").exists()) {
+			log("Please (re)-install the toolchain.");
+			return false;
+		}
+		return true;
 	}
 }

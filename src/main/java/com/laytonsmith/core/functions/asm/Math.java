@@ -18,6 +18,9 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  */
@@ -30,37 +33,23 @@ public class Math {
 			LLVMEnvironment llvmenv = env.getEnv(LLVMEnvironment.class);
 			CompilerEnvironment cEnv = env.getEnv(CompilerEnvironment.class);
 			llvmenv.addGlobalDeclaration(AsmCommonLibTemplates.RAND, env);
-			// First, generate our random number, scaled to 0-1
-			int allocaI = llvmenv.getNewLocalVariableReference();
-			int allocaR = llvmenv.getNewLocalVariableReference();
-			int rand = llvmenv.getNewLocalVariableReference();
-			int loadRand = llvmenv.getNewLocalVariableReference();
-			int icmpEq = llvmenv.getNewLocalVariableReference();
 
-			int firstJump = llvmenv.getGotoLabel();
-			int secondJump = llvmenv.getGotoLabel();
+			builder.appendStartupCode(this, (startupEnv) -> {
+				LLVMEnvironment startupllvmenv = startupEnv.getEnv(LLVMEnvironment.class);
+				int callTime = startupllvmenv.getNewLocalVariableReference();
+				int rand1 = startupllvmenv.getNewLocalVariableReference();
+				startupllvmenv.addGlobalDeclaration(AsmCommonLibTemplates.SRAND, env);
+				startupllvmenv.addGlobalDeclaration(AsmCommonLibTemplates.TIME, env);
+				String[] lines = new String[] {
+					"%" + callTime + " = call i32 bitcast (i32 (...)* @time to i32 (i8*)*)(i8* null)",
+					"call void @srand(i32 %" + callTime + ")",
+					// burn one rand, so the second ("first" from the user perspective)
+					// gets a bit of the bias out of the way
+					"%" + rand1 + " = call i32 @rand()"
+				};
+				return lines;
+			});
 
-//			int loadI = llvmenv.getNewLocalVariableReference();
-			int sdiv = llvmenv.getNewLocalVariableReference();
-			int sitofp = llvmenv.getNewLocalVariableReference();
-
-			int lastJump = llvmenv.getNewLocalVariableReference();
-
-			int loadFinal = llvmenv.getNewLocalVariableReference();
-
-			builder.appendLine(t, "%" + allocaI + " = alloca i32");
-			builder.appendLine(t, "%" + allocaR + " = alloca double");
-			builder.appendLine(t, "%" + rand + " = call i32 @rand()");
-			builder.appendLine(t, "store i32 %" + rand + ", i32* %" + allocaI);
-			builder.appendLine(t, "%" + loadRand + " = load i32, i32* %" + allocaI);
-			builder.appendLine(t, "%" + icmpEq + " = icmp eq i32 %" + loadRand + ", 0");
-			builder.appendLine(t, "br i1 %" + icmpEq + ", label %" + firstJump + ", label %" + secondJump);
-
-			builder.appendLine(t, firstJump + ":");
-			builder.appendLine(t, "store double 1.0e+00, double* %" + allocaR);
-			builder.appendLine(t, "br label %" + lastJump);
-
-			builder.appendLine(t, secondJump + ":");
 			// TODO: There has to be a better way to get this, but it seems like this is only defined in a C header
 			// file, which is not particularly ideal to use. However, given that it is a header file, it should be
 			// in plaintext on the system, and can be pretty straightforwardly parsed out.
@@ -68,16 +57,21 @@ public class Math {
 			if(cEnv.getTargetOS().isLinux()) {
 				RAND_MAX = "2147483647";
 			}
-			builder.appendLine(t, "%" + sdiv + " = sdiv i32 %" + rand + ", " + RAND_MAX);
-			builder.appendLine(t, "%" + sitofp + " = sitofp i32 %" + sdiv + " to double");
-			builder.appendLine(t, "store double %" + sitofp + ", double* %" + allocaR);
-			builder.appendLine(t, "br label %" + lastJump);
+			// First, generate our random number, scaled to 0-1
 
-			builder.appendLine(t, lastJump + ":");
-			builder.appendLine(t, "%" + loadFinal + " = load double, double* %" + allocaR);
+			int allocaD = llvmenv.getNewLocalVariableReference();
+			int callRand = llvmenv.getNewLocalVariableReference();
+			int sitofp = llvmenv.getNewLocalVariableReference();
+			int fdiv = llvmenv.getNewLocalVariableReference(); // returned value
+
+			builder.util().alloca(allocaD, IRType.DOUBLE, t);
+			builder.appendLine(t, "%" + callRand + " = call i32 @rand()");
+			builder.appendLine(t, "%" + sitofp + " = sitofp i32 %" + callRand + " to double");
+			builder.appendLine(t, "%" + fdiv + " = fdiv double %" + sitofp + ", " + RAND_MAX + ".0");
+			builder.appendLine(t, "store double %" + fdiv + ", double* %" + allocaD);
 
 			if(nodes.length == 0) {
-				return IRDataBuilder.setReturnVariable(loadFinal, IRType.DOUBLE);
+				return IRDataBuilder.setReturnVariable(fdiv, IRType.DOUBLE);
 			} else {
 				String min;
 				String max;

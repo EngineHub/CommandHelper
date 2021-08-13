@@ -1,16 +1,22 @@
 package com.laytonsmith.core.asm;
 
+import com.laytonsmith.PureUtilities.Common.OSUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.core.asm.metadata.IRMetadata;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
  *
  */
 public class IRBuilder {
+	Map<LLVMFunction, StartupCodeLineGetter> startupCode = new HashMap<>();
+
 	List<String> lines = new ArrayList<>();
 	List<Target> targets = new ArrayList<>();
 
@@ -18,6 +24,23 @@ public class IRBuilder {
 
 	public IRBuilder() {
 
+	}
+
+	public static interface StartupCodeLineGetter {
+		String[] getLines(Environment env);
+	}
+
+	/**
+	 * Adds code that will run at the beginning of main, and is intended for activities such as seeding rand, etc,
+	 * which should only be called once ever per program run, and only if this function is actually used. Note that
+	 * this code will only be called once per function, so feel free to run environment modifying code.
+	 * @param function this
+	 * @param lines The lines to append
+	 */
+	public void appendStartupCode(LLVMFunction function, StartupCodeLineGetter lines) {
+		if(!startupCode.containsKey(function)) {
+			startupCode.put(function, lines);
+		}
 	}
 
 	public void appendLine(Target t, String line) {
@@ -36,6 +59,25 @@ public class IRBuilder {
 		for(String line : lines) {
 			appendLine(t, line);
 		}
+	}
+
+	public String renderStartupCode(Environment env) {
+		StringBuilder b = new StringBuilder();
+		LLVMEnvironment llvmenv = env.getEnv(LLVMEnvironment.class);
+
+		for(Map.Entry<LLVMFunction, StartupCodeLineGetter> entry : startupCode.entrySet()) {
+			LLVMFunction function = entry.getKey();
+			StartupCodeLineGetter lines = entry.getValue();
+			String glue;
+			if(llvmenv.isOutputIRCodeTargetLoggingEnabled()) {
+				glue = " ; " + function.getName() + " startup code " + OSUtils.GetLineEnding() + "  ";
+			} else {
+				glue = OSUtils.GetLineEnding();
+			}
+			b.append("  " + StringUtils.Join(lines.getLines(env), glue) + glue);
+		}
+		b.append(OSUtils.GetLineEnding());
+		return b.toString();
 	}
 
 	public String renderIR(Environment env) {
@@ -62,5 +104,18 @@ public class IRBuilder {
 		for(IRMetadata d : metadataRefs) {
 			metadata.add(d.getDefinition());
 		}
+	}
+
+	public util util() {
+		return this.new util();
+	}
+
+	public class util {
+
+		public void alloca(int id, IRType type, Target t) {
+			// TODO: Look into the alignment
+			IRBuilder.this.appendLine(t, "%" + id + " = alloca " + type.getIRType());
+		}
+
 	}
 }

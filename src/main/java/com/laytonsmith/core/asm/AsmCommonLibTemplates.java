@@ -48,4 +48,18 @@ public class AsmCommonLibTemplates {
 	public static final Generator RAND = (env) -> {
 		register("declare dso_local i32 @rand()", env);
 	};
+
+	/**
+	 * C Standard
+	 */
+	public static final Generator SRAND = (env) -> {
+		register("declare dso_local void @srand(i32)", env);
+	};
+
+	/**
+	 * C Standard
+	 */
+	public static final Generator TIME = (env) -> {
+		register("declare dso_local i32 @time(...)", env);
+	};
 }

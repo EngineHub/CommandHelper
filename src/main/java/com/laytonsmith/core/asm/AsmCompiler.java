@@ -34,6 +34,8 @@ import com.laytonsmith.persistence.DataSourceException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,6 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  *
@@ -168,6 +171,11 @@ public class AsmCompiler {
 			lld = new File("/usr/bin/ld.lld-12");
 			clang = new File("/usr/bin/clang");
 			llvmlink = new File("/usr/bin/llvm-link-12");
+		} else if(OSUtils.GetOS().isMac()) {
+			llc = new File("/usr/local/opt/llvm@12/bin/llc");
+			lld = new File("/Library/Developer/CommandLineTools/usr/bin/ld");
+			clang = new File("/usr/local/opt/llvm@12/bin/clang");
+			llvmlink = new File("/usr/local/opt/llvm@12/bin/llvm-link");
 		} else {
 			throw new UnsupportedOperationException("OS not yet supported");
 		}
@@ -260,6 +268,24 @@ public class AsmCompiler {
 			if(!"unreachable".equals(lastLine)) {
 				builder.appendLine(new Target(0, new File("synth"), 0), "ret i32 0");
 			}
+
+			llvmenv.newMethodFrame("__startup");
+			llvmenv.getNewLocalVariableReference(); // pop the entry point
+			String startupCode = builder.renderStartupCode(env);
+			String startupFunctionName;
+			{
+				// Hash it so we get a deterministic, but "random" function name
+				byte[] val = startupCode.getBytes();
+				MessageDigest digest = null;
+				try {
+					digest = MessageDigest.getInstance("MD5");
+					digest.update(val);
+					startupFunctionName = "\"__" + StringUtils.toHex(digest.digest()).toLowerCase() + "\"";
+				} catch (NoSuchAlgorithmException e) {
+					throw new Error(e);
+				}
+			}
+
 			program.append(builder.renderIR(env));
 			StringBuilder ir = new StringBuilder();
 			StringBuilder strings = new StringBuilder();
@@ -268,10 +294,16 @@ public class AsmCompiler {
 			for(Map.Entry<String, String> entry : llvmenv.getStrings().entrySet()) {
 				String string = entry.getKey();
 				String id = entry.getValue();
-				strings.append("$").append(id).append(" = comdat any").append(nl);
+				String comdat = "";
+				if(!OSUtils.GetOS().isMac()) {
+					// TODO: This also affects other systems, such as WebAssembly targets, so this needs to be
+					// abstracted out into a general method to see if it supports comdat
+					strings.append("$").append(id).append(" = comdat any").append(nl);
+					comdat = "comdat, ";
+				}
 				strings.append("@").append(id).append(" = linkonce_odr dso_local unnamed_addr constant [")
 						.append(string.length() + 1).append(" x i8] c\"").append(string)
-						.append("\\00\", comdat, align 1").append(nl);
+						.append("\\00\", ").append(comdat).append("align 1").append(nl);
 			}
 
 			////////////////// DATA LAYOUT
@@ -310,7 +342,10 @@ public class AsmCompiler {
 				irHeader += "@__fltused = constant i32 0" + nl;
 			}
 
-			String irTop = "define dso_local i32 @main(i32 %0, i8** %1) !dbg " + subprogram.getReference() + " {" + nl;
+
+			String irTop = "define dso_local i32 @main(i32 %0, i8** %1) !dbg " + subprogram.getReference() + " {" + nl
+					+ "  call void @" + startupFunctionName + "()" + nl;
+
 			String irBottom = "}" + nl + nl;
 			String namedMetadata = "!llvm.dbg.cu = " + llvmDbgCu.getDefinition() + nl
 					+ "!llvm.ident = " + llvmIdent.getDefinition() + nl
@@ -319,6 +354,12 @@ public class AsmCompiler {
 
 			ir.append(irHeader); // always first
 			ir.append(strings.toString());
+			if(startupFunctionName != null) {
+				ir.append("define dso_local hidden void @" + startupFunctionName + "() {" + nl);
+				ir.append(startupCode);
+				ir.append("  ret void").append(nl);
+				ir.append("}" + nl + nl);
+			}
 			ir.append(irTop);
 			ir.append(program.toString());
 			ir.append(irBottom);
@@ -430,7 +471,8 @@ public class AsmCompiler {
 				args.add("--build-id=uuid");
 				args.add("--eh-frame-hdr");
 				args.add("-m"); args.add("elf_x86_64"); // Emulate the elf_x86_64 linker, regardless of system configuration
-				args.add("-dynamic-linker"); args.add("/lib64/ld-linux-x86-64.so.2");
+				args.add("-dynamic-linker");
+				args.add("/lib64/ld-linux-x86-64.so.2");
 				args.add("-o"); args.add(exeName);
 				args.add("/usr/lib/x86_64-linux-gnu/crt1.o");
 				args.add("/usr/lib/x86_64-linux-gnu/crti.o");
@@ -449,7 +491,21 @@ public class AsmCompiler {
 
 				args.add("-lc"); // libc
 				args.add("-lgcc");
-				args.add("--as-needed"); args.add("-lgcc_s"); args.add("--no-as-needed");
+				args.add("--as-needed");
+				args.add("-lgcc_s");
+				args.add("--no-as-needed");
+			} else if(OSUtils.GetOS().isMac()) {
+				args.add("-demangle");
+				args.add("-lto_library"); args.add("/Library/Developer/CommandLineTools/usr/lib/libLTO.dylib");
+				args.add("-no_deduplicate");
+				args.add("-dynamic");
+				args.add("-arch"); args.add("x86_64"); // Probably going to break on M1, need a real M1 to test on
+				args.add("-platform_version"); args.add("macos"); args.add("11.0.0"); args.add("11.3");
+				args.add("-syslibroot"); args.add("/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk");
+				args.add("-o"); args.add(exeName);
+				args.add("-L/usr/local/lib");
+				args.add("-lSystem");
+				args.add("/Library/Developer/CommandLineTools/usr/lib/clang/12.0.5/lib/darwin/libclang_rt.osx.a");
 			} else {
 				throw new UnsupportedOperationException("OS not yet supported");
 			}
