@@ -6,7 +6,13 @@ import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.*;
+import com.laytonsmith.core.InternalException;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Profiles;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.asm.metadata.IRMetadata;
 import com.laytonsmith.core.asm.metadata.IRMetadataDICompileUnit;
 import com.laytonsmith.core.asm.metadata.IRMetadataDIFile;
@@ -251,7 +257,7 @@ public class AsmCompiler {
 			if(builder.lines.size() >= 1) {
 				lastLine = builder.lines.get(builder.lines.size() - 1);
 			}
-			if (!"unreachable".equals(lastLine)) {
+			if(!"unreachable".equals(lastLine)) {
 				builder.appendLine(new Target(0, new File("synth"), 0), "ret i32 0");
 			}
 			program.append(builder.renderIR(env));

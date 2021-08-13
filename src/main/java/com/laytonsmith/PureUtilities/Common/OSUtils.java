@@ -1,11 +1,8 @@
 package com.laytonsmith.PureUtilities.Common;
 
 import com.laytonsmith.PureUtilities.CommandExecutor;
-import com.laytonsmith.core.constructs.Command;
-
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -246,12 +243,12 @@ public class OSUtils {
 		if(!GetOS().isLinux()) {
 			throw new UnsupportedOperationException("Only Linux distributions are supported in this method.");
 		}
-		File lsb_release = new File("/etc/lsb-release");
-		if(!lsb_release.exists()) {
+		File lsbRelease = new File("/etc/lsb-release");
+		if(!lsbRelease.exists()) {
 			return null;
 		}
 		Properties props = new Properties();
-		props.load(new FileInputStream(lsb_release));
+		props.load(new FileInputStream(lsbRelease));
 		return props;
 	}
 

@@ -68,9 +68,9 @@ public class AsmMain {
 							LogErrorAndQuit(ex.getMessage(), 1);
 						} catch (InternalException ex) {
 							LogErrorAndQuit(ex.getMessage() + "\nAn internal exception occurred, which is not caused by your code. "
-									+ (parsedArgs.isFlagSet("verbose") ?
-									"Please report this with all the above information."
-									: "Please re-run with the --verbose switch." ), 2);
+									+ (parsedArgs.isFlagSet("verbose")
+									? "Please report this with all the above information."
+									: "Please re-run with the --verbose switch."), 2);
 						}
 					}
 				} catch (ConfigCompileException ex) {

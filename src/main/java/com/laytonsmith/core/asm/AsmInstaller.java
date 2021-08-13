@@ -137,9 +137,9 @@ public class AsmInstaller {
 		if(distro.contains("debian") || distro.contains("ubuntu")) {
 			installDebianBased();
 		} else {
-			throw new UnsupportedOperationException("Your linux distribution is not supported yet. It may be a simple" +
-					" matter to add support, however, please file an issue (or PR!) if you're interested in adding" +
-					" support for " + OSUtils.GetLinuxDistro());
+			throw new UnsupportedOperationException("Your linux distribution is not supported yet. It may be a simple"
+					+ " matter to add support, however, please file an issue (or PR!) if you're interested in adding"
+					+ " support for " + OSUtils.GetLinuxDistro());
 		}
 	}
 
