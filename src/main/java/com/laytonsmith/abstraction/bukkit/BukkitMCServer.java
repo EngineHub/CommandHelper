@@ -13,6 +13,7 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCMerchant;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCPlayerProfile;
 import com.laytonsmith.abstraction.MCPluginManager;
 import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCScoreboard;
@@ -60,9 +61,14 @@ public class BukkitMCServer implements MCServer {
 
 	Server s;
 	MCVersion version;
+	boolean isPaper = false;
 
 	public BukkitMCServer() {
 		this.s = Bukkit.getServer();
+		try {
+			Class.forName("com.destroystokyo.paper.PaperConfig");
+			this.isPaper = true;
+		} catch (ClassNotFoundException e) {}
 	}
 
 	public BukkitMCServer(Server server) {
@@ -76,6 +82,10 @@ public class BukkitMCServer implements MCServer {
 
 	public Server __Server() {
 		return s;
+	}
+
+	public boolean isPaper() {
+		return this.isPaper;
 	}
 
 	@Override
@@ -314,6 +324,14 @@ public class BukkitMCServer implements MCServer {
 	@Override
 	public MCCommandMap getCommandMap() {
 		return new BukkitMCCommandMap((SimpleCommandMap) ReflectionUtils.invokeMethod(s.getClass(), s, "getCommandMap"));
+	}
+
+	@Override
+	public MCPlayerProfile getPlayerProfile(UUID id, String name) {
+		if(isPaper()) {
+			return new BukkitMCPlayerProfile(ReflectionUtils.invokeMethod(s, "createProfile", id, name));
+		}
+		return null;
 	}
 
 	@Override
