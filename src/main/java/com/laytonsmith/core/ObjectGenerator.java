@@ -30,10 +30,13 @@ import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCMapMeta;
 import com.laytonsmith.abstraction.MCMetadataValue;
+import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPattern;
+import com.laytonsmith.abstraction.MCPlayerProfile;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.MCPotionMeta;
+import com.laytonsmith.abstraction.MCProfileProperty;
 import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCShapedRecipe;
 import com.laytonsmith.abstraction.MCShapelessRecipe;
@@ -594,10 +597,39 @@ public class ObjectGenerator {
 				ma.set("author", author, t);
 				ma.set("pages", pages, t);
 			} else if(meta instanceof MCSkullMeta) {
-				if(((MCSkullMeta) meta).hasOwner()) {
-					ma.set("owner", new CString(((MCSkullMeta) meta).getOwner(), t), t);
+				MCPlayerProfile profile = ((MCSkullMeta) meta).getProfile();
+				// If a profile doesn't exist, it either doesn't have one (plain head) or it's not supported by server.
+				// Either way we fall back to old behavior.
+				if(profile != null) {
+					if(profile.getName() != null) {
+						ma.set("owner", new CString(profile.getName(), t), t);
+					} else {
+						ma.set("owner", CNull.NULL, t);
+					}
+					if(profile.getId() != null) {
+						ma.set("owneruuid", new CString(profile.getId().toString(), t), t);
+					} else {
+						ma.set("owneruuid", CNull.NULL, t);
+					}
+					MCProfileProperty texture = profile.getProperty("textures");
+					if(texture != null) {
+						ma.set("texture", new CString(texture.getValue(), t), t);
+					} else {
+						ma.set("texture", CNull.NULL, t);
+					}
 				} else {
-					ma.set("owner", CNull.NULL, t);
+					if(((MCSkullMeta) meta).hasOwner()) {
+						ma.set("owner", new CString(((MCSkullMeta) meta).getOwner(), t), t);
+						MCOfflinePlayer ofp = ((MCSkullMeta) meta).getOwningPlayer();
+						if(ofp != null) {
+							ma.set("owneruuid", new CString(ofp.getUniqueID().toString(), t), t);
+						} else {
+							ma.set("owneruuid", CNull.NULL, t);
+						}
+					} else {
+						ma.set("owner", CNull.NULL, t);
+						ma.set("owneruuid", CNull.NULL, t);
+					}
 				}
 			} else if(meta instanceof MCEnchantmentStorageMeta) {
 				Construct stored;
@@ -1010,10 +1042,39 @@ public class ObjectGenerator {
 						}
 					}
 				} else if(meta instanceof MCSkullMeta) {
+					String name = null;
+					UUID id = null;
 					if(ma.containsKey("owner")) {
-						Mixed owner = ma.get("owner", t);
-						if(!(owner instanceof CNull) && !owner.val().isEmpty()) {
-							((MCSkullMeta) meta).setOwner(owner.val());
+						name = Construct.nval(ma.get("owner", t));
+					}
+					if(ma.containsKey("owneruuid")) {
+						Mixed uuid = ma.get("owneruuid", t);
+						if(uuid instanceof CString) {
+							id = Static.GetUUID(uuid, t);
+						}
+					}
+					if(name != null && !name.isEmpty() || id != null) {
+						MCPlayerProfile profile = Static.getServer().getPlayerProfile(id, name);
+						if(profile != null) {
+							if(ma.containsKey("texture")) {
+								Mixed texture = ma.get("texture", t);
+								if(texture instanceof CString) {
+									profile.setProperty(new MCProfileProperty("textures", texture.val(), null));
+								}
+							}
+							((MCSkullMeta) meta).setProfile(profile);
+						} else {
+							// No profile, but we might still be able to set the owner.
+							MCOfflinePlayer ofp = null;
+							if(id != null) {
+								ofp = Static.getServer().getOfflinePlayer(id);
+							}
+							if(ofp != null) {
+								((MCSkullMeta) meta).setOwningPlayer(ofp);
+							} else if(name != null && !name.isEmpty()) {
+								// No offline player found by UUID, but we can fallback to owner by name.
+								((MCSkullMeta) meta).setOwner(name);
+							}
 						}
 					}
 				} else if(meta instanceof MCEnchantmentStorageMeta) {

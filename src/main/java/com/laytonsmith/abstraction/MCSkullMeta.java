@@ -11,4 +11,9 @@ public interface MCSkullMeta extends MCItemMeta {
 	boolean setOwner(String owner);
 
 	void setOwningPlayer(MCOfflinePlayer player);
+
+	MCPlayerProfile getProfile();
+
+	void setProfile(MCPlayerProfile profile);
+
 }

@@ -38,7 +38,9 @@ Below are the available fields in the item meta array. Fields can be null when t
 |-
 | Player Heads
 |
-* '''owner''' : (string) The player name.
+* '''owner''' : (string) The user name. Can be null if there is no owner.
+* '''owneruuid''' : (string) The user UUID. Can be null if there is no owner.
+* '''texture''' : (string) The texture property value used for custom heads. This is a base64 encoded JSON object seen under the "Value" key in vanilla. It contains the skin texture URL among other things. Requires an owner. (Paper only)
 |-
 | Potions
 |

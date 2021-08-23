@@ -66,6 +66,17 @@ public interface MCServer extends AbstractionObject {
 	MCInventory createInventory(MCInventoryHolder owner, int size, String title);
 
 	/**
+	 * Gets a player profile with the specified UUID or name. If id is null, name will be used.
+	 * A profile provides MC account information including name, UUID, and properties like skin texture data.
+	 * Returns null if player doesn't exist (or server implementation does not support this feature).
+	 *
+	 * @param id The user UUID
+	 * @param name The player name
+	 * @return The player profile for this user
+	 */
+	MCPlayerProfile getPlayerProfile(UUID id, String name);
+
+	/**
 	 * Provides access to local user data associated with a name. Depending on the implementation, a web lookup with the
 	 * official API may or may not be performed.
 	 *
