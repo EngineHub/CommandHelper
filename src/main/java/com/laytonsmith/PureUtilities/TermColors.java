@@ -155,6 +155,13 @@ public final class TermColors {
 	@TermColor
 	public static String RESET = special("reset");
 
+	private static final byte[] RGB2ANSI_TABLE = {
+			0, 4, 4, 4, 2, 8, 12, 12, 2, 2, 6, 6, 10, 10, 10, 14,
+			1, 5, 4, 4, 8, 8, 12, 12, 2, 2, 6, 7, 10, 10, 10, 14,
+			1, 9, 5, 12, 1, 9, 5, 12, 11, 7, 7, 7, 10, 10, 14, 14,
+			1, 9, 5, 13, 1, 9, 5, 13, 3, 3, 7, 13, 11, 11, 11, 15
+	};
+
 	private static final Map<String, String> DEFAULTS = new HashMap<String, String>();
 	private static List<Field> fields = null;
 
@@ -283,6 +290,25 @@ public final class TermColors {
 		}
 		// ANSI: 0 = reset, 1 = bright_intensity, 22 = normal_intensity.
 		return "\033[" + (resetCurrent ? "0;" : "") + color + ";" + (bright ? "1" : "22") + "m";
+	}
+
+	/**
+	 * Converts a RGB color to its (perceptually) closest equivalent.
+	 * @param hex A 6-characters wide hexadecimal-formatted string containing the RRGGBB pattern.
+	 * @return The ANSI string representing such color; {@code null} if an invalid pattern was passed to {@code hex}.
+	 */
+	public static String fromRGB(String hex) {
+		String ret = null;
+		if(hex.matches("(?i)^[a-z0-9]{6}$")) {
+			int hexValue = Integer.parseInt(hex, 16);
+			byte code = RGB2ANSI_TABLE[
+					16 * Math.round(((hexValue >> 16) & 0xFF) / (float) 0x55)
+					+ 4 * Math.round(((hexValue >> 8) & 0xFF) / (float) 0x55)
+					+ Math.round((hexValue & 0xFF) / (float) 0x55)
+					];
+			ret = "\033[" + (30 + (code & 7)) + ";" + ((code & 0x8) != 0 ? "1" : "22") + "m";
+		}
+		return ret;
 	}
 
 	public static void p(CharSequence c) {

@@ -1181,6 +1181,11 @@ public final class Static {
 		if(mes == null) {
 			return null;
 		}
+		if(mes.length() > 13) {
+			mes = Pattern.compile("(?i)§x(§[0-9A-F]){6}").matcher(mes).replaceAll(match -> {
+				return TermColors.fromRGB(match.group(0).substring(2).replaceAll("§", ""));
+			});
+		}
 		return mes
 				.replaceAll("§0", TermColors.BLACK)
 				.replaceAll("§1", TermColors.BLUE)
@@ -1203,9 +1208,7 @@ public final class Static {
 				.replaceAll("§m", TermColors.STRIKE)
 				.replaceAll("§n", TermColors.UNDERLINE)
 				.replaceAll("§o", TermColors.ITALIC)
-				.replaceAll("§r", TermColors.RESET)
-				.replaceAll("(?i)§x(§[a-f0-9]){6}", "");
-
+				.replaceAll("§r", TermColors.RESET);
 	}
 
 	public static MCCommandSender GetInjectedPlayer(String name) {
