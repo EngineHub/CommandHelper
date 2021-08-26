@@ -1652,6 +1652,7 @@ public class Meta {
 	}
 
 	@api
+	@noboilerplate
 	public static class get_alias_comment extends AbstractFunction {
 
 		@Override
