@@ -4,22 +4,25 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.AbstractCompileException;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.testing.StaticTest;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.Set;
+
+import static com.laytonsmith.testing.StaticTest.SRun;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import org.junit.Before;
-import static com.laytonsmith.testing.StaticTest.SRun;
-import java.util.Set;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  *
@@ -253,7 +256,7 @@ public class NewExceptionHandlingTest {
 				/* 14 */ + "		msg(@e);\n"
 				/* 15 */ + "}\n",
 				fakePlayer);
-		verify(fakePlayer).sendMessage(
+		verify(fakePlayer, atMost(1)).sendMessage(
 				"{"
 				+ "causedBy: {"
 				+ "causedBy: null, "
