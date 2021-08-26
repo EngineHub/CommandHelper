@@ -8,10 +8,11 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  build_ubuntu:
 
     runs-on: ubuntu-latest
-
+    env:
+      methodscript_run_llvm_integration_tests: 1
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 16
@@ -21,3 +22,33 @@ jobs:
         distribution: 'adopt'
     - name: Build with Maven
       run: mvn -B package --file pom.xml -Pfail-on-test-failures
+  build_mac:
+
+    runs-on: macos-11
+    env:
+      methodscript_run_llvm_integration_tests: 1
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 16
+      uses: actions/setup-java@v2
+      with:
+        java-version: '16'
+        distribution: 'adopt'
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml -Pfail-on-test-failures
+  build_windows:
+
+    runs-on: windows-latest
+    env:
+      methodscript_run_llvm_integration_tests: 1
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 16
+      uses: actions/setup-java@v2
+      with:
+        java-version: '16'
+        distribution: 'adopt'
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml -Pfail-on-test-failures
+
+
