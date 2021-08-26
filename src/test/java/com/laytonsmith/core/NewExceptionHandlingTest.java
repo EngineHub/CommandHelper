@@ -256,7 +256,8 @@ public class NewExceptionHandlingTest {
 				/* 14 */ + "		msg(@e);\n"
 				/* 15 */ + "}\n",
 				fakePlayer);
-		verify(fakePlayer, atMost(1)).sendMessage(
+		verify(fakePlayer, atMost(1)).isOnline();
+		verify(fakePlayer).sendMessage(
 				"{"
 				+ "causedBy: {"
 				+ "causedBy: null, "
