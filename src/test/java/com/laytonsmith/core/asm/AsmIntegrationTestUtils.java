@@ -96,7 +96,7 @@ public class AsmIntegrationTestUtils {
 		}
 		AsmMainCmdlineTool tool = new AsmMain.AsmMainCmdlineTool();
 		tool.execute(tool.getArgumentParser().match("\"" + file.getAbsolutePath() + "\" -o \""
-				+ new File(file.getParentFile(), "target").getCanonicalPath() + "\""));
+				+ new File(file.getParentFile(), "target").getCanonicalPath() + "\" --verbose"));
 	}
 
 	/**
