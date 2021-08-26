@@ -36,14 +36,14 @@ public class AsmMain {
 
 		@Override
 		public void execute(ArgumentParser.ArgumentParserResults parsedArgs) throws Exception {
-			if(parsedArgs.isFlagSet("install-toolchain")) {
+			if(parsedArgs.isFlagSet("install-toolchain") || parsedArgs.isFlagSet("install-toolchain-non-interactive")) {
 				try {
-					new AsmInstaller().install();
+					new AsmInstaller().install(parsedArgs.isFlagSet("install-toolchain-non-interactive"));
 				} catch (IOException | InterruptedException e) {
 					StreamUtils.GetSystemErr().println(e.getMessage());
 					System.exit(1);
 				}
-				System.exit(0);
+				return;
 			}
 
 			File input = new File(".");
@@ -82,6 +82,5 @@ public class AsmMain {
 				ConfigRuntimeException.HandleUncaughtException(ex, "One or more compile errors occurred during compilation.", null);
 			}
 		}
-
 	}
 }

@@ -1140,7 +1140,7 @@ public class Math {
 				return new CDouble(java.lang.Math.random(), t);
 			} else {
 				long min = 0;
-				long max = 0;
+				long max;
 				if(args.length == 1) {
 					max = ArgumentValidation.getInt(args[0], t);
 				} else {
@@ -2688,9 +2688,9 @@ public class Math {
 				MathConstants c = MathConstants.valueOf(args[0].val());
 				Number v = c.getValue();
 				if(v instanceof Double) {
-					return new CDouble((Double) c.getValue(), t);
+					return new CDouble(c.getValue().doubleValue(), t);
 				} else {
-					return new CInt((Integer) c.getValue(), t);
+					return new CInt(c.getValue().longValue(), t);
 				}
 			} catch (IllegalArgumentException ex) {
 				throw new CRECastException("No constant with the value " + args[0].val() + " exists.", t);

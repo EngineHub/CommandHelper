@@ -6,6 +6,9 @@ package com.laytonsmith.core.asm;
 public class IRDataBuilder {
 
 	public static IRData setReturnVariable(int variableId, IRType type) {
+		if(type == IRType.OTHER) {
+			throw new Error("OTHER cannot be returned outside of a single instruction set.");
+		}
 		IRData data = new IRData();
 		data.resultVariable = variableId;
 		data.returnCategory = IRReturnCategory.NORMAL;
@@ -33,6 +36,9 @@ public class IRDataBuilder {
 	}
 
 	public static IRData asConstant(IRType type, String value) {
+		if(type == IRType.OTHER) {
+			throw new Error("OTHER cannot be returned outside of a single instruction set.");
+		}
 		IRData data = new IRData();
 		data.resultType = type;
 		data.returnCategory = IRReturnCategory.CONSTANT;
@@ -40,11 +46,4 @@ public class IRDataBuilder {
 		return data;
 	}
 
-	/*package*/ static IRData setRaw(int variableId, IRType type, IRReturnCategory category) {
-		IRData data = new IRData();
-		data.resultVariable = variableId;
-		data.resultType = type;
-		data.returnCategory = category;
-		return data;
-	}
 }

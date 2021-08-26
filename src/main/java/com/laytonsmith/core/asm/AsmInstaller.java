@@ -25,11 +25,11 @@ public class AsmInstaller {
 	}
 
 	private static void log(String output) {
-		StreamUtils.GetSystemOut().println(output);
+		StreamUtils.GetSystemOut().println(output + TermColors.RESET);
 	}
 
 
-	public void install() throws IOException, InterruptedException {
+	public void install(boolean nonInteractive) throws IOException, InterruptedException {
 		if(OSUtils.GetOSBitDepth() != OSUtils.BitDepth.B64) {
 			// Some of the code below looks like it supports 32 bit, but actually it doesn't. Not sure
 			// if there's actually any real demand for 32 bit these days, but if there is, more work needs
@@ -37,17 +37,17 @@ public class AsmInstaller {
 			throw new UnsupportedOperationException("This is only supported on 64 bit systems currently.");
 		}
 		if(OSUtils.GetOS().isWindows()) {
-			installWindows();
+			installWindows(nonInteractive);
 		} else if(OSUtils.GetOS().isLinux()) {
-			installLinux();
+			installLinux(nonInteractive);
 		} else if(OSUtils.GetOS().isMac()) {
-			installMac();
+			installMac(nonInteractive);
 		} else {
 			throw new UnsupportedOperationException("Toolchain installation not supported on this platform");
 		}
 	}
 
-	private void installWindows() throws IOException, InterruptedException {
+	private void installWindows(boolean nonInteractive) throws IOException, InterruptedException {
 		// NOTE: Installation MUST be idempotent, please ensure it stays that way.
 
 		String installerUrl = null;
@@ -67,7 +67,7 @@ public class AsmInstaller {
 		String redistUrl = extrasBase + "/installers/winsdk/10.0.19041.0/winsdksetup.exe";
 		String buildToolsUrl = extrasBase + "/installers/winsdk/MSVC/vs_BuildTools.exe";
 		if(OSUtils.GetOSBitDepth() == OSUtils.BitDepth.B64) {
-			log("Detected 64 bit Windows");
+			log(TermColors.GREEN + "Detected 64 bit Windows");
 			installerUrl
 					= "https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.1/LLVM-12.0.1-win64.exe";
 			destFilename = "LLVM-12.0.1-win64.exe";
@@ -78,16 +78,21 @@ public class AsmInstaller {
 		File lld = new File("C:\\Program Files\\LLVM\\bin\\lld-link.exe");
 		File winSDK = new File("C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.19041.0");
 		File buildTools = new File("C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\" + msvcVersion);
-		log("Installing LLVM...");
+		log(TermColors.GREEN + "Installing LLVM...");
 		if(!lld.exists() || !CommandExecutor.Execute(lld.getAbsolutePath(), "--version").contains("LLD 12.0.1")) {
-			File exe = download(installerUrl, destFilename);
-			log(TermColors.YELLOW + "Please note, when installing LLVM, install in the standard location,"
-					+ " \"C:\\Program Files\\LLVM\", otherwise the toolchain will not work." + TermColors.reset());
-			CommandExecutor.Execute(exe.getAbsolutePath());
+			if(new File("C:\\ProgramData\\chocolatey\\bin\\choco.exe").exists()) {
+				// Use chocolatey, since it's non-interactive
+				CommandExecutor.ExecuteWithRedirect("choco", "install", "llvm", "-y");
+			} else {
+				File exe = download(installerUrl, destFilename);
+				log(TermColors.YELLOW + "Please note, when installing LLVM, install in the standard location,"
+						+ " \"C:\\Program Files\\LLVM\", otherwise the toolchain will not work." + TermColors.reset());
+				CommandExecutor.Execute(exe.getAbsolutePath());
+			}
 		}
 
 		{
-			log("Installing extras...");
+			log(TermColors.GREEN + "Installing extras...");
 			File root = new File("C:\\Program Files\\LLVM\\bin\\");
 			for(Map.Entry<String, String> entry : llvmExtras.entrySet()) {
 				String url = entry.getKey();
@@ -111,13 +116,13 @@ public class AsmInstaller {
 
 		if(!winSDK.exists()) {
 			File redist = download(redistUrl, redistFileName);
-			log("Installing Windows 10 SDK");
-			CommandExecutor.Execute(redist.getAbsolutePath());
+			log(TermColors.GREEN + "Installing Windows 10 SDK");
+			CommandExecutor.Execute(redist.getAbsolutePath(), "/quiet");
 		}
 
 		if(!buildTools.exists()) {
 			File buildToolsInstaller = download(buildToolsUrl, buildToolsFileName);
-			log("Installing MSVC Build Tools");
+			log(TermColors.GREEN + "Installing MSVC Build Tools");
 			String[] args = new String[]{
 				buildToolsInstaller.getAbsolutePath(),
 				// Cmdline option references can be found here
@@ -130,14 +135,14 @@ public class AsmInstaller {
 			CommandExecutor.Execute(args);
 		}
 
-		log("Done.");
+		log(TermColors.GREEN + "Done.");
 
 	}
 
-	private void installLinux() throws IOException, InterruptedException {
+	private void installLinux(boolean nonInteractive) throws IOException, InterruptedException {
 		String distro = OSUtils.GetLinuxDistro().toLowerCase();
 		if(distro.contains("debian") || distro.contains("ubuntu")) {
-			installDebianBased();
+			installDebianBased(nonInteractive);
 		} else {
 			throw new UnsupportedOperationException("Your linux distribution is not supported yet. It may be a simple"
 					+ " matter to add support, however, please file an issue (or PR!) if you're interested in adding"
@@ -145,7 +150,7 @@ public class AsmInstaller {
 		}
 	}
 
-	private void installDebianBased() throws IOException, InterruptedException {
+	private void installDebianBased(boolean nonInteractive) throws IOException, InterruptedException {
 
 		boolean isUbuntu = CommandExecutor.Execute("lsb_release", "-a").contains("buntu");
 		if(!isUbuntu) {
@@ -173,7 +178,7 @@ public class AsmInstaller {
 				.waitFor();
 	}
 
-	private void installMac() throws IOException, InterruptedException {
+	private void installMac(boolean nonInteractive) throws IOException, InterruptedException {
 		String brewLocation = CommandExecutor.Execute("which", "brew");
 		if(!"/usr/local/bin/brew\n".equals(brewLocation)) {
 			log(TermColors.RED + "Homebrew is required for installation. Please install homebrew with "
@@ -208,7 +213,7 @@ public class AsmInstaller {
 	/**
 	 * Validates the currently installed toolchain, to see if there is an update needed. If so, the user is prompted
 	 * to run the --install-toolchain command before trying again.
-	 * @return
+	 * @return True if the toolchain appears to be installed, false otherwise.
 	 */
 	public static boolean validateToolchain() {
 		if(OSUtils.GetOS().isWindows()) {

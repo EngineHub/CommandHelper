@@ -8,6 +8,7 @@ import com.laytonsmith.core.asm.AsmCommonLibTemplates;
 import com.laytonsmith.core.asm.IRBuilder;
 import com.laytonsmith.core.asm.IRData;
 import com.laytonsmith.core.asm.IRDataBuilder;
+import com.laytonsmith.core.asm.IRType;
 import com.laytonsmith.core.asm.LLVMArgumentValidation;
 import com.laytonsmith.core.asm.LLVMEnvironment;
 import com.laytonsmith.core.asm.LLVMFunction;
@@ -77,7 +78,7 @@ public class Cmdline {
 			List<String> lines = new ArrayList<>();
 			IRData string = LLVMArgumentValidation.getString(builder, env, nodes[0], t);
 			llvmenv.addGlobalDeclaration(AsmCommonLibTemplates.PUTS, env);
-			int ret = llvmenv.getNewLocalVariableReference(); // returned value
+			int ret = llvmenv.getNewLocalVariableReference(IRType.INTEGER32); // returned value
 			lines.add("%" + ret + " = call i32 @puts(" + string.getReference() + ")");
 			builder.appendLines(t, lines);
 			// TODO: Use the return value, puts doesn't actually return void.

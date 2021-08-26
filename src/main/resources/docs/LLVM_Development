@@ -29,6 +29,8 @@ platforms at once, but this is a future concern.
 * Foundational concepts cannot be changed under any circumstances. For instance, variables that are untyped \
 (implied or explicit auto) must continue to be supported.
 * The C Runtime Library is the primary runtime library, though others can be added as needed.
+* Windows, Ubuntu, and MacOS are the supported OSes. More may be added later if sponsorship is obtained. In general, \
+Debian is expected to work, but it is not a supported OS, and no bugs filed against Debian will be accepted.
 
 Native MethodScript uses LLVM (which stands for Low Level Virtual Machine) to create the native binaries.
 Thus, it's important to eventually understand various concepts within LLVM in order to successfully understand
@@ -93,12 +95,8 @@ the future.
 == Testing and Debugging ==
 When adding additional functions, it's important to make sure that everything works as intended. Unfortunately, since
 some functions have very platform specific code, it makes it more difficult to test. Luckily, it's easy to get Virtual
-Machines for both Ubuntu and Windows. (Mac OS is difficult, and thus support for Macs is currently limited.) You can
-download time limited Windows VMs for free [https://developer.microsoft.com/en-us/microsoft-edge/tools/vms/ here], but
-for development purposes, the time limitation is fine. Note that versions of Windows before Windows 10 are unsupported.
-Ubuntu is the only supported Linux distrubution, though in general, other distros may work fine, particularly other
-Debian based versions. Additional flavors of Linux may be supported in the future, however, so platform specific code
-should in general be abstracted as best as possible.
+Machines for both Ubuntu and Windows. (Newer Mac OS is difficult, and thus support for Macs is currently limited.)
+See the section below for information and steps on setting up these VMs.
 
 The IR is written out to .ll files, and this can be read to see the code in full context.
 
@@ -144,8 +142,8 @@ for daily use, however, for our purposes, they are good enough. For Windows inst
 be rather annoying, so it is recommended to use an actual copy of Windows, rather than the development VMs.
 
 If you aren't willing to install other development environments when adding new features, don't assume that new features
-that you're adding will work on other OSes. If you have reason to believe they will (for instance, doesn't do any OS
-specific actions, or only uses the C standard library) then it's fine to make this assumption, but it's better to
+that you're adding will work on other OSes. If you have reason to believe they will (for instance, only uses LLVM
+specific constructs and makes no system calls) then it's fine to make this assumption, but it's better to
 add a compile error when used in an untested system than it is to assume your feature will work. PRs that do OS specific
 tasks will not be accepted without proof of testing on all OSes that are supported in the code.
 
@@ -176,7 +174,7 @@ Click "Take" in the top, and name the snapshot something reasonable, like "Prist
 normal, and once the trial expires, or for whatever reason if you want to return to a brand new OS state, restore the
 snapshot.
 
-==== Linux Guest ====
+==== Ubuntu Guest ====
 
 Download Ubuntu 20.04 LTS from here https://ubuntu.com/download/desktop. This is the ISO file, which is like a disk
 image, and will need to be manually installed and imported. Go to Machine -> New, and follow the prompts. Select the
@@ -264,6 +262,17 @@ For linux/mac, you can use nm or objdump
 
 * nm /usr/lib/x86_64-linux-gnu/libc.a
 * objdump -x /usr/lib/x86_64-linux-gnu/libc.a
+
+=== Adjusting Linker Options ===
+
+At the early stages of development, it's possible that the linker options are very wrong, and will need to be adjusted.
+Certainly, as new native code is integrated with, we will need to add more files to the linker. In order to get a good
+template for this, it is easiest to run clang against an equivalent C program, and view the linker options it uses.
+Use <code>clang -v test.c</code> to see the verbose output for clang, including the linker options, and use that as
+your template.
+
+Note that the linker option format varies fairly widely from OS to OS, so any change to these options will almost
+certainly require testing on all supported OSes, unfortunately.
 
 == Common Errors ==
 

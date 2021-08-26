@@ -34,6 +34,10 @@ public enum IRType {
 	 */
 	INTEGER8POINTER("i8*", Category.POINTER, -1),
 	/**
+	 * A 2D pointer to an 8 bit integer
+	 */
+	INTEGER8POINTERPOINTER("i8**", Category.POINTER, -1),
+	/**
 	 * 16 bit floating point value
 	 */
 	HALF("half", Category.FLOAT, 16),
@@ -52,7 +56,13 @@ public enum IRType {
 	/**
 	 * A string is just an i8* (a char array) but for convenience, we refer to it as a different type.
 	 */
-	STRING("i8*", Category.POINTER, -1);
+	STRING("i8*", Category.POINTER, -1),
+	/**
+	 * OTHER is a type which means that this value can't be parsed directly. This should only be used for values which
+	 * are used internally within a single instruction group, and never returned as a type. (This is checked in the
+	 * relevant places in IRBuilder and an error is thrown).
+	 */
+	OTHER(null, Category.UNSET, -1);
 
 	private final String irType;
 	private final Category category;
@@ -116,6 +126,7 @@ public enum IRType {
 		UNSET,
 		INTEGER,
 		FLOAT,
-		POINTER
+		POINTER,
+		ARRAY
 	}
 }

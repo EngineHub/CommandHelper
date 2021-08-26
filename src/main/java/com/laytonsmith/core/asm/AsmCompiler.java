@@ -31,6 +31,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.persistence.DataSourceException;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -227,10 +228,13 @@ public class AsmCompiler {
 			}
 			StringBuilder program = new StringBuilder();
 			llvmenv.newMethodFrame("@main");
+			llvmenv.pushVariableScope();
+			// TODO: Eventually add the argument processing for this
 			// Pop 0..2 for the main args and entry label
-			for(int i = 0; i <= 2; i++) {
-				llvmenv.getNewLocalVariableReference();
-			}
+			llvmenv.getNewLocalVariableReference(IRType.INTEGER32);
+			llvmenv.getNewLocalVariableReference(IRType.INTEGER8POINTERPOINTER);
+			int entryPoint = llvmenv.getGotoLabel();
+
 
 			env = env.cloneAndAdd(llvmenv);
 			Target t = new Target(0, file, 0);
@@ -265,11 +269,11 @@ public class AsmCompiler {
 				lastLine = builder.lines.get(builder.lines.size() - 1);
 			}
 			if(!"unreachable".equals(lastLine)) {
-				builder.appendLine(new Target(0, new File("synth"), 0), "ret i32 0");
+				builder.appendLine(new Target(0, new File("/synth"), 0), "ret i32 0");
 			}
 
 			llvmenv.newMethodFrame("__startup");
-			llvmenv.getNewLocalVariableReference(); // pop the entry point
+			llvmenv.getGotoLabel(); // pop the entry point
 			String startupCode = builder.renderStartupCode(env);
 			String startupFunctionName;
 			{
@@ -354,7 +358,7 @@ public class AsmCompiler {
 			ir.append(irHeader); // always first
 			ir.append(strings.toString());
 			if(startupFunctionName != null) {
-				ir.append("define dso_local hidden void @" + startupFunctionName + "() {" + nl);
+				ir.append("define linkonce_odr dso_local hidden void @" + startupFunctionName + "() alwaysinline {" + nl);
 				ir.append(startupCode);
 				ir.append("  ret void").append(nl);
 				ir.append("}" + nl + nl);
@@ -402,6 +406,9 @@ public class AsmCompiler {
 				args.add("-o");
 				args.add(ll.getAbsolutePath());
 				args.add("-S"); // Write output in LLVM IR (instead of bitcode).
+				if(verbose) {
+					args.add("-v");
+				}
 				args.add(ll.getAbsolutePath());
 				for(File h : headersLL) {
 					args.add(h.getAbsolutePath());
@@ -543,13 +550,14 @@ public class AsmCompiler {
 		if(node.getData() instanceof CFunction cf) {
 			FunctionBase fb = FunctionList.getFunction(cf, api.Platforms.COMPILER_LLVM, ENVS);
 			if(fb instanceof LLVMFunction f) {
+				builder.functionsUsed.add(f);
 				return f.buildIR(builder, node.getTarget(), env,
 						node.getChildren().toArray(new ParseTree[node.getChildren().size()]));
 			} else {
 				throw new Error("Unexpected function type");
 			}
 		} else {
-			return LLVMPlatformResolver.outputConstant(node.getData(), env);
+			return LLVMPlatformResolver.outputConstant(builder, node.getData(), env);
 		}
 	}
 

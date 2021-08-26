@@ -106,8 +106,8 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 
 	/**
 	 * {@inheritDoc}
-	 * By default, this calls {@link StaticAnalysis#typecheck(ParseTree, Set)} on the function's arguments and passes
-	 * them to {@link #getReturnType(Target, List, List, Set)} to get this function's return type.
+	 * By default, this calls {@link StaticAnalysis#typecheck(ParseTree, Environment, Set)} on the function's arguments and passes
+	 * them to {@link #getReturnType(Target, List, List, Environment, Set)} (Target, List, List, Set)} to get this function's return type.
 	 */
 	@Override
 	public CClassType typecheck(StaticAnalysis analysis,
@@ -222,5 +222,19 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	@Override
 	public final Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 		throw new UnsupportedOperationException("Not supported.");
+	}
+
+	/**
+	 * If this function is used, and it needs to do startup configuration, that configuration goes here.
+	 *
+	 * There may be other circumstances where this code is called, for instance if the user has indicated
+	 * that it may be called via reflection, so functions should keep this in mind, and configure the environment
+	 * appropriately.
+	 * @param builder
+	 * @param startupEnv
+	 * @param t The synthesized code target for this function
+	 */
+	public void addStartupCode(IRBuilder builder, Environment startupEnv, Target t) {
+		//
 	}
 }

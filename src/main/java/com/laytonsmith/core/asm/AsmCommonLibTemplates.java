@@ -62,4 +62,8 @@ public class AsmCommonLibTemplates {
 	public static final Generator TIME = (env) -> {
 		register("declare dso_local i32 @time(...)", env);
 	};
+
+	public static final Generator LLVM_MEMCPY_P0I8_P0I8_I64 = (env) -> {
+		register("declare void @llvm.memcpy.p0i8.p0i8.i64(i8* noalias nocapture writeonly, i8* noalias nocapture readonly, i64, i1 immarg) nounwind", env);
+	};
 }

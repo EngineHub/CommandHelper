@@ -1,9 +1,12 @@
 package com.laytonsmith.core.asm;
 
 
-import com.laytonsmith.core.asm.metadata.LLVMMetadataRegistry;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
+import com.laytonsmith.core.asm.metadata.LLVMMetadataRegistry;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.environments.Environment;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -20,7 +23,10 @@ public class LLVMEnvironment implements Environment.EnvironmentImpl {
 	private final AtomicInteger stringIdCounter = new AtomicInteger();
 	private final Map<String, String> strings = new HashMap<>();
 	private final Stack<Map<String, Integer>> variableTable = new Stack<>();
+	private final Stack<Map<String, CClassType>> variableTableType = new Stack<>();
+	private final Stack<Map<Integer, IRType>> irVariableTableType = new Stack<>();
 	private final Set<String> globalDeclarations = new HashSet<>();
+	private final StaticAnalysis staticAnalysis = new StaticAnalysis(false);
 	private int localVariableCounter = 0;
 	// LinkedHashSet, to maintain insertion order, but only allow one entry per header.
 	private final LinkedHashSet<Header> additionalHeaders = new LinkedHashSet<>();
@@ -147,8 +153,10 @@ public class LLVMEnvironment implements Environment.EnvironmentImpl {
 	 * function definition.
 	 * @return
 	 */
-	public int getNewLocalVariableReference() {
-		return localVariableCounter++;
+	public int getNewLocalVariableReference(IRType type) {
+		int value = localVariableCounter++;
+		irVariableTableType.peek().put(value, type);
+		return value;
 	}
 
 	/**
@@ -191,18 +199,37 @@ public class LLVMEnvironment implements Environment.EnvironmentImpl {
 
 	public void pushVariableScope() {
 		variableTable.push(new HashMap<>());
+		variableTableType.push(new HashMap<>());
+		irVariableTableType.push(new HashMap<>());
 	}
 
 	public void popVariableScope() {
 		variableTable.pop();
+		variableTableType.pop();
+		irVariableTableType.pop();
 	}
 
-	public void addVariableMapping(String methodscriptVariableName, int llvmVariableName) {
+	public void addVariableMapping(String methodscriptVariableName, int llvmVariableName, CClassType type) {
 		variableTable.peek().put(methodscriptVariableName, llvmVariableName);
+		variableTableType.peek().put(methodscriptVariableName, type);
 	}
 
+	/**
+	 * Returns the IR reference to this variable. All variables are allocaStoreAndLoaded, so this is the value of
+	 * the load instruction.
+	 * @param methodscriptVariableName
+	 * @return
+	 */
 	public int getVariableMapping(String methodscriptVariableName) {
 		return variableTable.peek().get(methodscriptVariableName);
+	}
+
+	public CClassType getVariableType(String methodscriptVariableName) {
+		return variableTableType.peek().get(methodscriptVariableName);
+	}
+
+	public IRType getIRType(int variable) {
+		return irVariableTableType.peek().get(variable);
 	}
 
 	public int getNewMetadataId() {
@@ -211,5 +238,9 @@ public class LLVMEnvironment implements Environment.EnvironmentImpl {
 
 	public LLVMMetadataRegistry getMetadataRegistry() {
 		return this.metadataRegistry;
+	}
+
+	public StaticAnalysis getStaticAnalysis() {
+		return this.staticAnalysis;
 	}
 }

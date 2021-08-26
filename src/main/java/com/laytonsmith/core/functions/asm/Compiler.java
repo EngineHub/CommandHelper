@@ -59,10 +59,10 @@ public class Compiler {
 		public IRData buildIR(IRBuilder builder, Target t, Environment env, ParseTree... nodes) throws ConfigCompileException {
 			IRData data = AsmCompiler.getIR(builder, nodes[0], env);
 			LLVMEnvironment llvmenv = env.getEnv(LLVMEnvironment.class);
-			int alloca = llvmenv.getNewLocalVariableReference(); // returned value
-			builder.appendLine(t, "%" + alloca + " = alloca " + data.getResultType().getIRType());
-			builder.appendLine(t, "store " + data.getReference() + ", " + data.getResultType().getIRType() + "* %" + alloca);
-			return IRDataBuilder.setReturnVariable(alloca, data.getResultType());
+			int alloca = llvmenv.getNewLocalVariableReference(data.getResultType());
+			int load = llvmenv.getNewLocalVariableReference(data.getResultType()); // returned value
+			builder.generator(t, env).allocaStoreAndLoad(alloca, data.getResultType(), data.getReference(), load);
+			return IRDataBuilder.setReturnVariable(load, data.getResultType());
 		}
 
 		@Override

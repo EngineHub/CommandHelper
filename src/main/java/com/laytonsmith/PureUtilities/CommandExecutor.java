@@ -2,6 +2,9 @@ package com.laytonsmith.PureUtilities;
 
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import org.apache.commons.io.input.CloseShieldInputStream;
+import org.apache.commons.io.output.CloseShieldOutputStream;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -17,14 +20,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.io.input.CloseShieldInputStream;
-import org.apache.commons.io.output.CloseShieldOutputStream;
 
 /**
  * Contains utilities to execute an external process and retrieve various results from it.
  *
  */
 public class CommandExecutor {
+
+	/**
+	 * If you're in a hurry, and all you want is to run a command and redirect inputs and outputs to the console,
+	 * this will do it for you. The exit code is returned.
+	 */
+	public static void ExecuteWithRedirect(String command) throws IOException, InterruptedException {
+		ExecuteWithRedirect(StringToArray(command));
+	}
+
+	/**
+	 * If you're in a hurry, and all you want is to run a command and redirect inputs and outputs to the console,
+	 * this will do it for you. The exit code is returned.
+	 * @param command
+	 */
+	public static int ExecuteWithRedirect(String... command) throws InterruptedException, IOException {
+		CommandExecutor exec = new CommandExecutor(command);
+		exec.setSystemInputsAndOutputs();
+		exec.start();
+		return exec.waitFor();
+	}
 
 	/**
 	 * If you're in a hurry, and all you want is to get the output of System.out from a process started with a string,
