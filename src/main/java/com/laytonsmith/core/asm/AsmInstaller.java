@@ -123,7 +123,7 @@ public class AsmInstaller {
 		boolean buildToolsUpToDate = false;
 		{
 			final Version minBuildToolsVersion = new SimpleVersion(14, 29, 30037);
-			Version installedVersion = getInstalledBuildToolsVersion();
+			Version installedVersion = getInstalledBuildToolsVersion(true);
 			if(installedVersion != null && installedVersion.gte(minBuildToolsVersion)) {
 				buildToolsUpToDate = true;
 			}
@@ -153,7 +153,7 @@ public class AsmInstaller {
 	 * (or if this isn't Windows), null is returned.
 	 * @return
 	 */
-	public static Version getInstalledBuildToolsVersion() {
+	public static Version getInstalledBuildToolsVersion(boolean verbose) {
 		File buildTools = new File("C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\");
 		if(!buildTools.exists() || buildTools.listFiles().length == 0) {
 			return null;
@@ -161,6 +161,9 @@ public class AsmInstaller {
 		Version latestVersion = new SimpleVersion(0, 0, 0);
 		for(File installedBuildToolVersion : buildTools.listFiles()) {
 			Version v = new SimpleVersion(installedBuildToolVersion.getName());
+			if(verbose) {
+				System.out.println("Found build tools version " + v);
+			}
 			if(v.gt(latestVersion)) {
 				latestVersion = v;
 			}
