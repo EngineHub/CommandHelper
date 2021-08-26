@@ -13,8 +13,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-    env:
-      methodscript_run_llvm_integration_tests: 1
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 16
@@ -23,7 +21,7 @@ jobs:
         java-version: '16'
         distribution: 'adopt'
     - name: Build with Maven
-      run: sudo -- sh -c "export PATH=/opt/hostedtoolcache/Java_Adopt_jdk/16.0.2-7/x64/bin:\$PATH && export JAVA_HOME=$JAVA_HOME && mvn -version && mvn -B package --file pom.xml -Pfail-on-test-failures"
+      run: sudo -- sh -c "export methodscript_run_llvm_integration_tests=1 && export PATH=/opt/hostedtoolcache/Java_Adopt_jdk/16.0.2-7/x64/bin:\$PATH && export JAVA_HOME=$JAVA_HOME && mvn -version && mvn -B package --file pom.xml -Pfail-on-test-failures"
   build_windows:
     runs-on: windows-latest
     env:
