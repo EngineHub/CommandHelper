@@ -305,7 +305,7 @@ public class AsmInstaller {
 			File lld = new File("C:\\Program Files\\LLVM\\bin\\lld-link.exe");
 			File llc = new File("C:\\Program Files\\LLVM\\bin\\llc.exe");
 			File winSDK = new File("C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.19041.0");
-			File msvc = new File("C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC");
+			File msvc = getWindowsBuildToolsLocation();
 			if(!lld.exists() || !CommandExecutor.Execute(lld.getAbsolutePath(), "--version").contains("LLD 12.0.1")) {
 				log("Missing correct version of lld tool, please re-install the toolchain.");
 				return false;
@@ -319,7 +319,7 @@ public class AsmInstaller {
 				log("Missing correct version of Windows SDK, please re-install the toolchain.");
 				return false;
 			}
-			if(!msvc.exists()) {
+			if(msvc == null || !msvc.exists()) {
 				log("Missing MSVC BuildTools, please re-install the toolchain.");
 			}
 			return true;
