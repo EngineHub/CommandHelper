@@ -123,7 +123,7 @@ public class AsmInstaller {
 		boolean buildToolsUpToDate = false;
 		{
 			final Version minBuildToolsVersion = new SimpleVersion(14, 29, 30037);
-			Version installedVersion = getInstalledBuildToolsVersion(true);
+			Version installedVersion = getWindowsInstalledBuildToolsVersion(true);
 			if(installedVersion != null && installedVersion.gte(minBuildToolsVersion)) {
 				buildToolsUpToDate = true;
 			}
@@ -150,25 +150,65 @@ public class AsmInstaller {
 
 	/**
 	 * Assuming that the Windows build tools are installed, returns the newest version. If no build tools are installed,
-	 * (or if this isn't Windows), null is returned.
+	 * (or if this isn't Windows), version 0.0.0 is returned.
 	 * @return
 	 */
-	public static Version getInstalledBuildToolsVersion(boolean verbose) {
-		File buildTools = new File("C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\");
-		if(!buildTools.exists() || buildTools.listFiles().length == 0) {
-			return null;
-		}
+	public static Version getWindowsInstalledBuildToolsVersion(boolean verbose) {
+		File[] buildToolLocations = new File[]{
+				new File("C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\"),
+				new File("C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\"),
+		};
 		Version latestVersion = new SimpleVersion(0, 0, 0);
-		for(File installedBuildToolVersion : buildTools.listFiles()) {
-			Version v = new SimpleVersion(installedBuildToolVersion.getName());
-			if(verbose) {
-				System.out.println("Found build tools version " + v);
+		for(File buildTools : buildToolLocations) {
+			if(!buildTools.exists() || buildTools.listFiles().length == 0) {
+				if(verbose) {
+					System.out.println("No installed build tools found in " + buildTools.getAbsolutePath() + ".");
+				}
+				continue;
 			}
-			if(v.gt(latestVersion)) {
-				latestVersion = v;
+			for(File installedBuildToolVersion : buildTools.listFiles()) {
+				if(verbose) {
+					System.out.println("Found build tools version " + installedBuildToolVersion);
+				}
+				String[] versionParts = installedBuildToolVersion.getName().split("\\.");
+				Version v = new SimpleVersion(Integer.parseInt(versionParts[0]), Integer.parseInt(versionParts[1]), Integer.parseInt(versionParts[2]));
+				if(v.gt(latestVersion)) {
+					latestVersion = v;
+				}
 			}
 		}
 		return latestVersion;
+	}
+
+	/**
+	 * Returns the path of the latest installed build tools.
+	 * @return Returns the path to the latest installed build tools, or null if none are installed.
+	 */
+	public static File getWindowsBuildToolsLocation() {
+		Version version = getWindowsInstalledBuildToolsVersion(false);
+		if(version.equals(new SimpleVersion(0, 0, 0))) {
+			return null;
+		}
+		File[] buildToolLocations = new File[]{
+				new File("C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Tools\\MSVC\\"),
+				new File("C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\"),
+		};
+		for(File buildTool : buildToolLocations) {
+			File withVersion = new File(buildTool, version.toString());
+			if(withVersion.exists()) {
+				return withVersion;
+			}
+			for(File fullVersion : buildTool.listFiles()) {
+				try {
+					if(fullVersion.getCanonicalPath().startsWith(withVersion.getCanonicalPath())) {
+						return fullVersion;
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return null;
 	}
 
 	private void installLinux(boolean nonInteractive) throws IOException, InterruptedException {
