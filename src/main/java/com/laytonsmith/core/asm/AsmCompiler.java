@@ -456,7 +456,9 @@ public class AsmCompiler {
 				String targetDepth = (OSUtils.GetOSBitDepth() == OSUtils.BitDepth.B64 ? "x64" : "x86"); // TODO make this selectable
 				args.add("/out:\"" + exeName + ".exe\"");
 				args.add("/entry:main");
-				String msvcBase = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.29.30037\\lib\\" + targetDepth + "\\";
+				String buildToolsVersion = AsmInstaller.getInstalledBuildToolsVersion().toString();
+				log("Using build tools version " + buildToolsVersion);
+				String msvcBase = "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\" + buildToolsVersion + "\\lib\\" + targetDepth + "\\";
 				String[] libs = new String[]{
 						"msvcrt.lib", "libcmt.lib"
 				};

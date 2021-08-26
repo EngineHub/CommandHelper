@@ -4,7 +4,9 @@ import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.PureUtilities.Web.RequestSettings;
 import com.laytonsmith.PureUtilities.Web.WebUtility;
 
@@ -55,7 +57,6 @@ public class AsmInstaller {
 
 		Map<String, String> llvmExtras = new HashMap<>();
 		String extrasBase = "https://raw.githubusercontent.com/LadyCailin/MethodScriptExtra/master";
-		String msvcVersion = "14.29.30037";
 		String llvmExtrasBase = extrasBase + "/installers/llvm/12.0.1/x64/";
 		llvmExtras.put(llvmExtrasBase + "llc/llc.exe", "llc.exe");
 		llvmExtras.put(llvmExtrasBase + "lli/lli.exe", "lli.exe");
@@ -77,7 +78,6 @@ public class AsmInstaller {
 		String buildToolsFileName = "vs_BuildTools.exe";
 		File lld = new File("C:\\Program Files\\LLVM\\bin\\lld-link.exe");
 		File winSDK = new File("C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.19041.0");
-		File buildTools = new File("C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\" + msvcVersion);
 		log(TermColors.GREEN + "Installing LLVM...");
 		if(!lld.exists() || !CommandExecutor.Execute(lld.getAbsolutePath(), "--version").contains("LLD 12.0.1")) {
 			if(new File("C:\\ProgramData\\chocolatey\\bin\\choco.exe").exists()) {
@@ -120,7 +120,16 @@ public class AsmInstaller {
 			CommandExecutor.Execute(redist.getAbsolutePath(), "/quiet");
 		}
 
-		if(!buildTools.exists()) {
+		boolean buildToolsUpToDate = false;
+		{
+			final Version minBuildToolsVersion = new SimpleVersion(14, 29, 30037);
+			Version installedVersion = getInstalledBuildToolsVersion();
+			if(installedVersion != null && installedVersion.gte(minBuildToolsVersion)) {
+				buildToolsUpToDate = true;
+			}
+		}
+
+		if(!buildToolsUpToDate) {
 			File buildToolsInstaller = download(buildToolsUrl, buildToolsFileName);
 			log(TermColors.GREEN + "Installing MSVC Build Tools");
 			String[] args = new String[]{
@@ -137,6 +146,26 @@ public class AsmInstaller {
 
 		log(TermColors.GREEN + "Done.");
 
+	}
+
+	/**
+	 * Assuming that the Windows build tools are installed, returns the newest version. If no build tools are installed,
+	 * (or if this isn't Windows), null is returned.
+	 * @return
+	 */
+	public static Version getInstalledBuildToolsVersion() {
+		File buildTools = new File("C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\");
+		if(!buildTools.exists() || buildTools.listFiles().length == 0) {
+			return null;
+		}
+		Version latestVersion = new SimpleVersion(0, 0, 0);
+		for(File installedBuildToolVersion : buildTools.listFiles()) {
+			Version v = new SimpleVersion(installedBuildToolVersion.getName());
+			if(v.gt(latestVersion)) {
+				latestVersion = v;
+			}
+		}
+		return latestVersion;
 	}
 
 	private void installLinux(boolean nonInteractive) throws IOException, InterruptedException {
@@ -233,7 +262,7 @@ public class AsmInstaller {
 			File lld = new File("C:\\Program Files\\LLVM\\bin\\lld-link.exe");
 			File llc = new File("C:\\Program Files\\LLVM\\bin\\llc.exe");
 			File winSDK = new File("C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.19041.0");
-			File msvc = new File("C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC\\14.29.30037");
+			File msvc = new File("C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools\\VC\\Tools\\MSVC");
 			if(!lld.exists() || !CommandExecutor.Execute(lld.getAbsolutePath(), "--version").contains("LLD 12.0.1")) {
 				log("Missing correct version of lld tool, please re-install the toolchain.");
 				return false;
