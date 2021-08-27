@@ -48,7 +48,6 @@ jobs:
     needs: 
       - build_linux
       - build_windows
-      - build_mac
     runs-on: ubuntu-latest
     permissions:
       contents: read
