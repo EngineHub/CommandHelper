@@ -23,7 +23,7 @@
 			for (const version of data) {
 				html += "<li><a href='https://apps.methodscript.com" + version.link + "'>";
 				html += version.buildId + "</a> ";
-				if(archive == "commandhelperjar") {
+				if(archive === "commandhelperjar") {
 					// This is the only one that has meta information at this stage
 					if(version.sha) {
 						html += "[";
@@ -41,7 +41,7 @@
 							pageRender.then(function() {
 								setTimeout(function() {
 									$("#commit_sha_" + version.sha).tooltipster({
-										content: $("<code><pre>"
+										content: $("<code><pre style='white-space: pre-wrap;'>"
 											+ escapeHTML(version.commitDetails)
 											+ "</pre></code>")
 									});
