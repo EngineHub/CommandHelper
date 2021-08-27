@@ -259,15 +259,9 @@ public class AsmInstaller {
 			return;
 		}
 		log(TermColors.GREEN + "Updating brew formulae" + TermColors.RESET);
-		new CommandExecutor("brew", "update")
-				.setSystemInputsAndOutputs()
-				.start()
-				.waitFor();
+		CommandExecutor.ExecuteWithRedirect("sudo", "brew", "update");
 		log(TermColors.GREEN + "Installing llvm@12" + TermColors.RESET);
-		new CommandExecutor("brew", "install", "llvm@12")
-				.setSystemInputsAndOutputs()
-				.start()
-				.waitFor();
+		CommandExecutor.ExecuteWithRedirect("sudo", "brew", "install", "llvm@12");
 	}
 
 	private File download(String installerUrl, String destFilename) throws IOException, InterruptedException {
