@@ -641,6 +641,7 @@ public class StaticTest {
 		Implementation.setServerType(Implementation.Type.TEST);
 		AliasCore fakeCore = mock(AliasCore.class);
 		fakeCore.autoIncludes = new ArrayList<File>();
+		SetPrivate(CommandHelperPlugin.class, "self", new CommandHelperPlugin(), CommandHelperPlugin.class);
 		SetPrivate(CommandHelperPlugin.class, "ac", fakeCore, AliasCore.class);
 		frontendInstalled = true;
 		try {
