@@ -1673,6 +1673,9 @@ public class Meta {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			SmartComment comment = environment.getEnv(GlobalEnv.class).GetAliasComment();
+			if(comment == null) {
+				return CNull.NULL;
+			}
 			CArray ret = CArray.GetAssociativeArray(t);
 			ret.set("body", comment.getBody());
 			CArray annotations = CArray.GetAssociativeArray(t);
