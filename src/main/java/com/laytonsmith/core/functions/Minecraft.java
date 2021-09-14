@@ -419,12 +419,13 @@ public class Minecraft {
 			return "void {locationArray, effect, [radius]} Plays the specified effect at the given location"
 					+ " for all players within the radius (or 64 by default). The effect can be one of the following: "
 					+ StringUtils.Join(MCEffect.values(), ", ", ", or ", " or ")
-					+ ". ---- Additional data can be supplied with the syntax EFFECT:DATA."
+					+ ". ---- Some effects may require an applicable block at the specified location."
+					+ " Additional data can be supplied with the syntax EFFECT:DATA."
 					+ "<br>The STEP_SOUND takes a block material name."
 					+ "<br>RECORD_PLAY takes a record material name."
 					+ "<br>SMOKE takes a facing, one of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ", " or ")
 					+ "<br>POTION_BREAK takes an int (represents color)."
-					+ "<br>VILLAGER_PLANT_GROW takes an int of the number of particles (requires a plant at location).";
+					+ "<br>VILLAGER_PLANT_GROW and BONE_MEAL_USE take an int for the number of particles.";
 		}
 
 		@Override
