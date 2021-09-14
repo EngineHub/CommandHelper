@@ -4438,7 +4438,7 @@ public class PlayerManagement {
 			if(loc == null) {
 				return CNull.NULL;
 			} else {
-				return ObjectGenerator.GetGenerator().location(loc, false);
+				return ObjectGenerator.GetGenerator().location(loc);
 			}
 		}
 
