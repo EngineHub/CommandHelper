@@ -23,6 +23,15 @@ public class BukkitMCTNT extends BukkitMCEntity implements MCTNT {
 	}
 
 	@Override
+	public void setSource(MCEntity source) {
+		if(source == null) {
+			tnt.setSource(null);
+		} else {
+			tnt.setSource((Entity) source.getHandle());
+		}
+	}
+
+	@Override
 	public int getFuseTicks() {
 		return tnt.getFuseTicks();
 	}

@@ -3195,6 +3195,14 @@ public class EntityManagement {
 							case entity_spec.KEY_PRIMED_TNT_FUSETICKS:
 								tnt.setFuseTicks(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
+							case entity_spec.KEY_PRIMED_TNT_SOURCE:
+								Mixed source = specArray.get(index, t);
+								if(source instanceof CNull) {
+									tnt.setSource(null);
+								} else {
+									tnt.setSource(Static.getLivingEntity(specArray.get(index, t), t));
+								}
+								break;
 							default:
 								throwException(index, t);
 						}
