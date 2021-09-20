@@ -34,6 +34,7 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBeacon;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBeehive;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBrewingStand;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCChest;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCContainer;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDispenser;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCDropper;
@@ -103,6 +104,7 @@ import org.bukkit.block.Beacon;
 import org.bukkit.block.Beehive;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.BrewingStand;
+import org.bukkit.block.Chest;
 import org.bukkit.block.Container;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Dispenser;
@@ -518,6 +520,9 @@ public class BukkitConvertor extends AbstractConvertor {
 	public static MCBlockState BukkitGetCorrectBlockState(BlockState bs) {
 		if(bs instanceof Container) {
 			// This code block should only contain checks for blockstates that implement Container.
+			if(bs instanceof Chest) {
+				return new BukkitMCChest((Chest) bs);
+			}
 			if(bs instanceof BrewingStand) {
 				return new BukkitMCBrewingStand((BrewingStand) bs);
 			}

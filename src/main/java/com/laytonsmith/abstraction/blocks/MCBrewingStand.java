@@ -1,9 +1,8 @@
 package com.laytonsmith.abstraction.blocks;
 
 import com.laytonsmith.abstraction.MCBrewerInventory;
-import com.laytonsmith.abstraction.MCInventoryHolder;
 
-public interface MCBrewingStand extends MCBlockState, MCInventoryHolder {
+public interface MCBrewingStand extends MCContainer {
 	int getBrewingTime();
 	int getFuelLevel();
 	@Override

@@ -1,7 +1,5 @@
 package com.laytonsmith.abstraction.blocks;
 
-import com.laytonsmith.abstraction.MCInventoryHolder;
-
-public interface MCDropper extends MCBlockState, MCInventoryHolder {
+public interface MCDropper extends MCContainer {
 	void drop();
 }

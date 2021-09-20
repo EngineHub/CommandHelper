@@ -52,9 +52,6 @@ import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCBanner;
 import com.laytonsmith.abstraction.blocks.MCBrewingStand;
-import com.laytonsmith.abstraction.blocks.MCContainer;
-import com.laytonsmith.abstraction.blocks.MCDispenser;
-import com.laytonsmith.abstraction.blocks.MCDropper;
 import com.laytonsmith.abstraction.blocks.MCFurnace;
 import com.laytonsmith.abstraction.entities.MCTropicalFish;
 import com.laytonsmith.abstraction.enums.MCAttribute;
@@ -472,18 +469,7 @@ public class ObjectGenerator {
 			// Specific ItemMeta
 			if(meta instanceof MCBlockStateMeta) {
 				MCBlockState bs = ((MCBlockStateMeta) meta).getBlockState(true);
-				if(bs instanceof MCContainer || bs instanceof MCDispenser || bs instanceof MCDropper) {
-					// Handle InventoryHolders with inventory slots that do not have a special meaning.
-					MCInventory inv = ((MCInventoryHolder) bs).getInventory();
-					CArray box = CArray.GetAssociativeArray(t);
-					for(int i = 0; i < inv.getSize(); i++) {
-						Construct item = ObjectGenerator.GetGenerator().item(inv.getItem(i), t);
-						if(!(item instanceof CNull)) {
-							box.set(i, item, t);
-						}
-					}
-					ma.set("inventory", box, t);
-				} else if(bs instanceof MCBanner) {
+				if(bs instanceof MCBanner) {
 					// This is a shield that may or may not have a banner attached, but if get get the BlockState when
 					// no banner exists, it gives us a default one. By first checking hasBlockState(),
 					// we can ensure we don't populate this meta array with the default banner data.
@@ -549,6 +535,17 @@ public class ObjectGenerator {
 					} else {
 						ma.set("flowerlocation", location(flowerLoc, false), t);
 					}
+				} else if(bs instanceof MCInventoryHolder) {
+					// Finally, handle InventoryHolders with inventory slots that do not have a special meaning.
+					MCInventory inv = ((MCInventoryHolder) bs).getInventory();
+					CArray box = CArray.GetAssociativeArray(t);
+					for(int i = 0; i < inv.getSize(); i++) {
+						Construct item = ObjectGenerator.GetGenerator().item(inv.getItem(i), t);
+						if(!(item instanceof CNull)) {
+							box.set(i, item, t);
+						}
+					}
+					ma.set("inventory", box, t);
 				}
 			} else if(meta instanceof MCFireworkEffectMeta) {
 				MCFireworkEffectMeta mcfem = (MCFireworkEffectMeta) meta;
@@ -826,35 +823,7 @@ public class ObjectGenerator {
 				if(meta instanceof MCBlockStateMeta) {
 					MCBlockStateMeta bsm = (MCBlockStateMeta) meta;
 					MCBlockState bs = bsm.getBlockState();
-					if(bs instanceof MCContainer || bs instanceof MCDispenser || bs instanceof MCDropper) {
-						if(ma.containsKey("inventory")) {
-							MCInventory inv = ((MCInventoryHolder) bs).getInventory();
-							Mixed cInvRaw = ma.get("inventory", t);
-							if(cInvRaw.isInstanceOf(CArray.TYPE)) {
-								CArray cinv = (CArray) cInvRaw;
-								for(String key : cinv.stringKeySet()) {
-									try {
-										int index = Integer.parseInt(key);
-										if(index < 0 || index >= inv.getSize()) {
-											ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found"
-													+ " in " + bs.getClass().getSimpleName().replaceFirst("MC", "")
-													+ " inventory array, so ignoring.");
-										}
-										MCItemStack is = ObjectGenerator.GetGenerator().item(cinv.get(key, t), t);
-										inv.setItem(index, is);
-									} catch (NumberFormatException ex) {
-										ConfigRuntimeException.DoWarning("Expecting integer value for key in "
-												+ bs.getClass().getSimpleName().replaceFirst("MC", "")
-												+ " inventory array, but \"" + key + "\" was found. Ignoring.");
-									}
-								}
-								bsm.setBlockState(bs);
-							} else if(!(cInvRaw instanceof CNull)) {
-								throw new CREFormatException(bs.getClass().getSimpleName().replaceFirst("MC", "")
-										+ " inventory expected to be an array or null.", t);
-							}
-						}
-					} else if(bs instanceof MCBanner) {
+					if(bs instanceof MCBanner) {
 						MCBanner banner = (MCBanner) bs;
 						if(ma.containsKey("basecolor")) {
 							String baseString = ma.get("basecolor", t).val().toUpperCase();
@@ -960,6 +929,35 @@ public class ObjectGenerator {
 							}
 						}
 						bsm.setBlockState(bs);
+					} else if(bs instanceof MCInventoryHolder) {
+						// Finally, handle InventoryHolders with inventory slots that do not have a special meaning.
+						if(ma.containsKey("inventory")) {
+							MCInventory inv = ((MCInventoryHolder) bs).getInventory();
+							Mixed cInvRaw = ma.get("inventory", t);
+							if(cInvRaw.isInstanceOf(CArray.TYPE)) {
+								CArray cinv = (CArray) cInvRaw;
+								for(String key : cinv.stringKeySet()) {
+									try {
+										int index = Integer.parseInt(key);
+										if(index < 0 || index >= inv.getSize()) {
+											ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found"
+													+ " in " + bs.getClass().getSimpleName().replaceFirst("MC", "")
+													+ " inventory array, so ignoring.");
+										}
+										MCItemStack is = ObjectGenerator.GetGenerator().item(cinv.get(key, t), t);
+										inv.setItem(index, is);
+									} catch (NumberFormatException ex) {
+										ConfigRuntimeException.DoWarning("Expecting integer value for key in "
+												+ bs.getClass().getSimpleName().replaceFirst("MC", "")
+												+ " inventory array, but \"" + key + "\" was found. Ignoring.");
+									}
+								}
+								bsm.setBlockState(bs);
+							} else if(!(cInvRaw instanceof CNull)) {
+								throw new CREFormatException(bs.getClass().getSimpleName().replaceFirst("MC", "")
+										+ " inventory expected to be an array or null.", t);
+							}
+						}
 					}
 				} else if(meta instanceof MCFireworkEffectMeta) {
 					MCFireworkEffectMeta femeta = (MCFireworkEffectMeta) meta;
