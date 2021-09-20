@@ -67,6 +67,7 @@ import com.laytonsmith.abstraction.entities.MCPig;
 import com.laytonsmith.abstraction.entities.MCPiglin;
 import com.laytonsmith.abstraction.entities.MCPigZombie;
 import com.laytonsmith.abstraction.entities.MCProjectile;
+import com.laytonsmith.abstraction.entities.MCPufferfish;
 import com.laytonsmith.abstraction.entities.MCRabbit;
 import com.laytonsmith.abstraction.entities.MCSheep;
 import com.laytonsmith.abstraction.entities.MCShulker;
@@ -2004,6 +2005,10 @@ public class EntityManagement {
 						specArray.set(entity_spec.KEY_PRIMED_TNT_SOURCE, CNull.NULL, t);
 					}
 					break;
+				case PUFFERFISH:
+					MCPufferfish puffer = (MCPufferfish) entity;
+					specArray.set(entity_spec.KEY_PUFFERFISH_SIZE, new CInt(puffer.getPuffState(), t), t);
+					break;
 				case RABBIT:
 					MCRabbit rabbit = (MCRabbit) entity;
 					specArray.set(entity_spec.KEY_RABBIT_TYPE, new CString(rabbit.getRabbitType().name(), t), t);
@@ -2210,6 +2215,7 @@ public class EntityManagement {
 		private static final String KEY_PANDA_HIDDENGENE = "hiddengene";
 		private static final String KEY_PARROT_TYPE = "type";
 		private static final String KEY_PHANTOM_SIZE = "size";
+		private static final String KEY_PUFFERFISH_SIZE = "size";
 		private static final String KEY_ZOMBIFIED_PIGLIN_ANGRY = "angry";
 		private static final String KEY_ZOMBIFIED_PIGLIN_ANGER = "anger";
 		private static final String KEY_RABBIT_TYPE = "type";
@@ -3218,6 +3224,18 @@ public class EntityManagement {
 								} catch (IllegalArgumentException exception) {
 									throw new CREFormatException("Invalid rabbit type: " + specArray.get(index, t).val(), t);
 								}
+								break;
+							default:
+								throwException(index, t);
+						}
+					}
+					break;
+				case PUFFERFISH:
+					MCPufferfish puffer = (MCPufferfish) entity;
+					for(String index : specArray.stringKeySet()) {
+						switch(index.toLowerCase()) {
+							case entity_spec.KEY_PUFFERFISH_SIZE:
+								puffer.setPuffState(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
