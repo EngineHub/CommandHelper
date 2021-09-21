@@ -45,9 +45,8 @@ jobs:
     - name: Build with Maven
       run: mvn -version && mvn -B package --file pom.xml -Pfail-on-test-failures
   publish:
-    needs: 
-      - build_linux
-      - build_windows
+    needs:
+      - build_windows # For now only windows, eventually all 3, once they're stable.
     runs-on: ubuntu-latest
     permissions:
       contents: read
