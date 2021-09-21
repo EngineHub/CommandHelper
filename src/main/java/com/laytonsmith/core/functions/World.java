@@ -1023,9 +1023,6 @@ public class World {
 				} catch (IllegalArgumentException e) {
 					throw new CREFormatException(args[1].val() + " is not a valid world type.", t);
 				}
-				if(!type.canCreate()) {
-					throw new CREFormatException("The world type " + args[1].val() + " cannot be created", t);
-				}
 				MCWorldEnvironment environment;
 				try {
 					environment = MCWorldEnvironment.valueOf(args[2].val().toUpperCase());

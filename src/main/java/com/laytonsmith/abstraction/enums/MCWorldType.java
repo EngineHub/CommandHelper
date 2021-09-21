@@ -6,23 +6,6 @@ import com.laytonsmith.annotations.MEnum;
 public enum MCWorldType {
 	NORMAL,
 	FLAT,
-	VERSION_1_1(false),
 	LARGE_BIOMES,
-	AMPLIFIED,
-	CUSTOMIZED(false),
-	BUFFET(false);
-
-	private final boolean create;
-
-	MCWorldType() {
-		this.create = true;
-	}
-
-	MCWorldType(boolean create) {
-		this.create = create;
-	}
-
-	public boolean canCreate() {
-		return create;
-	}
+	AMPLIFIED
 }

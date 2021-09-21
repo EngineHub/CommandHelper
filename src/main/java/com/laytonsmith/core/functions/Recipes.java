@@ -177,8 +177,7 @@ public class Recipes {
 		@Override
 		public String docs() {
 			return "boolean {recipe_key} Remove a certain recipe by its registered key."
-					+ " Returns whether the recipe was removed successfully or not."
-					+ " (Minecraft 1.15.2 or higher)";
+					+ " Returns whether the recipe was removed successfully or not.";
 		}
 	}
 

@@ -186,12 +186,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 | MUSHROOM_COW
 | 
 * %KEY_MUSHROOM_COW_TYPE%: The type of mushroom cow. (can be %MUSHROOM_COW_TYPE%).
-|- 
-| OCELOT
-| 
-* %KEY_GENERIC_SITTING%: If the ocelot is sitting. (1.13 only)
-* %KEY_OCELOT_TYPE%: The type of the ocelot (can be %OCELOT_TYPE%). (1.13 only)
-|- 
+|-
 | PAINTING
 | 
 * %KEY_PAINTING_ART%: The art on the painting (can be %ART%).
@@ -262,16 +257,9 @@ without knowing the rotations on the other axis or of other body parts beforehan
 * %KEY_ARROW_DAMAGE%: The amount of damage. (double)
 * %KEY_SPECTRAL_ARROW_GLOWING_TICKS%: The number of ticks the hit entity will glow. (int)
 |-
-| SPLASH_POTION, LINGERING_POTION (removed in 1.14, use SPLASH_POTION)
+| SPLASH_POTION
 | 
 * %KEY_SPLASH_POTION_ITEM%: The item for the thrown potion.
-|-
-| TIPPED_ARROW (removed in 1.14, use ARROW)
-|
-* %KEY_ARROW_CRITICAL%: If this arrow is critical. (boolean)
-* %KEY_ARROW_KNOCKBACK%: The knockback strength. (double)
-* %KEY_ARROW_DAMAGE%: The amount of damage. (double)
-* %KEY_TIPPEDARROW_POTIONMETA%: An associative array with a "base" potion array and a "potions" array of effect arrays for a tipped arrow.
 |-
 | TRIDENT
 | 
@@ -291,9 +279,9 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |-
 | VILLAGER
 | 
-* %KEY_VILLAGER_PROFESSION%: The profession of the villager (can be %PROFESSION%). This list differs in 1.14 from 1.13.
-* %KEY_VILLAGER_EXPERIENCE%: The amount of experience in the villager's profession towards the next level. (not in 1.13)
-* %KEY_VILLAGER_LEVEL%: The level of villager's profession. Can be 1-5. (not in 1.13)
+* %KEY_VILLAGER_PROFESSION%: The profession of the villager (can be %PROFESSION%).
+* %KEY_VILLAGER_EXPERIENCE%: The amount of experience in the villager's profession towards the next level.
+* %KEY_VILLAGER_LEVEL%: The level of villager's profession. Can be 1-5.
 |-
 | WITHER_SKULL
 | 
