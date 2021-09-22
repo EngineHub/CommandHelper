@@ -20,7 +20,6 @@ import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CDecimal;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
-import com.laytonsmith.core.constructs.CIdentifier;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
@@ -2335,14 +2334,6 @@ public final class MethodScriptCompiler {
 			if(func.getClass().getAnnotation(nolinking.class) != null) {
 				//It's an unlinking function, so we need to stop at this point
 				return;
-			}
-		}
-		if(cFunction instanceof CIdentifier) {
-			//Add the child to the identifier
-			ParseTree c = ((CIdentifier) cFunction).contained();
-			tree.addChild(c);
-			if(c.getData() instanceof Construct) {
-				((Construct) c.getData()).setWasIdentifier(true);
 			}
 		}
 

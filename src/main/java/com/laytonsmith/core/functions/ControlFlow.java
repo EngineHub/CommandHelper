@@ -25,7 +25,6 @@ import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CFunction;
-import com.laytonsmith.core.constructs.CIdentifier;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
@@ -96,14 +95,6 @@ public class ControlFlow {
 
 		@Override
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-
-			// TODO - This 'if' should be rewritten to 'ifelse' during compilation instead if this is the case.
-			for(ParseTree node : nodes) {
-				if(node.getData() instanceof CIdentifier) {
-					return new ifelse().execs(t, env, parent, nodes);
-				}
-			}
-
 			ParseTree condition = nodes[0];
 			if(ArgumentValidation.getBooleanish(parent.seval(condition, env), t)) {
 				ParseTree ifCode = nodes[1];
@@ -334,22 +325,14 @@ public class ControlFlow {
 			for(int i = 0; i <= nodes.length - 2; i += 2) {
 				ParseTree statement = nodes[i];
 				ParseTree code = nodes[i + 1];
-				Mixed evalStatement = parent.seval(statement, env);
-				if(evalStatement instanceof CIdentifier) {
-					evalStatement = parent.seval(((CIdentifier) evalStatement).contained(), env);
-				}
-				if(ArgumentValidation.getBooleanish(evalStatement, t)) {
+				if(ArgumentValidation.getBooleanish(parent.seval(statement, env), t)) {
 					Mixed ret = env.getEnv(GlobalEnv.class).GetScript().eval(code, env);
 					return ret;
 				}
 			}
 			if(nodes.length % 2 == 1) {
 				Mixed ret = env.getEnv(GlobalEnv.class).GetScript().seval(nodes[nodes.length - 1], env);
-				if(ret instanceof CIdentifier) {
-					return parent.seval(((CIdentifier) ret).contained(), env);
-				} else {
-					return ret;
-				}
+				return ret;
 			}
 			return CVoid.VOID;
 		}
