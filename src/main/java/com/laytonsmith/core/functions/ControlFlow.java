@@ -323,16 +323,14 @@ public class ControlFlow {
 				throw new CREInsufficientArgumentsException("ifelse expects at least 2 arguments", t);
 			}
 			for(int i = 0; i <= nodes.length - 2; i += 2) {
-				ParseTree statement = nodes[i];
-				ParseTree code = nodes[i + 1];
-				if(ArgumentValidation.getBooleanish(parent.seval(statement, env), t)) {
-					Mixed ret = env.getEnv(GlobalEnv.class).GetScript().eval(code, env);
-					return ret;
+				ParseTree condition = nodes[i];
+				if(ArgumentValidation.getBooleanish(parent.seval(condition, env), t)) {
+					ParseTree ifCode = nodes[i + 1];
+					return env.getEnv(GlobalEnv.class).GetScript().seval(ifCode, env);
 				}
 			}
 			if(nodes.length % 2 == 1) {
-				Mixed ret = env.getEnv(GlobalEnv.class).GetScript().seval(nodes[nodes.length - 1], env);
-				return ret;
+				return env.getEnv(GlobalEnv.class).GetScript().seval(nodes[nodes.length - 1], env);
 			}
 			return CVoid.VOID;
 		}
