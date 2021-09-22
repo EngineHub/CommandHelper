@@ -96,22 +96,23 @@ public class ControlFlow {
 
 		@Override
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+
+			// TODO - This 'if' should be rewritten to 'ifelse' during compilation instead if this is the case.
 			for(ParseTree node : nodes) {
 				if(node.getData() instanceof CIdentifier) {
 					return new ifelse().execs(t, env, parent, nodes);
 				}
 			}
-			ParseTree condition = nodes[0];
-			ParseTree __if = nodes[1];
-			ParseTree __else = (nodes.length == 3 ? nodes[2] : null);
 
+			ParseTree condition = nodes[0];
 			if(ArgumentValidation.getBooleanish(parent.seval(condition, env), t)) {
-				return parent.seval(__if, env);
+				ParseTree ifCode = nodes[1];
+				return parent.seval(ifCode, env);
+			} else if(nodes.length == 3) {
+				ParseTree elseCode = nodes[2];
+				return parent.seval(elseCode, env);
 			} else {
-				if(__else == null) {
-					return CVoid.VOID;
-				}
-				return parent.seval(__else, env);
+				return CVoid.VOID;
 			}
 		}
 
