@@ -18,7 +18,7 @@ nbactions.xml
 .DS_Store
 /test-backend/
 /nbproject/
-/dependency-reduced-pom.xml
+dependency-reduced-pom.xml
 
 desktop.ini
 

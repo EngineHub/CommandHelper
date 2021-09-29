@@ -70,7 +70,7 @@ public abstract class CompositeFunction extends AbstractFunction {
 
 		GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
 		IVariableList oldVariables = gEnv.GetVarList();
-		IVariableList newVariables = new IVariableList();
+		IVariableList newVariables = new IVariableList(oldVariables);
 		newVariables.set(new IVariable(CArray.TYPE, "@arguments", new CArray(t, args.length, args), t));
 		gEnv.SetVarList(newVariables);
 		Mixed ret = CVoid.VOID;

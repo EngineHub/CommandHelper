@@ -2,8 +2,12 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.Finalizable;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.functions.ResourceManager.res_free_resource;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
+import java.io.File;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -13,7 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * created.
  */
 @typeof("ms.lang.Resource")
-public class CResource<T> extends Construct {
+public class CResource<T> extends Construct implements Finalizable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get(CResource.class);
@@ -98,6 +102,11 @@ public class CResource<T> extends Construct {
 	@Override
 	public Version since() {
 		return MSVersion.V3_3_1;
+	}
+
+	@Override
+	public void msFinalize() {
+		new res_free_resource().exec(new Target(0, new File("/Finalizer"), 0), null, this);
 	}
 
 	public static interface ResourceToString {

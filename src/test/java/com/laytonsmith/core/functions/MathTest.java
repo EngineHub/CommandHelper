@@ -15,18 +15,19 @@ import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
-import static com.laytonsmith.testing.StaticTest.GetFakeServer;
-import static com.laytonsmith.testing.StaticTest.assertCEquals;
 import org.junit.After;
 import org.junit.AfterClass;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.mockito.Mockito.verify;
+
+import static com.laytonsmith.testing.StaticTest.GetFakeServer;
 import static com.laytonsmith.testing.StaticTest.GetOnlinePlayer;
 import static com.laytonsmith.testing.StaticTest.SRun;
+import static com.laytonsmith.testing.StaticTest.assertCEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.verify;
 
 /**
  *
@@ -57,7 +58,7 @@ public class MathTest {
 		fakePlayer = GetOnlinePlayer();
 		fakeServer = GetFakeServer();
 
-		varList = new IVariableList();
+		varList = new IVariableList(null);
 		varList.set(new IVariable(Auto.TYPE, "var", C.onstruct(1), Target.UNKNOWN, env));
 		varList.set(new IVariable(Auto.TYPE, "var2", C.onstruct(2.5), Target.UNKNOWN, env));
 		env = Static.GenerateStandaloneEnvironment();

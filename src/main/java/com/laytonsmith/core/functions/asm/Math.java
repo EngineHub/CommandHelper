@@ -49,8 +49,6 @@ public class Math {
 			llvmenv.addGlobalDeclaration(AsmCommonLibTemplates.RAND, env);
 
 			String RAND_MAX = "2147483647"; // 2**31-1
-			int allocaD = llvmenv.getNewLocalVariableReference(IRType.DOUBLE);
-			builder.generator(t, env).alloca(allocaD, IRType.DOUBLE);
 			int callRand;
 			String conversionInstruction;
 			// callRand is the output of this block, for windows this is the output of the or
@@ -81,7 +79,6 @@ public class Math {
 			builder.appendLine(t, "%" + fdiv + " = fdiv double %" + sitofp + ", " + RAND_MAX + ".0");
 
 			if(nodes.length == 0) {
-				builder.appendLine(t, "store double %" + fdiv + ", double* %" + allocaD);
 				return IRDataBuilder.setReturnVariable(fdiv, IRType.DOUBLE);
 			} else {
 				String min;

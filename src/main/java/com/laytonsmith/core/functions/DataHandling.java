@@ -13,10 +13,10 @@ import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.annotations.unbreakable;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.MSLog;
-import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Globals;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
@@ -61,6 +61,7 @@ import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -73,18 +74,19 @@ import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
-import com.laytonsmith.core.functions.ArrayHandling.array_get;
-import com.laytonsmith.core.functions.ArrayHandling.array_push;
-import com.laytonsmith.core.functions.ArrayHandling.array_set;
-import com.laytonsmith.core.functions.Compiler.__autoconcat__;
-import com.laytonsmith.core.functions.Compiler.centry;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
+import com.laytonsmith.core.functions.ArrayHandling.array_get;
+import com.laytonsmith.core.functions.ArrayHandling.array_push;
+import com.laytonsmith.core.functions.ArrayHandling.array_set;
+import com.laytonsmith.core.functions.Compiler.__autoconcat__;
+import com.laytonsmith.core.functions.Compiler.centry;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.tools.docgen.templates.ArrayIteration;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -3741,6 +3743,71 @@ public class DataHandling {
 			};
 		}
 
+	}
+
+//	@api
+	public static class free extends AbstractFunction implements Optimizable {
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			IVariableList list = env.getEnv(GlobalEnv.class).GetVarList();
+			Mixed value = list.get(((IVariable) args[0]).getVariableName(), t, env).ival();
+			list.freeValue(value);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public String getName() {
+			return "free";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		@Override
+		public boolean preResolveVariables() {
+			return false;
+		}
+
+		@Override
+		public String docs() {
+			return "void {ivar} Frees the memory of the underlying value.";
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env, Set<Class<? extends EnvironmentImpl>> envs, List<ParseTree> children, FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() != 1 || !(children.get(0).getData() instanceof IVariable)) {
+				throw new ConfigCompileException(getName() + " can only accept an IVariable as the argument.", t);
+			}
+			return null;
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
 	}
 
 }

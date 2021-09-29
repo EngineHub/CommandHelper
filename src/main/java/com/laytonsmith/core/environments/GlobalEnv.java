@@ -168,7 +168,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		if(cloneVars && iVariableList != null) {
 			clone.iVariableList = iVariableList.clone();
 		} else if(!cloneVars) {
-			clone.iVariableList = new IVariableList();
+			clone.iVariableList = new IVariableList(clone.iVariableList);
 		}
 		return clone;
 	}
@@ -246,7 +246,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 */
 	public IVariableList GetVarList() {
 		if(iVariableList == null) {
-			iVariableList = new IVariableList();
+			iVariableList = new IVariableList(null);
 		}
 		return iVariableList;
 	}

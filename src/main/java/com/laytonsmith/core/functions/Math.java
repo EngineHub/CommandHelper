@@ -19,6 +19,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
@@ -1177,6 +1178,14 @@ public class Math {
 			};
 		}
 
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			if(argTypes.size() == 0) {
+				return CDouble.TYPE;
+			} else {
+				return CInt.TYPE;
+			}
+		}
 	}
 
 	@api

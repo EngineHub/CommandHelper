@@ -120,7 +120,7 @@ public class EventBinding {
 			Mixed options = parent.seval(nodes[1], env);
 			Mixed prefilter = parent.seval(nodes[2], env);
 			Mixed event_obj = parent.eval(nodes[3], env);
-			IVariableList custom_params = new IVariableList();
+			IVariableList custom_params = new IVariableList(env.getEnv(GlobalEnv.class).GetVarList());
 			for(int a = 0; a < nodes.length - 5; a++) {
 				Mixed var = parent.eval(nodes[4 + a], env);
 				if(!(var instanceof IVariable)) {

@@ -1,11 +1,16 @@
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.Finalizable;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,7 +20,51 @@ import java.util.Set;
  */
 public class IVariableList {
 
+	private final IVariableList parentScope;
+
+	/**
+	 * Creates a new IVariableList.
+	 * @param parentScope The parent scope, used when freeing variables. If this is the top level scope, this
+	 *                    can be null.
+	 */
+	public IVariableList(IVariableList parentScope) {
+		this.parentScope = parentScope;
+	}
+
 	Map<String, IVariable> varList = new HashMap<>();
+
+	public void freeValue(Mixed value) {
+		// TODO: If assign adds backreferences, then this can be made more efficient. Research needed.
+		List<String> toRemove = new ArrayList<>();
+		for(String ivarS : keySet()) {
+			IVariable ivar = varList.get(ivarS);
+			// ==, not equals, we only want to clear it if it's the same exact reference.
+			if(ivar.ival() == value) {
+				toRemove.add(ivar.getVariableName());
+			}
+		}
+
+		for(String ivarS : toRemove) {
+			IVariable ivar = varList.get(ivarS);
+			remove(ivar.getVariableName());
+			ivar.setIval(CNull.NULL);
+			set(ivar);
+		}
+
+		if(parentScope != null) {
+			parentScope.freeValue(value);
+		} else {
+			if(value instanceof Finalizable f) {
+				try {
+					f.msFinalize();
+				} catch (RuntimeException ex) {
+					if(Prefs.DebugMode() || Prefs.ScreamErrors()) {
+						ex.printStackTrace();
+					}
+				}
+			}
+		}
+	}
 
 	/**
 	 * Removes a value from the variable table
@@ -83,7 +132,7 @@ public class IVariableList {
 
 	@Override
 	public IVariableList clone() {
-		IVariableList clone = new IVariableList();
+		IVariableList clone = new IVariableList(this);
 		clone.varList = new HashMap<>(varList);
 		return clone;
 	}
