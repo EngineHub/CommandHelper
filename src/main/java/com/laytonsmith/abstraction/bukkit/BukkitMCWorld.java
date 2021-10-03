@@ -463,8 +463,13 @@ public class BukkitMCWorld extends BukkitMCMetadatable implements MCWorld {
 	}
 
 	@Override
-	public void explosion(double x, double y, double z, float size, boolean safe) {
-		w.createExplosion(x, y, z, size, !safe, !safe);
+	public boolean explosion(MCLocation location, float size, boolean safe, boolean fire, MCEntity source) {
+		Location loc = (Location) location.getHandle();
+		Entity src = null;
+		if(source != null) {
+			src = (Entity) source.getHandle();
+		}
+		return w.createExplosion(loc, size, fire, !safe, src);
 	}
 
 	@Override

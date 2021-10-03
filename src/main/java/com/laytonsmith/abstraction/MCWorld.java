@@ -145,7 +145,7 @@ public interface MCWorld extends MCMetadatable {
 
 	MCBlock getHighestBlockAt(int x, int z);
 
-	void explosion(double x, double y, double z, float size, boolean safe);
+	boolean explosion(MCLocation location, float size, boolean safe, boolean fire, MCEntity source);
 
 	/**
 	 * This method performs some check on the world to ensure it exists.

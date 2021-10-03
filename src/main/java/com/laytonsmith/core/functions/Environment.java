@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
@@ -1199,21 +1200,24 @@ public class Environment {
 
 		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{1, 2, 3};
+			return new Integer[]{1, 2, 3, 4, 5};
 		}
 
 		@Override
 		public String docs() {
-			return "void {locationArray, [size], [safe]} Creates an explosion with a given size at a given location."
-					+ " Size defaults to size of a creeper (3), and null uses the default. If safe is true,"
-					+ " (defaults to false) the explosion won't hurt the surrounding blocks. If size is 0, and safe is"
-					+ " true, you will still see the animation and hear the sound, but players won't be hurt, and"
-					+ " neither will the blocks.";
+			return "boolean {locationArray, [size], [safe], [fire], [source]} Creates an explosion at a location."
+					+ " Size defaults to size of a creeper (3), where 0 does no damage to entities."
+					+ " If safe is true (defaults to false) the explosion won't break blocks."
+					+ " If fire is true (defaults to true unless safe is true), the explosion may leave behind fire."
+					+ " The source must be an entity UUID, which can be used for block and entity damage attribution."
+					+ " The explosion will not damage source entity."
+					+ " Returns false if the explosion was canceled.";
 		}
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{CREFormatException.class, CRECastException.class, CRELengthException.class, CREInvalidWorldException.class};
+			return new Class[]{CREFormatException.class, CRECastException.class, CRELengthException.class,
+					CREInvalidWorldException.class, CRERangeException.class, CREBadEntityException.class};
 		}
 
 		@Override
@@ -1228,49 +1232,44 @@ public class Environment {
 
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			double x = 0;
-			double y = 0;
-			double z = 0;
+			MCLocation loc;
 			float size = 3;
-			MCWorld w = null;
-			MCPlayer m = null;
 			boolean safe = false;
-
-			if(args.length >= 3) {
-				safe = ArgumentValidation.getBoolean(args[2], t);
-			}
-			if(args.length >= 2) {
-				if(!(args[1] instanceof CNull)) {
-					size = ArgumentValidation.getInt(args[1], t);
-				}
-			}
-
-			if(size > 100) {
-				throw new CRERangeException("A bit excessive, don't you think? Let's scale that back some, huh?", t);
-			}
+			boolean fire = true;
+			MCEntity source = null;
 
 			if(!(args[0].isInstanceOf(CArray.TYPE))) {
 				throw new CRECastException("Expecting an array at parameter 1 of explosion", t);
 			}
-
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
-			w = loc.getWorld();
-			x = loc.getX();
-			z = loc.getZ();
-			y = loc.getY();
-
-			if(w == null) {
-				if(!(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer)) {
-					throw new CREPlayerOfflineException(this.getName() + " needs a world in the location array,"
-							+ " or a player so it can take the current world of that player.", t);
+			if(args.length >= 2) {
+				if(!(args[1] instanceof CNull)) {
+					size = ArgumentValidation.getInt(args[1], t);
+					if(size > 100) {
+						throw new CRERangeException("A bit excessive, don't you think? Let's scale that back some, huh?", t);
+					}
 				}
-
-				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				w = m.getWorld();
+				if(args.length >= 3) {
+					safe = ArgumentValidation.getBooleanObject(args[2], t);
+					if(args.length >= 4) {
+						fire = ArgumentValidation.getBooleanObject(args[3], t);
+						if(args.length == 5) {
+							source = Static.getEntity(args[4], t);
+						}
+					} else {
+						fire = !safe;
+					}
+				}
 			}
 
-			w.explosion(x, y, z, size, safe);
-			return CVoid.VOID;
+			MCWorld w = null;
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(p != null) {
+				w = p.getWorld();
+			}
+			loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			w = loc.getWorld();
+
+			return CBoolean.get(w.explosion(loc, size, safe, fire, source));
 		}
 
 		@Override
