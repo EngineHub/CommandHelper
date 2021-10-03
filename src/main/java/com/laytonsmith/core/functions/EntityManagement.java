@@ -4119,6 +4119,69 @@ public class EntityManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_entity_freezing extends EntityGetterFunction {
+
+		@Override
+		public String getName() {
+			return "get_entity_freezing";
+		}
+
+		@Override
+		public String docs() {
+			return "int {entityUUID} Returns the number of ticks the entity has been freezing in powdered snow."
+					+ " Counts down by 2 every tick when entity is thawing.";
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(args[0], t);
+			return new CInt(e.getFreezingTicks(), t);
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_entity_freezing extends EntitySetterFunction {
+
+		@Override
+		public String getName() {
+			return "set_entity_freezing";
+		}
+
+		@Override
+		public String docs() {
+			return "void {entityUUID, int} Sets how many server ticks the entity has been freezing."
+					+ " Must be above zero, and will clamp to the maximum the server allows.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CREFormatException.class, CRELengthException.class, CREBadEntityException.class,
+					CRERangeException.class};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCEntity entity = Static.getEntity(args[0], t);
+			int ticks = ArgumentValidation.getInt32(args[1], t);
+			if(ticks < 0) {
+				throw new CRERangeException("Freezing ticks must not be below zero.", t);
+			}
+			entity.setFreezingTicks(ticks);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_scoreboard_tags extends EntityGetterFunction {
 
 		@Override

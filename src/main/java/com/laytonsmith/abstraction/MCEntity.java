@@ -104,4 +104,8 @@ public interface MCEntity extends MCMetadatable {
 	boolean addScoreboardTag(String tag);
 
 	boolean removeScoreboardTag(String tag);
+
+	int getFreezingTicks();
+
+	void setFreezingTicks(int ticks);
 }

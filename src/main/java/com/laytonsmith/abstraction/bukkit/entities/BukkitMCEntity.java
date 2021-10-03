@@ -323,6 +323,28 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	}
 
 	@Override
+	public int getFreezingTicks() {
+		try {
+			return e.getFreezeTicks();
+		} catch (NoSuchMethodError ex) {
+			// prior to 1.17
+			return 0;
+		}
+	}
+
+	@Override
+	public void setFreezingTicks(int ticks) {
+		try {
+			if(ticks > e.getMaxFreezeTicks()) {
+				ticks = e.getMaxFreezeTicks();
+			}
+			e.setFreezeTicks(ticks);
+		} catch (NoSuchMethodError ex) {
+			// prior to 1.17
+		}
+	}
+
+	@Override
 	public String toString() {
 		return e.toString();
 	}
