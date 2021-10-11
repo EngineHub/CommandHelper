@@ -6,6 +6,8 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 
+import java.util.UUID;
+
 public class BukkitMCItem extends BukkitMCEntity implements MCItem {
 
 	Item i;
@@ -33,5 +35,25 @@ public class BukkitMCItem extends BukkitMCEntity implements MCItem {
 	@Override
 	public void setPickupDelay(int delay) {
 		i.setPickupDelay(delay);
+	}
+
+	@Override
+	public UUID getOwner() {
+		return i.getOwner();
+	}
+
+	@Override
+	public void setOwner(UUID owner) {
+		i.setOwner(owner);
+	}
+
+	@Override
+	public UUID getThrower() {
+		return i.getThrower();
+	}
+
+	@Override
+	public void setThrower(UUID thrower) {
+		i.setThrower(thrower);
 	}
 }

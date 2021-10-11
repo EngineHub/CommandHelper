@@ -143,6 +143,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -1828,6 +1829,18 @@ public class EntityManagement {
 					MCItem item = (MCItem) entity;
 					specArray.set(entity_spec.KEY_DROPPED_ITEM_ITEMSTACK, ObjectGenerator.GetGenerator().item(item.getItemStack(), t), t);
 					specArray.set(entity_spec.KEY_DROPPED_ITEM_PICKUPDELAY, new CInt(item.getPickupDelay(), t), t);
+					UUID owner = item.getOwner();
+					if(owner == null) {
+						specArray.set(entity_spec.KEY_DROPPED_ITEM_OWNER, CNull.NULL, t);
+					} else {
+						specArray.set(entity_spec.KEY_DROPPED_ITEM_OWNER, new CString(owner.toString(), t), t);
+					}
+					UUID thrower = item.getThrower();
+					if(thrower == null) {
+						specArray.set(entity_spec.KEY_DROPPED_ITEM_THROWER, CNull.NULL, t);
+					} else {
+						specArray.set(entity_spec.KEY_DROPPED_ITEM_THROWER, new CString(thrower.toString(), t), t);
+					}
 					break;
 				case ENDER_CRYSTAL:
 					MCEnderCrystal endercrystal = (MCEnderCrystal) entity;
@@ -2173,6 +2186,8 @@ public class EntityManagement {
 		private static final String KEY_CREEPER_EXPLOSIONRADIUS = "explosionradius";
 		private static final String KEY_DROPPED_ITEM_ITEMSTACK = "itemstack";
 		private static final String KEY_DROPPED_ITEM_PICKUPDELAY = "pickupdelay";
+		private static final String KEY_DROPPED_ITEM_OWNER = "owner";
+		private static final String KEY_DROPPED_ITEM_THROWER = "thrower";
 		private static final String KEY_ENDERCRYSTAL_BASE = "base";
 		private static final String KEY_ENDERCRYSTAL_BEAMTARGET = "beamtarget";
 		private static final String KEY_ENDEREYE_DESPAWNTICKS = "despawnticks";
@@ -2683,6 +2698,22 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_DROPPED_ITEM_PICKUPDELAY:
 								item.setPickupDelay(ArgumentValidation.getInt32(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_DROPPED_ITEM_OWNER:
+								Mixed owner = specArray.get(index, t);
+								if(owner instanceof CNull) {
+									item.setOwner(null);
+								} else {
+									item.setOwner(Static.GetUUID(specArray.get(index, t), t));
+								}
+								break;
+							case entity_spec.KEY_DROPPED_ITEM_THROWER:
+								Mixed thrower = specArray.get(index, t);
+								if(thrower instanceof CNull) {
+									item.setThrower(null);
+								} else {
+									item.setThrower(Static.GetUUID(specArray.get(index, t), t));
+								}
 								break;
 							default:
 								throwException(index, t);
