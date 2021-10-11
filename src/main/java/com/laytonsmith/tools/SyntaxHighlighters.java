@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
-import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.api;
@@ -58,7 +57,6 @@ public class SyntaxHighlighters {
 				+ "can work to get it included in CommandHelper!";
 
 	public static String generate(String type, String theme) {
-		Implementation.forceServerType(Implementation.Type.BUKKIT);
 		if("npp".equals(type) || "notepad++".equals(type)) {
 			if("default".equals(theme)) {
 				return template("/syntax-templates/notepad++/default.xml");

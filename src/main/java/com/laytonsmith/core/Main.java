@@ -1162,6 +1162,7 @@ public class Main {
 			List<String> syntax = parsedArgs.getStringListArgument();
 			String type = (syntax.size() >= 1 ? syntax.get(0) : null);
 			String theme = (syntax.size() >= 2 ? syntax.get(1) : null);
+			Implementation.forceServerType(Implementation.Type.BUKKIT);
 			StreamUtils.GetSystemOut().println(SyntaxHighlighters.generate(type, theme));
 			System.exit(0);
 		}
