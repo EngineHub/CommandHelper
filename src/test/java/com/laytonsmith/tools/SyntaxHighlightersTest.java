@@ -5,6 +5,7 @@
  */
 package com.laytonsmith.tools;
 
+import com.laytonsmith.testing.StaticTest;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Ignore;
@@ -16,6 +17,7 @@ import org.junit.Ignore;
 public class SyntaxHighlightersTest {
 
 	public SyntaxHighlightersTest() {
+		StaticTest.InstallFakeServerFrontend();
 	}
 
 	@Test
