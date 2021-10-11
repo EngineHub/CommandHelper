@@ -29,4 +29,14 @@ public class BukkitMCPiglin extends BukkitMCLivingEntity implements MCPiglin {
 	public void setBaby(boolean baby) {
 		getHandle().setBaby(baby);
 	}
+
+	@Override
+	public boolean isImmuneToZombification() {
+		return getHandle().isImmuneToZombification();
+	}
+
+	@Override
+	public void setImmuneToZombification(boolean immune) {
+		getHandle().setImmuneToZombification(immune);
+	}
 }

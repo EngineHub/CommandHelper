@@ -1994,6 +1994,7 @@ public class EntityManagement {
 				case PIGLIN:
 					MCPiglin piglin = (MCPiglin) entity;
 					specArray.set(entity_spec.KEY_GENERIC_BABY, CBoolean.get(piglin.isBaby()), t);
+					specArray.set(entity_spec.KEY_PIGLIN_ZOMBIFICATION_IMMUNE, CBoolean.get(piglin.isImmuneToZombification()), t);
 					break;
 				case PRIMED_TNT:
 					MCTNT tnt = (MCTNT) entity;
@@ -2215,6 +2216,7 @@ public class EntityManagement {
 		private static final String KEY_PANDA_HIDDENGENE = "hiddengene";
 		private static final String KEY_PARROT_TYPE = "type";
 		private static final String KEY_PHANTOM_SIZE = "size";
+		private static final String KEY_PIGLIN_ZOMBIFICATION_IMMUNE = "zombificationimmune";
 		private static final String KEY_PUFFERFISH_SIZE = "size";
 		private static final String KEY_ZOMBIFIED_PIGLIN_ANGRY = "angry";
 		private static final String KEY_ZOMBIFIED_PIGLIN_ANGER = "anger";
@@ -3188,6 +3190,9 @@ public class EntityManagement {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_GENERIC_BABY:
 								piglin.setBaby(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_PIGLIN_ZOMBIFICATION_IMMUNE:
+								piglin.setImmuneToZombification(ArgumentValidation.getBooleanObject(specArray.get(index, t), t));
 								break;
 							default:
 								throwException(index, t);
