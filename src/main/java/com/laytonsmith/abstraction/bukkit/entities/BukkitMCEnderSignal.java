@@ -1,11 +1,14 @@
 package com.laytonsmith.abstraction.bukkit.entities;
 
+import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.entities.MCEnderSignal;
 import org.bukkit.Location;
 import org.bukkit.entity.EnderSignal;
 import org.bukkit.entity.Entity;
+import org.bukkit.inventory.ItemStack;
 
 public class BukkitMCEnderSignal extends BukkitMCEntity implements MCEnderSignal {
 
@@ -44,5 +47,19 @@ public class BukkitMCEnderSignal extends BukkitMCEntity implements MCEnderSignal
 	@Override
 	public void setTargetLocation(MCLocation loc) {
 		es.setTargetLocation((Location) loc.getHandle());
+	}
+
+	@Override
+	public MCItemStack getItem() {
+		return new BukkitMCItemStack(es.getItem());
+	}
+
+	@Override
+	public void setItem(MCItemStack stack) {
+		if(stack == null) {
+			es.setItem(null);
+		} else {
+			es.setItem((ItemStack) stack.getHandle());
+		}
 	}
 }

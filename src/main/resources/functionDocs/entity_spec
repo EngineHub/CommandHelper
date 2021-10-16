@@ -97,6 +97,7 @@ without knowing the rotations on the other axis or of other body parts beforehan
 |
 * %KEY_ENDEREYE_DESPAWNTICKS%: The number of ticks counted until despawn. (will despawn after 80 ticks)
 * %KEY_ENDEREYE_DROP%: Whether or not the EnderEye will drop an item on despawn.
+* %KEY_ENDEREYE_ITEM%: The item the EnderEye entity displays and drops.
 * %KEY_ENDEREYE_TARGET%: The target location array that the EnderEye will travel towards.
 |-
 | ENDERMAN

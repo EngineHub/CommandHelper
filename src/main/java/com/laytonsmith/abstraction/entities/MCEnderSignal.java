@@ -1,6 +1,7 @@
 package com.laytonsmith.abstraction.entities;
 
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 
 public interface MCEnderSignal extends MCEntity {
@@ -10,4 +11,6 @@ public interface MCEnderSignal extends MCEntity {
 	void setDropItem(boolean drop);
 	MCLocation getTargetLocation();
 	void setTargetLocation(MCLocation loc);
+	MCItemStack getItem();
+	void setItem(MCItemStack stack);
 }

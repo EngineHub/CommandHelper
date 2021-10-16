@@ -1857,6 +1857,7 @@ public class EntityManagement {
 					MCEnderSignal endereye = (MCEnderSignal) entity;
 					specArray.set(entity_spec.KEY_ENDEREYE_DESPAWNTICKS, new CInt(endereye.getDespawnTicks(), t), t);
 					specArray.set(entity_spec.KEY_ENDEREYE_DROP, CBoolean.get(endereye.getDropItem()), t);
+					specArray.set(entity_spec.KEY_ENDEREYE_ITEM, ObjectGenerator.GetGenerator().item(endereye.getItem(), t), t);
 					specArray.set(entity_spec.KEY_ENDEREYE_TARGET, ObjectGenerator.GetGenerator().location(endereye.getTargetLocation(), false), t);
 					break;
 				case ENDER_DRAGON:
@@ -2192,6 +2193,7 @@ public class EntityManagement {
 		private static final String KEY_ENDERCRYSTAL_BEAMTARGET = "beamtarget";
 		private static final String KEY_ENDEREYE_DESPAWNTICKS = "despawnticks";
 		private static final String KEY_ENDEREYE_DROP = "drop";
+		private static final String KEY_ENDEREYE_ITEM = "item";
 		private static final String KEY_ENDEREYE_TARGET = "target";
 		private static final String KEY_ENDERDRAGON_PHASE = "phase";
 		private static final String KEY_ENDERMAN_CARRIED = "carried";
@@ -2299,8 +2301,9 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_AREAEFFECTCLOUD_COLOR:
-								if(specArray.get(index, t).isInstanceOf(CArray.TYPE)) {
-									CArray color = (CArray) specArray.get(index, t);
+								Mixed colorMixed = specArray.get(index, t);
+								if(colorMixed.isInstanceOf(CArray.TYPE)) {
+									CArray color = (CArray) colorMixed;
 									cloud.setColor(ObjectGenerator.GetGenerator().color(color, t));
 								} else {
 									throw new CRECastException("AreaEffectCloud color must be an array", t);
@@ -2313,9 +2316,10 @@ public class EntityManagement {
 								cloud.setDurationOnUse(ArgumentValidation.getInt32(specArray.get(index, t), t));
 								break;
 							case entity_spec.KEY_AREAEFFECTCLOUD_PARTICLE:
-								if(specArray.get(index, t).isInstanceOf(CArray.TYPE)) {
+								Mixed particleMixed = specArray.get(index, t);
+								if(particleMixed.isInstanceOf(CArray.TYPE)) {
 									Object data = null;
-									CArray pa = (CArray) specArray.get(index, t);
+									CArray pa = (CArray) particleMixed;
 									MCParticle p;
 									try {
 										p = MCParticle.valueOf(pa.get("particle", t).val().toUpperCase());
@@ -2368,7 +2372,7 @@ public class EntityManagement {
 										throw new CREFormatException("Invalid particle data for " + p.name(), t);
 									}
 								} else {
-									String particleName = specArray.get(index, t).val();
+									String particleName = particleMixed.val();
 									try {
 										cloud.setParticle(MCParticle.valueOf(particleName), null);
 									} catch (IllegalArgumentException ex) {
@@ -2515,8 +2519,9 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_ARMORSTAND_POSES:
 								Map<MCBodyPart, Vector3D> poseMap = stand.getAllPoses();
-								if(specArray.get(index, t).isInstanceOf(CArray.TYPE)) {
-									CArray poseArray = (CArray) specArray.get(index, t);
+								Mixed posesMixed = specArray.get(index, t);
+								if(posesMixed.isInstanceOf(CArray.TYPE)) {
+									CArray poseArray = (CArray) posesMixed;
 									for(MCBodyPart key : poseMap.keySet()) {
 										try {
 											poseMap.put(key, ObjectGenerator.GetGenerator().vector(poseMap.get(key),
@@ -2526,7 +2531,7 @@ public class EntityManagement {
 										}
 									}
 								}
-								if(specArray.get(index, t) instanceof CNull) {
+								if(posesMixed instanceof CNull) {
 									for(MCBodyPart key : poseMap.keySet()) {
 										poseMap.put(key, Vector3D.ZERO);
 									}
@@ -2704,7 +2709,7 @@ public class EntityManagement {
 								if(owner instanceof CNull) {
 									item.setOwner(null);
 								} else {
-									item.setOwner(Static.GetUUID(specArray.get(index, t), t));
+									item.setOwner(Static.GetUUID(owner, t));
 								}
 								break;
 							case entity_spec.KEY_DROPPED_ITEM_THROWER:
@@ -2712,7 +2717,7 @@ public class EntityManagement {
 								if(thrower instanceof CNull) {
 									item.setThrower(null);
 								} else {
-									item.setThrower(Static.GetUUID(specArray.get(index, t), t));
+									item.setThrower(Static.GetUUID(thrower, t));
 								}
 								break;
 							default:
@@ -2777,6 +2782,14 @@ public class EntityManagement {
 								break;
 							case entity_spec.KEY_ENDEREYE_DROP:
 								endereye.setDropItem(ArgumentValidation.getBoolean(specArray.get(index, t), t));
+								break;
+							case entity_spec.KEY_ENDEREYE_ITEM:
+								Mixed enderItem = specArray.get(index, t);
+								if(enderItem instanceof CNull) {
+									endereye.setItem(null);
+								} else {
+									endereye.setItem(ObjectGenerator.GetGenerator().item(enderItem, t));
+								}
 								break;
 							case entity_spec.KEY_ENDEREYE_TARGET:
 								break;
@@ -3069,17 +3082,19 @@ public class EntityManagement {
 					for(String index : specArray.stringKeySet()) {
 						switch(index.toLowerCase()) {
 							case entity_spec.KEY_MINECART_COMMAND_CUSTOMNAME:
-								if(specArray.get(index, t) instanceof CNull) {
+								Mixed customName = specArray.get(index, t);
+								if(customName instanceof CNull) {
 									commandminecart.setName(null);
 								} else {
-									commandminecart.setName(specArray.get(index, t).val());
+									commandminecart.setName(customName.val());
 								}
 								break;
 							case entity_spec.KEY_MINECART_COMMAND_COMMAND:
-								if(specArray.get(index, t) instanceof CNull) {
+								Mixed command = specArray.get(index, t);
+								if(command instanceof CNull) {
 									commandminecart.setCommand(null);
 								} else {
-									commandminecart.setCommand(specArray.get(index, t).val());
+									commandminecart.setCommand(command.val());
 								}
 								break;
 							case entity_spec.KEY_MINECART_BLOCK:
