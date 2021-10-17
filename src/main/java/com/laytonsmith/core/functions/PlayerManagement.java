@@ -4202,6 +4202,67 @@ public class PlayerManagement {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
+	public static class psend_block_damage extends AbstractFunction {
+
+		@Override
+		public String getName() {
+			return "psend_block_damage";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "void {[player], locationArray, progress} Sends the player fake block break progress for a location."
+					+ " Progress is a percentage from 0.0 to 1.0.";
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREFormatException.class, CREInvalidWorldException.class,
+					CRELengthException.class, CREPlayerOfflineException.class, CRERangeException.class};
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p;
+			int offset = 0;
+			if(args.length == 3) {
+				p = Static.GetPlayer(args[0], t);
+				offset = 1;
+			} else {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				Static.AssertPlayerNonNull(p, t);
+			}
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
+			double progress = ArgumentValidation.getDouble(args[offset + 1], t);
+			if(progress < 0.0 || progress > 1.0) {
+				throw new CRERangeException("Block damage progress must be 0.0 to 1.0.", t);
+			}
+			p.sendBlockDamage(loc, progress);
+			return CVoid.VOID;
+		}
+
+		@Override
+		public MSVersion since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class phunger extends AbstractFunction {
 
 		@Override

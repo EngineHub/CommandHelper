@@ -515,6 +515,11 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	@Override
+	public void sendBlockDamage(MCLocation loc, double progress) {
+		p.sendBlockDamage((Location) loc.getHandle(), (float) progress);
+	}
+
+	@Override
 	public void sendSignTextChange(MCLocation loc, String[] lines) {
 		p.sendSignChange(((Location) loc.getHandle()), lines);
 	}
