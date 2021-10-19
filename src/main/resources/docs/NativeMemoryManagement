@@ -1,0 +1,180 @@
+{{unimplemented}}
+
+Memory Management is a huge field of study, of which entire university courses or PhD programs could be devoted.
+Therefore, this article will necessarily skip most of the details about the subject. However, a general overview on
+the subject is provided, as well as the information necessary to change the default settings. In perhaps 90% of all
+cases, the default settings should be appropriate, and shouldn't be changed.
+
+Also note that this article only applies to MethodScript which is compiled to native binaries. Interpreted MethodScript
+relies entirely on the memory management of the JVM, and has no specific memory management options.
+
+== Memory Management Overview ==
+
+All useful programs rely on allocating memory in RAM. There are two conceptual types of allocations, those which happen
+on the stack, and those which happen on the heap. For stack based allocations, these are easy enough for the system to
+manage, because the lifetime of the memory only lasts as long as the function call is running. Once the function is
+complete, any memory allocated can merely be popped off and discarded entirely (hence the name, "stack"). This is only
+suitable in certain cases, however. Large objects, and those that need to continue existing after the function returns
+cannot use this technique. The alternative then is to allocate this memory on the heap.
+Memory allocated on the heap is more difficult to manage, however, in part because the lifetime of the memory is uncertain.
+In a sense, you can think of this memory as "global variables", or at least memory that is generally addressable by
+multiple functions. There are plenty of concerns for memory on the heap, from heap fragmentation, to memory paging
+strategies, all of which have to be addressed by either the programmer or the programming language or the OS.
+For these examples in particular, the programming language or OS can generally handle these in a way that is fairly
+win-win, in other words, there are no downsides to the implementation, and it doesn't require specific thought from
+the programmer. The other, larger problem revolves around when to free up some memory. When RAM is no longer in use, it
+should be freed, so that the system no longer has to manage it. While all modern desktop OSes support virtual memory
+by paging out blocks of memory onto the disk when the physical RAM is full, this technique introduces a serious
+performance hit, and even still doesn't provide infinite memory. Therefore, it's important that when a program is
+finished with a piece of memory, it is freed up somehow.
+
+Unfortunately, this is not a straightforward thing to determine in the general case. In some cases, it is easy, you
+simply count up the number of things that have reference to some memory, and as soon as the reference count drops to 0,
+you know that it's no longer necessary to keep that memory around, because no one could use it anymore even if they
+wanted. However, circular references prevent this from being possible in general, because two objects might reference
+each other, and even though the number of other references to these blocks of memory might be zero, since they reference
+each other, they will have reference counts above 0, making the system unable to automatically free them.
+
+In general, there are two different approaches that programming languages can take. They can simply not address the
+issue at all, and instead provide a mechanism for the programmer to manually free the memory when it's done, (such as
+in C and C++). Doing it this way relies on the programmer to ensure that memory is not freed too early (when references
+to the object still exist, causing what's known as a dangling pointer) or too late (a memory leak) or more than once
+(double free bugs). The other
+alternative is to not rely on the programmer at all, and instead using a ''Garbage Collector'' (GC). A GC works by
+continually scanning the memory, and seeing when there are no longer references to an object, and clearing it at that
+time. There are multiple strategies to doing this scan, each with their own pros and cons. Overall, these two approaches
+also have their own pros and cons, and it's not clear to say in general that one is better than the other. Manual
+memory management requires humans to make sure they don't write bugs (a hard task), but if done correctly, has less
+overhead and is more predictable. Garbage Collection will automatically manage memory, making things like dangling
+pointers and memory leaks impossible (assuming the GC algorithm is correctly implemented), but means that performance
+might be impacted, and in any case makes the behavior of the system less predictable.
+
+For most programs, however, using a Garbage Collector is the best option. The performanace overhead is usually
+acceptable, especially given the correctness guarantee that comes along with it, and precisely when an object is freed
+from memory doesn't really matter, so long as it's eventually freed and the memory reclaimed after it's done being used.
+Therefore, the default setting of MethodScript is to do just that. Include a GC in the compiled program, and allowing
+the programmer to not have to worry about this at all. In rare circumstances however, this might not be acceptable,
+therefore additional compilation options are available, and details can be modified where necessary. In almost all
+cases though, unless you have a very specific use case, AND you have positively identified through benchmarking that the
+default option is insufficient, the default options should be left alone.
+
+== GC Options ==
+
+The default option may change as new features are implemented in the language, but for now the default setting is to
+use reference counting plus a backup mark & sweep garbage collector.
+
+There are a number of options that can be used to control the garbage collector that is compiled in to your program.
+These options are added to the compile command.
+
+=== --no-gc ===
+If you have a program that is guaranteed to be quick running, or will never allocate more than a fixed amount of memory,
+it may be suitable to completely disable garbage collection. No GC will be compiled in, and memory will therefore be
+consumed permanently while the process runs. Eventually, a deallocation mechanism will be provided, and this will allow
+you to manage memory for longer running programs without running out of memory.
+
+When using library code that has not been written with no GC in mind, this may make it impossible to write a program
+without memory leaks. Therefore, libraries specifically have to state that they are No-GC safe through a file option,
+otherwise it is a compile error to use them with this mode. (Use file option <code>no-gc: true</code> to allow this
+option. This must be included in the file options for all files that are intended on being compiled in.) You can
+override this check by using --force-no-gc instead.
+
+=== --reference-counting ===
+For some programs, reference counting may be sufficient. Reference counting has very little overhead, and makes object
+deallocation predicable. Reference counting alone cannot detect cycles however, and so in general cannot be used without
+potentially introducing memory leaks. For carefully crafted code however, this may be sufficient. One can manually break
+cycles by setting one of the references in the cycle to null. This will decrement the reference counter for that object
+to zero, which will then cause it to be collected, which will then reduce the count to the first object by one, and once
+your code loses its reference as well, it will drop to zero, causing it to be collected as well.
+
+When using library code that has not been written with this in mind, this may make it impossible to write a program
+without memory leaks. Therefore, libraries specifically have to state that they are reference counting safe through a
+file option, otherwise it is a compile error to use them with this mode. (Use file option <code>ref-count: true</code>
+to allow this option. This must be included in the file options for all files that are intended on being compiled in.)
+You can override this check by using --force-reference-counting instead.
+
+=== --mark-and-sweep ===
+Mark and sweep is a stop-the-world algorithm, which can reliably be used in all cases where this is acceptable. This
+disables reference counting, which slightly decreases the memory used on a per object basis, at the cost of potentially
+require more CPU time.
+
+=== --rc-mark-and-sweep ===
+Reference counting + mark and sweep to detect cycles. This is the default option, and is suitable for most programs. This
+algorithm uses reference counting as a first line - any reference that goes to 0 is definitely ok to be collected
+immediately, and is likely to work for most allocations, and the mark and sweep GC runs as a backup to detect cycles.
+
+This algorithm balances all the factors in the middle - each object will have a little more memory allocated in the
+object header, but will require less overall work by the mark and sweep collector.
+
+=== Future Algorithms ===
+In the future, a generational collector will be implemented. It will also be possible to include multiple garbage
+collectors in the binary, allowing the user to switch algorithms through parameters passed to the binary.
+
+== free() ==
+
+In future versions of MethodScript, it will be possible to disable automatic memory management and instead use manual
+techniques. Currently, there is no free function available to programs, and so for programs which need real
+time or predicable collection, MethodScript is not yet suitable. The rest of this section outlines how it will work once
+implemented.
+
+Allowing a free() function with no garbage collector creates situations that are harder to reason through, and in
+particular can open code up to 3 separate issues.
+
+* Dangling pointers - These are created when two separate pieces of code have a reference to the same object in memory \
+which is then freed. In the meantime, the memory in that location may be re-used for another object. This can cause \
+errors or unexpected behavior in the best case, and security issues in the worst case.
+* Double free - These errors are created when memory is freed twice, the second time potentially causing some other \
+object to be deleted or partially deleted.
+* Memory leaks - These errors are created when the programmer forgets to free memory that should have been freed, but \
+then loses all references to the memory, making it impossible to free in the future. If this continues happening, the \
+system will eventually run out of memory, causing the program to crash.
+
+When using free() with a garbage collector, it's possible to avoid all these issues, and still use free() to simply
+run the finalizers on an object, which can be useful in the case of objects with external references, such as file
+handles or network connections. When using free() with a GC, the object itself is generally deallocated, but the header
+for the object remains, with a deallocated flag set, so that any references to the object will not point to invalid
+memory, and can instead provide defined behavior by causing a null pointer exception, rather than allowing reading from
+unexpected memory locations. If the object is freed again, this will simply be a no-op. The
+header of the object is then garbage collected when it otherwise naturally would, preventing memory leaks.
+
+Nonetheless, in all cases, using free() in one place in the code can cause code in another location to stop working, as
+suddenly references to values may go to null or point to invalid memory,
+making it extremely hard to reason through. Therefore, it's important for code to be aware of the use of free()
+elsewhere in the code base, even if it does not use free() itself. For code which accepts the use of free(), it can be
+marked with the <code>allow-free: true</code> file option. (Using the no-gc file option does not imply allow-free, since
+the code might have only been intended to be used with short running or known finite memory programs.)
+If any of the code in the project uses free(), and the project includes files
+that don't declare allow-free, then this becomes a compile error to use free(), unless the --force-allow-free compiler
+option is specified.
+
+Note that direct integrations with non-MethodScript code is unable to detect safety, and so all external code is treated
+as if it uses free() and is therefore unsafe.
+
+== ofree() ==
+
+To assist programmers in writing multipurpose code, an additional version of free() exists, ofree() (optional free).
+This is a no-op if the code is compiled with a garbage collector, and simply free() if it is compiled with --no-gc. This
+prevents triggering of the allow-free check when free() would be used for normal memory cleanup in the course of using
+manual memory management techniques, while still allowing for free() when it's specifically meant to be used even in a
+GC environment.
+
+It is recommended to use this version of free where appropriate to make code more reuseable, and to prevent requiring
+the allow-free file option throughout the whole project when not actually necessary.
+
+== Multiple Heaps ==
+
+In the future, multiple heaps will be supported, some of which can be used with a GC, and some of which are manually
+managed. In this way, code which is particularly performance critical can be run in a real-time and deterministic way
+with no additional overhead, and other code can be managed by the GC. Threads will be configured at startup to have
+access to one heap or the other, with well defined ways of passing memory between the two thread types. This is not
+implemented currently, and is not planned for the immediate future.
+
+== Library Authors ==
+
+There is a higher burden placed on authors of library code, if they wish their code to be useable in all modes.
+Care must be used to write code with all modes in mind, and set appropriate file options. In particular, code must
+manually manage memory using ofree(), and not use free() unnecessarily. Additionally, code must avoid circular
+references, and set the <code>ref-count: true</code> file option in order to make code work under the reference
+counting strategy.
+
+In general, tests should be run under the --no-gc flag, and verify that code compiles under the --reference-counting
+flag and against a file with the allow-free option set to false with no warnings.
