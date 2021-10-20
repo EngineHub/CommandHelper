@@ -341,7 +341,16 @@ public final class FileOptions {
 				+ " secure_string class instead of string. There is first class language support for this in"
 				+ " many places, but in general makes it harder to accidentally leak sensitive data in for"
 				+ " example log messages, even when passing the data around to code that accepts strings.",
-				MSVersion.V3_3_4, SeverityLevel.MEDIUM);
+				MSVersion.V3_3_4, SeverityLevel.MEDIUM),
+		FutureNestedCommentChange("In version 3.3.6 or later, nested comment blocks will be allowed."
+				+ " This will cause the code here to suddenly change behavior by opening a new comment"
+				+ " block, which will never be closed (as that's impossible with 3.3.5 behavior)."
+				+ " If you accept that this will suddenly break in a future upgrade, you may do nothing"
+				+ " now and deal with it later by closing the comment, but this (suppressable) "
+				+ " warning is provided now during"
+				+ " a phase in period in case you would like to deal with it by removing the opening"
+				+ " comment symbol.",
+				MSVersion.V3_3_5, SeverityLevel.HIGH);
 
 		private SuppressWarning(String docs, Version version, SeverityLevel severityLevel) {
 			this.docs = docs;

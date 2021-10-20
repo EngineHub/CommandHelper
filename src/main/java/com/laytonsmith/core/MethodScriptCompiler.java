@@ -12,6 +12,7 @@ import com.laytonsmith.core.compiler.BranchStatement;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.FileOptions.SuppressWarning;
 import com.laytonsmith.core.compiler.KeywordList;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
@@ -45,21 +46,22 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.extensions.ExtensionManager;
 import com.laytonsmith.core.extensions.ExtensionTracker;
+import com.laytonsmith.core.functions.ArrayHandling.array_get;
 import com.laytonsmith.core.functions.Compiler;
 import com.laytonsmith.core.functions.Compiler.__autoconcat__;
 import com.laytonsmith.core.functions.Compiler.__cbrace__;
-import com.laytonsmith.core.functions.Compiler.p;
 import com.laytonsmith.core.functions.Compiler.__smart_string__;
-import com.laytonsmith.core.functions.Math.neg;
+import com.laytonsmith.core.functions.Compiler.p;
 import com.laytonsmith.core.functions.ControlFlow;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.IncludeCache;
-import com.laytonsmith.core.functions.ArrayHandling.array_get;
+import com.laytonsmith.core.functions.Math.neg;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistence.DataSourceException;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -149,6 +151,11 @@ public final class MethodScriptCompiler {
 			script = script.substring(1);
 		}
 		final StringBuilder fileOptions = new StringBuilder();
+		/**
+		 * May be null if the file options aren't parsed yet, but if they have been, they will be parsed and put in
+		 * this variable, to allow the lexer to make use of the file options already.
+		 */
+		FileOptions builtFileOptions = null;
 		script = script.replaceAll("\r\n", "\n");
 		script = script + "\n";
 		final Set<String> keywords = KeywordList.getKeywordNames();
@@ -218,6 +225,7 @@ public final class MethodScriptCompiler {
 							tokenList.add(new Token(TType.FILE_OPTIONS_END, ">", target));
 						}
 						inFileOptions = false;
+						builtFileOptions = TokenStream.parseFileOptions(fileOptions.toString(), new HashMap<>());
 						continue;
 					}
 				}
@@ -231,25 +239,34 @@ public final class MethodScriptCompiler {
 
 					// Block comments start (/* and /**) and Double slash line comment start (//).
 					case '/': {
-						if(!inComment) {
-							if(c2 == '*') { // "/*" or "/**".
-								buf.append("/*");
-								inComment = true;
-								commentIsBlock = true;
-								if(i < script.length() - 2 && script.charAt(i + 2) == '*') { // "/**".
-									inSmartComment = true;
-									buf.append("*");
-									i++;
-								}
-								commentLineNumberStart = lineNum;
-								i++;
-								continue;
-							} else if(c2 == '/') { // "//".
-								buf.append("//");
-								inComment = true;
-								i++;
-								continue;
+						if(c2 == '*') { // "/*" or "/**".
+							if(inComment && commentIsBlock) {
+								// This compiler warning can be removed and the nested comment blocks implemented in 3.3.6
+								// or later.
+								CompilerWarning warning = new CompilerWarning("Nested comment blocks are being"
+										+ " added to a future version, where this code will suddenly cause an unclosed"
+										+ " comment block. You can remove this block comment open symbol now, or add a "
+										+ " new block comment close when this feature is implemented (it will likely"
+										+ " cause an obvious compile error), and optionally suppress this warning.",
+										target, SuppressWarning.FutureNestedCommentChange);
+								env.getEnv(CompilerEnvironment.class).addCompilerWarning(builtFileOptions, warning);
 							}
+							buf.append("/*");
+							inComment = true;
+							commentIsBlock = true;
+							if(i < script.length() - 2 && script.charAt(i + 2) == '*') { // "/**".
+								inSmartComment = true;
+								buf.append("*");
+								i++;
+							}
+							commentLineNumberStart = lineNum;
+							i++;
+							continue;
+						} else if(c2 == '/') { // "//".
+							buf.append("//");
+							inComment = true;
+							i++;
+							continue;
 						}
 						break;
 					}
