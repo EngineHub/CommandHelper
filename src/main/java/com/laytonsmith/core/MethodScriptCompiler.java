@@ -162,6 +162,7 @@ public final class MethodScriptCompiler {
 		boolean inComment = false;
 		int commentLineNumberStart = 1;
 		boolean commentIsBlock = false;
+		int nestedBlockCommentCount = 0;
 		boolean inOptVar = false;
 		boolean inCommand = (!inPureMScript);
 		boolean inMultiline = false;
@@ -231,25 +232,24 @@ public final class MethodScriptCompiler {
 
 					// Block comments start (/* and /**) and Double slash line comment start (//).
 					case '/': {
-						if(!inComment) {
-							if(c2 == '*') { // "/*" or "/**".
-								buf.append("/*");
-								inComment = true;
-								commentIsBlock = true;
-								if(i < script.length() - 2 && script.charAt(i + 2) == '*') { // "/**".
-									inSmartComment = true;
-									buf.append("*");
-									i++;
-								}
-								commentLineNumberStart = lineNum;
+						if(c2 == '*') { // "/*" or "/**".
+							buf.append("/*");
+							inComment = true;
+							commentIsBlock = true;
+							if(i < script.length() - 2 && script.charAt(i + 2) == '*') { // "/**".
+								inSmartComment = true;
+								buf.append("*");
 								i++;
-								continue;
-							} else if(c2 == '/') { // "//".
-								buf.append("//");
-								inComment = true;
-								i++;
-								continue;
 							}
+							commentLineNumberStart = lineNum;
+							i++;
+							nestedBlockCommentCount++;
+							continue;
+						} else if(c2 == '/') { // "//".
+							buf.append("//");
+							inComment = true;
+							i++;
+							continue;
 						}
 						break;
 					}
@@ -267,16 +267,19 @@ public final class MethodScriptCompiler {
 					// Block comment end (*/).
 					case '*': {
 						if(inComment && commentIsBlock && c2 == '/') { // "*/".
-							if(saveAllTokens || inSmartComment) {
-								buf.append("*/");
-								tokenList.add(new Token(inSmartComment ? TType.SMART_COMMENT : TType.COMMENT,
-										buf.toString(), target));
+							nestedBlockCommentCount--;
+							if(nestedBlockCommentCount == 0) {
+								if(saveAllTokens || inSmartComment) {
+									buf.append("*/");
+									tokenList.add(new Token(inSmartComment ? TType.SMART_COMMENT : TType.COMMENT,
+											buf.toString(), target));
+								}
+								buf = new StringBuilder();
+								target = new Target(lineNum, file, column);
+								inComment = false;
+								commentIsBlock = false;
+								inSmartComment = false;
 							}
-							buf = new StringBuilder();
-							target = new Target(lineNum, file, column);
-							inComment = false;
-							commentIsBlock = false;
-							inSmartComment = false;
 							i++;
 							continue;
 						}
