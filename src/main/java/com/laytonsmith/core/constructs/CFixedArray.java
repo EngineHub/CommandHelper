@@ -23,8 +23,8 @@ import java.util.Set;
  * fixed size arrays, which assists with code mapping and is a required primitive for bootstrapping purposes.
  */
 @typeof("ms.lang.fixed_array")
-public class CFixedArray extends Construct implements java.lang.Iterable<Mixed>, Booleanish,
-		com.laytonsmith.core.natives.interfaces.Iterable{
+public class CFixedArray extends Construct implements
+		java.lang.Iterable<Mixed>, Booleanish, com.laytonsmith.core.natives.interfaces.Iterable {
 
 	public static final CClassType TYPE = CClassType.get(CFixedArray.class);
 	private Mixed[] data;
