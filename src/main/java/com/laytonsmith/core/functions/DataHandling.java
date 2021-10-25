@@ -3822,7 +3822,7 @@ public class DataHandling {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[0];
+			return new Class[] {CRERangeException.class, CRECastException.class};
 		}
 
 		@Override
@@ -3839,6 +3839,9 @@ public class DataHandling {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			CClassType type = ArgumentValidation.getClassType(args[0], t);
 			int size = ArgumentValidation.getInt32(args[1], t);
+			if(size < 0) {
+				throw new CRERangeException("Array size must be zero or greater. Received: " + size, t);
+			}
 			// nullOut is intentionally ignored here, as it's irrelevant in the case of the interpreter
 			return new CFixedArray(t, type, size);
 		}
@@ -3855,9 +3858,10 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "fixed_array {ClassType type, int size, [boolean nullOut]} Creates an array that can hold values of the given type,"
-					+ " and is of the given size. The array cannot be resized or retyped later. The array cannot be"
-					+ " associative. In general, this isn't"
+			return "fixed_array {ClassType type, int size, [boolean nullOut]} Creates an array that can hold values of"
+					+ " the given type, and is of the given size."
+					+ " The array cannot be resized or retyped later."
+					+ " The array cannot be associative. In general, this isn't"
 					+ " meant for normal use, and unless you have specific need for a fixed_size array, array() should"
 					+ " be used instead. This is instead meant for writing low level system code. On the other hand,"
 					+ " for performance sensitive needs, this may be used instead, though note that most of the API"
@@ -3869,7 +3873,9 @@ public class DataHandling {
 					+ " true, and in the interpreter is irrelevant, but for native code, if set to true, this loops"
 					+ " through the array and sets each value to null (or equivalent for primitive types). This"
 					+ " takes additional work, but sets the value to a known state. This can be bypassed if the array"
-					+ " is about to be filled from 0 to length, but should otherwise always be set to true.";
+					+ " is about to be filled from 0 to length, but should otherwise always be set to true."
+					+ " A RangeException is thrown if size is negative, or larger than a 32 bits signed integer."
+					+ " A CastException is thrown when size cannot be cast to an int.";
 		}
 	}
 
