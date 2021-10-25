@@ -667,8 +667,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	/**
 	 * Removes the value at the specified key
 	 *
-	 * @param construct
-	 * @return
+	 * @param construct The value to remove
+	 * @return The removed value, or CNull if nothing was removed.
 	 */
 	public Mixed remove(Mixed construct) {
 		String c = normalizeConstruct(construct);
@@ -697,7 +697,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	/**
 	 * Removes all values that are equal to the specified construct from this array
 	 *
-	 * @param construct
+	 * @param construct The value to remove
 	 */
 	public void removeValues(Mixed construct) {
 		if(associativeMode) {
@@ -742,16 +742,10 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		}
 	}
 
-	private Comparator<String> comparator = new Comparator<String>() {
+	private final Comparator<String> comparator = new Comparator<>() {
 
 		private int normalize(int value) {
-			if(value < 0) {
-				return -1;
-			} else if(value > 0) {
-				return 1;
-			} else {
-				return 0;
-			}
+			return Integer.compare(value, 0);
 		}
 
 		@Override
@@ -769,29 +763,6 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			// change the order of certain associative array's key display, however, this has never
 			// been a guaranteed property of the arrays.
 			return normalize(o1.compareTo(o2));
-			/*
-			//Due to a dumb behavior in Double.parseDouble,
-			//we need to check to see if there are non-digit characters in
-			//the keys, and if so, do a string comparison.
-			if(o1.matches(".*[^0-9\\.]+.*") || o2.matches(".*[^0-9\\.]+.*")){
-				return normalize(o1.compareTo(o2));
-			}
-			try {
-				int i1 = Integer.parseInt(o1);
-				int i2 = Integer.parseInt(o2);
-				//They're both integers, do an integer comparison
-				return new Integer(i1).compareTo(new Integer(i2));
-			} catch (NumberFormatException e){
-				try {
-					double d1 = Double.parseDouble(o1);
-					double d2 = Double.parseDouble(o2);
-					//They're both doubles, do a double comparison
-					return new Double(d1).compareTo(new Double(d2));
-				} catch (NumberFormatException ee){
-					//Just do a string comparison
-					return normalize(o1.compareTo(o2));
-				}
-			}*/
 		}
 
 	};
@@ -860,7 +831,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 
 	public void sort(final ArraySortType sort) {
 		if(this.associativeMode) {
-			array = new ArrayList(associativeArray.values());
+			array = new ArrayList<>(associativeArray.values());
 			this.associativeArray.clear();
 			this.associativeArray = null;
 			this.associativeMode = false;
@@ -897,36 +868,31 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 					}
 				}
 				if(o1.isInstanceOf(CBoolean.TYPE) || o2.isInstanceOf(CBoolean.TYPE)) {
-					if(ArgumentValidation.getBoolean(o1, Target.UNKNOWN) == ArgumentValidation.getBoolean(o2, Target.UNKNOWN)) {
+					if(ArgumentValidation.getBooleanish(o1, Target.UNKNOWN) == ArgumentValidation.getBooleanish(o2, Target.UNKNOWN)) {
 						return 0;
 					} else {
-						int oo1 = ArgumentValidation.getBoolean(o1, Target.UNKNOWN) ? 1 : 0;
-						int oo2 = ArgumentValidation.getBoolean(o2, Target.UNKNOWN) ? 1 : 0;
+						int oo1 = ArgumentValidation.getBooleanish(o1, Target.UNKNOWN) ? 1 : 0;
+						int oo2 = ArgumentValidation.getBooleanish(o2, Target.UNKNOWN) ? 1 : 0;
 						return (oo1 < oo2) ? -1 : 1;
 					}
 				}
 				//At this point, things will either be numbers or strings
-				switch(sort) {
-					case REGULAR:
-						return compareRegular(o1, o2);
-					case NUMERIC:
-						return compareNumeric(o1, o2);
-					case STRING:
-						return compareString(o1.val(), o2.val());
-					case STRING_IC:
-						return compareString(o1.val().toLowerCase(), o2.val().toLowerCase());
-				}
-				throw ConfigRuntimeException.CreateUncatchableException("Missing implementation for " + sort.name(), Target.UNKNOWN);
+				return switch(sort) {
+					case REGULAR -> compareRegular(o1, o2);
+					case NUMERIC -> compareNumeric(o1, o2);
+					case STRING -> compareString(o1.val(), o2.val());
+					case STRING_IC -> compareString(o1.val().toLowerCase(), o2.val().toLowerCase());
+				};
 			}
 
 			public int compareRegular(Mixed o1, Mixed o2) {
-				if(ArgumentValidation.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1), Target.UNKNOWN)
-						&& ArgumentValidation.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2), Target.UNKNOWN)) {
+				if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1), Target.UNKNOWN)
+						&& ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2), Target.UNKNOWN)) {
 					return compareNumeric(o1, o2);
-				} else if(ArgumentValidation.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1), Target.UNKNOWN)) {
+				} else if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1), Target.UNKNOWN)) {
 					//The first is a number, the second is a string
 					return -1;
-				} else if(ArgumentValidation.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2), Target.UNKNOWN)) {
+				} else if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2), Target.UNKNOWN)) {
 					//The second is a number, the first is a string
 					return 1;
 				} else {
@@ -964,7 +930,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	public void ensureCapacity(int capacity) {
-		((ArrayList) array).ensureCapacity(capacity);
+		((ArrayList<Mixed>) array).ensureCapacity(capacity);
 	}
 
 	@Override

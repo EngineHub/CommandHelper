@@ -30,7 +30,7 @@ platforms at once, but this is a future concern.
 (implied or explicit auto) must continue to be supported.
 * The C Runtime Library is the primary runtime library, though others can be added as needed.
 * Windows, Ubuntu, and MacOS are the supported OSes. More may be added later if sponsorship is obtained. In general, \
-Debian is expected to work, but it is not a supported OS, and no bugs filed against Debian will be accepted.
+Debian is expected to work, but it is not a supported OS, and no bugs filed against Debian will currently be accepted.
 
 Native MethodScript uses LLVM (which stands for Low Level Virtual Machine) to create the native binaries.
 Thus, it's important to eventually understand various concepts within LLVM in order to successfully understand

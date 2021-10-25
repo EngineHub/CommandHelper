@@ -45,6 +45,7 @@ import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CFixedArray;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CIClosure;
 import com.laytonsmith.core.constructs.CInt;
@@ -3807,6 +3808,68 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+	}
+
+	@api
+	@seealso(array.class)
+	public static class fixed_array extends AbstractFunction {
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[0];
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return false;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return null;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+			CClassType type = ArgumentValidation.getClassType(args[0], t);
+			int size = ArgumentValidation.getInt32(args[1], t);
+			// nullOut is intentionally ignored here, as it's irrelevant in the case of the interpreter
+			return new CFixedArray(t, type, size);
+		}
+
+		@Override
+		public String getName() {
+			return "fixed_array";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		@Override
+		public String docs() {
+			return "fixed_array {ClassType type, int size, [boolean nullOut]} Creates an array that can hold values of the given type,"
+					+ " and is of the given size. The array cannot be resized or retyped later. The array cannot be"
+					+ " associative. In general, this isn't"
+					+ " meant for normal use, and unless you have specific need for a fixed_size array, array() should"
+					+ " be used instead. This is instead meant for writing low level system code. On the other hand,"
+					+ " for performance sensitive needs, this may be used instead, though note that most of the API"
+					+ " does not accept fixed_arrays (though it does implement ArrayAccess, and so can be used in most"
+					+ " read only array based functions), nor will it in the future. This does however map to the"
+					+ " underlying system array closely, and so can in particular be used to integrate more directly"
+					+ " with the system. fixed_array isn't a particularly flexible type, but it isn't meant to be,"
+					+ " it's meant to more directly map to the lower level part of the system. nullOut defaults to"
+					+ " true, and in the interpreter is irrelevant, but for native code, if set to true, this loops"
+					+ " through the array and sets each value to null (or equivalent for primitive types). This"
+					+ " takes additional work, but sets the value to a known state. This can be bypassed if the array"
+					+ " is about to be filled from 0 to length, but should otherwise always be set to true.";
 		}
 	}
 
