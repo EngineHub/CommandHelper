@@ -1,0 +1,623 @@
+{{unimplemented}}
+
+Generics are a way to make a class be able to specify a type which is to be determined later, and generically use
+that type no matter what specific type it is. An example of this is a collection, such as array, which can be typed
+using generics so that only values of a specific type can be put into the array.
+
+== Using Defined Generics ==
+The first place you'll likely encounter generics is simply when using classes which were defined with a generic
+parameter. A good first example is the array type. In general, let's consider a simple use without generics.
+
+<%CODE|
+array @a = array();       // Using the array function
+array @b = new array();   // Using the array type, and creating a new isntance of it
+%>
+
+Under the hood, the array function simply constructs a new instance of an array and returns it, so these two examples
+are equivalent.
+
+In both cases, the array is implicitely constructed with an ''auto type parameter''. We can keep the same
+behavior but make it explicit by doing this:
+
+<%CODE|
+array<auto> @a = array<auto>();
+array<auto> @b = new array<auto>();
+%>
+
+In this case, we have passed the auto type to the array function/constructor. This tells the array
+that we only want to allow any value to be added to or read from the array. We can instead put a specific
+type here, such as number, and we will change the behavior slightly.
+
+<%CODE|
+array<number> @a = new array<number>();
+%>
+
+Now, we have told the compiler that we only want to allow numbers (and subtypes of number) to be put into the array.
+
+<%CODE|
+@a[] = 1;               // Valid, int extends number
+@a[] = 3.14;            // Valid, double extends number
+number @n = _procThatReturnsNumber();
+@a[] = @n;              // Valid, we don't know the exact type of @n at compile time, but we know it's of type number
+@a[] = "hi";            // Invalid, string doesn't extend number
+auto @u = _procThatReturnsAuto();
+@a[] = @u;              // Valid, but might cause a runtime error, if the type returned isn't a number
+@a[] = "12345";         // Invalid, because strings do not cross cast to number, which is the implied type.
+@a[] = "12345" as int;  // Valid, because string does crosscast to int, which is a subtype of number. We do have to be
+                        // explicit here though.
+%>
+
+Note that we will always still be returning a value of type number, so when reading from the array, it's slightly
+different.
+
+<%CODE|
+number @n0 = @a[0]; // Valid
+double @n1 = @a[1]; // Invalid. Even though we put 3.14 in index 1, the compiler doesn't assume that, since it can change.
+%>
+
+In this case, we always have to refer to returned values as number, because any subtype of number can be placed into
+the array, and we won't know specifically what type they are, just that they are some subclass of number.
+
+Let's next look at how to define a class using generics.
+
+== Defining a Class ==
+
+In order to use generics in your own classes, you need to provide the generic type parameters in the class definition.
+
+<%CODE|
+class A<T> {}
+%>
+
+In this extremely simple class, we have defined a class named A, and stated that it has a type parameter which we are
+calling <code>T</code>. (Note that in most examples, the letter T is used, but this doesn't have to be a single letter,
+you can name it however you like.) This allows
+us to use T within the class as if it were a real data type, and can use it for return values and parameter types.
+
+<%CODE|
+class A<T> {
+    T @v;
+
+    public T get() {
+        return(@v);
+    }
+
+    public set(T @value) {
+        this->@v = @value;
+    }
+}
+%>
+
+Later, when we construct an instance of A, we will provide the type as a generic parameter.
+
+<%CODE|
+A<int> @a = new A<int>();
+%>
+
+When we construct the instance with <code>int</code>, then T is effectively replaced with int for that one instance, so
+you can sort of think of it as if the class had been defined like:
+<%CODE|
+class A {
+    int @v;
+
+    public int get() {
+        return(@v);
+    }
+
+    public set(int @value) {
+        this->@v = @value;
+    }
+}
+%>
+
+Each instance may have a different type, however. This allows us to then provide different types to the object.
+
+<%CODE|
+A<int> @ai = new A<int>();
+@ai->set(12345);
+int @i = @ai->get();
+
+A<string> @as = new A<string>();
+@as->set("Hello World!");
+string @s = @as->get();
+
+@as->set(12345); // Compile error, 12345 is not a string
+@ai->set("Hi");  // Compile error, "Hi" is not an int
+%>
+
+== Constraints ==
+
+So far, we've only discussed ''unconstrained'' generics, but we can define the class with a given constraint, and
+then that constraint will be applied when considering the type that the object is being constructed with. There are
+multiple types of constraints, and 3 different rulesets for where these constraints can be used.
+
+<%TAKENOTE|These terms are used throughout the rest of the article, and you should understand them well before reading
+further%>
+
+The three different locations are:
+# The definition site, that is, where class A is defined
+# The left hand side of an assignment (LHS)
+# The right hand side of an assignment (RHS).
+
+The terms LHS and RHS also apply to function calls, the parameters passed to a function are the RHS, and
+the arguments in the function definition are the LHS. The return value of a function is also the RHS.
+
+<%CODE|
+Type @a;    // LHS
+@a = @value; // RHS
+
+proc _p(Type @n) {} // LHS
+_p(@value);         // @value is RHS, also the return value from _p is RHS
+%>
+
+Depending on what constraint is used, and where the constraint is used, this gives restrictions in different places in
+the code. Some within the class where the generic is defined, and some at the use site of the class. Each is discussed
+below.
+
+=== Exact Type ===
+
+An exact type is what we've shown above. But it's worth pointing out that if the class is defined with a type, you
+cannot provide an instance with a subtype for the generic parameter. Consider the following:
+
+<%CODE|
+A<int> @a = new A<int>();       // Valid
+A<number> @b = new A<number>(); // Valid
+A<number> @c = new A<int>();    // Invalid!
+%>
+
+While int is a subclass of number, generic parameters do not inheret in the same way. If we consider the example class
+A, we can see why if we think about the difference between the 3 places that constraints can be.
+
+Also, recall that the LHS and the RHS do not have to happen in the same place in a regular assignment either, if a
+variable is forward declared, then the RHS might come later, and vary depending on what happens.
+
+<%CODE|
+A<number> @a; // Forward declaration
+if($input == "true") {
+    @a = new A<int>(); // Compile error
+} else {
+    @a = new A<double>(); // Compile error
+}
+%>
+
+In the above example, you might think this should work, but it doesn't. But let's assume it did work, and consider
+what happens lower in the code if we tried to use @a.
+
+<%CODE|
+@a->set(1.0); // 1.0 (a double) is a number. However, what if we had hit the top branch?
+%>
+
+Now, if $input is false, this should work fine, because A's T value is a double. But what happens if $input was true?
+Then all of a sudden, this will stop working! Inside of A's set function, we would have tried to assign a double to an
+int.
+
+Therefore, when simply providing an unbounded type parameter, you MUST use the same value on the LHS and RHS.
+
+This does not constrain you in what values you can pass when using the class though. This is perfectly valid:
+
+<%CODE|
+A<number> @a = new A<number>();
+int @value = 1234;
+@a->set(@value); // This works, despite @value being an int
+int @return = @a->get(); // Compile error, we're trying to assign number to int
+%>
+
+The only "catch" here is that T is of type number, so the return type is also a number, and even though we know we sent
+it an int, it can in general return a double as well, so the call to get() must accept that possibility.
+
+This is also the only type of constraint which supports <code>auto</code>, and the only type where the object can be
+used without generics despite the class being defined with a generic parameter.
+
+<%CODE|
+A @a = new A(); // Valid, equivalent to the next line
+A<auto> @a = new A<auto>();
+%>
+
+=== Upper/Lower Bound ===
+
+==== LHS/RHS ====
+
+However, we might not want this behavior, we might want to sometimes actually have a subclass in the generic parameter.
+If so, we can use an boundary constraint, which is defined on the LHS. Let's consider an upper bound first. An upper
+bound is defined with the syntax <code>? extends Type</code>. The question mark (called a wildcard) is there because
+we aren't actually defining a generic parameter here (like T), we're simply saying that the RHS for this must match this
+constraint.
+
+<%CODE|
+A<? extends number> @a;
+if($input == "true") {
+    @a = new A<int>(); // Now this works!
+} else {
+    @a = new A<double>(); // Now this works!
+}
+%>
+
+But won't we just run into the same problem as discussed above? No, but that's because the code now has additional
+restrictions on it. When we do this, whenever T is used on the RHS, it is treated as if it is a number, but it isn't
+allowed to be on the LHS at all. Why? Assume @a was defined as in the above code.
+
+<%CODE|
+number @n = @a->get(); // Valid! @a definitely contains a number
+@a->set(1.0); // Not valid! What if $input had been true? @a would be A<int>, so this would cause an error.
+%>
+
+This begs the question, how would we get a value into A in the first place then? There are a number of ways, but
+mostly it involves temporary transfers or casts.
+
+
+<%CODE|
+A<? extends number> @a;
+if($input == "true") {
+    A<int> @temp = new A<int>();
+    @temp->set(1);
+    @a = @temp;
+} else {
+    @a = new A<double>();
+    (@a as A<double>)->set(1.0);
+}
+@a->get(); // Either 1 or 1.0 depending on the value of $input
+%>
+
+In the first example, we're creating a temporary variable, where on the LHS, we declare it to only hold ints. Then, we
+can use the methods in the class unrestricted. Then, we assign that to @a, where the restrictions exist. In the second
+example, we're casting the value @a to A&lt;double&gt;, which in this case we can clearly see will be fine, but once we
+leave the else block, won't necessarily be. The compiler can't figure this out though, so it needs the cast to be told
+that this is safe in this one instance.
+
+If we don't care about the type at all, we can also use the constraint <code>?</code>, which is usually just shorthand for
+<code>? extends mixed</code> when the type on the definition is unbounded.
+
+<%CODE|
+class A<T> {}
+
+A<?> @a;
+switch($input) {
+    case "1": @a = new A<int>();
+    case "2": @a = new A<string>();
+    cast "3": @a = new A<array>();
+}
+%>
+
+This does change however, if the class definition has provided an upper bound. See below.
+
+==== Upper Bound in Definition ====
+
+We may want to generally constrain the value of T to some class OR subclass from within the class itself.
+We can do that with this code:
+
+<%CODE|
+class A<T extends number> {}
+%>
+
+Now, when we instantiate a new instance of A, we are required to provide a type which extends number, such as int or
+double (or number itself), or another wildcard upper bound.
+
+<%CODE|
+A<number> @a = new A<number>();         // Valid
+A<int> @i = new A<int>();               // Valid
+A<? extends number> @e = new A<int>;    // Valid, <? extends number> on the LHS is a subtype of
+                                        //      <? extends number> in the definition
+A<string> @s = new A<string>();         // Invalid! string does not extend number
+%>
+
+Now, from within the class A, we can always treat the ''input parameter'' values of type T as if they are a number,
+so any operations defined in number will be applicable and allowed.
+
+<%CODE|
+class A<T extends number> {
+    public T triple(T @value) {
+        return(@value * 3); // All numbers can be multiplied, so if this is either an int or a double, this will still work
+    }
+}
+%>
+
+If the class definition contains an upper bound, then the behavior of the plain wildcard varies as well. In the example
+above, <code>?</code> would be equivalent to <code>? extends number</code>.
+
+<%CODE|
+A<?> @a = new A<int>();     // Valid
+A<?> @a = new A<string>();  // Invalid
+%>
+
+=== Lower Bound (super) ===
+
+A lower bound is the opposite of an upper bound. This is generally less useful than an upper bound, but it is useful
+for write-only values. Consider the following definition of @a.
+
+<%CODE|
+A<? super number> @a;
+if($input == "true") {
+    @a = new A<primitive>();
+} else {
+    @a = new A<mixed>();
+}
+%>
+
+In this case, @a is defined with the generic type <code>? super number</code>. This means that the type on the RHS must
+contain a type which is a superclass of number. number has two superclasses, primitive, and mixed, so these are the
+only two options in this case. As in the above example, we use either primitive or mixed, based on the value of $input.
+
+In principal, a lower bound acts in reverse of an upper bound. This means that the values are "write only", that is,
+whenever T is used on the LHS, it is treated as if it is a number, but it isn't allowed to be on the RHS at all
+(actually, it is, but then it's treated as if it's of type mixed). Let's consider why this is. Let's write some values
+into @a.
+
+<%CODE|
+@a->set(1.0); // double is a number, this is fine
+@a->set(42); // int is also a number, so this is also fine
+%>
+
+In both cases, writing either a double or an int into a value of type number, primitive, or mixed, will all work just
+fine. But we can't read the values from the object, (or at least we can't assume they're numbers) because in general,
+code elsewhere could have written non-numbers into the object.
+
+<%CODE|
+A<? super number> @a;
+A<mixed> @temp = new A<mixed>();
+@temp->set('string'); // Valid, because a string is a subtype of mixed
+@a = @temp; // Valid, because <mixed> is a supertype of <? super number>
+number @n = @a->get(); // Invalid! This would return a string.
+mixed @m = @a->get(); // Valid, but only because everything is of type mixed
+%>
+
+In general, a lower bound is useful in less cases than an upper bound, but can come in handy sometimes.
+
+Note that lower bounds cannot be used in generic definitions, the following doesn't make any sense.
+
+<%CODE|
+class A<T super number> { // Invalid!
+    T @v; // We would always just have to consider T to be of type mixed, because it might be constructed with new A<mixed>()
+}
+%>
+
+If you think you want to do this, you can get the intended behavior by just using mixed instead of T from within the
+class, and not having a generic parameter at all.
+
+=== Constructor Constraint ===
+
+A constructor constraint asserts that the given type has a constructor with the specified signature. An example with
+the no-argument constructor would be this:
+
+<%CODE|
+class A<new T()> {}
+%>
+
+This constrains the caller such that they must now provide an instance of a class which contains a no argument, public
+constructor. From within the class though, we are then able to construct a new instance of T.
+
+<%CODE|
+class A<new T()> {
+    public T getInstance() {
+        return(new T());
+    }
+}
+
+class MyClass {
+    public MyClass() {}
+}
+
+A<MyClass> @a = new A<MyClass>();
+MyClass @newInstance = @a->getInstance();
+
+// Note on the LHS, we could have used "new()" if we don't generally care about the specific type, though that means
+// that we have to treat T as mixed when it's used on the RHS, unless there were additional constraints
+A<new()> @dontcare = new A<MyClass>();
+mixed @m = @dontcare->getInstance();
+%>
+
+We can also provide parameters to new() to state that there must be a public constructor which accepts the given types.
+
+<%CODE|
+// Assume X, Y, and Z are classes
+class A<new T(X, Y, Z)> {
+    public T getInstance() {
+        return(new T(new X(), new Y(), new Z()));
+    }
+}
+
+class MyClass {
+    public MyClass(X @x, Y @y, Z @z) {}
+}
+
+A<MyClass> @a = new A<MyClass>();
+MyClass @newInstance = @a->getInstance();
+%>
+
+This is useful in cases where you may need to construct a new instance of T from within the class, such as in a factory
+class or similar. The constructor constraint cannot be used on the RHS generic parameter.
+
+=== Annotation Constraint ===
+
+An annotation constraint states that the class passed in to the generic parameter must have a specific annotation
+on it.
+
+<%CODE|
+class A<@{NonNull} T> {
+    public void print(T @obj) {
+        // Since T has @{NonNull}, then we know we can never assign null to a variable of this type,
+        // thus this code is guaranteed to never throw a NullPointerException.
+        msg(@obj->toString());
+    }
+}
+%>
+
+Any annotation which can be put on a class type may be used, but there is no way to specify the specific annotation
+parameters themselves.
+
+== Multiple Constraints ==
+
+So far we have only discussed single constraints, however, it is possible to specify that the generic type match
+multiple constraints at the same time. These are separated by the <code>&amp;</code> symbol.
+
+<%CODE|
+class A<T extends ArrayAccess & T extends Sizeable & new T()> {
+    public void test() {
+        T @t = new T();     // We can construct a new instance of this type...
+        length(@t);         // We can check the length of it (from Sizeable)...
+        mixed @m = @t[0];   // And we can use bracket accessors on it (from ArrayAccess).
+    }
+}
+
+class MyClass implements ArrayAccess, Sizeable {
+    public MyClass() {}
+    // etc
+}
+
+A<? extends ArrayAccess & ? extends Sizeable & new()> @a = new A<MyClass>();
+%>
+
+Note that the type variable name in the definition site must be the same within each constraint, in this case, T.
+
+The more constraints you have, the more typing you have to do. You may consider defining all the constraints
+in a [[Typedefs|typedef]].
+
+<%CODE|
+typedef AConstraints = T extends ArrayAccess & T extends Sizeable & new T();
+class A<AConstraints> {}
+
+A<AConstraints> @a = ...;
+%>
+
+Note that typedefs automatically translate the type variable (in this case T) into the appropriate wildcard when used
+on the LHS. Typedefs of constraints cannot be used on the RHS, as a concrete class must always be provided there.
+
+== Multiple Parameters ==
+
+Some classes might wish to provide type parameters. This is possible by comma separating them.
+
+<%CODE|
+class A<T, U> {
+    T @t;
+    U @u;
+}
+
+A<string, number> @a = new A<string, number>();
+%>
+
+== Variadic Type Parameters ==
+
+The number of type parameters on the class can also vary.
+
+<%CODE|
+class A<T...> {
+    public void method(T... @values) {
+        /* */
+    }
+}
+%>
+
+When used in this way, T can only be used as a type of a variadic parameter in methods, and cannot be used as the type
+of a field or of the return type of a method. When construct an instance of this type, we must specify the types on the
+LHS, as well as the RHS.
+
+<%CODE|
+A<string, int> @a = new A<string, int>();
+// Now method() is defined as if it were method(string, int)
+@a->method('string', 1);
+@a->method(); // Compile error! Expected (string, int), but found ()
+%>
+
+Variadic type parameters can be used in combination with multiple parameters, but it must be last in the list. It may
+have additional constraints, however.
+
+From within the class, we won't know the type of T at compile time, but the types are still reified anyways, and T will
+actually be defined as <code>array&lt;ClassType&gt;</code>, and can be iterated at runtime to get the types that were
+defined on that specific instance.
+
+One great example of this is how Callable is implemented.
+
+<%CODE|
+class Callable<Return, Parameters...> {
+    public Return invoke(Parameters... @parameters) {
+        ...
+    }
+}
+%>
+
+This is what mechanism you're using when when you define a fully typed closure.
+
+<%CODE|
+Callable<string, int, int> @closure = string closure(int @i, int @j) {
+    return(string(@i + @j));
+}
+%>
+
+You can also define variadic parameter types in the LHS.
+
+<%CODE|
+Callable<string, string...> @c = string closure(string... @s) {};
+%>
+
+By default, if this isn't specified, it uses the type <code>auto...</code>
+
+<%CODE|
+// These two lines are equivalent
+Callable @c;
+Callable<auto, auto...> @d;
+%>
+
+== Type Parameters on Methods ==
+
+So far in the article, we have only discussed type parameters on classes, but these can be scoped to a single method
+as well. The syntax for this is such:
+
+<%CODE|
+class A {
+    public <T> T method(T @value) {
+        msg(typeof(T)); // Note that we're printing out the type of T when we call the method
+        return(@value);
+    }
+}
+%>
+
+This defines that a type parameter named T will be used just within this method, and then it can be used as either the
+return type or the parameter types. In this example, since we're using T for both the return and parameter types, then
+that means that if we call the method and send it an int, then it will also return an int. The binding of the specific
+type of T can happen in a number of ways. Usually, it guesses the type of T correctly, and if you use the same type
+everywhere, this will be correct. However, you may wish to specify a superclass, in which case you'll need to explicitly
+specify this on the method use site.
+
+<%CODE|
+A @a = new A();
+int @i = @a->method(1); // T is int. This can be inferred because all the types match
+number @n = @a->method(2); // T is number. This is also inferred, by finding the least common supertype of number and int
+@a->method(3); // T is int. The return type isn't used, so only 3 is used to get the type. But if we wanted T to be number, we can do...
+@a-><number>method(3); // Now T is number (int is a subclass of number, so this is still valid code)
+%>
+
+== Inferred Type Parameters (Diamond Operator) ==
+
+In all the above examples, we have been explicit about the type passed to the RHS, but this isn't necessary. We can
+instead on the RHS used the ''inferred type'', if that is correct, and simply omit the type on the RHS.
+
+<%CODE|
+class A<T> {}
+
+A<number> @a = new A<>(); // equivalent to new A<number>()
+A<number> @a = new A(); // Different! Compiler warning is issued here, this is equivalent to new A<auto>()
+%>
+
+Different types of constraints have different inference rules.
+
+<%CODE|
+A<? extends number> @a = new A<>(); // Inferred type new A<number>()
+A<? super number> @a = new A<>(); // Inferred type new A<number>()
+A<new()> @a = new A<>(); // Compile error, new() cannot be inferred
+
+class B<T...> {}
+B<string, int> @b = new B<>(); // Inferred type new B<string, int>()
+%>
+
+When there are multiple parameters, some of them may not be inferrable, while others are. In that case, you can
+force inference of the ones that are inferrable by using ? on the RHS for those, and providing the specific parameters
+where not inferrable.
+
+<%CODE|
+class C<T, new(), U...> {}
+
+C<number, new(), string, int> @c = new C<?, MyClass, ?>(); // Inferred to new C<number, MyClass, string, int>()
+%>
+
+At a basic level, generics are fairly easy to understand, but especially with some of the constraints and more
+advanced techniques, it can be fairly difficult to understand, so don't be discouraged if you don't get everything in
+this article at first.
+
