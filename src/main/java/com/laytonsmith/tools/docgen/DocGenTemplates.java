@@ -577,7 +577,7 @@ public class DocGenTemplates {
 			try {
 				out = SimpleSyntaxHighlighter.Highlight(code, true);
 			} catch (ConfigCompileException ex) {
-				throw new GenerateException(ex.getMessage() + "\nFor code: " + code, ex);
+				return "<p>(The following code doesn't compile)</p>\n" + PRE.generate(args);
 			} catch (Exception ex) {
 				throw new RuntimeException(ex);
 			}
