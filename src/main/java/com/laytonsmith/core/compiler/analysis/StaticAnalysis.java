@@ -1,16 +1,5 @@
 package com.laytonsmith.core.compiler.analysis;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.Stack;
-import java.util.TreeSet;
-
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
@@ -26,15 +15,26 @@ import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.CRE.CREException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.telemetry.DefaultTelemetry;
 import com.laytonsmith.core.telemetry.Telemetry;
+
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.Stack;
+import java.util.TreeSet;
 
 /**
  * This class can be used to perform static analysis.
@@ -431,7 +431,7 @@ public class StaticAnalysis {
 			Target t, Environment env, Set<ConfigCompileException> exceptions) {
 
 		// Handle types that cause exceptions in the InstanceofUtil isInstanceof check.
-		if(type == expected || type == CClassType.AUTO || type == CNull.TYPE) {
+		if(type.equals(expected) || type == CClassType.AUTO || type == CNull.TYPE) {
 			return;
 		}
 		if(type == CVoid.TYPE || expected == CVoid.TYPE || expected == CNull.TYPE) {
@@ -461,7 +461,7 @@ public class StaticAnalysis {
 
 		// Return if the type is instanceof any expected type.
 		for(CClassType exp : expected) {
-			if(type == exp || type == CClassType.AUTO || type == CNull.TYPE
+			if(type.equals(exp) || type == CClassType.AUTO || type == CNull.TYPE
 					|| (type != CVoid.TYPE && exp != CVoid.TYPE && exp != CNull.TYPE)
 					|| InstanceofUtil.isInstanceof(type, exp, env)) {
 				return;

@@ -2,11 +2,19 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.ExactType;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
+import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
@@ -17,10 +25,14 @@ import com.laytonsmith.core.objects.ObjectDefinition;
 import com.laytonsmith.core.objects.ObjectDefinitionNotFoundException;
 import com.laytonsmith.core.objects.ObjectDefinitionTable;
 import com.laytonsmith.core.objects.UserObject;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -30,7 +42,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * A CClassType represent
+ * A CClassType represents a reference to a MethodScript class.
  */
 @typeof("ms.lang.ClassType")
 @SuppressWarnings("checkstyle:overloadmethodsdeclarationorder")
@@ -38,7 +50,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 
 	public static final String PATH_SEPARATOR = FullyQualifiedClassName.PATH_SEPARATOR;
 
-	private static final Map<FullyQualifiedClassName, CClassType> CACHE = new HashMap<>();
+	private static final ClassTypeCache CACHE = new ClassTypeCache();
 
 	// The only types that can be created here are the ones that don't have a real class associated with them, or the
 	// TYPE value itself
@@ -52,10 +64,15 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 */
 	private static final Mixed[] UNINITIALIZED = new Mixed[0];
 
+	// Have to manually place this in the cache later
+	private static final GenericDeclaration CCLASS_TYPE_GENERIC_DECLARATION
+			= new GenericDeclaration(Target.UNKNOWN, new Constraints(ConstraintLocation.DEFINITION,
+				new UnboundedConstraint(Target.UNKNOWN, "T")));
+
 	static {
 		try {
-			TYPE = new CClassType("ms.lang.ClassType", Target.UNKNOWN);
-			AUTO = new CClassType("auto", Target.UNKNOWN);
+			TYPE = new CClassType("ms.lang.ClassType", Target.UNKNOWN, CCLASS_TYPE_GENERIC_DECLARATION);
+			AUTO = new CClassType("auto", Target.UNKNOWN, null);
 		} catch (ClassNotFoundException e) {
 			throw new Error(e);
 		}
@@ -68,7 +85,13 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	public static final CClassType[] EMPTY_CLASS_ARRAY = new CClassType[0];
 
 	static {
-		CACHE.put(FullyQualifiedClassName.forNativeClass(CClassType.class), TYPE);
+		CACHE.add(FullyQualifiedClassName.forNativeClass(CClassType.class),
+				GenericParameters.start(CCLASS_TYPE_GENERIC_DECLARATION)
+						.addParameter(CClassType.TYPE,
+								new LeftHandGenericUse(CClassType.TYPE, Target.UNKNOWN,
+										new Constraints(ConstraintLocation.LHS,
+												new ExactType(Target.UNKNOWN, CClassType.TYPE))))
+						.build(), TYPE);
 	}
 
 	private final boolean isTypeUnion;
@@ -94,6 +117,26 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 */
 	private final SortedSet<FullyQualifiedClassName> types = new TreeSet<>();
 
+	private final GenericDeclaration genericDeclaration;
+	private final GenericParameters genericParameters;
+
+	/**
+	 * Returns the singular instance of CClassType that represents this type.
+	 *
+	 * <p>IMPORTANT: The type MUST be fully qualified AND exist as a real, instantiable class, or this will cause
+	 * errors. The only time this method is preferred vs {@link #get(com.laytonsmith.core.FullyQualifiedClassName)} is
+	 * when used to define the TYPE value. The native class must also be provided at the same time, which is used
+	 * for various operations to increase efficiency when dealing with native classes. If the type is defined with
+	 * generics, use {@link #getWithGenericDefinition(Class, GenericDeclaration)}.
+	 *
+	 * Unlike the other getters, this will not throw a ClassNotFoundException, it will instead throw an Error.
+	 * @param type
+	 * @return
+	 */
+	public static CClassType get(Class<? extends Mixed> type) {
+		return getWithGenericDefinition(type, null);
+	}
+
 	/**
 	 * Returns the singular instance of CClassType that represents this type.
 	 *
@@ -106,9 +149,9 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * @param type
 	 * @return
 	 */
-	public static CClassType get(Class<? extends Mixed> type) {
+	public static CClassType getWithGenericDefinition(Class<? extends Mixed> type, GenericDeclaration generics) {
 		try {
-			CClassType t = get(FullyQualifiedClassName.forNativeClass(type));
+			CClassType t = get(FullyQualifiedClassName.forNativeClass(type), generics);
 			t.nativeClass = type;
 			return t;
 		} catch (ClassNotFoundException ex) {
@@ -117,16 +160,28 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	/**
+	 * Returns the "naked class type". This is the
+	 * @param type
+	 * @return
+	 * @throws ClassNotFoundException
+	 */
+	public static CClassType getNakedClassType(FullyQualifiedClassName type)
+			throws ClassNotFoundException {
+		return CACHE.getNakedClassType(type);
+	}
+
+	/**
 	 * Returns the singular instance of CClassType that represents this type.
 	 *
 	 * @param type
 	 * @return
 	 */
-	public static CClassType get(FullyQualifiedClassName type) throws ClassNotFoundException {
+	public static CClassType get(FullyQualifiedClassName type, GenericParameters generics)
+			throws ClassNotFoundException {
 		assert type != null;
-		CClassType ctype = CACHE.get(type);
+		CClassType ctype = CACHE.get();
 		if(ctype == null) {
-			ctype = new CClassType(type, Target.UNKNOWN, false);
+			ctype = new CClassType(type, Target.UNKNOWN, false, generics);
 			CACHE.put(type, ctype);
 		}
 		return ctype;
@@ -149,7 +204,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 				= FullyQualifiedClassName.forFullyQualifiedClass(StringUtils.Join(t, "|", e -> e.getFQCN()));
 		CClassType ctype = CACHE.get(type);
 		if(ctype == null) {
-			ctype = new CClassType(type, Target.UNKNOWN, false);
+			ctype = new CClassType(type, Target.UNKNOWN, false, null);
 			CACHE.put(type, ctype);
 		}
 		return ctype;
@@ -179,7 +234,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 */
 	public static CClassType defineClass(FullyQualifiedClassName fqcn) {
 		try {
-			CClassType type = new CClassType(fqcn, Target.UNKNOWN, true);
+			CClassType type = new CClassType(fqcn, Target.UNKNOWN, true, null);
 			CACHE.put(fqcn, type);
 			return type;
 		} catch (ClassNotFoundException ex) {
@@ -192,8 +247,21 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * @param type This must be the fully qualified string name.
 	 * @param t
 	 */
-	private CClassType(String type, Target t) throws ClassNotFoundException {
-		this(FullyQualifiedClassName.forFullyQualifiedClass(type), t, false);
+	private CClassType(String type, Target t, GenericDeclaration genericDeclaration) throws ClassNotFoundException {
+		this(FullyQualifiedClassName.forFullyQualifiedClass(type), t, false, genericDeclaration);
+	}
+
+	private static String formatName(FullyQualifiedClassName type, GenericDeclaration generics) {
+		if(generics == null) {
+			return type.getFQCN();
+		} else {
+			StringBuilder b = new StringBuilder();
+			b.append(type.getFQCN());
+			b.append("<");
+			b.append(generics.toString());
+			b.append(">");
+			return b.toString();
+		}
 	}
 
 	/**
@@ -204,10 +272,13 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * @param newDefinition If true, this function MUST NOT throw a ClassNotFoundException.
 	 */
 	@SuppressWarnings("ConvertToStringSwitch")
-	private CClassType(FullyQualifiedClassName type, Target t, boolean newDefinition) throws ClassNotFoundException {
-		super(type.getFQCN(), ConstructType.CLASS_TYPE, t);
+	private CClassType(FullyQualifiedClassName type, Target t, boolean newDefinition, GenericDeclaration genericDeclaration)
+			throws ClassNotFoundException {
+		super(formatName(type, genericDeclaration), ConstructType.CLASS_TYPE, t);
 		isTypeUnion = type.isTypeUnion();
 		fqcn = type;
+		this.genericDeclaration = genericDeclaration;
+		this.genericParameters = new GenericParameters(this);
 		if(isTypeUnion) {
 			// Split them out
 			types.addAll(Stream.of(type.getFQCN().split("\\|"))
@@ -536,8 +607,21 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		return MSVersion.V3_3_1;
 	}
 
+	/**
+	 * Returns the fully qualified class name for the class. Note that this is just the name of the class, not the
+	 * complete type definition. See {@link #getTypeDefinition}.
+	 * @return <code>ms.lang.ClassType</code> for instance.
+	 */
 	public FullyQualifiedClassName getFQCN() {
 		return fqcn;
+	}
+
+	/**
+	 * Returns the type definition, including generic definitions.
+	 * @return <code>ms.lang.ClassType&gt;T&lt;</code> for instance.
+	 */
+	public String getTypeDefinition() {
+		return val();
 	}
 
 	public boolean isEnum() {
@@ -646,4 +730,46 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		return true;
 	}
 
+	/**
+	 * Returns the generic declaration on the class itself.
+	 *
+	 * @return null if no generics were defined on this class, or else the {@link GenericDeclaration} for this ClassType.
+	 */
+	public GenericDeclaration getGenericDeclaration() {
+		return genericDeclaration;
+	}
+
+	private static class ClassTypeCache {
+
+		private Map<Pair<FullyQualifiedClassName, GenericParameters>, CClassType> cache;
+
+		public ClassTypeCache() {
+			cache = Collections.synchronizedMap(new HashMap<>());
+		}
+
+		public void add(FullyQualifiedClassName fqcn, GenericParameters parameters, CClassType type) {
+			cache.put(new Pair<>(fqcn, parameters), type);
+		}
+
+		public List<GenericParameters> getGenericsByFQCN(FullyQualifiedClassName fqcn) {
+			List<GenericParameters> ret = new ArrayList<>();
+			Set<Pair<FullyQualifiedClassName, GenericParameters>> keySet = cache.keySet();
+			synchronized(cache) {
+				for(Pair<FullyQualifiedClassName, GenericParameters> lhs : keySet) {
+					if(lhs.getKey().equals(fqcn)) {
+						ret.add(lhs.getValue());
+					}
+				}
+			}
+			return ret;
+		}
+
+		public CClassType getNakedClassType(FullyQualifiedClassName fqcn) {
+			return cache.get(new Pair<>(fqcn, null));
+		}
+
+		public void get(FullyQualifiedClassName fqcn, GenericParameters declaration) {
+			cache.get(new Pair<>(fqcn, declaration));
+		}
+	}
 }

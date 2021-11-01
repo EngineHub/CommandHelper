@@ -41,16 +41,19 @@ import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Compiler.p;
 import com.laytonsmith.core.functions.DataHandling._string;
 import com.laytonsmith.core.functions.DataHandling.array;
 import com.laytonsmith.core.functions.DataHandling.g;
-import com.laytonsmith.core.exceptions.CancelCommandException;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.natives.interfaces.Sizeable;
+
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -61,8 +64,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import com.laytonsmith.core.natives.interfaces.Sizeable;
-import java.lang.reflect.InaccessibleObjectException;
 import java.util.UUID;
 
 /**
@@ -2450,9 +2451,10 @@ public class StringHandling {
 		@Override
 		public String docs() {
 			return "secure_string {charArray|string} Constructs a secure_string from a given char array or string."
-					+ " ---- A secure_string is a string which cannot normally be toString'd, and whose underlying representation"
+					+ " ---- A secure_string is a pseudo-string which cannot normally be toString'd, and whose"
+					+ " underlying representation"
 					+ " is encrypted in memory. This should be used for storing passwords or other sensitive data which"
-					+ " should in no cases be stored in plain text. Since this extends string, it can generally be used in"
+					+ " should in no cases be stored in plain text. It can generally be used in"
 					+ " place of a string, and when done so, cannot accidentally be exposed (via logs or exception messages,"
 					+ " or other accidental exposure) unless it is specifically instructed to decrypt and switch to a char"
 					+ " array. While this cannot by itself ensure security of the value, it can help prevent most accidental"
@@ -2476,10 +2478,7 @@ public class StringHandling {
 				new ExampleScript("Demonstrates compatibility with other functions", "@profile = array(\n"
 				+ "\tuser: 'username',\n\tpassword: secure_string('password')\n"
 				+ ");\n"
-				+ "msg(@profile);"),
-				new ExampleScript("Demonstrates compatibility with string class", "string @sec = secure_string('password');"
-				+ " // Not an error, because secure_string extends string\n"
-				+ "msg(decrypt_secure_string(@sec));")
+				+ "msg(@profile);")
 			};
 		}
 	}
@@ -2532,7 +2531,7 @@ public class StringHandling {
 
 		@Override
 		public String docs() {
-			return "array {string} Decrypts a secure_string into a char array. To keep backwards compatibility with"
+			return "array {secure_string | string} Decrypts a secure_string into a char array. To keep backwards compatibility with"
 					+ " strings in general, this function also accepts normal strings, which are not decrypted, but"
 					+ " instead simply returned in the same format as if it were a secure_string."
 					+ " See the examples in {{function|secure_string}}.";

@@ -5,6 +5,10 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
@@ -26,7 +30,9 @@ import java.util.Set;
 public class CFixedArray extends Construct implements
 		java.lang.Iterable<Mixed>, Booleanish, com.laytonsmith.core.natives.interfaces.Iterable {
 
-	public static final CClassType TYPE = CClassType.get(CFixedArray.class);
+	public static final CClassType TYPE = CClassType.getWithGenericDefinition(CFixedArray.class,
+			new GenericDeclaration(Target.UNKNOWN, new Constraints(ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"))));
 	private Mixed[] data;
 	private CClassType allowedType;
 

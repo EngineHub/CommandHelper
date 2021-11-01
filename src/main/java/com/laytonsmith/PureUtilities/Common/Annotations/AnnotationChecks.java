@@ -39,8 +39,11 @@ public class AnnotationChecks {
 					errors.add("TYPE is null? " + clazz.getClassName());
 					continue;
 				}
-				if(!type.val().equals(clazz.getAnnotation(typeof.class).getValue("value"))) {
-					errors.add(clazz.getClassName() + "'s TYPE value is different than the typeof annotation on it");
+				String classType = type.val().replaceAll("<.*>", "");
+				if(!classType.equals(clazz.getAnnotation(typeof.class).getValue("value"))) {
+					errors.add(clazz.getClassName() + "'s TYPE value is different than the typeof annotation on it"
+							+ " (expected " + clazz.getAnnotation(typeof.class).getValue("value") + " but"
+							+ " got " + type.val() + ")");
 				}
 			} catch (ReflectionUtils.ReflectionException ex) {
 				errors.add(clazz.getClassName() + " needs to add the following:\n\t@SuppressWarnings(\"FieldNameHidesFieldInSuperclass\")\n"
