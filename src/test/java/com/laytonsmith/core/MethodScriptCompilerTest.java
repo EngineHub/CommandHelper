@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.core.constructs.Target;
@@ -7,33 +8,36 @@ import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.AbstractCompileException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
-import static com.laytonsmith.testing.StaticTest.RunCommand;
-import static com.laytonsmith.testing.StaticTest.SRun;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import java.io.File;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.After;
-import org.junit.AfterClass;
+import static com.laytonsmith.testing.StaticTest.RunCommand;
+import static com.laytonsmith.testing.StaticTest.SRun;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import org.junit.Ignore;
 //import org.powermock.api.mockito.PowerMockito;
 //import org.powermock.core.classloader.annotations.PowerMockIgnore;
 //import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -1269,5 +1273,12 @@ public class MethodScriptCompilerTest {
 				+ "/test = msg(get_alias_comment())\n";
 		RunCommand(config, fakePlayer, "/test");
 		verify(fakePlayer).sendMessage("{annotations: {@annotation: {test_annotation}}, body: Smart comment!}");
+	}
+
+	@Test(expected = ConfigCompileException.class)
+	public void testUnbalancedRTLScriptCausesCompileError() throws Exception {
+		URL url = MethodScriptCompilerTest.class.getResource("/unbalancedRTLSource.ms");
+		File f = new File(new URI(url.toString()));
+		MethodScriptCompiler.lex(FileUtil.read(f), null, null, true);
 	}
 }

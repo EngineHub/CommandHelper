@@ -269,6 +269,7 @@ public final class MethodScriptCompiler {
 						if(inComment && commentIsBlock && c2 == '/') { // "*/".
 							if(saveAllTokens || inSmartComment) {
 								buf.append("*/");
+								validateTerminatedBidiSequence(buf.toString(), target);
 								tokenList.add(new Token(inSmartComment ? TType.SMART_COMMENT : TType.COMMENT,
 										buf.toString(), target));
 							}
@@ -288,6 +289,7 @@ public final class MethodScriptCompiler {
 						if(inComment && !commentIsBlock) { // "\n".
 							inComment = false;
 							if(saveAllTokens) {
+								validateTerminatedBidiSequence(buf.toString(), target);
 								tokenList.add(new Token(TType.COMMENT, buf.toString(), target));
 								tokenList.add(new Token(TType.NEWLINE, "\n", new Target(lineNum + 1, file, 0)));
 							}
@@ -635,6 +637,7 @@ public final class MethodScriptCompiler {
 			switch(c) {
 				case '\'': {
 					if(stateInQuote && !inSmartQuote) {
+						validateTerminatedBidiSequence(buf.toString(), target);
 						tokenList.add(new Token(TType.STRING, buf.toString(), target));
 						buf = new StringBuilder();
 						target = new Target(lineNum, file, column);
@@ -658,6 +661,7 @@ public final class MethodScriptCompiler {
 				}
 				case '"': {
 					if(stateInQuote && inSmartQuote) {
+						validateTerminatedBidiSequence(buf.toString(), target);
 						tokenList.add(new Token(TType.SMART_STRING, buf.toString(), target));
 						buf = new StringBuilder();
 						target = new Target(lineNum, file, column);
@@ -2846,6 +2850,80 @@ public final class MethodScriptCompiler {
 				e.setEnv(env);
 				ConfigRuntimeException.HandleUncaughtException(e, env);
 			}
+		}
+	}
+
+	private static final List<Character> PDF_STACK = Arrays.asList(
+			'\u202A', // LRE
+			'\u202B', // RLE
+			'\u202D', // LRO
+			'\u202E'  // RLO
+	);
+	private static final List<Character> PDI_STACK = Arrays.asList(
+			'\u2066', // LRI
+			'\u2067'  // RLI
+	);
+	private static final char PDF = '\u202C';
+	private static final char PDI = '\u2069';
+
+	/**
+	 * A bidirectional control character (bidi character) is a unicode character which is used in legitimate
+	 * circumstances to force right to left languages such as Arabic and Hebrew to format correctly, when used
+	 * within the same encoding stream. There are a number of these characters, but in particular, there are two
+	 * which can be used to hide the functionality, because they cause the rendering of the text to appear one way,
+	 * but the compiler will read the code differently. In particular, if we insert "right to left isolation override"
+	 * in the middle of a comment, it will cause the rest of the line to be reversed.
+	 * <p>
+	 * Say we have the following code, which appears like this in a text editor, where RLI is the text direction override.
+	 * <pre>
+	 *     /* This is a comment RLI &#42;/ if(!@admin) {exit()}
+	 *     codeOnlyForAdmins();
+	 * </pre>
+	 *
+	 * The editor will render that code as shown above, but the compiler will view the code as if it were
+	 * written as such:
+	 * <pre>
+	 *     /* This is a comment if(!@admin) {exit()} &#42;/
+	 *     codeOnlyForAdmins();
+	 * </pre>
+	 *
+	 * Thus bypassing the apparently correct check for admin access. The key here is that the RLI indicator is not
+	 * visible in the editor, and so cannot be checked for through simple code review without compiler or editor
+	 * support. Some editors may add this in the future, but here, we simply disallow the attack at the compiler
+	 * level, making such code uncompilable whether or not it is visible in the editor.
+	 * <p>
+	 * It's also worth noting that the end of a line implicitely terminates unbalanced flow modifiers.
+	 * <p>
+	 * The solution then is to disallow unterminated flow modifiers from being used in comments and strings, where
+	 * the effects can flow across string or comment end markers. This allows for right-to-left languages to be used
+	 * within strings and comments anyways, but prevents them from being used maliciously. Thus, this function should
+	 * be called against the full string of the completed token.
+	 * <p>
+	 * For full details, see
+	 * <a href="https://trojansource.codes/trojan-source.pdf">https://trojansource.codes/trojan-source.pdf</a>
+	 * @param s The string to check
+	 * @param t The code target of the token
+	 * @throws ConfigCompileException If an unexpected sequence is detected
+	 */
+	private static void validateTerminatedBidiSequence(String s, Target t) throws ConfigCompileException {
+		int pdfStack = 0;
+		int pdiStack = 0;
+		for(Character c : s.toCharArray()) {
+			if(PDF_STACK.contains(c)) {
+				pdfStack++;
+			}
+			if(c == PDF) {
+				pdfStack--;
+			}
+			if(PDI_STACK.contains(c)) {
+				pdiStack++;
+			}
+			if(c == PDI) {
+				pdiStack--;
+			}
+		}
+		if(pdfStack != 0 || pdiStack != 0) {
+			throw new ConfigCompileException("Incorrectly formatted unicode sequence", t);
 		}
 	}
 }
