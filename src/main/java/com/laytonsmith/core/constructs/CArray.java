@@ -7,6 +7,12 @@ import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.constructs.generics.ConstraintLocation;
+import com.laytonsmith.core.constructs.generics.Constraints;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
@@ -44,7 +50,9 @@ import java.util.TreeMap;
 public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		com.laytonsmith.core.natives.interfaces.Iterable {
 
-	public static final CClassType TYPE = CClassType.get(CArray.class);
+	public static final CClassType TYPE = CClassType.getWithGenericDeclaration(CArray.class, new GenericDeclaration(Target.UNKNOWN,
+			new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+					new UnboundedConstraint(Target.UNKNOWN, "T"))));
 	private boolean associativeMode = false;
 	private long nextIndex = 0;
 	private List<Mixed> array;
@@ -52,29 +60,34 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	private String mutVal;
 	private CArray parent = null;
 	private boolean valueDirty = true;
+	private GenericParameters genericParameters = null;
+	// For the val(), we need to use the fallbackEnv
+	private final Environment fallbackEnv;
 
-	public CArray(Target t) {
-		this(t, 0, (Mixed[]) null);
+	public CArray(Target t, GenericParameters genericParameters, Environment env) {
+		this(t, 0, genericParameters, env, (Mixed[]) null);
 	}
 
-	public CArray(Target t, Mixed... items) {
-		this(t, 0, items);
+	public CArray(Target t, GenericParameters genericParameters, Environment env, Mixed... items) {
+		this(t, 0, genericParameters, env, items);
 	}
 
-	public CArray(Target t, int initialCapacity) {
-		this(t, initialCapacity, (Mixed[]) null);
+	public CArray(Target t, int initialCapacity, GenericParameters genericParameters, Environment env) {
+		this(t, initialCapacity, genericParameters, env, (Mixed[]) null);
 	}
 
-	public CArray(Target t, Collection<Mixed> items) {
-		this(t, 0, getArray(items));
+	public CArray(Target t, Collection<Mixed> items, GenericParameters genericParameters, Environment env) {
+		this(t, 0, genericParameters, env, getArray(items));
 	}
 
-	public CArray(Target t, int initialCapacity, Collection<Mixed> items) {
-		this(t, initialCapacity, getArray(items));
+	public CArray(Target t, int initialCapacity, Collection<Mixed> items, GenericParameters genericParameters, Environment env) {
+		this(t, initialCapacity, genericParameters, env, getArray(items));
 	}
 
-	public CArray(Target t, int initialCapacity, Mixed... items) {
+	public CArray(Target t, int initialCapacity, GenericParameters parameters, Environment env, Mixed... items) {
 		super("{}", ConstructType.ARRAY, t);
+		this.fallbackEnv = env;
+		this.genericParameters = parameters;
 		if(initialCapacity == -1) {
 			associativeMode = true;
 		} else if(items != null) {
@@ -93,8 +106,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				for(Mixed item : items) {
 					if(item instanceof CEntry) {
 						Mixed value = ((CEntry) item).construct;
-						associativeArray.put(normalizeConstruct(((CEntry) item).ckey), value);
-						if(value.isInstanceOf(CArray.TYPE)) {
+						associativeArray.put(normalizeConstruct(((CEntry) item).ckey, env), value);
+						if(value.isInstanceOf(CArray.TYPE, null, env)) {
 							((CArray) value).parent = this;
 						}
 					} else {
@@ -110,7 +123,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 							max = -1; //Special case, there are no integer indexes in here yet.
 						}
 						associativeArray.put(Integer.toString(max + 1), item);
-						if(item.isInstanceOf(CArray.TYPE)) {
+						if(item.isInstanceOf(CArray.TYPE, null, env)) {
 							((CArray) item).parent = this;
 						}
 					}
@@ -120,7 +133,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			if(items != null) {
 				for(Mixed item : items) {
 					array.add(item);
-					if(item.isInstanceOf(CArray.TYPE)) {
+					if(item.isInstanceOf(CArray.TYPE, null, env)) {
 						((CArray) item).parent = this;
 					}
 				}
@@ -193,12 +206,12 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 * @param t
 	 * @return
 	 */
-	public static CArray GetAssociativeArray(Target t) {
-		return new CArray(t, -1);
+	public static CArray GetAssociativeArray(Target t, GenericParameters genericParameters, Environment env) {
+		return new CArray(t, -1, genericParameters, env);
 	}
 
-	public static CArray GetAssociativeArray(Target t, Mixed[] args) {
-		return new CArray(t, -1, args);
+	public static CArray GetAssociativeArray(Target t, GenericParameters genericParameters, Environment env, Mixed[] args) {
+		return new CArray(t, -1, genericParameters, env, args);
 	}
 
 	/**
@@ -243,8 +256,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 * @param c
 	 * @param t
 	 */
-	public final void push(Mixed c, Target t) {
-		push(c, null, t);
+	public final void push(Mixed c, Target t, Environment env) {
+		push(c, null, t, env);
 	}
 
 	/**
@@ -257,7 +270,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 * @throws IllegalArgumentException If index is not null, and this is an associative array.
 	 * @throws IndexOutOfBoundsException If the index is not null, and the index specified is out of range.
 	 */
-	public void push(Mixed c, Integer index, Target t) throws IllegalArgumentException, IndexOutOfBoundsException {
+	public void push(Mixed c, Integer index, Target t, Environment env) throws IllegalArgumentException, IndexOutOfBoundsException {
 		if(!associativeMode) {
 			if(index != null) {
 				array.add(index, c);
@@ -283,7 +296,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				associativeArray.put(Integer.toString(max + 1), c);
 			}
 		}
-		if(c.isInstanceOf(CArray.TYPE)) {
+		if(c.isInstanceOf(CArray.TYPE, null, env)) {
 			((CArray) c).parent = this;
 		}
 		setDirty();
@@ -344,7 +357,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 * @param index
 	 * @param c
 	 */
-	public void set(Mixed index, Mixed c, Target t) {
+	public void set(Mixed index, Mixed c, Target t, Environment env) {
 		if(!associativeMode) {
 			if(index instanceof CNull) {
 				// Invalid normal array index
@@ -356,7 +369,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 						// Out of range
 						setAssociative();
 					} else if(indx == nextIndex) {
-						this.push(c, t);
+						this.push(c, t, env);
 					} else {
 						array.set(indx, c);
 					}
@@ -367,33 +380,33 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			}
 		}
 		if(associativeMode) {
-			associativeArray.put(normalizeConstruct(index), c);
+			associativeArray.put(normalizeConstruct(index, env), c);
 		}
-		if(c.isInstanceOf(CArray.TYPE)) {
+		if(c.isInstanceOf(CArray.TYPE, null, env)) {
 			((CArray) c).parent = this;
 		}
 		setDirty();
 	}
 
-	public final void set(int index, Mixed c, Target t) {
-		this.set(new CInt(index, t), c, t);
+	public final void set(int index, Mixed c, Target t, Environment env) {
+		this.set(new CInt(index, t), c, t, env);
 	}
 
 	/* Shortcuts */
-	public final void set(String index, Mixed c, Target t) {
-		set(new CString(index, t), c, t);
+	public final void set(String index, Mixed c, Target t, Environment env) {
+		set(new CString(index, t), c, t, env);
 	}
 
-	public final void set(String index, String value, Target t) {
-		set(index, new CString(value, t), t);
+	public final void set(String index, String value, Target t, Environment env) {
+		set(index, new CString(value, t), t, env);
 	}
 
-	public final void set(String index, String value) {
-		set(index, value, Target.UNKNOWN);
+	public final void set(String index, String value, Environment env) {
+		set(index, value, Target.UNKNOWN, env);
 	}
 
 	@Override
-	public Mixed get(Mixed index, Target t) {
+	public Mixed get(Mixed index, Target t, Environment env) {
 		if(!associativeMode) {
 			try {
 				return array.get(ArgumentValidation.getInt32(index, t));
@@ -401,7 +414,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				throw new CREIndexOverflowException("The element at index \"" + index.val() + "\" does not exist", t, e);
 			}
 		} else {
-			Mixed val = associativeArray.get(normalizeConstruct(index));
+			Mixed val = associativeArray.get(normalizeConstruct(index, env));
 			if(val != null) {
 				if(val instanceof CEntry) {
 					return ((CEntry) val).construct();
@@ -416,18 +429,18 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		}
 	}
 
-	public final Mixed get(long index, Target t) {
-		return this.get(new CInt(index, t), t);
+	public final Mixed get(long index, Target t, Environment env) {
+		return this.get(new CInt(index, t), t, env);
 	}
 
 	@Override
-	public final Mixed get(int index, Target t) {
-		return this.get(new CInt(index, t), t);
+	public final Mixed get(int index, Target t, Environment env) {
+		return this.get(new CInt(index, t), t, env);
 	}
 
 	@Override
-	public final Mixed get(String index, Target t) {
-		return this.get(new CString(index, t), t);
+	public final Mixed get(String index, Target t, Environment env) {
+		return this.get(new CString(index, t), t, env);
 	}
 
 	public boolean containsKey(String c) {
@@ -468,18 +481,22 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 * @param value
 	 * @return
 	 */
-	public CArray indexesOf(Mixed value) {
-		CArray ret = new CArray(Target.UNKNOWN);
+	public CArray indexesOf(Mixed value, Environment env) {
+		CArray ret;
 		if(associativeMode) {
+			ret = new CArray(Target.UNKNOWN, GenericParameters.start(CArray.TYPE)
+					.addParameter(CString.TYPE, null).build(), env);
 			for(String key : associativeArray.keySet()) {
 				if(BasicLogic.equals.doEquals(associativeArray.get(key), value)) {
-					ret.push(new CString(key, Target.UNKNOWN), Target.UNKNOWN);
+					ret.push(new CString(key, Target.UNKNOWN), Target.UNKNOWN, env);
 				}
 			}
 		} else {
+			ret = new CArray(Target.UNKNOWN, GenericParameters.start(CArray.TYPE)
+					.addParameter(CInt.TYPE, null).build(), env);
 			for(int i = 0; i < array.size(); i++) {
 				if(BasicLogic.equals.doEquals(array.get(i), value)) {
-					ret.push(new CInt(i, Target.UNKNOWN), Target.UNKNOWN);
+					ret.push(new CInt(i, Target.UNKNOWN), Target.UNKNOWN, env);
 				}
 			}
 		}
@@ -489,7 +506,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	@Override
 	public String val() {
 		if(valueDirty) {
-			getString(new Stack<>(), this.getTarget());
+			getString(new Stack<>(), this.getTarget(), fallbackEnv);
 		}
 		return mutVal;
 	}
@@ -507,7 +524,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 * @param t
 	 * @return
 	 */
-	protected String getString(Stack<CArray> arrays, Target t) {
+	protected String getString(Stack<CArray> arrays, Target t, Environment env) {
 		if(!valueDirty) {
 			return mutVal;
 		}
@@ -515,15 +532,15 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		b.append("{");
 		if(!inAssociativeMode()) {
 			for(int i = 0; i < this.size(); i++) {
-				Mixed value = this.get(i, t);
+				Mixed value = this.get(i, t, env);
 				String v;
-				if(value.isInstanceOf(CArray.TYPE)) {
+				if(value.isInstanceOf(CArray.TYPE, null, env)) {
 					if(arrays.contains(value)) {
 						//Check for recursion
 						v = "*recursion*";
 					} else {
 						arrays.add(((CArray) value));
-						v = ((CArray) value).getString(arrays, t);
+						v = ((CArray) value).getString(arrays, t, env);
 						arrays.pop();
 					}
 				} else {
@@ -542,16 +559,16 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				}
 				first = false;
 				String v;
-				if(this.get(key, t) == null) {
+				if(this.get(key, t, env) == null) {
 					v = "null";
 				} else {
-					Mixed value = this.get(key, t);
-					if(value.isInstanceOf(CArray.TYPE)) {
+					Mixed value = this.get(key, t, env);
+					if(value.isInstanceOf(CArray.TYPE, null, env)) {
 						if(arrays.contains(value)) {
 							v = "*recursion*";
 						} else {
 							arrays.add(((CArray) value));
-							v = ((CArray) value).getString(arrays, t);
+							v = ((CArray) value).getString(arrays, t, env);
 						}
 					} else {
 						v = value.val();
@@ -595,11 +612,11 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		return clone;
 	}
 
-	public CArray deepClone(Target t) {
-		return deepClone(this, t, new ArrayList<>());
+	public CArray deepClone(Target t, Environment env) {
+		return deepClone(this, t, new ArrayList<>(), env);
 	}
 
-	protected CArray deepClone(CArray array, Target t, ArrayList<CArray[]> cloneRefs) {
+	protected CArray deepClone(CArray array, Target t, ArrayList<CArray[]> cloneRefs, Environment env) {
 
 		// Return the clone reference if this array has been cloned before (both clones will have the same reference).
 		for(CArray[] refCouple : cloneRefs) {
@@ -609,36 +626,36 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		}
 
 		// Create the clone to put array in and add it to the cloneRefs list.
-		CArray clone = new CArray(t, (int) array.size());
+		CArray clone = new CArray(t, (int) array.size(), array.genericParameters, env);
 		clone.associativeMode = array.associativeMode;
 		cloneRefs.add(new CArray[]{array, clone});
 
 		// Iterate over the array, recursively calling this method to perform a deep clone.
 		for(Mixed key : array.keySet()) {
-			Mixed value = array.get(key, t);
-			if(value.isInstanceOf(CArray.TYPE)) {
-				value = deepClone((CArray) value, t, cloneRefs);
+			Mixed value = array.get(key, t, env);
+			if(value.isInstanceOf(CArray.TYPE, null, env)) {
+				value = deepClone((CArray) value, t, cloneRefs, env);
 			}
-			clone.set(key, value, t);
+			clone.set(key, value, t, env);
 		}
 		return clone;
 	}
 
-	private String normalizeConstruct(Mixed c) {
-		if(c.isInstanceOf(CArray.TYPE)) {
+	private String normalizeConstruct(Mixed c, Environment env) {
+		if(c.isInstanceOf(CArray.TYPE, null, env)) {
 			throw new CRECastException("Arrays cannot be used as the key in an associative array", c.getTarget());
-		} else if(c.isInstanceOf(CString.TYPE) || c.isInstanceOf(CInt.TYPE)) {
+		} else if(c.isInstanceOf(CString.TYPE, null, env) || c.isInstanceOf(CInt.TYPE, null, env)) {
 			return c.val();
 		} else if(c instanceof CNull) {
 			return "";
-		} else if(c.isInstanceOf(CBoolean.TYPE)) {
+		} else if(c.isInstanceOf(CBoolean.TYPE, null, env)) {
 			if(((CBoolean) c).getBoolean()) {
 				return "1";
 			} else {
 				return "0";
 			}
 		} else if(c instanceof CLabel) {
-			return normalizeConstruct(((CLabel) c).cVal());
+			return normalizeConstruct(((CLabel) c).cVal(), env);
 		} else {
 			return c.val();
 		}
@@ -650,8 +667,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 * @param i
 	 * @return
 	 */
-	public Mixed remove(int i) {
-		return remove(new CInt(i, Target.UNKNOWN));
+	public Mixed remove(int i, Environment env) {
+		return remove(new CInt(i, Target.UNKNOWN), env);
 	}
 
 	/**
@@ -660,8 +677,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 * @param s
 	 * @return
 	 */
-	public Mixed remove(String s) {
-		return remove(new CString(s, Target.UNKNOWN));
+	public Mixed remove(String s, Environment env) {
+		return remove(new CString(s, Target.UNKNOWN), env);
 	}
 
 	/**
@@ -670,8 +687,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	 * @param construct The value to remove
 	 * @return The removed value, or CNull if nothing was removed.
 	 */
-	public Mixed remove(Mixed construct) {
-		String c = normalizeConstruct(construct);
+	public Mixed remove(Mixed construct, Environment env) {
+		String c = normalizeConstruct(construct, env);
 		Mixed ret;
 		if(!associativeMode) {
 			try {
@@ -829,7 +846,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 		STRING_IC
 	}
 
-	public void sort(final ArraySortType sort) {
+	public void sort(final ArraySortType sort, Environment env) {
 		if(this.associativeMode) {
 			array = new ArrayList<>(associativeArray.values());
 			this.associativeArray.clear();
@@ -850,11 +867,14 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 					} else {
 						c = o2;
 					}
-					if(c.isInstanceOf(CArray.TYPE)) {
+					if(c.isInstanceOf(CArray.TYPE, null, env)) {
 						throw new CRECastException("Cannot sort an array of arrays.", CArray.this.getTarget());
 					}
-					if(!(c.isInstanceOf(CBoolean.TYPE) || c.isInstanceOf(CString.TYPE) || c.isInstanceOf(CInt.TYPE)
-							|| c.isInstanceOf(CDouble.TYPE) || c instanceof CNull || c.isInstanceOf(CClassType.TYPE))) {
+					if(!(c.isInstanceOf(CBoolean.TYPE, null, env)
+							|| c.isInstanceOf(CString.TYPE, null, env)
+							|| c.isInstanceOf(CInt.TYPE, null, env)
+							|| c.isInstanceOf(CDouble.TYPE, null, env)
+							|| c instanceof CNull || c.isInstanceOf(CClassType.TYPE, null, env))) {
 						throw new CREFormatException("Unsupported type being sorted: " + c.typeof(), CArray.this.getTarget());
 					}
 				}
@@ -867,7 +887,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 						return o1.val().compareTo("");
 					}
 				}
-				if(o1.isInstanceOf(CBoolean.TYPE) || o2.isInstanceOf(CBoolean.TYPE)) {
+				if(o1.isInstanceOf(CBoolean.TYPE, null, env)
+						|| o2.isInstanceOf(CBoolean.TYPE, null, env)) {
 					if(ArgumentValidation.getBooleanish(o1, Target.UNKNOWN) == ArgumentValidation.getBooleanish(o2, Target.UNKNOWN)) {
 						return 0;
 					} else {

@@ -184,7 +184,7 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * @param args
 	 * @return
 	 */
-	public String profileMessage(Mixed... args);
+	public String profileMessage(Environment env, Mixed... args);
 
 	/**
 	 * Returns the message to use when this function gets profiled, if useSpecialExec returns true.

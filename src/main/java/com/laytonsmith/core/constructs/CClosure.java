@@ -10,12 +10,15 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREStackOverflowError;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
@@ -69,11 +72,11 @@ public class CClosure extends Construct implements Callable {
 	@Override
 	public String val() {
 		StringBuilder b = new StringBuilder();
-		condense(getNode(), b);
+		condense(getNode(), b, env);
 		return b.toString();
 	}
 
-	private void condense(ParseTree node, StringBuilder b) {
+	private void condense(ParseTree node, StringBuilder b, Environment env) {
 		if(node == null) {
 			return;
 		}
@@ -84,18 +87,18 @@ public class CClosure extends Construct implements Callable {
 				// when deserializing it later.
 				// Labels add : themselves, so no need to add that.
 				b.append(node.getChildAt(0));
-				condense(node.getChildAt(1), b);
+				condense(node.getChildAt(1), b, env);
 			} else {
 				b.append(func.val()).append("(");
 				for(int i = 0; i < node.numberOfChildren(); i++) {
-					condense(node.getChildAt(i), b);
+					condense(node.getChildAt(i), b, env);
 					if(i != node.numberOfChildren() - 1 && !((CFunction) node.getData()).val().equals("__autoconcat__")) {
 						b.append(",");
 					}
 				}
 				b.append(")");
 			}
-		} else if(node.getData().isInstanceOf(CString.TYPE)) {
+		} else if(node.getData().isInstanceOf(CString.TYPE, null, env)) {
 			String data = ArgumentValidation.getString(node.getData(), node.getTarget());
 			// Convert: \ -> \\ and ' -> \'
 			b.append("'").append(data.replace("\\", "\\\\").replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n")
@@ -187,10 +190,10 @@ public class CClosure extends Construct implements Callable {
 	}
 
 	/**
-	 * @deprecated This method suffers from the fact that a FunctionReturnException may end up bubbling up past the
+	 * This method suffers from the fact that a FunctionReturnException may end up bubbling up past the
 	 * point of intended handling, given an error in the code that forgets to catch FunctionReturnException
 	 * (or a superclass), but may be
-	 * hard to detect. Instead, use {@link #ExecuteClosure} which unconditionally catches the exception, and then
+	 * hard to detect. Instead, use {@link #executeCallable} which unconditionally catches the exception, and then
 	 * returns it. This also simplifies the code. This will not be removed earlier than 3.3.5.
 	 * @param values
 	 * @throws ConfigRuntimeException
@@ -198,10 +201,7 @@ public class CClosure extends Construct implements Callable {
 	 * @throws FunctionReturnException
 	 * @throws CancelCommandException
 	 */
-	// This method actually shouldn't be removed when the deprecation period is over, it should just be made protected,
-	// since it is still the foundation of executeClosure.
-	@Deprecated
-	public void execute(Mixed... values) throws ConfigRuntimeException, ProgramFlowManipulationException,
+	protected void execute(Mixed... values) throws ConfigRuntimeException, ProgramFlowManipulationException,
 			FunctionReturnException, CancelCommandException {
 		if(node == null) {
 			return;
@@ -222,8 +222,12 @@ public class CClosure extends Construct implements Callable {
 					} catch (Exception e) {
 						value = defaults[i].clone();
 					}
-					environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value,
-							getTarget(), environment));
+					try {
+						environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value,
+								getTarget(), environment));
+					} catch (ConfigCompileException cce) {
+						throw new CREFormatException(cce.getMessage(), getTarget());
+					}
 				}
 			}
 			boolean hasArgumentsParam = false;
@@ -235,14 +239,18 @@ public class CClosure extends Construct implements Callable {
 			}
 
 			if(!hasArgumentsParam) {
-				CArray arguments = new CArray(node.getData().getTarget());
+				CArray arguments = new CArray(node.getData().getTarget(), GenericParameters.start(CArray.TYPE).build(), env);
 				if(values != null) {
 					for(Mixed value : values) {
-						arguments.push(value, node.getData().getTarget());
+						arguments.push(value, node.getData().getTarget(), env);
 					}
 				}
-				environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
-						node.getData().getTarget()));
+				try {
+					environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
+							node.getData().getTarget()));
+				} catch (ConfigCompileException cce) {
+					throw new CREFormatException(cce.getMessage(), node.getData().getTarget());
+				}
 			}
 
 			ParseTree newNode = new ParseTree(new CFunction("g", getTarget()), node.getFileOptions());

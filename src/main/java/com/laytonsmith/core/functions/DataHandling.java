@@ -127,7 +127,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			return new CArray(t, args);
+			return new CArray(t, null, env, args);
 		}
 
 		@Override
@@ -194,8 +194,6 @@ public class DataHandling {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 
-		FileOptions lastFileOptions = null;
-
 		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children,
@@ -216,7 +214,7 @@ public class DataHandling {
 						String v;
 						if(value instanceof IVariable) {
 							v = ((IVariable) value).getVariableName();
-						} else if(value.isInstanceOf(CString.TYPE)) {
+						} else if(value.isInstanceOf(CString.TYPE, null, env)) {
 							v = ((CString) value).getQuote();
 						} else {
 							v = "@value";
@@ -255,9 +253,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray array = CArray.GetAssociativeArray(t, args);
-			return array;
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CArray.GetAssociativeArray(t, null, env, args);
 		}
 
 		@Override
@@ -352,11 +349,15 @@ public class DataHandling {
 				type = listVar.getDefinedType();
 			}
 			Mixed c = args[offset + 1];
-			while(c instanceof IVariable) {
-				IVariable cur = (IVariable) c;
+			while(c instanceof IVariable cur) {
 				c = list.get(cur.getVariableName(), cur.getTarget(), env).ival();
 			}
-			IVariable v = new IVariable(type, name, c, t, env);
+			IVariable v;
+			try {
+				v = new IVariable(type, name, c, t, env);
+			} catch(ConfigCompileException cce) {
+				throw new CREFormatException(cce.getMessage(), t);
+			}
 			list.set(v);
 			return v;
 		}
@@ -435,9 +436,7 @@ public class DataHandling {
 				Mixed rawType = ast.getChildAt(0).getData();
 				ParseTree ivarAst = ast.getChildAt(1);
 				Mixed rawIVar = ivarAst.getData();
-				if(rawType instanceof CClassType && rawIVar instanceof IVariable) {
-					CClassType type = (CClassType) rawType;
-					IVariable iVar = (IVariable) rawIVar;
+				if(rawType instanceof CClassType type && rawIVar instanceof IVariable iVar) {
 
 					// Add the new variable declaration.
 					declScope.addDeclaration(new Declaration(
@@ -458,8 +457,7 @@ public class DataHandling {
 				Scope newScope = analysis.createNewScope(valScope);
 				ParseTree ivarAst = ast.getChildAt(0);
 				Mixed rawIVar = ivarAst.getData();
-				if(rawIVar instanceof IVariable) {
-					IVariable iVar = (IVariable) rawIVar;
+				if(rawIVar instanceof IVariable iVar) {
 
 					// Add ivariable assign declaration in a new scope.
 					newScope.addDeclaration(new IVariableAssignDeclaration(iVar.getVariableName(), iVar.getTarget()));
@@ -497,10 +495,7 @@ public class DataHandling {
 				Mixed rawType = ast.getChildAt(0).getData();
 				ParseTree ivarAst = ast.getChildAt(1);
 				Mixed rawIVar = ivarAst.getData();
-				if(rawType instanceof CClassType && rawIVar instanceof IVariable) {
-					CClassType type = (CClassType) rawType;
-					IVariable iVar = (IVariable) rawIVar;
-
+				if(rawType instanceof CClassType type && rawIVar instanceof IVariable iVar) {
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
 					paramScope.addDeclaration(new ParamDeclaration(iVar.getVariableName(), type, ast.getTarget()));
@@ -521,8 +516,7 @@ public class DataHandling {
 				// Put the variable declaration in the param scope.
 				ParseTree ivarAst = ast.getChildAt(0);
 				Mixed rawIVar = ivarAst.getData();
-				if(rawIVar instanceof IVariable) {
-					IVariable iVar = (IVariable) rawIVar;
+				if(rawIVar instanceof IVariable iVar) {
 
 					// Add the new variable declaration.
 					paramScope = analysis.createNewScope(paramScope);
@@ -582,7 +576,7 @@ public class DataHandling {
 			int offset = 0;
 			if(args.length == 3) {
 				offset = 1;
-				if(!(args[0].isInstanceOf(CClassType.TYPE))) {
+				if(!(args[0].isInstanceOf(CClassType.TYPE, null, env))) {
 					throw new ConfigCompileException("Expecting a ClassType for parameter 1 to assign", t);
 				}
 			}
@@ -722,7 +716,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(!(args[0].isInstanceOf(CArray.TYPE)));
+			return CBoolean.get(!(args[0].isInstanceOf(CArray.TYPE, null, env)));
 		}
 
 		@Override
@@ -783,7 +777,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0].isInstanceOf(CString.TYPE));
+			return CBoolean.get(args[0].isInstanceOf(CString.TYPE, null, env));
 		}
 
 		@Override
@@ -800,6 +794,13 @@ public class DataHandling {
 				new ExampleScript("True condition", "is_string('yes')"),
 				new ExampleScript("False condition", "is_string(1) #is_stringable() would return true here")};
 		}
+
+		@Override
+		public CClassType getReturnType(Target t, List<CClassType> argTypes, List<Target> argTargets, Environment env, Set<ConfigCompileException> exceptions) {
+			return CBoolean.TYPE;
+		}
+
+
 	}
 
 	@api
@@ -842,7 +843,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0].isInstanceOf(CByteArray.TYPE));
+			return CBoolean.get(args[0].isInstanceOf(CByteArray.TYPE, null, env));
 		}
 
 		@Override
@@ -902,7 +903,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0].isInstanceOf(CArray.TYPE));
+			return CBoolean.get(args[0].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env));
 		}
 
 		@Override
@@ -964,7 +965,8 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0].isInstanceOf(CInt.TYPE) || args[0].isInstanceOf(CDouble.TYPE));
+			return CBoolean.get(args[0].isInstanceOf(CInt.TYPE, null, env)
+					|| args[0].isInstanceOf(CDouble.TYPE, null, env));
 		}
 
 		@Override
@@ -1027,7 +1029,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0].isInstanceOf(CDouble.TYPE));
+			return CBoolean.get(args[0].isInstanceOf(CDouble.TYPE, null, env));
 		}
 
 		@Override
@@ -1088,7 +1090,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0].isInstanceOf(CInt.TYPE));
+			return CBoolean.get(args[0].isInstanceOf(CInt.TYPE, null, env));
 		}
 
 		@Override
@@ -1148,7 +1150,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0].isInstanceOf(CBoolean.TYPE));
+			return CBoolean.get(args[0].isInstanceOf(CBoolean.TYPE, null, env));
 		}
 
 		@Override
@@ -1435,7 +1437,7 @@ public class DataHandling {
 			List<String> varNames = new ArrayList<>();
 			boolean usesAssign = false;
 			CClassType returnType = Auto.TYPE;
-			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData().isInstanceOf(CClassType.TYPE)) {
+			if(nodes[0].getData().equals(CVoid.VOID) || nodes[0].getData().isInstanceOf(CClassType.TYPE, null, env)) {
 				if(nodes[0].getData().equals(CVoid.VOID)) {
 					returnType = CVoid.TYPE;
 				} else {
@@ -1495,8 +1497,12 @@ public class DataHandling {
 								//into this proc, if the call to the proc didn't have a value in this slot.
 								c = new CString("", t);
 							}
-							ivar = new IVariable(((IVariable) cons).getDefinedType(),
-									((IVariable) cons).getVariableName(), c.clone(), t, env);
+							try {
+								ivar = new IVariable(((IVariable) cons).getDefinedType(),
+										((IVariable) cons).getVariableName(), c.clone(), t, env);
+							} catch (ConfigCompileException cce) {
+								throw new CREFormatException(cce.getMessage(), t);
+							}
 						} catch (CloneNotSupportedException ex) {
 							//
 						}
@@ -1608,8 +1614,7 @@ public class DataHandling {
 					//Yup! It worked. It's a const proc.
 					return c;
 				} catch (ConfigRuntimeException e) {
-					if(e instanceof CREThrowable
-							&& ((CREThrowable) e).isInstanceOf(CREInvalidProcedureException.TYPE)) {
+					if(e instanceof CREInvalidProcedureException) {
 						//This is the only valid exception that doesn't strictly mean it's a bad
 						//call.
 						return null;
@@ -2106,7 +2111,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CArray.TYPE)) {
+			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				return CBoolean.get(((CArray) args[0]).inAssociativeMode());
 			} else {
 				throw new CRECastException(this.getName() + " expects argument 1 to be an array", t);
@@ -2165,7 +2170,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0].isInstanceOf(CClosure.TYPE));
+			return CBoolean.get(args[0].isInstanceOf(CClosure.TYPE, null, environment));
 		}
 
 		@Override
@@ -2225,15 +2230,15 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String key;
-			if(args[0].isInstanceOf(CString.TYPE)) {
+			if(args[0].isInstanceOf(CString.TYPE, null, env)) {
 				key = args[0].val();
-			} else if(args[0].isInstanceOf(CArray.TYPE)) {
+			} else if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				if(((CArray) args[0]).isAssociative()) {
 					throw new CREIllegalArgumentException("Associative arrays may not be used as keys in " + getName(), t);
 				}
-				key = GetNamespace((CArray) args[0], t);
+				key = GetNamespace((CArray) args[0], t, env);
 			} else {
 				throw new CREIllegalArgumentException("Argument 1 in " + this.getName() + " must be a string or array.", t);
 			}
@@ -2296,15 +2301,15 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String key;
-			if(args[0].isInstanceOf(CString.TYPE)) {
+			if(args[0].isInstanceOf(CString.TYPE, null, env)) {
 				key = args[0].val();
-			} else if(args[0].isInstanceOf(CArray.TYPE)) {
+			} else if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				if(((CArray) args[0]).isAssociative()) {
 					throw new CREIllegalArgumentException("Associative arrays may not be used as keys in " + getName(), t);
 				}
-				key = GetNamespace((CArray) args[0], t);
+				key = GetNamespace((CArray) args[0], t, env);
 			} else {
 				throw new CREIllegalArgumentException("Argument 1 in " + this.getName() + " must be a string or array.", t);
 			}
@@ -2400,7 +2405,7 @@ public class DataHandling {
 			}
 			// Handle the closure type first thing
 			CClassType returnType = Auto.TYPE;
-			if(nodes[0].getData().isInstanceOf(CClassType.TYPE)) {
+			if(nodes[0].getData().isInstanceOf(CClassType.TYPE, null, env)) {
 				returnType = (CClassType) nodes[0].getData();
 				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
 				for(int i = 1; i < nodes.length; i++) {
@@ -2460,7 +2465,7 @@ public class DataHandling {
 
 			// Handle optional return type argument.
 			int ind = 0;
-			if(ast.getChildAt(ind).getData().isInstanceOf(CClassType.TYPE)) {
+			if(ast.getChildAt(ind).getData().isInstanceOf(CClassType.TYPE, null, env)) {
 				analysis.linkScope(parentScope, ast.getChildAt(ind++), env, exceptions);
 			}
 
@@ -2572,7 +2577,7 @@ public class DataHandling {
 			}
 			// Handle the closure type first thing
 			CClassType returnType = Auto.TYPE;
-			if(nodes[0].getData().isInstanceOf(CClassType.TYPE)) {
+			if(nodes[0].getData().isInstanceOf(CClassType.TYPE, null, env)) {
 				returnType = (CClassType) nodes[0].getData();
 				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
 				for(int i = 1; i < nodes.length; i++) {
@@ -2718,8 +2723,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[args.length - 1].isInstanceOf(CClosure.TYPE)) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			if(args[args.length - 1].isInstanceOf(CClosure.TYPE, null, env)) {
 				Mixed[] vals = new Mixed[args.length - 1];
 				System.arraycopy(args, 0, vals, 0, args.length - 1);
 				CClosure closure = (CClosure) args[args.length - 1];
@@ -2825,8 +2830,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(!(args[args.length - 1].isInstanceOf(CClosure.TYPE))) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			if(!(args[args.length - 1].isInstanceOf(CClosure.TYPE, null, env))) {
 				throw new CRECastException("Only a closure (created from the closure function) can be sent to executeas()", t);
 			}
 			Mixed[] vals = new Mixed[args.length - 3];
@@ -2838,7 +2843,7 @@ public class DataHandling {
 			MCCommandSender originalSender = cEnv.GetCommandSender();
 			MCCommandSender sender;
 			if(args[0] instanceof CNull) {
-				sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+				sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			} else {
 				sender = Static.GetCommandSender(args[0].val(), t);
 			}
@@ -3110,8 +3115,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CString.TYPE)) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CString.TYPE, null, env)) {
 				return args[0];
 			}
 			return new CString(args[0].val(), t);
@@ -3287,7 +3292,7 @@ public class DataHandling {
 	 * @param array
 	 * @return
 	 */
-	private static String GetNamespace(CArray array, Target t) {
+	private static String GetNamespace(CArray array, Target t, Environment env) {
 		boolean first = true;
 		StringBuilder b = new StringBuilder();
 		for(int i = 0; i < array.size(); i++) {
@@ -3295,7 +3300,7 @@ public class DataHandling {
 				b.append(".");
 			}
 			first = false;
-			b.append(array.get(i, t).val());
+			b.append(array.get(i, t, env).val());
 		}
 		return b.toString();
 	}
@@ -3411,7 +3416,7 @@ public class DataHandling {
 			try {
 				env.getEnv(GlobalEnv.class).SetDynamicScriptingMode(true);
 				Mixed script = parent.seval(node, env);
-				if(script.isInstanceOf(CClosure.TYPE)) {
+				if(script.isInstanceOf(CClosure.TYPE, null, env)) {
 					throw new CRECastException("Closures cannot be eval'd directly. Use execute() instead.", t);
 				}
 				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), env, t.file(), true),
@@ -3663,18 +3668,18 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CNull) {
 				return CBoolean.FALSE;
 			}
 			CClassType type;
-			if(args[1].isInstanceOf(CClassType.TYPE)) {
+			if(args[1].isInstanceOf(CClassType.TYPE, null, env)) {
 				type = (CClassType) args[1];
 			} else {
 				throw new RuntimeException("This should have been optimized out, this is a bug in instanceof,"
 						+ " please report it");
 			}
-			boolean b = InstanceofUtil.isInstanceof(args[0], type, environment);
+			boolean b = InstanceofUtil.isInstanceof(args[0], type, env);
 			return CBoolean.get(b);
 		}
 
@@ -3708,7 +3713,7 @@ public class DataHandling {
 				FileOptions fileOptions) throws ConfigCompileException, ConfigRuntimeException {
 			// There are two specific cases here where we will give more precise error messages.
 			// If it's a string, yell at them
-			if(children.get(1).getData().isInstanceOf(CString.TYPE)) {
+			if(children.get(1).getData().isInstanceOf(CString.TYPE, null, env)) {
 				throw new ConfigCompileException("Unexpected string type passed to \"instanceof\"", t);
 			}
 			// If it's a variable, also yell at them
@@ -3716,7 +3721,7 @@ public class DataHandling {
 				throw new ConfigCompileException("Variable types are not allowed in \"instanceof\"", t);
 			}
 			// Unknown error, but this is still never valid.
-			if(!(children.get(1).getData().isInstanceOf(CClassType.TYPE))) {
+			if(!(children.get(1).getData().isInstanceOf(CClassType.TYPE, null, env))) {
 				throw new ConfigCompileException("Unexpected type for \"instanceof\": " + children.get(1).getData(), t);
 			}
 			// null is technically a type, but instanceof shouldn't work with that

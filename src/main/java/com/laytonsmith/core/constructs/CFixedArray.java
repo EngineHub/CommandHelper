@@ -30,9 +30,10 @@ import java.util.Set;
 public class CFixedArray extends Construct implements
 		java.lang.Iterable<Mixed>, Booleanish, com.laytonsmith.core.natives.interfaces.Iterable {
 
-	public static final CClassType TYPE = CClassType.getWithGenericDefinition(CFixedArray.class,
-			new GenericDeclaration(Target.UNKNOWN, new Constraints(ConstraintLocation.DEFINITION,
-					new UnboundedConstraint(Target.UNKNOWN, "T"))));
+	private static final GenericDeclaration gen = new GenericDeclaration(Target.UNKNOWN,
+			new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
+				new UnboundedConstraint(Target.UNKNOWN, "T")));
+	public static final CClassType TYPE = CClassType.getWithGenericDeclaration(CFixedArray.class, gen);
 	private Mixed[] data;
 	private CClassType allowedType;
 

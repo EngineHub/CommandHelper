@@ -6,8 +6,11 @@ import com.laytonsmith.core.Finalizable;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.functions.ResourceManager.res_free_resource;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.objects.ObjectModifier;
 
 import java.io.File;
+import java.util.EnumSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -17,7 +20,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * created.
  */
 @typeof("ms.lang.Resource")
-public class CResource<T> extends Construct implements Finalizable {
+public final class CResource<T> extends Construct implements Finalizable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get(CResource.class);
@@ -130,4 +133,8 @@ public class CResource<T> extends Construct implements Finalizable {
 		return CClassType.EMPTY_CLASS_ARRAY;
 	}
 
+	@Override
+	public Set<ObjectModifier> getObjectModifiers() {
+		return EnumSet.of(ObjectModifier.FINAL);
+	}
 }

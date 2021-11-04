@@ -8,18 +8,16 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.junit.Ignore;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -36,9 +34,8 @@ public class TestCClassType {
 		env = env.cloneAndAdd(new CommandHelperEnvironment());
 	}
 
-	private static CClassType get(String... types) throws ClassNotFoundException {
-		return CClassType.get(Stream.of(types).map(e -> FullyQualifiedClassName.forName(e, Target.UNKNOWN, env))
-				.collect(Collectors.toList()).toArray(new FullyQualifiedClassName[0]));
+	private static CClassType get(String type) throws ClassNotFoundException {
+		return CClassType.get(FullyQualifiedClassName.forName(type, Target.UNKNOWN, env));
 	}
 
 	@Test
@@ -53,11 +50,11 @@ public class TestCClassType {
 		assertFalse(get("mixed").equals(get("array")));
 	}
 
-	@Test
-	public void testEqualsWithTypeUnion() throws Exception {
-		assertTrue(get("array", "int").equals(get("int", "array")));
-		assertFalse(get("array", "int").equals(get("string", "array")));
-	}
+//	@Test
+//	public void testEqualsWithTypeUnion() throws Exception {
+//		assertTrue(get("array", "int").equals(get("int", "array")));
+//		assertFalse(get("array", "int").equals(get("string", "array")));
+//	}
 
 	@Test
 	public void testDoesExtend() throws Exception {

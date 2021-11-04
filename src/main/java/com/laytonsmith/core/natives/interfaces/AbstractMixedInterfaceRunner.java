@@ -1,7 +1,5 @@
 package com.laytonsmith.core.natives.interfaces;
 
-import com.laytonsmith.core.objects.ObjectType;
-import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.Annotations.InterfaceRunnerFor;
 import com.laytonsmith.PureUtilities.Version;
@@ -10,7 +8,12 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.AccessModifier;
+import com.laytonsmith.core.objects.ObjectModifier;
+import com.laytonsmith.core.objects.ObjectType;
+
 import java.net.URL;
 import java.util.EnumSet;
 import java.util.Set;
@@ -120,13 +123,8 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 	}
 
 	@Override
-	public boolean isInstanceOf(CClassType type) {
-		return Construct.isInstanceof(this, type);
-	}
-
-	@Override
-	public boolean isInstanceOf(Class<? extends Mixed> type) {
-		return Construct.isInstanceof(this, type);
+	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
+		return Construct.isInstanceof(this, type, lhsGenericParameters, env);
 	}
 
 }

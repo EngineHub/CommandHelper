@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
@@ -17,7 +18,7 @@ import java.util.Set;
  */
 public class InstanceofUtil {
 	/**
-	 * Returns a list of all classes that the specified class can be validly cast to. This includes all super classes,
+	 * Returns a list of all naked classes that the specified class can be validly cast to. This includes all super classes,
 	 * as well as all interfaces (and superclasses of those interfaces, etc) and java.lang.Object, as well as the class
 	 * itself.
 	 *
@@ -31,7 +32,7 @@ public class InstanceofUtil {
 	}
 
 	/**
-	 * Private version of {@link #getAllCastableClasses(java.lang.Class)}
+	 * Private version of {@link #getAllCastableClasses(CClassType, Environment)}
 	 *
 	 * @param c
 	 * @param blacklist
@@ -39,6 +40,7 @@ public class InstanceofUtil {
 	 */
 	private static Set<CClassType> getAllCastableClassesWithBlacklist(CClassType c, Set<CClassType> blacklist,
 			Environment env) {
+		c = CClassType.getNakedClassType(c.getFQCN());
 		if(blacklist.contains(c)) {
 			return blacklist;
 		}
@@ -58,47 +60,48 @@ public class InstanceofUtil {
 		return blacklist;
 	}
 
-	/**
-	 * Returns true whether or not a given MethodScript value is an instance of the specified MethodScript type.
-	 *
-	 * @param value The value to check for
-	 * @param instanceofThis The string type to check. This must be the fully qualified name.
-	 * @param env
-	 * @return
-	 */
-	public static boolean isInstanceof(Mixed value, FullyQualifiedClassName instanceofThis, Environment env) {
-		Static.AssertNonNull(instanceofThis, "instanceofThis may not be null");
-		if(instanceofThis.getFQCN().equals("auto")) {
-			return true;
-		}
-		if(value instanceof CFunction) {
-			// TODO: Need to put the return type here, so we can work with this, but for now, just always return false
-			return false;
-		}
-		return isInstanceof(value.typeof(), instanceofThis, env);
-	}
+//	/**
+//	 * Returns true whether or not a given MethodScript value is an instance of the specified MethodScript type.
+//	 *
+//	 * @param value The value to check for
+//	 * @param instanceofThis The string type to check. This must be the fully qualified name.
+//	 * @param env
+//	 * @return
+//	 */
+//	public static boolean isInstanceof(Mixed value, FullyQualifiedClassName instanceofThis, Environment env) {
+//		Static.AssertNonNull(instanceofThis, "instanceofThis may not be null");
+//		if(instanceofThis.getFQCN().equals("auto")) {
+//			return true;
+//		}
+//		if(value instanceof CFunction) {
+//			// TODO: Need to put the return type here, so we can work with this, but for now, just always return false
+//			return false;
+//		}
+//		return isInstanceof(value.typeof(), instanceofThis, env);
+//	}
 
-	/**
-	 * Returns true whether or not a given MethodScript type is an instance of the specified MethodScript type.
-	 *
-	 * @param type The type to check for
-	 * @param instanceofThis The string type to check. This must be the fully qualified name.
-	 * @param env
-	 * @return
-	 */
-	public static boolean isInstanceof(CClassType type, FullyQualifiedClassName instanceofThis, Environment env) {
-		Static.AssertNonNull(instanceofThis, "instanceofThis may not be null");
-		if(instanceofThis.getFQCN().equals("auto")) {
-			return true;
-		}
-		for(CClassType c : getAllCastableClasses(type, env)) {
-			FullyQualifiedClassName typeof = c.getFQCN();
-			if(typeof != null && typeof.equals(instanceofThis)) {
-				return true;
-			}
-		}
-		return false;
-	}
+//	/**
+//	 * Returns true whether or not a given MethodScript type is an instance of the specified MethodScript type.
+//	 *
+//	 * @param type The type to check for
+//	 * @param instanceofThis The string type to check. This must be the fully qualified name.
+//	 * @param env
+//	 * @return
+//	 */
+//	public static boolean isInstanceof(CClassType type, FullyQualifiedClassName instanceofThis, Environment env) {
+//		Static.AssertNonNull(instanceofThis, "instanceofThis may not be null");
+//		if(instanceofThis.getFQCN().equals("auto")) {
+//			return true;
+//		}
+//		for(CClassType c : getAllCastableClasses(type, env)) {
+//			FullyQualifiedClassName typeof = c.getFQCN();
+//			if(typeof != null && typeof.equals(instanceofThis)) {
+//				// Check generics, if they exist
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
 
 	/**
 	 * Returns whether or not a given MethodScript value is an instanceof the specified MethodScript type.
@@ -107,9 +110,10 @@ public class InstanceofUtil {
 	 * @param env
 	 * @return
 	 */
-	public static boolean isInstanceof(Mixed value, Class<? extends Mixed> instanceofThis, Environment env) {
+	public static boolean isInstanceof(Mixed value, Class<? extends Mixed> instanceofThis, Environment env) throws ClassNotFoundException {
 		FullyQualifiedClassName typeof = typeof(instanceofThis);
-		return typeof == null ? false : isInstanceof(value, typeof, env);
+		CClassType type = CClassType.get(typeof);
+		return isInstanceof(value, type, env);
 	}
 
 	/**
@@ -121,7 +125,20 @@ public class InstanceofUtil {
 	 * @return
 	 */
 	public static boolean isInstanceof(Mixed value, CClassType instanceofThis, Environment env) {
-		return isInstanceof(value, instanceofThis.getFQCN(), env);
+		return isInstanceof(value, instanceofThis, null, env);
+	}
+
+	/**
+	 * Returns whether or not a given MethodScript value is an instance of the specified MethodScript type.
+	 *
+	 * @param value The value to check for
+	 * @param instanceofThis The CClassType to check
+	 * @param generics The LHS generic parameters
+	 * @param env
+	 * @return
+	 */
+	public static boolean isInstanceof(Mixed value, CClassType instanceofThis, LeftHandGenericUse generics, Environment env) {
+		return isInstanceof(value.typeof(), instanceofThis, generics, env);
 	}
 
 	private static final Map<CClassType, Set<CClassType>> ISINSTANCEOF_CACHE = new HashMap<>();
@@ -130,13 +147,14 @@ public class InstanceofUtil {
 	 * Returns whether or not a given MethodScript type is an instance of the specified MethodScript type.
 	 *
 	 * @param type The type to check for
-	 * @param instanceofThis The CClassType to check
+	 * @param instanceofThis The CClassType to check. This may not be null.
+	 * @param generics The LHS generics definition\
 	 * @param env
 	 * @return
 	 */
-	public static boolean isInstanceof(CClassType type, CClassType instanceofThis, Environment env) {
+	public static boolean isInstanceof(CClassType type, CClassType instanceofThis, LeftHandGenericUse generics, Environment env) {
 		Static.AssertNonNull(instanceofThis, "instanceofThis may not be null");
-
+		instanceofThis = CClassType.getNakedClassType(instanceofThis.getFQCN());
 		// Return true for AUTO, as everything can be used as AUTO.
 		if(instanceofThis == CClassType.AUTO) {
 			return true;
@@ -150,7 +168,15 @@ public class InstanceofUtil {
 		}
 
 		// Return the result.
-		return castableClasses.contains(instanceofThis);
+		if(!castableClasses.contains(instanceofThis)) {
+			return false;
+		}
+
+		if(instanceofThis.getGenericDeclaration() != null ) {
+			return type.getGenericParameters().isInstanceof(generics);
+		} else {
+			return true;
+		}
 	}
 
 	private static FullyQualifiedClassName typeof(Class<? extends Mixed> c) {

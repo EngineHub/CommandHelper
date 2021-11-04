@@ -11,6 +11,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
@@ -191,13 +192,14 @@ public class Procedure implements Cloneable {
 		Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel(), null);
 
 		// Create container for the @arguments variable.
-		CArray arguments = new CArray(Target.UNKNOWN, this.varIndex.size());
+		CArray arguments = new CArray(Target.UNKNOWN, this.varIndex.size(),
+				GenericParameters.start(CArray.TYPE).build(), env);
 
 		// Handle passed procedure arguments.
 		int varInd;
 		for(varInd = 0; varInd < args.size(); varInd++) {
 			Mixed c = args.get(varInd);
-			arguments.push(c, t);
+			arguments.push(c, t, env);
 			if(this.varIndex.size() > varInd) {
 				IVariable var = this.varIndex.get(varInd);
 				if(c instanceof CVoid
@@ -207,8 +209,12 @@ public class Procedure implements Cloneable {
 							+ " a void value was found instead.", c.getTarget());
 				} else if(!(c instanceof CVoid) && c instanceof CNull || var.getDefinedType().equals(Auto.TYPE)
 						|| InstanceofUtil.isInstanceof(c, var.getDefinedType(), env)) {
-					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
-							var.getVariableName(), c, c.getTarget()));
+					try {
+						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(var.getDefinedType(),
+								var.getVariableName(), c, c.getTarget()));
+					} catch (ConfigCompileException cce) {
+						throw new CREFormatException(cce.getMessage(), t);
+					}
 				} else {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
 							+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
@@ -221,11 +227,20 @@ public class Procedure implements Cloneable {
 		while(varInd < this.varIndex.size()) {
 			String varName = this.varIndex.get(varInd++).getVariableName();
 			Mixed defVal = this.originals.get(varName);
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, varName, defVal, defVal.getTarget()));
-			arguments.push(defVal, t);
+			try {
+				env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(Auto.TYPE, varName, defVal, defVal.getTarget()));
+			} catch (ConfigCompileException cce) {
+				// Shouldn't happen here, but just in case
+				throw new CREFormatException(cce.getMessage(), defVal.getTarget());
+			}
+			arguments.push(defVal, t, env);
 		}
 
-		env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, t));
+		try {
+			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments, t));
+		} catch (ConfigCompileException cce) {
+			throw new CREFormatException(cce.getMessage(), t);
+		}
 		StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 		stManager.addStackTraceElement(new ConfigRuntimeException.StackTraceElement("proc " + name, getTarget()));
 		try {

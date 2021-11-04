@@ -1,16 +1,18 @@
 package com.laytonsmith.core.natives.interfaces;
 
-import com.laytonsmith.core.objects.ObjectType;
-import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.AccessModifier;
+import com.laytonsmith.core.objects.ObjectModifier;
+import com.laytonsmith.core.objects.ObjectType;
+
 import java.util.Set;
 
 /**
@@ -108,33 +110,11 @@ public interface Mixed extends Cloneable, Documentation {
 	 * instanceof keyword, so in order to do that, we must compare objects with a custom method, rather than rely on
 	 * Java's keyword.
 	 *
-	 * This method works with CClassTypes.
-	 *
-	 * Implementation note: The implementation of this should just be
-	 * {@link Construct#isInstanceof(com.laytonsmith.core.natives.interfaces.Mixed,
-	 * com.laytonsmith.core.constructs.CClassType)} which supports Mixed values.
-	 *
 	 * @param type
+	 * @param lhsGenericParameters The LHS generic definition (may be null)
 	 * @return
 	 */
-	public boolean isInstanceOf(CClassType type);
-
-	/**
-	 * Generally speaking, we cannot use Java's instanceof keyword to determine if something is an instanceof, because
-	 * user classes do not extend the hierarchy of objects in MethodScript. Essentially, we need to extend Java's
-	 * instanceof keyword, so in order to do that, we must compare objects with a custom method, rather than rely on
-	 * Java's keyword.
-	 *
-	 * This method works with class type directly.
-	 *
-	 * Implementation note: The implementation of this should just be
-	 * {@link Construct#isInstanceof(com.laytonsmith.core.natives.interfaces.Mixed, java.lang.Class)} which supports
-	 * Mixed values.
-	 *
-	 * @param type
-	 * @return
-	 */
-	public boolean isInstanceOf(Class<? extends Mixed> type);
+	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env);
 
 	/**
 	 * Returns the typeof this value, as a CClassType object. Not all constructs are annotated with the @typeof

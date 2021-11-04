@@ -1,20 +1,14 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
-import com.laytonsmith.core.constructs.generics.ConstraintLocation;
-import com.laytonsmith.core.constructs.generics.Constraints;
-import com.laytonsmith.core.constructs.generics.ExactType;
 import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
-import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
-import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
@@ -27,7 +21,6 @@ import com.laytonsmith.core.objects.ObjectDefinitionTable;
 import com.laytonsmith.core.objects.UserObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -64,14 +57,9 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 */
 	private static final Mixed[] UNINITIALIZED = new Mixed[0];
 
-	// Have to manually place this in the cache later
-	private static final GenericDeclaration CCLASS_TYPE_GENERIC_DECLARATION
-			= new GenericDeclaration(Target.UNKNOWN, new Constraints(ConstraintLocation.DEFINITION,
-				new UnboundedConstraint(Target.UNKNOWN, "T")));
-
 	static {
 		try {
-			TYPE = new CClassType("ms.lang.ClassType", Target.UNKNOWN, CCLASS_TYPE_GENERIC_DECLARATION);
+			TYPE = new CClassType("ms.lang.ClassType", Target.UNKNOWN, null);
 			AUTO = new CClassType("auto", Target.UNKNOWN, null);
 		} catch (ClassNotFoundException e) {
 			throw new Error(e);
@@ -85,17 +73,12 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	public static final CClassType[] EMPTY_CLASS_ARRAY = new CClassType[0];
 
 	static {
-		CACHE.add(FullyQualifiedClassName.forNativeClass(CClassType.class),
-				GenericParameters.start(CCLASS_TYPE_GENERIC_DECLARATION)
-						.addParameter(CClassType.TYPE,
-								new LeftHandGenericUse(CClassType.TYPE, Target.UNKNOWN,
-										new Constraints(ConstraintLocation.LHS,
-												new ExactType(Target.UNKNOWN, CClassType.TYPE))))
-						.build(), TYPE);
+		CACHE.add(FullyQualifiedClassName.forNativeClass(CClassType.class), null , TYPE);
 	}
 
 	private final boolean isTypeUnion;
 	private final FullyQualifiedClassName fqcn;
+	private final GenericParameters genericParameters;
 
 	/**
 	 * This is an invalid instance of the underlying type that can only be used for Documentation purposes or finding
@@ -118,7 +101,6 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	private final SortedSet<FullyQualifiedClassName> types = new TreeSet<>();
 
 	private final GenericDeclaration genericDeclaration;
-	private final GenericParameters genericParameters;
 
 	/**
 	 * Returns the singular instance of CClassType that represents this type.
@@ -127,14 +109,14 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * errors. The only time this method is preferred vs {@link #get(com.laytonsmith.core.FullyQualifiedClassName)} is
 	 * when used to define the TYPE value. The native class must also be provided at the same time, which is used
 	 * for various operations to increase efficiency when dealing with native classes. If the type is defined with
-	 * generics, use {@link #getWithGenericDefinition(Class, GenericDeclaration)}.
+	 * generics, use {@link #getWithGenericDeclaration(Class, GenericDeclaration)}.
 	 *
 	 * Unlike the other getters, this will not throw a ClassNotFoundException, it will instead throw an Error.
 	 * @param type
 	 * @return
 	 */
 	public static CClassType get(Class<? extends Mixed> type) {
-		return getWithGenericDefinition(type, null);
+		return getWithGenericDeclaration(type, null);
 	}
 
 	/**
@@ -149,81 +131,116 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * @param type
 	 * @return
 	 */
-	public static CClassType getWithGenericDefinition(Class<? extends Mixed> type, GenericDeclaration generics) {
-		try {
-			CClassType t = get(FullyQualifiedClassName.forNativeClass(type), generics);
-			t.nativeClass = type;
-			return t;
-		} catch (ClassNotFoundException ex) {
-			throw new Error(ex);
+	public static CClassType getWithGenericDeclaration(Class<? extends Mixed> type, GenericDeclaration generics) {
+		FullyQualifiedClassName fqcn = FullyQualifiedClassName.forNativeClass(type);
+		CClassType classtype = getNakedClassType(fqcn);
+		if(classtype == null) {
+			// hasn't been defined yet
+			classtype = defineClass(fqcn, generics);
+			classtype.nativeClass = type;
 		}
+		return classtype;
 	}
 
 	/**
-	 * Returns the "naked class type". This is the
+	 * Returns the "naked class type". This is the type without any parameters defined. In general, this represents
+	 * a non-instantiatable class, but can be used in certain circumstances, particularly when the compiler needs to
+	 * verify the generic declaration.
 	 * @param type
 	 * @return
-	 * @throws ClassNotFoundException
 	 */
-	public static CClassType getNakedClassType(FullyQualifiedClassName type)
-			throws ClassNotFoundException {
+	public static CClassType getNakedClassType(FullyQualifiedClassName type) {
 		return CACHE.getNakedClassType(type);
 	}
 
 	/**
-	 * Returns the singular instance of CClassType that represents this type.
+	 * Returns the "naked class type". This is the type without any parameters defined. In general, this represents
+	 * a non-instantiatable class, but can be used in certain circumstances, particularly when the compiler needs to
+	 * verify the generic declaration or for very generic instanceof checks.
+	 *
+	 * @return
+	 */
+	public CClassType getNakedType() {
+		return CClassType.getNakedClassType(this.getFQCN());
+	}
+
+	/**
+	 * Returns the singular instance of CClassType that represents this type. If it doesn't exist, it creates it, stores,
+	 * and returns that instance. Note that in general, == is not supported for these types. This method will only
+	 * succeed on types that don't have a generic declaration, for ones with, you must use
+	 * {@link #get(FullyQualifiedClassName, Target, GenericParameters)}
 	 *
 	 * @param type
 	 * @return
 	 */
-	public static CClassType get(FullyQualifiedClassName type, GenericParameters generics)
+	public static CClassType get(FullyQualifiedClassName type)
+			throws ClassNotFoundException {
+		return get(type, Target.UNKNOWN, null);
+	}
+
+	/**
+	 * Returns the singular instance of CClassType that represents this type. If it doesn't exist, it creates it, stores,
+	 * and returns that instance. Note that in general, == is not supported for these types.
+	 *
+	 * @param type
+	 * @return
+	 */
+	public static CClassType get(FullyQualifiedClassName type, Target t, GenericParameters generics)
 			throws ClassNotFoundException {
 		assert type != null;
-		CClassType ctype = CACHE.get();
+		CClassType naked = getNakedClassType(type);
+		if(naked == null && generics != null) {
+			throw new ClassNotFoundException("Naked class for " + type.getFQCN()
+					+ " is not yet defined, it must be defined before use.");
+		}
+		if(naked.getGenericDeclaration() != null && generics == null) {
+			throw new ClassNotFoundException("Missing generic parameters for " + type.getFQCN());
+		}
+		CClassType ctype = CACHE.get(type, generics);
 		if(ctype == null) {
-			ctype = new CClassType(type, Target.UNKNOWN, false, generics);
-			CACHE.put(type, ctype);
+			ctype = new CClassType(naked, t, generics);
+			CACHE.add(type, generics, ctype);
 		}
 		return ctype;
 	}
 
-	/**
-	 * Returns the singular instance of CClassType that represents this type union. string|int and int|string are both
-	 * considered the same type union, as they are first normalized into a canonical form.
-	 *
-	 * Use {@link #get(com.laytonsmith.core.constructs.CClassType...)} instead, to ensure type safety, unless absolutely
-	 * impossible (comes from user input, for instance).
-	 *
-	 * @param types
-	 * @return
-	 */
-	public static CClassType get(FullyQualifiedClassName... types) throws ClassNotFoundException {
-
-		SortedSet<FullyQualifiedClassName> t = new TreeSet<>(Arrays.asList(types));
-		FullyQualifiedClassName type
-				= FullyQualifiedClassName.forFullyQualifiedClass(StringUtils.Join(t, "|", e -> e.getFQCN()));
-		CClassType ctype = CACHE.get(type);
-		if(ctype == null) {
-			ctype = new CClassType(type, Target.UNKNOWN, false, null);
-			CACHE.put(type, ctype);
-		}
-		return ctype;
-	}
-
-	/**
-	 * Returns the singular instance of CClassType that represents this type union. string|int and int|string are both
-	 * considered the same type union, as they are first normalized into a canonical form.
-	 *
-	 * @param types
-	 * @return
-	 */
-	public static CClassType get(CClassType... types) throws ClassNotFoundException {
-		return get(Stream.of(types)
-				.map(e -> e.getFQCN())
-				.sorted()
-				.collect(Collectors.toSet())
-				.toArray(new FullyQualifiedClassName[types.length]));
-	}
+//	/**
+//	 * Returns the singular instance of CClassType that represents this type union. string|int and int|string are both
+//	 * considered the same type union, as they are first normalized into a canonical form.
+//	 *
+//	 * Use {@link #get(com.laytonsmith.core.constructs.CClassType...)} instead, to ensure type safety, unless absolutely
+//	 * impossible (comes from user input, for instance).
+//	 *
+//	 * @param types
+//	 * @return
+//	 */
+//	private static CClassType get(FullyQualifiedClassName... types) throws ClassNotFoundException {
+//
+//		SortedSet<FullyQualifiedClassName> t = new TreeSet<>(Arrays.asList(types));
+//		FullyQualifiedClassName type
+//				= FullyQualifiedClassName.forFullyQualifiedClass(StringUtils.Join(t, "|", e -> e.getFQCN()));
+//		CClassType ctype = CACHE.get(type);
+//		if(ctype == null) {
+//			ctype = new CClassType(type, Target.UNKNOWN, false, null);
+//			CACHE.put(type, ctype);
+//		}
+//		return ctype;
+//	}
+//
+//	/**
+//	 * Returns the singular instance of CClassType that represents this type union. string|int and int|string are both
+//	 * considered the same type union, as they are first normalized into a canonical form.
+//	 *
+//	 * @param types
+//	 * @return
+//	 */
+//	public static CClassType get(CClassType... types) throws ClassNotFoundException {
+//		return get(Stream.of(types)
+//				.map(e -> e.getFQCN())
+//				.sorted()
+//				.collect(Collectors.toSet())
+//				.toArray(new FullyQualifiedClassName[types.length]));
+//	}
 
 	/**
 	 * This function defines a brand new class type. This should exclusively be used in a class
@@ -232,10 +249,10 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * @param fqcn
 	 * @return
 	 */
-	public static CClassType defineClass(FullyQualifiedClassName fqcn) {
+	public static CClassType defineClass(FullyQualifiedClassName fqcn, GenericDeclaration genericDeclaration) {
 		try {
-			CClassType type = new CClassType(fqcn, Target.UNKNOWN, true, null);
-			CACHE.put(fqcn, type);
+			CClassType type = new CClassType(fqcn, Target.UNKNOWN, true, genericDeclaration);
+			CACHE.add(fqcn, null, type);
 			return type;
 		} catch (ClassNotFoundException ex) {
 			throw new Error(ex);
@@ -270,6 +287,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * @param type
 	 * @param t
 	 * @param newDefinition If true, this function MUST NOT throw a ClassNotFoundException.
+	 * @param genericDeclaration The generic declaration for this class. May be null if no generics are being defined.
 	 */
 	@SuppressWarnings("ConvertToStringSwitch")
 	private CClassType(FullyQualifiedClassName type, Target t, boolean newDefinition, GenericDeclaration genericDeclaration)
@@ -277,8 +295,8 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		super(formatName(type, genericDeclaration), ConstructType.CLASS_TYPE, t);
 		isTypeUnion = type.isTypeUnion();
 		fqcn = type;
+		this.genericParameters = null;
 		this.genericDeclaration = genericDeclaration;
-		this.genericParameters = new GenericParameters(this);
 		if(isTypeUnion) {
 			// Split them out
 			types.addAll(Stream.of(type.getFQCN().split("\\|"))
@@ -329,6 +347,25 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 				throw new ClassNotFoundException("Could not find class of type " + type);
 			}
 		}
+	}
+
+	/**
+	 * Creates a genericized version of an existing naked class definition.
+	 * @param nakedType The naked type, that is, the one that contains just the generic declaration with no parameters.
+	 * @param t Code target
+	 * @param genericParameters The concrete generic parameters
+	 */
+	private CClassType(CClassType nakedType, Target t, GenericParameters genericParameters) {
+		super(nakedType.getFQCN() + (genericParameters == null ? "" : genericParameters.toString()),
+				ConstructType.CLASS_TYPE, t);
+		if(nakedType.isTypeUnion) {
+			throw new Error("Type union classes cannot have generic parameters");
+		}
+		GenericDeclaration declaration = nakedType.getGenericDeclaration();
+		this.genericDeclaration = declaration; // same declaration as "parent" class
+		isTypeUnion = false;
+		fqcn = nakedType.fqcn;
+		this.genericParameters = genericParameters;
 	}
 
 	/**
@@ -641,7 +678,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	// TODO: These getters will eventually be re-done to support static methods, but for now that is out of scope,
 	// so we just specifically support enums for now.
 	@Override
-	public Mixed get(String index, Target t) throws ConfigRuntimeException {
+	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
 		if(isEnum()) {
 			try {
 				return NativeTypeList.getNativeEnumType(fqcn).get(index, t);
@@ -653,7 +690,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	@Override
-	public Mixed get(int index, Target t) throws ConfigRuntimeException {
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
 		if(isEnum()) {
 			try {
 				return NativeTypeList.getNativeEnumType(fqcn).get(index, t);
@@ -665,7 +702,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	@Override
-	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
+	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
 		if(isEnum()) {
 			try {
 				return NativeTypeList.getNativeEnumType(fqcn).get(index, t);
@@ -739,6 +776,14 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		return genericDeclaration;
 	}
 
+	/**
+	 * Returns the generic parameters on the instance of the class.
+	 * @return null if no generics are defined on this class, or they were, but it's the naked class.
+	 */
+	public GenericParameters getGenericParameters() {
+		return this.genericParameters;
+	}
+
 	private static class ClassTypeCache {
 
 		private Map<Pair<FullyQualifiedClassName, GenericParameters>, CClassType> cache;
@@ -747,6 +792,13 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 			cache = Collections.synchronizedMap(new HashMap<>());
 		}
 
+		/**
+		 * Adds a new class to the cache.
+		 * @param fqcn The fully qualified class name
+		 * @param parameters The parameters for this instance. This may be null, both if the class has no generic
+		 *                   definition, but also if this is the naked class.
+		 * @param type The CClassType.
+		 */
 		public void add(FullyQualifiedClassName fqcn, GenericParameters parameters, CClassType type) {
 			cache.put(new Pair<>(fqcn, parameters), type);
 		}
@@ -764,12 +816,26 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 			return ret;
 		}
 
+		/**
+		 * Returns the naked class, that is, the class without a defined parameter set. This may
+		 * return null if the class has not been defined at all. Note that all classes without generic
+		 * parameters are considered "naked", but then those would have been added with a null parameter
+		 * set anyways, which should be equivalent.
+		 * @param fqcn
+		 * @return
+		 */
 		public CClassType getNakedClassType(FullyQualifiedClassName fqcn) {
-			return cache.get(new Pair<>(fqcn, null));
+			return get(fqcn, null);
 		}
 
-		public void get(FullyQualifiedClassName fqcn, GenericParameters declaration) {
-			cache.get(new Pair<>(fqcn, declaration));
+		/**
+		 * Gets the CClassType instance for this FQCN and parameter set.
+		 * @param fqcn The fully qualified class name
+		 * @param declaration The parameter declaration. Null if this is a type without a parameter declaration, or
+		 *                    if you wish to get the naked class.
+		 */
+		public CClassType get(FullyQualifiedClassName fqcn, GenericParameters declaration) {
+			return cache.get(new Pair<>(fqcn, declaration));
 		}
 	}
 }

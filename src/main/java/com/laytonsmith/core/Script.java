@@ -374,7 +374,7 @@ public class Script {
 			} else if(possibleFunction.hasIVariable()) {
 				//Check if this ivar is a closure and execute it
 				Mixed closure = env.getEnv(GlobalEnv.class).GetVarList().get(m.val(), m.getTarget(), env).ival();
-				if(!closure.isInstanceOf(CClosure.TYPE)) {
+				if(!closure.typeof().getNakedType().isInstanceOf(CClosure.TYPE, null, env)) {
 					throw new CRECastException("Expecting variable to contain a closure to execute, but found type: "
 							+ closure.typeof().getSimpleName(), m.getTarget());
 				}
@@ -455,7 +455,7 @@ public class Script {
 					ProfilePoint p = null;
 					if(f.shouldProfile() && env.getEnv(StaticRuntimeEnv.class).GetProfiler() != null
 							&& env.getEnv(StaticRuntimeEnv.class).GetProfiler().isLoggable(f.profileAt())) {
-						p = env.getEnv(StaticRuntimeEnv.class).GetProfiler().start(f.profileMessage(ca), f.profileAt());
+						p = env.getEnv(StaticRuntimeEnv.class).GetProfiler().start(f.profileMessage(env, ca), f.profileAt());
 					}
 					Mixed ret;
 					try {

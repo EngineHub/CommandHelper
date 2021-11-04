@@ -40,7 +40,7 @@ public final class WorldEvents {
 	public abstract static class WorldEvent extends AbstractEvent {
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			Map<String, Mixed> r = evaluate_helper(e);
 			r.put("world", new CString(((MCWorldEvent) e).getWorld().getName(), Target.UNKNOWN));
 			return r;
@@ -85,12 +85,12 @@ public final class WorldEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 	}
@@ -133,12 +133,12 @@ public final class WorldEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 	}
@@ -181,12 +181,12 @@ public final class WorldEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 	}
@@ -248,7 +248,7 @@ public final class WorldEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			Map<String, Mixed> r = super.evaluate(e);
 			MCStructureGrowEvent event = (MCStructureGrowEvent) e;
 			List<MCBlockState> blocks = event.getBlocks();
@@ -266,12 +266,12 @@ public final class WorldEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 	}

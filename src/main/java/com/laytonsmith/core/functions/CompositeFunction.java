@@ -14,15 +14,17 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import java.io.File;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,7 +73,12 @@ public abstract class CompositeFunction extends AbstractFunction {
 		GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
 		IVariableList oldVariables = gEnv.GetVarList();
 		IVariableList newVariables = new IVariableList(oldVariables);
-		newVariables.set(new IVariable(CArray.TYPE, "@arguments", new CArray(t, args.length, args), t));
+		try {
+			newVariables.set(new IVariable(CArray.TYPE, "@arguments", new CArray(t, args.length,
+					GenericParameters.start(CArray.TYPE).build(), env, args), t));
+		} catch (ConfigCompileException cce) {
+			throw new CREFormatException(cce.getMessage(), t);
+		}
 		gEnv.SetVarList(newVariables);
 		Mixed ret = CVoid.VOID;
 		try {

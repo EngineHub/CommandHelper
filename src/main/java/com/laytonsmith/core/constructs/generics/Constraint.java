@@ -1,6 +1,9 @@
 package com.laytonsmith.core.constructs.generics;
 
+import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 
 import java.util.EnumSet;
 
@@ -79,4 +82,58 @@ public abstract class Constraint {
 	public Target getTarget() {
 		return target;
 	}
+
+	/**
+	 * Returns true if the provided constraint is within the bounds defined by this constraint, false if it isn't.
+	 *
+	 * Given that class Z extends class Y which extends class X, and class Z has a public no arg constructor,
+	 * consider the following class definition: <code>class C&lt;T extends X & new T()&gt;</code> and the LHS
+	 * definition: <code>C&lt;? extends Y & new ?()&gt;</code> and the RHS <code>new C&lt;Z&gt;()</code>. This code
+	 * is perfectly valid, however, when validating the LHS, we will compare the LHS constraint <code>new ?()</code> to
+	 * the definition constraint <code>? extends Y</code>. These don't compare at all, because we don't have enough
+	 * information to compare these, however, comparing the RHS <code>Z</code> to both <code>? extends Y</code> and
+	 * <code>new ?()</code>, they both do apply.
+	 * <p>
+	 * In cases where the comparison simply doesn't make sense, null is returned. However, this isn't necessarily
+	 * sufficient to say that this is correct. Consider if the LHS had been defined as <code>C&lt;new ?()&gt;</code>.
+	 * This is still lacking, because we need some constraint that matches the <code>? extends X</code> in the
+	 * definition.
+	 * <p>
+	 * The key then, is to ensure that for each constraint in the class definition, at least one constraint on the LHS
+	 * returns true, and none of them return false.
+	 *
+	 * @param lhs The constraint to determine if is in bounds of this constraint
+	 * @return True if the constraint is within the bounds, false otherwise.
+	 */
+	public final Boolean isWithinConstraint(Constraint lhs, Environment env) {
+		ConstraintToConstraintValidator validator = this.getConstraintToConstraintValidator(env);
+		if(lhs instanceof ConstructorConstraint c) {
+			return validator.isWithinBounds(c);
+		} else if(lhs instanceof ExactType c) {
+			return validator.isWithinBounds(c);
+		} else if(lhs instanceof LowerBoundConstraint c) {
+			return validator.isWithinBounds(c);
+		} else if(lhs instanceof UpperBoundConstraint c) {
+			return validator.isWithinBounds(c);
+		} else if(lhs instanceof UnboundedConstraint c) {
+			return validator.isWithinBounds(c);
+		} else {
+			throw new Error("Unhandled constraint type");
+		}
+	}
+
+	/**
+	 * Returns true if the concrete type is within the bounds of this constraint.
+	 *
+	 * @param type The concrete type to check
+	 * @param generics Any LHS generics that were defined along with the type, null if there were none.
+	 * @return
+	 */
+	public abstract boolean isWithinConstraint(CClassType type, LeftHandGenericUse generics, Environment env);
+
+	@ForceImplementation
+	protected abstract ConstraintToConstraintValidator getConstraintToConstraintValidator(Environment env);
+
+	public abstract ExactType convertFromDiamond(Target t);
+
 }

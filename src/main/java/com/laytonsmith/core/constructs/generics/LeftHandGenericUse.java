@@ -39,8 +39,21 @@ public class LeftHandGenericUse {
 		return ObjectHelpers.DoHashCode(this);
 	}
 
+	public List<Constraints> getConstraints() {
+		return constraints;
+	}
+
 	@Override
 	public String toString() {
-		return ObjectHelpers.DoToString(this);
+		StringBuilder b = new StringBuilder();
+		boolean doComma = false;
+		for(Constraints cc : constraints) {
+			if(doComma) {
+				b.append(", ");
+			}
+			doComma = true;
+			b.append(cc.toString());
+		}
+		return b.toString();
 	}
 }

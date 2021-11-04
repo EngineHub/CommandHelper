@@ -9,13 +9,16 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -58,8 +61,12 @@ public class CIClosure extends CClosure {
 					} catch (Exception e) {
 						value = defaults[i].clone();
 					}
-					environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value,
-							getTarget(), environment));
+					try {
+						environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(types[i], name, value,
+								getTarget(), environment));
+					} catch (ConfigCompileException cce) {
+						throw new CREFormatException(cce.getMessage(), getTarget());
+					}
 				}
 			}
 			boolean hasArgumentsParam = false;
@@ -77,8 +84,12 @@ public class CIClosure extends CClosure {
 						arguments.push(value, node.getData().getTarget());
 					}
 				}
-				environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
-						node.getData().getTarget()));
+				try {
+					environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(CArray.TYPE, "@arguments", arguments,
+							node.getData().getTarget()));
+				} catch (ConfigCompileException cce) {
+					throw new CREFormatException(cce.getMessage(), node.getData().getTarget());
+				}
 			}
 
 			ParseTree newNode = new ParseTree(new CFunction("g", getTarget()), node.getFileOptions());

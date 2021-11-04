@@ -62,12 +62,12 @@ public class PluginEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCPluginIncomingMessageEvent) {
 				MCPluginIncomingMessageEvent event = (MCPluginIncomingMessageEvent) e;
 				Map<String, Mixed> ret = evaluate_helper(e);
@@ -94,7 +94,7 @@ public class PluginEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 

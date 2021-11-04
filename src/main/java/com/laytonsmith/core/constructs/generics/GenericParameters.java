@@ -20,6 +20,31 @@ public class GenericParameters {
 	private GenericDeclaration genericDeclaration;
 	List<Pair<CClassType, LeftHandGenericUse>> parameters;
 
+	/**
+	 * Returns true if this parameter set is a subtype of the LHS constraints. This does not check the base types
+	 * against each other, so this can't be used in place of a full instanceof check, as it merely compares generics
+	 * themselves.
+	 * @param generics The generics to check if this is a subtype of.
+	 * @return
+	 */
+	public boolean isInstanceof(LeftHandGenericUse generics) {
+		if(generics.getConstraints().size() != parameters.size()) {
+			return false;
+		}
+		for(int i = 0; i < parameters.size(); i++) {
+			Pair<CClassType, LeftHandGenericUse> pair = parameters.get(i);
+			Constraints constraints = generics.getConstraints().get(i);
+			if(!isInstanceofParameter(pair.getKey(), pair.getValue(), constraints)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static boolean isInstanceofParameter(CClassType rhsType, LeftHandGenericUse rhsGenerics, Constraints lhs) {
+		return lhs.withinBounds(rhsType, rhsGenerics);
+	}
+
 	public static class GenericParametersBuilder1 {
 		GenericParameters p;
 		private GenericParametersBuilder1(GenericParameters p) {
@@ -50,6 +75,10 @@ public class GenericParameters {
 		public GenericParameters build() {
 			return p;
 		}
+	}
+
+	public static GenericParametersBuilder1 start(CClassType type) {
+		return start(type.getGenericDeclaration());
 	}
 
 	/**
@@ -89,7 +118,20 @@ public class GenericParameters {
 
 	@Override
 	public String toString() {
-		return ObjectHelpers.DoToString(this);
+		StringBuilder b = new StringBuilder();
+		b.append("<");
+		boolean doComma = false;
+		for(Pair<CClassType, LeftHandGenericUse> p : getParameters()) {
+			if(doComma) {
+				b.append(", ");
+			}
+			doComma = true;
+			if(p.getValue() != null) {
+				b.append(p.getValue());
+			}
+		}
+		b.append(">");
+		return b.toString();
 	}
 
 }

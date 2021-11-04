@@ -21,6 +21,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -69,8 +70,8 @@ public class Enchantments {
 	 * @param value
 	 * @return
 	 */
-	public static int ConvertLevel(Mixed value) {
-		if(value.isInstanceOf(CInt.TYPE)) {
+	public static int ConvertLevel(Environment env, Mixed value) {
+		if(value.isInstanceOf(CInt.TYPE, null, env)) {
 			return (int) ((CInt) value).getInt();
 		}
 		String lc = value.val().toLowerCase().trim();
@@ -185,7 +186,7 @@ public class Enchantments {
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			int offset = 0;
-			if(args.length == 4 || args.length == 3 && args[2].isInstanceOf(CArray.TYPE)) {
+			if(args.length == 4 || args.length == 3 && args[2].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, environment)) {
 				p = Static.GetPlayer(args[0].val(), t);
 				offset = 1;
 			} else {
@@ -197,14 +198,14 @@ public class Enchantments {
 				throw new CRECastException("There is no item at slot " + args[offset], t);
 			}
 
-			if(args[args.length - 1].isInstanceOf(CArray.TYPE)) {
+			if(args[args.length - 1].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, environment)) {
 				CArray ca = (CArray) args[args.length - 1];
 				Map<MCEnchantment, Integer> enchants = ObjectGenerator.GetGenerator().enchants(ca, t);
 				for(Map.Entry<MCEnchantment, Integer> en : enchants.entrySet()) {
 					is.addUnsafeEnchantment(en.getKey(), en.getValue());
 				}
 			} else {
-				int level = ConvertLevel(args[offset + 2]);
+				int level = ConvertLevel(environment, args[offset + 2]);
 				if(level > 0) {
 					is.addUnsafeEnchantment(GetEnchantment(args[offset + 1].val(), t), level);
 				} else {
@@ -273,7 +274,7 @@ public class Enchantments {
 				throw new CRECastException("There is no item at slot " + args[offset], t);
 			}
 
-			if(args[offset + 1].isInstanceOf(CArray.TYPE)) {
+			if(args[offset + 1].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, environment)) {
 				for(String name : ((CArray) args[offset + 1]).stringKeySet()) {
 					MCEnchantment e = GetEnchantment(name, t);
 					is.removeEnchantment(e);
@@ -489,7 +490,7 @@ public class Enchantments {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCItemStack is;
-			if(args[0].isInstanceOf(CArray.TYPE)) {
+			if(args[0].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, environment)) {
 				is = ObjectGenerator.GetGenerator().item(args[0], t);
 			} else {
 				is = Static.ParseItemNotation(null, args[0].val(), 1, t);
@@ -502,10 +503,11 @@ public class Enchantments {
 			if(CACHE.containsKey(name)) {
 				return CACHE.get(name).clone();
 			}
-			CArray ca = new CArray(t);
+			CArray ca = new CArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CString.TYPE, null).build(), environment);
 			for(MCEnchantment e : StaticLayer.GetEnchantmentValues()) {
 				if(e.canEnchantItem(is)) {
-					ca.push(new CString(e.getKey(), t), t);
+					ca.push(new CString(e.getKey(), t), t, environment);
 				}
 			}
 			CACHE.put(name, ca);
@@ -518,7 +520,8 @@ public class Enchantments {
 				FileOptions fileOptions)
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 1
-					&& (children.get(0).getData().isInstanceOf(CString.TYPE) || children.get(0).getData().isInstanceOf(CInt.TYPE))) {
+					&& (children.get(0).getData().isInstanceOf(CString.TYPE, null, env)
+					|| children.get(0).getData().isInstanceOf(CInt.TYPE, null, env))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));
 			}
@@ -601,9 +604,10 @@ public class Enchantments {
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
 			MCEnchantment[] enchantments = StaticLayer.GetEnchantmentValues();
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CString.TYPE, null).build(), environment);
 			for(MCEnchantment e : enchantments) {
-				ret.push(new CString(e.getKey(), t), t);
+				ret.push(new CString(e.getKey(), t), t, environment);
 			}
 			return ret;
 		}

@@ -36,6 +36,7 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.BoundEvent;
@@ -70,17 +71,17 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e, Environment env) {
 			return false;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			MCBlockPistonEvent event = (MCBlockPistonEvent) e;
 			Target t = Target.UNKNOWN;
 			Map<String, Mixed> map = evaluate_helper(event);
@@ -89,16 +90,16 @@ public class BlockEvents {
 			map.put("isSticky", CBoolean.get(event.isSticky()));
 			map.put("direction", new CString(event.getDirection().name(), t));
 
-			CArray affected = new CArray(t);
+			CArray affected = new CArray(t, null, env);
 			for(MCBlock block : event.getAffectedBlocks()) {
 				MCMaterial mat = block.getType();
-				CArray blk = CArray.GetAssociativeArray(t);
-				blk.set("name", mat.getName(), t);
-				blk.set("x", new CInt(block.getX(), t), t);
-				blk.set("y", new CInt(block.getY(), t), t);
-				blk.set("z", new CInt(block.getZ(), t), t);
-				blk.set("world", new CString(block.getWorld().getName(), t), t);
-				affected.push(blk, t);
+				CArray blk = CArray.GetAssociativeArray(t, null, env);
+				blk.set("name", mat.getName(), t, env);
+				blk.set("x", new CInt(block.getX(), t), t, env);
+				blk.set("y", new CInt(block.getY(), t), t, env);
+				blk.set("z", new CInt(block.getZ(), t), t, env);
+				blk.set("world", new CString(block.getWorld().getName(), t), t, env);
+				affected.push(blk, t, env);
 			}
 			map.put("affectedBlocks", affected);
 
@@ -163,9 +164,9 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			MCBlockPistonRetractEvent event = (MCBlockPistonRetractEvent) e;
-			Map<String, Mixed> map = super.evaluate(e);
+			Map<String, Mixed> map = super.evaluate(e, env);
 			map.put("retractedLocation", ObjectGenerator.GetGenerator().location(event.getRetractedLocation(), false));
 			return map;
 		}
@@ -217,12 +218,12 @@ public class BlockEvents {
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("type")) {
 				Mixed cid = prefilter.get("type");
-				if(cid.isInstanceOf(CInt.TYPE)) {
+				if(cid.isInstanceOf(CInt.TYPE, null, event.getEnvironment())) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("data")) {
 						Mixed cdata = prefilter.get("data");
-						if(cdata.isInstanceOf(CInt.TYPE)) {
+						if(cdata.isInstanceOf(CInt.TYPE, null, event.getEnvironment())) {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
@@ -259,12 +260,12 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			MCBlockBreakEvent event = (MCBlockBreakEvent) e;
 			Target t = Target.UNKNOWN;
 			Map<String, Mixed> map = evaluate_helper(event);
@@ -274,13 +275,13 @@ public class BlockEvents {
 			map.put("player", new CString(event.getPlayer().getName(), t));
 			map.put("block", new CString(block.getType().getName(), t));
 
-			CArray drops = new CArray(t);
+			CArray drops = new CArray(t, null, env);
 			Collection<MCItemStack> items = event.getDrops();
 			if(items == null) {
 				items = block.getDrops(event.getPlayer().getInventory().getItemInMainHand());
 			}
 			for(MCItemStack stack : items) {
-				drops.push(ObjectGenerator.GetGenerator().item(stack, t), t);
+				drops.push(ObjectGenerator.GetGenerator().item(stack, t), t, env);
 			}
 			map.put("drops", drops);
 
@@ -291,15 +292,15 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e, Environment env) {
 			MCBlockBreakEvent event = (MCBlockBreakEvent) e;
 
 			if(key.equals("drops")) {
 				List<MCItemStack> drops = new ArrayList<>();
-				if(value.isInstanceOf(CArray.TYPE)) {
+				if(value.isInstanceOf(CArray.TYPE, null, env)) {
 					CArray arr = (CArray) value;
 					for(int i = 0; i < arr.size(); i++) {
-						CArray item = ArgumentValidation.getArray(arr.get(i, value.getTarget()), value.getTarget());
+						CArray item = ArgumentValidation.getArray(arr.get(i, value.getTarget(), env), value.getTarget());
 						MCItemStack stack = ObjectGenerator.GetGenerator().item(item, value.getTarget());
 						if(!stack.isEmpty()) {
 							drops.add(stack);
@@ -311,7 +312,7 @@ public class BlockEvents {
 			}
 
 			if(key.equals("xp")) {
-				if(value.isInstanceOf(CInt.TYPE)) {
+				if(value.isInstanceOf(CInt.TYPE, null, env)) {
 					int xp = Integer.parseInt(value.val());
 					event.setExpToDrop(xp);
 					return true;
@@ -363,12 +364,12 @@ public class BlockEvents {
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("type")) {
 				Mixed cid = prefilter.get("type");
-				if(cid.isInstanceOf(CInt.TYPE)) {
+				if(cid.isInstanceOf(CInt.TYPE, null, event.getEnvironment())) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("data")) {
 						Mixed cdata = prefilter.get("data");
-						if(cdata.isInstanceOf(CInt.TYPE)) {
+						if(cdata.isInstanceOf(CInt.TYPE, null, event.getEnvironment())) {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
@@ -406,12 +407,12 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
 			Target t = Target.UNKNOWN;
 			Map<String, Mixed> map = evaluate_helper(e);
@@ -425,11 +426,11 @@ public class BlockEvents {
 
 			MCBlock agstblock = event.getBlockAgainst();
 			MCMaterial agstmat = agstblock.getType();
-			CArray agst = CArray.GetAssociativeArray(t);
-			agst.set("name", agstmat.getName(), t);
-			agst.set("x", new CInt(agstblock.getX(), t), t);
-			agst.set("y", new CInt(agstblock.getY(), t), t);
-			agst.set("z", new CInt(agstblock.getZ(), t), t);
+			CArray agst = CArray.GetAssociativeArray(t, null, env);
+			agst.set("name", agstmat.getName(), t, env);
+			agst.set("x", new CInt(agstblock.getX(), t), t, env);
+			agst.set("y", new CInt(agstblock.getY(), t), t, env);
+			agst.set("z", new CInt(agstblock.getZ(), t), t, env);
 			map.put("against", agst);
 
 			map.put("oldblock", new CString(event.getBlockReplacedState().getType().getName(), t));
@@ -438,7 +439,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e, Environment env) {
 			MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
 
 			if(key.equals("block")) {
@@ -458,7 +459,7 @@ public class BlockEvents {
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), value.getTarget());
 				return true;
 			} else if(key.equals("type")) {
-				if(value.isInstanceOf(CInt.TYPE)) {
+				if(value.isInstanceOf(CInt.TYPE, null, env)) {
 					MCMaterial mat = StaticLayer.GetMaterialFromLegacy((int) ((CInt) value).getInt(), 0);
 					event.getBlock().setType(mat);
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Mutable data key \"type\" in " + getName()
@@ -512,12 +513,12 @@ public class BlockEvents {
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("type")) {
 				Mixed cid = prefilter.get("type");
-				if(cid.isInstanceOf(CInt.TYPE)) {
+				if(cid.isInstanceOf(CInt.TYPE, null, event.getEnvironment())) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("data")) {
 						Mixed cdata = prefilter.get("data");
-						if(cdata.isInstanceOf(CInt.TYPE)) {
+						if(cdata.isInstanceOf(CInt.TYPE, null, event.getEnvironment())) {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
@@ -549,12 +550,12 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			MCBlockBurnEvent event = (MCBlockBurnEvent) e;
 			Target t = Target.UNKNOWN;
 			Map<String, Mixed> map = evaluate_helper(event);
@@ -568,7 +569,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e, Environment env) {
 			return false;
 		}
 	}
@@ -621,12 +622,12 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(!(e instanceof MCBlockIgniteEvent)) {
 				throw new EventException("Cannot convert e to MCBlockIgniteEvent");
 			}
@@ -655,7 +656,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 	}
@@ -698,12 +699,12 @@ public class BlockEvents {
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("type")) {
 				Mixed cid = prefilter.get("type");
-				if(cid.isInstanceOf(CInt.TYPE)) {
+				if(cid.isInstanceOf(CInt.TYPE, null, event.getEnvironment())) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("data")) {
 						Mixed cdata = prefilter.get("data");
-						if(cdata.isInstanceOf(CInt.TYPE)) {
+						if(cdata.isInstanceOf(CInt.TYPE, null, event.getEnvironment())) {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
@@ -723,12 +724,12 @@ public class BlockEvents {
 						+ " is deprecated for \"toblock\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("totype")) {
 				Mixed cid = prefilter.get("totype");
-				if(cid.isInstanceOf(CInt.TYPE)) {
+				if(cid.isInstanceOf(CInt.TYPE, null, event.getEnvironment())) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("todata")) {
 						Mixed cdata = prefilter.get("todata");
-						if(cdata.isInstanceOf(CInt.TYPE)) {
+						if(cdata.isInstanceOf(CInt.TYPE, null, event.getEnvironment())) {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
@@ -766,12 +767,12 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(!(e instanceof MCBlockFromToEvent)) {
 				throw new EventException("Cannot convert e to MCBlockFromToEvent");
 			}
@@ -799,21 +800,21 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(!(event instanceof MCBlockFromToEvent)) {
 				return false;
 			}
 			MCBlockFromToEvent e = (MCBlockFromToEvent) event;
 			if(key.equals("block")) {
 				MCBlock block = e.getBlock();
-				if(value.isInstanceOf(CArray.TYPE)) {
+				if(value.isInstanceOf(CArray.TYPE, null, env)) {
 					CArray blockArray = (CArray) value;
 					if(blockArray.containsKey("name")) {
-						Mixed name = blockArray.get("name", value.getTarget());
+						Mixed name = blockArray.get("name", value.getTarget(), env);
 						int data = 0;
 						if(blockArray.containsKey("data")) {
 							try {
-								data = Integer.parseInt(blockArray.get("data", value.getTarget()).val());
+								data = Integer.parseInt(blockArray.get("data", value.getTarget(), env).val());
 							} catch (Exception ex) {
 								throw new CREFormatException("blockArray is invalid", value.getTarget());
 							}
@@ -831,13 +832,13 @@ public class BlockEvents {
 						int type;
 						int data = 0;
 						try {
-							type = Integer.parseInt(blockArray.get("type", value.getTarget()).val());
+							type = Integer.parseInt(blockArray.get("type", value.getTarget(), env).val());
 						} catch (Exception ex) {
 							throw new CREFormatException("blockArray is invalid", value.getTarget());
 						}
 						if(blockArray.containsKey("data")) {
 							try {
-								data = Integer.parseInt(blockArray.get("data", value.getTarget()).val());
+								data = Integer.parseInt(blockArray.get("data", value.getTarget(), env).val());
 							} catch (Exception ex) {
 								throw new CREFormatException("blockArray is invalid", value.getTarget());
 							}
@@ -862,14 +863,14 @@ public class BlockEvents {
 			}
 			if(key.equals("toblock")) {
 				MCBlock block = e.getToBlock();
-				if(value.isInstanceOf(CArray.TYPE)) {
+				if(value.isInstanceOf(CArray.TYPE, null, env)) {
 					CArray blockArray = (CArray) value;
 					if(blockArray.containsKey("name")) {
-						Mixed name = blockArray.get("name", value.getTarget());
+						Mixed name = blockArray.get("name", value.getTarget(), env);
 						int data = 0;
 						if(blockArray.containsKey("data")) {
 							try {
-								data = Integer.parseInt(blockArray.get("data", value.getTarget()).val());
+								data = Integer.parseInt(blockArray.get("data", value.getTarget(), env).val());
 							} catch (Exception ex) {
 								throw new CREFormatException("blockArray is invalid", value.getTarget());
 							}
@@ -887,13 +888,13 @@ public class BlockEvents {
 						int type;
 						int data = 0;
 						try {
-							type = Integer.parseInt(blockArray.get("type", value.getTarget()).val());
+							type = Integer.parseInt(blockArray.get("type", value.getTarget(), env).val());
 						} catch (Exception ex) {
 							throw new CREFormatException("blockArray is invalid", value.getTarget());
 						}
 						if(blockArray.containsKey("data")) {
 							try {
-								data = Integer.parseInt(blockArray.get("data", value.getTarget()).val());
+								data = Integer.parseInt(blockArray.get("data", value.getTarget(), env).val());
 							} catch (Exception ex) {
 								throw new CREFormatException("blockArray is invalid", value.getTarget());
 							}
@@ -970,7 +971,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(!(e instanceof MCSignChangeEvent)) {
 				throw new EventException("Cannot convert e to MCSignChangeEvent");
 			}
@@ -978,14 +979,14 @@ public class BlockEvents {
 			Map<String, Mixed> map = evaluate_helper(e);
 
 			map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
-			map.put("text", event.getLines());
+			map.put("text", event.getLines(env));
 			map.put("location", ObjectGenerator.GetGenerator().location(event.getBlock().getLocation(), false));
 
 			return map;
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(!(event instanceof MCSignChangeEvent)) {
 				return false;
 			}
@@ -993,7 +994,7 @@ public class BlockEvents {
 
 			// Allow changing everything at once.
 			if(key.equals("text")) {
-				if(!(value.isInstanceOf(CArray.TYPE))) {
+				if(!(value.isInstanceOf(CArray.TYPE, null, env))) {
 					return false;
 				}
 
@@ -1005,7 +1006,7 @@ public class BlockEvents {
 				String[] lines = {"", "", "", ""};
 
 				for(int i = 0; i < 4; i++) {
-					lines[i] = val.get(i, value.getTarget()).toString();
+					lines[i] = val.get(i, value.getTarget(), env).toString();
 				}
 
 				sce.setLines(lines);
@@ -1037,12 +1038,12 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manual, Target t) {
+		public BindableEvent convert(CArray manual, Target t, Environment env) {
 			MCSignChangeEvent e = EventBuilder.instantiate(
 					MCSignChangeEvent.class,
-					Static.GetPlayer(manual.get("player", Target.UNKNOWN).val(), Target.UNKNOWN),
-					manual.get("1", Target.UNKNOWN).val(), manual.get("2", Target.UNKNOWN).val(),
-					manual.get("3", Target.UNKNOWN).val(), manual.get("4", Target.UNKNOWN).val());
+					Static.GetPlayer(manual.get("player", Target.UNKNOWN, env).val(), Target.UNKNOWN),
+					manual.get("1", Target.UNKNOWN, env).val(), manual.get("2", Target.UNKNOWN, env).val(),
+					manual.get("3", Target.UNKNOWN, env).val(), manual.get("4", Target.UNKNOWN, env).val());
 			return e;
 		}
 	}
@@ -1101,12 +1102,12 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			MCBlockDispenseEvent event = (MCBlockDispenseEvent) e;
 			Target t = Target.UNKNOWN;
 			Map<String, Mixed> map = evaluate_helper(e);
@@ -1118,14 +1119,14 @@ public class BlockEvents {
 			map.put("location", ObjectGenerator.GetGenerator().location(block.getLocation(), false));
 
 			CArray velocity = ObjectGenerator.GetGenerator().vector(event.getVelocity(), t);
-			velocity.set("magnitude", new CDouble(event.getVelocity().length(), t), t);
+			velocity.set("magnitude", new CDouble(event.getVelocity().length(), t), t, env);
 			map.put("velocity", velocity);
 
 			return map;
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCBlockDispenseEvent) {
 				if("item".equals(key)) {
 					((MCBlockDispenseEvent) event).setItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
@@ -1164,12 +1165,12 @@ public class BlockEvents {
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("oldtype")) {
 				Mixed cid = prefilter.get("oldtype");
-				if(cid.isInstanceOf(CInt.TYPE)) {
+				if(cid.isInstanceOf(CInt.TYPE, null, event.getEnvironment())) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("olddata")) {
 						Mixed cdata = prefilter.get("olddata");
-						if(cdata.isInstanceOf(CInt.TYPE)) {
+						if(cdata.isInstanceOf(CInt.TYPE, null, event.getEnvironment())) {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
@@ -1189,12 +1190,12 @@ public class BlockEvents {
 						+ " is deprecated for \"newblock\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("newtype")) {
 				Mixed cid = prefilter.get("newtype");
-				if(cid.isInstanceOf(CInt.TYPE)) {
+				if(cid.isInstanceOf(CInt.TYPE, null, event.getEnvironment())) {
 					int id = (int) ((CInt) cid).getInt();
 					int data = 0;
 					if(prefilter.containsKey("newdata")) {
 						Mixed cdata = prefilter.get("newdata");
-						if(cdata.isInstanceOf(CInt.TYPE)) {
+						if(cdata.isInstanceOf(CInt.TYPE, null, event.getEnvironment())) {
 							data = (int) ((CInt) cdata).getInt();
 						}
 					}
@@ -1248,12 +1249,12 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(!(event instanceof MCBlockGrowEvent)) {
 				throw new EventException("Cannot convert event to BlockGrowEvent");
 			}
@@ -1268,7 +1269,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e, Environment env) {
 			return false;
 		}
 	}
@@ -1308,12 +1309,12 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent event) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent event, Environment env) throws EventException {
 			if(!(event instanceof MCNotePlayEvent)) {
 				throw new EventException("Cannot convert event to NotePlayEvent");
 			}
@@ -1330,7 +1331,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e, Environment env) {
 			MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "Modifying the instrument or note for note_play"
 					+ " events is no longer supported.", value.getTarget());
 			return false;
@@ -1378,7 +1379,7 @@ public class BlockEvents {
 						+ " is deprecated for \"block\". Converted to " + mat.getName(), event.getTarget());
 			} else if(prefilter.containsKey("oldtype")) {
 				Mixed cid = prefilter.get("oldtype");
-				if(cid.isInstanceOf(CInt.TYPE)) {
+				if(cid.isInstanceOf(CInt.TYPE, null, event.getEnvironment())) {
 					int id = (int) ((CInt) cid).getInt();
 					MCMaterial mat = StaticLayer.GetMaterialFromLegacy(id, 0);
 					if(mat == null) {
@@ -1411,12 +1412,12 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(!(e instanceof MCBlockFadeEvent)) {
 				throw new EventException("Cannot convert event to BlockFadeEvent");
 			}
@@ -1432,7 +1433,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 	}
@@ -1472,12 +1473,12 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(!(e instanceof MCBlockExplodeEvent)) {
 				throw new EventException("Cannot convert event to BlockExplodeEvent");
 			}
@@ -1487,9 +1488,9 @@ public class BlockEvents {
 
 			MCBlock blk = event.getBlock();
 			ret.put("location", ObjectGenerator.GetGenerator().location(blk.getLocation(), false));
-			CArray blocks = new CArray(t);
+			CArray blocks = new CArray(t, null, env);
 			for(MCBlock b : event.getBlocks()) {
-				blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation(), false), t);
+				blocks.push(ObjectGenerator.GetGenerator().location(b.getLocation(), false), t, env);
 			}
 			ret.put("blocks", blocks);
 			ret.put("yield", new CDouble(event.getYield(), t));
@@ -1497,7 +1498,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCBlockExplodeEvent) {
 				MCBlockExplodeEvent e = (MCBlockExplodeEvent) event;
 				if(key.equals("yield")) {
@@ -1505,7 +1506,7 @@ public class BlockEvents {
 					return true;
 				}
 				if(key.equals("blocks")) {
-					if(value.isInstanceOf(CArray.TYPE)) {
+					if(value.isInstanceOf(CArray.TYPE, null, env)) {
 						CArray ba = (CArray) value;
 						List<MCBlock> blocks = new ArrayList<>();
 						for(Mixed m : ba.asList()) {
@@ -1547,7 +1548,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return null;
 		}
 
@@ -1572,7 +1573,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(!(e instanceof MCBlockFormEvent)) {
 				throw new EventException("Cannot convert event to MCBlockFormEvent");
 			} else {
@@ -1587,7 +1588,7 @@ public class BlockEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e, Environment env) {
 			return false;
 		}
 	}

@@ -1,6 +1,7 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.annotations.ExposedElement;
 import com.laytonsmith.annotations.NonInheritImplements;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
@@ -12,11 +13,11 @@ import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.ObjectType;
+
 import java.util.AbstractSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
-import com.laytonsmith.annotations.ExposedElement;
 
 /**
  *
@@ -88,7 +89,7 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	@Override
-	public Mixed get(int index, Target t) throws ConfigRuntimeException {
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
 		try {
 			return new CString(this.val().charAt(index), t);
 		} catch (StringIndexOutOfBoundsException e) {
@@ -97,16 +98,16 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	@Override
-	public final Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
+	public final Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
 		int i = ArgumentValidation.getInt32(index, t);
-		return get(i, t);
+		return get(i, t, env);
 	}
 
 	@Override
-	public final Mixed get(String index, Target t) {
+	public final Mixed get(String index, Target t, Environment env) {
 		try {
 			int i = Integer.parseInt(index);
-			return get(i, t);
+			return get(i, t, env);
 		} catch (NumberFormatException e) {
 			throw new CREFormatException("Expecting numerical index, but received " + index, t);
 		}

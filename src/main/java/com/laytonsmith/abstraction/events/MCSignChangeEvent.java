@@ -4,6 +4,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BindableEvent;
 
 public interface MCSignChangeEvent extends BindableEvent {
@@ -18,5 +19,5 @@ public interface MCSignChangeEvent extends BindableEvent {
 
 	void setLines(String[] lines);
 
-	CArray getLines();
+	CArray getLines(Environment env);
 }

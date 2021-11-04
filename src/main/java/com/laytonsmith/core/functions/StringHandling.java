@@ -33,6 +33,7 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREError;
@@ -386,12 +387,13 @@ public class StringHandling {
 			for(int i = 0; i < a.size(); i++) {
 				csa[i] = a.get(i);
 			}
-			return new CArray(t, csa);
+			return new CArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CString.TYPE, null).build(), env, csa);
 		}
 
 		@Override
 		public String docs() {
-			return "array {string, [useAdvanced]} Parses string into an array, where string is a space seperated list of arguments. Handy for turning"
+			return "array<string> {string, [useAdvanced]} Parses string into an array, where string is a space seperated list of arguments. Handy for turning"
 					+ " $ into a usable array of items with which to script against. Extra spaces are ignored, so you would never get an empty"
 					+ " string as an input. useAdvanced defaults to false, but if true, uses a basic argument parser that supports quotes for"
 					+ " allowing arguments with spaces.";
@@ -648,7 +650,7 @@ public class StringHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(args[0].isInstanceOf(Sizeable.TYPE)) {
+			if(args[0].isInstanceOf(Sizeable.TYPE, null, env)) {
 				return new CInt(((Sizeable) args[0]).size(), t);
 			} else {
 				return new CInt(args[0].val().length(), t);
@@ -710,7 +712,7 @@ public class StringHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(!(args[0].isInstanceOf(CString.TYPE))) {
+			if(!(args[0].isInstanceOf(CString.TYPE, null, env))) {
 				throw new CREFormatException(this.getName() + " expects a string as first argument, but type "
 						+ args[0].typeof() + " was found.", t);
 			}
@@ -773,7 +775,7 @@ public class StringHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
-			if(!(args[0].isInstanceOf(CString.TYPE))) {
+			if(!(args[0].isInstanceOf(CString.TYPE, null, env))) {
 				throw new CREFormatException(this.getName() + " expects a string as first argument, but type "
 						+ args[0].typeof() + " was found.", t);
 			}
@@ -1283,7 +1285,7 @@ public class StringHandling {
 
 		@Override
 		public String docs() {
-			return "array {split, string, [limit]} Splits a string into parts, using the split as the index. Though it can be used in every single case"
+			return "array<string> {split, string, [limit]} Splits a string into parts, using the split as the index. Though it can be used in every single case"
 					+ " you would use reg_split, this does not use regex,"
 					+ " and therefore can take a literal split expression instead of needing an escaped regex, and *may* perform better than the"
 					+ " regex versions, as it uses an optimized tokenizer split, instead of Java regex. Limit defaults to infinity, but if set, only"
@@ -1315,7 +1317,8 @@ public class StringHandling {
 			//http://stackoverflow.com/questions/2667015/is-regex-too-slow-real-life-examples-where-simple-non-regex-alternative-is-bett
 			//According to this, regex isn't necessarily slower, but we do want to escape the pattern either way, since the main advantage
 			//of this function is convenience (not speed) however, if we can eek out a little extra speed too, excellent.
-			CArray array = new CArray(t);
+			CArray array = new CArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CString.TYPE, null).build(), env);
 			String split = args[0].val();
 			String string = args[1].val();
 			int limit = Integer.MAX_VALUE;
@@ -1326,7 +1329,7 @@ public class StringHandling {
 			if(split.length() == 0) {
 				//Empty string, so special case.
 				for(int i = 0; i < string.length(); i++) {
-					array.push(new CString(string.charAt(i), t), t);
+					array.push(new CString(string.charAt(i), t), t, env);
 				}
 				return array;
 			}
@@ -1335,16 +1338,16 @@ public class StringHandling {
 				if(string.substring(i, i + split.length()).equals(split)) {
 					//Split point found
 					splitsFound++;
-					array.push(new CString(string.substring(sp, i), t), t);
+					array.push(new CString(string.substring(sp, i), t), t, env);
 					sp = i + split.length();
 					i += split.length() - 1;
 				}
 			}
 			if(sp != 0) {
-				array.push(new CString(string.substring(sp, string.length()), t), t);
+				array.push(new CString(string.substring(sp, string.length()), t), t, env);
 			} else {
 				//It was not found anywhere, so put the whole string in
-				array.push(args[1], t);
+				array.push(args[1], t, env);
 			}
 			return array;
 		}
@@ -1388,7 +1391,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args.length < 2) {
 				throw new CREInsufficientArgumentsException(getName() + " expects 2 or more arguments", t);
 			}
@@ -1421,12 +1424,12 @@ public class StringHandling {
 			}
 
 			List<Mixed> flattenedArgs = new ArrayList<>();
-			if(numArgs == 3 && args[2].isInstanceOf(CArray.TYPE)) {
+			if(numArgs == 3 && args[2].isInstanceOf(CArray.TYPE, null, env)) {
 				if(((CArray) args[2]).inAssociativeMode()) {
 					throw new CRECastException("If the second argument to " + getName() + " is an array, it may not be associative.", t);
 				} else {
 					for(int i = 0; i < ((CArray) args[2]).size(); i++) {
-						flattenedArgs.add(((CArray) args[2]).get(i, t));
+						flattenedArgs.add(((CArray) args[2]).get(i, t, env));
 					}
 				}
 			} else {
@@ -2428,8 +2431,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CArray.TYPE)) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray array = ArgumentValidation.getArray(args[0], t);
 				return new CSecureString(array, t);
 			} else {
@@ -2504,14 +2507,15 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CSecureString.TYPE)) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CSecureString.TYPE, null, env)) {
 				CSecureString secure = ArgumentValidation.getObject(args[0], t, CSecureString.class);
 				return secure.getDecryptedCharCArray();
-			} else if(args[0].isInstanceOf(CString.TYPE)) {
-				CArray array = new CArray(Target.UNKNOWN, args[0].val().length());
+			} else if(args[0].isInstanceOf(CString.TYPE, null, env)) {
+				CArray array = new CArray(Target.UNKNOWN, args[0].val().length(), GenericParameters.start(CArray.TYPE)
+						.addParameter(CString.TYPE, null).build(), env);
 				for(char c : args[0].val().toCharArray()) {
-					array.push(new CString(c, t), t);
+					array.push(new CString(c, t), t, env);
 				}
 				return array;
 			} else {

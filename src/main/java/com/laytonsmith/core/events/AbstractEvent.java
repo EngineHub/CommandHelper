@@ -211,10 +211,10 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 	 * @param manualObject
 	 * @return
 	 */
-	public static Object DoConvert(CArray manualObject) {
+	public static Object DoConvert(CArray manualObject, Environment env) {
 		Map<String, Mixed> map = new HashMap<>();
 		for(String key : manualObject.stringKeySet()) {
-			map.put(key, manualObject.get(key, Target.UNKNOWN));
+			map.put(key, manualObject.get(key, Target.UNKNOWN, env));
 		}
 		return map;
 	}

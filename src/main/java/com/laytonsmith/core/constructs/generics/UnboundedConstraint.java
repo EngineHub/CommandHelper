@@ -1,6 +1,8 @@
 package com.laytonsmith.core.constructs.generics;
 
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 
 import java.util.EnumSet;
 
@@ -23,6 +25,41 @@ public class UnboundedConstraint extends Constraint {
 	@Override
 	public String getConstraintName() {
 		return "unbounded constraint";
+	}
+
+	@Override
+	public boolean isWithinConstraint(CClassType type, LeftHandGenericUse generics, Environment env) {
+		return true;
+	}
+
+	@Override
+	protected ConstraintToConstraintValidator getConstraintToConstraintValidator(Environment env) {
+		return new ConstraintToConstraintValidator() {
+			@Override
+			public Boolean isWithinBounds(ConstructorConstraint lhs) {
+				return null;
+			}
+
+			@Override
+			public Boolean isWithinBounds(ExactType lhs) {
+				return false;
+			}
+
+			@Override
+			public Boolean isWithinBounds(LowerBoundConstraint lhs) {
+				return true;
+			}
+
+			@Override
+			public Boolean isWithinBounds(UpperBoundConstraint lhs) {
+				return true;
+			}
+
+			@Override
+			public Boolean isWithinBounds(UnboundedConstraint lhs) {
+				return true;
+			}
+		};
 	}
 
 	@Override

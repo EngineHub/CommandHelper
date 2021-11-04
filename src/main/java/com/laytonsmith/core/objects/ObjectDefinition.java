@@ -10,12 +10,14 @@ import com.laytonsmith.core.UnqualifiedClassName;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.natives.interfaces.Commentable;
 import com.laytonsmith.core.natives.interfaces.MAnnotation;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -52,7 +54,7 @@ public class ObjectDefinition implements Commentable {
 	private final Target definitionTarget;
 	private final Map<String, List<ElementDefinition>> properties;
 	private final SmartComment classComment;
-	private final List<Object> genericParameters;
+	private final GenericDeclaration genericDeclaration;
 	private final Class<? extends Mixed> nativeClass;
 
 	private Set<CClassType> qualifiedSuperclasses;
@@ -63,7 +65,7 @@ public class ObjectDefinition implements Commentable {
 			Set<UnqualifiedClassName> superclasses, Set<UnqualifiedClassName> interfaces,
 			CClassType containingClass, Target t,
 			Map<String, List<ElementDefinition>> properties, List<MAnnotation> annotations,
-			SmartComment classComment, List<Object> genericParameters, Class<? extends Mixed> nativeClass) {
+			SmartComment classComment, Class<? extends Mixed> nativeClass) {
 		this.accessModifier = accessModifier;
 		this.objectModifiers = objectModifiers;
 		this.objectType = objectType;
@@ -75,7 +77,7 @@ public class ObjectDefinition implements Commentable {
 		this.properties = properties;
 		this.annotations = annotations;
 		this.classComment = classComment;
-		this.genericParameters = genericParameters;
+		this.genericDeclaration = type.getGenericDeclaration();
 		this.nativeClass = nativeClass;
 	}
 
@@ -270,8 +272,8 @@ public class ObjectDefinition implements Commentable {
 		return classComment;
 	}
 
-	public List<Object> getGenericParameters() {
-		return genericParameters;
+	public GenericDeclaration getGenericDeclaration() {
+		return genericDeclaration;
 	}
 
 	/**

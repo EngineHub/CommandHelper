@@ -37,6 +37,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -66,6 +67,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("ALL")
 public class World {
 
 	public static String docs() {
@@ -258,7 +260,7 @@ public class World {
 				z = l.getBlockZ();
 			} else if(args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 2
-				if(args[1].isInstanceOf(CArray.TYPE)) {
+				if(args[1].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, environment)) {
 					world = Static.getServer().getWorld(args[0].val());
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[1], null, t);
 					x = l.getBlockX();
@@ -317,7 +319,7 @@ public class World {
 				z = l.getBlockZ();
 			} else if(args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 2
-				if(args[1].isInstanceOf(CArray.TYPE)) {
+				if(args[1].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, environment)) {
 					world = Static.getServer().getWorld(args[0].val());
 					if(world == null) {
 						throw new CREInvalidWorldException("The given world (" + args[0].val() + ") does not exist.", t);
@@ -400,7 +402,7 @@ public class World {
 				z = l.getBlockZ();
 			} else if(args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 2
-				if(args[1].isInstanceOf(CArray.TYPE)) {
+				if(args[1].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, environment)) {
 					world = Static.getServer().getWorld(args[0].val());
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[1], null, t);
 					x = l.getBlockX();
@@ -488,13 +490,13 @@ public class World {
 				throw new CRENotFoundException(
 						"Could not find the chunk objects of the world (are you running in cmdline mode?)", t);
 			}
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, GenericParameters.start(CArray.TYPE).build(), environment);
 			for(MCChunk c : chunks) {
-				CArray chunk = CArray.GetAssociativeArray(t);
-				chunk.set("x", new CInt(c.getX(), t), t);
-				chunk.set("z", new CInt(c.getZ(), t), t);
-				chunk.set("world", c.getWorld().getName(), t);
-				ret.push(chunk, t);
+				CArray chunk = CArray.GetAssociativeArray(t, GenericParameters.start(CArray.TYPE).build(), environment);
+				chunk.set("x", new CInt(c.getX(), t), t, environment);
+				chunk.set("z", new CInt(c.getZ(), t), t, environment);
+				chunk.set("world", c.getWorld().getName(), t, environment);
+				ret.push(chunk, t, environment);
 			}
 			return ret;
 		}
@@ -580,7 +582,7 @@ public class World {
 				z = l.getBlockZ() >> 4;
 			} else if(args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 1
-				if(args[0].isInstanceOf(CArray.TYPE)) {
+				if(args[0].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, environment)) {
 					world = Static.getServer().getWorld(args[1].val());
 					if(world == null) {
 						throw new CREInvalidWorldException("World " + args[1].val() + " does not exist.", t);
@@ -671,7 +673,7 @@ public class World {
 				z = l.getBlockZ() >> 4;
 			} else if(args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 1
-				if(args[0].isInstanceOf(CArray.TYPE)) {
+				if(args[0].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, environment)) {
 					world = Static.getServer().getWorld(args[1].val());
 					if(world == null) {
 						throw new CREInvalidWorldException("The given world (" + args[1].val() + ") does not exist.", t);
@@ -1033,7 +1035,7 @@ public class World {
 				creator.type(type).environment(environment);
 			}
 			if((args.length >= 4) && !(args[3] instanceof CNull)) {
-				if(args[3].isInstanceOf(CInt.TYPE)) {
+				if(args[3].isInstanceOf(CInt.TYPE, null, env)) {
 					creator.seed(ArgumentValidation.getInt(args[3], t));
 				} else {
 					creator.seed(args[3].val().hashCode());
@@ -1093,9 +1095,10 @@ public class World {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray worlds = new CArray(t);
+			CArray worlds = new CArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CString.TYPE, null).build(), environment);
 			for(MCWorld w : Static.getServer().getWorlds()) {
-				worlds.push(new CString(w.getName(), t), t);
+				worlds.push(new CString(w.getName(), t), t, environment);
 			}
 			return worlds;
 		}
@@ -1112,7 +1115,7 @@ public class World {
 
 		@Override
 		public String docs() {
-			return "array {} Returns a list of all currently loaded worlds.";
+			return "array<string> {} Returns a list of all currently loaded worlds.";
 		}
 
 		@Override
@@ -1153,7 +1156,7 @@ public class World {
 			}
 
 			if(args.length == 1) {
-				if(args[0].isInstanceOf(CArray.TYPE)) {
+				if(args[0].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env)) {
 					l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				} else {
 					throw new CREFormatException("Expecting argument 1 of get_chunk_loc to be a location array", t);
@@ -1165,13 +1168,13 @@ public class World {
 				}
 			}
 
-			CArray chunk = CArray.GetAssociativeArray(t);
-			chunk.set(0, new CInt(l.getBlockX() >> 4, t), t);
-			chunk.set(1, new CInt(l.getBlockZ() >> 4, t), t);
-			chunk.set(2, new CString(l.getWorld().getName(), t), t);
-			chunk.set("x", new CInt(l.getBlockX() >> 4, t), t);
-			chunk.set("z", new CInt(l.getBlockZ() >> 4, t), t);
-			chunk.set("world", l.getWorld().getName(), t);
+			CArray chunk = CArray.GetAssociativeArray(t, GenericParameters.start(CArray.TYPE).build(), env);
+			chunk.set(0, new CInt(l.getBlockX() >> 4, t), t, env);
+			chunk.set(1, new CInt(l.getBlockZ() >> 4, t), t, env);
+			chunk.set(2, new CString(l.getWorld().getName(), t), t, env);
+			chunk.set("x", new CInt(l.getBlockX() >> 4, t), t, env);
+			chunk.set("z", new CInt(l.getBlockZ() >> 4, t), t, env);
+			chunk.set("world", l.getWorld().getName(), t, env);
 			return chunk;
 		}
 
@@ -1308,14 +1311,14 @@ public class World {
 			if(w == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
 			}
-			CArray ret = CArray.GetAssociativeArray(t);
-			ret.set("name", new CString(w.getName(), t), t);
-			ret.set("seed", new CInt(w.getSeed(), t), t);
-			ret.set("environment", new CString(w.getEnvironment().name(), t), t);
-			ret.set("generator", new CString(w.getGenerator(), t), t);
-			ret.set("worldtype", new CString(w.getWorldType().name(), t), t);
-			ret.set("sealevel", new CInt(w.getSeaLevel(), t), t);
-			ret.set("maxheight", new CInt(w.getMaxHeight(), t), t);
+			CArray ret = CArray.GetAssociativeArray(t, GenericParameters.start(CArray.TYPE).build(), environment);
+			ret.set("name", new CString(w.getName(), t), t, environment);
+			ret.set("seed", new CInt(w.getSeed(), t), t, environment);
+			ret.set("environment", new CString(w.getEnvironment().name(), t), t, environment);
+			ret.set("generator", new CString(w.getGenerator(), t), t, environment);
+			ret.set("worldtype", new CString(w.getWorldType().name(), t), t, environment);
+			ret.set("sealevel", new CInt(w.getSeaLevel(), t), t, environment);
+			ret.set("maxheight", new CInt(w.getMaxHeight(), t), t, environment);
 			return ret;
 		}
 
@@ -1665,10 +1668,11 @@ public class World {
 				throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 			}
 			if(args.length == 1) {
-				CArray gameRules = CArray.GetAssociativeArray(t);
+				CArray gameRules = CArray.GetAssociativeArray(t, GenericParameters.start(CArray.TYPE)
+						.addParameter(CString.TYPE, null).build(), environment);
 				for(String gameRule : world.getGameRules()) {
 					gameRules.set(new CString(gameRule, t),
-							Static.resolveConstruct(world.getGameRuleValue(gameRule), t), t);
+							Static.resolveConstruct(world.getGameRuleValue(gameRule), t), t, environment);
 				}
 				return gameRules;
 			} else {
@@ -1849,7 +1853,7 @@ public class World {
 				distance = ArgumentValidation.getNumber(args[2], t);
 			}
 			Vector3D vector;
-			if(args[1].isInstanceOf(CArray.TYPE)) {
+			if(args[1].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env)) {
 				MCLocation to = ObjectGenerator.GetGenerator().location(args[1], loc.getWorld(), t);
 				vector = to.toVector().subtract(loc.toVector()).normalize();
 			} else {
@@ -2228,13 +2232,13 @@ public class World {
 				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
 			}
 			MCWorldBorder wb = w.getWorldBorder();
-			CArray ret = CArray.GetAssociativeArray(t);
-			ret.set("width", new CDouble(wb.getSize(), t), t);
-			ret.set("center", ObjectGenerator.GetGenerator().location(wb.getCenter(), false), t);
-			ret.set("damagebuffer", new CDouble(wb.getDamageBuffer(), t), t);
-			ret.set("damageamount", new CDouble(wb.getDamageAmount(), t), t);
-			ret.set("warningtime", new CInt(wb.getWarningTime(), t), t);
-			ret.set("warningdistance", new CInt(wb.getWarningDistance(), t), t);
+			CArray ret = CArray.GetAssociativeArray(t, GenericParameters.start(CArray.TYPE).build(), environment);
+			ret.set("width", new CDouble(wb.getSize(), t), t, environment);
+			ret.set("center", ObjectGenerator.GetGenerator().location(wb.getCenter(), false), t, environment);
+			ret.set("damagebuffer", new CDouble(wb.getDamageBuffer(), t), t, environment);
+			ret.set("damageamount", new CDouble(wb.getDamageAmount(), t), t, environment);
+			ret.set("warningtime", new CInt(wb.getWarningTime(), t), t, environment);
+			ret.set("warningdistance", new CInt(wb.getWarningDistance(), t), t, environment);
 			return ret;
 		}
 
@@ -2287,32 +2291,32 @@ public class World {
 			}
 			MCWorldBorder wb = w.getWorldBorder();
 			Mixed c = args[1];
-			if(!(c.isInstanceOf(CArray.TYPE))) {
+			if(!(c.typeof().getNakedType().isInstanceOf(CArray.TYPE, null, environment))) {
 				throw new CREFormatException("Expected array but given \"" + args[1].val() + "\"", t);
 			}
 			CArray params = (CArray) c;
 			if(params.containsKey("width")) {
 				if(params.containsKey("seconds")) {
-					wb.setSize(ArgumentValidation.getDouble(params.get("width", t), t),
-							ArgumentValidation.getInt32(params.get("seconds", t), t));
+					wb.setSize(ArgumentValidation.getDouble(params.get("width", t, environment), t),
+							ArgumentValidation.getInt32(params.get("seconds", t, environment), t));
 				} else {
-					wb.setSize(ArgumentValidation.getDouble(params.get("width", t), t));
+					wb.setSize(ArgumentValidation.getDouble(params.get("width", t, environment), t));
 				}
 			}
 			if(params.containsKey("center")) {
-				wb.setCenter(ObjectGenerator.GetGenerator().location(params.get("center", t), w, t));
+				wb.setCenter(ObjectGenerator.GetGenerator().location(params.get("center", t, environment), w, t));
 			}
 			if(params.containsKey("damagebuffer")) {
-				wb.setDamageBuffer(ArgumentValidation.getDouble(params.get("damagebuffer", t), t));
+				wb.setDamageBuffer(ArgumentValidation.getDouble(params.get("damagebuffer", t, environment), t));
 			}
 			if(params.containsKey("damageamount")) {
-				wb.setDamageAmount(ArgumentValidation.getDouble(params.get("damageamount", t), t));
+				wb.setDamageAmount(ArgumentValidation.getDouble(params.get("damageamount", t, environment), t));
 			}
 			if(params.containsKey("warningtime")) {
-				wb.setWarningTime(ArgumentValidation.getInt32(params.get("warningtime", t), t));
+				wb.setWarningTime(ArgumentValidation.getInt32(params.get("warningtime", t, environment), t));
 			}
 			if(params.containsKey("warningdistance")) {
-				wb.setWarningDistance(ArgumentValidation.getInt32(params.get("warningdistance", t), t));
+				wb.setWarningDistance(ArgumentValidation.getInt32(params.get("warningdistance", t, environment), t));
 			}
 			return CVoid.VOID;
 		}

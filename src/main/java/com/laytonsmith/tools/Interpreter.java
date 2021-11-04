@@ -72,6 +72,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.InvalidEnvironmentException;
@@ -176,27 +177,27 @@ public final class Interpreter {
 	 */
 	private static final int MAX_COMMAND_HISTORY = 100;
 
-	public static void startWithTTY(File file, List<String> args, boolean systemExitOnFailure) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
-		startWithTTY(file.getCanonicalPath(), args, systemExitOnFailure);
+	public static void startWithTTY(File file, List<String> args, boolean systemExitOnFailure, Environment env) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+		startWithTTY(file.getCanonicalPath(), args, systemExitOnFailure, env);
 	}
 
-	public static void startWithTTY(String file, List<String> args) throws Profiles.InvalidProfileException, IOException, DataSourceException, URISyntaxException {
-		startWithTTY(file, args, true);
+	public static void startWithTTY(String file, List<String> args, Environment env) throws Profiles.InvalidProfileException, IOException, DataSourceException, URISyntaxException {
+		startWithTTY(file, args, true, env);
 	}
 
-	public static void startWithTTY(String file, List<String> args, boolean systemExitOnFailure) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+	public static void startWithTTY(String file, List<String> args, boolean systemExitOnFailure, Environment env) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		File fromFile = new File(file).getCanonicalFile();
 		Interpreter interpreter = new Interpreter(args, fromFile.getParentFile().getPath(), true);
 		try {
 			interpreter.execute(FileUtil.read(fromFile), args, fromFile);
 		} catch (ConfigCompileException ex) {
-			ConfigRuntimeException.HandleUncaughtException(ex, null, null);
+			ConfigRuntimeException.HandleUncaughtException(ex, null, null, env);
 			StreamUtils.GetSystemOut().println(TermColors.reset());
 			if(systemExitOnFailure) {
 				System.exit(1);
 			}
 		} catch (ConfigCompileGroupException ex) {
-			ConfigRuntimeException.HandleUncaughtException(ex, null);
+			ConfigRuntimeException.HandleUncaughtException(ex, null, env);
 			StreamUtils.GetSystemOut().println(TermColors.reset());
 			if(systemExitOnFailure) {
 				System.exit(1);
@@ -239,7 +240,8 @@ public final class Interpreter {
 		this(args, cwd, false);
 	}
 
-	private Interpreter(List<String> args, String cwd, boolean inTTYMode) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+	private Interpreter(List<String> args, String cwd, boolean inTTYMode)
+			throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		doStartup();
 		env.getEnv(GlobalEnv.class).SetRootFolder(new File(cwd));
 		if(inTTYMode) {
@@ -264,11 +266,11 @@ public final class Interpreter {
 				StreamUtils.GetSystemOut().print(TermColors.reset());
 				System.exit(0);
 			} catch (ConfigCompileException ex) {
-				ConfigRuntimeException.HandleUncaughtException(ex, null, null);
+				ConfigRuntimeException.HandleUncaughtException(ex, null, null, env);
 				StreamUtils.GetSystemOut().print(TermColors.reset());
 				System.exit(1);
 			} catch (ConfigCompileGroupException ex) {
-				ConfigRuntimeException.HandleUncaughtException(ex, null);
+				ConfigRuntimeException.HandleUncaughtException(ex, null, env);
 				StreamUtils.GetSystemOut().println(TermColors.reset());
 				System.exit(1);
 			}
@@ -356,9 +358,9 @@ public final class Interpreter {
 			MethodScriptCompiler.execute(autoInclude, MethodScriptFileLocations.getDefault()
 					.getCmdlineInterpreterAutoIncludeFile(), true, env, env.getEnvClasses(), null, null, null);
 		} catch (ConfigCompileException ex) {
-			ConfigRuntimeException.HandleUncaughtException(ex, "Interpreter will continue to run, however.", null);
+			ConfigRuntimeException.HandleUncaughtException(ex, "Interpreter will continue to run, however.", null, env);
 		} catch (ConfigCompileGroupException ex) {
-			ConfigRuntimeException.HandleUncaughtException(ex, null);
+			ConfigRuntimeException.HandleUncaughtException(ex, null, env);
 		}
 		//Install our signal handlers.
 		SignalHandler.SignalCallback signalHandler = new SignalHandler.SignalCallback() {
@@ -434,9 +436,9 @@ public final class Interpreter {
 					execute(script, null);
 					script = "";
 				} catch (ConfigCompileException e) {
-					ConfigRuntimeException.HandleUncaughtException(e, null, null);
+					ConfigRuntimeException.HandleUncaughtException(e, null, null, env);
 				} catch (ConfigCompileGroupException e) {
-					ConfigRuntimeException.HandleUncaughtException(e, null);
+					ConfigRuntimeException.HandleUncaughtException(e, null, env);
 				}
 				break;
 			case "$$":
@@ -480,9 +482,9 @@ public final class Interpreter {
 							//Execute single line
 							execute(line, null);
 						} catch (ConfigCompileException ex) {
-							ConfigRuntimeException.HandleUncaughtException(ex, null, null);
+							ConfigRuntimeException.HandleUncaughtException(ex, null, null, env);
 						} catch (ConfigCompileGroupException ex) {
-							ConfigRuntimeException.HandleUncaughtException(ex, null);
+							ConfigRuntimeException.HandleUncaughtException(ex, null, env);
 						}
 					}
 					break;
@@ -792,7 +794,8 @@ public final class Interpreter {
 			//However, it doesn't get added to either $ or @arguments, due to the
 			//uncommon use of it.
 			StringBuilder finalArgument = new StringBuilder();
-			CArray arguments = new CArray(Target.UNKNOWN);
+			CArray arguments = new CArray(Target.UNKNOWN, GenericParameters.start(CArray.TYPE)
+					.addParameter(CString.TYPE, null).build(), env);
 			{
 				//Set the $0 argument
 				Variable v = new Variable("$0", "", Target.UNKNOWN);
@@ -810,7 +813,7 @@ public final class Interpreter {
 				v.setDefault(arg);
 				vars.add(v);
 				finalArgument.append(arg);
-				arguments.push(new CString(arg, Target.UNKNOWN), Target.UNKNOWN);
+				arguments.push(new CString(arg, Target.UNKNOWN), Target.UNKNOWN, env);
 			}
 			Variable v = new Variable("$", "", false, true, Target.UNKNOWN);
 			v.setVal(new CString(finalArgument.toString(), Target.UNKNOWN));

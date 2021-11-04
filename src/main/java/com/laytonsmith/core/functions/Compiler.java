@@ -440,7 +440,8 @@ public class Compiler {
 
 			// Look for typed assignments
 			for(int k = 0; k < list.size(); k++) {
-				if(list.get(k).getData().equals(CVoid.VOID) || list.get(k).getData().isInstanceOf(CClassType.TYPE)) {
+				if(list.get(k).getData().equals(CVoid.VOID)
+						|| list.get(k).getData() instanceof CClassType) {
 					if(k == list.size() - 1) {
 						// This is not a typed assignment
 						break;
@@ -758,7 +759,7 @@ public class Compiler {
 				if(children.size() != 1) {
 					throw new ConfigCompileException(getName() + " can only take one parameter", t);
 				}
-				if(!(children.get(0).getData().isInstanceOf(CString.TYPE))) {
+				if(!(children.get(0).getData().isInstanceOf(CString.TYPE, null, env))) {
 					throw new ConfigCompileException("Only hardcoded strings may be passed into " + getName(), t);
 				}
 				String value = children.get(0).getData().val();

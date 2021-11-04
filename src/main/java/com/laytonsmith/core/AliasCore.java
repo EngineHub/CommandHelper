@@ -405,7 +405,7 @@ public class AliasCore {
 						this.autoIncludes, env, env.getEnvClasses(), compileExceptions);
 				for(ConfigCompileException ex : compileExceptions) {
 					ConfigRuntimeException.HandleUncaughtException(ex, "Compile error in script."
-							+ " Compilation will attempt to continue, however.", player);
+							+ " Compilation will attempt to continue, however.", player, env);
 				}
 
 				try {
@@ -429,7 +429,7 @@ public class AliasCore {
 									if(s1.getCommandName().equalsIgnoreCase(s2.getCommandName())) {
 										ConfigRuntimeException.HandleUncaughtException(
 												new ConfigCompileException("Duplicate command defined. (First occurance found at "
-												+ s1.getTarget() + ")", s2.getTarget()), "Duplicate command.", player);
+												+ s1.getTarget() + ")", s2.getTarget()), "Duplicate command.", player, env);
 									}
 								}
 							}
@@ -810,11 +810,11 @@ public class AliasCore {
 								scripts.add(s);
 							} catch (ConfigCompileException e) {
 								ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script."
-										+ " Compilation will attempt to continue, however.", player);
+										+ " Compilation will attempt to continue, however.", player, env);
 							} catch (ConfigCompileGroupException ex) {
 								for(ConfigCompileException e : ex.getList()) {
 									ConfigRuntimeException.HandleUncaughtException(e, "Compile error in script."
-											+ " Compilation will attempt to continue, however.", player);
+											+ " Compilation will attempt to continue, however.", player, env);
 								}
 							} catch (CloneNotSupportedException e) {
 								throw new Error("Environment wasn't clonable, while it should be.", e);
@@ -827,7 +827,7 @@ public class AliasCore {
 					}
 				} catch (ConfigCompileException e) {
 					ConfigRuntimeException.HandleUncaughtException(e, "Could not compile file " + fi.file
-							+ ", so compilation will halt.", player);
+							+ ", so compilation will halt.", player, env);
 					return;
 				}
 			}
@@ -883,11 +883,11 @@ public class AliasCore {
 				} catch (ConfigCompileGroupException e) {
 					exception = true;
 					ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath()
-							+ " could not be compiled, due to compile errors.", player);
+							+ " could not be compiled, due to compile errors.", player, env);
 				} catch (ConfigCompileException e) {
 					exception = true;
 					ConfigRuntimeException.HandleUncaughtException(e, fi.file.getAbsolutePath()
-							+ " could not be compiled, due to a compile error.", player);
+							+ " could not be compiled, due to a compile error.", player, env);
 				} catch (ConfigRuntimeException e) {
 					exception = true;
 					ConfigRuntimeException.HandleUncaughtException(e, msFileEnv);

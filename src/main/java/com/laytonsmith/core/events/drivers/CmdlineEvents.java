@@ -12,6 +12,7 @@ import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.BoundEvent;
@@ -85,7 +86,7 @@ public class CmdlineEvents {
 
 		@Override
 		public String docs() {
-			return "{} Fires off every 5 seconds, with no other side effects. {} {} {}";
+			return "{} Fires off every 5 seconds, with no other side effects. {} {} {}";
 		}
 
 		@Override
@@ -94,7 +95,7 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			return new BindableEvent() {
 
 				@Override
@@ -105,7 +106,7 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			Map<String, Mixed> map = new HashMap<>();
 			map.put("time", new CInt(System.currentTimeMillis(), Target.UNKNOWN));
 			return map;
@@ -117,7 +118,7 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -153,14 +154,14 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
-			CmdlinePromptInput cpi = new CmdlinePromptInput(manualObject.get("command", t).val(),
-					ArgumentValidation.getBoolean(manualObject.get("shellMode", t), t));
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
+			CmdlinePromptInput cpi = new CmdlinePromptInput(manualObject.get("command", t, env).val(),
+					ArgumentValidation.getBoolean(manualObject.get("shellMode", t, env), t));
 			return cpi;
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			CmdlinePromptInput cpi = (CmdlinePromptInput) e;
 			Map<String, Mixed> map = new HashMap<>();
 			map.put("command", new CString(cpi.getCommand(), Target.UNKNOWN));
@@ -174,7 +175,7 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -251,12 +252,12 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			return Collections.EMPTY_MAP;
 		}
 
@@ -266,7 +267,7 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 

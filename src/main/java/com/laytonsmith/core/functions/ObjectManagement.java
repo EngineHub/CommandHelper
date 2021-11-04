@@ -24,6 +24,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericDeclaration;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREClassDefinitionError;
@@ -305,9 +306,8 @@ public class ObjectManagement {
 			}
 
 			// 11 - Generic Parameter declarations
-			// TODO This should of course not be Object, but I need
-			// to create a new class first.
-			List<Object> genericDeclarations = new ArrayList<>();
+			// TODO This should of course not be null
+			GenericDeclaration genericDeclarations = null;
 
 			// TODO Populate the native elements in the ElementDefinition
 
@@ -332,7 +332,7 @@ public class ObjectManagement {
 					accessModifier,
 					objectModifiers,
 					type,
-					CClassType.defineClass(name),
+					CClassType.defineClass(name, genericDeclarations),
 					superclasses,
 					interfaces,
 					containingClass,
@@ -340,7 +340,6 @@ public class ObjectManagement {
 					elementDefinitions,
 					annotations,
 					classComment,
-					genericDeclarations,
 					nativeClass);
 			if(env == null) {
 				throw new Error("Environment may not be null");

@@ -5,26 +5,10 @@ import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.DaemonManager;
 import com.laytonsmith.PureUtilities.TermColors;
-import static com.laytonsmith.PureUtilities.TermColors.BG_RED;
-import static com.laytonsmith.PureUtilities.TermColors.BLINKOFF;
-import static com.laytonsmith.PureUtilities.TermColors.BLINKON;
-import static com.laytonsmith.PureUtilities.TermColors.BLUE;
-import static com.laytonsmith.PureUtilities.TermColors.BOLD;
-import static com.laytonsmith.PureUtilities.TermColors.BRIGHT_WHITE;
-import static com.laytonsmith.PureUtilities.TermColors.CYAN;
-import static com.laytonsmith.PureUtilities.TermColors.GREEN;
-import static com.laytonsmith.PureUtilities.TermColors.MAGENTA;
-import static com.laytonsmith.PureUtilities.TermColors.RED;
-import static com.laytonsmith.PureUtilities.TermColors.WHITE;
-import static com.laytonsmith.PureUtilities.TermColors.YELLOW;
-import static com.laytonsmith.PureUtilities.TermColors.cls;
-import static com.laytonsmith.PureUtilities.TermColors.p;
-import static com.laytonsmith.PureUtilities.TermColors.prompt;
-import static com.laytonsmith.PureUtilities.TermColors.reset;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.commandhelper.CommandHelperFileLocations;
-import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.Installer;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.MethodScriptFileLocations;
@@ -51,6 +35,7 @@ import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.ReadOnlyException;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -63,6 +48,23 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+
+import static com.laytonsmith.PureUtilities.TermColors.BG_RED;
+import static com.laytonsmith.PureUtilities.TermColors.BLINKOFF;
+import static com.laytonsmith.PureUtilities.TermColors.BLINKON;
+import static com.laytonsmith.PureUtilities.TermColors.BLUE;
+import static com.laytonsmith.PureUtilities.TermColors.BOLD;
+import static com.laytonsmith.PureUtilities.TermColors.BRIGHT_WHITE;
+import static com.laytonsmith.PureUtilities.TermColors.CYAN;
+import static com.laytonsmith.PureUtilities.TermColors.GREEN;
+import static com.laytonsmith.PureUtilities.TermColors.MAGENTA;
+import static com.laytonsmith.PureUtilities.TermColors.RED;
+import static com.laytonsmith.PureUtilities.TermColors.WHITE;
+import static com.laytonsmith.PureUtilities.TermColors.YELLOW;
+import static com.laytonsmith.PureUtilities.TermColors.cls;
+import static com.laytonsmith.PureUtilities.TermColors.p;
+import static com.laytonsmith.PureUtilities.TermColors.prompt;
+import static com.laytonsmith.PureUtilities.TermColors.reset;
 
 /**
  *
@@ -460,7 +462,7 @@ public class Manager {
 			Environment env = Environment.createEnvironment(gEnv, staticRuntimeEnv, new CommandHelperEnvironment());
 			Mixed c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(
 					MethodScriptCompiler.lex(valueScript, env, null, true), env, null), env, null, null);
-			String value = Construct.json_encode(c, Target.UNKNOWN);
+			String value = Construct.json_encode(c, Target.UNKNOWN, env);
 			pl(CYAN + "Adding: " + WHITE + value);
 			String[] k = key.split("\\.");
 			DaemonManager dm = new DaemonManager();

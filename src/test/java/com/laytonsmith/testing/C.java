@@ -14,6 +14,7 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 
 /**
  * This class provides methods for more easily creating different Constructs for testing purposes.
@@ -69,7 +70,7 @@ public class C {
 		return CVoid.VOID;
 	}
 
-	public static IVariable IVariable(String name, Construct val) {
+	public static IVariable IVariable(String name, Construct val) throws ConfigCompileException {
 		return new IVariable(Auto.TYPE, name, val, Target.UNKNOWN, ENV);
 	}
 

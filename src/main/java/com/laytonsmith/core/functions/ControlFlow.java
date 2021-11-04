@@ -1,7 +1,7 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
+import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.breakable;
@@ -9,8 +9,8 @@ import com.laytonsmith.annotations.core;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.annotations.seealso;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Procedure;
@@ -39,10 +39,17 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
+import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CREInvalidProcedureException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
+import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.FunctionReturnException;
+import com.laytonsmith.core.exceptions.LoopBreakException;
+import com.laytonsmith.core.exceptions.LoopContinueException;
 import com.laytonsmith.core.functions.BasicLogic.and;
 import com.laytonsmith.core.functions.Compiler.__statements__;
 import com.laytonsmith.core.functions.Compiler.centry;
@@ -52,12 +59,6 @@ import com.laytonsmith.core.functions.Math.inc;
 import com.laytonsmith.core.functions.Math.postdec;
 import com.laytonsmith.core.functions.Math.postinc;
 import com.laytonsmith.core.functions.StringHandling.sconcat;
-import com.laytonsmith.core.exceptions.CancelCommandException;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
-import com.laytonsmith.core.exceptions.LoopBreakException;
-import com.laytonsmith.core.exceptions.LoopContinueException;
 import com.laytonsmith.core.natives.interfaces.Iterator;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.tools.docgen.templates.ArrayIteration;
@@ -1356,12 +1357,20 @@ public class ControlFlow {
 					}
 					//If the key isn't null, set that in the variable table.
 					if(kkey != null) {
-						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(),
-								kkey.getVariableName(), c, t, env));
+						try {
+							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(),
+									kkey.getVariableName(), c, t, env));
+						}  catch (ConfigCompileException cce) {
+							throw new CREFormatException(cce.getMessage(), t);
+						}
 					}
 					//Set the value in the variable table
-					env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(),
-							two.getVariableName(), one.get(c.val(), t), t, env));
+					try {
+						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(),
+								two.getVariableName(), one.get(c.val(), t), t, env));
+					}  catch (ConfigCompileException cce) {
+						throw new CREFormatException(cce.getMessage(), t);
+					}
 					try {
 						//Execute the code
 						parent.eval(code, env);
@@ -1414,11 +1423,19 @@ public class ControlFlow {
 						//If the item is blacklisted, we skip it.
 						if(!iterator.isBlacklisted(current)) {
 							if(kkey != null) {
-								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(),
-										kkey.getVariableName(), new CInt(current, t), t, env));
+								try {
+									env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getDefinedType(),
+											kkey.getVariableName(), new CInt(current, t), t, env));
+								} catch (ConfigCompileException cce) {
+									throw new CREFormatException(cce.getMessage(), t);
+								}
 							}
-							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(),
-									two.getVariableName(), one.get(current, t), t, env));
+							try {
+								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(),
+										two.getVariableName(), one.get(current, t), t, env));
+							} catch (ConfigCompileException cce) {
+								throw new CREFormatException(cce.getMessage(), t);
+							}
 							try {
 								parent.eval(code, env);
 							} catch (LoopBreakException e) {

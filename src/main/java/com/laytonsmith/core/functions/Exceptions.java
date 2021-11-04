@@ -508,9 +508,13 @@ public class Exceptions {
 							IVariableList varList = env.getEnv(GlobalEnv.class).GetVarList();
 							IVariable var = (IVariable) assign.getChildAt(1).getData();
 							// This should eventually be changed to be of the appropriate type. Unfortunately, that will
-							// require reworking basically everything. We need all functions to accept Mixed, instead of Mixed.
+							// require reworking basically everything. We need all functions to accept Mixed, instead of Construct.
 							// This will have to do in the meantime.
-							varList.set(new IVariable(CArray.TYPE, var.getVariableName(), e.getExceptionObject(), t));
+							try {
+								varList.set(new IVariable(CArray.TYPE, var.getVariableName(), e.getExceptionObject(), t));
+							} catch (ConfigCompileException cce) {
+								throw new CREFormatException(cce.getMessage(), t);
+							}
 							parent.eval(nodes[i + 1], env);
 							varList.remove(var.getVariableName());
 						} catch (ConfigRuntimeException | FunctionReturnException newEx) {

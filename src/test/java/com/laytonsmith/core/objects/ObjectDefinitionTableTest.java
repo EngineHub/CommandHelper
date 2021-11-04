@@ -19,18 +19,22 @@ import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.core.taskmanager.TaskManager;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.testing.StaticTest;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.mockito.Mockito;
+
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.Test;
-import org.mockito.Mockito;
 
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Ignore;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -153,7 +157,7 @@ public class ObjectDefinitionTableTest {
 		// TODO: This is currently skipped
 		// assertEquals("class comment", clazz.getElementComment().getBody());
 		// TODO: Generic parameters aren't properly implemented yet
-		assertEquals(new ArrayList<Object>(), clazz.getGenericParameters());
+		assertEquals(null, clazz.getGenericDeclaration());
 	}
 
 	@Test

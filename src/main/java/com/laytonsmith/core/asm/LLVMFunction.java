@@ -172,7 +172,7 @@ public abstract class LLVMFunction implements FunctionBase, Function {
 	}
 
 	@Override
-	public String profileMessage(Mixed... args) {
+	public String profileMessage(Environment env, Mixed... args) {
 		throw new UnsupportedOperationException("Not supported.");
 	}
 

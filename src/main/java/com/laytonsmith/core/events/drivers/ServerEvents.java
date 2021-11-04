@@ -99,12 +99,12 @@ public class ServerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(!(e instanceof MCServerCommandEvent)) {
 				throw new EventException("Cannot convert e to MCServerCommandEvent");
 			}
@@ -134,7 +134,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCServerCommandEvent) {
 				MCServerCommandEvent e = (MCServerCommandEvent) event;
 				if(key.equals("command")) {
@@ -186,12 +186,12 @@ public class ServerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			if(e instanceof MCServerPingEvent) {
 				MCServerPingEvent event = (MCServerPingEvent) e;
 				Target t = Target.UNKNOWN;
@@ -218,7 +218,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCServerPingEvent) {
 				MCServerPingEvent e = (MCServerPingEvent) event;
 				switch(key.toLowerCase()) {
@@ -294,7 +294,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			throw ConfigRuntimeException.CreateUncatchableException("Unsupported Operation", Target.UNKNOWN);
 		}
 
@@ -331,7 +331,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			if(event instanceof MCCommandTabCompleteEvent) {
 				MCCommandTabCompleteEvent e = (MCCommandTabCompleteEvent) event;
 				if("completions".equals(key)) {
@@ -406,12 +406,12 @@ public class ServerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			MCRedstoneChangedEvent event = (MCRedstoneChangedEvent) e;
 			Map<String, Mixed> map = evaluate_helper(e);
 			map.put("location", ObjectGenerator.GetGenerator().location(event.getLocation()));
@@ -425,7 +425,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public boolean modifyEvent(String key, Mixed value, BindableEvent event) {
+		public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env) {
 			return false;
 		}
 
@@ -465,7 +465,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public BindableEvent convert(CArray manualObject, Target t) {
+		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 
 			// Get the player recipients.
 			Mixed cRecipients = manualObject.get("player_recipients", t);
@@ -493,7 +493,7 @@ public class ServerEvents {
 		}
 
 		@Override
-		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
 			MCBroadcastMessageEvent event = (MCBroadcastMessageEvent) e;
 			Map<String, Mixed> map = evaluate_helper(e);
 			map.put("message", new CString(event.getMessage(), Target.UNKNOWN));

@@ -22,6 +22,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -352,13 +353,13 @@ public class Debug {
 			};
 		}
 
-		public static CVoid doTrace(Target t, Environment environment, Mixed... args) {
+		public static CVoid doTrace(Target t, Environment env, Mixed... args) {
 			if(args[0] instanceof IVariable) {
-				IVariable ivar = environment.getEnv(GlobalEnv.class).GetVarList()
-						.get(((IVariable) args[0]).getVariableName(), t, environment);
+				IVariable ivar = env.getEnv(GlobalEnv.class).GetVarList()
+						.get(((IVariable) args[0]).getVariableName(), t, env);
 				Mixed val = ivar.ival();
 				StreamUtils.GetSystemOut().println(
-						TermColors.GREEN + environment.getEnv(GlobalEnv.class).GetStackTraceManager()
+						TermColors.GREEN + env.getEnv(GlobalEnv.class).GetStackTraceManager()
 								.getCurrentStackTrace().get(0).getProcedureName()
 						+ TermColors.RESET + ":"
 						+ TermColors.YELLOW + t.file().getName()
@@ -368,7 +369,7 @@ public class Debug {
 						+ TermColors.BRIGHT_WHITE + ivar.getDefinedType()
 						+ TermColors.RESET + " (actual type "
 						+ TermColors.BRIGHT_WHITE + val.typeof()
-						+ (val.isInstanceOf(Sizeable.TYPE) ? ", length: " + ((Sizeable) val).size() : "")
+						+ (val.isInstanceOf(Sizeable.TYPE, null, env) ? ", length: " + ((Sizeable) val).size() : "")
 						+ TermColors.RESET + ") "
 						+ TermColors.CYAN + ivar.getVariableName()
 						+ TermColors.RESET + ": " + val.val());
@@ -606,11 +607,12 @@ public class Debug {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-			CArray carray = new CArray(t);
+			CArray carray = new CArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CString.TYPE, null).build(), env);
 			for(Thread thread : threadSet) {
-				carray.push(new CString(thread.getName(), t), t);
+				carray.push(new CString(thread.getName(), t), t, env);
 			}
 			return carray;
 		}

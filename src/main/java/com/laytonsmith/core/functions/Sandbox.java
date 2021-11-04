@@ -1,6 +1,5 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.FileWriteMode;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.Version;
@@ -11,6 +10,7 @@ import com.laytonsmith.annotations.hide;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.commandhelper.BukkitDirtyRegisteredListener;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.FileWriteMode;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
@@ -39,6 +39,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import org.apache.commons.io.FileUtils;
 import org.bukkit.event.Cancellable;
 
 import java.io.File;
@@ -46,7 +47,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Random;
-import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -597,17 +597,17 @@ public class Sandbox {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(!Static.InCmdLine(environment, true)) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			if(!Static.InCmdLine(env, true)) {
 				throw new CRESecurityException(getName() + " is only available in cmdline mode.", t);
 			}
-			File location = Static.GetFileFromArgument(args[0].val(), environment, t, null);
+			File location = Static.GetFileFromArgument(args[0].val(), env, t, null);
 			if(location.isDirectory()) {
 				throw new CREIOException("Path already exists, and is a directory", t);
 			}
 
 			byte[] content;
-			if(!(args[1].isInstanceOf(CByteArray.TYPE))) {
+			if(!(args[1].isInstanceOf(CByteArray.TYPE, null, env))) {
 				content = args[1].val().getBytes(Charset.forName("UTF-8"));
 			} else {
 				content = ArgumentValidation.getByteArray(args[1], t).asByteArrayCopy();

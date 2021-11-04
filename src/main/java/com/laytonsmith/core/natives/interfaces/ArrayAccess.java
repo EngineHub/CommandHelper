@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.Set;
 
@@ -24,7 +25,7 @@ public interface ArrayAccess extends Booleanish {
 	 * @param t
 	 * @return
 	 */
-	public Mixed get(String index, Target t) throws ConfigRuntimeException;
+	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException;
 
 	/**
 	 * Returns the mixed at this location. This should throw an exception if the index does not exist. This method will
@@ -35,7 +36,7 @@ public interface ArrayAccess extends Booleanish {
 	 * @return
 	 * @throws ConfigRuntimeException
 	 */
-	public Mixed get(int index, Target t) throws ConfigRuntimeException;
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException;
 
 	/**
 	 * Returns the mixed at this location. This should throw an exception if the index does not exist. This method may
@@ -46,7 +47,7 @@ public interface ArrayAccess extends Booleanish {
 	 * @return
 	 * @throws ConfigRuntimeException
 	 */
-	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException;
+	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException;
 
 	/**
 	 * If {@link #isAssociative()} returns true, this should return a set of all keys. If {@link #isAssociative()}
@@ -59,8 +60,8 @@ public interface ArrayAccess extends Booleanish {
 	/**
 	 * Unlike {@link #canBeAssociative()}, this is a runtime flag. If the underlying object is associative (that is, it
 	 * is an unordered, non numeric key set), this should return true. If this is true, then
-	 * {@link #get(java.lang.String, com.laytonsmith.core.constructs.Target)} will not be called, and
-	 * {@link #get(int, com.laytonsmith.core.constructs.Target)} will be called instead. If this is false, the opposite
+	 * {@link #get(java.lang.String, com.laytonsmith.core.constructs.Target, Environment)} will not be called, and
+	 * {@link #get(int, com.laytonsmith.core.constructs.Target, Environment)} will be called instead. If this is false, the opposite
 	 * will occur.
 	 *
 	 * @return

@@ -59,7 +59,7 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * @param t
 	 * @return
 	 */
-	public BindableEvent convert(CArray manualObject, Target t);
+	public BindableEvent convert(CArray manualObject, Target t, Environment env);
 
 	/**
 	 * This function is called when an event is triggered. It passes the event, and expects back a Map, which will be
@@ -70,7 +70,7 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * @return The map build from the event
 	 * @throws com.laytonsmith.core.exceptions.EventException If some exception occurs during map building
 	 */
-	public Map<String, Mixed> evaluate(BindableEvent e) throws EventException;
+	public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException;
 
 	/**
 	 * This is called to determine if an event is cancellable in the first place
@@ -166,7 +166,7 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * @param event
 	 * @return
 	 */
-	public boolean modifyEvent(String key, Mixed value, BindableEvent event);
+	public boolean modifyEvent(String key, Mixed value, BindableEvent event, Environment env);
 
 	/**
 	 * Returns if this event is cancelled. If the event is not cancellable, false should be returned, though this case
