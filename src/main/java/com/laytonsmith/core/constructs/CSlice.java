@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -32,8 +33,8 @@ public class CSlice extends CArray {
 	private long max;
 	private long size;
 
-	public CSlice(String slice, Target t) throws ConfigCompileException {
-		super(t);
+	public CSlice(String slice, Target t, Environment env) throws ConfigCompileException {
+		super(t, null, env);
 		String[] split = slice.split("\\.\\.");
 		if(split.length > 2) {
 			throw new ConfigCompileException("Invalid slice notation! (" + slice + ")", t);
@@ -60,8 +61,8 @@ public class CSlice extends CArray {
 		calculateCaches();
 	}
 
-	public CSlice(long from, long to, Target t) {
-		super(t);
+	public CSlice(long from, long to, Target t, Environment env) {
+		super(t, null, env);
 		this.start = from;
 		this.finish = to;
 		calculateCaches();
@@ -103,7 +104,7 @@ public class CSlice extends CArray {
 	}
 
 	@Override
-	protected String getString(Stack<CArray> arrays, Target t) {
+	protected String getString(Stack<CArray> arrays, Target t, Environment env) {
 		//We don't need to consider arrays, because we can't
 		//get stuck in an infinite loop.
 		return val();
@@ -115,13 +116,13 @@ public class CSlice extends CArray {
 	}
 
 	@Override
-	public void set(Mixed index, Mixed c, Target t) {
+	public void set(Mixed index, Mixed c, Target t, Environment env) {
 		throw new CRECastException("CSlices cannot set values", t);
 	}
 
 	@Override
-	public Mixed get(Mixed index, Target t) {
-		long i = ArgumentValidation.getInt(index, t);
+	public Mixed get(Mixed index, Target t, Environment env) {
+		long i = ArgumentValidation.getInt(index, t, env);
 		if(i > max) {
 			throw new CRERangeException("Index out of bounds. Index: " + i + " Size: " + max, t);
 		}
@@ -173,7 +174,7 @@ public class CSlice extends CArray {
 	@Override
 	public boolean contains(Mixed c) {
 		try {
-			long i = ArgumentValidation.getInt(c, Target.UNKNOWN);
+			long i = ArgumentValidation.getInt(c, Target.UNKNOWN, fallbackEnv);
 			if(start < finish) {
 				return start <= i && i <= finish;
 			} else {

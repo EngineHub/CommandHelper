@@ -151,12 +151,12 @@ public class Exceptions {
 			List<FullyQualifiedClassName> interest = new ArrayList<>();
 			if(types != null) {
 				Mixed ptypes = that.seval(types, env);
-				if(ptypes.isInstanceOf(CString.TYPE)) {
+				if(ptypes.isInstanceOf(CString.TYPE, null, env)) {
 					interest.add(FullyQualifiedClassName.forName(ptypes.val(), t, env));
-				} else if(ptypes.isInstanceOf(CArray.TYPE)) {
+				} else if(ptypes.isInstanceOf(CArray.TYPE, null, env)) {
 					CArray ca = (CArray) ptypes;
 					for(int i = 0; i < ca.size(); i++) {
-						interest.add(FullyQualifiedClassName.forName(ca.get(i, t).val(), t, env));
+						interest.add(FullyQualifiedClassName.forName(ca.get(i, t, env).val(), t, env));
 					}
 				} else {
 					throw new CRECastException("Expected argument 4 to be a string, or an array of strings.", t);
@@ -334,7 +334,7 @@ public class Exceptions {
 				try {
 					// Exception type
 					// We need to reverse the excpetion into an object
-					throw ObjectGenerator.GetGenerator().exception(ArgumentValidation.getArray(args[0], t), t, env);
+					throw ObjectGenerator.GetGenerator().exception(ArgumentValidation.getArray(args[0], t, env), t, env);
 				} catch (ClassNotFoundException ex) {
 					throw new CRECastException(ex.getMessage(), t);
 				}
@@ -356,7 +356,7 @@ public class Exceptions {
 				arguments.add(t);
 				if(args.length == 3) {
 					classes.add(Throwable.class);
-					arguments.add(new CRECausedByWrapper(ArgumentValidation.getArray(args[2], t)));
+					arguments.add(new CRECausedByWrapper(ArgumentValidation.getArray(args[2], t, env)));
 				}
 				CREThrowable throwable = (CREThrowable) ReflectionUtils.newInstance(c, classes.toArray(new Class[classes.size()]), arguments.toArray());
 				throw throwable;
@@ -384,10 +384,10 @@ public class Exceptions {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].isInstanceOf(CClosure.TYPE)) {
-				CClosure old = environment.getEnv(GlobalEnv.class).GetExceptionHandler();
-				environment.getEnv(GlobalEnv.class).SetExceptionHandler((CClosure) args[0]);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			if(args[0].isInstanceOf(CClosure.TYPE, null, env)) {
+				CClosure old = env.getEnv(GlobalEnv.class).GetExceptionHandler();
+				env.getEnv(GlobalEnv.class).SetExceptionHandler((CClosure) args[0]);
 				if(old == null) {
 					return CNull.NULL;
 				} else {
@@ -511,7 +511,7 @@ public class Exceptions {
 							// require reworking basically everything. We need all functions to accept Mixed, instead of Construct.
 							// This will have to do in the meantime.
 							try {
-								varList.set(new IVariable(CArray.TYPE, var.getVariableName(), e.getExceptionObject(), t));
+								varList.set(new IVariable(CArray.TYPE, var.getVariableName(), e.getExceptionObject(env), t));
 							} catch (ConfigCompileException cce) {
 								throw new CREFormatException(cce.getMessage(), t);
 							}
@@ -603,7 +603,7 @@ public class Exceptions {
 				ParseTree assign = children.get(i);
 
 				// Check for a container function with a string as first argument, being an unknown type.
-				if(assign.numberOfChildren() > 0 && assign.getChildAt(0).getData().isInstanceOf(CString.TYPE)) {
+				if(assign.numberOfChildren() > 0 && assign.getChildAt(0).getData().isInstanceOf(CString.TYPE, null, env)) {
 					throw new ConfigCompileException("Unknown class type: " + assign.getChildAt(0).getData().val(), t);
 				}
 
@@ -707,12 +707,12 @@ public class Exceptions {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			StackTraceManager stManager = environment.getEnv(GlobalEnv.class).GetStackTraceManager();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			StackTraceManager stManager = env.getEnv(GlobalEnv.class).GetStackTraceManager();
 			List<ConfigRuntimeException.StackTraceElement> elements = stManager.getCurrentStackTrace();
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, null, env);
 			for(ConfigRuntimeException.StackTraceElement e : elements) {
-				ret.push(e.getObjectFor(), Target.UNKNOWN);
+				ret.push(e.getObjectFor(env), Target.UNKNOWN, env);
 			}
 			return ret;
 		}

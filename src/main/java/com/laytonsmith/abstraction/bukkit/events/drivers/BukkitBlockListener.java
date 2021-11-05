@@ -2,9 +2,9 @@ package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.bukkit.events.BukkitBlockEvents;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -19,6 +19,7 @@ import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFadeEvent;
+import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
@@ -27,7 +28,6 @@ import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.NotePlayEvent;
 import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 
@@ -36,25 +36,25 @@ public class BukkitBlockListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPistonExtend(final BlockPistonExtendEvent e) {
 		BukkitBlockEvents.BukkitMCBlockPistonExtendEvent mce = new BukkitBlockEvents.BukkitMCBlockPistonExtendEvent(e);
-		EventUtils.TriggerListener(Driver.PISTON_EXTEND, "piston_extend", mce);
+		EventUtils.TriggerListener(Driver.PISTON_EXTEND, "piston_extend", mce, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPistonRetract(final BlockPistonRetractEvent e) {
 		BukkitBlockEvents.BukkitMCBlockPistonRetractEvent mce = new BukkitBlockEvents.BukkitMCBlockPistonRetractEvent(e);
-		EventUtils.TriggerListener(Driver.PISTON_RETRACT, "piston_retract", mce);
+		EventUtils.TriggerListener(Driver.PISTON_RETRACT, "piston_retract", mce, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onSignChange(SignChangeEvent e) {
 		BukkitBlockEvents.BukkitMCSignChangeEvent mce = new BukkitBlockEvents.BukkitMCSignChangeEvent(e);
-		EventUtils.TriggerListener(Driver.SIGN_CHANGED, "sign_changed", mce);
+		EventUtils.TriggerListener(Driver.SIGN_CHANGED, "sign_changed", mce, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockPlace(BlockPlaceEvent e) {
 		BukkitBlockEvents.BukkitMCBlockPlaceEvent bpe = new BukkitBlockEvents.BukkitMCBlockPlaceEvent(e);
-		EventUtils.TriggerListener(Driver.BLOCK_PLACE, "block_place", bpe);
+		EventUtils.TriggerListener(Driver.BLOCK_PLACE, "block_place", bpe, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	private static boolean ignorebreak = false;
@@ -65,7 +65,7 @@ public class BukkitBlockListener implements Listener {
 			return;
 		}
 		BukkitBlockEvents.BukkitMCBlockBreakEvent bbe = new BukkitBlockEvents.BukkitMCBlockBreakEvent(e);
-		EventUtils.TriggerListener(Driver.BLOCK_BREAK, "block_break", bbe);
+		EventUtils.TriggerListener(Driver.BLOCK_BREAK, "block_break", bbe, CommandHelperPlugin.getCore().getLastLoadedEnv());
 		if(bbe.isModified() && !e.isCancelled()) {
 			if(bbe.getDrops().isEmpty()) {
 				e.setDropItems(false);
@@ -104,54 +104,54 @@ public class BukkitBlockListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockDispense(BlockDispenseEvent e) {
 		BukkitBlockEvents.BukkitMCBlockDispenseEvent bde = new BukkitBlockEvents.BukkitMCBlockDispenseEvent(e);
-		EventUtils.TriggerListener(Driver.BLOCK_DISPENSE, "block_dispense", bde);
+		EventUtils.TriggerListener(Driver.BLOCK_DISPENSE, "block_dispense", bde, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockBurn(BlockBurnEvent e) {
 		BukkitBlockEvents.BukkitMCBlockBurnEvent bbe = new BukkitBlockEvents.BukkitMCBlockBurnEvent(e);
-		EventUtils.TriggerListener(Driver.BLOCK_BURN, "block_burn", bbe);
+		EventUtils.TriggerListener(Driver.BLOCK_BURN, "block_burn", bbe, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockFromTo(BlockFromToEvent e) {
 		BukkitBlockEvents.BukkitMCBlockFromToEvent bbe = new BukkitBlockEvents.BukkitMCBlockFromToEvent(e);
-		EventUtils.TriggerListener(Driver.BLOCK_FROM_TO, "block_from_to", bbe);
+		EventUtils.TriggerListener(Driver.BLOCK_FROM_TO, "block_from_to", bbe, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockIgnite(BlockIgniteEvent e) {
 		BukkitBlockEvents.BukkitMCBlockIgniteEvent bie = new BukkitBlockEvents.BukkitMCBlockIgniteEvent(e);
-		EventUtils.TriggerListener(Driver.BLOCK_IGNITE, "block_ignite", bie);
+		EventUtils.TriggerListener(Driver.BLOCK_IGNITE, "block_ignite", bie, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockGrow(BlockGrowEvent e) {
 		BukkitBlockEvents.BukkitMCBlockGrowEvent bge = new BukkitBlockEvents.BukkitMCBlockGrowEvent(e);
-		EventUtils.TriggerListener(Driver.BLOCK_GROW, "block_grow", bge);
+		EventUtils.TriggerListener(Driver.BLOCK_GROW, "block_grow", bge, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onNotePlay(NotePlayEvent e) {
 		BukkitBlockEvents.BukkitMCNotePlayEvent npe = new BukkitBlockEvents.BukkitMCNotePlayEvent(e);
-		EventUtils.TriggerListener(Driver.NOTE_PLAY, "note_play", npe);
+		EventUtils.TriggerListener(Driver.NOTE_PLAY, "note_play", npe, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockFade(BlockFadeEvent e) {
 		BukkitBlockEvents.BukkitMCBlockFadeEvent bfe = new BukkitBlockEvents.BukkitMCBlockFadeEvent(e);
-		EventUtils.TriggerListener(Driver.BLOCK_FADE, "block_fade", bfe);
+		EventUtils.TriggerListener(Driver.BLOCK_FADE, "block_fade", bfe, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockExplode(BlockExplodeEvent e) {
 		BukkitBlockEvents.BukkitMCBlockExplodeEvent bee = new BukkitBlockEvents.BukkitMCBlockExplodeEvent(e);
-		EventUtils.TriggerListener(Driver.BLOCK_EXPLODE, "block_explode", bee);
+		EventUtils.TriggerListener(Driver.BLOCK_EXPLODE, "block_explode", bee, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockForm(BlockFormEvent event) {
 		BukkitBlockEvents.BukkitBlockFormEventEvent form = new BukkitBlockEvents.BukkitBlockFormEventEvent(event);
-		EventUtils.TriggerListener(Driver.BLOCK_FORM, "block_form", form);
+		EventUtils.TriggerListener(Driver.BLOCK_FORM, "block_form", form, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 }

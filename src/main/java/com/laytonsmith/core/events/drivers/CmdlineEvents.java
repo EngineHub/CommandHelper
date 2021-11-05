@@ -59,7 +59,7 @@ public class CmdlineEvents {
 								public Object _GetObject() {
 									return new Object();
 								}
-							});
+							}, event.getEnvironment());
 							try {
 								Thread.sleep(5000);
 							} catch (InterruptedException ex) {
@@ -90,7 +90,7 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			return true;
 		}
 
@@ -149,14 +149,14 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			return true;
 		}
 
 		@Override
 		public BindableEvent convert(CArray manualObject, Target t, Environment env) {
 			CmdlinePromptInput cpi = new CmdlinePromptInput(manualObject.get("command", t, env).val(),
-					ArgumentValidation.getBoolean(manualObject.get("shellMode", t, env), t));
+					ArgumentValidation.getBoolean(manualObject.get("shellMode", t, env), t, env));
 			return cpi;
 		}
 
@@ -247,7 +247,7 @@ public class CmdlineEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			return true;
 		}
 

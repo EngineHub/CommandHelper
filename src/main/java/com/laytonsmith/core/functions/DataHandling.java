@@ -1263,10 +1263,10 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			boolean b = true;
 			try {
-				ArgumentValidation.getNumber(args[0], t);
+				ArgumentValidation.getNumber(args[0], t, env);
 			} catch (ConfigRuntimeException e) {
 				b = false;
 			}
@@ -1337,10 +1337,10 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			double d;
 			try {
-				d = ArgumentValidation.getDouble(args[0], t);
+				d = ArgumentValidation.getDouble(args[0], t, env);
 			} catch (ConfigRuntimeException e) {
 				return CBoolean.FALSE;
 			}
@@ -2778,8 +2778,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			Mixed[] vals = ArgumentValidation.getArray(args[0], t).asList().toArray(new Mixed[0]);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			Mixed[] vals = ArgumentValidation.getArray(args[0], t, env).asList().toArray(new Mixed[0]);
 			CClosure closure = ArgumentValidation.getObject(args[1], t, CClosure.class);
 			return closure.executeCallable(vals);
 		}
@@ -2919,8 +2919,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(ArgumentValidation.getBoolean(args[0], t));
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CBoolean.get(ArgumentValidation.getBoolean(args[0], t, env));
 		}
 
 		@Override
@@ -2988,8 +2988,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			return new CInt((long) ArgumentValidation.getNumber(args[0], t), t);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return new CInt((long) ArgumentValidation.getNumber(args[0], t, env), t);
 		}
 
 		@Override
@@ -3050,8 +3050,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			return new CDouble(ArgumentValidation.getDouble(args[0], t), t);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return new CDouble(ArgumentValidation.getDouble(args[0], t, env), t);
 		}
 
 		@Override
@@ -3167,12 +3167,12 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			int radix = ArgumentValidation.getInt32(args[1], t);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			int radix = ArgumentValidation.getInt32(args[1], t, env);
 			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
 				throw new CRERangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
 			}
-			return new CString(Long.toString(ArgumentValidation.getInt(args[0], t), radix), t);
+			return new CString(Long.toString(ArgumentValidation.getInt(args[0], t, env), radix), t);
 		}
 
 		@Override
@@ -3239,9 +3239,9 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String value = args[0].val();
-			int radix = ArgumentValidation.getInt32(args[1], t);
+			int radix = ArgumentValidation.getInt32(args[1], t, env);
 			if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
 				throw new CRERangeException("The radix must be between " + Character.MIN_RADIX + " and " + Character.MAX_RADIX + ", inclusive.", t);
 			}
@@ -3408,7 +3408,7 @@ public class DataHandling {
 		@Override
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			if(ArgumentValidation.getBooleanish(env.getEnv(GlobalEnv.class).GetRuntimeSetting("function.eval.disable",
-					CBoolean.FALSE), t)) {
+					CBoolean.FALSE), t, env)) {
 				throw new CREInsufficientPermissionException("eval is disabled", t);
 			}
 			boolean oldDynamicScriptMode = env.getEnv(GlobalEnv.class).GetDynamicScriptingMode();
@@ -3566,12 +3566,12 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			Mixed val = CNull.NULL;
 			if(args.length > 0) {
 				val = args[0];
 			}
-			return new CMutablePrimitive(val, t);
+			return new CMutablePrimitive(val, t, env);
 		}
 
 		@Override
@@ -3841,9 +3841,9 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			CClassType type = ArgumentValidation.getClassType(args[0], t);
-			int size = ArgumentValidation.getInt32(args[1], t);
+			int size = ArgumentValidation.getInt32(args[1], t, env);
 			if(size < 0) {
 				throw new CRERangeException("Array size must be zero or greater. Received: " + size, t);
 			}

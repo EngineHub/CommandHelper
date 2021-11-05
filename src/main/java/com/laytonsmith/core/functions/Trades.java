@@ -58,9 +58,9 @@ public class Trades {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, null, env);
 			for(MCMerchantRecipe mr : GetMerchant(args[0], t).getRecipes()) {
-				ret.push(trade(mr, t), t);
+				ret.push(trade(mr, t, env), t, env);
 			}
 			return ret;
 		}
@@ -99,13 +99,13 @@ public class Trades {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCMerchant merchant = GetMerchant(args[0], t);
-			CArray trades = ArgumentValidation.getArray(args[1], t);
+			CArray trades = ArgumentValidation.getArray(args[1], t, env);
 			List<MCMerchantRecipe> recipes = new ArrayList<>();
 			if(trades.isAssociative()) {
 				throw new CRECastException("Expected non-associative array for list of trade arrays.", t);
 			}
 			for(Mixed trade : trades.asList()) {
-				recipes.add(trade(trade, t));
+				recipes.add(trade(trade, t, env));
 			}
 			merchant.setRecipes(recipes);
 			return CVoid.VOID;
@@ -170,13 +170,13 @@ public class Trades {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = CArray.GetAssociativeArray(t);
+			CArray ret = CArray.GetAssociativeArray(t, null, env);
 			for(Map.Entry<String, MCMerchant> entry : VIRTUAL_MERCHANTS.entrySet()) {
 				if(entry.getValue() == null) {
 					VIRTUAL_MERCHANTS.remove(entry.getKey());
 					continue;
 				}
-				ret.set(entry.getKey(), entry.getValue().getTitle(), t);
+				ret.set(entry.getKey(), entry.getValue().getTitle(), t, env);
 			}
 			return ret;
 		}
@@ -295,12 +295,12 @@ public class Trades {
 			MCPlayer player;
 			boolean force = false;
 			if(args.length > 1) {
-				player = Static.GetPlayer(args[1], t);
+				player = Static.GetPlayer(args[1], t, env);
 			} else {
 				player = Static.getPlayer(env, t);
 			}
 			if(args.length == 3) {
-				force = ArgumentValidation.getBooleanish(args[2], t);
+				force = ArgumentValidation.getBooleanish(args[2], t, env);
 			}
 			MCMerchant merchant = GetMerchant(args[0], t);
 			if(!force && merchant.isTrading()) {
@@ -399,25 +399,25 @@ public class Trades {
 		return merchant;
 	}
 
-	private static MCMerchantRecipe trade(Mixed c, Target t) {
+	private static MCMerchantRecipe trade(Mixed c, Target t, Environment env) {
 
-		CArray recipe = ArgumentValidation.getArray(c, t);
+		CArray recipe = ArgumentValidation.getArray(c, t, env);
 
-		MCItemStack result = ObjectGenerator.GetGenerator().item(recipe.get("result", t), t);
+		MCItemStack result = ObjectGenerator.GetGenerator().item(recipe.get("result", t, env), t, env);
 
 		MCMerchantRecipe mer = (MCMerchantRecipe) StaticLayer.GetNewRecipe(null, MCRecipeType.MERCHANT, result);
 
 		if(recipe.containsKey("maxuses")) {
-			mer.setMaxUses(ArgumentValidation.getInt32(recipe.get("maxuses", t), t));
+			mer.setMaxUses(ArgumentValidation.getInt32(recipe.get("maxuses", t, env), t, env));
 		}
 		if(recipe.containsKey("uses")) {
-			mer.setUses(ArgumentValidation.getInt32(recipe.get("uses", t), t));
+			mer.setUses(ArgumentValidation.getInt32(recipe.get("uses", t, env), t, env));
 		}
 		if(recipe.containsKey("hasxpreward")) {
-			mer.setHasExperienceReward(ArgumentValidation.getBoolean(recipe.get("hasxpreward", t), t));
+			mer.setHasExperienceReward(ArgumentValidation.getBoolean(recipe.get("hasxpreward", t, env), t, env));
 		}
 
-		CArray ingredients = ArgumentValidation.getArray(recipe.get("ingredients", t), t);
+		CArray ingredients = ArgumentValidation.getArray(recipe.get("ingredients", t, env), t, env);
 		if(ingredients.inAssociativeMode()) {
 			throw new CREFormatException("Ingredients array is invalid.", t);
 		}
@@ -427,27 +427,27 @@ public class Trades {
 		}
 		List<MCItemStack> mcIngredients = new ArrayList<>();
 		for(Mixed ingredient : ingredients.asList()) {
-			mcIngredients.add(ObjectGenerator.GetGenerator().item(ingredient, t));
+			mcIngredients.add(ObjectGenerator.GetGenerator().item(ingredient, t, env));
 		}
 		mer.setIngredients(mcIngredients);
 
 		return mer;
 	}
 
-	private static Mixed trade(MCMerchantRecipe r, Target t) {
+	private static Mixed trade(MCMerchantRecipe r, Target t, Environment env) {
 		if(r == null) {
 			return CNull.NULL;
 		}
-		CArray ret = CArray.GetAssociativeArray(t);
-		ret.set("result", ObjectGenerator.GetGenerator().item(r.getResult(), t), t);
-		CArray il = new CArray(t);
+		CArray ret = CArray.GetAssociativeArray(t, null, env);
+		ret.set("result", ObjectGenerator.GetGenerator().item(r.getResult(), t, env), t, env);
+		CArray il = new CArray(t, null, env);
 		for(MCItemStack i : r.getIngredients()) {
-			il.push(ObjectGenerator.GetGenerator().item(i, t), t);
+			il.push(ObjectGenerator.GetGenerator().item(i, t, env), t, env);
 		}
-		ret.set("ingredients", il, t);
-		ret.set("maxuses", new CInt(r.getMaxUses(), t), t);
-		ret.set("uses", new CInt(r.getUses(), t), t);
-		ret.set("hasxpreward", CBoolean.get(r.hasExperienceReward()), t);
+		ret.set("ingredients", il, t, env);
+		ret.set("maxuses", new CInt(r.getMaxUses(), t), t, env);
+		ret.set("uses", new CInt(r.getUses(), t), t, env);
+		ret.set("hasxpreward", CBoolean.get(r.hasExperienceReward()), t, env);
 
 		return ret;
 	}

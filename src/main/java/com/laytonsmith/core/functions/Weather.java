@@ -70,19 +70,19 @@ public class Weather {
 			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray a = (CArray) args[0];
 				MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				MCLocation l = ObjectGenerator.GetGenerator().location(a, p == null ? null : p.getWorld(), t);
+				MCLocation l = ObjectGenerator.GetGenerator().location(a, p == null ? null : p.getWorld(), t, env);
 				x = (int) java.lang.Math.floor(l.getX());
 				y = (int) java.lang.Math.floor(l.getY());
 				z = (int) java.lang.Math.floor(l.getZ());
 				w = l.getWorld();
 			} else {
-				x = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[0], t));
-				y = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[1], t));
-				z = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[2], t));
+				x = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[0], t, env));
+				y = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[1], t, env));
+				z = (int) java.lang.Math.floor(ArgumentValidation.getNumber(args[2], t, env));
 				safeIndex = 3;
 			}
 			if(args.length >= safeIndex + 1) {
-				safe = ArgumentValidation.getBoolean(args[safeIndex], t);
+				safe = ArgumentValidation.getBoolean(args[safeIndex], t, env);
 			}
 			if(w != null) {
 				if(!safe) {
@@ -137,21 +137,21 @@ public class Weather {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			boolean b = ArgumentValidation.getBoolean(args[0], t);
+			boolean b = ArgumentValidation.getBoolean(args[0], t, env);
 			MCWorld w = null;
 			int duration = -1;
 			if(args.length == 2) {
 				if(args[1].isInstanceOf(CString.TYPE, null, env)) {
 					w = Static.getServer().getWorld(args[1].val());
 				} else if(args[1].isInstanceOf(CInt.TYPE, null, env)) {
-					duration = ArgumentValidation.getInt32(args[1], t);
+					duration = ArgumentValidation.getInt32(args[1], t, env);
 				} else {
 					throw new CREFormatException("", t);
 				}
 			}
 			if(args.length == 3) {
 				w = Static.getServer().getWorld(args[1].val());
-				duration = ArgumentValidation.getInt32(args[2], t);
+				duration = ArgumentValidation.getInt32(args[2], t, env);
 			}
 			if(w == null) {
 				MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
@@ -223,22 +223,22 @@ public class Weather {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCWorld w = null;
 			if(args.length == 1) {
-				if(environment.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
-					w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+				if(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+					w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
 				}
 			} else {
 				w = Static.getServer().getWorld(args[1].val());
 			}
 			if(w != null) {
-				w.setThundering(ArgumentValidation.getBoolean(args[0], t));
+				w.setThundering(ArgumentValidation.getBoolean(args[0], t, env));
 			} else {
 				throw new CREInvalidWorldException("No existing world specified!", t);
 			}
 			if(args.length == 3) {
-				w.setThunderDuration(ArgumentValidation.getInt32(args[2], t));
+				w.setThunderDuration(ArgumentValidation.getInt32(args[2], t, env));
 			}
 			return CVoid.VOID;
 		}

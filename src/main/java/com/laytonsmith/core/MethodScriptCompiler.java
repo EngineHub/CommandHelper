@@ -1457,7 +1457,7 @@ public final class MethodScriptCompiler {
 						myIndex.addChild(tree.getChildAt(j));
 					}
 				} else {
-					myIndex = new ParseTree(new CSlice("0..-1", t.target), fileOptions);
+					myIndex = new ParseTree(new CSlice("0..-1", t.target, environment), fileOptions);
 				}
 				tree.setChildren(tree.getChildren().subList(0, array));
 				ParseTree arrayGet = new ParseTree(new CFunction(array_get.NAME, t.target), fileOptions);
@@ -1628,7 +1628,7 @@ public final class MethodScriptCompiler {
 						value = next1.val() + next2.val();
 						i++;
 					}
-					slice = new CSlice(".." + value, t.getTarget());
+					slice = new CSlice(".." + value, t.getTarget(), environment);
 					i++;
 					tree.addChild(new ParseTree(slice, fileOptions));
 					constructCount.peek().incrementAndGet();
@@ -1651,7 +1651,7 @@ public final class MethodScriptCompiler {
 							value = next2.val() + next3.val();
 							i++;
 						}
-						slice = new CSlice(".." + value, next1.getTarget());
+						slice = new CSlice(".." + value, next1.getTarget(), environment);
 						if(t.type.isKeyword()) {
 							tree.addChild(new ParseTree(new CKeyword(t.val(), t.getTarget()), fileOptions));
 							constructCount.peek().incrementAndGet();
@@ -1664,7 +1664,7 @@ public final class MethodScriptCompiler {
 							modifier = prev1.val();
 							tree.removeChildAt(tree.getChildren().size() - 1);
 						}
-						slice = new CSlice(modifier + t.value + "..", t.target);
+						slice = new CSlice(modifier + t.value + "..", t.target, environment);
 					} else {
 						//both are provided
 						String modifier1 = "";
@@ -1686,7 +1686,7 @@ public final class MethodScriptCompiler {
 							second = next3;
 							i++;
 						}
-						slice = new CSlice(modifier1 + first.value + ".." + modifier2 + second.value, t.target);
+						slice = new CSlice(modifier1 + first.value + ".." + modifier2 + second.value, t.target, environment);
 					}
 					i++;
 					tree.addChild(new ParseTree(slice, fileOptions));
@@ -1964,7 +1964,7 @@ public final class MethodScriptCompiler {
 			long breakCounter = 1;
 			if(tree.getChildren().size() == 1) {
 				try {
-					breakCounter = ArgumentValidation.getInt32(tree.getChildAt(0).getData(), tree.getChildAt(0).getTarget());
+					breakCounter = ArgumentValidation.getInt32(tree.getChildAt(0).getData(), tree.getChildAt(0).getTarget(), Environment.createEnvironment());
 				} catch (CRECastException | CRERangeException e) {
 					compilerErrors.add(new ConfigCompileException(e));
 					return;

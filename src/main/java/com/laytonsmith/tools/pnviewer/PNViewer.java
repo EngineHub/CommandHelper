@@ -2,7 +2,6 @@ package com.laytonsmith.tools.pnviewer;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
-import com.laytonsmith.PureUtilities.UI.TextDialog;
 import com.laytonsmith.PureUtilities.Common.AutoFlushObjectOutputStream;
 import com.laytonsmith.PureUtilities.Common.MutableObject;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
@@ -10,8 +9,11 @@ import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Common.TemplateBuilder;
 import com.laytonsmith.PureUtilities.Common.UIUtils;
+import com.laytonsmith.PureUtilities.UI.TextDialog;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.Profiles.InvalidProfileException;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -21,6 +23,14 @@ import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -49,15 +59,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
 
 /**
  *
@@ -334,8 +335,8 @@ public class PNViewer extends javax.swing.JFrame {
 			}).start();
 			Construct c = CNull.NULL;
 			try {
-				c = Construct.json_decode(value, Target.UNKNOWN);
-			} catch (MarshalException ex) {
+				c = Construct.json_decode(value, Target.UNKNOWN, Static.GenerateStandaloneEnvironment());
+			} catch (MarshalException | InvalidProfileException | DataSourceException | IOException | URISyntaxException ex) {
 				Logger.getLogger(PNViewer.class.getName()).log(Level.SEVERE, null, ex);
 			}
 			valueTypeLabel.setText(new DataHandling.typeof().exec(Target.UNKNOWN, null, c).val());

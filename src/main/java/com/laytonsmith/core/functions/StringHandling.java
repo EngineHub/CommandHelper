@@ -368,7 +368,7 @@ public class StringHandling {
 			String string = args[0].val();
 			boolean useAdvanced = false;
 			if(args.length >= 2) {
-				useAdvanced = ArgumentValidation.getBoolean(args[1], t);
+				useAdvanced = ArgumentValidation.getBoolean(args[1], t, env);
 			}
 			List<Mixed> a = new ArrayList<>();
 			if(!useAdvanced) {
@@ -843,10 +843,10 @@ public class StringHandling {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			try {
 				String s = args[0].val();
-				int begin = ArgumentValidation.getInt32(args[1], t);
+				int begin = ArgumentValidation.getInt32(args[1], t, env);
 				int end;
 				if(args.length == 3) {
-					end = ArgumentValidation.getInt32(args[2], t);
+					end = ArgumentValidation.getInt32(args[2], t, env);
 				} else {
 					end = s.length();
 				}
@@ -1323,7 +1323,7 @@ public class StringHandling {
 			String string = args[1].val();
 			int limit = Integer.MAX_VALUE;
 			if(args.length >= 3) {
-				limit = ArgumentValidation.getInt32(args[2], t);
+				limit = ArgumentValidation.getInt32(args[2], t, env);
 			}
 			int sp = 0;
 			if(split.length() == 0) {
@@ -1450,18 +1450,18 @@ public class StringHandling {
 				Mixed arg = flattenedArgs.get(i);
 				FormatString fs = parsed.get(i);
 				Character c = fs.getExpectedType();
-				params[i] = convertArgument(arg, c, i, t);
+				params[i] = convertArgument(arg, c, i, t, env);
 			}
 			//Ok, done.
 			return new CString(String.format(locale, formatString, params), t);
 		}
 
-		private Object convertArgument(Mixed arg, Character c, int i, Target t) {
+		private Object convertArgument(Mixed arg, Character c, int i, Target t, Environment env) {
 			Object o;
 			if(Conversion.isValid(c)) {
 				if(c == 't' || c == 'T') {
 					//Datetime, parse as long
-					o = ArgumentValidation.getInt(arg, t);
+					o = ArgumentValidation.getInt(arg, t, env);
 				} else if(Conversion.isCharacter(c)) {
 					//Character, parse as string, and verify it's of length 1
 					String s = arg.val();
@@ -1472,15 +1472,15 @@ public class StringHandling {
 					o = s.charAt(0);
 				} else if(Conversion.isFloat(c)) {
 					//Float, parse as double
-					o = ArgumentValidation.getDouble(arg, t);
+					o = ArgumentValidation.getDouble(arg, t, env);
 				} else if(Conversion.isInteger(c)) {
 					//Integer, parse as long
-					o = ArgumentValidation.getInt(arg, t);
+					o = ArgumentValidation.getInt(arg, t, env);
 				} else {
 					//Further processing is needed
 					if(c == Conversion.BOOLEAN || c == Conversion.BOOLEAN_UPPER) {
 						//Boolean, parse as such
-						o = ArgumentValidation.getBoolean(arg, t);
+						o = ArgumentValidation.getBoolean(arg, t, env);
 					} else {
 						//Else it's either a string or a hash code, in which case
 						//we will treat it as a string anyways
@@ -1661,7 +1661,7 @@ public class StringHandling {
 						//We skip the dynamic ones, but the constant ones we can know for sure
 						//if they are convertable or not.
 						if(children.get(i).isConst()) {
-							convertArgument(children.get(i).getData(), parsed.get(i - 2).getExpectedType(), i, t);
+							convertArgument(children.get(i).getData(), parsed.get(i - 2).getExpectedType(), i, t, env);
 						}
 					}
 				} catch (IllegalFormatException e) {
@@ -1939,14 +1939,14 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String val = args[0].val();
 			String encoding = "UTF-8";
 			if(args.length == 2) {
 				encoding = args[1].val();
 			}
 			try {
-				return CByteArray.wrap(val.getBytes(encoding), t);
+				return CByteArray.wrap(val.getBytes(encoding), t, env);
 			} catch (UnsupportedEncodingException ex) {
 				throw new CREFormatException("Unknown encoding type \"" + encoding + "\"", t);
 			}
@@ -1995,8 +1995,8 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CByteArray ba = ArgumentValidation.getByteArray(args[0], t);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			CByteArray ba = ArgumentValidation.getByteArray(args[0], t, env);
 			String encoding = "UTF-8";
 			if(args.length == 2) {
 				encoding = args[1].val();
@@ -2139,9 +2139,9 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			try {
-				return new CString(new String(Character.toChars(ArgumentValidation.getInt32(args[0], t))), t);
+				return new CString(new String(Character.toChars(ArgumentValidation.getInt32(args[0], t, env))), t);
 			} catch (IllegalArgumentException ex) {
 				throw new CRERangeException("Code point out of range: " + args[0].val(), t);
 			}
@@ -2322,12 +2322,12 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CNull) {
 				return CNull.NULL;
 			}
 			String string = args[0].val();
-			int times = ArgumentValidation.getInt32(args[1], t);
+			int times = ArgumentValidation.getInt32(args[1], t, env);
 			if(times < 0) {
 				throw new CRERangeException("Expecting a value >= 0, but " + times + " was found.", t);
 			}
@@ -2433,8 +2433,8 @@ public class StringHandling {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
-				CArray array = ArgumentValidation.getArray(args[0], t);
-				return new CSecureString(array, t);
+				CArray array = ArgumentValidation.getArray(args[0], t, env);
+				return new CSecureString(array, t, env);
 			} else {
 				String s = args[0].val();
 				return new CSecureString(s.toCharArray(), t);
@@ -2510,7 +2510,7 @@ public class StringHandling {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args[0].isInstanceOf(CSecureString.TYPE, null, env)) {
 				CSecureString secure = ArgumentValidation.getObject(args[0], t, CSecureString.class);
-				return secure.getDecryptedCharCArray();
+				return secure.getDecryptedCharCArray(env);
 			} else if(args[0].isInstanceOf(CString.TYPE, null, env)) {
 				CArray array = new CArray(Target.UNKNOWN, args[0].val().length(), GenericParameters.start(CArray.TYPE)
 						.addParameter(CString.TYPE, null).build(), env);

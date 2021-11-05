@@ -49,7 +49,7 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * @throws com.laytonsmith.core.exceptions.PrefilterNonMatchException Equivalent to returning false, though throwing
 	 * an exception is sometimes easier, given that lower level code may be handling the prefilter match.
 	 */
-	public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException;
+	public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException;
 
 	/**
 	 * If an event is manually triggered, then it may be required for an event object to be faked, so the rest of the

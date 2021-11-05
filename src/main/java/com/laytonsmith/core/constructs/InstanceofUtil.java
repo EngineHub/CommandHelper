@@ -138,6 +138,11 @@ public class InstanceofUtil {
 	 * @return
 	 */
 	public static boolean isInstanceof(Mixed value, CClassType instanceofThis, LeftHandGenericUse generics, Environment env) {
+		if(generics == null && value.typeof().getGenericParameters() == null
+				&& instanceofThis.getNativeType() != null && instanceofThis.getNativeType().isAssignableFrom(value.getClass())) {
+			// Short circuit this for native classes if neither side has generics, since this is faster and more memory efficient anyways
+			return true;
+		}
 		return isInstanceof(value.typeof(), instanceofThis, generics, env);
 	}
 

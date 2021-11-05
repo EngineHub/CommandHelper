@@ -12,6 +12,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericParameters;
@@ -141,11 +142,11 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 		}
 		String message = exception.get("message", t, env).val();
 		List<StackTraceElement> st = new ArrayList<>();
-		for(Mixed consStElement : ArgumentValidation.getArray(exception.get("stackTrace", t, env), t).asList()) {
-			CArray stElement = ArgumentValidation.getArray(consStElement, t);
-			int line = ArgumentValidation.getInt32(stElement.get("line", t, env), t);
+		for(Mixed consStElement : ArgumentValidation.getArray(exception.get("stackTrace", t, env), t, env).asList()) {
+			CArray stElement = ArgumentValidation.getArray(consStElement, t, env);
+			int line = ArgumentValidation.getInt32(stElement.get("line", t, env), t, env);
 			File f = new File(stElement.get("file", t, env).val());
-			int col = ArgumentValidation.getInt32(stElement.get("col", t, env), t);
+			int col = ArgumentValidation.getInt32(stElement.get("col", t, env), t, env);
 			st.add(new StackTraceElement(stElement.get("id", t, env).val(), new Target(line, f, col)));
 		}
 		// Now we have parsed everything into POJOs
@@ -223,8 +224,8 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	}
 
 	@Override
-	public Mixed slice(int begin, int end, Target t) {
-		return exceptionObject.slice(begin, end, t);
+	public Mixed slice(int begin, int end, Target t, Environment env) {
+		return exceptionObject.slice(begin, end, t, env);
 	}
 
 	@Override
@@ -298,7 +299,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhs, Environment env) {
-		return Construct.isInstanceof(this, type, lhs, env);
+		return InstanceofUtil.isInstanceof(this, type, lhs, env);
 	}
 
 	@Override

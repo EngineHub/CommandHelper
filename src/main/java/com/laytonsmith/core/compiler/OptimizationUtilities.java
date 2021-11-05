@@ -2,6 +2,8 @@ package com.laytonsmith.core.compiler;
 
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Profiles.InvalidProfileException;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CFunction;
@@ -13,7 +15,11 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
+import com.laytonsmith.persistence.DataSourceException;
+
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
@@ -97,7 +103,7 @@ public class OptimizationUtilities {
 			return ((Variable) node.getData()).getVariableName();
 		} else if(node.getData() instanceof CSlice) {
 			return node.getData().val();
-		} else if(node.getData().isInstanceOf(CArray.TYPE)) {
+		} else if(node.getData() instanceof CArray) {
 			//It's a hardcoded array. This only happens in the course of optimization, if
 			//the optimizer adds a new array. We still need to handle it appropriately though.
 			//The values in the array will be constant, guaranteed.
@@ -110,7 +116,11 @@ public class OptimizationUtilities {
 					b.append(",");
 				}
 				first = false;
-				b.append(optimize0(new ParseTree(n.get(key, Target.UNKNOWN), node.getFileOptions())));
+				try {
+					b.append(optimize0(new ParseTree(n.get(key, Target.UNKNOWN, Static.GenerateStandaloneEnvironment()), node.getFileOptions())));
+				} catch (IOException | DataSourceException | URISyntaxException | InvalidProfileException e) {
+					throw new RuntimeException(e);
+				}
 			}
 			b.append(")");
 			return b.toString();

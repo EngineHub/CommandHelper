@@ -90,7 +90,7 @@ public final class LLVMArgumentValidation {
 	public static IRData getInt64(IRBuilder builder, Environment env, ParseTree c, Target t) throws ConfigCompileException {
 		if(c.isConst()) {
 			Mixed data = c.getData();
-			long i = ArgumentValidation.getInt(data, t);
+			long i = ArgumentValidation.getInt(data, t, env);
 			return IRDataBuilder.asConstant(IRType.INTEGER64, Long.toString(i));
 		} else if(c.getData() instanceof CFunction) {
 			return handleFunction(t, IRType.INTEGER64, builder, env, c);
@@ -101,7 +101,7 @@ public final class LLVMArgumentValidation {
 	public static IRData getInt32(IRBuilder builder, Environment env, ParseTree c, Target t) throws ConfigCompileException {
 		if(c.isConst()) {
 			Mixed data = c.getData();
-			int i = ArgumentValidation.getInt32(data, t);
+			int i = ArgumentValidation.getInt32(data, t, env);
 			return IRDataBuilder.asConstant(IRType.INTEGER32, Integer.toString(i));
 		} else if(c.getData() instanceof CFunction) {
 			return handleFunction(t, IRType.INTEGER32, builder, env, c);
@@ -112,7 +112,7 @@ public final class LLVMArgumentValidation {
 	public static IRData getDouble(IRBuilder builder, Environment env, ParseTree c, Target t) throws ConfigCompileException {
 		if(c.isConst()) {
 			Mixed data = c.getData();
-			double i = ArgumentValidation.getDouble(data, t);
+			double i = ArgumentValidation.getDouble(data, t, env);
 			return IRDataBuilder.asConstant(IRType.DOUBLE, Double.toString(i));
 		} else if(c.getData() instanceof CFunction) {
 			return handleFunction(t, IRType.DOUBLE, builder, env, c);

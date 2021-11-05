@@ -84,7 +84,7 @@ public class Math {
 				String min;
 				String max;
 				if(nodes[0].isConst()) {
-					long vMax = ArgumentValidation.getInt(nodes[0].getData(), t);
+					long vMax = ArgumentValidation.getInt(nodes[0].getData(), t, env);
 					if(vMax > Integer.MAX_VALUE) {
 						throw new ConfigCompileException("max and min must be below int max, defined as "
 								+ Integer.MAX_VALUE, t);
@@ -109,7 +109,7 @@ public class Math {
 					max = dmax.getReference();
 
 					if(nodes[1].isConst()) {
-						long vMax = ArgumentValidation.getInt(nodes[1].getData(), t);
+						long vMax = ArgumentValidation.getInt(nodes[1].getData(), t, env);
 						if(vMax > Integer.MAX_VALUE) {
 							throw new ConfigCompileException("max and min must be below int max, defined as "
 									+ Integer.MAX_VALUE, t);

@@ -17,6 +17,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
@@ -85,12 +86,12 @@ public class Commands {
 		 * For setting the completion code of a command that exists but might not be registered yet
 		 *
 		 * @param t
-		 * @param environment
+		 * @param env
 		 * @param cmd
 		 * @param arg
 		 */
-		public static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
-			if(arg.isInstanceOf(CClosure.TYPE)) {
+		public static void customExec(Target t, Environment env, MCCommand cmd, Mixed arg) {
+			if(arg.isInstanceOf(CClosure.TYPE, null, env)) {
 				onTabComplete.put(cmd.getName(), (CClosure) arg);
 			} else {
 				throw new CREFormatException("At this time, only closures are accepted as tabcompleters", t);
@@ -224,7 +225,7 @@ public class Commands {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map == null) {
 				throw new CRENotFoundException(
@@ -242,24 +243,24 @@ public class Commands {
 				register = true;
 				cmd = StaticLayer.GetConvertor().getNewCommand(cmdStr);
 			}
-			if(args[1].isInstanceOf(CArray.TYPE)) {
+			if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ops = (CArray) args[1];
 				if(ops.containsKey("permission")) {
-					cmd.setPermission(ops.get("permission", t).val());
+					cmd.setPermission(ops.get("permission", t, env).val());
 				}
 				if(ops.containsKey("description")) {
-					cmd.setDescription(ops.get("description", t).val());
+					cmd.setDescription(ops.get("description", t, env).val());
 				}
 				if(ops.containsKey("usage")) {
-					cmd.setUsage(ops.get("usage", t).val());
+					cmd.setUsage(ops.get("usage", t, env).val());
 				}
 				if(ops.containsKey("noPermMsg")) {
-					cmd.setPermissionMessage(ops.get("noPermMsg", t).val());
+					cmd.setPermissionMessage(ops.get("noPermMsg", t, env).val());
 				}
 				List<String> oldAliases = new ArrayList<>(cmd.getAliases());
 				if(ops.containsKey("aliases")) {
-					if(ops.get("aliases", t).isInstanceOf(CArray.TYPE)) {
-						List<Mixed> ca = ((CArray) ops.get("aliases", t)).asList();
+					if(ops.get("aliases", t, env).isInstanceOf(CArray.TYPE, null, env)) {
+						List<Mixed> ca = ((CArray) ops.get("aliases", t, env)).asList();
 						List<String> aliases = new ArrayList<>();
 						for(Mixed c : ca) {
 							String alias = c.val().toLowerCase().trim();
@@ -279,10 +280,10 @@ public class Commands {
 					}
 				}
 				if(ops.containsKey("executor")) {
-					set_executor.customExec(t, environment, cmd, ops.get("executor", t));
+					set_executor.customExec(t, env, cmd, ops.get("executor", t, env));
 				}
 				if(ops.containsKey("tabcompleter")) {
-					set_tabcompleter.customExec(t, environment, cmd, ops.get("tabcompleter", t));
+					set_tabcompleter.customExec(t, env, cmd, ops.get("tabcompleter", t, env));
 				}
 				boolean success = true;
 				if(register) {
@@ -511,12 +512,12 @@ public class Commands {
 		 * For setting the execution code of a command that exists but might not be registered yet
 		 *
 		 * @param t
-		 * @param environment
+		 * @param env
 		 * @param cmd
 		 * @param arg
 		 */
-		static void customExec(Target t, Environment environment, MCCommand cmd, Mixed arg) {
-			if(arg.isInstanceOf(CClosure.TYPE)) {
+		static void customExec(Target t, Environment env, MCCommand cmd, Mixed arg) {
+			if(arg.isInstanceOf(CClosure.TYPE, null, env)) {
 				onCommand.put(cmd.getName(), (CClosure) arg);
 			} else {
 				throw new CREFormatException("At this time, only closures are accepted as command executors.", t);
@@ -566,32 +567,33 @@ public class Commands {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCCommandMap map = Static.getServer().getCommandMap();
 			if(map == null) {
 				return CNull.NULL;
 			}
 			Collection<MCCommand> commands = map.getCommands();
-			CArray ret = CArray.GetAssociativeArray(t);
+			CArray ret = CArray.GetAssociativeArray(t, null, env);
 			for(MCCommand command : commands) {
-				CArray ca = CArray.GetAssociativeArray(t);
-				ca.set("name", new CString(command.getName(), t), t);
-				ca.set("description", new CString(command.getDescription(), t), t);
+				CArray ca = CArray.GetAssociativeArray(t, null, env);
+				ca.set("name", new CString(command.getName(), t), t, env);
+				ca.set("description", new CString(command.getDescription(), t), t, env);
 				Mixed permission;
 				if(command.getPermission() == null) {
 					permission = CNull.NULL;
 				} else {
 					permission = new CString(command.getPermission(), t);
 				}
-				ca.set("permission", permission, t);
-				ca.set("nopermmsg", new CString(command.getPermissionMessage(), t), t);
-				ca.set("usage", new CString(command.getUsage(), t), t);
-				CArray aliases = new CArray(t);
+				ca.set("permission", permission, t, env);
+				ca.set("nopermmsg", new CString(command.getPermissionMessage(), t), t, env);
+				ca.set("usage", new CString(command.getUsage(), t), t, env);
+				CArray aliases = new CArray(t, GenericParameters.start(CArray.TYPE)
+						.addParameter(CString.TYPE, null).build(), env);
 				for(String a : command.getAliases()) {
-					aliases.push(new CString(a, t), t);
+					aliases.push(new CString(a, t), t, env);
 				}
-				ca.set("aliases", aliases, t);
-				ret.set(command.getName(), ca, t);
+				ca.set("aliases", aliases, t, env);
+				ret.set(command.getName(), ca, t, env);
 			}
 			return ret;
 		}

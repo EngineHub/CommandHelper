@@ -38,6 +38,7 @@ import com.laytonsmith.abstraction.MCPotionData;
 import com.laytonsmith.abstraction.MCRecipe;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCAttribute;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
@@ -177,31 +178,34 @@ public final class Interpreter {
 	 */
 	private static final int MAX_COMMAND_HISTORY = 100;
 
-	public static void startWithTTY(File file, List<String> args, boolean systemExitOnFailure, Environment env) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
-		startWithTTY(file.getCanonicalPath(), args, systemExitOnFailure, env);
+	public static void startWithTTY(File file, List<String> args, boolean systemExitOnFailure) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+		startWithTTY(file.getCanonicalPath(), args, systemExitOnFailure);
 	}
 
-	public static void startWithTTY(String file, List<String> args, Environment env) throws Profiles.InvalidProfileException, IOException, DataSourceException, URISyntaxException {
-		startWithTTY(file, args, true, env);
+	public static void startWithTTY(String file, List<String> args) throws Profiles.InvalidProfileException, IOException, DataSourceException, URISyntaxException {
+		startWithTTY(file, args, true);
 	}
 
-	public static void startWithTTY(String file, List<String> args, boolean systemExitOnFailure, Environment env) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
+	public static void startWithTTY(String file, List<String> args, boolean systemExitOnFailure) throws IOException, DataSourceException, URISyntaxException, Profiles.InvalidProfileException {
 		File fromFile = new File(file).getCanonicalFile();
 		Interpreter interpreter = new Interpreter(args, fromFile.getParentFile().getPath(), true);
+		Environment e = Static.GenerateStandaloneEnvironment();
 		try {
-			interpreter.execute(FileUtil.read(fromFile), args, fromFile);
+			interpreter.execute(FileUtil.read(fromFile), args, fromFile, e);
 		} catch (ConfigCompileException ex) {
-			ConfigRuntimeException.HandleUncaughtException(ex, null, null, env);
+			ConfigRuntimeException.HandleUncaughtException(ex, null, null, e);
 			StreamUtils.GetSystemOut().println(TermColors.reset());
 			if(systemExitOnFailure) {
 				System.exit(1);
 			}
 		} catch (ConfigCompileGroupException ex) {
-			ConfigRuntimeException.HandleUncaughtException(ex, null, env);
+			ConfigRuntimeException.HandleUncaughtException(ex, null, e);
 			StreamUtils.GetSystemOut().println(TermColors.reset());
 			if(systemExitOnFailure) {
 				System.exit(1);
 			}
+		} finally {
+			StaticLayer.GetConvertor().runShutdownHooks(e);
 		}
 	}
 
@@ -262,7 +266,7 @@ public final class Interpreter {
 				//Done
 			}
 			try {
-				execute(script.toString(), args);
+				execute(script.toString(), args, env);
 				StreamUtils.GetSystemOut().print(TermColors.reset());
 				System.exit(0);
 			} catch (ConfigCompileException ex) {
@@ -433,7 +437,7 @@ public final class Interpreter {
 				//Execute multiline
 				multilineMode = false;
 				try {
-					execute(script, null);
+					execute(script, null, env);
 					script = "";
 				} catch (ConfigCompileException e) {
 					ConfigRuntimeException.HandleUncaughtException(e, null, null, env);
@@ -480,7 +484,7 @@ public final class Interpreter {
 					} else {
 						try {
 							//Execute single line
-							execute(line, null);
+							execute(line, null, env);
 						} catch (ConfigCompileException ex) {
 							ConfigRuntimeException.HandleUncaughtException(ex, null, null, env);
 						} catch (ConfigCompileGroupException ex) {
@@ -715,8 +719,8 @@ public final class Interpreter {
 	 * @throws ConfigCompileException
 	 * @throws IOException
 	 */
-	public void execute(String script, List<String> args) throws ConfigCompileException, IOException, ConfigCompileGroupException {
-		execute(script, args, null);
+	public void execute(String script, List<String> args, Environment env) throws ConfigCompileException, IOException, ConfigCompileGroupException {
+		execute(script, args, null, env);
 	}
 
 	/**
@@ -729,9 +733,9 @@ public final class Interpreter {
 	 * @throws ConfigCompileException
 	 * @throws IOException
 	 */
-	public void execute(String script, List<String> args, File fromFile) throws ConfigCompileException, IOException, ConfigCompileGroupException {
+	public void execute(String script, List<String> args, File fromFile, Environment env) throws ConfigCompileException, IOException, ConfigCompileGroupException {
 		CmdlineEvents.cmdline_prompt_input.CmdlinePromptInput input = new CmdlineEvents.cmdline_prompt_input.CmdlinePromptInput(script, inShellMode);
-		EventUtils.TriggerListener(Driver.CMDLINE_PROMPT_INPUT, "cmdline_prompt_input", input);
+		EventUtils.TriggerListener(Driver.CMDLINE_PROMPT_INPUT, "cmdline_prompt_input", input, env);
 		if(input.isCancelled()) {
 			return;
 		}
@@ -893,7 +897,7 @@ public final class Interpreter {
 	}
 
 	/**
-	 * Works like {@link #execute(String, List, File)} but reads the file in for you.
+	 * Works like {@link #execute(String, List, File, Environment)} but reads the file in for you.
 	 *
 	 * @param script Path the the file
 	 * @param args Arguments to be passed to the script
@@ -902,7 +906,7 @@ public final class Interpreter {
 	 */
 	public void execute(File script, List<String> args) throws ConfigCompileException, IOException, ConfigCompileGroupException {
 		String scriptString = FileUtil.read(script);
-		execute(scriptString, args, script);
+		execute(scriptString, args, script, env);
 	}
 
 	public boolean doBuiltin(String script) {

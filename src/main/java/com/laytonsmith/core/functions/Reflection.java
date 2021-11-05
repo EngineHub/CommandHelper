@@ -30,6 +30,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -217,9 +218,10 @@ public class Reflection {
 			} else if("varlist".equalsIgnoreCase(param)) {
 				if(args.length == 1) {
 					//No name provided
-					CArray ca = new CArray(t);
+					CArray ca = new CArray(t, GenericParameters.start(CArray.TYPE)
+						.addParameter(CString.TYPE, null).build(), env);
 					for(String name : env.getEnv(GlobalEnv.class).GetVarList().keySet()) {
-						ca.push(new CString(name, t), t);
+						ca.push(new CString(name, t), t, env);
 					}
 					return ca;
 				} else if(args.length == 2) {
@@ -259,9 +261,10 @@ public class Reflection {
 						protocols.add(new CString(s, Target.UNKNOWN));
 					}
 				}
-				return new CArray(t, protocols);
+				return new CArray(t, protocols, GenericParameters.start(CArray.TYPE)
+						.addParameter(CString.TYPE, null).build(), env);
 			} else if("enum".equalsIgnoreCase(param)) {
-				CArray a = new CArray(t);
+				CArray a = new CArray(t, null, env);
 				Set<ClassMirror<? extends Enum>> enums = ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(MEnum.class, Enum.class);
 				Set<ClassMirror<? extends DynamicEnum>> dEnums = ClassDiscovery.getDefaultInstance().getClassesWithAnnotationThatExtend(MDynamicEnum.class, DynamicEnum.class);
 				if(args.length == 1) {
@@ -269,11 +272,11 @@ public class Reflection {
 						//No name provided
 						for(ClassMirror<? extends Enum> e : enums) {
 							String name = (String) e.getAnnotation(MEnum.class).getValue("value");
-							a.push(CClassType.get(FullyQualifiedClassName.forNativeEnum(e.loadClass())), t);
+							a.push(CClassType.get(FullyQualifiedClassName.forNativeEnum(e.loadClass())), t, env);
 						}
 						for(ClassMirror<? extends DynamicEnum> d : dEnums) {
 							String name = (String) d.getAnnotation(MDynamicEnum.class).getValue("value");
-							a.push(CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(name)), t);
+							a.push(CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(name)), t, env);
 						}
 					} catch (ClassNotFoundException ex) {
 						throw new Error(ex);
@@ -282,7 +285,7 @@ public class Reflection {
 					FullyQualifiedClassName enumName = FullyQualifiedClassName.forName(args[1].val(), t, env);
 					try {
 						for(MEnumTypeValue v : NativeTypeList.getNativeEnumType(enumName).values()) {
-							a.push(v, t);
+							a.push(v, t, env);
 						}
 					} catch (ClassNotFoundException ex) {
 						// Actually, I don't think this can
@@ -292,12 +295,12 @@ public class Reflection {
 				return a;
 			} else if("keywords".equalsIgnoreCase(param)) {
 				if(args.length == 1) {
-					CArray a = new CArray(t);
+					CArray a = new CArray(t, null, env);
 					List<Keyword> l = new ArrayList<>(KeywordList.getKeywordList());
 					l.forEach(new Consumer<Keyword>() {
 						@Override
 						public void accept(Keyword t) {
-							a.push(new CString(t.getKeywordName(), Target.UNKNOWN), Target.UNKNOWN);
+							a.push(new CString(t.getKeywordName(), Target.UNKNOWN), Target.UNKNOWN, env);
 						}
 					});
 					return new ArrayHandling.array_sort().exec(t, env, a);
@@ -359,25 +362,27 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			CClassType type = ArgumentValidation.getClassType(args[0], t);
-			CArray ret = new CArray(t);
-			ret.set("fqcn", type.getFQCN().getFQCN());
-			ret.set("name", type.getFQCN().getSimpleName());
-			ret.set("interfaces", new CArray(t, type.getTypeInterfaces(environment)), t);
-			ret.set("superclasses", new CArray(t, type.getTypeSuperclasses(environment)), t);
+			CArray ret = new CArray(t, null, env);
+			ret.set("fqcn", type.getFQCN().getFQCN(), env);
+			ret.set("name", type.getFQCN().getSimpleName(), env);
+			ret.set("interfaces", new CArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CClassType.TYPE, null).build(), env, type.getTypeInterfaces(env)), t, env);
+			ret.set("superclasses", new CArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CClassType.TYPE, null).build(), env, type.getTypeSuperclasses(env)), t, env);
 
-			CArray typeDocs = new CArray(t);
+			CArray typeDocs = new CArray(t, null, env);
 			// When type unions are a thing, this will need to be implemented slightly differently.
 			for(CClassType m : Arrays.asList(type)) {
-				CArray docs = CArray.GetAssociativeArray(t);
-				docs.set("package", type.getPackage() == null ? CNull.NULL : type.getPackage(), t);
-				docs.set("isNative", CBoolean.get(type.getNativeType() != null), t);
-				docs.set("docs", m.getTypeDocs(t, environment));
-				docs.set("since", m.getTypeSince(t, environment).toString());
-				typeDocs.push(docs, t);
+				CArray docs = CArray.GetAssociativeArray(t, null, env);
+				docs.set("package", type.getPackage() == null ? CNull.NULL : type.getPackage(), t, env);
+				docs.set("isNative", CBoolean.get(type.getNativeType() != null), t, env);
+				docs.set("docs", m.getTypeDocs(t, env), env);
+				docs.set("since", m.getTypeSince(t, env).toString(), env);
+				typeDocs.push(docs, t, env);
 			}
-			ret.set("typeDocs", typeDocs, t);
+			ret.set("typeDocs", typeDocs, t, env);
 			return ret;
 		}
 
@@ -600,17 +605,18 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = CArray.GetAssociativeArray(t);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			CArray ret = CArray.GetAssociativeArray(t, null, env);
 			if(FUNCS.keySet().size() < 10) {
-				initf(environment);
+				initf(env);
 			}
 			for(String cname : FUNCS.keySet()) {
-				CArray fnames = new CArray(t);
+				CArray fnames = new CArray(t, GenericParameters.start(CArray.TYPE)
+						.addParameter(CString.TYPE, null).build(), env);
 				for(String fname : FUNCS.get(cname)) {
-					fnames.push(new CString(fname, t), t);
+					fnames.push(new CString(fname, t), t, env);
 				}
-				ret.set(new CString(cname, t), fnames, t);
+				ret.set(new CString(cname, t), fnames, t, env);
 			}
 			return ret;
 		}
@@ -657,13 +663,14 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment,
+		public Mixed exec(Target t, Environment env,
 				Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CString.TYPE, null).build(), env);
 			for(Event event : EventList.GetEvents()) {
-				ret.push(new CString(event.getName(), t), t);
+				ret.push(new CString(event.getName(), t), t, env);
 			}
-			ret.sort(CArray.ArraySortType.STRING_IC);
+			ret.sort(CArray.ArraySortType.STRING_IC, env);
 			return ret;
 		}
 
@@ -707,12 +714,13 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			CArray ret = new CArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CString.TYPE, null).build(), env);
 			for(Script s : Static.getAliasCore().getScripts()) {
-				ret.push(new CString(s.getSignature(), t), t);
+				ret.push(new CString(s.getSignature(), t), t, env);
 			}
-			ret.sort(CArray.ArraySortType.STRING_IC);
+			ret.sort(CArray.ArraySortType.STRING_IC, env);
 			return ret;
 		}
 
@@ -807,12 +815,13 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t);
-			for(Map.Entry<String, Procedure> p : environment.getEnv(GlobalEnv.class).GetProcs().entrySet()) {
-				ret.push(new CString(p.getKey(), t), t);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			CArray ret = new CArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CString.TYPE, null).build(), env);
+			for(Map.Entry<String, Procedure> p : env.getEnv(GlobalEnv.class).GetProcs().entrySet()) {
+				ret.push(new CString(p.getKey(), t), t, env);
 			}
-			ret.sort(CArray.ArraySortType.STRING_IC);
+			ret.sort(CArray.ArraySortType.STRING_IC, env);
 			return ret;
 		}
 
@@ -872,12 +881,13 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t);
-			ObjectDefinitionTable odt = environment.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			CArray ret = new CArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CClassType.TYPE, null).build(), env);
+			ObjectDefinitionTable odt = env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
 			for(ObjectDefinition od : odt.getObjectDefinitionSet()) {
 				try {
-					ret.push(CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(od.getClassName())), t);
+					ret.push(CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(od.getClassName())), t, env);
 				} catch (ClassNotFoundException ex) {
 					throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
 				}
@@ -940,10 +950,10 @@ public class Reflection {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			String type = ArgumentValidation.getStringObject(args[0], t);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			String type = ArgumentValidation.getStringObject(args[0], t, env);
 			try {
-				return CClassType.get(FullyQualifiedClassName.forName(args[0].val(), t, environment));
+				return CClassType.get(FullyQualifiedClassName.forName(args[0].val(), t, env));
 			} catch (CRECastException | ClassNotFoundException ex) {
 				throw new CRENotFoundException("Could not find type " + type, t);
 			}

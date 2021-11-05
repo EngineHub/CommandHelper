@@ -55,10 +55,10 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
-			if(!(args[0].isInstanceOf(CClosure.TYPE))) {
+			if(!(args[0].isInstanceOf(CClosure.TYPE, null, env))) {
 				throw new CRECastException("Parameter 1 to " + getName() + " must be a closure.", t);
 			}
 			c = ((CClosure) args[0]);
@@ -66,8 +66,8 @@ public class ExecutionQueue {
 				queue = Construct.nval(args[1]);
 			}
 
-			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(
-					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
+			env.getEnv(GlobalEnv.class).GetExecutionQueue().push(
+					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override
 				public void run() {
@@ -79,7 +79,7 @@ public class ExecutionQueue {
 								try {
 									c.executeCallable();
 								} catch (ConfigRuntimeException ex) {
-									ConfigRuntimeException.HandleUncaughtException(ex, environment);
+									ConfigRuntimeException.HandleUncaughtException(ex, env);
 								} catch (ProgramFlowManipulationException ex) {
 									// Ignored
 								}
@@ -138,10 +138,10 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
-			if(!(args[0].isInstanceOf(CClosure.TYPE))) {
+			if(!(args[0].isInstanceOf(CClosure.TYPE, null, env))) {
 				throw new CRECastException("Parameter 1 to " + getName() + " must be a closure.", t);
 			}
 			c = ((CClosure) args[0]);
@@ -149,8 +149,8 @@ public class ExecutionQueue {
 				queue = Construct.nval(args[1]);
 			}
 
-			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(
-					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
+			env.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(
+					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override
 				public void run() {
@@ -162,7 +162,7 @@ public class ExecutionQueue {
 								try {
 									c.executeCallable();
 								} catch (ConfigRuntimeException ex) {
-									ConfigRuntimeException.HandleUncaughtException(ex, environment);
+									ConfigRuntimeException.HandleUncaughtException(ex, env);
 								} catch (ProgramFlowManipulationException ex) {
 									// Ignored
 								}
@@ -422,14 +422,14 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 2) {
 				queue = Construct.nval(args[1]);
 			}
-			final long delay = ArgumentValidation.getInt(args[0], t);
-			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(
-					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
+			final long delay = ArgumentValidation.getInt(args[0], t, env);
+			env.getEnv(GlobalEnv.class).GetExecutionQueue().push(
+					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override
 				public void run() {
@@ -485,14 +485,14 @@ public class ExecutionQueue {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 2) {
 				queue = Construct.nval(args[1]);
 			}
-			final long delay = ArgumentValidation.getInt(args[0], t);
-			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(
-					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
+			final long delay = ArgumentValidation.getInt(args[0], t, env);
+			env.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(
+					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager(), queue, new Runnable() {
 
 				@Override
 				public void run() {

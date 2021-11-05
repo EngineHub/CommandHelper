@@ -18,6 +18,7 @@ import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.Driver;
@@ -25,6 +26,7 @@ import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
 import java.util.List;
 import java.util.Map;
 
@@ -75,9 +77,9 @@ public final class WorldEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			if(e instanceof MCWorldLoadEvent) {
-				Prefilters.match(prefilter, "world", ((MCWorldEvent) e).getWorld().getName(), Prefilters.PrefilterType.MACRO);
+				Prefilters.match(prefilter, "world", ((MCWorldEvent) e).getWorld().getName(), Prefilters.PrefilterType.MACRO, env);
 				return true;
 			} else {
 				return false;
@@ -123,9 +125,9 @@ public final class WorldEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			if(e instanceof MCWorldUnloadEvent) {
-				Prefilters.match(prefilter, "world", ((MCWorldEvent) e).getWorld().getName(), Prefilters.PrefilterType.MACRO);
+				Prefilters.match(prefilter, "world", ((MCWorldEvent) e).getWorld().getName(), Prefilters.PrefilterType.MACRO, env);
 				return true;
 			} else {
 				return false;
@@ -171,9 +173,9 @@ public final class WorldEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			if(e instanceof MCWorldSaveEvent) {
-				Prefilters.match(prefilter, "world", ((MCWorldEvent) e).getWorld().getName(), Prefilters.PrefilterType.MACRO);
+				Prefilters.match(prefilter, "world", ((MCWorldEvent) e).getWorld().getName(), Prefilters.PrefilterType.MACRO, env);
 				return true;
 			} else {
 				return false;
@@ -225,10 +227,10 @@ public final class WorldEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			if(e instanceof MCStructureGrowEvent) {
 				MCStructureGrowEvent event = (MCStructureGrowEvent) e;
-				Prefilters.match(prefilter, "world", event.getWorld().getName(), Prefilters.PrefilterType.MACRO);
+				Prefilters.match(prefilter, "world", event.getWorld().getName(), Prefilters.PrefilterType.MACRO, env);
 				if(prefilter.containsKey("player")) {
 					MCPlayer player = event.getPlayer();
 					if(player == null) {
@@ -239,8 +241,8 @@ public final class WorldEvents {
 						return false;
 					}
 				}
-				Prefilters.match(prefilter, "type", event.getSpecies().name(), Prefilters.PrefilterType.MACRO);
-				Prefilters.match(prefilter, "bonemeal", event.isFromBonemeal(), Prefilters.PrefilterType.BOOLEAN_MATCH);
+				Prefilters.match(prefilter, "type", event.getSpecies().name(), Prefilters.PrefilterType.MACRO, env);
+				Prefilters.match(prefilter, "bonemeal", event.isFromBonemeal(), Prefilters.PrefilterType.BOOLEAN_MATCH, env);
 				return true;
 			} else {
 				return false;
@@ -249,15 +251,15 @@ public final class WorldEvents {
 
 		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e, Environment env) throws EventException {
-			Map<String, Mixed> r = super.evaluate(e);
+			Map<String, Mixed> r = super.evaluate(e, env);
 			MCStructureGrowEvent event = (MCStructureGrowEvent) e;
 			List<MCBlockState> blocks = event.getBlocks();
-			CArray a = new CArray(Target.UNKNOWN, blocks.size());
+			CArray a = new CArray(Target.UNKNOWN, blocks.size(), null, env);
 			for(MCBlockState block : blocks) {
-				a.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false), Target.UNKNOWN);
+				a.push(ObjectGenerator.GetGenerator().location(block.getLocation(), false, env), Target.UNKNOWN, env);
 			}
 			r.put("blocks", a);
-			r.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false));
+			r.put("location", ObjectGenerator.GetGenerator().location(event.getLocation(), false, env));
 			MCPlayer player = event.getPlayer();
 			r.put("player", player == null ? CNull.NULL : new CString(player.getName(), Target.UNKNOWN));
 			r.put("type", new CString(event.getSpecies().name(), Target.UNKNOWN));

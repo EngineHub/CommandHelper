@@ -7,6 +7,7 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
@@ -124,7 +125,7 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
-		return Construct.isInstanceof(this, type, lhsGenericParameters, env);
+		return InstanceofUtil.isInstanceof(this, type, lhsGenericParameters, env);
 	}
 
 }

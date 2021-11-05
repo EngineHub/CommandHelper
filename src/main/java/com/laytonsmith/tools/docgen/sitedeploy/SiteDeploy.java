@@ -1,6 +1,5 @@
 package com.laytonsmith.tools.docgen.sitedeploy;
 
-import com.laytonsmith.tools.docgen.localization.TranslationMaster;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.MethodMirror;
 import com.laytonsmith.PureUtilities.CommandExecutor;
@@ -44,7 +43,10 @@ import com.laytonsmith.tools.docgen.DocGenTemplates.Generator;
 import com.laytonsmith.tools.docgen.DocGenTemplates.Generator.GenerateException;
 import com.laytonsmith.tools.docgen.localization.MasterSearchIndex;
 import com.laytonsmith.tools.docgen.localization.ResultType;
+import com.laytonsmith.tools.docgen.localization.TranslationMaster;
 import com.laytonsmith.tools.docgen.templates.Template;
+import org.json.simple.JSONValue;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -76,7 +78,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
-import org.json.simple.JSONValue;
 
 /**
  * This class is responsible for deploying documentation to an html webserver. It converts wiki markup to html, and uses
@@ -1284,8 +1285,8 @@ public final class SiteDeploy {
 							hiddenFunctions.add(f.getName());
 						}
 						c.add("[[API/functions/" + f.getName() + "|" + f.getName() + "]]()");
-						c.add(di.ret);
-						c.add(di.args);
+						c.add(HTMLUtils.escapeHTML(di.ret));
+						c.add(HTMLUtils.escapeHTML(di.args));
 						List<String> exc = new ArrayList<>();
 						if(f.thrown() != null) {
 							for(Class<? extends CREThrowable> e : f.thrown()) {

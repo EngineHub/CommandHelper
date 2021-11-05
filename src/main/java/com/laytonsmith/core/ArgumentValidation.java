@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.typeof;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
@@ -53,9 +54,9 @@ public final class ArgumentValidation {
 	 * @throws ConfigRuntimeException A FormatException is thrown if it doesn't contain the appropriate value and the
 	 * defaultItem is null.
 	 */
-	public static Mixed getItemFromArray(CArray object, String key, Target t, Mixed defaultItem) throws ConfigRuntimeException {
+	public static Mixed getItemFromArray(CArray object, String key, Target t, Mixed defaultItem, Environment env) throws ConfigRuntimeException {
 		if(object.containsKey(key)) {
-			return object.get(key, t);
+			return object.get(key, t, env);
 		} else if(defaultItem == null) {
 			throw new CREFormatException("Expected the key \"" + key + "\" to be present, but it was not found.", t);
 		} else {
@@ -70,8 +71,8 @@ public final class ArgumentValidation {
 	 * @param t
 	 * @return
 	 */
-	public static CArray getArray(Mixed construct, Target t) {
-		if(construct.isInstanceOf(CArray.TYPE)) {
+	public static CArray getArray(Mixed construct, Target t, Environment env) {
+		if(construct.isInstanceOf(CArray.TYPE, null, env)) {
 			return ((CArray) construct);
 		} else {
 			throw new CRECastException("Expecting array, but received " + construct.val(), t);
@@ -99,6 +100,7 @@ public final class ArgumentValidation {
 		if(clazz.isAssignableFrom(construct.getClass())) {
 			return (T) construct;
 		} else {
+			// TODO: For user objects, return a proxy
 			String expectedClassName = ClassDiscovery.GetClassAnnotation(clazz, typeof.class).value();
 			String actualClassName = ClassDiscovery.GetClassAnnotation(construct.getClass(), typeof.class).value();
 			throw new CRECastException("Expecting " + expectedClassName + " but received " + construct.val()
@@ -115,7 +117,7 @@ public final class ArgumentValidation {
 	 * @param t
 	 * @return
 	 */
-	public static double getNumber(Mixed c, Target t) {
+	public static double getNumber(Mixed c, Target t, Environment env) {
 		// TODO: Formalize this in the same way that Booleanish is formalized.
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
@@ -124,21 +126,21 @@ public final class ArgumentValidation {
 		if(c == null || c instanceof CNull) {
 			return 0.0;
 		}
-		if(c instanceof CNumber) {
+		if(c instanceof CNumber || c.isInstanceOf(CNumber.TYPE, null, env)) {
 			d = ((CNumber) c).getNumber();
-		} else if(c instanceof CString) {
+		} else if(c instanceof CString || c.isInstanceOf(CString.TYPE, null, env)) {
 			try {
 				d = Double.parseDouble(c.val());
 			} catch (NumberFormatException e) {
 				throw new CRECastException("Expecting a number, but received \"" + c.val() + "\" instead", t);
 			}
-		} else if(c instanceof CBoolean) {
+		} else if(c instanceof CBoolean || c.isInstanceOf(CBoolean.TYPE, null, env)) {
 			if(((CBoolean) c).getBoolean()) {
 				d = 1;
 			} else {
 				d = 0;
 			}
-		} else if(c instanceof CDecimal) {
+		} else if(c instanceof CDecimal || c.isInstanceOf(CDecimal.TYPE, null, env)) {
 			throw new CRECastException("Expecting a number, but received a decimal value instead. This cannot be"
 					+ " automatically cast, please use double(@decimal) to manually cast down to a double.", t);
 		} else {
@@ -174,7 +176,7 @@ public final class ArgumentValidation {
 	 * @param c Mixed
 	 * @return boolean
 	 */
-	public static boolean isNumber(Mixed c) {
+	public static boolean isNumber(Mixed c, Environment env) {
 		return c instanceof CNumber || VALID_DOUBLE.matcher(c.val()).matches();
 	}
 
@@ -185,12 +187,12 @@ public final class ArgumentValidation {
 	 * @param t
 	 * @return
 	 */
-	public static double getDouble(Mixed c, Target t) {
+	public static double getDouble(Mixed c, Target t, Environment env) {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
 		try {
-			return getNumber(c, t);
+			return getNumber(c, t, env);
 		} catch (ConfigRuntimeException e) {
 			throw new CRECastException("Expecting a double, but received " + c.val() + " instead", t);
 		}
@@ -205,13 +207,13 @@ public final class ArgumentValidation {
 	 * @param t
 	 * @return
 	 */
-	public static float getDouble32(Mixed c, Target t) {
+	public static float getDouble32(Mixed c, Target t, Environment env) {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
 		// Use 6 places at most else the imprecisions of float makes this function throw the exception.
 		double delta = 0.0000001;
-		double l = getDouble(c, t);
+		double l = getDouble(c, t, env);
 		float f = (float) l;
 		if(Math.abs(f - l) > delta) {
 			throw new CRERangeException("Expecting a 32 bit float, but a larger value was found: " + l, t);
@@ -227,7 +229,7 @@ public final class ArgumentValidation {
 	 * @throws CRECastException If the value cannot be converted to a long
 	 * @return
 	 */
-	public static long getInt(Mixed c, Target t) {
+	public static long getInt(Mixed c, Target t, Environment env) {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
@@ -235,9 +237,9 @@ public final class ArgumentValidation {
 		if(c == null || c instanceof CNull) {
 			return 0;
 		}
-		if(c.isInstanceOf(CInt.TYPE)) {
+		if(c instanceof CInt || c.isInstanceOf(CInt.TYPE, null, env)) {
 			i = getObject(c, t, CInt.class).getInt();
-		} else if(c.isInstanceOf(CBoolean.TYPE)) {
+		} else if(c.isInstanceOf(CBoolean.TYPE, null, env)) {
 			if(getObject(c, t, CBoolean.class).getBoolean()) {
 				i = 1;
 			} else {
@@ -264,11 +266,11 @@ public final class ArgumentValidation {
 	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
-	public static int getInt32(Mixed c, Target t) {
+	public static int getInt32(Mixed c, Target t, Environment env) {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
-		long l = getInt(c, t);
+		long l = getInt(c, t, env);
 		int i = (int) l;
 		if(i != l) {
 			throw new CRERangeException("Expecting a 32 bit integer, but a larger value was found: " + l, t);
@@ -287,11 +289,11 @@ public final class ArgumentValidation {
 	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
-	public static short getInt16(Mixed c, Target t) {
+	public static short getInt16(Mixed c, Target t, Environment env) {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
-		long l = getInt(c, t);
+		long l = getInt(c, t, env);
 		short s = (short) l;
 		if(s != l) {
 			throw new CRERangeException("Expecting a 16 bit integer, but a larger value was found: " + l, t);
@@ -310,11 +312,11 @@ public final class ArgumentValidation {
 	 * @throws CRECastException If the value cannot be cast to an int
 	 * @return
 	 */
-	public static byte getInt8(Mixed c, Target t) {
+	public static byte getInt8(Mixed c, Target t, Environment env) {
 		if(c instanceof CMutablePrimitive) {
 			c = ((CMutablePrimitive) c).get();
 		}
-		long l = getInt(c, t);
+		long l = getInt(c, t, env);
 		byte b = (byte) l;
 		if(b != l) {
 			throw new CRERangeException("Expecting an 8 bit integer, but a larger value was found: " + l, t);
@@ -333,8 +335,8 @@ public final class ArgumentValidation {
 	 * @param t
 	 * @return
 	 */
-	public static boolean getBooleanObject(Mixed c, Target t) {
-		return getBooleanish(c, t);
+	public static boolean getBooleanObject(Mixed c, Target t, Environment env) {
+		return getBooleanish(c, t, env);
 	}
 
 	/**
@@ -350,8 +352,8 @@ public final class ArgumentValidation {
 	 * getBooleanish should be used. If it indicates a probable error, getBooleanObject should be used.
 	 */
 	@Deprecated
-	public static boolean getBoolean(Mixed c, Target t) {
-		return getBooleanish(c, t);
+	public static boolean getBoolean(Mixed c, Target t, Environment env) {
+		return getBooleanish(c, t, env);
 	}
 
 	/**
@@ -363,7 +365,7 @@ public final class ArgumentValidation {
 	 * @param t The code target
 	 * @return
 	 */
-	public static boolean getBooleanish(Mixed c, Target t) {
+	public static boolean getBooleanish(Mixed c, Target t, Environment env) {
 		if(c instanceof CVoid) {
 			// Eventually, we may want to turn this into a warning, maybe even a compiler error, but for now,
 			// to keep backwards compatibility, we want to keep this as is.
@@ -375,7 +377,7 @@ public final class ArgumentValidation {
 		if(c == null) {
 			return false;
 		}
-		if(c instanceof Booleanish) {
+		if(c.isInstanceOf(Booleanish.TYPE, null, env)) {
 			return ((Booleanish) c).getBooleanValue(t);
 		}
 		throw new CRECastException("Could not convert value of type " + c.typeof() + " to a " + Booleanish.TYPE, t);
@@ -388,11 +390,11 @@ public final class ArgumentValidation {
 	 * @param t
 	 * @return
 	 */
-	public static CByteArray getByteArray(Mixed c, Target t) {
+	public static CByteArray getByteArray(Mixed c, Target t, Environment env) {
 		if(c instanceof CByteArray) {
 			return (CByteArray) c;
 		} else if(c instanceof CNull) {
-			return new CByteArray(t, 0);
+			return new CByteArray(t, 0, env);
 		} else {
 			throw new CRECastException("Expecting byte array, but found " + c.typeof() + " instead.", t);
 		}
@@ -420,14 +422,14 @@ public final class ArgumentValidation {
 
 	/**
 	 * Returns a String object from the given construct. Note that unlike {@link #getString}, this strictly expects a
-	 * string object, and will throw a CRECastException if it is not a string.
+	 * string object (or subtype), and will throw a CRECastException if it is not a string.
 	 *
 	 * @param c
 	 * @param t
 	 * @return
 	 */
-	public static String getStringObject(Mixed c, Target t) {
-		if(!c.isInstanceOf(CString.class)) {
+	public static String getStringObject(Mixed c, Target t, Environment env) {
+		if(!c.isInstanceOf(CString.TYPE, null, env)) {
 			throw new CRECastException("Expected a string, but found " + c.typeof() + " instead.", t);
 		}
 		return c.val();
@@ -439,7 +441,7 @@ public final class ArgumentValidation {
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyDoubles(Mixed... c) {
+	public static boolean anyDoubles(Environment env, Mixed... c) {
 		for(Mixed c1 : c) {
 			if(c1 instanceof CDouble || c1 instanceof CString && c1.val().indexOf(".", 1) > -1) {
 				return true;
@@ -454,7 +456,7 @@ public final class ArgumentValidation {
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyStrings(Mixed... c) {
+	public static boolean anyStrings(Environment env, Mixed... c) {
 		for(Mixed c1 : c) {
 			if(c1 instanceof CString) {
 				return true;
@@ -469,7 +471,7 @@ public final class ArgumentValidation {
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyNulls(Mixed... c) {
+	public static boolean anyNulls(Environment env, Mixed... c) {
 		for(Mixed c1 : c) {
 			if(c1 instanceof CNull) {
 				return true;
@@ -484,7 +486,7 @@ public final class ArgumentValidation {
 	 * @param c
 	 * @return
 	 */
-	public static boolean anyBooleans(Mixed... c) {
+	public static boolean anyBooleans(Environment env, Mixed... c) {
 		for(Mixed c1 : c) {
 			if(c1 instanceof CBoolean) {
 				return true;
@@ -507,6 +509,7 @@ public final class ArgumentValidation {
 	 * class name will be used.
 	 */
 	public static <T extends Enum<T>> T getEnum(Mixed c, Class<T> enumClass, Target t) {
+		// TODO: Can't proxy an enum, need to return an interface instead which can be proxied.
 		String val = c.val();
 		try {
 			return Enum.valueOf(enumClass, val);
@@ -531,14 +534,14 @@ public final class ArgumentValidation {
 	 * @param t
 	 * @return
 	 */
-	public static <T extends Enum<T>> Set<T> getEnumSet(Mixed c, Class<T> enumClass, Target t) {
+	public static <T extends Enum<T>> Set<T> getEnumSet(Mixed c, Class<T> enumClass, Target t, Environment env) {
 		if(c instanceof CNull) {
 			return EnumSet.noneOf(enumClass);
 		}
-		if(!c.isInstanceOf(CArray.TYPE)) {
+		if(!c.isInstanceOf(CArray.TYPE, null, env)) {
 			Mixed val = c;
-			c = new CArray(t);
-			((CArray) c).push(val, t);
+			c = new CArray(t, null, env);
+			((CArray) c).push(val, t, env);
 		}
 		CArray ca = (CArray) c;
 		Set<T> set = EnumSet.noneOf(enumClass);

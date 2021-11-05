@@ -156,18 +156,18 @@ public class Sandbox {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer me;
 			boolean isVanished;
 			MCPlayer other;
 			if(args.length == 2) {
-				me = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				isVanished = ArgumentValidation.getBoolean(args[0], t);
-				other = Static.GetPlayer(args[1], t);
+				me = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				isVanished = ArgumentValidation.getBoolean(args[0], t, env);
+				other = Static.GetPlayer(args[1], t, env);
 			} else {
-				me = Static.GetPlayer(args[0], t);
-				isVanished = ArgumentValidation.getBoolean(args[1], t);
-				other = Static.GetPlayer(args[2], t);
+				me = Static.GetPlayer(args[0], t, env);
+				isVanished = ArgumentValidation.getBoolean(args[1], t, env);
+				other = Static.GetPlayer(args[2], t, env);
 			}
 
 			other.setVanished(isVanished, me);
@@ -217,15 +217,15 @@ public class Sandbox {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer me;
 			MCPlayer other;
 			if(args.length == 1) {
-				me = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-				other = Static.GetPlayer(args[0], t);
+				me = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				other = Static.GetPlayer(args[0], t, env);
 			} else {
-				me = Static.GetPlayer(args[0], t);
-				other = Static.GetPlayer(args[1], t);
+				me = Static.GetPlayer(args[0], t, env);
+				other = Static.GetPlayer(args[1], t, env);
 			}
 			return CBoolean.get(me.canSee(other));
 		}
@@ -610,7 +610,7 @@ public class Sandbox {
 			if(!(args[1].isInstanceOf(CByteArray.TYPE, null, env))) {
 				content = args[1].val().getBytes(Charset.forName("UTF-8"));
 			} else {
-				content = ArgumentValidation.getByteArray(args[1], t).asByteArrayCopy();
+				content = ArgumentValidation.getByteArray(args[1], t, env).asByteArrayCopy();
 			}
 			FileWriteMode mode = FileWriteMode.SAFE_WRITE;
 			if(args.length > 2) {

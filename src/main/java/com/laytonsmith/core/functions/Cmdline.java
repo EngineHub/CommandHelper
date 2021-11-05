@@ -33,6 +33,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
@@ -337,15 +338,15 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			int exit_code = 0;
 			if(args.length == 1) {
-				exit_code = ArgumentValidation.getInt32(args[0], t);
+				exit_code = ArgumentValidation.getInt32(args[0], t, env);
 			}
-			if(Static.InCmdLine(environment, true)) {
+			if(Static.InCmdLine(env, true)) {
 				System.exit(exit_code);
 			}
-			return new ControlFlow.die().exec(t, environment, args);
+			return new ControlFlow.die().exec(t, env, args);
 		}
 
 		@Override
@@ -403,7 +404,7 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 1) {
 				String propName = args[0].val();
 				String prop;
@@ -417,13 +418,14 @@ public class Cmdline {
 				}
 				return new CString(prop, t);
 			} else {
-				CArray ca = CArray.GetAssociativeArray(t);
+				CArray ca = CArray.GetAssociativeArray(t, GenericParameters.start(CArray.TYPE)
+						.addParameter(CString.TYPE, null).build(), env);
 				for(String key : System.getProperties().stringPropertyNames()) {
-					ca.set(key, System.getProperty(key));
+					ca.set(key, System.getProperty(key), env);
 				}
 				Map<String, String> msProps = getMethodScriptProperties();
 				for(String key : msProps.keySet()) {
-					ca.set(key, msProps.get(key));
+					ca.set(key, msProps.get(key), env);
 				}
 				return ca;
 			}
@@ -509,13 +511,14 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args.length == 1) {
 				return new CString(System.getenv(args[0].val()), t);
 			} else {
-				CArray ca = CArray.GetAssociativeArray(t);
+				CArray ca = CArray.GetAssociativeArray(t, GenericParameters.start(CArray.TYPE)
+						.addParameter(CString.TYPE, null).build(), env);
 				for(String key : System.getenv().keySet()) {
-					ca.set(key, System.getenv(key));
+					ca.set(key, System.getenv(key), env);
 				}
 				return ca;
 			}
@@ -654,13 +657,13 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(!Static.InCmdLine(environment, true)) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			if(!Static.InCmdLine(env, true)) {
 				throw new CREInsufficientPermissionException(getName() + " cannot be used outside of cmdline mode.", t);
 			}
 			boolean mask = true;
 			if(args.length > 1) {
-				mask = ArgumentValidation.getBoolean(args[1], t);
+				mask = ArgumentValidation.getBoolean(args[1], t, env);
 			}
 
 			String prompt = args[0].val();
@@ -965,12 +968,12 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(final Target t, final Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(!Static.InCmdLine(environment, true)) {
+		public Mixed exec(final Target t, final Environment env, Mixed... args) throws ConfigRuntimeException {
+			if(!Static.InCmdLine(env, true)) {
 				if(!Prefs.AllowShellCommands()) {
 					throw new CREInsufficientPermissionException("Shell commands are not allowed. Enable them in preferences.ini.", t);
 				}
-				if(environment.getEnv(GlobalEnv.class).GetDynamicScriptingMode() && !Prefs.AllowDynamicShell()) {
+				if(env.getEnv(GlobalEnv.class).GetDynamicScriptingMode() && !Prefs.AllowDynamicShell()) {
 					throw new CREInsufficientPermissionException("Shell commands are disabled from dynamic sources.", t);
 				}
 			}
@@ -980,31 +983,31 @@ public class Cmdline {
 			final CClosure stderr;
 			final CClosure exit;
 			final boolean subshell;
-			if(args[0].isInstanceOf(CArray.TYPE)) {
+			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray array = (CArray) args[0];
 				command = new String[(int) array.size()];
 				for(int i = 0; i < array.size(); i++) {
-					command[i] = array.get(i, t).val();
+					command[i] = array.get(i, t, env).val();
 				}
 			} else {
 				command = StringUtils.ArgParser(args[0].val()).toArray(new String[0]);
 			}
 			if(args.length > 1) {
-				CArray options = ArgumentValidation.getArray(args[1], t);
-				if(options.containsKey("workingDir") && !(options.get("workingDir", t) instanceof CNull)) {
-					workingDir = new File(options.get("workingDir", t).val());
+				CArray options = ArgumentValidation.getArray(args[1], t, env);
+				if(options.containsKey("workingDir") && !(options.get("workingDir", t, env) instanceof CNull)) {
+					workingDir = new File(options.get("workingDir", t, env).val());
 					if(!workingDir.isAbsolute()) {
 						workingDir = new File(t.file().getParentFile(), workingDir.getPath());
 					}
 				}
-				stdout = (options.containsKey("stdout") && !(options.get("stdout", t) instanceof CNull)
-						? ArgumentValidation.getObject(options.get("stdout", t), t, CClosure.class) : null);
-				stderr = (options.containsKey("stderr") && !(options.get("stderr", t) instanceof CNull)
-						? ArgumentValidation.getObject(options.get("stderr", t), t, CClosure.class) : null);
-				exit = (options.containsKey("exit") && !(options.get("exit", t) instanceof CNull)
-						? ArgumentValidation.getObject(options.get("exit", t), t, CClosure.class) : null);
+				stdout = (options.containsKey("stdout") && !(options.get("stdout", t, env) instanceof CNull)
+						? ArgumentValidation.getObject(options.get("stdout", t, env), t, CClosure.class) : null);
+				stderr = (options.containsKey("stderr") && !(options.get("stderr", t, env) instanceof CNull)
+						? ArgumentValidation.getObject(options.get("stderr", t, env), t, CClosure.class) : null);
+				exit = (options.containsKey("exit") && !(options.get("exit", t, env) instanceof CNull)
+						? ArgumentValidation.getObject(options.get("exit", t, env), t, CClosure.class) : null);
 				subshell = (options.containsKey("subshell")
-						? ArgumentValidation.getBoolean(options.get("subshell", t), t) : false);
+						? ArgumentValidation.getBoolean(options.get("subshell", t, env), t, env) : false);
 			} else {
 				stdout = null;
 				stderr = null;
@@ -1066,7 +1069,7 @@ public class Cmdline {
 			}
 
 			Runnable run = () -> {
-				environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager().activateThread(null);
+				env.getEnv(StaticRuntimeEnv.class).GetDaemonManager().activateThread(null);
 				try {
 					final int exitCode = cmd.waitFor();
 					try {
@@ -1098,7 +1101,7 @@ public class Cmdline {
 				} catch (InterruptedException ex) {
 					throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
 				} finally {
-					environment.getEnv(StaticRuntimeEnv.class).GetDaemonManager().deactivateThread(null);
+					env.getEnv(StaticRuntimeEnv.class).GetDaemonManager().deactivateThread(null);
 				}
 			};
 			if(subshell) {
@@ -1167,34 +1170,34 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(!Static.InCmdLine(environment, true)) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			if(!Static.InCmdLine(env, true)) {
 				if(!Prefs.AllowShellCommands()) {
 					throw new CREInsufficientPermissionException("Shell commands are not allowed. Enable them in preferences.ini.", t);
 				}
-				if(environment.getEnv(GlobalEnv.class).GetDynamicScriptingMode() && !Prefs.AllowDynamicShell()) {
+				if(env.getEnv(GlobalEnv.class).GetDynamicScriptingMode() && !Prefs.AllowDynamicShell()) {
 					throw new CREInsufficientPermissionException("Shell commands are disabled from dynamic sources.", t);
 				}
 			}
 			String[] command;
 			int expectedExitCode = 0;
 			File workingDir = null;
-			if(args[0].isInstanceOf(CArray.TYPE)) {
+			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray array = (CArray) args[0];
 				command = new String[(int) array.size()];
 				for(int i = 0; i < array.size(); i++) {
-					command[i] = array.get(i, t).val();
+					command[i] = array.get(i, t, env).val();
 				}
 			} else {
 				command = StringUtils.ArgParser(args[0].val()).toArray(new String[0]);
 			}
 			if(args.length > 1) {
-				CArray options = ArgumentValidation.getArray(args[1], t);
+				CArray options = ArgumentValidation.getArray(args[1], t, env);
 				if(options.containsKey("expectedExitCode")) {
-					expectedExitCode = ArgumentValidation.getInt32(options.get("expectedExitCode", t), t);
+					expectedExitCode = ArgumentValidation.getInt32(options.get("expectedExitCode", t, env), t, env);
 				}
-				if(options.containsKey("workingDir") && !(options.get("workingDir", t) instanceof CNull)) {
-					workingDir = new File(options.get("workingDir", t).val());
+				if(options.containsKey("workingDir") && !(options.get("workingDir", t, env) instanceof CNull)) {
+					workingDir = new File(options.get("workingDir", t, env).val());
 					if(!workingDir.isAbsolute()) {
 						workingDir = new File(t.file().getParentFile(), workingDir.getPath());
 					}
@@ -1488,8 +1491,8 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(!Static.InCmdLine(environment, true)) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			if(!Static.InCmdLine(env, true)) {
 				throw new CREInsufficientPermissionException(getName() + " cannot be used outside of cmdline mode.", t);
 			}
 			if(System.console() != null) {
@@ -1497,11 +1500,11 @@ public class Cmdline {
 			}
 			boolean binary = false;
 			if(args.length > 0) {
-				binary = ArgumentValidation.getBoolean(args[0], t);
+				binary = ArgumentValidation.getBoolean(args[0], t, env);
 			}
 			try {
 				if(binary) {
-					CByteArray ba = new CByteArray(t);
+					CByteArray ba = new CByteArray(t, env);
 					while(true) {
 						int b = System.in.read();
 						if(b < 0) {
@@ -1691,13 +1694,14 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			requireCmdlineMode(environment, this, t);
-			CArray ca = new CArray(t);
-			File cwd = Static.GetFileFromArgument(args.length > 0 ? args[0].val() : null, environment, t, environment.getEnv(GlobalEnv.class).GetRootFolder());
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			requireCmdlineMode(env, this, t);
+			CArray ca = new CArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CString.TYPE, null).build(), env);
+			File cwd = Static.GetFileFromArgument(args.length > 0 ? args[0].val() : null, env, t, env.getEnv(GlobalEnv.class).GetRootFolder());
 			if(cwd.exists()) {
 				for(File f : cwd.listFiles()) {
-					ca.push(new CString(f.getName(), t), t);
+					ca.push(new CString(f.getName(), t), t, env);
 				}
 			} else {
 				throw new CREIOException("No such file or directory: " + cwd.getPath(), t);
@@ -1717,7 +1721,7 @@ public class Cmdline {
 
 		@Override
 		public String docs() {
-			return "array {[directory]} Returns an array of files in the current working directory, including \"hidden\" files, or"
+			return "array<string> {[directory]} Returns an array of files in the current working directory, including \"hidden\" files, or"
 					+ "if directory is specified, the files in that directory. This is only available in cmdline mode.";
 		}
 
@@ -1747,12 +1751,12 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			requireCmdlineMode(environment, this, t);
-			if(!(args[0].isInstanceOf(CClosure.TYPE))) {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			requireCmdlineMode(env, this, t);
+			if(!(args[0].isInstanceOf(CClosure.TYPE, null, env))) {
 				throw new CRECastException("Expecting a closure for argument 1 of " + getName(), t);
 			}
-			environment.getEnv(GlobalEnv.class).SetCustom("cmdline_prompt", args[0]);
+			env.getEnv(GlobalEnv.class).SetCustom("cmdline_prompt", args[0]);
 			return CVoid.VOID;
 		}
 
@@ -1949,21 +1953,21 @@ public class Cmdline {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			requireCmdlineMode(environment, this, t);
-			final CArray a = new CArray(t);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			requireCmdlineMode(env, this, t);
+			final CArray a = new CArray(t, null, env);
 			String regex = ArgumentValidation.getString(args[0], t);
-			String startFrom = environment.getEnv(GlobalEnv.class).GetRootFolder().getAbsolutePath();
+			String startFrom = env.getEnv(GlobalEnv.class).GetRootFolder().getAbsolutePath();
 			Set<FindType> findTypes = EnumSet.allOf(FindType.class);
 			if(args.length == 2) {
-				if(args[1].isInstanceOf(CArray.TYPE)) {
-					findTypes = ArgumentValidation.getEnumSet(args[1], FindType.class, t);
+				if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
+					findTypes = ArgumentValidation.getEnumSet(args[1], FindType.class, t, env);
 				} else {
 					startFrom = ArgumentValidation.getString(args[1], t);
 				}
 			} else if(args.length > 2) {
 				startFrom = ArgumentValidation.getString(args[1], t);
-				findTypes = ArgumentValidation.getEnumSet(args[2], FindType.class, t);
+				findTypes = ArgumentValidation.getEnumSet(args[2], FindType.class, t, env);
 			}
 			if(findTypes.isEmpty()) {
 				throw new CREIllegalArgumentException("types must be a non-empty array, and not null", t);
@@ -1974,7 +1978,7 @@ public class Cmdline {
 				FileUtil.recursiveFind(startFromF, (file) -> {
 					// We are such a potentially long running process, that we want to specially provide support
 					// for Ctrl-C, so we check for interruption here.
-					if(environment.getEnv(GlobalEnv.class).IsInterrupted()) {
+					if(env.getEnv(GlobalEnv.class).IsInterrupted()) {
 						throw new CancelCommandException("", Target.UNKNOWN);
 					}
 					if(!types.contains(FindType.FILE) && file.isHidden()) {
@@ -1987,7 +1991,7 @@ public class Cmdline {
 						return;
 					}
 					if(file.getName().matches(regex)) {
-						a.push(new CString(file.getAbsolutePath(), t), t);
+						a.push(new CString(file.getAbsolutePath(), t), t, env);
 					}
 				});
 			} catch (IOException ex) {

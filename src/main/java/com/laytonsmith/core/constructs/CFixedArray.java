@@ -9,6 +9,7 @@ import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.constructs.generics.UnboundedConstraint;
 import com.laytonsmith.core.constructs.generics.GenericDeclaration;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREIndexOverflowException;
 import com.laytonsmith.core.exceptions.CRE.CREUnsupportedOperationException;
@@ -34,8 +35,8 @@ public class CFixedArray extends Construct implements
 			new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 				new UnboundedConstraint(Target.UNKNOWN, "T")));
 	public static final CClassType TYPE = CClassType.getWithGenericDeclaration(CFixedArray.class, gen);
-	private Mixed[] data;
-	private CClassType allowedType;
+	private final Mixed[] data;
+	private final CClassType allowedType;
 
 	public CFixedArray(Target t, CClassType type, int size) {
 		super(type.getSimpleName() + "[" + size + "]", ConstructType.ARRAY, t);
@@ -49,12 +50,12 @@ public class CFixedArray extends Construct implements
 	}
 
 	@Override
-	public Mixed get(String index, Target t) throws ConfigRuntimeException {
+	public Mixed get(String index, Target t, Environment env) throws ConfigRuntimeException {
 		return null;
 	}
 
 	@Override
-	public Mixed get(int index, Target t) throws ConfigRuntimeException {
+	public Mixed get(int index, Target t, Environment env) throws ConfigRuntimeException {
 		if(index < 0 || index >= data.length) {
 			throw new CREIndexOverflowException("Index overflows array size", t);
 		}
@@ -66,8 +67,8 @@ public class CFixedArray extends Construct implements
 	}
 
 	@Override
-	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
-		return get(ArgumentValidation.getInt32(index, t), t);
+	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		return get(ArgumentValidation.getInt32(index, t, env), t, env);
 	}
 
 	@Override
@@ -104,7 +105,7 @@ public class CFixedArray extends Construct implements
 	}
 
 	@Override
-	public Mixed slice(int begin, int end, Target t) {
+	public Mixed slice(int begin, int end, Target t, Environment env) {
 		throw new CREUnsupportedOperationException("slices are not yet implemented on fixed_array", t);
 	}
 

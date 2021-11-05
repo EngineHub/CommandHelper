@@ -579,11 +579,6 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		return null;
 	}
 
-	public static boolean isInstanceof(Mixed that, CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
-		return InstanceofUtil.isInstanceof(that, type, lhsGenericParameters, env);
-//		return that.getClass().isAnnotationPresent(typeof.class) && that.typeof().doesExtend(type);
-	}
-
 	public static boolean isInstanceof(Mixed that, Class<? extends Mixed> type) {
 		if(ClassDiscovery.GetClassAnnotation(that.getClass(), typeof.class) == null) {
 			// This can happen in cases where we are in the middle of optimization.
@@ -598,7 +593,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
-		return isInstanceof(this, type, lhsGenericParameters, env);
+		return InstanceofUtil.isInstanceof(this, type, lhsGenericParameters, env);
 	}
 
 	/**

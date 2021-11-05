@@ -85,7 +85,7 @@ public interface ArrayAccess extends Booleanish {
 	 * @param t
 	 * @return
 	 */
-	public Mixed slice(int begin, int end, Target t);
+	public Mixed slice(int begin, int end, Target t, Environment env);
 
 
 	@Override

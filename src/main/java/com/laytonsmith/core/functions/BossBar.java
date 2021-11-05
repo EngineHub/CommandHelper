@@ -156,11 +156,11 @@ public class BossBar {
 					}
 				}
 				if(ca.containsKey("visible")) {
-					visible = ArgumentValidation.getBoolean(ca.get("visible", t, env), t);
+					visible = ArgumentValidation.getBoolean(ca.get("visible", t, env), t, env);
 				}
 				if(ca.containsKey("percent")) {
 					try {
-						percent = ArgumentValidation.getDouble(ca.get("percent", t, env), t);
+						percent = ArgumentValidation.getDouble(ca.get("percent", t, env), t, env);
 					} catch (IllegalArgumentException ex) {
 						throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 					}
@@ -215,7 +215,7 @@ public class BossBar {
 				bar.setTitle(args[1].val());
 			} else if(args[1].isInstanceOf(CDouble.TYPE, null, env)) {
 				try {
-					bar.setProgress(ArgumentValidation.getDouble(args[1], t));
+					bar.setProgress(ArgumentValidation.getDouble(args[1], t, env));
 				} catch (IllegalArgumentException ex) {
 					throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 				}
@@ -239,11 +239,11 @@ public class BossBar {
 					}
 				}
 				if(ca.containsKey("visible")) {
-					bar.setVisible(ArgumentValidation.getBoolean(ca.get("visible", t, env), t));
+					bar.setVisible(ArgumentValidation.getBoolean(ca.get("visible", t, env), t, env));
 				}
 				if(ca.containsKey("percent")) {
 					try {
-						bar.setProgress(ArgumentValidation.getDouble(ca.get("percent", t, env), t));
+						bar.setProgress(ArgumentValidation.getDouble(ca.get("percent", t, env), t, env));
 					} catch (IllegalArgumentException ex) {
 						throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 					}
@@ -364,7 +364,7 @@ public class BossBar {
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
-			bar.addPlayer(Static.GetPlayer(args[1].val(), t));
+			bar.addPlayer(Static.GetPlayer(args[1].val(), t, env));
 			return CVoid.VOID;
 		}
 
@@ -398,7 +398,7 @@ public class BossBar {
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
-			bar.removePlayer(Static.GetPlayer(args[1].val(), t));
+			bar.removePlayer(Static.GetPlayer(args[1].val(), t, env));
 			return CVoid.VOID;
 		}
 

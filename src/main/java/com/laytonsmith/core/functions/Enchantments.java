@@ -183,29 +183,29 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			int offset = 0;
-			if(args.length == 4 || args.length == 3 && args[2].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, environment)) {
-				p = Static.GetPlayer(args[0].val(), t);
+			if(args.length == 4 || args.length == 3 && args[2].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env)) {
+				p = Static.GetPlayer(args[0].val(), t, env);
 				offset = 1;
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			}
-			MCItemStack is = p.getItemAt(args[offset] instanceof CNull ? null : ArgumentValidation.getInt32(args[offset], t));
+			MCItemStack is = p.getItemAt(args[offset] instanceof CNull ? null : ArgumentValidation.getInt32(args[offset], t, env));
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[offset], t);
 			}
 
-			if(args[args.length - 1].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, environment)) {
+			if(args[args.length - 1].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ca = (CArray) args[args.length - 1];
-				Map<MCEnchantment, Integer> enchants = ObjectGenerator.GetGenerator().enchants(ca, t);
+				Map<MCEnchantment, Integer> enchants = ObjectGenerator.GetGenerator().enchants(ca, t, env);
 				for(Map.Entry<MCEnchantment, Integer> en : enchants.entrySet()) {
 					is.addUnsafeEnchantment(en.getKey(), en.getValue());
 				}
 			} else {
-				int level = ConvertLevel(environment, args[offset + 2]);
+				int level = ConvertLevel(env, args[offset + 2]);
 				if(level > 0) {
 					is.addUnsafeEnchantment(GetEnchantment(args[offset + 1].val(), t), level);
 				} else {
@@ -258,23 +258,23 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			int offset = 0;
 			if(args.length == 3) {
-				p = Static.GetPlayer(args[0].val(), t);
+				p = Static.GetPlayer(args[0].val(), t, env);
 				offset = 1;
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			}
 
-			MCItemStack is = p.getItemAt(args[offset] instanceof CNull ? null : ArgumentValidation.getInt32(args[offset], t));
+			MCItemStack is = p.getItemAt(args[offset] instanceof CNull ? null : ArgumentValidation.getInt32(args[offset], t, env));
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + args[offset], t);
 			}
 
-			if(args[offset + 1].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, environment)) {
+			if(args[offset + 1].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env)) {
 				for(String name : ((CArray) args[offset + 1]).stringKeySet()) {
 					MCEnchantment e = GetEnchantment(name, t);
 					is.removeEnchantment(e);
@@ -331,22 +331,22 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			Mixed slot;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0].val(), t);
+				p = Static.GetPlayer(args[0].val(), t, env);
 				slot = args[1];
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 				slot = args[0];
 			}
-			MCItemStack is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t));
+			MCItemStack is = p.getItemAt(slot instanceof CNull ? null : ArgumentValidation.getInt32(slot, t, env));
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + slot, t);
 			}
-			return ObjectGenerator.GetGenerator().enchants(is.getEnchantments(), t);
+			return ObjectGenerator.GetGenerator().enchants(is.getEnchantments(), t, env);
 		}
 	}
 
@@ -392,9 +392,9 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCEnchantment e = GetEnchantment(args[0].val(), t);
-			MCItemStack is = ObjectGenerator.GetGenerator().item(args[1], t);
+			MCItemStack is = ObjectGenerator.GetGenerator().item(args[1], t, env);
 			return CBoolean.get(e.canEnchantItem(is));
 		}
 	}
@@ -488,10 +488,10 @@ public class Enchantments {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCItemStack is;
-			if(args[0].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, environment)) {
-				is = ObjectGenerator.GetGenerator().item(args[0], t);
+			if(args[0].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env)) {
+				is = ObjectGenerator.GetGenerator().item(args[0], t, env);
 			} else {
 				is = Static.ParseItemNotation(null, args[0].val(), 1, t);
 			}
@@ -504,10 +504,10 @@ public class Enchantments {
 				return CACHE.get(name).clone();
 			}
 			CArray ca = new CArray(t, GenericParameters.start(CArray.TYPE)
-					.addParameter(CString.TYPE, null).build(), environment);
+					.addParameter(CString.TYPE, null).build(), env);
 			for(MCEnchantment e : StaticLayer.GetEnchantmentValues()) {
 				if(e.canEnchantItem(is)) {
-					ca.push(new CString(e.getKey(), t), t, environment);
+					ca.push(new CString(e.getKey(), t), t, env);
 				}
 			}
 			CACHE.put(name, ca);

@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCI
 import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCItemSwapEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCPrepareItemCraftEvent;
 import com.laytonsmith.abstraction.bukkit.events.BukkitInventoryEvents.BukkitMCPrepareItemEnchantEvent;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import org.bukkit.event.EventHandler;
@@ -30,54 +31,54 @@ public class BukkitInventoryListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onInvClick(InventoryClickEvent event) {
 		BukkitMCInventoryClickEvent ice = new BukkitInventoryEvents.BukkitMCInventoryClickEvent(event);
-		EventUtils.TriggerListener(Driver.INVENTORY_CLICK, "inventory_click", ice);
+		EventUtils.TriggerListener(Driver.INVENTORY_CLICK, "inventory_click", ice, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onInvDrag(InventoryDragEvent event) {
 		BukkitMCInventoryDragEvent ide = new BukkitInventoryEvents.BukkitMCInventoryDragEvent(event);
-		EventUtils.TriggerListener(Driver.INVENTORY_DRAG, "inventory_drag", ide);
+		EventUtils.TriggerListener(Driver.INVENTORY_DRAG, "inventory_drag", ide, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onInvOpen(InventoryOpenEvent event) {
 		BukkitMCInventoryOpenEvent ioe = new BukkitInventoryEvents.BukkitMCInventoryOpenEvent(event);
-		EventUtils.TriggerListener(Driver.INVENTORY_OPEN, "inventory_open", ioe);
+		EventUtils.TriggerListener(Driver.INVENTORY_OPEN, "inventory_open", ioe, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onInvClose(InventoryCloseEvent event) {
 		BukkitMCInventoryCloseEvent ice = new BukkitInventoryEvents.BukkitMCInventoryCloseEvent(event);
-		EventUtils.TriggerListener(Driver.INVENTORY_CLOSE, "inventory_close", ice);
+		EventUtils.TriggerListener(Driver.INVENTORY_CLOSE, "inventory_close", ice, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onItemEnchant(EnchantItemEvent event) {
 		BukkitMCEnchantItemEvent eie = new BukkitInventoryEvents.BukkitMCEnchantItemEvent(event);
-		EventUtils.TriggerListener(Driver.ITEM_ENCHANT, "item_enchant", eie);
+		EventUtils.TriggerListener(Driver.ITEM_ENCHANT, "item_enchant", eie, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPreEnchant(PrepareItemEnchantEvent event) {
 		BukkitMCPrepareItemEnchantEvent pie = new BukkitInventoryEvents.BukkitMCPrepareItemEnchantEvent(event);
-		EventUtils.TriggerListener(Driver.ITEM_PRE_ENCHANT, "item_pre_enchant", pie);
+		EventUtils.TriggerListener(Driver.ITEM_PRE_ENCHANT, "item_pre_enchant", pie, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onItemHeld(PlayerItemHeldEvent event) {
 		BukkitMCItemHeldEvent ih = new BukkitInventoryEvents.BukkitMCItemHeldEvent(event);
-		EventUtils.TriggerListener(Driver.ITEM_HELD, "item_held", ih);
+		EventUtils.TriggerListener(Driver.ITEM_HELD, "item_held", ih, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onItemSwap(PlayerSwapHandItemsEvent event) {
 		BukkitMCItemSwapEvent is = new BukkitInventoryEvents.BukkitMCItemSwapEvent(event);
-		EventUtils.TriggerListener(Driver.ITEM_SWAP, "item_swap", is);
+		EventUtils.TriggerListener(Driver.ITEM_SWAP, "item_swap", is, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPreCraft(PrepareItemCraftEvent event) {
 		BukkitMCPrepareItemCraftEvent pc = new BukkitInventoryEvents.BukkitMCPrepareItemCraftEvent(event);
-		EventUtils.TriggerListener(Driver.ITEM_PRE_CRAFT, "item_pre_craft", pc);
+		EventUtils.TriggerListener(Driver.ITEM_PRE_CRAFT, "item_pre_craft", pc, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 }

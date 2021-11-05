@@ -4,11 +4,10 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.events.BukkitServerEvents;
 import com.laytonsmith.abstraction.events.MCRedstoneChangedEvent;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.events.drivers.ServerEvents;
-import java.util.Map;
-
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -16,12 +15,14 @@ import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.server.BroadcastMessageEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 
+import java.util.Map;
+
 public class BukkitServerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPing(ServerListPingEvent event) {
 		BukkitServerEvents.BukkitMCServerPingEvent pe = new BukkitServerEvents.BukkitMCServerPingEvent(event);
-		EventUtils.TriggerListener(Driver.SERVER_PING, "server_ping", pe);
+		EventUtils.TriggerListener(Driver.SERVER_PING, "server_ping", pe, CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -55,7 +56,7 @@ public class BukkitServerListener implements Listener {
 					public Object _GetObject() {
 						return null;
 					}
-				});
+				}, CommandHelperPlugin.getCore().getLastLoadedEnv());
 			}
 		}
 	}
@@ -63,6 +64,6 @@ public class BukkitServerListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBroadcast(BroadcastMessageEvent event) {
 		EventUtils.TriggerListener(Driver.BROADCAST_MESSAGE, "broadcast_message",
-				new BukkitServerEvents.BukkitMCBroadcastMessageEvent(event));
+				new BukkitServerEvents.BukkitMCBroadcastMessageEvent(event), CommandHelperPlugin.getCore().getLastLoadedEnv());
 	}
 }

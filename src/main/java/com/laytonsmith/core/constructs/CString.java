@@ -72,7 +72,7 @@ public class CString extends CPrimitive implements Cloneable,
 	}
 
 	@Override
-	public Mixed slice(int begin, int end, Target t) {
+	public Mixed slice(int begin, int end, Target t, Environment env) {
 		if(begin > end) {
 			return new CString("", t);
 		}
@@ -99,7 +99,7 @@ public class CString extends CPrimitive implements Cloneable,
 
 	@Override
 	public final Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
-		int i = ArgumentValidation.getInt32(index, t);
+		int i = ArgumentValidation.getInt32(index, t, env);
 		return get(i, t, env);
 	}
 

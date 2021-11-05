@@ -7,6 +7,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.Driver;
@@ -14,6 +15,7 @@ import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
 import java.util.Map;
 
 /**
@@ -50,11 +52,11 @@ public class PluginEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			if(e instanceof MCPluginIncomingMessageEvent) {
 				MCPluginIncomingMessageEvent event = (MCPluginIncomingMessageEvent) e;
 
-				Prefilters.match(prefilter, "channel", event.getChannel(), Prefilters.PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "channel", event.getChannel(), Prefilters.PrefilterType.STRING_MATCH, env);
 
 				return true;
 			}
@@ -76,7 +78,7 @@ public class PluginEvents {
 				ret.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
 
 				// Insert bytes into a CByteArray
-				CByteArray a = CByteArray.wrap(event.getBytes().clone(), Target.UNKNOWN);
+				CByteArray a = CByteArray.wrap(event.getBytes().clone(), Target.UNKNOWN, env);
 
 				a.rewind();
 

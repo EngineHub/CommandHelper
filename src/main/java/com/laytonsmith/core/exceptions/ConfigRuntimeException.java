@@ -123,7 +123,7 @@ public class ConfigRuntimeException extends RuntimeException {
 					return Reaction.REPORT; // Closure returned null or scream-errors was set in the config.
 				}
 				// Closure returned a boolean. TRUE -> IGNORE and FALSE -> FATAL.
-				return (ArgumentValidation.getBooleanObject(ret, Target.UNKNOWN) ? Reaction.IGNORE : Reaction.FATAL);
+				return (ArgumentValidation.getBooleanObject(ret, Target.UNKNOWN, env) ? Reaction.IGNORE : Reaction.FATAL);
 			} catch (ConfigRuntimeException cre) {
 
 				// A CRE occurred in the exception handler. Report both exceptions.
@@ -232,7 +232,8 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * message may be provided (null otherwise).
 	 */
 	@SuppressWarnings("ThrowableResultIgnored")
-	private static void DoReport(String message, String exceptionType, ConfigRuntimeException ex, List<StackTraceElement> stacktrace, MCPlayer currentPlayer, Environment env) {
+	private static void DoReport(String message, String exceptionType, ConfigRuntimeException ex,
+								 List<StackTraceElement> stacktrace, MCPlayer currentPlayer, Environment env) {
 		String type = exceptionType;
 		if(exceptionType == null) {
 			type = "FATAL";
@@ -267,13 +268,13 @@ public class ConfigRuntimeException extends RuntimeException {
 				console.append(TermColors.CYAN).append("Caused by:\n");
 				player.append(MCChatColor.AQUA).append("Caused by:\n");
 				CArray exception = ((CRECausedByWrapper) ex).getException();
-				CArray stackTrace = ArgumentValidation.getArray(exception.get("stackTrace", t, env), t);
+				CArray stackTrace = ArgumentValidation.getArray(exception.get("stackTrace", t, env), t, env);
 				List<StackTraceElement> newSt = new ArrayList<>();
 				for(Mixed consElement : stackTrace.asList()) {
-					CArray element = ArgumentValidation.getArray(consElement, t);
-					int line = ArgumentValidation.getInt32(element.get("line", t, env), t);
+					CArray element = ArgumentValidation.getArray(consElement, t, env);
+					int line = ArgumentValidation.getInt32(element.get("line", t, env), t, env);
 					File file = new File(element.get("file", t, env).val());
-					int col = ArgumentValidation.getInt32(element.get("col", t, env), t);
+					int col = ArgumentValidation.getInt32(element.get("col", t, env), t, env);
 					Target stElementTarget = new Target(line, file, col);
 					newSt.add(new StackTraceElement(element.get("id", t, env).val(), stElementTarget));
 				}

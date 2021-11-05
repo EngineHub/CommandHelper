@@ -5,21 +5,23 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREReadOnlyException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.natives.interfaces.Sizeable;
 import com.laytonsmith.core.objects.ObjectModifier;
+
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
-import com.laytonsmith.core.natives.interfaces.Sizeable;
-import java.util.ArrayList;
-import java.util.EnumSet;
 
 /**
  *
@@ -49,8 +51,8 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * @param t
 	 * @return
 	 */
-	public static CByteArray wrap(byte[] b, Target t) {
-		CByteArray ba = new CByteArray(t, 0);
+	public static CByteArray wrap(byte[] b, Target t, Environment env) {
+		CByteArray ba = new CByteArray(t, 0, env);
 		ba.data = ByteBuffer.wrap(b);
 		ba.maxValue = b.length;
 		return ba;
@@ -65,8 +67,8 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 *
 	 * @param t
 	 */
-	public CByteArray(Target t) {
-		this(t, INITIAL_SIZE);
+	public CByteArray(Target t, Environment env) {
+		this(t, INITIAL_SIZE, env);
 	}
 
 	/**
@@ -75,8 +77,8 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * @param t
 	 * @param capacity
 	 */
-	public CByteArray(Target t, int capacity) {
-		super(t, INITIAL_SIZE);
+	public CByteArray(Target t, int capacity, Environment env) {
+		super(t, INITIAL_SIZE, null, env);
 		//super("", ConstructType.BYTE_ARRAY, t);
 		data = ByteBuffer.allocate(capacity);
 	}
@@ -370,8 +372,8 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * @param pos
 	 * @return
 	 */
-	public CByteArray getBytes(int size, Integer pos) {
-		CByteArray ba = new CByteArray(this.getTarget(), 0);
+	public CByteArray getBytes(int size, Integer pos, Environment env) {
+		CByteArray ba = new CByteArray(this.getTarget(), 0, env);
 		byte[] d = new byte[size];
 		if(pos != null) {
 			data.position(pos);
@@ -460,7 +462,7 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	 * @return
 	 */
 	public CArray asArray(Target t) {
-		return new CArrayByteBacking(asByteArrayCopy(), t);
+		return new CArrayByteBacking(asByteArrayCopy(), t, fallbackEnv);
 	}
 
 	/**
@@ -482,8 +484,8 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	}
 
 	@Override
-	public Mixed slice(int begin, int end, Target t) {
-		return getBytes(end - begin, begin);
+	public Mixed slice(int begin, int end, Target t, Environment env) {
+		return getBytes(end - begin, begin, env);
 	}
 
 	@Override
@@ -497,17 +499,17 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 	}
 
 	@Override
-	protected CArray deepClone(CArray array, Target t, ArrayList<CArray[]> cloneRefs) {
+	protected CArray deepClone(CArray array, Target t, ArrayList<CArray[]> cloneRefs, Environment env) {
 		CByteArray that = (CByteArray) array;
 		byte[] original = that.data.array();
 		byte[] newArray = new byte[that.maxValue];
 		System.arraycopy(original, 0, newArray, 0, that.maxValue);
-		return CByteArray.wrap(newArray, t);
+		return CByteArray.wrap(newArray, t, env);
 	}
 
 	@Override
-	public Mixed get(Mixed index, Target t) throws ConfigRuntimeException {
-		int i = ArgumentValidation.getInt32(index, t);
+	public Mixed get(Mixed index, Target t, Environment env) throws ConfigRuntimeException {
+		int i = ArgumentValidation.getInt32(index, t, env);
 		byte b = getByte(i);
 		return new CInt(b, t);
 	}
@@ -543,8 +545,8 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		private final byte[] backing;
 		private String value = null;
 
-		public CArrayByteBacking(byte[] backing, Target t) {
-			super(t);
+		public CArrayByteBacking(byte[] backing, Target t, Environment env) {
+			super(t, null, env);
 			this.backing = backing;
 		}
 
@@ -554,18 +556,18 @@ public class CByteArray extends CArray implements Sizeable, ArrayAccess {
 		}
 
 		@Override
-		public void push(Mixed c, Integer i, Target t) {
+		public void push(Mixed c, Integer i, Target t, Environment env) {
 			throw new CREByteArrayReadOnlyException("Arrays copied from ByteArrays are read only", t);
 		}
 
 		@Override
-		public void set(Mixed index, Mixed c, Target t) {
+		public void set(Mixed index, Mixed c, Target t, Environment env) {
 			throw new CREByteArrayReadOnlyException("Arrays copied from ByteArrays are read only", t);
 		}
 
 		@Override
-		public Mixed get(Mixed index, Target t) {
-			int i = ArgumentValidation.getInt32(index, t);
+		public Mixed get(Mixed index, Target t, Environment env) {
+			int i = ArgumentValidation.getInt32(index, t, env);
 			try {
 				return new CInt(backing[i], t);
 			} catch (ArrayIndexOutOfBoundsException e) {

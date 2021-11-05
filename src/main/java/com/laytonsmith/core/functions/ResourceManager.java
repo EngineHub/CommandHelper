@@ -111,7 +111,7 @@ public class ResourceManager {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			ResourceTypes type;
 			Mixed data = null;
 			try {
@@ -145,7 +145,7 @@ public class ResourceManager {
 					break;
 				case RANDOM:
 					resource = new CResource<>(new Random(
-							ArgumentValidation.getInt(data, t)), new CResource.ResourceToString() {
+							ArgumentValidation.getInt(data, t, env)), new CResource.ResourceToString() {
 						@Override
 						public String getString(CResource res) {
 							return res.getResource().toString();

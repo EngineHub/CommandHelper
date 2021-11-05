@@ -33,6 +33,9 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.ReadOnlyException;
+import org.apache.oltu.oauth2.client.request.OAuthClientRequest;
+import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -51,8 +54,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.oltu.oauth2.client.request.OAuthClientRequest;
-import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 
 /**
  *
@@ -89,34 +90,34 @@ public class OAuth {
 				this.tokenUrl = tokenUrl;
 			}
 
-			CArray toOptionsArray() {
-				CArray ret = CArray.GetAssociativeArray(Target.UNKNOWN);
-				ret.set("authorizationUrl", authorizationUrl);
-				ret.set("clientId", clientId);
-				ret.set("scope", scope);
-				ret.set("tokenUrl", tokenUrl);
-				ret.set("clientSecret", clientSecret == null ? "" : clientSecret);
+			CArray toOptionsArray(Environment env) {
+				CArray ret = CArray.GetAssociativeArray(Target.UNKNOWN, null, env);
+				ret.set("authorizationUrl", authorizationUrl, env);
+				ret.set("clientId", clientId, env);
+				ret.set("scope", scope, env);
+				ret.set("tokenUrl", tokenUrl, env);
+				ret.set("clientSecret", clientSecret == null ? "" : clientSecret, env);
 				ret.set("successText", successText == null ? CNull.NULL : new CString(successText, Target.UNKNOWN),
-						Target.UNKNOWN);
+						Target.UNKNOWN, env);
 				if(extraHeaders != null) {
-					CArray eh = CArray.GetAssociativeArray(Target.UNKNOWN);
+					CArray eh = CArray.GetAssociativeArray(Target.UNKNOWN, null, env);
 					for(Map.Entry<String, String> e : extraHeaders.entrySet()) {
-						eh.set(e.getKey(), e.getValue());
+						eh.set(e.getKey(), e.getValue(), env);
 					}
-					ret.set("extraHeaders", eh, Target.UNKNOWN);
+					ret.set("extraHeaders", eh, Target.UNKNOWN, env);
 				}
 				if(refreshToken != null) {
-					ret.set("refreshToken", refreshToken);
+					ret.set("refreshToken", refreshToken, env);
 				}
 				if(forcePort != null) {
-					ret.set("forcePort", new CInt(forcePort, Target.UNKNOWN), Target.UNKNOWN);
+					ret.set("forcePort", new CInt(forcePort, Target.UNKNOWN), Target.UNKNOWN, env);
 				}
 				return ret;
 			}
 		}
 
 		public static String execute(Environment env, OAuthOptions options) {
-			return new x_get_oauth_token().exec(Target.UNKNOWN, env, options.toOptionsArray()).val();
+			return new x_get_oauth_token().exec(Target.UNKNOWN, env, options.toOptionsArray(env)).val();
 		}
 
 		@Override
@@ -137,33 +138,33 @@ public class OAuth {
 		@Override
 		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args) throws ConfigRuntimeException {
 			// TODO: Make this part support profiles
-			CArray options = ArgumentValidation.getArray(args[0], t);
-			String authorizationUrl = options.get("authorizationUrl", t).val();
-			String tokenUrl = options.get("tokenUrl", t).val();
-			String clientId = options.get("clientId", t).val();
-			String clientSecret = options.get("clientSecret", t).val();
-			String scope = options.get("scope", t).val();
-			String successText = Construct.nval(options.get("successText", t));
+			CArray options = ArgumentValidation.getArray(args[0], t, env);
+			String authorizationUrl = options.get("authorizationUrl", t, env).val();
+			String tokenUrl = options.get("tokenUrl", t, env).val();
+			String clientId = options.get("clientId", t, env).val();
+			String clientSecret = options.get("clientSecret", t, env).val();
+			String scope = options.get("scope", t, env).val();
+			String successText = Construct.nval(options.get("successText", t, env));
 			CArray extraHeaders1 = null;
 			if(options.containsKey("extraHeaders")) {
-				extraHeaders1 = ArgumentValidation.getArray(options.get("extraHeaders", t), t);
+				extraHeaders1 = ArgumentValidation.getArray(options.get("extraHeaders", t, env), t, env);
 			}
 			Map<String, String> extraHeaders = new HashMap<>();
 			if(extraHeaders1 != null) {
 				for(String key : extraHeaders1.stringKeySet()) {
-					extraHeaders.put(key, extraHeaders1.get(key, t).val());
+					extraHeaders.put(key, extraHeaders1.get(key, t, env).val());
 				}
 			}
 			Integer forcePort = null;
 			if(options.containsKey("forcePort")) {
-				forcePort = ArgumentValidation.getInt32(options.get("forcePort", t), t);
+				forcePort = ArgumentValidation.getInt32(options.get("forcePort", t, env), t, env);
 			}
 			try { // Persistence errors
 				String accessToken = getAccessToken(env, clientId);
 				if(accessToken == null) {
 					try {
 						if(options.containsKey("refreshToken")) {
-							String refreshToken = options.get("refreshToken", t).val();
+							String refreshToken = options.get("refreshToken", t, env).val();
 							storeRefreshToken(env, clientId, refreshToken);
 						}
 						String refreshToken;
@@ -209,12 +210,12 @@ public class OAuth {
 									CArray tokenJson = (CArray) new DataTransformations.json_decode()
 											.exec(t, env, new CString(tokenResponse.getContentAsString(), t));
 									if(tokenJson.containsKey("refresh_token")) {
-										storeRefreshToken(env, clientId, tokenJson.get("refresh_token", t).val());
+										storeRefreshToken(env, clientId, tokenJson.get("refresh_token", t, env).val());
 									}
-									accessToken = tokenJson.get("access_token", t).val();
+									accessToken = tokenJson.get("access_token", t, env).val();
 									int expiresIn;
 									if(tokenJson.containsKey("expires_in")) {
-										expiresIn = ArgumentValidation.getInt32(tokenJson.get("expires_in", t), t) * 1000;
+										expiresIn = ArgumentValidation.getInt32(tokenJson.get("expires_in", t, env), t, env) * 1000;
 									} else {
 										expiresIn = Integer.MAX_VALUE;
 									}
@@ -247,8 +248,9 @@ public class OAuth {
 							settings.setParameters(tokenParameters);
 							HTTPResponse tokenResponse = WebUtility.GetPage(new URL(tokenUrl), settings);
 							CArray tokenJson = (CArray) new DataTransformations.json_decode().exec(t, env, new CString(tokenResponse.getContentAsString(), t));
-							accessToken = tokenJson.get("access_token", t).val();
-							storeAccessToken(env, clientId, new AccessToken(accessToken, ArgumentValidation.getInt32(tokenJson.get("expires_in", t), t) * 1000));
+							accessToken = tokenJson.get("access_token", t, env).val();
+							storeAccessToken(env, clientId, new AccessToken(accessToken,
+									ArgumentValidation.getInt32(tokenJson.get("expires_in", t, env), t, env) * 1000));
 						}
 					} catch (InterruptedException ex) {
 						return CNull.NULL;
@@ -307,14 +309,14 @@ public class OAuth {
 		private static void storeRefreshToken(Environment env, String clientId, String refreshToken) throws DataSourceException, ReadOnlyException, IOException {
 			PersistenceNetwork pn = env.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
 			DaemonManager dm = env.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
-			pn.set(dm, new String[]{"oauth", getFormattedClientId(clientId), "refreshToken"}, formatValue(refreshToken));
+			pn.set(dm, new String[]{"oauth", getFormattedClientId(clientId), "refreshToken"}, formatValue(refreshToken, env));
 		}
 
 		private static void storeAccessToken(Environment env, String clientId, AccessToken token) throws DataSourceException, ReadOnlyException, IOException {
 			PersistenceNetwork pn = env.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
 			DaemonManager dm = env.getEnv(StaticRuntimeEnv.class).GetDaemonManager();
 			pn.set(dm, new String[]{"oauth", getFormattedClientId(clientId), "accessToken"},
-					formatValue(token.getExpiry().getTime() + "," + token.getAccessToken()));
+					formatValue(token.getExpiry().getTime() + "," + token.getAccessToken(), env));
 		}
 
 		/**
@@ -328,7 +330,7 @@ public class OAuth {
 			AccessToken aT = null;
 			String aTS = pn.get(new String[]{"oauth", getFormattedClientId(clientId), "accessToken"});
 			if(aTS != null) {
-				String[] aTSA = unformatValue(aTS).split(",", 2);
+				String[] aTSA = unformatValue(aTS, env).split(",", 2);
 				aT = new AccessToken(aTSA[1], new Date(Long.parseLong(aTSA[0])));
 			}
 			if(aT == null) {
@@ -350,7 +352,7 @@ public class OAuth {
 			if(v == null) {
 				return v;
 			} else {
-				return unformatValue(v);
+				return unformatValue(v, env);
 			}
 		}
 
@@ -358,17 +360,17 @@ public class OAuth {
 			return clientId.replaceAll("[^a-zA-Z0-9_\\.]", "");
 		}
 
-		private static String formatValue(String value) {
+		private static String formatValue(String value, Environment env) {
 			try {
-				return Construct.json_encode(new CString(value, Target.UNKNOWN), Target.UNKNOWN);
+				return Construct.json_encode(new CString(value, Target.UNKNOWN), Target.UNKNOWN, env);
 			} catch (MarshalException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
 
-		private static String unformatValue(String pnVersion) {
+		private static String unformatValue(String pnVersion, Environment env) {
 			try {
-				return Construct.json_decode(pnVersion, Target.UNKNOWN).val();
+				return Construct.json_decode(pnVersion, Target.UNKNOWN, env).val();
 			} catch (MarshalException ex) {
 				throw new RuntimeException(ex);
 			}
@@ -492,7 +494,7 @@ public class OAuth {
 
 		/**
 		 *
-		 * @param gEnv
+		 * @param env
 		 * @param clientId If set, clears just the one client id, if null, clears all tokens.
 		 */
 		public static void execute(Environment env, String clientId) {

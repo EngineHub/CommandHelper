@@ -72,12 +72,12 @@ public class ItemMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCItemStack is;
 			Mixed slot;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				slot = args[1];
 			} else {
 				slot = args[0];
@@ -86,12 +86,12 @@ public class ItemMeta {
 			if(slot instanceof CNull) {
 				is = p.getItemAt(null);
 			} else {
-				is = p.getItemAt(ArgumentValidation.getInt32(slot, t));
+				is = p.getItemAt(ArgumentValidation.getInt32(slot, t, env));
 			}
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + slot, t);
 			}
-			return ObjectGenerator.GetGenerator().itemMeta(is, t);
+			return ObjectGenerator.GetGenerator().itemMeta(is, t, env);
 		}
 
 		@Override
@@ -176,13 +176,13 @@ public class ItemMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			Mixed slot;
 			Mixed meta;
 			MCItemStack is;
 			if(args.length == 3) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				slot = args[1];
 				meta = args[2];
 			} else {
@@ -193,12 +193,12 @@ public class ItemMeta {
 			if(slot instanceof CNull) {
 				is = p.getItemAt(null);
 			} else {
-				is = p.getItemAt(ArgumentValidation.getInt32(slot, t));
+				is = p.getItemAt(ArgumentValidation.getInt32(slot, t, env));
 			}
 			if(is == null) {
 				throw new CRECastException("There is no item at slot " + slot, t);
 			}
-			is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(meta, is.getType(), t));
+			is.setItemMeta(ObjectGenerator.GetGenerator().itemMeta(meta, is.getType(), t, env));
 			return CVoid.VOID;
 		}
 
@@ -283,14 +283,14 @@ public class ItemMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
-				slot = ArgumentValidation.getInt32(args[1], t);
+				p = Static.GetPlayer(args[0], t, env);
+				slot = ArgumentValidation.getInt32(args[1], t, env);
 			} else {
-				slot = ArgumentValidation.getInt32(args[0], t);
+				slot = ArgumentValidation.getInt32(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			MCItemStack is = p.getItemAt(slot);
@@ -299,7 +299,7 @@ public class ItemMeta {
 			}
 			MCItemMeta im = is.getItemMeta();
 			if(im instanceof MCLeatherArmorMeta) {
-				return ObjectGenerator.GetGenerator().color(((MCLeatherArmorMeta) im).getColor(), t);
+				return ObjectGenerator.GetGenerator().color(((MCLeatherArmorMeta) im).getColor(), t, env);
 			} else {
 				throw new CRECastException("The item at slot " + slot + " is not leather armor.", t);
 			}
@@ -348,21 +348,21 @@ public class ItemMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
 			CArray color;
 			if(args.length == 3) {
-				p = Static.GetPlayer(args[0], t);
-				slot = ArgumentValidation.getInt32(args[1], t);
-				if(args[2].isInstanceOf(CArray.TYPE)) {
+				p = Static.GetPlayer(args[0], t, env);
+				slot = ArgumentValidation.getInt32(args[1], t, env);
+				if(args[2].isInstanceOf(CArray.TYPE, null, env)) {
 					color = (CArray) args[2];
 				} else {
 					throw new CREFormatException("Expected an array but received " + args[2] + " instead.", t);
 				}
 			} else {
-				slot = ArgumentValidation.getInt32(args[0], t);
-				if(args[1].isInstanceOf(CArray.TYPE)) {
+				slot = ArgumentValidation.getInt32(args[0], t, env);
+				if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 					color = (CArray) args[1];
 				} else {
 					throw new CREFormatException("Expected an array but received " + args[1] + " instead.", t);
@@ -375,7 +375,7 @@ public class ItemMeta {
 			}
 			MCItemMeta im = is.getItemMeta();
 			if(im instanceof MCLeatherArmorMeta) {
-				((MCLeatherArmorMeta) im).setColor(ObjectGenerator.GetGenerator().color(color, t));
+				((MCLeatherArmorMeta) im).setColor(ObjectGenerator.GetGenerator().color(color, t, env));
 				is.setItemMeta(im);
 			} else {
 				throw new CRECastException("The item at slot " + slot + " is not leather armor", t);
@@ -427,14 +427,14 @@ public class ItemMeta {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int slot;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
-				slot = ArgumentValidation.getInt32(args[1], t);
+				p = Static.GetPlayer(args[0], t, env);
+				slot = ArgumentValidation.getInt32(args[1], t, env);
 			} else {
-				slot = ArgumentValidation.getInt32(args[0], t);
+				slot = ArgumentValidation.getInt32(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			return CBoolean.get(p.getItemAt(slot).getItemMeta() instanceof MCLeatherArmorMeta);

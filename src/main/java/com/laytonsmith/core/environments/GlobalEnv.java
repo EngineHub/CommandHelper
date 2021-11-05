@@ -437,10 +437,10 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * @param t
 	 * @return
 	 */
-	public boolean GetRuntimeSetting(String name, boolean defaultValue, Target t) {
+	public boolean GetRuntimeSetting(String name, boolean defaultValue, Target t, Environment env) {
 		Mixed b = GetRuntimeSetting(name, CBoolean.get(defaultValue));
 		try {
-			return ArgumentValidation.getBooleanish(b, t);
+			return ArgumentValidation.getBooleanish(b, t, env);
 		} catch (CRECastException ex) {
 			MSLog.GetLogger().w(MSLog.Tags.RUNTIME, "Runtime setting \"" + name + "\" is not a boolean value, but was"
 					+ " expected to be. The default value is being used instead.", t);

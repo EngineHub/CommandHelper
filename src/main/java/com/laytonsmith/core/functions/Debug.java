@@ -715,8 +715,8 @@ public class Debug {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			Script.debugOutput = ArgumentValidation.getBoolean(args[0], t);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			Script.debugOutput = ArgumentValidation.getBoolean(args[0], t, env);
 			if(Script.debugOutput) {
 				StreamUtils.GetSystemOut().println(TermColors.BG_RED + "[[DEBUG]] set_debug_output(true)"
 						+ TermColors.RESET);

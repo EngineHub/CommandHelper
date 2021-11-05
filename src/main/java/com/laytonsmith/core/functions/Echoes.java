@@ -132,7 +132,7 @@ public class Echoes {
 			if(Static.getConsoleName().equals(args[0].val())) {
 				p = Static.getServer().getConsole();
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 			StringBuilder b = new StringBuilder();
 			for(int i = 1; i < args.length; i++) {
@@ -283,7 +283,7 @@ public class Echoes {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer player;
 			int fadein = 10;
 			int stay = 70;
@@ -291,17 +291,17 @@ public class Echoes {
 			int offset = 0;
 
 			if(args.length == 3 || args.length == 6) {
-				player = Static.GetPlayer(args[0].val(), t);
+				player = Static.GetPlayer(args[0].val(), t, env);
 				offset = 1;
 			} else {
-				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(player, t);
 			}
 
 			if(args.length > 3) {
-				fadein = ArgumentValidation.getInt32(args[2 + offset], t);
-				stay = ArgumentValidation.getInt32(args[3 + offset], t);
-				fadeout = ArgumentValidation.getInt32(args[4 + offset], t);
+				fadein = ArgumentValidation.getInt32(args[2 + offset], t, env);
+				stay = ArgumentValidation.getInt32(args[3 + offset], t, env);
+				fadeout = ArgumentValidation.getInt32(args[4 + offset], t, env);
 			}
 
 			player.sendTitle(Construct.nval(args[offset]), Construct.nval(args[1 + offset]), fadein, stay, fadeout);
@@ -610,7 +610,7 @@ public class Echoes {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			final MCPlayer player = Static.GetPlayer(args[0], t);
+			final MCPlayer player = Static.GetPlayer(args[0], t, env);
 			player.chat(args[1].val());
 			return CVoid.VOID;
 		}
@@ -673,7 +673,7 @@ public class Echoes {
 			}
 
 			// Handle "broadcast(message, recipientsArray)".
-			if(args[1].isInstanceOf(CArray.TYPE)) {
+			if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 
 				// Get the CArray and validate that it is non-associative.
 				CArray array = (CArray) args[1];
@@ -689,7 +689,7 @@ public class Echoes {
 						recipients.add(server.getConsole());
 					} else {
 						try {
-							recipients.add(Static.GetPlayer(p, t));
+							recipients.add(Static.GetPlayer(p, t, env));
 						} catch (CREPlayerOfflineException cre) {
 							// Ignore offline players.
 						}
@@ -755,9 +755,9 @@ public class Echoes {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String mes = Static.MCToANSIColors(args[0].val());
 			boolean prefix = ArgumentValidation.getBooleanish(env.getEnv(GlobalEnv.class)
-					.GetRuntimeSetting("function.console.prefix_default", CBoolean.TRUE), t);
+					.GetRuntimeSetting("function.console.prefix_default", CBoolean.TRUE), t, env);
 			if(args.length > 1) {
-				prefix = ArgumentValidation.getBoolean(args[1], t);
+				prefix = ArgumentValidation.getBoolean(args[1], t, env);
 			}
 
 			if(prefix) {
@@ -799,13 +799,13 @@ public class Echoes {
 		color color = new color();
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			Mixed text = args[0];
 			String symbol = "&";
 			if(args.length == 2) {
 				symbol = args[1].val();
 			}
-			if(text.isInstanceOf(CString.TYPE)) {
+			if(text.isInstanceOf(CString.TYPE, null, env)) {
 				String stext = text.val();
 				StringBuilder b = new StringBuilder();
 				int sl = symbol.length();
@@ -839,7 +839,7 @@ public class Echoes {
 							break;
 						}
 						if(Echoes.color.COLOR_SYMBOLS.contains(c)) {
-							b.append(color.exec(t, environment, new CString(c, t)));
+							b.append(color.exec(t, env, new CString(c, t)));
 							i += sl;
 						} else {
 							if(c.equals('#')) {

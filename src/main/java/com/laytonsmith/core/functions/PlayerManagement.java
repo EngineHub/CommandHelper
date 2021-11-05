@@ -49,6 +49,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -111,7 +112,7 @@ public class PlayerManagement {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 
 			// assuming p is not null, just return the name set by the CommandSender
@@ -185,18 +186,18 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCOfflinePlayer pl = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCOfflinePlayer pl = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			boolean dashless = false;
 			if(args.length >= 1) {
 				try {
-					pl = Static.GetPlayer(args[0], t);
+					pl = Static.GetPlayer(args[0], t, env);
 				} catch (ConfigRuntimeException cre) {
-					pl = Static.GetUser(args[0], t);
+					pl = Static.GetUser(args[0], t, env);
 				}
 			}
 			if(args.length == 2) {
-				dashless = ArgumentValidation.getBoolean(args[1], t);
+				dashless = ArgumentValidation.getBoolean(args[1], t, env);
 			}
 			if(pl == null) {
 				throw new CREPlayerOfflineException("No matching player could be found.", t);
@@ -250,10 +251,10 @@ public class PlayerManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			CArray players = new CArray(t);
+			CArray players = new CArray(t, null, env);
 			if(args.length == 0) {
 				for(MCPlayer player : Static.getServer().getOnlinePlayers()) {
-					players.push(new CString(player.getName(), t), t);
+					players.push(new CString(player.getName(), t), t, env);
 				}
 			} else {
 				MCWorld world = Static.getServer().getWorld(args[0].val());
@@ -262,7 +263,7 @@ public class PlayerManagement {
 				}
 				for(MCPlayer player : world.getPlayers()) {
 					if(player.isOnline()) {
-						players.push(new CString(player.getName(), t), t);
+						players.push(new CString(player.getName(), t), t, env);
 					}
 				}
 			}
@@ -339,23 +340,23 @@ public class PlayerManagement {
 			double dist;
 
 			if(args.length == 1) {
-				dist = ArgumentValidation.getDouble(args[0], t);
+				dist = ArgumentValidation.getDouble(args[0], t, env);
 				Static.AssertPlayerNonNull(p, t);
 				loc = p.getLocation();
 			} else {
-				if(!(args[0].isInstanceOf(CArray.TYPE))) {
+				if(!(args[0].isInstanceOf(CArray.TYPE, null, env))) {
 					throw new CRECastException("Expecting an array at parameter 1 of players_in_radius", t);
 				}
 
-				loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
-				dist = ArgumentValidation.getDouble(args[1], t);
+				loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t, env);
+				dist = ArgumentValidation.getDouble(args[1], t, env);
 			}
 
-			CArray sa = new CArray(t);
+			CArray sa = new CArray(t, null, env);
 
 			for(MCPlayer pa1 : pa) {
 				if(inRadius(pa1, dist, loc)) {
-					sa.push(new CString(pa1.getName(), t), t);
+					sa.push(new CString(pa1.getName(), t), t, env);
 				}
 			}
 
@@ -409,7 +410,7 @@ public class PlayerManagement {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 			MCLocation location = p.getLocation();
 			if(location == null) {
@@ -417,7 +418,7 @@ public class PlayerManagement {
 						"Could not find the location of the player (are you running in cmdline mode?)", t);
 			}
 			location.setY(location.getY() - 1);
-			return ObjectGenerator.GetGenerator().location(location);
+			return ObjectGenerator.GetGenerator().location(location, env);
 		}
 
 		@Override
@@ -496,18 +497,18 @@ public class PlayerManagement {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l;
 			if(args.length <= 2) {
-				if(!(args[args.length - 1].isInstanceOf(CArray.TYPE))) {
+				if(!(args[args.length - 1].isInstanceOf(CArray.TYPE, null, env))) {
 					throw new CRECastException("Expecting an array at parameter " + args.length + " of set_ploc", t);
 				}
 				CArray ca = (CArray) args[args.length - 1];
 
 				if(args.length == 2) {
-					p = Static.GetPlayer(args[0], t);
+					p = Static.GetPlayer(args[0], t, env);
 				} else {
 					Static.AssertPlayerNonNull(p, t);
 				}
 
-				l = ObjectGenerator.GetGenerator().location(ca, p.getWorld(), t);
+				l = ObjectGenerator.GetGenerator().location(ca, p.getWorld(), t, env);
 
 				// set yaw/pitch to current player values if not given
 				MCLocation ploc = p.getLocation();
@@ -524,14 +525,14 @@ public class PlayerManagement {
 				}
 			} else {
 				if(args.length == 4) {
-					p = Static.GetPlayer(args[0], t);
+					p = Static.GetPlayer(args[0], t, env);
 				} else {
 					Static.AssertPlayerNonNull(p, t);
 				}
 
-				double x = ArgumentValidation.getNumber(args[args.length - 3], t);
-				double y = ArgumentValidation.getNumber(args[args.length - 2], t);
-				double z = ArgumentValidation.getNumber(args[args.length - 1], t);
+				double x = ArgumentValidation.getNumber(args[args.length - 3], t, env);
+				double y = ArgumentValidation.getNumber(args[args.length - 2], t, env);
+				double z = ArgumentValidation.getNumber(args[args.length - 1], t, env);
 				float yaw = 0;
 				float pitch = 0;
 				MCLocation ploc = p.getLocation();
@@ -592,14 +593,14 @@ public class PlayerManagement {
 			HashSet<MCMaterial> trans = null;
 			int transparentIndex = -1;
 			if(args.length == 1) {
-				if(args[0].isInstanceOf(CArray.TYPE)) {
+				if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 					transparentIndex = 0;
 				} else {
-					p = Static.GetPlayer(args[0], t);
+					p = Static.GetPlayer(args[0], t, env);
 				}
 			} else if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
-				if(args[1].isInstanceOf(CArray.TYPE)) {
+				p = Static.GetPlayer(args[0], t, env);
+				if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 					transparentIndex = 1;
 				} else {
 					throw new CREFormatException("An array was expected for argument 2 but received " + args[1], t);
@@ -615,7 +616,7 @@ public class PlayerManagement {
 						continue;
 					}
 					try {
-						material = StaticLayer.GetMaterialFromLegacy(ArgumentValidation.getInt16(mat, t), 0);
+						material = StaticLayer.GetMaterialFromLegacy(ArgumentValidation.getInt16(mat, t, env), 0);
 						if(material != null) {
 							MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The id \"" + mat.val() + "\" is deprecated."
 									+ " Converted to \"" + material.getName() + "\"", t);
@@ -639,7 +640,7 @@ public class PlayerManagement {
 			if(b == null) {
 				throw new CRERangeException("No block in sight, or block too far", t);
 			} else {
-				return ObjectGenerator.GetGenerator().location(b.getLocation(), false);
+				return ObjectGenerator.GetGenerator().location(b.getLocation(), false, env);
 			}
 		}
 
@@ -686,17 +687,17 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length > 0) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			MCBlock b = p.getTargetSpace(512);
 			if(b == null) {
 				throw new CRERangeException("No block in sight, or block too far", t);
 			}
-			return ObjectGenerator.GetGenerator().location(b.getLocation(), false);
+			return ObjectGenerator.GetGenerator().location(b.getLocation(), false, env);
 		}
 
 		@Override
@@ -740,7 +741,7 @@ public class PlayerManagement {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if(args.length == 1) {
-				m = Static.GetPlayer(args[0], t);
+				m = Static.GetPlayer(args[0], t, env);
 			} else {
 				if(p instanceof MCPlayer) {
 					m = (MCPlayer) p;
@@ -799,10 +800,10 @@ public class PlayerManagement {
 				sender = Static.GetCommandSender(args[0].val(), t);
 			}
 
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, null, env);
 			if(sender != null) {
 				for(String group : sender.getGroups()) {
-					ret.push(new CString(group, t), t);
+					ret.push(new CString(group, t), t, env);
 				}
 			}
 			return ret;
@@ -916,9 +917,9 @@ public class PlayerManagement {
 				index = -1;
 			} else {
 				player = args[0].val();
-				index = ArgumentValidation.getInt32(args[1], t);
+				index = ArgumentValidation.getInt32(args[1], t, env);
 			}
-			MCPlayer p = Static.GetPlayer(player, t);
+			MCPlayer p = Static.GetPlayer(player, t, env);
 
 			Static.AssertPlayerNonNull(p, t);
 			int maxIndex = 20;
@@ -938,6 +939,8 @@ public class PlayerManagement {
 							"Could not find the location of the player (are you running in cmdline mode?)", t);
 				}
 				retVals.add(new CArray(t,
+						GenericParameters.start(CArray.TYPE)
+								.addParameter(CDouble.TYPE, null).build(), env,
 						new CDouble(loc.getX(), t),
 						new CDouble(loc.getY() - 1, t),
 						new CDouble(loc.getZ(), t)));
@@ -953,7 +956,9 @@ public class PlayerManagement {
 				if(b == null) {
 					retVals.add(CNull.NULL);
 				} else {
-					retVals.add(new CArray(t, new CInt(b.getX(), t), new CInt(b.getY(), t), new CInt(b.getZ(), t)));
+					retVals.add(new CArray(t, GenericParameters.start(CArray.TYPE)
+							.addParameter(CInt.TYPE, null).build(), env,
+							new CInt(b.getX(), t), new CInt(b.getY(), t), new CInt(b.getZ(), t)));
 				}
 			}
 			if(index == 3 || index == -1) {
@@ -990,9 +995,10 @@ public class PlayerManagement {
 			}
 			if(index == 9 || index == -1) {
 				//MCPlayer groups
-				CArray a = new CArray(t);
+				CArray a = new CArray(t, GenericParameters.start(CArray.TYPE)
+						.addParameter(CString.TYPE, null).build(), env);
 				for(String group : p.getGroups()) {
-					a.push(new CString(group, t), t);
+					a.push(new CString(group, t), t, env);
 				}
 				retVals.add(a);
 			}
@@ -1043,9 +1049,9 @@ public class PlayerManagement {
 			if(retVals.size() == 1) {
 				return retVals.get(0);
 			} else {
-				CArray ca = new CArray(t);
+				CArray ca = new CArray(t, null, env);
 				for(Mixed c : retVals) {
-					ca.push(c, t);
+					ca.push(c, t, env);
 				}
 				return ca;
 			}
@@ -1100,7 +1106,7 @@ public class PlayerManagement {
 					m = (MCPlayer) p;
 				}
 			} else {
-				m = Static.GetPlayer(args[0], t);
+				m = Static.GetPlayer(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			return new CString(m.getWorld().getName(), t);
@@ -1158,7 +1164,7 @@ public class PlayerManagement {
 				}
 			}
 			if(args.length >= 1) {
-				m = Static.GetPlayer(args[0], t);
+				m = Static.GetPlayer(args[0], t, env);
 			}
 			if(args.length >= 2) {
 				message = args[1].val();
@@ -1215,7 +1221,7 @@ public class PlayerManagement {
 				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(m, t);
 			} else {
-				m = Static.GetPlayer(args[0].val(), t);
+				m = Static.GetPlayer(args[0].val(), t, env);
 			}
 			return new CString(m.getDisplayName(), t);
 		}
@@ -1270,7 +1276,7 @@ public class PlayerManagement {
 				Static.AssertPlayerNonNull(player, t);
 				name = args[0].val();
 			} else {
-				player = Static.GetPlayer(args[0], t);
+				player = Static.GetPlayer(args[0], t, env);
 				name = args[1].val();
 			}
 			player.setDisplayName(name);
@@ -1324,7 +1330,7 @@ public class PlayerManagement {
 				player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(player, t);
 			} else {
-				player = Static.GetPlayer(args[0], t);
+				player = Static.GetPlayer(args[0], t, env);
 			}
 			player.setDisplayName(player.getName());
 			return CVoid.VOID;
@@ -1399,8 +1405,8 @@ public class PlayerManagement {
 					}
 				} else {
 					//if it's a number, we are setting F. Otherwise, it's a getter for the MCPlayer specified.
-					if(!(args[0].isInstanceOf(CInt.TYPE))) {
-						MCPlayer p2 = Static.GetPlayer(args[0], t);
+					if(!(args[0].isInstanceOf(CInt.TYPE, null, env))) {
+						MCPlayer p2 = Static.GetPlayer(args[0], t, env);
 						l = p2.getLocation();
 					}
 				}
@@ -1411,7 +1417,9 @@ public class PlayerManagement {
 						yaw += 360.0f;
 					}
 					float pitch = l.getPitch();
-					return new CArray(t, new CDouble(yaw, t), new CDouble(pitch, t));
+					return new CArray(t, GenericParameters.start(CArray.TYPE)
+							.addParameter(CDouble.TYPE, null).build(), env,
+							new CDouble(yaw, t), new CDouble(pitch, t));
 				}
 			}
 			//Setter
@@ -1429,7 +1437,7 @@ public class PlayerManagement {
 					}
 					pitch = loc.getPitch();
 				}
-				int g = ArgumentValidation.getInt32(args[0], t);
+				int g = ArgumentValidation.getInt32(args[0], t, env);
 				if(g < 0 || g > 3) {
 					throw new CRERangeException("The F specifed must be from 0 to 3", t);
 				}
@@ -1438,17 +1446,17 @@ public class PlayerManagement {
 				//Either we are setting this MCPlayer's pitch and yaw, or we are setting the specified MCPlayer's F.
 				//Check to see if args[0] is a number
 				try {
-					yaw = (float) ArgumentValidation.getNumber(args[0], t);
-					pitch = (float) ArgumentValidation.getNumber(args[1], t);
+					yaw = (float) ArgumentValidation.getNumber(args[0], t, env);
+					pitch = (float) ArgumentValidation.getNumber(args[1], t, env);
 					//It's the yaw, pitch variation
 					if(p instanceof MCPlayer) {
 						toSet = (MCPlayer) p;
 					}
 				} catch (CRECastException e) {
 					//It's the MCPlayer, F variation
-					toSet = Static.GetPlayer(args[0], t);
+					toSet = Static.GetPlayer(args[0], t, env);
 					pitch = toSet.getLocation().getPitch();
-					int g = ArgumentValidation.getInt32(args[1], t);
+					int g = ArgumentValidation.getInt32(args[1], t, env);
 					if(g < 0 || g > 3) {
 						throw new CRERangeException("The F specifed must be from 0 to 3", t);
 					}
@@ -1456,9 +1464,9 @@ public class PlayerManagement {
 				}
 			} else if(args.length == 3) {
 				//It's the MCPlayer, yaw, pitch variation
-				toSet = Static.GetPlayer(args[0], t);
-				yaw = (float) ArgumentValidation.getNumber(args[1], t);
-				pitch = (float) ArgumentValidation.getNumber(args[2], t);
+				toSet = Static.GetPlayer(args[0], t, env);
+				yaw = (float) ArgumentValidation.getNumber(args[1], t, env);
+				pitch = (float) ArgumentValidation.getNumber(args[2], t, env);
 			}
 
 			//Error check our data
@@ -1534,7 +1542,7 @@ public class PlayerManagement {
 				m = (MCPlayer) p;
 			}
 			if(args.length == 1) {
-				m = Static.GetPlayer(args[0], t);
+				m = Static.GetPlayer(args[0], t, env);
 			}
 
 			Static.AssertPlayerNonNull(m, t);
@@ -1597,7 +1605,7 @@ public class PlayerManagement {
 				m = (MCPlayer) p;
 			}
 			if(args.length == 2) {
-				m = Static.GetPlayer(args[0], t);
+				m = Static.GetPlayer(args[0], t, env);
 				mode = args[1].val();
 			} else {
 				mode = args[0].val();
@@ -1661,7 +1669,7 @@ public class PlayerManagement {
 				m = (MCPlayer) p;
 			}
 			if(args.length == 1) {
-				m = Static.GetPlayer(args[0].val(), t);
+				m = Static.GetPlayer(args[0].val(), t, env);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			return new CInt(java.lang.Math.round(m.getExp() * 100), t);
@@ -1716,10 +1724,10 @@ public class PlayerManagement {
 				m = (MCPlayer) p;
 			}
 			if(args.length == 2) {
-				m = Static.GetPlayer(args[0].val(), t);
-				xp = ArgumentValidation.getInt32(args[1], t);
+				m = Static.GetPlayer(args[0].val(), t, env);
+				xp = ArgumentValidation.getInt32(args[1], t, env);
 			} else {
-				xp = ArgumentValidation.getInt32(args[0], t);
+				xp = ArgumentValidation.getInt32(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			if(xp < 0 || xp > 100) {
@@ -1769,18 +1777,18 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCCommandSender p = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			int xp;
 			if(p instanceof MCPlayer) {
 				m = (MCPlayer) p;
 			}
 			if(args.length == 2) {
-				m = Static.GetPlayer(args[0].val(), t);
-				xp = ArgumentValidation.getInt32(args[1], t);
+				m = Static.GetPlayer(args[0].val(), t, env);
+				xp = ArgumentValidation.getInt32(args[1], t, env);
 			} else {
-				xp = ArgumentValidation.getInt32(args[0], t);
+				xp = ArgumentValidation.getInt32(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.giveExp(xp);
@@ -1835,7 +1843,7 @@ public class PlayerManagement {
 				m = (MCPlayer) p;
 			}
 			if(args.length == 1) {
-				m = Static.GetPlayer(args[0].val(), t);
+				m = Static.GetPlayer(args[0].val(), t, env);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			return new CInt(m.getLevel(), t);
@@ -1889,10 +1897,10 @@ public class PlayerManagement {
 				m = (MCPlayer) p;
 			}
 			if(args.length == 2) {
-				m = Static.GetPlayer(args[0].val(), t);
-				level = ArgumentValidation.getInt32(args[1], t);
+				m = Static.GetPlayer(args[0].val(), t, env);
+				level = ArgumentValidation.getInt32(args[1], t, env);
 			} else {
-				level = ArgumentValidation.getInt32(args[0], t);
+				level = ArgumentValidation.getInt32(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setLevel(level);
@@ -1946,7 +1954,7 @@ public class PlayerManagement {
 				m = (MCPlayer) p;
 			}
 			if(args.length == 1) {
-				m = Static.GetPlayer(args[0].val(), t);
+				m = Static.GetPlayer(args[0].val(), t, env);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			int texp = m.getExpAtLevel() + java.lang.Math.round(m.getExpToLevel() * m.getExp());
@@ -2001,10 +2009,10 @@ public class PlayerManagement {
 				m = (MCPlayer) p;
 			}
 			if(args.length == 2) {
-				m = Static.GetPlayer(args[0].val(), t);
-				xp = ArgumentValidation.getInt32(args[1], t);
+				m = Static.GetPlayer(args[0].val(), t, env);
+				xp = ArgumentValidation.getInt32(args[1], t, env);
 			} else {
-				xp = ArgumentValidation.getInt32(args[0], t);
+				xp = ArgumentValidation.getInt32(args[0], t, env);
 			}
 			if(xp < 0) {
 				throw new CRERangeException("Experience can't be negative", t);
@@ -2065,7 +2073,7 @@ public class PlayerManagement {
 				m = (MCPlayer) p;
 			}
 			if(args.length == 1) {
-				m = Static.GetPlayer(args[0].val(), t);
+				m = Static.GetPlayer(args[0].val(), t, env);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			return new CInt(m.getFoodLevel(), t);
@@ -2119,10 +2127,10 @@ public class PlayerManagement {
 				m = (MCPlayer) p;
 			}
 			if(args.length == 2) {
-				m = Static.GetPlayer(args[0].val(), t);
-				level = ArgumentValidation.getInt32(args[1], t);
+				m = Static.GetPlayer(args[0].val(), t, env);
+				level = ArgumentValidation.getInt32(args[1], t, env);
 			} else {
-				level = ArgumentValidation.getInt32(args[0], t);
+				level = ArgumentValidation.getInt32(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setFoodLevel(level);
@@ -2180,10 +2188,10 @@ public class PlayerManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer m = Static.GetPlayer(args[0].val(), t);
+			MCPlayer m = Static.GetPlayer(args[0].val(), t, env);
 
 			MCPotionEffectType type = null;
-			if(args[1].isInstanceOf(CString.TYPE)) {
+			if(args[1].isInstanceOf(CString.TYPE, null, env)) {
 				try {
 					type = MCPotionEffectType.valueOf(args[1].val().toUpperCase());
 				} catch (IllegalArgumentException ex) {
@@ -2192,7 +2200,7 @@ public class PlayerManagement {
 			}
 			if(type == null) {
 				try {
-					type = MCPotionEffectType.getById(ArgumentValidation.getInt32(args[1], t));
+					type = MCPotionEffectType.getById(ArgumentValidation.getInt32(args[1], t, env));
 				} catch (CRECastException | IllegalArgumentException ex) {
 					throw new CREFormatException("Invalid potion effect type: " + args[1].val(), t);
 				}
@@ -2204,10 +2212,10 @@ public class PlayerManagement {
 			boolean particles = true;
 			boolean icon = true;
 			if(args.length >= 3) {
-				strength = ArgumentValidation.getInt32(args[2], t);
+				strength = ArgumentValidation.getInt32(args[2], t, env);
 
 				if(args.length >= 4) {
-					seconds = ArgumentValidation.getDouble(args[3], t);
+					seconds = ArgumentValidation.getDouble(args[3], t, env);
 					if(seconds < 0.0) {
 						throw new CRERangeException("Seconds cannot be less than 0.0", t);
 					} else if(seconds * 20 > Integer.MAX_VALUE) {
@@ -2215,13 +2223,13 @@ public class PlayerManagement {
 					}
 
 					if(args.length >= 5) {
-						ambient = ArgumentValidation.getBoolean(args[4], t);
+						ambient = ArgumentValidation.getBoolean(args[4], t, env);
 
 						if(args.length >= 6) {
-							particles = ArgumentValidation.getBoolean(args[5], t);
+							particles = ArgumentValidation.getBoolean(args[5], t, env);
 
 							if(args.length == 7) {
-								icon = ArgumentValidation.getBoolean(args[6], t);
+								icon = ArgumentValidation.getBoolean(args[6], t, env);
 							}
 						}
 					}
@@ -2270,13 +2278,13 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length > 0) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
-			return ObjectGenerator.GetGenerator().potions(p.getEffects(), t);
+			return ObjectGenerator.GetGenerator().potions(p.getEffects(), t, env);
 		}
 
 		@Override
@@ -2329,7 +2337,7 @@ public class PlayerManagement {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 			p.removeEffects();
 			return CVoid.VOID;
@@ -2401,7 +2409,7 @@ public class PlayerManagement {
 				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(m, t);
 			} else {
-				m = Static.GetPlayer(args[0].val(), t);
+				m = Static.GetPlayer(args[0].val(), t, env);
 			}
 			return CBoolean.get(m.isSneaking());
 		}
@@ -2452,7 +2460,7 @@ public class PlayerManagement {
 				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(m, t);
 			} else {
-				m = Static.GetPlayer(args[0].val(), t);
+				m = Static.GetPlayer(args[0].val(), t, env);
 			}
 			return new CDouble(m.getHealth(), t);
 		}
@@ -2506,10 +2514,10 @@ public class PlayerManagement {
 			}
 			double health;
 			if(args.length == 2) {
-				m = Static.GetPlayer(args[0].val(), t);
-				health = ArgumentValidation.getDouble(args[1], t);
+				m = Static.GetPlayer(args[0].val(), t, env);
+				health = ArgumentValidation.getDouble(args[1], t, env);
 			} else {
-				health = ArgumentValidation.getDouble(args[0], t);
+				health = ArgumentValidation.getDouble(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			if(health < 0 || health > m.getMaxHealth()) {
@@ -2566,7 +2574,7 @@ public class PlayerManagement {
 			try {
 				//Static.GetPlayer() autocompletes names, which we don't want in this function,
 				//however we have to check if this is an injected player first.
-				MCPlayer p = Static.GetPlayer(args[0], t);
+				MCPlayer p = Static.GetPlayer(args[0], t, env);
 				//Now we must check if the name was exact. Skip this if the argument is a UUID.
 				if(args[0].val().length() <= 16 && !p.getName().equalsIgnoreCase(args[0].val())) {
 					p = Static.getServer().getPlayerExact(args[0].val());
@@ -2620,7 +2628,7 @@ public class PlayerManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
+			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t, env);
 			return CBoolean.get(pl != null && pl.isWhitelisted());
 		}
 	}
@@ -2666,8 +2674,8 @@ public class PlayerManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
-			boolean whitelist = ArgumentValidation.getBoolean(args[1], t);
+			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t, env);
+			boolean whitelist = ArgumentValidation.getBoolean(args[1], t, env);
 			if(pl == null) {
 				throw new CRENotFoundException(
 						this.getName() + " could not get the offline player (are you running in cmdline mode?)", t);
@@ -2729,7 +2737,7 @@ public class PlayerManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t);
+			MCOfflinePlayer pl = Static.GetUser(args[0].val(), t, env);
 			if(pl == null) {
 				throw new CRENotFoundException(
 						this.getName() + " could not get the offline player (are you running in cmdline mode?)", t);
@@ -2785,12 +2793,12 @@ public class PlayerManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String target = args[0].val();
-			boolean ban = ArgumentValidation.getBoolean(args[1], t);
+			boolean ban = ArgumentValidation.getBoolean(args[1], t, env);
 			String reason = "";
 			String source = "";
 
 			if(target.length() > 16) {
-				MCOfflinePlayer pl = Static.GetUser(target, t);
+				MCOfflinePlayer pl = Static.GetUser(target, t, env);
 				if(pl == null) {
 					throw new CRENotFoundException(
 							this.getName() + " could not get the offline player (are you running in cmdline mode?)", t);
@@ -2865,10 +2873,10 @@ public class PlayerManagement {
 				m = (MCPlayer) p;
 			}
 			if(args.length == 2) {
-				m = Static.GetPlayer(args[0], t);
-				speed = ArgumentValidation.getDouble(args[1], t);
+				m = Static.GetPlayer(args[0], t, env);
+				speed = ArgumentValidation.getDouble(args[1], t, env);
 			} else {
-				speed = ArgumentValidation.getDouble(args[0], t);
+				speed = ArgumentValidation.getDouble(args[0], t, env);
 			}
 
 			if(speed < -1 || speed > 1) {
@@ -2929,7 +2937,7 @@ public class PlayerManagement {
 			}
 
 			if(args.length == 1) {
-				m = Static.GetPlayer(args[0], t);
+				m = Static.GetPlayer(args[0], t, env);
 			}
 
 			Static.AssertPlayerNonNull(m, t);
@@ -2987,10 +2995,10 @@ public class PlayerManagement {
 				m = (MCPlayer) p;
 			}
 			if(args.length == 2) {
-				m = Static.GetPlayer(args[0], t);
-				speed = ArgumentValidation.getDouble(args[1], t);
+				m = Static.GetPlayer(args[0], t, env);
+				speed = ArgumentValidation.getDouble(args[1], t, env);
 			} else {
-				speed = ArgumentValidation.getDouble(args[0], t);
+				speed = ArgumentValidation.getDouble(args[0], t, env);
 			}
 
 			if(speed < -1 || speed > 1) {
@@ -3051,7 +3059,7 @@ public class PlayerManagement {
 			}
 
 			if(args.length == 1) {
-				m = Static.GetPlayer(args[0], t);
+				m = Static.GetPlayer(args[0], t, env);
 			}
 
 			Static.AssertPlayerNonNull(m, t);
@@ -3099,10 +3107,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
-				m = Static.GetPlayer(args[0].val(), t);
+				m = Static.GetPlayer(args[0].val(), t, env);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			return CBoolean.get(m.isOp());
@@ -3148,14 +3156,14 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l;
 			if(args.length == 1) {
-				l = ObjectGenerator.GetGenerator().location(args[0], null, t);
+				l = ObjectGenerator.GetGenerator().location(args[0], null, t, env);
 			} else {
-				m = Static.GetPlayer(args[0].val(), t);
-				l = ObjectGenerator.GetGenerator().location(args[1], null, t);
+				m = Static.GetPlayer(args[0].val(), t, env);
+				l = ObjectGenerator.GetGenerator().location(args[1], null, t, env);
 			}
 			if(m == null) {
 				throw new CREPlayerOfflineException("That player is not online", t);
@@ -3163,7 +3171,7 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(m, t);
 			MCLocation old = m.getCompassTarget();
 			m.setCompassTarget(l);
-			return ObjectGenerator.GetGenerator().location(old);
+			return ObjectGenerator.GetGenerator().location(old, env);
 		}
 	}
 
@@ -3206,13 +3214,13 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
-				m = Static.GetPlayer(args[0].val(), t);
+				m = Static.GetPlayer(args[0].val(), t, env);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			return ObjectGenerator.GetGenerator().location(m.getCompassTarget(), false);
+			return ObjectGenerator.GetGenerator().location(m.getCompassTarget(), false, env);
 		}
 	}
 
@@ -3256,10 +3264,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			int left = p.getRemainingFireTicks();
@@ -3307,23 +3315,23 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			Mixed ticks;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				ticks = args[1];
 			} else {
 				ticks = args[0];
 			}
 			int tick = 0;
-			if(ticks.isInstanceOf(CBoolean.TYPE)) {
+			if(ticks.isInstanceOf(CBoolean.TYPE, null, env)) {
 				boolean value = ((CBoolean) ticks).getBoolean();
 				if(value) {
 					tick = 20;
 				}
 			} else {
-				tick = ArgumentValidation.getInt32(ticks, t);
+				tick = ArgumentValidation.getInt32(ticks, t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			p.setRemainingFireTicks(tick);
@@ -3365,10 +3373,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			return CBoolean.get(p.getAllowFlight());
@@ -3415,14 +3423,14 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			boolean flight;
 			if(args.length == 1) {
-				flight = ArgumentValidation.getBoolean(args[0], t);
+				flight = ArgumentValidation.getBoolean(args[0], t, env);
 			} else {
-				p = Static.GetPlayer(args[0], t);
-				flight = ArgumentValidation.getBoolean(args[1], t);
+				p = Static.GetPlayer(args[0], t, env);
+				flight = ArgumentValidation.getBoolean(args[1], t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			p.setAllowFlight(flight);
@@ -3500,17 +3508,17 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = null;
 			boolean relative = false;
-			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			}
 			if(args.length >= 2) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 			if(args.length == 3) {
-				relative = ArgumentValidation.getBoolean(args[2], t);
+				relative = ArgumentValidation.getBoolean(args[2], t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			long time = 0;
@@ -3596,13 +3604,13 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = null;
-			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			}
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			return new CInt(p.getPlayerTime(), t);
@@ -3648,13 +3656,13 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p = null;
-			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null) {
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			}
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			p.resetPlayerTime();
@@ -3681,10 +3689,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
-				m = Static.GetPlayer(args[0], t);
+				m = Static.GetPlayer(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			return CBoolean.get(m.getPlayerWeather() == MCWeather.DOWNFALL);
@@ -3731,17 +3739,17 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
 			if(args.length == 2) {
-				m = Static.GetPlayer(args[0], t);
+				m = Static.GetPlayer(args[0], t, env);
 				offset = 1;
 			}
 			Static.AssertPlayerNonNull(m, t);
 			if(args[offset] instanceof CNull) {
 				m.resetPlayerWeather();
-			} else if(ArgumentValidation.getBoolean(args[offset], t)) {
+			} else if(ArgumentValidation.getBoolean(args[offset], t, env)) {
 				m.setPlayerWeather(MCWeather.DOWNFALL);
 			} else {
 				m.setPlayerWeather(MCWeather.CLEAR);
@@ -3791,14 +3799,14 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer m;
 			String listName;
 			if(args.length == 2) {
-				m = Static.GetPlayer(args[0], t);
+				m = Static.GetPlayer(args[0], t, env);
 				listName = Construct.nval(args[1]);
 			} else {
-				m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(m, t);
 				listName = Construct.nval(args[0]);
 			}
@@ -3847,10 +3855,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			return new CString(p.getPlayerListName(), t);
@@ -3914,12 +3922,12 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			}
 			Vector3D velocity = p.getVelocity();
@@ -3927,8 +3935,8 @@ public class PlayerManagement {
 				throw new CRENotFoundException(
 						"The players velocity could not be found (Are you running in cmdline mode?)", t);
 			}
-			CArray vector = ObjectGenerator.GetGenerator().vector(velocity, t);
-			vector.set("magnitude", new CDouble(velocity.length(), t), t);
+			CArray vector = ObjectGenerator.GetGenerator().vector(velocity, t, env);
+			vector.set("magnitude", new CDouble(velocity.length(), t), t, env);
 			return vector;
 		}
 
@@ -3958,8 +3966,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			Vector3D v;
 			int offset = 0;
 			switch(args.length) {
@@ -3967,20 +3975,20 @@ public class PlayerManagement {
 				case 2: {
 					if(args.length == 2) {
 						offset = 1;
-						p = Static.GetPlayer(args[0], t);
+						p = Static.GetPlayer(args[0], t, env);
 					}
-					v = ObjectGenerator.GetGenerator().vector(args[offset], t);
+					v = ObjectGenerator.GetGenerator().vector(args[offset], t, env);
 					break;
 				}
 				case 3:
 				case 4: {
 					if(args.length == 4) {
 						offset = 1;
-						p = Static.GetPlayer(args[0], t);
+						p = Static.GetPlayer(args[0], t, env);
 					}
-					double x = ArgumentValidation.getDouble(args[offset], t);
-					double y = ArgumentValidation.getDouble(args[offset + 1], t);
-					double z = ArgumentValidation.getDouble(args[offset + 2], t);
+					double x = ArgumentValidation.getDouble(args[offset], t, env);
+					double y = ArgumentValidation.getDouble(args[offset + 1], t, env);
+					double z = ArgumentValidation.getDouble(args[offset + 2], t, env);
 					v = new Vector3D(x, y, z);
 					break;
 				}
@@ -4046,28 +4054,28 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
 			if(args.length == 3 || args.length == 6) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				offset = 1;
 			}
 			Static.AssertPlayerNonNull(p, t);
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t, env);
 
 			String[] lines = new String[4];
 
 			if(args.length == 2 || args.length == 3) {
 				//Lines are in an array
-				CArray lineArray = ArgumentValidation.getArray(args[1 + offset], t);
+				CArray lineArray = ArgumentValidation.getArray(args[1 + offset], t, env);
 				if(lineArray.size() != 4) {
 					throw new CRECastException("Line array must have 4 elements.", t);
 				}
-				lines[0] = lineArray.get(0, t).val();
-				lines[1] = lineArray.get(1, t).val();
-				lines[2] = lineArray.get(2, t).val();
-				lines[3] = lineArray.get(3, t).val();
+				lines[0] = lineArray.get(0, t, env).val();
+				lines[1] = lineArray.get(1, t, env).val();
+				lines[2] = lineArray.get(2, t, env).val();
+				lines[3] = lineArray.get(3, t, env).val();
 			} else {
 				//Lines are in different arguments
 				lines[0] = args[1 + offset].val();
@@ -4122,15 +4130,15 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
 			if(args.length == 3) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				offset = 1;
 			}
 			Static.AssertPlayerNonNull(p, t);
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t, env);
 			Mixed cdata = args[1 + offset];
 			MCBlockData data;
 			if(cdata instanceof CNull) {
@@ -4227,18 +4235,18 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			int offset = 0;
 			if(args.length == 3) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				offset = 1;
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			}
-			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
-			double progress = ArgumentValidation.getDouble(args[offset + 1], t);
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t, env);
+			double progress = ArgumentValidation.getDouble(args[offset + 1], t, env);
 			if(progress < 0.0 || progress > 1.0) {
 				throw new CRERangeException("Block damage progress must be 0.0 to 1.0.", t);
 			}
@@ -4281,10 +4289,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			return new CInt(p.getFoodLevel(), t);
@@ -4330,15 +4338,15 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int hungerIndex = 0;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				hungerIndex = 1;
 			}
 			Static.AssertPlayerNonNull(p, t);
-			int hunger = ArgumentValidation.getInt32(args[hungerIndex], t);
+			int hunger = ArgumentValidation.getInt32(args[hungerIndex], t, env);
 			p.setFoodLevel(hunger);
 			return CVoid.VOID;
 		}
@@ -4383,10 +4391,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			return new CDouble(p.getSaturation(), t);
@@ -4432,16 +4440,16 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			float saturation;
 			int saturationIndex = 0;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				saturationIndex = 1;
 			}
 			Static.AssertPlayerNonNull(p, t);
-			saturation = (float) ArgumentValidation.getDouble(args[saturationIndex], t);
+			saturation = (float) ArgumentValidation.getDouble(args[saturationIndex], t, env);
 			p.setSaturation(saturation);
 			return CVoid.VOID;
 		}
@@ -4487,7 +4495,7 @@ public class PlayerManagement {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCOfflinePlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
-				player = Static.GetUser(args[0].val(), t);
+				player = Static.GetUser(args[0].val(), t, env);
 			} else if(player == null) {
 				throw new CREInsufficientArgumentsException(this.getName() + " requires a player as first argument when ran from console", t);
 			}
@@ -4499,7 +4507,7 @@ public class PlayerManagement {
 			if(loc == null) {
 				return CNull.NULL;
 			} else {
-				return ObjectGenerator.GetGenerator().location(loc);
+				return ObjectGenerator.GetGenerator().location(loc, env);
 			}
 		}
 
@@ -4584,7 +4592,7 @@ public class PlayerManagement {
 			boolean forced = true;
 
 			if(args.length == 1) {
-				if(args[0].isInstanceOf(CArray.TYPE)) {
+				if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 					if(p instanceof MCPlayer) {
 						m = ((MCPlayer) p);
 					}
@@ -4593,23 +4601,23 @@ public class PlayerManagement {
 					throw new CRECastException("Expecting an array in set_pbed_location", t);
 				}
 			} else if(args.length == 2) {
-				if(args[1].isInstanceOf(CArray.TYPE)) {
+				if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 					pname = args[0].val();
 					locationIndex = 1;
-				} else if(args[0].isInstanceOf(CArray.TYPE)) {
+				} else if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 					if(p instanceof MCPlayer) {
 						m = ((MCPlayer) p);
 					}
 					locationIndex = 0;
-					forced = ArgumentValidation.getBoolean(args[1], t);
+					forced = ArgumentValidation.getBoolean(args[1], t, env);
 				} else {
 					throw new CRECastException("Expecting an array in set_pbed_location", t);
 				}
 			} else if(args.length == 3) {
-				if(args[1].isInstanceOf(CArray.TYPE)) {
+				if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 					pname = args[0].val();
 					locationIndex = 1;
-					forced = ArgumentValidation.getBoolean(args[2], t);
+					forced = ArgumentValidation.getBoolean(args[2], t, env);
 				} else {
 					if(p instanceof MCPlayer) {
 						m = (MCPlayer) p;
@@ -4618,29 +4626,29 @@ public class PlayerManagement {
 				}
 			} else if(args.length == 4) {
 				try {
-					m = Static.GetPlayer(args[0], t);
+					m = Static.GetPlayer(args[0], t, env);
 					locationIndex = 1;
 				} catch (ConfigRuntimeException e) {
 					if(p instanceof MCPlayer) {
 						m = (MCPlayer) p;
 					}
 					locationIndex = 0;
-					forced = ArgumentValidation.getBoolean(args[3], t);
+					forced = ArgumentValidation.getBoolean(args[3], t, env);
 				}
 			} else {
-				m = Static.GetPlayer(args[0], t);
+				m = Static.GetPlayer(args[0], t, env);
 				locationIndex = 1;
-				forced = ArgumentValidation.getBoolean(args[4], t);
+				forced = ArgumentValidation.getBoolean(args[4], t, env);
 			}
 
 			if(m == null && pname != null) {
-				m = Static.GetPlayer(pname, t);
+				m = Static.GetPlayer(pname, t, env);
 			}
 			Static.AssertPlayerNonNull(m, t);
 
-			if(args[locationIndex].isInstanceOf(CArray.TYPE)) {
+			if(args[locationIndex].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ca = (CArray) args[locationIndex];
-				l = ObjectGenerator.GetGenerator().location(ca, m.getWorld(), t);
+				l = ObjectGenerator.GetGenerator().location(ca, m.getWorld(), t, env);
 				l.add(0, 1, 0); // someone decided to match ploc() here
 			} else {
 				l = m.getLocation();
@@ -4648,9 +4656,9 @@ public class PlayerManagement {
 					throw new CRENullPointerException(
 							"The given player has a null location (are you running from cmdline mode?)", t);
 				}
-				l.setX(ArgumentValidation.getNumber(args[locationIndex], t));
-				l.setY(ArgumentValidation.getNumber(args[locationIndex + 1], t) + 1);
-				l.setZ(ArgumentValidation.getNumber(args[locationIndex + 2], t));
+				l.setX(ArgumentValidation.getNumber(args[locationIndex], t, env));
+				l.setY(ArgumentValidation.getNumber(args[locationIndex + 1], t, env) + 1);
+				l.setZ(ArgumentValidation.getNumber(args[locationIndex + 2], t, env));
 			}
 
 			m.setBedSpawnLocation(l, forced);
@@ -4698,10 +4706,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0].val(), t);
+				p = Static.GetPlayer(args[0].val(), t, env);
 			}
 
 			Static.AssertPlayerNonNull(p, t);
@@ -4753,10 +4761,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0].val(), t);
+				p = Static.GetPlayer(args[0].val(), t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
 
@@ -4783,15 +4791,16 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
-			CArray ret = new CArray(t);
+			CArray ret = new CArray(t, GenericParameters.start(CArray.TYPE)
+				.addParameter(CString.TYPE, null).build(), env);
 			// This causes the function to return an empty array for a fake/null server.
 			if(s != null) {
 				MCOfflinePlayer[] players = s.getOfflinePlayers();
 				if(players != null) {
 					for(MCOfflinePlayer offp : players) {
-						ret.push(new CString(offp.getName(), t), t);
+						ret.push(new CString(offp.getName(), t), t, env);
 					}
 				}
 			}
@@ -4810,7 +4819,7 @@ public class PlayerManagement {
 
 		@Override
 		public String docs() {
-			return "array {} Returns an array of every player who has played on this server.";
+			return "array<string> {} Returns an array of every player who has played on this server.";
 		}
 
 		@Override
@@ -4846,8 +4855,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCOfflinePlayer offp = Static.GetUser(args[0].val(), t);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCOfflinePlayer offp = Static.GetUser(args[0].val(), t, env);
 			return CBoolean.get(offp != null && offp.hasPlayedBefore());
 		}
 
@@ -4903,13 +4912,13 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCCommandSender cs = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCOfflinePlayer op = null;
 			if(args.length == 1) {
-				op = Static.GetUser(args[0].val(), t);
+				op = Static.GetUser(args[0].val(), t, env);
 			} else if(cs != null) {
-				op = Static.GetUser(cs.getName(), t);
+				op = Static.GetUser(cs.getName(), t, env);
 			}
 			return new CInt((op == null ? 0 : op.getFirstPlayed()), t); // Return 0 for fake/null command senders.
 		}
@@ -4967,13 +4976,13 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCCommandSender cs = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCOfflinePlayer op = null;
 			if(args.length == 1) {
-				op = Static.GetUser(args[0].val(), t);
+				op = Static.GetUser(args[0].val(), t, env);
 			} else if(cs != null) {
-				op = Static.GetUser(cs.getName(), t);
+				op = Static.GetUser(cs.getName(), t, env);
 			}
 			return new CInt((op == null ? 0 : op.getLastPlayed()), t); // Return 0 for fake/null command senders.
 		}
@@ -5030,8 +5039,8 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCOfflinePlayer p = Static.GetUser(args[0].val(), t);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCOfflinePlayer p = Static.GetUser(args[0].val(), t, env);
 			if(p == null) {
 				return CNull.NULL;
 			}
@@ -5146,14 +5155,14 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			boolean flight;
 			if(args.length == 1) {
-				flight = ArgumentValidation.getBoolean(args[0], t);
+				flight = ArgumentValidation.getBoolean(args[0], t, env);
 			} else {
-				p = Static.GetPlayer(args[0], t);
-				flight = ArgumentValidation.getBoolean(args[1], t);
+				p = Static.GetPlayer(args[0], t, env);
+				flight = ArgumentValidation.getBoolean(args[1], t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			if(!p.getAllowFlight()) {
@@ -5214,12 +5223,12 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			}
 			return CBoolean.get(p.isFlying());
@@ -5267,12 +5276,12 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 0) {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			if(p.getGameMode() != MCGameMode.SPECTATOR) {
@@ -5328,13 +5337,13 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			int offset = 0;
 			if(args.length == 1) {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			} else {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				offset = 1;
 			}
 			Static.AssertPlayerNonNull(p, t);
@@ -5376,10 +5385,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args)
 				throws ConfigRuntimeException {
 
-			MCPlayer p = Static.GetPlayer(args[0], t);
+			MCPlayer p = Static.GetPlayer(args[0], t, env);
 
 			MCSound sound;
 			try {
@@ -5446,10 +5455,10 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment environment, Mixed... args)
+		public Mixed exec(Target t, com.laytonsmith.core.environments.Environment env, Mixed... args)
 				throws ConfigRuntimeException {
 
-			MCPlayer p = Static.GetPlayer(args[0], t);
+			MCPlayer p = Static.GetPlayer(args[0], t, env);
 			String sound = args[1].val();
 			if(args.length == 3) {
 				MCSoundCategory category;
@@ -5511,7 +5520,7 @@ public class PlayerManagement {
 			MCPlayer p;
 			String materialName;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				materialName = args[1].val();
 			} else {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -5576,14 +5585,14 @@ public class PlayerManagement {
 			String materialName;
 			int cooldown;
 			if(args.length == 3) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				materialName = args[1].val();
-				cooldown = ArgumentValidation.getInt32(args[2], t);
+				cooldown = ArgumentValidation.getInt32(args[2], t, env);
 			} else {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 				materialName = args[0].val();
-				cooldown = ArgumentValidation.getInt32(args[1], t);
+				cooldown = ArgumentValidation.getInt32(args[1], t, env);
 			}
 
 			MCMaterial mat = StaticLayer.GetMaterial(materialName);
@@ -5646,7 +5655,7 @@ public class PlayerManagement {
 			if(args.length == 0) {
 				he = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			} else {
-				he = Static.GetPlayer(args[0], t);
+				he = Static.GetPlayer(args[0], t, env);
 			}
 			return new CDouble(he.getAttackCooldown(), t);
 		}
@@ -5697,7 +5706,7 @@ public class PlayerManagement {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			} else {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
@@ -5752,7 +5761,7 @@ public class PlayerManagement {
 			MCPlayer p;
 			String header;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				header = args[1].val();
 			} else {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -5807,7 +5816,7 @@ public class PlayerManagement {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			} else {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
@@ -5862,7 +5871,7 @@ public class PlayerManagement {
 			MCPlayer p;
 			String footer;
 			if(args.length == 2) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				footer = args[1].val();
 			} else {
 				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -6002,14 +6011,14 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			String filter = null;
 			MCPlayerStatistic stat;
 			int offset = 0;
 			if(args.length > 1) {
 				offset = 1;
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				if(args.length > 2) {
 					filter = args[2].val().toUpperCase();
 				}
@@ -6105,20 +6114,20 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			String filter = null;
 			MCPlayerStatistic stat;
 			int offset = 0;
 			int amount = 0;
 			if(args.length > 2) {
 				offset = 1;
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 				if(args.length == 3) {
-					amount = ArgumentValidation.getInt32(args[2], t);
+					amount = ArgumentValidation.getInt32(args[2], t, env);
 				} else {
 					filter = args[2].val().toUpperCase();
-					amount = ArgumentValidation.getInt32(args[3], t);
+					amount = ArgumentValidation.getInt32(args[3], t, env);
 				}
 			}
 
@@ -6227,12 +6236,12 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			}
 			return CBoolean.get(p.isBlocking());
@@ -6278,12 +6287,12 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCPlayer p;
 			if(args.length == 1) {
-				p = Static.GetPlayer(args[0], t);
+				p = Static.GetPlayer(args[0], t, env);
 			} else {
-				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 				Static.AssertPlayerNonNull(p, t);
 			}
 			return CBoolean.get(p.isSprinting());

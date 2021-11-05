@@ -107,25 +107,25 @@ public class BukkitMetadata {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			List<MCMetadataValue> metadata;
 			if(args.length == 1) {
-				metadata = Static.getPlayer(environment, t).getMetadata(args[0].val());
+				metadata = Static.getPlayer(env, t).getMetadata(args[0].val());
 			} else {
-				metadata = GetMetadatable(args[0], t).getMetadata(args[1].val());
+				metadata = GetMetadatable(args[0], t, env).getMetadata(args[1].val());
 			}
 			if(args.length == 3) {
 				MCPlugin plugin = Static.getPlugin(args[2], t);
 				for(MCMetadataValue value : metadata) {
 					if(value.getOwningPlugin().equals(plugin)) {
-						return Static.getMSObject(value.value(), t);
+						return Static.getMSObject(value.value(), t, env);
 					}
 				}
 				return CNull.NULL;
 			} else {
-				CArray values = CArray.GetAssociativeArray(t);
+				CArray values = CArray.GetAssociativeArray(t, null, env);
 				for(MCMetadataValue value : metadata) {
-					values.set(value.getOwningPlugin().getName(), Static.getMSObject(value.value(), t), t);
+					values.set(value.getOwningPlugin().getName(), Static.getMSObject(value.value(), t, env), t, env);
 				}
 				return values;
 			}
@@ -156,14 +156,14 @@ public class BukkitMetadata {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String key;
 			MCMetadatable metadatable;
 			if(args.length == 1) {
-				metadatable = Static.getPlayer(environment, t);
+				metadatable = Static.getPlayer(env, t);
 				key = args[0].val();
 			} else {
-				metadatable = GetMetadatable(args[0], t);
+				metadatable = GetMetadatable(args[0], t, env);
 				key = args[1].val();
 			}
 			if(metadatable.hasMetadata(key)) {
@@ -213,18 +213,18 @@ public class BukkitMetadata {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String key;
 			MCMetadatable metadatable;
 			Mixed value;
 			MCPlugin plugin;
 			if(args.length == 2) {
-				metadatable = Static.getPlayer(environment, t);
+				metadatable = Static.getPlayer(env, t);
 				key = args[0].val();
 				value = args[1];
 				plugin = StaticLayer.GetPlugin();
 			} else {
-				metadatable = GetMetadatable(args[0], t);
+				metadatable = GetMetadatable(args[0], t, env);
 				key = args[1].val();
 				value = args[2];
 				plugin = (args.length == 4) ? Static.getPlugin(args[3], t) : StaticLayer.GetPlugin();
@@ -258,14 +258,14 @@ public class BukkitMetadata {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String key;
 			MCMetadatable metadatable;
 			if(args.length == 1) {
-				metadatable = Static.getPlayer(environment, t);
+				metadatable = Static.getPlayer(env, t);
 				key = args[0].val();
 			} else {
-				metadatable = GetMetadatable(args[0], t);
+				metadatable = GetMetadatable(args[0], t, env);
 				key = args[1].val();
 			}
 			if(args.length == 3) {
@@ -292,9 +292,9 @@ public class BukkitMetadata {
 	 * @param t
 	 * @return
 	 */
-	private static MCMetadatable GetMetadatable(Mixed construct, Target t) {
-		if(construct.isInstanceOf(CArray.TYPE)) {
-			return ObjectGenerator.GetGenerator().location(construct, null, t).getBlock();
+	private static MCMetadatable GetMetadatable(Mixed construct, Target t, Environment env) {
+		if(construct.isInstanceOf(CArray.TYPE, null, env)) {
+			return ObjectGenerator.GetGenerator().location(construct, null, t, env).getBlock();
 		} else if(construct instanceof CString) {
 			switch(construct.val().length()) {
 				case 32:

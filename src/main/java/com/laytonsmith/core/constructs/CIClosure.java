@@ -78,10 +78,10 @@ public class CIClosure extends CClosure {
 			}
 
 			if(!hasArgumentsParam) {
-				CArray arguments = new CArray(node.getData().getTarget());
+				CArray arguments = new CArray(node.getData().getTarget(), null, env);
 				if(values != null) {
 					for(Mixed value : values) {
-						arguments.push(value, node.getData().getTarget());
+						arguments.push(value, node.getData().getTarget(), env);
 					}
 				}
 				try {

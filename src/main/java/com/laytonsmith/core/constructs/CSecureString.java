@@ -4,7 +4,10 @@ import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
+import com.laytonsmith.core.objects.ObjectModifier;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -21,15 +24,17 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
  * @author cailin
  */
 @typeof("ms.lang.secure_string")
-public class CSecureString extends Construct {
+public final class CSecureString extends Construct {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get(CSecureString.class);
@@ -45,10 +50,10 @@ public class CSecureString extends Construct {
 		construct(ArrayUtils.charToBytes(val));
 	}
 
-	public CSecureString(CArray val, Target t) {
+	public CSecureString(CArray val, Target t, Environment env) {
 		super("**secure string**", ConstructType.STRING, t);
 		init();
-		construct(CArrayToByteArray(val, t));
+		construct(CArrayToByteArray(val, t, env));
 	}
 
 	// duplicate constructor
@@ -85,13 +90,13 @@ public class CSecureString extends Construct {
 		}
 	}
 
-	private static byte[] CArrayToByteArray(CArray val, Target t) {
+	private static byte[] CArrayToByteArray(CArray val, Target t, Environment env) {
 		List<Byte> cval = new ArrayList<>((int) val.size());
 		if(val.isAssociative()) {
 			throw new CREFormatException("Expected a normal array in secure string, but an associative one was passed in", t);
 		}
 		for(int i = 0; i < val.size(); i++) {
-			String c = val.get(i, t).val();
+			String c = val.get(i, t, env).val();
 			if(c.length() != 1) {
 				throw new CREFormatException("The array passed in must be an array of single character strings", t);
 			}
@@ -114,11 +119,12 @@ public class CSecureString extends Construct {
 		}
 	}
 
-	public CArray getDecryptedCharCArray() {
+	public CArray getDecryptedCharCArray(Environment env) {
 		char[] array = getDecryptedCharArray();
-		CArray carray = new CArray(Target.UNKNOWN, array.length);
+		CArray carray = new CArray(Target.UNKNOWN, array.length, GenericParameters.start(CArray.TYPE)
+			.addParameter(CString.TYPE, null).build(), env);
 		for(char c : array) {
-			carray.push(new CString(c, Target.UNKNOWN), Target.UNKNOWN);
+			carray.push(new CString(c, Target.UNKNOWN), Target.UNKNOWN, env);
 		}
 		return carray;
 	}
@@ -213,4 +219,8 @@ public class CSecureString extends Construct {
 		}
 	}
 
+	@Override
+	public Set<ObjectModifier> getObjectModifiers() {
+		return EnumSet.of(ObjectModifier.FINAL);
+	}
 }

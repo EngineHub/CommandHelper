@@ -81,6 +81,7 @@ public class AliasCore {
 	private List<Script> scripts;
 	private final Set<String> echoCommand = new HashSet<>();
 	private CompilerEnvironment compilerEnv;
+	private Environment env;
 	public List<File> autoIncludes;
 	public static CommandHelperPlugin parent;
 	public List<String> registeredCommands = new ArrayList<>();
@@ -162,7 +163,7 @@ public class AliasCore {
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 		cEnv.SetCommandSender(sender);
 		cEnv.SetCommand(command);
-		Environment env = Environment.createEnvironment(gEnv, staticRuntimeEnv, cEnv, compilerEnv);
+		env = Environment.createEnvironment(gEnv, staticRuntimeEnv, cEnv, compilerEnv);
 
 		this.addPlayerReference(sender);
 		ProfilePoint alias = staticRuntimeEnv.GetProfiler().start("Alias - \"" + command + "\"", LogLevel.ERROR);
@@ -193,6 +194,10 @@ public class AliasCore {
 			this.removePlayerReference(sender);
 		}
 		return true;
+	}
+
+	public Environment getLastLoadedEnv() {
+		return env;
 	}
 
 	/**
@@ -239,7 +244,7 @@ public class AliasCore {
 
 			ProfilePoint shutdownHooks = parent.profiler.start("Shutdown hooks call", LogLevel.VERBOSE);
 			try {
-				StaticLayer.GetConvertor().runShutdownHooks();
+				StaticLayer.GetConvertor().runShutdownHooks(env);
 			} finally {
 				shutdownHooks.stop();
 			}

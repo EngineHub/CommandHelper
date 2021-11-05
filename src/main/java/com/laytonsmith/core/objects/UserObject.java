@@ -7,10 +7,12 @@ import com.laytonsmith.core.Method;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -150,13 +152,8 @@ public class UserObject implements Mixed {
 	}
 
 	@Override
-	public boolean isInstanceOf(CClassType type) {
-		return Construct.isInstanceof(this, type);
-	}
-
-	@Override
-	public boolean isInstanceOf(Class<? extends Mixed> type) {
-		return Construct.isInstanceof(this, type);
+	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
+		return InstanceofUtil.isInstanceof(this, type, lhsGenericParameters, env);
 	}
 
 	@Override

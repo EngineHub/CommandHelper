@@ -62,7 +62,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	private boolean valueDirty = true;
 	private GenericParameters genericParameters = null;
 	// For the val(), we need to use the fallbackEnv
-	private final Environment fallbackEnv;
+	protected final Environment fallbackEnv;
 
 	public CArray(Target t, GenericParameters genericParameters, Environment env) {
 		this(t, 0, genericParameters, env, (Mixed[]) null);
@@ -364,7 +364,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				setAssociative();
 			} else {
 				try {
-					int indx = ArgumentValidation.getInt32(index, t);
+					int indx = ArgumentValidation.getInt32(index, t, env);
 					if(indx > nextIndex || indx < 0) {
 						// Out of range
 						setAssociative();
@@ -409,7 +409,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	public Mixed get(Mixed index, Target t, Environment env) {
 		if(!associativeMode) {
 			try {
-				return array.get(ArgumentValidation.getInt32(index, t));
+				return array.get(ArgumentValidation.getInt32(index, t, env));
 			} catch (IndexOutOfBoundsException e) {
 				throw new CREIndexOverflowException("The element at index \"" + index.val() + "\" does not exist", t, e);
 			}
@@ -802,8 +802,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	@Override
-	public Mixed slice(int begin, int end, Target t) {
-		return new ArrayHandling.array_get().exec(t, null, new CSlice(begin, end, t));
+	public Mixed slice(int begin, int end, Target t, Environment env) {
+		return new ArrayHandling.array_get().exec(t, null, new CSlice(begin, end, t, env));
 	}
 
 	@Override
@@ -889,31 +889,32 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				}
 				if(o1.isInstanceOf(CBoolean.TYPE, null, env)
 						|| o2.isInstanceOf(CBoolean.TYPE, null, env)) {
-					if(ArgumentValidation.getBooleanish(o1, Target.UNKNOWN) == ArgumentValidation.getBooleanish(o2, Target.UNKNOWN)) {
+					if(ArgumentValidation.getBooleanish(o1, Target.UNKNOWN, env)
+							== ArgumentValidation.getBooleanish(o2, Target.UNKNOWN, env)) {
 						return 0;
 					} else {
-						int oo1 = ArgumentValidation.getBooleanish(o1, Target.UNKNOWN) ? 1 : 0;
-						int oo2 = ArgumentValidation.getBooleanish(o2, Target.UNKNOWN) ? 1 : 0;
+						int oo1 = ArgumentValidation.getBooleanish(o1, Target.UNKNOWN, env) ? 1 : 0;
+						int oo2 = ArgumentValidation.getBooleanish(o2, Target.UNKNOWN, env) ? 1 : 0;
 						return (oo1 < oo2) ? -1 : 1;
 					}
 				}
 				//At this point, things will either be numbers or strings
 				return switch(sort) {
-					case REGULAR -> compareRegular(o1, o2);
-					case NUMERIC -> compareNumeric(o1, o2);
+					case REGULAR -> compareRegular(o1, o2, env);
+					case NUMERIC -> compareNumeric(o1, o2, env);
 					case STRING -> compareString(o1.val(), o2.val());
 					case STRING_IC -> compareString(o1.val().toLowerCase(), o2.val().toLowerCase());
 				};
 			}
 
-			public int compareRegular(Mixed o1, Mixed o2) {
-				if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1), Target.UNKNOWN)
-						&& ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2), Target.UNKNOWN)) {
-					return compareNumeric(o1, o2);
-				} else if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1), Target.UNKNOWN)) {
+			public int compareRegular(Mixed o1, Mixed o2, Environment env) {
+				if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1), Target.UNKNOWN, env)
+						&& ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2), Target.UNKNOWN, env)) {
+					return compareNumeric(o1, o2, env);
+				} else if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1), Target.UNKNOWN, env)) {
 					//The first is a number, the second is a string
 					return -1;
-				} else if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2), Target.UNKNOWN)) {
+				} else if(ArgumentValidation.getBooleanObject(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2), Target.UNKNOWN, env)) {
 					//The second is a number, the first is a string
 					return 1;
 				} else {
@@ -922,9 +923,9 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				}
 			}
 
-			public int compareNumeric(Mixed o1, Mixed o2) {
-				double d1 = ArgumentValidation.getNumber(o1, o1.getTarget());
-				double d2 = ArgumentValidation.getNumber(o2, o2.getTarget());
+			public int compareNumeric(Mixed o1, Mixed o2, Environment env) {
+				double d1 = ArgumentValidation.getNumber(o1, o1.getTarget(), env);
+				double d2 = ArgumentValidation.getNumber(o2, o2.getTarget(), env);
 				return Double.compare(d1, d2);
 			}
 

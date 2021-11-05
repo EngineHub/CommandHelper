@@ -33,8 +33,6 @@ import com.laytonsmith.core.constructs.CDecimal;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.CNumber;
-import com.laytonsmith.core.constructs.CPrimitive;
 import com.laytonsmith.core.constructs.CResource;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -42,6 +40,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -56,7 +55,6 @@ import com.laytonsmith.core.exceptions.CRE.CREInvalidWorldException;
 import com.laytonsmith.core.exceptions.CRE.CRELengthException;
 import com.laytonsmith.core.exceptions.CRE.CRENullPointerException;
 import com.laytonsmith.core.exceptions.CRE.CREPlayerOfflineException;
-import com.laytonsmith.core.exceptions.CRE.CRERangeException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Function;
@@ -67,6 +65,7 @@ import com.laytonsmith.persistence.DataSourceException;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.PersistenceNetworkImpl;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -90,7 +89,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.yaml.snakeyaml.Yaml;
 
 /**
  * This class contains several static methods to get various objects that really should be static in the first place,
@@ -127,246 +125,6 @@ public final class Static {
 	 * The label representing unrestricted access.
 	 */
 	public static final String GLOBAL_PERMISSION = "*";
-
-	/**
-	 * Returns a CArray object from a given construct, throwing a common error message if not.
-	 *
-	 * @param construct
-	 * @param t
-	 * @return
-	 * @deprecated Use {@link ArgumentValidation#getArray(Mixed, Target)} instead.
-	 */
-	@Deprecated
-	public static CArray getArray(Mixed construct, Target t) {
-		return ArgumentValidation.getArray(construct, t);
-	}
-
-	/**
-	 * Works like the other get* methods, but works in a more generic way for other types of Constructs. It also assumes
-	 * that the class specified is tagged with a typeof annotation, thereby preventing the need for the
-	 * expectedClassName like the deprecated version uses.
-	 *
-	 * @param <T> The type expected.
-	 * @param construct The generic object
-	 * @param t Code target
-	 * @param clazz The type expected.
-	 * @return The properly cast object.
-	 * @deprecated Use {@link ArgumentValidation#getArray(Mixed, Target)} instead.
-	 */
-	@Deprecated
-	public static <T extends Mixed> T getObject(Mixed construct, Target t, Class<T> clazz) {
-		return ArgumentValidation.getObject(construct, t, clazz);
-	}
-
-	/**
-	 * Returns a CNumber construct (CInt or CDouble) from any java number.
-	 *
-	 * @param number The java number to convert.
-	 * @param t The code target.
-	 * @return A construct equivalent to the given java number, whose the type is the better to represent it.
-	 */
-	public static CNumber getNumber(Number number, Target t) {
-		long longValue = number.longValue();
-		double doubleValue = number.doubleValue();
-		return longValue == doubleValue ? new CInt(longValue, t) : new CDouble(doubleValue, t);
-	}
-
-	/**
-	 * This function pulls a numerical equivalent from any given construct. It throws a ConfigRuntimeException if it
-	 * cannot be converted, for instance the string "s" cannot be cast to a number. The number returned will always be a
-	 * double.
-	 *
-	 * @param c
-	 * @return
-	 * @deprecated Use {@link ArgumentValidation#getNumber(Mixed, Target)} instead.
-	 */
-	@Deprecated
-	public static double getNumber(Mixed c, Target t) {
-		return ArgumentValidation.getNumber(c, t);
-	}
-
-	/**
-	 * Alias to getNumber
-	 *
-	 * @param c
-	 * @return
-	 * @deprecated Use {@link ArgumentValidation#getDouble(Mixed, Target)} instead.
-	 */
-	@Deprecated
-	public static double getDouble(Mixed c, Target t) {
-		return ArgumentValidation.getDouble(c, t);
-	}
-
-	/**
-	 *
-	 * @param c
-	 * @param t
-	 * @return
-	 * @deprecated Use {@link ArgumentValidation#getDouble32(Mixed, Target)} instead.
-	 */
-	@Deprecated
-	public static float getDouble32(Mixed c, Target t) {
-		return ArgumentValidation.getDouble32(c, t);
-	}
-
-	/**
-	 * Returns an integer from any given construct.
-	 *
-	 * @param c
-	 * @throws CRERangeException If the value would be truncated
-	 * @throws CRECastException If the value cannot be cast to an int
-	 * @return
-	 * @deprecated Use {@link ArgumentValidation#getInt(Mixed, Target)} instead.
-	 */
-	@Deprecated
-	public static long getInt(Mixed c, Target t) {
-		return ArgumentValidation.getInt(c, t);
-	}
-
-	/**
-	 * Returns a 32 bit int from the construct. Since the backing value is actually a long, if the number contained in
-	 * the construct is not the same after truncating, an exception is thrown (fail fast). When needing an int from a
-	 * construct, this method is much preferred over silently truncating.
-	 *
-	 * @param c
-	 * @param t
-	 * @throws CRERangeException If the value would be truncated
-	 * @throws CRECastException If the value cannot be cast to an int
-	 * @return
-	 * @deprecated Use {@link ArgumentValidation#getInt32(Mixed, Target)} instead.
-	 */
-	@Deprecated
-	public static int getInt32(Mixed c, Target t) {
-		return ArgumentValidation.getInt32(c, t);
-	}
-
-	/**
-	 * Returns a 16 bit int from the construct (a short). Since the backing value is actually a long, if the number
-	 * contained in the construct is not the same after truncating, an exception is thrown (fail fast). When needing an
-	 * short from a construct, this method is much preferred over silently truncating.
-	 *
-	 * @param c
-	 * @param t
-	 * @throws CRERangeException If the value would be truncated
-	 * @throws CRECastException If the value cannot be cast to an int
-	 * @return
-	 * @deprecated Use {@link ArgumentValidation#getInt16(Mixed, Target)} instead.
-	 */
-	@Deprecated
-	public static short getInt16(Mixed c, Target t) {
-		return ArgumentValidation.getInt16(c, t);
-	}
-
-	/**
-	 * Returns an 8 bit int from the construct (a byte). Since the backing value is actually a long, if the number
-	 * contained in the construct is not the same after truncating, an exception is thrown (fail fast). When needing a
-	 * byte from a construct, this method is much preferred over silently truncating.
-	 *
-	 * @param c
-	 * @param t
-	 * @throws CRERangeException If the value would be truncated
-	 * @throws CRECastException If the value cannot be cast to an int
-	 * @return
-	 * @deprecated Use {@link ArgumentValidation#getInt8(Mixed, Target)} instead.
-	 */
-	@Deprecated
-	public static byte getInt8(Mixed c, Target t) {
-		return ArgumentValidation.getInt8(c, t);
-	}
-
-	/**
-	 * Currently forwards the call to
-	 * {@link ArgumentValidation#getBooleanish},
-	 * to keep backwards compatible behavior, but will be removed in a future release. Explicitly use either
-	 * {@link ArgumentValidation#getBooleanish} or {@link ArgumentValidation#getBooleanObject}.
-	 * @param c
-	 * @param t
-	 * @return
-	 * @deprecated Use {@link ArgumentValidation#getBooleanish} for current behavior, or
-	 * {@link ArgumentValidation#getBooleanObject} for strict behavior. Note: While this is deprecated, and will be
-	 * removed from Static, it will not be removed until all the other methods that are duplicated here and in
-	 * {@link ArgumentValidation} are officially deprecated and removed, so there is no immediate need to backport older
-	 * code, as it will probably be easier to do it all at once later. However, new code should no longer use this
-	 * method. (Or any of the other methods that are duplicated.)
-	 */
-	@Deprecated
-	public static boolean getBoolean(Mixed c, Target t) {
-		return ArgumentValidation.getBooleanish(c, t);
-	}
-
-	/**
-	 * Returns a primitive from any given construct.
-	 *
-	 * @param c
-	 * @param t
-	 * @return
-	 * @deprecated Use {@link ArgumentValidation#getObject(Mixed, Target, Class)} with {@link CPrimitive}.class instead.
-	 */
-	@Deprecated
-	public static CPrimitive getPrimitive(Mixed c, Target t) {
-		return ArgumentValidation.getObject(c, t, CPrimitive.class);
-	}
-
-	/**
-	 * Returns a CByteArray from any given construct.
-	 *
-	 * @param c
-	 * @param t
-	 * @return
-	 * @deprecated Use {@link ArgumentValidation#getByteArray(Mixed, Target)} instead.
-	 */
-	@Deprecated
-	public static CByteArray getByteArray(Mixed c, Target t) {
-		return ArgumentValidation.getByteArray(c, t);
-	}
-
-	/**
-	 * Returns true if any of the constructs are a CDouble, false otherwise.
-	 *
-	 * @param c
-	 * @return
-	 * @deprecated Use {@link ArgumentValidation#anyDoubles(Mixed...)} instead.
-	 */
-	@Deprecated
-	public static boolean anyDoubles(Mixed... c) {
-		return ArgumentValidation.anyDoubles(c);
-	}
-
-	/**
-	 * Return true if any of the constructs are CStrings, false otherwise.
-	 *
-	 * @param c
-	 * @return
-	 * @deprecated Use {@link ArgumentValidation#anyStrings(Mixed...)} instead.
-	 */
-	@Deprecated
-	public static boolean anyStrings(Mixed... c) {
-		return ArgumentValidation.anyStrings(c);
-	}
-
-	/**
-	 * Returns true if any of the constructs are CBooleans, false otherwise.
-	 *
-	 * @param c
-	 * @return
-	 * @deprecated Use {@link ArgumentValidation#anyBooleans(Mixed...)} instead.
-	 */
-	@Deprecated
-	public static boolean anyBooleans(Mixed... c) {
-		return ArgumentValidation.anyBooleans(c);
-	}
-
-	/**
-	 * Returns true if any of the constructs are null.
-	 *
-	 * @param c
-	 * @return
-	 * @deprecated Use {@link ArgumentValidation#anyNulls(Mixed...)} instead.
-	 */
-	@Deprecated
-	public static boolean anyNulls(Mixed... c) {
-		return ArgumentValidation.anyNulls(c);
-	}
 
 	/**
 	 * Returns the logger for the plugin
@@ -786,8 +544,8 @@ public final class Static {
 		return GetUUID(subject.val(), t);
 	}
 
-	public static MCOfflinePlayer GetUser(Mixed search, Target t) {
-		return GetUser(search.val(), t);
+	public static MCOfflinePlayer GetUser(Mixed search, Target t, Environment env) {
+		return GetUser(search.val(), t, env);
 	}
 
 	/**
@@ -799,7 +557,7 @@ public final class Static {
 	 * @param t
 	 * @return
 	 */
-	public static MCOfflinePlayer GetUser(String search, Target t) {
+	public static MCOfflinePlayer GetUser(String search, Target t, Environment env) {
 		MCOfflinePlayer ofp;
 		if(search.length() > 0 && search.length() <= 16) {
 			ofp = getServer().getOfflinePlayer(search);
@@ -807,7 +565,7 @@ public final class Static {
 			try {
 				ofp = getServer().getOfflinePlayer(GetUUID(search, t));
 			} catch (ConfigRuntimeException cre) {
-				if(cre instanceof CREThrowable && ((CREThrowable) cre).isInstanceOf(CRELengthException.TYPE)) {
+				if(cre instanceof CREThrowable && ((CREThrowable) cre).isInstanceOf(CRELengthException.TYPE, null, env)) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
 				} else {
@@ -828,7 +586,7 @@ public final class Static {
 	 * @return
 	 * @throws ConfigRuntimeException
 	 */
-	public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {
+	public static MCPlayer GetPlayer(String player, Target t, Environment env) throws ConfigRuntimeException {
 		MCCommandSender m;
 
 		if(player == null) {
@@ -841,7 +599,7 @@ public final class Static {
 			try {
 				m = getServer().getPlayer(GetUUID(player, t));
 			} catch (ConfigRuntimeException cre) {
-				if(cre instanceof CREThrowable && ((CREThrowable) cre).isInstanceOf(CRELengthException.TYPE)) {
+				if(cre instanceof CREThrowable && ((CREThrowable) cre).isInstanceOf(CRELengthException.TYPE, null, env)) {
 					throw new CRELengthException("The given string was the wrong size to identify a player."
 							+ " A player name is expected to be between 1 and 16 characters. " + cre.getMessage(), t);
 				} else {
@@ -862,8 +620,8 @@ public final class Static {
 		return p;
 	}
 
-	public static MCPlayer GetPlayer(Mixed player, Target t) throws ConfigRuntimeException {
-		return GetPlayer(player.val(), t);
+	public static MCPlayer GetPlayer(Mixed player, Target t, Environment env) throws ConfigRuntimeException {
+		return GetPlayer(player.val(), t, env);
 	}
 
 	/**
@@ -1456,7 +1214,7 @@ public final class Static {
 	 * @param t
 	 * @return
 	 */
-	public static Construct getMSObject(Object object, Target t) {
+	public static Construct getMSObject(Object object, Target t, Environment env) {
 		if(object == null) {
 			return CNull.NULL;
 		} else if(object instanceof Boolean) {
@@ -1482,69 +1240,76 @@ public final class Static {
 			return (Construct) object;
 		} else if(object instanceof boolean[]) {
 			boolean[] array = (boolean[]) object;
-			CArray r = new CArray(t);
+			CArray r = new CArray(t, GenericParameters.start(CArray.TYPE)
+				.addParameter(CBoolean.TYPE, null).build(), env);
 			for(boolean b : array) {
-				r.push(CBoolean.get(b), t);
+				r.push(CBoolean.get(b), t, env);
 			}
 			return r;
 		} else if(object instanceof byte[]) {
-			return CByteArray.wrap((byte[]) object, t);
+			return CByteArray.wrap((byte[]) object, t, env);
 		} else if(object instanceof char[]) {
 			char[] array = (char[]) object;
-			CArray r = new CArray(t);
+			CArray r = new CArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CString.TYPE, null).build(), env);
 			for(char c : array) {
-				r.push(new CString(c, t), t);
+				r.push(new CString(c, t), t, env);
 			}
 			return r;
 		} else if(object instanceof short[]) {
 			short[] array = (short[]) object;
-			CArray r = new CArray(t);
+			CArray r = new CArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CInt.TYPE, null).build(), env);
 			for(short s : array) {
-				r.push(new CInt(s, t), t);
+				r.push(new CInt(s, t), t, env);
 			}
 			return r;
 		} else if(object instanceof int[]) {
 			int[] array = (int[]) object;
-			CArray r = new CArray(t);
+			CArray r = new CArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CInt.TYPE, null).build(), null);
 			for(int i : array) {
-				r.push(new CInt(i, t), t);
+				r.push(new CInt(i, t), t, env);
 			}
 			return r;
 		} else if(object instanceof long[]) {
 			long[] array = (long[]) object;
-			CArray r = new CArray(t);
+			CArray r = new CArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CInt.TYPE, null).build(), env);
 			for(long l : array) {
-				r.push(new CInt(l, t), t);
+				r.push(new CInt(l, t), t, env);
 			}
 			return r;
 		} else if(object instanceof float[]) {
 			float[] array = (float[]) object;
-			CArray r = new CArray(t);
+			CArray r = new CArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CDouble.TYPE, null).build(), env);
 			for(float f : array) {
-				r.push(new CDouble(f, t), t);
+				r.push(new CDouble(f, t), t, env);
 			}
 			return r;
 		} else if(object instanceof double[]) {
 			double[] array = (double[]) object;
-			CArray r = new CArray(t);
+			CArray r = new CArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CDouble.TYPE, null).build(), env);
 			for(double d : array) {
-				r.push(new CDouble(d, t), t);
+				r.push(new CDouble(d, t), t, env);
 			}
 			return r;
 		} else if(object instanceof Object[]) {
-			CArray r = new CArray(t);
+			CArray r = new CArray(t, null, env);
 			for(Object o : (Object[]) object) {
-				r.push((o == object) ? r : getMSObject(o, t), t);
+				r.push((o == object) ? r : getMSObject(o, t, env), t, env);
 			}
 			return r;
 		} else if(object instanceof Collection) {
-			return getMSObject(((Collection) object).toArray(), t);
+			return getMSObject(((Collection) object).toArray(), t, env);
 		} else if(object instanceof Map) {
 			Map map = ((Map) object);
-			CArray r = new CArray(t);
+			CArray r = new CArray(t, null, env);
 			for(Object key : map.keySet()) {
 				Object o = map.get(key);
-				r.set(key.toString(), (o == object) ? r : getMSObject(o, t), t);
+				r.set(key.toString(), (o == object) ? r : getMSObject(o, t, env), t, env);
 			}
 			return r;
 		} else {
@@ -1558,7 +1323,7 @@ public final class Static {
 	 * @param construct
 	 * @return
 	 */
-	public static Object getJavaObject(Mixed construct) {
+	public static Object getJavaObject(Mixed construct, Environment env) {
 		if((construct == null) || (construct instanceof CNull)) {
 			return null;
 		} else if(construct instanceof CVoid) {
@@ -1575,13 +1340,13 @@ public final class Static {
 			return ((CByteArray) construct).asByteArrayCopy();
 		} else if(construct instanceof CResource) {
 			return ((CResource) construct).getResource();
-		} else if(construct.isInstanceOf(CArray.TYPE)) {
+		} else if(construct.isInstanceOf(CArray.TYPE, null, env)) {
 			CArray array = (CArray) construct;
 			if(array.isAssociative()) {
 				HashMap<String, Object> map = new HashMap<>();
 				for(Mixed key : array.keySet()) {
-					Mixed c = array.get(key.val(), Target.UNKNOWN);
-					map.put(key.val(), (c == array) ? map : getJavaObject(c));
+					Mixed c = array.get(key.val(), Target.UNKNOWN, env);
+					map.put(key.val(), (c == array) ? map : getJavaObject(c, env));
 				}
 				return map;
 			} else {
@@ -1589,11 +1354,11 @@ public final class Static {
 				boolean nullable = false;
 				Class<?> clazz = null;
 				for(int i = 0; i < array.size(); i++) {
-					Mixed c = array.get(i, Target.UNKNOWN);
+					Mixed c = array.get(i, Target.UNKNOWN, env);
 					if(c == array) {
 						a[i] = a;
 					} else {
-						a[i] = getJavaObject(array.get(i, Target.UNKNOWN));
+						a[i] = getJavaObject(array.get(i, Target.UNKNOWN, env), env);
 					}
 					if(a[i] != null) {
 						if(clazz == null) {

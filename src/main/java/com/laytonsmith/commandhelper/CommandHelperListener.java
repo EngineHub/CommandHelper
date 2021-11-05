@@ -26,6 +26,7 @@ import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
 import com.laytonsmith.core.InternalException;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -73,8 +74,11 @@ public class CommandHelperListener implements Listener {
 			//They are in interpreter mode, so we want it to handle this, not everything else.
 			return;
 		}
+
+		Environment env = CommandHelperPlugin.getCore().getLastLoadedEnv();
 		MCPlayerCommandEvent mpce = new BukkitPlayerEvents.BukkitMCPlayerCommandEvent(event);
-		EventUtils.TriggerListener(Driver.PLAYER_COMMAND, "player_command", mpce);
+
+		EventUtils.TriggerListener(Driver.PLAYER_COMMAND, "player_command", mpce, env);
 		if(mpce.isCancelled()) {
 			return;
 		}

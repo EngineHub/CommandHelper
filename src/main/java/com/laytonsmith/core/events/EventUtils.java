@@ -8,6 +8,8 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BoundEvent.Priority;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CREEventException;
@@ -139,7 +141,7 @@ public final class EventUtils {
 		return EVENT_HANDLES.get(type);
 	}
 
-	public static void ManualTrigger(String eventName, CArray object, Target t, boolean serverWide) {
+	public static void ManualTrigger(String eventName, CArray object, Target t, boolean serverWide, Environment env) {
 		for(Driver type : EVENT_HANDLES.keySet()) {
 			SortedSet<BoundEvent> toRun = new TreeSet<>();
 			SortedSet<BoundEvent> bounded = GetEvents(type);
@@ -150,13 +152,13 @@ public final class EventUtils {
 						try {
 							BindableEvent convertedEvent = null;
 							try {
-								convertedEvent = driver.convert(object, t);
+								convertedEvent = driver.convert(object, t, env);
 							} catch (UnsupportedOperationException ex) {
 								// The event will stay null, and be caught below
 							}
 							if(convertedEvent == null) {
 								throw new CREBindException(eventName + " doesn't support the use of trigger() yet.", t);
-							} else if(driver.matches(b.getPrefilter(), convertedEvent)) {
+							} else if(driver.matches(b.getPrefilter(), convertedEvent, env)) {
 								toRun.add(b);
 							}
 						} catch (PrefilterNonMatchException ex) {
@@ -168,10 +170,10 @@ public final class EventUtils {
 			//If it's not a serverwide event, or this event doesn't support external events.
 			if(!toRun.isEmpty()) {
 				if(!serverWide || !driver.supportsExternal()) {
-					FireListeners(toRun, driver, driver.convert(object, t));
+					FireListeners(toRun, driver, driver.convert(object, t, env), env);
 				} else {
 					//It's serverwide, so we can just trigger it normally with the driver, and it should trickle back down to us
-					driver.manualTrigger(driver.convert(object, t));
+					driver.manualTrigger(driver.convert(object, t, env));
 				}
 			} else {
 				//They have fired a non existent event
@@ -189,7 +191,7 @@ public final class EventUtils {
 	 * @param e
 	 * @return
 	 */
-	public static SortedSet<BoundEvent> GetMatchingEvents(Driver type, String eventName, BindableEvent e, Event driver) {
+	public static SortedSet<BoundEvent> GetMatchingEvents(Driver type, String eventName, BindableEvent e, Event driver, Environment env) {
 		SortedSet<BoundEvent> toRun = new TreeSet<>();
 		//This is the set of bounded events of this driver type.
 		//We must now look through the bound events to see if they are
@@ -202,7 +204,7 @@ public final class EventUtils {
 				try {
 					boolean matches = false;
 					try {
-						matches = driver.matches(b.getPrefilter(), e);
+						matches = driver.matches(b.getPrefilter(), e, env);
 					} catch (ConfigRuntimeException ex) {
 						//This can happen in limited cases, but still needs to be
 						//handled properly. This would happen if, for instance, a
@@ -287,16 +289,16 @@ public final class EventUtils {
 	 * @param eventName
 	 * @param e
 	 */
-	public static void TriggerListener(Driver type, String eventName, BindableEvent e) {
+	public static void TriggerListener(Driver type, String eventName, BindableEvent e, Environment env) {
 		Event driver = EventList.getEvent(type, eventName);
 		if(driver == null) {
 			throw ConfigRuntimeException.CreateUncatchableException("Tried to fire an unknown event: " + eventName, Target.UNKNOWN);
 		} else if(!(driver instanceof AbstractEvent) || ((AbstractEvent) driver).shouldFire(e)) {
-			FireListeners(GetMatchingEvents(type, eventName, e, driver), driver, e);
+			FireListeners(GetMatchingEvents(type, eventName, e, driver, env), driver, e, env);
 		}
 	}
 
-	public static void FireListeners(SortedSet<BoundEvent> toRun, Event driver, BindableEvent e) {
+	public static void FireListeners(SortedSet<BoundEvent> toRun, Event driver, BindableEvent e, Environment env) {
 		//Sort our event handlers by priorities
 		BoundEvent.ActiveEvent activeEvent = new BoundEvent.ActiveEvent(e);
 		for(BoundEvent b : toRun) {
@@ -304,7 +306,7 @@ public final class EventUtils {
 				try {
 					//We must re-set the active event's bound event and parsed event
 					activeEvent.setBoundEvent(b);
-					activeEvent.setParsedEvent(driver.evaluate(e));
+					activeEvent.setParsedEvent(driver.evaluate(e, env));
 					b.trigger(activeEvent);
 				} catch (FunctionReturnException ex) {
 					//We also know how to deal with this
@@ -326,13 +328,14 @@ public final class EventUtils {
 		}
 	}
 
-	public static Construct DumpEvents() {
-		CArray ca = new CArray(Target.UNKNOWN);
+	public static Construct DumpEvents(Environment env) {
+		CArray ca = new CArray(Target.UNKNOWN, GenericParameters.start(CArray.TYPE)
+			.addParameter(CString.TYPE, null).build(), env);
 		for(SortedSet<BoundEvent> set : EVENT_HANDLES.values()) {
 			Iterator<BoundEvent> i = set.iterator();
 			while(i.hasNext()) {
 				BoundEvent b = i.next();
-				ca.push(new CString(b.toString() + ":" + b.getFile() + ":" + b.getLineNum(), Target.UNKNOWN), Target.UNKNOWN);
+				ca.push(new CString(b.toString() + ":" + b.getFile() + ":" + b.getLineNum(), Target.UNKNOWN), Target.UNKNOWN, env);
 			}
 		}
 		return ca;

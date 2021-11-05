@@ -6,6 +6,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -87,7 +88,7 @@ public class MObject {
 	 * @param value
 	 * @param t
 	 */
-	public final void set(String field, Construct value, Target t) {
+	public final void set(String field, Construct value, Target t, Environment env) {
 		String alias = alias(field);
 		if(alias != null) {
 			field = alias;
@@ -106,13 +107,13 @@ public class MObject {
 					val = null;
 				} else {
 					if(fType == byte.class) {
-						val = ArgumentValidation.getInt8(value, t);
+						val = ArgumentValidation.getInt8(value, t, env);
 					} else if(fType == short.class) {
-						val = ArgumentValidation.getInt16(value, t);
+						val = ArgumentValidation.getInt16(value, t, env);
 					} else if(fType == int.class) {
-						val = ArgumentValidation.getInt32(value, t);
+						val = ArgumentValidation.getInt32(value, t, env);
 					} else if(fType == long.class) {
-						val = ArgumentValidation.getInt(value, t);
+						val = ArgumentValidation.getInt(value, t, env);
 					} else if(fType == char.class) {
 						if(value.val().length() == 0) {
 							val = null;
@@ -120,32 +121,32 @@ public class MObject {
 							val = value.val().charAt(0);
 						}
 					} else if(fType == boolean.class) {
-						val = ArgumentValidation.getBoolean(value, t);
+						val = ArgumentValidation.getBoolean(value, t, env);
 					} else if(fType == float.class) {
-						val = ArgumentValidation.getDouble32(value, t);
+						val = ArgumentValidation.getDouble32(value, t, env);
 					} else if(fType == double.class) {
-						val = ArgumentValidation.getDouble(value, t);
+						val = ArgumentValidation.getDouble(value, t, env);
 					} else if(fType == MMap.class) {
-						CArray ca = ArgumentValidation.getArray(value, t);
+						CArray ca = ArgumentValidation.getArray(value, t, env);
 						MMap m = new MMap();
 						for(String key : ca.stringKeySet()) {
-							m.put(key, ca.get(key, t));
+							m.put(key, ca.get(key, t, env));
 						}
 						val = m;
 					} else if(fType == MList.class) {
-						CArray ca = ArgumentValidation.getArray(value, t);
+						CArray ca = ArgumentValidation.getArray(value, t, env);
 						MList m = new MList();
 						if(ca.inAssociativeMode()) {
 							throw new CRECastException("Expected non-associative array, but an associative array was found instead.", t);
 						}
 						for(int i = 0; i < ca.size(); i++) {
-							m.add(ca.get(i, t));
+							m.add(ca.get(i, t, env));
 						}
 						val = m;
 					} else if(Construct.class.isAssignableFrom(fType)) {
 						val = value;
 					} else if(MObject.class.isAssignableFrom(fType)) {
-						CArray ca = ArgumentValidation.getArray(value, t);
+						CArray ca = ArgumentValidation.getArray(value, t, env);
 						val = MObject.Construct(fType, ca);
 					} else {
 						//Programming error.

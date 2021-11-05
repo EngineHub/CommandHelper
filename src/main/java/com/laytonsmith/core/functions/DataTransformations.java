@@ -13,6 +13,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -21,6 +22,13 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import org.xml.sax.SAXException;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.parser.ParserException;
+import org.yaml.snakeyaml.scanner.ScannerException;
+
+import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -28,12 +36,6 @@ import java.io.StringWriter;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
-import javax.xml.xpath.XPathExpressionException;
-import org.xml.sax.SAXException;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.parser.ParserException;
-import org.yaml.snakeyaml.scanner.ScannerException;
 
 /**
  *
@@ -65,10 +67,10 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray ca = ArgumentValidation.getArray(args[0], t);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			CArray ca = ArgumentValidation.getArray(args[0], t, env);
 			try {
-				return new CString(Construct.json_encode(ca, t), t);
+				return new CString(Construct.json_encode(ca, t, env), t);
 			} catch (MarshalException ex) {
 				throw new CRECastException(ex.getMessage(), t);
 			}
@@ -122,10 +124,10 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String s = args[0].val();
 			try {
-				return Construct.json_decode(s, t);
+				return Construct.json_decode(s, t, env);
 			} catch (MarshalException ex) {
 				throw new CREFormatException("The input JSON string is improperly formatted. Check your formatting and try again.", t, ex);
 			}
@@ -180,11 +182,11 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray ca = ArgumentValidation.getArray(args[0], t);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			CArray ca = ArgumentValidation.getArray(args[0], t, env);
 			boolean prettyPrint = false;
 			if(args.length == 2) {
-				prettyPrint = ArgumentValidation.getBoolean(args[1], t);
+				prettyPrint = ArgumentValidation.getBoolean(args[1], t, env);
 			}
 			DumperOptions options = new DumperOptions();
 			if(prettyPrint) {
@@ -193,7 +195,7 @@ public class DataTransformations {
 			}
 			Yaml yaml = new Yaml(options);
 			try {
-				return new CString(yaml.dump(Construct.GetPOJO(ca)), t);
+				return new CString(yaml.dump(Construct.GetPOJO(ca, env)), t);
 			} catch (ClassCastException ex) {
 				throw new CRECastException(ex.getMessage(), t);
 			}
@@ -240,7 +242,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			String data = args[0].val();
 			Yaml yaml = new Yaml();
 			Object ret = null;
@@ -253,7 +255,7 @@ public class DataTransformations {
 			if(!(ret instanceof Map) && !(ret instanceof Collection)) {
 				throw new CREFormatException("Improperly formatted YML", t, cause);
 			}
-			return Construct.GetConstruct(ret);
+			return Construct.GetConstruct(ret, env);
 		}
 
 		@Override
@@ -298,9 +300,9 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			Properties props = new Properties();
-			CArray arr = ArgumentValidation.getArray(args[0], t);
+			CArray arr = ArgumentValidation.getArray(args[0], t, env);
 			String comment = null;
 			if(args.length == 2) {
 				comment = args[1].val();
@@ -309,11 +311,11 @@ public class DataTransformations {
 				throw new CRECastException("Expecting an associative array", t);
 			}
 			for(String key : arr.stringKeySet()) {
-				Mixed c = arr.get(key, t);
+				Mixed c = arr.get(key, t, env);
 				String val;
 				if(c instanceof CNull) {
 					val = "";
-				} else if(c.isInstanceOf(CArray.TYPE)) {
+				} else if(c.isInstanceOf(CArray.TYPE, null, env)) {
 					throw new CRECastException("Arrays cannot be encoded with ini_encode.", t);
 				} else {
 					val = c.val();
@@ -377,7 +379,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			Properties props = new Properties();
 			Reader reader = new StringReader(args[0].val());
 			try {
@@ -385,9 +387,10 @@ public class DataTransformations {
 			} catch (IOException ex) {
 				throw new CREFormatException(ex.getMessage(), t);
 			}
-			CArray arr = CArray.GetAssociativeArray(t);
+			CArray arr = CArray.GetAssociativeArray(t, GenericParameters.start(CArray.TYPE)
+					.addParameter(CString.TYPE, null).build(), env);
 			for(String key : props.stringPropertyNames()) {
-				arr.set(key, props.getProperty(key));
+				arr.set(key, props.getProperty(key), env);
 			}
 			return arr;
 		}

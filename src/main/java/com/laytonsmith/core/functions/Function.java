@@ -71,12 +71,12 @@ public interface Function extends FunctionBase, Documentation, Comparable<Functi
 	 * CVoid.
 	 *
 	 * @param t The location of this function call in the code, used for correct error messages
-	 * @param environment The current code environment
+	 * @param env The current code environment
 	 * @param args An array of evaluated objects
 	 * @return
 	 * @throws CancelCommandException
 	 */
-	public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException;
+	public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException;
 
 	/**
 	 * Gets the return type of this function, based on the types of the passed arguments.

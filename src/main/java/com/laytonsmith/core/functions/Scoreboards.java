@@ -253,8 +253,8 @@ public class Scoreboards {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = Static.GetPlayer(args[0], t);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			MCPlayer p = Static.GetPlayer(args[0], t, env);
 			String ret;
 			try {
 				ret = getBoardID(p.getScoreboard(), t);
@@ -297,9 +297,9 @@ public class Scoreboards {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment,
+		public Mixed exec(Target t, Environment env,
 				Mixed... args) throws ConfigRuntimeException {
-			MCPlayer p = Static.GetPlayer(args[0], t);
+			MCPlayer p = Static.GetPlayer(args[0], t, env);
 			p.setScoreboard(assignBoard(1, t, args));
 			return CVoid.VOID;
 		}
@@ -925,12 +925,12 @@ public class Scoreboards {
 	public static class remove_scoreboard extends SBFunction {
 
 		@Override
-		public Mixed exec(Target t, Environment environment,
+		public Mixed exec(Target t, Environment env,
 				Mixed... args) throws ConfigRuntimeException {
 			String id = args[0].val();
 			boolean nullify = true;
 			if(args.length == 2) {
-				nullify = ArgumentValidation.getBoolean(args[1], t);
+				nullify = ArgumentValidation.getBoolean(args[1], t, env);
 			}
 			if(nullify) {
 				MCScoreboard s = getBoard(id, t);
@@ -1107,7 +1107,7 @@ public class Scoreboards {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCScoreboard s = assignBoard(3, t, args);
 			MCObjective o = s.getObjective(args[0].val());
 			if(o == null) {
@@ -1116,7 +1116,7 @@ public class Scoreboards {
 			if(args[1].val().length() > 40) {
 				throw new CRELengthException("Score name must be 40 characters or less.", t);
 			}
-			o.getScore(args[1].val()).setScore(ArgumentValidation.getInt32(args[2], t));
+			o.getScore(args[1].val()).setScore(ArgumentValidation.getInt32(args[2], t, env));
 			return CVoid.VOID;
 		}
 
@@ -1193,10 +1193,10 @@ public class Scoreboards {
 			if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray options = (CArray) args[1];
 				if(options.containsKey("friendlyfire")) {
-					team.setAllowFriendlyFire(ArgumentValidation.getBoolean(options.get("friendlyfire", t, env), t));
+					team.setAllowFriendlyFire(ArgumentValidation.getBoolean(options.get("friendlyfire", t, env), t, env));
 				}
 				if(options.containsKey("friendlyinvisibles")) {
-					team.setCanSeeFriendlyInvisibles(ArgumentValidation.getBoolean(options.get("friendlyinvisibles", t, env), t));
+					team.setCanSeeFriendlyInvisibles(ArgumentValidation.getBoolean(options.get("friendlyinvisibles", t, env), t, env));
 				}
 				if(options.containsKey("nametagvisibility")) {
 					MCOptionStatus namevisibility;

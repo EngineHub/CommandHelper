@@ -92,7 +92,7 @@ public class InventoryEvents {
 			if(prefilter.containsKey("slotitem")) {
 				Mixed type = prefilter.get("slotitem");
 				if(type.isInstanceOf(CString.TYPE, null, event.getEnvironment())
-						&& type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+						&& type.val().contains(":") || ArgumentValidation.isNumber(type, event.getEnvironment())) {
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("slotitem").val(), 1, event.getTarget());
 					prefilter.put("slotitem", new CString(is.getType().getName(), event.getTarget()));
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format for the \"slotitem\" prefilter"
@@ -102,21 +102,21 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCInventoryClickEvent) {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
 
 				if(prefilter.containsKey("virtual")) {
 					boolean isVirtual = e.getInventory().getHolder() instanceof MCVirtualInventoryHolder;
-					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN)) {
+					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN, env)) {
 						return false;
 					}
 				}
-				Prefilters.match(prefilter, "action", e.getAction().name(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "player", e.getWhoClicked().getName(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "clicktype", e.getClickType().name(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "slottype", e.getSlotType().name(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "slotitem", e.getCurrentItem().getType().getName(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "action", e.getAction().name(), PrefilterType.MACRO, env);
+				Prefilters.match(prefilter, "player", e.getWhoClicked().getName(), PrefilterType.MACRO, env);
+				Prefilters.match(prefilter, "clicktype", e.getClickType().name(), PrefilterType.MACRO, env);
+				Prefilters.match(prefilter, "slottype", e.getSlotType().name(), PrefilterType.MACRO, env);
+				Prefilters.match(prefilter, "slotitem", e.getCurrentItem().getType().getName(), PrefilterType.STRING_MATCH, env);
 
 				return true;
 			}
@@ -151,18 +151,18 @@ public class InventoryEvents {
 				map.put("shiftclick", CBoolean.get(e.isShiftClick()));
 				map.put("creativeclick", CBoolean.get(e.isCreativeClick()));
 				map.put("keyboardclick", CBoolean.get(e.isKeyboardClick()));
-				map.put("cursoritem", ObjectGenerator.GetGenerator().item(e.getCursor(), t));
+				map.put("cursoritem", ObjectGenerator.GetGenerator().item(e.getCursor(), t, env));
 
 				map.put("slot", new CInt(e.getSlot(), t));
 				map.put("rawslot", new CInt(e.getRawSlot(), t));
 				map.put("hotbarbutton", new CInt(e.getHotbarButton(), t));
 				map.put("slottype", new CString(e.getSlotType().name(), t));
-				map.put("slotitem", ObjectGenerator.GetGenerator().item(e.getCurrentItem(), t));
+				map.put("slotitem", ObjectGenerator.GetGenerator().item(e.getCurrentItem(), t, env));
 
 				CArray items = CArray.GetAssociativeArray(t, null, env);
 				MCInventory inv = e.getInventory();
 				for(int i = 0; i < inv.getSize(); i++) {
-					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), t), t, env);
+					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), t, env), t, env);
 				}
 				map.put("inventory", items);
 				map.put("inventorytype", new CString(inv.getType().name(), t));
@@ -185,11 +185,11 @@ public class InventoryEvents {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
 
 				if(key.equalsIgnoreCase("slotitem")) {
-					e.setCurrentItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+					e.setCurrentItem(ObjectGenerator.GetGenerator().item(value, value.getTarget(), env));
 					return true;
 				}
 				if(key.equalsIgnoreCase("cursoritem")) {
-					e.setCursor(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+					e.setCursor(ObjectGenerator.GetGenerator().item(value, value.getTarget(), env));
 					return true;
 				}
 			}
@@ -236,7 +236,7 @@ public class InventoryEvents {
 			if(prefilter.containsKey("cursoritem")) {
 				Mixed type = prefilter.get("cursoritem");
 				if(type.isInstanceOf(CString.TYPE, null, event.getEnvironment())
-						&& type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+						&& type.val().contains(":") || ArgumentValidation.isNumber(type, event.getEnvironment())) {
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("cursoritem").val(), 1, event.getTarget());
 					prefilter.put("cursoritem", new CString(is.getType().getName(), event.getTarget()));
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format for the \"cursoritem\" prefilter"
@@ -246,19 +246,19 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCInventoryDragEvent) {
 				MCInventoryDragEvent e = (MCInventoryDragEvent) event;
 
 				if(prefilter.containsKey("virtual")) {
 					boolean isVirtual = e.getInventory().getHolder() instanceof MCVirtualInventoryHolder;
-					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN)) {
+					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN, env)) {
 						return false;
 					}
 				}
-				Prefilters.match(prefilter, "world", e.getWhoClicked().getWorld().getName(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "type", e.getType().name(), PrefilterType.STRING_MATCH);
-				Prefilters.match(prefilter, "cursoritem", e.getOldCursor().getType().getName(), PrefilterType.STRING_MATCH);
+				Prefilters.match(prefilter, "world", e.getWhoClicked().getWorld().getName(), PrefilterType.MACRO, env);
+				Prefilters.match(prefilter, "type", e.getType().name(), PrefilterType.STRING_MATCH, env);
+				Prefilters.match(prefilter, "cursoritem", e.getOldCursor().getType().getName(), PrefilterType.STRING_MATCH, env);
 
 				return true;
 			}
@@ -277,8 +277,8 @@ public class InventoryEvents {
 				Map<String, Mixed> map = evaluate_helper(event);
 
 				map.put("player", new CString(e.getWhoClicked().getName(), Target.UNKNOWN));
-				map.put("newcursoritem", ObjectGenerator.GetGenerator().item(e.getCursor(), Target.UNKNOWN));
-				map.put("oldcursoritem", ObjectGenerator.GetGenerator().item(e.getOldCursor(), Target.UNKNOWN));
+				map.put("newcursoritem", ObjectGenerator.GetGenerator().item(e.getCursor(), Target.UNKNOWN, env));
+				map.put("oldcursoritem", ObjectGenerator.GetGenerator().item(e.getOldCursor(), Target.UNKNOWN, env));
 
 				CArray slots = new CArray(Target.UNKNOWN, GenericParameters.start(CArray.TYPE)
 						.addParameter(CInt.TYPE, null).build(), env);
@@ -298,14 +298,14 @@ public class InventoryEvents {
 				for(Map.Entry<Integer, MCItemStack> ni : e.getNewItems().entrySet()) {
 					Integer key = ni.getKey();
 					MCItemStack value = ni.getValue();
-					newItems.set(key.intValue(), ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN), Target.UNKNOWN, env);
+					newItems.set(key.intValue(), ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN, env), Target.UNKNOWN, env);
 				}
 				map.put("newitems", newItems);
 
 				CArray items = CArray.GetAssociativeArray(Target.UNKNOWN, null, env);
 				MCInventory inv = e.getInventory();
 				for(int i = 0; i < inv.getSize(); i++) {
-					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), Target.UNKNOWN), Target.UNKNOWN, env);
+					items.set(i, ObjectGenerator.GetGenerator().item(inv.getItem(i), Target.UNKNOWN, env), Target.UNKNOWN, env);
 				}
 				map.put("inventory", items);
 				map.put("inventorytype", new CString(inv.getType().name(), Target.UNKNOWN));
@@ -330,7 +330,7 @@ public class InventoryEvents {
 				MCInventoryDragEvent e = (MCInventoryDragEvent) event;
 
 				if(key.equalsIgnoreCase("cursoritem")) {
-					e.setCursor(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+					e.setCursor(ObjectGenerator.GetGenerator().item(value, value.getTarget(), env));
 					return true;
 				}
 			}
@@ -364,12 +364,12 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCInventoryOpenEvent) {
 				MCInventoryOpenEvent e = (MCInventoryOpenEvent) event;
 				if(prefilter.containsKey("virtual")) {
 					boolean isVirtual = e.getInventory().getHolder() instanceof MCVirtualInventoryHolder;
-					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN)) {
+					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN, env)) {
 						return false;
 					}
 				}
@@ -394,13 +394,13 @@ public class InventoryEvents {
 				CArray items = CArray.GetAssociativeArray(t, null, env);
 				MCInventory inv = e.getInventory();
 				for(int i = 0; i < inv.getSize(); i++) {
-					Mixed c = ObjectGenerator.GetGenerator().item(inv.getItem(i), t);
+					Mixed c = ObjectGenerator.GetGenerator().item(inv.getItem(i), t, env);
 					items.set(i, c, t, env);
 				}
 				map.put("inventory", items);
 
 				map.put("inventorytype", new CString(inv.getType().name(), t));
-				map.put("holder", InventoryManagement.GetInventoryHolder(inv, t));
+				map.put("holder", InventoryManagement.GetInventoryHolder(inv, t, env));
 				map.put("virtual", CBoolean.get(inv.getHolder() instanceof MCVirtualInventoryHolder));
 
 				return map;
@@ -446,12 +446,12 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCInventoryCloseEvent) {
 				MCInventoryCloseEvent e = (MCInventoryCloseEvent) event;
 				if(prefilter.containsKey("virtual")) {
 					boolean isVirtual = e.getInventory().getHolder() instanceof MCVirtualInventoryHolder;
-					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN)) {
+					if(isVirtual != ArgumentValidation.getBoolean(prefilter.get("virtual"), Target.UNKNOWN, env)) {
 						return false;
 					}
 				}
@@ -476,13 +476,13 @@ public class InventoryEvents {
 				CArray items = CArray.GetAssociativeArray(t, null, env);
 				MCInventory inv = e.getInventory();
 				for(int i = 0; i < inv.getSize(); i++) {
-					Mixed c = ObjectGenerator.GetGenerator().item(inv.getItem(i), t);
+					Mixed c = ObjectGenerator.GetGenerator().item(inv.getItem(i), t, env);
 					items.set(i, c, t, env);
 				}
 				map.put("inventory", items);
 
 				map.put("inventorytype", new CString(inv.getType().name(), t));
-				map.put("holder", InventoryManagement.GetInventoryHolder(inv, t));
+				map.put("holder", InventoryManagement.GetInventoryHolder(inv, t, env));
 				map.put("virtual", CBoolean.get(inv.getHolder() instanceof MCVirtualInventoryHolder));
 
 				return map;
@@ -534,7 +534,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			return true;
 		}
 
@@ -550,12 +550,12 @@ public class InventoryEvents {
 				Map<String, Mixed> map = evaluate_helper(event);
 
 				map.put("player", new CString(e.GetEnchanter().getName(), Target.UNKNOWN));
-				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN));
+				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), Target.UNKNOWN, env));
 				map.put("inventorytype", new CString(e.getInventory().getType().name(), Target.UNKNOWN));
 				map.put("levels", new CInt(e.getExpLevelCost(), Target.UNKNOWN));
-				map.put("enchants", ObjectGenerator.GetGenerator().enchants(e.getEnchantsToAdd(), Target.UNKNOWN));
+				map.put("enchants", ObjectGenerator.GetGenerator().enchants(e.getEnchantsToAdd(), Target.UNKNOWN, env));
 
-				CArray loc = ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation());
+				CArray loc = ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation(), env);
 
 				loc.remove(new CString("yaw", Target.UNKNOWN), env);
 				loc.remove(new CString("pitch", Target.UNKNOWN), env);
@@ -583,17 +583,17 @@ public class InventoryEvents {
 				MCEnchantItemEvent e = (MCEnchantItemEvent) event;
 
 				if(key.equalsIgnoreCase("levels")) {
-					e.setExpLevelCost(ArgumentValidation.getInt32(value, value.getTarget()));
+					e.setExpLevelCost(ArgumentValidation.getInt32(value, value.getTarget(), env));
 					return true;
 				}
 
 				if(key.equalsIgnoreCase("item")) {
-					e.setItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+					e.setItem(ObjectGenerator.GetGenerator().item(value, value.getTarget(), env));
 					return true;
 				}
 
 				if(key.equalsIgnoreCase("enchants")) {
-					e.setEnchantsToAdd((ObjectGenerator.GetGenerator().enchants((CArray) value, value.getTarget())));
+					e.setEnchantsToAdd((ObjectGenerator.GetGenerator().enchants((CArray) value, value.getTarget(), env)));
 					return true;
 				}
 			}
@@ -630,7 +630,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e, Environment env) throws PrefilterNonMatchException {
 			return true;
 		}
 
@@ -647,7 +647,7 @@ public class InventoryEvents {
 				Map<String, Mixed> map = evaluate_helper(event);
 
 				map.put("player", new CString(e.getEnchanter().getName(), t));
-				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), t));
+				map.put("item", ObjectGenerator.GetGenerator().item(e.getItem(), t, env));
 				map.put("inventorytype", new CString(e.getInventory().getType().name(), t));
 				map.put("enchantmentbonus", new CInt(e.getEnchantmentBonus(), t));
 
@@ -661,7 +661,7 @@ public class InventoryEvents {
 
 				map.put("expcosts", expCostsCArray);
 
-				CArray loc = ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation());
+				CArray loc = ObjectGenerator.GetGenerator().location(e.getEnchantBlock().getLocation(), env);
 
 				loc.remove(new CString("yaw", t), env);
 				loc.remove(new CString("pitch", t), env);
@@ -688,7 +688,7 @@ public class InventoryEvents {
 				MCPrepareItemEnchantEvent e = (MCPrepareItemEnchantEvent) event;
 
 				if(key.equalsIgnoreCase("item")) {
-					e.setItem(ObjectGenerator.GetGenerator().item(value, t));
+					e.setItem(ObjectGenerator.GetGenerator().item(value, t, env));
 					return true;
 				}
 
@@ -701,7 +701,7 @@ public class InventoryEvents {
 							for(int i = 0; i <= 2; i++) {
 								MCEnchantmentOffer offer = offers[i];
 								Mixed cost = cExpCosts.get(i, t, env);
-								offer.setCost(ArgumentValidation.getInt32(cost, t));
+								offer.setCost(ArgumentValidation.getInt32(cost, t, env));
 							}
 						} else {
 							throw new CREFormatException("Expected a normal array!", t);
@@ -739,7 +739,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCItemHeldEvent) {
 				MCItemHeldEvent e = (MCItemHeldEvent) event;
 				if(prefilter.containsKey("player") && !e.getPlayer().getName().equals(prefilter.get("player").val())) {
@@ -778,7 +778,7 @@ public class InventoryEvents {
 			if(event instanceof MCItemHeldEvent) {
 				MCItemHeldEvent e = (MCItemHeldEvent) event;
 				if("to".equals(key)) {
-					e.getPlayer().getInventory().setHeldItemSlot(ArgumentValidation.getInt32(value, value.getTarget()));
+					e.getPlayer().getInventory().setHeldItemSlot(ArgumentValidation.getInt32(value, value.getTarget(), env));
 					return true;
 				}
 			}
@@ -819,7 +819,7 @@ public class InventoryEvents {
 			if(prefilter.containsKey("main_hand")) {
 				Mixed type = prefilter.get("main_hand");
 				if(type.isInstanceOf(CString.TYPE, null, event.getEnvironment())
-						&& type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+						&& type.val().contains(":") || ArgumentValidation.isNumber(type, event.getEnvironment())) {
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format in the \"main_hand\""
 							+ " prefilter in " + getName() + " is deprecated.", event.getTarget());
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("main_hand").val(), 1, event.getTarget());
@@ -829,7 +829,7 @@ public class InventoryEvents {
 			if(prefilter.containsKey("off_hand")) {
 				Mixed type = prefilter.get("off_hand");
 				if(type.isInstanceOf(CString.TYPE, null, event.getEnvironment())
-						&& type.val().contains(":") || ArgumentValidation.isNumber(type)) {
+						&& type.val().contains(":") || ArgumentValidation.isNumber(type, event.getEnvironment())) {
 					MSLog.GetLogger().w(MSLog.Tags.DEPRECATION, "The item notation format in the \"off_hand\""
 							+ " prefilter in " + getName() + " is deprecated.", event.getTarget());
 					MCItemStack is = Static.ParseItemNotation(null, prefilter.get("off_hand").val(), 1, event.getTarget());
@@ -839,11 +839,11 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCItemSwapEvent) {
 				MCItemSwapEvent e = (MCItemSwapEvent) event;
 
-				Prefilters.match(prefilter, "player", e.getPlayer().getName(), PrefilterType.MACRO);
+				Prefilters.match(prefilter, "player", e.getPlayer().getName(), PrefilterType.MACRO, env);
 				if(prefilter.containsKey("main_hand")) {
 					String value = prefilter.get("main_hand").val();
 					if(!e.getMainHandItem().getType().getName().equals(value)) {
@@ -872,8 +872,8 @@ public class InventoryEvents {
 			if(event instanceof MCItemSwapEvent) {
 				MCItemSwapEvent e = (MCItemSwapEvent) event;
 				Map<String, Mixed> ret = evaluate_helper(e);
-				ret.put("main_hand", ObjectGenerator.GetGenerator().item(e.getMainHandItem(), Target.UNKNOWN));
-				ret.put("off_hand", ObjectGenerator.GetGenerator().item(e.getOffHandItem(), Target.UNKNOWN));
+				ret.put("main_hand", ObjectGenerator.GetGenerator().item(e.getMainHandItem(), Target.UNKNOWN, env));
+				ret.put("off_hand", ObjectGenerator.GetGenerator().item(e.getOffHandItem(), Target.UNKNOWN, env));
 				return ret;
 			} else {
 				throw new EventException("Event received was not an MCItemSwapEvent");
@@ -890,11 +890,11 @@ public class InventoryEvents {
 			if(event instanceof MCItemSwapEvent) {
 				MCItemSwapEvent e = (MCItemSwapEvent) event;
 				if("main_hand".equals(key)) {
-					e.setMainHandItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+					e.setMainHandItem(ObjectGenerator.GetGenerator().item(value, value.getTarget(), env));
 					return true;
 				}
 				if("off_hand".equals(key)) {
-					e.setOffHandItem(ObjectGenerator.GetGenerator().item(value, value.getTarget()));
+					e.setOffHandItem(ObjectGenerator.GetGenerator().item(value, value.getTarget(), env));
 					return true;
 				}
 			}
@@ -927,7 +927,7 @@ public class InventoryEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent event, Environment env) throws PrefilterNonMatchException {
 			if(event instanceof MCPrepareItemCraftEvent) {
 				return true;
 			}
@@ -951,15 +951,15 @@ public class InventoryEvents {
 					viewers.push(new CString(v.getName(), t), t, env);
 				}
 				ret.put("viewers", viewers);
-				ret.put("recipe", ObjectGenerator.GetGenerator().recipe(e.getRecipe(), t));
+				ret.put("recipe", ObjectGenerator.GetGenerator().recipe(e.getRecipe(), t, env));
 				ret.put("isRepair", CBoolean.get(e.isRepair()));
 				CArray matrix = CArray.GetAssociativeArray(t, null, env);
 				MCItemStack[] mi = e.getInventory().getMatrix();
 				for(int i = 0; i < mi.length; i++) {
-					matrix.set(i, ObjectGenerator.GetGenerator().item(mi[i], t), t, env);
+					matrix.set(i, ObjectGenerator.GetGenerator().item(mi[i], t, env), t, env);
 				}
 				ret.put("matrix", matrix);
-				ret.put("result", ObjectGenerator.GetGenerator().item(e.getInventory().getResult(), t));
+				ret.put("result", ObjectGenerator.GetGenerator().item(e.getInventory().getResult(), t, env));
 				return ret;
 			} else {
 				throw new EventException("Event received was not an MCPrepareItemCraftEvent.");

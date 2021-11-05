@@ -4,33 +4,38 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.MSVersion;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.Sizeable;
 import com.laytonsmith.core.natives.interfaces.ValueType;
+import com.laytonsmith.core.objects.ObjectModifier;
+
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 
 /**
  *
  */
 @typeof("ms.lang.mutable_primitive")
-public class CMutablePrimitive extends CArray implements Sizeable {
+public final class CMutablePrimitive extends CArray implements Sizeable {
 
 	@SuppressWarnings("FieldNameHidesFieldInSuperclass")
 	public static final CClassType TYPE = CClassType.get(CMutablePrimitive.class);
 
 	private Mixed value = CNull.NULL;
 
-	public CMutablePrimitive(Target t) {
-		this(null, t);
+	public CMutablePrimitive(Target t, Environment env) {
+		this(null, t, env);
 	}
 
-	public CMutablePrimitive(Mixed value, Target t) {
-		super(t, 0);
-		set(value, t);
+	public CMutablePrimitive(Mixed value, Target t, Environment env) {
+		super(t, 0, null, env);
+		set(value, t, env);
 	}
 
 	@Override
@@ -44,29 +49,29 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 	 * @param value
 	 * @param t
 	 */
-	public void set(Mixed value, Target t) {
-		if(!value.isInstanceOf(ValueType.TYPE)) {
+	public void set(Mixed value, Target t, Environment env) {
+		if(!value.isInstanceOf(ValueType.TYPE, null, env)) {
 			throw new CREFormatException("mutable_primitives can only store primitive values.", t);
 		}
 		this.value = value;
 	}
 
 	@Override
-	public void set(Mixed index, Mixed c, Target t) {
+	public void set(Mixed index, Mixed c, Target t, Environment env) {
 		throw new CRECastException("mutable_primitives cannot have values set in them", t);
 	}
 
 	/**
 	 * Sets the value as if
-	 * {@link #set(Mixed, com.laytonsmith.core.constructs.Target)} were called, then
+	 * {@link #set(Mixed, com.laytonsmith.core.constructs.Target, Environment)} were called, then
 	 * returns a reference to this object.
 	 *
 	 * @param value
 	 * @param t
 	 * @return
 	 */
-	public CMutablePrimitive setAndReturn(Mixed value, Target t) {
-		set(value, t);
+	public CMutablePrimitive setAndReturn(Mixed value, Target t, Environment env) {
+		set(value, t, env);
 		return this;
 	}
 
@@ -75,7 +80,7 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 	}
 
 	@Override
-	public Mixed get(Mixed index, Target t) {
+	public Mixed get(Mixed index, Target t, Environment env) {
 		return value;
 	}
 
@@ -101,7 +106,7 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 
 	@Override
 	public long size() {
-		if(value.isInstanceOf(Sizeable.TYPE)) {
+		if(value.isInstanceOf(Sizeable.TYPE, null, fallbackEnv)) {
 			return ArgumentValidation.getObject(value, Target.UNKNOWN, Sizeable.class).size();
 		} else {
 			return 0;
@@ -125,7 +130,7 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 
 	@Override
 	public CArray createNew(Target t) {
-		return new CMutablePrimitive(value, t);
+		return new CMutablePrimitive(value, t, fallbackEnv);
 	}
 
 	@Override
@@ -136,13 +141,13 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 	}
 
 	@Override
-	protected String getString(Stack<CArray> arrays, Target t) {
+	protected String getString(Stack<CArray> arrays, Target t, Environment env) {
 		return value.val();
 	}
 
 	@Override
-	public void push(Mixed c, Integer i, Target t) {
-		set(c, t);
+	public void push(Mixed c, Integer i, Target t, Environment env) {
+		set(c, t, env);
 	}
 
 	@Override
@@ -165,4 +170,8 @@ public class CMutablePrimitive extends CArray implements Sizeable {
 		return new CClassType[]{Sizeable.TYPE};
 	}
 
+	@Override
+	public Set<ObjectModifier> getObjectModifiers() {
+		return EnumSet.of(ObjectModifier.FINAL);
+	}
 }

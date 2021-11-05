@@ -9,6 +9,7 @@ import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -67,28 +68,28 @@ public final class Prefilters {
 	}
 
 	public static void match(Map<String, Mixed> map, String key,
-			String actualValue, PrefilterType type) throws PrefilterNonMatchException {
-		match(map, key, new CString(actualValue, Target.UNKNOWN), type);
+			String actualValue, PrefilterType type, Environment env) throws PrefilterNonMatchException {
+		match(map, key, new CString(actualValue, Target.UNKNOWN), type, env);
 	}
 
 	public static void match(Map<String, Mixed> map, String key,
-			int actualValue, PrefilterType type) throws PrefilterNonMatchException {
-		match(map, key, new CInt(actualValue, Target.UNKNOWN), type);
+			int actualValue, PrefilterType type, Environment env) throws PrefilterNonMatchException {
+		match(map, key, new CInt(actualValue, Target.UNKNOWN), type, env);
 	}
 
 	public static void match(Map<String, Mixed> map, String key,
-			double actualValue, PrefilterType type) throws PrefilterNonMatchException {
-		match(map, key, new CDouble(actualValue, Target.UNKNOWN), type);
+			double actualValue, PrefilterType type, Environment env) throws PrefilterNonMatchException {
+		match(map, key, new CDouble(actualValue, Target.UNKNOWN), type, env);
 	}
 
 	public static void match(Map<String, Mixed> map, String key,
-			boolean actualValue, PrefilterType type) throws PrefilterNonMatchException {
-		match(map, key, CBoolean.get(actualValue), type);
+			boolean actualValue, PrefilterType type, Environment env) throws PrefilterNonMatchException {
+		match(map, key, CBoolean.get(actualValue), type, env);
 	}
 
 	public static void match(Map<String, Mixed> map, String key,
-			MCLocation actualValue, PrefilterType type) throws PrefilterNonMatchException {
-		match(map, key, ObjectGenerator.GetGenerator().location(actualValue, false), type);
+			MCLocation actualValue, PrefilterType type, Environment env) throws PrefilterNonMatchException {
+		match(map, key, ObjectGenerator.GetGenerator().location(actualValue, false, env), type, env);
 	}
 
 	/**
@@ -97,7 +98,7 @@ public final class Prefilters {
 	 * the event matches.
 	 */
 	public static void match(Map<String, Mixed> map, String key,
-			Mixed actualValue, PrefilterType type) throws PrefilterNonMatchException {
+			Mixed actualValue, PrefilterType type, Environment env) throws PrefilterNonMatchException {
 		if(map.containsKey(key)) {
 			switch(type) {
 				case ITEM_MATCH:
@@ -107,13 +108,13 @@ public final class Prefilters {
 					StringMatch(map.get(key).val(), actualValue.val());
 					break;
 				case MATH_MATCH:
-					MathMatch(map.get(key), actualValue);
+					MathMatch(map.get(key), actualValue, env);
 					break;
 				case EXPRESSION:
 					Mixed exp = map.get(key);
 					if(!exp.val().isEmpty()
 							&& exp.val().charAt(0) == '(' && exp.val().charAt(exp.val().length() - 1) == ')') {
-						ExpressionMatch(exp, key, actualValue);
+						ExpressionMatch(exp, key, actualValue, env);
 					} else {
 						throw new CREFormatException("Prefilter expecting expression type, and \""
 								+ exp.val() + "\" does not follow expression format. "
@@ -131,13 +132,13 @@ public final class Prefilters {
 					}
 					break;
 				case MACRO:
-					MacroMatch(key, map.get(key), actualValue);
+					MacroMatch(key, map.get(key), actualValue, env);
 					break;
 				case BOOLEAN_MATCH:
-					BooleanMatch(map.get(key), actualValue);
+					BooleanMatch(map.get(key), actualValue, env);
 					break;
 				case LOCATION_MATCH:
-					LocationMatch(map.get(key), actualValue);
+					LocationMatch(map.get(key), actualValue, env);
 					break;
 			}
 		}
@@ -151,15 +152,16 @@ public final class Prefilters {
 		}
 	}
 
-	private static void BooleanMatch(Mixed bool1, Mixed bool2) throws PrefilterNonMatchException {
-		if(ArgumentValidation.getBoolean(bool1, Target.UNKNOWN) != ArgumentValidation.getBoolean(bool2, Target.UNKNOWN)) {
+	private static void BooleanMatch(Mixed bool1, Mixed bool2, Environment env) throws PrefilterNonMatchException {
+		if(ArgumentValidation.getBoolean(bool1, Target.UNKNOWN, env)
+				!= ArgumentValidation.getBoolean(bool2, Target.UNKNOWN, env)) {
 			throw new PrefilterNonMatchException();
 		}
 	}
 
-	private static void LocationMatch(Mixed location1, Mixed location2) throws PrefilterNonMatchException {
-		MCLocation l1 = ObjectGenerator.GetGenerator().location(location1, null, location1.getTarget());
-		MCLocation l2 = ObjectGenerator.GetGenerator().location(location2, null, Target.UNKNOWN);
+	private static void LocationMatch(Mixed location1, Mixed location2, Environment env) throws PrefilterNonMatchException {
+		MCLocation l1 = ObjectGenerator.GetGenerator().location(location1, null, location1.getTarget(), env);
+		MCLocation l2 = ObjectGenerator.GetGenerator().location(location2, null, Target.UNKNOWN, env);
 		if((!l1.getWorld().equals(l2.getWorld())) || (l1.getBlockX() != l2.getBlockX()) || (l1.getBlockY() != l2.getBlockY()) || (l1.getBlockZ() != l2.getBlockZ())) {
 			throw new PrefilterNonMatchException();
 		}
@@ -171,10 +173,10 @@ public final class Prefilters {
 		}
 	}
 
-	private static void MathMatch(Mixed one, Mixed two) throws PrefilterNonMatchException {
+	private static void MathMatch(Mixed one, Mixed two, Environment env) throws PrefilterNonMatchException {
 		try {
-			double dOne = ArgumentValidation.getNumber(one, Target.UNKNOWN);
-			double dTwo = ArgumentValidation.getNumber(two, Target.UNKNOWN);
+			double dOne = ArgumentValidation.getNumber(one, Target.UNKNOWN, env);
+			double dTwo = ArgumentValidation.getNumber(two, Target.UNKNOWN, env);
 			if(dOne != dTwo) {
 				throw new PrefilterNonMatchException();
 			}
@@ -183,7 +185,7 @@ public final class Prefilters {
 		}
 	}
 
-	private static void ExpressionMatch(Mixed expression, String key, Mixed dvalue) throws PrefilterNonMatchException {
+	private static void ExpressionMatch(Mixed expression, String key, Mixed dvalue, Environment env) throws PrefilterNonMatchException {
 		String exp = expression.val().substring(1, expression.val().length() - 1);
 		boolean inequalityMode = false;
 		if(exp.contains("<") || exp.contains(">") || exp.contains("==")) {
@@ -204,13 +206,13 @@ public final class Prefilters {
 					new Class[]{String.class, String[].class}, new Object[]{exp, new String[]{key}});
 			double val = (double) ReflectionUtils.invokeMethod(eClazz, e, "evaluate",
 					new Class[]{double[].class},
-					new Object[]{new double[]{ArgumentValidation.getDouble(dvalue, Target.UNKNOWN)}});
+					new Object[]{new double[]{ArgumentValidation.getDouble(dvalue, Target.UNKNOWN, env)}});
 			if(inequalityMode) {
 				if(val == 0) {
 					throw new PrefilterNonMatchException();
 				}
 			} else {
-				if(val != ArgumentValidation.getDouble(dvalue, Target.UNKNOWN)) {
+				if(val != ArgumentValidation.getDouble(dvalue, Target.UNKNOWN, env)) {
 					throw new PrefilterNonMatchException();
 				}
 			}
@@ -231,11 +233,11 @@ public final class Prefilters {
 		}
 	}
 
-	private static void MacroMatch(String key, Mixed expression, Mixed value) throws PrefilterNonMatchException {
+	private static void MacroMatch(String key, Mixed expression, Mixed value, Environment env) throws PrefilterNonMatchException {
 		if(expression.val().isEmpty()) {
 			throw new PrefilterNonMatchException();
 		} else if(expression.val().charAt(0) == '(' && expression.val().charAt(expression.val().length() - 1) == ')') {
-			ExpressionMatch(expression, key, value);
+			ExpressionMatch(expression, key, value, env);
 		} else if(expression.val().charAt(0) == '/' && expression.val().charAt(expression.val().length() - 1) == '/') {
 			RegexMatch(expression.val(), value);
 		} else {

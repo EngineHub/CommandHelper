@@ -97,7 +97,7 @@ public class ControlFlow {
 		@Override
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			ParseTree condition = nodes[0];
-			if(ArgumentValidation.getBooleanish(parent.seval(condition, env), t)) {
+			if(ArgumentValidation.getBooleanish(parent.seval(condition, env), t, env)) {
 				ParseTree ifCode = nodes[1];
 				return parent.seval(ifCode, env);
 			} else if(nodes.length == 3) {
@@ -193,7 +193,7 @@ public class ControlFlow {
 			}
 			if(args.get(0).isConst()) {
 				// We can optimize this one way or the other, since the condition is const
-				if(ArgumentValidation.getBoolean(args.get(0).getData(), t)) {
+				if(ArgumentValidation.getBoolean(args.get(0).getData(), t, env)) {
 					// It's true, return the true condition
 					return args.get(1);
 				} else // If there are three args, return the else condition, otherwise,
@@ -325,7 +325,7 @@ public class ControlFlow {
 			}
 			for(int i = 0; i <= nodes.length - 2; i += 2) {
 				ParseTree condition = nodes[i];
-				if(ArgumentValidation.getBooleanish(parent.seval(condition, env), t)) {
+				if(ArgumentValidation.getBooleanish(parent.seval(condition, env), t, env)) {
 					ParseTree ifCode = nodes[i + 1];
 					return env.getEnv(GlobalEnv.class).GetScript().seval(ifCode, env);
 				}
@@ -483,22 +483,22 @@ public class ControlFlow {
 					if(evalStatement instanceof CSlice) { //Can do more optimal handling for this Array subclass
 						long rangeLeft = ((CSlice) evalStatement).getStart();
 						long rangeRight = ((CSlice) evalStatement).getFinish();
-						if(value.isInstanceOf(CInt.TYPE)) {
-							long v = ArgumentValidation.getInt(value, t);
+						if(value.isInstanceOf(CInt.TYPE, null, env)) {
+							long v = ArgumentValidation.getInt(value, t, env);
 							if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
 									|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
 									|| (rangeLeft == rangeRight && v == rangeLeft)) {
 								return parent.seval(code, env);
 							}
 						}
-					} else if(evalStatement.isInstanceOf(CArray.TYPE)) {
+					} else if(evalStatement.isInstanceOf(CArray.TYPE, null, env)) {
 						for(String index : ((CArray) evalStatement).stringKeySet()) {
-							Mixed inner = ((CArray) evalStatement).get(index, t);
+							Mixed inner = ((CArray) evalStatement).get(index, t, env);
 							if(inner instanceof CSlice) {
 								long rangeLeft = ((CSlice) inner).getStart();
 								long rangeRight = ((CSlice) inner).getFinish();
-								if(value.isInstanceOf(CInt.TYPE)) {
-									long v = ArgumentValidation.getInt(value, t);
+								if(value.isInstanceOf(CInt.TYPE, null, env)) {
+									long v = ArgumentValidation.getInt(value, t, env);
 									if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
 											|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
 											|| (rangeLeft == rangeRight && v == rangeLeft)) {
@@ -639,7 +639,7 @@ public class ControlFlow {
 				newChildren.add(children.get(0)); //Initial child
 				List<ParseTree> c = children.get(1).getChildren();
 				List<ParseTree> lastCodeBlock = new ArrayList<>();
-				CArray conditions = new CArray(t);
+				CArray conditions = new CArray(t, null, env);
 				boolean inCase = false;
 				boolean inDefault = false;
 				for(int i = 0; i < c.size(); i++) {
@@ -662,7 +662,7 @@ public class ControlFlow {
 							if(lastCodeBlock.size() > 0) {
 								//Ok, need to push some stuff on to the new children
 								newChildren.add(new ParseTree(conditions, c2.getFileOptions()));
-								conditions = new CArray(t);
+								conditions = new CArray(t, null, env);
 								ParseTree codeBlock = new ParseTree(
 										new CFunction(new StringHandling.sconcat().getName(), t), c2.getFileOptions());
 								for(ParseTree line : lastCodeBlock) {
@@ -681,7 +681,7 @@ public class ControlFlow {
 							//	code()
 							//would be turned into array(1, 2), code() in the
 							//old style.
-							conditions.push(((CLabel) c2.getData()).cVal(), t);
+							conditions.push(((CLabel) c2.getData()).cVal(), t, env);
 							inCase = true;
 							i++;
 							continue;
@@ -693,7 +693,7 @@ public class ControlFlow {
 						if(lastCodeBlock.size() > 0) {
 							//Ok, need to push some stuff on to the new children
 							newChildren.add(new ParseTree(conditions, c1.getFileOptions()));
-							conditions = new CArray(t);
+							conditions = new CArray(t, null, env);
 							ParseTree codeBlock = new ParseTree(
 									new CFunction(new StringHandling.sconcat().getName(), t), c1.getFileOptions());
 							for(ParseTree line : lastCodeBlock) {
@@ -715,7 +715,7 @@ public class ControlFlow {
 							//this block of code will run if 0 or the default is
 							//hit, and if 0 is the condition provided, it would
 							//work the same if it weren't specified at all.
-							conditions = new CArray(t);
+							conditions = new CArray(t, null, env);
 						}
 						inDefault = true;
 						continue;
@@ -775,17 +775,17 @@ public class ControlFlow {
 				//To standardize the rest of the code (and to optimize), go ahead and resolve array()
 				if(children.get(i).getData() instanceof CFunction
 						&& new DataHandling.array().getName().equals(children.get(i).getData().val())) {
-					CArray data = new CArray(t);
+					CArray data = new CArray(t, null, env);
 					for(ParseTree child : children.get(i).getChildren()) {
 						if(Construct.IsDynamicHelper(child.getData())) {
 							throw new ConfigCompileException(notConstant, child.getTarget());
 						}
-						data.push(child.getData(), t);
+						data.push(child.getData(), t, env);
 					}
 					children.set(i, new ParseTree(data, children.get(i).getFileOptions()));
 				}
 				//Now we validate that the values are constant and non-repeating.
-				if(children.get(i).getData().isInstanceOf(CArray.TYPE)) {
+				if(children.get(i).getData().isInstanceOf(CArray.TYPE, null, env)) {
 					List<Mixed> list = ((CArray) children.get(i).getData()).asList();
 					for(Mixed c : list) {
 						if(c instanceof CSlice) {
@@ -817,7 +817,8 @@ public class ControlFlow {
 				}
 			}
 
-			if((children.size() > 3 || (children.size() > 1 && children.get(1).getData().isInstanceOf(CArray.TYPE)))
+			if((children.size() > 3 || (children.size() > 1
+					&& children.get(1).getData().isInstanceOf(CArray.TYPE, null, env)))
 					//No point in doing this optimization if there are only 3 args and the case is flat.
 					//Also, doing this check prevents an inifinite loop during optimization.
 					&& (children.size() > 0 && !Construct.IsDynamicHelper(children.get(0).getData()))) {
@@ -828,17 +829,17 @@ public class ControlFlow {
 				for(int i = 1; i < children.size(); i += 2) {
 					Mixed data = children.get(i).getData();
 
-					if(!(data.isInstanceOf(CArray.TYPE)) || data instanceof CSlice) {
+					if(!(data.isInstanceOf(CArray.TYPE, null, env)) || data instanceof CSlice) {
 						//Put it in an array to make the rest of this parsing easier.
-						data = new CArray(t);
-						((CArray) data).push(children.get(i).getData(), t);
+						data = new CArray(t, null, env);
+						((CArray) data).push(children.get(i).getData(), t, env);
 					}
 					for(Mixed value : ((CArray) data).asList()) {
 						if(value instanceof CSlice) {
 							long rangeLeft = ((CSlice) value).getStart();
 							long rangeRight = ((CSlice) value).getFinish();
-							if(children.get(0).getData().isInstanceOf(CInt.TYPE)) {
-								long v = ArgumentValidation.getInt(children.get(0).getData(), t);
+							if(children.get(0).getData().isInstanceOf(CInt.TYPE, null, env)) {
+								long v = ArgumentValidation.getInt(children.get(0).getData(), t, env);
 								if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
 										|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
 										|| (rangeLeft == rangeRight && v == rangeLeft)) {
@@ -951,11 +952,11 @@ public class ControlFlow {
 				ParseTree child = children.get(i);
 				Mixed caseData = child.getData();
 				if(caseData instanceof CArray) {
-					CArray newData = new CArray(child.getTarget());
+					CArray newData = new CArray(child.getTarget(), null, env);
 					for(Mixed cse : ((CArray) caseData).asList()) {
 						if(cse instanceof CString) {
 							CString data = (CString) cse;
-							newData.push(new CString(data.val().toLowerCase(), data.getTarget()), data.getTarget());
+							newData.push(new CString(data.val().toLowerCase(), data.getTarget()), data.getTarget(), env);
 						} else {
 							throw new ConfigCompileException(getName() + " can only accept strings in case statements.",
 									cse.getTarget());
@@ -1186,7 +1187,7 @@ public class ControlFlow {
 			}
 			int _continue = 0;
 			while(true) {
-				boolean cond = ArgumentValidation.getBoolean(parent.seval(condition, env), t);
+				boolean cond = ArgumentValidation.getBoolean(parent.seval(condition, env), t, env);
 				if(cond == false) {
 					break;
 				}
@@ -1367,7 +1368,7 @@ public class ControlFlow {
 					//Set the value in the variable table
 					try {
 						env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(),
-								two.getVariableName(), one.get(c.val(), t), t, env));
+								two.getVariableName(), one.get(c.val(), t, env), t, env));
 					}  catch (ConfigCompileException cce) {
 						throw new CREFormatException(cce.getMessage(), t);
 					}
@@ -1432,7 +1433,7 @@ public class ControlFlow {
 							}
 							try {
 								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getDefinedType(),
-										two.getVariableName(), one.get(current, t), t, env));
+										two.getVariableName(), one.get(current, t, env), t, env));
 							} catch (ConfigCompileException cce) {
 								throw new CREFormatException(cce.getMessage(), t);
 							}
@@ -1728,7 +1729,7 @@ public class ControlFlow {
 
 			Mixed data = parent.seval(array, env);
 
-			if(!(data.isInstanceOf(CArray.TYPE)) && !(data instanceof CSlice)) {
+			if(!(data.isInstanceOf(CArray.TYPE, null, env)) && !(data instanceof CSlice)) {
 				throw new CRECastException(getName() + " expects an array for parameter 1", t);
 			}
 
@@ -1873,7 +1874,7 @@ public class ControlFlow {
 		@Override
 		public Mixed execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			try {
-				while(ArgumentValidation.getBoolean(parent.seval(nodes[0], env), t)) {
+				while(ArgumentValidation.getBoolean(parent.seval(nodes[0], env), t, env)) {
 					//We allow while(thing()); to be done. This makes certain
 					//types of coding styles possible.
 					if(nodes.length > 1) {
@@ -2016,7 +2017,7 @@ public class ControlFlow {
 					} catch (LoopContinueException e) {
 						//ok. No matter how many times it tells us to continue, we're only going to continue once.
 					}
-				} while(ArgumentValidation.getBoolean(parent.seval(nodes[1], env), t));
+				} while(ArgumentValidation.getBoolean(parent.seval(nodes[1], env), t, env));
 			} catch (LoopBreakException e) {
 				if(e.getTimes() > 1) {
 					throw new LoopBreakException(e.getTimes() - 1, t);
@@ -2119,7 +2120,7 @@ public class ControlFlow {
 				throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if(args.length == 1) {
-				num = ArgumentValidation.getInt32(args[0], t);
+				num = ArgumentValidation.getInt32(args[0], t, env);
 			}
 			throw new LoopBreakException(num, t);
 		}
@@ -2153,7 +2154,7 @@ public class ControlFlow {
 							+ " be hard coded, and should not be dynamically determinable, since this is always a sign"
 							+ " of loose code flow, which should be avoided.", t);
 				}
-				if(!(children.get(0).getData().isInstanceOf(CInt.TYPE))) {
+				if(!(children.get(0).getData().isInstanceOf(CInt.TYPE, null, env))) {
 					throw new ConfigCompileException("break() only accepts integer values.", t);
 				}
 			}
@@ -2215,7 +2216,7 @@ public class ControlFlow {
 				throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if(args.length == 1) {
-				num = ArgumentValidation.getInt32(args[0], t);
+				num = ArgumentValidation.getInt32(args[0], t, env);
 			}
 			throw new LoopContinueException(num, t);
 		}
@@ -2377,17 +2378,17 @@ public class ControlFlow {
 	public static class call_proc_array extends call_proc {
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray ca = ArgumentValidation.getArray(args[1], t);
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			CArray ca = ArgumentValidation.getArray(args[1], t, env);
 			if(ca.inAssociativeMode()) {
 				throw new CRECastException("Expected the array passed to " + getName() + " to be non-associative.", t);
 			}
 			Mixed[] args2 = new Mixed[(int) ca.size() + 1];
 			args2[0] = args[0];
 			for(int i = 1; i < args2.length; i++) {
-				args2[i] = ca.get(i - 1, t);
+				args2[i] = ca.get(i - 1, t, env);
 			}
-			return super.exec(t, environment, args2);
+			return super.exec(t, env, args2);
 		}
 
 		@Override

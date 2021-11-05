@@ -95,7 +95,7 @@ public class Persistence {
 			String key = GetNamespace(args, args.length - 1, getName(), t);
 			String value = null;
 			try {
-				value = Construct.json_encode(args[args.length - 1], t);
+				value = Construct.json_encode(args[args.length - 1], t, env);
 			} catch (MarshalException e) {
 				throw new CREFormatException(e.getMessage(), t);
 			}
@@ -191,7 +191,7 @@ public class Persistence {
 				if(obj == null) {
 					return CNull.NULL;
 				}
-				o = Construct.json_decode(obj.toString(), t);
+				o = Construct.json_decode(obj.toString(), t, env);
 			} catch (MarshalException ex) {
 				throw ConfigRuntimeException.CreateUncatchableException(ex.getMessage(), t);
 			}
@@ -264,8 +264,8 @@ public class Persistence {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			PersistenceNetwork p = environment.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			PersistenceNetwork p = env.getEnv(StaticRuntimeEnv.class).GetPersistenceNetwork();
 			List<String> keyChain = new ArrayList<String>();
 			keyChain.add("storage");
 			String namespace = GetNamespace(args, null, getName(), t);
@@ -279,13 +279,13 @@ public class Persistence {
 			} catch (IllegalArgumentException e) {
 				throw new CREFormatException(e.getMessage(), t, e);
 			}
-			CArray ca = CArray.GetAssociativeArray(t);
+			CArray ca = CArray.GetAssociativeArray(t, null, env);
 			MSLog.GetLogger().Log(MSLog.Tags.PERSISTENCE, LogLevel.DEBUG, list.size() + " value(s) are being returned", t);
 			for(String[] e : list.keySet()) {
 				try {
 					String key = StringUtils.Join(e, ".").replaceFirst("storage\\.", ""); //Get that junk out of here
 					ca.set(new CString(key, t),
-							Construct.json_decode(list.get(e), t), t);
+							Construct.json_decode(list.get(e), t, env), t, env);
 				} catch (MarshalException ex) {
 					Logger.getLogger(Persistence.class.getName()).log(Level.SEVERE, null, ex);
 				}

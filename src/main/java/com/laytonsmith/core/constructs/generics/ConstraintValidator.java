@@ -3,6 +3,7 @@ package com.laytonsmith.core.constructs.generics;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
 
 import java.util.ArrayList;
@@ -73,7 +74,7 @@ public class ConstraintValidator {
 		ValidateLHStoLHS(t, c, declarationConstraints);
 	}
 
-	public static void ValidateLHStoLHS(Target t, List<Constraints> checkIfTheseConstraints, List<Constraints> areWithinBoundsOfThese)
+	public static void ValidateLHStoLHS(Target t, List<Constraints> checkIfTheseConstraints, List<Constraints> areWithinBoundsOfThese, Environment env)
 			throws CREGenericConstraintException {
 		if(checkIfTheseConstraints.size() != areWithinBoundsOfThese.size()) {
 			throw new CREGenericConstraintException("Expected " + areWithinBoundsOfThese.size() + " parameter(s), but found"
@@ -84,7 +85,7 @@ public class ConstraintValidator {
 			Constraints lhs = checkIfTheseConstraints.get(i);
 			// Check that the LHS fits the bounds of the definition
 			List<String> errors = new ArrayList<>();
-			if(!definition.withinBounds(lhs, errors)) {
+			if(!definition.withinBounds(lhs, errors, env)) {
 				throw new CREGenericConstraintException("The constraint " + lhs.toString() + " does not fit within the"
 						+ " bounds " + definition.toString() + ": "
 						+ StringUtils.Join(errors, "\n"), t);
