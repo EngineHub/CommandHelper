@@ -3,7 +3,6 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.FullyQualifiedClassName;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -150,19 +149,40 @@ public class InstanceofUtil {
 
 	/**
 	 * Returns whether or not a given MethodScript type is an instance of the specified MethodScript type.
-	 *
-	 * @param type The type to check for
-	 * @param instanceofThis The CClassType to check. This may not be null.
-	 * @param generics The LHS generics definition\
+	 * The following rules apply in the given order:
+	 * <ul>
+	 *     <li>If instanceofThis == Java null, {@code true} is returned.</li>
+	 *     <li>If instanceofThis.equals(type) where the generic declaration of instanceofThis is absent or the generic
+	 *     parameters of type are instanceof the given instanceofThisGenerics, {@code true} is returned.</li>
+	 *     <li>Java null is only instanceof Java null.</li>
+	 *     <li>auto and null are instanceof any type.</li>
+	 *     <li>Any type is instanceof auto.</li>
+	 *     <li>Nothing is instanceof void and null.</li>
+	 *     <li>void is instanceof nothing.</li>
+	 *     <li>{@code A<B>} is instanceof {@code A}.</li>
+	 * </ul>
+	 * @param type - The type to check for.
+	 * Java {@code null} can be used to indicate no type (e.g. from control flow breaking statements).
+	 * @param instanceofThis - The {@link CClassType} to check against.
+	 * Java {@code null} can be used to indicate that anything is allowed to match this
+	 * (i.e. making this method return {@code true}).
+	 * @param instanceofThisGenerics
 	 * @param env
-	 * @return
+	 * @return {@code true} if type is instance of instanceofThis.
 	 */
-	public static boolean isInstanceof(CClassType type, CClassType instanceofThis, LeftHandGenericUse generics, Environment env) {
-		Static.AssertNonNull(instanceofThis, "instanceofThis may not be null");
-		instanceofThis = CClassType.getNakedClassType(instanceofThis.getFQCN());
-		// Return true for AUTO, as everything can be used as AUTO.
-		if(instanceofThis == CClassType.AUTO) {
+	public static boolean isInstanceof(
+			CClassType type, CClassType instanceofThis, LeftHandGenericUse instanceofThisGenerics, Environment env) {
+		instanceofThis = (instanceofThis != null ? CClassType.getNakedClassType(instanceofThis.getFQCN()) : null);
+
+		// Handle special cases.
+		if(instanceofThis == null || (instanceofThis.equals(type) && (instanceofThis.getGenericDeclaration() == null
+				|| type.getGenericParameters().isInstanceof(instanceofThisGenerics))) || CClassType.AUTO.equals(type)
+				|| CNull.TYPE.equals(type) || CClassType.AUTO.equals(instanceofThis)) {
 			return true;
+		}
+		if(type == null || CVoid.TYPE.equals(type)
+				|| CVoid.TYPE.equals(instanceofThis) || CNull.TYPE.equals(instanceofThis)) {
+			return false;
 		}
 
 		// Get cached result or compute and cache result.
@@ -173,15 +193,8 @@ public class InstanceofUtil {
 		}
 
 		// Return the result.
-		if(!castableClasses.contains(instanceofThis)) {
-			return false;
-		}
-
-		if(instanceofThis.getGenericDeclaration() != null ) {
-			return type.getGenericParameters().isInstanceof(generics, env);
-		} else {
-			return true;
-		}
+		return castableClasses.contains(instanceofThis) && (instanceofThis.getGenericDeclaration() == null
+				|| type.getGenericParameters().isInstanceof(instanceofThisGenerics));
 	}
 
 	private static FullyQualifiedClassName typeof(Class<? extends Mixed> c) {
