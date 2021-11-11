@@ -48,28 +48,28 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.awt.*;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.laytonsmith.testing.StaticTest.Run;
+import static com.laytonsmith.testing.StaticTest.SRun;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
-import static com.laytonsmith.testing.StaticTest.Run;
-import static com.laytonsmith.testing.StaticTest.SRun;
-import java.awt.HeadlessException;
-import java.util.Arrays;
-import java.util.HashSet;
+import static org.mockito.Mockito.when;
 
 /**
  *
@@ -80,11 +80,13 @@ import java.util.HashSet;
 public class RandomTests {
 
 	MCPlayer fakePlayer;
+	Environment env;
 
 	Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
 
 	@Before
 	public void setUp() throws Exception {
+		env = Static.GenerateStandaloneEnvironment();
 		fakePlayer = StaticTest.GetOnlinePlayer();
 		StaticTest.InstallFakeConvertor(fakePlayer);
 	}
@@ -209,36 +211,36 @@ public class RandomTests {
 
 	@Test
 	public void testJSONEscapeString() throws MarshalException {
-		CArray ca = new CArray(Target.UNKNOWN);
+		CArray ca = new CArray(Target.UNKNOWN, null, env);
 		final Target t = Target.UNKNOWN;
-		ca.push(C.Int(1), t);
-		ca.push(C.Double(2.2), t);
-		ca.push(C.String("string"), t);
-		ca.push(C.String("\"Quote\""), t);
-		ca.push(C.Boolean(true), t);
-		ca.push(C.Boolean(false), t);
-		ca.push(C.Null(), t);
-		ca.push(C.Void(), t);
-		ca.push(new Command("/Command", Target.UNKNOWN), t);
-		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)), t);
+		ca.push(C.Int(1), t, env);
+		ca.push(C.Double(2.2), t, env);
+		ca.push(C.String("string"), t, env);
+		ca.push(C.String("\"Quote\""), t, env);
+		ca.push(C.Boolean(true), t, env);
+		ca.push(C.Boolean(false), t, env);
+		ca.push(C.Null(), t, env);
+		ca.push(C.Void(), t, env);
+		ca.push(new Command("/Command", Target.UNKNOWN), t, env);
+		ca.push(new CArray(Target.UNKNOWN, null, env, new CInt(1, Target.UNKNOWN)), t, env);
 		//[1, 2.2, "string", "\"Quote\"", true, false, null, "", "/Command", [1]]
-		assertEquals("[1,2.2,\"string\",\"\\\"Quote\\\"\",true,false,null,\"\",\"\\/Command\",[1]]", Construct.json_encode(ca, Target.UNKNOWN));
+		assertEquals("[1,2.2,\"string\",\"\\\"Quote\\\"\",true,false,null,\"\",\"\\/Command\",[1]]", Construct.json_encode(ca, Target.UNKNOWN, env));
 	}
 
 	@Test
 	public void testJSONDecodeString() throws MarshalException {
-		CArray ca = new CArray(Target.UNKNOWN);
-		ca.push(C.Int(1), Target.UNKNOWN);
-		ca.push(C.Double(2.2), Target.UNKNOWN);
-		ca.push(C.String("string"), Target.UNKNOWN);
-		ca.push(C.String("\"Quote\""), Target.UNKNOWN);
-		ca.push(C.Boolean(true), Target.UNKNOWN);
-		ca.push(C.Boolean(false), Target.UNKNOWN);
-		ca.push(C.Null(), Target.UNKNOWN);
-		ca.push(C.Void(), Target.UNKNOWN);
-		ca.push(new Command("/Command", Target.UNKNOWN), Target.UNKNOWN);
-		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)), Target.UNKNOWN);
-		StaticTest.assertCEquals(ca, Construct.json_decode("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", \"\\/Command\", [1]]", Target.UNKNOWN));
+		CArray ca = new CArray(Target.UNKNOWN, null, env);
+		ca.push(C.Int(1), Target.UNKNOWN, env);
+		ca.push(C.Double(2.2), Target.UNKNOWN, env);
+		ca.push(C.String("string"), Target.UNKNOWN, env);
+		ca.push(C.String("\"Quote\""), Target.UNKNOWN, env);
+		ca.push(C.Boolean(true), Target.UNKNOWN, env);
+		ca.push(C.Boolean(false), Target.UNKNOWN, env);
+		ca.push(C.Null(), Target.UNKNOWN, env);
+		ca.push(C.Void(), Target.UNKNOWN, env);
+		ca.push(new Command("/Command", Target.UNKNOWN), Target.UNKNOWN, env);
+		ca.push(new CArray(Target.UNKNOWN, null, env, new CInt(1, Target.UNKNOWN)), Target.UNKNOWN, env);
+		StaticTest.assertCEquals(ca, Construct.json_decode("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", \"\\/Command\", [1]]", Target.UNKNOWN, env));
 	}
 
 	@Test
@@ -251,14 +253,14 @@ public class RandomTests {
 		MCServer fakeServer = mock(MCServer.class);
 		when(fakeServer.getWorld("world")).thenReturn(fakeWorld);
 		CommandHelperPlugin.myServer = fakeServer;
-		CArray ca1 = new CArray(Target.UNKNOWN, C.onstruct(1), C.onstruct(2), C.onstruct(3));
-		CArray ca2 = new CArray(Target.UNKNOWN, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"));
-		CArray ca3 = new CArray(Target.UNKNOWN, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(45), C.onstruct(50));
-		CArray ca4 = new CArray(Target.UNKNOWN, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"), C.onstruct(45), C.onstruct(50));
-		MCLocation l1 = ObjectGenerator.GetGenerator().location(ca1, fakeWorld, Target.UNKNOWN);
-		MCLocation l2 = ObjectGenerator.GetGenerator().location(ca2, fakeWorld, Target.UNKNOWN);
-		MCLocation l3 = ObjectGenerator.GetGenerator().location(ca3, fakeWorld, Target.UNKNOWN);
-		MCLocation l4 = ObjectGenerator.GetGenerator().location(ca4, fakeWorld, Target.UNKNOWN);
+		CArray ca1 = new CArray(Target.UNKNOWN, null, env, C.onstruct(1), C.onstruct(2), C.onstruct(3));
+		CArray ca2 = new CArray(Target.UNKNOWN, null, env, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"));
+		CArray ca3 = new CArray(Target.UNKNOWN, null, env, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(45), C.onstruct(50));
+		CArray ca4 = new CArray(Target.UNKNOWN, null, env, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"), C.onstruct(45), C.onstruct(50));
+		MCLocation l1 = ObjectGenerator.GetGenerator().location(ca1, fakeWorld, Target.UNKNOWN, env);
+		MCLocation l2 = ObjectGenerator.GetGenerator().location(ca2, fakeWorld, Target.UNKNOWN, env);
+		MCLocation l3 = ObjectGenerator.GetGenerator().location(ca3, fakeWorld, Target.UNKNOWN, env);
+		MCLocation l4 = ObjectGenerator.GetGenerator().location(ca4, fakeWorld, Target.UNKNOWN, env);
 		assertEquals(fakeWorld, l1.getWorld());
 		assertEquals(fakeWorld, l2.getWorld());
 		assertEquals(fakeWorld, l3.getWorld());

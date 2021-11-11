@@ -14,7 +14,7 @@ public class MainSandbox {
 	}
 
     public static void main(String[] args) throws Exception {
-
+		C<? extends Number> c = new C<Integer>();
 	}
 
 	public static void print(Object o) {

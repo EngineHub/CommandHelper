@@ -1,5 +1,6 @@
 package com.laytonsmith.core.constructs.generics;
 
+import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -28,6 +29,14 @@ public class LowerBoundConstraint extends BoundaryConstraint {
 		}
 	}
 
+	@Override
+	protected boolean isConcreteClassWithinConstraint(CClassType type, LeftHandGenericUse generics, Environment env) {
+		return this.bound.doesExtend(type) && (
+				(getBoundaryGenerics() == null && generics == null)
+				|| getBoundaryGenerics().isWithinBounds(env, new Pair<>(type, generics))
+		);
+	}
+
 	public CClassType getLowerBound() {
 		return this.bound;
 	}
@@ -46,6 +55,41 @@ public class LowerBoundConstraint extends BoundaryConstraint {
 	@Override
 	public String getConstraintName() {
 		return "lower bound";
+	}
+
+	@Override
+	protected ConstraintToConstraintValidator getConstraintToConstraintValidator(Environment env) {
+		return new ConstraintToConstraintValidator() {
+			@Override
+			public Boolean isWithinBounds(ConstructorConstraint lhs) {
+				return null;
+			}
+
+			@Override
+			public Boolean isWithinBounds(ExactType lhs) {
+				return isWithinConstraint(lhs.getType(), lhs.getGenericParameters(), env);
+			}
+
+			@Override
+			public Boolean isWithinBounds(LowerBoundConstraint lhs) {
+				return isWithinConstraint(lhs.getLowerBound(), lhs.genericParameters, env);
+			}
+
+			@Override
+			public Boolean isWithinBounds(UpperBoundConstraint lhs) {
+				return false;
+			}
+
+			@Override
+			public Boolean isWithinBounds(UnboundedConstraint lhs) {
+				return true;
+			}
+		};
+	}
+
+	@Override
+	public ExactType convertFromDiamond(Target t) {
+		return new ExactType(t, this.bound, this.genericParameters);
 	}
 
 }

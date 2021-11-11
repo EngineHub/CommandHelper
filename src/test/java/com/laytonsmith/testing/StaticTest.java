@@ -386,7 +386,7 @@ public class StaticTest {
 	 * @param actual
 	 */
 	public static void assertCTrue(Mixed actual) {
-		if(!ArgumentValidation.getBooleanish(actual, Target.UNKNOWN)) {
+		if(!ArgumentValidation.getBooleanish(actual, Target.UNKNOWN, env)) {
 			fail("Expected '" + actual.val() + "' to resolve to true, but it did not");
 		}
 	}
@@ -398,7 +398,7 @@ public class StaticTest {
 	 * @param actual
 	 */
 	public static void assertCFalse(Mixed actual) {
-		if(ArgumentValidation.getBooleanish(actual, Target.UNKNOWN)) {
+		if(ArgumentValidation.getBooleanish(actual, Target.UNKNOWN, env)) {
 			fail("Expected '" + actual.val() + "' to resolve to false, but it did not");
 		}
 	}

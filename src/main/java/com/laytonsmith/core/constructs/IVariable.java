@@ -76,7 +76,7 @@ public class IVariable extends Construct implements Cloneable {
 		if(value instanceof CVoid) {
 			throw new CRECastException("Void may not be assigned to a variable", t);
 		}
-		ConstraintValidator.ValidateLHS(t, type, genericDefinition);
+		ConstraintValidator.ValidateLHS(t, type, genericDefinition, env);
 		if(env != null && (!type.equals(Auto.TYPE) && !(value instanceof CNull))) {
 			if(!InstanceofUtil.isInstanceof(value, type, env)) {
 				throw new CRECastException(name + " is of type " + type.val() + ", but a value of type "
