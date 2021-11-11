@@ -178,7 +178,7 @@ public class InstanceofUtil {
 		}
 
 		if(instanceofThis.getGenericDeclaration() != null ) {
-			return type.getGenericParameters().isInstanceof(generics);
+			return type.getGenericParameters().isInstanceof(generics, env);
 		} else {
 			return true;
 		}

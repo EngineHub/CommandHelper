@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
 
 import java.util.EnumSet;
 
@@ -134,6 +135,14 @@ public abstract class Constraint {
 	@ForceImplementation
 	protected abstract ConstraintToConstraintValidator getConstraintToConstraintValidator(Environment env);
 
-	public abstract ExactType convertFromDiamond(Target t);
+	/**
+	 * Given the Diamond Operator on the RHS, takes this LHS object and converts it to an ExactType object,
+	 * which can be used on the RHS. Note that this only works with one constraint, multiple constraints
+	 * cannot be inferred, by definition.
+	 * @param t The code target
+	 * @return The ExactType
+	 * @throws CREGenericConstraintException If the type cannot be inferred from this Constraint
+	 */
+	public abstract ExactType convertFromDiamond(Target t) throws CREGenericConstraintException;
 
 }

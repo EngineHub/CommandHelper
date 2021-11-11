@@ -31,21 +31,13 @@ public abstract class BoundaryConstraint extends Constraint {
 	 */
 	@Override
 	public boolean isWithinConstraint(CClassType type, LeftHandGenericUse generics, Environment env) {
-		if(!isConcreteClassWithinConstraint(type, env)) {
-			return false;
-		}
-		// If the class itself is within the constraints, we also check if the generics are as well.
-		// If the definition is <T extends array<? extends int>> but the provided instance is
-		// <? extends array<? extends number>> then this isn't correct, even though array extends array.
-		try {
-			ConstraintValidator.ValidateLHStoLHS(Target.UNKNOWN, genericParameters.getConstraints(),
-					generics.getConstraints());
-			return true;
-		} catch (CREGenericConstraintException c) {
-			return false;
-		}
+		return isConcreteClassWithinConstraint(type, generics, env);
 	}
 
-	protected abstract boolean isConcreteClassWithinConstraint(CClassType type, Environment env);
+	public LeftHandGenericUse getBoundaryGenerics() {
+		return genericParameters;
+	}
+
+	protected abstract boolean isConcreteClassWithinConstraint(CClassType type, LeftHandGenericUse generics, Environment env);
 
 }

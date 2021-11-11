@@ -319,12 +319,14 @@ public class DataHandling {
 			int offset;
 			CClassType type;
 			String name;
+			IVariable definedVar;
 			if(args.length == 3) {
 				offset = 1;
 				if(!(args[offset] instanceof IVariable)) {
 					throw new CRECastException(getName() + " with 3 arguments only accepts an ivariable as the second argument.", t);
 				}
-				name = ((IVariable) args[offset]).getVariableName();
+				definedVar = (IVariable) args[offset];
+				name = definedVar.getVariableName();
 				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag("no-check-duplicate-assign") == null) {
 					if(env.getEnv(GlobalEnv.class).GetFlag("closure-warn-overwrite") != null) {
 						MSLog.GetLogger().Log(MSLog.Tags.RUNTIME, LogLevel.ERROR,
@@ -341,7 +343,8 @@ public class DataHandling {
 				if(!(args[offset] instanceof IVariable)) {
 					throw new CRECastException(getName() + " with 2 arguments only accepts an ivariable as the first argument.", t);
 				}
-				name = ((IVariable) args[offset]).getVariableName();
+				definedVar = (IVariable) args[offset];
+				name = definedVar.getVariableName();
 				IVariable listVar = list.get(name, t, true, env);
 				if(listVar.ival() != CNull.UNDEFINED) {
 					t = listVar.getDefinedTarget();
@@ -349,6 +352,7 @@ public class DataHandling {
 				type = listVar.getDefinedType();
 			}
 			Mixed c = args[offset + 1];
+
 			while(c instanceof IVariable cur) {
 				c = list.get(cur.getVariableName(), cur.getTarget(), env).ival();
 			}

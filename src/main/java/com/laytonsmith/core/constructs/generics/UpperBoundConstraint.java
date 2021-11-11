@@ -1,8 +1,11 @@
 package com.laytonsmith.core.constructs.generics;
 
+import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
+import com.laytonsmith.core.objects.ObjectModifier;
 
 import java.util.EnumSet;
 
@@ -21,6 +24,10 @@ public class UpperBoundConstraint extends BoundaryConstraint {
 	 */
 	public UpperBoundConstraint(Target t, String typename, CClassType upperBound, LeftHandGenericUse genericParameters) {
 		super(t, typename, upperBound, genericParameters);
+		if(upperBound.getObjectModifiers().contains(ObjectModifier.FINAL)) {
+			throw new CREGenericConstraintException(upperBound.getFQCN().getFQCN() + " is marked as final, and so"
+					+ " cannot be used in an upper bound constraint.", t);
+		}
 	}
 
 	public CClassType getUpperBound() {
@@ -44,8 +51,11 @@ public class UpperBoundConstraint extends BoundaryConstraint {
 	}
 
 	@Override
-	protected boolean isConcreteClassWithinConstraint(CClassType type, Environment env) {
-		return type.isInstanceOf(bound, genericParameters, env);
+	protected boolean isConcreteClassWithinConstraint(CClassType type, LeftHandGenericUse generics, Environment env) {
+		return type.doesExtend(bound) && (
+				(getBoundaryGenerics() == null && generics == null)
+				|| getBoundaryGenerics().isWithinBounds(env, new Pair<>(type, generics))
+		);
 	}
 
 	@Override
@@ -58,17 +68,17 @@ public class UpperBoundConstraint extends BoundaryConstraint {
 
 			@Override
 			public Boolean isWithinBounds(ExactType lhs) {
-				return isWithinConstraint(lhs.getType(), lhs.getGenericParameters());
+				return isWithinConstraint(lhs.getType(), lhs.getGenericParameters(), env);
 			}
 
 			@Override
 			public Boolean isWithinBounds(LowerBoundConstraint lhs) {
-				return lhs.getLowerBound().isInstanceOf(UpperBoundConstraint.this.getUpperBound(), genericParameters, env);
+				return lhs.getLowerBound().doesExtend(UpperBoundConstraint.this.getUpperBound());
 			}
 
 			@Override
 			public Boolean isWithinBounds(UpperBoundConstraint lhs) {
-				return lhs.getUpperBound().isInstanceOf(UpperBoundConstraint.this.getUpperBound(), genericParameters, env);
+				return UpperBoundConstraint.this.getUpperBound().doesExtend(lhs.getUpperBound());
 			}
 
 			@Override
@@ -76,5 +86,10 @@ public class UpperBoundConstraint extends BoundaryConstraint {
 				return true;
 			}
 		};
+	}
+
+	@Override
+	public ExactType convertFromDiamond(Target t) {
+		return new ExactType(t, this.bound, this.genericParameters);
 	}
 }

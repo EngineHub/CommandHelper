@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.ObjectHelpers;
 import com.laytonsmith.PureUtilities.ObjectHelpers.StandardField;
 import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.environments.Environment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,22 +28,22 @@ public class GenericParameters {
 	 * @param generics The generics to check if this is a subtype of.
 	 * @return
 	 */
-	public boolean isInstanceof(LeftHandGenericUse generics) {
+	public boolean isInstanceof(LeftHandGenericUse generics, Environment env) {
 		if(generics.getConstraints().size() != parameters.size()) {
 			return false;
 		}
 		for(int i = 0; i < parameters.size(); i++) {
 			Pair<CClassType, LeftHandGenericUse> pair = parameters.get(i);
 			Constraints constraints = generics.getConstraints().get(i);
-			if(!isInstanceofParameter(pair.getKey(), pair.getValue(), constraints)) {
+			if(!isInstanceofParameter(pair.getKey(), pair.getValue(), constraints, env)) {
 				return false;
 			}
 		}
 		return true;
 	}
 
-	private static boolean isInstanceofParameter(CClassType rhsType, LeftHandGenericUse rhsGenerics, Constraints lhs) {
-		return lhs.withinBounds(rhsType, rhsGenerics);
+	private static boolean isInstanceofParameter(CClassType rhsType, LeftHandGenericUse rhsGenerics, Constraints lhs, Environment env) {
+		return lhs.withinBounds(rhsType, rhsGenerics, env);
 	}
 
 	public static class GenericParametersBuilder1 {

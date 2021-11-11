@@ -2,8 +2,10 @@ package com.laytonsmith.core.constructs.generics;
 
 import com.laytonsmith.PureUtilities.ObjectHelpers;
 import com.laytonsmith.PureUtilities.ObjectHelpers.StandardField;
+import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,10 +24,10 @@ public class LeftHandGenericUse {
 	private final List<Constraints> constraints;
 	private final Target target;
 
-	public LeftHandGenericUse(CClassType type, Target t, Constraints... constraints) {
+	public LeftHandGenericUse(CClassType type, Target t, Environment env, Constraints... constraints) {
 		this.target = t;
 		this.constraints = Arrays.asList(constraints);
-		ConstraintValidator.ValidateLHS(t, type, Arrays.asList(constraints));
+		ConstraintValidator.ValidateLHS(t, type, Arrays.asList(constraints), env);
 	}
 
 
@@ -55,5 +57,24 @@ public class LeftHandGenericUse {
 			b.append(cc.toString());
 		}
 		return b.toString();
+	}
+
+	/**
+	 * Checks if the generics on the RHS are within bounds of this LHS generic definition.
+	 * @param rhsGenerics
+	 * @return
+	 */
+	public boolean isWithinBounds(Environment env, Pair<CClassType, LeftHandGenericUse>... types) {
+		if(this.getConstraints().size() != types.length) {
+			return false;
+		}
+		for(int i = 0; i < this.getConstraints().size(); i++) {
+			Constraints lhs = this.getConstraints().get(i);
+			Pair<CClassType, LeftHandGenericUse> type = types[i];
+			if(!lhs.withinBounds(type.getKey(), type.getValue(), env)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

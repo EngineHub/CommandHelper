@@ -14,20 +14,20 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
+import org.junit.Before;
+import org.junit.Test;
+
 import static com.laytonsmith.testing.StaticTest.Run;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import static com.laytonsmith.testing.StaticTest.TestClassDocs;
 import static com.laytonsmith.testing.StaticTest.assertCEquals;
 import static com.laytonsmith.testing.StaticTest.assertReturn;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.Test;
-
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.hamcrest.core.Is.*;
 
 /**
  *
@@ -48,7 +48,7 @@ public class ArrayHandlingTest {
 	@Before
 	public void setUp() {
 		fakePlayer = StaticTest.GetOnlinePlayer();
-		commonArray = new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN), new CInt(2, Target.UNKNOWN), new CInt(3, Target.UNKNOWN));
+		commonArray = new CArray(Target.UNKNOWN, null, env, new CInt(1, Target.UNKNOWN), new CInt(2, Target.UNKNOWN), new CInt(3, Target.UNKNOWN));
 		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
 	}
 
@@ -161,10 +161,10 @@ public class ArrayHandlingTest {
 	public void testArrayPush() throws CancelCommandException {
 		ArrayHandling.array_push a = new ArrayHandling.array_push();
 		assertReturn(a.exec(Target.UNKNOWN, env, commonArray, C.onstruct(4)), C.VOID);
-		assertCEquals(C.onstruct(1), commonArray.get(0, Target.UNKNOWN));
-		assertCEquals(C.onstruct(2), commonArray.get(1, Target.UNKNOWN));
-		assertCEquals(C.onstruct(3), commonArray.get(2, Target.UNKNOWN));
-		assertCEquals(C.onstruct(4), commonArray.get(3, Target.UNKNOWN));
+		assertCEquals(C.onstruct(1), commonArray.get(0, Target.UNKNOWN, env));
+		assertCEquals(C.onstruct(2), commonArray.get(1, Target.UNKNOWN, env));
+		assertCEquals(C.onstruct(3), commonArray.get(2, Target.UNKNOWN, env));
+		assertCEquals(C.onstruct(4), commonArray.get(3, Target.UNKNOWN, env));
 	}
 
 	@Test(timeout = 10000)

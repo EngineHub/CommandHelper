@@ -43,7 +43,7 @@ public class C {
 	public static final Class<Variable> VARIABLE = Variable.class;
 
 	public static CArray Array(Construct... elems) {
-		return new CArray(Target.UNKNOWN, elems);
+		return new CArray(Target.UNKNOWN, null, ENV, elems);
 	}
 
 	public static CBoolean Boolean(boolean b) {

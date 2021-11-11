@@ -3,6 +3,8 @@ package com.laytonsmith.core.constructs.generics;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.util.EnumSet;
 
@@ -37,12 +39,12 @@ public class UnboundedConstraint extends Constraint {
 		return new ConstraintToConstraintValidator() {
 			@Override
 			public Boolean isWithinBounds(ConstructorConstraint lhs) {
-				return null;
+				return true;
 			}
 
 			@Override
 			public Boolean isWithinBounds(ExactType lhs) {
-				return false;
+				return true;
 			}
 
 			@Override
@@ -60,6 +62,11 @@ public class UnboundedConstraint extends Constraint {
 				return true;
 			}
 		};
+	}
+
+	@Override
+	public ExactType convertFromDiamond(Target t) throws CREGenericConstraintException {
+		return new ExactType(t, Mixed.TYPE, null);
 	}
 
 	@Override

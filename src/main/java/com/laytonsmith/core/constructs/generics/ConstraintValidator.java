@@ -40,25 +40,27 @@ public class ConstraintValidator {
 	}
 
 	/**
-	 * Validates the LHS of a definition. This should be called with null if no generic parameters were defined, as that
-	 * is not always allowed, depending on the ClassType, and this case is accounted for.
+	 * Validates the RHS against the LHS of a definition. This should be called with null if no generic parameters were
+	 * defined, as that is not always allowed, depending on the ClassType, and this case is accounted for. It is assumed
+	 * that the LHS fits the constraints defined in the constraint definition.
 	 * @param t
 	 * @param type
 	 * @param genericParameters
 	 */
-	public static void ValidateLHS(Target t, CClassType type, LeftHandGenericUse genericParameters) {
-		ValidateLHS(t, type, genericParameters == null ? null : genericParameters.getConstraints());
+	public static void ValidateLHS(Target t, CClassType type, LeftHandGenericUse genericParameters, Environment env) {
+		ValidateLHS(t, type, genericParameters == null ? null : genericParameters.getConstraints(), env);
 	}
 
 	/**
-	 * Validates the LHS of a definition. This should be called with null if no generic parameters were defined, as that
-	 * 	 * is not always allowed, depending on the ClassType, and this case is accounted for.
+	 * Validates the RHS against the LHS of a definition. This should be called with null if no generic parameters were
+	 * defined, as that is not always allowed, depending on the ClassType, and this case is accounted for. It is assumed
+	 * that the LHS fits the constraints defined in the constraint definition.
 	 * @param t
 	 * @param type
 	 * @param c
 	 * @throws CREGenericConstraintException
 	 */
-	public static void ValidateLHS(Target t, CClassType type, List<Constraints> c)
+	public static void ValidateLHS(Target t, CClassType type, List<Constraints> c, Environment env)
 			throws CREGenericConstraintException {
 		GenericDeclaration dec = type.getGenericDeclaration();
 		if(dec == null) {
@@ -71,9 +73,26 @@ public class ConstraintValidator {
 			return;
 		}
 		List<Constraints> declarationConstraints = dec.getConstraints();
-		ValidateLHStoLHS(t, c, declarationConstraints);
+		ValidateLHStoLHS(t, c, declarationConstraints, env);
 	}
 
+	public static void ValidateRHStoLHS(Target t, CClassType rhs, LeftHandGenericUse lhsGenerics, Environment env) {
+		List<Constraints> exactType = new ArrayList<>();
+		// TODO: Should these rhs generic parameters be null?
+		exactType.add(new Constraints(t, ConstraintLocation.RHS, new ExactType(t, rhs, null)));
+		ValidateLHStoLHS(t, exactType, lhsGenerics.getConstraints(), env);
+	}
+
+	/**
+	 * Checks that the given constraints are within the bounds of the other constraints.
+	 * @param t
+	 * @param checkIfTheseConstraints These are the constraints to check to see if they are within the bounds of the
+	 *                                other constraints.
+	 * @param areWithinBoundsOfThese These are the constraints to check against. These can be thought of as the "definition"
+	 *                               even though that's not the case using previously defined terminology.
+	 * @param env
+	 * @throws CREGenericConstraintException
+	 */
 	public static void ValidateLHStoLHS(Target t, List<Constraints> checkIfTheseConstraints, List<Constraints> areWithinBoundsOfThese, Environment env)
 			throws CREGenericConstraintException {
 		if(checkIfTheseConstraints.size() != areWithinBoundsOfThese.size()) {
