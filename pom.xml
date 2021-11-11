@@ -483,6 +483,8 @@
 					</compilerArgs>
 					<fork>true</fork>
 					<optimize>true</optimize>
+							<useIncrementalCompilation>true</useIncrementalCompilation>
+
 				</configuration>
 			</plugin>
 
@@ -1140,6 +1142,8 @@
 						<version>3.8.1</version>
 						<configuration>
 							<showDeprecation>false</showDeprecation>
+							<useIncrementalCompilation>true</useIncrementalCompilation>
+
 						</configuration>
 					</plugin>
 				</plugins>
