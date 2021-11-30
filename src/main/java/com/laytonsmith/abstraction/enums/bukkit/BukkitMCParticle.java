@@ -2,6 +2,7 @@ package com.laytonsmith.abstraction.enums.bukkit;
 
 import com.laytonsmith.abstraction.enums.MCParticle;
 import com.laytonsmith.core.MSLog;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import org.bukkit.Particle;
 
@@ -42,7 +43,7 @@ public class BukkitMCParticle extends MCParticle<Particle> {
 	public static void build() {
 		NULL = new BukkitMCParticle(MCVanillaParticle.UNKNOWN, null);
 		for(MCVanillaParticle v : MCVanillaParticle.values()) {
-			if(v.existsInCurrent()) {
+			if(v.existsIn(Static.getServer().getMinecraftVersion())) {
 				Particle type;
 				try {
 					type = getBukkitType(v);
