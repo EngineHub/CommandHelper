@@ -24,6 +24,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCVibration;
 import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCParticle;
+import com.laytonsmith.abstraction.enums.MCParticle.MCVanillaParticle;
 import com.laytonsmith.abstraction.enums.MCPlayerStatistic;
 import com.laytonsmith.abstraction.enums.MCPotionEffectType;
 import com.laytonsmith.abstraction.enums.MCSound;
@@ -580,10 +581,14 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		switch((MCParticle.MCVanillaParticle) pa.getAbstracted()) {
 			case BLOCK_DUST:
 			case BLOCK_CRACK:
+			case BLOCK_MARKER:
 			case FALLING_DUST:
 				BlockData bd;
 				if(data instanceof MCBlockData) {
 					bd = (BlockData) ((MCBlockData) data).getHandle();
+				} else if(pa.getAbstracted() == MCVanillaParticle.BLOCK_MARKER) {
+					// Barrier (and light) particles were replaced by block markers, so this is the best fallback.
+					bd = Material.BARRIER.createBlockData();
 				} else {
 					bd = Material.STONE.createBlockData();
 				}

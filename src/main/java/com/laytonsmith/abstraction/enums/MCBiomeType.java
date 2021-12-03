@@ -27,11 +27,11 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 	public static MCBiomeType valueOf(String test) throws IllegalArgumentException {
 		MCBiomeType ret = MAP.get(test);
 		if(ret == null) {
-			switch(test) {
-				case "NETHER":
-					MSLog.GetLogger().e(MSLog.Tags.GENERAL,
-							"NETHER biome type was renamed in 1.16. Converted to NETHER_WASTES.", Target.UNKNOWN);
-					return MAP.get("NETHER_WASTES");
+			MCVanillaBiomeType oldType = MCVanillaBiomeType.valueOf(test);
+			if(oldType.newType != null) {
+				MSLog.GetLogger().e(MSLog.Tags.GENERAL, test + " biome type was renamed after " + oldType.until.name()
+						+ ". Converted to " + oldType.newType, Target.UNKNOWN);
+				return MAP.get(oldType.newType);
 			}
 			throw new IllegalArgumentException("Unknown biome type: " + test);
 		}
@@ -85,64 +85,64 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 		OCEAN,
 		PLAINS,
 		DESERT,
-		MOUNTAINS,
+		MOUNTAINS(MCVersion.MC1_0, MCVersion.MC1_17_X, "WINDSWEPT_HILLS"),
 		FOREST,
 		TAIGA,
 		SWAMP,
 		RIVER,
-		NETHER(MCVersion.MC1_0, MCVersion.MC1_15_X), // renamed to NETHER_WASTES
+		NETHER(MCVersion.MC1_0, MCVersion.MC1_15_X, "NETHER_WASTES"),
 		THE_END,
 		FROZEN_OCEAN,
 		FROZEN_RIVER,
-		SNOWY_TUNDRA,
-		SNOWY_MOUNTAINS,
+		SNOWY_TUNDRA(MCVersion.MC1_0, MCVersion.MC1_17_X, "SNOWY_PLAINS"),
+		SNOWY_MOUNTAINS(MCVersion.MC1_0, MCVersion.MC1_17_X),
 		MUSHROOM_FIELDS,
-		MUSHROOM_FIELD_SHORE,
+		MUSHROOM_FIELD_SHORE(MCVersion.MC1_0, MCVersion.MC1_17_X),
 		BEACH,
-		DESERT_HILLS,
+		DESERT_HILLS(MCVersion.MC1_1, MCVersion.MC1_17_X),
 		WOODED_HILLS,
-		TAIGA_HILLS,
-		MOUNTAIN_EDGE,
+		TAIGA_HILLS(MCVersion.MC1_1, MCVersion.MC1_17_X),
+		MOUNTAIN_EDGE(MCVersion.MC1_1, MCVersion.MC1_17_X),
 		JUNGLE,
-		JUNGLE_HILLS,
-		JUNGLE_EDGE,
+		JUNGLE_HILLS(MCVersion.MC1_2, MCVersion.MC1_17_X),
+		JUNGLE_EDGE(MCVersion.MC1_7_2, MCVersion.MC1_17_X, "SPARSE_JUNGLE"),
 		DEEP_OCEAN,
-		STONE_SHORE,
+		STONE_SHORE(MCVersion.MC1_0, MCVersion.MC1_17_X, "STONY_SHORE"),
 		SNOWY_BEACH,
 		BIRCH_FOREST,
-		BIRCH_FOREST_HILLS,
+		BIRCH_FOREST_HILLS(MCVersion.MC1_7_2, MCVersion.MC1_17_X),
 		DARK_FOREST,
 		SNOWY_TAIGA,
-		SNOWY_TAIGA_HILLS,
-		GIANT_TREE_TAIGA,
-		GIANT_TREE_TAIGA_HILLS,
-		WOODED_MOUNTAINS,
+		SNOWY_TAIGA_HILLS(MCVersion.MC1_7_2, MCVersion.MC1_17_X),
+		GIANT_TREE_TAIGA(MCVersion.MC1_7_2, MCVersion.MC1_17_X, "OLD_GROWTH_PINE_TAIGA"),
+		GIANT_TREE_TAIGA_HILLS(MCVersion.MC1_7_2, MCVersion.MC1_17_X),
+		WOODED_MOUNTAINS(MCVersion.MC1_7_2, MCVersion.MC1_17_X, "WINDSWEPT_FOREST"),
 		SAVANNA,
 		SAVANNA_PLATEAU,
 		BADLANDS,
-		WOODED_BADLANDS_PLATEAU,
-		BADLANDS_PLATEAU,
+		WOODED_BADLANDS_PLATEAU(MCVersion.MC1_7_2, MCVersion.MC1_17_X, "WOODED_BADLANDS"),
+		BADLANDS_PLATEAU(MCVersion.MC1_7_2, MCVersion.MC1_17_X),
 		SUNFLOWER_PLAINS,
-		DESERT_LAKES,
+		DESERT_LAKES(MCVersion.MC1_7_2, MCVersion.MC1_17_X),
 		FLOWER_FOREST,
-		TAIGA_MOUNTAINS,
+		TAIGA_MOUNTAINS(MCVersion.MC1_1, MCVersion.MC1_17_X),
 		ICE_SPIKES,
-		MODIFIED_JUNGLE,
-		MODIFIED_JUNGLE_EDGE,
-		SNOWY_TAIGA_MOUNTAINS,
-		SHATTERED_SAVANNA,
-		SHATTERED_SAVANNA_PLATEAU,
+		MODIFIED_JUNGLE(MCVersion.MC1_7_2, MCVersion.MC1_17_X),
+		MODIFIED_JUNGLE_EDGE(MCVersion.MC1_7_2, MCVersion.MC1_17_X),
+		SNOWY_TAIGA_MOUNTAINS(MCVersion.MC1_7_2, MCVersion.MC1_17_X),
+		SHATTERED_SAVANNA(MCVersion.MC1_7_2, MCVersion.MC1_17_X, "WINDSWEPT_SAVANNA"),
+		SHATTERED_SAVANNA_PLATEAU(MCVersion.MC1_7_2, MCVersion.MC1_17_X),
 		ERODED_BADLANDS,
-		MODIFIED_WOODED_BADLANDS_PLATEAU,
-		MODIFIED_BADLANDS_PLATEAU,
-		TALL_BIRCH_FOREST,
-		TALL_BIRCH_HILLS,
-		DARK_FOREST_HILLS,
-		GIANT_SPRUCE_TAIGA,
-		GRAVELLY_MOUNTAINS,
-		MODIFIED_GRAVELLY_MOUNTAINS,
-		SWAMP_HILLS,
-		GIANT_SPRUCE_TAIGA_HILLS,
+		MODIFIED_WOODED_BADLANDS_PLATEAU(MCVersion.MC1_7_2, MCVersion.MC1_17_X),
+		MODIFIED_BADLANDS_PLATEAU(MCVersion.MC1_7_2, MCVersion.MC1_17_X),
+		TALL_BIRCH_FOREST(MCVersion.MC1_7_2, MCVersion.MC1_17_X, "OLD_GROWTH_BIRCH_FOREST"),
+		TALL_BIRCH_HILLS(MCVersion.MC1_7_2, MCVersion.MC1_17_X),
+		DARK_FOREST_HILLS(MCVersion.MC1_7_2, MCVersion.MC1_17_X),
+		GIANT_SPRUCE_TAIGA(MCVersion.MC1_7_2, MCVersion.MC1_17_X, "OLD_GROWTH_SPRUCE_TAIGA"),
+		GRAVELLY_MOUNTAINS(MCVersion.MC1_7_2, MCVersion.MC1_17_X, "WINDSWEPT_GRAVELLY_HILLS"),
+		MODIFIED_GRAVELLY_MOUNTAINS(MCVersion.MC1_7_2, MCVersion.MC1_17_X),
+		SWAMP_HILLS(MCVersion.MC1_7_2, MCVersion.MC1_17_X),
+		GIANT_SPRUCE_TAIGA_HILLS(MCVersion.MC1_7_2, MCVersion.MC1_17_X),
 		THE_VOID,
 		SMALL_END_ISLANDS,
 		END_MIDLANDS,
@@ -151,12 +151,12 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 		WARM_OCEAN,
 		LUKEWARM_OCEAN,
 		COLD_OCEAN,
-		DEEP_WARM_OCEAN,
+		DEEP_WARM_OCEAN(MCVersion.MC1_13, MCVersion.MC1_17_X),
 		DEEP_LUKEWARM_OCEAN,
 		DEEP_COLD_OCEAN,
 		DEEP_FROZEN_OCEAN,
 		BAMBOO_JUNGLE(MCVersion.MC1_14),
-		BAMBOO_JUNGLE_HILLS(MCVersion.MC1_14),
+		BAMBOO_JUNGLE_HILLS(MCVersion.MC1_14, MCVersion.MC1_17_X),
 		NETHER_WASTES(MCVersion.MC1_16),
 		SOUL_SAND_VALLEY(MCVersion.MC1_16),
 		CRIMSON_FOREST(MCVersion.MC1_16),
@@ -165,10 +165,28 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 		CUSTOM(MCVersion.MC1_16_X),
 		DRIPSTONE_CAVES(MCVersion.MC1_17),
 		LUSH_CAVES(MCVersion.MC1_17),
+		FROZEN_PEAKS(MCVersion.MC1_18),
+		GROVE(MCVersion.MC1_18),
+		JAGGED_PEAKS(MCVersion.MC1_18),
+		MEADOW(MCVersion.MC1_18),
+		OLD_GROWTH_BIRCH_FOREST(MCVersion.MC1_18),
+		OLD_GROWTH_PINE_TAIGA(MCVersion.MC1_18),
+		OLD_GROWTH_SPRUCE_TAIGA(MCVersion.MC1_18),
+		SNOWY_PLAINS(MCVersion.MC1_18),
+		SNOWY_SLOPES(MCVersion.MC1_18),
+		SPARSE_JUNGLE(MCVersion.MC1_18),
+		STONY_PEAKS(MCVersion.MC1_18),
+		STONY_SHORE(MCVersion.MC1_18),
+		WINDSWEPT_FOREST(MCVersion.MC1_18),
+		WINDSWEPT_GRAVELLY_HILLS(MCVersion.MC1_18),
+		WINDSWEPT_HILLS(MCVersion.MC1_18),
+		WINDSWEPT_SAVANNA(MCVersion.MC1_18),
+		WOODED_BADLANDS(MCVersion.MC1_18),
 		UNKNOWN(MCVersion.NEVER);
 
 		private final MCVersion since;
 		private final MCVersion until;
+		private final String newType;
 
 		MCVanillaBiomeType() {
 			this(MCVersion.MC1_0);
@@ -181,6 +199,13 @@ public abstract class MCBiomeType<Concrete> extends DynamicEnum<MCBiomeType.MCVa
 		MCVanillaBiomeType(MCVersion since, MCVersion until) {
 			this.since = since;
 			this.until = until;
+			this.newType = null;
+		}
+
+		MCVanillaBiomeType(MCVersion since, MCVersion until, String newType) {
+			this.since = since;
+			this.until = until;
+			this.newType = newType;
 		}
 
 		public boolean existsIn(MCVersion version) {
