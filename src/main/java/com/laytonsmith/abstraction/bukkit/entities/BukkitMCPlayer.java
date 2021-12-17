@@ -420,20 +420,23 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		// Get some version specific strings
 		String nms;
 		String playersPackage;
-		String ops;
+		String ops = "operators";
+		String getPlayerList = "getPlayerList";
 		if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_17)) {
 			nms = "net.minecraft.server";
 			playersPackage = nms + ".players";
 			ops = "n";
+			if(Static.getServer().getMinecraftVersion().gte(MCVersion.MC1_18)) {
+				getPlayerList = "ac";
+			}
 		} else { // 1.16.5 and prior
 			nms = "net.minecraft.server." + version;
 			playersPackage = nms;
-			ops = "operators";
 		}
 
 		Class nmsMinecraftServerClass = Class.forName(nms + ".MinecraftServer");
 		/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
-		/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
+		/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, getPlayerList);
 		/*n.m.s.OpList*/ Object opSet = ReflectionUtils.get(Class.forName(playersPackage + ".PlayerList"), nmsPlayerList, ops);
 		//opSet.getClass().getSuperclass() == n.m.s.JsonList
 		Map/*<String, n.m.s.OpListEntry>*/ d = (Map) ReflectionUtils.get(opSet.getClass().getSuperclass(), opSet, "d");
