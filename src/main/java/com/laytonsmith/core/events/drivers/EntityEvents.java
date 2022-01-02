@@ -1097,8 +1097,9 @@ public class EntityEvents {
 		public String docs() {
 			return "{player: <macro> | itemname: <string match>} "
 					+ "This event is called when a player drops an item. "
-					+ "{player: The player | item: An item array representing "
-					+ "the item being dropped. } "
+					+ "{player: The player "
+					+ "| id: The item's entityID "
+					+ "| item: An item array representing the item being dropped.} "
 					+ "{item: setting this to null removes the dropped item} "
 					+ "{player|item}";
 		}
