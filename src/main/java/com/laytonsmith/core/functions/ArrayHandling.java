@@ -986,10 +986,10 @@ public class ArrayHandling {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args[0].isInstanceOf(CArray.TYPE)) {
 				Mixed m = args[0];
-				if(!(m.isInstanceOf(CArray.TYPE))) {
-					return CBoolean.FALSE;
-				}
 				for(int i = 1; i < args.length; i++) {
+					if(!(m.isInstanceOf(CArray.TYPE))) {
+						return CBoolean.FALSE;
+					}
 					CArray ca = (CArray) m;
 					if(!ca.inAssociativeMode()) {
 						try {
