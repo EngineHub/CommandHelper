@@ -2104,6 +2104,27 @@ public class InventoryManagement {
 		}
 
 		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript(
+					"Demonstrates adding 10 bread to the inventory of a player named 'jeb_'.",
+					"add_to_inventory(puuid('jeb_'), array('name': 'BREAD', 'qty': 10))",
+					":0"
+				),
+				new ExampleScript(
+					"An empty inventory supports 2304 of the same item (36 stacks of 64). Attempting to add 2400 items, results in 96 being left over that were not added to the inventory. The left over items will simply disappear, they will NOT appear on the ground in front of the player.",
+					"add_to_inventory(puuid('jeb_'), array('name': 'BREAD', 'qty': 2400))",
+					":96"
+				),
+				new ExampleScript(
+					"Demonstrates adding 10 bread to an inventory identifier that does not exist.",
+					"add_to_inventory('does_not_exist', array('name': 'BREAD', 'qty': 10))",
+					"(Throws IllegalArgumentException: An inventory for \"does_not_exist\" does not exist.)"
+				),
+			};
+		}
+
+		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRECastException.class, CREFormatException.class, CREBadEntityException.class,
 					CREInvalidWorldException.class, CREIllegalArgumentException.class, CRENotFoundException.class,

@@ -277,6 +277,21 @@ public class PlayerManagement {
 		}
 
 		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates retrieving a list of all online players, in every dimension.",
+				"all_players()",
+				"{Dinnerbone, jeb_, kingbdogz}"),
+				new ExampleScript("Demonstrates retrieving a list of all online players, but only in the nether.",
+				"all_players('world_nether')",
+				"{kingbdogz}"),
+				new ExampleScript("Demonstrates attempting to retrieve players from a non-existent dimension.",
+				"all_players('does_not_exist')",
+				"(Throws InvalidWorldException: Unknown world: does_not_exist)"),
+			};
+		}
+
+		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CREInvalidWorldException.class};
 		}
@@ -1195,6 +1210,27 @@ public class PlayerManagement {
 		}
 
 		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript(
+					"Demonstrates retrieving the display name for the player calling the function.",
+					"display_name()",
+					":The King"
+				),
+				new ExampleScript(
+					"Demonstrates retrieving the display name for the specified player.",
+					"display_name('kingbdogz')",
+					":The King"
+				),
+				new ExampleScript(
+					"Demonstrates attempting to retrieve the display name for a non-existent player.",
+					"display_name('does_not_exist')",
+					"(Throws PlayerOfflineException: The specified player (does_not_exist) is not online)"
+				),
+			};
+		}
+
+		@Override
 		public Class<? extends CREThrowable>[] thrown() {
 			return new Class[]{CRELengthException.class, CREPlayerOfflineException.class};
 		}
@@ -1245,6 +1281,27 @@ public class PlayerManagement {
 			return "void {[playerName], newDisplayName} Sets a player's display name. If the first name isn't provided,"
 					+ " it sets the display name of the player running the command. See reset_display_name() also."
 					+ " All player functions expect the player's real name, not their display name.";
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript(
+					"Demonstrates setting a display name for the player calling the function.",
+					"set_display_name('The King')",
+					"(The current player will now appear as 'The King' in chat)"
+				),
+				new ExampleScript(
+					"Demonstrates setting a display name for the specified player.",
+					"set_display_name('kingbdogz', 'The King')",
+					"(The player named 'kingbdogz' will now appear as 'The King' in chat)"
+				),
+				new ExampleScript(
+					"Demonstrates attempting to set the display name for a non-existent player.",
+					"set_display_name('does_not_exist', 'The King')",
+					"(Throws PlayerOfflineException: The specified player (does_not_exist) is not online)"
+				),
+			};
 		}
 
 		@Override
@@ -1301,6 +1358,27 @@ public class PlayerManagement {
 		public String docs() {
 			return "void {[playerName]} Resets a player's display name to their real name."
 					+ " If playerName isn't specified, defaults to the player running the command.";
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript(
+					"Demonstrates resetting a display name for the player calling the function.",
+					"reset_display_name()",
+					"(The current player will have their display name removed and their real Minecraft username will be shown.)"
+				),
+				new ExampleScript(
+					"Demonstrates resetting a display name for the specified player.",
+					"reset_display_name('kingbdogz')",
+					"(The player named 'kingbdogz' will have their display name removed and their real Minecraft username will be shown.)"
+				),
+				new ExampleScript(
+					"Demonstrates attempting to reset the display name for a non-existent player. Note that you must use the player's real name, not their current display name.",
+					"reset_display_name('The King')",
+					"(Throws PlayerOfflineException: The specified player (The King) is not online)"
+				),
+			};
 		}
 
 		@Override
