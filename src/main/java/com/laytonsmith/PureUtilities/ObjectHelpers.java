@@ -142,7 +142,7 @@ public class ObjectHelpers {
 		if(calculatedFields.isEmpty()) {
 			return 0;
 		}
-		return Arrays.hashCode(calculatedFields.toArray(new Object[calculatedFields.size()]));
+		return Arrays.hashCode(calculatedFields.toArray(Object[]::new));
 	}
 
 	/**
@@ -196,7 +196,7 @@ public class ObjectHelpers {
 					}
 					// Do not recurse further, as self referential arrays would cause a SOE, and to properly
 					// avoid that would require a much more complex system.
-					b.append(Objects.toString(Array.get(_this, i)));
+					b.append(Array.get(_this, i));
 				}
 				b.append('}');
 				return b.toString();

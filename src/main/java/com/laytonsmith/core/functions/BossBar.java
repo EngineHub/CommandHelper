@@ -81,7 +81,7 @@ public class BossBar {
 
 		@Override
 		public CArray exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			CArray ca = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray ca = new CArray(t, GenericParameters
 					.addParameter(CString.TYPE, null).build(), env);
 			for(String id : BARS.keySet()) {
 				ca.push(new CString(id, t), t, env);
@@ -134,7 +134,7 @@ public class BossBar {
 			boolean visible = true;
 			double percent = 1.0;
 			if(args.length == 2) {
-				if(!(args[1].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env))) {
+				if(!(args[1].isInstanceOf(CArray.TYPE, null, env))) {
 					throw new CRECastException("Expected array for parameter 2 of create_bar()", t);
 				}
 				CArray ca = (CArray) args[1];
@@ -219,7 +219,7 @@ public class BossBar {
 				} catch (IllegalArgumentException ex) {
 					throw new CRERangeException("Progress percentage must be from 0.0 to 1.0.", t);
 				}
-			} else if(args[1].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env)) {
+			} else if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ca = (CArray) args[1];
 				if(ca.containsKey("title")) {
 					bar.setTitle(ca.get("title", t, env).val());
@@ -287,7 +287,7 @@ public class BossBar {
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
-			CArray ret = CArray.GetAssociativeArray(t, GenericParameters.start(CArray.TYPE).build(), env);
+			CArray ret = CArray.GetAssociativeArray(t, null, env);
 			ret.set("title", bar.getTitle(), t, env);
 			ret.set("color", bar.getColor().name(), t, env);
 			ret.set("style", bar.getStyle().name(), t, env);
@@ -432,7 +432,7 @@ public class BossBar {
 			if(bar == null) {
 				throw new CRENotFoundException("That boss bar id does not exist.", t);
 			}
-			CArray players = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray players = new CArray(t, GenericParameters
 					.addParameter(CString.TYPE, null).build(), env);
 			for(MCPlayer player : bar.getPlayers()) {
 				players.push(new CString(player.getName(), t), t, env);

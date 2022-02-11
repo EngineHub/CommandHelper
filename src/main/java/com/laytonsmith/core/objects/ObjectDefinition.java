@@ -4,22 +4,30 @@ import com.laytonsmith.PureUtilities.ObjectHelpers;
 import com.laytonsmith.PureUtilities.ObjectHelpers.Equals;
 import com.laytonsmith.PureUtilities.ObjectHelpers.HashCode;
 import com.laytonsmith.PureUtilities.ObjectHelpers.ToString;
+import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.UnqualifiedClassName;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.generics.GenericDeclaration;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
+import com.laytonsmith.core.constructs.generics.UnqualifiedGenericDeclaration;
+import com.laytonsmith.core.constructs.generics.UnqualifiedGenericParameters;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.natives.interfaces.Commentable;
 import com.laytonsmith.core.natives.interfaces.MAnnotation;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -45,24 +53,30 @@ public class ObjectDefinition implements Commentable {
 	@ToString
 	private final ObjectType objectType;
 	@ToString
-	private final CClassType type;
+	private final FullyQualifiedClassName type;
+	// The original ordering of the interfaces and superclasses is intended to remain, so LinkedHashSet is part of the
+	// contract.
 	@ToString
-	private final Set<UnqualifiedClassName> superclasses;
+	private final LinkedHashSet<Pair<UnqualifiedClassName, UnqualifiedGenericParameters>> superclasses;
 	@ToString
-	private final Set<UnqualifiedClassName> interfaces;
+	private final LinkedHashSet<Pair<UnqualifiedClassName, UnqualifiedGenericParameters>> interfaces;
+	private final UnqualifiedGenericDeclaration genericDeclaration;
 	private final CClassType containingClass;
 	private final Target definitionTarget;
 	private final Map<String, List<ElementDefinition>> properties;
 	private final SmartComment classComment;
-	private final GenericDeclaration genericDeclaration;
 	private final Class<? extends Mixed> nativeClass;
 
-	private Set<CClassType> qualifiedSuperclasses;
-	private Set<CClassType> qualifiedInterfaces;
+	private LinkedHashSet<CClassType> qualifiedSuperclasses;
+	private LinkedHashSet<CClassType> qualifiedInterfaces;
+	private GenericDeclaration qualifiedGenericDeclaration;
+	private CClassType qualifiedType;
 
 	public ObjectDefinition(AccessModifier accessModifier, Set<ObjectModifier> objectModifiers, ObjectType objectType,
-			CClassType type,
-			Set<UnqualifiedClassName> superclasses, Set<UnqualifiedClassName> interfaces,
+			FullyQualifiedClassName type,
+			UnqualifiedGenericDeclaration genericDeclaration,
+			LinkedHashSet<Pair<UnqualifiedClassName, UnqualifiedGenericParameters>> superclasses,
+			LinkedHashSet<Pair<UnqualifiedClassName, UnqualifiedGenericParameters>> interfaces,
 			CClassType containingClass, Target t,
 			Map<String, List<ElementDefinition>> properties, List<MAnnotation> annotations,
 			SmartComment classComment, Class<? extends Mixed> nativeClass) {
@@ -77,7 +91,7 @@ public class ObjectDefinition implements Commentable {
 		this.properties = properties;
 		this.annotations = annotations;
 		this.classComment = classComment;
-		this.genericDeclaration = type.getGenericDeclaration();
+		this.genericDeclaration = genericDeclaration;
 		this.nativeClass = nativeClass;
 	}
 
@@ -94,7 +108,7 @@ public class ObjectDefinition implements Commentable {
 	 * @return
 	 */
 	public FullyQualifiedClassName getFQCN() {
-		return this.type.getFQCN();
+		return this.type;
 	}
 
 	@Override
@@ -161,7 +175,10 @@ public class ObjectDefinition implements Commentable {
 	 * @return
 	 */
 	public CClassType getType() {
-		return type;
+		if(qualifiedSuperclasses == null) {
+			throw new Error("qualifyClasses() must be called before getType can be used (" + getType() + ")");
+		}
+		return qualifiedType;
 	}
 
 	/**
@@ -169,7 +186,7 @@ public class ObjectDefinition implements Commentable {
 	 * @return
 	 */
 	public String getName() {
-		return type.getFQCN().getFQCN();
+		return type.getFQCN();
 	}
 
 	private volatile boolean classesQualified = false;
@@ -191,27 +208,53 @@ public class ObjectDefinition implements Commentable {
 			}
 			Set<ConfigCompileException> uhohs = new HashSet<>();
 			@SuppressWarnings("LocalVariableHidesMemberVariable")
-			Set<CClassType> superclasses = new HashSet<>();
+			LinkedHashSet<CClassType> superclasses = new LinkedHashSet<>();
 			@SuppressWarnings("LocalVariableHidesMemberVariable")
-			Set<CClassType> interfaces = new HashSet<>();
-			for(UnqualifiedClassName ucn : this.superclasses) {
-				try {
-					superclasses.add(CClassType.get(ucn.getFQCN(env)));
-				} catch (ClassNotFoundException ex) {
-					uhohs.add(new ConfigCompileException("Could not find " + ucn.getUnqualifiedClassName(),
-							ucn.getTarget(), ex));
+			LinkedHashSet<CClassType> interfaces = new LinkedHashSet<>();
+			for(Set<Pair<UnqualifiedClassName, UnqualifiedGenericParameters>> set
+					: Arrays.asList(this.superclasses, this.interfaces)) {
+				for(Pair<UnqualifiedClassName, UnqualifiedGenericParameters> ucnP : set) {
+					UnqualifiedClassName ucn = ucnP.getKey();
+					UnqualifiedGenericParameters parameters = ucnP.getValue();
+					try {
+						// We have to qualify the superclass first, otherwise the reference to CClassType.get will
+						// fail for non-native classes.
+						FullyQualifiedClassName fqcn = ucn.getFQCN(env);
+						if(fqcn.getNativeClass() == null) {
+							ObjectDefinition superclass = env.getEnv(CompilerEnvironment.class)
+									.getObjectDefinitionTable().get(fqcn);
+							superclass.qualifyClasses(env);
+						}
+						GenericParameters genericParameters = null;
+						if(parameters != null) {
+							CClassType nakedSuperClass = CClassType.getNakedClassType(fqcn, env);
+							genericParameters = parameters.qualify(nakedSuperClass, ucn.getTarget(), env);
+						}
+						CClassType type = CClassType.get(fqcn, ucn.getTarget(), genericParameters, env);
+						if(set == this.superclasses) {
+							superclasses.add(type);
+						} else if(set == this.interfaces) {
+							interfaces.add(type);
+						} else {
+							throw new Error();
+						}
+					} catch (CRECastException | ClassNotFoundException | ObjectDefinitionNotFoundException ex) {
+						uhohs.add(new ConfigCompileException("Could not find " + ucn.getUnqualifiedClassName(),
+								ucn.getTarget(), ex));
+					}
 				}
 			}
-			for(UnqualifiedClassName ucn : this.interfaces) {
-				try {
-					interfaces.add(CClassType.get(ucn.getFQCN(env)));
-				} catch (ClassNotFoundException ex) {
-					uhohs.add(new ConfigCompileException("Could not find " + ucn.getUnqualifiedClassName(),
-							ucn.getTarget(), ex));
-				}
+
+			try {
+				this.qualifiedGenericDeclaration = genericDeclaration == null
+						? null : genericDeclaration.qualify(definitionTarget, env);
+				qualifiedType = CClassType.defineClass(getFQCN(), qualifiedGenericDeclaration, env, this.nativeClass);
+			} catch (ClassNotFoundException e) {
+				uhohs.add(new ConfigCompileException(e.getMessage(), definitionTarget));
 			}
 			if(!uhohs.isEmpty()) {
-				throw new ConfigCompileGroupException(uhohs);
+				ConfigCompileException ex = uhohs.stream().findFirst().get();
+				throw new ConfigCompileGroupException(uhohs, ex);
 			}
 			this.qualifiedSuperclasses = superclasses;
 			this.qualifiedInterfaces = interfaces;
@@ -223,22 +266,22 @@ public class ObjectDefinition implements Commentable {
 	 * Returns a List of superclasses.
 	 * @return
 	 */
-	public Set<CClassType> getSuperclasses() {
+	public LinkedHashSet<CClassType> getSuperclasses() {
 		if(qualifiedSuperclasses == null) {
 			throw new Error("qualifyClasses() must be called before getSuperclasses can be used (" + getType() + ")");
 		}
-		return new HashSet<>(qualifiedSuperclasses);
+		return new LinkedHashSet<>(qualifiedSuperclasses);
 	}
 
 	/**
 	 * Returns a list of implementing interfaces.
 	 * @return
 	 */
-	public Set<CClassType> getInterfaces() {
+	public LinkedHashSet<CClassType> getInterfaces() {
 		if(qualifiedSuperclasses == null) {
 			throw new Error("qualifyClasses() must be called before getInterfaces can be used (" + getType() + ")");
 		}
-		return new HashSet<>(qualifiedInterfaces);
+		return new LinkedHashSet<>(qualifiedInterfaces);
 	}
 
 	/**
@@ -273,7 +316,10 @@ public class ObjectDefinition implements Commentable {
 	}
 
 	public GenericDeclaration getGenericDeclaration() {
-		return genericDeclaration;
+		if(qualifiedSuperclasses == null) {
+			throw new Error("qualifyClasses() must be called before getGenericDeclaration can be used (" + getType() + ")");
+		}
+		return qualifiedGenericDeclaration;
 	}
 
 	/**
@@ -290,11 +336,19 @@ public class ObjectDefinition implements Commentable {
 			// We want to ensure that if we attempt to instantiate this
 			// through the native type list, it will succeed, so we actually
 			// do that test here.
-			NativeTypeList.getNativeClassOrInterfaceRunner(type.getFQCN());
+			NativeTypeList.getNativeClassOrInterfaceRunner(type);
 			return true;
 		} catch (ClassNotFoundException ex) {
 			return false;
 		}
+	}
+
+	/**
+	 * Returns the native class for this object definition, may be null.
+	 * @return
+	 */
+	public Class<? extends Mixed> getNativeClass() {
+		return this.nativeClass;
 	}
 
 }

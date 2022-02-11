@@ -75,7 +75,7 @@ public abstract class CompositeFunction extends AbstractFunction {
 		IVariableList newVariables = new IVariableList(oldVariables);
 		try {
 			newVariables.set(new IVariable(CArray.TYPE, "@arguments", new CArray(t, args.length,
-					GenericParameters.start(CArray.TYPE).build(), env, args), t));
+					null, env, args), t));
 		} catch (ConfigCompileException cce) {
 			throw new CREFormatException(cce.getMessage(), t);
 		}

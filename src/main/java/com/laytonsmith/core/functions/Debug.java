@@ -609,7 +609,7 @@ public class Debug {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-			CArray carray = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray carray = new CArray(t, GenericParameters
 					.addParameter(CString.TYPE, null).build(), env);
 			for(Thread thread : threadSet) {
 				carray.push(new CString(thread.getName(), t), t, env);

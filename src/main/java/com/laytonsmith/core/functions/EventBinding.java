@@ -923,7 +923,7 @@ public class EventBinding {
 			if(env.getEnv(GlobalEnv.class).GetEvent() == null) {
 				throw new CREBindException("event_meta must be called from within an event handler!", t);
 			}
-			CArray history = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray history = new CArray(t, GenericParameters
 					.addParameter(CString.TYPE, null).build(), env);
 			for(String entry : env.getEnv(GlobalEnv.class).GetEvent().getHistory()) {
 				history.push(new CString(entry, t), t, env);

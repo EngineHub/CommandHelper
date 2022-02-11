@@ -39,7 +39,8 @@ public class ConstructorConstraint extends Constraint {
 					", ",
 					", ",
 					"",
-					item -> item.getKey().getFQCN().getFQCN() + "<" + item.getValue().toString() + ">")
+					item -> item.getKey().toString()
+							+ (item.getValue() == null ? "" : "<" + item.getValue().toString() + ">"))
 				+ ")";
 	}
 

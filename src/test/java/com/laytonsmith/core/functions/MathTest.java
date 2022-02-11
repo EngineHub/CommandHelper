@@ -59,8 +59,8 @@ public class MathTest {
 		fakeServer = GetFakeServer();
 
 		varList = new IVariableList(null);
-		varList.set(new IVariable(Auto.TYPE, "var", C.onstruct(1), Target.UNKNOWN, env));
-		varList.set(new IVariable(Auto.TYPE, "var2", C.onstruct(2.5), Target.UNKNOWN, env));
+		varList.set(new IVariable(Auto.TYPE, "@var", C.onstruct(1), Target.UNKNOWN, env));
+		varList.set(new IVariable(Auto.TYPE, "@var2", C.onstruct(2.5), Target.UNKNOWN, env));
 		env = Static.GenerateStandaloneEnvironment();
 		env = env.cloneAndAdd(new CommandHelperEnvironment());
 		env.getEnv(GlobalEnv.class).SetVarList(varList);
@@ -94,8 +94,8 @@ public class MathTest {
 	@Test(timeout = 10000)
 	public void testDec() throws Exception {
 		Math.dec a = new Math.dec();
-		IVariable v = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(Auto.TYPE, "var", C.onstruct(1), Target.UNKNOWN, env));
-		IVariable v2 = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(Auto.TYPE, "var2", C.onstruct(2.5), Target.UNKNOWN, env));
+		IVariable v = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(Auto.TYPE, "@var", C.onstruct(1), Target.UNKNOWN, env));
+		IVariable v2 = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(Auto.TYPE, "@var2", C.onstruct(2.5), Target.UNKNOWN, env));
 		assertCEquals(C.onstruct(0), v.ival());
 		assertCEquals(C.onstruct(1.5), v2.ival());
 		StaticTest.SRun("assign(@var, 0) dec(@var, 2) msg(@var)", fakePlayer);
@@ -113,8 +113,8 @@ public class MathTest {
 	@Test(timeout = 10000)
 	public void testInc() throws Exception {
 		Math.inc a = new Math.inc();
-		IVariable v = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(Auto.TYPE, "var", C.onstruct(1), Target.UNKNOWN, env));
-		IVariable v2 = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(Auto.TYPE, "var2", C.onstruct(2.5), Target.UNKNOWN, env));
+		IVariable v = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(Auto.TYPE, "@var", C.onstruct(1), Target.UNKNOWN, env));
+		IVariable v2 = (IVariable) a.exec(Target.UNKNOWN, env, new IVariable(Auto.TYPE, "@var2", C.onstruct(2.5), Target.UNKNOWN, env));
 		assertCEquals(C.onstruct(2), v.ival());
 		assertCEquals(C.onstruct(3.5), v2.ival());
 		StaticTest.SRun("assign(@var, 0) inc(@var, 2) msg(@var)", fakePlayer);
@@ -252,7 +252,7 @@ public class MathTest {
 	@Test
 	public void testSinh() throws Exception {
 		assertEquals("1.1752011936438014", SRun("sinh(1)", null));
-		assertEquals("0", SRun("sinh(0)", null));
+		assertEquals("0.0", SRun("sinh(0)", null));
 		assertEquals("6.0502044810397875", SRun("sinh(2.5)", null));
 		assertEquals("-6.0502044810397875", SRun("sinh(-2.5)", null));
 	}
@@ -260,7 +260,7 @@ public class MathTest {
 	@Test
 	public void testCosh() throws Exception {
 		assertEquals("1.543080634815244", SRun("cosh(1)", null));
-		assertEquals("1", SRun("cosh(0)", null));
+		assertEquals("1.0", SRun("cosh(0)", null));
 		assertEquals("6.132289479663686", SRun("cosh(2.5)", null));
 		assertEquals("6.132289479663686", SRun("cosh(-2.5)", null));
 	}
@@ -268,7 +268,7 @@ public class MathTest {
 	@Test
 	public void testTanh() throws Exception {
 		assertEquals("0.7615941559557649", SRun("tanh(1)", null));
-		assertEquals("0", SRun("tanh(0)", null));
+		assertEquals("0.0", SRun("tanh(0)", null));
 		assertEquals("0.9866142981514303", SRun("tanh(2.5)", null));
 		assertEquals("-0.9866142981514303", SRun("tanh(-2.5)", null));
 	}

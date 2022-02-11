@@ -221,7 +221,7 @@ public class BukkitMCCommand implements MCCommand {
 		}
 		if(Commands.onTabComplete.containsKey(cmd.getName().toLowerCase())) {
 			Target t = Target.UNKNOWN;
-			CArray cargs = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray cargs = new CArray(t, GenericParameters
 					.addParameter(CString.TYPE, null).build(), env);
 			for(String arg : args) {
 				cargs.push(new CString(arg, t), t, env);
@@ -265,7 +265,7 @@ public class BukkitMCCommand implements MCCommand {
 		}
 		if(Commands.onCommand.containsKey(cmd.getName().toLowerCase())) {
 			Target t = Target.UNKNOWN;
-			CArray cargs = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray cargs = new CArray(t, GenericParameters
 					.addParameter(CString.TYPE, null).build(), env);
 			for(String arg : args) {
 				cargs.push(new CString(arg, t), t, env);

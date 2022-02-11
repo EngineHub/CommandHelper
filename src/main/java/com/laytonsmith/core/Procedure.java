@@ -193,7 +193,7 @@ public class Procedure implements Cloneable {
 
 		// Create container for the @arguments variable.
 		CArray arguments = new CArray(Target.UNKNOWN, this.varIndex.size(),
-				GenericParameters.start(CArray.TYPE).build(), env);
+				null, env);
 
 		// Handle passed procedure arguments.
 		int varInd;

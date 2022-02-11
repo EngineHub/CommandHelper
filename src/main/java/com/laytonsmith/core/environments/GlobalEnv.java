@@ -11,6 +11,7 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClassType.ClassTypeCache;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.IVariableList;
@@ -22,6 +23,7 @@ import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Iterator;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,6 +66,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private final MutableObject<Map<String, Mixed>> runtimeSettings
 			= new MutableObject<>(new ConcurrentHashMap<>());
 	private FileOptions fileOptions;
+	private ClassTypeCache classTypeCache = new ClassTypeCache();
 
 	/**
 	 * Creates a new GlobalEnvironment. All fields in the constructor are required, and cannot be null.
@@ -497,5 +500,14 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 */
 	public FileOptions GetFileOptions() {
 		return this.fileOptions;
+	}
+
+	/**
+	 * Returns the ClassTypeCache. NOTE: This shouldn't normally be used except by CClassType. Instead, use
+	 * the accessor methods defined there, and pass the environment to it.
+	 * @return
+	 */
+	public ClassTypeCache GetClassCache() {
+		return this.classTypeCache;
 	}
 }

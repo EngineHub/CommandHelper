@@ -207,7 +207,7 @@ public class ServerEvents {
 				ret.put("motd", new CString(event.getMOTD(), t));
 				ret.put("players", new CInt(event.getNumPlayers(), t));
 				ret.put("maxplayers", new CInt(event.getMaxPlayers(), t));
-				CArray players = new CArray(t, GenericParameters.start(CArray.TYPE)
+				CArray players = new CArray(t, GenericParameters
 						.addParameter(CString.TYPE, null).build(), env);
 				for(MCPlayer player : event.getPlayers()) {
 					players.push(new CString(player.getName(), t), t, env);
@@ -307,7 +307,7 @@ public class ServerEvents {
 				Target t = Target.UNKNOWN;
 				Map<String, Mixed> ret = evaluate_helper(event);
 				ret.put("sender", new CString(e.getCommandSender().getName(), t));
-				CArray comp = new CArray(t, GenericParameters.start(CArray.TYPE)
+				CArray comp = new CArray(t, GenericParameters
 						.addParameter(CString.TYPE, null).build(), env);
 				if(e.getCompletions() != null) {
 					for(String c : e.getCompletions()) {
@@ -316,7 +316,7 @@ public class ServerEvents {
 				}
 				ret.put("completions", comp);
 				ret.put("command", new CString(e.getCommand().getName(), t));
-				CArray args = new CArray(t, GenericParameters.start(CArray.TYPE)
+				CArray args = new CArray(t, GenericParameters
 						.addParameter(CString.TYPE, null).build(), env);
 				for(String a : e.getArguments()) {
 					args.push(new CString(a, t), t, env);
@@ -501,7 +501,7 @@ public class ServerEvents {
 			MCBroadcastMessageEvent event = (MCBroadcastMessageEvent) e;
 			Map<String, Mixed> map = evaluate_helper(e);
 			map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
-			CArray cRecipients = new CArray(Target.UNKNOWN, GenericParameters.start(CArray.TYPE)
+			CArray cRecipients = new CArray(Target.UNKNOWN, GenericParameters
 					.addParameter(CString.TYPE, null).build(), env);
 			for(MCPlayer player : event.getPlayerRecipients()) {
 				cRecipients.push(new CString(player.getName(), Target.UNKNOWN), Target.UNKNOWN, env);

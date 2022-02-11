@@ -78,7 +78,7 @@ public class UpperBoundConstraint extends BoundaryConstraint {
 
 			@Override
 			public Boolean isWithinBounds(UpperBoundConstraint lhs) {
-				return UpperBoundConstraint.this.getUpperBound().doesExtend(lhs.getUpperBound());
+				return lhs.getUpperBound().doesExtend(UpperBoundConstraint.this.getUpperBound());
 			}
 
 			@Override

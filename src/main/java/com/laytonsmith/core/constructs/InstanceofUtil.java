@@ -39,7 +39,7 @@ public class InstanceofUtil {
 	 */
 	private static Set<CClassType> getAllCastableClassesWithBlacklist(CClassType c, Set<CClassType> blacklist,
 			Environment env) {
-		c = CClassType.getNakedClassType(c.getFQCN());
+		c = CClassType.getNakedClassType(c.getFQCN(), env);
 		if(blacklist.contains(c)) {
 			return blacklist;
 		}
@@ -109,9 +109,9 @@ public class InstanceofUtil {
 	 * @param env
 	 * @return
 	 */
-	public static boolean isInstanceof(Mixed value, Class<? extends Mixed> instanceofThis, Environment env) throws ClassNotFoundException {
-		FullyQualifiedClassName typeof = typeof(instanceofThis);
-		CClassType type = CClassType.get(typeof);
+	public static boolean isInstanceof(Mixed value, Class<? extends Mixed> instanceofThis, Environment env)
+			throws ClassNotFoundException {
+		CClassType type = CClassType.get(instanceofThis);
 		return isInstanceof(value, type, env);
 	}
 
@@ -145,7 +145,33 @@ public class InstanceofUtil {
 		return isInstanceof(value.typeof(), instanceofThis, generics, env);
 	}
 
+	/**
+	 * This contains only naked CClassTypes.
+	 */
 	private static final Map<CClassType, Set<CClassType>> ISINSTANCEOF_CACHE = new HashMap<>();
+
+	/**
+	 * This function returns true if a value of a certain type is assignable to the given type. In general, this is
+	 * precisely equivalent to {@link #isInstanceof(CClassType, CClassType, LeftHandGenericUse, Environment)} except
+	 * this allows for null to be assigned to any value in general. The only exception to this rule is if the type is
+	 * defined with the NotNull annotation.
+	 * @param type The type to check for.
+	 *             Java {@code null} can be used to indicate no type (e.g. from control flow breaking statements),
+	 *             though this is in general the wrong method to use for this type of check.
+	 * @param instanceofThis The type of the variable to determine if this can be assigned.
+	 * @param instanceofThisGenerics The type of the LHS to validate against.
+	 * @param env
+	 * @return
+	 */
+	public static boolean isAssignableTo(CClassType type, CClassType instanceofThis, LeftHandGenericUse instanceofThisGenerics, Environment env) {
+		if(
+				type != null && type.getNakedType(env).equals(CNull.TYPE)
+				// TODO: Check for NotNull anntoation on instanceofThis
+		) {
+			return true;
+		}
+		return isInstanceof(type, instanceofThis, instanceofThisGenerics, env);
+	}
 
 	/**
 	 * Returns whether or not a given MethodScript type is an instance of the specified MethodScript type.
@@ -155,46 +181,80 @@ public class InstanceofUtil {
 	 *     <li>If instanceofThis.equals(type) where the generic declaration of instanceofThis is absent or the generic
 	 *     parameters of type are instanceof the given instanceofThisGenerics, {@code true} is returned.</li>
 	 *     <li>Java null is only instanceof Java null.</li>
-	 *     <li>auto and null are instanceof any type.</li>
+	 *     <li>auto is instanceof any type.</li>
+	 *     <li>null is never instanceof any type. (See {@link #isAssignableTo(CClassType, CClassType, LeftHandGenericUse, Environment)}
+	 *      if you're looking for the assignment rules instead, where this returns true in general)</li>
 	 *     <li>Any type is instanceof auto.</li>
 	 *     <li>Nothing is instanceof void and null.</li>
 	 *     <li>void is instanceof nothing.</li>
-	 *     <li>{@code A<B>} is instanceof {@code A}.</li>
+	 *     <li>{@code A<B>} is instanceof {@code A}, because {@code A} is {@code A<auto>}.</li>
 	 * </ul>
 	 * @param type - The type to check for.
 	 * Java {@code null} can be used to indicate no type (e.g. from control flow breaking statements).
 	 * @param instanceofThis - The {@link CClassType} to check against.
 	 * Java {@code null} can be used to indicate that anything is allowed to match this
 	 * (i.e. making this method return {@code true}).
-	 * @param instanceofThisGenerics
+	 * @param instanceofThisGenerics The LHS generics. Confusingly, this is actually on the RHS of the instanceof statement,
+	 *                               because we generally accept LHS statements RHS of the instanceof. For example
+	 *                               {@code (new A<int>()) instanceof A<? extends primitive>} and
+	 *                               {@code (new A<int>()) instanceof A<int>} are both valid. In the second example,
+	 *                               this is simply a LeftHandGenericUse with an ExactType value.
 	 * @param env
 	 * @return {@code true} if type is instance of instanceofThis.
 	 */
 	public static boolean isInstanceof(
 			CClassType type, CClassType instanceofThis, LeftHandGenericUse instanceofThisGenerics, Environment env) {
-		instanceofThis = (instanceofThis != null ? CClassType.getNakedClassType(instanceofThis.getFQCN()) : null);
+		instanceofThis = (instanceofThis != null ? CClassType.getNakedClassType(instanceofThis.getFQCN(), env) : null);
 
 		// Handle special cases.
-		if(instanceofThis == null || (instanceofThis.equals(type) && (instanceofThis.getGenericDeclaration() == null
-				|| type.getGenericParameters().isInstanceof(instanceofThisGenerics))) || CClassType.AUTO.equals(type)
-				|| CNull.TYPE.equals(type) || CClassType.AUTO.equals(instanceofThis)) {
+		if(
+				(type == instanceofThis && instanceofThisGenerics == null) // Identity short circuit
+				|| instanceofThis == null // java null on RHS defined as true for implementation purposes
+				|| (instanceofThis.equals(type) && instanceofThis.getGenericDeclaration() == null) // no generics involved, and the types are equal
+				|| CClassType.AUTO.equals(type) // auto type on
+				|| CClassType.AUTO.equals(instanceofThis) // either side
+		) {
 			return true;
 		}
-		if(type == null || CVoid.TYPE.equals(type)
-				|| CVoid.TYPE.equals(instanceofThis) || CNull.TYPE.equals(instanceofThis)) {
+		if(
+				type == null // type is java null defined as false (except if instanceofThis was true, which is caught above)
+				|| CVoid.TYPE.equals(type) // void is not instanceof anything
+				|| CVoid.TYPE.equals(instanceofThis) // nothing is instanceof void
+				|| CNull.TYPE.equals(instanceofThis) // nothing is instanceof null (should be compile error)
+				|| CNull.TYPE.equals(type) // type is mscript null defined as false
+		) {
 			return false;
 		}
 
+		/*
+		In general at this point, all special cases have been handled, so the approach is to validate that the
+		naked type is instanceof the specified value, and then if not, return false. If it is, we also need to
+		validate that the generics match, because A<int> is instanceof A<int> but not A<string>.
+		 */
+
 		// Get cached result or compute and cache result.
-		Set<CClassType> castableClasses = ISINSTANCEOF_CACHE.get(type);
+		CClassType nakedType = type.getNakedType(env);
+		Set<CClassType> castableClasses = ISINSTANCEOF_CACHE.get(nakedType);
 		if(castableClasses == null) {
-			castableClasses = getAllCastableClasses(type, env);
-			ISINSTANCEOF_CACHE.put(type, castableClasses);
+			castableClasses = getAllCastableClasses(nakedType, env);
+			ISINSTANCEOF_CACHE.put(nakedType, castableClasses);
 		}
 
 		// Return the result.
-		return castableClasses.contains(instanceofThis) && (instanceofThis.getGenericDeclaration() == null
-				|| type.getGenericParameters().isInstanceof(instanceofThisGenerics));
+		if(!castableClasses.contains(instanceofThis)) {
+			return false;
+		}
+		// The classes match, validate generics.
+
+		// No generics defined on the RHS, or they are defined, but the LHS doesn't provide them,
+		// so implied <auto>, so they pass.
+		if(instanceofThis.getGenericDeclaration() == null || instanceofThisGenerics == null) {
+			return true;
+		}
+
+		// They are defined on the class, AND some were provided. If they pass this, they are instanceof, otherwise
+		// they aren't.
+		return type.getGenericParameters().isInstanceof(instanceofThisGenerics, env);
 	}
 
 	private static FullyQualifiedClassName typeof(Class<? extends Mixed> c) {

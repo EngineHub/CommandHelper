@@ -8,6 +8,7 @@ import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
 
 public class ConstraintValidator {
 
@@ -18,9 +19,16 @@ public class ConstraintValidator {
 	 * @param constraints The constraint(s) to validate
 	 * @return The typename, for instance <code>T</code> in <code>T extends Number</code>.
 	 */
-	public static String ValidateDefinition(List<Constraint> constraints)
+	public static String ValidateDefinition(SortedSet<Constraint> constraints, Target t)
 			throws CREGenericConstraintException {
+		String typename = null;
 		for(Constraint c : constraints) {
+			if(typename == null) {
+				typename = c.getTypeName();
+			} else if(!typename.equals(c.getTypeName())) {
+				throw new CREGenericConstraintException("Multiple constraints in the same parameter must be named"
+						+ " with the same type name.", t);
+			}
 			if(!c.validLocations().contains(ConstraintLocation.DEFINITION)) {
 				throw new CREGenericConstraintException("The " + c.getConstraintName() + " constraint type cannot be"
 						+ " used at the location of the " + ConstraintLocation.DEFINITION.getLocationName(),
@@ -30,13 +38,25 @@ public class ConstraintValidator {
 				throw new CREGenericConstraintException("Constraints cannot use wildcards at the definition site.",
 						c.getTarget());
 			}
+			for(Constraint cc : constraints) {
+				// Check for duplicate constraints
+				if(c == cc) {
+					continue;
+				}
+				if(c.equals(cc)) {
+					throw new CREGenericConstraintException("Duplicate constraint found. One constraint"
+							+ " defined at " + c.getTarget() + ", the other constraint at " + cc.getTarget(), t);
+				}
+			}
 		}
 		if(constraints.size() == 1) {
 			// Only 1 constraint is always valid
-			return constraints.get(0).getTypeName();
+			return typename;
 		}
-		throw new CREGenericConstraintException("Multiple constraints are not yet supported.",
-				constraints.get(0).getTarget());
+		// TODO: Need to write the constraint error solver.
+		// This will require additional work to ensure that for instance, a type does not have an impossible
+		// upper and lower bound, among others.
+		throw new CREGenericConstraintException("Multiple constraints are not yet supported.", t);
 	}
 
 	/**
@@ -73,13 +93,22 @@ public class ConstraintValidator {
 			return;
 		}
 		List<Constraints> declarationConstraints = dec.getConstraints();
-		ValidateLHStoLHS(t, c, declarationConstraints, env);
+		if(c == null) {
+			// If nothing was passed in, then this was declared without parameters, and they would be inferred ones.
+			// This is generally fine, except when they're specifically required due to the class definition requiring
+			// them, such as with the ConstructorConstraint. Therefore, we simply loop through the parameters, and try to
+			// infer them, and if they all pass, we're good.
+			for(Constraints cc : declarationConstraints) {
+				cc.convertFromDiamond(t);
+			}
+		} else {
+			ValidateLHStoLHS(t, c, declarationConstraints, env);
+		}
 	}
 
 	public static void ValidateRHStoLHS(Target t, CClassType rhs, LeftHandGenericUse lhsGenerics, Environment env) {
 		List<Constraints> exactType = new ArrayList<>();
-		// TODO: Should these rhs generic parameters be null?
-		exactType.add(new Constraints(t, ConstraintLocation.RHS, new ExactType(t, rhs, null)));
+		exactType.add(new Constraints(t, ConstraintLocation.RHS, new ExactType(t, rhs, lhsGenerics)));
 		ValidateLHStoLHS(t, exactType, lhsGenerics.getConstraints(), env);
 	}
 
@@ -95,6 +124,14 @@ public class ConstraintValidator {
 	 */
 	public static void ValidateLHStoLHS(Target t, List<Constraints> checkIfTheseConstraints, List<Constraints> areWithinBoundsOfThese, Environment env)
 			throws CREGenericConstraintException {
+		if((checkIfTheseConstraints == null || checkIfTheseConstraints.isEmpty())
+				&& (areWithinBoundsOfThese == null || areWithinBoundsOfThese.isEmpty())) {
+			// This is ok, nothing to validate on either side
+			return;
+		}
+		if(areWithinBoundsOfThese != null && checkIfTheseConstraints == null) {
+			throw new RuntimeException("Missing constraints.");
+		}
 		if(checkIfTheseConstraints.size() != areWithinBoundsOfThese.size()) {
 			throw new CREGenericConstraintException("Expected " + areWithinBoundsOfThese.size() + " parameter(s), but found"
 					+ " " + checkIfTheseConstraints.size(), t);

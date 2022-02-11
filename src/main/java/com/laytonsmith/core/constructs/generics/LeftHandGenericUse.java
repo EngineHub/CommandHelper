@@ -7,6 +7,7 @@ import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,16 +19,16 @@ import java.util.List;
  * particularly when the class specified on the RHS itself contains generics, in which case, the information within
  * those parameters will be LHS information.
  */
-@StandardField
 public class LeftHandGenericUse {
 
+	@StandardField
 	private final List<Constraints> constraints;
 	private final Target target;
 
-	public LeftHandGenericUse(CClassType type, Target t, Environment env, Constraints... constraints) {
+	public LeftHandGenericUse(CClassType forType, Target t, Environment env, Constraints... constraints) {
 		this.target = t;
 		this.constraints = Arrays.asList(constraints);
-		ConstraintValidator.ValidateLHS(t, type, Arrays.asList(constraints), env);
+		ConstraintValidator.ValidateLHS(t, forType, Arrays.asList(constraints), env);
 	}
 
 
@@ -61,8 +62,6 @@ public class LeftHandGenericUse {
 
 	/**
 	 * Checks if the generics on the RHS are within bounds of this LHS generic definition.
-	 * @param rhsGenerics
-	 * @return
 	 */
 	public boolean isWithinBounds(Environment env, Pair<CClassType, LeftHandGenericUse>... types) {
 		if(this.getConstraints().size() != types.length) {
@@ -77,4 +76,28 @@ public class LeftHandGenericUse {
 		}
 		return true;
 	}
+
+	/**
+	 * Returns true if the input LHS type is a subtype of this LHS.
+	 * @param env The environment
+	 * @param presumedSubtype The value to check if it is within the bounds represented by this object
+	 */
+	public boolean isWithinBounds(Environment env, LeftHandGenericUse presumedSubtype) {
+		List<Constraints> checkIfTheseConstraints = presumedSubtype.getConstraints();
+		List<Constraints> areWithinBoundsOfThese = this.getConstraints();
+		if(checkIfTheseConstraints.size() != areWithinBoundsOfThese.size()) {
+			return false;
+		}
+		for(int i = 0; i < areWithinBoundsOfThese.size(); i++) {
+			Constraints definition = areWithinBoundsOfThese.get(i);
+			Constraints lhs = checkIfTheseConstraints.get(i);
+			// Check that the LHS fits the bounds of the definition
+			List<String> errors = new ArrayList<>();
+			if(!definition.withinBounds(lhs, errors, env)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 }

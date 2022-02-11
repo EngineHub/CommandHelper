@@ -183,7 +183,12 @@ public class ArrayHandlingTest {
 
 	@Test(timeout = 10000)
 	public void testArrayResize() throws Exception {
-		String script = "assign(@array, array(1)) msg(@array) array_resize(@array, 2) msg(@array) array_resize(@array, 3, 'hello') msg(@array)";
+		String script = "assign(@array, array(1))"
+				+ " msg(@array)"
+				+ " array_resize(@array, 2)"
+				+ " msg(@array)"
+				+ " array_resize(@array, 3, 'hello')"
+				+ " msg(@array)";
 		StaticTest.Run(script, fakePlayer);
 		verify(fakePlayer).sendMessage("{1}");
 		verify(fakePlayer).sendMessage("{1, null}");
@@ -374,7 +379,11 @@ public class ArrayHandlingTest {
 
 	@Test
 	public void testArrayGetClone() throws Exception { // This is expected to be a deep clone.
-		Run("@a = array(array(array('value'))); @b = @a[]; @b[0][0][0] = 'changedValue'; msg(@a[0][0][0]); msg(@b[0][0][0]);", fakePlayer);
+		Run("@a = array(array(array('value')));"
+				+ " @b = @a[];"
+				+ " @b[0][0][0] = 'changedValue';"
+				+ " msg(@a[0][0][0]);"
+				+ " msg(@b[0][0][0]);", fakePlayer);
 		verify(fakePlayer).sendMessage("value");
 		verify(fakePlayer).sendMessage("changedValue");
 	}

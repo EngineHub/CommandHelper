@@ -575,7 +575,7 @@ public class Environment {
 				CString line2 = new CString(s.getLine(1), t);
 				CString line3 = new CString(s.getLine(2), t);
 				CString line4 = new CString(s.getLine(3), t);
-				return new CArray(t, GenericParameters.start(CArray.TYPE)
+				return new CArray(t, GenericParameters
 						.addParameter(CString.TYPE, null).build(), env, line1, line2, line3, line4);
 			} else {
 				throw new CRERangeException("The block at the specified location is not a sign", t);
@@ -870,7 +870,7 @@ public class Environment {
 				if(owner == null) {
 					return CNull.NULL;
 				} else {
-					CArray ret = new CArray(t, GenericParameters.start(CArray.TYPE)
+					CArray ret = new CArray(t, GenericParameters
 							.addParameter(CString.TYPE, null).build(), env);
 					ret.set("name", owner.getName(), env);
 					ret.set("uuid", owner.getUniqueID().toString(), env);
@@ -1889,7 +1889,7 @@ public class Environment {
 						throw new CREFormatException("Invalid argument for block info", t);
 				}
 			}
-			CArray array = CArray.GetAssociativeArray(t, GenericParameters.start(CArray.TYPE)
+			CArray array = CArray.GetAssociativeArray(t, GenericParameters
 					.addParameter(CBoolean.TYPE, null).build(), env);
 			array.set("solid", CBoolean.get(b.isSolid()), t, env);
 			array.set("flammable", CBoolean.get(b.isFlammable()), t, env);

@@ -8,6 +8,7 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNumber;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.Constraint;
 import com.laytonsmith.core.constructs.generics.ConstraintLocation;
 import com.laytonsmith.core.constructs.generics.Constraints;
 import com.laytonsmith.core.constructs.generics.ConstructorConstraint;
@@ -79,26 +80,26 @@ public class GenericsTest {
 		// ? extends array<int>
 		LeftHandGenericUse lhgu = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env, new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
 				new UpperBoundConstraint(Target.UNKNOWN, "?", CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN,
-						GenericParameters.start(CArray.TYPE.getGenericDeclaration())
+						GenericParameters
 								.addParameter(CArray.TYPE, new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 										new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new ExactType(Target.UNKNOWN, CInt.TYPE, null))))
-								.build()), null)));
+								.build(), env), null)));
 		assertEquals("? extends ms.lang.array<ms.lang.int>", lhgu.toString());
 
 		// ? extends array<? extends int>
 
 		lhgu = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env, new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
 				new UpperBoundConstraint(Target.UNKNOWN, "?", CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN,
-						GenericParameters.start(CArray.TYPE.getGenericDeclaration())
+						GenericParameters
 								.addParameter(CArray.TYPE, new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env,
 										new Constraints(Target.UNKNOWN, ConstraintLocation.LHS, new UpperBoundConstraint(Target.UNKNOWN, "?", CInt.TYPE, null))))
-								.build()), null)));
+								.build(), env), null)));
 		assertEquals("? extends ms.lang.array<? extends ms.lang.int>", lhgu.toString());
 
-		GenericParameters params = GenericParameters.start(CArray.TYPE.getGenericDeclaration())
+		GenericParameters params = GenericParameters
 				.addParameter(CArray.TYPE, lhgu).build();
 
-		CClassType array = CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN, params);
+		CClassType array = CClassType.get(CArray.TYPE.getFQCN(), Target.UNKNOWN, params, env);
 
 		assertEquals("ms.lang.array<? extends ms.lang.array<? extends ms.lang.int>>", array.val());
 	}
@@ -109,7 +110,7 @@ public class GenericsTest {
 		LeftHandGenericUse lhgu = new LeftHandGenericUse(CArray.TYPE, Target.UNKNOWN, env, new Constraints(Target.UNKNOWN, ConstraintLocation.LHS,
 				new ExactType(Target.UNKNOWN, CInt.TYPE, null)));
 		// double
-		CArray array = new CArray(Target.UNKNOWN, GenericParameters.start(CArray.TYPE.getGenericDeclaration())
+		CArray array = new CArray(Target.UNKNOWN, GenericParameters
 				.addParameter(CDouble.TYPE, null).build(), env);
 		try {
 			IVariable var = new IVariable(CArray.TYPE, "@a", array, Target.UNKNOWN, lhgu, null);
@@ -122,10 +123,10 @@ public class GenericsTest {
 
 	@Test
 	public void testBuildFromString1() throws Exception {
-		Constraints[] cs = Constraints.BuildFromString(CArray.TYPE, "? extends array<? super int> & new ?(int, array<?>), int", ConstraintLocation.LHS, Target.UNKNOWN, env);
+		Constraints[] cs = Constraints.BuildFromString("? extends array<? super int> & new ?(int, array<?>), int", ConstraintLocation.LHS, Target.UNKNOWN, env);
 		assertTrue(cs.length == 2);
-		assertTrue(cs[1].get(0) instanceof ExactType);
-		Constraints constraints = cs[0];
+		assertTrue(cs[1].getInDefinitionOrder().get(0) instanceof ExactType);
+		List<Constraint> constraints = cs[0].getInDefinitionOrder();
 		assertTrue(constraints.size() == 2);
 		assertTrue(constraints.get(0) instanceof UpperBoundConstraint);
 		assertTrue(constraints.get(1) instanceof ConstructorConstraint);
@@ -134,7 +135,7 @@ public class GenericsTest {
 		ConstructorConstraint cc = (ConstructorConstraint) constraints.get(1);
 
 		assertEquals(CArray.TYPE, ub.getUpperBound());
-		assertTrue(ub.getBoundaryGenerics().getConstraints().get(0).get(0) instanceof LowerBoundConstraint);
+		assertTrue(ub.getBoundaryGenerics().getConstraints().get(0).getInDefinitionOrder().get(0) instanceof LowerBoundConstraint);
 
 		assertTrue(cc.getTypes().size() == 2);
 		assertEquals(CInt.TYPE, cc.getTypes().get(0).getKey());
@@ -143,15 +144,13 @@ public class GenericsTest {
 	}
 
 	private class GenericTestCase {
-		CClassType forType;
 		String definition;
 		String lhs;
 		CClassType rhs;
 		String rhsGenerics;
 		Expected expected;
 
-		public GenericTestCase(CClassType forType, String definition, String lhs, CClassType rhs, String rhsGenerics, Expected expected) {
-			this.forType = forType;
+		public GenericTestCase(String definition, String lhs, CClassType rhs, String rhsGenerics, Expected expected) {
 			this.definition = definition;
 			this.lhs = lhs;
 			this.rhs = rhs;
@@ -161,9 +160,9 @@ public class GenericsTest {
 
 		public void test() {
 			try {
-				TestValidationDefinitionAndLHS(forType, definition, lhs);
+				TestValidationDefinitionAndLHS(definition, lhs);
 				if(rhs != null) {
-					TestValdationLHSAndRHS(forType, lhs, rhs, rhsGenerics);
+					TestValdationLHSAndRHS(lhs, rhs, rhsGenerics);
 				}
 			} catch (Exception e) {
 				if(expected == Expected.PASS) {
@@ -182,7 +181,6 @@ public class GenericsTest {
 		@Override
 		public String toString() {
 			return "GenericTestCase{" +
-					"forType=" + forType +
 					", definition='" + definition + '\'' +
 					", lhs='" + lhs + '\'' +
 					", rhs=" + rhs +
@@ -196,9 +194,9 @@ public class GenericsTest {
 		PASS, FAIL;
 	}
 
-	public void TestValidationDefinitionAndLHS(CClassType forType, String definition, String lhs) throws Exception {
-		Constraints[] cs = Constraints.BuildFromString(forType, definition, ConstraintLocation.DEFINITION, Target.UNKNOWN, env);
-		Constraints[] lh = Constraints.BuildFromString(forType, lhs, ConstraintLocation.LHS, Target.UNKNOWN, env);
+	public void TestValidationDefinitionAndLHS(String definition, String lhs) throws Exception {
+		Constraints[] cs = Constraints.BuildFromString(definition, ConstraintLocation.DEFINITION, Target.UNKNOWN, env);
+		Constraints[] lh = Constraints.BuildFromString(lhs, ConstraintLocation.LHS, Target.UNKNOWN, env);
 		if(cs.length != lh.length || lh.length != 1) {
 			throw new Exception("Invalid lengths, only one template parameter is allowed");
 		}
@@ -211,12 +209,12 @@ public class GenericsTest {
 		}
 	}
 
-	public void TestValdationLHSAndRHS(CClassType forType, String lhs, CClassType rhs, String rhsGenerics) throws Exception {
-		Constraints[] lh = Constraints.BuildFromString(forType, lhs, ConstraintLocation.LHS, Target.UNKNOWN, env);
+	public void TestValdationLHSAndRHS(String lhs, CClassType rhs, String rhsGenerics) throws Exception {
+		Constraints[] lh = Constraints.BuildFromString(lhs, ConstraintLocation.LHS, Target.UNKNOWN, env);
 		if(lh.length != 1) {
 			throw new Exception("Invalid length, only one template parameter is allowed");
 		}
-		if(!lh[0].withinBounds(rhs, rhsGenerics == null ? null : new LeftHandGenericUse(rhs, Target.UNKNOWN, env, Constraints.BuildFromString(rhs, rhsGenerics, ConstraintLocation.LHS, Target.UNKNOWN, env)), env)) {
+		if(!lh[0].withinBounds(rhs, rhsGenerics == null ? null : new LeftHandGenericUse(rhs, Target.UNKNOWN, env, Constraints.BuildFromString(rhsGenerics, ConstraintLocation.LHS, Target.UNKNOWN, env)), env)) {
 			throw new Exception("Not in bounds");
 		}
 	}
@@ -224,15 +222,15 @@ public class GenericsTest {
 	@Test
 	public void testConstraintValidations() throws Exception {
 		GenericTestCase[] testCases = new GenericTestCase[]{
-				new GenericTestCase(CArray.TYPE, "T", "int", CInt.TYPE, null, Expected.PASS),
-				new GenericTestCase(CArray.TYPE, "T extends number", "? extends number", CInt.TYPE, null, Expected.PASS),
-				new GenericTestCase(CArray.TYPE, "T extends number", "number", CNumber.TYPE, null, Expected.PASS),
-				new GenericTestCase(CArray.TYPE, "T extends number", "number", CInt.TYPE, null, Expected.FAIL),
-				new GenericTestCase(CArray.TYPE, "T extends number", "int", CNumber.TYPE, null, Expected.FAIL),
-				new GenericTestCase(CArray.TYPE, "T extends primitive", "? super number", CNumber.TYPE, null, Expected.PASS),
-				new GenericTestCase(CArray.TYPE, "T", "array<? extends array<? extends number>>", CArray.TYPE, "? extends number", Expected.PASS),
-				new GenericTestCase(CArray.TYPE, "T", "array<? extends array<? extends number>>", CArray.TYPE, "? extends int", Expected.PASS),
-				new GenericTestCase(CArray.TYPE, "T", "array<? extends array<? extends number>>", CArray.TYPE, "? extends string", Expected.FAIL),
+				new GenericTestCase("T", "int", CInt.TYPE, null, Expected.PASS),
+				new GenericTestCase("T extends number", "? extends number", CInt.TYPE, null, Expected.PASS),
+				new GenericTestCase("T extends number", "number", CNumber.TYPE, null, Expected.PASS),
+				new GenericTestCase("T extends number", "number", CInt.TYPE, null, Expected.FAIL),
+				new GenericTestCase("T extends number", "int", CNumber.TYPE, null, Expected.FAIL),
+				new GenericTestCase("T extends primitive", "? super number", CNumber.TYPE, null, Expected.PASS),
+				new GenericTestCase("T", "array<? extends array<? extends number>>", CArray.TYPE, "? extends number", Expected.PASS),
+				new GenericTestCase("T", "array<? extends array<? extends number>>", CArray.TYPE, "? extends int", Expected.PASS),
+				new GenericTestCase("T", "array<? extends array<? extends number>>", CArray.TYPE, "? extends string", Expected.FAIL),
 		};
 
 		for(int i = 0; i < testCases.length; i++) {

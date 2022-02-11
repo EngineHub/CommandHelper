@@ -129,7 +129,7 @@ public final class CMutablePrimitive extends CArray implements Sizeable {
 	}
 
 	@Override
-	public CArray createNew(Target t) {
+	public CArray createNew(Target t, Environment env) {
 		return new CMutablePrimitive(value, t, fallbackEnv);
 	}
 

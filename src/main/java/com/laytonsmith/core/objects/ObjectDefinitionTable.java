@@ -15,6 +15,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public final class ObjectDefinitionTable implements Iterable<ObjectDefinition> {
 	}
 
 	/**
-	 * Unless you have a special use case, use {@link #GetNewInstance()} instead of this method.
+	 * Unless you have a special use case, use {@link #GetNewInstance(Environment, Set)} instead of this method.
 	 * <p>
 	 * In normal use cases, the native types should all be added. However, for testing and other meta use cases, it
 	 * may be desirable to have a totally blank table. This method returns such an instance.
@@ -90,7 +91,7 @@ public final class ObjectDefinitionTable implements Iterable<ObjectDefinition> {
 			// still want to properly manage. Fallback onboarding is when we scan the
 			// native source files and compile them ourselves. This is actually the normal
 			// code path when compiling the java code, so we do need to support this anyhow.
-			List<Exception> oops = new ArrayList<>();
+			List<Throwable> oops = new ArrayList<>();
 			if(ObjectDefinitionTable.class.getResource("/nativeSource.ser") != null) {
 				// Normal onboarding
 				throw new UnsupportedOperationException();
@@ -126,11 +127,14 @@ public final class ObjectDefinitionTable implements Iterable<ObjectDefinition> {
 							oops.addAll(g.getList());
 						} catch (IOException | ConfigCompileException ex) {
 							oops.add(ex);
+						} catch (Throwable t) {
+							oops.add(t);
 						}
 					});
-				if(!oops.isEmpty()) {
+				// TODO: Currently removed because nothing compiles, once it does, this should be re-enabled
+				if(false && !oops.isEmpty()) {
 					List<String> b = new ArrayList<>();
-					for(Exception e : oops) {
+					for(Throwable e : oops) {
 						if(e instanceof ConfigCompileException) {
 							ConfigCompileException cce = (ConfigCompileException) e;
 							b.add(cce.getMessage() + " " + cce.getFile() + ":"

@@ -1,5 +1,7 @@
 package com.laytonsmith.core.constructs.generics;
 
+import com.laytonsmith.PureUtilities.ObjectHelpers;
+import com.laytonsmith.PureUtilities.ObjectHelpers.StandardField;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -9,25 +11,24 @@ import java.util.Objects;
 
 public class ExactType extends Constraint {
 
+	@StandardField
 	private final CClassType type;
+	@StandardField
 	private final LeftHandGenericUse genericParameters;
-	private final GenericDeclaration genericDeclaration;
 
 	/**
 	 * Constructs a new unbounded wildcard instance of ExactType.
-	 * @param typeDeclaration As an unbounded wildcard, it simply inherits the restrictions from the class definition.
 	 * @param t The code target
 	 * @return
 	 */
-	public static ExactType AsUnboundedWildcard(GenericDeclaration typeDeclaration, Target t) {
-		return new ExactType(typeDeclaration, t);
+	public static ExactType AsUnboundedWildcard(Target t) {
+		return new ExactType(t);
 	}
 
-	private ExactType(GenericDeclaration typeDeclaration, Target t) {
+	private ExactType(Target t) {
 		super(t, "?");
 		type = null;
 		genericParameters = null;
-		this.genericDeclaration = typeDeclaration;
 	}
 
 	/**
@@ -41,7 +42,6 @@ public class ExactType extends Constraint {
 		Objects.requireNonNull(type);
 		this.type = type;
 		this.genericParameters = genericParameters;
-		this.genericDeclaration = null;
 	}
 
 	@Override
@@ -57,15 +57,15 @@ public class ExactType extends Constraint {
 	@Override
 	public boolean isWithinConstraint(CClassType type, LeftHandGenericUse generics, Environment env) {
 		if(this.type == null) {
-			for(Constraints c : this.genericDeclaration.getConstraints()) {
+			for(Constraints c : type.getGenericDeclaration().getConstraints()) {
 				if(!c.withinBounds(type, generics, env)) {
 					return false;
 				}
 			}
 			return true;
 		}
-		return type.getNakedType().equals(this.type.getNakedType())
-				&& (this.genericParameters == null || this.genericParameters.equals(generics));
+		return type.getNakedType(env).equals(this.type.getNakedType(env))
+				&& (this.genericParameters == null || this.genericParameters.isWithinBounds(env, generics));
 	}
 
 	@Override
@@ -106,7 +106,6 @@ public class ExactType extends Constraint {
 	/**
 	 * Returns the exact ClassType for this constraint. Note that in the case of a wildcard "?", an ExactType constraint
 	 * will be used, however, this value will be null.
-	 * @return
 	 */
 	public CClassType getType() {
 		return type;
@@ -114,10 +113,21 @@ public class ExactType extends Constraint {
 
 	@Override
 	public String toString() {
-		return type == null ? "?" : type.getFQCN().getFQCN();
+		return type == null ? "?" : type.getFQCN().getFQCN()
+				+ (genericParameters == null ? "" : "<" + genericParameters.toString() + ">");
 	}
 
 	public LeftHandGenericUse getGenericParameters() {
 		return genericParameters;
+	}
+
+	@Override
+	public boolean equals(Object that) {
+		return ObjectHelpers.DoEquals(this, that);
+	}
+
+	@Override
+	public int hashCode() {
+		return ObjectHelpers.DoHashCode(this);
 	}
 }

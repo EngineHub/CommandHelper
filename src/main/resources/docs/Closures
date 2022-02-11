@@ -292,4 +292,29 @@ The most common usage that you will find is likely when you use a built in funct
 may also use them in a library project, where you are wanting to create a callback of some sort, or as a way to abstract
 up a loop, for instance.
 
-{{LearningTrail}}
+<!--
+Closures are an instance of the Callable interface, allowing you to generically pass around instances of anything
+that is executable.
+
+<%CODE|
+Callable<double, int> @c = void closure(int @a) {
+    return(1.234);
+};
+%>
+
+Procs can also be referenced as Callable, using the ProcCallable instance for a given proc.
+
+<%CODE|
+double proc _myProc(int @a) {
+    return(3.1415);
+}
+Callable<double, int> @pc = proc _myProc; // "proc _myProc" is an instance of ProcCallable<void, int> representing _myProc
+%>
+
+This allows for unified execution of either procs or closures.
+
+<%CODE|
+Callable<void, int> @toExecute = if(@userInput, @c, @pc);
+double @d = execute(1234, @toExecute); // Fully type safe way of calling either a proc or a closure
+%>
+-->

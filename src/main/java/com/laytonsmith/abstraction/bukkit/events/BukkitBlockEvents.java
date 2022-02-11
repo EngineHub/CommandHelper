@@ -387,7 +387,7 @@ public class BukkitBlockEvents {
 
 		@Override
 		public CArray getLines(Environment env) {
-			CArray retn = new CArray(Target.UNKNOWN, GenericParameters.start(CArray.TYPE)
+			CArray retn = new CArray(Target.UNKNOWN, GenericParameters
 					.addParameter(CString.TYPE, null).build(), env);
 
 			for(int i = 0; i < 4; i++) {

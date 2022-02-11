@@ -7,8 +7,8 @@ import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.ArgumentValidation;
-import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
@@ -18,13 +18,13 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
 import com.laytonsmith.core.exceptions.CRE.CRECausedByWrapper;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -500,7 +500,7 @@ public class ConfigRuntimeException extends RuntimeException {
 		}
 
 		public CArray getObjectFor(Environment env) {
-			CArray element = CArray.GetAssociativeArray(Target.UNKNOWN, GenericParameters.start(CArray.TYPE).build(), env);
+			CArray element = CArray.GetAssociativeArray(Target.UNKNOWN, null, env);
 			element.set("id", getProcedureName(), env);
 			try {
 				String name = "Unknown file";

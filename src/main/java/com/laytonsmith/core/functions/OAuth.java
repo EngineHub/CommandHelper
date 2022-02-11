@@ -507,7 +507,7 @@ public class OAuth {
 
 		@Override
 		public Class<? extends CREThrowable>[] thrown() {
-			return new Class[]{};
+			return new Class[]{CREReadOnlyException.class, CREIOException.class, CREFormatException.class};
 		}
 
 		@Override

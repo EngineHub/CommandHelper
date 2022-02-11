@@ -12,14 +12,20 @@ import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.objects.ObjectDefinition;
 import com.laytonsmith.core.objects.ObjectType;
 import com.laytonsmith.testing.StaticTest;
+import org.junit.Test;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Set;
-import org.junit.Test;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -99,7 +105,7 @@ public class ObjectManagementTest {
 		assertFalse(env.getObjectDefinitionTable().getObjectDefinitionSet().isEmpty());
 		ObjectDefinition B = env.getObjectDefinitionTable().get(FullyQualifiedClassName
 				.forFullyQualifiedClass("B"));
-		B.qualifyClasses(Environment.createEnvironment(env));
+		B.qualifyClasses(Environment.createEnvironment(env, Static.GenerateStandaloneEnvironment(false).getEnv(GlobalEnv.class)));
 		assertEquals(FullyQualifiedClassName.forFullyQualifiedClass("A"),
 				new ArrayList<>(B.getSuperclasses()).get(0).getFQCN());
 	}
@@ -154,7 +160,7 @@ public class ObjectManagementTest {
 		assertFalse(env.getObjectDefinitionTable().getObjectDefinitionSet().isEmpty());
 		ObjectDefinition C = env.getObjectDefinitionTable().get(FullyQualifiedClassName
 				.forFullyQualifiedClass("C"));
-		C.qualifyClasses(Environment.createEnvironment(env));
+		C.qualifyClasses(Environment.createEnvironment(env, Static.GenerateStandaloneEnvironment(false).getEnv(GlobalEnv.class)));
 		assertEquals(FullyQualifiedClassName.forFullyQualifiedClass("B"),
 				new ArrayList<>(C.getSuperclasses()).get(0).getFQCN());
 		assertEquals(FullyQualifiedClassName.forFullyQualifiedClass("A"),
@@ -182,7 +188,7 @@ public class ObjectManagementTest {
 		assertFalse(env.getObjectDefinitionTable().getObjectDefinitionSet().isEmpty());
 		ObjectDefinition A = env.getObjectDefinitionTable().get(FullyQualifiedClassName
 				.forFullyQualifiedClass("A"));
-		A.qualifyClasses(Environment.createEnvironment(env));
+		A.qualifyClasses(Environment.createEnvironment(env, Static.GenerateStandaloneEnvironment(false).getEnv(GlobalEnv.class)));
 		assertEquals(ObjectType.INTERFACE, A.getObjectType());
 	}
 
@@ -221,7 +227,7 @@ public class ObjectManagementTest {
 		assertFalse(env.getObjectDefinitionTable().getObjectDefinitionSet().isEmpty());
 		ObjectDefinition B = env.getObjectDefinitionTable().get(FullyQualifiedClassName
 				.forFullyQualifiedClass("B"));
-		B.qualifyClasses(Environment.createEnvironment(env));
+		B.qualifyClasses(Environment.createEnvironment(env, Static.GenerateStandaloneEnvironment(false).getEnv(GlobalEnv.class)));
 		assertEquals(FullyQualifiedClassName.forFullyQualifiedClass("A"),
 				new ArrayList<>(B.getInterfaces()).get(0).getFQCN());
 	}
@@ -275,31 +281,36 @@ public class ObjectManagementTest {
 		assertFalse(env.getObjectDefinitionTable().getObjectDefinitionSet().isEmpty());
 		ObjectDefinition C = env.getObjectDefinitionTable().get(FullyQualifiedClassName
 				.forFullyQualifiedClass("C"));
-		C.qualifyClasses(Environment.createEnvironment(env));
+		C.qualifyClasses(Environment.createEnvironment(env, Static.GenerateStandaloneEnvironment(false).getEnv(GlobalEnv.class)));
 		assertEquals(FullyQualifiedClassName.forFullyQualifiedClass("B"),
 				new ArrayList<>(C.getInterfaces()).get(0).getFQCN());
 		assertEquals(FullyQualifiedClassName.forFullyQualifiedClass("A"),
 				new ArrayList<>(C.getInterfaces()).get(1).getFQCN());
 	}
 
-	@Test(expected = ConfigCompileException.class)
+	@Test
 	public void testThatAtRuntimeClassesAreImmediatelyQualified() throws Exception {
 		CompilerEnvironment cEnv = new CompilerEnvironment();
 		GlobalEnv gEnv = Static.GenerateStandaloneEnvironment(false).getEnv(GlobalEnv.class);
 		Environment env = Environment.createEnvironment(gEnv, cEnv);
-		Run("define_object(DEFAULT," // 0 - Access modifier
-				+ "array()," // 1 - Object modifier
-				+ "CLASS," // 2 - Object type
-				+ "C," // 3 - Object name
-				+ "array()," // 4 - Superclasses
-				// B and A are not defined yet
-				+ "array(B, A)," // 5 - Interfaces
-				+ "null," // 6 - Enum list
-				+ "associative_array()," // 7 - element definitions
-				+ "array()," // 8 - annotations
-				+ "null," // 9 - containing class
-				+ "''," // 10 - class comment
-				+ "null)", env);
+		try {
+			Run("define_object(DEFAULT," // 0 - Access modifier
+					+ "array()," // 1 - Object modifier
+					+ "CLASS," // 2 - Object type
+					+ "C," // 3 - Object name
+					+ "array()," // 4 - Superclasses
+					// B and A are not defined yet
+					+ "array(B, A)," // 5 - Interfaces
+					+ "null," // 6 - Enum list
+					+ "associative_array()," // 7 - element definitions
+					+ "array()," // 8 - annotations
+					+ "null," // 9 - containing class
+					+ "''," // 10 - class comment
+					+ "null)", env);
+			fail();
+		} catch (ConfigCompileGroupException | ConfigCompileException ex) {
+			// pass
+		}
 	}
 
 	@Test

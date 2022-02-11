@@ -725,8 +725,8 @@ public class BasicLogic {
 
 		@Override
 		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, environment)
-					&& args[1].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, environment)) {
+			if(args[0].isInstanceOf(CArray.TYPE, null, environment)
+					&& args[1].isInstanceOf(CArray.TYPE, null, environment)) {
 				return CBoolean.get(args[0] == args[1]);
 			} else {
 				return new equals().exec(t, environment, args);

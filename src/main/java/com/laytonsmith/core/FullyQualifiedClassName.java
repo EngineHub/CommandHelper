@@ -24,7 +24,15 @@ import java.util.regex.Pattern;
 
 /**
  * This class represents a fully qualified class name. It is better to fully qualify the type once, and then pass that
- * around, rather than passing around a string.
+ * around, rather than passing around a string. Other than the static validation methods, this class is a fairly thin
+ * wrapper around a String containing the fully qualified class name, and the validation methods are trivial to bypass,
+ * because during the intermediate phases of compilation, the fully qualified class name may be used, but the actual
+ * class it represents isn't defined yet (but will be, eventually, in the non compile-error case). In general, it's
+ * only possible to use the fully qualified name based on user code in a few cases, namely during object definition,
+ * where the name of the object is by definition whatever the user input. In other cases based on user code,
+ * {@link UnqualifiedClassName} should be used instead, which can easily be converted to a FullyQualifiedClassName once
+ * the object table has been completed, and will throw the appropriate exceptions once the compilation stages are all
+ * complete, and object definitions have been completed entirely.
  */
 public final class FullyQualifiedClassName implements Comparable<FullyQualifiedClassName> {
 	public static final String PATH_SEPARATOR = ".";
@@ -55,12 +63,16 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	 * @return The fully qualified class name.
 	 * @throws CRECastException If the class type can't be found
 	 */
-	public static FullyQualifiedClassName forName(String unqualified, Target t, Environment env)
-			throws CRECastException {
+	public static FullyQualifiedClassName forName(String unqualified, Target t, Environment env) {
 		ObjectDefinitionTable odt = env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
 		try {
 			// Try first, if this is a fully qualified name
 			FullyQualifiedClassName fqcn = new FullyQualifiedClassName(unqualified);
+			try {
+				fqcn.nativeClass = NativeTypeList.getNativeClass(fqcn);
+			} catch (ClassNotFoundException ex) {
+				// Ignored, nativeClass will just stay null
+			}
 			odt.get(fqcn);
 			// It is, this would have thrown an exception otherwise
 			return fqcn;
@@ -77,8 +89,8 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	/**
 	 * If the type represents an enum tagged with {@link MEnum}, then this method should be used, but is otherwise
 	 * identical to {@link #forNativeClass(java.lang.Class)}.
-	 * @param clazz
-	 * @return
+	 * @param clazz The Java Enum type. It must provide an MEnum annotation, as well as being a Java enum.
+	 * @return The FullyQualifiedClassName representing this enum object
 	 */
 	public static FullyQualifiedClassName forNativeEnum(Class<? extends Enum> clazz) {
 		MEnum m = clazz.getAnnotation(MEnum.class);
@@ -100,8 +112,8 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	 * If the type represents a native class, this method can be used. Not only does it never throw an exception
 	 * (except an Error, if the class does not define a typeof annotation), getNativeClass will return a reference
 	 * to the Class object, which is useful for shortcutting various operations.
-	 * @param clazz
-	 * @return
+	 * @param clazz The native MethodScript class
+	 * @return The FullyQualifiedClassName for this native class (generally defined by the typeof annotation)
 	 */
 	public static FullyQualifiedClassName forNativeClass(Class<? extends Mixed> clazz) {
 		typeof t = ClassDiscovery.GetClassAnnotation(clazz, typeof.class);
@@ -134,7 +146,7 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 
 	/**
 	 * If you know for a fact that the name is already fully qualified, this step skips qualification. If you aren't
-	 * sure whether or not the name is fully qualified, don't use the method, the other methods will accept a fully
+	 * sure whether the name is fully qualified, don't use the method, the other methods will accept a fully
 	 * qualified class name, but not change it, but if it isn't fully qualified, then it will do so.
 	 * <p>
 	 * The class does not have to (yet) exist, though it should exist before usage anywhere else, such as in CClassType.
@@ -143,11 +155,17 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	 * class.
 	 * <p>
 	 * If this represents a native class, use {@link #forNativeClass(java.lang.Class)} instead.
-	 * @param qualified
-	 * @return
+	 * @param qualified The fully qualified class name as a string
+	 * @return A FullyQualifiedClassName object
 	 */
 	public static FullyQualifiedClassName forFullyQualifiedClass(String qualified) {
-		return new FullyQualifiedClassName(qualified);
+		FullyQualifiedClassName fqcn = new FullyQualifiedClassName(qualified);
+		try {
+			fqcn.nativeClass = NativeTypeList.getNativeClass(fqcn);
+		} catch (ClassNotFoundException ex) {
+			// Ignored, nativeClass will just stay null
+		}
+		return fqcn;
 	}
 
 	@Override
@@ -195,7 +213,7 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 
 	/**
 	 * Returns the underlying native class, iff this is a native class.
-	 * @return
+	 * @return The native class, or null.
 	 */
 	public Class<? extends Mixed> getNativeClass() {
 		return nativeClass;

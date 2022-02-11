@@ -309,8 +309,8 @@ public final class Static {
 	 * @return
 	 * @throws ConfigRuntimeException If the value is a hex or binary value, but has invalid characters in it.
 	 */
-	public static Construct resolveConstruct(String val, Target t) throws ConfigRuntimeException {
-		return resolveConstruct(val, t, false);
+	public static Construct resolveConstruct(String val, Target t, Environment env) throws ConfigRuntimeException {
+		return resolveConstruct(val, t, false, env);
 	}
 
 	/**
@@ -324,7 +324,7 @@ public final class Static {
 	 * @return
 	 * @throws ConfigRuntimeException
 	 */
-	public static Construct resolveConstruct(String val, Target t, boolean returnBareStrings)
+	public static Construct resolveConstruct(String val, Target t, boolean returnBareStrings, Environment env)
 			throws ConfigRuntimeException {
 		if(val == null) {
 			return new CString("", t);
@@ -383,12 +383,7 @@ public final class Static {
 		}
 		String fqType = NativeTypeList.resolveNativeType(val);
 		if(fqType != null) {
-			try {
-				return CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(fqType));
-			} catch (ClassNotFoundException ex) {
-				// Can't happen, because we just resolved the type, and it wasn't null.
-				throw new Error(ex);
-			}
+			return CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(fqType), env);
 		}
 		if(returnBareStrings) {
 			return new CBareString(val, t);
@@ -1060,7 +1055,7 @@ public final class Static {
 				? new ProfilesImpl(MethodScriptFileLocations.getDefault().getProfilesFile())
 				: new ProfilesImpl());
 		PersistenceNetwork persistenceNetwork = new PersistenceNetworkImpl(MethodScriptFileLocations.getDefault().getPersistenceConfig(),
-				new URI(URLEncoder.encode("sqlite://" + new File(platformFolder, "persistence.db").getCanonicalPath().replace('\\', '/'), "UTF-8")), options);
+				new URI("sqlite://" + URLEncoder.encode(new File(platformFolder, "persistence.db").getCanonicalPath().replace('\\', '/'), "UTF-8")), options);
 		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScriptExecutionQueue", "default"),
 				platformFolder, runtimeModes);
 		gEnv.SetLabel(GLOBAL_PERMISSION);
@@ -1240,7 +1235,7 @@ public final class Static {
 			return (Construct) object;
 		} else if(object instanceof boolean[]) {
 			boolean[] array = (boolean[]) object;
-			CArray r = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray r = new CArray(t, GenericParameters
 				.addParameter(CBoolean.TYPE, null).build(), env);
 			for(boolean b : array) {
 				r.push(CBoolean.get(b), t, env);
@@ -1250,7 +1245,7 @@ public final class Static {
 			return CByteArray.wrap((byte[]) object, t, env);
 		} else if(object instanceof char[]) {
 			char[] array = (char[]) object;
-			CArray r = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray r = new CArray(t, GenericParameters
 					.addParameter(CString.TYPE, null).build(), env);
 			for(char c : array) {
 				r.push(new CString(c, t), t, env);
@@ -1258,7 +1253,7 @@ public final class Static {
 			return r;
 		} else if(object instanceof short[]) {
 			short[] array = (short[]) object;
-			CArray r = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray r = new CArray(t, GenericParameters
 					.addParameter(CInt.TYPE, null).build(), env);
 			for(short s : array) {
 				r.push(new CInt(s, t), t, env);
@@ -1266,7 +1261,7 @@ public final class Static {
 			return r;
 		} else if(object instanceof int[]) {
 			int[] array = (int[]) object;
-			CArray r = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray r = new CArray(t, GenericParameters
 					.addParameter(CInt.TYPE, null).build(), null);
 			for(int i : array) {
 				r.push(new CInt(i, t), t, env);
@@ -1274,7 +1269,7 @@ public final class Static {
 			return r;
 		} else if(object instanceof long[]) {
 			long[] array = (long[]) object;
-			CArray r = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray r = new CArray(t, GenericParameters
 					.addParameter(CInt.TYPE, null).build(), env);
 			for(long l : array) {
 				r.push(new CInt(l, t), t, env);
@@ -1282,7 +1277,7 @@ public final class Static {
 			return r;
 		} else if(object instanceof float[]) {
 			float[] array = (float[]) object;
-			CArray r = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray r = new CArray(t, GenericParameters
 					.addParameter(CDouble.TYPE, null).build(), env);
 			for(float f : array) {
 				r.push(new CDouble(f, t), t, env);
@@ -1290,7 +1285,7 @@ public final class Static {
 			return r;
 		} else if(object instanceof double[]) {
 			double[] array = (double[]) object;
-			CArray r = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray r = new CArray(t, GenericParameters
 					.addParameter(CDouble.TYPE, null).build(), env);
 			for(double d : array) {
 				r.push(new CDouble(d, t), t, env);

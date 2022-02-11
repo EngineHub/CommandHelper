@@ -20,8 +20,9 @@ behavior but make it explicit by doing this:
 array<auto> @a = new array<auto>();
 %>
 
-In this case, we have passed the auto type to the array function/constructor. This tells the array
-that we only want to allow any value to be added to or read from the array. We can instead put a specific
+In this case, we have passed the auto type to the array function/constructor. This tells the compiler
+that we want to allow any value to be added to or read from the array (and furthermore, we don't want to do
+any typechecking on those values, per how auto works in general). We can instead put a specific
 type here, such as number, and we will change the behavior slightly.
 
 <%CODE|

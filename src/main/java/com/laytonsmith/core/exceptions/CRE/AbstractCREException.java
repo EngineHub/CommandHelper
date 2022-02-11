@@ -15,7 +15,6 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -24,6 +23,7 @@ import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.objects.AccessModifier;
 import com.laytonsmith.core.objects.ObjectModifier;
+
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -116,10 +116,10 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 * @return
 	 */
 	public CArray getExceptionObject(Environment env) {
-		CArray ret = CArray.GetAssociativeArray(Target.UNKNOWN, GenericParameters.start(CArray.TYPE).build(), env);
+		CArray ret = CArray.GetAssociativeArray(Target.UNKNOWN, null, env);
 		ret.set("classType", this.getExceptionType(), Target.UNKNOWN, env);
 		ret.set("message", this.getMessage(), env);
-		CArray stackTrace = new CArray(Target.UNKNOWN, GenericParameters.start(CArray.TYPE).build(), env);
+		CArray stackTrace = new CArray(Target.UNKNOWN, null, env);
 		ret.set("stackTrace", stackTrace, Target.UNKNOWN, env);
 		for(StackTraceElement e : this.getCREStackTrace()) {
 			CArray element = e.getObjectFor(env);

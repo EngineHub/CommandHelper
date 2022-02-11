@@ -108,13 +108,13 @@ public class TestStatic {
 
 	@Test
 	public void testResolveConstruct() {
-		assertTrue(Static.resolveConstruct("1", Target.UNKNOWN) instanceof CInt);
-		assertTrue(Static.resolveConstruct("true", Target.UNKNOWN) instanceof CBoolean);
-		assertTrue(Static.resolveConstruct("false", Target.UNKNOWN) instanceof CBoolean);
-		assertTrue(Static.resolveConstruct("null", Target.UNKNOWN) instanceof CNull);
-		assertTrue(Static.resolveConstruct("1.1", Target.UNKNOWN) instanceof CDouble);
-		assertTrue(Static.resolveConstruct("astring", Target.UNKNOWN) instanceof CString);
-		assertTrue(Static.resolveConstruct("string", Target.UNKNOWN) instanceof CClassType);
+		assertTrue(Static.resolveConstruct("1", Target.UNKNOWN, env) instanceof CInt);
+		assertTrue(Static.resolveConstruct("true", Target.UNKNOWN, env) instanceof CBoolean);
+		assertTrue(Static.resolveConstruct("false", Target.UNKNOWN, env) instanceof CBoolean);
+		assertTrue(Static.resolveConstruct("null", Target.UNKNOWN, env) instanceof CNull);
+		assertTrue(Static.resolveConstruct("1.1", Target.UNKNOWN, env) instanceof CDouble);
+		assertTrue(Static.resolveConstruct("astring", Target.UNKNOWN, env) instanceof CString);
+		assertTrue(Static.resolveConstruct("string", Target.UNKNOWN, env) instanceof CClassType);
 	}
 
 }

@@ -244,7 +244,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		if(s.startsWith("{")) {
 			//Object
 			JSONObject obj = (JSONObject) JSONValue.parse(s);
-			CArray ca = CArray.GetAssociativeArray(t, GenericParameters.start(CArray.TYPE).build(), env);
+			CArray ca = CArray.GetAssociativeArray(t, null, env);
 			if(obj == null) {
 				//From what I can tell, this happens when the json object is improperly formatted,
 				//so go ahead and throw an exception
@@ -261,7 +261,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			if(array == null) {
 				throw new MarshalException();
 			}
-			CArray carray = new CArray(t, GenericParameters.start(CArray.TYPE).build(), env);
+			CArray carray = new CArray(t, null, env);
 			for(int i = 0; i < array.size(); i++) {
 				carray.push(convertJSON(array.get(i), t, env), t, env);
 			}
@@ -295,7 +295,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return CBoolean.get((Boolean) o);
 		} else if(o instanceof java.util.List) {
 			java.util.List l = (java.util.List) o;
-			CArray ca = new CArray(t, GenericParameters.start(CArray.TYPE).build(), env);
+			CArray ca = new CArray(t, null, env);
 			for(Object l1 : l) {
 				ca.push(convertJSON(l1, t, env), t, env);
 			}
@@ -303,7 +303,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		} else if(o == null) {
 			return CNull.NULL;
 		} else if(o instanceof java.util.Map) {
-			CArray ca = CArray.GetAssociativeArray(t, GenericParameters.start(CArray.TYPE).build(), env);
+			CArray ca = CArray.GetAssociativeArray(t, null, env);
 			for(Object key : ((java.util.Map) o).keySet()) {
 				ca.set(convertJSON(key, t, env),
 						convertJSON(((java.util.Map) o).get(key), t, env), t, env);
@@ -368,7 +368,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return CBoolean.get((Boolean) o);
 		} else if(o instanceof Map) {
 			//associative array
-			CArray a = CArray.GetAssociativeArray(Target.UNKNOWN, GenericParameters.start(CArray.TYPE).build(), env);
+			CArray a = CArray.GetAssociativeArray(Target.UNKNOWN, null, env);
 			Map m = (Map) o;
 			for(Entry<?, ?> entry : (Set<Entry<?, ?>>) m.entrySet()) {
 				a.set(entry.getKey().toString(), GetConstruct(entry.getValue(), allowResources, env), Target.UNKNOWN, env);
@@ -376,7 +376,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			return a;
 		} else if(o instanceof Collection) {
 			//normal array
-			CArray a = new CArray(Target.UNKNOWN, GenericParameters.start(CArray.TYPE).build(), env);
+			CArray a = new CArray(Target.UNKNOWN, null, env);
 			Collection l = (Collection) o;
 			for(Object obj : l) {
 				a.push(GetConstruct(obj, allowResources, env), Target.UNKNOWN, env);
@@ -593,6 +593,12 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
 	@Override
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env) {
+		if(this.getClass().getAnnotation(typeof.class) == null) {
+			// TODO: This isn't ideal, but CFunction and other things extend Mixed. Maybe they shouldn't, or
+			// maybe they should have a typeof defined on them, but in general, that doesn't make sense, because
+			// they currently aren't first class, and can only be accessed by accident.
+			return false;
+		}
 		return InstanceofUtil.isInstanceof(this, type, lhsGenericParameters, env);
 	}
 

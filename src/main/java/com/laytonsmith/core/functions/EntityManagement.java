@@ -204,7 +204,7 @@ public class EntityManagement {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			CArray ret = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray ret = new CArray(t, GenericParameters
 					.addParameter(CString.TYPE, null).build(), env);
 			if(args.length == 0) {
 				for(MCWorld w : Static.getServer().getWorlds()) {
@@ -1339,7 +1339,7 @@ public class EntityManagement {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCEntity ent = Static.getEntity(args[0], t);
 			List<MCEntity> riders = ent.getPassengers();
-			CArray ret = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray ret = new CArray(t, GenericParameters
 				.addParameter(CString.TYPE, null).build(), env);
 			for(MCEntity rider : riders) {
 				ret.push(new CString(rider.getUniqueId().toString(), t), t, env);
@@ -4173,7 +4173,7 @@ public class EntityManagement {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCEntity e = Static.getEntity(args[0], t);
-			CArray tags = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray tags = new CArray(t, GenericParameters
 				.addParameter(CString.TYPE, null).build(), env);
 			for(String tag : e.getScoreboardTags()) {
 				tags.push(new CString(tag, t), t, env);

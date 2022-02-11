@@ -45,7 +45,8 @@ public class ObjectDefinitionTableTest {
 	static Set<Class<? extends Environment.EnvironmentImpl>> envs = Environment.getDefaultEnvClasses();
 
 	private void doCompile(String script) throws Exception {
-		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, new File("Test.ms"), true), env,
+		addNatives();
+		MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, env, new File("Test.ms"), true), env,
 				Environment.getDefaultEnvClasses());
 	}
 
@@ -192,7 +193,7 @@ public class ObjectDefinitionTableTest {
 				+ ")"; //
 		doCompile(script);
 		ObjectDefinition clazz = getObjectDefinition("inner");
-		assertEquals(CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass("outer")),
+		assertEquals(CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass("outer"), env),
 				clazz.getContainingClass());
 	}
 

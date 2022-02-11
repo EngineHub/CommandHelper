@@ -84,19 +84,19 @@ public class C {
 	 * @param val
 	 * @return
 	 */
-	public static Construct onstruct(String val) {
-		return Static.resolveConstruct(val, Target.UNKNOWN);
+	public static CString onstruct(String val) {
+		return new CString(val, Target.UNKNOWN);
 	}
 
-	public static Construct onstruct(long val) {
-		return Static.resolveConstruct(Long.toString(val), Target.UNKNOWN);
+	public static CInt onstruct(long val) {
+		return new CInt(val, Target.UNKNOWN);
 	}
 
-	public static Construct onstruct(boolean val) {
-		return Static.resolveConstruct((val ? "true" : "false"), Target.UNKNOWN);
+	public static CBoolean onstruct(boolean val) {
+		return CBoolean.get(val);
 	}
 
-	public static Construct onstruct(double val) {
-		return Static.resolveConstruct(java.lang.Double.toString(val), Target.UNKNOWN);
+	public static CDouble onstruct(double val) {
+		return new CDouble(val, Target.UNKNOWN);
 	}
 }

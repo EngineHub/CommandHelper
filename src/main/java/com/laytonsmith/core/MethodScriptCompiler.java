@@ -1698,7 +1698,7 @@ public final class MethodScriptCompiler {
 					throw new ConfigCompileException(ex);
 				}
 			} else if(t.type == TType.LIT) {
-				Construct c = Static.resolveConstruct(t.val(), t.target, true);
+				Construct c = Static.resolveConstruct(t.val(), t.target, true, environment);
 				// We need to consider other contexts, such as array(key: 'value'), which should be allowed. Thus
 				// this can't be implemented like this.
 //				if(c instanceof CBareString && StrictMode.isStrictMode(fileOptions, environment, unknown)) {
@@ -1740,7 +1740,7 @@ public final class MethodScriptCompiler {
 				tree.addChild(new ParseTree(new IVariable(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 			} else if(t.type.equals(TType.UNKNOWN)) {
-				tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target), fileOptions));
+				tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target, environment), fileOptions));
 				constructCount.peek().incrementAndGet();
 			} else if(t.type.isSymbol()) { //Logic and math symbols
 
@@ -2549,7 +2549,18 @@ public final class MethodScriptCompiler {
 //								// what cases it would occur in.
 //								e.printStackTrace(System.err);
 //							}
-							result = func.exec(tree.getData().getTarget(), env, constructs);
+							boolean stop = false;
+							for(Mixed r : constructs) {
+								if(r instanceof CSymbol) {
+									compilerErrors.add(new ConfigCompileException("Unexpected symbol", r.getTarget()));
+									stop = true;
+								}
+							}
+							if(!stop) {
+								result = func.exec(tree.getData().getTarget(), env, constructs);
+							} else {
+								result = null;
+							}
 						}
 					} else {
 						result = ((Optimizable) func).optimize(tree.getData().getTarget(), env, constructs);
@@ -2835,7 +2846,7 @@ public final class MethodScriptCompiler {
 		if(returnable != null) {
 			return returnable;
 		}
-		return Static.resolveConstruct(b.toString().trim(), Target.UNKNOWN);
+		return Static.resolveConstruct(b.toString().trim(), Target.UNKNOWN, env);
 	}
 
 	public static void registerAutoIncludes(Environment env, Script s) {

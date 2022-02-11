@@ -87,6 +87,8 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	public CArray(Target t, int initialCapacity, GenericParameters parameters, Environment env, Mixed... items) {
 		super("{}", ConstructType.ARRAY, t);
 		this.fallbackEnv = env;
+		parameters = parameters != null ? parameters : GenericParameters.addParameter(Auto.TYPE, null)
+				.build();
 		this.genericParameters = parameters;
 		if(initialCapacity == -1) {
 			associativeMode = true;
@@ -484,7 +486,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	public CArray indexesOf(Mixed value, Environment env) {
 		CArray ret;
 		if(associativeMode) {
-			ret = new CArray(Target.UNKNOWN, GenericParameters.start(CArray.TYPE)
+			ret = new CArray(Target.UNKNOWN, GenericParameters
 					.addParameter(CString.TYPE, null).build(), env);
 			for(String key : associativeArray.keySet()) {
 				if(BasicLogic.equals.doEquals(associativeArray.get(key), value)) {
@@ -492,7 +494,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				}
 			}
 		} else {
-			ret = new CArray(Target.UNKNOWN, GenericParameters.start(CArray.TYPE)
+			ret = new CArray(Target.UNKNOWN, GenericParameters
 					.addParameter(CInt.TYPE, null).build(), env);
 			for(int i = 0; i < array.size(); i++) {
 				if(BasicLogic.equals.doEquals(array.get(i), value)) {
@@ -642,13 +644,9 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 	}
 
 	private String normalizeConstruct(Mixed c, Environment env) {
-		if(c.isInstanceOf(CArray.TYPE, null, env)) {
-			throw new CRECastException("Arrays cannot be used as the key in an associative array", c.getTarget());
-		} else if(c.isInstanceOf(CString.TYPE, null, env) || c.isInstanceOf(CInt.TYPE, null, env)) {
-			return c.val();
-		} else if(c instanceof CNull) {
+		if(c instanceof CNull) {
 			return "";
-		} else if(c.isInstanceOf(CBoolean.TYPE, null, env)) {
+		} else if(c instanceof CBoolean) {
 			if(((CBoolean) c).getBoolean()) {
 				return "1";
 			} else {
@@ -656,6 +654,10 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 			}
 		} else if(c instanceof CLabel) {
 			return normalizeConstruct(((CLabel) c).cVal(), env);
+		} else if(c.isInstanceOf(CArray.TYPE, null, env)) {
+			throw new CRECastException("Arrays cannot be used as the key in an associative array", c.getTarget());
+		} else if(c.isInstanceOf(CString.TYPE, null, env) || c.isInstanceOf(CInt.TYPE, null, env)) {
+			return c.val();
 		} else {
 			return c.val();
 		}
@@ -739,16 +741,17 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 
 	/**
 	 * Creates a new, empty array, with the same type. Note to subclasses: By default, this method expects a constructor
-	 * that accepts a {@link Target}. If this assumption is not valid, you may override this method as needed.
+	 * that accepts a {@link Target}, {@link GenericParameters}, {@link Environment}.
+	 * If this assumption is not valid, you may override this method as needed.
 	 *
 	 * @param t
 	 * @return
 	 */
-	public CArray createNew(Target t) {
+	public CArray createNew(Target t, Environment env) {
 		try {
-			Constructor<CArray> con = (Constructor<CArray>) this.getClass().getConstructor(Target.class);
+			Constructor<CArray> con = (Constructor<CArray>) this.getClass().getConstructor(Target.class, GenericParameters.class, Environment.class);
 			try {
-				return con.newInstance(t);
+				return con.newInstance(t, this.genericParameters, env);
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 				throw new RuntimeException(ex);
 			}

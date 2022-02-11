@@ -29,6 +29,7 @@ import java.net.URL;
 import java.util.AbstractList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -49,15 +50,16 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	 * @param fqcn The fully qualified class name. Generally, this should be gathered from the typeof of the MEnum, if
 	 * applicable, but if this is an external enum, or dynamically generated, this may come from other sources.
 	 * @param enumClass The underlying java enum class
+	 * @param env The environment. Optional for native MethodScript types.
 	 * @param docs This may be null if the enum implements {@code public static String enumDocs()}, otherwise this
 	 * should be the docs for the enum class as a whole.
 	 * @param since This may be null if the enum implements {@code public static Version enumSince()}, otherwise this
 	 * should be the since tag for the enum class as a whole.
 	 * @return A subclass of MEnumType. This does not register it in the ecosystem.
 	 */
-	public static MEnumType FromEnum(FullyQualifiedClassName fqcn, final Class<Enum<?>> enumClass,
+	public static MEnumType FromEnum(FullyQualifiedClassName fqcn, final Class<Enum<?>> enumClass, Environment env,
 			String docs, Version since) {
-		return FromPartialEnum(fqcn, enumClass, enumClass.getEnumConstants(), docs, since);
+		return FromPartialEnum(fqcn, enumClass, env, enumClass.getEnumConstants(), docs, since);
 	}
 
 	/**
@@ -65,6 +67,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	 * @param fqcn The fully qualified class name. Generally, this should be gathered from the typeof of the MEnum, if
 	 * applicable, but if this is an external enum, or dynamically generated, this may come from other sources.
 	 * @param enumClass The underlying java enum class
+	 * @param env The environment. Optional for native MethodScript types.
 	 * @param values The list of enum constants. This does not have to be the full list of Enum values in the type, or
 	 * indeed, even the enum values from the enumClass. It does have to be an Enum type, however, as we need a
 	 * customizable type for documentation purposes.
@@ -74,9 +77,13 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	 * should be the since tag for the enum class as a whole.
 	 * @return A subclass of MEnumType. This does not register it in the ecosystem.
 	 */
-	public static MEnumType FromPartialEnum(FullyQualifiedClassName fqcn, final Class<?> enumClass,
+	public static MEnumType FromPartialEnum(FullyQualifiedClassName fqcn, final Class<?> enumClass, Environment env,
 			Enum<?>[] values, String docs, Version since) {
 		final Enum<?>[] constants = values;
+		if(fqcn.getNativeClass() == null) {
+			Objects.requireNonNull(env);
+		}
+//		final CClassType typeof = CClassType.get(fqcn, env);
 		return new MEnumType() {
 			@Override
 			public String docs() {
@@ -147,11 +154,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 
 			@Override
 			public CClassType typeof() {
-				try {
-					return CClassType.get(fqcn);
-				} catch (ClassNotFoundException ex) {
-					throw new Error(ex);
-				}
+				return CClassType.get(fqcn, env);
 			}
 
 			@Override
@@ -161,7 +164,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 
 			@Override
 			public List<MEnumTypeValue> getValues() {
-				return new AbstractList<MEnumTypeValue>() {
+				return new AbstractList<>() {
 					@Override
 					public MEnumTypeValue get(int index) {
 						final Enum<?> v = constants[index];
@@ -246,11 +249,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 
 							@Override
 							public CClassType typeof() {
-								try {
-									return CClassType.get(fqcn);
-								} catch (ClassNotFoundException ex) {
-									throw new Error(ex);
-								}
+								return CClassType.get(fqcn, env);
 							}
 
 							@Override

@@ -121,7 +121,7 @@ public final class CSecureString extends Construct {
 
 	public CArray getDecryptedCharCArray(Environment env) {
 		char[] array = getDecryptedCharArray();
-		CArray carray = new CArray(Target.UNKNOWN, array.length, GenericParameters.start(CArray.TYPE)
+		CArray carray = new CArray(Target.UNKNOWN, array.length, GenericParameters
 			.addParameter(CString.TYPE, null).build(), env);
 		for(char c : array) {
 			carray.push(new CString(c, Target.UNKNOWN), Target.UNKNOWN, env);

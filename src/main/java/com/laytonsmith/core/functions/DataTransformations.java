@@ -387,7 +387,7 @@ public class DataTransformations {
 			} catch (IOException ex) {
 				throw new CREFormatException(ex.getMessage(), t);
 			}
-			CArray arr = CArray.GetAssociativeArray(t, GenericParameters.start(CArray.TYPE)
+			CArray arr = CArray.GetAssociativeArray(t, GenericParameters
 					.addParameter(CString.TYPE, null).build(), env);
 			for(String key : props.stringPropertyNames()) {
 				arr.set(key, props.getProperty(key), env);
@@ -447,7 +447,7 @@ public class DataTransformations {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			XMLDocument doc;
 			try {
 				doc = new XMLDocument(args[0].val());
@@ -455,7 +455,7 @@ public class DataTransformations {
 				throw new CREFormatException("Malformed XML.", t, ex);
 			}
 			try {
-				return Static.resolveConstruct(doc.getNode(args[1].val()), t);
+				return Static.resolveConstruct(doc.getNode(args[1].val()), t, env);
 			} catch (XPathExpressionException ex) {
 				throw new CREFormatException(ex.getMessage(), t, ex);
 			}

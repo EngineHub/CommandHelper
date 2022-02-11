@@ -655,7 +655,7 @@ public class Minecraft {
 			}
 			if(index == 8 || index == -1) {
 				//Array of op's
-				CArray co = new CArray(t, GenericParameters.start(CArray.TYPE)
+				CArray co = new CArray(t, GenericParameters
 						.addParameter(CString.TYPE, null).build(), null);
 				List<MCOfflinePlayer> so = server.getOperators();
 				for(MCOfflinePlayer o : so) {
@@ -669,7 +669,7 @@ public class Minecraft {
 			}
 			if(index == 9 || index == -1) {
 				//Array of plugins
-				CArray co = new CArray(t, GenericParameters.start(CArray.TYPE)
+				CArray co = new CArray(t, GenericParameters
 						.addParameter(CString.TYPE, null).build(), env);
 				MCPluginManager plugManager = server.getPluginManager();
 				if(plugManager == null) {
@@ -1033,7 +1033,7 @@ public class Minecraft {
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCServer s = Static.getServer();
-			CArray ret = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray ret = new CArray(t, GenericParameters
 					.addParameter(CString.TYPE, null).build(), env);
 			for(String ip : s.getIPBans()) {
 				ret.push(new CString(ip, t), t, env);
@@ -1384,7 +1384,7 @@ public class Minecraft {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			CArray mats = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray mats = new CArray(t, GenericParameters
 					.addParameter(CString.TYPE, null).build(), env);
 			for(MCMaterial mat : StaticLayer.GetMaterialValues()) {
 				if(!mat.isLegacy()) {

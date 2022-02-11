@@ -67,7 +67,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@SuppressWarnings("ALL")
 public class World {
 
 	public static String docs() {
@@ -260,7 +259,7 @@ public class World {
 				z = l.getBlockZ();
 			} else if(args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 2
-				if(args[1].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env)) {
+				if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 					world = Static.getServer().getWorld(args[0].val());
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[1], null, t, env);
 					x = l.getBlockX();
@@ -319,7 +318,7 @@ public class World {
 				z = l.getBlockZ();
 			} else if(args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 2
-				if(args[1].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env)) {
+				if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 					world = Static.getServer().getWorld(args[0].val());
 					if(world == null) {
 						throw new CREInvalidWorldException("The given world (" + args[0].val() + ") does not exist.", t);
@@ -402,7 +401,7 @@ public class World {
 				z = l.getBlockZ();
 			} else if(args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 2
-				if(args[1].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env)) {
+				if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 					world = Static.getServer().getWorld(args[0].val());
 					MCLocation l = ObjectGenerator.GetGenerator().location(args[1], null, t, env);
 					x = l.getBlockX();
@@ -490,9 +489,9 @@ public class World {
 				throw new CRENotFoundException(
 						"Could not find the chunk objects of the world (are you running in cmdline mode?)", t);
 			}
-			CArray ret = new CArray(t, GenericParameters.start(CArray.TYPE).build(), environment);
+			CArray ret = new CArray(t, null, environment);
 			for(MCChunk c : chunks) {
-				CArray chunk = CArray.GetAssociativeArray(t, GenericParameters.start(CArray.TYPE).build(), environment);
+				CArray chunk = CArray.GetAssociativeArray(t, null, environment);
 				chunk.set("x", new CInt(c.getX(), t), t, environment);
 				chunk.set("z", new CInt(c.getZ(), t), t, environment);
 				chunk.set("world", c.getWorld().getName(), t, environment);
@@ -582,7 +581,7 @@ public class World {
 				z = l.getBlockZ() >> 4;
 			} else if(args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 1
-				if(args[0].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env)) {
+				if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 					world = Static.getServer().getWorld(args[1].val());
 					if(world == null) {
 						throw new CREInvalidWorldException("World " + args[1].val() + " does not exist.", t);
@@ -673,7 +672,7 @@ public class World {
 				z = l.getBlockZ() >> 4;
 			} else if(args.length == 2) {
 				//Either location array and world provided, or x and z. Test for array at pos 1
-				if(args[0].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env)) {
+				if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 					world = Static.getServer().getWorld(args[1].val());
 					if(world == null) {
 						throw new CREInvalidWorldException("The given world (" + args[1].val() + ") does not exist.", t);
@@ -1095,7 +1094,7 @@ public class World {
 
 		@Override
 		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			CArray worlds = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray worlds = new CArray(t, GenericParameters
 					.addParameter(CString.TYPE, null).build(), environment);
 			for(MCWorld w : Static.getServer().getWorlds()) {
 				worlds.push(new CString(w.getName(), t), t, environment);
@@ -1156,7 +1155,7 @@ public class World {
 			}
 
 			if(args.length == 1) {
-				if(args[0].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env)) {
+				if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 					l = ObjectGenerator.GetGenerator().location(args[0], w, t, env);
 				} else {
 					throw new CREFormatException("Expecting argument 1 of get_chunk_loc to be a location array", t);
@@ -1168,7 +1167,7 @@ public class World {
 				}
 			}
 
-			CArray chunk = CArray.GetAssociativeArray(t, GenericParameters.start(CArray.TYPE).build(), env);
+			CArray chunk = CArray.GetAssociativeArray(t, null, env);
 			chunk.set(0, new CInt(l.getBlockX() >> 4, t), t, env);
 			chunk.set(1, new CInt(l.getBlockZ() >> 4, t), t, env);
 			chunk.set(2, new CString(l.getWorld().getName(), t), t, env);
@@ -1311,7 +1310,7 @@ public class World {
 			if(w == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
 			}
-			CArray ret = CArray.GetAssociativeArray(t, GenericParameters.start(CArray.TYPE).build(), environment);
+			CArray ret = CArray.GetAssociativeArray(t, null, environment);
 			ret.set("name", new CString(w.getName(), t), t, environment);
 			ret.set("seed", new CInt(w.getSeed(), t), t, environment);
 			ret.set("environment", new CString(w.getEnvironment().name(), t), t, environment);
@@ -1662,17 +1661,17 @@ public class World {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			MCWorld world = Static.getServer().getWorld(args[0].val());
 			if(world == null) {
 				throw new CREInvalidWorldException("Unknown world: " + args[0].val(), t);
 			}
 			if(args.length == 1) {
-				CArray gameRules = CArray.GetAssociativeArray(t, GenericParameters.start(CArray.TYPE)
-						.addParameter(CString.TYPE, null).build(), environment);
+				CArray gameRules = CArray.GetAssociativeArray(t, GenericParameters
+						.addParameter(CString.TYPE, null).build(), env);
 				for(String gameRule : world.getGameRules()) {
 					gameRules.set(new CString(gameRule, t),
-							Static.resolveConstruct(world.getGameRuleValue(gameRule), t), t, environment);
+							Static.resolveConstruct(world.getGameRuleValue(gameRule), t, env), t, env);
 				}
 				return gameRules;
 			} else {
@@ -1683,7 +1682,7 @@ public class World {
 						throw new CREFormatException("The gamerule \"" + args[1].val()
 								+ "\" does not exist in this version.", t);
 					}
-					return Static.resolveConstruct(value, t);
+					return Static.resolveConstruct(value, t, env);
 				} catch (IllegalArgumentException exception) {
 					throw new CREFormatException("The gamerule \"" + args[1].val() + "\" does not exist.", t);
 				}
@@ -1853,7 +1852,7 @@ public class World {
 				distance = ArgumentValidation.getNumber(args[2], t, env);
 			}
 			Vector3D vector;
-			if(args[1].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env)) {
+			if(args[1].isInstanceOf(CArray.TYPE, null, env)) {
 				MCLocation to = ObjectGenerator.GetGenerator().location(args[1], loc.getWorld(), t, env);
 				vector = to.toVector().subtract(loc.toVector()).normalize();
 			} else {
@@ -2232,7 +2231,7 @@ public class World {
 				throw new CREInvalidWorldException("Unknown world: " + args[0], t);
 			}
 			MCWorldBorder wb = w.getWorldBorder();
-			CArray ret = CArray.GetAssociativeArray(t, GenericParameters.start(CArray.TYPE).build(), env);
+			CArray ret = CArray.GetAssociativeArray(t, null, env);
 			ret.set("width", new CDouble(wb.getSize(), t), t, env);
 			ret.set("center", ObjectGenerator.GetGenerator().location(wb.getCenter(), false, env), t, env);
 			ret.set("damagebuffer", new CDouble(wb.getDamageBuffer(), t), t, env);
@@ -2291,7 +2290,7 @@ public class World {
 			}
 			MCWorldBorder wb = w.getWorldBorder();
 			Mixed c = args[1];
-			if(!(c.typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env))) {
+			if(!(c.isInstanceOf(CArray.TYPE, null, env))) {
 				throw new CREFormatException("Expected array but given \"" + args[1].val() + "\"", t);
 			}
 			CArray params = (CArray) c;

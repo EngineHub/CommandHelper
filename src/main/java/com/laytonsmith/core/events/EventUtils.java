@@ -329,7 +329,7 @@ public final class EventUtils {
 	}
 
 	public static Construct DumpEvents(Environment env) {
-		CArray ca = new CArray(Target.UNKNOWN, GenericParameters.start(CArray.TYPE)
+		CArray ca = new CArray(Target.UNKNOWN, GenericParameters
 			.addParameter(CString.TYPE, null).build(), env);
 		for(SortedSet<BoundEvent> set : EVENT_HANDLES.values()) {
 			Iterator<BoundEvent> i = set.iterator();

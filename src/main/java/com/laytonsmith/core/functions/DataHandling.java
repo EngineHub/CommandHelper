@@ -907,7 +907,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			return CBoolean.get(args[0].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env));
+			return CBoolean.get(args[0].isInstanceOf(CArray.TYPE, null, env));
 		}
 
 		@Override
@@ -2409,7 +2409,7 @@ public class DataHandling {
 			}
 			// Handle the closure type first thing
 			CClassType returnType = Auto.TYPE;
-			if(nodes[0].getData().isInstanceOf(CClassType.TYPE, null, env)) {
+			if(nodes[0].getData() instanceof CClassType) {
 				returnType = (CClassType) nodes[0].getData();
 				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
 				for(int i = 1; i < nodes.length; i++) {
@@ -2581,7 +2581,7 @@ public class DataHandling {
 			}
 			// Handle the closure type first thing
 			CClassType returnType = Auto.TYPE;
-			if(nodes[0].getData().isInstanceOf(CClassType.TYPE, null, env)) {
+			if(nodes[0].getData() instanceof CClassType) {
 				returnType = (CClassType) nodes[0].getData();
 				ParseTree[] newNodes = new ParseTree[nodes.length - 1];
 				for(int i = 1; i < nodes.length; i++) {
@@ -3672,7 +3672,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CNull) {
 				return CBoolean.FALSE;
 			}

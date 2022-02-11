@@ -5,6 +5,8 @@ import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.abstraction.AbstractionObject;
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.Implementation.Type;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
@@ -14,9 +16,9 @@ import com.laytonsmith.abstraction.bukkit.entities.BukkitMCPlayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.api.Platforms;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
@@ -32,6 +34,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.environments.StaticRuntimeEnv;
 import com.laytonsmith.core.exceptions.CRE.CREPluginInternalException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -46,7 +49,6 @@ import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import org.bukkit.entity.Player;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.awt.*;
 import java.io.File;
@@ -86,6 +88,7 @@ public class RandomTests {
 
 	@Before
 	public void setUp() throws Exception {
+		Implementation.setServerType(Type.TEST);
 		env = Static.GenerateStandaloneEnvironment();
 		fakePlayer = StaticTest.GetOnlinePlayer();
 		StaticTest.InstallFakeConvertor(fakePlayer);
@@ -221,10 +224,10 @@ public class RandomTests {
 		ca.push(C.Boolean(false), t, env);
 		ca.push(C.Null(), t, env);
 		ca.push(C.Void(), t, env);
-		ca.push(new Command("/Command", Target.UNKNOWN), t, env);
+//		ca.push(new Command("/Command", Target.UNKNOWN), t, env);
 		ca.push(new CArray(Target.UNKNOWN, null, env, new CInt(1, Target.UNKNOWN)), t, env);
 		//[1, 2.2, "string", "\"Quote\"", true, false, null, "", "/Command", [1]]
-		assertEquals("[1,2.2,\"string\",\"\\\"Quote\\\"\",true,false,null,\"\",\"\\/Command\",[1]]", Construct.json_encode(ca, Target.UNKNOWN, env));
+		assertEquals("[1,2.2,\"string\",\"\\\"Quote\\\"\",true,false,null,\"\",[1]]", Construct.json_encode(ca, Target.UNKNOWN, env));
 	}
 
 	@Test
@@ -238,9 +241,9 @@ public class RandomTests {
 		ca.push(C.Boolean(false), Target.UNKNOWN, env);
 		ca.push(C.Null(), Target.UNKNOWN, env);
 		ca.push(C.Void(), Target.UNKNOWN, env);
-		ca.push(new Command("/Command", Target.UNKNOWN), Target.UNKNOWN, env);
+//		ca.push(new Command("/Command", Target.UNKNOWN), Target.UNKNOWN, env);
 		ca.push(new CArray(Target.UNKNOWN, null, env, new CInt(1, Target.UNKNOWN)), Target.UNKNOWN, env);
-		StaticTest.assertCEquals(ca, Construct.json_decode("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", \"\\/Command\", [1]]", Target.UNKNOWN, env));
+		StaticTest.assertCEquals(ca, Construct.json_decode("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", [1]]", Target.UNKNOWN, env));
 	}
 
 	@Test
@@ -332,28 +335,22 @@ public class RandomTests {
 
 			// Generate the environment.
 			Environment env = Static.GenerateStandaloneEnvironment();
-			env = env.cloneAndAdd(new CommandHelperEnvironment());
-
-			// Override the persistence network in the static runtime environment.
+			StaticRuntimeEnv srEnv = env.getEnv(StaticRuntimeEnv.class);
 			ConnectionMixinFactory.ConnectionMixinOptions options;
 			options = new ConnectionMixinFactory.ConnectionMixinOptions();
 			options.setWorkingDirectory(new File("."));
 			PersistenceNetworkImpl network = new PersistenceNetworkImpl(
 					"**=json://persistence.json", new URI("default"), options);
-			StaticRuntimeEnv staticRuntimeEnvSpy = Mockito.spy(env.getEnv(StaticRuntimeEnv.class));
-			when(staticRuntimeEnvSpy.GetPersistenceNetwork()).thenReturn(network);
+			env = env.cloneAndAdd(env.getEnv(GlobalEnv.class),
+					env.getEnv(CompilerEnvironment.class),
+					env.getEnv(StaticRuntimeEnv.class),
+					new CommandHelperEnvironment(),
+					new StaticRuntimeEnv(srEnv.GetProfiler(), network, srEnv.getProfiles(), srEnv.GetTaskManager()));
 
-			// Run the test code.
 			Run("store_value('t.test1', 'test')\n"
 					+ "store_value('t.test2', 'test')\n"
 					+ "store_value('t.test3.third', 'test')\n"
-					+ "msg(get_values('t'))", fakePlayer, new MethodScriptComplete() {
-
-				@Override
-				public void done(String output) {
-					//
-				}
-			}, env);
+					+ "msg(get_values('t'))", fakePlayer, output -> {}, env);
 			verify(fakePlayer).sendMessage("{t.test1: test, t.test2: test, t.test3.third: test}");
 		} finally {
 			new File("persistence.json").deleteOnExit();
@@ -366,7 +363,7 @@ public class RandomTests {
 			Environment env = Static.GenerateStandaloneEnvironment(true);
 			Mixed returnedVoid = new ArrayHandling.array_insert().exec(Target.UNKNOWN, env,
 					C.Array(), C.String(""), C.Int(0));
-			Construct voidKeyword = Static.resolveConstruct("void", Target.UNKNOWN);
+			Construct voidKeyword = Static.resolveConstruct("void", Target.UNKNOWN, env);
 			assertTrue(returnedVoid == voidKeyword);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);

@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.SmartComment;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
@@ -24,7 +25,8 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.generics.GenericDeclaration;
+import com.laytonsmith.core.constructs.generics.UnqualifiedGenericDeclaration;
+import com.laytonsmith.core.constructs.generics.UnqualifiedGenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.CREClassDefinitionError;
@@ -43,10 +45,11 @@ import com.laytonsmith.core.objects.ObjectDefinitionTable;
 import com.laytonsmith.core.objects.ObjectModifier;
 import com.laytonsmith.core.objects.ObjectType;
 import com.laytonsmith.core.objects.UserObject;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -173,8 +176,11 @@ public class ObjectManagement {
 			if(data.getData() instanceof CNull) {
 				return CNull.NULL;
 			}
-			if(!(data.getData().isInstanceOf(CString.TYPE, null, env))) {
-				throw new CREClassDefinitionError("Expected a string, but found " + data.getData() + " instead", t);
+			if(data.getData() instanceof CClassType) {
+				return new CString(data.getData().val(), data.getTarget());
+			}
+			if(!(data.getData() instanceof CString)) {
+				throw new CREClassDefinitionError("Expected a string, but found " + data.getData() + " (" + data.getData().typeof() + ") instead", t);
 			}
 			return data.getData();
 		}
@@ -186,7 +192,7 @@ public class ObjectManagement {
 			return (CString) d;
 		}
 
-		private Mixed evaluateMixed(ParseTree data, Target t) {
+		private Mixed evaluateMixed(ParseTree data, Target t, Environment env) {
 			if(data.isDynamic()) {
 			// TODO: Since CClassType doesn't know about other classes yet, we can't allow hardcoding yet, as it's
 			// a chicken and egg problem. Eventually, when we get a two pass compiler, this can be re-allowed, but
@@ -198,7 +204,7 @@ public class ObjectManagement {
 					throw new CREClassDefinitionError("Expected __to_class_reference__, but found " + data.getData()
 							+ " instead", t);
 				}
-				return new __to_class_reference__().exec(t, null,
+				return new __to_class_reference__().exec(t, env,
 						data.getChildren().stream()
 								.map((parseTree -> parseTree.getData()))
 								.collect(Collectors.toList())
@@ -226,7 +232,7 @@ public class ObjectManagement {
 					= FullyQualifiedClassName.forFullyQualifiedClass(evaluateStringNoNull(nodes[3], t, env).val());
 
 			// 4 - Superclasses
-			Set<UnqualifiedClassName> superclasses = new HashSet<>();
+			LinkedHashSet<Pair<UnqualifiedClassName, UnqualifiedGenericParameters>> superclasses = new LinkedHashSet<>();
 			{
 				CArray su = evaluateArrayNoNull(nodes[4], "superclasses", t, env);
 				if(!type.canUseExtends() && !su.isEmpty()) {
@@ -237,26 +243,30 @@ public class ObjectManagement {
 				}
 				for(Mixed m : su) {
 					if(m instanceof CClassType) {
-						superclasses.add(new UnqualifiedClassName(((CClassType) m).getFQCN()));
+						superclasses.add(new Pair<>(new UnqualifiedClassName(((CClassType) m).getFQCN()),
+								/*TODO*/ null));
 					} else {
-						superclasses.add(new UnqualifiedClassName(m.val(), t));
+						superclasses.add(new Pair<>(new UnqualifiedClassName(m.val(), t),
+								/*TODO*/ null));
 					}
 				}
 			}
 
 			if(type.extendsMixed() && superclasses.isEmpty()) {
-				superclasses.add(Mixed.TYPE.getFQCN().asUCN());
+				superclasses.add(new Pair<>(Mixed.TYPE.getFQCN().asUCN(), null));
 			}
 
 			// 5 - Interfaces
-			Set<UnqualifiedClassName> interfaces = new HashSet<>();
+			LinkedHashSet<Pair<UnqualifiedClassName, UnqualifiedGenericParameters>> interfaces = new LinkedHashSet<>();
 			{
 				CArray su = evaluateArrayNoNull(nodes[5], "interfaces", t, env);
 				for(Mixed m : su) {
 					if(m instanceof CClassType) {
-						interfaces.add(new UnqualifiedClassName(((CClassType) m).getFQCN()));
+						interfaces.add(new Pair<>(new UnqualifiedClassName(((CClassType) m).getFQCN()),
+								/*TODO*/ null));
 					} else {
-						interfaces.add(new UnqualifiedClassName(m.val(), t));
+						interfaces.add(new Pair<>(new UnqualifiedClassName(m.val(), t),
+								/*TODO*/ null));
 					}
 				}
 
@@ -287,7 +297,7 @@ public class ObjectManagement {
 			if(nodes[9].getData() instanceof CNull) {
 				containingClass = null;
 			} else {
-				containingClass = ArgumentValidation.getClassType(evaluateMixed(nodes[9], t), t);
+				containingClass = ArgumentValidation.getClassType(evaluateMixed(nodes[9], t, env), t);
 			}
 
 			// 10 - Class Comment
@@ -307,7 +317,7 @@ public class ObjectManagement {
 
 			// 11 - Generic Parameter declarations
 			// TODO This should of course not be null
-			GenericDeclaration genericDeclarations = null;
+			UnqualifiedGenericDeclaration genericDeclarations = null;
 
 			// TODO Populate the native elements in the ElementDefinition
 
@@ -332,7 +342,8 @@ public class ObjectManagement {
 					accessModifier,
 					objectModifiers,
 					type,
-					CClassType.defineClass(name, genericDeclarations),
+					name,
+					genericDeclarations,
 					superclasses,
 					interfaces,
 					containingClass,
@@ -366,7 +377,7 @@ public class ObjectManagement {
 						msgs.add(e.getMessage() + " - " + e.getTarget());
 					}
 					throw new CREClassDefinitionError("One or more compile errors occurred while trying to compile "
-							+ def.getName() + ":\n" + StringUtils.Join(msgs, "\n"), t);
+							+ def.getName() + ":\n" + StringUtils.Join(msgs, "\n"), t, ex);
 				}
 			}
 
@@ -519,21 +530,17 @@ public class ObjectManagement {
 			if(children.get(0).isDynamic()) {
 				throw new ConfigCompileException("The first parameter to new_object must be hardcoded.", t);
 			}
-			FullyQualifiedClassName fqcn = FullyQualifiedClassName.forName(children.get(0).getData().val(), t, env);
+			FullyQualifiedClassName fqcn;
 			ObjectDefinition od;
 			try {
+				fqcn = FullyQualifiedClassName.forName(children.get(0).getData().val(), t, env);
 				od = odt.get(fqcn);
 			} catch (ObjectDefinitionNotFoundException ex) {
-				throw new ConfigCompileException("Could not find class with name " + fqcn + ". Are you missing"
-						+ " a \"use\" statement?", t);
+				throw new ConfigCompileException("Could not find class with name " + children.get(0).getData().val()
+						+ ". Are you missing a \"use\" statement?", t);
 			}
-			try {
-				children.set(0, new ParseTree(CClassType.get(fqcn), fileOptions));
-			} catch (ClassNotFoundException ex) {
-				// This shouldn't happen, as we would have already thrown a CCE above if the class
-				// really didn't exist.
-				throw new Error(ex);
-			}
+
+			children.set(0, new ParseTree(CClassType.get(fqcn, env), fileOptions));
 			List<ElementDefinition> constructors = od.getElements().get("<constructor>");
 			int id;
 			if(constructors == null || constructors.isEmpty()) {
@@ -596,12 +603,8 @@ public class ObjectManagement {
 
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
-			try {
-				return CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(args[0].val()));
-			} catch (ClassNotFoundException ex) {
-				throw new CREClassDefinitionError(ex.getMessage(), t, ex);
-			}
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			return CClassType.get(FullyQualifiedClassName.forFullyQualifiedClass(args[0].val()), env);
 		}
 
 	}

@@ -214,4 +214,13 @@ public class CSlice extends CArray {
 	public CClassType[] getInterfaces() {
 		return CClassType.EMPTY_CLASS_ARRAY;
 	}
+
+	@Override
+	public Mixed slice(int begin, int end, Target t, Environment env) {
+		if(begin < end) {
+			return new CSlice(start - begin, finish - end, t, env);
+		} else {
+			return new CSlice(finish - begin, start - end, t, env);
+		}
+	}
 }

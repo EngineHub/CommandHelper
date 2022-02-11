@@ -6,7 +6,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREGenericConstraintException;
 
-import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * A Constraint is a single part of the general declaration. For instance, in the declaration
@@ -19,7 +19,7 @@ import java.util.EnumSet;
  * In general, two different Constraints may be contradictory, and when used in combination, erroneous. The solver
  * for this isn't built in to the Constraint class however, since you need to know all constraints in the generic
  * to determine if the combination is erroneous. Individually, a constraint cannot itself be erroneous.
- *
+ * <p>
  * Constraints can be placed in 3 different locations.
  * <ul>
  *     <li>Definitions - That is, a class or method definition</li>
@@ -29,14 +29,19 @@ import java.util.EnumSet;
  *
  * Different constraints are valid in different locations, though the RHS can only contain a concrete class, and so
  * isn't grouped as part of the Constraint heirarchy itself.
- *
+ * <p>
  * For the Definition site and LHS sites though, some constraints are simply not valid at all, and others must be used
  * as a wildcard.
+ * <p>
+ * Note that while the class implements Comparable, the order is not well defined, and is subject to change. This is
+ * an implementation detail to allow lists of Contraint objects to be ordered in a normal, deterministic way, in order
+ * to be properly comparable against other lists of Constraints. The specific order should not be relied upon beyond
+ * the execution of a single process.
  */
-public abstract class Constraint {
-	private String typename;
-	private boolean isWildcard;
-	private Target target;
+public abstract class Constraint implements Comparable<Constraint> {
+	private final String typename;
+	private final boolean isWildcard;
+	private final Target target;
 
 	/**
 	 * Constructs a new constraint.
@@ -44,33 +49,31 @@ public abstract class Constraint {
 	 */
 	protected Constraint(Target t, String constraintName) {
 		this.typename = constraintName;
-		isWildcard = this.typename.equals("?");
+		this.isWildcard = this.typename.equals("?");
+		this.target = t;
 	}
 
 	/**
 	 * Returns the name of the type, for instance T. If defined as a wildcard, this will be <code>?</code>
-	 * @return
+	 * @return The typename
 	 */
 	public String getTypeName() {
 		return this.typename;
 	}
 
 	/**
-	 * Returns an EnumSet which contains the locations where this is valid to be defined at.
-	 * @return
+	 * Returns a Set which contains the locations where this is valid to be defined at.
 	 */
-	public abstract EnumSet<ConstraintLocation> validLocations();
+	public abstract Set<ConstraintLocation> validLocations();
 
 	/**
 	 * This returns the name of the type of constraint, for instance "lower bound constraint". This is useful for
 	 * identifying the constraint type in error messages.
-	 * @return
 	 */
 	public abstract String getConstraintName();
 
 	/**
 	 * Returns true if the type was defined as a wildcard.
-	 * @return
 	 */
 	public boolean isWildcard() {
 		return isWildcard;
@@ -78,7 +81,6 @@ public abstract class Constraint {
 
 	/**
 	 * Returns the code target where this constraint was defined.
-	 * @return
 	 */
 	public Target getTarget() {
 		return target;
@@ -128,7 +130,6 @@ public abstract class Constraint {
 	 *
 	 * @param type The concrete type to check
 	 * @param generics Any LHS generics that were defined along with the type, null if there were none.
-	 * @return
 	 */
 	public abstract boolean isWithinConstraint(CClassType type, LeftHandGenericUse generics, Environment env);
 
@@ -144,5 +145,12 @@ public abstract class Constraint {
 	 * @throws CREGenericConstraintException If the type cannot be inferred from this Constraint
 	 */
 	public abstract ExactType convertFromDiamond(Target t) throws CREGenericConstraintException;
+
+	@Override
+	public int compareTo(Constraint o) {
+		// Just compare against the toString, order doesn't *really* matter, it's just so that equality checks
+		// are deterministic.
+		return this.toString().compareTo(o.toString());
+	}
 
 }

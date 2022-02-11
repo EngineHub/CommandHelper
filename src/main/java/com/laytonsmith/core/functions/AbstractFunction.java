@@ -270,11 +270,11 @@ public abstract class AbstractFunction implements Function {
 				b.append(", ");
 			}
 			first = false;
-			if(ccc instanceof CArray || ccc.typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env)) {
+			if(ccc instanceof CArray || ccc.isInstanceOf(CArray.TYPE, null, env)) {
 				//Arrays take too long to toString, so we don't want to actually toString them here if
 				//we don't need to.
 				b.append("<arrayNotShown size:").append(((CArray) ccc).size()).append(">");
-			} else if(ccc instanceof CClosure || ccc.typeof().getNakedType().isInstanceOf(CClosure.TYPE, null, env)) {
+			} else if(ccc instanceof CClosure || ccc.isInstanceOf(CClosure.TYPE, null, env)) {
 				//The toString of a closure is too long, so let's not output them either.
 				b.append("<closureNotShown>");
 			} else if(ccc instanceof CString || ccc.isInstanceOf(CString.TYPE, null, env)) {

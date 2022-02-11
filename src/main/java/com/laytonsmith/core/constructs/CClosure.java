@@ -10,7 +10,6 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
-import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CRE.AbstractCREException;
@@ -25,6 +24,7 @@ import com.laytonsmith.core.exceptions.LoopManipulationException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.exceptions.StackTraceManager;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -98,7 +98,7 @@ public class CClosure extends Construct implements Callable {
 				}
 				b.append(")");
 			}
-		} else if(node.getData().isInstanceOf(CString.TYPE, null, env)) {
+		} else if(node.getData() instanceof CString) {
 			String data = ArgumentValidation.getString(node.getData(), node.getTarget());
 			// Convert: \ -> \\ and ' -> \'
 			b.append("'").append(data.replace("\\", "\\\\").replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n")
@@ -239,7 +239,7 @@ public class CClosure extends Construct implements Callable {
 			}
 
 			if(!hasArgumentsParam) {
-				CArray arguments = new CArray(node.getData().getTarget(), GenericParameters.start(CArray.TYPE).build(), env);
+				CArray arguments = new CArray(node.getData().getTarget(), null, env);
 				if(values != null) {
 					for(Mixed value : values) {
 						arguments.push(value, node.getData().getTarget(), env);

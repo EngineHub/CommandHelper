@@ -35,7 +35,7 @@ public class TestCClassType {
 	}
 
 	private static CClassType get(String type) throws ClassNotFoundException {
-		return CClassType.get(FullyQualifiedClassName.forName(type, Target.UNKNOWN, env));
+		return CClassType.get(FullyQualifiedClassName.forName(type, Target.UNKNOWN, env), env);
 	}
 
 	@Test

@@ -136,7 +136,7 @@ public class InventoryEvents {
 				Target t = Target.UNKNOWN;
 
 				map.put("player", new CString(e.getWhoClicked().getName(), t));
-				CArray viewers = new CArray(t, GenericParameters.start(CArray.TYPE)
+				CArray viewers = new CArray(t, GenericParameters
 						.addParameter(CString.TYPE, null).build(), env);
 				for(MCHumanEntity viewer : e.getViewers()) {
 					viewers.push(new CString(viewer.getName(), t), t, env);
@@ -280,14 +280,14 @@ public class InventoryEvents {
 				map.put("newcursoritem", ObjectGenerator.GetGenerator().item(e.getCursor(), Target.UNKNOWN, env));
 				map.put("oldcursoritem", ObjectGenerator.GetGenerator().item(e.getOldCursor(), Target.UNKNOWN, env));
 
-				CArray slots = new CArray(Target.UNKNOWN, GenericParameters.start(CArray.TYPE)
+				CArray slots = new CArray(Target.UNKNOWN, GenericParameters
 						.addParameter(CInt.TYPE, null).build(), env);
 				for(Integer slot : e.getInventorySlots()) {
 					slots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN, env);
 				}
 				map.put("slots", slots);
 
-				CArray rawSlots = new CArray(Target.UNKNOWN, GenericParameters.start(CArray.TYPE)
+				CArray rawSlots = new CArray(Target.UNKNOWN, GenericParameters
 						.addParameter(CInt.TYPE, null).build(), env);
 				for(Integer slot : e.getRawSlots()) {
 					rawSlots.push(new CInt(slot.intValue(), Target.UNKNOWN), Target.UNKNOWN, env);
@@ -651,7 +651,7 @@ public class InventoryEvents {
 				map.put("inventorytype", new CString(e.getInventory().getType().name(), t));
 				map.put("enchantmentbonus", new CInt(e.getEnchantmentBonus(), t));
 
-				CArray expCostsCArray = new CArray(t, GenericParameters.start(CArray.TYPE)
+				CArray expCostsCArray = new CArray(t, GenericParameters
 						.addParameter(CInt.TYPE, null).build(), env);
 
 				MCEnchantmentOffer[] offers = e.getOffers();
@@ -945,7 +945,7 @@ public class InventoryEvents {
 				MCPrepareItemCraftEvent e = (MCPrepareItemCraftEvent) event;
 				Map<String, Mixed> ret = evaluate_helper(e);
 				Target t = Target.UNKNOWN;
-				CArray viewers = new CArray(t, GenericParameters.start(CArray.TYPE)
+				CArray viewers = new CArray(t, GenericParameters
 						.addParameter(CString.TYPE, null).build(), env);
 				for(MCHumanEntity v : e.getViewers()) {
 					viewers.push(new CString(v.getName(), t), t, env);

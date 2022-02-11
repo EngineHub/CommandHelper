@@ -95,7 +95,7 @@ public class ArrayHandling {
 			if(args[0] instanceof Sizeable s) {
 				return new CInt(s.size(), t);
 			}
-			if(args[0].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env)
+			if(args[0].isInstanceOf(CArray.TYPE, null, env)
 					&& !(args[0] instanceof CMutablePrimitive)) {
 				return new CInt(((CArray) args[0]).size(), t);
 			}
@@ -178,7 +178,7 @@ public class ArrayHandling {
 				defaultConstruct = args[2];
 			}
 
-			if(args[0].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env)) {
+			if(args[0].isInstanceOf(CArray.TYPE, null, env)) {
 				CArray ca = (CArray) args[0];
 				if(index instanceof CSlice) {
 
@@ -208,7 +208,7 @@ public class ArrayHandling {
 										+ ((CSlice) index).getFinish() + "\" does not exist", t);
 							}
 						}
-						CArray na = ca.createNew(t);
+						CArray na = ca.createNew(t, env);
 						if(finish < start) {
 							//return an empty array in cases where the indexes don't make sense
 							return na;
@@ -1106,10 +1106,10 @@ public class ArrayHandling {
 
 		@Override
 		public CArray exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			if(args[0].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env)
-					&& args[1].typeof().getNakedType().isInstanceOf(CArray.TYPE, null, env)) {
-				CArray original = (CArray) args[0];
-				int size = (int) ((CInt) args[1]).getInt();
+			if(args[0].isInstanceOf(CArray.TYPE, null, env)
+					&& args[1].isInstanceOf(CInt.TYPE, null, env)) {
+				CArray original = ArgumentValidation.getArray(args[0], t, env);
+				int size = ArgumentValidation.getInt32(args[1], t, env);
 				Mixed fill = CNull.NULL;
 				if(args.length == 3) {
 					fill = args[2];
@@ -1210,10 +1210,10 @@ public class ArrayHandling {
 				increment = ArgumentValidation.getInt(args[2], t, env);
 			}
 			if(start < finish && increment < 0 || start > finish && increment > 0 || increment == 0) {
-				return new CArray(t, GenericParameters.start(CArray.TYPE)
+				return new CArray(t, GenericParameters
 						.addParameter(CInt.TYPE, null).build(), env);
 			}
-			CArray ret = new CArray(t, GenericParameters.start(CArray.TYPE)
+			CArray ret = new CArray(t, GenericParameters
 					.addParameter(CInt.TYPE, null).build(), env);
 			for(long i = start; (increment > 0 ? i < finish : i > finish); i = i + increment) {
 				ret.push(new CInt(i, t), t, env);
