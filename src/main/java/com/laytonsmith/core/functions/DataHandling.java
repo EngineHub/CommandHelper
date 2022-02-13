@@ -98,6 +98,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.lsp4j.SymbolKind;
 
 /**
  *
@@ -1372,7 +1373,7 @@ public class DataHandling {
 
 	@api
 	@unbreakable
-	public static class proc extends AbstractFunction implements BranchStatement, VariableScope {
+	public static class proc extends AbstractFunction implements BranchStatement, VariableScope, DocumentSymbolProvider {
 
 		public static final String NAME = "proc";
 
@@ -1658,6 +1659,55 @@ public class DataHandling {
 				ret.add(true);
 			}
 			return ret;
+		}
+
+		@Override
+		public String symbolDisplayName(List<ParseTree> children) {
+			StringBuilder builder = new StringBuilder();
+			builder.append("proc ");
+			builder.append(ArgumentValidation.getString(children.get(0).getData(), Target.UNKNOWN));
+			builder.append("(");
+			boolean first = true;
+			for(int i = 1; i < children.size() - 1; i++) {
+				if(!first) {
+					builder.append(", ");
+				}
+				first = false;
+				ParseTree child = children.get(i);
+				Mixed parameter = child.getData();
+				if(parameter instanceof IVariable ivar) {
+					builder.append(ivar.getVariableName());
+				} else if(parameter instanceof CFunction f) {
+					try {
+						if(f.getFunction() instanceof assign) {
+							Mixed variable = child.getChildAt(0).getData();
+							Mixed value = child.getChildAt(1).getData();
+							if(variable instanceof IVariable ivar) {
+								builder.append(ivar.getVariableName())
+										.append(" = ");
+								if(value instanceof CString) {
+									builder.append("'")
+											.append(value.val().replace("\\", "\\\\")
+													.replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n")
+													.replace("'", "\\'"))
+											.append("'");
+								} else {
+									builder.append(value.val());
+								}
+							}
+						}
+					} catch (ConfigCompileException ex) {
+						builder.append("_");
+					}
+				}
+			}
+			builder.append(")");
+			return builder.toString();
+		}
+
+		@Override
+		public SymbolKind getSymbolKind() {
+			return SymbolKind.Function;
 		}
 	}
 

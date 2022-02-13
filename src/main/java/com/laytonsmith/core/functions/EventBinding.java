@@ -46,6 +46,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.eclipse.lsp4j.SymbolKind;
 
 /**
  *
@@ -60,7 +61,7 @@ public class EventBinding {
 	private static final AtomicInteger BIND_COUNTER = new AtomicInteger(0);
 
 	@api
-	public static class bind extends AbstractFunction implements Optimizable, BranchStatement, VariableScope {
+	public static class bind extends AbstractFunction implements Optimizable, BranchStatement, VariableScope, DocumentSymbolProvider {
 
 		@Override
 		public String getName() {
@@ -271,6 +272,16 @@ public class EventBinding {
 		@Override
 		public List<Boolean> isScope(List<ParseTree> children) {
 			return isBranch(children);
+		}
+
+		@Override
+		public String symbolDisplayName(List<ParseTree> children) {
+			return "bind " + children.get(0).getData().val() + ":" + children.get(0).getTarget().line();
+		}
+
+		@Override
+		public SymbolKind getSymbolKind() {
+			return SymbolKind.Event;
 		}
 
 	}

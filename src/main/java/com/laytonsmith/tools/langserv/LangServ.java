@@ -4,7 +4,6 @@ import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.StackTraceUtils;
-import com.laytonsmith.PureUtilities.Triplet;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.hide;
 import com.laytonsmith.core.AbstractCommandLineTool;
@@ -14,6 +13,7 @@ import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Profiles;
+import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
@@ -33,6 +33,7 @@ import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.functions.DocumentLinkProvider;
+import com.laytonsmith.core.functions.DocumentSymbolProvider;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
@@ -83,17 +84,22 @@ import org.eclipse.lsp4j.DidSaveTextDocumentParams;
 import org.eclipse.lsp4j.DocumentLink;
 import org.eclipse.lsp4j.DocumentLinkOptions;
 import org.eclipse.lsp4j.DocumentLinkParams;
+import org.eclipse.lsp4j.DocumentSymbol;
+import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.ExecuteCommandOptions;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.InitializedParams;
+import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.SymbolInformation;
+import org.eclipse.lsp4j.SymbolKind;
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.WorkspaceFolder;
@@ -197,7 +203,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				}
 				Launcher<LanguageClient> launcher = LSPLauncher.createServerLauncher(langserv, is, os);
 				LanguageClient client = launcher.getRemoteProxy();
-				((LanguageClientAware) langserv).connect(client);
+				langserv.connect(client);
 				RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
 				List<String> arguments = runtimeMxBean.getInputArguments();
 				langserv.log("Java started with args: " + arguments.toString(), LogLevel.DEBUG);
@@ -472,7 +478,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 //
 //	}
 
-	private Map<String, CommandProvider> commandProviders = new HashMap<>();
+	private final Map<String, CommandProvider> commandProviders = new HashMap<>();
 
 	@Override
 	public CompletableFuture<InitializeResult> initialize(InitializeParams params) {
@@ -482,9 +488,13 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		CompletableFuture<InitializeResult> cf = new CompletableFuture<>();
 		ServerCapabilities sc = new ServerCapabilities();
 		sc.setTextDocumentSync(TextDocumentSyncKind.Full);
+
 		DocumentLinkOptions documentLinkOptions = new DocumentLinkOptions();
 		documentLinkOptions.setResolveProvider(false);
 		sc.setDocumentLinkProvider(documentLinkOptions);
+
+		sc.setDocumentSymbolProvider(true);
+
 		{
 			ExecuteCommandOptions eco = new ExecuteCommandOptions();
 			List<String> commands = new ArrayList<>();
@@ -560,12 +570,6 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		return this;
 	}
 
-	private static final int COMPILATION_DELAY = 3;
-
-	private final Map<String, Triplet<Long, Executor, CompletableFuture<ParseTree>>> compileDelays = new HashMap<>();
-
-	private Thread compilerDelayThread = null;
-
 	private static DiagnosticSeverity getSeverity(CompilerWarning warning) {
 		if(warning.getSuppressCategory() == null) {
 			return DiagnosticSeverity.Warning;
@@ -580,6 +584,70 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		}
 		throw new Error("Unaccounted for case: " + warning.getSuppressCategory());
 	}
+
+	/**
+	 * This function compiles MSA files and returns the Script objects. Note that this is not intended for use
+	 * to get compile errors. If there are compile errors, it will not call the future. This is also the case
+	 * if the uri does not point to a msa file. Any other errors will result in the future being called.
+	 */
+	public void doPreprocess(CompletableFuture<List<Script>> future, Executor threadPool, final String uri,
+			boolean withDelay) {
+		threadPool.execute(() -> {
+			URI uuri;
+			String code;
+			try {
+				uuri = new URI(uri);
+				code = getDocument(uri);
+			} catch (URISyntaxException | IOException ex) {
+				return;
+			}
+			File f;
+			if("untitled".equals(uuri.getScheme())) {
+				// For open files that aren't saved to disk, the client sends something like "untitled:untitled-1",
+				// which isn't a valid file provider, so we can't call Paths.get on it. Instead, we just mock
+				// the name here. We also need to provide getAbsoluteFile, so that the below call to getParentFile
+				// will work.
+				f = new File(uuri.getSchemeSpecificPart()).getAbsoluteFile();
+			} else {
+				f = Paths.get(uuri).toFile();
+			}
+			if(!f.getName().endsWith(".msa")) {
+				return;
+			}
+
+			logd(() -> "Compiling " + f);
+
+			Environment env;
+			try {
+				// Cmdline mode disables things like security checks and whatnot.
+				// These may be present in the runtime environment,
+				// but it's not possible for us to tell that at this point.
+				env = Static.GenerateStandaloneEnvironment(false, EnumSet.of(RuntimeMode.CMDLINE));
+				// Make this configurable at some point. For now, however, we need this so we can get
+				// correct handling on minecraft functions.
+				env = env.cloneAndAdd(new CommandHelperEnvironment());
+			} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
+				throw new RuntimeException(ex);
+			}
+			CompilerEnvironment compilerEnv = env.getEnv(CompilerEnvironment.class);
+			compilerEnv.setLogCompilerWarnings(false); // No one would see them
+			GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
+			gEnv.SetRootFolder(f.getParentFile());
+			// Eventually we want to rework this so that this is available
+			Set<Class<? extends Environment.EnvironmentImpl>> envs = new HashSet<>();
+			for(Class<Environment.EnvironmentImpl> c
+					: ClassDiscovery.getDefaultInstance().loadClassesThatExtend(Environment.EnvironmentImpl.class)) {
+				envs.add(c);
+			}
+			try {
+				TokenStream tokens = MethodScriptCompiler.lex(code, env, f, false);
+				List<Script> scripts = MethodScriptCompiler.preprocess(tokens, envs);
+				future.complete(scripts);
+			} catch (ConfigCompileException ex) {
+				return;
+			}
+		});
+	}
 	/**
 	 * Compiles the file, on the given thread pool.
 	 * @param future After compilation is done, the parse tree is returned. May be null if you don't need it.
@@ -591,7 +659,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	@SuppressWarnings({"UseSpecificCatch", "SleepWhileInLoop"})
 	public void doCompilation(CompletableFuture<ParseTree> future, Executor threadPool, final String uri,
 			boolean withDelay) {
-		// This has to be finished before compile on change can be enavled, but for now compile on save is good enough
+		// This has to be finished before compile on change can be enabled, but for now compile on save is good enough
 //		if(compilerDelayThread == null) {
 //			compilerDelayThread = new Thread(() -> {
 //				try {
@@ -816,13 +884,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 
 	//</editor-fold>
 
-	public Range convertTargetToRange(ParseTree node) {
-		String val = Construct.nval(node.getData());
-		if(val == null) {
-			val = "null";
-		}
-		int tokenLength = val.length();
-		Target t = node.getTarget();
+	private static Range convertNakedTargetToRange(Target t, int tokenLength) {
 		if(tokenLength < 1) {
 			// Something went wrong, but we always want an error to show up, so set this here
 			tokenLength = 1;
@@ -847,7 +909,22 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		return new Range(start, end);
 	}
 
-	public Range convertTargetToRange(TokenStream tokens, Target t) {
+	public static Range convertTargetToRange(Script script, Target t) {
+		int tokenLength = script.getSignature().length();
+		return convertNakedTargetToRange(t, tokenLength);
+	}
+
+	public static Range convertTargetToRange(ParseTree node) {
+		String val = Construct.nval(node.getData());
+		if(val == null) {
+			val = "null";
+		}
+		int tokenLength = val.length();
+		Target t = node.getTarget();
+		return convertNakedTargetToRange(t, tokenLength);
+	}
+
+	public static Range convertTargetToRange(TokenStream tokens, Target t) {
 		int tokenLength = 5;
 		if(tokens != null) {
 			for(int i = 0; i < tokens.size(); i++) {
@@ -862,24 +939,12 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 			// Something went wrong, but we always want an error to show up, so set this here
 			tokenLength = 1;
 		}
-		// I'm not sure if the column offset -2 is because of a bug in the code target calculation,
-		// or due to how VSCode indexes the column numbers, but either way it seems most all errors
-		// suffer from the weird -2 offset.
-		Position start = new Position(t.line() - 1, t.col() - 2);
-		Position end = new Position(t.line() - 1, t.col() + tokenLength - 2);
-		if(start.getLine() < 0) {
-			start.setLine(0);
-		}
-		if(start.getCharacter() < 0) {
-			start.setCharacter(0);
-		}
-		if(end.getLine() < 0) {
-			end.setLine(0);
-		}
-		if(end.getCharacter() < 0) {
-			end.setCharacter(1);
-		}
-		return new Range(start, end);
+		return convertNakedTargetToRange(t, tokenLength);
+	}
+
+	public static Location convertTargetToLocation(Target t, Range range) {
+		Location location = new Location(t.file().toURI().toString(), range);
+		return location;
 	}
 
 	@Override
@@ -891,15 +956,6 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 	public void didChangeWatchedFiles(DidChangeWatchedFilesParams params) {
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
 	}
-
-//	@Override
-//	public CompletableFuture<Hover> hover(final TextDocumentPositionParams position) {
-//		final CompletableFuture<Hover> result = new CompletableFuture<>();
-//		processors.execute(() -> {
-//			position.getPosition().
-//		});
-//		return result;
-//	}
 
 	@Override
 	public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(CompletionParams position) {
@@ -928,6 +984,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		String uri = params.getTextDocument().getUri();
 		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
 		logv(() -> "Requested " + uri);
+
 		CompletableFuture<ParseTree> future = new CompletableFuture<>();
 		CompletableFuture<List<DocumentLink>> result = new CompletableFuture<>();
 		doCompilation(future, lowPriorityProcessors, uri, false);
@@ -945,9 +1002,9 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				if(node.getData() instanceof CFunction && ((CFunction) (node.getData())).hasFunction()) {
 					try {
 						Function f = ((CFunction) (node.getData())).getFunction();
-						if(f instanceof DocumentLinkProvider) {
+						if(f instanceof DocumentLinkProvider documentLinkProvider) {
 							logv(() -> "Found DocumentLinkProvider " + f.getName());
-							for(ParseTree link : ((DocumentLinkProvider) f).getDocumentLinks(node.getChildren())) {
+							for(ParseTree link : documentLinkProvider.getDocumentLinks(node.getChildren())) {
 								if(link.isConst()) {
 									File file = Static.GetFileFromArgument(link.getData().val(), env, link.getTarget(),
 											null);
@@ -971,6 +1028,63 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		});
 		return result;
 	}
+
+	@Override
+	public CompletableFuture<List<Either<SymbolInformation, DocumentSymbol>>> documentSymbol(DocumentSymbolParams params) {
+		String uri = params.getTextDocument().getUri();
+		logv(this.getClass().getName() + "." + StackTraceUtils.currentMethod() + " called");
+		logv(() -> "Requested symbols for " + uri);
+
+		CompletableFuture<List<Either<SymbolInformation, DocumentSymbol>>> result = new CompletableFuture<>();
+		List<Either<SymbolInformation, DocumentSymbol>> links = new ArrayList<>();
+
+		// TODO: Sort by kind/link name
+
+		// Different handling for msa and ms. msa returns aliases, ms returns procs and things.
+		if(uri.endsWith(".msa")) {
+			CompletableFuture<List<Script>> future = new CompletableFuture<>();
+			doPreprocess(future, lowPriorityProcessors, uri, false);
+			future.thenAccept((scripts) -> {
+				for(Script script : scripts) {
+					String link = script.getSignatureWithoutLabel();
+					link = link.replace("[ ", "[").replace(" ]", "]");
+					SymbolInformation docSymbol = new SymbolInformation(link, SymbolKind.Method,
+							convertTargetToLocation(script.getTarget(), convertTargetToRange(script, script.getTarget())));
+					links.add(Either.forLeft(docSymbol));
+				}
+				result.complete(links);
+			});
+		} else {
+			CompletableFuture<ParseTree> future = new CompletableFuture<>();
+			doCompilation(future, lowPriorityProcessors, uri, false);
+			future.thenAccept((tree) -> {
+				tree.getAllNodes().forEach(node -> {
+					if(node.getData() instanceof CFunction && ((CFunction) (node.getData())).hasFunction()) {
+						try {
+							Function f = ((CFunction) (node.getData())).getFunction();
+							if(f instanceof DocumentSymbolProvider documentSymbolProvider) {
+								logv(() -> "Found DocumentSymbolProvider " + f.getName());
+								String link = documentSymbolProvider.symbolDisplayName(node.getChildren());
+								if(link != null) {
+									SymbolInformation docSymbol = new SymbolInformation(link,
+											documentSymbolProvider.getSymbolKind(),
+											convertTargetToLocation(node.getTarget(), convertTargetToRange(node)));
+									links.add(Either.forLeft(docSymbol));
+								}
+							}
+						} catch (ConfigCompileException ex) {
+							// Ignore this. This can be caused errors, but the point is, it's not a
+							// valid symbol right now.
+						}
+					}
+				});
+				result.complete(links);
+			});
+		}
+		return result;
+	}
+
+
 
 	@Override
 	public CompletableFuture<Object> executeCommand(ExecuteCommandParams params) {
