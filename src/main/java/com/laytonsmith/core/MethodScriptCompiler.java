@@ -2469,6 +2469,11 @@ public final class MethodScriptCompiler {
 			try {
 				ParseTree tempNode;
 				try {
+					for(ParseTree child : tree.getChildren()) {
+						if(child.getData() instanceof CSymbol) {
+							throw new ConfigCompileException("Unexpected symbol", tree.getData().getTarget());
+						}
+					}
 					tempNode = ((Optimizable) func).optimizeDynamic(tree.getData().getTarget(), env, envs,
 							tree.getChildren(), tree.getFileOptions());
 				} catch (ConfigRuntimeException e) {
