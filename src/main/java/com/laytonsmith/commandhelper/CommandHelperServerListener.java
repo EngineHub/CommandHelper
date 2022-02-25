@@ -4,6 +4,7 @@ import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCBlockCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCConsoleCommandSender;
+import com.laytonsmith.abstraction.bukkit.BukkitMCRemoteConsoleCommandSender;
 import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
 import com.laytonsmith.abstraction.bukkit.events.BukkitServerEvents;
 import com.laytonsmith.abstraction.enums.MCChatColor;
@@ -15,6 +16,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.logging.Level;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.command.RemoteConsoleCommandSender;
 import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -27,12 +29,14 @@ public class CommandHelperServerListener implements Listener {
 	public void onServerCommand(ServerCommandEvent event) {
 		// Select the proper CommandSender wrapper.
 		MCCommandSender sender;
-		if(event.getSender() instanceof ConsoleCommandSender) { // Console.
-			sender = new BukkitMCConsoleCommandSender((ConsoleCommandSender) event.getSender());
-		} else if(event.getSender() instanceof BlockCommandSender) { // Commandblock blocks.
-			sender = new BukkitMCBlockCommandSender((BlockCommandSender) event.getSender());
-		} else if(event.getSender() instanceof CommandMinecart) { // Commandblock minecarts.
-			sender = new BukkitMCCommandMinecart((CommandMinecart) event.getSender());
+		if(event.getSender() instanceof ConsoleCommandSender consoleCommandSender) { // Console.
+			sender = new BukkitMCConsoleCommandSender(consoleCommandSender);
+		} else if(event.getSender() instanceof RemoteConsoleCommandSender remoteConsoleCommandSender) { // RCON
+			sender = new BukkitMCRemoteConsoleCommandSender(remoteConsoleCommandSender);
+		} else if(event.getSender() instanceof BlockCommandSender blockCommandSender) { // Commandblock blocks.
+			sender = new BukkitMCBlockCommandSender(blockCommandSender);
+		} else if(event.getSender() instanceof CommandMinecart commandMinecart) { // Commandblock minecarts.
+			sender = new BukkitMCCommandMinecart(commandMinecart);
 		} else { // other CommandSenders.
 			sender = new BukkitMCCommandSender(event.getSender());
 		}
