@@ -1,11 +1,7 @@
 package com.laytonsmith.commandhelper;
 
 import com.laytonsmith.abstraction.MCCommandSender;
-import com.laytonsmith.abstraction.bukkit.BukkitMCBlockCommandSender;
-import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
-import com.laytonsmith.abstraction.bukkit.BukkitMCConsoleCommandSender;
-import com.laytonsmith.abstraction.bukkit.BukkitMCRemoteConsoleCommandSender;
-import com.laytonsmith.abstraction.bukkit.entities.BukkitMCCommandMinecart;
+import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.events.BukkitServerEvents;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.InternalException;
@@ -14,32 +10,26 @@ import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.logging.Level;
-import org.bukkit.command.BlockCommandSender;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.command.RemoteConsoleCommandSender;
-import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.server.RemoteServerCommandEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 
 public class CommandHelperServerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onServerCommand(ServerCommandEvent event) {
-		// Select the proper CommandSender wrapper.
-		MCCommandSender sender;
-		if(event.getSender() instanceof ConsoleCommandSender consoleCommandSender) { // Console.
-			sender = new BukkitMCConsoleCommandSender(consoleCommandSender);
-		} else if(event.getSender() instanceof RemoteConsoleCommandSender remoteConsoleCommandSender) { // RCON
-			sender = new BukkitMCRemoteConsoleCommandSender(remoteConsoleCommandSender);
-		} else if(event.getSender() instanceof BlockCommandSender blockCommandSender) { // Commandblock blocks.
-			sender = new BukkitMCBlockCommandSender(blockCommandSender);
-		} else if(event.getSender() instanceof CommandMinecart commandMinecart) { // Commandblock minecarts.
-			sender = new BukkitMCCommandMinecart(commandMinecart);
-		} else { // other CommandSenders.
-			sender = new BukkitMCCommandSender(event.getSender());
-		}
+		processServerCommand(event);
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onRemoteCommand(RemoteServerCommandEvent event) {
+		processServerCommand(event);
+	}
+
+	private void processServerCommand(ServerCommandEvent event) {
+		MCCommandSender sender = BukkitConvertor.BukkitGetCorrectSender(event.getSender());
 
 		BukkitServerEvents.BukkitMCServerCommandEvent cce = new BukkitServerEvents.BukkitMCServerCommandEvent(event, sender);
 		EventUtils.TriggerListener(Driver.SERVER_COMMAND, "server_command", cce);

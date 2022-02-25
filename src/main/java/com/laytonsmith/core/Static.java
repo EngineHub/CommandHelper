@@ -665,14 +665,13 @@ public final class Static {
 	 */
 	public static void SendMessage(final MCCommandSender m, String msg, final Target t) {
 		if(m != null && !(m instanceof MCConsoleCommandSender)) {
-			if(m instanceof MCPlayer) {
-				MCPlayer p = (MCPlayer) m;
+			if(m instanceof MCPlayer p) {
 				if(!p.isOnline()) {
 					throw new CREPlayerOfflineException("The player " + p.getName() + " is not online", t);
 				}
 			}
 			m.sendMessage(msg);
-		} else if(m != null && m instanceof MCRemoteCommandSender rcon) {
+		} else if(m instanceof MCRemoteCommandSender rcon) {
 			if(!Prefs.UseColors()) {
 				msg = MCChatColor.stripColor(msg);
 			}
