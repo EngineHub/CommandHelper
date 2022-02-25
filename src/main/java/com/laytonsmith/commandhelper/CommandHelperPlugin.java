@@ -71,6 +71,7 @@ import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.command.RemoteConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.event.Event;
@@ -587,7 +588,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			if(sender instanceof Player) {
 				PlayerCommandPreprocessEvent pcpe = new PlayerCommandPreprocessEvent((Player) sender, command);
 				playerListener.onPlayerCommandPreprocess(pcpe);
-			} else if(sender instanceof ConsoleCommandSender
+			} else if(sender instanceof ConsoleCommandSender || sender instanceof RemoteConsoleCommandSender
 					|| sender instanceof BlockCommandSender || sender instanceof CommandMinecart) {
 				// Console commands and command blocks/minecarts all fire the same event, so pass them to the
 				// event handler that would get them if they would not have started with "/runalias".

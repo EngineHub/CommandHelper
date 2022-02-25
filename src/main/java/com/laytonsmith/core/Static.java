@@ -17,10 +17,12 @@ import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCPlugin;
+import com.laytonsmith.abstraction.MCRemoteCommandSender;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
@@ -416,13 +418,17 @@ public final class Static {
 	 */
 	public static void SendMessage(final MCCommandSender m, String msg, final Target t) {
 		if(m != null && !(m instanceof MCConsoleCommandSender)) {
-			if(m instanceof MCPlayer) {
-				MCPlayer p = (MCPlayer) m;
+			if(m instanceof MCPlayer p) {
 				if(!p.isOnline()) {
 					throw new CREPlayerOfflineException("The player " + p.getName() + " is not online", t);
 				}
 			}
 			m.sendMessage(msg);
+		} else if(m instanceof MCRemoteCommandSender rcon) {
+			if(!Prefs.UseColors()) {
+				msg = MCChatColor.stripColor(msg);
+			}
+			rcon.sendMessage(msg);
 		} else {
 			msg = Static.MCToANSIColors(msg);
 			if(msg.contains("\033")) {
