@@ -176,6 +176,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
+import org.bukkit.command.RemoteConsoleCommandSender;
 
 @convert(type = Implementation.Type.BUKKIT)
 public class BukkitConvertor extends AbstractConvertor {
@@ -797,14 +798,16 @@ public class BukkitConvertor extends AbstractConvertor {
 	}
 
 	public static MCCommandSender BukkitGetCorrectSender(CommandSender sender) {
-		if(sender instanceof Player) {
-			return new BukkitMCPlayer((Player) sender);
-		} else if(sender instanceof ConsoleCommandSender) {
-			return new BukkitMCConsoleCommandSender((ConsoleCommandSender) sender);
-		} else if(sender instanceof BlockCommandSender) {
-			return new BukkitMCBlockCommandSender((BlockCommandSender) sender);
-		} else if(sender instanceof CommandMinecart) {
-			return new BukkitMCCommandMinecart((CommandMinecart) sender);
+		if(sender instanceof Player player) {
+			return new BukkitMCPlayer(player);
+		} else if(sender instanceof ConsoleCommandSender consoleCommandSender) {
+			return new BukkitMCConsoleCommandSender(consoleCommandSender);
+		} else if(sender instanceof RemoteConsoleCommandSender remoteConsoleCommandSender) {
+			return new BukkitMCRemoteConsoleCommandSender(remoteConsoleCommandSender);
+		} else if(sender instanceof BlockCommandSender blockCommandSender) {
+			return new BukkitMCBlockCommandSender(blockCommandSender);
+		} else if(sender instanceof CommandMinecart commandMinecart) {
+			return new BukkitMCCommandMinecart(commandMinecart);
 		} else {
 			return new BukkitMCCommandSender(sender);
 		}

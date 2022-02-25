@@ -1,12 +1,12 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.MCConsoleCommandSender;
+import com.laytonsmith.abstraction.MCRemoteCommandSender;
 import org.bukkit.command.RemoteConsoleCommandSender;
 
 /**
  *
  */
-public class BukkitMCRemoteConsoleCommandSender extends BukkitMCCommandSender implements MCConsoleCommandSender {
+public class BukkitMCRemoteConsoleCommandSender extends BukkitMCCommandSender implements MCRemoteCommandSender {
 
 	RemoteConsoleCommandSender ccs;
 
