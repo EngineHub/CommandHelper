@@ -41,7 +41,7 @@ public class PersistenceNetworkImpl implements PersistenceNetwork {
 			if(f.getParentFile() != null) {
 				f.getParentFile().mkdirs();
 			}
-			
+
 			try {
 				f.createNewFile();
 			} catch (IOException ex) {
