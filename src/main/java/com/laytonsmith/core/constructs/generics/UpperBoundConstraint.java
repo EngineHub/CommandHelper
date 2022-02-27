@@ -78,12 +78,16 @@ public class UpperBoundConstraint extends BoundaryConstraint {
 
 			@Override
 			public Boolean isWithinBounds(UpperBoundConstraint lhs) {
-				return lhs.getUpperBound().doesExtend(UpperBoundConstraint.this.getUpperBound());
+				boolean subtypeMatches = true;
+				if(UpperBoundConstraint.this.genericParameters != null) {
+					subtypeMatches = UpperBoundConstraint.this.genericParameters.isWithinBounds(env, lhs.genericParameters);
+				}
+				return lhs.getUpperBound().doesExtend(UpperBoundConstraint.this.getUpperBound()) && subtypeMatches;
 			}
 
 			@Override
 			public Boolean isWithinBounds(UnboundedConstraint lhs) {
-				return true;
+				throw new Error("Unexpected constraint combination.");
 			}
 		};
 	}

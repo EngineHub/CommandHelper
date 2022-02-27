@@ -6,7 +6,9 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassLoading.DynamicEnum;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.annotations.MDynamicEnum;
 import com.laytonsmith.annotations.MEnum;
 import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
@@ -39,6 +41,7 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 
 	private final String fullyQualifiedName;
 	private Class<? extends Mixed> nativeClass;
+	private boolean nativeClassLoaded = false;
 
 	private FullyQualifiedClassName(String name) {
 		Objects.requireNonNull(name, "The name passed in may not be null");
@@ -68,11 +71,6 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 		try {
 			// Try first, if this is a fully qualified name
 			FullyQualifiedClassName fqcn = new FullyQualifiedClassName(unqualified);
-			try {
-				fqcn.nativeClass = NativeTypeList.getNativeClass(fqcn);
-			} catch (ClassNotFoundException ex) {
-				// Ignored, nativeClass will just stay null
-			}
 			odt.get(fqcn);
 			// It is, this would have thrown an exception otherwise
 			return fqcn;
@@ -99,12 +97,16 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 		}
 		String fqcn = m.value();
 		FullyQualifiedClassName f = new FullyQualifiedClassName(fqcn);
-		try {
-			f.nativeClass = NativeTypeList.getNativeEnumType(f).typeof().getNativeType();
-		} catch (ClassNotFoundException ex) {
-			// This can't happen, it would have already been the above error.
-			throw new Error(ex);
+		return f;
+	}
+
+	public static FullyQualifiedClassName forDynamicEnum(Class<? extends DynamicEnum> clazz) {
+		MDynamicEnum m = clazz.getAnnotation(MDynamicEnum.class);
+		if(m == null) {
+			throw new Error("Native dynamic enum " + clazz + " does not provide an MEnum annotation");
 		}
+		String fqcn = m.value();
+		FullyQualifiedClassName f = new FullyQualifiedClassName(fqcn);
 		return f;
 	}
 
@@ -123,6 +125,7 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 		String fqcn = t.value();
 		FullyQualifiedClassName f = new FullyQualifiedClassName(fqcn);
 		f.nativeClass = clazz;
+		f.nativeClassLoaded = true;
 		return f;
 	}
 
@@ -154,17 +157,15 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	 * between compilation and object specification encoding, so this can be used in the meantime to represent the
 	 * class.
 	 * <p>
-	 * If this represents a native class, use {@link #forNativeClass(java.lang.Class)} instead.
+	 * If this for sure represents a native class, use {@link #forNativeClass(java.lang.Class)} instead.
+	 * This is especially important during bootstrapping, though post bootstrap, it's fine to use, particularly
+	 * if this represents user input.
+	 *
 	 * @param qualified The fully qualified class name as a string
 	 * @return A FullyQualifiedClassName object
 	 */
 	public static FullyQualifiedClassName forFullyQualifiedClass(String qualified) {
 		FullyQualifiedClassName fqcn = new FullyQualifiedClassName(qualified);
-		try {
-			fqcn.nativeClass = NativeTypeList.getNativeClass(fqcn);
-		} catch (ClassNotFoundException ex) {
-			// Ignored, nativeClass will just stay null
-		}
 		return fqcn;
 	}
 
@@ -212,10 +213,28 @@ public final class FullyQualifiedClassName implements Comparable<FullyQualifiedC
 	}
 
 	/**
+	 * Returns true if the native class has been attempted to be loaded. This is really only useful for calls
+	 * from NativeTypeList, in order to break the circular dependency. Calls from outside of that class can safely
+	 * call getNativeClass directly, and it will have the correct behavior.
+	 * @return
+	 */
+	public boolean isNativeClassLoaded() {
+		return this.nativeClassLoaded;
+	}
+
+	/**
 	 * Returns the underlying native class, iff this is a native class.
 	 * @return The native class, or null.
 	 */
 	public Class<? extends Mixed> getNativeClass() {
+		if(!nativeClassLoaded) {
+			try {
+				this.nativeClass = NativeTypeList.getNativeClass(this);
+			} catch (ClassNotFoundException ex) {
+				// Ignored, nativeClass will just stay null
+			}
+		}
+		this.nativeClassLoaded = true;
 		return nativeClass;
 	}
 

@@ -51,10 +51,10 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	public static final String PATH_SEPARATOR = FullyQualifiedClassName.PATH_SEPARATOR;
 
 	/**
-	 * The NATIVE_CACHE caches natively defined classes. These have generally different lifetime rules, namely,
-	 * they always exist, and can't be undefined. Thus, we cache these here statically in CClassType, whereas
-	 * the user class cache exists as part of the environment.
-	 * TODO: Consider serializing this at compile time and loading it in at startup
+	 * The NATIVE_CACHE caches natively defined classes. These have generally different lifetime rules, namely, they
+	 * always exist, and can't be undefined. Thus, we cache these here statically in CClassType, whereas the user class
+	 * cache exists as part of the environment. TODO: Consider serializing this at compile time and loading it in at
+	 * startup
 	 */
 	private static final ClassTypeCache NATIVE_CACHE = new ClassTypeCache();
 
@@ -163,7 +163,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		try {
 			TYPE = new CClassType("ms.lang.ClassType", Target.UNKNOWN, null, CClassType.class);
 			AUTO = new CClassType("auto", Target.UNKNOWN, null, null);
-		} catch (ClassNotFoundException e) {
+		} catch(ClassNotFoundException e) {
 			throw new Error(e);
 		}
 	}
@@ -175,7 +175,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	public static final CClassType[] EMPTY_CLASS_ARRAY = new CClassType[0];
 
 	static {
-		NATIVE_CACHE.add(FullyQualifiedClassName.forNativeClass(CClassType.class), null , TYPE);
+		NATIVE_CACHE.add(FullyQualifiedClassName.forNativeClass(CClassType.class), null, TYPE);
 	}
 
 	@StandardField
@@ -192,9 +192,9 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	private Mixed invalidType = UNINITIALIZED;
 
 	/**
-	 * If this was constructed against a native class, we can do some optimizations in the course
-	 * of operation. This may be null, and all code in this class must support the mechanisms if this
-	 * is null anyways, but if it isn't null, then this can perhaps be used to help optimize.
+	 * If this was constructed against a native class, we can do some optimizations in the course of operation. This may
+	 * be null, and all code in this class must support the mechanisms if this is null anyways, but if it isn't null,
+	 * then this can perhaps be used to help optimize.
 	 */
 	private final Class<? extends Mixed> nativeClass;
 
@@ -203,13 +203,15 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	/**
 	 * Returns the singular instance of CClassType that represents this native type.
 	 *
-	 * <p>IMPORTANT: The type MUST be fully qualified AND exist as a real, instantiable class, or this will cause
-	 * errors. The only time this method is preferred vs {@link #get(FullyQualifiedClassName, Environment)} is
-	 * when used to define the TYPE value. The native class must also be provided at the same time, which is used
-	 * for various operations to increase efficiency when dealing with native classes. If the type is defined with
-	 * generics, use {@link #getWithGenericDeclaration(Class, GenericDeclaration)}.
+	 * <p>
+	 * IMPORTANT: The type MUST be fully qualified AND exist as a real, instantiable class, or this will cause errors.
+	 * The only time this method is preferred vs {@link #get(FullyQualifiedClassName, Environment)} is when used to
+	 * define the TYPE value. The native class must also be provided at the same time, which is used for various
+	 * operations to increase efficiency when dealing with native classes. If the type is defined with generics, use
+	 * {@link #getWithGenericDeclaration(Class, GenericDeclaration)}.
 	 *
 	 * Unlike the other getters, this will not throw a ClassNotFoundException, it will instead throw an Error.
+	 *
 	 * @param type The native class
 	 * @return A CClassType representing this native class
 	 */
@@ -220,12 +222,14 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	/**
 	 * Returns the singular instance of CClassType that represents this type.
 	 *
-	 * <p>IMPORTANT: The type MUST be fully qualified AND exist as a real, instantiable class, or this will cause
-	 * errors. The only time this method is preferred vs {@link #get(FullyQualifiedClassName, Environment)} is
-	 * when used to define the TYPE value. The native class must also be provided at the same time, which is used
-	 * for various operations to increase efficiency when dealing with native classes.
+	 * <p>
+	 * IMPORTANT: The type MUST be fully qualified AND exist as a real, instantiable class, or this will cause errors.
+	 * The only time this method is preferred vs {@link #get(FullyQualifiedClassName, Environment)} is when used to
+	 * define the TYPE value. The native class must also be provided at the same time, which is used for various
+	 * operations to increase efficiency when dealing with native classes.
 	 *
 	 * Unlike the other getters, this will not throw a ClassNotFoundException, it will instead throw an Error.
+	 *
 	 * @param type The native class
 	 * @return A CClassType representing this native class
 	 */
@@ -242,19 +246,20 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	/**
-	 * Returns the "naked class type". This is the type without any parameters defined. In general, this represents
-	 * a non-instantiatable class, but can be used in certain circumstances, particularly when the compiler needs to
+	 * Returns the "naked class type". This is the type without any parameters defined. In general, this represents a
+	 * non-instantiatable class, but can be used in certain circumstances, particularly when the compiler needs to
 	 * verify the generic declaration.
+	 *
 	 * @param type The type to get
-	 * @param env The environment. For native class definitions only, this may be null, but is a required parameter
-	 * in general. It's only safe to send null here if you're certain the class represented by {@code type}
-	 * exists in the native cache.
+	 * @param env The environment. For native class definitions only, this may be null, but is a required parameter in
+	 * general. It's only safe to send null here if you're certain the class represented by {@code type} exists in the
+	 * native cache.
 	 * @return The naked class type. This may return null if the class is not yet defined.
 	 */
 	public static CClassType getNakedClassType(FullyQualifiedClassName type, Environment env) {
 		try {
 			NativeTypeList.getNativeClass(type);
-		} catch (ClassNotFoundException e) {
+		} catch(ClassNotFoundException e) {
 			// Ignored, because we just want to load the Java class, which this method does.
 		}
 		if(NATIVE_CACHE.containsNakedClassType(type)) {
@@ -267,12 +272,12 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	/**
-	 * Returns the "naked class type". This is the type without any parameters defined. In general, this represents
-	 * a non-instantiatable class, but can be used in certain circumstances, particularly when the compiler needs to
+	 * Returns the "naked class type". This is the type without any parameters defined. In general, this represents a
+	 * non-instantiatable class, but can be used in certain circumstances, particularly when the compiler needs to
 	 * verify the generic declaration or for very generic instanceof checks.
 	 *
-	 * @param env The environment. If the FQCN represents a native class, this can safely be null, but otherwise, and
-	 * 	 * in general, is a required parameter.
+	 * @param env The environment. If the FQCN represents a native class, this can safely be null, but otherwise, and *
+	 * in general, is a required parameter.
 	 * @return The naked class for this CClassType, maybe just this object if the type already represents the naked
 	 * type.
 	 */
@@ -282,18 +287,18 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 
 	/**
 	 * <p>
-	 * 		<strong>NOTE:</strong> This can only be used in specific cases where it is known that the type doesn't have
-	 * 		generic parameters, or where you specifically want the naked type. This version of get should not be used in
-	 * 		general.
+	 * <strong>NOTE:</strong> This can only be used in specific cases where it is known that the type doesn't have
+	 * generic parameters, or where you specifically want the naked type. This version of get should not be used in
+	 * general.
 	 * </p>
-	 * Returns the singular instance of CClassType that represents this type. If it doesn't exist, it creates it, stores,
-	 * and returns that instance. Note that in general, == is not supported for these types. This method will only
-	 * succeed on types that don't have a generic declaration, for ones with, you must use
+	 * Returns the singular instance of CClassType that represents this type. If it doesn't exist, it creates it,
+	 * stores, and returns that instance. Note that in general, == is not supported for these types. This method will
+	 * only succeed on types that don't have a generic declaration, for ones with, you must use
 	 * {@link #get(FullyQualifiedClassName, Target, GenericParameters, Environment)}.
 	 *
 	 * @param type The fully qualified class type
-	 * @param env The environment. If the FQCN represents a native class, this can safely be null, but otherwise, and
-	 * in general, is a required parameter.
+	 * @param env The environment. If the FQCN represents a native class, this can safely be null, but otherwise, and in
+	 * general, is a required parameter.
 	 * @return The CClassType object for this FQCN
 	 */
 	public static CClassType get(FullyQualifiedClassName type, Environment env) {
@@ -301,47 +306,48 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	/**
-	 * Returns the singular instance of CClassType that represents this type. If it doesn't exist, it creates it, stores,
-	 * and returns that instance. Note that in general, == is not supported for these types, even though in general
-	 * it is correct to say that for each type, there will only be one instance.
+	 * Returns the singular instance of CClassType that represents this type. If it doesn't exist, it creates it,
+	 * stores, and returns that instance. Note that in general, == is not supported for these types, even though in
+	 * general it is correct to say that for each type, there will only be one instance.
 	 *
-	 * @param nakedType The top level type. This doesn't technically have to be the naked type, however, the
-	 * parameters that are perhaps contained in this class are discarded.
+	 * @param nakedType The top level type. This doesn't technically have to be the naked type, however, the parameters
+	 * that are perhaps contained in this class are discarded.
 	 * @param t The code target where this instance is being used.
 	 * @param generics The generics to be added to this CClassType
 	 * @return The CClassType object with the given generic parameter set
 	 * @throws NoClassDefFoundError If there are generic parameters defined as non-null, but the naked class has not
-	 * been defined yet. This shouldn't be possible except due to bugs in the code, because the general
-	 * approach for native classes is to use the TYPE value, and in creation of user classes, it's important
-	 * that the compiler does this correctly, rather than user code. Creation of the FullyQualifiedClassName may
-	 * throw a ClassNotFoundException however, but that will be handled elsewhere.
-	 * @throws CREGenericConstraintException In general, the generic parameters that are required
-	 * must be provided (or be able to be inferred) and so if these are malformed, this will be thrown.
-	 * For instance, if the naked type defines a new T() constraint, then a class will be required in
-	 * the generics, this cannot be inferred. If it's not provided, then this will be thrown.
+	 * been defined yet. This shouldn't be possible except due to bugs in the code, because the general approach for
+	 * native classes is to use the TYPE value, and in creation of user classes, it's important that the compiler does
+	 * this correctly, rather than user code. Creation of the FullyQualifiedClassName may throw a ClassNotFoundException
+	 * however, but that will be handled elsewhere.
+	 * @throws CREGenericConstraintException In general, the generic parameters that are required must be provided (or
+	 * be able to be inferred) and so if these are malformed, this will be thrown. For instance, if the naked type
+	 * defines a new T() constraint, then a class will be required in the generics, this cannot be inferred. If it's not
+	 * provided, then this will be thrown.
 	 */
 	public static CClassType get(CClassType nakedType, Target t, GenericParameters generics, Environment env) {
 		return get(nakedType.getFQCN(), t, generics, env);
 	}
 
 	/**
-	 * Returns the singular instance of CClassType that represents this type. If it doesn't exist, it creates it, stores,
-	 * and returns that instance. Note that in general, == is not supported for these types, even though in general
-	 * it is correct to say that for each type, there will only be one instance.
+	 * Returns the singular instance of CClassType that represents this type. If it doesn't exist, it creates it,
+	 * stores, and returns that instance. Note that in general, == is not supported for these types, even though in
+	 * general it is correct to say that for each type, there will only be one instance.
+	 *
 	 * @param type The fully qualified class name.
 	 * @param t The code target where this instance is being used.
 	 * @param generics The generics to be added to this CClassType
 	 * @return The CClassType object with the given generic parameter set
 	 *
 	 * @throws NoClassDefFoundError If there are generic parameters defined as non-null, but the naked class has not
-	 * been defined yet. This shouldn't be possible except due to bugs in the code, because the general
-	 * approach for native classes is to use the TYPE value, and in creation of user classes, it's important
-	 * that the compiler does this correctly, rather than user code. Creation of the FullyQualifiedClassName may
-	 * throw a ClassNotFoundException however, but that will be handled elsewhere.
-	 * @throws CREGenericConstraintException In general, the generic parameters that are required
-	 * must be provided (or be able to be inferred) and so if these are malformed, this will be thrown.
-	 * For instance, if the naked type defines a new T() constraint, then a class will be required in
-	 * the generics, this cannot be inferred. If it's not provided, then this will be thrown.
+	 * been defined yet. This shouldn't be possible except due to bugs in the code, because the general approach for
+	 * native classes is to use the TYPE value, and in creation of user classes, it's important that the compiler does
+	 * this correctly, rather than user code. Creation of the FullyQualifiedClassName may throw a ClassNotFoundException
+	 * however, but that will be handled elsewhere.
+	 * @throws CREGenericConstraintException In general, the generic parameters that are required must be provided (or
+	 * be able to be inferred) and so if these are malformed, this will be thrown. For instance, if the naked type
+	 * defines a new T() constraint, then a class will be required in the generics, this cannot be inferred. If it's not
+	 * provided, then this will be thrown.
 	 */
 	public static CClassType get(FullyQualifiedClassName type, Target t, GenericParameters generics, Environment env) {
 		Objects.requireNonNull(type);
@@ -380,23 +386,22 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	/**
-	 * This function defines a brand new class type. This should exclusively be used in a class
-	 * definition scenario, and never when simply looking up an existing class. The created
-	 * CClassType is returned.
+	 * This function defines a brand new class type. This should exclusively be used in a class definition scenario, and
+	 * never when simply looking up an existing class. The created CClassType is returned.
 	 */
 	public static CClassType defineClass(FullyQualifiedClassName fqcn, GenericDeclaration genericDeclaration,
-										 Environment env, Class<? extends Mixed> nativeClass) {
+			Environment env, Class<? extends Mixed> nativeClass) {
 		try {
 			return new CClassType(fqcn, Target.UNKNOWN, true, genericDeclaration, env,
 					nativeClass);
-		} catch (ClassNotFoundException ex) {
+		} catch(ClassNotFoundException ex) {
 			throw new Error(ex);
 		}
 	}
 
 	/**
-	 * INTERNAL ONLY: This can only be used for defining CClassType itself, as well as any other special types
-	 * such as AUTO.
+	 * INTERNAL ONLY: This can only be used for defining CClassType itself, as well as any other special types such as
+	 * AUTO.
 	 */
 	private CClassType(String type, Target t, GenericDeclaration genericDeclaration, Class<? extends Mixed> nativeClass)
 			throws ClassNotFoundException {
@@ -411,14 +416,14 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * @param t The code target
 	 * @param newDefinition If true, this function MUST NOT throw a ClassNotFoundException.
 	 * @param genericDeclaration The generic declaration for this class. May be null if no generics are being defined.
-	 * @param env The environment. The class will be added to the environment's cache if this is a user class. This
-	 * can safely be null for native classes.
+	 * @param env The environment. The class will be added to the environment's cache if this is a user class. This can
+	 * safely be null for native classes.
 	 * @param nativeClass The native class, if that's applicable. May be null, and all code will have to accept that
 	 * this value might be null for user classes.
 	 */
 	@SuppressWarnings("ConvertToStringSwitch")
 	private CClassType(FullyQualifiedClassName type, Target t, boolean newDefinition,
-					   GenericDeclaration genericDeclaration, Environment env, Class<? extends Mixed> nativeClass)
+			GenericDeclaration genericDeclaration, Environment env, Class<? extends Mixed> nativeClass)
 			throws ClassNotFoundException {
 		super(type.getFQCN(), ConstructType.CLASS_TYPE, t);
 		fqcn = type;
@@ -462,12 +467,13 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 
 	/**
 	 * Creates a genericized version of an existing naked class definition.
+	 *
 	 * @param nakedType The naked type, that is, the one that contains just the generic declaration with no parameters.
 	 * @param t Code target
 	 * @param genericParameters The concrete generic parameters
 	 */
 	private CClassType(CClassType nakedType, Target t, GenericParameters genericParameters, ClassTypeCache cache) {
-		super(nakedType.getFQCN()+ (genericParameters == null ? "" : genericParameters.toString()),
+		super(nakedType.getFQCN() + (genericParameters == null ? "" : genericParameters.toString()),
 				ConstructType.CLASS_TYPE, t);
 		this.genericDeclaration = nakedType.getGenericDeclaration(); // same declaration as "parent" class
 		fqcn = nakedType.fqcn;
@@ -478,9 +484,9 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 
 	/**
 	 * While we would prefer to instantiate invalidType in the constructor, we can't, because this initializes the type,
-	 * which occurs first when TYPE is initialized, that is, before the class is valid. Therefore, we cannot actually
-	 * do that in the constructor, we need to lazy load it. We do take pains in the constructor to ensure that there is
-	 * at least no way this will throw a ClassCastException, so given that, we are able to supress that exception here.
+	 * which occurs first when TYPE is initialized, that is, before the class is valid. Therefore, we cannot actually do
+	 * that in the constructor, we need to lazy load it. We do take pains in the constructor to ensure that there is at
+	 * least no way this will throw a ClassCastException, so given that, we are able to supress that exception here.
 	 */
 	private void instantiateInvalidType(Environment env) {
 		if(this.invalidType != UNINITIALIZED) {
@@ -508,7 +514,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 						invalidType = new UserObject(Target.UNKNOWN, null, env, od, null);
 					}
 				}
-			} catch (ClassNotFoundException | ObjectDefinitionNotFoundException ex) {
+			} catch(ClassNotFoundException | ObjectDefinitionNotFoundException ex) {
 				throw new Error(ex);
 			}
 		}
@@ -559,7 +565,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 				// TODO
 				throw new ClassNotFoundException();
 			}
-		} catch (ClassNotFoundException ex) {
+		} catch(ClassNotFoundException ex) {
 			throw new RuntimeException(ex);
 		}
 		return true;
@@ -622,7 +628,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	/**
-	 *  Returns the interfaces for the underlying type, not the interfaces for ClassType itself.
+	 * Returns the interfaces for the underlying type, not the interfaces for ClassType itself.
 	 */
 	public CClassType[] getTypeInterfaces(Environment env) {
 		instantiateInvalidType(env);
@@ -631,8 +637,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	/**
-	 * Returns the package that this class is in. If the class is not in a package, null
-	 * is returned.
+	 * Returns the package that this class is in. If the class is not in a package, null is returned.
 	 */
 	public CPackage getPackage() {
 		if(!val().contains(PATH_SEPARATOR)) {
@@ -673,6 +678,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	/**
 	 * Returns the fully qualified class name for the class. Note that this is just the name of the class, not the
 	 * complete type definition. See {@link #getTypeDefinition}.
+	 *
 	 * @return <code>ms.lang.ClassType</code> for instance.
 	 */
 	public FullyQualifiedClassName getFQCN() {
@@ -681,7 +687,8 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 
 	/**
 	 * Returns the type definition, including generic definitions.
-	 * @return <code>ms.lang.ClassType&gt;T&lt;</code> for instance.
+	 *
+	 * @return <code>ms.lang.ClassType&lt;T&gt;</code> for instance.
 	 */
 	public String getTypeDefinition() {
 		return val();
@@ -708,7 +715,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		if(isEnum()) {
 			try {
 				return NativeTypeList.getNativeEnumType(fqcn).get(index, t, env);
-			} catch (ClassNotFoundException ex) {
+			} catch(ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -720,7 +727,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		if(isEnum()) {
 			try {
 				return NativeTypeList.getNativeEnumType(fqcn).get(index, t, env);
-			} catch (ClassNotFoundException ex) {
+			} catch(ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -732,7 +739,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		if(isEnum()) {
 			try {
 				return NativeTypeList.getNativeEnumType(fqcn).get(index, t, env);
-			} catch (ClassNotFoundException ex) {
+			} catch(ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -744,7 +751,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		if(isEnum()) {
 			try {
 				return NativeTypeList.getNativeEnumType(fqcn).keySet();
-			} catch (ClassNotFoundException ex) {
+			} catch(ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -756,7 +763,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		if(isEnum()) {
 			try {
 				return NativeTypeList.getNativeEnumType(fqcn).size();
-			} catch (ClassNotFoundException ex) {
+			} catch(ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -779,9 +786,9 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	/**
-	 * If this was constructed against a native class, we can do some optimizations in the course
-	 * of operation. This may be null, and all code that uses this method must support the mechanisms if this
-	 * is null anyways, but if it isn't null, then this can perhaps be used to help optimize.
+	 * If this was constructed against a native class, we can do some optimizations in the course of operation. This may
+	 * be null, and all code that uses this method must support the mechanisms if this is null anyways, but if it isn't
+	 * null, then this can perhaps be used to help optimize.
 	 */
 	public Class<? extends Mixed> getNativeType() {
 		return nativeClass;
@@ -795,7 +802,8 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	/**
 	 * Returns the generic declaration on the class itself.
 	 *
-	 * @return null if no generics were defined on this class, or else the {@link GenericDeclaration} for this ClassType.
+	 * @return null if no generics were defined on this class, or else the {@link GenericDeclaration} for this
+	 * ClassType.
 	 */
 	public GenericDeclaration getGenericDeclaration() {
 		return genericDeclaration;
@@ -803,6 +811,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 
 	/**
 	 * Returns the generic parameters on the instance of the class.
+	 *
 	 * @return null if no generics are defined on this class, or they were, but it's the naked class.
 	 */
 	public GenericParameters getGenericParameters() {
@@ -820,9 +829,10 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 
 		/**
 		 * Adds a new class to the cache.
+		 *
 		 * @param fqcn The fully qualified class name
 		 * @param parameters The parameters for this instance. This may be null, both if the class has no generic
-		 *                   definition, but also if this is the naked class.
+		 * definition, but also if this is the naked class.
 		 * @param type The CClassType.
 		 */
 		private void add(FullyQualifiedClassName fqcn, GenericParameters parameters, CClassType type) {
@@ -830,10 +840,9 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		}
 
 		/**
-		 * Returns the naked class, that is, the class without a defined parameter set. This may
-		 * return null if the class has not been defined at all. Note that all classes without generic
-		 * parameters are considered "naked", but then those would have been added with a null parameter
-		 * set anyways, which should be equivalent.
+		 * Returns the naked class, that is, the class without a defined parameter set. This may return null if the
+		 * class has not been defined at all. Note that all classes without generic parameters are considered "naked",
+		 * but then those would have been added with a null parameter set anyways, which should be equivalent.
 		 */
 		private CClassType getNakedClassType(FullyQualifiedClassName fqcn) {
 			return get(fqcn, null);
@@ -841,9 +850,10 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 
 		/**
 		 * Gets the CClassType instance for this FQCN and parameter set.
+		 *
 		 * @param fqcn The fully qualified class name
-		 * @param declaration The parameter declaration. Null if this is a type without a parameter declaration, or
-		 *                    if you wish to get the naked class.
+		 * @param declaration The parameter declaration. Null if this is a type without a parameter declaration, or if
+		 * you wish to get the naked class.
 		 */
 		private CClassType get(FullyQualifiedClassName fqcn, GenericParameters declaration) {
 			return cache.get(new Pair<>(fqcn, declaration));

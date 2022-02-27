@@ -102,14 +102,14 @@ public class NativeTypeList {
 							.getClassesWithAnnotationThatExtend(MEnum.class, Enum.class)) {
 						String name = (String) c.getAnnotation(MEnum.class).getValue("value");
 						nativeTypes.add(name);
-						fqNativeTypesPrivate.add(FullyQualifiedClassName.forFullyQualifiedClass(name));
+						fqNativeTypesPrivate.add(FullyQualifiedClassName.forNativeEnum(c.loadClass()));
 					}
 
 					for(ClassMirror<? extends DynamicEnum> c : ClassDiscovery.getDefaultInstance()
 							.getClassesWithAnnotationThatExtend(MDynamicEnum.class, DynamicEnum.class)) {
 						String name = (String) c.getAnnotation(MDynamicEnum.class).getValue("value");
 						nativeTypes.add(name);
-						fqNativeTypesPrivate.add(FullyQualifiedClassName.forFullyQualifiedClass(name));
+						fqNativeTypesPrivate.add(FullyQualifiedClassName.forDynamicEnum(c.loadClass()));
 					}
 					fqNativeTypes = fqNativeTypesPrivate;
 					NativeTypeList.nativeTypes = nativeTypes;
@@ -144,7 +144,7 @@ public class NativeTypeList {
 	 * be thrown.
 	 */
 	public static Class<? extends Mixed> getNativeClass(FullyQualifiedClassName fqcn) throws ClassNotFoundException {
-		if(fqcn.getNativeClass() != null) {
+		if(fqcn.isNativeClassLoaded() && fqcn.getNativeClass() != null) {
 			return fqcn.getNativeClass();
 		}
 		// This is super super expensive, so we cannot afford to run this more than once per class. Even more
@@ -212,7 +212,7 @@ public class NativeTypeList {
 		}
 		try {
 			Class<? extends Enum<?>> e = getNativeEnum(fqcn);
-			return MEnumType.FromEnum(fqcn, (Class<Enum<?>>) e, null,null, null);
+			return MEnumType.FromEnum(fqcn, (Class<Enum<?>>) e, null, null, null);
 		} catch (ClassNotFoundException ex) {
 			// Try DynamicEnums
 			for(ClassMirror<? extends DynamicEnum> c : ClassDiscovery.getDefaultInstance()

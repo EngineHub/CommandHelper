@@ -2,7 +2,6 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.annotations.typeof;
-import com.laytonsmith.core.FullyQualifiedClassName;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -146,34 +145,6 @@ public class InstanceofUtil {
 	}
 
 	/**
-	 * This contains only naked CClassTypes.
-	 */
-	private static final Map<CClassType, Set<CClassType>> ISINSTANCEOF_CACHE = new HashMap<>();
-
-	/**
-	 * This function returns true if a value of a certain type is assignable to the given type. In general, this is
-	 * precisely equivalent to {@link #isInstanceof(CClassType, CClassType, LeftHandGenericUse, Environment)} except
-	 * this allows for null to be assigned to any value in general. The only exception to this rule is if the type is
-	 * defined with the NotNull annotation.
-	 * @param type The type to check for.
-	 *             Java {@code null} can be used to indicate no type (e.g. from control flow breaking statements),
-	 *             though this is in general the wrong method to use for this type of check.
-	 * @param instanceofThis The type of the variable to determine if this can be assigned.
-	 * @param instanceofThisGenerics The type of the LHS to validate against.
-	 * @param env
-	 * @return
-	 */
-	public static boolean isAssignableTo(CClassType type, CClassType instanceofThis, LeftHandGenericUse instanceofThisGenerics, Environment env) {
-		if(
-				type != null && type.getNakedType(env).equals(CNull.TYPE)
-				// TODO: Check for NotNull anntoation on instanceofThis
-		) {
-			return true;
-		}
-		return isInstanceof(type, instanceofThis, instanceofThisGenerics, env);
-	}
-
-	/**
 	 * Returns whether or not a given MethodScript type is an instance of the specified MethodScript type.
 	 * The following rules apply in the given order:
 	 * <ul>
@@ -257,13 +228,32 @@ public class InstanceofUtil {
 		return type.getGenericParameters().isInstanceof(instanceofThisGenerics, env);
 	}
 
-	private static FullyQualifiedClassName typeof(Class<? extends Mixed> c) {
-		typeof type = ClassDiscovery.GetClassAnnotation(c, typeof.class);
-		if(type == null) {
-			return null;
-		} else {
-			return FullyQualifiedClassName.forNativeClass(c);
+	/**
+	 * This contains only naked CClassTypes.
+	 */
+	private static final Map<CClassType, Set<CClassType>> ISINSTANCEOF_CACHE = new HashMap<>();
+
+	/**
+	 * This function returns true if a value of a certain type is assignable to the given type. In general, this is
+	 * precisely equivalent to {@link #isInstanceof(CClassType, CClassType, LeftHandGenericUse, Environment)} except
+	 * this allows for null to be assigned to any value in general. The only exception to this rule is if the type is
+	 * defined with the NotNull annotation.
+	 * @param type The type to check for.
+	 *             Java {@code null} can be used to indicate no type (e.g. from control flow breaking statements),
+	 *             though this is in general the wrong method to use for this type of check.
+	 * @param instanceofThis The type of the variable to determine if this can be assigned.
+	 * @param instanceofThisGenerics The type of the LHS to validate against.
+	 * @param env
+	 * @return
+	 */
+	public static boolean isAssignableTo(CClassType type, CClassType instanceofThis, LeftHandGenericUse instanceofThisGenerics, Environment env) {
+		if(
+				type != null && type.getNakedType(env).equals(CNull.TYPE)
+				// TODO: Check for NotNull anntoation on instanceofThis
+		) {
+			return true;
 		}
+		return isInstanceof(type, instanceofThis, instanceofThisGenerics, env);
 	}
 
 }

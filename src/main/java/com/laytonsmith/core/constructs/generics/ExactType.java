@@ -93,7 +93,7 @@ public class ExactType extends Constraint {
 
 			@Override
 			public Boolean isWithinBounds(UnboundedConstraint lhs) {
-				return false;
+				throw new Error("Unexpected constraint combination.");
 			}
 		};
 	}

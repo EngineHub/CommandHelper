@@ -29,7 +29,6 @@ import java.net.URL;
 import java.util.AbstractList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -80,9 +79,9 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	public static MEnumType FromPartialEnum(FullyQualifiedClassName fqcn, final Class<?> enumClass, Environment env,
 			Enum<?>[] values, String docs, Version since) {
 		final Enum<?>[] constants = values;
-		if(fqcn.getNativeClass() == null) {
-			Objects.requireNonNull(env);
-		}
+//		if(fqcn.getNativeClass() == null) {
+//			Objects.requireNonNull(env);
+//		}
 //		final CClassType typeof = CClassType.get(fqcn, env);
 		return new MEnumType() {
 			@Override

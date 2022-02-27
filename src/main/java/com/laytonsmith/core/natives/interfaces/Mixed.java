@@ -106,12 +106,13 @@ public interface Mixed extends Cloneable, Documentation {
 
 	/**
 	 * Generally speaking, we cannot use Java's instanceof keyword to determine if something is an instanceof, because
-	 * user classes do not extend the hierarchy of objects in MethodScript. Essentially, we need to extend Java's
+	 * user classes do not extend the hierarchy of objects in MethodScript.Essentially, we need to extend Java's
 	 * instanceof keyword, so in order to do that, we must compare objects with a custom method, rather than rely on
 	 * Java's keyword.
 	 *
-	 * @param type
+	 * @param type The CClassType to check against
 	 * @param lhsGenericParameters The LHS generic definition (may be null)
+	 * @param env The environment
 	 * @return
 	 */
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env);

@@ -1,6 +1,5 @@
 package com.laytonsmith.core.constructs.generics;
 
-import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 

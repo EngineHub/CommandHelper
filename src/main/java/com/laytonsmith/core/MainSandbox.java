@@ -5,16 +5,16 @@ package com.laytonsmith.core;
 import java.util.Arrays;
 
 /**
- * This class is for testing concepts
+ * This class is for testing concepts. Please zero out this class other than the main and general utility functions
+ * before committing.
  */
 public class MainSandbox {
 
-	static class C<T extends Number> {
-
-	}
+	public static class A<T extends Number> {}
 
     public static void main(String[] args) throws Exception {
-		C<? extends Number> c = new C<Integer>();
+//		A<? super Object> a;
+//		a = new A<? extends Number>();
 	}
 
 	public static void print(Object o) {

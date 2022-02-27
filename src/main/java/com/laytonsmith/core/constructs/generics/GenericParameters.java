@@ -21,7 +21,7 @@ import java.util.List;
  * general anyways.
  */
 @StandardField
-public class GenericParameters {
+public final class GenericParameters {
 
 	private GenericDeclaration genericDeclaration;
 	private List<Pair<CClassType, LeftHandGenericUse>> parameters;
@@ -51,7 +51,7 @@ public class GenericParameters {
 		return lhs.withinBounds(rhsType, rhsGenerics, env);
 	}
 
-	public static class GenericParametersBuilder {
+	public static final class GenericParametersBuilder {
 		GenericParameters p;
 		private GenericParametersBuilder(GenericParameters p) {
 			this.p = p;

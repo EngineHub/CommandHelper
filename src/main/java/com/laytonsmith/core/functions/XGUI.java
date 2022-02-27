@@ -18,15 +18,18 @@ import com.laytonsmith.core.exceptions.CRE.CREIOException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import java.awt.Color;
+import java.awt.Desktop;
+import java.awt.Window;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 /**
  *

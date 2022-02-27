@@ -82,7 +82,7 @@ public class LowerBoundConstraint extends BoundaryConstraint {
 
 			@Override
 			public Boolean isWithinBounds(UnboundedConstraint lhs) {
-				return true;
+				throw new Error("Unexpected constraint combination.");
 			}
 		};
 	}

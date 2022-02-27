@@ -64,7 +64,7 @@ public class IVariable extends Construct implements Cloneable {
 	 * @throws NullPointerException If the value was null
 	 */
 	public IVariable(CClassType type, String name, Mixed value, Target t, LeftHandGenericUse genericDefinition,
-					 Environment env) throws ConfigCompileException {
+					Environment env) throws ConfigCompileException {
 		super(name, ConstructType.IVARIABLE, t);
 		if(!name.matches(VARIABLE_NAME_REGEX)) {
 			throw new ConfigCompileException("IVariables must match the regex: " + VARIABLE_NAME_REGEX, t);

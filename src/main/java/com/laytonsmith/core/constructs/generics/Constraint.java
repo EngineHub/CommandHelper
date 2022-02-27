@@ -88,11 +88,12 @@ public abstract class Constraint implements Comparable<Constraint> {
 
 	/**
 	 * Returns true if the provided constraint is within the bounds defined by this constraint, false if it isn't.
-	 *
 	 * Given that class Z extends class Y which extends class X, and class Z has a public no arg constructor,
 	 * consider the following class definition: <code>class C&lt;T extends X & new T()&gt;</code> and the LHS
-	 * definition: <code>C&lt;? extends Y & new ?()&gt;</code> and the RHS <code>new C&lt;Z&gt;()</code>. This code
-	 * is perfectly valid, however, when validating the LHS, we will compare the LHS constraint <code>new ?()</code> to
+	 * definition: <code>C&lt;? extends Y & new ?()&gt;</code> and the RHS <code>new C&lt;Z&gt;()</code>.
+	 *
+	 * This code is perfectly valid, however, when validating the LHS, we will compare the LHS constraint
+	 * <code>new ?()</code> to
 	 * the definition constraint <code>? extends Y</code>. These don't compare at all, because we don't have enough
 	 * information to compare these, however, comparing the RHS <code>Z</code> to both <code>? extends Y</code> and
 	 * <code>new ?()</code>, they both do apply.
@@ -106,23 +107,27 @@ public abstract class Constraint implements Comparable<Constraint> {
 	 * returns true, and none of them return false.
 	 *
 	 * @param lhs The constraint to determine if is in bounds of this constraint
+	 * @param env The environment.
 	 * @return True if the constraint is within the bounds, false otherwise.
 	 */
 	public final Boolean isWithinConstraint(Constraint lhs, Environment env) {
 		ConstraintToConstraintValidator validator = this.getConstraintToConstraintValidator(env);
+		Boolean baseResult = false;
 		if(lhs instanceof ConstructorConstraint c) {
-			return validator.isWithinBounds(c);
+			baseResult = validator.isWithinBounds(c);
 		} else if(lhs instanceof ExactType c) {
-			return validator.isWithinBounds(c);
+			baseResult = validator.isWithinBounds(c);
 		} else if(lhs instanceof LowerBoundConstraint c) {
-			return validator.isWithinBounds(c);
+			baseResult = validator.isWithinBounds(c);
 		} else if(lhs instanceof UpperBoundConstraint c) {
-			return validator.isWithinBounds(c);
+			baseResult = validator.isWithinBounds(c);
 		} else if(lhs instanceof UnboundedConstraint c) {
-			return validator.isWithinBounds(c);
+			baseResult = validator.isWithinBounds(c);
 		} else {
 			throw new Error("Unhandled constraint type");
 		}
+		return baseResult;
+
 	}
 
 	/**

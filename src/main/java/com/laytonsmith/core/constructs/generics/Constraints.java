@@ -77,9 +77,12 @@ public class Constraints implements Iterable<Constraint> {
 
 	/**
 	 * Validates that the given set of Constraints is within the bounds of these contraints. This can be used to validate
-	 * LHS against the class definition. Use {@link #withinBounds(CClassType, LeftHandGenericUse, Environment)} to validate RHS
+	 * LHS against the class definition.Use {@link #withinBounds(CClassType, LeftHandGenericUse, Environment)} to validate RHS
 	 * against LHS.
 	 * @param lhs The other, presumably subtype to compare against.
+	 * @param errors The ongoing list of errors with this statement.
+	 * @param env The environment.
+	 * @return If the provided constraints are within the bounds of these constraints.
 	 */
 	public boolean withinBounds(Constraints lhs, List<String> errors, Environment env) {
 		for(Constraint t : constraints) {
@@ -108,10 +111,11 @@ public class Constraints implements Iterable<Constraint> {
 
 	/**
 	 * Validates that this concrete type (and perhaps the concrete type's generics) fit within the boundary
-	 * specified in the LHS constraint. This is used to validate the RHS against the LHS. Use
+	 * specified in the LHS constraint.This is used to validate the RHS against the LHS. Use
 	 * {@link #withinBounds(Constraints, List, Environment)} to validate the LHS against the definition.
 	 * @param rhsType The RHS type
 	 * @param rhsGenerics The LHS generics that are associated with the RHS.
+	 * @param env
 	 * @return If the specified RHS types passed in fit within the bounds of these Constraints
 	 */
 	public boolean withinBounds(CClassType rhsType, LeftHandGenericUse rhsGenerics, Environment env) {
@@ -225,7 +229,7 @@ public class Constraints implements Iterable<Constraint> {
 
 		constraints.add(GetConstraint(buf.toString(), t, location, env));
 
-		return new Constraints(t, location, constraints.toArray(new Constraint[0]));
+		return new Constraints(t, location, constraints.toArray(Constraint[]::new));
 	}
 
 	/*package*/ static Constraint GetConstraint(String s, Target t,
@@ -238,9 +242,22 @@ public class Constraints implements Iterable<Constraint> {
 		boolean inName = true;
 		boolean inKeyword = false;
 		boolean isNewConstraint = false;
+		int subGenericStack = 0;
 		int newParenthesisStack = 0;
 		StringBuilder buf = new StringBuilder();
 		for(Character c : s.trim().toCharArray()) {
+			if(c == '<') {
+				subGenericStack++;
+			}
+			if(c == '>') {
+				subGenericStack--;
+				buf.append(c);
+				continue;
+			}
+			if(subGenericStack > 0) {
+				buf.append(c);
+				continue;
+			}
 			if(!isNewConstraint && inName && Character.isWhitespace(c)) {
 				name = buf.toString();
 				buf = new StringBuilder();
@@ -249,10 +266,11 @@ public class Constraints implements Iterable<Constraint> {
 					name = "";
 					continue;
 				}
-				inName = false;
 				inKeyword = true;
+				inName = false;
 				continue;
 			}
+
 			if(inKeyword && Character.isWhitespace(c)) {
 				keyword = buf.toString();
 				buf = new StringBuilder();
@@ -292,7 +310,8 @@ public class Constraints implements Iterable<Constraint> {
 				if("?".equals(typename)) {
 					return ExactType.AsUnboundedWildcard(t);
 				} else {
-					return new ExactType(t, CClassType.get(FullyQualifiedClassName.forName(typename, t, env), t, null, env), null);
+					clazz = ParseClassType(typename, t, env);
+					return new ExactType(t, clazz.getKey(), clazz.getValue());
 				}
 			}
 		}

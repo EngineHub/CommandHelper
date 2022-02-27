@@ -233,7 +233,7 @@ public class ConfigRuntimeException extends RuntimeException {
 	 */
 	@SuppressWarnings("ThrowableResultIgnored")
 	private static void DoReport(String message, String exceptionType, ConfigRuntimeException ex,
-								 List<StackTraceElement> stacktrace, MCPlayer currentPlayer, Environment env) {
+			List<StackTraceElement> stacktrace, MCPlayer currentPlayer, Environment env) {
 		String type = exceptionType;
 		if(exceptionType == null) {
 			type = "FATAL";

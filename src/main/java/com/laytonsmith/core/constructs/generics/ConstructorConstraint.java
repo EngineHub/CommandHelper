@@ -85,7 +85,7 @@ public class ConstructorConstraint extends Constraint {
 
 			@Override
 			public Boolean isWithinBounds(UnboundedConstraint lhs) {
-				return null;
+				throw new Error("Unexpected constraint combination.");
 			}
 		};
 	}

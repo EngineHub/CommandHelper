@@ -162,11 +162,11 @@ public class GenericsTest {
 			try {
 				TestValidationDefinitionAndLHS(definition, lhs);
 				if(rhs != null) {
-					TestValdationLHSAndRHS(lhs, rhs, rhsGenerics);
+					TestValidationLHSAndRHS(lhs, rhs, rhsGenerics);
 				}
 			} catch (Exception e) {
 				if(expected == Expected.PASS) {
-					e.printStackTrace();
+					e.printStackTrace(System.out);
 					fail("Failed on " + this.toString() + " because " + e.toString());
 				} else {
 					// Good.
@@ -180,13 +180,13 @@ public class GenericsTest {
 
 		@Override
 		public String toString() {
-			return "GenericTestCase{" +
-					", definition='" + definition + '\'' +
-					", lhs='" + lhs + '\'' +
-					", rhs=" + rhs +
-					", rhsGenerics='" + rhsGenerics + '\'' +
-					", expected=" + expected +
-					'}';
+			return "GenericTestCase{"
+					+ "definition='" + definition + '\''
+					+ ", lhs='" + lhs + '\''
+					+ ", rhs=" + rhs
+					+ ", rhsGenerics='" + rhsGenerics + '\''
+					+ ", expected=" + expected
+					+ '}';
 		}
 	}
 
@@ -202,40 +202,56 @@ public class GenericsTest {
 		}
 		for(int i = 0; i < cs.length; i++) {
 			List<String> errors = new ArrayList<>();
-			cs[0].withinBounds(lh[0], errors, env);
+			cs[i].withinBounds(lh[i], errors, env);
 			if(!errors.isEmpty()) {
 				throw new Exception(StringUtils.Join(errors, "\n"));
 			}
 		}
 	}
 
-	public void TestValdationLHSAndRHS(String lhs, CClassType rhs, String rhsGenerics) throws Exception {
+	public void TestValidationLHSAndRHS(String lhs, CClassType rhs, String rhsGenerics) throws Exception {
 		Constraints[] lh = Constraints.BuildFromString(lhs, ConstraintLocation.LHS, Target.UNKNOWN, env);
 		if(lh.length != 1) {
 			throw new Exception("Invalid length, only one template parameter is allowed");
 		}
-		if(!lh[0].withinBounds(rhs, rhsGenerics == null ? null : new LeftHandGenericUse(rhs, Target.UNKNOWN, env, Constraints.BuildFromString(rhsGenerics, ConstraintLocation.LHS, Target.UNKNOWN, env)), env)) {
+		if(!lh[0].withinBounds(rhs, rhsGenerics == null
+				? null
+				: new LeftHandGenericUse(rhs, Target.UNKNOWN, env, Constraints.BuildFromString(rhsGenerics, ConstraintLocation.LHS, Target.UNKNOWN, env)), env)) {
 			throw new Exception("Not in bounds");
 		}
 	}
 
 	@Test
 	public void testConstraintValidations() throws Exception {
+		// TODO: Ensure all permutations of the implemented constraint validators are covered here,
+		// both failing and non-failing.
 		GenericTestCase[] testCases = new GenericTestCase[]{
-				new GenericTestCase("T", "int", CInt.TYPE, null, Expected.PASS),
-				new GenericTestCase("T extends number", "? extends number", CInt.TYPE, null, Expected.PASS),
-				new GenericTestCase("T extends number", "number", CNumber.TYPE, null, Expected.PASS),
-				new GenericTestCase("T extends number", "number", CInt.TYPE, null, Expected.FAIL),
-				new GenericTestCase("T extends number", "int", CNumber.TYPE, null, Expected.FAIL),
-				new GenericTestCase("T extends primitive", "? super number", CNumber.TYPE, null, Expected.PASS),
-				new GenericTestCase("T", "array<? extends array<? extends number>>", CArray.TYPE, "? extends number", Expected.PASS),
-				new GenericTestCase("T", "array<? extends array<? extends number>>", CArray.TYPE, "? extends int", Expected.PASS),
-				new GenericTestCase("T", "array<? extends array<? extends number>>", CArray.TYPE, "? extends string", Expected.FAIL),
+			// ConstructorConstraint - once this is generally supported
+			// ExactTypeConstraint
+			new GenericTestCase("T", "int", CInt.TYPE, null, Expected.PASS),
+			new GenericTestCase("T", "number", CInt.TYPE, null, Expected.FAIL),
+			// LowerBoundConstraint
+			new GenericTestCase("T", "? super number", CInt.TYPE, null, Expected.FAIL),
+			new GenericTestCase("T", "? super number", null, null, Expected.PASS),
+			new GenericTestCase("T super int", "int", null, null, Expected.FAIL),
+			// UpperBoundConstraint
+			new GenericTestCase("T extends number", "? super int", CInt.TYPE, null, Expected.PASS),
+			new GenericTestCase("T extends number", "? super number", CNumber.TYPE, null, Expected.PASS),
+			new GenericTestCase("T extends number", "? super mixed", null, null, Expected.FAIL),
+			new GenericTestCase("T extends number", "? extends number", CInt.TYPE, null, Expected.PASS),
+			new GenericTestCase("T extends number", "number", CNumber.TYPE, null, Expected.PASS),
+			new GenericTestCase("T extends number", "number", CInt.TYPE, null, Expected.FAIL),
+			new GenericTestCase("T extends number", "int", CNumber.TYPE, null, Expected.FAIL),
+			new GenericTestCase("T extends primitive", "? super number", CNumber.TYPE, null, Expected.PASS),
+			// Unbounded Constraint
+			new GenericTestCase("T", "array<? extends array<? extends number>>", CArray.TYPE, "? extends array<? extends string>", Expected.FAIL),
+			new GenericTestCase("T", "array<? extends array<? extends number>>", CArray.TYPE, "? extends array<? extends number>", Expected.PASS),
+			new GenericTestCase("T", "array<? extends array<? extends number>>", CArray.TYPE, "? extends array<? extends int>", Expected.PASS),
 		};
 
 		for(int i = 0; i < testCases.length; i++) {
 			GenericTestCase test = testCases[i];
-			System.out.println(test);
+			System.out.println(i + " " + test);
 			test.test();
 		}
 	}

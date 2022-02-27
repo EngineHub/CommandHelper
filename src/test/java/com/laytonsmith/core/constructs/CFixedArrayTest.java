@@ -25,7 +25,7 @@ public class CFixedArrayTest {
 	}
 
 	@Before
-	public void setUp() throws Exception{
+	public void setUp() throws Exception {
 		env = Static.GenerateStandaloneEnvironment();
 	}
 

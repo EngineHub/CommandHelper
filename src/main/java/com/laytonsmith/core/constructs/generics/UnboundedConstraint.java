@@ -9,9 +9,9 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.EnumSet;
 
 /**
- * An ExactConstraint is a generic constraint which is a simple type. For instance,
- * <code>class M&lt;T&gt;</code>, the constraint T is an ExactConstraint. Note that
- * ExactConstraint isn't used in use-time, it's for declare time.
+ * An UnboundedConstraint is a generic constraint which is a simple and single type. For instance,
+ * <code>class M&lt;T&gt;</code>, the constraint T is an UnboundedConstraint. Note that
+ * UnboundedConstraint isn't used in use-time, it's for declare time.
  */
 public class UnboundedConstraint extends Constraint {
 
@@ -59,7 +59,7 @@ public class UnboundedConstraint extends Constraint {
 
 			@Override
 			public Boolean isWithinBounds(UnboundedConstraint lhs) {
-				return true;
+				throw new Error("Unexpected constraint combination.");
 			}
 		};
 	}

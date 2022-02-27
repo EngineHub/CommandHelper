@@ -522,7 +522,7 @@ public class Enchantments {
 				throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 1
 					&& !(children.get(0).getData() instanceof CFunction)
-					&&(children.get(0).getData().isInstanceOf(CString.TYPE, null, env)
+					&& (children.get(0).getData().isInstanceOf(CString.TYPE, null, env)
 					|| children.get(0).getData().isInstanceOf(CInt.TYPE, null, env))) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 						new CompilerWarning("The string item format in " + getName() + " is deprecated.", t, null));

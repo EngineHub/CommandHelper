@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class UnqualifiedGenericParameters {
 
-	private List<Pair<UnqualifiedClassName, UnqualifiedLeftHandGenericUse>> parameters = new ArrayList<>();
+	private final List<Pair<UnqualifiedClassName, UnqualifiedLeftHandGenericUse>> parameters = new ArrayList<>();
 
 	/**
 	 * Qualifies the UnqualifiedGenericParamaters. This may return null if the type does not have them, or if this
@@ -48,7 +48,7 @@ public class UnqualifiedGenericParameters {
 	}
 
 
-	public static class UnqualifiedGenericParametersBuilder {
+	public static final class UnqualifiedGenericParametersBuilder {
 		UnqualifiedGenericParameters p;
 		private UnqualifiedGenericParametersBuilder(UnqualifiedGenericParameters p) {
 			this.p = p;

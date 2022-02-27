@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 
-public class ConstraintValidator {
+public final class ConstraintValidator {
 
-	private ConstraintValidator(){}
+	private ConstraintValidator() {}
 
 	/**
 	 * Validates and returns the typename for a set of constraints.

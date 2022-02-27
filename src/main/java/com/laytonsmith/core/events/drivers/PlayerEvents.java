@@ -1672,7 +1672,7 @@ public class PlayerEvents {
 				//Fill in the event parameters
 				map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
 				CArray ca = new CArray(Target.UNKNOWN, GenericParameters
-					.addParameter(CString.TYPE, null).build(),env);
+					.addParameter(CString.TYPE, null).build(), env);
 				for(MCPlayer recipient : event.getRecipients()) {
 					ca.push(new CString(recipient.getName(), Target.UNKNOWN), Target.UNKNOWN, env);
 				}
@@ -2358,7 +2358,7 @@ public class PlayerEvents {
 				}
 				if(newBookMeta.hasPages()) {
 					CArray pages = new CArray(Target.UNKNOWN, GenericParameters
-						.addParameter(CString.TYPE, null).build(),env);
+						.addParameter(CString.TYPE, null).build(), env);
 					for(String page : newBookMeta.getPages()) {
 						pages.push(new CString(page, Target.UNKNOWN), Target.UNKNOWN, env);
 					}

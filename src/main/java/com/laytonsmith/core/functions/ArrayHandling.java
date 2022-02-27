@@ -990,7 +990,7 @@ public class ArrayHandling {
 			if(args[0] instanceof CArray) {
 				Mixed m = args[0];
 				for(int i = 1; i < args.length; i++) {
-					if(!(m.isInstanceOf(CArray.TYPE))) {
+					if(!(m.isInstanceOf(CArray.TYPE, null, env))) {
 						return CBoolean.FALSE;
 					}
 					CArray ca = (CArray) m;

@@ -13,7 +13,7 @@ parameter. A good first example is the array type. In general, let's consider a 
 array @b = new array();
 %>
 
-In this case, the array is implicitely constructed with an ''auto type parameter''. We can keep the same
+In this case, the array is implicitly constructed with an ''auto type parameter''. We can keep the same
 behavior but make it explicit by doing this:
 
 <%CODE|
@@ -68,7 +68,8 @@ class A<T> {}
 In this extremely simple class, we have defined a class named A, and stated that it has a type parameter which we are
 calling <code>T</code>. (Note that in most examples, the letter T is used, but this doesn't have to be a single letter,
 you can name it however you like, just like how you can name a class whatever you like.) This allows
-us to use T within the class as if it were a real data type, and can use it for return values and parameter types.
+us to use T within the class as if it were a real data type, and can use it for return values, parameter types, and
+field types, as well as local variables. Anywhere we could use any datatype (but only within this class).
 
 <%CODE|
 class A<T> {
@@ -135,7 +136,7 @@ The three different locations are:
 # The left hand side of an assignment (LHS)
 # The right hand side of an assignment (RHS).
 
-The terms LHS and RHS also apply to function calls, the parameters passed to a function are the RHS, and
+The terms LHS and RHS also apply to function calls. The parameters passed to a function are the RHS, and
 the arguments in the function definition are the LHS. The return value of a function is also the RHS.
 
 <%CODE|
@@ -160,7 +161,7 @@ A<int> @a;          // This is the LHS, this is what defines the type of the var
 
 === Exact Type ===
 
-An exact type is what we've shown above. But it's worth pointing out that if the class is defined with a type, you
+An exact type is what we've shown above. But it's worth pointing out that if the LHS is defined with a type, you
 cannot provide an instance with a subtype for the generic parameter. Consider the following:
 
 <%CODE|
@@ -217,7 +218,7 @@ A @a = new A(); // Valid, equivalent to the next line
 A<auto> @a = new A<auto>();
 %>
 
-=== Upper/Lower Bound ===
+=== Upper (extends)/Lower (super) Bounds ===
 
 ==== LHS/RHS ====
 

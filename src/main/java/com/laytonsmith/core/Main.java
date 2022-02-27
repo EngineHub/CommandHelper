@@ -59,10 +59,10 @@ import com.laytonsmith.tools.docgen.ExtensionDocGen;
 import com.laytonsmith.tools.docgen.sitedeploy.APIBuilder;
 import com.laytonsmith.tools.docgen.sitedeploy.SiteDeploy;
 import com.laytonsmith.tools.pnviewer.PNViewer;
+import java.awt.HeadlessException;
 import jline.console.ConsoleReader;
 import org.json.simple.JSONValue;
 
-import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

@@ -1,6 +1,6 @@
 package com.laytonsmith.core.constructs.generics;
 
-/*package*/ interface ConstraintToConstraintValidator {
+public interface ConstraintToConstraintValidator {
 	/**
 	 * If "this" is the class definition, then lhs is the LHS of the statement.
 	 * @param lhs
