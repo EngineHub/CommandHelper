@@ -115,6 +115,7 @@ public class StaticTest {
 		try {
 			envs.add(CommandHelperEnvironment.class);
 			Implementation.setServerType(Implementation.Type.TEST);
+			ClassDiscovery.getDefaultInstance().addDiscoveryLocation(ClassDiscovery.GetClassContainer(StaticTest.class));
 			env = Static.GenerateStandaloneEnvironment();
 			env = env.cloneAndAdd(new CommandHelperEnvironment());
 		} catch (Exception ex) {

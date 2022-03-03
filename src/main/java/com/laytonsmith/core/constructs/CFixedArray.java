@@ -81,14 +81,14 @@ public class CFixedArray extends Construct implements
 		return set;
 	}
 
-	private void validateSet(Mixed value, Target t) {
-		if(!value.typeof().doesExtend(allowedType)) {
-			throw new CRECastException("Cannot set value of type " + value.typeof().toString() + " into fixed_array of type " + allowedType.toString(), t);
+	private void validateSet(Mixed value, Target t, Environment env) {
+		if(!value.typeof(env).doesExtend(allowedType)) {
+			throw new CRECastException("Cannot set value of type " + value.typeof(env).toString() + " into fixed_array of type " + allowedType.toString(), t);
 		}
 	}
 
-	public void set(int index, Mixed value, Target t) {
-		validateSet(value, t);
+	public void set(int index, Mixed value, Target t, Environment env) {
+		validateSet(value, t, env);
 		if(index >= data.length || index < 0) {
 			throw new CREIndexOverflowException("Index under/overflow in fixed_array", t);
 		}
@@ -120,8 +120,8 @@ public class CFixedArray extends Construct implements
 		return data.length;
 	}
 
-	public void fill(Mixed value, Target t) {
-		validateSet(value, t);
+	public void fill(Mixed value, Target t, Environment env) {
+		validateSet(value, t, env);
 		ArrayUtils.fill(data, value);
 	}
 

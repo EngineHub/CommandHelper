@@ -9,6 +9,7 @@ import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.AccessModifier;
@@ -119,8 +120,13 @@ public abstract class AbstractMixedInterfaceRunner implements MixedInterfaceRunn
 	 * @throws IllegalArgumentException If the class isn't public facing.
 	 */
 	@Override
-	public final CClassType typeof() {
-		return Construct.typeof(this);
+	public final CClassType typeof(Environment env) {
+		return Construct.typeof(this, env);
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 	@Override

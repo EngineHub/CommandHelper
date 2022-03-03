@@ -714,7 +714,7 @@ public class StringHandling {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(!(args[0].isInstanceOf(CString.TYPE, null, env))) {
 				throw new CREFormatException(this.getName() + " expects a string as first argument, but type "
-						+ args[0].typeof() + " was found.", t);
+						+ args[0].typeof(env) + " was found.", t);
 			}
 			return new CString(args[0].val().toUpperCase(), t);
 		}
@@ -777,7 +777,7 @@ public class StringHandling {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(!(args[0].isInstanceOf(CString.TYPE, null, env))) {
 				throw new CREFormatException(this.getName() + " expects a string as first argument, but type "
-						+ args[0].typeof() + " was found.", t);
+						+ args[0].typeof(env) + " was found.", t);
 			}
 			return new CString(args[0].val().toLowerCase(), t);
 		}
@@ -1024,10 +1024,10 @@ public class StringHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws CancelCommandException, ConfigRuntimeException {
 			if(!(Construct.nval(args[0]) instanceof String)) {
 				throw new CRECastException(this.getName() + " expects a string as first argument, but type "
-						+ args[0].typeof() + " was found.", t);
+						+ args[0].typeof(env) + " was found.", t);
 			}
 			String text = Construct.nval(args[0]);
 			// Enforce the fact we are only taking the first character here

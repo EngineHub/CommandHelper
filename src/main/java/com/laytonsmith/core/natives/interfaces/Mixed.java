@@ -7,6 +7,7 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.objects.AccessModifier;
@@ -93,6 +94,7 @@ public interface Mixed extends Cloneable, Documentation {
 
 	/**
 	 * Gets the access level for this object, i.e. public, private...
+	 *
 	 * @return
 	 */
 	public AccessModifier getAccessModifier();
@@ -118,27 +120,41 @@ public interface Mixed extends Cloneable, Documentation {
 	public boolean isInstanceOf(CClassType type, LeftHandGenericUse lhsGenericParameters, Environment env);
 
 	/**
-	 * Returns the typeof this value, as a CClassType object. Not all constructs are annotated with the @typeof
+	 * Returns the typeof this value, as a CClassType object.Not all constructs are annotated with the @typeof
 	 * annotation, in which case this is considered a "private" object, which can't be directly accessed via
 	 * MethodScript. In this case, an IllegalArgumentException is thrown.
 	 *
+	 * @param env The environment.
 	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
 	 */
-	public CClassType typeof();
+	public CClassType typeof(Environment env);
 
 	/**
-	 * Casts the class to the specified type. This only works with Java types, and so for dynamic elements, this
-	 * may throw a RuntimeException. For dynamic types, use the other castTo.
+	 * Returns the generic paramters assigned to this instance. This MUST be null if
+	 * {@code typeof().getGenericDeclaration()} would return null, and MUST NOT be null if it doesn't.
+	 * <p>
+	 * The generic parameters represent the concrete types that this instance was constructed with at runtime, and
+	 * remain with the instance as part of the runtime data.
 	 *
-	 * <p>For classes that are instanceof this class, (or vice versa) no logic is done, it is just cast, though if
-	 * it can't be cast, it will throw a ClassCastException. For classes that are cross castable, they will be first
-	 * cross casted.
+	 * @return The generic parameters for this instance, or null if it doesn't/can't have any.
+	 */
+	public GenericParameters getGenericParameters();
+
+	/**
+	 * Casts the class to the specified type. This only works with Java types, and so for dynamic elements, this may
+	 * throw a RuntimeException. For dynamic types, use the other castTo.
 	 *
-	 * An important note, while it seems like you can just cast from the value using standard java cast notation,
-	 * the object model is not 1:1, and so dynamic classes may logically extend the java class, but due to restrictions
-	 * in java, that can't actually happen in java's object model, so we cannot rely on java's casting functionality
+	 * <p>
+	 * For classes that are instanceof this class, (or vice versa) no logic is done, it is just cast, though if it can't
+	 * be cast, it will throw a ClassCastException. For classes that are cross castable, they will be first cross
+	 * casted.
+	 *
+	 * An important note, while it seems like you can just cast from the value using standard java cast notation, the
+	 * object model is not 1:1, and so dynamic classes may logically extend the java class, but due to restrictions in
+	 * java, that can't actually happen in java's object model, so we cannot rely on java's casting functionality
 	 * either. Add to that that user types don't exist in the java anyways.
+	 *
 	 * @param <T>
 	 * @param clazz
 	 * @return
@@ -146,5 +162,4 @@ public interface Mixed extends Cloneable, Documentation {
 	 */
 	// The whole argument validation/Static.get* methods needs to be moved to this mechanism.
 	//public <T extends Mixed> T castTo(Class<T> clazz) throws ClassCastException;
-
 }

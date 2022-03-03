@@ -178,7 +178,7 @@ public class Exceptions {
 				if(!(e instanceof AbstractCREException)) {
 					throw e;
 				}
-				FullyQualifiedClassName name = ((AbstractCREException) e).getExceptionType().getFQCN();
+				FullyQualifiedClassName name = ((AbstractCREException) e).getExceptionType(env).getFQCN();
 				if(Prefs.DebugMode()) {
 					StreamUtils.GetSystemOut().println("[" + Implementation.GetServerType().getBranding() + "]:"
 							+ " Exception thrown (debug mode on) -> " + e.getMessage() + " :: " + name + ":"
@@ -499,7 +499,7 @@ public class Exceptions {
 					throw ex;
 				}
 				AbstractCREException e = AbstractCREException.getAbstractCREException(ex);
-				CClassType exceptionType = e.getExceptionType();
+				CClassType exceptionType = e.getExceptionType(env);
 				for(int i = 1; i < nodes.length - 1; i += 2) {
 					ParseTree assign = nodes[i];
 					CClassType clauseType = ((CClassType) assign.getChildAt(0).getData());

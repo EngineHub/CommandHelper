@@ -423,7 +423,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				for(FullyQualifiedClassName fqcn : NativeTypeList.getNativeTypeList()) {
 					try {
 						Mixed m = NativeTypeList.getInvalidInstanceForUse(fqcn);
-						CompletionItem ci = new CompletionItem(m.typeof().getSimpleName());
+						CompletionItem ci = new CompletionItem(m.typeof(null).getSimpleName());
 						ci.setKind(CompletionItemKind.TypeParameter);
 						ci.setDetail(m.getName());
 						ci.setDocumentation(m.docs());

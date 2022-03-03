@@ -358,7 +358,7 @@ public class Reflection {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			CClassType type = ArgumentValidation.getClassType(args[0], t);
+			CClassType type = ArgumentValidation.getClassType(args[0], t, env);
 			CArray ret = new CArray(t, null, env);
 			ret.set("fqcn", type.getFQCN().getFQCN(), env);
 			ret.set("name", type.getFQCN().getSimpleName(), env);

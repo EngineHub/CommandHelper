@@ -217,7 +217,7 @@ public class Procedure implements Cloneable {
 				} else {
 					throw new CRECastException("Procedure \"" + name + "\" expects a value of type "
 							+ var.getDefinedType().val() + " in argument " + (varInd + 1) + ", but"
-							+ " a value of type " + c.typeof() + " was found instead.", c.getTarget());
+							+ " a value of type " + c.typeof(env) + " was found instead.", c.getTarget());
 				}
 			}
 		}
@@ -269,7 +269,7 @@ public class Procedure implements Cloneable {
 					|| !ret.equals(CNull.NULL) && !ret.equals(CVoid.VOID)
 					&& !InstanceofUtil.isInstanceof(ret, returnType, env)) {
 				throw new CRECastException("Expected procedure \"" + name + "\" to return a value of type "
-						+ returnType.val() + " but a value of type " + ret.typeof() + " was returned instead",
+						+ returnType.val() + " but a value of type " + ret.typeof(env) + " was returned instead",
 						ret.getTarget());
 			}
 			return ret;

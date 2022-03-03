@@ -164,7 +164,7 @@ public class ObjectGenerator {
 	 */
 	public MCLocation location(Mixed c, MCWorld w, Target t, Environment env) {
 		if(!(c.isInstanceOf(CArray.TYPE, null, env))) {
-			throw new CREFormatException("Expecting an array, received " + c.typeof().getSimpleName(), t);
+			throw new CREFormatException("Expecting an array, received " + c.typeof(env).getSimpleName(), t);
 		}
 		CArray array = (CArray) c;
 		MCWorld world = w;
@@ -1387,7 +1387,7 @@ public class ObjectGenerator {
 			// fulfilling the todo?
 			return v;
 		} else {
-			throw new CREFormatException("Expecting an array, received " + c.typeof().getSimpleName(), t);
+			throw new CREFormatException("Expecting an array, received " + c.typeof(env).getSimpleName(), t);
 		}
 	}
 
@@ -1670,7 +1670,7 @@ public class ObjectGenerator {
 							break;
 						} else {
 							throw new CREFormatException("Expecting individual color to be an array or string, but found "
-									+ color.typeof(), t);
+									+ color.typeof(env), t);
 						}
 						builder.addColor(mccolor);
 					}
@@ -1686,7 +1686,7 @@ public class ObjectGenerator {
 				}
 			} else {
 				throw new CREFormatException("Expecting an array or string for colors parameter, but found "
-						+ colors.typeof(), t);
+						+ colors.typeof(env), t);
 			}
 		} else {
 			builder.addColor(MCColor.WHITE);
@@ -1707,7 +1707,7 @@ public class ObjectGenerator {
 						break;
 					} else {
 						throw new CREFormatException("Expecting individual color to be an array or string, but found "
-								+ color.typeof(), t);
+								+ color.typeof(env), t);
 					}
 					builder.addFadeColor(mccolor);
 				}
@@ -1718,7 +1718,7 @@ public class ObjectGenerator {
 				}
 			} else {
 				throw new CREFormatException("Expecting an array or string for fade parameter, but found "
-						+ colors.typeof(), t);
+						+ colors.typeof(env), t);
 			}
 		}
 		if(fe.containsKey("type")) {
@@ -1836,7 +1836,7 @@ public class ObjectGenerator {
 
 	public MCRecipe recipe(Mixed c, Target t, Environment env) {
 		if(!(c.isInstanceOf(CArray.TYPE, null, env))) {
-			throw new CRECastException("Expected array but received " + c.typeof().getSimpleName(), t);
+			throw new CRECastException("Expected array but received " + c.typeof(env).getSimpleName(), t);
 		}
 		CArray recipe = (CArray) c;
 

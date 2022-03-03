@@ -25,6 +25,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.UnqualifiedGenericDeclaration;
 import com.laytonsmith.core.constructs.generics.UnqualifiedGenericParameters;
 import com.laytonsmith.core.environments.Environment;
@@ -180,7 +181,7 @@ public class ObjectManagement {
 				return new CString(data.getData().val(), data.getTarget());
 			}
 			if(!(data.getData() instanceof CString)) {
-				throw new CREClassDefinitionError("Expected a string, but found " + data.getData() + " (" + data.getData().typeof() + ") instead", t);
+				throw new CREClassDefinitionError("Expected a string, but found " + data.getData() + " (" + data.getData().typeof(env) + ") instead", t);
 			}
 			return data.getData();
 		}
@@ -297,7 +298,7 @@ public class ObjectManagement {
 			if(nodes[9].getData() instanceof CNull) {
 				containingClass = null;
 			} else {
-				containingClass = ArgumentValidation.getClassType(evaluateMixed(nodes[9], t, env), t);
+				containingClass = ArgumentValidation.getClassType(evaluateMixed(nodes[9], t, env), t, env);
 			}
 
 			// 10 - Class Comment
@@ -505,7 +506,8 @@ public class ObjectManagement {
 				// TODO If this is a native object, we need to intercept the call to the native constructor,
 				// and grab the object generated there.
 			}
-			Mixed obj = new UserObject(t, parent, env, od, null);
+			GenericParameters genericParameters = null; // TODO
+			Mixed obj = new UserObject(t, parent, env, od, genericParameters, null);
 			// This is the MethodScript construction.
 			if(constructor != null) {
 				Mixed[] values = new Mixed[args.length - 1];
@@ -576,7 +578,7 @@ public class ObjectManagement {
 
 		@Override
 		public String docs() {
-			return "<T> T {ClassType<T> type, params...} Constructs a new object of the specified type. The type must"
+			return "<T> T {ClassType<T> type, array genericParameters, params...} Constructs a new object of the specified type. The type must"
 					+ " be hardcoded.";
 		}
 

@@ -9,6 +9,7 @@ import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -30,10 +31,12 @@ public class UserObject implements Mixed {
 	private final Environment env;
 	private final Target t;
 	private final ObjectDefinition objectDefinition;
+	private final GenericParameters genericParameters;
 
 	private final Map<String, Mixed> fieldTable;
 
 	private final Mixed nativeObject;
+
 
 	private final int objectId;
 
@@ -44,13 +47,16 @@ public class UserObject implements Mixed {
 	 * an invalid object. The default values will not be properly populated if this is null.
 	 * @param env The environment
 	 * @param objectDefinition The object definition this object is based on.
+	 * @param genericParameters The generic parameters for this instance.
 	 * @param nativeObject If there is an underlying native object, this should be sent along with this object. However,
 	 * if this is not a native object, this should be null.
 	 */
-	public UserObject(Target t, Script parent, Environment env, ObjectDefinition objectDefinition, Mixed nativeObject) {
+	public UserObject(Target t, Script parent, Environment env, ObjectDefinition objectDefinition,
+			GenericParameters genericParameters, Mixed nativeObject) {
 		this.t = t;
 		this.env = env;
 		this.objectDefinition = objectDefinition;
+		this.genericParameters = genericParameters;
 		this.nativeObject = nativeObject;
 		this.objectId = objectIdCounter++;
 		this.fieldTable = new HashMap<>();
@@ -157,8 +163,13 @@ public class UserObject implements Mixed {
 	}
 
 	@Override
-	public CClassType typeof() {
-		return objectDefinition.getType();
+	public CClassType typeof(Environment env) {
+		return CClassType.get(objectDefinition.getType(), Target.UNKNOWN, this.getGenericParameters(), env);
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return genericParameters;
 	}
 
 	@Override

@@ -39,7 +39,7 @@ public class DataHandling {
 					throw new CRECastException(getName() + " with 3 arguments only accepts an ivariable as the second argument.", t);
 				}
 				name = ((IVariable) nodes[offset].getData()).getVariableName();
-				type = ArgumentValidation.getClassType(nodes[0].getData(), t);
+				type = ArgumentValidation.getClassType(nodes[0].getData(), t, env);
 				// TODO: Add duplicate check here, or remove if not needed
 //				if(list.has(name) && env.getEnv(GlobalEnv.class).GetFlag("no-check-duplicate-assign") == null) {
 //					if(env.getEnv(GlobalEnv.class).GetFlag("closure-warn-overwrite") != null) {

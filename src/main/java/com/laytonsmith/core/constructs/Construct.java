@@ -6,6 +6,7 @@ import com.laytonsmith.annotations.typeof;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.MarshalException;
@@ -58,8 +59,9 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	/**
-	 * Convenience method to check if a Mixed value is of the specified type. If it is not, or it isn't a construct
-	 * in the first place, false is returned.
+	 * Convenience method to check if a Mixed value is of the specified type. If it is not, or it isn't a construct in
+	 * the first place, false is returned.
+	 *
 	 * @param m
 	 * @param type
 	 * @return
@@ -130,9 +132,10 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	/**
-	 * Sets the wasIdentifier property on the left side if and only if both values are constructs.
-	 * Default value can be provided if the left value is a construct, but not the right, then this value will
-	 * be set. If it is null, the default is preserved.
+	 * Sets the wasIdentifier property on the left side if and only if both values are constructs. Default value can be
+	 * provided if the left value is a construct, but not the right, then this value will be set. If it is null, the
+	 * default is preserved.
+	 *
 	 * @param left
 	 * @param right
 	 */
@@ -323,7 +326,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			Double d1 = Double.valueOf(this.value);
 			Double d2 = Double.valueOf(c.value);
 			return d1.compareTo(d2);
-		} catch (NumberFormatException e) {
+		} catch(NumberFormatException e) {
 			return this.value.compareTo(c.value);
 		}
 	}
@@ -453,6 +456,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
 	/**
 	 * If the underlying Mixed value is a Construct, returns the value of isDynamic. Otherwise, returns true.
+	 *
 	 * @param m
 	 * @return
 	 */
@@ -482,22 +486,36 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * case, an IllegalArgumentException is thrown.
 	 *
 	 * This method may be overridden in special cases, such as dynamic types, but for most types, this
+	 *
 	 * @return
 	 * @throws IllegalArgumentException If the class isn't public facing.
 	 */
 	@Override
-	public CClassType typeof() {
-		return typeof(this);
+	public CClassType typeof(Environment env) {
+		return typeof(this, env);
 	}
 
 	/**
-	 * Returns the typeof for the given class, using the same mechanism as the default. (Whether or not that subtype
-	 * overrode the original typeof() method.
-	 * @param that
+	 * Returns the generic parameters for this Construct. By default, null, but this MUST be overridden by objects which
+	 * have generics.
+	 *
 	 * @return
 	 */
-	public static CClassType typeof(Mixed that) {
-		return CClassType.get(that.getClass());
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
+	}
+
+	/**
+	 * Returns the typeof for the given class, using the same mechanism as the default.(Whether or not that subtype
+	 * overrode the original typeof() method.
+	 *
+	 * @param that
+	 * @param env
+	 * @return
+	 */
+	public static CClassType typeof(Mixed that, Environment env) {
+		return CClassType.get(that.getClass(), Target.UNKNOWN, that.getGenericParameters(), env);
 	}
 
 	/**
@@ -556,6 +574,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
 	/**
 	 * By default, all native methodscript objects have no modifiers.
+	 *
 	 * @return
 	 */
 	@Override
@@ -578,7 +597,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		return null;
 	}
 
-	public static boolean isInstanceof(Mixed that, Class<? extends Mixed> type) {
+	public static boolean isInstanceof(Mixed that, Class<? extends Mixed> type, Environment env) {
 		if(ClassDiscovery.GetClassAnnotation(that.getClass(), typeof.class) == null) {
 			// This can happen in cases where we are in the middle of optimization.
 			// This can perhaps be improved in the future, when we store the return
@@ -586,8 +605,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			// but anyways, for now, just return false.
 			return false;
 		}
-		// TODO: We need the compiler environment here so we can look up custom types.
-		return that.typeof().doesExtend(CClassType.get(type));
+		return that.typeof(env).doesExtend(CClassType.get(type));
 	}
 
 	@Override
@@ -602,15 +620,14 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	}
 
 	/**
-	 * Provides a default implementation of hashCode for all constructs. In this implementation, the type of the
-	 * object is taken into account, as well as the underlying value.
+	 * Provides a default implementation of hashCode for all constructs. In this implementation, the type of the object
+	 * is taken into account, as well as the underlying value.
+	 *
 	 * @return
 	 */
 	@Override
 	public int hashCode() {
 		return Objects.hash(ClassDiscovery.GetClassAnnotation(this.getClass(), typeof.class), val());
 	}
-
-
 
 }

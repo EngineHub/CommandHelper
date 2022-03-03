@@ -10,11 +10,8 @@ import java.util.Arrays;
  */
 public class MainSandbox {
 
-	public static class A<T extends Number> {}
-
     public static void main(String[] args) throws Exception {
-//		A<? super Object> a;
-//		a = new A<? extends Number>();
+
 	}
 
 	public static void print(Object o) {

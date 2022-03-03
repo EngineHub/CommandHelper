@@ -13,6 +13,7 @@ import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CRE.CREIllegalArgumentException;
@@ -152,7 +153,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 			}
 
 			@Override
-			public CClassType typeof() {
+			public CClassType typeof(Environment env) {
 				return CClassType.get(fqcn, env);
 			}
 
@@ -247,8 +248,13 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 							}
 
 							@Override
-							public CClassType typeof() {
+							public CClassType typeof(Environment env) {
 								return CClassType.get(fqcn, env);
+							}
+
+							@Override
+							public GenericParameters getGenericParameters() {
+								return null;
 							}
 
 							@Override
@@ -425,8 +431,13 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 	}
 
 	@Override
-	public CClassType typeof() {
+	public CClassType typeof(Environment env) {
 		return TYPE;
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 	@Override
@@ -465,7 +476,7 @@ public abstract class MEnumType implements Mixed, com.laytonsmith.core.natives.i
 				return v;
 			}
 		}
-		throw new CREIllegalArgumentException(index + " cannot be found in " + typeof(), t);
+		throw new CREIllegalArgumentException(index + " cannot be found in " + typeof(env), t);
 	}
 
 	@Override

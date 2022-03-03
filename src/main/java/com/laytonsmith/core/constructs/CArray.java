@@ -756,7 +756,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 				throw new RuntimeException(ex);
 			}
 		} catch (NoSuchMethodException ex) {
-			throw new RuntimeException(this.typeof() + " does not support creating a new value.");
+			throw new RuntimeException(this.typeof(env) + " does not support creating a new value.");
 		} catch (SecurityException ex) {
 			throw new RuntimeException(ex);
 		}
@@ -878,7 +878,7 @@ public class CArray extends Construct implements Iterable<Mixed>, Booleanish,
 							|| c.isInstanceOf(CInt.TYPE, null, env)
 							|| c.isInstanceOf(CDouble.TYPE, null, env)
 							|| c instanceof CNull || c.isInstanceOf(CClassType.TYPE, null, env))) {
-						throw new CREFormatException("Unsupported type being sorted: " + c.typeof(), CArray.this.getTarget());
+						throw new CREFormatException("Unsupported type being sorted: " + c.typeof(env), CArray.this.getTarget());
 					}
 				}
 				if(o1 instanceof CNull || o2 instanceof CNull) {

@@ -143,7 +143,12 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 		}
 
 		@Override
-		public CClassType typeof() {
+		public CClassType typeof(Environment env) {
+			throw new Error();
+		}
+
+		@Override
+		public GenericParameters getGenericParameters() {
 			throw new Error();
 		}
 
@@ -231,6 +236,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 * Unlike the other getters, this will not throw a ClassNotFoundException, it will instead throw an Error.
 	 *
 	 * @param type The native class
+	 * @param generics The generic declaration for this class. Null, if it doesn't have any.
 	 * @return A CClassType representing this native class
 	 */
 	public static CClassType getWithGenericDeclaration(Class<? extends Mixed> type, GenericDeclaration generics) {
@@ -327,6 +333,30 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 */
 	public static CClassType get(CClassType nakedType, Target t, GenericParameters generics, Environment env) {
 		return get(nakedType.getFQCN(), t, generics, env);
+	}
+
+	/**
+	 * Returns the singular instance of CClassType that represents this type. If it doesn't exist, it creates it,
+	 * stores, and returns that instance. Note that in general, == is not supported for these types, even though in
+	 * general it is correct to say that for each type, there will only be one instance.
+	 *
+	 * @param type The native class
+	 * @param t The code target where this instance is being used.
+	 * @param generics The generics to be added to this CClassType
+	 * @return The CClassType object with the given generic parameter set
+	 *
+	 * @throws NoClassDefFoundError If there are generic parameters defined as non-null, but the naked class has not
+	 * been defined yet. This shouldn't be possible except due to bugs in the code, because the general approach for
+	 * native classes is to use the TYPE value, and in creation of user classes, it's important that the compiler does
+	 * this correctly, rather than user code. Creation of the FullyQualifiedClassName may throw a ClassNotFoundException
+	 * however, but that will be handled elsewhere.
+	 * @throws CREGenericConstraintException In general, the generic parameters that are required must be provided (or
+	 * be able to be inferred) and so if these are malformed, this will be thrown. For instance, if the naked type
+	 * defines a new T() constraint, then a class will be required in the generics, this cannot be inferred. If it's not
+	 * provided, then this will be thrown.
+	 */
+	public static CClassType get(Class<? extends Mixed> type, Target t, GenericParameters generics, Environment env) {
+		return get(FullyQualifiedClassName.forNativeClass(type), t, generics, env);
 	}
 
 	/**
@@ -511,7 +541,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 					} else {
 						ObjectDefinitionTable odt = env.getEnv(CompilerEnvironment.class).getObjectDefinitionTable();
 						ObjectDefinition od = odt.get(this.fqcn);
-						invalidType = new UserObject(Target.UNKNOWN, null, env, od, null);
+						invalidType = new UserObject(Target.UNKNOWN, null, env, od, null, null);
 					}
 				}
 			} catch(ClassNotFoundException | ObjectDefinitionNotFoundException ex) {
@@ -704,7 +734,7 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	@Override
-	public CClassType typeof() {
+	public CClassType typeof(Environment env) {
 		return CClassType.TYPE;
 	}
 

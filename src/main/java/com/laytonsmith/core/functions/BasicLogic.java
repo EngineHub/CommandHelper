@@ -251,18 +251,18 @@ public class BasicLogic {
 		}
 
 		@Override
-		public CBoolean exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			if(args.length != 2) {
 				throw new CREFormatException(this.getName() + " expects 2 arguments.", t);
 			}
-			if(args[1].typeof().equals(args[0].typeof())) {
-				if(args[0].isInstanceOf(CString.TYPE, null, environment)
-						&& args[1].isInstanceOf(CString.TYPE, null, environment)) {
+			if(args[1].typeof(env).equals(args[0].typeof(env))) {
+				if(args[0].isInstanceOf(CString.TYPE, null, env)
+						&& args[1].isInstanceOf(CString.TYPE, null, env)) {
 					// Check for actual string equality, so we don't do type massaging
 					// for numeric strings. Thus '2' !== '2.0'
 					return CBoolean.get(args[0].val().equals(args[1].val()));
 				}
-				return new equals().exec(t, environment, args);
+				return new equals().exec(t, env, args);
 			} else {
 				return CBoolean.FALSE;
 			}

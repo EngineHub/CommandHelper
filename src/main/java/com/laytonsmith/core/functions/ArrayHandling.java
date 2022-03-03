@@ -410,7 +410,7 @@ public class ArrayHandling {
 			Mixed index = parent.seval(nodes[1], env);
 			Mixed value = parent.seval(nodes[2], env);
 			if(array instanceof CFixedArray) {
-				((CFixedArray) array).set(ArgumentValidation.getInt32(index, t, env), value, t);
+				((CFixedArray) array).set(ArgumentValidation.getInt32(index, t, env), value, t, env);
 				return value;
 			}
 			if(!(array.isInstanceOf(CArray.TYPE, null, env))) {
@@ -3510,7 +3510,7 @@ public class ArrayHandling {
 		}
 
 		public boolean subsetOf(Mixed constA, Mixed constB, Target t, Environment env) {
-			if(!constA.typeof().equals(constB.typeof())) {
+			if(!constA.typeof(env).equals(constB.typeof(env))) {
 				return false;
 			}
 			if(constA.isInstanceOf(CArray.TYPE, null, env)) {
@@ -3822,7 +3822,7 @@ public class ArrayHandling {
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			Mixed fill = args[1];
 			if(args[0] instanceof CFixedArray fa) {
-				fa.fill(fill, t);
+				fa.fill(fill, t, env);
 				return fa;
 			} else {
 				CArray array = ArgumentValidation.getArray(args[0], t, env);

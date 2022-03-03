@@ -338,7 +338,7 @@ public class DataHandling {
 								+ list.get(name, t, true, env).getDefinedTarget() + " but is being redefined.", t);
 					}
 				}
-				type = ArgumentValidation.getClassType(args[0], t);
+				type = ArgumentValidation.getClassType(args[0], t, env);
 			} else {
 				offset = 0;
 				if(!(args[offset] instanceof IVariable)) {
@@ -3378,9 +3378,9 @@ public class DataHandling {
 		}
 
 		@Override
-		public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
 			try {
-				return args[0].typeof();
+				return args[0].typeof(env);
 			} catch (IllegalArgumentException ex) {
 				throw new Error("Class " + args[0].getClass().getName() + " is not annotated with @typeof. Please report this"
 						+ " error to the developers.");
@@ -3896,7 +3896,7 @@ public class DataHandling {
 
 		@Override
 		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
-			CClassType type = ArgumentValidation.getClassType(args[0], t);
+			CClassType type = ArgumentValidation.getClassType(args[0], t, env);
 			int size = ArgumentValidation.getInt32(args[1], t, env);
 			if(size < 0) {
 				throw new CRERangeException("Array size must be zero or greater. Received: " + size, t);

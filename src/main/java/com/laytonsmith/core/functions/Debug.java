@@ -368,14 +368,14 @@ public class Debug {
 						+ TermColors.RESET + ": "
 						+ TermColors.BRIGHT_WHITE + ivar.getDefinedType()
 						+ TermColors.RESET + " (actual type "
-						+ TermColors.BRIGHT_WHITE + val.typeof()
+						+ TermColors.BRIGHT_WHITE + val.typeof(env)
 						+ (val.isInstanceOf(Sizeable.TYPE, null, env) ? ", length: " + ((Sizeable) val).size() : "")
 						+ TermColors.RESET + ") "
 						+ TermColors.CYAN + ivar.getVariableName()
 						+ TermColors.RESET + ": " + val.val());
 				return CVoid.VOID;
 			} else {
-				throw new CRECastException("Expecting an ivar, but received " + args[0].typeof().getSimpleName()
+				throw new CRECastException("Expecting an ivar, but received " + args[0].typeof(env).getSimpleName()
 						+ " instead", t);
 			}
 		}

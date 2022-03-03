@@ -380,7 +380,7 @@ public final class ArgumentValidation {
 		if(c.isInstanceOf(Booleanish.TYPE, null, env)) {
 			return ((Booleanish) c).getBooleanValue(t);
 		}
-		throw new CRECastException("Could not convert value of type " + c.typeof() + " to a " + Booleanish.TYPE, t);
+		throw new CRECastException("Could not convert value of type " + c.typeof(env) + " to a " + Booleanish.TYPE, t);
 	}
 
 	/**
@@ -396,15 +396,15 @@ public final class ArgumentValidation {
 		} else if(c instanceof CNull) {
 			return new CByteArray(t, 0, env);
 		} else {
-			throw new CRECastException("Expecting byte array, but found " + c.typeof() + " instead.", t);
+			throw new CRECastException("Expecting byte array, but found " + c.typeof(env) + " instead.", t);
 		}
 	}
 
-	public static CClassType getClassType(Mixed c, Target t) {
+	public static CClassType getClassType(Mixed c, Target t, Environment env) {
 		if(c instanceof CClassType) {
 			return (CClassType) c;
 		} else {
-			throw new CRECastException("Expecting a ClassType, but found " + c.typeof() + " instead.", t);
+			throw new CRECastException("Expecting a ClassType, but found " + c.typeof(env) + " instead.", t);
 		}
 	}
 
@@ -430,7 +430,7 @@ public final class ArgumentValidation {
 	 */
 	public static String getStringObject(Mixed c, Target t, Environment env) {
 		if(!c.isInstanceOf(CString.TYPE, null, env)) {
-			throw new CRECastException("Expected a string, but found " + c.typeof() + " instead.", t);
+			throw new CRECastException("Expected a string, but found " + c.typeof(env) + " instead.", t);
 		}
 		return c.val();
 	}

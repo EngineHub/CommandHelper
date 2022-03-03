@@ -39,7 +39,7 @@ public class CFixedArrayTest {
 		assertEquals(10, fa.size());
 		assertEquals(false, fa.canBeAssociative());
 		assertEquals(CNull.NULL, fa.get(0, Target.UNKNOWN, env));
-		fa.set(0, new CInt(10, Target.UNKNOWN), Target.UNKNOWN);
+		fa.set(0, new CInt(10, Target.UNKNOWN), Target.UNKNOWN, env);
 		assertEquals(10, ((CInt) fa.get(0, Target.UNKNOWN, env)).val);
 	}
 }

@@ -475,7 +475,7 @@ public class ServerEvents {
 			Mixed cRecipients = manualObject.get("player_recipients", t, env);
 			if(!(cRecipients instanceof CArray) && !(cRecipients instanceof CNull)) {
 				throw new CRECastException("Expected player_recipients to be an array, but received: "
-						+ cRecipients.typeof().toString(), t);
+						+ cRecipients.typeof(env).toString(), t);
 			}
 			Set<MCCommandSender> recipients = new HashSet<>();
 			CArray recipientsArray = (CArray) cRecipients;
@@ -488,7 +488,7 @@ public class ServerEvents {
 			Mixed cMessage = manualObject.get("message", t, env);
 			if(!(cMessage instanceof CString)) {
 				throw new CRECastException("Expected message to be a string, but received: "
-						+ cMessage.typeof().toString(), t);
+						+ cMessage.typeof(env).toString(), t);
 			}
 
 			// Instantiate and return the event.

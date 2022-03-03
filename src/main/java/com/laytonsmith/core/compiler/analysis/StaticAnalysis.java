@@ -407,7 +407,7 @@ public class StaticAnalysis {
 
 		// The node is some other Construct, so return its type.
 		try {
-			return node.typeof();
+			return node.typeof(env);
 		} catch (Throwable t) {
 			// Functions that might contain these unsupported objects should make sure that they don't type check them.
 			// In case an unsupported object causes an error here, it likely means that we have a syntax error.

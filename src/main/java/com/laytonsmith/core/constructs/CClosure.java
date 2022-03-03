@@ -273,7 +273,7 @@ public class CClosure extends Construct implements Callable {
 				Mixed ret = ex.getReturn();
 				if(!InstanceofUtil.isInstanceof(ret, returnType, environment)) {
 					throw new CRECastException("Expected closure to return a value of type " + returnType.val()
-							+ " but a value of type " + ret.typeof() + " was returned instead", ret.getTarget());
+							+ " but a value of type " + ret.typeof(env) + " was returned instead", ret.getTarget());
 				}
 				// Now rethrow it
 				throw ex;

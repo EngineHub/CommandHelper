@@ -52,6 +52,7 @@ public class InstanceofUtilTest {
 	@BeforeClass
 	public static void beforeClass() {
 		Implementation.setServerType(Type.TEST);
+		StaticTest.InstallFakeServerFrontend();
 	}
 
 	@Test
@@ -260,41 +261,62 @@ public class InstanceofUtilTest {
 		}
 
 		@Override
-		public CClassType typeof() {
-			return CClassType.get(this.getClass());
+		public CClassType typeof(Environment env) {
+			return CClassType.get(this.getClass(), Target.UNKNOWN, this.getGenericParameters(), env);
 		}
+
+		@Override
+		public GenericParameters getGenericParameters() {
+			return genericParameters;
+		}
+
 	}
 
 	@typeof("InstanceofUtilTestB")
 	public static class InstanceofUtilTestB extends InstanceofUtilTestA {
 		private GenericParameters genericParameters = null;
 
-		public static final CClassType TYPE = CClassType.getWithGenericDeclaration(InstanceofUtilTestA.class, new GenericDeclaration(Target.UNKNOWN,
+		@SuppressWarnings("FieldNameHidesFieldInSuperclass")
+		public static final CClassType TYPE = CClassType.getWithGenericDeclaration(InstanceofUtilTestB.class, new GenericDeclaration(Target.UNKNOWN,
+				InstanceofUtilTestA.TYPE.getGenericDeclaration().getConstraints().get(0),
 				new Constraints(Target.UNKNOWN, ConstraintLocation.DEFINITION,
 						new UpperBoundConstraint(Target.UNKNOWN, "U", CNumber.TYPE, null))));
 
-		public InstanceofUtilTestB(GenericParameters genericParametersT, GenericParameters genericParametersU) {
-			super(genericParametersT);
-			this.genericParameters = genericParametersU;
+		public InstanceofUtilTestB(GenericParameters genericParameters) {
+			super(genericParameters.subset(InstanceofUtilTestA.TYPE.getGenericDeclaration(), "T"));
+			this.genericParameters = genericParameters;
 		}
+
+		@Override
+		public GenericParameters getGenericParameters() {
+			return genericParameters;
+		}
+
+		@Override
+		public CClassType[] getSuperclasses() {
+			return new CClassType[]{InstanceofUtilTestA.TYPE};
+		}
+
 	}
 
 	@Test
 	public void testGenericInheritanceInstanceof() throws Exception {
 		InstanceofUtilTestB bStringInt = new InstanceofUtilTestB(GenericParameters
 				.addParameter(CString.TYPE, null)
-				.build(), GenericParameters
 				.addParameter(CInt.TYPE, null).build());
 		InstanceofUtilTestB bIntInt = new InstanceofUtilTestB(GenericParameters
-				.addParameter(CString.TYPE, null)
-				.build(), GenericParameters
+				.addParameter(CInt.TYPE, null)
 				.addParameter(CInt.TYPE, null).build());
 		CClassType aString = CClassType.get(InstanceofUtilTestA.TYPE.getFQCN(), Target.UNKNOWN, GenericParameters
 				.addParameter(CString.TYPE, null).build(), env);
 
-		assertFalse(bStringInt.isInstanceOf(bIntInt.typeof(), null, env));
-		assertTrue(bStringInt.isInstanceOf(bStringInt.typeof(), null, env));
-		assertTrue(bStringInt.isInstanceOf(aString, null, env));
-		assertFalse(bIntInt.isInstanceOf(aString, null, env));
+		assertFalse(bStringInt.isInstanceOf(bIntInt.typeof(env), bIntInt.getGenericParameters()
+				.toLeftHandEquivalent(bIntInt.typeof(env), env), env));
+		assertTrue(bStringInt.isInstanceOf(bStringInt.typeof(env), null, env));
+		// TODO: Need to figure out how to square the circle here. The ClassType contains the parameter, but then
+		// if that's the case, what does the LHS parameter contain? In general, the second part of the instanceof
+		// check contains a LHS declaration, so how do we generally represent that here?
+		assertTrue(bStringInt.isInstanceOf(aString, aString.getGenericParameters().toLeftHandEquivalent(aString, env), env));
+		assertFalse(bIntInt.isInstanceOf(aString, aString.getGenericParameters().toLeftHandEquivalent(aString, env), env));
 	}
 }

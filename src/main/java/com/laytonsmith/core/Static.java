@@ -1068,7 +1068,11 @@ public final class Static {
 		StaticRuntimeEnv staticRuntimeEnv = new StaticRuntimeEnv(
 				new Profiler(MethodScriptFileLocations.getDefault().getProfilerConfigFile()),
 				persistenceNetwork, profiles, new TaskManagerImpl());
-		return Environment.createEnvironment(gEnv, staticRuntimeEnv, new CompilerEnvironment());
+		CompilerEnvironment compilerEnvironment = new CompilerEnvironment();
+		Environment retEnv = Environment.createEnvironment(gEnv, staticRuntimeEnv, compilerEnvironment);
+		// TODO: This will need to be added once native classes are compiled in
+//		compilerEnvironment.getObjectDefinitionTable().addNativeTypes(retEnv, retEnv.getEnvClasses());
+		return retEnv;
 	}
 
 	/**
@@ -1189,13 +1193,15 @@ public final class Static {
 	 * error message if the cast cannot occur.
 	 * @param func The function, in case this errors out, to build the error message.
 	 * @param t The code target
+	 * @param env The environment.
 	 * @return The value, cast to the desired type.
 	 */
-	public static <T extends Mixed> T AssertType(Class<T> type, Mixed[] args, int argNumber, Function func, Target t) {
+	public static <T extends Mixed> T AssertType(Class<T> type, Mixed[] args, int argNumber, Function func, Target t,
+			Environment env) {
 		Mixed value = args[argNumber];
 		if(!type.isAssignableFrom(value.getClass())) {
 			typeof todesired = ClassDiscovery.GetClassAnnotation(type, typeof.class);
-			CClassType toactual = value.typeof();
+			CClassType toactual = value.typeof(env);
 			if(todesired != null) {
 				throw new CRECastException("Argument " + (argNumber + 1) + " of " + func.getName() + " was expected to be a "
 						+ todesired.value() + ", but " + toactual + " \"" + value.val() + "\" was found.", t);

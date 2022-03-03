@@ -26,6 +26,10 @@ public class GenericDeclaration {
 		return new ArrayList<>(constraints);
 	}
 
+	/**
+	 * Returns the number of parameters in this declaration.
+	 * @return
+	 */
 	public int getParameterCount() {
 		return constraints.size();
 	}

@@ -376,7 +376,7 @@ public class Script {
 				Mixed closure = env.getEnv(GlobalEnv.class).GetVarList().get(m.val(), m.getTarget(), env).ival();
 				if(!closure.isInstanceOf(CClosure.TYPE, null, env)) {
 					throw new CRECastException("Expecting variable to contain a closure to execute, but found type: "
-							+ closure.typeof().getSimpleName(), m.getTarget());
+							+ closure.typeof(env).getSimpleName(), m.getTarget());
 				}
 				Mixed[] list = new Mixed[c.numberOfChildren()];
 				for(int i = 0; i < c.numberOfChildren(); i++) {

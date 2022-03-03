@@ -15,6 +15,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.InstanceofUtil;
 import com.laytonsmith.core.constructs.NativeTypeList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.generics.GenericParameters;
 import com.laytonsmith.core.constructs.generics.LeftHandGenericUse;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -87,10 +88,11 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	/**
 	 * Alias for {@link #getName() }
 	 *
+	 * @param env
 	 * @return
 	 */
-	public CClassType getExceptionType() {
-		return Construct.typeof(this);
+	public CClassType getExceptionType(Environment env) {
+		return Construct.typeof(this, env);
 	}
 
 	/**
@@ -117,7 +119,7 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	 */
 	public CArray getExceptionObject(Environment env) {
 		CArray ret = CArray.GetAssociativeArray(Target.UNKNOWN, null, env);
-		ret.set("classType", this.getExceptionType(), Target.UNKNOWN, env);
+		ret.set("classType", this.getExceptionType(env), Target.UNKNOWN, env);
 		ret.set("message", this.getMessage(), env);
 		CArray stackTrace = new CArray(Target.UNKNOWN, null, env);
 		ret.set("stackTrace", stackTrace, Target.UNKNOWN, env);
@@ -303,8 +305,13 @@ public abstract class AbstractCREException extends ConfigRuntimeException implem
 	}
 
 	@Override
-	public CClassType typeof() {
-		return Construct.typeof(this);
+	public CClassType typeof(Environment env) {
+		return Construct.typeof(this, env);
+	}
+
+	@Override
+	public GenericParameters getGenericParameters() {
+		return null;
 	}
 
 	@Override
