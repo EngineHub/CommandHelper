@@ -11,4 +11,5 @@ public interface MCBanner extends MCBlockState {
 	int numberOfPatterns();
 	List<MCPattern> getPatterns();
 	void addPattern(MCPattern pattern);
+	void clearPatterns();
 }

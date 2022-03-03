@@ -27,6 +27,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import org.bukkit.block.Banner;
 
 public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 
@@ -173,6 +174,11 @@ public class BukkitMCBlock extends BukkitMCMetadatable implements MCBlock {
 	@Override
 	public boolean isPassable() {
 		return b.isPassable();
+	}
+
+	@Override
+	public boolean isBanner() {
+		return b.getState() instanceof Banner;
 	}
 
 	@Override
