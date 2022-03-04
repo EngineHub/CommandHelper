@@ -164,8 +164,8 @@ public interface Optimizable extends Function {
 
 	/**
 	 * If the function indicates it can optimize dynamic values, this method is called.It may also throw a compile
- exception should the parameters be unacceptable. It may return null if no changes should be made (which is likely
- the default).
+	 * exception should the parameters be unacceptable. It may return null if no changes should be made (which is likely
+	 * the default).
 	 *
 	 * @param t
 	 * @param env The environment. The only guaranteed usable environment is the {@link CompilerEnvironment}.

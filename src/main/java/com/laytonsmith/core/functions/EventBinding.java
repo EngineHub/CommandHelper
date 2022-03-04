@@ -295,7 +295,7 @@ public class EventBinding {
 
 			// Validate prefilters, if we can
 			Event ev = EventList.getEvent(topChildren.get(0).getData().val());
- 			if(ev != null) {
+			if(ev != null) {
 				Event.PrefilterBuilder prefilterBuilder = ev.getPrefilters();
 				if(prefilterBuilder != null) {
 					Map<String, Pair<Prefilters.PrefilterType, Event.PrefilterMatcher>> prefilters = prefilterBuilder.build();
