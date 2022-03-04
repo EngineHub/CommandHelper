@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
@@ -12,6 +13,8 @@ import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.compiler.BranchStatement;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.VariableScope;
 import com.laytonsmith.core.compiler.analysis.Namespace;
@@ -19,6 +22,8 @@ import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClassType;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -32,20 +37,28 @@ import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.BoundEvent.Priority;
 import com.laytonsmith.core.events.Event;
+import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.events.EventUtils;
+import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREInsufficientArgumentsException;
 import com.laytonsmith.core.exceptions.CRE.CREThrowable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import org.eclipse.lsp4j.SymbolKind;
 
 /**
@@ -233,15 +246,121 @@ public class EventBinding {
 		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env,
 				Set<Class<? extends Environment.EnvironmentImpl>> envs,
-				List<ParseTree> children, FileOptions fileOptions)
-				throws ConfigCompileException, ConfigRuntimeException {
-			if(children.size() < 5) {
+				List<ParseTree> topChildren, FileOptions fileOptions)
+				throws ConfigCompileException, ConfigRuntimeException, ConfigCompileGroupException {
+			if(topChildren.size() < 5) {
 				throw new CREInsufficientArgumentsException("bind accepts 5 or more parameters", t);
 			}
-			if(!children.get(0).isConst()) {
+			if(!topChildren.get(0).isConst()) {
 				// Const event name allows for better compilation checks of event type, once objects are added.
 				// This will throw an exception when linking, so let's give a more specific message here
 				throw new ConfigCompileException("Event names must be constant in bind().", t);
+			}
+
+			Set<ConfigCompileException> exceptions = new HashSet<>();
+			// Validate options
+			ParseTree child = topChildren.get(1);
+			if(child.getData() instanceof CFunction && child.getData().val().equals("array")) {
+				for(ParseTree node : child.getChildren()) {
+					if(node.getData() instanceof CFunction && node.getData().val().equals("centry")) {
+						List<ParseTree> children = node.getChildren();
+						if(children.get(0).getData().val().equals("id")
+								&& children.get(1).getData().isInstanceOf(CString.TYPE)) {
+							if(children.get(1).getData().val().matches(".*?:\\d*?")) {
+								exceptions.add(new ConfigCompileException(children.get(1).getData().val()
+											+ " is not a valid event identifier."
+											+ " It cannot match the regex \".*?:\\d*?\".", children.get(1).getTarget()));
+							}
+						} else if(children.get(0).getData().val().equals("priority")
+								&& children.get(1).getData().isInstanceOf(CString.TYPE)) {
+							try {
+								BoundEvent.Priority.valueOf(children.get(1).getData().val());
+							} catch (IllegalArgumentException ex) {
+								exceptions.add(new ConfigCompileException(children.get(1).getData().val()
+											+ " is not a valid enum in ms.lang.Priority",
+												children.get(1).getTarget()));
+							}
+						} else {
+							List<String> validProps = Arrays.asList("id", "priority");
+							String prop = children.get(0).getData().val();
+							if(!validProps.contains(prop)) {
+								env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+											new CompilerWarning("Unexpected entry, this will be ignored.",
+													children.get(0).getTarget(), null));
+							}
+						}
+					}
+				}
+			}
+
+			// Validate prefilters, if we can
+			Event ev = EventList.getEvent(topChildren.get(0).getData().val());
+ 			if(ev != null) {
+				Event.PrefilterBuilder prefilterBuilder = ev.getPrefilters();
+				if(prefilterBuilder != null) {
+					Map<String, Pair<Prefilters.PrefilterType, Event.PrefilterMatcher>> prefilters = prefilterBuilder.build();
+					child = topChildren.get(2);
+					if(child.getData() instanceof CFunction && child.getData().val().equals("array")) {
+						for(ParseTree node : child.getChildren()) {
+							if(node.getData() instanceof CFunction && node.getData().val().equals("centry")) {
+								List<ParseTree> children = node.getChildren();
+								if(prefilters.containsKey(children.get(0).getData().val())) {
+									ParseTree value = children.get(1);
+									CClassType valType = value.getType(env);
+									Prefilters.PrefilterType type = prefilters.get(children.get(0).getData().val()).getKey();
+									String warn = null;
+									switch(type) {
+										case BOOLEAN_MATCH:
+											if(!valType.unsafeDoesExtend(CBoolean.TYPE)) {
+												warn = "Expected a boolean here, this may not perform as expected.";
+											}
+											break;
+										case LOCATION_MATCH:
+											if(!valType.unsafeDoesExtend(CArray.TYPE)) {
+												warn = "Expecting an array here.";
+											}
+											break;
+										case REGEX:
+											if(!valType.unsafeDoesExtend(CString.TYPE)) {
+												warn = "Expecting a string (regex) type here.";
+											} else if(value.isConst()) {
+												try {
+													Pattern.compile(value.getData().val());
+												} catch (PatternSyntaxException ex) {
+													exceptions.add(new ConfigCompileException(ex.getMessage(), t));
+												}
+											}
+											break;
+										case STRING_MATCH:
+											if(!valType.unsafeDoesExtend(CString.TYPE)) {
+												warn = "String type expected here, this may not perform as expected.";
+											}
+											break;
+										// TODO
+										case MATH_MATCH:
+											break;
+										case MACRO:
+											break;
+										case EXPRESSION:
+											break;
+									}
+									if(warn != null) {
+										env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+												new CompilerWarning(warn,
+														children.get(1).getTarget(), null));
+									}
+								} else {
+									env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+												new CompilerWarning("Unexpected prefilter, this will be ignored.",
+														children.get(0).getTarget(), null));
+								}
+							}
+						}
+					}
+				}
+			}
+			if(!exceptions.isEmpty()) {
+				throw new ConfigCompileGroupException(exceptions);
 			}
 			return null;
 		}

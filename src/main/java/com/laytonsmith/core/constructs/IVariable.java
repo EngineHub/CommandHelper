@@ -112,6 +112,11 @@ public class IVariable extends Construct implements Cloneable {
 		return type;
 	}
 
+	@Override
+	public CClassType typeof() {
+		return getDefinedType();
+	}
+
 	/**
 	 * Returns the target where the variable was initially defined at, not where the enclosed value was defined.
 	 *

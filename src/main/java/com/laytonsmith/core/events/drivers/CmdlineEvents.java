@@ -94,6 +94,11 @@ public class CmdlineEvents {
 		}
 
 		@Override
+		public PrefilterBuilder getPrefilters() {
+			return PrefilterBuilder.EMPTY;
+		}
+
+		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
 			return new BindableEvent() {
 
@@ -150,6 +155,11 @@ public class CmdlineEvents {
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			return true;
+		}
+
+		@Override
+		public PrefilterBuilder getPrefilters() {
+			return PrefilterBuilder.EMPTY;
 		}
 
 		@Override

@@ -1,5 +1,8 @@
 package com.laytonsmith.core.events;
 
+import com.laytonsmith.PureUtilities.MapBuilder;
+import com.laytonsmith.PureUtilities.Pair;
+import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.annotations.core;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.ParseTree;
@@ -10,6 +13,7 @@ import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -48,7 +52,12 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * @return True, iff the event code should be run
 	 * @throws com.laytonsmith.core.exceptions.PrefilterNonMatchException Equivalent to returning false, though throwing
 	 * an exception is sometimes easier, given that lower level code may be handling the prefilter match.
+	 * @deprecated The {@link #getPrefilters} declarative approach is preferred here. While this isn't going to be
+	 * removed until all events are converted over, if {@link #getPrefilters} returns non-null, that should be used
+	 * instead of this method. For event types that return non-null in {@link #getPrefilters}, calling this method
+	 * is an Error.
 	 */
+	@Deprecated
 	public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException;
 
 	/**
@@ -200,5 +209,104 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * @return
 	 */
 	public boolean isCore();
+
+	/**
+	 * This method is used to return a declarative list of prefilter types that are available in this event. Since this
+	 * was added later, it's possible that this method isn't supported, and old, unconverted event types should remain
+	 * supported. In that case, this method should simply return null, which should be the initial default.
+	 * <p>
+	 * For newer, supported event types though, this replaces the call to the matches method, as well as the
+	 * documentation for the prefilters in docs, and is more efficient, as it replaces the exception driven matching
+	 * pattern with a closure driven one.
+	 * <p>
+	 * The general behavior is to return a list of matchers, mapping from prefilter name to a pair of prefilter types
+	 * and prefilter matcher closures. The name and type are used in the documentation, and a subclass of the
+	 * PrefilterMatcher is used in order to get the correct object out of the event. Depending on the prefilter type,
+	 * the correct method is called. (All other methods return null, and aren't called in normal course.) The method
+	 * for the given type should be overridden. A unit test exists in the core to ensure that these are correctly
+	 * implemented, though this doesn't necessarily help with extensions.
+	 * @return
+	 */
+//	@ForceImplementation
+	public PrefilterBuilder getPrefilters();
+
+	public abstract static class PrefilterMatcher {
+
+		public MCLocation getLocationParameter(BindableEvent e) {
+			return null;
+		}
+		public Boolean getBooleanParameter(BindableEvent e) {
+			return null;
+		}
+		public String getStringParameter(BindableEvent e) {
+			return null;
+		}
+		public Number getMathParameter(BindableEvent e) {
+			return null;
+		}
+		public String getRegexParameter(BindableEvent e) {
+			return null;
+		}
+		public Number getExpressionParameter(BindableEvent e) {
+			return null;
+		}
+		public Object getMacroParameter(BindableEvent e) {
+			return null;
+		}
+
+	}
+
+	public static final class PrefilterBuilder {
+
+		/**
+		 * If the event has no prefilters, this should be used.
+		 */
+		public static final PrefilterBuilder EMPTY = new PrefilterBuilder();
+
+		/**
+		 * Starts building a new PrefilterBuilder.
+		 * @param prefilterName The name of the prefilter.
+		 * @param type The type of the prefilter. Depending on this value, the same method type must be defined in the
+		 * matcher.
+		 * @param matcher The matcher object. This should override a single method, the one that corresponds to the
+		 * specified type of this prefilter.
+		 * @return A new PrefilterBuilder object, which can then be chained.
+		 */
+		public static PrefilterBuilder start(String prefilterName, Prefilters.PrefilterType type, PrefilterMatcher matcher) {
+			PrefilterBuilder builder = new PrefilterBuilder();
+			builder.builder = MapBuilder.start(prefilterName, new Pair<>(type, matcher));
+			return builder;
+		}
+
+		private PrefilterBuilder() {}
+
+		private MapBuilder<String, Pair<Prefilters.PrefilterType, PrefilterMatcher>> builder;
+
+		/**
+		 * Adds another prefilter to the PrefilterBuilder.
+		 * @param prefilterName The name of the prefilter.
+		 * @param type The type of the prefilter. Depending on this value, the same method type must be defined in the
+		 * matcher.
+		 * @param matcher The matcher object. This should override a single method, the one that corresponds to the
+		 * specified type of this prefilter.
+		 * @return {@code this} for easy chaining.
+		 */
+		public PrefilterBuilder set(String prefilterName, Prefilters.PrefilterType type, PrefilterMatcher matcher) {
+			builder.set(prefilterName, new Pair<>(type, matcher));
+			return this;
+		}
+
+		/**
+		 * Builds a Map object based on the configured parameters.
+		 * @return
+		 */
+		public Map<String, Pair<Prefilters.PrefilterType, PrefilterMatcher>> build() {
+			if(builder == null) {
+				return new HashMap<>();
+			}
+			return builder.build();
+		}
+
+	}
 
 }

@@ -911,6 +911,67 @@ public class PlayerEvents {
 		}
 
 		@Override
+		public PrefilterBuilder getPrefilters() {
+			return PrefilterBuilder
+					.start("button", PrefilterType.STRING_MATCH, new PrefilterMatcher() {
+						@Override
+						public String getStringParameter(BindableEvent e) {
+							if(e instanceof MCPlayerInteractEvent pie) {
+								if(pie.getAction().equals(MCAction.LEFT_CLICK_AIR)
+									|| pie.getAction().equals(MCAction.LEFT_CLICK_BLOCK)) {
+									return "left";
+								}
+								if(pie.getAction().equals(MCAction.RIGHT_CLICK_AIR)
+										|| pie.getAction().equals(MCAction.RIGHT_CLICK_BLOCK)) {
+									return "right";
+								}
+							}
+							return null;
+						}
+					})
+					.set("itemname", PrefilterType.STRING_MATCH, new PrefilterMatcher() {
+						@Override
+						public String getStringParameter(BindableEvent e) {
+							if(e instanceof MCPlayerInteractEvent pie) {
+								return pie.getItem().getType().getName();
+							}
+							return null;
+						}
+					})
+					.set("block", PrefilterType.STRING_MATCH, new PrefilterMatcher() {
+						@Override
+						public String getStringParameter(BindableEvent e) {
+							if(e instanceof MCPlayerInteractEvent pie) {
+								return pie.getClickedBlock().getType().getName();
+							}
+							return null;
+						}
+					})
+					.set("player", PrefilterType.MACRO, new PrefilterMatcher() {
+						@Override
+						public String getMacroParameter(BindableEvent e) {
+							if(e instanceof MCPlayerInteractEvent pie) {
+								return pie.getPlayer().getName();
+							}
+							return null;
+						}
+					})
+					.set("hand", PrefilterType.STRING_MATCH, new PrefilterMatcher() {
+						@Override
+						public String getMacroParameter(BindableEvent e) {
+							if(e instanceof MCPlayerInteractEvent pie) {
+								if(pie.getHand() == MCEquipmentSlot.WEAPON) {
+									return "main_hand";
+								} else {
+									return "off_hand";
+								}
+							}
+							return null;
+						}
+					});
+		}
+
+		@Override
 		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
 			if(e instanceof MCPlayerInteractEvent) {
 				MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;

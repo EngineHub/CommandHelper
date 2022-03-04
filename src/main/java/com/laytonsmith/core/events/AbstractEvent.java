@@ -293,4 +293,9 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 		return false;
 	}
 
+	@Override
+	public PrefilterBuilder getPrefilters() {
+		return null;
+	}
+
 }

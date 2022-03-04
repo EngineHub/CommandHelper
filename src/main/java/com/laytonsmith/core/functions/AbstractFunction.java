@@ -27,6 +27,7 @@ import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.snapins.PackagePermission;
@@ -55,7 +56,7 @@ public abstract class AbstractFunction implements Function {
 
 	/**
 	 * {@inheritDoc}
-	 * 
+	 *
 	 * By default, we return CVoid.
 	 *
 	 * @param t
@@ -70,8 +71,7 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * By default, {@link CClassType#AUTO} is returned.
+	 * {@inheritDoc} By default, {@link CClassType#AUTO} is returned.
 	 */
 	@Override
 	public CClassType getReturnType(Target t, List<CClassType> argTypes,
@@ -80,9 +80,8 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * By default, this calls {@link StaticAnalysis#typecheck(ParseTree, Set)} on the function's arguments and passes
-	 * them to {@link #getReturnType(Target, List, List, Set)} to get this function's return type.
+	 * {@inheritDoc} By default, this calls {@link StaticAnalysis#typecheck(ParseTree, Set)} on the function's arguments
+	 * and passes them to {@link #getReturnType(Target, List, List, Set)} to get this function's return type.
 	 */
 	@Override
 	public CClassType typecheck(StaticAnalysis analysis,
@@ -102,9 +101,9 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * By default, the parent scope is passed to the first child, the result is passed to the second child, etc.
-	 * This method returns the scope as returned by the last child, or the parent scope if it does not have children.
+	 * {@inheritDoc} By default, the parent scope is passed to the first child, the result is passed to the second
+	 * child, etc. This method returns the scope as returned by the last child, or the parent scope if it does not have
+	 * children.
 	 */
 	@Override
 	public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
@@ -117,15 +116,16 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	/**
-	 * Functions that use lazy evaluation where the first argument is always evaluated, and later arguments might not
-	 * be evaluated depending on the outcome of previous arguments.
+	 * Functions that use lazy evaluation where the first argument is always evaluated, and later arguments might not be
+	 * evaluated depending on the outcome of previous arguments.
+	 *
 	 * @param analysis - The {@link StaticAnalysis}.
 	 * @param parentScope - The current scope.
 	 * @param ast - The abstract syntax tree representing this function.
 	 * @param env - The environment.
 	 * @param exceptions - A set to put compile errors in.
-	 * @return The new (linked) scope from the first argument, or the parent scope if no arguments are available or
-	 * if this function does not require a new scope.
+	 * @return The new (linked) scope from the first argument, or the parent scope if no arguments are available or if
+	 * this function does not require a new scope.
 	 */
 	protected Scope linkScopeLazy(StaticAnalysis analysis, Scope parentScope,
 			ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
@@ -210,7 +210,7 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	/**
-	 * It may be that a function can simply check for compile errors, but not optimize. In this case, it is appropriate
+	 * It may be that a function can simply check for compile errors, but not optimize.In this case, it is appropriate
 	 * to use this definition of optimizeDynamic, to return a value that will essentially make no changes, or in the
 	 * case where it can optimize anyways, even if some values are undetermined at the moment.
 	 *
@@ -221,10 +221,11 @@ public abstract class AbstractFunction implements Function {
 	 * @param fileOptions
 	 * @return
 	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
+	 * @throws com.laytonsmith.core.exceptions.ConfigCompileGroupException
 	 */
 	public ParseTree optimizeDynamic(Target t, Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, List<ParseTree> children, FileOptions fileOptions)
-			throws ConfigCompileException, ConfigRuntimeException {
+			throws ConfigCompileException, ConfigRuntimeException, ConfigCompileGroupException {
 		return null;
 	}
 
@@ -303,7 +304,7 @@ public abstract class AbstractFunction implements Function {
 	protected String getBundledDocs() {
 		try {
 			return getBundledDocs(null);
-		} catch (GenerateException ex) {
+		} catch(GenerateException ex) {
 			// This condition is impossible, so we just ignore this case.
 			return "";
 		}
