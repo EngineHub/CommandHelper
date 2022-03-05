@@ -21,18 +21,8 @@ public class BukkitMCPlayerProfile implements MCPlayerProfile {
 	}
 
 	@Override
-	public String setName(String name) {
-		return (String) ReflectionUtils.invokeMethod(this.pp, "setName", name);
-	}
-
-	@Override
 	public UUID getId() {
 		return (UUID) ReflectionUtils.invokeMethod(this.pp, "getId");
-	}
-
-	@Override
-	public UUID setId(UUID id) {
-		return (UUID) ReflectionUtils.invokeMethod(this.pp, "setId", id);
 	}
 
 	@Override
