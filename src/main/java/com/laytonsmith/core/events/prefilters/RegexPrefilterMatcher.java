@@ -62,7 +62,7 @@ public abstract class RegexPrefilterMatcher<T extends BindableEvent> extends Abs
 		} else if(node.isConst()) {
 			try {
 				Pattern.compile(node.getData().val());
-			} catch(PatternSyntaxException ex) {
+			} catch (PatternSyntaxException ex) {
 				throw new ConfigCompileException(ex.getMessage(), node.getTarget());
 			}
 		}

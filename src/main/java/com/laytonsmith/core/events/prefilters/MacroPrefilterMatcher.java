@@ -80,7 +80,7 @@ public abstract class MacroPrefilterMatcher<T extends BindableEvent> extends Abs
 		} else if(expression.charAt(0) == '(' && expression.charAt(expression.length() - 1) == ')') {
 			try {
 				return FastExpressionMatch(expression, key, (double) javaObject, t);
-			} catch(ClassCastException ex) {
+			} catch (ClassCastException ex) {
 				throw new RuntimeException("Unexpected class type, please report this bug to the developers.", ex);
 			}
 		} else if(expression.charAt(0) == '/' && expression.charAt(expression.length() - 1) == '/') {

@@ -46,7 +46,7 @@ public abstract class MathPrefilterMatcher<T extends BindableEvent> extends Abst
 				tolerance, but this can be overridden by providing an array with the keys "value" and
 				"tolerance", and then the tolerance can be set as necessary.
 
-                <%CODE|
+				<%CODE|
 					bind('event', null, array(prefilter: 5), @event) {
 						// Will fire if prefilter is 5.0
 					}
@@ -54,8 +54,8 @@ public abstract class MathPrefilterMatcher<T extends BindableEvent> extends Abst
 					bind('event', null, array(prefilter: array(value: 5, tolerance: 2)), @event) {
 						// Will fire if prefilter is 5.0, 6.5, or 4.3 for instance
 					}
-                %>
-            """;
+				%>
+			""";
 		}
 
 		@Override

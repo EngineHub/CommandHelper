@@ -95,7 +95,7 @@ public abstract class MaterialPrefilterMatcher<T extends BindableEvent> extends 
 					// This time we want to actually load the original Material enum, so don't allow shade to rewrite
 					orgBukkitMaterial = new ClassMirror(Class.forName("org.bukkit.Material"));
 				}
-			} catch(ClassNotFoundException ex) {
+			} catch (ClassNotFoundException ex) {
 				// Do nothing.
 			}
 			materialClassFound = true;

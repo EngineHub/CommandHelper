@@ -132,5 +132,5 @@ public abstract class LocationPrefilterMatcher<T extends BindableEvent> extends 
 	protected double getDefaultTolerance() {
 		return 1.0;
 	}
-;
+
 }
