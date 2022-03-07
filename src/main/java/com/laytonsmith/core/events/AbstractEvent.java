@@ -1,5 +1,6 @@
 package com.laytonsmith.core.events;
 
+import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.abstraction.MCCommandSender;

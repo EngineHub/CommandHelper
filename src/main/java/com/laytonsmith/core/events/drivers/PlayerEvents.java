@@ -67,9 +67,13 @@ import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
-import com.laytonsmith.core.events.Prefilters;
-import com.laytonsmith.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.core.events.prefilters.Prefilters;
+import com.laytonsmith.core.events.prefilters.Prefilters.PrefilterType;
 import com.laytonsmith.core.events.drivers.EntityEvents.entity_death;
+import com.laytonsmith.core.events.prefilters.MaterialPrefilterMatcher;
+import com.laytonsmith.core.events.prefilters.PlayerPrefilterMatcher;
+import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
+import com.laytonsmith.core.events.prefilters.StringICPrefilterMatcher;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -911,62 +915,47 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public PrefilterBuilder getPrefilters() {
-			return PrefilterBuilder
-					.start("button", PrefilterType.STRING_MATCH, new PrefilterMatcher() {
+		public PrefilterBuilder<MCPlayerInteractEvent> getPrefilters() {
+			return new PrefilterBuilder<MCPlayerInteractEvent>()
+					.set("button", "\"left\" or \"right\". If they left or right clicked",
+							new StringICPrefilterMatcher<>() {
 						@Override
-						public String getStringParameter(BindableEvent e) {
-							if(e instanceof MCPlayerInteractEvent pie) {
-								if(pie.getAction().equals(MCAction.LEFT_CLICK_AIR)
-									|| pie.getAction().equals(MCAction.LEFT_CLICK_BLOCK)) {
-									return "left";
-								}
-								if(pie.getAction().equals(MCAction.RIGHT_CLICK_AIR)
-										|| pie.getAction().equals(MCAction.RIGHT_CLICK_BLOCK)) {
-									return "right";
-								}
+						protected String getProperty(MCPlayerInteractEvent pie) {
+							if(pie.getAction().equals(MCAction.LEFT_CLICK_AIR)
+								|| pie.getAction().equals(MCAction.LEFT_CLICK_BLOCK)) {
+								return "left";
 							}
-							return null;
+							if(pie.getAction().equals(MCAction.RIGHT_CLICK_AIR)
+									|| pie.getAction().equals(MCAction.RIGHT_CLICK_BLOCK)) {
+								return "right";
+							}
+							throw new Error("Unexpected event behavior, please report this bug to developers.");
 						}
 					})
-					.set("itemname", PrefilterType.STRING_MATCH, new PrefilterMatcher() {
+					.set("itemname", "The item type they are holding when they interacted, or null",
+							new MaterialPrefilterMatcher<>() {
 						@Override
-						public String getStringParameter(BindableEvent e) {
-							if(e instanceof MCPlayerInteractEvent pie) {
-								return pie.getItem().getType().getName();
-							}
-							return null;
+						public MCMaterial getMaterial(MCPlayerInteractEvent pie) {
+							return pie.getItem().getType();
 						}
 					})
-					.set("block", PrefilterType.STRING_MATCH, new PrefilterMatcher() {
+					.set("block", "The block type the player interacts with, or null if nothing",
+							new MaterialPrefilterMatcher<>() {
 						@Override
-						public String getStringParameter(BindableEvent e) {
-							if(e instanceof MCPlayerInteractEvent pie) {
-								return pie.getClickedBlock().getType().getName();
-							}
-							return null;
+						public MCMaterial getMaterial(MCPlayerInteractEvent pie) {
+							return pie.getClickedBlock().getType();
 						}
 					})
-					.set("player", PrefilterType.MACRO, new PrefilterMatcher() {
+					.set("player", "The player that triggered the event", new PlayerPrefilterMatcher<>())
+					.set("hand", "The hand the player clicked with.",
+							new StringICPrefilterMatcher<>() {
 						@Override
-						public String getMacroParameter(BindableEvent e) {
-							if(e instanceof MCPlayerInteractEvent pie) {
-								return pie.getPlayer().getName();
+						public String getProperty(MCPlayerInteractEvent pie) {
+							if(pie.getHand() == MCEquipmentSlot.WEAPON) {
+								return "main_hand";
+							} else {
+								return "off_hand";
 							}
-							return null;
-						}
-					})
-					.set("hand", PrefilterType.STRING_MATCH, new PrefilterMatcher() {
-						@Override
-						public String getMacroParameter(BindableEvent e) {
-							if(e instanceof MCPlayerInteractEvent pie) {
-								if(pie.getHand() == MCEquipmentSlot.WEAPON) {
-									return "main_hand";
-								} else {
-									return "off_hand";
-								}
-							}
-							return null;
 						}
 					});
 		}

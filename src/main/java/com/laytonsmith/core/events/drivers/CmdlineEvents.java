@@ -18,6 +18,7 @@ import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.CancellableEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
+import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.natives.interfaces.Mixed;

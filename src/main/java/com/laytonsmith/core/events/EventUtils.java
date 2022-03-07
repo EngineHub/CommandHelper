@@ -1,17 +1,17 @@
 package com.laytonsmith.core.events;
 
-import com.laytonsmith.PureUtilities.Pair;
+import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
+import com.laytonsmith.core.events.prefilters.PrefilterMatcher;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.core.ArgumentValidation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.BoundEvent.Priority;
+import com.laytonsmith.core.events.prefilters.Prefilter;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CREEventException;
 import com.laytonsmith.core.extensions.Extension;
@@ -190,7 +190,7 @@ public final class EventUtils {
 	 * @return
 	 */
 	public static boolean PrefilterMatches(BoundEvent b, BindableEvent e, Event driver) {
-		Event.PrefilterBuilder prefilterBuilder = driver.getPrefilters();
+		PrefilterBuilder prefilterBuilder = driver.getPrefilters();
 		Map<String, Mixed> userPrefilters = b.getPrefilter();
 		if(prefilterBuilder == null) {
 			// Old, deprecated method
@@ -200,73 +200,17 @@ public final class EventUtils {
 				return false;
 			}
 		} else {
-			Map<String, Pair<Prefilters.PrefilterType, Event.PrefilterMatcher>> prefilters = prefilterBuilder.build();
+			Map<String, Prefilter<BindableEvent>> prefilters = prefilterBuilder.build();
 			for(Map.Entry<String, Mixed> prefilter : userPrefilters.entrySet()) {
 				if(!prefilters.containsKey(prefilter.getKey())) {
 					// The compiler should have already warned about this
 					continue;
 				}
-				Pair<Prefilters.PrefilterType, Event.PrefilterMatcher> pair = prefilters.get(prefilter.getKey());
-				Event.PrefilterMatcher matcher = pair.getValue();
+				Prefilter<BindableEvent> pf = prefilters.get(prefilter.getKey());
+				PrefilterMatcher matcher = pf.getMatcher();
 				Mixed value = prefilter.getValue();
-				switch(pair.getKey()) {
-					case STRING_MATCH: {
-						String compare = matcher.getStringParameter(e);
-						if(compare != null && !Prefilters.FastStringMatch(compare, value.val())) {
-							return false;
-						}
-						break;
-					}
-					case MATH_MATCH: {
-						Number compare = matcher.getMathParameter(e);
-						if(compare != null && compare.doubleValue() != ArgumentValidation.getNumber(value, value.getTarget())) {
-							return false;
-						}
-						break;
-					}
-					case EXPRESSION: {
-						Number compare = matcher.getExpressionParameter(e);
-						if(compare != null && !Prefilters.FastExpressionMatch(value.val(), prefilter.getKey(), compare.doubleValue(), value.getTarget())) {
-							return false;
-						}
-						break;
-					}
-					case REGEX: {
-						String regex = value.val();
-						String compare = matcher.getRegexParameter(e);
-						if(compare != null) {
-							if(!regex.isEmpty() && regex.charAt(0) == '/' && regex.charAt(regex.length() - 1) == '/') {
-								regex = regex.substring(1, regex.length() - 1);
-								if(!Prefilters.FastRegexMatch(regex, compare)) {
-									return false;
-								}
-							}
-						}
-						break;
-					}
-					case MACRO: {
-						Object compare = matcher.getMacroParameter(e);
-						if(compare != null) {
-							if(!Prefilters.FastMacroMatch(prefilter.getKey(), value.val(), compare, value.getTarget())) {
-								return false;
-							}
-						}
-						break;
-					}
-					case BOOLEAN_MATCH: {
-						Boolean compare = matcher.getBooleanParameter(e);
-						if(compare != null && compare != ArgumentValidation.getBooleanish(value, Target.UNKNOWN)) {
-							return false;
-						}
-						break;
-					}
-					case LOCATION_MATCH: {
-						MCLocation compare = matcher.getLocationParameter(e);
-						if(!Prefilters.FastLocationMatch(value, compare)) {
-							return false;
-						}
-						break;
-					}
+				if(!matcher.matches(value, e, b.getTarget())) {
+					return false;
 				}
 			}
 			return true;

@@ -572,6 +572,7 @@
 									<include>io.gsonfire:gson-fire:jar:*</include>
 									<include>com.squareup.okhttp:logging-interceptor:jar:*</include>
 									<include>com.microsoft.sqlserver:mssql-jdbc:jar:*</include>
+									<include>org.spigotmc:spigot-api:jar:*</include>
 								</includes>
 							</artifactSet>
 							<relocations>
@@ -925,6 +926,12 @@
 									<excludes>
 										<exclude>META-INF/**</exclude>
 									</excludes>
+								</filter>
+								<filter>
+									<artifact>org.spigotmc:spigot-api:jar:*</artifact>
+									<includes>
+										<include>org/bukkit/Material.class</include>
+									</includes>
 								</filter>
 							</filters>
 						</configuration>

@@ -1,4 +1,4 @@
-package com.laytonsmith.core.events;
+package com.laytonsmith.core.events.prefilters;
 
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCLocation;
