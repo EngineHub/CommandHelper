@@ -32,7 +32,7 @@ public abstract class StringPrefilterMatcher<T extends BindableEvent> extends Ab
 
 		@Override
 		public String getNameWiki() {
-			return "[[Prefilters#string ic match|String IC Match]]";
+			return "[[Prefilters#string match|String Match]]";
 		}
 
 		@Override

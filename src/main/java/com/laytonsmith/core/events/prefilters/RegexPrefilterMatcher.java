@@ -33,7 +33,7 @@ public abstract class RegexPrefilterMatcher<T extends BindableEvent> extends Abs
 
 		@Override
 		public String getNameWiki() {
-			return "[[Prefilters#Regex|Regex]]";
+			return "[[Prefilters#regex match|Regex]]";
 		}
 
 		@Override
