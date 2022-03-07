@@ -1,6 +1,9 @@
 package com.laytonsmith.core.events.prefilters;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.events.MCPlayerEvent;
+import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
@@ -15,27 +18,52 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 /**
  * A PlayerPrefilterMatcher is a relatively specialized PrefilterMatcher which only works with MCPlayerEvent subtypes.
  * It simply matches the player name against the specified input.
+ *
  * @param <T>
  */
-public class PlayerPrefilterMatcher<T extends MCPlayerEvent> implements PrefilterMatcher<T> {
+public class PlayerPrefilterMatcher<T extends MCPlayerEvent> extends AbstractPrefilterMatcher<T> {
+
+	@api
+	public static class PlayerPrefilterDocs implements PrefilterDocs {
+
+		@Override
+		public String getName() {
+			return "player match";
+		}
+
+		@Override
+		public String getNameWiki() {
+			return "[[Prefilters#player match|Player Match]]";
+		}
+
+		@Override
+		public String docs() {
+			return "A player match is a simple string match on the player's name, ignoring case.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
 
 	@Override
-	public String filterType() {
-		return "player match";
+	public PrefilterDocs getDocsObject() {
+		return new PlayerPrefilterDocs();
 	}
 
 	@Override
 	public void validate(ParseTree node, Environment env) throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
 		if(!node.getType(env).doesExtend(CString.TYPE)) {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
-				new CompilerWarning("Expected a string (player) here, this may not perform as expected.",
-						node.getTarget(), null));
+					new CompilerWarning("Expected a string (player) here, this may not perform as expected.",
+							node.getTarget(), null));
 		}
 	}
 
 	@Override
 	public boolean matches(Mixed value, T event, Target t) {
-		return value.val().equals(event.getPlayer().getName());
+		return value.val().equalsIgnoreCase(event.getPlayer().getName());
 	}
 
 }

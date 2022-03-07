@@ -1,10 +1,10 @@
 /**
  * Based on the following library, with improvements added:
- * 
- * 
+ *
+ *
  * Wiky.js - Javascript library to converts Wiki MarkUp language to HTML.
  * You can do whatever with it. Please give me some credits (Apache License)
- * - Tanin Na Nakorn 
+ * - Tanin Na Nakorn
  */
 
 var wiky = {
@@ -27,23 +27,23 @@ wiky.process = function (wikitext, options) {
         if (line.match(/^======/) !== null && line.match(/======$/) !== null)
         {
             var subject = line.substring(6, line.length - 6).trim();
-            html += "<h6 id=\"" + subject + "\">" + subject + "</h6>";
+            html += "<h6 id=\"" + encodeURIComponent(subject) + "\">" + subject + "</h6>";
         } else if (line.match(/^=====/) !== null && line.match(/=====$/) !== null)
         {
             var subject = line.substring(5, line.length - 5).trim();
-            html += "<h5 id=\"" + subject + "\">" + subject + "</h5>";
+            html += "<h5 id=\"" + encodeURIComponent(subject) + "\">" + subject + "</h5>";
         } else if (line.match(/^====/) !== null && line.match(/====$/) !== null)
         {
             var subject = line.substring(4, line.length - 4).trim();
-            html += "<h4 id=\"" + subject + "\">" + subject + "</h4>";
+            html += "<h4 id=\"" + encodeURIComponent(subject) + "\">" + subject + "</h4>";
         } else if (line.match(/^===/) !== null && line.match(/===$/) !== null)
         {
             var subject = line.substring(3, line.length - 3).trim();
-            html += "<h3 id=\"" + subject + "\">" + subject + "</h3>";
+            html += "<h3 id=\"" + encodeURIComponent(subject) + "\">" + subject + "</h3>";
         } else if (line.match(/^==/) !== null && line.match(/==$/) !== null)
         {
             var subject = line.substring(2, line.length - 2).trim();
-            html += "<h2 id=\"" + subject + "\">" + subject + "</h2>";
+            html += "<h2 id=\"" + encodeURIComponent(subject) + "\">" + subject + "</h2>";
         } else if (line.match(/^:+/) !== null)
         {
             // find start line and ending line

@@ -1,6 +1,9 @@
 package com.laytonsmith.core.events.prefilters;
 
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
+import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -13,12 +16,40 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  *
+ * @param <T>
  */
-public abstract class ExpressionPrefilterMatcher<T extends BindableEvent> implements PrefilterMatcher<T> {
+public abstract class ExpressionPrefilterMatcher<T extends BindableEvent> extends AbstractPrefilterMatcher<T> {
+
+	@api
+	public static class ExpressionPrefilterDocs implements PrefilterDocs {
+		@Override
+		public String getName() {
+			return "expression match";
+		}
+
+
+		@Override
+		public String getNameWiki() {
+			return "[[Prefilters#expression match|Expression]]";
+		}
+
+		@Override
+		public String docs() {
+			return "An expression allows for a range or complex mathematical expression to be provided. This uses"
+					+ " the WorldEdit expression format, which is documented here. https://worldedit.enginehub.org/en/latest/usage/other/expressions/"
+					+ " The prefilter name is assigned the value at resolution time. For instance, if the prefilter name"
+					+ " were \"height\", then you might provide the following prefilter: array(height: \"height > 50\").";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
 
 	@Override
-	public String filterType() {
-		return "expression match";
+	public PrefilterDocs getDocsObject() {
+		return new ExpressionPrefilterDocs();
 	}
 
 	@Override

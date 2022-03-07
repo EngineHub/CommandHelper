@@ -1,5 +1,8 @@
 package com.laytonsmith.core.events.prefilters;
 
+import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
@@ -17,19 +20,44 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
  *
  * @param <T>
  */
-public abstract class StringPrefilterMatcher<T extends BindableEvent> implements PrefilterMatcher<T> {
+public abstract class StringPrefilterMatcher<T extends BindableEvent> extends AbstractPrefilterMatcher<T> {
+
+	@api
+	public static class StringPrefilterDocs implements PrefilterDocs {
+
+		@Override
+		public String getName() {
+			return "string match";
+		}
+
+		@Override
+		public String getNameWiki() {
+			return "[[Prefilters#string ic match|String IC Match]]";
+		}
+
+		@Override
+		public String docs() {
+			return "A string match is a simple string match, that does NOT ignore case. That is, \"aSdF\" and \"asdf\" do not match,"
+					+ " nor do \"asd\" and \"asdf\".";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
 
 	@Override
-	public String filterType() {
-		return "string match";
+	public PrefilterDocs getDocsObject() {
+		return new StringPrefilterDocs();
 	}
 
 	@Override
 	public void validate(ParseTree node, Environment env) throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
 		if(!node.getType(env).doesExtend(CString.TYPE)) {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
-				new CompilerWarning("Expecting a string type here.",
-						node.getTarget(), null));
+					new CompilerWarning("Expecting a string type here.",
+							node.getTarget(), null));
 		}
 	}
 
@@ -43,8 +71,5 @@ public abstract class StringPrefilterMatcher<T extends BindableEvent> implements
 	}
 
 	protected abstract String getProperty(T event);
-
-
-
 
 }

@@ -1,6 +1,7 @@
 package com.laytonsmith.core.events.prefilters;
 
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BindableEvent;
@@ -13,7 +14,11 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
  *
  * @param <T>
  */
-public interface PrefilterMatcher<T extends BindableEvent> {
+public interface PrefilterMatcher<T extends BindableEvent> extends SimpleDocumentation {
+
+	public static interface PrefilterDocs extends SimpleDocumentation {
+		String getNameWiki();
+	}
 
 	/**
 	 * Given the value and event, should return false if this doesn't match.If true is returned, this indicates that the
@@ -27,11 +32,32 @@ public interface PrefilterMatcher<T extends BindableEvent> {
 	boolean matches(Mixed value, T event, Target t);
 
 	/**
-	 * Returns the filter type, which is used in documentation.
+	 * Returns the filter type, which is used in text based documentation.
 	 *
 	 * @return
 	 */
-	String filterType();
+	@Override
+	String getName();
+
+	/**
+	 * Returns the filter type, which is used in Wiki based documentation.
+	 * @return
+	 */
+	String getNameWiki();
+
+	/**
+	 * Returns documentation for this filter type, which is used in the events page for matchers tagged with @api.
+	 * Optional if this class isn't tagged with @api.
+	 * @return
+	 */
+	@Override
+	String docs();
+
+	/**
+	 * Returns the documentation object, if it exists.
+	 * @return
+	 */
+	PrefilterDocs getDocsObject();
 
 	/**
 	 * If additional prefilter validation can be performed at compile time, this should be done here.Note that this

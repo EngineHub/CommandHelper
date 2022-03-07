@@ -1,6 +1,9 @@
 package com.laytonsmith.core.events.prefilters;
 
+import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
@@ -17,12 +20,38 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
  *
  * @param <T>
  */
-public abstract class BooleanPrefilterMatcher<T extends BindableEvent> implements PrefilterMatcher<T> {
+public abstract class BooleanPrefilterMatcher<T extends BindableEvent> extends AbstractPrefilterMatcher<T> {
+
+	@api
+	public static class BooleanPrefilterDocsObject implements PrefilterDocs {
+		@Override
+		public String getName() {
+			return "boolean match";
+		}
+
+		@Override
+		public String getNameWiki() {
+			return "[[Prefilters#boolean match|Boolean Match]]";
+		}
+
+		@Override
+		public String docs() {
+			return "A boolean prefilter matches if the boolean value is the same. In general, this is a booleanish value,"
+					+ " but if a non-boolean is provided, a compiler warning is issued, as this indicates possibly"
+					+ " suspect code. Null is considered false.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
 
 	@Override
-	public String filterType() {
-		return "boolean match";
+	public PrefilterDocs getDocsObject() {
+		return new BooleanPrefilterDocsObject();
 	}
+
 
 	@Override
 	public void validate(ParseTree node, Environment env) throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {

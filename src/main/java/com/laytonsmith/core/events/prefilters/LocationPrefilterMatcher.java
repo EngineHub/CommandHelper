@@ -1,7 +1,10 @@
 package com.laytonsmith.core.events.prefilters;
 
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ArgumentValidation;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
@@ -19,18 +22,51 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
  *
  * @param <T>
  */
-public abstract class LocationPrefilterMatcher<T extends BindableEvent> implements PrefilterMatcher<T> {
+public abstract class LocationPrefilterMatcher<T extends BindableEvent> extends AbstractPrefilterMatcher<T> {
+
+	@api
+	public static class LocationPrefilterDocs implements PrefilterDocs {
+
+		@Override
+		public String getName() {
+			return "location match";
+		}
+
+		@Override
+		public String getNameWiki() {
+			return "[[Prefilters#location match|Location Match]]";
+		}
+
+		@Override
+		public String docs() {
+			return "A location match accepts an array that looks similar to a location array, though is slightly modified."
+					+ " In general, the array can contain x, y, z, and world keys (or indexes 0, 1, 2, and 3, though the"
+					+ " named parameters take precedence). However, it can also include another parameter, called "
+					+ " \"tolerance\", which indicates how fuzzy of a match the x, y, and z values can be."
+					+ " For instance, if the event"
+					+ " location occurs at x = 64.5837, and the prefilter indicates array(x: 65, tolerance: 1), then"
+					+ " this would match. Missing keys in the prefilter are ignored and so will match any value in the"
+					+ " event. If tolerance is not explicitely provided in the prefilter, the default tolerance is used,"
+					+ " which itself defaults to 1.0, unless otherwise documented in the specific prefilter.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
 	@Override
-	public String filterType() {
-		return "location match";
+	public PrefilterDocs getDocsObject() {
+		return new LocationPrefilterDocs();
 	}
 
 	@Override
 	public void validate(ParseTree node, Environment env) throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
 		if(!node.getType(env).doesExtend(CBoolean.TYPE)) {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
-				new CompilerWarning("Expected a location array here, this may not perform as expected.",
-						node.getTarget(), null));
+					new CompilerWarning("Expected a location array here, this may not perform as expected.",
+							node.getTarget(), null));
 		}
 	}
 
@@ -67,7 +103,10 @@ public abstract class LocationPrefilterMatcher<T extends BindableEvent> implemen
 		}
 
 		MCLocation eventLocation = getLocation(event);
-		double tolerance = getTolerance();
+		double tolerance = getDefaultTolerance();
+		if(location.containsKey("tolerance")) {
+			tolerance = ArgumentValidation.getDouble(location.get("tolerance", t), t);
+		}
 
 		if(world != null && !eventLocation.getWorld().getName().equals(world)) {
 			return false;
@@ -90,5 +129,8 @@ public abstract class LocationPrefilterMatcher<T extends BindableEvent> implemen
 
 	protected abstract MCLocation getLocation(T event);
 
-	protected abstract double getTolerance();
+	protected double getDefaultTolerance() {
+		return 1.0;
+	}
+;
 }

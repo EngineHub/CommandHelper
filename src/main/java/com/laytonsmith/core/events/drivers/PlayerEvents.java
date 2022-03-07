@@ -793,11 +793,7 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{block: <string match> The block type the player interacts with, or null if nothing"
-					+ " | button: <string match> left or right. If they left or right clicked |"
-					+ " itemname: <string match> The item type they are holding when they interacted, or null |"
-					+ " hand: <string match> The hand the player clicked with |"
-					+ " player: <macro> The player that triggered the event} "
+			return "{} "
 					+ "Fires when a player left or right clicks a block or the air. Note that this event may fire for"
 					+ " the main hand, off hand, or twice, one for each hand, depending on the item priority and what"
 					+ " is clicked. If you don't want multiple events, you can prefilter on hand. If you want to remove"

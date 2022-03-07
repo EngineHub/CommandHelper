@@ -3,8 +3,11 @@ package com.laytonsmith.core.events.prefilters;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.ClassMirror;
 import com.laytonsmith.PureUtilities.ClassLoading.ClassMirror.FieldMirror;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
@@ -24,6 +27,44 @@ public abstract class MaterialPrefilterMatcher<T extends BindableEvent> extends 
 	private static ClassMirror orgBukkitMaterial = null;
 	private static boolean materialClassFound = false;
 	private static ClassDiscovery privateClassDiscovery = null;
+
+	@api
+	public static class MaterialPrefilterDocs implements PrefilterDocs {
+
+		@Override
+		public String getName() {
+			return "material match";
+		}
+
+		@Override
+		public String getNameWiki() {
+			return "[[Prefilters#material match|Material Match]]";
+		}
+
+		@Override
+		public String docs() {
+			return """
+				A material match is a simple string match against the list of materials in the game. For instance,
+				SOUL_TORCH or STONE. Unlike a string match though, the compiler is aware of the material types, and
+				will be a compile error if the material doesn't exist.
+
+				<%CODE|
+					bind('player_interact', null, array(itemname: 'SOUL_TORCH', block: 'STONE'), @event) {
+						# This code will run if a player clicks stone while holding a soul torch.
+					}
+				%>""";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+
+	@Override
+	public PrefilterDocs getDocsObject() {
+		return new MaterialPrefilterDocs();
+	}
 
 	@Override
 	public void validate(ParseTree node, Environment env) throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
@@ -54,7 +95,7 @@ public abstract class MaterialPrefilterMatcher<T extends BindableEvent> extends 
 					// This time we want to actually load the original Material enum, so don't allow shade to rewrite
 					orgBukkitMaterial = new ClassMirror(Class.forName("org.bukkit.Material"));
 				}
-			} catch (ClassNotFoundException ex) {
+			} catch(ClassNotFoundException ex) {
 				// Do nothing.
 			}
 			materialClassFound = true;
@@ -70,13 +111,11 @@ public abstract class MaterialPrefilterMatcher<T extends BindableEvent> extends 
 			}
 			if(!found) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
-				new CompilerWarning("\"" + name + "\" is not a valid material type, this will never match. (This will eventually be a compile error)",
-						node.getTarget(), null));
+						new CompilerWarning("\"" + name + "\" is not a valid material type, this will never match. (This will eventually be a compile error)",
+								node.getTarget(), null));
 			}
 		}
 	}
-
-
 
 	@Override
 	protected String getProperty(T event) {
@@ -84,6 +123,5 @@ public abstract class MaterialPrefilterMatcher<T extends BindableEvent> extends 
 	}
 
 	protected abstract MCMaterial getMaterial(T event);
-
 
 }
