@@ -58,9 +58,8 @@ public abstract class ExpressionPrefilterMatcher<T extends BindableEvent> extend
 	}
 
 	@Override
-	public boolean matches(Mixed value, T event, Target t) {
+	public boolean matches(String key, Mixed value, T event, Target t) {
 		String expression = value.val();
-		String key = getKey();
 		double dvalue = getProperty();
 		String exp = expression.substring(1, expression.length() - 1);
 		boolean inequalityMode = false;
@@ -102,13 +101,6 @@ public abstract class ExpressionPrefilterMatcher<T extends BindableEvent> extend
 		}
 		return true;
 	}
-
-	/**
-	 * The key is the prefilter name, which is what's is replaced in the expression. Unfortunately, there isn't a good
-	 * way to provide this directly through the prefilter mechanisms without leaking the abstraction.
-	 * @return
-	 */
-	protected abstract String getKey();
 
 	protected abstract double getProperty();
 

@@ -107,8 +107,9 @@ during the execution of the script, they are reset to the bind time values each 
 though you may consider redesigning if you're doing it this way, because there is likely a simpler way.
 
 ===Return===
-Any values {{function|return}}ed from the code are ignored, but will cause the event handler to stop running, which can
-be a convenient way to stop the handler short.
+If {{function|return}} is called from the code, it will cause the event handler to stop running, which can
+be a convenient way to stop the handler short. Currently, any values returned are ignored, in the future, it will
+be a compile error to return anything other than void.
 
 ==Order of events==
 Event handlers (the code inside a <code>bind</code>) are fired off in order from highest to lowest, then monitor. All
@@ -143,17 +144,17 @@ trigger something else as long as some other parameter is some value upon it act
 impossible without the callbacks. Or if a handler wants to act on some event, and other events also acting on it would
 cause issues, it can consume the event, and not have to worry about undesired behavior. This is why choosing a priority
 is important, and the priority you choose should be based on the following guidelines:
-* Lowest: Lowest priority handlers should expect to not be able to edit parameters, or even run, but should instead be \
+* LOWEST: Lowest priority handlers should expect to not be able to edit parameters, or even run, but should instead be \
 a "default" occurrence, should nothing else choose to deal with this event.
-* Low: Handlers that don't need to run at all, but would like to be able to edit and see at least some events should \
+* LOW: Handlers that don't need to run at all, but would like to be able to edit and see at least some events should \
 register at low priority.
-* Normal: Normal priority handlers intend on being run as they expect, but there would be not be a big loss if they \
+* NORMAL: Normal priority handlers intend on being run as they expect, but there would be not be a big loss if they \
 weren't able to run as intended.
-* High: Handlers that play an important role, but don't need absolute say over an event should register as a high \
+* HIGH: Handlers that play an important role, but don't need absolute say over an event should register as a high \
 priority handler.
-* Highest: Highest level handlers receive the event first. Handlers that need to have absolute say about the event \
+* HIGHEST: Highest level handlers receive the event first. Handlers that need to have absolute say about the event \
 should register at this level.
-* Monitor: Monitor level handlers receive the event last, and cannot edit the event in any way. This should be used \
+* MONITOR: Monitor level handlers receive the event last, and cannot edit the event in any way. This should be used \
 for logging type handlers. In general, if the handler hooks in to game functionality (even if it doesn't intend on \
 modifying the event) it should register at Lowest or Low. The exception to this is if a handler wants to get the event \
 even if it is cancelled or consumed, at which point it is appropriate to use monitor. Monitor level handlers still \
@@ -173,7 +174,7 @@ meta information at runtime, you can
 use the following code snippet:
 
 <%CODE|
-bind(event_name, array(priority: monitor), null, @event) {
+bind(event_name, array(priority: 'MONITOR'), null, @event) {
     console(event_meta());
 }
 %>
@@ -183,24 +184,4 @@ the active event, including information about what handlers received, locked, co
 Because logging information for {{function|event_meta}} does use marginally more resources, history is only logged if
 debug mode is on (this can be set in preferences.txt).
 
-<!--==Timeouts and Intervals==
-In addition to events, you may also register code to run at some specified time in the future, or at some given
-interval. You can use the {{function|set_timeout}} and {{function|set_interval}} functions for this. The signature for
-both is the same:
-<pre>
-set_interval(interval_in_seconds, [id], &lt;code&gt;)
-set_timeout(time_to_wait_in_seconds, [id], &lt;code&gt;)
-</pre>
-
-<code>set_timeout</code> allows you to wait x seconds, then run some code. <code>set_interval</code> allows you to run
-some code every x seconds. Much the same way <code>bind</code> works, a unique id is returned that represents this
-interval or timeout's closure, and you may <code>unbind</code> the interval or timeout. If you need to know the the id
-of the event, you may also force an id on the event, subject to the same restrictions as <code>bind</code>'s
-restrictions on ids. These functions are much like Javascript's setInterval and setTimeout functions if you are familiar
-with that language, and in fact are modeled after it.
-==Manually Triggering Events==
-Sometimes it may be desirable to manually trigger an event. Each event has it's own requirements for exactly what is
-required to fire it, but all the events use the {{function|trigger}} function. The exact requirements can be found in
-the documentation with the event in the Event API.
-==Example==-->
 

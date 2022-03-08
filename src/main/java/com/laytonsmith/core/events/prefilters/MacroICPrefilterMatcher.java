@@ -21,31 +21,25 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
  *
  * @param <T>
  */
-public abstract class MacroPrefilterMatcher<T extends BindableEvent> extends AbstractPrefilterMatcher<T> {
+public abstract class MacroICPrefilterMatcher<T extends BindableEvent> extends AbstractPrefilterMatcher<T> {
 
 	@api
-	public static class MacroPrefilterDocs implements PrefilterDocs {
+	public static class MacroPrefilterDocs implements PrefilterMatcher.PrefilterDocs {
 
 		@Override
 		public String getName() {
-			return "macro match";
+			return "macro ic match";
 		}
 
 		@Override
 		public String getNameWiki() {
-			return "[[Prefilters#macro match|Macro]]";
+			return "[[Prefilters#macro ic match|Macro]]";
 		}
 
 		@Override
 		public String docs() {
-			return "A macro prefilter is a combination of three other prefilter types, expression, regex, and string."
-					+ " Depending on the type of prefilter, only some of these may make sense. In general, the matcher"
-					+ " used is determined by the surrounding characters of the prefilter string. If the prefilter"
-					+ " is surrounded by parenthesis, it is an expression, if it is surrounded by forward slash (/)"
-					+ " it is considered a regex, and if it isn't either of these, then it is considered a string"
-					+ " match. For instance, array(prefilter: \"/myRegex/\") will use a regex match, and"
-					+ " array(prefilter: \"myString\") will use a string match. Please see the other prefilter"
-					+ " types for more information on the specific types.";
+			return "A macro ic prefilter the same as a macro match, but if the string match function is used,"
+					+ " it ignores case. NOTE: Regex and expression is still case sensitive.";
 		}
 
 		@Override
@@ -55,7 +49,7 @@ public abstract class MacroPrefilterMatcher<T extends BindableEvent> extends Abs
 	}
 
 	@Override
-	public PrefilterDocs getDocsObject() {
+	public PrefilterMatcher.PrefilterDocs getDocsObject() {
 		return new MacroPrefilterDocs();
 	}
 
@@ -85,7 +79,7 @@ public abstract class MacroPrefilterMatcher<T extends BindableEvent> extends Abs
 		} else if(expression.charAt(0) == '/' && expression.charAt(expression.length() - 1) == '/') {
 			return FastRegexMatch(expression, javaObject.toString());
 		} else {
-			return FastStringMatch(expression, javaObject.toString());
+			return FastStringMatch(expression.toLowerCase(), javaObject.toString().toLowerCase());
 		}
 	}
 

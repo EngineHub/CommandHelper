@@ -62,7 +62,7 @@ public abstract class StringPrefilterMatcher<T extends BindableEvent> extends Ab
 	}
 
 	@Override
-	public boolean matches(Mixed value, T event, Target t) {
+	public boolean matches(String key, Mixed value, T event, Target t) {
 		String prop = getProperty(event);
 		if(prop == null) {
 			return CNull.NULL.equals(value);

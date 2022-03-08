@@ -8,12 +8,10 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  * A PlayerPrefilterMatcher is a relatively specialized PrefilterMatcher which only works with MCPlayerEvent subtypes.
@@ -21,7 +19,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
  *
  * @param <T>
  */
-public class PlayerPrefilterMatcher<T extends MCPlayerEvent> extends AbstractPrefilterMatcher<T> {
+public class PlayerPrefilterMatcher<T extends MCPlayerEvent> extends MacroICPrefilterMatcher<T> {
 
 	@api
 	public static class PlayerPrefilterDocs implements PrefilterDocs {
@@ -38,7 +36,7 @@ public class PlayerPrefilterMatcher<T extends MCPlayerEvent> extends AbstractPre
 
 		@Override
 		public String docs() {
-			return "A player match is a simple string match on the player's name, ignoring case.";
+			return "A player match is a macro ic string match on the player's name.";
 		}
 
 		@Override
@@ -62,8 +60,8 @@ public class PlayerPrefilterMatcher<T extends MCPlayerEvent> extends AbstractPre
 	}
 
 	@Override
-	public boolean matches(Mixed value, T event, Target t) {
-		return value.val().equalsIgnoreCase(event.getPlayer().getName());
+	protected Object getProperty(T event) {
+		return event.getPlayer().getName();
 	}
 
 }

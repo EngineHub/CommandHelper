@@ -44,6 +44,9 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * This function should return true if the event code should be run, based on this prefilter and triggering event's
 	 * parameters.
 	 *
+	 * For subclasses who properly implement {@link #getPrefilters}, this should be changed to throw an
+	 * UnsupportedOperationException until the method is fully removed.
+	 *
 	 * @param prefilter The prefilter map, provided by the script
 	 * @param e The bindable event itself
 	 * @return True, iff the event code should be run

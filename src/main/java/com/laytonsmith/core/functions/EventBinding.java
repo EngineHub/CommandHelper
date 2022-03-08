@@ -272,7 +272,15 @@ public class EventBinding {
 						} else if(children.get(0).getData().val().equals("priority")
 								&& children.get(1).getData().isInstanceOf(CString.TYPE)) {
 							try {
-								BoundEvent.Priority.valueOf(children.get(1).getData().val());
+								BoundEvent.Priority.valueOf(children.get(1).getData().val().toUpperCase());
+								try {
+									BoundEvent.Priority.valueOf(children.get(1).getData().val());
+								} catch (IllegalArgumentException ex) {
+									env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+											new CompilerWarning("This field will become case sensitive in the future,"
+													+ " so should be capitalised to match the actual enum values.",
+													children.get(1).getTarget(), null));
+								}
 							} catch (IllegalArgumentException ex) {
 								exceptions.add(new ConfigCompileException(children.get(1).getData().val()
 											+ " is not a valid enum in ms.lang.Priority",

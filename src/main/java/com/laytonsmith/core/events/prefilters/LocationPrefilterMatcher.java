@@ -10,6 +10,7 @@ import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BindableEvent;
@@ -71,7 +72,16 @@ public abstract class LocationPrefilterMatcher<T extends BindableEvent> extends 
 	}
 
 	@Override
-	public boolean matches(Mixed value, T event, Target t) {
+	public boolean matches(String key, Mixed value, T event, Target t) {
+		MCLocation eventLocation = getLocation(event);
+		if(eventLocation == null) {
+			return CNull.NULL.equals(value);
+		}
+		if(CNull.NULL.equals(value)) {
+			// At this point, the event wasn't null, so this is a non-match.
+			return false;
+		}
+
 		CArray location = ArgumentValidation.getArray(value, t);
 		Double x = null;
 		Double y = null;
@@ -102,7 +112,6 @@ public abstract class LocationPrefilterMatcher<T extends BindableEvent> extends 
 			world = ArgumentValidation.getString(location.get(3, t), t);
 		}
 
-		MCLocation eventLocation = getLocation(event);
 		double tolerance = getDefaultTolerance();
 		if(location.containsKey("tolerance")) {
 			tolerance = ArgumentValidation.getDouble(location.get("tolerance", t), t);

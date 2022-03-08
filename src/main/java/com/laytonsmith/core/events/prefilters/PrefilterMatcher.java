@@ -1,5 +1,6 @@
 package com.laytonsmith.core.events.prefilters;
 
+import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.SimpleDocumentation;
 import com.laytonsmith.core.constructs.Target;
@@ -24,12 +25,14 @@ public interface PrefilterMatcher<T extends BindableEvent> extends SimpleDocumen
 	 * Given the value and event, should return false if this doesn't match.If true is returned, this indicates that the
 	 * event matches, and assuming all other prefilters match, means the event will run.
 	 *
+	 * @param key The name of this prefilter. This is a bit of a leaky abstraction, but can be useful for macro based
+	 * prefilters.
 	 * @param value The value of the prefilter
 	 * @param event The event
 	 * @param t The code target.
 	 * @return False if the event doesn't match, true otherwise.
 	 */
-	boolean matches(Mixed value, T event, Target t);
+	boolean matches(String key, Mixed value, T event, Target t);
 
 	/**
 	 * Returns the filter type, which is used in text based documentation.
@@ -57,6 +60,7 @@ public interface PrefilterMatcher<T extends BindableEvent> extends SimpleDocumen
 	 * Returns the documentation object, if it exists.
 	 * @return
 	 */
+	@ForceImplementation
 	PrefilterDocs getDocsObject();
 
 	/**

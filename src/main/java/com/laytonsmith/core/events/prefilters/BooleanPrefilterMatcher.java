@@ -63,7 +63,7 @@ public abstract class BooleanPrefilterMatcher<T extends BindableEvent> extends A
 	}
 
 	@Override
-	public boolean matches(Mixed value, T event, Target t) {
+	public boolean matches(String key, Mixed value, T event, Target t) {
 		return ArgumentValidation.getBooleanish(value, t) == getProperty(event);
 	}
 

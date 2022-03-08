@@ -1,4 +1,4 @@
-package com.laytonsmith.core.events.prefilters;
+package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.Common.ReflectionUtils;
 import com.laytonsmith.abstraction.MCLocation;
@@ -19,14 +19,26 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Map;
 
 /**
+ * Use PrefilterMatchers instead. This class was deprecated on 2022/03/08, and will remain supported for no less than
+ * 1 year or until version >= 3.3.6, or until all core prefilters are swapped to the new mechanism.
+ * Instead of using this class, use declarative matchers. Events can override the
+ * {@link Event#getPrefilters()} method to integrate into this new system. Docs for the prefilters should be replaced
+ * with empty brackets, and as a separate deprecation phase, those will also be removed.
  *
- *
+ * @deprecated
  */
+@Deprecated
 public final class Prefilters {
 
 	private Prefilters() {
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 *
+	 * @deprecated
+	 */
+	@Deprecated
 	public enum PrefilterType {
 		/**
 		 * Checks if indexes 'x', 'y', 'z' and 'world' (or 0, 1, 2, 3) of a location array match. The location is
@@ -62,26 +74,51 @@ public final class Prefilters {
 		MACRO
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	public static void match(Map<String, Mixed> map, String key,
 			String actualValue, PrefilterType type) throws PrefilterNonMatchException {
 		match(map, key, new CString(actualValue, Target.UNKNOWN), type);
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	public static void match(Map<String, Mixed> map, String key,
 			int actualValue, PrefilterType type) throws PrefilterNonMatchException {
 		match(map, key, new CInt(actualValue, Target.UNKNOWN), type);
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	public static void match(Map<String, Mixed> map, String key,
 			double actualValue, PrefilterType type) throws PrefilterNonMatchException {
 		match(map, key, new CDouble(actualValue, Target.UNKNOWN), type);
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	public static void match(Map<String, Mixed> map, String key,
 			boolean actualValue, PrefilterType type) throws PrefilterNonMatchException {
 		match(map, key, CBoolean.get(actualValue), type);
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	public static void match(Map<String, Mixed> map, String key,
 			MCLocation actualValue, PrefilterType type) throws PrefilterNonMatchException {
 		match(map, key, ObjectGenerator.GetGenerator().location(actualValue, false), type);
@@ -91,7 +128,9 @@ public final class Prefilters {
 	 * Given a prototype and the actual user provided value, determines if it matches. If it doesn't, it throws an
 	 * exception. If the value is not provided, or it does match, it returns void, which means that the test passed, and
 	 * the event matches.
+	 * @deprecated Use PrefilterMatchers instead
 	 */
+	@Deprecated
 	public static void match(Map<String, Mixed> map, String key,
 			Mixed actualValue, PrefilterType type) throws PrefilterNonMatchException {
 		if(map.containsKey(key)) {
@@ -142,28 +181,53 @@ public final class Prefilters {
 		}
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	public static boolean FastLocationMatch(Mixed location1, MCLocation location2) {
 		MCLocation l1 = ObjectGenerator.GetGenerator().location(location1, null, location1.getTarget());
 		MCLocation l2 = location2;
 		return !((!l1.getWorld().equals(l2.getWorld())) || (l1.getBlockX() != l2.getBlockX()) || (l1.getBlockY() != l2.getBlockY()) || (l1.getBlockZ() != l2.getBlockZ()));
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	private static void LocationMatch(Mixed location1, Mixed location2) throws PrefilterNonMatchException {
 		if(!FastLocationMatch(location1, ObjectGenerator.GetGenerator().location(location2, null, Target.UNKNOWN))) {
 			throw new PrefilterNonMatchException();
 		}
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	public static boolean FastStringMatch(String string1, String string2) {
 		return string1.equals(string2);
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	private static void StringMatch(String string1, String string2) throws PrefilterNonMatchException {
 		if(!FastStringMatch(string1, string2)) {
 			throw new PrefilterNonMatchException();
 		}
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	private static void MathMatch(Mixed one, Mixed two) throws PrefilterNonMatchException {
 		try {
 			double dOne = ArgumentValidation.getNumber(one, Target.UNKNOWN);
@@ -176,6 +240,11 @@ public final class Prefilters {
 		}
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	public static boolean FastExpressionMatch(String expression, String key, double dvalue, Target t) {
 		String exp = expression.substring(1, expression.length() - 1);
 		boolean inequalityMode = false;
@@ -224,6 +293,11 @@ public final class Prefilters {
 		}
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	public static boolean FastRegexMatch(String regex, String value) {
 		regex = regex.substring(1, regex.length() - 1);
 		return value.matches(regex);
@@ -235,6 +309,11 @@ public final class Prefilters {
 		}
 	}
 
+	/**
+	 * Use PrefilterMatchers instead.
+	 * @deprecated
+	 */
+	@Deprecated
 	public static boolean FastMacroMatch(String key, String expression, Object javaObject, Target t) {
 		if(expression.isEmpty()) {
 			return false;

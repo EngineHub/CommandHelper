@@ -209,7 +209,7 @@ public final class EventUtils {
 				Prefilter<BindableEvent> pf = prefilters.get(prefilter.getKey());
 				PrefilterMatcher matcher = pf.getMatcher();
 				Mixed value = prefilter.getValue();
-				if(!matcher.matches(value, e, b.getTarget())) {
+				if(!matcher.matches(prefilter.getKey(), value, e, b.getTarget())) {
 					return false;
 				}
 			}

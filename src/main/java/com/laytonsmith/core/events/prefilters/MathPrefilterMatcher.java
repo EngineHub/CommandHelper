@@ -106,7 +106,7 @@ public abstract class MathPrefilterMatcher<T extends BindableEvent> extends Abst
 	}
 
 	@Override
-	public boolean matches(Mixed value, T event, Target t) {
+	public boolean matches(String key, Mixed value, T event, Target t) {
 		double val;
 		double tolerance = getTolerance();
 		if(value instanceof CArray array) {

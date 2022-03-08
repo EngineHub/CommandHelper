@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * This annotation, when tagging a constructor/method, indicates that ALL subclasses must include a constructor/method
- * with the same parameter signature. This check is enforced at compile time.
+ * with the same parameter signature, excluding abstract subclasses. This check is enforced at compile time.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.CONSTRUCTOR, ElementType.METHOD})

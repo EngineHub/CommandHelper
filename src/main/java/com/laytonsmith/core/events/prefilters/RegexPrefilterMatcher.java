@@ -69,7 +69,7 @@ public abstract class RegexPrefilterMatcher<T extends BindableEvent> extends Abs
 	}
 
 	@Override
-	public boolean matches(Mixed value, T event, Target t) {
+	public boolean matches(String key, Mixed value, T event, Target t) {
 		return getProperty(event).matches(value.val());
 	}
 

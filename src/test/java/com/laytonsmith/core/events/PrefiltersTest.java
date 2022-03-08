@@ -1,7 +1,6 @@
 package com.laytonsmith.core.events;
 
-import com.laytonsmith.core.events.prefilters.Prefilters;
-import com.laytonsmith.core.events.prefilters.Prefilters.PrefilterType;
+import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.natives.interfaces.Mixed;

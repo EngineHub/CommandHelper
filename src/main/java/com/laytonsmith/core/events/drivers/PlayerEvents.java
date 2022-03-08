@@ -67,13 +67,19 @@ import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventBuilder;
-import com.laytonsmith.core.events.prefilters.Prefilters;
-import com.laytonsmith.core.events.prefilters.Prefilters.PrefilterType;
+import com.laytonsmith.core.events.Prefilters;
+import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.events.drivers.EntityEvents.entity_death;
 import com.laytonsmith.core.events.prefilters.MaterialPrefilterMatcher;
 import com.laytonsmith.core.events.prefilters.PlayerPrefilterMatcher;
 import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
 import com.laytonsmith.core.events.prefilters.StringICPrefilterMatcher;
+import com.laytonsmith.core.events.prefilters.EnumPrefilterMatcher;
+import com.laytonsmith.core.events.prefilters.EnumICPrefilterMatcher;
+import com.laytonsmith.core.events.prefilters.LocationPrefilterMatcher;
+import com.laytonsmith.core.events.prefilters.MacroPrefilterMatcher;
+import com.laytonsmith.core.events.prefilters.StringPrefilterMatcher;
+import com.laytonsmith.core.events.prefilters.WorldPrefilterMatcher;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CRECastException;
 import com.laytonsmith.core.exceptions.CRE.CREFormatException;
@@ -110,7 +116,7 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <string match>}"
+			return "{}"
 					+ " Fires as a player's food level changes."
 					+ " Cancelling the event will cause the change to not be"
 					+ " applied."
@@ -121,16 +127,19 @@ public class PlayerEvents {
 		}
 
 		@Override
+		public PrefilterBuilder getPrefilters() {
+			return new PrefilterBuilder<MCFoodLevelChangeEvent>()
+					.set("player", "The player whose food level changed", new StringPrefilterMatcher<>() {
+						@Override
+						protected String getProperty(MCFoodLevelChangeEvent event) {
+							return event.getEntity().getName();
+						}
+					});
+		}
+
+		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCFoodLevelChangeEvent) {
-
-				MCFoodLevelChangeEvent event = (MCFoodLevelChangeEvent) e;
-				Prefilters.match(prefilter, "player", event.getEntity().getName(), PrefilterType.STRING_MATCH);
-
-				return true;
-			}
-
-			return false;
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -189,7 +198,7 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{itemname: <string match>}"
+			return "{}"
 					+ " Fires as a player is finishing eating/drinking an item."
 					+ " Cancelling the event will cause any effects to not be"
 					+ " applied and the item to not be taken from the player."
@@ -197,6 +206,18 @@ public class PlayerEvents {
 					+ " {item: A different item to be consumed, changing this will"
 					+ " cause the original item to remain in the inventory}"
 					+ " {player|item}";
+		}
+
+		@Override
+		public PrefilterBuilder getPrefilters() {
+			return new PrefilterBuilder<MCPlayerItemConsumeEvent>()
+					.set("player", "The player consuming the item", new PlayerPrefilterMatcher<>())
+					.set("itemname", "The item the player is consuming", new MaterialPrefilterMatcher<>() {
+						@Override
+						protected MCMaterial getMaterial(MCPlayerItemConsumeEvent event) {
+							return event.getItem().getType();
+						}
+					});
 		}
 
 		@Override
@@ -214,13 +235,7 @@ public class PlayerEvents {
 
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCPlayerItemConsumeEvent) {
-				MCPlayerItemConsumeEvent event = (MCPlayerItemConsumeEvent) e;
-				Prefilters.match(prefilter, "itemname", event.getItem().getType().getName(),
-						PrefilterType.STRING_MATCH);
-				return true;
-			}
-			return false;
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -278,7 +293,7 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <macro> | reason: <macro>}"
+			return "{}"
 					+ "Fired when a player is kicked from the game. "
 					+ "{player: the kicked player | message: the message shown to all online"
 					+ " players | reason: the message shown to the player getting kicked}"
@@ -287,14 +302,22 @@ public class PlayerEvents {
 		}
 
 		@Override
+		public PrefilterBuilder getPrefilters() {
+			return new PrefilterBuilder<MCPlayerKickEvent>()
+					.set("player", "The player being kicked", new PlayerPrefilterMatcher<>())
+					.set("reason", "The reason string", new MacroPrefilterMatcher<>() {
+						@Override
+						protected Object getProperty(MCPlayerKickEvent event) {
+							return event.getReason();
+						}
+					});
+		}
+
+
+
+		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCPlayerKickEvent) {
-				Prefilters.match(prefilter, "player", ((MCPlayerKickEvent) e).getPlayer().getName(),
-						PrefilterType.MACRO);
-				Prefilters.match(prefilter, "reason", ((MCPlayerKickEvent) e).getReason(), PrefilterType.MACRO);
-				return true;
-			}
-			return false;
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -355,11 +378,7 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <string match> The player that teleport. Switching worlds will trigger this event, but"
-					+ " world_changed is called after, only if this isn't cancelled first. | type: <string match>"
-					+ "| from: <location match> This should be a location array (x, y, z, world)."
-					+ "| to: <location match> The location the player is now in. This should be a location array as"
-					+ " well.} "
+			return "{} "
 					+ "{player | from: The location the player is coming from | to: The location the player is now in |"
 					+ " type: the type of teleport occuring, one of "
 					+ StringUtils.Join(MCTeleportCause.values(), ", ") + "}"
@@ -368,30 +387,32 @@ public class PlayerEvents {
 		}
 
 		@Override
+		public PrefilterBuilder getPrefilters() {
+			return new PrefilterBuilder<MCPlayerTeleportEvent>()
+					.set("player", "The player teleporting.", new PlayerPrefilterMatcher<>())
+					.set("type", "The teleportation cause.", new EnumICPrefilterMatcher<>(MCTeleportCause.class) {
+						@Override
+						protected Enum<MCTeleportCause> getEnum(MCPlayerTeleportEvent event) {
+							return event.getCause();
+						}
+					})
+					.set("from", "The location the player is teleporting from.", new LocationPrefilterMatcher<>() {
+						@Override
+						protected MCLocation getLocation(MCPlayerTeleportEvent event) {
+							return event.getFrom();
+						}
+					})
+					.set("to", "The location the player is teleporting to.", new LocationPrefilterMatcher<>() {
+						@Override
+						protected MCLocation getLocation(MCPlayerTeleportEvent event) {
+							return event.getTo();
+						}
+					});
+		}
+
+		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCPlayerTeleportEvent) {
-				MCPlayerTeleportEvent event = (MCPlayerTeleportEvent) e;
-
-				if(prefilter.containsKey("player")) {
-					if(!(prefilter.get("player").toString().equalsIgnoreCase(event.getPlayer().getName()))) {
-						return false;
-					}
-				}
-
-				if(prefilter.containsKey("type")) {
-					if(!(prefilter.get("type").toString().equalsIgnoreCase(event.getCause().toString()))) {
-						return false;
-					}
-				}
-
-				Prefilters.match(prefilter, "from", event.getFrom(), PrefilterType.LOCATION_MATCH);
-				Prefilters.match(prefilter, "to", event.getTo(), PrefilterType.LOCATION_MATCH);
-
-				return true;
-
-			}
-
-			return false;
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -459,9 +480,7 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <macro> | from: <location match> An exact location array where the player is coming from."
-					+ " | to: <location match> An exact location array where the player is going to."
-					+ " | type: <macro> The type of portal occurring, either NETHER_PORTAL or END_PORTAL}"
+			return "{}"
 					+ "Fired when a player collides with portal."
 					+ "{player: The player that teleport | from: The location the player is coming from"
 					+ " | to: The location the player is coming to. Returns null when using nether portal and"
@@ -475,22 +494,34 @@ public class PlayerEvents {
 		}
 
 		@Override
+		public PrefilterBuilder getPrefilters() {
+			return new PrefilterBuilder<MCPlayerPortalEvent>()
+					.set("player", "The player portaling", new PlayerPrefilterMatcher<>())
+					.set("from", "The location where the player is coming from", new LocationPrefilterMatcher<>() {
+						@Override
+						protected MCLocation getLocation(MCPlayerPortalEvent event) {
+							return event.getFrom();
+						}
+					})
+					.set("type", "The type of portal occurring, either NETHER_PORTAL or END_PORTAL", new EnumPrefilterMatcher<>(MCTeleportCause.class) {
+						@Override
+						protected Enum<MCTeleportCause> getEnum(MCPlayerPortalEvent event) {
+							return event.getCause();
+						}
+					})
+					.set("to", "The location the player is coming to. Returns null when using nether portal and"
+							+ " \"allow-nether\" in server.properties is set to false or when using end portal and"
+							+ " \"allow-end\" in bukkit.yml is set to false.", new LocationPrefilterMatcher<>() {
+						@Override
+						protected MCLocation getLocation(MCPlayerPortalEvent event) {
+							return event.getTo();
+						}
+					});
+		}
+
+		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCPlayerPortalEvent) {
-				MCPlayerPortalEvent event = (MCPlayerPortalEvent) e;
-				Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "type", event.getCause().toString(), PrefilterType.MACRO);
-				Prefilters.match(prefilter, "from", event.getFrom(), PrefilterType.LOCATION_MATCH);
-				if(event.getTo() != null) {
-					Prefilters.match(prefilter, "to", event.getTo(), PrefilterType.LOCATION_MATCH);
-				} else {
-					Prefilters.match(prefilter, "to", CNull.NULL, PrefilterType.MACRO);
-				}
-				return true;
-
-			}
-
-			return false;
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -857,57 +888,7 @@ public class PlayerEvents {
 
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCPlayerInteractEvent) {
-				MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
-
-				if(prefilter.containsKey("button")) {
-					if(pie.getAction().equals(MCAction.LEFT_CLICK_AIR)
-							|| pie.getAction().equals(MCAction.LEFT_CLICK_BLOCK)) {
-						if(!prefilter.get("button").val().toLowerCase().equals("left")) {
-							return false;
-						}
-					}
-					if(pie.getAction().equals(MCAction.RIGHT_CLICK_AIR)
-							|| pie.getAction().equals(MCAction.RIGHT_CLICK_BLOCK)) {
-						if(!prefilter.get("button").val().toLowerCase().equals("right")) {
-							return false;
-						}
-					}
-				}
-
-				if(prefilter.containsKey("itemname")) {
-					Mixed item = prefilter.get("itemname");
-					MCMaterial mat = pie.getItem().getType();
-					if(mat == null) {
-						if(!(item instanceof CNull)) {
-							return false;
-						}
-					} else if(!mat.getName().equals(item.val())) {
-						return false;
-					}
-				}
-				if(prefilter.containsKey("block")) {
-					Mixed block = prefilter.get("block");
-					MCBlock b = pie.getClickedBlock();
-					if(b.isEmpty()) {
-						if(!(block instanceof CNull)) {
-							return false;
-						}
-					} else if(!b.getType().getName().equals(block.val())) {
-						return false;
-					}
-				}
-				Prefilters.match(prefilter, "player", pie.getPlayer().getName(), PrefilterType.MACRO);
-
-				if(pie.getHand() == MCEquipmentSlot.WEAPON) {
-					Prefilters.match(prefilter, "hand", "main_hand", PrefilterType.STRING_MATCH);
-				} else {
-					Prefilters.match(prefilter, "hand", "off_hand", PrefilterType.STRING_MATCH);
-				}
-
-				return true;
-			}
-			return false;
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -2147,13 +2128,31 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{state: <macro> Can be one of " + StringUtils.Join(MCFishingState.values(), ", ", ", or ")
-					+ " | player: <macro> The player who is fishing | world: <string match>}"
+			return "{}"
 					+ " Fires when a player casts or reels a fishing rod."
 					+ " {player | world | state | xp | hook: the fishhook entity id"
 					+ " | caught: the id of the snared entity, can be a fish item}"
 					+ " {xp: the exp the player will get from catching a fish}"
 					+ " {}";
+		}
+
+		@Override
+		public PrefilterBuilder getPrefilters() {
+			return new PrefilterBuilder<MCPlayerFishEvent>()
+					.set("state", "Can be one of " + StringUtils.Join(MCFishingState.values(), ", ", ", or ") + ".",
+							new EnumPrefilterMatcher<>(MCFishingState.class) {
+						@Override
+						protected Enum<MCFishingState> getEnum(MCPlayerFishEvent event) {
+							return event.getState();
+						}
+					})
+					.set("player", "The player who is fishing.", new PlayerPrefilterMatcher<>())
+					.set("world", "The world the fishing happens in.", new WorldPrefilterMatcher<MCPlayerFishEvent>() {
+						@Override
+						protected MCWorld getWorld(MCPlayerFishEvent event) {
+							return event.getPlayer().getWorld();
+						}
+					});
 		}
 
 		@Override
