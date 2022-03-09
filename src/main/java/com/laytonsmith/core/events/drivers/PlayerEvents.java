@@ -70,12 +70,13 @@ import com.laytonsmith.core.events.EventBuilder;
 import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.events.drivers.EntityEvents.entity_death;
-import com.laytonsmith.core.events.prefilters.MaterialPrefilterMatcher;
+import com.laytonsmith.core.events.prefilters.BlockPrefilterMatcher;
 import com.laytonsmith.core.events.prefilters.PlayerPrefilterMatcher;
 import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
 import com.laytonsmith.core.events.prefilters.StringICPrefilterMatcher;
 import com.laytonsmith.core.events.prefilters.EnumPrefilterMatcher;
 import com.laytonsmith.core.events.prefilters.EnumICPrefilterMatcher;
+import com.laytonsmith.core.events.prefilters.ItemStackPrefilterMatcher;
 import com.laytonsmith.core.events.prefilters.LocationPrefilterMatcher;
 import com.laytonsmith.core.events.prefilters.MacroPrefilterMatcher;
 import com.laytonsmith.core.events.prefilters.StringPrefilterMatcher;
@@ -135,11 +136,6 @@ public class PlayerEvents {
 							return event.getEntity().getName();
 						}
 					});
-		}
-
-		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -212,10 +208,10 @@ public class PlayerEvents {
 		public PrefilterBuilder getPrefilters() {
 			return new PrefilterBuilder<MCPlayerItemConsumeEvent>()
 					.set("player", "The player consuming the item", new PlayerPrefilterMatcher<>())
-					.set("itemname", "The item the player is consuming", new MaterialPrefilterMatcher<>() {
+					.set("itemname", "The item the player is consuming", new ItemStackPrefilterMatcher<>() {
 						@Override
-						protected MCMaterial getMaterial(MCPlayerItemConsumeEvent event) {
-							return event.getItem().getType();
+						protected MCItemStack getItemStack(MCPlayerItemConsumeEvent event) {
+							return event.getItem();
 						}
 					});
 		}
@@ -231,11 +227,6 @@ public class PlayerEvents {
 				MCItemStack is = Static.ParseItemNotation(null, prefilter.get("item").val(), 1, event.getTarget());
 				prefilter.put("itemname", new CString(is.getType().getName(), event.getTarget()));
 			}
-		}
-
-		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -311,13 +302,6 @@ public class PlayerEvents {
 							return event.getReason();
 						}
 					});
-		}
-
-
-
-		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -408,11 +392,6 @@ public class PlayerEvents {
 							return event.getTo();
 						}
 					});
-		}
-
-		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -517,11 +496,6 @@ public class PlayerEvents {
 							return event.getTo();
 						}
 					});
-		}
-
-		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -887,11 +861,6 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
 		public PrefilterBuilder<MCPlayerInteractEvent> getPrefilters() {
 			return new PrefilterBuilder<MCPlayerInteractEvent>()
 					.set("button", "\"left\" or \"right\". If they left or right clicked",
@@ -910,25 +879,17 @@ public class PlayerEvents {
 						}
 					})
 					.set("itemname", "The item type they are holding when they interacted, or null",
-							new MaterialPrefilterMatcher<>() {
+							new ItemStackPrefilterMatcher<>() {
 						@Override
-						public MCMaterial getMaterial(MCPlayerInteractEvent pie) {
-							MCItemStack item = pie.getItem();
-							if(item == null) {
-								return null;
-							}
-							return item.getType();
+						public MCItemStack getItemStack(MCPlayerInteractEvent pie) {
+							return pie.getItem();
 						}
 					})
 					.set("block", "The block type the player interacts with, or null if nothing",
-							new MaterialPrefilterMatcher<>() {
+							new BlockPrefilterMatcher<>() {
 						@Override
-						public MCMaterial getMaterial(MCPlayerInteractEvent pie) {
-							MCBlock block = pie.getClickedBlock();
-							if(block == null) {
-								return null;
-							}
-							return block.getType();
+						public MCBlock getBlock(MCPlayerInteractEvent pie) {
+							return pie.getClickedBlock();
 						}
 					})
 					.set("player", "The player that triggered the event", new PlayerPrefilterMatcher<>())

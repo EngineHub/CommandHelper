@@ -45,7 +45,8 @@ public interface Event extends Comparable<Event>, Documentation {
 	 * parameters.
 	 *
 	 * For subclasses who properly implement {@link #getPrefilters}, this should be changed to throw an
-	 * UnsupportedOperationException until the method is fully removed.
+	 * UnsupportedOperationException until the method is fully removed. For classes that extend AbstractEvent, it
+	 * should simply be removed.
 	 *
 	 * @param prefilter The prefilter map, provided by the script
 	 * @param e The bindable event itself
