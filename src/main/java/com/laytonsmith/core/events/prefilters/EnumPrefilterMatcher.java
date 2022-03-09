@@ -65,7 +65,7 @@ public abstract class EnumPrefilterMatcher<T extends BindableEvent, U extends En
 
 	@Override
 	public void validate(ParseTree node, Environment env) throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
-		if(!node.getType(env).doesExtend(CString.TYPE)) {
+		if(!node.getDeclaredType(env).doesExtend(CString.TYPE)) {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
 					new CompilerWarning("Unexpected type here.",
 							node.getTarget(), null));

@@ -73,12 +73,12 @@ public abstract class MathPrefilterMatcher<T extends BindableEvent> extends Abst
 
 	@Override
 	public void validate(ParseTree node, Environment env) throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
-		if(!node.getType(env).doesExtend(CNumber.TYPE) && !node.getType(env).doesExtend(CArray.TYPE)) {
+		if(!node.getDeclaredType(env).doesExtend(CNumber.TYPE) && !node.getDeclaredType(env).doesExtend(CArray.TYPE)) {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
 					new CompilerWarning("Expecting a number or array here, this may not perform as expected.",
 							node.getTarget(), null));
 		}
-		if(node.getType(env).doesExtend(CArray.TYPE)) {
+		if(node.getDeclaredType(env).doesExtend(CArray.TYPE)) {
 			if(node.getData().val().equals("array")) {
 				for(ParseTree values : node.getChildren()) {
 					if(values.getData() instanceof CEntry centry) {
@@ -89,12 +89,12 @@ public abstract class MathPrefilterMatcher<T extends BindableEvent> extends Abst
 											centry.ckey().getTarget(), null));
 							continue;
 						}
-						if(key.equals("value") && !values.getChildAt(1).getType(env).doesExtend(CNumber.TYPE)) {
+						if(key.equals("value") && !values.getChildAt(1).getDeclaredType(env).doesExtend(CNumber.TYPE)) {
 							env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
 									new CompilerWarning("Value should be a double",
 											centry.ckey().getTarget(), null));
 						}
-						if(key.equals("tolerance") && !values.getChildAt(1).getType(env).doesExtend(CNumber.TYPE)) {
+						if(key.equals("tolerance") && !values.getChildAt(1).getDeclaredType(env).doesExtend(CNumber.TYPE)) {
 							env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
 									new CompilerWarning("Tolerance should be a number",
 											centry.ckey().getTarget(), null));

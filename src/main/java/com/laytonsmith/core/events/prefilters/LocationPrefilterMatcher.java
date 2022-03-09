@@ -64,7 +64,7 @@ public abstract class LocationPrefilterMatcher<T extends BindableEvent> extends 
 
 	@Override
 	public void validate(ParseTree node, Environment env) throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
-		if(!node.getType(env).doesExtend(CBoolean.TYPE)) {
+		if(!node.getDeclaredType(env).doesExtend(CBoolean.TYPE)) {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
 					new CompilerWarning("Expected a location array here, this may not perform as expected.",
 							node.getTarget(), null));

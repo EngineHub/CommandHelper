@@ -11,6 +11,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -100,7 +101,7 @@ public abstract class MaterialPrefilterMatcher<T extends BindableEvent> extends 
 			}
 			materialClassFound = true;
 		}
-		if(orgBukkitMaterial != null && node.isConst()) {
+		if(orgBukkitMaterial != null && node.isConst() && !node.getData().equals(CNull.NULL)) {
 			String name = node.getData().val();
 			boolean found = false;
 			for(FieldMirror e : orgBukkitMaterial.getFields()) {
@@ -119,7 +120,11 @@ public abstract class MaterialPrefilterMatcher<T extends BindableEvent> extends 
 
 	@Override
 	protected String getProperty(T event) {
-		return getMaterial(event).getName();
+		MCMaterial material = getMaterial(event);
+		if(material == null) {
+			return null;
+		}
+		return material.getName();
 	}
 
 	protected abstract MCMaterial getMaterial(T event);

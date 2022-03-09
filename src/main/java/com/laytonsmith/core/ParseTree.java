@@ -1,6 +1,11 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.analysis.Declaration;
+import com.laytonsmith.core.compiler.analysis.Namespace;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.constructs.Auto;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
@@ -336,7 +341,7 @@ public class ParseTree implements Cloneable {
 							Function ff = (Function) f;
 							functions.add(ff);
 						}
-					} catch (ConfigCompileException ex) {
+					} catch(ConfigCompileException ex) {
 						throw new Error(ex);
 					}
 
@@ -394,25 +399,52 @@ public class ParseTree implements Cloneable {
 	}
 
 	/**
-	 * Returns the CClassType of this node. For constants, this is just the type, for variables, this is the defined
-	 * type, and for functions, this is the return type of the function. For many value, the type will be AUTO. The
-	 * type may be CNull for literal nulls, but will never be java null.
+	 * Returns the declared CClassType of this node. For constants, this is just the type, for variables, this is the
+	 * defined type, and for functions and procs, this is the return type of the function. For many values,
+	 * the type will be AUTO. The type may be CNull for literal nulls, but will never be java null.
+	 *
+	 * @param env
 	 * @return
 	 */
-	public CClassType getType(Environment env) {
+	public CClassType getDeclaredType(Environment env) {
 		if(isConst()) {
 			return getData().typeof();
 		} else if(getData() instanceof IVariable ivar) {
-			return ivar.getDefinedType();
-		} else if(getData() instanceof CFunction cf) {
-			List<CClassType> argTypes = new ArrayList<>();
-			List<Target> argTargets = new ArrayList<>();
-			Set<ConfigCompileException> exceptions = new HashSet<>();
-			for(ParseTree child : getChildren()) {
-				argTypes.add(child.getType(env));
-				argTargets.add(child.getTarget());
+			StaticAnalysis sa = env.getEnv(CompilerEnvironment.class).getStaticAnalysis();
+			if(sa.isLocalEnabled()) {
+				List<Declaration> decls = new ArrayList<>(sa.getTermScope(this).getDeclarations(Namespace.IVARIABLE, ivar.getVariableName()));
+				if(decls.size() == 1) {
+					return decls.get(0).getType();
+				} else {
+					return Auto.TYPE;
+				}
+			} else {
+				// This isn't possible to accurately get without static analysis enabled.
+				return Auto.TYPE;
 			}
-			return cf.getCachedFunction().getReturnType(getTarget(), argTypes, argTargets, env, exceptions);
+		} else if(getData() instanceof CFunction cf) {
+			if(cf.hasProcedure()) {
+				StaticAnalysis sa = env.getEnv(CompilerEnvironment.class).getStaticAnalysis();
+				if(sa.isLocalEnabled()) {
+					List<Declaration> decls = new ArrayList<>(sa.getTermScope(this).getDeclarations(Namespace.PROCEDURE, cf.val()));
+					if(decls.size() == 1) {
+						return decls.get(0).getType();
+					} else {
+						return Auto.TYPE;
+					}
+				} else {
+					return Auto.TYPE;
+				}
+			} else {
+				List<CClassType> argTypes = new ArrayList<>();
+				List<Target> argTargets = new ArrayList<>();
+				Set<ConfigCompileException> exceptions = new HashSet<>();
+				for(ParseTree child : getChildren()) {
+					argTypes.add(child.getDeclaredType(env));
+					argTargets.add(child.getTarget());
+				}
+				return cf.getCachedFunction().getReturnType(getTarget(), argTypes, argTargets, env, exceptions);
+			}
 		} else {
 			throw new Error("Unhandled type, please report this bug");
 		}

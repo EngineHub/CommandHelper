@@ -1285,6 +1285,7 @@ public final class MethodScriptCompiler {
 				Environment e = Static.GenerateStandaloneEnvironment(false);
 				environment = environment.cloneAndAdd(e.getEnv(CompilerEnvironment.class));
 			}
+			environment.getEnv(CompilerEnvironment.class).setStaticAnalysis(staticAnalysis);
 		} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
 			throw new RuntimeException(ex);
 		}

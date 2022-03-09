@@ -65,7 +65,7 @@ public interface PrefilterMatcher<T extends BindableEvent> extends SimpleDocumen
 
 	/**
 	 * If additional prefilter validation can be performed at compile time, this should be done here.Note that this
-	 * method is run during compiation, and so the value may be of any type (CFunction, etc).The type will always be
+	 * method is run during compilation, and so the value may be of any type (CFunction, etc).The type will always be
 	 * declared however (though may be AUTO) and can be typechecked as necessary.
 	 *
 	 * @param node The parse tree for the prefilter node.

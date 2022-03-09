@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -64,6 +65,8 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl {
 	public final Map<Target, ConfigCompileException> potentialKeywordCompileErrors = new HashMap<>();
 
 	private boolean logCompilerWarnings = true;
+
+	private StaticAnalysis staticAnalysis;
 
 	/**
 	 * The OS that this code should be compiled against. By default, the current OS.
@@ -204,5 +207,13 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl {
 		}
 		this.targetOS = targetOS;
 		targetOSAlreadySet = true;
+	}
+
+	public void setStaticAnalysis(StaticAnalysis staticAnalysis) {
+		this.staticAnalysis = staticAnalysis;
+	}
+
+	public StaticAnalysis getStaticAnalysis() {
+		return this.staticAnalysis;
 	}
 }

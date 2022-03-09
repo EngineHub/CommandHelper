@@ -1,6 +1,5 @@
 package com.laytonsmith.core.events;
 
-import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
 import com.laytonsmith.core.events.prefilters.PrefilterMatcher;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
@@ -12,6 +11,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.BoundEvent.Priority;
 import com.laytonsmith.core.events.prefilters.Prefilter;
+import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CREEventException;
 import com.laytonsmith.core.extensions.Extension;
@@ -25,6 +25,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.io.File;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -181,6 +182,8 @@ public final class EventUtils {
 		}
 	}
 
+	private static Map<Event, Map<String, Prefilter<BindableEvent>>> prefilterData = new HashMap<>();
+
 	/**
 	 * This returns whether or not the given BoundEvent's prefilters matches the event. This method will never
 	 * throw a {@link PrefilterNonMatchException}
@@ -190,9 +193,21 @@ public final class EventUtils {
 	 * @return
 	 */
 	public static boolean PrefilterMatches(BoundEvent b, BindableEvent e, Event driver) {
-		PrefilterBuilder prefilterBuilder = driver.getPrefilters();
+		Map<String, Prefilter<BindableEvent>> prefilters;
+		// Keep a cache so we only build the prefilters object once.
+		if(!prefilterData.containsKey(driver)) {
+			PrefilterBuilder prefilterBuilder = driver.getPrefilters();
+			if(prefilterBuilder != null) {
+				prefilters = prefilterBuilder.build();
+			} else {
+				prefilters = null;
+			}
+			prefilterData.put(driver, prefilters);
+		} else {
+			prefilters = prefilterData.get(driver);
+		}
 		Map<String, Mixed> userPrefilters = b.getPrefilter();
-		if(prefilterBuilder == null) {
+		if(prefilters == null) {
 			// Old, deprecated method
 			try {
 				return driver.matches(userPrefilters, e);
@@ -200,7 +215,6 @@ public final class EventUtils {
 				return false;
 			}
 		} else {
-			Map<String, Prefilter<BindableEvent>> prefilters = prefilterBuilder.build();
 			for(Map.Entry<String, Mixed> prefilter : userPrefilters.entrySet()) {
 				if(!prefilters.containsKey(prefilter.getKey())) {
 					// The compiler should have already warned about this

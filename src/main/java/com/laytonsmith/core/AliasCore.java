@@ -857,7 +857,10 @@ public class AliasCore {
 
 		public void compileMS(MCPlayer player, Environment env) {
 			@SuppressWarnings("deprecation") // Remove as soon as static analysis is enforced.
-			boolean staticAnalysisEnabled = StaticAnalysis.enabled();
+			boolean staticAnalysisEnabled = StaticAnalysis.enabled()
+					|| (env.hasEnv(CompilerEnvironment.class)
+						&& env.getEnv(CompilerEnvironment.class).getStaticAnalysis() != null
+						&& env.getEnv(CompilerEnvironment.class).getStaticAnalysis().isLocalEnabled());
 			for(FileInfo fi : ms) {
 				boolean exception = false;
 

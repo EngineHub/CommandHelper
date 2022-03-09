@@ -52,7 +52,7 @@ public class PlayerPrefilterMatcher<T extends MCPlayerEvent> extends MacroICPref
 
 	@Override
 	public void validate(ParseTree node, Environment env) throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
-		if(!node.getType(env).doesExtend(CString.TYPE)) {
+		if(!node.getDeclaredType(env).doesExtend(CString.TYPE)) {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
 					new CompilerWarning("Expected a string (player) here, this may not perform as expected.",
 							node.getTarget(), null));

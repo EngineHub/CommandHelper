@@ -913,14 +913,22 @@ public class PlayerEvents {
 							new MaterialPrefilterMatcher<>() {
 						@Override
 						public MCMaterial getMaterial(MCPlayerInteractEvent pie) {
-							return pie.getItem().getType();
+							MCItemStack item = pie.getItem();
+							if(item == null) {
+								return null;
+							}
+							return item.getType();
 						}
 					})
 					.set("block", "The block type the player interacts with, or null if nothing",
 							new MaterialPrefilterMatcher<>() {
 						@Override
 						public MCMaterial getMaterial(MCPlayerInteractEvent pie) {
-							return pie.getClickedBlock().getType();
+							MCBlock block = pie.getClickedBlock();
+							if(block == null) {
+								return null;
+							}
+							return block.getType();
 						}
 					})
 					.set("player", "The player that triggered the event", new PlayerPrefilterMatcher<>())
