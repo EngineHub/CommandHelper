@@ -79,6 +79,7 @@ import com.laytonsmith.core.events.prefilters.EnumICPrefilterMatcher;
 import com.laytonsmith.core.events.prefilters.ItemStackPrefilterMatcher;
 import com.laytonsmith.core.events.prefilters.LocationPrefilterMatcher;
 import com.laytonsmith.core.events.prefilters.MacroPrefilterMatcher;
+import com.laytonsmith.core.events.prefilters.RegexPrefilterMatcher;
 import com.laytonsmith.core.events.prefilters.StringPrefilterMatcher;
 import com.laytonsmith.core.events.prefilters.WorldPrefilterMatcher;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
@@ -581,7 +582,7 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <string match>} "
+			return "{} "
 					+ "This event is called when a player is about to log in. "
 					+ "This event cannot be cancelled. Instead, you can deny them by setting "
 					+ "'result' to KICK_BANNED, KICK_WHITELIST, KICK_OTHER, or KICK_FULL. "
@@ -596,17 +597,9 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCPlayerLoginEvent) {
-				MCPlayerLoginEvent event = (MCPlayerLoginEvent) e;
-				if(prefilter.containsKey("player")) {
-					if(!event.getName().equals(prefilter.get("player").val())) {
-						return false;
-					}
-				}
-				return true;
-			}
-			return false;
+		public PrefilterBuilder getPrefilters() {
+			return new PrefilterBuilder<MCPlayerLoginEvent>()
+					.set("player", "The player that is about to login", new PlayerPrefilterMatcher<>());
 		}
 
 		@Override
@@ -692,8 +685,8 @@ public class PlayerEvents {
 
 		@Override
 		public String docs() {
-			return "{player: <string match> | world: <string match> |"
-					+ "join_message: <regex>} This event is called when a player logs in. "
+			return "{} "
+					+ "This event is called when a player logs in. "
 					+ "Setting join_message to null causes it to not be displayed at all. Cancelling "
 					+ "the event does not prevent them from logging in. Instead, you should just pkick() them."
 					+ "{player: The player's name | world | join_message: The default join message |"
@@ -714,19 +707,21 @@ public class PlayerEvents {
 		}
 
 		@Override
-		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCPlayerJoinEvent) {
-				MCPlayerJoinEvent ple = (MCPlayerJoinEvent) e;
-				if(prefilter.containsKey("player")) {
-					if(!ple.getPlayer().getName().equals(prefilter.get("player").val())) {
-						return false;
-					}
-				}
-				Prefilters.match(prefilter, "join_message", ple.getJoinMessage(), Prefilters.PrefilterType.REGEX);
-				Prefilters.match(prefilter, "world", ple.getPlayer().getWorld().getName(), PrefilterType.STRING_MATCH);
-				return true;
-			}
-			return false;
+		public PrefilterBuilder getPrefilters() {
+			return new PrefilterBuilder<MCPlayerJoinEvent>()
+					.set("player", "The player joining", new PlayerPrefilterMatcher<>())
+					.set("world", "The world the player is logging in to", new WorldPrefilterMatcher<>() {
+						@Override
+						protected MCWorld getWorld(MCPlayerJoinEvent event) {
+							return event.getPlayer().getWorld();
+						}
+					})
+					.set("join_message", "The join message", new RegexPrefilterMatcher<>() {
+						@Override
+						protected String getProperty(MCPlayerJoinEvent event) {
+							return event.getJoinMessage();
+						}
+					});
 		}
 
 		@Override
@@ -897,11 +892,7 @@ public class PlayerEvents {
 							new StringICPrefilterMatcher<>() {
 						@Override
 						public String getProperty(MCPlayerInteractEvent pie) {
-							if(pie.getHand() == MCEquipmentSlot.WEAPON) {
-								return "main_hand";
-							} else {
-								return "off_hand";
-							}
+							return pie.getHand() == MCEquipmentSlot.WEAPON ? "main_hand" : "off_hand";
 						}
 					});
 		}
