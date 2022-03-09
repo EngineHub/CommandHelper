@@ -60,7 +60,7 @@ public abstract class ExpressionPrefilterMatcher<T extends BindableEvent> extend
 	@Override
 	public boolean matches(String key, Mixed value, T event, Target t) {
 		String expression = value.val();
-		double dvalue = getProperty();
+		double dvalue = getProperty(event);
 		String exp = expression.substring(1, expression.length() - 1);
 		boolean inequalityMode = false;
 		if(exp.contains("<") || exp.contains(">") || exp.contains("==")) {
@@ -102,6 +102,6 @@ public abstract class ExpressionPrefilterMatcher<T extends BindableEvent> extend
 		return true;
 	}
 
-	protected abstract double getProperty();
+	protected abstract double getProperty(T event);
 
 }

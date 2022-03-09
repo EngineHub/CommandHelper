@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.MapBuilder;
 import com.laytonsmith.core.events.BindableEvent;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -31,10 +32,24 @@ public final class PrefilterBuilder<T extends BindableEvent> {
 	 * @return {@code this} for easy chaining.
 	 */
 	public PrefilterBuilder<T> set(String prefilterName, String docs, PrefilterMatcher<T> matcher) {
+		return set(prefilterName, docs, matcher, null);
+	}
+
+	/**
+	 * Adds another prefilter to the PrefilterBuilder.
+	 *
+	 * @param prefilterName The name of the prefilter.
+	 * @param matcher The matcher object. This should override a single method, the one that corresponds to the
+	 * specified type of this prefilter.
+	 * @param docs The documentation for this prefilter.
+	 * @param status Status flags that apply to this prefilter.
+	 * @return {@code this} for easy chaining.
+	 */
+	public PrefilterBuilder<T> set(String prefilterName, String docs, PrefilterMatcher<T> matcher, Set<PrefilterStatus> status) {
 		if(builder == null) {
-			builder = MapBuilder.start(prefilterName, new Prefilter<>(prefilterName, docs, matcher));
+			builder = MapBuilder.start(prefilterName, new Prefilter<>(prefilterName, docs, matcher, status));
 		} else {
-			builder.set(prefilterName, new Prefilter<>(prefilterName, docs, matcher));
+			builder.set(prefilterName, new Prefilter<>(prefilterName, docs, matcher, status));
 		}
 		return this;
 	}
