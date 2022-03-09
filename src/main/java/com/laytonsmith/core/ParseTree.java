@@ -341,7 +341,7 @@ public class ParseTree implements Cloneable {
 							Function ff = (Function) f;
 							functions.add(ff);
 						}
-					} catch(ConfigCompileException ex) {
+					} catch (ConfigCompileException ex) {
 						throw new Error(ex);
 					}
 

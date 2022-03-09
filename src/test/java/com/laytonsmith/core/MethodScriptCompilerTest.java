@@ -1288,6 +1288,7 @@ public class MethodScriptCompilerTest {
 	}
 
 	@Test
+	@SuppressWarnings("checkstyle:localvariablename")
 	public void testParseTreeHasCorrectType() throws Exception {
 		Environment env = Static.GenerateStandaloneEnvironment();
 		StaticAnalysis sa = new StaticAnalysis(true);
