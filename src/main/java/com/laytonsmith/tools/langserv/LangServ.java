@@ -59,6 +59,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -774,6 +775,25 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 					// Just skip this, we can't do much here.
 					loge(() -> StackTraceUtils.GetStacktrace(e));
 				}
+
+				// Filter exceptions and warnings that are not part of this file.
+				// As of now, we cannot display them on their own file because all scripts are compiled asynchronously
+				// without notion of what forms an entire project.
+				for(Iterator<ConfigCompileException> it = exceptions.iterator(); it.hasNext();) {
+					ConfigCompileException exception = it.next();
+					if(!f.equals(exception.getTarget().file())) {
+						it.remove();
+					}
+				}
+				List<CompilerWarning> warnings = compilerEnv.getCompilerWarnings();
+				for(Iterator<CompilerWarning> it = warnings.iterator(); it.hasNext();) {
+					CompilerWarning warning = it.next();
+					if(!f.equals(warning.getTarget().file())) {
+						it.remove();
+					}
+				}
+
+				// Convert compile exceptions and warnings to diagnostics list.
 				List<Diagnostic> diagnosticsList = new ArrayList<>();
 				if(!exceptions.isEmpty()) {
 					logi(() -> "Errors found, reporting " + exceptions.size() + " errors");
@@ -785,7 +805,6 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 						diagnosticsList.add(d);
 					}
 				}
-				List<CompilerWarning> warnings = compilerEnv.getCompilerWarnings();
 				if(!warnings.isEmpty()) {
 					for(CompilerWarning c : warnings) {
 						Diagnostic d = new Diagnostic();
