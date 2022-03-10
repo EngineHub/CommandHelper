@@ -127,9 +127,9 @@ public class StaticAnalysis {
 	public void analyze(ParseTree ast, Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
 
-		// Don't perform static analysis if it's disabled.
+		// Suppress static analysis exceptions when it's disabled.
 		if(!enabled()) {
-			return;
+			exceptions = new HashSet<>();
 		}
 
 		// Clear scopes from previous analysis.
@@ -170,9 +170,9 @@ public class StaticAnalysis {
 	public static void setAndAnalyzeAutoIncludes(List<File> autoIncludes, Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, Set<ConfigCompileException> exceptions) {
 
-		// Don't perform static analysis if it's disabled.
+		// Suppress static analysis exceptions when it's disabled.
 		if(!enabled()) {
-			return;
+			exceptions = new HashSet<>();
 		}
 
 		// Clear previous auto includes analysis and return since there are no auto includes.
