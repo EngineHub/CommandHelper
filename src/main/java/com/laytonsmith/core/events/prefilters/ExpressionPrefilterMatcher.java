@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BindableEvent;
@@ -53,7 +54,8 @@ public abstract class ExpressionPrefilterMatcher<T extends BindableEvent> extend
 	}
 
 	@Override
-	public void validate(ParseTree node, Environment env) throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
+	public void validate(ParseTree node, CClassType nodeType, Environment env)
+			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
 
 	}
 

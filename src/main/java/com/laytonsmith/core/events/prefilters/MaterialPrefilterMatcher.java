@@ -11,6 +11,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BindableEvent;
@@ -68,7 +69,8 @@ public abstract class MaterialPrefilterMatcher<T extends BindableEvent> extends 
 	}
 
 	@Override
-	public void validate(ParseTree node, Environment env) throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
+	public void validate(ParseTree node, CClassType nodeType, Environment env)
+			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
 		if(!materialClassFound) {
 			try {
 				// Oh my god, this is insanely evil, I love it.
@@ -112,8 +114,8 @@ public abstract class MaterialPrefilterMatcher<T extends BindableEvent> extends 
 			}
 			if(!found) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
-						new CompilerWarning("\"" + name + "\" is not a valid material type, this will never match. (This will eventually be a compile error)",
-								node.getTarget(), null));
+						new CompilerWarning("\"" + name + "\" is not a valid material type, this will never match."
+								+ " (This will eventually be a compile error)", node.getTarget(), null));
 			}
 		}
 	}

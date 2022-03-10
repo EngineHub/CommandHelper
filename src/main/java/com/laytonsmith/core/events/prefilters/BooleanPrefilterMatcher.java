@@ -8,6 +8,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BindableEvent;
@@ -54,8 +55,9 @@ public abstract class BooleanPrefilterMatcher<T extends BindableEvent> extends A
 
 
 	@Override
-	public void validate(ParseTree node, Environment env) throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
-		if(!node.getDeclaredType(env).doesExtend(CBoolean.TYPE)) {
+	public void validate(ParseTree node, CClassType nodeType, Environment env)
+			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
+		if(!nodeType.doesExtend(CBoolean.TYPE)) {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
 				new CompilerWarning("Expected a boolean here, this may not perform as expected.",
 						node.getTarget(), null));

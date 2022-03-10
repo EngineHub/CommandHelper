@@ -8,6 +8,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CEntry;
 import com.laytonsmith.core.constructs.CNumber;
 import com.laytonsmith.core.constructs.Target;
@@ -72,13 +73,14 @@ public abstract class MathPrefilterMatcher<T extends BindableEvent> extends Abst
 	private static final List<String> VALID_KEYS = Arrays.asList("value", "tolerance");
 
 	@Override
-	public void validate(ParseTree node, Environment env) throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
-		if(!node.getDeclaredType(env).doesExtend(CNumber.TYPE) && !node.getDeclaredType(env).doesExtend(CArray.TYPE)) {
+	public void validate(ParseTree node, CClassType nodeType, Environment env)
+			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
+		if(!nodeType.doesExtend(CNumber.TYPE) && !nodeType.doesExtend(CArray.TYPE)) {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
 					new CompilerWarning("Expecting a number or array here, this may not perform as expected.",
 							node.getTarget(), null));
 		}
-		if(node.getDeclaredType(env).doesExtend(CArray.TYPE)) {
+		if(nodeType.doesExtend(CArray.TYPE)) {
 			if(node.getData().val().equals("array")) {
 				for(ParseTree values : node.getChildren()) {
 					if(values.getData() instanceof CEntry centry) {

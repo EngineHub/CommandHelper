@@ -3,6 +3,7 @@ package com.laytonsmith.core.events.prefilters;
 import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.SimpleDocumentation;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BindableEvent;
@@ -68,11 +69,13 @@ public interface PrefilterMatcher<T extends BindableEvent> extends SimpleDocumen
 	 * method is run during compilation, and so the value may be of any type (CFunction, etc).The type will always be
 	 * declared however (though may be AUTO) and can be typechecked as necessary.
 	 *
-	 * @param node The parse tree for the prefilter node.
+	 * @param node - The {@link ParseTree} for the prefilter node.
+	 * @param nodeType - The {@link CClassType} of the node.
 	 * @param env
 	 * @throws com.laytonsmith.core.exceptions.ConfigCompileException
 	 * @throws com.laytonsmith.core.exceptions.ConfigCompileGroupException
 	 */
-	void validate(ParseTree node, Environment env) throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException;
+	void validate(ParseTree node, CClassType nodeType, Environment env)
+			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException;
 
 }

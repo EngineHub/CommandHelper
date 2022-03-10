@@ -6,6 +6,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BindableEvent;
@@ -54,12 +55,12 @@ public abstract class MacroICPrefilterMatcher<T extends BindableEvent> extends A
 	}
 
 	@Override
-	public void validate(ParseTree node, Environment env) throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
+	public void validate(ParseTree node, CClassType nodeType, Environment env)
+			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
 		if(node.isConst()) {
 			if(node.getData().val().isEmpty()) {
 				env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
-						new CompilerWarning("Hardcoded empty string, this will never match.",
-								node.getTarget(), null));
+						new CompilerWarning("Hardcoded empty string, this will never match.", node.getTarget(), null));
 			}
 		}
 	}

@@ -21,6 +21,7 @@ import com.laytonsmith.core.compiler.analysis.Scope;
 import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
@@ -197,6 +198,106 @@ public class EventBinding {
 		}
 
 		@Override
+		public CClassType typecheck(StaticAnalysis analysis,
+				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
+
+			// Get and check the types of the function's arguments.
+			List<ParseTree> children = ast.getChildren();
+			List<CClassType> argTypes = new ArrayList<>(children.size());
+			List<Target> argTargets = new ArrayList<>(children.size());
+			for(int i = 0; i < children.size(); i++) {
+				ParseTree child = children.get(i);
+
+				// Perform prefilter validation for known events.
+				String eventName = (children.isEmpty() || !children.get(0).isConst()
+						? null : children.get(0).getData().val());
+				if(i == 2 && eventName != null) {
+					argTypes.add(this.typecheckPrefilterParseTree(
+							analysis, eventName, child, env, ast.getFileOptions(), exceptions));
+					argTargets.add(child.getTarget());
+				} else {
+
+					// Typecheck child node.
+					argTypes.add(analysis.typecheck(child, env, exceptions));
+					argTargets.add(child.getTarget());
+				}
+			}
+
+			// Return the return type of this function.
+			return this.getReturnType(ast.getTarget(), argTypes, argTargets, env, exceptions);
+		}
+
+		private CClassType typecheckPrefilterParseTree(
+				StaticAnalysis analysis, String eventName, ParseTree prefilterParseTree,
+				Environment env, FileOptions fileOptions, Set<ConfigCompileException> exceptions) {
+
+			// Return if the prefilter parse tree is not a hard-coded "array(...)" node.
+			if(!(prefilterParseTree.getData() instanceof CFunction)
+					|| !prefilterParseTree.getData().val().equals(DataHandling.array.NAME)) {
+				return analysis.typecheck(prefilterParseTree, env, exceptions);
+			}
+
+			// Return if the event name is invalid.
+			Event ev = EventList.getEvent(eventName);
+			if(ev == null) {
+				return analysis.typecheck(prefilterParseTree, env, exceptions);
+			}
+
+			// Return if there are no prefilters defined for this event.
+			PrefilterBuilder<BindableEvent> prefilterBuilder = ev.getPrefilters();
+			if(prefilterBuilder == null) {
+				return analysis.typecheck(prefilterParseTree, env, exceptions);
+			}
+
+			// Validate prefilters.
+			Map<String, Prefilter<BindableEvent>> prefilters = prefilterBuilder.build();
+			for(ParseTree node : prefilterParseTree.getChildren()) {
+				if(node.getData() instanceof CFunction && node.getData().val().equals(Compiler.centry.NAME)) {
+					List<ParseTree> children = node.getChildren();
+					String prefilterKey = children.get(0).getData().val();
+					ParseTree prefilterEntryValParseTree = children.get(1);
+					CClassType prefilterEntryValType = analysis.typecheck(prefilterEntryValParseTree, env, exceptions);
+					if(prefilters.containsKey(prefilterKey)) {
+						try {
+							try {
+								Prefilter<BindableEvent> prefilter = prefilters.get(children.get(0).getData().val());
+								prefilter.getMatcher().validate(prefilterEntryValParseTree, prefilterEntryValType, env);
+								if(prefilter.getStatus().contains(PrefilterStatus.DEPRECATED)) {
+									env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+									new CompilerWarning("This prefilter is deprecated, and will be removed in a future"
+											+ " release. Please see the documentation"
+											+ " for this event for more details on the replacement options available.",
+											children.get(0).getTarget(), null));
+								} else if(prefilter.getStatus().contains(PrefilterStatus.REMOVED)) {
+									exceptions.add(new ConfigCompileException("This prefilter has been removed,"
+											+ " and is no longer available.", prefilterEntryValParseTree.getTarget()));
+								}
+							} catch (ConfigRuntimeException ex) {
+								throw new ConfigCompileException(ex);
+							}
+						} catch (ConfigCompileException ex) {
+							exceptions.add(ex);
+						} catch (ConfigCompileGroupException ex) {
+							exceptions.addAll(ex.getList());
+						}
+					} else {
+						env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+									new CompilerWarning("Unexpected prefilter, this will be ignored."
+											+ " (This warning will eventually become a compile error.)",
+											children.get(0).getTarget(), null));
+					}
+				} else {
+
+					// Non-centry node, type check and continue.
+					analysis.typecheck(node, env, exceptions);
+				}
+			}
+
+			// All array entries have been typechecked, so we can just return the array type here.
+			return CArray.TYPE;
+		}
+
+		@Override
 		public Scope linkScope(StaticAnalysis analysis, Scope parentScope,
 				ParseTree ast, Environment env, Set<ConfigCompileException> exceptions) {
 
@@ -294,50 +395,6 @@ public class EventBinding {
 								env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
 											new CompilerWarning("Unexpected entry, this will be ignored.",
 													children.get(0).getTarget(), null));
-							}
-						}
-					}
-				}
-			}
-
-			// Validate prefilters, if we can
-			Event ev = EventList.getEvent(topChildren.get(0).getData().val());
-			if(ev != null) {
-				PrefilterBuilder<BindableEvent> prefilterBuilder = ev.getPrefilters();
-				if(prefilterBuilder != null) {
-					Map<String, Prefilter<BindableEvent>> prefilters = prefilterBuilder.build();
-					child = topChildren.get(2);
-					if(child.getData() instanceof CFunction && child.getData().val().equals("array")) {
-						for(ParseTree node : child.getChildren()) {
-							if(node.getData() instanceof CFunction && node.getData().val().equals("centry")) {
-								List<ParseTree> children = node.getChildren();
-								if(prefilters.containsKey(children.get(0).getData().val())) {
-									ParseTree value = children.get(1);
-									try {
-										try {
-											Prefilter<BindableEvent> prefilter = prefilters.get(children.get(0).getData().val());
-											prefilter.getMatcher().validate(value, env);
-											if(prefilter.getStatus().contains(PrefilterStatus.DEPRECATED)) {
-												env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
-												new CompilerWarning("This prefilter is deprecated, and will be removed in a future release. Please see the documentation"
-														+ " for this event for more details on the replacement options available.",
-														children.get(0).getTarget(), null));
-											} else if(prefilter.getStatus().contains(PrefilterStatus.REMOVED)) {
-												exceptions.add(new ConfigCompileException("This prefilter has been removed, and is no longer available.", t));
-											}
-										} catch (ConfigRuntimeException ex) {
-											throw new ConfigCompileException(ex);
-										}
-									} catch (ConfigCompileException ex) {
-										exceptions.add(ex);
-									} catch (ConfigCompileGroupException ex) {
-										exceptions.addAll(ex.getList());
-									}
-								} else {
-									env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
-												new CompilerWarning("Unexpected prefilter, this will be ignored. (This warning will eventually become a compile error.)",
-														children.get(0).getTarget(), null));
-								}
 							}
 						}
 					}

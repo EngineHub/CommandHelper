@@ -7,6 +7,7 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
+import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -51,8 +52,9 @@ public class PlayerPrefilterMatcher<T extends MCPlayerEvent> extends MacroICPref
 	}
 
 	@Override
-	public void validate(ParseTree node, Environment env) throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
-		if(!node.getDeclaredType(env).doesExtend(CString.TYPE)) {
+	public void validate(ParseTree node, CClassType nodeType, Environment env)
+			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
+		if(!nodeType.doesExtend(CString.TYPE)) {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
 					new CompilerWarning("Expected a string (player) here, this may not perform as expected.",
 							node.getTarget(), null));
