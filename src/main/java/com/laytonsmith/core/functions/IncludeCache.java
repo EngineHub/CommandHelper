@@ -32,15 +32,15 @@ public class IncludeCache {
 	private static final Map<File, StaticAnalysis> ANALYSIS_CACHE = new HashMap<>();
 	public static final Map<Target, Scope> DYNAMIC_ANALYSIS_PARENT_SCOPE_CACHE = new HashMap<>();
 
-	static void add(File file, ParseTree tree) {
+	static synchronized void add(File file, ParseTree tree) {
 		CACHE.put(file, tree);
 	}
 
-	static void addAll(HashMap<File, ParseTree> files) {
+	static synchronized void addAll(HashMap<File, ParseTree> files) {
 		CACHE.putAll(files);
 	}
 
-	static boolean has(File file) {
+	static synchronized boolean has(File file) {
 		return CACHE.containsKey(file);
 	}
 
@@ -49,7 +49,7 @@ public class IncludeCache {
 		return get(file, env, envs, new StaticAnalysis(false), t);
 	}
 
-	public static ParseTree get(File file, com.laytonsmith.core.environments.Environment env,
+	public static synchronized ParseTree get(File file, com.laytonsmith.core.environments.Environment env,
 			Set<Class<? extends Environment.EnvironmentImpl>> envs, StaticAnalysis staticAnalysis, Target t) {
 		MSLog.GetLogger().Log(TAG, LogLevel.DEBUG, "Loading " + file, t);
 		if(CACHE.containsKey(file)) {
@@ -96,11 +96,11 @@ public class IncludeCache {
 		}
 	}
 
-	public static StaticAnalysis getStaticAnalysis(File file) {
+	public static synchronized StaticAnalysis getStaticAnalysis(File file) {
 		return ANALYSIS_CACHE.get(file);
 	}
 
-	public static void clearCache() {
+	public static synchronized void clearCache() {
 		MSLog.GetLogger().Log(TAG, LogLevel.INFO, "Clearing include cache", Target.UNKNOWN);
 		CACHE.clear();
 		ANALYSIS_CACHE.clear();

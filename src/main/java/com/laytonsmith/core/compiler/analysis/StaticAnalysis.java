@@ -612,9 +612,9 @@ public class StaticAnalysis {
 				File file = Static.GetFileFromArgument(includeRef.getIdentifier(), env, includeRef.getTarget(), null);
 				includeAnalysis = IncludeCache.getStaticAnalysis(file);
 				if(includeAnalysis == null) {
-					includeAnalysis = new StaticAnalysis(false);
-					IncludeCache.get(file, env, envs, includeAnalysis, includeRef.getTarget());
-					assert IncludeCache.getStaticAnalysis(file) != null : "Failed to cache include analysis.";
+					IncludeCache.get(file, env, envs, new StaticAnalysis(false), includeRef.getTarget());
+					includeAnalysis = IncludeCache.getStaticAnalysis(file);
+					assert includeAnalysis != null : "Failed to cache include analysis.";
 				}
 			} catch (CREException e) {
 
