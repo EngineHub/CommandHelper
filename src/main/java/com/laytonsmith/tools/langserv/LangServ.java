@@ -19,6 +19,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.TokenStream;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.NativeTypeList;
@@ -78,6 +79,7 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
+import org.eclipse.lsp4j.DidChangeWorkspaceFoldersParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
@@ -103,6 +105,8 @@ import org.eclipse.lsp4j.SymbolKind;
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.WorkspaceFolder;
+import org.eclipse.lsp4j.WorkspaceFoldersOptions;
+import org.eclipse.lsp4j.WorkspaceServerCapabilities;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.launch.LSPLauncher;
@@ -493,6 +497,13 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		documentLinkOptions.setResolveProvider(false);
 		sc.setDocumentLinkProvider(documentLinkOptions);
 
+		WorkspaceServerCapabilities wsc = new WorkspaceServerCapabilities();
+		WorkspaceFoldersOptions wfo = new WorkspaceFoldersOptions();
+		wfo.setSupported(true);
+		wfo.setChangeNotifications(true);
+		wsc.setWorkspaceFolders(wfo);
+		sc.setWorkspace(wsc);
+
 		sc.setDocumentSymbolProvider(true);
 
 		{
@@ -522,6 +533,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 		if(usingStdio) {
 			System.err.println("Language Server Connected");
 		}
+		workspaceFolders.addAll(params.getWorkspaceFolders());
 		return cf;
 	}
 
@@ -648,6 +660,15 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 			}
 		});
 	}
+
+	private final List<WorkspaceFolder> workspaceFolders = new ArrayList<>();
+
+	@Override
+	public void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params) {
+		workspaceFolders.removeAll(params.getEvent().getRemoved());
+		workspaceFolders.addAll(params.getEvent().getAdded());
+	}
+
 	/**
 	 * Compiles the file, on the given thread pool.
 	 * @param future After compilation is done, the parse tree is returned. May be null if you don't need it.
@@ -700,9 +721,9 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 //			// compiled immediately anyways.
 //		}
 
-
 		threadPool.execute(() -> {
 			try {
+
 				Set<ConfigCompileException> exceptions = new HashSet<>();
 				String code;
 				// Eventually we want to rework this so that this is available
@@ -727,16 +748,38 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				compilerEnv.setLogCompilerWarnings(false); // No one would see them
 				GlobalEnv gEnv = env.getEnv(GlobalEnv.class);
 
-				URI uuri = new URI(uri);
+
 				File f;
-				if("untitled".equals(uuri.getScheme())) {
-					// For open files that aren't saved to disk, the client sends something like "untitled:untitled-1",
-					// which isn't a valid file provider, so we can't call Paths.get on it. Instead, we just mock
-					// the name here. We also need to provide getAbsoluteFile, so that the below call to getParentFile
-					// will work.
-					f = new File(uuri.getSchemeSpecificPart()).getAbsoluteFile();
-				} else {
-					f = Paths.get(uuri).toFile();
+				{
+					URI uuri = new URI(uri);
+					if("untitled".equals(uuri.getScheme())) {
+						// For open files that aren't saved to disk, the client sends something like "untitled:untitled-1",
+						// which isn't a valid file provider, so we can't call Paths.get on it. Instead, we just mock
+						// the name here. We also need to provide getAbsoluteFile, so that the below call to getParentFile
+						// will work.
+						f = new File(uuri.getSchemeSpecificPart()).getAbsoluteFile();
+					} else {
+						f = Paths.get(uuri).toFile();
+					}
+				}
+
+				// SA is currently not async safe, so we just manually synch outside for now. This is obviously
+				// bad and should be fixed.
+				synchronized(LangServ.class) {
+					Set<File> autoIncludes = new HashSet<>();
+					for(WorkspaceFolder folder : workspaceFolders) {
+						URI uuri = new URI(folder.getUri());
+						File ai = Paths.get(uuri).toFile();
+						FileUtil.recursiveFind(ai, (r) -> {
+							if(r.isFile() && r.getAbsolutePath().endsWith("auto_include.ms")) {
+								autoIncludes.add(r);
+							}
+						});
+					}
+					autoIncludes.remove(f); // If we're compiling the auto_include file itself
+					logv(() -> "Providing StaticAnalysis with auto includes: " + autoIncludes.toString());
+
+					StaticAnalysis.setAndAnalyzeAutoIncludes(new ArrayList<>(autoIncludes), env, envs, exceptions);
 				}
 				gEnv.SetRootFolder(f.getParentFile());
 				TokenStream tokens = null;
