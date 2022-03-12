@@ -1,8 +1,11 @@
 package com.laytonsmith.core.events.prefilters;
 
+import java.util.Set;
+
 import com.laytonsmith.PureUtilities.Common.Annotations.ForceImplementation;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.SimpleDocumentation;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -65,7 +68,20 @@ public interface PrefilterMatcher<T extends BindableEvent> extends SimpleDocumen
 	PrefilterDocs getDocsObject();
 
 	/**
-	 * If additional prefilter validation can be performed at compile time, this should be done here.Note that this
+	 * Typechecks the given prefilter value, generating compile errors when types or signatures don't match.
+	 * This method is responsible for type checking the prefilter value's child nodes,
+	 * which can be done by calling {@Link StaticAnalysis#typecheck(ParseTree, Environment, Set)} on those child nodes.
+	 * @param analysis - The {@link StaticAnalysis}, used to resolve variable/proc/... references.
+	 * @param prefilterValueParseTree - The prefilter value parse tree.
+	 * @param env - The {@link Environment}, used for instanceof checks on types.
+	 * @param exceptions - Any compile exceptions will be added to this set.
+	 * @return The return type of this prefilter value.
+	 */
+	CClassType typecheck(StaticAnalysis analysis,
+			ParseTree prefilterValueParseTree, Environment env, Set<ConfigCompileException> exceptions);
+
+	/**
+	 * If additional prefilter validation can be performed at compile time, this should be done here. Note that this
 	 * method is run during compilation, and so the value may be of any type (CFunction, etc).The type will always be
 	 * declared however (though may be AUTO) and can be typechecked as necessary.
 	 *

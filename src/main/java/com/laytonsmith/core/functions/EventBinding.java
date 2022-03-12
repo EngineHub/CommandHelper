@@ -205,12 +205,12 @@ public class EventBinding {
 			List<ParseTree> children = ast.getChildren();
 			List<CClassType> argTypes = new ArrayList<>(children.size());
 			List<Target> argTargets = new ArrayList<>(children.size());
+			String eventName = (children.isEmpty() || !children.get(0).isConst()
+					? null : children.get(0).getData().val());
 			for(int i = 0; i < children.size(); i++) {
 				ParseTree child = children.get(i);
 
 				// Perform prefilter validation for known events.
-				String eventName = (children.isEmpty() || !children.get(0).isConst()
-						? null : children.get(0).getData().val());
 				if(i == 2 && eventName != null) {
 					argTypes.add(this.typecheckPrefilterParseTree(
 							analysis, eventName, child, env, ast.getFileOptions(), exceptions));
@@ -256,29 +256,18 @@ public class EventBinding {
 					List<ParseTree> children = node.getChildren();
 					String prefilterKey = children.get(0).getData().val();
 					ParseTree prefilterEntryValParseTree = children.get(1);
-					CClassType prefilterEntryValType = analysis.typecheck(prefilterEntryValParseTree, env, exceptions);
 					if(prefilters.containsKey(prefilterKey)) {
-						try {
-							try {
-								Prefilter<BindableEvent> prefilter = prefilters.get(children.get(0).getData().val());
-								prefilter.getMatcher().validate(prefilterEntryValParseTree, prefilterEntryValType, env);
-								if(prefilter.getStatus().contains(PrefilterStatus.REMOVED)) {
-									exceptions.add(new ConfigCompileException("This prefilter has been removed,"
-											+ " and is no longer available.", prefilterEntryValParseTree.getTarget()));
-								} else if(prefilter.getStatus().contains(PrefilterStatus.DEPRECATED)) {
-									env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
-									new CompilerWarning("This prefilter is deprecated, and will be removed in a future"
-											+ " release. Please see the documentation"
-											+ " for this event for more details on the replacement options available.",
-											children.get(0).getTarget(), null));
-								}
-							} catch (ConfigRuntimeException ex) {
-								throw new ConfigCompileException(ex);
-							}
-						} catch (ConfigCompileException ex) {
-							exceptions.add(ex);
-						} catch (ConfigCompileGroupException ex) {
-							exceptions.addAll(ex.getList());
+						Prefilter<BindableEvent> prefilter = prefilters.get(prefilterKey);
+						prefilter.getMatcher().typecheck(analysis, prefilterEntryValParseTree, env, exceptions);
+						if(prefilter.getStatus().contains(PrefilterStatus.REMOVED)) {
+							exceptions.add(new ConfigCompileException("This prefilter has been removed,"
+									+ " and is no longer available.", prefilterEntryValParseTree.getTarget()));
+						} else if(prefilter.getStatus().contains(PrefilterStatus.DEPRECATED)) {
+							env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,
+							new CompilerWarning("This prefilter is deprecated, and will be removed in a future"
+									+ " release. Please see the documentation"
+									+ " for this event for more details on the replacement options available.",
+									children.get(0).getTarget(), null));
 						}
 					} else {
 						env.getEnv(CompilerEnvironment.class).addCompilerWarning(fileOptions,

@@ -7,9 +7,11 @@ import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.CompilerWarning;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClassType;
 import com.laytonsmith.core.constructs.CEntry;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CNumber;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -17,9 +19,11 @@ import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -73,37 +77,52 @@ public abstract class MathPrefilterMatcher<T extends BindableEvent> extends Abst
 	private static final List<String> VALID_KEYS = Arrays.asList("value", "tolerance");
 
 	@Override
+	public CClassType typecheck(StaticAnalysis analysis,
+			ParseTree prefilterValueParseTree, Environment env, Set<ConfigCompileException> exceptions) {
+
+		// Add deep validation for hard-coded "array(...)" arguments.
+		if(prefilterValueParseTree.getData() instanceof CFunction
+				&& prefilterValueParseTree.getData().val().equals(DataHandling.array.NAME)) {
+			for(ParseTree entry : prefilterValueParseTree.getChildren()) {
+				if(entry.getData() instanceof CEntry centry) {
+					String key = entry.getChildAt(0).getData().val();
+					ParseTree valParseTree = entry.getChildAt(1);
+					CClassType valType = analysis.typecheck(valParseTree, env, exceptions);
+					if(!VALID_KEYS.contains(key)) {
+						env.getEnv(CompilerEnvironment.class).addCompilerWarning(
+								prefilterValueParseTree.getFileOptions(),
+								new CompilerWarning("Unexpected key, this will be ignored.",
+										centry.ckey().getTarget(), null));
+						continue;
+					}
+					if(key.equals("value") && !valType.doesExtend(CNumber.TYPE)) {
+						env.getEnv(CompilerEnvironment.class).addCompilerWarning(
+								prefilterValueParseTree.getFileOptions(),
+								new CompilerWarning("Value should be a double", centry.ckey().getTarget(), null));
+					}
+					if(key.equals("tolerance") && !valType.doesExtend(CNumber.TYPE)) {
+						env.getEnv(CompilerEnvironment.class).addCompilerWarning(
+								prefilterValueParseTree.getFileOptions(),
+								new CompilerWarning("Tolerance should be a number", centry.ckey().getTarget(), null));
+					}
+				} else {
+					analysis.typecheck(entry, env, exceptions);
+				}
+			}
+			return CArray.TYPE;
+		}
+
+		// Handle other prefilter values as usual.
+		return super.typecheck(analysis, prefilterValueParseTree, env, exceptions);
+	}
+
+	@Override
 	public void validate(ParseTree node, CClassType nodeType, Environment env)
 			throws ConfigCompileException, ConfigCompileGroupException, ConfigRuntimeException {
 		if(!nodeType.doesExtend(CNumber.TYPE) && !nodeType.doesExtend(CArray.TYPE)) {
 			env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
 					new CompilerWarning("Expecting a number or array here, this may not perform as expected.",
 							node.getTarget(), null));
-		}
-		if(nodeType.doesExtend(CArray.TYPE)) {
-			if(node.getData().val().equals("array")) {
-				for(ParseTree values : node.getChildren()) {
-					if(values.getData() instanceof CEntry centry) {
-						String key = centry.ckey().val();
-						if(!VALID_KEYS.contains(key)) {
-							env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
-									new CompilerWarning("Unexpected key, this will be ignored.",
-											centry.ckey().getTarget(), null));
-							continue;
-						}
-						if(key.equals("value") && !values.getChildAt(1).getDeclaredType(env).doesExtend(CNumber.TYPE)) {
-							env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
-									new CompilerWarning("Value should be a double",
-											centry.ckey().getTarget(), null));
-						}
-						if(key.equals("tolerance") && !values.getChildAt(1).getDeclaredType(env).doesExtend(CNumber.TYPE)) {
-							env.getEnv(CompilerEnvironment.class).addCompilerWarning(node.getFileOptions(),
-									new CompilerWarning("Tolerance should be a number",
-											centry.ckey().getTarget(), null));
-						}
-					}
-				}
-			}
 		}
 	}
 
