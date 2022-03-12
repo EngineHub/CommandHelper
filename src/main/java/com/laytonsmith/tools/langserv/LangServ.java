@@ -763,6 +763,11 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 					}
 				}
 
+				if(f.getAbsolutePath().replace("\\", "/").contains(".disabled/")) {
+					// Don't compile files in disabled folders at all.
+					return;
+				}
+
 				// SA is currently not async safe, so we just manually synch outside for now. This is obviously
 				// bad and should be fixed.
 				synchronized(LangServ.class) {
@@ -772,7 +777,11 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 						File ai = Paths.get(uuri).toFile();
 						FileUtil.recursiveFind(ai, (r) -> {
 							if(r.isFile() && r.getAbsolutePath().endsWith("auto_include.ms")) {
-								autoIncludes.add(r);
+								String path = r.getAbsolutePath().replace("\\", "/");
+								if(!path.contains(".disabled/")
+										&& !path.contains(".library/")) {
+									autoIncludes.add(r);
+								}
 							}
 						});
 					}
@@ -781,6 +790,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 
 					StaticAnalysis.setAndAnalyzeAutoIncludes(new ArrayList<>(autoIncludes), env, envs, exceptions);
 				}
+
 				gEnv.SetRootFolder(f.getParentFile());
 				TokenStream tokens = null;
 				ParseTree tree = null;
