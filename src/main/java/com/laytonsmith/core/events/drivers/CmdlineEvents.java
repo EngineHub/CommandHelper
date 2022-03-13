@@ -18,6 +18,7 @@ import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.CancellableEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
+import com.laytonsmith.core.events.prefilters.PrefilterBuilder;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -94,6 +95,11 @@ public class CmdlineEvents {
 		}
 
 		@Override
+		protected PrefilterBuilder getPrefilterBuilder() {
+			return PrefilterBuilder.EMPTY;
+		}
+
+		@Override
 		public BindableEvent convert(CArray manualObject, Target t) {
 			return new BindableEvent() {
 
@@ -150,6 +156,11 @@ public class CmdlineEvents {
 		@Override
 		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			return true;
+		}
+
+		@Override
+		protected PrefilterBuilder getPrefilterBuilder() {
+			return PrefilterBuilder.EMPTY;
 		}
 
 		@Override

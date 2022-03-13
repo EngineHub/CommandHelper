@@ -343,6 +343,11 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 			// more efficient check
 			return true;
 		}
+
+		if(Auto.TYPE.equals(superClass) || Auto.TYPE.equals(checkClass)) {
+			return true;
+		}
+
 		if(checkClass.nativeClass != null && superClass.nativeClass != null
 				&& superClass.nativeClass.isAssignableFrom(checkClass.nativeClass)) {
 			// Since native classes are not allowed to extend multiple superclasees, but
@@ -382,29 +387,6 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	}
 
 	/**
-	 * Works like {@link #doesExtend(com.laytonsmith.core.constructs.CClassType, com.laytonsmith.core.constructs.CClassType)
-	 * }, however rethrows the {@link ClassNotFoundException} that doesExtend throws as an {@link Error}. This should
-	 * not be used unless the class names come from hardcoded values.
-	 *
-	 * @param checkClass
-	 * @param superClass
-	 * @return
-	 */
-	public static boolean unsafeDoesExtend(CClassType checkClass, CClassType superClass) {
-		return doesExtend(checkClass, superClass);
-	}
-
-	/**
-	 * Performs an unsafe check to see if this class extends the specified one
-	 *
-	 * @param superClass
-	 * @return
-	 */
-	public boolean unsafeDoesExtend(CClassType superClass) {
-		return unsafeDoesExtend(this, superClass);
-	}
-
-	/**
 	 * Returns true if the specified class extends this one
 	 *
 	 * @param checkClass
@@ -413,16 +395,6 @@ public final class CClassType extends Construct implements com.laytonsmith.core.
 	 */
 	public boolean isExtendedBy(CClassType checkClass) throws ClassNotFoundException {
 		return doesExtend(checkClass, this);
-	}
-
-	/**
-	 * Performs an unsafe check to see if the specified class extends this one
-	 *
-	 * @param checkClass
-	 * @return
-	 */
-	public boolean unsafeIsExtendedBy(CClassType checkClass) {
-		return unsafeDoesExtend(checkClass, this);
 	}
 
 	@Override

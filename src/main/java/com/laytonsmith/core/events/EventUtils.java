@@ -1,5 +1,6 @@
 package com.laytonsmith.core.events;
 
+import com.laytonsmith.core.events.prefilters.PrefilterMatcher;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -9,6 +10,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.BoundEvent.Priority;
+import com.laytonsmith.core.events.prefilters.Prefilter;
 import com.laytonsmith.core.exceptions.CRE.CREBindException;
 import com.laytonsmith.core.exceptions.CRE.CREEventException;
 import com.laytonsmith.core.extensions.Extension;
@@ -18,6 +20,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 import java.io.File;
 import java.util.EnumMap;
@@ -147,20 +150,16 @@ public final class EventUtils {
 			if(bounded != null) {
 				for(BoundEvent b : bounded) {
 					if(b.getEventName().equalsIgnoreCase(eventName)) {
+						BindableEvent convertedEvent = null;
 						try {
-							BindableEvent convertedEvent = null;
-							try {
-								convertedEvent = driver.convert(object, t);
-							} catch (UnsupportedOperationException ex) {
-								// The event will stay null, and be caught below
-							}
-							if(convertedEvent == null) {
-								throw new CREBindException(eventName + " doesn't support the use of trigger() yet.", t);
-							} else if(driver.matches(b.getPrefilter(), convertedEvent)) {
-								toRun.add(b);
-							}
-						} catch (PrefilterNonMatchException ex) {
-							//Not running this one
+							convertedEvent = driver.convert(object, t);
+						} catch (UnsupportedOperationException ex) {
+							// The event will stay null, and be caught below
+						}
+						if(convertedEvent == null) {
+							throw new CREBindException(eventName + " doesn't support the use of trigger() yet.", t);
+						} else if(PrefilterMatches(b, convertedEvent, driver)) {
+							toRun.add(b);
 						}
 					}
 				}
@@ -182,11 +181,47 @@ public final class EventUtils {
 	}
 
 	/**
+	 * This returns whether or not the given BoundEvent's prefilters matches the event. This method will never
+	 * throw a {@link PrefilterNonMatchException}
+	 * @param b
+	 * @param e
+	 * @param driver
+	 * @return
+	 */
+	public static boolean PrefilterMatches(BoundEvent b, BindableEvent e, Event driver) {
+		Map<String, Prefilter<? extends BindableEvent>> prefilters = driver.getPrefilters();
+		Map<String, Mixed> userPrefilters = b.getPrefilter();
+		if(prefilters == null) {
+			// Old, deprecated method
+			try {
+				return driver.matches(userPrefilters, e);
+			} catch (PrefilterNonMatchException ex) {
+				return false;
+			}
+		} else {
+			for(Map.Entry<String, Mixed> prefilter : userPrefilters.entrySet()) {
+				if(!prefilters.containsKey(prefilter.getKey())) {
+					// The compiler should have already warned about this
+					continue;
+				}
+				Prefilter<? extends BindableEvent> pf = prefilters.get(prefilter.getKey());
+				PrefilterMatcher matcher = pf.getMatcher();
+				Mixed value = prefilter.getValue();
+				if(!matcher.matches(prefilter.getKey(), value, e, b.getTarget())) {
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
+	/**
 	 * Returns a set of events that should be triggered by this event.
 	 *
 	 * @param type
 	 * @param eventName
 	 * @param e
+	 * @param driver
 	 * @return
 	 */
 	public static SortedSet<BoundEvent> GetMatchingEvents(Driver type, String eventName, BindableEvent e, Event driver) {
@@ -196,84 +231,82 @@ public final class EventUtils {
 		//the eventName, and if so, we will also run the prefilter.
 		SortedSet<BoundEvent> bounded = GetEvents(type);
 		if(bounded != null) {
-			//Wrap this in a new set, so we can safely iterate it with async threads
-			bounded = new TreeSet<>(bounded);
-			for(BoundEvent b : bounded) {
-				try {
-					boolean matches = false;
-					try {
-						matches = driver.matches(b.getPrefilter(), e);
-					} catch (ConfigRuntimeException ex) {
-						//This can happen in limited cases, but still needs to be
-						//handled properly. This would happen if, for instance, a
-						//prefilter was configured improperly with bad runtime data.
-						//We use the environment from the bound event.
-						ConfigRuntimeException.HandleUncaughtException(ex, b.getEnvironment());
-					} catch (NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError err) {
-						// This happens when a CH extension depends on a not-included or binary outdated class.
-						// Log the error and continue since there's nothing we can do about it.
-
-						String chBrand = Implementation.GetServerType().getBranding();
-						String chVersion = Static.getVersion().toString();
-
-						String culprit = chBrand;
-						outerLoop:
-						for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()) {
-							for(Event event : tracker.getEvents()) {
-								if(event.getName().equals(driver.getName())) {
-									for(Extension extension : tracker.getExtensions()) {
-										culprit = extension.getName();
-										break outerLoop;
-									}
-								}
-							}
-						}
-
-						String modVersion;
-						try {
-							modVersion = StaticLayer.GetConvertor().GetServer().getAPIVersion();
-						} catch (Exception ex) {
-							modVersion = Implementation.GetServerType().name();
-						}
-
-						String extensionData = "";
-						for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()) {
-							for(Extension extension : tracker.getExtensions()) {
-								try {
-									extensionData += TermColors.CYAN + extension.getName() + TermColors.RED
-											+ " (" + TermColors.RESET + extension.getVersion() + TermColors.RED + ")\n";
-								} catch (AbstractMethodError ex) {
-									// This happens with an old style extensions. Just skip it.
-									extensionData += TermColors.CYAN + "Unknown Extension" + TermColors.RED + "\n";
-								}
-							}
-						}
-						if(extensionData.isEmpty()) {
-							extensionData = "NONE\n";
-						}
-
-						String driverEventName = driver.getName();
-						String jarName = new File(driver.getSourceJar().getFile()).getName();
-						String emsg = TermColors.RED + "Uh oh! You've found an error in the eventhandler for event "
-								+ TermColors.CYAN + driverEventName + TermColors.RED + ", implemented in "
-								+ TermColors.CYAN + culprit + " (" + jarName + ")" + TermColors.RED + ".\n"
-								+ "Please report this to the developers, and be sure to include the version numbers:\n"
-								+ TermColors.CYAN + "Server" + TermColors.RED + " version: "
-								+ TermColors.RESET + modVersion + TermColors.RED + ";\n"
-								+ TermColors.CYAN + chBrand + TermColors.RED + " version: "
-								+ TermColors.RESET + chVersion + TermColors.RED + ";\n"
-								+ "Loaded extensions and versions:\n" + extensionData
-								+ "Here's the stacktrace:\n" + TermColors.RESET + Static.GetStacktraceString(err);
-						Static.getLogger().log(Level.SEVERE, emsg);
-						continue; // If we can't match it, it's not a match.
-					}
-					if(b.getEventName().equals(eventName) && matches) {
-						toRun.add(b);
-					}
-				} catch (PrefilterNonMatchException ex) {
-					//Not running this one
+			bounded.stream().forEach(b -> {
+				if(!b.getEventName().equals(eventName)) {
+					return;
 				}
-			}
+				boolean matches;
+				try {
+					matches = PrefilterMatches(b, e, driver);
+				} catch (ConfigRuntimeException ex) {
+					//This can happen in limited cases, but still needs to be
+					//handled properly. This would happen if, for instance, a
+					//prefilter was configured improperly with bad runtime data.
+					//We use the environment from the bound event.
+					ConfigRuntimeException.HandleUncaughtException(ex, b.getEnvironment());
+					return;
+				} catch (NoClassDefFoundError | NoSuchMethodError | NoSuchFieldError err) {
+					// This happens when a CH extension depends on a not-included or binary outdated class.
+					// Log the error and continue since there's nothing we can do about it.
+
+					String chBrand = Implementation.GetServerType().getBranding();
+					String chVersion = Static.getVersion().toString();
+
+					String culprit = chBrand;
+					outerLoop:
+					for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()) {
+						for(Event event : tracker.getEvents()) {
+							if(event.getName().equals(driver.getName())) {
+								for(Extension extension : tracker.getExtensions()) {
+									culprit = extension.getName();
+									break outerLoop;
+								}
+							}
+						}
+					}
+
+					String modVersion;
+					try {
+						modVersion = StaticLayer.GetConvertor().GetServer().getAPIVersion();
+					} catch (Exception ex) {
+						modVersion = Implementation.GetServerType().name();
+					}
+
+					String extensionData = "";
+					for(ExtensionTracker tracker : ExtensionManager.getTrackers().values()) {
+						for(Extension extension : tracker.getExtensions()) {
+							try {
+								extensionData += TermColors.CYAN + extension.getName() + TermColors.RED
+										+ " (" + TermColors.RESET + extension.getVersion() + TermColors.RED + ")\n";
+							} catch (AbstractMethodError ex) {
+								// This happens with an old style extensions. Just skip it.
+								extensionData += TermColors.CYAN + "Unknown Extension" + TermColors.RED + "\n";
+							}
+						}
+					}
+					if(extensionData.isEmpty()) {
+						extensionData = "NONE\n";
+					}
+
+					String driverEventName = driver.getName();
+					String jarName = new File(driver.getSourceJar().getFile()).getName();
+					String emsg = TermColors.RED + "Uh oh! You've found an error in the eventhandler for event "
+							+ TermColors.CYAN + driverEventName + TermColors.RED + ", implemented in "
+							+ TermColors.CYAN + culprit + " (" + jarName + ")" + TermColors.RED + ".\n"
+							+ "Please report this to the developers, and be sure to include the version numbers:\n"
+							+ TermColors.CYAN + "Server" + TermColors.RED + " version: "
+							+ TermColors.RESET + modVersion + TermColors.RED + ";\n"
+							+ TermColors.CYAN + chBrand + TermColors.RED + " version: "
+							+ TermColors.RESET + chVersion + TermColors.RED + ";\n"
+							+ "Loaded extensions and versions:\n" + extensionData
+							+ "Here's the stacktrace:\n" + TermColors.RESET + Static.GetStacktraceString(err);
+					Static.getLogger().log(Level.SEVERE, emsg);
+					return;
+				}
+				if(matches) {
+					toRun.add(b);
+				}
+			});
 		}
 		return toRun;
 	}

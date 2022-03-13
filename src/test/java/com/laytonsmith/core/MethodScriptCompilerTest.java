@@ -3,6 +3,11 @@ package com.laytonsmith.core;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.core.compiler.analysis.StaticAnalysis;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CPrimitive;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Variable;
@@ -1280,5 +1285,23 @@ public class MethodScriptCompilerTest {
 		URL url = MethodScriptCompilerTest.class.getResource("/unbalancedRTLSource.ms");
 		File f = new File(new URI(url.toString()));
 		MethodScriptCompiler.lex(FileUtil.read(f), null, null, true);
+	}
+
+	@Test
+	@SuppressWarnings("checkstyle:localvariablename")
+	public void testParseTreeHasCorrectType() throws Exception {
+		Environment env = Static.GenerateStandaloneEnvironment();
+		StaticAnalysis sa = new StaticAnalysis(true);
+		sa.setLocalEnable(true);
+		ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex("primitive @s = 'asdf'; msg(@s); int proc _a(){return(1);} _a();",
+				env, null, true), env, env.getEnvClasses(), sa);
+		ParseTree sUsage = tree.getChildAt(0).getChildAt(1).getChildAt(0);
+		assertTrue(sUsage.getDeclaredType(env).equals(CPrimitive.TYPE));
+		ParseTree asdf = tree.getChildAt(0).getChildAt(0).getChildAt(2);
+		assertTrue(asdf.getDeclaredType(env).equals(CString.TYPE));
+		ParseTree msg = tree.getChildAt(0).getChildAt(1);
+		assertTrue(msg.getDeclaredType(env).equals(CVoid.TYPE));
+		ParseTree _a = tree.getChildAt(0).getChildAt(3);
+		assertTrue(_a.getDeclaredType(env).equals(CInt.TYPE));
 	}
 }

@@ -377,7 +377,7 @@ public class LangServ implements LanguageServer, LanguageClientAware, TextDocume
 				for(Event e : EventList.GetEvents()) {
 					final DocGen.EventDocInfo edi;
 					try {
-						edi = new DocGen.EventDocInfo(e.docs(), e.getName());
+						edi = new DocGen.EventDocInfo(e, e.docs(), e.getName(), DocGen.MarkupType.HTML);
 					} catch (IllegalArgumentException ex) {
 						MSLog.GetLogger().Log(LANGSERVLOGTAG, LogLevel.ERROR, ex.getMessage(), Target.UNKNOWN);
 						continue;

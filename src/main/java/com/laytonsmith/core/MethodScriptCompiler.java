@@ -1285,6 +1285,7 @@ public final class MethodScriptCompiler {
 				Environment e = Static.GenerateStandaloneEnvironment(false);
 				environment = environment.cloneAndAdd(e.getEnv(CompilerEnvironment.class));
 			}
+			environment.getEnv(CompilerEnvironment.class).setStaticAnalysis(staticAnalysis);
 		} catch (IOException | DataSourceException | URISyntaxException | Profiles.InvalidProfileException ex) {
 			throw new RuntimeException(ex);
 		}
@@ -2354,6 +2355,9 @@ public final class MethodScriptCompiler {
 				// If an error occurs, we will skip the rest of this element
 				compilerErrors.add(ex);
 				return;
+			} catch (ConfigCompileGroupException ex) {
+				compilerErrors.addAll(ex.getList());
+				return;
 			} catch (ConfigRuntimeException ex) {
 				compilerErrors.add(new ConfigCompileException(ex));
 				return;
@@ -2509,6 +2513,9 @@ public final class MethodScriptCompiler {
 				compilerErrors.add(ex);
 				// Also turn off optimizations for the rest of this flow, so we don't try the other optimization
 				// mechanisms, which are also bound to fail.
+				options = NO_OPTIMIZATIONS;
+			} catch (ConfigCompileGroupException ex) {
+				compilerErrors.addAll(ex.getList());
 				options = NO_OPTIMIZATIONS;
 			}
 		}
